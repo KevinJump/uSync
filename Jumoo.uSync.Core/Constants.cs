@@ -29,6 +29,11 @@ namespace Jumoo.uSync.Core
             public const int Content = USYNC_RESERVED_LOWER + 210;
 
             public const int DataTypeMappings = USYNC_RESERVED_LOWER + 220;
+
+            public const int MemberGroup = USYNC_RESERVED_LOWER + 900;
+            public const int Member = USYNC_RESERVED_LOWER + 905;
+            public const int UserType = USYNC_RESERVED_LOWER + 910;
+            public const int User = USYNC_RESERVED_LOWER + 915;
         }
 
         public static class Serailization 
@@ -58,6 +63,11 @@ namespace Jumoo.uSync.Core
             public const string View = "View";
             public const string Parial = "Partial";
 
+            public const string Member = "Member";
+            public const string MemberGroup = "MemberGroup";
+            public const string User = "User";
+            public const string UserType = "UserType";
+
             /// <summary>
             ///  the default priority for all serializers in the core
             ///  if you write your own serailizer and give it a higher
@@ -71,5 +81,24 @@ namespace Jumoo.uSync.Core
             public const int DefaultPriority = 100;
         }
 
+        /// <summary>
+        /// Contains constants used in serialization/deserialization of content from XML.
+        /// </summary>
+        public static class Xml
+        {
+            public const string FileName = "def";
+            public const string Name = "Name";
+            public const string ContentTypeAlias = "ContentTypeAlias";
+            public const string Key = "Key";
+            public const string Type = "Type";
+            public const string RawPassword = "RawPassword";
+            public const string RawPasswordAnswer = "RawPasswordAnswer";
+            public const string Alias = "Alias";
+        }
+
+        public class PropertyEditorAliases
+        {
+            public const string NoEdit = "Umbraco.NoEdit";
+        }
     }
 }

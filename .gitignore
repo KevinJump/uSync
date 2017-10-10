@@ -15,6 +15,7 @@ snapshots/
 App_Browsers/
 App_Data/
 Umbraco/
+!Jumoo.uSync.Core/Extensions/Umbraco
 Umbraco_Client/
 Bin/
 # Config/

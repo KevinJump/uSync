@@ -295,10 +295,15 @@
     <Compile Include="Handlers\LanguageHandler.cs" />
     <Compile Include="Handlers\MacroHandler.cs" />
     <Compile Include="Handlers\MediaTypeHandler.cs" />
+    <Compile Include="Handlers\MemberGroupHandler.cs" />
+    <Compile Include="Handlers\MemberHandler.cs" />
     <Compile Include="Handlers\MemberTypeHandler.cs" />
     <Compile Include="Handlers\TemplateHandler.cs" />
     <Compile Include="Handlers\TestHandler.cs" />
+    <Compile Include="Handlers\UserHandler.cs" />
+    <Compile Include="Handlers\UserTypeHandler.cs" />
     <Compile Include="Handlers\uSyncBaseHandler.cs" />
+    <Compile Include="Handlers\uSyncExtendedHandler.cs" />
     <Compile Include="Helpers\ActionTracker.cs" />
     <Compile Include="Helpers\DeployIOHelper.cs" />
     <Compile Include="Helpers\NameChecker.cs" />
