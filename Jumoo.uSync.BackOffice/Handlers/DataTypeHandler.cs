@@ -44,6 +44,7 @@ namespace Jumoo.uSync.BackOffice.Handlers
                 throw new FileNotFoundException(filePath);
 
             var node = XElement.Load(filePath);
+            node = UnwrapPreValueFromCDataSection(node);
 
             return uSyncCoreContext.Instance.DataTypeSerializer.Deserialize(node, force, false);
         }
@@ -110,7 +111,8 @@ namespace Jumoo.uSync.BackOffice.Handlers
                 if (attempt.Success)
                 {
                     filename = uSyncIOHelper.SavePath(folder, SyncFolder, GetItemPath(item), item.Name.ToSafeAlias());
-                    uSyncIOHelper.SaveNode(attempt.Item, filename);
+                    var wrappedItem = WrapPreValueInCDataSection(attempt.Item);
+                    uSyncIOHelper.SaveNode(wrappedItem, filename);
                 }
 
                 return uSyncActionHelper<XElement>.SetAction(attempt, filename);
@@ -288,5 +290,52 @@ namespace Jumoo.uSync.BackOffice.Handlers
 
             return actions;
         }
+
+        #region PreValue Value CData wrapper and Unwrapper
+
+        private static XElement WrapPreValueInCDataSection(XElement node)
+        {
+            var preValueRoot = node.Element("PreValues");
+            if (preValueRoot.HasElements)
+            {
+                var preValues = preValueRoot.Elements("PreValue");
+                foreach (var preValue in preValues)
+                {
+                    var value = preValue.Attribute("Value");
+                    var cdata = new XCData(value.Value);
+                    preValue.Add(cdata);
+                    value.Remove();
+                }
+            }
+            return node;
+        }
+
+        private static XElement UnwrapPreValueFromCDataSection(XElement node)
+        {
+             var preValueRoot = node.Element("PreValues");
+            if (preValueRoot.HasElements)
+            {
+                var preValues = preValueRoot.Elements("PreValue");
+                foreach (var preValue in preValues)
+                {
+                    if (preValue.Attribute("Value") == null)
+                    {
+                        var cdata = preValue.FirstNode as XCData;
+                        if (cdata != null)
+                        {
+                            var attribute = new XAttribute("Value", cdata.Value);
+                            preValue.Add(attribute);
+                            cdata.Remove();
+                        }
+                    }
+                }
+            
+            }
+            
+
+            return node;
+        }
+
+        #endregion
     }
 }
