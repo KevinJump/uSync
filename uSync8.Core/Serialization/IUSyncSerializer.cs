@@ -4,15 +4,9 @@ using Umbraco.Core.Models.Entities;
 
 namespace uSync8.Core.Serialization
 {
-    /// <summary>
-    ///  Serializer interface (this should be generic? - but then how do i load them into the composition?)
-    /// </summary>
-    public interface IUSyncSerializer
+   
+    public interface ISyncSerializerBase
     {
-        SyncAttempt<XElement> Serialize(IUmbracoEntity item);
-        SyncAttempt<IUmbracoEntity> Deserialize(XElement node, bool force);
-
-        bool IsCurrent(XElement node);
         Type UmbracoObjectType { get; }
     }
 
@@ -21,11 +15,11 @@ namespace uSync8.Core.Serialization
     ///  it's type is generic?
     /// </summary>
     /// <typeparam name="TObject"></typeparam>
-    public interface ISyncSerializer<TObject>
+    public interface ISyncSerializer<TObject> : ISyncSerializerBase
         where TObject : IEntity
     {
         SyncAttempt<XElement> Serialize(TObject item);
-        SyncAttempt<IUmbracoEntity> Deserialize(XElement node, bool force);
+        SyncAttempt<TObject> Deserialize(XElement node, bool force);
 
         bool IsCurrent(XElement node);
     }

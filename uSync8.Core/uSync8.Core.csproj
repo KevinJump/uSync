@@ -130,6 +130,7 @@
   <ItemGroup>
     <Compile Include="ChangeType.cs" />
     <Compile Include="Serialization\IUSyncSerializer.cs" />
+    <Compile Include="Serialization\Serializers\ContentTypeBaseSerializer.cs" />
     <Compile Include="Serialization\Serializers\ContentTypeSerializer.cs" />
     <Compile Include="Serialization\USyncSerializerAttribute.cs" />
     <Compile Include="Serialization\USyncSerializerBase.cs" />
@@ -137,6 +138,7 @@
     <Compile Include="Serialization\USyncSerializerCollectionBuilder.cs" />
     <Compile Include="uSync8Core.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="uSyncConstants.cs" />
     <Compile Include="uSyncCoreComposer.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -6,25 +6,42 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
+using Umbraco.Core.Services;
 
 namespace uSync8.Core.Serialization.Serializers
 {
-    [USyncSerializer("B3F7F247-6077-406D-8480-DB1004C8211C", "ContentTypeSerializer")]
-    public class ContentTypeSerializer : USyncSerializerBase<IContentType>
+    [USyncSerializer("B3F7F247-6077-406D-8480-DB1004C8211C", "ContentTypeSerializer", uSyncConstants.Serialization.ContentType)]
+    public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, ISyncSerializer<IContentType>
     {
-        public Type UmbracoObjectType => typeof(IContentType);
+        private readonly IContentTypeService contentTypeService;
 
-        public override SyncAttempt<XElement> Serialize(IContentType item)
+        public ContentTypeSerializer(
+            IContentTypeService contentTypeService,
+            IDataTypeService dataTypeService) 
+            : base(dataTypeService)
+        {
+            this.contentTypeService = contentTypeService;
+        }
+
+        protected override SyncAttempt<XElement> SerializeCore(IContentType item)
+        {
+            var info = SerializeInfo(item);
+
+            var node = new XElement(ItemType,
+                info,
+                this.SerializeStructure(item),
+                this.SerializeProperties(item),
+                this.SerializeTabs(item));
+
+            return SyncAttempt<XElement>.Succeed(item.Name, node, typeof(IContentType), ChangeType.Export);
+        }
+
+        protected override SyncAttempt<IContentType> DeserializeCore(XElement node)
         {
             throw new NotImplementedException();
         }
 
-        public override SyncAttempt<IContentType> Deserialize(XElement node, bool force)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override bool IsCurrent(XElement node)
+        protected override IContentType LookupById(int id)
         {
             throw new NotImplementedException();
         }

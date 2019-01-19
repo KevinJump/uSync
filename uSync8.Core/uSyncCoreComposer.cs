@@ -14,7 +14,7 @@ namespace uSync8.Core
         {
             // register *all* serializers, except those marked [HideFromTypeFinder]
             composition.WithCollectionBuilder<USyncSerializerCollectionBuilder>()
-                .Add(() => composition.TypeLoader.GetTypes<IUSyncSerializer>());
+                .Add(() => composition.TypeLoader.GetTypes<ISyncSerializerBase>());
         }
     }
 }

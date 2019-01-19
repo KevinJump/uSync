@@ -23,8 +23,35 @@ namespace uSync8.Core.Serialization
         public Guid Id { get; private set; }
         public string Name { get; private set; }
 
-        public abstract SyncAttempt<XElement> Serialize(TObject item);
-        public abstract SyncAttempt<TObject> Deserialize(XElement node, bool force);
-        public abstract bool IsCurrent(XElement node);
+        public string ItemType { get; set; }
+
+        public Type UmbracoObjectType => typeof(TObject);
+
+
+        public SyncAttempt<XElement> Serialize(TObject item)
+        {
+            return SerializeCore(item);
+        }
+
+        public SyncAttempt<TObject> Deserialize(XElement node, bool force)
+        {
+            if (node.Name.LocalName != this.ItemType)
+                throw new ArgumentException($"XML Not valid for type {ItemType}");
+
+            if (force || !IsCurrent(node))
+            {
+                return DeserializeCore(node);
+            }
+
+            return SyncAttempt<TObject>.Succeed(node.Name.LocalName, default(TObject), ChangeType.NoChange);
+        }
+
+        protected abstract SyncAttempt<XElement> SerializeCore(TObject item);
+        protected abstract SyncAttempt<TObject> DeserializeCore(XElement node);
+
+        public virtual bool IsCurrent(XElement node)
+        {
+            return true;
+        }
     }
 }
