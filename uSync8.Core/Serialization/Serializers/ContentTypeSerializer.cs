@@ -90,7 +90,7 @@ namespace uSync8.Core.Serialization.Serializers
                 foreach(var template in item.AllowedTemplates.OrderBy(x => x.Alias))
                 {
                     node.Add(new XElement("Template", template.Alias,
-                        new XAttribute("Key", template.Key));
+                        new XAttribute("Key", template.Key)));
                 }
             }
 
