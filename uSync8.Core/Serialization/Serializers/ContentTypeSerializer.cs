@@ -27,6 +27,14 @@ namespace uSync8.Core.Serialization.Serializers
         {
             var info = SerializeInfo(item);
 
+            // templates
+            info.Add(SerailizeTemplates(item));
+
+            // compositions ? 
+            // (might be in the ContentTypeCore, because you can also do this
+            //  with media?)
+   
+
             var node = new XElement(ItemType,
                 info,
                 this.SerializeStructure(item),
@@ -34,6 +42,21 @@ namespace uSync8.Core.Serialization.Serializers
                 this.SerializeTabs(item));
 
             return SyncAttempt<XElement>.Succeed(item.Name, node, typeof(IContentType), ChangeType.Export);
+        }
+
+        private XElement SerailizeTemplates(IContentType item)
+        {
+            var node = new XElement("AllowedTemplates");
+            if (item.AllowedTemplates.Any())
+            {
+                foreach(var template in item.AllowedTemplates.OrderBy(x => x.Alias))
+                {
+                    node.Add(new XElement("Template", template.Alias,
+                        new XAttribute("Key", template.Key));
+                }
+            }
+
+            return node;
         }
 
         protected override SyncAttempt<IContentType> DeserializeCore(XElement node)

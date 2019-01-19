@@ -19,7 +19,6 @@ namespace uSync8.Core.Serialization.Serializers
         {
             this.dataTypeService = dataTypeService;
         }
-    
 
         protected XElement SerializeInfo(TObject item)
         {
