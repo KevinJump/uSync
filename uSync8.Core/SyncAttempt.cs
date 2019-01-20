@@ -14,7 +14,7 @@ namespace uSync8.Core
         public string Message { get; private set; }
         public Exception Exception { get; set; }
 
-        public IEnumerable<Object> Details { get; set; }
+        public IEnumerable<uSyncChange> Details { get; set; }
 
         private SyncAttempt(bool success, string name, TObject item, Type itemType, ChangeType change,
             string message, Exception ex) 
@@ -113,4 +113,28 @@ namespace uSync8.Core
         }
 
     }
+
+    public class uSyncChange
+    {
+        public string Path { get; set; }
+        public string Name { get; set; }
+        public ChangeDetailType Change { get; set; }
+        public string OldVal { get; set; }
+        public string NewVal { get; set; }
+        public ChangeValueType ValueType { get; set; }
+    }
+
+    public enum ChangeDetailType
+    {
+        Create,
+        Update,
+        Delete,
+        Error
+    }
+
+    public enum ChangeValueType
+    {
+        Node, Element, Attribute, Value
+    }
+
 }

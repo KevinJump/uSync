@@ -18,6 +18,7 @@ namespace uSync8.Core.Serialization
 
             Name = meta.Name;
             Id = meta.Id;
+            ItemType = meta.ItemType;
         }
 
         public Guid Id { get; private set; }

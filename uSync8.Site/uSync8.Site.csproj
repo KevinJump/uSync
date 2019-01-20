@@ -455,6 +455,16 @@
     <Analyzer Include="..\packages\Microsoft.CodeAnalysis.Analyzers.2.6.1\analyzers\dotnet\cs\Microsoft.CodeAnalysis.Analyzers.dll" />
     <Analyzer Include="..\packages\Microsoft.CodeAnalysis.Analyzers.2.6.1\analyzers\dotnet\cs\Microsoft.CodeAnalysis.CSharp.Analyzers.dll" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\uSync8.BackOffice\uSync8.BackOffice.csproj">
+      <Project>{f2dfcb19-c9ee-471e-b8e2-e0b4dd31761d}</Project>
+      <Name>uSync8.BackOffice</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\uSync8.Core\uSync8.Core.csproj">
+      <Project>{79011408-c423-479f-9b0a-8da465de92eb}</Project>
+      <Name>uSync8.Core</Name>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
