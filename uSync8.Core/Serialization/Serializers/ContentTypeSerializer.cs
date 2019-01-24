@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Web;
 using System.Xml.Linq;
-using Umbraco.Core;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
@@ -24,7 +20,7 @@ namespace uSync8.Core.Serialization.Serializers
             IDataTypeService dataTypeService,
             IContentTypeService contentTypeService,
             IFileService fileService)
-            : base(entityService, dataTypeService)
+            : base(entityService, dataTypeService, contentTypeService)
         {
             this.contentTypeService = contentTypeService;
             this.fileService = fileService;
@@ -71,7 +67,7 @@ namespace uSync8.Core.Serialization.Serializers
 
             return SyncAttempt<XElement>.Succeed(item.Name, node, typeof(IContentType), ChangeType.Export);
         }
-    
+
         private XElement SerailizeTemplates(IContentType item)
         {
             var node = new XElement("AllowedTemplates");
@@ -102,16 +98,11 @@ namespace uSync8.Core.Serialization.Serializers
             // content type only property stuff.
             DeserializeContentTypeProperties(item, node);
 
-
-            // 2nd pass (don't need to do it twice)
-            // DeserializeStructure(item, node);
-
             // clean tabs 
             CleanTabs(item, node);
 
             // templates 
             DeserializeTemplates(item, node);
-
 
             contentTypeService.Save(item);
 
@@ -177,25 +168,6 @@ namespace uSync8.Core.Serialization.Serializers
             item.AllowedTemplates = allowedTemplates;
         }
 
-        private void DeserializeCompositions(IContentType item, XElement node)
-        {
-            var comps = node.Element("Info").Element("Compositions");
-            if (comps == null) return;
-            List<IContentTypeComposition> compositions = new List<IContentTypeComposition>();
-
-            foreach (var compositionNode in comps.Elements("Composition"))
-            {
-                var alias = compositionNode.Value;
-                var key = compositionNode.Attribute("Key").ValueOrDefault(Guid.Empty);
-
-                var type = LookupByKeyOrAlias(key, alias);
-                if (type != null)
-                    compositions.Add(type);
-            }
-
-            item.ContentTypeComposition = compositions;
-        }
-
 
         protected override IContentType CreateItem(string alias, IContentType parent, ITreeEntity treeItem)
         {
@@ -210,43 +182,6 @@ namespace uSync8.Core.Serialization.Serializers
             item.SetParent(treeItem);
 
             return item;
-        }
-
-        // TODO: Workout what base class service we should pass to
-        //       not need all these little overrides here
-
-        protected override IContentType LookupById(int id)
-            => contentTypeService.Get(id);
-
-        protected override IContentType LookupByKey(Guid key)
-            => contentTypeService.Get(key);
-
-        protected override IContentType LookupByAlias(string alias)
-            => contentTypeService.Get(alias);
-
-        protected override Attempt<OperationResult<OperationResultType, EntityContainer>> CreateContainer(int parentId, string name)
-            => contentTypeService.CreateContainer(parentId, name);
-
-        protected override EntityContainer GetContainer(Guid key)
-            => contentTypeService.GetContainer(key);
-                       
-        protected override IEnumerable<EntityContainer> GetContainers(string folder, int level)
-            => contentTypeService.GetContainers(folder, level);
-
-        /// <summary>
-        ///  does the property with the alias we want exist on
-        ///  any of the ContentTypes that may inherit this one?
-        /// </summary>
-        protected override bool PropertyExistsOnComposite(IContentTypeBase item, string alias)
-        {
-            var allTypes = contentTypeService.GetAll().ToList();
-
-            var allProperties = allTypes
-                    .Where(x => x.ContentTypeComposition.Any(y => y.Id == item.Id))
-                    .Select(x => x.PropertyTypes)
-                    .ToList();
-
-            return allProperties.Any(x => x.Any(y => y.Alias == alias));
         }
     }
 }

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Web;
 using System.Xml.Linq;
 using Umbraco.Core;
@@ -14,14 +12,20 @@ using uSync8.Core.Extensions;
 namespace uSync8.Core.Serialization.Serializers
 {
     public abstract class ContentTypeBaseSerializer<TObject> : SyncSerializerBase<TObject>
-        where TObject : IContentTypeBase
+        where TObject : IContentTypeComposition
     {
         private readonly IDataTypeService dataTypeService;
 
-        public ContentTypeBaseSerializer(IEntityService entityService, IDataTypeService dataTypeService)
+        private readonly IContentTypeServiceBase<TObject> baseService;
+
+        public ContentTypeBaseSerializer(
+            IEntityService entityService,
+            IDataTypeService dataTypeService,
+            IContentTypeServiceBase<TObject> baseService)
             : base(entityService)
         {
             this.dataTypeService = dataTypeService;
+            this.baseService = baseService;
         }
 
         #region Serialization 
@@ -108,7 +112,7 @@ namespace uSync8.Core.Serialization.Serializers
 
         protected virtual void SerializeExtraProperties(XElement node, TObject item, PropertyType property)
         {
-            // no-op
+            // when something has extra properties that the others don't (memberTypes at the moment)
         }
 
         protected XElement SerializeStructure(TObject item)
@@ -145,7 +149,7 @@ namespace uSync8.Core.Serialization.Serializers
 
         protected virtual bool IsValid(XElement node)
         {
-            if (node == null 
+            if (node == null
                 || node.Element("Info") == null
                 || node.Element("Info").Element("Alias") == null)
             {
@@ -153,7 +157,7 @@ namespace uSync8.Core.Serialization.Serializers
             }
 
             return true;
-               
+
         }
 
         protected void DeserializeBase(TObject item, XElement node)
@@ -333,7 +337,7 @@ namespace uSync8.Core.Serialization.Serializers
 
             var defaultSort = 0;
 
-            foreach(var tab in tabNode.Elements("Tab"))
+            foreach (var tab in tabNode.Elements("Tab"))
             {
                 var name = tab.Element("Caption").ValueOrDefault(string.Empty);
                 var sortOrder = tab.Element("SortOrder").ValueOrDefault(defaultSort);
@@ -385,6 +389,26 @@ namespace uSync8.Core.Serialization.Serializers
             }
         }
 
+        protected void DeserializeCompositions(TObject item, XElement node)
+        {
+            var comps = node.Element("Info").Element("Compositions");
+            if (comps == null) return;
+            List<IContentTypeComposition> compositions = new List<IContentTypeComposition>();
+
+            foreach (var compositionNode in comps.Elements("Composition"))
+            {
+                var alias = compositionNode.Value;
+                var key = compositionNode.Attribute("Key").ValueOrDefault(Guid.Empty);
+
+                var type = LookupByKeyOrAlias(key, alias);
+                if (type != null)
+                    compositions.Add(type);
+            }
+
+            item.ContentTypeComposition = compositions;
+        }
+
+
 
         protected XElement GetFolderNode(IEnumerable<EntityContainer> containers)
         {
@@ -422,7 +446,7 @@ namespace uSync8.Core.Serialization.Serializers
             }
         }
 
-        private PropertyType GetOrCreateProperty(IContentTypeBase item,
+        private PropertyType GetOrCreateProperty(TObject item,
             Guid key,
             string alias,
             Guid definitionKey,
@@ -526,7 +550,7 @@ namespace uSync8.Core.Serialization.Serializers
 
             if (removals.Any())
             {
-                foreach(var alias in removals)
+                foreach (var alias in removals)
                 {
                     // if you remove something with lots of 
                     // content this can timeout (still? - need to check on v8)
@@ -647,6 +671,22 @@ namespace uSync8.Core.Serialization.Serializers
             return null;
         }
 
+        /// <summary>
+        ///  does this property alias exist further down the composition tree ? 
+        /// </summary>
+        protected virtual bool PropertyExistsOnComposite(TObject item, string alias)
+        {
+            var allTypes = baseService.GetAll().ToList();
+
+            var allProperties = allTypes
+                    .Where(x => x.ContentTypeComposition.Any(y => y.Id == item.Id))
+                    .Select(x => x.PropertyTypes)
+                    .ToList();
+
+            return allProperties.Any(x => x.Any(y => y.Alias == alias));
+        }
+
+
         protected TObject LookupByKeyOrAlias(Guid key, string alias)
         {
             var item = LookupByKey(key);
@@ -655,18 +695,24 @@ namespace uSync8.Core.Serialization.Serializers
             return LookupByAlias(alias);
         }
 
-        protected abstract TObject LookupById(int id);
-        protected abstract TObject LookupByKey(Guid key);
-        protected abstract TObject LookupByAlias(string alias);
+        protected virtual TObject LookupById(int id)
+            => baseService.Get(id);
 
-        protected abstract Attempt<OperationResult<OperationResultType, EntityContainer>> CreateContainer(int parentId, string name);
+        protected virtual TObject LookupByKey(Guid key)
+            => baseService.Get(key);
 
-        protected abstract EntityContainer GetContainer(Guid key);
-        protected abstract IEnumerable<EntityContainer> GetContainers(string folder, int level);
+        protected virtual TObject LookupByAlias(string alias)
+            => baseService.Get(alias);
 
-        /// <summary>
-        ///  does this property alias exist further down the composition tree ? 
-        /// </summary>
-        protected abstract bool PropertyExistsOnComposite(IContentTypeBase item, string alias);
+
+        protected virtual Attempt<OperationResult<OperationResultType, EntityContainer>> CreateContainer(int parentId, string name)
+            => baseService.CreateContainer(parentId, name);
+
+        protected virtual EntityContainer GetContainer(Guid key)
+            => baseService.GetContainer(key);
+
+        protected virtual IEnumerable<EntityContainer> GetContainers(string folder, int level)
+            => baseService.GetContainers(folder, level);
+
     }
 }

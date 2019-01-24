@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
-using Umbraco.Core;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
@@ -16,14 +12,13 @@ namespace uSync8.Core.Serialization.Serializers
     public class MemberTypeSerializer : ContentTypeBaseSerializer<IMemberType>,
         ISyncSerializer<IMemberType>
     {
-
         private readonly IMemberTypeService memberTypeService;
 
         public MemberTypeSerializer(
             IEntityService entityService, 
             IDataTypeService dataTypeService,
             IMemberTypeService memberTypeService) 
-            : base(entityService, dataTypeService)
+            : base(entityService, dataTypeService, memberTypeService)
         {
             this.memberTypeService = memberTypeService;
         }
@@ -91,38 +86,6 @@ namespace uSync8.Core.Serialization.Serializers
             item.SetMemberCanEditProperty(property.Alias, node.Element("CanEdit").ValueOrDefault(false));
             item.SetMemberCanViewProperty(property.Alias, node.Element("CanView").ValueOrDefault(false));
             item.SetIsSensitiveProperty(property.Alias, node.Element("IsSensitive").ValueOrDefault(true));
-
-        }
-
-        protected override IMemberType LookupByAlias(string alias)
-            => memberTypeService.Get(alias);
-
-        protected override IMemberType LookupById(int id)
-            => memberTypeService.Get(id);
-
-        protected override IMemberType LookupByKey(Guid key)
-            => memberTypeService.Get(key);
-
-        protected override Attempt<OperationResult<OperationResultType, EntityContainer>> CreateContainer(int parentId, string name)
-            => memberTypeService.CreateContainer(parentId, name);
-
-        protected override EntityContainer GetContainer(Guid key)
-            => memberTypeService.GetContainer(key);
-
-        protected override IEnumerable<EntityContainer> GetContainers(string folder, int level)
-            => memberTypeService.GetContainers(folder, level);
-
-        
-        protected override bool PropertyExistsOnComposite(IContentTypeBase item, string alias)
-        {
-            var allTypes = memberTypeService.GetAll().ToList();
-
-            var allProperties = allTypes
-                .Where(x => x.ContentTypeComposition.Any(y => y.Id == item.Id))
-                .Select(x => x.PropertyTypes)
-                .ToList();
-
-            return allProperties.Any(x => x.Any(y => y.Alias == alias));
 
         }
 
