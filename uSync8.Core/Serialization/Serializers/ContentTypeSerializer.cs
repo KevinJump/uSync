@@ -95,6 +95,7 @@ namespace uSync8.Core.Serialization.Serializers
             var item = FindOrCreate(node);
 
             DeserializeBase(item, node);
+
             DeserializeTabs(item, node);
             DeserializeProperties(item, node);
 

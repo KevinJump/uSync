@@ -44,7 +44,8 @@ namespace uSync8.Core.Serialization.Serializers
                             new XElement("Description", string.IsNullOrWhiteSpace(item.Description) ? "" : item.Description),
                             new XElement("AllowAtRoot", item.AllowedAsRoot.ToString()),
                             new XElement("IsListView", item.IsContainer.ToString()),
-                            new XElement("Variations", item.Variations));
+                            new XElement("Variations", item.Variations),
+                            new XElement("IsElement", item.IsElement));
         }
 
 
@@ -189,6 +190,10 @@ namespace uSync8.Core.Serialization.Serializers
             var variations = info.Element("Variations").ValueOrDefault(ContentVariation.Nothing);
             if (item.Variations != variations)
                 item.Variations = variations;
+
+            var isElement = info.Element("IsElement").ValueOrDefault(false);
+            if (item.IsElement != isElement)
+                item.IsElement = isElement;
 
             SetMasterFromElement(item, info.Element("Master"));
 
