@@ -129,6 +129,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Services\SyncFileService.cs" />
+    <Compile Include="SyncHandlers\Handlers\MediaTypeHandler.cs" />
+    <Compile Include="SyncHandlers\Handlers\MemberTypeHandler.cs" />
     <Compile Include="uSyncAction.cs" />
     <Compile Include="uSyncBackofficeComponent.cs" />
     <Compile Include="uSyncBackOfficeComposer.cs" />

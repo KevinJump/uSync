@@ -13,7 +13,7 @@ using uSync8.Core.Extensions;
 
 namespace uSync8.Core.Serialization.Serializers
 {
-    [SyncSerializerAttribute("B3F7F247-6077-406D-8480-DB1004C8211C", "ContentTypeSerializer", uSyncConstants.Serialization.ContentType)]
+    [SyncSerializer("B3F7F247-6077-406D-8480-DB1004C8211C", "ContentTypeSerializer", uSyncConstants.Serialization.ContentType)]
     public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, ISyncSerializer<IContentType>
     {
         private readonly IContentTypeService contentTypeService;
@@ -44,21 +44,13 @@ namespace uSync8.Core.Serialization.Serializers
             }
             else if (item.Level != 1)
             {
-                // in a folder. 
-                var folders = contentTypeService.GetContainers(item)
-                    .OrderBy(x => x.Level)
-                    .Select(x => HttpUtility.UrlEncode(x.Name))
-                    .ToList();
-
-                if (folders.Any())
-                {
-                    string path = string.Join("/", folders);
-                    info.Add(new XElement("Folder", path));
-                }
+                var folderNode = this.GetFolderNode(contentTypeService.GetContainers(item));
+                if (folderNode != null)
+                    info.Add(folderNode);
             }
 
             // compositions ? 
-            info.Add(SerializeCompostions(item));
+            info.Add(SerializeCompostions((ContentTypeCompositionBase)item));
 
             // templates
             var templateAlias =
@@ -79,20 +71,7 @@ namespace uSync8.Core.Serialization.Serializers
 
             return SyncAttempt<XElement>.Succeed(item.Name, node, typeof(IContentType), ChangeType.Export);
         }
-
-        private XElement SerializeCompostions(IContentType item)
-        {
-            var compNode = new XElement("Compositions");
-            var compositions = item.ContentTypeComposition;
-            foreach (var composition in compositions.OrderBy(x => x.Key))
-            {
-                compNode.Add(new XElement("Composition", composition.Alias,
-                    new XAttribute("Key", composition.Key)));
-            }
-
-            return compNode;
-        }
-
+    
         private XElement SerailizeTemplates(IContentType item)
         {
             var node = new XElement("AllowedTemplates");
@@ -110,9 +89,6 @@ namespace uSync8.Core.Serialization.Serializers
 
         protected override SyncAttempt<IContentType> DeserializeCore(XElement node)
         {
-            if (node.Name.LocalName != ItemType)
-                return SyncAttempt<IContentType>.Fail(node.Name.LocalName, ChangeType.Fail);
-
             if (!IsValid(node))
                 throw new ArgumentException("Invalid XML Format");
 
@@ -206,7 +182,7 @@ namespace uSync8.Core.Serialization.Serializers
             if (comps == null) return;
             List<IContentTypeComposition> compositions = new List<IContentTypeComposition>();
 
-            foreach(var compositionNode in comps.Elements("Composition"))
+            foreach (var compositionNode in comps.Elements("Composition"))
             {
                 var alias = compositionNode.Value;
                 var key = compositionNode.Attribute("Key").ValueOrDefault(Guid.Empty);
@@ -220,56 +196,9 @@ namespace uSync8.Core.Serialization.Serializers
         }
 
 
-        private IContentType FindOrCreate(XElement node)
+        protected override IContentType CreateItem(string alias, IContentType parent, ITreeEntity treeItem)
         {
-            var info = node.Element("Info");
-            IContentType item = null;
-            var key = info.Element("Key").ValueOrDefault(Guid.Empty);
-            if (key == Guid.Empty) return null;
-
-            item = LookupByKey(key);
-            if (item != null) return item;
-
-
-            var alias = info.Element("Alias").ValueOrDefault(string.Empty);
-            if (alias == string.Empty) return null;
-            item = LookupByAlias(alias);
-            if (item != null) return item;
-
-            // create
-            var parentId = -1;
-            var parent = default(IContentType);
-            var treeItem = default(ITreeEntity);
-
-            var master = info.Element("Master");
-            if (master != null)
-            {
-                var parentKey = master.Attribute("Key").ValueOrDefault(Guid.Empty);
-                parent = LookupByKeyOrAlias(parentKey, master.Value);
-
-                if (parent != null)
-                {
-                    treeItem = parent;
-                    parentId = parent.Id;
-                }
-            }
-
-            if (parent == null)
-            {
-                // might be in a folder 
-                var folder = info.Element("Folder");
-                if (folder != null)
-                {
-                    var folderKey = folder.Attribute("Key").ValueOrDefault(Guid.Empty);
-                    var container = LookupFolderByKeyOrPath(folderKey, folder.Value);
-                    if (container != null)
-                    {
-                        treeItem = container;
-                    }
-                }
-            }
-
-            item = new ContentType(-1)
+            var item = new ContentType(-1)
             {
                 Alias = alias
             };
@@ -282,62 +211,8 @@ namespace uSync8.Core.Serialization.Serializers
             return item;
         }
 
-        private ITreeEntity LookupFolderByKeyOrPath(Guid key, string path)
-        {
-            var container = contentTypeService.GetContainer(key);
-            if (container != null) return container;
-
-            /// else - we have to parse it like a path ... 
-            var bits = path.Split('/');
-
-            var rootFolder = HttpUtility.UrlDecode(bits[0]);
-
-            var root = contentTypeService.GetContainers(rootFolder, 1)
-                .FirstOrDefault();
-            if (root == null)
-            {
-                var attempt = contentTypeService.CreateContainer(-1, rootFolder);
-                if (!attempt)
-                {
-                    return null;
-                }
-
-                root = attempt.Result.Entity;
-            }
-
-            if (root != null)
-            {
-                var current = (ITreeEntity)root;
-                for (int i = 1; i < bits.Length; i++)
-                {
-                    var name = HttpUtility.UrlDecode(bits[i]);
-                    current = TryCreateContainer(name, current);
-                    if (current == null) break;
-                }
-
-                if (current != null)
-                    return current;
-            }
-
-            return null;
-
-        }
-
-        private ITreeEntity TryCreateContainer(string name, ITreeEntity parent)
-        {
-            var children = entityService.GetChildren(parent.Id, UmbracoObjectTypes.DocumentTypeContainer);
-            if (children != null && children.Any(x => x.Name.InvariantEquals(name)))
-            {
-                return children.Single(x => x.Name.InvariantEquals(name));
-            }
-
-            // else create 
-            var attempt = contentTypeService.CreateContainer(parent.Id, name);
-            if (attempt)
-                return (ITreeEntity)attempt.Result.Entity;
-
-            return null;
-        }
+        // TODO: Workout what base class service we should pass to
+        //       not need all these little overrides here
 
         protected override IContentType LookupById(int id)
             => contentTypeService.Get(id);
@@ -345,9 +220,17 @@ namespace uSync8.Core.Serialization.Serializers
         protected override IContentType LookupByKey(Guid key)
             => contentTypeService.Get(key);
 
-
         protected override IContentType LookupByAlias(string alias)
             => contentTypeService.Get(alias);
+
+        protected override Attempt<OperationResult<OperationResultType, EntityContainer>> CreateContainer(int parentId, string name)
+            => contentTypeService.CreateContainer(parentId, name);
+
+        protected override EntityContainer GetContainer(Guid key)
+            => contentTypeService.GetContainer(key);
+                       
+        protected override IEnumerable<EntityContainer> GetContainers(string folder, int level)
+            => contentTypeService.GetContainers(folder, level);
 
         /// <summary>
         ///  does the property with the alias we want exist on

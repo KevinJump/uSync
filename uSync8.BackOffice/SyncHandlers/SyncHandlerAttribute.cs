@@ -21,6 +21,6 @@ namespace uSync8.BackOffice.SyncHandlers
         public int Priority { get; set; }
         public string Folder { get; set; }
 
-        public bool TwoStep { get; set; } = false;
+        public bool IsTwoPass { get; set; } = false;
     }
 }

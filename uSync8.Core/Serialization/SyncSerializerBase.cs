@@ -24,6 +24,8 @@ namespace uSync8.Core.Serialization
             Id = meta.Id;
             ItemType = meta.ItemType;
 
+            IsTwoPass = meta.IsTwoPass;
+
             // base services 
             this.entityService = entityService;
 
@@ -35,6 +37,8 @@ namespace uSync8.Core.Serialization
         public string ItemType { get; set; }
 
         public Type UmbracoObjectType => typeof(TObject);
+
+        public bool IsTwoPass { get; private set; }
 
 
         public SyncAttempt<XElement> Serialize(TObject item)

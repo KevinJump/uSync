@@ -24,5 +24,7 @@ namespace uSync8.Core.Serialization
         SyncAttempt<TObject> DesrtializeSecondPass(TObject item, XElement node);
 
         bool IsCurrent(XElement node);
+
+        bool IsTwoPass { get; }
     }
 }

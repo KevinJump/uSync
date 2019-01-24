@@ -19,11 +19,10 @@ using uSync8.Core.Serialization.Serializers;
 
 namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
-    [SyncHandler("contentTypeHandler", "ContentType Handler", "ContentTypes", 1, TwoStep = true)]
+    [SyncHandler("contentTypeHandler", "ContentType Handler", "ContentTypes", 1, IsTwoPass = true)]
     public class ContentTypeHandler : SyncHandlerBase<IContentType>, ISyncHandler
     {
         private readonly IContentTypeService contentTypeService;
-        private ISyncSerializer<IContentType> serializer;
 
         public ContentTypeHandler(
             IEntityService entityService,
@@ -32,99 +31,45 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             ISyncSerializer<IContentType> serializer,
             SyncFileService fileService,
             uSyncBackOfficeSettings settings)
-            : base(entityService, logger, fileService, settings)
+            : base(entityService, logger, serializer, fileService, settings)
         {
             this.contentTypeService = contentTypeService;
-            this.serializer = serializer;
+
+            this.itemObjectType = UmbracoObjectTypes.DocumentType;
+            this.itemContainerType = UmbracoObjectTypes.DocumentTypeContainer;
+
         }
 
 
         #region Import
-        public override SyncAttempt<IContentType> Import(string filePath, bool force = false)
-        {
-            syncFileService.EnsureFileExists(filePath);
-
-            using (var stream = syncFileService.OpenRead(filePath))
-            {
-                var node = XElement.Load(stream);
-                var attempt = serializer.Deserialize(node, force, false);
-                return attempt;
-            }
-             
-        }
-
-        public override void ImportSecondPass(string filePath, IContentType item)
-        {
-            syncFileService.EnsureFileExists(filePath);
-
-            using (var stream = syncFileService.OpenRead(filePath))
-            {
-                var node = XElement.Load(stream);
-                serializer.DesrtializeSecondPass(item, node);
-            }
-        }
+            // default import behavior is in the base class.
         #endregion
 
         #region Export
+            // most of export is now in the base 
 
-        public uSyncAction Export(IContentType item, string folder)
-        {
-            if (item == null)
-                return uSyncAction.Fail(item.Alias, typeof(IContentType), ChangeType.Fail, "Item not set");
-
-            var filename = GetPath(folder, item);
-
-            var attempt = serializer.Serialize(item);
-            if (attempt.Success)
-            {
-                using (var stream = syncFileService.OpenWrite(filename))
-                {
-                    attempt.Item.Save(stream);
-                    stream.Flush();
-                }
-            }
-
-            return uSyncActionHelper<XElement>.SetAction(attempt, filename);
-        }
-
-        
-
-        public IEnumerable<uSyncAction> ExportAll(string folder)
-        {
-            return ExportAll(-1, folder);
-        }
-
-        public IEnumerable<uSyncAction> ExportAll(int parent, string folder)
-        {
-            var actions = new List<uSyncAction>();
-
-            var containers = entityService.GetChildren(parent, UmbracoObjectTypes.DocumentTypeContainer);
-            foreach(var container in containers)
-            {
-                actions.AddRange(ExportAll(container.Id, folder));
-            }
-
-            var items = entityService.GetChildren(parent, UmbracoObjectTypes.DocumentType);
-            foreach(var item in items)
-            {
-                var contentType = contentTypeService.Get(item.Id);
-                actions.Add(Export(contentType, folder));
-
-                actions.AddRange(ExportAll(item.Id, folder));
-            }
-
-            return actions;
-
-        }
 
         #endregion
 
+        #region Reporting
         public override uSyncAction ReportItem(string file)
         {
             return new uSyncAction();
         }
+        #endregion
 
-        ////////////////////////////// Event Handlers 
+        #region HelperFunctions
+
+        protected override IContentType GetFromService(int id)
+            => contentTypeService.Get(id);
+
+        protected override string GetItemFileName(IUmbracoEntity item)
+            => item.Name;
+
+        #endregion
+
+
+        #region Event Handlers 
         public void InitializeEvents()
         {
             ContentTypeService.Saved += ContentTypeService_Saved;
@@ -145,17 +90,7 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             // remove the files from the disk, put something in the action log ?
         }
 
-        // /////////////////////// helper functions (will probibly go into base) 
+        #endregion
 
-        private string GetPath(string folder, IContentType item)
-        {
-            return $"{folder}/{this.GetItemPath(item)}.config";
-        }
-
-        protected override string GetItemFileName(IUmbracoEntity item)
-        {
-            return item.Name;
-        }
-        
     }
 }

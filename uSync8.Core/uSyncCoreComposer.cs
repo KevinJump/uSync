@@ -23,6 +23,8 @@ namespace uSync8.Core
 
             // register the core handlers (we will refactor to make this dynamic)
             composition.Register<ISyncSerializer<IContentType>, ContentTypeSerializer>();
+            composition.Register<ISyncSerializer<IMediaType>, MediaTypeSerializer>();
+            composition.Register<ISyncSerializer<IMemberType>, MemberTypeSerializer>();
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 using System.Xml.Linq;
 using Umbraco.Core;
 using Umbraco.Core.Models;
@@ -42,8 +43,10 @@ namespace uSync8.Core.Serialization.Serializers
                             new XElement("Thumbnail", item.Thumbnail),
                             new XElement("Description", string.IsNullOrWhiteSpace(item.Description) ? "" : item.Description),
                             new XElement("AllowAtRoot", item.AllowedAsRoot.ToString()),
-                            new XElement("IsListView", item.IsContainer.ToString()));
+                            new XElement("IsListView", item.IsContainer.ToString()),
+                            new XElement("Variations", item.Variations));
         }
+
 
         protected XElement SerializeTabs(TObject item)
         {
@@ -94,10 +97,17 @@ namespace uSync8.Core.Serialization.Serializers
                 var tab = item.PropertyGroups.FirstOrDefault(x => x.PropertyTypes.Contains(property));
                 propNode.Add(new XElement("Tab", tab != null ? tab.Name : ""));
 
+                SerializeExtraProperties(propNode, item, property);
+
                 node.Add(propNode);
             }
 
             return node;
+        }
+
+        protected virtual void SerializeExtraProperties(XElement node, TObject item, PropertyType property)
+        {
+            // no-op
         }
 
         protected XElement SerializeStructure(TObject item)
@@ -114,6 +124,19 @@ namespace uSync8.Core.Serialization.Serializers
             }
 
             return node;
+        }
+
+        protected XElement SerializeCompostions(ContentTypeCompositionBase item)
+        {
+            var compNode = new XElement("Compositions");
+            var compositions = item.ContentTypeComposition;
+            foreach (var composition in compositions.OrderBy(x => x.Key))
+            {
+                compNode.Add(new XElement("Composition", composition.Alias,
+                    new XAttribute("Key", composition.Key)));
+            }
+
+            return compNode;
         }
         #endregion
 
@@ -132,7 +155,7 @@ namespace uSync8.Core.Serialization.Serializers
                
         }
 
-        protected void DeserializeBase(IContentTypeBase item, XElement node)
+        protected void DeserializeBase(TObject item, XElement node)
         {
             if (node == null) return;
 
@@ -163,11 +186,15 @@ namespace uSync8.Core.Serialization.Serializers
             if (item.AllowedAsRoot != allowedAsRoot)
                 item.AllowedAsRoot = allowedAsRoot;
 
+            var variations = info.Element("Variations").ValueOrDefault(ContentVariation.Nothing);
+            if (item.Variations != variations)
+                item.Variations = variations;
+
             SetMasterFromElement(item, info.Element("Master"));
 
         }
 
-        protected void DeserializeStructure(IContentTypeBase item, XElement node)
+        protected void DeserializeStructure(TObject item, XElement node)
         {
             var structure = node.Element("Structure");
             if (structure == null) return;
@@ -206,7 +233,7 @@ namespace uSync8.Core.Serialization.Serializers
             item.AllowedContentTypes = allowed;
         }
 
-        protected void DeserializeProperties(IContentTypeBase item, XElement node)
+        protected void DeserializeProperties(TObject item, XElement node)
         {
             if (node == null) return;
 
@@ -249,6 +276,8 @@ namespace uSync8.Core.Serialization.Serializers
                 property.ValidationRegExp = propertyNode.Element("Validation").ValueOrDefault(string.Empty);
                 property.SortOrder = propertyNode.Element("SortOrder").ValueOrDefault(0);
 
+                DeserializeExtraProperties(item, property, propertyNode);
+
                 var tab = propertyNode.Element("Tab").ValueOrDefault(string.Empty);
 
                 if (IsNew)
@@ -287,7 +316,12 @@ namespace uSync8.Core.Serialization.Serializers
             RemoveProperties(item, propertiesNode);
         }
 
-        protected void DeserializeTabs(IContentTypeBase item, XElement node)
+        virtual protected void DeserializeExtraProperties(TObject item, PropertyType property, XElement node)
+        {
+            // no op.
+        }
+
+        protected void DeserializeTabs(TObject item, XElement node)
         {
             var tabNode = node.Element("Tabs");
             if (tabNode == null) return;
@@ -321,7 +355,8 @@ namespace uSync8.Core.Serialization.Serializers
             }
         }
 
-        protected void CleanTabs(IContentTypeBase item, XElement tabNode)
+
+        protected void CleanTabs(TObject item, XElement tabNode)
         {
             if (tabNode == null) return;
 
@@ -345,6 +380,29 @@ namespace uSync8.Core.Serialization.Serializers
             }
         }
 
+
+        protected XElement GetFolderNode(IEnumerable<EntityContainer> containers)
+        {
+            if (containers == null || !containers.Any())
+                return null;
+
+            var parentKey = containers.OrderBy(x => x.Level).LastOrDefault().Key.ToString();
+
+            var folders = containers
+                .OrderBy(x => x.Level)
+                .Select(x => HttpUtility.UrlEncode(x.Name))
+                .ToList();
+
+            if (folders.Any())
+            {
+                var path = string.Join("/", folders);
+                return new XElement("Folder", path,
+                    new XAttribute("Key", parentKey));
+            }
+
+            return null;
+
+        }
 
         private void SetMasterFromElement(IContentTypeBase item, XElement masterNode)
         {
@@ -474,6 +532,116 @@ namespace uSync8.Core.Serialization.Serializers
 
         #endregion
 
+        protected TObject FindOrCreate(XElement node)
+        {
+            var info = node.Element("Info");
+            TObject item = default(TObject);
+            var key = info.Element("Key").ValueOrDefault(Guid.Empty);
+            if (key == Guid.Empty) return default(TObject);
+
+            item = LookupByKey(key);
+            if (item != null) return item;
+
+
+            var alias = info.Element("Alias").ValueOrDefault(string.Empty);
+            if (alias == string.Empty) return default(TObject);
+            item = LookupByAlias(alias);
+            if (item != null) return item;
+
+            // create
+            var parentId = -1;
+            var parent = default(TObject);
+            var treeItem = default(ITreeEntity);
+
+            var master = info.Element("Master");
+            if (master != null)
+            {
+                var parentKey = master.Attribute("Key").ValueOrDefault(Guid.Empty);
+                parent = LookupByKeyOrAlias(parentKey, master.Value);
+
+                if (parent != null)
+                {
+                    treeItem = parent;
+                    parentId = parent.Id;
+                }
+            }
+
+            if (parent == null)
+            {
+                // might be in a folder 
+                var folder = info.Element("Folder");
+                if (folder != null)
+                {
+                    var folderKey = folder.Attribute("Key").ValueOrDefault(Guid.Empty);
+                    var container = LookupFolderByKeyOrPath(folderKey, folder.Value);
+                    if (container != null)
+                    {
+                        treeItem = container;
+                    }
+                }
+            }
+
+            return CreateItem(alias, parent, treeItem);
+        }
+
+        protected abstract TObject CreateItem(string alias, TObject parent, ITreeEntity treeItem);
+
+        protected virtual ITreeEntity LookupFolderByKeyOrPath(Guid key, string path)
+        {
+            var container = GetContainer(key);
+            if (container != null) return container;
+
+            /// else - we have to parse it like a path ... 
+            var bits = path.Split('/');
+
+            var rootFolder = HttpUtility.UrlDecode(bits[0]);
+
+            var root = GetContainers(rootFolder, 1)
+                .FirstOrDefault();
+            if (root == null)
+            {
+                var attempt = CreateContainer(-1, rootFolder);
+                if (!attempt)
+                {
+                    return null;
+                }
+
+                root = attempt.Result.Entity;
+            }
+
+            if (root != null)
+            {
+                var current = (ITreeEntity)root;
+                for (int i = 1; i < bits.Length; i++)
+                {
+                    var name = HttpUtility.UrlDecode(bits[i]);
+                    current = TryCreateContainer(name, current);
+                    if (current == null) break;
+                }
+
+                if (current != null)
+                    return current;
+            }
+
+            return null;
+        }
+
+        private ITreeEntity TryCreateContainer(string name, ITreeEntity parent)
+        {
+            var children = entityService.GetChildren(parent.Id, UmbracoObjectTypes.DocumentTypeContainer);
+            if (children != null && children.Any(x => x.Name.InvariantEquals(name)))
+            {
+                return children.Single(x => x.Name.InvariantEquals(name));
+            }
+
+            // else create 
+            var attempt = CreateContainer(parent.Id, name);
+            if (attempt)
+                return (ITreeEntity)attempt.Result.Entity;
+
+            return null;
+        }
+
         protected TObject LookupByKeyOrAlias(Guid key, string alias)
         {
             var item = LookupByKey(key);
@@ -486,10 +654,14 @@ namespace uSync8.Core.Serialization.Serializers
         protected abstract TObject LookupByKey(Guid key);
         protected abstract TObject LookupByAlias(string alias);
 
+        protected abstract Attempt<OperationResult<OperationResultType, EntityContainer>> CreateContainer(int parentId, string name);
+
+        protected abstract EntityContainer GetContainer(Guid key);
+        protected abstract IEnumerable<EntityContainer> GetContainers(string folder, int level);
+
         /// <summary>
         ///  does this property alias exist further down the composition tree ? 
         /// </summary>
         protected abstract bool PropertyExistsOnComposite(IContentTypeBase item, string alias);
-
     }
 }

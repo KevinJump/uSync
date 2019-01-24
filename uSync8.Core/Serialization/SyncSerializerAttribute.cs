@@ -16,5 +16,7 @@ namespace uSync8.Core.Serialization
         public string ItemType { get; private set; }
 
         public int Priority { get; set; }
+
+        public bool IsTwoPass { get; set; }
     }
 }
