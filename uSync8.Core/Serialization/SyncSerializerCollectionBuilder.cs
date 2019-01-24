@@ -3,10 +3,10 @@ using Umbraco.Core.Composing;
 
 namespace uSync8.Core.Serialization
 {
-    public class USyncSerializerCollectionBuilder
-        : LazyCollectionBuilderBase<USyncSerializerCollectionBuilder, USyncSerializerCollection, ISyncSerializerBase>
+    public class SyncSerializerCollectionBuilder
+        : LazyCollectionBuilderBase<SyncSerializerCollectionBuilder, USyncSerializerCollection, ISyncSerializerBase>
     {
-        protected override USyncSerializerCollectionBuilder This => this;
+        protected override SyncSerializerCollectionBuilder This => this;
     }
 
 

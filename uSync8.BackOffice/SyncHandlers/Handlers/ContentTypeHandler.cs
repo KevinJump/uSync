@@ -25,7 +25,7 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
         public ContentTypeHandler(
             IEntityService entityService,
             IContentTypeService contentTypeService,
-            ContentTypeSerializer serializer)
+            ISyncSerializer<IContentType> serializer)
             : base(entityService)
         {
             this.contentTypeService = contentTypeService;
@@ -118,7 +118,7 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
                 Directory.CreateDirectory(folderPath);
 
             var file = Path.Combine(folderPath, name.ToSafeAlias(), ".config");
-            if (!System.IO.File.Exists(file))
+            if (System.IO.File.Exists(file))
                 System.IO.File.Delete(file);
 
             return file;

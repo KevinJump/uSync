@@ -2,9 +2,9 @@
 
 namespace uSync8.Core.Serialization
 {
-    public sealed class USyncSerializerAttribute : Attribute
+    public sealed class SyncSerializerAttribute : Attribute
     {
-        public USyncSerializerAttribute(string id, string name, string itemType)
+        public SyncSerializerAttribute(string id, string name, string itemType)
         {
             Id = new Guid(id);
             Name = name;

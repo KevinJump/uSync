@@ -3,22 +3,30 @@ using System.Xml.Linq;
 using Umbraco.Core;
 using Umbraco.Core.Composing;
 using Umbraco.Core.Models.Entities;
+using Umbraco.Core.Services;
 
 namespace uSync8.Core.Serialization
 {
-    public abstract class USyncSerializerBase<TObject> : IDiscoverable
+    public abstract class SyncSerializerBase<TObject> : IDiscoverable
         where TObject : IEntity
     {
-        protected USyncSerializerBase()
+        protected readonly IEntityService entityService;
+
+        protected SyncSerializerBase(IEntityService entityService)
         {
+            // read the attribute
             var thisType = GetType();
-            var meta = thisType.GetCustomAttribute<USyncSerializerAttribute>(false);
+            var meta = thisType.GetCustomAttribute<SyncSerializerAttribute>(false);
             if (meta == null)
-                throw new InvalidOperationException($"the uSyncSerializer {thisType} requires a {typeof(USyncSerializerAttribute)}");
+                throw new InvalidOperationException($"the uSyncSerializer {thisType} requires a {typeof(SyncSerializerAttribute)}");
 
             Name = meta.Name;
             Id = meta.Id;
             ItemType = meta.ItemType;
+
+            // base services 
+            this.entityService = entityService;
+
         }
 
         public Guid Id { get; private set; }
