@@ -25,6 +25,7 @@ namespace uSync8.Core
             composition.Register<ISyncSerializer<IContentType>, ContentTypeSerializer>();
             composition.Register<ISyncSerializer<IMediaType>, MediaTypeSerializer>();
             composition.Register<ISyncSerializer<IMemberType>, MemberTypeSerializer>();
+            composition.Register<ISyncSerializer<ITemplate>, TemplateSerializer>();
         }
     }
 }

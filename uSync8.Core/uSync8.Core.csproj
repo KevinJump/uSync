@@ -136,6 +136,7 @@
     <Compile Include="Serialization\Serializers\ContentTypeSerializer.cs" />
     <Compile Include="Serialization\Serializers\MediaTypeSerializer.cs" />
     <Compile Include="Serialization\Serializers\MemberTypeSerializer.cs" />
+    <Compile Include="Serialization\Serializers\TemplateSerializer.cs" />
     <Compile Include="Serialization\SyncSerializerAttribute.cs" />
     <Compile Include="Serialization\SyncSerializerBase.cs" />
     <Compile Include="SyncAttempt.cs" />

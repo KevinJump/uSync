@@ -4,34 +4,37 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Umbraco.Core;
-using Umbraco.Core.Composing;
-using Umbraco.Core.Models.Entities;
-using Umbraco.Core.Logging;
-using Umbraco.Core.Services;
-using uSync8.Core;
-using uSync8.BackOffice.Services;
-using Umbraco.Core.Models;
-using uSync8.Core.Serialization;
 using System.Xml.Linq;
+using Umbraco.Core;
+using Umbraco.Core.Logging;
+using Umbraco.Core.Models;
+using Umbraco.Core.Models.Entities;
+using Umbraco.Core.Services;
+using uSync8.BackOffice.Services;
+using uSync8.Core;
+using uSync8.Core.Serialization;
 
 namespace uSync8.BackOffice.SyncHandlers
 {
-    public abstract class SyncHandlerBase<TObject> : IDiscoverable
-        where TObject : IUmbracoEntity
+    public abstract class SyncHandlerBase<TObject>
+        where TObject : IEntity
     {
         protected readonly IProfilingLogger logger;
         protected readonly IEntityService entityService;
-
         protected readonly uSyncBackOfficeSettings globalSettings;
         protected readonly SyncFileService syncFileService;
-
         protected readonly ISyncSerializer<TObject> serializer;
+
+        public string Alias { get; private set; }
+        public string Name { get; private set; }
+        public string DefaultFolder { get; private set; }
+        public int Priority { get; private set; }
+        protected bool IsTwoPass = false;
 
         protected UmbracoObjectTypes itemObjectType = UmbracoObjectTypes.Unknown;
         protected UmbracoObjectTypes itemContainerType = UmbracoObjectTypes.Unknown;
 
-        protected SyncHandlerBase(
+        public SyncHandlerBase(
             IEntityService entityService,
             IProfilingLogger logger,
             ISyncSerializer<TObject> serializer,
@@ -42,12 +45,8 @@ namespace uSync8.BackOffice.SyncHandlers
             this.logger = logger;
 
             this.globalSettings = settings;
-
             this.serializer = serializer;
-
             this.syncFileService = syncFileService;
-
-            
 
             var thisType = GetType();
             var meta = thisType.GetCustomAttribute<SyncHandlerAttribute>(false);
@@ -59,15 +58,10 @@ namespace uSync8.BackOffice.SyncHandlers
             DefaultFolder = meta.Folder;
             Priority = meta.Priority;
             IsTwoPass = meta.IsTwoPass;
+
         }
 
-        public string Alias { get; private set; }
-        public string Name { get; private set; }
-        public string DefaultFolder { get; private set; }
-        public int Priority { get; private set; }
-        protected bool IsTwoPass = false;
-
-
+        #region Importing 
         public IEnumerable<uSyncAction> ImportAll(string folder, bool force)
         {
             logger.Info<uSync8BackOffice>("Running Import: {0}", Path.GetFileName(folder));
@@ -87,19 +81,6 @@ namespace uSync8.BackOffice.SyncHandlers
             }
 
             return actions;
-
-        }
-
-        virtual public SyncAttempt<TObject> Import(string filePath, bool force = false)
-        {
-            syncFileService.EnsureFileExists(filePath);
-
-            using (var stream = syncFileService.OpenRead(filePath))
-            {
-                var node = XElement.Load(stream);
-                var attempt = serializer.Deserialize(node, force, false);
-                return attempt;
-            }
         }
 
         private IEnumerable<uSyncAction> ImportFolder(string folder, bool force, Dictionary<string, TObject> updates)
@@ -130,6 +111,18 @@ namespace uSync8.BackOffice.SyncHandlers
             return actions;
         }
 
+        virtual public SyncAttempt<TObject> Import(string filePath, bool force = false)
+        {
+            syncFileService.EnsureFileExists(filePath);
+
+            using (var stream = syncFileService.OpenRead(filePath))
+            {
+                var node = XElement.Load(stream);
+                var attempt = serializer.Deserialize(node, force, false);
+                return attempt;
+            }
+        }
+
         virtual public void ImportSecondPass(string file, TObject item)
         {
             if (IsTwoPass)
@@ -144,15 +137,18 @@ namespace uSync8.BackOffice.SyncHandlers
             }
         }
 
+        #endregion
+
+        #region Exporting
         virtual public IEnumerable<uSyncAction> ExportAll(string folder)
         {
             return ExportAll(-1, folder);
         }
 
-        virtual public IEnumerable<uSyncAction> ExportAll(int parent, string folder )
+        virtual public IEnumerable<uSyncAction> ExportAll(int parent, string folder)
         {
             var actions = new List<uSyncAction>();
-           
+
             if (itemContainerType != UmbracoObjectTypes.Unknown)
             {
                 var containers = entityService.GetChildren(parent, this.itemContainerType);
@@ -174,8 +170,6 @@ namespace uSync8.BackOffice.SyncHandlers
             return actions;
         }
 
-        protected abstract TObject GetFromService(int id);
-
         virtual public uSyncAction Export(TObject item, string folder)
         {
             if (item == null)
@@ -194,10 +188,12 @@ namespace uSync8.BackOffice.SyncHandlers
             }
 
             return uSyncActionHelper<XElement>.SetAction(attempt, filename);
-
         }
 
-        abstract public uSyncAction ReportItem(string file);
+        #endregion
+
+        #region reporting 
+
         public IEnumerable<uSyncAction> Report(string folder)
         {
             List<uSyncAction> actions = new List<uSyncAction>();
@@ -209,7 +205,6 @@ namespace uSync8.BackOffice.SyncHandlers
                 foreach (string file in Directory.GetFiles(mappedfolder, "*.config"))
                 {
                     actions.Add(ReportItem(file));
-
                 }
 
                 foreach (var children in Directory.GetDirectories(mappedfolder))
@@ -221,8 +216,20 @@ namespace uSync8.BackOffice.SyncHandlers
             return actions;
         }
 
+        #endregion
 
-        private IEnumerable<uSyncAction> ProcessActions()
+        abstract protected TObject GetFromService(int id);
+        abstract public uSyncAction ReportItem(string file);
+
+        virtual protected string GetPath(string folder, TObject item)
+        {
+            return $"{folder}/{this.GetItemPath(item)}.config";
+        }
+
+        abstract protected string GetItemPath(TObject item);
+
+
+        protected IEnumerable<uSyncAction> ProcessActions()
         {
             return Enumerable.Empty<uSyncAction>();
         }
@@ -232,53 +239,5 @@ namespace uSync8.BackOffice.SyncHandlers
 
         virtual public uSyncAction Rename(TObject item)
             => new uSyncAction();
-
-
-
-        virtual protected string GetItemFileName(IUmbracoEntity item)
-        {
-            if (item != null)
-            {
-                if (globalSettings.UseFlatStructure)
-                    return item.Key.ToString();
-
-                return item.Name.ToSafeFileName();
-            }
-
-            return Guid.NewGuid().ToString();
-        }
-
-        virtual protected string GetPath(string folder, TObject item)
-        {
-            return $"{folder}/{this.GetItemPath(item)}.config";
-        }
-
-        virtual protected string GetItemPath(TObject item)
-        {
-            if (globalSettings.UseFlatStructure)
-                return GetItemFileName(item);
-
-            return GetEntityPath((IUmbracoEntity)item);
-        }
-
-        protected string GetEntityPath(IUmbracoEntity item)
-        {
-            var path = string.Empty;
-            if (item != null)
-            {
-                if (item.ParentId > 0)
-                {
-                    var parent = entityService.Get(item.ParentId);
-                    if (parent != null)
-                    {
-                        path = GetEntityPath(parent);
-                    }
-                }
-
-                path = Path.Combine(path, GetItemFileName(item));
-            }
-
-            return path;
-        }
     }
 }
