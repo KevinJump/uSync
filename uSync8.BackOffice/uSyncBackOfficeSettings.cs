@@ -12,7 +12,7 @@ namespace uSync8.BackOffice
 
         public bool UseFlatStructure { get; set; } = true;
 
-        public bool ImportAtStartup { get; set; } = false;
+        public bool ImportAtStartup { get; set; } = true;
         public bool ExportAtStartup { get; set; } = false;
         public bool ExportOnSave { get; set; } = true;
         

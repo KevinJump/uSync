@@ -78,7 +78,7 @@ namespace uSync8.Core.Serialization
 
         public virtual bool IsCurrent(XElement node)
         {
-            return true;
+            return false;
         }
     }
 }

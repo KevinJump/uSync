@@ -20,6 +20,7 @@ namespace uSync8.BackOffice.SyncHandlers
         IEnumerable<uSyncAction> Report(string folder);
 
         // uSyncAction Import(string file, bool force);
+        bool Enabled { get; }
 
     }
 }

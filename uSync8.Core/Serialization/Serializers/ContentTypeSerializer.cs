@@ -179,7 +179,10 @@ namespace uSync8.Core.Serialization.Serializers
             if (parent != null)
                 item.AddContentType(parent);
 
-            item.SetParent(treeItem);
+            if (treeItem != null)
+                item.SetParent(treeItem);
+
+            
 
             return item;
         }

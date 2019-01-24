@@ -42,18 +42,9 @@ namespace uSync8.BackOffice
 
         private void InitBackOffice()
         {
-            if (globalSettings.ExportOnSave)
-            {
-                foreach (var syncHandler in syncHandlers)
-                {
-                    logger.Debug<uSyncBackofficeComponent>($"Starting up Handler {syncHandler.Name}");
-                    syncHandler.InitializeEvents();
-                }
-            }
-
             if (globalSettings.ExportAtStartup || (globalSettings.ExportOnSave && !syncFileService.RootExists()))
             {
-                foreach (var syncHandler in syncHandlers)
+                foreach (var syncHandler in syncHandlers.Where(x => x.Enabled))
                 {
                     using (logger.DebugDuration<uSyncBackofficeComponent>($"Exporting: {syncHandler.Name}"))
                     {
@@ -64,7 +55,7 @@ namespace uSync8.BackOffice
 
             if (globalSettings.ImportAtStartup)
             {
-                foreach (var syncHandler in syncHandlers)
+                foreach (var syncHandler in syncHandlers.Where(x => x.Enabled))
                 {
                     using (logger.DebugDuration<uSyncBackofficeComponent>($"Importing: {syncHandler.Name}"))
                     {
@@ -72,6 +63,16 @@ namespace uSync8.BackOffice
                     }
                 }
             }
+
+            if (globalSettings.ExportOnSave)
+            {
+                foreach (var syncHandler in syncHandlers.Where(x => x.Enabled))
+                {
+                    logger.Debug<uSyncBackofficeComponent>($"Starting up Handler {syncHandler.Name}");
+                    syncHandler.InitializeEvents();
+                }
+            }
+
         }
 
         public void Terminate()

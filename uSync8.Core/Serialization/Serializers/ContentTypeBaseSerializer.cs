@@ -272,14 +272,13 @@ namespace uSync8.Core.Serialization.Serializers
                 if (key != Guid.Empty && property.Key != key)
                     property.Key = key;
 
-
                 // do we trust the core ? - because in theory 
                 // we can set the value, and it will only
                 // be updated if marked dirty and that will
                 // only happen if the value is diffrent ?
 
                 property.Alias = alias;
-
+                property.Name = propertyNode.Element("Name").ValueOrDefault(alias);
                 property.Description = propertyNode.Element("Description").ValueOrDefault(string.Empty);
                 property.Mandatory = propertyNode.Element("Mandatory").ValueOrDefault(false);
                 property.ValidationRegExp = propertyNode.Element("Validation").ValueOrDefault(string.Empty);
@@ -350,7 +349,7 @@ namespace uSync8.Core.Serialization.Serializers
                 else
                 {
                     // create the tab
-                    if (item.AddPropertyGroup(null))
+                    if (item.AddPropertyGroup(name))
                     {
                         var newTab = item.PropertyGroups.FirstOrDefault(x => x.Name.InvariantEquals(name));
                         if (newTab != null)
@@ -365,8 +364,10 @@ namespace uSync8.Core.Serialization.Serializers
         }
 
 
-        protected void CleanTabs(TObject item, XElement tabNode)
+        protected void CleanTabs(TObject item, XElement node)
         {
+            var tabNode = node.Element("Tabs");
+
             if (tabNode == null) return;
 
             var newTabs = tabNode.Elements("Tab")

@@ -43,6 +43,7 @@ namespace uSync8.Core.Serialization.Serializers
 
             info.Add(SerializeCompostions((ContentTypeCompositionBase)item));
 
+            node.Add(info);
             node.Add(SerializeProperties(item));
             node.Add(SerializeStructure(item));
             node.Add(SerializeTabs(item));
@@ -52,13 +53,16 @@ namespace uSync8.Core.Serialization.Serializers
 
         protected override SyncAttempt<IMediaType> DeserializeCore(XElement node)
         {
-            if (IsValid(node))
+            if (!IsValid(node))
                 throw new ArgumentException("Invalid XML Format");
 
             var item = FindOrCreate(node);
 
             DeserializeBase(item, node);
             DeserializeTabs(item, node);
+
+            // mediaTypeService.Save(item);
+
             DeserializeProperties(item, node);
 
             CleanTabs(item, node);
@@ -91,7 +95,8 @@ namespace uSync8.Core.Serialization.Serializers
             if (parent != null)
                 item.AddContentType(parent);
 
-            item.SetParent(treeItem);
+            if (treeItem != null)
+                item.SetParent(treeItem);
 
             return item;
         }

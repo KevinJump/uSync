@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 using Umbraco.Core;
 using Umbraco.Core.Logging;
@@ -29,6 +27,7 @@ namespace uSync8.BackOffice.SyncHandlers
         public string Name { get; private set; }
         public string DefaultFolder { get; private set; }
         public int Priority { get; private set; }
+        public bool Enabled { get; protected set; } = true;
         protected bool IsTwoPass = false;
 
         protected UmbracoObjectTypes itemObjectType = UmbracoObjectTypes.Unknown;
@@ -87,26 +86,26 @@ namespace uSync8.BackOffice.SyncHandlers
         {
             List<uSyncAction> actions = new List<uSyncAction>();
 
-            string mappedfolder = Umbraco.Core.IO.IOHelper.MapPath(folder);
+            var files = syncFileService.GetFiles(folder, "*.config");
 
-            if (Directory.Exists(mappedfolder))
+            foreach (string file in files)
             {
-                foreach (string file in Directory.GetFiles(mappedfolder, "*.config"))
+                var attempt = Import(file, force);
+                if (attempt.Success && attempt.Item != null)
                 {
-                    var attempt = Import(file, force);
-                    if (attempt.Success && attempt.Item != null)
-                    {
-                        updates.Add(file, attempt.Item);
-                    }
-
-                    actions.Add(uSyncActionHelper<TObject>.SetAction(attempt, file, IsTwoPass));
+                    updates.Add(file, attempt.Item);
                 }
 
-                foreach (var children in Directory.GetDirectories(mappedfolder))
-                {
-                    actions.AddRange(ImportFolder(children, force, updates));
-                }
+                actions.Add(uSyncActionHelper<TObject>.SetAction(attempt, file, IsTwoPass));
             }
+
+            var folders = syncFileService.GetDirectories(folder);
+
+            foreach (var children in folders)
+            {
+                actions.AddRange(ImportFolder(children, force, updates));
+            }
+
 
             return actions;
         }
@@ -120,6 +119,7 @@ namespace uSync8.BackOffice.SyncHandlers
                 var node = XElement.Load(stream);
                 var attempt = serializer.Deserialize(node, force, false);
                 return attempt;
+                stream.Dispose();
             }
         }
 
@@ -133,6 +133,7 @@ namespace uSync8.BackOffice.SyncHandlers
                 {
                     var node = XElement.Load(stream);
                     serializer.DesrtializeSecondPass(item, node);
+                    stream.Dispose();
                 }
             }
         }
@@ -184,6 +185,7 @@ namespace uSync8.BackOffice.SyncHandlers
                 {
                     attempt.Item.Save(stream);
                     stream.Flush();
+                    stream.Dispose();
                 }
             }
 
@@ -198,20 +200,18 @@ namespace uSync8.BackOffice.SyncHandlers
         {
             List<uSyncAction> actions = new List<uSyncAction>();
 
-            string mappedfolder = Umbraco.Core.IO.IOHelper.MapPath(folder);
+            var files = syncFileService.GetFiles(folder, "*.config");
 
-            if (Directory.Exists(mappedfolder))
+            foreach (string file in files)
             {
-                foreach (string file in Directory.GetFiles(mappedfolder, "*.config"))
-                {
-                    actions.Add(ReportItem(file));
-                }
-
-                foreach (var children in Directory.GetDirectories(mappedfolder))
-                {
-                    actions.AddRange(Report(children));
-                }
+                actions.Add(ReportItem(file));
             }
+
+            foreach (var children in syncFileService.GetDirectories(folder))
+            {
+                actions.AddRange(Report(children));
+            }
+
 
             return actions;
         }

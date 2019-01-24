@@ -15,15 +15,18 @@ namespace uSync8.BackOffice.Services
     public class SyncFileService
     {
         private readonly uSyncBackOfficeSettings globalSettings;
+        private readonly string mappedRoot;
 
         public SyncFileService(uSyncBackOfficeSettings settings)
         {
             this.globalSettings = settings;
+            this.mappedRoot = IOHelper.MapPath(globalSettings.rootFolder);
         }
 
 
         private string GetAbsPath(string path)
         {
+            if (path.StartsWith(mappedRoot)) return path;
             return IOHelper.MapPath(globalSettings.rootFolder + path.TrimStart(new char[] { '/' }));
         }
 
@@ -78,6 +81,27 @@ namespace uSync8.BackOffice.Services
             var absPath = Path.GetDirectoryName(GetAbsPath(filePath));
             if (!Directory.Exists(absPath))
                 Directory.CreateDirectory(absPath);
+        }
+
+
+        public IEnumerable<string> GetFiles(string folder, string extensions)
+        {
+            if (DirectoryExists(folder))
+            {
+                return Directory.GetFiles(GetAbsPath(folder));
+            }
+
+            return Enumerable.Empty<string>();
+        }
+
+        public IEnumerable<string> GetDirectories(string folder)
+        {
+            if (DirectoryExists(folder))
+            {
+                return Directory.GetDirectories(GetAbsPath(folder));
+            }
+
+            return Enumerable.Empty<string>();
         }
     }
 }

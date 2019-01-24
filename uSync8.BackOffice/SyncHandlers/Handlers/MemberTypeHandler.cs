@@ -33,7 +33,10 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 
             // this is also set in base, but explity here so you know
             //    no folders for membertypes
-            this.itemContainerType = UmbracoObjectTypes.Unknown; 
+            this.itemContainerType = UmbracoObjectTypes.Unknown;
+
+            this.Enabled = false; 
+            // turn it off it appears to break things in current build
         }
 
         public override uSyncAction ReportItem(string file)
