@@ -28,7 +28,8 @@ namespace uSync8.Core.Serialization.Serializers
         protected XElement SerializeBase(TObject item)
         {
             return new XElement(ItemType,
-                new XAttribute("Level", item.Level));
+                new XAttribute("Level", item.Level),
+                new XAttribute("Key", item.Key));
         }
 
         protected XElement SerializeInfo(TObject item)

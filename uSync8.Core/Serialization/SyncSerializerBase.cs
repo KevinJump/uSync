@@ -42,17 +42,31 @@ namespace uSync8.Core.Serialization
             return SerializeCore(item);
         }
 
-        public SyncAttempt<TObject> Deserialize(XElement node, bool force)
+        public SyncAttempt<TObject> Deserialize(XElement node, bool force, bool OnePass)
         {
             if (node.Name.LocalName != this.ItemType)
                 throw new ArgumentException($"XML Not valid for type {ItemType}");
 
             if (force || !IsCurrent(node))
             {
-                return DeserializeCore(node);
+                var result = DeserializeCore(node);
+                if (OnePass && result.Success)
+                {
+                    DesrtializeSecondPass(result.Item, node);
+                }
+
+                return result;
             }
 
+
+
             return SyncAttempt<TObject>.Succeed(node.Name.LocalName, default(TObject), ChangeType.NoChange);
+        }
+
+        public virtual SyncAttempt<TObject> DesrtializeSecondPass(TObject item, XElement node)
+        {
+            return SyncAttempt<TObject>.Succeed(nameof(item), item, typeof(TObject), ChangeType.NoChange);
+
         }
 
         protected abstract SyncAttempt<XElement> SerializeCore(TObject item);

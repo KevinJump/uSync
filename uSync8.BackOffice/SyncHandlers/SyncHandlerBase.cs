@@ -7,20 +7,33 @@ using System.Threading.Tasks;
 using Umbraco.Core;
 using Umbraco.Core.Composing;
 using Umbraco.Core.Models.Entities;
+using Umbraco.Core.Logging;
 using Umbraco.Core.Services;
 using uSync8.Core;
+using uSync8.BackOffice.Services;
 
 namespace uSync8.BackOffice.SyncHandlers
 {
     public abstract class SyncHandlerBase<TObject> : IDiscoverable
         where TObject : IUmbracoEntity
     {
-
+        protected readonly IProfilingLogger logger;
         protected readonly IEntityService entityService;
 
-        protected SyncHandlerBase(IEntityService entityService)
+        protected readonly uSyncBackOfficeSettings globalSettings;
+        protected readonly SyncFileService syncFileService;
+
+        protected SyncHandlerBase(
+            IEntityService entityService,
+            IProfilingLogger logger,
+            SyncFileService syncFileService,
+            uSyncBackOfficeSettings settings)
         {
             this.entityService = entityService;
+            this.logger = logger;
+
+            this.globalSettings = settings;
+            this.syncFileService = syncFileService;
 
             var thisType = GetType();
             var meta = thisType.GetCustomAttribute<SyncHandlerAttribute>(false);
@@ -28,13 +41,13 @@ namespace uSync8.BackOffice.SyncHandlers
                 throw new InvalidOperationException($"The Handler {thisType} requires a {typeof(SyncHandlerAttribute)}");
 
             Name = meta.Name;
-            Id = meta.Id;
+            Alias = meta.Alias;
             DefaultFolder = meta.Folder;
             Priority = meta.Priority;
             IsTwoStep = meta.TwoStep;
         }
 
-        public Guid Id { get; private set; }
+        public string Alias { get; private set; }
         public string Name { get; private set; }
         public string DefaultFolder { get; private set; }
         public int Priority { get; private set; }
@@ -43,11 +56,12 @@ namespace uSync8.BackOffice.SyncHandlers
 
         public IEnumerable<uSyncAction> ImportAll(string folder, bool force)
         {
+            logger.Info<uSync8BackOffice>("Running Import: {0}", Path.GetFileName(folder));
+
             var actions = new List<uSyncAction>();
             var updates = new Dictionary<string, TObject>();
 
             actions.AddRange(ProcessActions());
-
             actions.AddRange(ImportFolder(folder, force, updates));
 
             if (updates.Any())
@@ -136,18 +150,24 @@ namespace uSync8.BackOffice.SyncHandlers
 
 
 
-        protected string GetItemFileName(IUmbracoEntity item)
+        virtual protected string GetItemFileName(IUmbracoEntity item)
         {
             if (item != null)
             {
+                if (globalSettings.UseFlatStructure)
+                    return item.Key.ToString();
+
                 return item.Name.ToSafeFileName();
             }
 
             return Guid.NewGuid().ToString();
         }
 
-        virtual public string GetItemPath(TObject item)
+        virtual protected string GetItemPath(TObject item)
         {
+            if (globalSettings.UseFlatStructure)
+                return GetItemFileName(item);
+
             return GetEntityPath((IUmbracoEntity)item);
         }
 

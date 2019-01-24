@@ -11,6 +11,7 @@ namespace uSync8.BackOffice.SyncHandlers
     {
         string Name { get; }
         int Priority { get; }
+        string DefaultFolder { get; }
 
         void InitializeEvents();
 

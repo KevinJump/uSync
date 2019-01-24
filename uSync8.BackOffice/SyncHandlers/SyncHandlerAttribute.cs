@@ -8,18 +8,19 @@ namespace uSync8.BackOffice.SyncHandlers
 {
     public class SyncHandlerAttribute : Attribute
     {
-        public SyncHandlerAttribute(string id, string name, string folder, int priority)
+        public SyncHandlerAttribute(string alias, string name, string folder, int priority)
         {
-            Id = new Guid(id);
+            Alias = alias;
             Name = name;
             Priority = priority;
             Folder = folder;
         }
 
         public string Name { get; set; }
-        public Guid Id { get; set; }
+        public string Alias { get; set; }
         public int Priority { get; set; }
         public string Folder { get; set; }
+
         public bool TwoStep { get; set; } = false;
     }
 }

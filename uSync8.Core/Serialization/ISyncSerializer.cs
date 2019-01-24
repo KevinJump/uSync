@@ -19,7 +19,9 @@ namespace uSync8.Core.Serialization
         where TObject : IEntity
     {
         SyncAttempt<XElement> Serialize(TObject item);
-        SyncAttempt<TObject> Deserialize(XElement node, bool force);
+
+        SyncAttempt<TObject> Deserialize(XElement node, bool force, bool onePass);
+        SyncAttempt<TObject> DesrtializeSecondPass(TObject item, XElement node);
 
         bool IsCurrent(XElement node);
     }

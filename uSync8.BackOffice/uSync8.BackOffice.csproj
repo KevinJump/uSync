@@ -128,6 +128,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Services\SyncFileService.cs" />
     <Compile Include="uSyncAction.cs" />
     <Compile Include="uSyncBackofficeComponent.cs" />
     <Compile Include="uSyncBackOfficeComposer.cs" />
@@ -138,6 +139,7 @@
     <Compile Include="SyncHandlers\SyncHandlerCollectionBuilder.cs" />
     <Compile Include="uSync8BackOffice.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="uSyncBackOfficeSettings.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

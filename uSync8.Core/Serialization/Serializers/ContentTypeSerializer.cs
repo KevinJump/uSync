@@ -58,16 +58,7 @@ namespace uSync8.Core.Serialization.Serializers
             }
 
             // compositions ? 
-            // (might be in the ContentTypeCore, because you can also do this
-            //  with media?)
-            var compNode = new XElement("Compositions");
-            var compositions = item.ContentTypeComposition;
-            foreach (var composition in compositions.OrderBy(x => x.Key))
-            {
-                compNode.Add(new XElement("Composition", composition.Alias,
-                    new XAttribute("Key", composition.Key)));
-            }
-            info.Add(compNode);
+            info.Add(SerializeCompostions(item));
 
             // templates
             var templateAlias =
@@ -87,6 +78,19 @@ namespace uSync8.Core.Serialization.Serializers
             node.Add(SerializeTabs(item));
 
             return SyncAttempt<XElement>.Succeed(item.Name, node, typeof(IContentType), ChangeType.Export);
+        }
+
+        private XElement SerializeCompostions(IContentType item)
+        {
+            var compNode = new XElement("Compositions");
+            var compositions = item.ContentTypeComposition;
+            foreach (var composition in compositions.OrderBy(x => x.Key))
+            {
+                compNode.Add(new XElement("Composition", composition.Alias,
+                    new XAttribute("Key", composition.Key)));
+            }
+
+            return compNode;
         }
 
         private XElement SerailizeTemplates(IContentType item)
@@ -122,7 +126,8 @@ namespace uSync8.Core.Serialization.Serializers
             DeserializeContentTypeProperties(item, node);
 
 
-            DeserializeStructure(item, node);
+            // 2nd pass (don't need to do it twice)
+            // DeserializeStructure(item, node);
 
             // clean tabs 
             CleanTabs(item, node);
@@ -138,6 +143,15 @@ namespace uSync8.Core.Serialization.Serializers
                 item,
                 ChangeType.Import,
                 "");
+        }
+
+        public override SyncAttempt<IContentType> DesrtializeSecondPass(IContentType item, XElement node)
+        {
+            DeserializeCompositions(item, node);
+            DeserializeStructure(item, node);
+            contentTypeService.Save(item);
+
+            return SyncAttempt<IContentType>.Succeed(item.Name, item, ChangeType.Import);
         }
 
         private void DeserializeContentTypeProperties(IContentType item, XElement node)
@@ -184,6 +198,25 @@ namespace uSync8.Core.Serialization.Serializers
             }
 
             item.AllowedTemplates = allowedTemplates;
+        }
+
+        private void DeserializeCompositions(IContentType item, XElement node)
+        {
+            var comps = node.Element("Info").Element("Compositions");
+            if (comps == null) return;
+            List<IContentTypeComposition> compositions = new List<IContentTypeComposition>();
+
+            foreach(var compositionNode in comps.Elements("Composition"))
+            {
+                var alias = compositionNode.Value;
+                var key = compositionNode.Attribute("Key").ValueOrDefault(Guid.Empty);
+
+                var type = LookupByKeyOrAlias(key, alias);
+                if (type != null)
+                    compositions.Add(type);
+            }
+
+            item.ContentTypeComposition = compositions;
         }
 
 
