@@ -130,6 +130,7 @@
   <ItemGroup>
     <Compile Include="Services\SyncFileService.cs" />
     <Compile Include="SyncHandlers\Handlers\LanguageHandler.cs" />
+    <Compile Include="SyncHandlers\Handlers\MacroHandler.cs" />
     <Compile Include="SyncHandlers\Handlers\MediaTypeHandler.cs" />
     <Compile Include="SyncHandlers\Handlers\MemberTypeHandler.cs" />
     <Compile Include="SyncHandlers\Handlers\TemplateHandler.cs" />
