@@ -21,7 +21,6 @@ namespace uSync8.BackOffice
                 .Add(() => composition.TypeLoader.GetTypes<ISyncHandler>());
 
             composition.Components().Append<uSyncBackofficeComponent>();
-
         }
     }
 }

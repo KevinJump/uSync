@@ -84,7 +84,7 @@ namespace uSync8.BackOffice.SyncHandlers
             return actions;
         }
 
-        private IEnumerable<uSyncAction> ImportFolder(string folder, bool force, Dictionary<string, TObject> updates)
+        protected virtual IEnumerable<uSyncAction> ImportFolder(string folder, bool force, Dictionary<string, TObject> updates)
         {
             List<uSyncAction> actions = new List<uSyncAction>();
 
@@ -102,7 +102,6 @@ namespace uSync8.BackOffice.SyncHandlers
             }
 
             var folders = syncFileService.GetDirectories(folder);
-
             foreach (var children in folders)
             {
                 actions.AddRange(ImportFolder(children, force, updates));
@@ -121,7 +120,6 @@ namespace uSync8.BackOffice.SyncHandlers
                 var node = XElement.Load(stream);
                 var attempt = serializer.Deserialize(node, force, false);
                 return attempt;
-                stream.Dispose();
             }
         }
 

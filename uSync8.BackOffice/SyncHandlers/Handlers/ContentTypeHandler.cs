@@ -20,7 +20,7 @@ using uSync8.Core.Serialization.Serializers;
 namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("contentTypeHandler", "ContentType Handler", "ContentTypes", uSyncBackOfficeConstants.Priorites.ContentTypes, IsTwoPass = true)]
-    public class ContentTypeHandler : SyncHandlerEntityBase<IContentType, IContentTypeService>, ISyncHandler
+    public class ContentTypeHandler : SyncHandlerTreeBase<IContentType, IContentTypeService>, ISyncHandler
     {
         private readonly IContentTypeService contentTypeService;
 

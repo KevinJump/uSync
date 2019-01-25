@@ -102,6 +102,8 @@ namespace uSync8.Core.Serialization.Serializers
         {
             var node = this.InitializeBaseNode(item);
 
+            node.Add(new XAttribute("Level", CalculateLevel(item)));
+
             node.Add(new XElement("Name", item.Name));
             node.Add(new XElement("Key", item.Key));
             node.Add(new XElement("Alias", item.Alias));
@@ -109,5 +111,25 @@ namespace uSync8.Core.Serialization.Serializers
 
             return SyncAttempt<XElement>.Succeed(item.Name, node, typeof(ITemplate), ChangeType.Export);
         }
+
+        private int CalculateLevel(ITemplate item)
+        {
+            if (item.MasterTemplateAlias.IsNullOrWhiteSpace()) return 1;
+
+            int level = 1;
+            var current = item;
+            while (!string.IsNullOrWhiteSpace(current.MasterTemplateAlias) && level < 20)
+            {
+                level++;
+                var parent = fileService.GetTemplate(current.MasterTemplateAlias);
+                if (parent == null) return level;
+
+                current = parent;
+            }
+
+            return level;
+        }
+
+        
     }
 }

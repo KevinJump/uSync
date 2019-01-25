@@ -10,7 +10,10 @@ namespace uSync8.Core.Extensions
 {
     public static class XElementExtensions
     {
-
+        public static int GetLevel(this XElement node)
+        {
+            return node.Attribute("Level").ValueOrDefault(0);
+        }
 
         public static string ValueOrDefault(this XElement node, string defaultValue)
         {

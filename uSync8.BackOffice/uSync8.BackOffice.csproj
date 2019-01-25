@@ -135,14 +135,15 @@
     <Compile Include="SyncHandlers\Handlers\MediaTypeHandler.cs" />
     <Compile Include="SyncHandlers\Handlers\MemberTypeHandler.cs" />
     <Compile Include="SyncHandlers\Handlers\TemplateHandler.cs" />
+    <Compile Include="SyncHandlers\ISyncPostImportHanlder.cs" />
     <Compile Include="SyncHandlers\SyncHandlerBase.cs" />
+    <Compile Include="SyncHandlers\SyncHandlerTreeBase.cs" />
     <Compile Include="uSyncAction.cs" />
     <Compile Include="uSyncBackofficeComponent.cs" />
     <Compile Include="uSyncBackOfficeComposer.cs" />
     <Compile Include="SyncHandlers\Handlers\ContentTypeHandler.cs" />
     <Compile Include="SyncHandlers\ISyncHandler.cs" />
     <Compile Include="SyncHandlers\SyncHandlerAttribute.cs" />
-    <Compile Include="SyncHandlers\SyncHandlerEntityBase.cs" />
     <Compile Include="SyncHandlers\SyncHandlerCollectionBuilder.cs" />
     <Compile Include="uSync8BackOffice.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
