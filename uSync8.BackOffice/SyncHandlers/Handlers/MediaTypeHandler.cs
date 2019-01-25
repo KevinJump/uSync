@@ -14,7 +14,7 @@ using uSync8.Core.Serialization;
 
 namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
-    [SyncHandler("mediaTypeHandler", "Media Type Handler", "MediaTypes", 2, IsTwoPass = true)]
+    [SyncHandler("mediaTypeHandler", "Media Type Handler", "MediaTypes", uSyncBackOfficeConstants.Priorites.MediaTypes, IsTwoPass = true)]
     public class MediaTypeHandler : SyncHandlerEntityBase<IMediaType>, ISyncHandler
     {
         private readonly IMediaTypeService mediaTypeService;

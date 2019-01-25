@@ -13,7 +13,7 @@ using uSync8.Core.Serialization;
 
 namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
-    [SyncHandler("memberTypeHandler", "Member Type Handler", "MemberTypes", 3, IsTwoPass = true)]
+    [SyncHandler("memberTypeHandler", "Member Type Handler", "MemberTypes", uSyncBackOfficeConstants.Priorites.MemberTypes, IsTwoPass = true)]
     public class MemberTypeHandler : SyncHandlerEntityBase<IMemberType>, ISyncHandler
     {
         private readonly IMemberTypeService memberTypeService;

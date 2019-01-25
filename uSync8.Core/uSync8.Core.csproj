@@ -134,6 +134,7 @@
     <Compile Include="Serialization\ISyncSerializer.cs" />
     <Compile Include="Serialization\Serializers\ContentTypeBaseSerializer.cs" />
     <Compile Include="Serialization\Serializers\ContentTypeSerializer.cs" />
+    <Compile Include="Serialization\Serializers\LanguageSerializer.cs" />
     <Compile Include="Serialization\Serializers\MediaTypeSerializer.cs" />
     <Compile Include="Serialization\Serializers\MemberTypeSerializer.cs" />
     <Compile Include="Serialization\Serializers\TemplateSerializer.cs" />
