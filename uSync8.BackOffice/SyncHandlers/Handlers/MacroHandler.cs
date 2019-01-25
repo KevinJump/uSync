@@ -14,7 +14,7 @@ using uSync8.Core.Serialization;
 namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("macroHandler", "Macro Handler", "Macros", uSyncBackOfficeConstants.Priorites.Macros)]
-    public class MacroHandler : SyncHandlerBase<IMacro>, ISyncHandler
+    public class MacroHandler : SyncHandlerBase<IMacro, IMacroService>, ISyncHandler
     {
         private readonly IMacroService macroService;
 
@@ -58,21 +58,9 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 
         public void InitializeEvents()
         {
-            MacroService.Saved += MacroService_Saved;
-            MacroService.Deleted += MacroService_Deleted;
+            MacroService.Saved += ItemSavedEvent;
+            MacroService.Deleted += ItemDeletedEvent;
         }
 
-        private void MacroService_Deleted(IMacroService sender, Umbraco.Core.Events.DeleteEventArgs<IMacro> e)
-        {
-            // throw new NotImplementedException();
-        }
-
-        private void MacroService_Saved(IMacroService sender, Umbraco.Core.Events.SaveEventArgs<IMacro> e)
-        {
-            foreach(var item in e.SavedEntities)
-            {
-                Export(item, this.DefaultFolder);
-            }
-        }
     }
 }

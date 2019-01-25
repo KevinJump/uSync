@@ -14,7 +14,7 @@ using uSync8.Core.Serialization;
 namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("memberTypeHandler", "Member Type Handler", "MemberTypes", uSyncBackOfficeConstants.Priorites.MemberTypes, IsTwoPass = true)]
-    public class MemberTypeHandler : SyncHandlerEntityBase<IMemberType>, ISyncHandler
+    public class MemberTypeHandler : SyncHandlerEntityBase<IMemberType, IMemberTypeService>, ISyncHandler
     {
         private readonly IMemberTypeService memberTypeService;
 
@@ -46,21 +46,8 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 
         public void InitializeEvents()
         {
-            MemberTypeService.Saved += MemberTypeService_Saved;
-            MemberTypeService.Deleted += MemberTypeService_Deleted;
-        }
-
-        private void MemberTypeService_Deleted(IMemberTypeService sender, Umbraco.Core.Events.DeleteEventArgs<IMemberType> e)
-        {
-            // no
-        }
-
-        private void MemberTypeService_Saved(IMemberTypeService sender, Umbraco.Core.Events.SaveEventArgs<IMemberType> e)
-        {
-            foreach(var item in e.SavedEntities)
-            {
-                Export(item, this.DefaultFolder);
-            }
+            MemberTypeService.Saved += ItemSavedEvent;
+            MemberTypeService.Deleted += ItemDeletedEvent;
         }
 
         protected override IMemberType GetFromService(int id)

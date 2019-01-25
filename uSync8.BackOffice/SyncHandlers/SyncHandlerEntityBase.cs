@@ -17,8 +17,9 @@ using System.Xml.Linq;
 
 namespace uSync8.BackOffice.SyncHandlers
 {
-    public abstract class SyncHandlerEntityBase<TObject> : SyncHandlerBase<TObject>, IDiscoverable
+    public abstract class SyncHandlerEntityBase<TObject, TService> : SyncHandlerBase<TObject, TService>, IDiscoverable
         where TObject : IUmbracoEntity
+        where TService : IService
     {
 
         protected SyncHandlerEntityBase(

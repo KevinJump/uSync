@@ -14,7 +14,7 @@ using uSync8.Core.Serialization;
 namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("languageHandler", "Language Handler", "Languages", uSyncBackOfficeConstants.Priorites.Languages)]
-    public class LanguageHandler : SyncHandlerBase<ILanguage>, ISyncHandler
+    public class LanguageHandler : SyncHandlerBase<ILanguage, ILocalizationService>, ISyncHandler
     {
         private readonly ILocalizationService localizationService;
 
@@ -47,21 +47,8 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 
         public void InitializeEvents()
         {
-            LocalizationService.SavedLanguage += LocalizationService_SavedLanguage;
-            LocalizationService.DeletedLanguage += LocalizationService_DeletedLanguage;
-        }
-
-        private void LocalizationService_DeletedLanguage(ILocalizationService sender, Umbraco.Core.Events.DeleteEventArgs<ILanguage> e)
-        {
-            // throw new NotImplementedException();
-        }
-
-        private void LocalizationService_SavedLanguage(ILocalizationService sender, Umbraco.Core.Events.SaveEventArgs<ILanguage> e)
-        {
-            foreach(var item in e.SavedEntities)
-            {
-                Export(item, this.DefaultFolder);
-            }
+            LocalizationService.SavedLanguage += ItemSavedEvent;
+            LocalizationService.DeletedLanguage += ItemDeletedEvent;
         }
     }
 }

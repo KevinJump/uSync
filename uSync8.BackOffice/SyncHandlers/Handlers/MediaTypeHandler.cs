@@ -15,7 +15,7 @@ using uSync8.Core.Serialization;
 namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("mediaTypeHandler", "Media Type Handler", "MediaTypes", uSyncBackOfficeConstants.Priorites.MediaTypes, IsTwoPass = true)]
-    public class MediaTypeHandler : SyncHandlerEntityBase<IMediaType>, ISyncHandler
+    public class MediaTypeHandler : SyncHandlerEntityBase<IMediaType, IMediaTypeService>, ISyncHandler
     {
         private readonly IMediaTypeService mediaTypeService;
 
@@ -51,21 +51,8 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 
         public void InitializeEvents()
         {
-            MediaTypeService.Saved += MediaTypeService_Saved;
-            MediaTypeService.Deleted += MediaTypeService_Deleted;
-        }
-
-        private void MediaTypeService_Deleted(IMediaTypeService sender, Umbraco.Core.Events.DeleteEventArgs<IMediaType> e)
-        {
-            // throw new NotImplementedException();
-        }
-
-        private void MediaTypeService_Saved(IMediaTypeService sender, Umbraco.Core.Events.SaveEventArgs<IMediaType> e)
-        {
-            foreach(var item in e.SavedEntities)
-            {
-                Export(item, this.DefaultFolder);
-            }
+            MediaTypeService.Saved += ItemSavedEvent;
+            MediaTypeService.Deleted += ItemDeletedEvent;
         }
 
         public override uSyncAction ReportItem(string file)

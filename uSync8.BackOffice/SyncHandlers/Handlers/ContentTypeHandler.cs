@@ -20,7 +20,7 @@ using uSync8.Core.Serialization.Serializers;
 namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("contentTypeHandler", "ContentType Handler", "ContentTypes", uSyncBackOfficeConstants.Priorites.ContentTypes, IsTwoPass = true)]
-    public class ContentTypeHandler : SyncHandlerEntityBase<IContentType>, ISyncHandler
+    public class ContentTypeHandler : SyncHandlerEntityBase<IContentType, IContentTypeService>, ISyncHandler
     {
         private readonly IContentTypeService contentTypeService;
 
@@ -58,7 +58,11 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
         }
         #endregion
 
-        #region HelperFunctions
+        public void InitializeEvents()
+        {
+            ContentTypeService.Saved += ItemSavedEvent;
+            ContentTypeService.Deleted += ItemDeletedEvent;
+        }
 
         protected override IContentType GetFromService(int id)
             => contentTypeService.Get(id);
@@ -66,31 +70,6 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
         protected override string GetItemFileName(IUmbracoEntity item)
             => item.Name;
 
-        #endregion
-
-
-        #region Event Handlers 
-        public void InitializeEvents()
-        {
-            ContentTypeService.Saved += ContentTypeService_Saved;
-            ContentTypeService.Deleted += ContentTypeService_Deleted;
-        }
-
-        private void ContentTypeService_Saved(IContentTypeService sender, Umbraco.Core.Events.SaveEventArgs<IContentType> e)
-        {
-            // do the save thing....
-            foreach (var item in e.SavedEntities)
-            {
-                Export(item, this.DefaultFolder);
-            }
-        }
-
-        private void ContentTypeService_Deleted(IContentTypeService sender, Umbraco.Core.Events.DeleteEventArgs<IContentType> e)
-        {
-            // remove the files from the disk, put something in the action log ?
-        }
-
-        #endregion
 
     }
 }

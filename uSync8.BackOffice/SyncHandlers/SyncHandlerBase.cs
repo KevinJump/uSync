@@ -14,11 +14,13 @@ using uSync8.Core.Serialization;
 
 namespace uSync8.BackOffice.SyncHandlers
 {
-    public abstract class SyncHandlerBase<TObject>
+    public abstract class SyncHandlerBase<TObject, TService>
         where TObject : IEntity
+        where TService : IService
     {
         protected readonly IProfilingLogger logger;
         protected readonly IEntityService entityService;
+
         protected readonly uSyncBackOfficeSettings globalSettings;
         protected readonly SyncFileService syncFileService;
         protected readonly ISyncSerializer<TObject> serializer;
@@ -218,6 +220,24 @@ namespace uSync8.BackOffice.SyncHandlers
 
         #endregion
 
+        #region Events 
+
+        protected virtual void ItemDeletedEvent(IService sender, Umbraco.Core.Events.DeleteEventArgs<TObject> e)
+        {
+            // throw new NotImplementedException();
+        }
+
+        protected virtual void ItemSavedEvent(IService sender, Umbraco.Core.Events.SaveEventArgs<TObject> e)
+        {
+            foreach (var item in e.SavedEntities)
+            {
+                Export(item, this.DefaultFolder);
+            }
+        }
+
+        #endregion
+
+
         abstract protected TObject GetFromService(int id);
         abstract public uSyncAction ReportItem(string file);
 
@@ -227,7 +247,6 @@ namespace uSync8.BackOffice.SyncHandlers
         }
 
         abstract protected string GetItemPath(TObject item);
-
 
         protected IEnumerable<uSyncAction> ProcessActions()
         {

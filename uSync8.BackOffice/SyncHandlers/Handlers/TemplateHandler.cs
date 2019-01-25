@@ -14,7 +14,7 @@ using uSync8.Core.Serialization;
 namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("templateHandler", "Template Handler", "Templates", uSyncBackOfficeConstants.Priorites.Templates)]
-    public class TemplateHandler : SyncHandlerBase<ITemplate>, ISyncHandler
+    public class TemplateHandler : SyncHandlerBase<ITemplate, IFileService>, ISyncHandler
     {
         private readonly IFileService fileService;
 
@@ -45,21 +45,8 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 
         public void InitializeEvents()
         {
-            FileService.SavedTemplate += FileService_SavedTemplate;
-            FileService.DeletedTemplate += FileService_DeletedTemplate;
-        }
-
-        private void FileService_DeletedTemplate(IFileService sender, Umbraco.Core.Events.DeleteEventArgs<ITemplate> e)
-        {
-            // not yet
-        }
-
-        private void FileService_SavedTemplate(IFileService sender, Umbraco.Core.Events.SaveEventArgs<ITemplate> e)
-        {
-            foreach(var item in e.SavedEntities)
-            {
-                Export(item, this.DefaultFolder);
-            }
+            FileService.SavedTemplate += ItemSavedEvent;
+            FileService.DeletedTemplate += ItemDeletedEvent;
         }
 
         protected override string GetItemPath(ITemplate item)
