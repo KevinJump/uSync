@@ -91,17 +91,17 @@ namespace uSync8.Core.Serialization.Serializers
 
         protected override SyncAttempt<XElement> SerializeCore(IMacro item)
         {
-            var node = new XElement("Macro",
-                new XAttribute("Key", item.Key),
-                new XElement("Name", item.Name),
-                new XElement("Alias", item.Alias),
-                new XElement("MacroSource", item.MacroSource),
-                new XElement("MacroType", item.MacroType),
-                new XElement("UseInEditor", item.UseInEditor),
-                new XElement("DontRender", item.DontRender),
-                new XElement("CachedByMember", item.CacheByMember),
-                new XElement("CachedByPage", item.CacheByPage),
-                new XElement("CachedDuration", item.CacheDuration));
+            var node = this.InitializeBaseNode(item);
+
+            node.Add(new XElement("Name", item.Name));
+            node.Add(new XElement("Alias", item.Alias));
+            node.Add(new XElement("MacroSource", item.MacroSource));
+            node.Add(new XElement("MacroType", item.MacroType));
+            node.Add(new XElement("UseInEditor", item.UseInEditor));
+            node.Add(new XElement("DontRender", item.DontRender));
+            node.Add(new XElement("CachedByMember", item.CacheByMember));
+            node.Add(new XElement("CachedByPage", item.CacheByPage));
+            node.Add(new XElement("CachedDuration", item.CacheDuration));
 
             var properties = new XElement("Properties");
             foreach(var property in item.Properties)

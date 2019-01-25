@@ -80,5 +80,11 @@ namespace uSync8.Core.Serialization
         {
             return false;
         }
+
+        protected virtual XElement InitializeBaseNode(TObject item)
+        {
+            return new XElement(ItemType,
+                new XAttribute("Key", item.Key));
+        }
     }
 }

@@ -90,7 +90,7 @@ namespace uSync8.Core.Serialization.Serializers
 
         }
 
-        protected override IMemberType CreateItem(string alias, IMemberType parent, ITreeEntity treeItem)
+        protected override IMemberType CreateItem(string alias, IMemberType parent, ITreeEntity treeItem, string extra)
         {
             var item = new MemberType(-1)
             {

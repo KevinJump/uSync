@@ -53,13 +53,13 @@ namespace uSync8.Core.Serialization.Serializers
 
         protected override SyncAttempt<XElement> SerializeCore(ILanguage item)
         {
-            var node = new XElement(ItemType,
-                new XAttribute("Key", item.Key),
-                new XElement("Id", item.Id),
-                new XElement("IsoCode", item.IsoCode),
-                new XElement("CultureName", item.CultureName),
-                new XElement("IsMandatory", item.IsMandatory),
-                new XElement("IsDefault", item.IsDefault));
+            var node = InitializeBaseNode(item);
+
+            node.Add(new XElement("Id", item.Id));
+            node.Add(new XElement("IsoCode", item.IsoCode));
+            node.Add(new XElement("CultureName", item.CultureName));
+            node.Add(new XElement("IsMandatory", item.IsMandatory));
+            node.Add(new XElement("IsDefault", item.IsDefault));
 
             if (item.FallbackLanguageId != null)
                 node.Add(new XElement("Fallback", item.FallbackLanguageId.Value));

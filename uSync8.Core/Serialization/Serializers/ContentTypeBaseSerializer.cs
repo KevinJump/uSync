@@ -11,7 +11,7 @@ using uSync8.Core.Extensions;
 
 namespace uSync8.Core.Serialization.Serializers
 {
-    public abstract class ContentTypeBaseSerializer<TObject> : SyncSerializerBase<TObject>
+    public abstract class ContentTypeBaseSerializer<TObject> : SyncTreeSerializerBase<TObject>
         where TObject : IContentTypeComposition
     {
         private readonly IDataTypeService dataTypeService;
@@ -32,9 +32,7 @@ namespace uSync8.Core.Serialization.Serializers
 
         protected XElement SerializeBase(TObject item)
         {
-            return new XElement(ItemType,
-                new XAttribute("Level", item.Level),
-                new XAttribute("Key", item.Key));
+            return InitializeBaseNode(item);
         }
 
         protected XElement SerializeInfo(TObject item)
@@ -411,28 +409,6 @@ namespace uSync8.Core.Serialization.Serializers
 
 
 
-        protected XElement GetFolderNode(IEnumerable<EntityContainer> containers)
-        {
-            if (containers == null || !containers.Any())
-                return null;
-
-            var parentKey = containers.OrderBy(x => x.Level).LastOrDefault().Key.ToString();
-
-            var folders = containers
-                .OrderBy(x => x.Level)
-                .Select(x => HttpUtility.UrlEncode(x.Name))
-                .ToList();
-
-            if (folders.Any())
-            {
-                var path = string.Join("/", folders);
-                return new XElement("Folder", path,
-                    new XAttribute("Key", parentKey));
-            }
-
-            return null;
-
-        }
 
         private void SetMasterFromElement(IContentTypeBase item, XElement masterNode)
         {
@@ -562,116 +538,7 @@ namespace uSync8.Core.Serialization.Serializers
 
         #endregion
 
-        protected TObject FindOrCreate(XElement node)
-        {
-            var info = node.Element("Info");
-            TObject item = default(TObject);
-            var key = info.Element("Key").ValueOrDefault(Guid.Empty);
-            if (key == Guid.Empty) return default(TObject);
-
-            item = LookupByKey(key);
-            if (item != null) return item;
-
-
-            var alias = info.Element("Alias").ValueOrDefault(string.Empty);
-            if (alias == string.Empty) return default(TObject);
-            item = LookupByAlias(alias);
-            if (item != null) return item;
-
-            // create
-            var parentId = -1;
-            var parent = default(TObject);
-            var treeItem = default(ITreeEntity);
-
-            var master = info.Element("Master");
-            if (master != null)
-            {
-                var parentKey = master.Attribute("Key").ValueOrDefault(Guid.Empty);
-                parent = LookupByKeyOrAlias(parentKey, master.Value);
-
-                if (parent != null)
-                {
-                    treeItem = parent;
-                    parentId = parent.Id;
-                }
-            }
-
-            if (parent == null)
-            {
-                // might be in a folder 
-                var folder = info.Element("Folder");
-                if (folder != null)
-                {
-                    var folderKey = folder.Attribute("Key").ValueOrDefault(Guid.Empty);
-                    var container = LookupFolderByKeyOrPath(folderKey, folder.Value);
-                    if (container != null)
-                    {
-                        treeItem = container;
-                    }
-                }
-            }
-
-            return CreateItem(alias, parent, treeItem);
-        }
-
-        protected abstract TObject CreateItem(string alias, TObject parent, ITreeEntity treeItem);
-
-        protected virtual ITreeEntity LookupFolderByKeyOrPath(Guid key, string path)
-        {
-            var container = GetContainer(key);
-            if (container != null) return container;
-
-            /// else - we have to parse it like a path ... 
-            var bits = path.Split('/');
-
-            var rootFolder = HttpUtility.UrlDecode(bits[0]);
-
-            var root = GetContainers(rootFolder, 1)
-                .FirstOrDefault();
-            if (root == null)
-            {
-                var attempt = CreateContainer(-1, rootFolder);
-                if (!attempt)
-                {
-                    return null;
-                }
-
-                root = attempt.Result.Entity;
-            }
-
-            if (root != null)
-            {
-                var current = (ITreeEntity)root;
-                for (int i = 1; i < bits.Length; i++)
-                {
-                    var name = HttpUtility.UrlDecode(bits[i]);
-                    current = TryCreateContainer(name, current);
-                    if (current == null) break;
-                }
-
-                if (current != null)
-                    return current;
-            }
-
-            return null;
-        }
-
-        private ITreeEntity TryCreateContainer(string name, ITreeEntity parent)
-        {
-            var children = entityService.GetChildren(parent.Id, UmbracoObjectTypes.DocumentTypeContainer);
-            if (children != null && children.Any(x => x.Name.InvariantEquals(name)))
-            {
-                return children.Single(x => x.Name.InvariantEquals(name));
-            }
-
-            // else create 
-            var attempt = CreateContainer(parent.Id, name);
-            if (attempt)
-                return (ITreeEntity)attempt.Result.Entity;
-
-            return null;
-        }
-
+       
         /// <summary>
         ///  does this property alias exist further down the composition tree ? 
         /// </summary>
@@ -687,33 +554,25 @@ namespace uSync8.Core.Serialization.Serializers
             return allProperties.Any(x => x.Any(y => y.Alias == alias));
         }
 
-
-        protected TObject LookupByKeyOrAlias(Guid key, string alias)
-        {
-            var item = LookupByKey(key);
-            if (item != null) return item;
-
-            return LookupByAlias(alias);
-        }
-
         protected virtual TObject LookupById(int id)
             => baseService.Get(id);
 
-        protected virtual TObject LookupByKey(Guid key)
+        override protected TObject LookupByKey(Guid key)
             => baseService.Get(key);
 
-        protected virtual TObject LookupByAlias(string alias)
+        override protected TObject LookupByAlias(string alias)
             => baseService.Get(alias);
 
 
-        protected virtual Attempt<OperationResult<OperationResultType, EntityContainer>> CreateContainer(int parentId, string name)
-            => baseService.CreateContainer(parentId, name);
-
-        protected virtual EntityContainer GetContainer(Guid key)
+        override protected EntityContainer GetContainer(Guid key)
             => baseService.GetContainer(key);
 
-        protected virtual IEnumerable<EntityContainer> GetContainers(string folder, int level)
+        override protected IEnumerable<EntityContainer> GetContainers(string folder, int level)
             => baseService.GetContainers(folder, level);
+
+        override protected Attempt<OperationResult<OperationResultType, EntityContainer>> CreateContainer(int parentId, string name)
+            => baseService.CreateContainer(parentId, name);
+
 
     }
 }

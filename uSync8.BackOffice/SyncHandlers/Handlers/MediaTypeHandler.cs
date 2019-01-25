@@ -35,13 +35,6 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             this.itemContainerType = UmbracoObjectTypes.MediaTypeContainer;
         }
 
-        #region Import
-
-        #endregion
-
-        #region Export 
-
-        #endregion
 
         protected override IMediaType GetFromService(int id)
             => mediaTypeService.Get(id);

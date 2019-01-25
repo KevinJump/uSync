@@ -134,6 +134,7 @@
     <Compile Include="Serialization\ISyncSerializer.cs" />
     <Compile Include="Serialization\Serializers\ContentTypeBaseSerializer.cs" />
     <Compile Include="Serialization\Serializers\ContentTypeSerializer.cs" />
+    <Compile Include="Serialization\Serializers\DataTypeSerializer.cs" />
     <Compile Include="Serialization\Serializers\LanguageSerializer.cs" />
     <Compile Include="Serialization\Serializers\MacroSerializer.cs" />
     <Compile Include="Serialization\Serializers\MediaTypeSerializer.cs" />
@@ -141,6 +142,7 @@
     <Compile Include="Serialization\Serializers\TemplateSerializer.cs" />
     <Compile Include="Serialization\SyncSerializerAttribute.cs" />
     <Compile Include="Serialization\SyncSerializerBase.cs" />
+    <Compile Include="Serialization\SyncTreeSerializerBase.cs" />
     <Compile Include="SyncAttempt.cs" />
     <Compile Include="Serialization\SyncSerializerCollectionBuilder.cs" />
     <Compile Include="uSync8Core.cs" />

@@ -29,7 +29,6 @@ namespace uSync8.Core.Serialization.Serializers
         protected override SyncAttempt<XElement> SerializeCore(IContentType item)
         {
             var node = SerializeBase(item);
-
             var info = SerializeInfo(item);
 
             var parent = item.ContentTypeComposition.FirstOrDefault(x => x.Id == item.ParentId);
@@ -169,7 +168,7 @@ namespace uSync8.Core.Serialization.Serializers
         }
 
 
-        protected override IContentType CreateItem(string alias, IContentType parent, ITreeEntity treeItem)
+        protected override IContentType CreateItem(string alias, IContentType parent, ITreeEntity treeItem, string itemType)
         {
             var item = new ContentType(-1)
             {

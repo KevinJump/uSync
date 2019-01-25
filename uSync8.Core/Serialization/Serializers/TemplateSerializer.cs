@@ -100,12 +100,12 @@ namespace uSync8.Core.Serialization.Serializers
 
         protected override SyncAttempt<XElement> SerializeCore(ITemplate item)
         {
-            var node = new XElement(ItemType,
-                new XAttribute("Key", item.Key),
-                new XElement("Name", item.Name),
-                new XElement("Key", item.Key),
-                new XElement("Alias", item.Alias),
-                new XElement("Master", item.MasterTemplateAlias));
+            var node = this.InitializeBaseNode(item);
+
+            node.Add(new XElement("Name", item.Name));
+            node.Add(new XElement("Key", item.Key));
+            node.Add(new XElement("Alias", item.Alias));
+            node.Add(new XElement("Master", item.MasterTemplateAlias));
 
             return SyncAttempt<XElement>.Succeed(item.Name, node, typeof(ITemplate), ChangeType.Export);
         }

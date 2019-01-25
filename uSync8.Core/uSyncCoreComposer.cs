@@ -28,6 +28,7 @@ namespace uSync8.Core
             composition.Register<ISyncSerializer<ITemplate>, TemplateSerializer>();
             composition.Register<ISyncSerializer<ILanguage>, LanguageSerializer>();
             composition.Register<ISyncSerializer<IMacro>, MacroSerializer>();
+            composition.Register<ISyncSerializer<IDataType>, DataTypeSerializer>();
         }
     }
 }
