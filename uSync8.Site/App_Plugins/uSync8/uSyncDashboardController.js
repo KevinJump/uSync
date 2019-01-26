@@ -18,6 +18,7 @@
 
         // functions 
         vm.report = report;
+        vm.export = exportItems;
 
 
         // kick it all off
@@ -33,6 +34,10 @@
                     vm.results = result.data;
                     vm.working = false;
                 });
+        }
+
+        function exportItems () {
+
         }
 
         ////// private 
