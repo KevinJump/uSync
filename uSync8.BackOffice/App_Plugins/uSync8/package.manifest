@@ -1,5 +1,8 @@
 {
-  "javascript": [],
+  "javascript": [
+    "~/app_plugins/uSync8/uSyncDashboardController.js",
+    "~/app_plugins/uSync8/uSyncService.js"
+  ],
   "dashboards": [
     {
       "alias": "uSync8",
