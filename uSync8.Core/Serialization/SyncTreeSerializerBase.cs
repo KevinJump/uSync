@@ -47,18 +47,16 @@ namespace uSync8.Core.Serialization
 
         protected TObject FindOrCreate(XElement node, string typeElement = "")
         {
-            var info = node.Element("Info");
             TObject item = default(TObject);
-            var key = info.Element("Key").ValueOrDefault(Guid.Empty);
+            var key = node.GetKey();
             if (key == Guid.Empty) return default(TObject);
 
-            item = LookupByKey(key);
+            item = GetItem(key);
             if (item != null) return item;
 
-
-            var alias = info.Element("Alias").ValueOrDefault(string.Empty);
+            var alias = node.GetAlias();
             if (alias == string.Empty) return default(TObject);
-            item = LookupByAlias(alias);
+            item = GetItem(alias);
             if (item != null) return item;
 
             // create
@@ -66,11 +64,12 @@ namespace uSync8.Core.Serialization
             var parent = default(TObject);
             var treeItem = default(ITreeEntity);
 
+            var info = node.Element("Info");
             var master = info.Element("Master");
             if (master != null)
             {
                 var parentKey = master.Attribute("Key").ValueOrDefault(Guid.Empty);
-                parent = LookupByKeyOrAlias(parentKey, master.Value);
+                parent = GetItem(parentKey, master.Value);
 
                 if (parent != null)
                 {
@@ -104,18 +103,6 @@ namespace uSync8.Core.Serialization
         }
 
         protected abstract TObject CreateItem(string alias, TObject parent, ITreeEntity treeItem, string itemType);
-
-
-        protected TObject LookupByKeyOrAlias(Guid key, string alias)
-        {
-            var item = LookupByKey(key);
-            if (item != null) return item;
-
-            return LookupByAlias(alias);
-        }
-
-        protected abstract TObject LookupByKey(Guid key);
-        protected abstract TObject LookupByAlias(string alias);
 
         protected virtual ITreeEntity LookupFolderByKeyOrPath(Guid key, string path)
         {
@@ -176,12 +163,5 @@ namespace uSync8.Core.Serialization
         protected abstract EntityContainer GetContainer(Guid key);
         protected abstract IEnumerable<EntityContainer> GetContainers(string folder, int level);
         protected abstract Attempt<OperationResult<OperationResultType, EntityContainer>> CreateContainer(int parentId, string name);
-
-        protected override XElement InitializeBaseNode(TObject item)
-        {
-            return new XElement(ItemType,
-                new XAttribute("Key", item.Key),
-                new XAttribute("Level", item.Level));
-        }
     }
 }

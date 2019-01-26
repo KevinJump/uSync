@@ -11,6 +11,7 @@ using Umbraco.Core.Services.Implement;
 using uSync8.BackOffice.Services;
 using uSync8.Core;
 using uSync8.Core.Serialization;
+using uSync8.Core.Tracking;
 
 namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
@@ -24,10 +25,10 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             IMediaTypeService mediaTypeService,
             IProfilingLogger logger, 
             ISyncSerializer<IMediaType> serializer,
+            ISyncTracker<IMediaType> tracker,
             SyncFileService syncFileService, 
             uSyncBackOfficeSettings settings) 
-            : base(entityService, logger, 
-                  serializer, syncFileService, settings)
+            : base(entityService, logger, serializer, tracker, syncFileService, settings)
         {
             this.mediaTypeService = mediaTypeService;
 
@@ -47,11 +48,5 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             MediaTypeService.Saved += ItemSavedEvent;
             MediaTypeService.Deleted += ItemDeletedEvent;
         }
-
-        public override uSyncAction ReportItem(string file)
-        {
-            return uSyncAction.Fail("not implimented", typeof(IMediaType), new Exception("Not implimented"));
-        }
-
     }
 }

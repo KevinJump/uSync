@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Xml.Linq;
 using Umbraco.Core.Models.Entities;
+using uSync8.Core.Models;
 
 namespace uSync8.Core.Serialization
 {
@@ -18,13 +19,21 @@ namespace uSync8.Core.Serialization
     public interface ISyncSerializer<TObject> : ISyncSerializerBase
         where TObject : IEntity
     {
+        TObject GetItem(XElement node);
+
         SyncAttempt<XElement> Serialize(TObject item);
 
         SyncAttempt<TObject> Deserialize(XElement node, bool force, bool onePass);
         SyncAttempt<TObject> DesrtializeSecondPass(TObject item, XElement node);
 
+        /// <summary>
+        ///  Returns true if the peice of xml is valid for this serializer
+        /// </summary>
+        bool IsValid(XElement node);
         bool IsCurrent(XElement node);
 
         bool IsTwoPass { get; }
+
+        string ItemType { get; }
     }
 }

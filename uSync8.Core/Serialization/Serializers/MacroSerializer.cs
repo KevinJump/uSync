@@ -7,6 +7,7 @@ using System.Xml.Linq;
 using Umbraco.Core.Models;
 using Umbraco.Core.Services;
 using uSync8.Core.Extensions;
+using uSync8.Core.Models;
 
 namespace uSync8.Core.Serialization.Serializers
 {
@@ -25,15 +26,13 @@ namespace uSync8.Core.Serialization.Serializers
 
         protected override SyncAttempt<IMacro> DeserializeCore(XElement node)
         {
-            if (node.Attribute("Key") == null
-                || node.Element("Alias") == null
-                || node.Element("Name") == null)
-                throw new ArgumentException("Invalid XML on Macro");
+            if (node.Element("Name") == null)
+                throw new ArgumentNullException("XML missing Name parameter");
 
             var item = default(IMacro);
 
-            var key = node.Attribute("Key").ValueOrDefault(Guid.Empty);
-            var alias = node.Element("Alias").ValueOrDefault(string.Empty);
+            var key = node.GetKey();
+            var alias = node.GetAlias();
             var name = node.Element("Name").ValueOrDefault(string.Empty);
 
             var macroSource = node.Element("MacroSource").ValueOrDefault(string.Empty);
@@ -89,12 +88,12 @@ namespace uSync8.Core.Serialization.Serializers
             return SyncAttempt<IMacro>.Succeed(item.Name, item, ChangeType.Import);
         }
 
+
         protected override SyncAttempt<XElement> SerializeCore(IMacro item)
         {
-            var node = this.InitializeBaseNode(item);
+            var node = this.InitializeBaseNode(item, item.Alias);
 
             node.Add(new XElement("Name", item.Name));
-            node.Add(new XElement("Alias", item.Alias));
             node.Add(new XElement("MacroSource", item.MacroSource));
             node.Add(new XElement("MacroType", item.MacroType));
             node.Add(new XElement("UseInEditor", item.UseInEditor));
@@ -122,7 +121,13 @@ namespace uSync8.Core.Serialization.Serializers
                 node,
                 typeof(IMacro),
                 ChangeType.Export);
-
         }
+
+        protected override IMacro GetItem(Guid key)
+            => macroService.GetById(key);
+
+        protected override IMacro GetItem(string alias)
+            => macroService.GetByAlias(alias);
+
     }
 }

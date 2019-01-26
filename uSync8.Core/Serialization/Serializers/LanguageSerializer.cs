@@ -7,6 +7,7 @@ using System.Xml.Linq;
 using Umbraco.Core.Models;
 using Umbraco.Core.Services;
 using uSync8.Core.Extensions;
+using uSync8.Core.Models;
 
 namespace uSync8.Core.Serialization.Serializers
 {
@@ -51,9 +52,10 @@ namespace uSync8.Core.Serialization.Serializers
             return SyncAttempt<ILanguage>.Succeed(item.CultureName, item, ChangeType.Import);
         }
 
+
         protected override SyncAttempt<XElement> SerializeCore(ILanguage item)
         {
-            var node = InitializeBaseNode(item);
+            var node = InitializeBaseNode(item, item.IsoCode);
 
             node.Add(new XElement("Id", item.Id));
             node.Add(new XElement("IsoCode", item.IsoCode));
@@ -71,5 +73,14 @@ namespace uSync8.Core.Serialization.Serializers
                 typeof(ILanguage),
                 ChangeType.Export);
         }
+
+        public override bool IsValid(XElement node)
+            => (base.IsValid(node) && node.Element("CultureName") != null && node.Element("IsoCode") != null);
+
+        protected override ILanguage GetItem(string alias) =>
+            localizationService.GetLanguageByIsoCode(alias);
+
+        protected override ILanguage GetItem(Guid key) => default(ILanguage);
+
     }
 }

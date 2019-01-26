@@ -47,5 +47,18 @@ namespace uSync8.BackOffice.Controllers
             }).OrderBy(x => x.Priority);
         }
 
+
+        [HttpGet]
+        public IEnumerable<uSyncAction> Report()
+        {
+            var updates = new List<uSyncAction>();
+
+            foreach(var syncHandler in syncHandlers.Where(x => x.Enabled))
+            {
+                updates.AddRange(syncHandler.Report(syncHandler.DefaultFolder));
+            }
+
+            return updates;
+        }
     }
 }

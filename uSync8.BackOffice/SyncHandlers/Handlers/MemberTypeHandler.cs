@@ -10,6 +10,7 @@ using Umbraco.Core.Services;
 using Umbraco.Core.Services.Implement;
 using uSync8.BackOffice.Services;
 using uSync8.Core.Serialization;
+using uSync8.Core.Tracking;
 
 namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
@@ -22,10 +23,11 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             IEntityService entityService,
             IProfilingLogger logger,
             IMemberTypeService memberTypeService,
-            ISyncSerializer<IMemberType> serializer, 
+            ISyncSerializer<IMemberType> serializer,
+            ISyncTracker<IMemberType> tracker,
             SyncFileService syncFileService, 
-            uSyncBackOfficeSettings settings) : base(entityService, logger
-            , serializer, syncFileService, settings)
+            uSyncBackOfficeSettings settings) 
+            : base(entityService, logger, serializer, tracker, syncFileService, settings)
         {
             this.memberTypeService = memberTypeService;
 
@@ -37,11 +39,6 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 
             this.Enabled = false; 
             // turn it off it appears to break things in current build
-        }
-
-        public override uSyncAction ReportItem(string file)
-        {
-            return uSyncAction.Fail("not implimented", typeof(IMemberType), new Exception("Not implimented"));
         }
 
         public void InitializeEvents()

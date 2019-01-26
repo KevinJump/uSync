@@ -1,9 +1,12 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using uSync8.Core;
+using uSync8.Core.Models;
 
 namespace uSync8.BackOffice
 {
@@ -13,7 +16,11 @@ namespace uSync8.BackOffice
         public Type ItemType { get; set; }
         public string Message { get; set; }
         public Exception Exception { get; set; }
+
+        [JsonConverter(typeof(StringEnumConverter))]
         public ChangeType Change { get; set; }
+
+
         public string FileName { get; private set; }
         public string Name { get; set; }
         public bool RequiresPostProcessing { get; set; }

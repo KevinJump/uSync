@@ -16,7 +16,9 @@
 
         var service = {
             getSettings: getSettings,
-            getHandlers: getHandlers
+            getHandlers: getHandlers,
+
+            report: report
         };
 
         return service;
@@ -29,6 +31,10 @@
 
         function getHandlers() {
             return $http.get(serviceRoot + 'GetHandlers');
+        }
+
+        function report() {
+            return $http.get(serviceRoot + 'report');
         }
 
     }

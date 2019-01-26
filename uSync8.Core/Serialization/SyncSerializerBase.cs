@@ -1,9 +1,13 @@
 ﻿using System;
+using System.IO;
+using System.Security.Cryptography;
 using System.Xml.Linq;
 using Umbraco.Core;
 using Umbraco.Core.Composing;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
+using uSync8.Core.Extensions;
+using uSync8.Core.Models;
 
 namespace uSync8.Core.Serialization
 {
@@ -48,7 +52,7 @@ namespace uSync8.Core.Serialization
 
         public SyncAttempt<TObject> Deserialize(XElement node, bool force, bool OnePass)
         {
-            if (node.Name.LocalName != this.ItemType)
+            if (!IsValid(node))
                 throw new ArgumentException($"XML Not valid for type {ItemType}");
 
             if (force || !IsCurrent(node))
@@ -62,8 +66,6 @@ namespace uSync8.Core.Serialization
                 return result;
             }
 
-
-
             return SyncAttempt<TObject>.Succeed(node.Name.LocalName, default(TObject), ChangeType.NoChange);
         }
 
@@ -76,15 +78,106 @@ namespace uSync8.Core.Serialization
         protected abstract SyncAttempt<XElement> SerializeCore(TObject item);
         protected abstract SyncAttempt<TObject> DeserializeCore(XElement node);
 
-        public virtual bool IsCurrent(XElement node)
+        /// <summary>
+        ///  all xml items now have the same top line, this makes 
+        ///  it eaiser for use to do lookups, get things like
+        ///  keys and aliases for the basic checkers etc, 
+        ///  makes the code simpler.
+        /// </summary>
+        /// <param name="item">Item we care about</param>
+        /// <param name="alias">Alias we want to use</param>
+        /// <param name="level">Level</param>
+        /// <returns></returns>
+        protected virtual XElement InitializeBaseNode(TObject item, string alias, int level = 0)
+            => new XElement(ItemType,
+                new XAttribute("Key", item.Key),
+                new XAttribute("Alias", alias),
+                new XAttribute("Level", level));
+
+        /// <summary>
+        ///  is this a bit of valid xml 
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
+        public virtual bool IsValid(XElement node)
+            => node.Name.LocalName == this.ItemType 
+                && node.GetKey() != Guid.Empty 
+                && node.GetAlias() != string.Empty;
+
+
+        public TObject GetItem(XElement node)
         {
-            return false;
+            var (key, alias) = FindKeyAndAlias(node);
+
+            if (key != Guid.Empty)
+            {
+                var item = GetItem(key);
+                if (item != null) return item;
+            }
+
+            if (!string.IsNullOrWhiteSpace(alias))
+                return GetItem(alias);
+
+            return default(TObject);
         }
 
-        protected virtual XElement InitializeBaseNode(TObject item)
+        protected (Guid key, string alias) FindKeyAndAlias(XElement node)
         {
-            return new XElement(ItemType,
-                new XAttribute("Key", item.Key));
+            if (IsValid(node))
+                return (
+                        key : node.Attribute("Key").ValueOrDefault(Guid.Empty),
+                        alias : node.Attribute("Alias").ValueOrDefault(string.Empty)
+                       );
+
+            return (key: Guid.Empty, alias: string.Empty);
         }
+
+        protected abstract TObject GetItem(Guid key);
+        protected abstract TObject GetItem(string alias);
+
+        protected TObject GetItem(Guid key, string alias)
+        {
+            var item = GetItem(key);
+            if (item != null) return item;
+
+            return GetItem(alias);
+        }
+
+
+        public bool IsCurrent(XElement node)
+        {
+            if (node == null) return false;
+
+            var newHash = MakeHash(node);
+
+            var item = GetItem(node);
+            if (item == null) return false;
+
+            var currentNode = Serialize(item);
+            if (!currentNode.Success) return false;
+
+            var currentHash = MakeHash(currentNode.Item);
+            if (string.IsNullOrEmpty(currentHash)) return false;
+
+            return currentHash == newHash;
+        }
+
+
+        private string MakeHash(XElement node)
+        {
+            if (node == null) return string.Empty;
+
+            using (MemoryStream s = new MemoryStream())
+            {
+                node.Save(s);
+                s.Position = 0;
+                using (var md5 = MD5.Create())
+                {
+                    return BitConverter.ToString(
+                        md5.ComputeHash(s)).Replace("-", "").ToLower();
+                }
+            }
+        }
+
     }
 }

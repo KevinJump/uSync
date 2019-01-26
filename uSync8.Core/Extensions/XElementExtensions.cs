@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using System.Xml.XPath;
 using Umbraco.Core;
 
 namespace uSync8.Core.Extensions
@@ -11,9 +12,13 @@ namespace uSync8.Core.Extensions
     public static class XElementExtensions
     {
         public static int GetLevel(this XElement node)
-        {
-            return node.Attribute("Level").ValueOrDefault(0);
-        }
+            => node.Attribute("Level").ValueOrDefault(0);
+
+        public static Guid GetKey(this XElement node)
+            => node.Attribute("Key").ValueOrDefault(Guid.Empty);
+
+        public static string GetAlias(this XElement node)
+            => node.Attribute("Alias").ValueOrDefault(string.Empty);
 
         public static string ValueOrDefault(this XElement node, string defaultValue)
         {

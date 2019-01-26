@@ -16,6 +16,7 @@ using uSync8.BackOffice.Services;
 using uSync8.Core;
 using uSync8.Core.Serialization;
 using uSync8.Core.Serialization.Serializers;
+using uSync8.Core.Tracking;
 
 namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
@@ -29,9 +30,10 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             IProfilingLogger logger,
             IContentTypeService contentTypeService,
             ISyncSerializer<IContentType> serializer,
+            ISyncTracker<IContentType> tracker,
             SyncFileService fileService,
             uSyncBackOfficeSettings settings)
-            : base(entityService, logger, serializer, fileService, settings)
+            : base(entityService, logger, serializer, tracker, fileService, settings)
         {
             this.contentTypeService = contentTypeService;
 
@@ -50,14 +52,7 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 
 
         #endregion
-
-        #region Reporting
-        public override uSyncAction ReportItem(string file)
-        {
-            return new uSyncAction();
-        }
-        #endregion
-
+      
         public void InitializeEvents()
         {
             ContentTypeService.Saved += ItemSavedEvent;

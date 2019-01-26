@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Umbraco.Core.IO;
 
 namespace uSync8.BackOffice.Services
@@ -102,6 +103,16 @@ namespace uSync8.BackOffice.Services
             }
 
             return Enumerable.Empty<string>();
+        }
+
+        public XElement LoadXElement(string file)
+        {
+            EnsureFileExists(file);
+
+            using (var stream = OpenRead(file))
+            {
+                return XElement.Load(stream);
+            }
         }
     }
 }

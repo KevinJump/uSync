@@ -32,15 +32,13 @@ namespace uSync8.Core.Serialization.Serializers
 
         protected XElement SerializeBase(TObject item)
         {
-            return InitializeBaseNode(item);
+            return InitializeBaseNode(item, item.Alias, item.Level);
         }
 
         protected XElement SerializeInfo(TObject item)
         {
             return new XElement("Info",
-                            new XElement("Key", item.Key),
                             new XElement("Name", item.Name),
-                            new XElement("Alias", item.Alias),
                             new XElement("Icon", item.Icon),
                             new XElement("Thumbnail", item.Thumbnail),
                             new XElement("Description", string.IsNullOrWhiteSpace(item.Description) ? "" : item.Description),
@@ -144,19 +142,7 @@ namespace uSync8.Core.Serialization.Serializers
         #endregion
 
         #region Deserialization
-
-        protected virtual bool IsValid(XElement node)
-        {
-            if (node == null
-                || node.Element("Info") == null
-                || node.Element("Info").Element("Alias") == null)
-            {
-                return false;
-            }
-
-            return true;
-
-        }
+    
 
         protected void DeserializeBase(TObject item, XElement node)
         {
@@ -165,7 +151,7 @@ namespace uSync8.Core.Serialization.Serializers
             var info = node.Element("Info");
             if (info == null) return;
 
-            var alias = info.RequiredElement("Alias");
+            var alias = info.GetAlias();
             if (item.Alias != alias)
                 item.Alias = alias;
 
@@ -219,13 +205,13 @@ namespace uSync8.Core.Serialization.Serializers
                 if (key != Guid.Empty)
                 {
                     // lookup by key (our prefered way)
-                    baseItem = LookupByKey(key);
+                    baseItem = GetItem(key);
                 }
 
                 if (baseItem == null)
                 {
                     // lookup by alias (less nice)
-                    baseItem = LookupByAlias(alias);
+                    baseItem = GetItem(alias);
                 }
 
                 if (baseItem != null)
@@ -399,7 +385,7 @@ namespace uSync8.Core.Serialization.Serializers
                 var alias = compositionNode.Value;
                 var key = compositionNode.Attribute("Key").ValueOrDefault(Guid.Empty);
 
-                var type = LookupByKeyOrAlias(key, alias);
+                var type = GetItem(key, alias);
                 if (type != null)
                     compositions.Add(type);
             }
@@ -538,7 +524,7 @@ namespace uSync8.Core.Serialization.Serializers
 
         #endregion
 
-       
+
         /// <summary>
         ///  does this property alias exist further down the composition tree ? 
         /// </summary>
@@ -553,14 +539,15 @@ namespace uSync8.Core.Serialization.Serializers
 
             return allProperties.Any(x => x.Any(y => y.Alias == alias));
         }
+      
 
         protected virtual TObject LookupById(int id)
             => baseService.Get(id);
 
-        override protected TObject LookupByKey(Guid key)
+        override protected TObject GetItem(Guid key)
             => baseService.Get(key);
 
-        override protected TObject LookupByAlias(string alias)
+        override protected TObject GetItem(string alias)
             => baseService.Get(alias);
 
 

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace uSync8.Core
+namespace uSync8.Core.Models
 {
     public struct SyncAttempt<TObject>
     {
@@ -17,7 +17,7 @@ namespace uSync8.Core
         public IEnumerable<uSyncChange> Details { get; set; }
 
         private SyncAttempt(bool success, string name, TObject item, Type itemType, ChangeType change,
-            string message, Exception ex) 
+            string message, Exception ex)
             : this()
         {
             Success = success;
@@ -112,29 +112,6 @@ namespace uSync8.Core
             return new SyncAttempt<TObject>(condition, name, item, itemType, change, string.Empty, null);
         }
 
-    }
-
-    public class uSyncChange
-    {
-        public string Path { get; set; }
-        public string Name { get; set; }
-        public ChangeDetailType Change { get; set; }
-        public string OldVal { get; set; }
-        public string NewVal { get; set; }
-        public ChangeValueType ValueType { get; set; }
-    }
-
-    public enum ChangeDetailType
-    {
-        Create,
-        Update,
-        Delete,
-        Error
-    }
-
-    public enum ChangeValueType
-    {
-        Node, Element, Attribute, Value
     }
 
 }

@@ -8,6 +8,8 @@ using Umbraco.Core.Models;
 using Umbraco.Core.Composing;
 using uSync8.Core.Serialization;
 using uSync8.Core.Serialization.Serializers;
+using uSync8.Core.Tracking;
+using uSync8.Core.Tracking.Impliment;
 
 namespace uSync8.Core
 {
@@ -29,6 +31,16 @@ namespace uSync8.Core
             composition.Register<ISyncSerializer<ILanguage>, LanguageSerializer>();
             composition.Register<ISyncSerializer<IMacro>, MacroSerializer>();
             composition.Register<ISyncSerializer<IDataType>, DataTypeSerializer>();
+
+            // the trackers, allow us to be more nuanced in tracking changes, should
+            // mean change messages are better. 
+            composition.Register<ISyncTracker<IContentType>, ContentTypeTracker>();
+            composition.Register<ISyncTracker<IMediaType>, MediaTypeTracker>();
+            composition.Register<ISyncTracker<IMemberType>, MemberTypeTracker>();
+            composition.Register<ISyncTracker<ITemplate>, TemplateTracker>();
+            composition.Register<ISyncTracker<ILanguage>, LanguageTracker>();
+            composition.Register<ISyncTracker<IMacro>, MacroTracker>();
+            composition.Register<ISyncTracker<IDataType>, DataTypeTracker>();
         }
     }
 }

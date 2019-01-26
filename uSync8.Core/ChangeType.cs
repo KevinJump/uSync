@@ -1,5 +1,6 @@
 ﻿namespace uSync8.Core
 {
+
     public enum ChangeType
     {
         Removed = -1,

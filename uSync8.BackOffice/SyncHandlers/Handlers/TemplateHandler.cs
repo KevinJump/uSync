@@ -10,6 +10,8 @@ using Umbraco.Core.Services;
 using Umbraco.Core.Services.Implement;
 using uSync8.BackOffice.Services;
 using uSync8.Core.Serialization;
+using uSync8.Core.Tracking;
+using uSync8.Core.Tracking.Impliment;
 
 namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
@@ -23,9 +25,10 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             IProfilingLogger logger, 
             IFileService fileService,
             ISyncSerializer<ITemplate> serializer, 
+            ISyncTracker<ITemplate> tracker,
             SyncFileService syncFileService, 
             uSyncBackOfficeSettings settings) 
-            : base(entityService, logger, serializer, syncFileService, settings)
+            : base(entityService, logger, serializer, tracker, syncFileService, settings)
         {
             this.fileService = fileService;
 
@@ -33,11 +36,6 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 
             // this might need some work - because its not a container thing ?
             this.itemContainerType = UmbracoObjectTypes.Unknown;
-        }
-
-        public override uSyncAction ReportItem(string file)
-        {
-            return uSyncAction.Fail("not implimented", typeof(IMemberType), new Exception("Not implimented"));
         }
 
         protected override ITemplate GetFromService(int id)

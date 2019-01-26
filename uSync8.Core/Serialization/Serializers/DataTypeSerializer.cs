@@ -12,6 +12,7 @@ using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
 using uSync8.Core.Extensions;
+using uSync8.Core.Models;
 
 namespace uSync8.Core.Serialization.Serializers
 {
@@ -29,15 +30,10 @@ namespace uSync8.Core.Serialization.Serializers
 
         protected override SyncAttempt<IDataType> DeserializeCore(XElement node)
         {
-            if (node.Element("Info") == null
-                || node.Element("Info").Element("Name") == null
-                || node.Element("Info").Element("EditorAlias") == null)
-                throw new ArgumentException("Invalid Datatype XML");
-
             var info = node.Element("Info");
-
-            var key = info.Element("Key").ValueOrDefault(Guid.Empty);
             var name = info.Element("Name").ValueOrDefault(string.Empty);
+
+            var key = node.GetKey();
 
             var item = FindOrCreate(node);
 
@@ -85,15 +81,12 @@ namespace uSync8.Core.Serialization.Serializers
 
         protected override SyncAttempt<XElement> SerializeCore(IDataType item)
         {
-            var node = InitializeBaseNode(item);
+            var node = InitializeBaseNode(item, item.Name, item.Level);
 
             var info = new XElement("Info",
                 new XElement("Name", item.Name),
-                new XElement("Alias", item.Name),
-                new XElement("Level", item.Level),
                 new XElement("EditorAlias", item.EditorAlias),
                 new XElement("DatabaseType", item.DatabaseType),
-                new XElement("Key", item.Key),
                 new XElement("SortOrder", item.SortOrder));
 
             if (item.Level != 1)
@@ -141,10 +134,10 @@ namespace uSync8.Core.Serialization.Serializers
             return item;
         }
 
-        protected override IDataType LookupByKey(Guid key)
+        protected override IDataType GetItem(Guid key)
             => dataTypeService.GetDataType(key);
 
-        protected override IDataType LookupByAlias(string alias)
+        protected override IDataType GetItem(string alias)
             => dataTypeService.GetDataType(alias);
 
         protected override EntityContainer GetContainer(Guid key)

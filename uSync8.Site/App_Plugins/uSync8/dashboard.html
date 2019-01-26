@@ -12,6 +12,14 @@
             <div>
                 <localize key="usync_intro"></localize>
             </div>
+            <div class="flex justify-start items-center">
+                <umb-button type="button"
+                            button-style="default"
+                            label-key="usync_report"
+                            action="vm.report()">
+                </umb-button>
+
+            </div>
         </umb-box-content>
     </umb-box>
     <umb-box>
@@ -23,17 +31,23 @@
     <div class="umb-healthcheck-group__details-group">
 
         <div class="umb-healthcheck-group__details-group-title">
-            <div class="umb-healthcheck-group__details-group-name"><localize key="usync_handlers">Handlers</localize></div>
+            <div class="umb-healthcheck-group__details-group-name">Importing</div>
         </div>
 
         <div class="umb-healthcheck-group__details-checks">
             <div class="umb-healthcheck-group__details-check">
                 <umb-box-content>
-                    <div class="usync-handlers flex justify-start items-center">
-                        <div ng-repeat="handler in vm.handlers" class="usync-handler-box text-center">
-                            <i class="icon {{handler.Icon}} color-grey"></i>
-                            <h5>{{handler.Name}}</h5>
+                    <div class="usync-handlers flex justify-center items-center">
+                        <div ng-repeat="handler in vm.handlers" class="usync-handler-box text-center"
+                             ng-class="{'enabled' : handler.Enabled, 'color-green' : $index < 2}">
+                            <i class="icon {{handler.Icon}} handler-icon"></i>
+                            <h5>{{handler.Folder}}</h5>
+                            <i ng-if="$index < 2" class="icon icon-checkbox handler-status-icon"></i>
+                            <i ng-if="$index > 1" class="icon icon-checkbox-empty handler-status-icon"></i>
                         </div>
+                    </div>
+                    <div class="flex justify-center">
+                        <h4>Syncing doctypes</h4>
                     </div>
                 </umb-box-content>
             </div>
@@ -41,8 +55,11 @@
     </div>
 
     <umb-box>
-
-        <umb-box-content>
+        <umb-box-content ng-if="!vm.working">
+            <div ng-repeat="result in vm.results">
+                {{result}}
+                <hr />
+            </div>
         </umb-box-content>
     </umb-box>
 

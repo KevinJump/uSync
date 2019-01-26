@@ -10,7 +10,10 @@ using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
 using uSync8.BackOffice.Services;
 using uSync8.Core;
+using uSync8.Core.Extensions;
+using uSync8.Core.Models;
 using uSync8.Core.Serialization;
+using uSync8.Core.Tracking;
 
 namespace uSync8.BackOffice.SyncHandlers
 {
@@ -23,7 +26,9 @@ namespace uSync8.BackOffice.SyncHandlers
 
         protected readonly uSyncBackOfficeSettings globalSettings;
         protected readonly SyncFileService syncFileService;
+
         protected readonly ISyncSerializer<TObject> serializer;
+        protected readonly ISyncTracker<TObject> tracker;
 
         public string Alias { get; private set; }
         public string Name { get; private set; }
@@ -40,6 +45,7 @@ namespace uSync8.BackOffice.SyncHandlers
             IEntityService entityService,
             IProfilingLogger logger,
             ISyncSerializer<TObject> serializer,
+            ISyncTracker<TObject> tracker,
             SyncFileService syncFileService,
             uSyncBackOfficeSettings settings)
         {
@@ -48,6 +54,7 @@ namespace uSync8.BackOffice.SyncHandlers
 
             this.globalSettings = settings;
             this.serializer = serializer;
+            this.tracker = tracker;
             this.syncFileService = syncFileService;
 
             var thisType = GetType();
@@ -218,6 +225,23 @@ namespace uSync8.BackOffice.SyncHandlers
             return actions;
         }
 
+
+        protected uSyncAction ReportItem(string file)
+        {
+            var node = syncFileService.LoadXElement(file);
+
+            var current = serializer.IsCurrent(node);
+            var action = uSyncActionHelper<TObject>
+                .ReportAction(!current, node.GetAlias());
+
+            action.Message = nameof(TObject);
+
+            if (action.Change > ChangeType.NoChange)
+                action.Details = tracker.GetChanges(node);
+
+            return action;
+        }
+
         #endregion
 
         #region Events 
@@ -239,7 +263,6 @@ namespace uSync8.BackOffice.SyncHandlers
 
 
         abstract protected TObject GetFromService(int id);
-        abstract public uSyncAction ReportItem(string file);
 
         virtual protected string GetPath(string folder, TObject item)
         {

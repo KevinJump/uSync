@@ -16,11 +16,24 @@
         vm.settings = {};
         vm.handlers = [];
 
-        init();
+        // functions 
+        vm.report = report;
 
+
+        // kick it all off
+        init();
 
         ////// public 
 
+        function report() {
+            vm.working = true;
+
+            uSync8DashboardService.report()
+                .then(function (result) {
+                    vm.results = result.data;
+                    vm.working = false;
+                });
+        }
 
         ////// private 
 

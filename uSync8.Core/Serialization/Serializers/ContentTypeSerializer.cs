@@ -6,6 +6,7 @@ using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
 using uSync8.Core.Extensions;
+using uSync8.Core.Models;
 
 namespace uSync8.Core.Serialization.Serializers
 {
@@ -84,9 +85,6 @@ namespace uSync8.Core.Serialization.Serializers
 
         protected override SyncAttempt<IContentType> DeserializeCore(XElement node)
         {
-            if (!IsValid(node))
-                throw new ArgumentException("Invalid XML Format");
-
             var item = FindOrCreate(node);
 
             DeserializeBase(item, node);
