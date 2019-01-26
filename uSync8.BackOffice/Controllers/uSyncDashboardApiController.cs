@@ -7,6 +7,7 @@ using System.Web.Http;
 using Umbraco.Web.Mvc;
 using Umbraco.Web.WebApi;
 using Umbraco.Web.WebApi.Filters;
+using uSync8.BackOffice.SyncHandlers;
 using Constants = Umbraco.Core.Constants;
 
 namespace uSync8.BackOffice.Controllers
@@ -16,16 +17,34 @@ namespace uSync8.BackOffice.Controllers
     public class uSyncDashboardApiController : UmbracoAuthorizedApiController
     {
         private readonly uSyncBackOfficeSettings settings;
+        private readonly SyncHandlerCollection syncHandlers;
 
-        public uSyncDashboardApiController(uSyncBackOfficeSettings settings)
+        public uSyncDashboardApiController(
+            SyncHandlerCollection syncHandlers,
+            uSyncBackOfficeSettings settings)
         {
             this.settings = settings;
+            this.syncHandlers = syncHandlers;
         }
 
         [HttpGet]
         public uSyncBackOfficeSettings GetSettings()
         {
             return settings;
+        }
+
+        [HttpGet]
+        public IEnumerable<object> GetHandlers()
+        {
+            return syncHandlers.Select(x => new
+            {
+                Name = x.Name,
+                Enabled = x.Enabled,
+                Icon = x.Icon,
+                Type = x.GetType(),
+                Folder = x.DefaultFolder,
+                Priority = x.Priority
+            }).OrderBy(x => x.Priority);
         }
 
     }

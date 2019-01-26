@@ -3,6 +3,9 @@
     "~/app_plugins/uSync8/uSyncDashboardController.js",
     "~/app_plugins/uSync8/uSyncService.js"
   ],
+  "css": [
+    "~/app_plugins/uSync8/usync.css"
+  ],
   "dashboards": [
     {
       "alias": "uSync8",

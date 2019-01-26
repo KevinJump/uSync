@@ -13,7 +13,7 @@ using uSync8.Core.Serialization;
 
 namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
-    [SyncHandler("macroHandler", "Macro Handler", "Macros", uSyncBackOfficeConstants.Priorites.Macros)]
+    [SyncHandler("macroHandler", "Macro Handler", "Macros", uSyncBackOfficeConstants.Priorites.Macros, Icon = "icon-settings-alt")]
     public class MacroHandler : SyncHandlerBase<IMacro, IMacroService>, ISyncHandler
     {
         private readonly IMacroService macroService;

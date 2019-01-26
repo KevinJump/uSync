@@ -13,7 +13,7 @@ using uSync8.Core.Serialization;
 
 namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
-    [SyncHandler("templateHandler", "Template Handler", "Templates", uSyncBackOfficeConstants.Priorites.Templates)]
+    [SyncHandler("templateHandler", "Template Handler", "Templates", uSyncBackOfficeConstants.Priorites.Templates, Icon = "icon-layout")]
     public class TemplateHandler : SyncHandlerBase<ITemplate, IFileService>, ISyncHandler
     {
         private readonly IFileService fileService;

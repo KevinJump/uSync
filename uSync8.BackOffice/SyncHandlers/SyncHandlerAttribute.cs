@@ -22,5 +22,7 @@ namespace uSync8.BackOffice.SyncHandlers
         public string Folder { get; set; }
 
         public bool IsTwoPass { get; set; } = false;
+
+        public string Icon { get; set; }
     }
 }

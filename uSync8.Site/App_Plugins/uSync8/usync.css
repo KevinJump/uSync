@@ -1,0 +1,15 @@
+.usync-handler-box
+{
+    text-align: center;
+    color: #aaa !important;
+    margin: 0.25rem 1rem;
+}
+
+.usync-handler-box i {
+    font-size: 50px;
+}
+
+.usync-handler-box h5 {
+    margin: 0;
+    font-weight: 300;
+}

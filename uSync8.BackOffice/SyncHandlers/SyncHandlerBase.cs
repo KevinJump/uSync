@@ -31,6 +31,7 @@ namespace uSync8.BackOffice.SyncHandlers
         public int Priority { get; private set; }
         public bool Enabled { get; protected set; } = true;
         protected bool IsTwoPass = false;
+        public string Icon { get; private set; }
 
         protected UmbracoObjectTypes itemObjectType = UmbracoObjectTypes.Unknown;
         protected UmbracoObjectTypes itemContainerType = UmbracoObjectTypes.Unknown;
@@ -59,6 +60,7 @@ namespace uSync8.BackOffice.SyncHandlers
             DefaultFolder = meta.Folder;
             Priority = meta.Priority;
             IsTwoPass = meta.IsTwoPass;
+            Icon = string.IsNullOrWhiteSpace(meta.Icon) ? "icon-umb-content" : meta.Icon;
 
         }
 

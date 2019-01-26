@@ -14,6 +14,7 @@
         var vm = this;
         vm.loading = true;
         vm.settings = {};
+        vm.handlers = [];
 
         init();
 
@@ -25,6 +26,7 @@
 
         function init() {
             getSettings();
+            getHandlers();
         }
 
         function getSettings() {
@@ -34,6 +36,13 @@
                     vm.settings = result.data;
                     vm.loading = false;
 
+                });
+        }
+
+        function getHandlers() {
+            uSync8DashboardService.getHandlers()
+                .then(function (result) {
+                    vm.handlers = result.data;
                 });
         }
 

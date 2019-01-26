@@ -8,5 +8,7 @@
     <key alias="name">uSync 8</key>
     <key alias="intro">Database elements to and from disk</key>
     <key alias="importaction">Import changes</key>
+  
+    <key alias="handlers">Item Handlers</key>
   </area>
 </language>

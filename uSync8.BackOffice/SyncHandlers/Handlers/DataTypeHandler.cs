@@ -14,7 +14,7 @@ using uSync8.Core.Serialization;
 
 namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
-    [SyncHandler("dataTypeHandler", "Datatype Handler", "DataTypes", uSyncBackOfficeConstants.Priorites.DataTypes)]
+    [SyncHandler("dataTypeHandler", "Datatype Handler", "DataTypes", uSyncBackOfficeConstants.Priorites.DataTypes, Icon = "icon-autofill")]
     public class DataTypeHandler : SyncHandlerTreeBase<IDataType, IDataTypeService>, ISyncHandler
     {
         private readonly IDataTypeService dataTypeService;

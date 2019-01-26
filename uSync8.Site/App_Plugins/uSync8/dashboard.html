@@ -1,5 +1,5 @@
 <div ng-controller="uSync8DashboardController as vm">
-    <umb-box> 
+    <umb-box>
         <umb-box-content>
             <div class="flex justify-between items-center">
                 <h3 class="bold"><localize key="usync_name">uSync 8</localize></h3>
@@ -13,10 +13,39 @@
                 <localize key="usync_intro"></localize>
             </div>
         </umb-box-content>
-    </umb-box>    
+    </umb-box>
     <umb-box>
         <umb-box-content>
             <pre>{{vm.settings}}</pre>
         </umb-box-content>
     </umb-box>
+
+    <div class="umb-healthcheck-group__details-group">
+
+        <div class="umb-healthcheck-group__details-group-title">
+            <div class="umb-healthcheck-group__details-group-name"><localize key="usync_handlers">Handlers</localize></div>
+        </div>
+
+        <div class="umb-healthcheck-group__details-checks">
+            <div class="umb-healthcheck-group__details-check">
+                <umb-box-content>
+                    <div class="usync-handlers flex justify-start items-center">
+                        <div ng-repeat="handler in vm.handlers" class="usync-handler-box text-center">
+                            <i class="icon {{handler.Icon}} color-grey"></i>
+                            <h5>{{handler.Name}}</h5>
+                        </div>
+                    </div>
+                </umb-box-content>
+            </div>
+        </div>
+    </div>
+
+    <umb-box>
+
+        <umb-box-content>
+        </umb-box-content>
+    </umb-box>
+
+    <pre>{{vm.handlers}}</pre>
+
 </div>

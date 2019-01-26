@@ -15,7 +15,8 @@
         var serviceRoot = 'backoffice/uSync/uSyncDashboardApi/';
 
         var service = {
-            getSettings: getSettings
+            getSettings: getSettings,
+            getHandlers: getHandlers
         };
 
         return service;
@@ -24,6 +25,10 @@
 
         function getSettings() {
             return $http.get(serviceRoot + 'GetSettings');
+        }
+
+        function getHandlers() {
+            return $http.get(serviceRoot + 'GetHandlers');
         }
 
     }

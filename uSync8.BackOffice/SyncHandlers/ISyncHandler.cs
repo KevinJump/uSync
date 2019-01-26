@@ -12,6 +12,8 @@ namespace uSync8.BackOffice.SyncHandlers
         string Name { get; }
         int Priority { get; }
         string DefaultFolder { get; }
+        string Icon { get; }
+        bool Enabled { get; }
 
         void InitializeEvents();
 
@@ -20,7 +22,6 @@ namespace uSync8.BackOffice.SyncHandlers
         IEnumerable<uSyncAction> Report(string folder);
 
         // uSyncAction Import(string file, bool force);
-        bool Enabled { get; }
 
     }
 }
