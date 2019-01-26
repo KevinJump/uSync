@@ -9,6 +9,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "uSync8.BackOffice", "uSync8
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "uSync8.Site", "uSync8.Site\uSync8.Site.csproj", "{B1683E5F-A12F-4F65-A671-C5B87EA25051}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionFiles", "SolutionFiles", "{6E911B34-61DC-471A-9AD7-97A74E9B3BE5}"
+	ProjectSection(SolutionItems) = preProject
+		gulpfile.js = gulpfile.js
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

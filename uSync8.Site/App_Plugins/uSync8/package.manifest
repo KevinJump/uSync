@@ -1,0 +1,11 @@
+{
+  "javascript": [],
+  "dashboards": [
+    {
+      "alias": "uSync8",
+      "name": "uSync",
+      "sections": [ "settings" ],
+      "view": "~/app_plugins/uSync8/dashboard.html"
+    }
+  ]
+}

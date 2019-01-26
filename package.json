@@ -1,0 +1,22 @@
+{
+  "name": "usync8",
+  "version": "1.0.0",
+  "description": "Database syncing tool for Umbraco 8",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KevinJump/uSync8.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/KevinJump/uSync8/issues"
+  },
+  "homepage": "https://github.com/KevinJump/uSync8#readme",
+  "devDependencies": {
+    "gulp": "^4.0.0"
+  }
+}
