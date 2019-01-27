@@ -13,6 +13,13 @@
 
         var vm = this;
         vm.loading = true;
+
+        vm.working = false;
+        vm.reported = false;
+        vm.syncing = false;
+
+        vm.showAll = false; 
+
         vm.settings = {};
         vm.handlers = [];
 
@@ -20,6 +27,9 @@
         vm.report = report;
         vm.export = exportItems;
 
+        vm.toggleDetails = toggleDetails;
+        vm.getTypeName = getTypeName;
+        vm.toggleAll = toggleAll;
 
         // kick it all off
         init();
@@ -27,17 +37,33 @@
         ////// public 
 
         function report() {
+            vm.reported = false;
             vm.working = true;
 
             uSync8DashboardService.report()
                 .then(function (result) {
                     vm.results = result.data;
                     vm.working = false;
+                    vm.reported = true;
                 });
         }
 
         function exportItems () {
 
+        }
+
+        function toggleDetails(result) {
+            result.showDetails = !result.showDetails;
+        }
+
+
+        function getTypeName(typeName) {
+            var umbType = typeName.substring(0, typeName.indexOf(','));
+            return umbType.substring(umbType.lastIndexOf('.') + 1);
+        }
+
+        function toggleAll() {
+            vm.showAll = !vm.showAll;
         }
 
         ////// private 

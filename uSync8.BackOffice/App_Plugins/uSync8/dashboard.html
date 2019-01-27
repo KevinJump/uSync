@@ -1,25 +1,36 @@
 ﻿<div ng-controller="uSync8DashboardController as vm">
     <umb-box>
         <umb-box-content>
-            <div class="flex justify-between items-center">
-                <h3 class="bold"><localize key="usync_name">uSync 8</localize></h3>
-                <umb-button type="button"
-                            button-style="success"
-                            label-key="usync_import"
-                            action="">
-                </umb-button>
+            <div class="flex justify-between">
+                <div>
+                    <h3 class="bold"><localize key="usync_name">uSync 8</localize></h3>
+                    <localize key="usync_intro"></localize>
+                </div>
+                <div class="flex flex-column items-center usync-header-buttons">
+                    <umb-button type="button"
+                                button-style="link"
+                                label-key="general_settings"
+                                action="">
+                    </umb-button>
+                </div>
             </div>
-            <div>
-                <localize key="usync_intro"></localize>
-            </div>
-            <div class="flex justify-start items-center">
+        </umb-box-content>
+    </umb-box>
+    <umb-box>
+        <umb-box-content>
+            <div class="flex justify-start items-center usync-action-buttons">
                 <umb-button type="button"
-                            button-style="default"
+                            button-style="info"
                             label-key="usync_report"
                             action="vm.report()">
                 </umb-button>
                 <umb-button type="button"
-                            button-style="default"
+                            button-style="primary"
+                            label-key="usync_import"
+                            action="">
+                </umb-button>
+                <umb-button type="button"
+                            button-style="neutral"
                             label-key="usync_export"
                             action="vm.exportItems()">
                 </umb-button>
@@ -27,47 +38,137 @@
             </div>
         </umb-box-content>
     </umb-box>
+
+    <div ng-show="vm.syncing">
+        <div class="umb-healthcheck-group__details-group">
+
+            <div class="umb-healthcheck-group__details-group-title">
+                <div class="umb-healthcheck-group__details-group-name">Importing</div>
+            </div>
+
+            <div class="umb-healthcheck-group__details-checks">
+                <div class="umb-healthcheck-group__details-check">
+                    <umb-box-content>
+                        <div class="usync-handlers flex justify-center items-center">
+                            <div ng-repeat="handler in vm.handlers" class="usync-handler-box text-center"
+                                 ng-class="{'enabled' : handler.Enabled, 'color-green' : $index < 2}">
+                                <i class="icon {{handler.Icon}} handler-icon"></i>
+                                <h5>{{handler.Folder}}</h5>
+                                <i ng-if="$index < 2" class="icon icon-checkbox handler-status-icon"></i>
+                                <i ng-if="$index > 1" class="icon icon-checkbox-empty handler-status-icon"></i>
+                            </div>
+                        </div>
+                        <div class="flex justify-center">
+                            <h4>Syncing doctypes</h4>
+                        </div>
+                    </umb-box-content>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <umb-box ng-if="vm.reported">
+        <umb-box-content>
+            <div class="flex justify-between items-center">
+                <h4>Report : {{vm.results.length}} items</h4>
+                <umb-toggle checked="vm.showAll"
+                            on-click="vm.toggleAll()"
+                            show-labels="true"
+                            label-on="Show all"
+                            label-off="Changes only"
+                            label-position="left"></umb-toggle>
+            </div>
+
+            <div class="umb-table">
+                <div class="umb-table-head">
+                    <div class="umb-table-row">
+                        <div class="umb-table-cell">
+                        </div>
+                        <div class="umb-table-cell">
+                            Type
+                        </div>
+                        <div class="umb-table-cell">
+                            Name
+                        </div>
+                        <div class="umb-table-cell">
+                            Change
+                        </div>
+                        <div class="umb-table-cell">
+
+                        </div>
+                    </div>
+                </div>
+                <div class="umb-table-body">
+                    <div ng-repeat="result in vm.results">
+                        <div class="umb-table-row"
+                             ng-if="result.Change != 'NoChange' || vm.showAll">
+                            <div class="umb-table-cell">
+                                <i ng-if="result.Change == 'NoChange'" class="icon icon-check color-green"></i>
+                                <i ng-if="result.Change == 'Update'" class="icon icon-sync color-orange"></i>
+                            </div>
+                            <div class="umb-table-cell">
+                                {{vm.getTypeName(result.ItemType)}}
+                            </div>
+                            <div class="umb-table-cell">
+                                {{result.Name}}
+                            </div>
+                            <div class="umb-table-cell">
+                                {{result.Change}}
+                            </div>
+                            <div class="umb-table-cell">
+                                <umb-button type="button"
+                                            button-style="link"
+                                            label-key="usync_details"
+                                            action="vm.toggleDetails(result)"
+                                            ng-if="result.Details != null"></umb-button>
+
+                            </div>
+                        </div>
+                        <div ng-if="result.showDetails"
+                             class="usync-item-details">
+                            <div class="umb-table">
+                                <div class="umb-table-head">
+                                    <div class="umb-table-row">
+                                        <div class="umb-table-cell"></div>
+                                        <div class="umb-table-cell">Name</div>
+                                        <div class="umb-table-cell">Old Value</div>
+                                        <div class="umb-table-cell">New Value</div>
+                                        <div class="umb-table-cell"></div>
+                                    </div>
+                                </div>
+                                <div class="umb-table-body">
+                                    <div ng-repeat="detail in result.Details" class="umb-table-row">
+                                        <div class="umb-table-cell"></div>
+                                        <div class="umb-table-cell">
+                                            {{detail.Name}}
+                                        </div>
+                                        <div class="umb-table-cell">
+                                            {{detail.OldValue}}
+                                        </div>
+                                        <div class="umb-table-cell">
+                                            {{detail.NewValue}}
+                                        </div>
+                                        <div class="umb-table-cell">
+                                            {{detail.Change}}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </umb-box-content>
+    </umb-box>
+
+    <!--
     <umb-box>
         <umb-box-content>
             <pre>{{vm.settings}}</pre>
         </umb-box-content>
     </umb-box>
 
-    <div class="umb-healthcheck-group__details-group">
-
-        <div class="umb-healthcheck-group__details-group-title">
-            <div class="umb-healthcheck-group__details-group-name">Importing</div>
-        </div>
-
-        <div class="umb-healthcheck-group__details-checks">
-            <div class="umb-healthcheck-group__details-check">
-                <umb-box-content>
-                    <div class="usync-handlers flex justify-center items-center">
-                        <div ng-repeat="handler in vm.handlers" class="usync-handler-box text-center"
-                             ng-class="{'enabled' : handler.Enabled, 'color-green' : $index < 2}">
-                            <i class="icon {{handler.Icon}} handler-icon"></i>
-                            <h5>{{handler.Folder}}</h5>
-                            <i ng-if="$index < 2" class="icon icon-checkbox handler-status-icon"></i>
-                            <i ng-if="$index > 1" class="icon icon-checkbox-empty handler-status-icon"></i>
-                        </div>
-                    </div>
-                    <div class="flex justify-center">
-                        <h4>Syncing doctypes</h4>
-                    </div>
-                </umb-box-content>
-            </div>
-        </div>
-    </div>
-
-    <umb-box>
-        <umb-box-content ng-if="!vm.working">
-            <div ng-repeat="result in vm.results">
-                {{result}}
-                <hr />
-            </div>
-        </umb-box-content>
-    </umb-box>
-
-    <pre>{{vm.handlers}}</pre>
+        <pre>{{vm.handlers}}</pre>
+    -->
 
 </div>

@@ -1,5 +1,28 @@
-.usync-handler-box
-{
+.usync-header-buttons {
+    padding: 1rem 0;
+}
+
+    .usync-header-buttons > * {
+        margin: 0.25rem 0;
+    }
+
+.usync-action-buttons {
+    margin: 0.25rem 0
+}
+
+    .usync-action-buttons > * {
+        margin-right: 0.25rem;
+    }
+
+.usync-item-details {
+    border-left: 4px solid #aaa;
+}
+
+    .usync-item-details .umb-table {
+        background-color: #f3f3f5;
+    }
+
+.usync-handler-box {
     text-align: center;
     color: #ccc !important;
     margin: 1rem 1rem 0;
@@ -16,10 +39,10 @@
     }
 
 
-.usync-handler-box h5 {
-    margin: 0;
-    font-weight: 300;
-}
+    .usync-handler-box h5 {
+        margin: 0;
+        font-weight: 300;
+    }
 
     .usync-handler-box.enabled {
         color: #555 !important;
