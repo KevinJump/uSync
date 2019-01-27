@@ -147,11 +147,10 @@ namespace uSync8.Core.Serialization
         public bool IsCurrent(XElement node)
         {
             if (node == null) return false;
-
-            var newHash = MakeHash(node);
-
             var item = GetItem(node);
             if (item == null) return false;
+
+            var newHash = MakeHash(node);
 
             var currentNode = Serialize(item);
             if (!currentNode.Success) return false;
@@ -166,6 +165,7 @@ namespace uSync8.Core.Serialization
         private string MakeHash(XElement node)
         {
             if (node == null) return string.Empty;
+            node = CleanseNode(node);
 
             using (MemoryStream s = new MemoryStream())
             {
@@ -178,6 +178,8 @@ namespace uSync8.Core.Serialization
                 }
             }
         }
+
+        protected virtual XElement CleanseNode(XElement node) => node;
 
     }
 }

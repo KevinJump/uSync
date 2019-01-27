@@ -19,7 +19,8 @@
             getHandlers: getHandlers,
 
             report: report,
-            exportItems: exportItems
+            exportItems: exportItems,
+            importItems: importItems
         };
 
         return service;
@@ -34,12 +35,16 @@
             return $http.get(serviceRoot + 'GetHandlers');
         }
 
-        function report() {
-            return $http.get(serviceRoot + 'report');
+        function report(clientId) {
+            return $http.post(serviceRoot + 'report', { clientId: clientId });
         }
 
-        function exportItems () {
-            return $http.get(serviceRoot + 'export');
+        function exportItems (clientId) {
+            return $http.post(serviceRoot + 'export', { clientId: clientId });
+        }
+
+        function importItems(force, clientId) {
+            return $http.put(serviceRoot + 'import', { force: force, clientId: clientId });
         }
     }
 

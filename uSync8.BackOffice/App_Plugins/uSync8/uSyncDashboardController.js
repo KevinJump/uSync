@@ -9,7 +9,9 @@
 (function () {
     'use strict';
 
-    function uSyncDashboardController($scope, uSync8DashboardService) {
+    function uSyncDashboardController($scope,
+        uSync8DashboardService,
+        uSyncHub) {
 
         var vm = this;
         vm.loading = true;
@@ -18,14 +20,25 @@
         vm.reported = false;
         vm.syncing = false;
 
+        var modes = {
+            NONE: 0,
+            REPORT: 1,
+            IMPORT: 2,
+            EXPORT: 3
+        };
+
+        vm.runmode = modes.NONE;
+
         vm.showAll = false;
 
         vm.settings = {};
         vm.handlers = [];
+        vm.status = {};
 
         // functions 
         vm.report = report;
         vm.exportItems = exportItems;
+        vm.importItems = importItems;
 
         vm.toggleDetails = toggleDetails;
         vm.getTypeName = getTypeName;
@@ -38,10 +51,9 @@
         ////// public 
 
         function report() {
-            vm.reported = false;
-            vm.working = true;
+            resetStatus(modes.REPORT);
 
-            uSync8DashboardService.report()
+            uSync8DashboardService.report(getClientId())
                 .then(function (result) {
                     vm.results = result.data;
                     vm.working = false;
@@ -50,16 +62,25 @@
         }
 
         function exportItems() {
-            vm.reported = false;
-            vm.working = true;
+            resetStatus(modes.EXPORT);
 
-            uSync8DashboardService.exportItems()
+            uSync8DashboardService.exportItems(getClientId())
                 .then(function (result) {
                     vm.results = result.data;
                     vm.working = false;
                     vm.reported = true;
                 });
+        }
 
+        function importItems(force) {
+            resetStatus(modes.IMPORT);
+
+            uSync8DashboardService.importItems(force, getClientId())
+                .then(function (result) {
+                    vm.results = result.data;
+                    vm.working = false;
+                    vm.reported = true;
+                });
         }
 
         function toggleDetails(result) {
@@ -90,6 +111,18 @@
         ////// private 
 
         function init() {
+
+            uSyncHub.initHub(function (hub) {
+
+                vm.hub = hub;
+
+                vm.hub.on('add', function (data) {
+                    vm.status = data;
+                });
+
+                vm.hub.start();
+            });
+
             getSettings();
             getHandlers();
         }
@@ -109,6 +142,25 @@
                 .then(function (result) {
                     vm.handlers = result.data;
                 });
+        }
+
+        function resetStatus(mode) {
+            vm.reported = false;
+            vm.working = true;
+            vm.runmode = mode;
+
+            vm.status = {
+                Percent: 0,
+                Message: ""
+            };
+        }
+
+        function getClientId() {
+            if ($.connection !== undefined && $.connection.hub !== undefined) {
+               return $.connection.hub.id;
+            }
+
+            return "";
         }
 
     }

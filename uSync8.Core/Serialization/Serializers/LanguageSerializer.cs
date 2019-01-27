@@ -82,5 +82,11 @@ namespace uSync8.Core.Serialization.Serializers
 
         protected override ILanguage GetItem(Guid key) => default(ILanguage);
 
+        protected override XElement CleanseNode(XElement node)
+        {
+            node.Attribute("Key").Value = "";
+            return node;
+        }
+
     }
 }

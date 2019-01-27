@@ -33,34 +33,32 @@
         background-color: #f3f3f5;
     }
 
-.usync-handler-box {
-    text-align: center;
-    color: #ccc !important;
-    margin: 1rem 1rem 0;
+.usync-handler-icon {
+    padding: 0.75em;
+    margin-right: 14px;
+    transition: all .3s ease-in;
 }
 
-    .usync-handler-box i.handler-icon {
-        font-size: 50px;
+    .usync-handler-icon i {
+        font-size: 40px;
     }
 
-    .usync-handler-box i.handler-status-icon {
-        font-size: 20px;
-        margin: 1rem 0;
-        display: block;
+    .usync-hanler-icon .usync-handler-name {
+        font-weight: 700;
+        margin-top: 0.25em;
     }
 
-
-    .usync-handler-box h5 {
-        margin: 0;
-        font-weight: 300;
-    }
-
-    .usync-handler-box.enabled {
+    .usync-handler-icon.enabled {
         color: #555 !important;
     }
 
 
-
-    .usync-handler-box.complete {
-        color: #03bfb3 !important;
-    }
+.usync-handler-icon.usync-pending {
+    color: #eee;
+}
+.usync-handler-icon.usync-progress {
+    color: #ff6a00;
+}
+.usync-handler-icon.usync-complete {
+    color: #35c786;
+}

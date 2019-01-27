@@ -28,7 +28,7 @@
                 <umb-button type="button"
                             button-style="primary"
                             label-key="usync_import"
-                            action="">
+                            action="vm.importItems(false)">
                 </umb-button>
                 <umb-button type="button"
                             button-style="neutral"
@@ -39,34 +39,25 @@
         </umb-box-content>
     </umb-box>
 
-    <div ng-show="vm.syncing">
-        <div class="umb-healthcheck-group__details-group">
-
-            <div class="umb-healthcheck-group__details-group-title">
-                <div class="umb-healthcheck-group__details-group-name">Importing</div>
-            </div>
-
-            <div class="umb-healthcheck-group__details-checks">
-                <div class="umb-healthcheck-group__details-check">
-                    <umb-box-content>
-                        <div class="usync-handlers flex justify-center items-center">
-                            <div ng-repeat="handler in vm.handlers" class="usync-handler-box text-center"
-                                 ng-class="{'enabled' : handler.Enabled, 'color-green' : $index < 2}">
-                                <i class="icon {{handler.Icon}} handler-icon"></i>
-                                <h5>{{handler.Folder}}</h5>
-                                <i ng-if="$index < 2" class="icon icon-checkbox handler-status-icon"></i>
-                                <i ng-if="$index > 1" class="icon icon-checkbox-empty handler-status-icon"></i>
-                            </div>
-                        </div>
-                        <div class="flex justify-center">
-                            <h4>Syncing doctypes</h4>
-                        </div>
-                    </umb-box-content>
+    <umb-box ng-if="vm.working">
+        <umb-box-content>
+            <div class="flex justify-start items-center">
+                <div ng-repeat="handler in vm.status.Handlers"
+                     class="text-center usync-handler-icon"
+                     ng-class="{'usync-pending' : handler.Status == 0, 'usync-progress' : handler.Status == 1, 'usync-complete' : handler.Status == 2}">
+                    <i class="icon {{handler.Icon}}"></i>
+                    <div class="">{{handler.Name}}</div>
                 </div>
             </div>
-        </div>
-    </div>
-
+            <div class="flex justify-center">
+                <h4>{{vm.status.Message}}</h4>
+            </div>
+            <div class="progress" style="height: 1px;">
+                <div class="bar" role="progressbar" style="width: {{vm.status.Percent}}%;" aria-valuenow="{{vm.status.Percent}}" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+        </umb-box-content>
+    </umb-box>
+       
     <umb-box ng-if="vm.reported">
         <div class="umb-box-header flex justify-between items-center">
             <div>
@@ -78,10 +69,11 @@
                         show-labels="true"
                         label-on="Show all"
                         label-off="Changes only"
-                        label-position="left"></umb-toggle>
+                        label-position="left"
+                        ng-if="vm.runMode = 'report'"></umb-toggle>
         </div>
         <umb-box-content>
-            <div class="umb-table">
+            <div class="umb-table" ng-show="vm.countChanges(vm.results) > 0 || vm.showAll">
                 <div class="umb-table-head">
                     <div class="umb-table-row">
                         <div class="umb-table-cell">
@@ -159,6 +151,9 @@
                         </div>
                     </div>
                 </div>
+            </div>
+            <div class="flex justify-center items-center" ng-if="vm.countChanges(vm.results) == 0">
+                <h4>No Changes</h4>
             </div>
         </umb-box-content>
     </umb-box>
