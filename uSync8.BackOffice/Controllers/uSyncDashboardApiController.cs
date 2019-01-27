@@ -17,13 +17,17 @@ namespace uSync8.BackOffice.Controllers
     [UmbracoApplicationAuthorize(Constants.Applications.Settings)]
     public class uSyncDashboardApiController : UmbracoAuthorizedApiController
     {
+        private readonly uSyncService uSyncService;
+
         private readonly uSyncBackOfficeSettings settings;
         private readonly SyncHandlerCollection syncHandlers;
 
         public uSyncDashboardApiController(
+            uSyncService uSyncService,
             SyncHandlerCollection syncHandlers,
             uSyncBackOfficeSettings settings)
         {
+            this.uSyncService = uSyncService;
             this.settings = settings;
             this.syncHandlers = syncHandlers;
         }
@@ -37,135 +41,56 @@ namespace uSync8.BackOffice.Controllers
         [HttpGet]
         public IEnumerable<object> GetHandlers()
         {
-            return syncHandlers.Select(x => new
+            return syncHandlers.Select(x => new SyncHandlerSummary()
             {
-                Name = x.Name,
-                Enabled = x.Enabled,
                 Icon = x.Icon,
-                Type = x.GetType(),
-                Folder = x.DefaultFolder,
-                Priority = x.Priority
-            }).OrderBy(x => x.Priority);
+                Name = x.Name,
+                Status = HandlerStatus.Pending
+            });
         }
 
 
         [HttpPost]
         public IEnumerable<uSyncAction> Report(uSyncOptions options)
         {
-            var updates = new List<uSyncAction>();
-
             var hubClient = new HubClientService(options.clientId);
-            var handlers = syncHandlers.Where(x => x.Enabled).ToList();
+            var summaryClient = new SummaryHandler(hubClient);
 
-            var progress = new Progress(handlers, "reporting");
-            var complete = 0;
-
-            foreach (var syncHandler in handlers)
-            {
-                complete++;
-                progress.Message = $"checking {syncHandler.Name}";
-                progress.UpdateHandler(syncHandler.Name, HandlerStatus.Processing);
-                hubClient.SendMessage(progress);
-
-                updates.AddRange(syncHandler.Report(syncHandler.DefaultFolder));
-
-                progress.UpdateHandler(syncHandler.Name, HandlerStatus.Complete);
-                progress.Percent = (int)Math.Round((double)(100 * complete) / handlers.Count);
-            }
-
-            return updates;
+            return uSyncService.Report("", summaryClient.PostSummary);
         }
 
         [HttpPost]
         public IEnumerable<uSyncAction> Export(uSyncOptions options)
         {
-            var updates = new List<uSyncAction>();
-
             var hubClient = new HubClientService(options.clientId);
-            var handlers = syncHandlers.Where(x => x.Enabled).ToList();
+            var summaryClient = new SummaryHandler(hubClient);
 
-            var progress = new Progress(handlers, "Exporting");
-            var complete = 0;
-
-            foreach (var syncHandler in handlers)
-            {
-                complete++;
-                progress.Message = $"Exporting {syncHandler.Name}";
-                progress.UpdateHandler(syncHandler.Name, HandlerStatus.Processing);
-                hubClient.SendMessage(progress);
-
-                updates.AddRange(syncHandler.ExportAll(syncHandler.DefaultFolder));
-
-                progress.UpdateHandler(syncHandler.Name, HandlerStatus.Complete);
-                progress.Percent = (int)Math.Round((double)(100 * complete) / handlers.Count);
-            }
-
-            return updates;
+            return uSyncService.Export("", summaryClient.PostSummary);
         }
 
         [HttpPut]
         public IEnumerable<uSyncAction> Import(uSyncOptions options)
         {
-            var updates = new List<uSyncAction>();
-
             var hubClient = new HubClientService(options.clientId);
-            var handlers = syncHandlers.Where(x => x.Enabled).ToList();
+            var summaryClient = new SummaryHandler(hubClient);
 
-            var progress = new Progress(handlers, "Importing");
-            var complete = 0;
-
-            foreach (var syncHandler in syncHandlers.Where(x => x.Enabled))
-            {
-                complete++;
-                progress.Message = $"Importing {syncHandler.Name}";
-                progress.UpdateHandler(syncHandler.Name, HandlerStatus.Processing);
-                hubClient.SendMessage(progress);
-
-                updates.AddRange(syncHandler.ImportAll(syncHandler.Name, options.force));
-
-                progress.UpdateHandler(syncHandler.Name, HandlerStatus.Complete);
-                progress.Percent = (int)Math.Round((double)(100 * complete) / handlers.Count);
-            }
-
-            return updates;
+            return uSyncService.Import("", options.force, summaryClient.PostSummary);
         }
 
-        public class Progress
+        public class SummaryHandler
         {
-            public Progress(IEnumerable<ISyncHandler> handlers, string message)
+            private readonly HubClientService hubClient;
+
+            public SummaryHandler(HubClientService hubClient)
             {
-                Percent = 0;
-                Message = message;
-                Handlers = handlers.Select(x => new HandlerInfo()
-                {
-                    Icon = x.Icon,
-                    Name = x.Name,
-                    Status = HandlerStatus.Pending
-                }).ToList();
+                this.hubClient = hubClient;
             }
 
-            public void UpdateHandler(string name, HandlerStatus status)
+            public void PostSummary(SyncProgressSummary summary)
             {
-                var info = Handlers.FirstOrDefault(x => x.Name == name);
-                if (info != null)
-                    info.Status = status;
+                hubClient.SendMessage(summary);
             }
 
-            public int Percent { get; set; }
-            public string Message { get; set; }
-            public List<HandlerInfo> Handlers { get; set; }
-        }
-
-        public class HandlerInfo
-        {
-            public string Icon { get; set; }
-            public string Name { get; set; }
-            public HandlerStatus Status { get; set; }
-        }
-
-        public enum HandlerStatus
-        {
-            Pending, Processing, Complete, Error
         }
 
         public class uSyncOptions

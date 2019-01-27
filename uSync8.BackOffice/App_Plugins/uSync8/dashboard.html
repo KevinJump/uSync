@@ -23,25 +23,26 @@
                 <umb-button type="button"
                             button-style="info"
                             label-key="usync_report"
-                            action="vm.report()">
+                            action="vm.report()"
+                            disabled="vm.working">
                 </umb-button>
                 <umb-button type="button"
                             button-style="primary"
                             label-key="usync_import"
-                            action="vm.importItems(false)">
+                            action="vm.importItems(false)"
+                            disabled="vm.working">
                 </umb-button>
                 <umb-button type="button"
                             button-style="neutral"
                             label-key="usync_export"
-                            action="vm.exportItems()">
+                            action="vm.exportItems()"
+                            disabled="vm.working">
                 </umb-button>
             </div>
         </umb-box-content>
-    </umb-box>
 
-    <umb-box ng-if="vm.working">
-        <umb-box-content>
-            <div class="flex justify-start items-center">
+        <umb-box-content  ng-if="vm.working || vm.reported">
+            <div class="flex justify-center items-center">
                 <div ng-repeat="handler in vm.status.Handlers"
                      class="text-center usync-handler-icon"
                      ng-class="{'usync-pending' : handler.Status == 0, 'usync-progress' : handler.Status == 1, 'usync-complete' : handler.Status == 2}">
@@ -53,7 +54,7 @@
                 <h4>{{vm.status.Message}}</h4>
             </div>
             <div class="progress" style="height: 1px;">
-                <div class="bar" role="progressbar" style="width: {{vm.status.Percent}}%;" aria-valuenow="{{vm.status.Percent}}" aria-valuemin="0" aria-valuemax="100"></div>
+                <div class="bar" role="progressbar" style="width: {{vm.calcPercentage(vm.status)}}%;" aria-valuenow="{{vm.calcPercentage(vm.status)}}" aria-valuemin="0" aria-valuemax="100"></div>
             </div>
         </umb-box-content>
     </umb-box>
@@ -61,8 +62,8 @@
     <umb-box ng-if="vm.reported">
         <div class="umb-box-header flex justify-between items-center">
             <div>
-                <div class="umb-box-header-title">Report</div>
-                <div class="umb-box-header-description">Detected {{vm.countChanges(vm.results)}} changes across {{vm.results.length}} items</div>
+                <div class="umb-box-header-title">{{vm.action}}</div>
+                <div class="umb-box-header-description">{{vm.countChanges(vm.results)}} changes across {{vm.results.length}} items</div>
             </div>
             <umb-toggle checked="vm.showAll"
                         on-click="vm.toggleAll()"

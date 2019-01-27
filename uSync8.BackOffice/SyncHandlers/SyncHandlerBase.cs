@@ -37,6 +37,7 @@ namespace uSync8.BackOffice.SyncHandlers
         public bool Enabled { get; protected set; } = true;
         protected bool IsTwoPass = false;
         public string Icon { get; private set; }
+        public Type ItemType { get; protected set;} = typeof(TObject);
 
         protected UmbracoObjectTypes itemObjectType = UmbracoObjectTypes.Unknown;
         protected UmbracoObjectTypes itemContainerType = UmbracoObjectTypes.Unknown;

@@ -17,18 +17,21 @@ namespace uSync8.BackOffice
 
         private readonly SyncFileService syncFileService;
         private readonly uSyncBackOfficeSettings globalSettings;
+        private readonly uSyncService uSyncService;
 
         public uSyncBackofficeComponent(
             SyncHandlerCollection syncHandlers,
             IProfilingLogger logger,
             SyncFileService fileService,
-            uSyncBackOfficeSettings settings)
+            uSyncBackOfficeSettings settings,
+            uSyncService uSyncService)
         {
             this.syncHandlers = syncHandlers;
             this.logger = logger;
 
             this.syncFileService = fileService;
             this.globalSettings = settings;
+            this.uSyncService = uSyncService;
         }
 
         public void Initialize()
@@ -44,24 +47,12 @@ namespace uSync8.BackOffice
         {
             if (globalSettings.ExportAtStartup || (globalSettings.ExportOnSave && !syncFileService.RootExists()))
             {
-                foreach (var syncHandler in syncHandlers.Where(x => x.Enabled))
-                {
-                    using (logger.DebugDuration<uSyncBackofficeComponent>($"Exporting: {syncHandler.Name}"))
-                    {
-                        syncHandler.ExportAll(syncHandler.DefaultFolder);
-                    }
-                }
+                uSyncService.Export("");
             }
 
             if (globalSettings.ImportAtStartup)
             {
-                foreach (var syncHandler in syncHandlers.Where(x => x.Enabled))
-                {
-                    using (logger.DebugDuration<uSyncBackofficeComponent>($"Importing: {syncHandler.Name}"))
-                    {
-                        syncHandler.ImportAll(syncHandler.DefaultFolder, false);
-                    }
-                }
+                uSyncService.Import("",false);
             }
 
             if (globalSettings.ExportOnSave)

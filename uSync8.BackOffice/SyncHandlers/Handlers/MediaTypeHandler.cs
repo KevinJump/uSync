@@ -15,7 +15,7 @@ using uSync8.Core.Tracking;
 
 namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
-    [SyncHandler("mediaTypeHandler", "Media Type Handler", "MediaTypes", uSyncBackOfficeConstants.Priorites.MediaTypes, IsTwoPass = true, Icon = "icon-thumbnails")]
+    [SyncHandler("mediaTypeHandler", "Media Types", "MediaTypes", uSyncBackOfficeConstants.Priorites.MediaTypes, IsTwoPass = true, Icon = "icon-thumbnails")]
     public class MediaTypeHandler : SyncHandlerTreeBase<IMediaType, IMediaTypeService>, ISyncHandler
     {
         private readonly IMediaTypeService mediaTypeService;
@@ -48,5 +48,8 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             MediaTypeService.Saved += ItemSavedEvent;
             MediaTypeService.Deleted += ItemDeletedEvent;
         }
+
+        protected override void DeleteFolder(int id)
+            => mediaTypeService.DeleteContainer(id);
     }
 }

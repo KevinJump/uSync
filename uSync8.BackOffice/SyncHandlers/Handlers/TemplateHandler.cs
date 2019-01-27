@@ -15,7 +15,7 @@ using uSync8.Core.Tracking.Impliment;
 
 namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
-    [SyncHandler("templateHandler", "Template Handler", "Templates", uSyncBackOfficeConstants.Priorites.Templates, Icon = "icon-layout")]
+    [SyncHandler("templateHandler", "Templates", "Templates", uSyncBackOfficeConstants.Priorites.Templates, Icon = "icon-layout")]
     public class TemplateHandler : SyncHandlerBase<ITemplate, IFileService>, ISyncHandler
     {
         private readonly IFileService fileService;

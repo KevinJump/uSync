@@ -20,8 +20,9 @@ using uSync8.Core.Tracking;
 
 namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
-    [SyncHandler("contentTypeHandler", "ContentType Handler", "ContentTypes", uSyncBackOfficeConstants.Priorites.ContentTypes, IsTwoPass = true, Icon = "icon-item-arrangement")]
-    public class ContentTypeHandler : SyncHandlerTreeBase<IContentType, IContentTypeService>, ISyncHandler
+    [SyncHandler("contentTypeHandler", "DocTypes", "ContentTypes", uSyncBackOfficeConstants.Priorites.ContentTypes, 
+            IsTwoPass = true, Icon = "icon-item-arrangement")]
+    public class ContentTypeHandler : SyncHandlerTreeBase<IContentType, IContentTypeService>, ISyncHandler, ISyncPostImportHandler
     {
         private readonly IContentTypeService contentTypeService;
 
@@ -65,6 +66,8 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
         protected override string GetItemFileName(IUmbracoEntity item)
             => item.Name;
 
+        protected override void DeleteFolder(int id)
+            => contentTypeService.DeleteContainer(id);
 
     }
 }

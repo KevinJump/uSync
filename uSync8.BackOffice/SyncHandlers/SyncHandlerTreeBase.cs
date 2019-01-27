@@ -7,9 +7,11 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using Umbraco.Core;
 using Umbraco.Core.Logging;
+using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
 using uSync8.BackOffice.Services;
+using uSync8.Core;
 using uSync8.Core.Extensions;
 using uSync8.Core.Serialization;
 using uSync8.Core.Tracking;
@@ -100,6 +102,35 @@ namespace uSync8.BackOffice.SyncHandlers
             return actions;
 
         }
+
+        public IEnumerable<uSyncAction> ProcessPostImport(string folder, IEnumerable<uSyncAction> actions)
+        {
+            if (actions == null || !actions.Any())
+                return null;
+
+            return CleanFolders(folder, -1);
+        }
+
+        protected IEnumerable<uSyncAction> CleanFolders(string folder, int parent)
+        {
+            var actions = new List<uSyncAction>();
+
+            var folders = entityService.GetChildren(parent, this.itemContainerType);
+            foreach (var fdlr in folders)
+            {
+                actions.AddRange(CleanFolders(folder, fdlr.Id));
+
+                if (!entityService.GetChildren(fdlr.Id).Any())
+                {
+                    actions.Add(uSyncAction.SetAction(true, fdlr.Name, typeof(EntityContainer), ChangeType.Delete, "Empty Container"));
+                    DeleteFolder(fdlr.Id);
+                }
+            }
+
+            return actions;
+        }
+
+        protected abstract void DeleteFolder(int id);
 
         private class LeveledFile
         {

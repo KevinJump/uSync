@@ -14,7 +14,7 @@ using uSync8.Core.Tracking;
 
 namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
-    [SyncHandler("memberTypeHandler", "Member Type Handler", "MemberTypes", uSyncBackOfficeConstants.Priorites.MemberTypes, IsTwoPass = true, Icon = "icon-item-arrangement")]
+    [SyncHandler("memberTypeHandler", "Member Types", "MemberTypes", uSyncBackOfficeConstants.Priorites.MemberTypes, IsTwoPass = true, Icon = "icon-item-arrangement")]
     public class MemberTypeHandler : SyncHandlerTreeBase<IMemberType, IMemberTypeService>, ISyncHandler
     {
         private readonly IMemberTypeService memberTypeService;
@@ -46,6 +46,9 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             MemberTypeService.Saved += ItemSavedEvent;
             MemberTypeService.Deleted += ItemDeletedEvent;
         }
+
+        protected override void DeleteFolder(int id)
+            => memberTypeService.DeleteContainer(id);
 
         protected override IMemberType GetFromService(int id)
             => memberTypeService.Get(id);

@@ -223,6 +223,7 @@
     <Compile Include="Hubs\HubClientService.cs" />
     <Compile Include="Hubs\uSyncHub.cs" />
     <Compile Include="Services\SyncFileService.cs" />
+    <Compile Include="Services\uSyncService.cs" />
     <Compile Include="SyncHandlers\Handlers\DataTypeHandler.cs" />
     <Compile Include="SyncHandlers\Handlers\LanguageHandler.cs" />
     <Compile Include="SyncHandlers\Handlers\MacroHandler.cs" />

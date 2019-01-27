@@ -14,6 +14,7 @@ namespace uSync8.BackOffice.SyncHandlers
         string DefaultFolder { get; }
         string Icon { get; }
         bool Enabled { get; }
+        Type ItemType { get; }
 
         void InitializeEvents();
 

@@ -14,7 +14,7 @@ using uSync8.Core.Tracking;
 
 namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
-    [SyncHandler("languageHandler", "Language Handler", "Languages", uSyncBackOfficeConstants.Priorites.Languages, Icon = "icon-globe")]
+    [SyncHandler("languageHandler", "Languages", "Languages", uSyncBackOfficeConstants.Priorites.Languages, Icon = "icon-globe")]
     public class LanguageHandler : SyncHandlerBase<ILanguage, ILocalizationService>, ISyncHandler
     {
         private readonly ILocalizationService localizationService;

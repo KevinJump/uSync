@@ -10,6 +10,7 @@
     'use strict';
 
     function uSyncDashboardController($scope,
+        notificationsService,
         uSync8DashboardService,
         uSyncHub) {
 
@@ -35,6 +36,8 @@
         vm.handlers = [];
         vm.status = {};
 
+        vm.reportAction = '';
+
         // functions 
         vm.report = report;
         vm.exportItems = exportItems;
@@ -44,6 +47,7 @@
         vm.getTypeName = getTypeName;
         vm.toggleAll = toggleAll;
         vm.countChanges = countChanges;
+        vm.calcPercentage = calcPercentage;
 
         // kick it all off
         init();
@@ -58,6 +62,8 @@
                     vm.results = result.data;
                     vm.working = false;
                     vm.reported = true;
+                }, function (error) {
+                    notificationsService.error('Reporting', error.data.Message);
                 });
         }
 
@@ -108,6 +114,10 @@
             return count;
         }
 
+        function calcPercentage(status) {
+            return (100 * status.Processed) / status.TotalSteps;
+        }
+
         ////// private 
 
         function init() {
@@ -140,7 +150,7 @@
         function getHandlers() {
             uSync8DashboardService.getHandlers()
                 .then(function (result) {
-                    vm.handlers = result.data;
+                    vm.status.Handlers = result.data;
                 });
         }
 
@@ -148,11 +158,24 @@
             vm.reported = false;
             vm.working = true;
             vm.runmode = mode;
+            vm.showAll = false;
 
             vm.status = {
                 Percent: 0,
                 Message: ""
             };
+
+            switch (mode) {
+                case modes.IMPORT:
+                    vm.action = 'Import';
+                    break;
+                case mode.REPORT:
+                    vm.action = 'Report';
+                    break;
+                case mode.EXPORT:
+                    vm.action = 'Export';
+                    break;
+            }
         }
 
         function getClientId() {
