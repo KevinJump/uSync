@@ -1,12 +1,13 @@
 ﻿<div ng-controller="uSync8DashboardController as vm">
+
     <umb-box>
         <umb-box-content>
-            <div class="flex justify-between">
+            <div class="flex justify-between items-center">
                 <div>
                     <h3 class="bold"><localize key="usync_name">uSync 8</localize></h3>
                     <localize key="usync_intro"></localize>
                 </div>
-                <div class="flex flex-column items-center usync-header-buttons">
+                <div class="flex flex-column usync-header-buttons">
                     <umb-button type="button"
                                 button-style="link"
                                 label-key="general_settings"
@@ -18,7 +19,7 @@
     </umb-box>
     <umb-box>
         <umb-box-content>
-            <div class="flex justify-start items-center usync-action-buttons">
+            <div>
                 <umb-button type="button"
                             button-style="info"
                             label-key="usync_report"
@@ -34,7 +35,6 @@
                             label-key="usync_export"
                             action="vm.exportItems()">
                 </umb-button>
-
             </div>
         </umb-box-content>
     </umb-box>
@@ -68,17 +68,19 @@
     </div>
 
     <umb-box ng-if="vm.reported">
-        <umb-box-content>
-            <div class="flex justify-between items-center">
-                <h4>Report : {{vm.results.length}} items</h4>
-                <umb-toggle checked="vm.showAll"
-                            on-click="vm.toggleAll()"
-                            show-labels="true"
-                            label-on="Show all"
-                            label-off="Changes only"
-                            label-position="left"></umb-toggle>
+        <div class="umb-box-header flex justify-between items-center">
+            <div>
+                <div class="umb-box-header-title">Report</div>
+                <div class="umb-box-header-description">Detected {{vm.countChanges(vm.results)}} changes across {{vm.results.length}} items</div>
             </div>
-
+            <umb-toggle checked="vm.showAll"
+                        on-click="vm.toggleAll()"
+                        show-labels="true"
+                        label-on="Show all"
+                        label-off="Changes only"
+                        label-position="left"></umb-toggle>
+        </div>
+        <umb-box-content>
             <div class="umb-table">
                 <div class="umb-table-head">
                     <div class="umb-table-row">
@@ -170,5 +172,4 @@
 
         <pre>{{vm.handlers}}</pre>
     -->
-
 </div>

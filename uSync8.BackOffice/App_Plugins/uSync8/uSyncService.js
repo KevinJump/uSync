@@ -18,7 +18,8 @@
             getSettings: getSettings,
             getHandlers: getHandlers,
 
-            report: report
+            report: report,
+            exportItems: exportItems
         };
 
         return service;
@@ -37,6 +38,9 @@
             return $http.get(serviceRoot + 'report');
         }
 
+        function exportItems () {
+            return $http.get(serviceRoot + 'export');
+        }
     }
 
     angular.module('umbraco.services')

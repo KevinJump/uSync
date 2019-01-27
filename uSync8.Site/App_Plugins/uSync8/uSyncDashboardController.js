@@ -9,7 +9,7 @@
 (function () {
     'use strict';
 
-    function uSyncDashboardController($scope, uSync8DashboardService ) {
+    function uSyncDashboardController($scope, uSync8DashboardService) {
 
         var vm = this;
         vm.loading = true;
@@ -18,18 +18,19 @@
         vm.reported = false;
         vm.syncing = false;
 
-        vm.showAll = false; 
+        vm.showAll = false;
 
         vm.settings = {};
         vm.handlers = [];
 
         // functions 
         vm.report = report;
-        vm.export = exportItems;
+        vm.exportItems = exportItems;
 
         vm.toggleDetails = toggleDetails;
         vm.getTypeName = getTypeName;
         vm.toggleAll = toggleAll;
+        vm.countChanges = countChanges;
 
         // kick it all off
         init();
@@ -48,7 +49,16 @@
                 });
         }
 
-        function exportItems () {
+        function exportItems() {
+            vm.reported = false;
+            vm.working = true;
+
+            uSync8DashboardService.exportItems()
+                .then(function (result) {
+                    vm.results = result.data;
+                    vm.working = false;
+                    vm.reported = true;
+                });
 
         }
 
@@ -64,6 +74,17 @@
 
         function toggleAll() {
             vm.showAll = !vm.showAll;
+        }
+
+        function countChanges(changes) {
+            var count = 0;
+            angular.forEach(changes, function (val, key) {
+                if (val.Change !== 'NoChange') {
+                    count++;
+                }
+            });
+
+            return count;
         }
 
         ////// private 
