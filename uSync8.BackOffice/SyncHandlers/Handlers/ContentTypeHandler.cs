@@ -54,10 +54,11 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 
         #endregion
       
-        public void InitializeEvents()
+            
+        protected override void InitializeEvents()
         {
-            ContentTypeService.Saved += ItemSavedEvent;
-            ContentTypeService.Deleted += ItemDeletedEvent;
+            ContentTypeService.Saved += EventSavedItem;
+            ContentTypeService.Deleted += EventDeletedItem;
         }
 
 

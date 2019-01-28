@@ -53,10 +53,10 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
         protected override string GetItemPath(IMacro item)
             => item.Alias.ToSafeFileName();
 
-        public void InitializeEvents()
+        protected override void InitializeEvents()
         {
-            MacroService.Saved += ItemSavedEvent;
-            MacroService.Deleted += ItemDeletedEvent;
+            MacroService.Saved += EventSavedItem;
+            MacroService.Deleted += EventDeletedItem;
         }
 
         protected override IMacro GetFromService(Guid key) 

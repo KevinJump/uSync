@@ -58,69 +58,87 @@ namespace uSync8.BackOffice
             return actions;
         }
 
+        private static object _importLock = new object();
+
         public IEnumerable<uSyncAction> Import(string folder, bool force, SyncEventCallback callback = null)
         {
-            var actions = new List<uSyncAction>();
-
-            var configuredHandlers = settings.Handlers.Where(x => x.Config.Enabled == true).ToList();
-
-            var summary = new SyncProgressSummary(configuredHandlers.Select(x => x.Handler), "Importing", configuredHandlers.Count + 1);
-            summary.Handlers.Add(new SyncHandlerSummary()
+            lock (_importLock)
             {
-                Icon = "icon-traffic",
-                Name = "Post Import",
-                Status = HandlerStatus.Pending
-            });
-
-            foreach (var configuredHandler in configuredHandlers)
-            {
-                var handler = configuredHandler.Handler;
-
-                summary.Processed++;
-
-                summary.UpdateHandler(
-                    handler.Name, HandlerStatus.Processing, $"Importing {handler.Name}");
-
-                callback?.Invoke(summary);
-
-                actions.AddRange(handler.ImportAll($"{folder}/{handler.DefaultFolder}", configuredHandler.Config, force));
-
-                summary.UpdateHandler(handler.Name, HandlerStatus.Complete);
-            }
-
-
-            // postImport things (mainly cleaning up folders)
-
-            summary.Processed++;
-            summary.UpdateHandler("Post Import", HandlerStatus.Pending, "Post Import Actions");
-
-            callback?.Invoke(summary);
-
-            var postImportActions = actions.Where(x => x.Success
-                                        && x.Change > Core.ChangeType.NoChange
-                                        && x.RequiresPostProcessing);
-
-            foreach(var configuredHandler in configuredHandlers)
-            {
-                var handler = configuredHandler.Handler;
-
-                if (handler is ISyncPostImportHandler postHandler)
+                try
                 {
-                    var handlerActions = postImportActions.Where(x => x.ItemType == handler.ItemType);
+                    uSync8BackOffice.eventsPaused = true;
 
-                    if (handlerActions.Any())
+                    var actions = new List<uSyncAction>();
+
+                    var configuredHandlers = settings.Handlers.Where(x => x.Config.Enabled == true).ToList();
+
+                    var summary = new SyncProgressSummary(configuredHandlers.Select(x => x.Handler), "Importing", configuredHandlers.Count + 1);
+                    summary.Handlers.Add(new SyncHandlerSummary()
                     {
-                        var postActions = postHandler.ProcessPostImport($"{folder}/{handler.DefaultFolder}", handlerActions, configuredHandler.Config );
-                        if (postActions != null)
-                            actions.AddRange(postActions);
+                        Icon = "icon-traffic",
+                        Name = "Post Import",
+                        Status = HandlerStatus.Pending
+                    });
+
+                    foreach (var configuredHandler in configuredHandlers)
+                    {
+                        var handler = configuredHandler.Handler;
+
+                        summary.Processed++;
+
+                        summary.UpdateHandler(
+                            handler.Name, HandlerStatus.Processing, $"Importing {handler.Name}");
+
+                        callback?.Invoke(summary);
+
+                        actions.AddRange(handler.ImportAll($"{folder}/{handler.DefaultFolder}", configuredHandler.Config, force));
+
+                        summary.UpdateHandler(handler.Name, HandlerStatus.Complete);
                     }
+
+
+                    // postImport things (mainly cleaning up folders)
+
+                    summary.Processed++;
+                    summary.UpdateHandler("Post Import", HandlerStatus.Pending, "Post Import Actions");
+
+                    callback?.Invoke(summary);
+
+                    var postImportActions = actions.Where(x => x.Success
+                                                && x.Change > Core.ChangeType.NoChange
+                                                && x.RequiresPostProcessing);
+
+                    foreach (var configuredHandler in configuredHandlers)
+                    {
+                        var handler = configuredHandler.Handler;
+
+                        if (handler is ISyncPostImportHandler postHandler)
+                        {
+                            var handlerActions = postImportActions.Where(x => x.ItemType == handler.ItemType);
+
+                            if (handlerActions.Any())
+                            {
+                                var postActions = postHandler.ProcessPostImport($"{folder}/{handler.DefaultFolder}", handlerActions, configuredHandler.Config);
+                                if (postActions != null)
+                                    actions.AddRange(postActions);
+                            }
+                        }
+                    }
+
+                    summary.UpdateHandler("Post Import", HandlerStatus.Complete, "Import Completed");
+                    callback?.Invoke(summary);
+
+                    return actions;
+                }
+                catch(Exception ex)
+                {
+                    throw ex;
+                }
+                finally
+                {
+                    uSync8BackOffice.eventsPaused = false;
                 }
             }
-
-            summary.UpdateHandler("Post Import", HandlerStatus.Complete, "Import Completed");
-            callback?.Invoke(summary);
-
-            return actions;
         }
 
         public IEnumerable<uSyncAction> Export(string folder, SyncEventCallback callback = null)

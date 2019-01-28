@@ -38,10 +38,10 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
         protected override IDataType GetFromService(int id)
             => dataTypeService.GetDataType(id);
 
-        public void InitializeEvents()
+        protected override void InitializeEvents()
         {
-            DataTypeService.Saved += ItemSavedEvent;
-            DataTypeService.Deleted += ItemDeletedEvent;
+            DataTypeService.Saved += EventSavedItem;
+            DataTypeService.Deleted += EventDeletedItem;
         }
 
         protected override string GetItemFileName(IUmbracoEntity item)

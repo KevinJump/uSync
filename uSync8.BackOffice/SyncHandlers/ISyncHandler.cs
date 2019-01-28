@@ -19,7 +19,7 @@ namespace uSync8.BackOffice.SyncHandlers
         bool Enabled { get; set; }
         uSyncHandlerSettings DefaultConfig { get; set; }
 
-        void InitializeEvents();
+        void Initialize();
 
         IEnumerable<uSyncAction> ExportAll(string folder, uSyncHandlerSettings setting);
         IEnumerable<uSyncAction> ImportAll(string folder, uSyncHandlerSettings setting, bool force);

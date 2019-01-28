@@ -41,10 +41,10 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
         protected override ITemplate GetFromService(int id)
             => fileService.GetTemplate(id);
 
-        public void InitializeEvents()
+        protected override void InitializeEvents()
         {
-            FileService.SavedTemplate += ItemSavedEvent;
-            FileService.DeletedTemplate += ItemDeletedEvent;
+            FileService.SavedTemplate += EventSavedItem;
+            FileService.DeletedTemplate += EventDeletedItem;
         }
 
         protected override string GetItemPath(ITemplate item)

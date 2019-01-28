@@ -22,6 +22,7 @@ namespace uSync8.BackOffice
 
         public bool ExportAtStartup { get; set; } = false;
         public bool ExportOnSave { get; set; } = true;
+        public bool UseGuidNames { get; set; } = false;
 
         public List<uSyncHandlerConfig> Handlers { get; set; } = new List<uSyncHandlerConfig>();
 
@@ -45,6 +46,7 @@ namespace uSync8.BackOffice
             this.ImportAtStartup = node.Element("ImportAtStartup").ValueOrDefault(true);
             this.ExportAtStartup = node.Element("ExportAtStartup").ValueOrDefault(false);
             this.ExportOnSave = node.Element("ExportOnSave").ValueOrDefault(true);
+            this.UseGuidNames = node.Element("UseGuidFilenames").ValueOrDefault(false);
 
             var handlerConfig = node.Element("Handlers");
             var defaultHandlerEnabled = handlerConfig.Attribute("EnableMissing").ValueOrDefault(false);
@@ -54,6 +56,7 @@ namespace uSync8.BackOffice
                 foreach (var handler in this.Handlers)
                 {
                     handler.Config.Enabled = defaultHandlerEnabled;
+                    handler.Config.GuidNames = this.UseGuidNames;
 
                     var handlerNode = handlerConfig.Elements("Handler").FirstOrDefault(x => x.Attribute("Alias").ValueOrDefault(string.Empty) == handler.Alias);
                     if (handlerNode != null)
@@ -73,6 +76,7 @@ namespace uSync8.BackOffice
             node.CreateOrSetElement("ImportAtStartup", ImportAtStartup);
             node.CreateOrSetElement("ExportAtStartup", ExportAtStartup);
             node.CreateOrSetElement("ExportOnSave", ExportOnSave);
+            node.CreateOrSetElement("UseGuidFilenames", UseGuidNames);
 
             if (this.Handlers != null)
             {
@@ -112,6 +116,7 @@ namespace uSync8.BackOffice
             var settings = new uSyncHandlerSettings();
 
             settings.Enabled = node.Attribute("Enabled").ValueOrDefault(true);
+            settings.GuidNames = node.Attribute("GuidNames").ValueOrDefault(this.UseGuidNames);
 
             var settingNode = node.Element("Settings");
             if (settingNode != null)
@@ -141,6 +146,9 @@ namespace uSync8.BackOffice
 
             node.SetAttributeValue("Alias", config.Alias);
             node.SetAttributeValue("Enabled", config.Config.Enabled);
+
+            if (config.Config.GuidNames != UseGuidNames)
+                node.SetAttributeValue("GuidNames", config.Config.GuidNames);
 
             if (config.Config.Settings != null && config.Config.Settings.Any())
             {
@@ -225,6 +233,7 @@ namespace uSync8.BackOffice
     {
         public bool Enabled { get; set; }
         public string[] Actions { get; set; }
+        public bool GuidNames { get; set; }
 
         public Dictionary<string, string> Settings { get; set; } = new Dictionary<string, string>();
 

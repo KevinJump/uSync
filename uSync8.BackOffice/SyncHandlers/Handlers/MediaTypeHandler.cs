@@ -43,10 +43,10 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
         protected override string GetItemFileName(IUmbracoEntity item)
             => item.Name;
 
-        public void InitializeEvents()
+        protected override void InitializeEvents()
         {
-            MediaTypeService.Saved += ItemSavedEvent;
-            MediaTypeService.Deleted += ItemDeletedEvent;
+            MediaTypeService.Saved += EventSavedItem;
+            MediaTypeService.Deleted += EventDeletedItem;
         }
 
         protected override void DeleteFolder(int id)

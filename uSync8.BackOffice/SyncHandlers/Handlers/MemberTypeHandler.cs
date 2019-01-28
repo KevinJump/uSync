@@ -41,10 +41,10 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             // turn it off it appears to break things in current build
         }
 
-        public void InitializeEvents()
+        protected override void InitializeEvents()
         {
-            MemberTypeService.Saved += ItemSavedEvent;
-            MemberTypeService.Deleted += ItemDeletedEvent;
+            MemberTypeService.Saved += EventSavedItem;
+            MemberTypeService.Deleted += EventDeletedItem;
         }
 
         protected override void DeleteFolder(int id)

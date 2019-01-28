@@ -49,7 +49,8 @@ namespace uSync8.BackOffice.Services
 
         public void DeleteFile(string path)
         {
-            File.Delete(GetAbsPath(path));
+            if (FileExists(path))
+                File.Delete(GetAbsPath(path));
         }
 
         public void EnsureFileExists(string path)

@@ -167,8 +167,10 @@
             vm.showAll = false;
 
             vm.status = {
-                Percent: 0,
-                Message: ""
+                Processed: 0,
+                TotalSteps: 1,
+                Message: "Initializing",
+                Handlers: []
             };
 
             switch (mode) {

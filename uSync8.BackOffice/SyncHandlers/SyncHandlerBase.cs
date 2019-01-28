@@ -79,7 +79,6 @@ namespace uSync8.BackOffice.SyncHandlers
             IsTwoPass = meta.IsTwoPass;
             Icon = string.IsNullOrWhiteSpace(meta.Icon) ? "icon-umb-content" : meta.Icon;
 
-            actionFile = Path.Combine(globalSettings.rootFolder, $"{DefaultFolder}_actions.config");
         }
 
         #region Importing 
@@ -196,7 +195,7 @@ namespace uSync8.BackOffice.SyncHandlers
             if (item == null)
                 return uSyncAction.Fail(nameof(item), typeof(TObject), ChangeType.Fail, "Item not set");
 
-            var filename = GetPath(folder, item);
+            var filename = GetPath(folder, item, config.GuidNames);
 
             var attempt = serializer.Serialize(item);
             if (attempt.Success)
@@ -266,36 +265,78 @@ namespace uSync8.BackOffice.SyncHandlers
 
         #region Events 
 
-        protected virtual void ItemDeletedEvent(IService sender, Umbraco.Core.Events.DeleteEventArgs<TObject> e)
+        protected virtual void EventDeletedItem(IService sender, Umbraco.Core.Events.DeleteEventArgs<TObject> e)
         {
+            if (uSync8BackOffice.eventsPaused) return;
+
             var actionService = new SyncActionService(syncFileService, actionFile);
             actionService.GetActions();
 
             foreach (var item in e.DeletedEntities)
             {
-                DeleteItem(item, Path.Combine(globalSettings.rootFolder, this.DefaultFolder), DefaultConfig);
-                actionService.AddAction(item.Key, SyncActionType.Delete);
+                ExportDeletedItem(item, Path.Combine(globalSettings.rootFolder, this.DefaultFolder), DefaultConfig);
+                actionService.AddAction(item.Key, GetItemName(item), SyncActionType.Delete);
             }
 
             actionService.SaveActions();
         }
 
-        protected virtual void ItemSavedEvent(IService sender, Umbraco.Core.Events.SaveEventArgs<TObject> e)
+        protected virtual void EventSavedItem(IService sender, Umbraco.Core.Events.SaveEventArgs<TObject> e)
         {
+            if (uSync8BackOffice.eventsPaused) return;
+
+            var actionService = new SyncActionService(syncFileService, actionFile);
+            actionService.GetActions();
+
             foreach (var item in e.SavedEntities)
             {
-                Export(item, Path.Combine(globalSettings.rootFolder, this.DefaultFolder), DefaultConfig);
+                var attempt = Export(item, Path.Combine(globalSettings.rootFolder, this.DefaultFolder), DefaultConfig);
+                if (attempt.Success)
+                {
+                    if (!DefaultConfig.GuidNames)
+                    {
+                        actionService.CleanActions(item.Key, GetItemName(item));
+                    }
+                }
             }
+            actionService.SaveActions();
         }
 
-        protected virtual void DeleteItem(TObject item, string folder, uSyncHandlerSettings config)
+        protected virtual void ExportDeletedItem(TObject item, string folder, uSyncHandlerSettings config)
         {
             if (item == null) return;
-            var filename = GetPath(folder, item);
+            var filename = GetPath(folder, item, config.GuidNames);
 
             var attempt = serializer.SerializeEmpty(item, GetItemName(item));
             if (attempt.Success)
                 syncFileService.SaveXElement(attempt.Item, filename);
+        }
+
+        /// <summary>
+        ///  cleans up the folder, so if someone renames a things
+        ///  (and we are using the name in the file) this will
+        ///  clean anything else in the folder that has that key
+        /// </summary>
+        protected void CleanUp(TObject item, string newFile, string folder)
+        {
+            var files = syncFileService.GetFiles(folder, "*.config");
+
+            foreach (string file in files)
+            {
+                if (!file.InvariantEquals(newFile)) {
+                    var node = syncFileService.LoadXElement(file);
+                    if (node.GetKey() == item.Key)
+                    {
+                        serializer.SerializeEmpty(item, GetItemName(item));
+                    }
+                }
+            }
+
+            var folders = syncFileService.GetDirectories(folder);
+            foreach (var children in folders)
+            {
+                CleanUp(item, newFile, children);
+            }
         }
 
         #endregion
@@ -317,7 +358,7 @@ namespace uSync8.BackOffice.SyncHandlers
                     switch (action.Action)
                     {
                         case SyncActionType.Delete:
-                            updates.Add(Delete(action.Key, action.Alias, report));
+                            updates.Add(ProcessDelete(action.Key, action.Alias, report));
                             break;
                     }
                 }
@@ -325,20 +366,8 @@ namespace uSync8.BackOffice.SyncHandlers
 
             return updates;
         }
-        #endregion
 
-        abstract protected TObject GetFromService(int id);
-        abstract protected TObject GetFromService(Guid key);
-        abstract protected TObject GetFromService(string alias);
-        abstract protected void DeleteViaService(TObject item);
-
-        abstract protected string GetItemPath(TObject item);
-        abstract protected string GetItemName(TObject item);
-
-        virtual protected string GetPath(string folder, TObject item)
-            => $"{folder}/{this.GetItemPath(item)}.config";
-
-        virtual public uSyncAction Delete(Guid key, string keyString, bool report)
+        virtual public uSyncAction ProcessDelete(Guid key, string keyString, bool report)
         {
             var item = GetFromService(key);
             if (item == null && !string.IsNullOrWhiteSpace(keyString))
@@ -349,14 +378,40 @@ namespace uSync8.BackOffice.SyncHandlers
             if (item != null)
             {
                 if (!report) DeleteViaService(item);
-
-                return uSyncAction.SetAction(true, item.Key.ToString(), typeof(TObject), ChangeType.Delete);
+                return uSyncAction.SetAction(true, keyString, typeof(TObject), ChangeType.Delete);
             }
 
-            return uSyncAction.SetAction(false, keyString, typeof(TObject), ChangeType.Delete);
+            return uSyncAction.SetAction(false, keyString, typeof(TObject), ChangeType.Removed);
+        }
+
+        #endregion
+
+        abstract protected TObject GetFromService(int id);
+        abstract protected TObject GetFromService(Guid key);
+        abstract protected TObject GetFromService(string alias);
+        abstract protected void DeleteViaService(TObject item);
+
+        abstract protected string GetItemPath(TObject item);
+        abstract protected string GetItemName(TObject item);
+
+        virtual protected string GetPath(string folder, TObject item, bool GuidNames)
+        {
+            if (GuidNames) return $"{folder}/{item.Key}.config";
+
+            return $"{folder}/{this.GetItemPath(item)}.config";
         }
 
         virtual public uSyncAction Rename(TObject item)
             => new uSyncAction();
+
+
+        public void Initialize()
+        {
+            actionFile = Path.Combine(globalSettings.rootFolder, $"_Actions/actions_{DefaultFolder}.config");
+            InitializeEvents();
+        }
+
+        protected abstract void InitializeEvents();
+
     }
 }

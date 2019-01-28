@@ -72,7 +72,7 @@ namespace uSync8.BackOffice
                 foreach (var syncHandler in globalSettings.Handlers.Where(x => x.Config.Enabled))
                 {
                     logger.Debug<uSyncBackofficeComponent>($"Starting up Handler {syncHandler.Handler.Name}");
-                    syncHandler.Handler.InitializeEvents();
+                    syncHandler.Handler.Initialize();
                 }
             }
 

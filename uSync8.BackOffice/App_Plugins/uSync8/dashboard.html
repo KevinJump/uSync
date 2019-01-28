@@ -51,7 +51,7 @@
                 </div>
             </div>
             <div class="flex justify-center">
-                <h4>{{vm.status.Message}}</h4>
+                <h4 class="usync-action-message">{{vm.status.Message}}</h4>
             </div>
             <div class="progress" style="height: 1px;">
                 <div class="bar" role="progressbar" style="width: {{vm.calcPercentage(vm.status)}}%;" aria-valuenow="{{vm.calcPercentage(vm.status)}}" aria-valuemin="0" aria-valuemax="100"></div>
@@ -89,8 +89,9 @@
                             Change
                         </div>
                         <div class="umb-table-cell">
-
+                            Message
                         </div>
+                        <div class="umb-table-cell"></div>
                     </div>
                 </div>
                 <div class="umb-table-body">
@@ -110,6 +111,9 @@
                             </div>
                             <div class="umb-table-cell">
                                 {{result.Change}}
+                            </div>
+                            <div class="umb-table-cell">
+                                {{result.Message}}
                             </div>
                             <div class="umb-table-cell">
                                 <umb-button type="button"

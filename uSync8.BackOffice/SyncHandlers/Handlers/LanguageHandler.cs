@@ -41,10 +41,10 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
         protected override string GetItemPath(ILanguage item)
             => item.IsoCode.ToSafeFileName();
 
-        public void InitializeEvents()
+        protected override void InitializeEvents()
         {
-            LocalizationService.SavedLanguage += ItemSavedEvent;
-            LocalizationService.DeletedLanguage += ItemDeletedEvent;
+            LocalizationService.SavedLanguage += EventSavedItem;
+            LocalizationService.DeletedLanguage += EventDeletedItem;
         }
 
         protected override ILanguage GetFromService(Guid key)

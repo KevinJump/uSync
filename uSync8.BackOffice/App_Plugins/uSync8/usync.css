@@ -25,6 +25,10 @@
         margin-right: 0.25rem;
     }
 
+.usync-action-message {
+    font-weight: 700;
+}
+
 .usync-item-details {
     border-left: 4px solid #aaa;
 }
@@ -53,12 +57,14 @@
     }
 
 
-.usync-handler-icon.usync-pending {
-    color: #eee;
-}
-.usync-handler-icon.usync-progress {
-    color: #675e7a;
-}
-.usync-handler-icon.usync-complete {
-    color: #35c786;
-}
+    .usync-handler-icon.usync-pending {
+        color: #eee;
+    }
+
+    .usync-handler-icon.usync-progress {
+        color: #675e7a;
+    }
+
+    .usync-handler-icon.usync-complete {
+        color: #35c786;
+    }

@@ -31,7 +31,10 @@ namespace uSync8.BackOffice.Services
 
         public void SaveActions()
         {
-            fileService.SaveXml(actionFile, actions);
+            if (actions.Any())
+                fileService.SaveXml(actionFile, actions);
+            else
+                fileService.DeleteFile(actionFile);
         }
 
         public void AddAction(Guid key, string alias, SyncActionType actionType)
@@ -71,6 +74,12 @@ namespace uSync8.BackOffice.Services
         public void RemoveActions(Guid key, string alias)
         {
             actions.RemoveAll(x => x.Key == key && x.Alias == alias);
+        }
+
+        public void CleanActions(Guid key,string alias)
+        {
+            RemoveActions(key);
+            RemoveActions(alias);
         }
     }
         

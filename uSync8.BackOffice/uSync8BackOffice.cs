@@ -8,5 +8,6 @@ namespace uSync8.BackOffice
 {
     public class uSync8BackOffice
     {
+        public static bool eventsPaused { get; set; }
     }
 }
