@@ -52,8 +52,15 @@ namespace uSync8.Core.Serialization
 
         public SyncAttempt<TObject> Deserialize(XElement node, bool force, bool OnePass)
         {
+            if (IsEmpty(node))
+            {
+                // empty node do nothing...
+                return SyncAttempt<TObject>.Succeed(node.GetKey().ToString(), ChangeType.Removed);
+            }
+
             if (!IsValid(node))
                 throw new ArgumentException($"XML Not valid for type {ItemType}");
+            
 
             if (force || !IsCurrent(node))
             {
@@ -104,6 +111,8 @@ namespace uSync8.Core.Serialization
                 && node.GetKey() != Guid.Empty 
                 && node.GetAlias() != string.Empty;
 
+        protected bool IsEmpty(XElement node)
+            => node.Name.LocalName == uSyncConstants.Serialization.Empty;
 
         public TObject GetItem(XElement node)
         {
@@ -147,6 +156,7 @@ namespace uSync8.Core.Serialization
         public bool IsCurrent(XElement node)
         {
             if (node == null) return false;
+
             var item = GetItem(node);
             if (item == null) return false;
 
@@ -159,6 +169,15 @@ namespace uSync8.Core.Serialization
             if (string.IsNullOrEmpty(currentHash)) return false;
 
             return currentHash == newHash;
+        }
+
+        public virtual SyncAttempt<XElement> SerializeEmpty(TObject item, string alias)
+        {
+            var node = new XElement(uSyncConstants.Serialization.Empty,
+                new XAttribute("Key", item.Key),
+                new XAttribute("Alias", alias));
+
+            return SyncAttempt<XElement>.Succeed("Empty", node, ChangeType.Removed);
         }
 
 

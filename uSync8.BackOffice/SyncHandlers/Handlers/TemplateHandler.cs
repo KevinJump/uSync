@@ -49,5 +49,17 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 
         protected override string GetItemPath(ITemplate item)
             => item.Name;
+
+        protected override ITemplate GetFromService(Guid key)
+            => fileService.GetTemplate(key);
+
+        protected override ITemplate GetFromService(string alias)
+            => fileService.GetTemplate(alias);
+
+        protected override void DeleteViaService(ITemplate item)
+            => fileService.DeleteTemplate(item.Alias);
+
+        protected override string GetItemName(ITemplate item)
+            => item.Name;
     }
 }

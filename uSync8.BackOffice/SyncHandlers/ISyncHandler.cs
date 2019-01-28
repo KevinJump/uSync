@@ -17,12 +17,12 @@ namespace uSync8.BackOffice.SyncHandlers
         Type ItemType { get; }
 
         bool Enabled { get; set; }
-        Dictionary<string, string> Settings { get; set; }
+        uSyncHandlerSettings DefaultConfig { get; set; }
 
         void InitializeEvents();
 
         IEnumerable<uSyncAction> ExportAll(string folder, uSyncHandlerSettings setting);
-        IEnumerable<uSyncAction> ImportAll(string folder, bool force, uSyncHandlerSettings setting);
+        IEnumerable<uSyncAction> ImportAll(string folder, uSyncHandlerSettings setting, bool force);
         IEnumerable<uSyncAction> Report(string folder, uSyncHandlerSettings setting);
 
         // uSyncAction Import(string file, bool force);

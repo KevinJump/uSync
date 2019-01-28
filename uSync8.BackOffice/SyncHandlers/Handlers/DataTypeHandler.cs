@@ -50,22 +50,30 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
         protected override void DeleteFolder(int id)
             => dataTypeService.DeleteContainer(id);
 
-        public IEnumerable<uSyncAction> ProcessPostImport(string folder, IEnumerable<uSyncAction> actions)
+        public override IEnumerable<uSyncAction> ProcessPostImport(string folder, IEnumerable<uSyncAction> actions, uSyncHandlerSettings config)
         {
             if (actions == null || !actions.Any())
                 return null;
 
             foreach (var action in actions)
             {
-                var attempt = Import(action.FileName);
+                var attempt = Import(action.FileName, config);
                 if (attempt.Success)
                 {
-                    ImportSecondPass(action.FileName, attempt.Item);
+                    ImportSecondPass(action.FileName, attempt.Item, config);
                 }
             }
 
             return CleanFolders(folder, -1);
         }
 
+        protected override IDataType GetFromService(Guid key)
+            => dataTypeService.GetDataType(key);
+
+        protected override IDataType GetFromService(string alias)
+            => dataTypeService.GetDataType(alias);
+
+        protected override void DeleteViaService(IDataType item)
+            => dataTypeService.Delete(item);
     }
 }

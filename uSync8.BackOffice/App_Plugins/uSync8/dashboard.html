@@ -96,10 +96,11 @@
                 <div class="umb-table-body">
                     <div ng-repeat="result in vm.results">
                         <div class="umb-table-row"
-                             ng-if="result.Change != 'NoChange' || vm.showAll">
+                             ng-if="vm.showChange(result.Change)">
                             <div class="umb-table-cell">
                                 <i ng-if="result.Change == 'NoChange'" class="icon icon-check color-green"></i>
                                 <i ng-if="result.Change == 'Update'" class="icon icon-sync color-orange"></i>
+                                <i ng-if="result.Change == 'Delete'" class="icon icon-wrong color-red"></i>
                             </div>
                             <div class="umb-table-cell">
                                 {{vm.getTypeName(result.ItemType)}}

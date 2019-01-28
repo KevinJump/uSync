@@ -28,6 +28,11 @@ namespace uSync8.Core.Extensions
             return node.Value;
         }
 
+        public static bool IsEmptyItem(this XElement node)
+        {
+            return node.Name.LocalName == uSyncConstants.Serialization.Empty;
+        }
+
         public static TObject ValueOrDefault<TObject>(this XElement node, TObject defaultValue)
         {
             var value = ValueOrDefault(node, string.Empty);

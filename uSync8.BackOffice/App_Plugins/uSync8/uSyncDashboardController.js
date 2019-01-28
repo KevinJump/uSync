@@ -49,6 +49,8 @@
         vm.countChanges = countChanges;
         vm.calcPercentage = calcPercentage;
 
+        vm.showChange = showChange;
+
         // kick it all off
         init();
 
@@ -101,6 +103,10 @@
 
         function toggleAll() {
             vm.showAll = !vm.showAll;
+        }
+
+        function showChange(change) {
+            return vm.showAll || (change !== 'NoChange' && change !== 'Removed');
         }
 
         function countChanges(changes) {

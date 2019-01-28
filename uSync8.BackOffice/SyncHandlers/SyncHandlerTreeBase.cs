@@ -53,12 +53,12 @@ namespace uSync8.BackOffice.SyncHandlers
         /// <param name="force"></param>
         /// <param name="updates"></param>
         /// <returns></returns>
-        protected override IEnumerable<uSyncAction> ImportFolder(string folder, bool force, Dictionary<string, TObject> updates)
+        protected override IEnumerable<uSyncAction> ImportFolder(string folder, uSyncHandlerSettings config, Dictionary<string, TObject> updates, bool force)
         {
             // if not using flat, then directory structure is doing
             // this for us. 
             if (globalSettings.UseFlatStructure == false)
-                return base.ImportFolder(folder, force, updates);
+                return base.ImportFolder(folder, config, updates, force);
 
             List<uSyncAction> actions = new List<uSyncAction>();
 
@@ -83,7 +83,7 @@ namespace uSync8.BackOffice.SyncHandlers
 
             foreach(var node in nodes.OrderBy(x => x.Level))
             {
-                var attempt = Import(node.File, force);
+                var attempt = Import(node.File, config, force);
                 if (attempt.Success && attempt.Item != null)
                 {
                     updates.Add(node.File, attempt.Item);
@@ -95,7 +95,7 @@ namespace uSync8.BackOffice.SyncHandlers
             var folders = syncFileService.GetDirectories(folder);
             foreach (var children in folders)
             {
-                actions.AddRange(ImportFolder(children, force, updates));
+                actions.AddRange(ImportFolder(children, config, updates, force));
             }
 
 
@@ -103,7 +103,7 @@ namespace uSync8.BackOffice.SyncHandlers
 
         }
 
-        public IEnumerable<uSyncAction> ProcessPostImport(string folder, IEnumerable<uSyncAction> actions)
+        public virtual IEnumerable<uSyncAction> ProcessPostImport(string folder, IEnumerable<uSyncAction> actions, uSyncHandlerSettings config)
         {
             if (actions == null || !actions.Any())
                 return null;
@@ -190,5 +190,8 @@ namespace uSync8.BackOffice.SyncHandlers
 
             return path;
         }
+
+        protected override string GetItemName(TObject item) => item.Name;
     }
+    
 }

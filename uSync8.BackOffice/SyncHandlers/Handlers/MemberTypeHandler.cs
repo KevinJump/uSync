@@ -50,8 +50,17 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
         protected override void DeleteFolder(int id)
             => memberTypeService.DeleteContainer(id);
 
+        protected override void DeleteViaService(IMemberType item)
+            => memberTypeService.Delete(item);
+
         protected override IMemberType GetFromService(int id)
             => memberTypeService.Get(id);
+
+        protected override IMemberType GetFromService(Guid key)
+            => memberTypeService.Get(key);
+
+        protected override IMemberType GetFromService(string alias)
+            => memberTypeService.Get(alias);
 
         protected override string GetItemFileName(IUmbracoEntity item)
             => item.Name;

@@ -36,12 +36,23 @@ namespace uSync8.BackOffice
 
         public void Initialize()
         {
-            globalSettings.LoadSettings(syncHandlers);
 
             using (logger.DebugDuration<uSyncBackOfficeComposer>("uSync Starting"))
             {
+                InitSettings();
+
                 InitBackOffice();
             }
+        }
+
+        private void InitSettings()
+        {
+            globalSettings.LoadSettings(syncHandlers);
+            foreach(var syncHandler in globalSettings.Handlers)
+            {
+                syncHandler.Handler.DefaultConfig = syncHandler.Config;
+            }
+
         }
 
         private void InitBackOffice()
@@ -58,10 +69,10 @@ namespace uSync8.BackOffice
 
             if (globalSettings.ExportOnSave)
             {
-                foreach (var syncHandler in syncHandlers.Where(x => x.Enabled))
+                foreach (var syncHandler in globalSettings.Handlers.Where(x => x.Config.Enabled))
                 {
-                    logger.Debug<uSyncBackofficeComponent>($"Starting up Handler {syncHandler.Name}");
-                    syncHandler.InitializeEvents();
+                    logger.Debug<uSyncBackofficeComponent>($"Starting up Handler {syncHandler.Handler.Name}");
+                    syncHandler.Handler.InitializeEvents();
                 }
             }
 

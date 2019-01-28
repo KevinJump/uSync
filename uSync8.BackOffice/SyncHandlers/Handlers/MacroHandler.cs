@@ -34,14 +34,14 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
         /// <summary>
         ///  overrider the default export, because macros, don't exist as an object type???
         /// </summary>
-        public override IEnumerable<uSyncAction> ExportAll(int parent, string folder)
+        public override IEnumerable<uSyncAction> ExportAll(int parent, string folder, uSyncHandlerSettings config = null)
         {
             var actions = new List<uSyncAction>();
 
             var items = macroService.GetAll();
             foreach(var item in items)
             {
-                actions.Add(Export(item, folder));
+                actions.Add(Export(item, folder, config));
             }
 
             return actions;
@@ -59,5 +59,17 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             MacroService.Deleted += ItemDeletedEvent;
         }
 
+        protected override IMacro GetFromService(Guid key) 
+            => null;
+
+        protected override IMacro GetFromService(string alias) 
+            => macroService.GetByAlias(alias);
+
+        protected override void DeleteViaService(IMacro item)
+            => macroService.Delete(item);
+
+        protected override string GetItemName(IMacro item)
+            => item.Name;
     }
+
 }

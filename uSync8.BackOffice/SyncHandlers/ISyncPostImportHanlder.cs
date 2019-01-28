@@ -13,6 +13,6 @@ namespace uSync8.BackOffice.SyncHandlers
     /// </summary>
     public interface ISyncPostImportHandler
     {
-        IEnumerable<uSyncAction> ProcessPostImport(string folder, IEnumerable<uSyncAction> actions);
+        IEnumerable<uSyncAction> ProcessPostImport(string folder, IEnumerable<uSyncAction> actions, uSyncHandlerSettings config);
     }
 }

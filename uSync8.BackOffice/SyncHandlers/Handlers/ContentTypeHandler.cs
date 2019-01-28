@@ -60,14 +60,24 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             ContentTypeService.Deleted += ItemDeletedEvent;
         }
 
-        protected override IContentType GetFromService(int id)
-            => contentTypeService.Get(id);
 
         protected override string GetItemFileName(IUmbracoEntity item)
             => item.Name;
 
+        protected override IContentType GetFromService(int id)
+            => contentTypeService.Get(id);
+
+        protected override IContentType GetFromService(Guid key)
+            => contentTypeService.Get(key);
+
+        protected override IContentType GetFromService(string alias)
+            => contentTypeService.Get(alias);
+
         protected override void DeleteFolder(int id)
             => contentTypeService.DeleteContainer(id);
+
+        protected override void DeleteViaService(IContentType item)
+            => contentTypeService.Delete(item);
 
     }
 }

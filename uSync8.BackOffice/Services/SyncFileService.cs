@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using System.Xml.Serialization;
 using Umbraco.Core.IO;
 
 namespace uSync8.BackOffice.Services
@@ -62,7 +63,7 @@ namespace uSync8.BackOffice.Services
             if (!FileExists(path)) return null;
 
             var absPath = GetAbsPath(path);
-            return File.OpenRead(path);
+            return File.OpenRead(absPath);
         }
 
         public Stream OpenWrite(string path)
@@ -112,6 +113,48 @@ namespace uSync8.BackOffice.Services
             using (var stream = OpenRead(file))
             {
                 return XElement.Load(stream);
+            }
+        }
+
+        public void SaveXElement(XElement node, string filename)
+        {
+            using (var stream = OpenWrite(filename))
+            {
+                node.Save(stream);
+                stream.Flush();
+                stream.Dispose();
+            }
+        }
+
+        public TObject LoadXml<TObject>(string file)
+        {
+            if (FileExists(file))
+            {
+
+                XmlSerializer xmlSerializer = new XmlSerializer(typeof(TObject));
+                using (var stream = OpenRead(file))
+                {
+                    var item = (TObject)xmlSerializer.Deserialize(stream);
+                    return item;
+                }
+            }
+            return default(TObject);
+        }
+
+        public static object _saveLock = new object();
+
+        public void SaveXml<TObject>(string file, TObject item)
+        {
+            lock(_saveLock)
+            {
+                if (FileExists(file))
+                    DeleteFile(file);
+
+                var xmlSerializer = new XmlSerializer(typeof(TObject));
+                using (var stream = OpenWrite(file))
+                {
+                    xmlSerializer.Serialize(stream, item);
+                }
             }
         }
     }

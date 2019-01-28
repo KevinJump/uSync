@@ -42,7 +42,7 @@ namespace uSync8.BackOffice
 
             this.rootFolder = node.Element("Folder").ValueOrDefault(rootFolder);
             this.UseFlatStructure = node.Element("FlatFolders").ValueOrDefault(true);
-            this.ImportAtStartup = node.Element("ImportAtStarup").ValueOrDefault(true);
+            this.ImportAtStartup = node.Element("ImportAtStartup").ValueOrDefault(true);
             this.ExportAtStartup = node.Element("ExportAtStartup").ValueOrDefault(false);
             this.ExportOnSave = node.Element("ExportOnSave").ValueOrDefault(true);
 

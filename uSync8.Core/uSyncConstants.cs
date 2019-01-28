@@ -23,6 +23,8 @@ namespace uSync8.Core
             public const string Media = "Media";
             public const string Users = "Users";
             public const string Members = "Members";
+
+            public const string Empty = "Empty";
         }
     }
 }

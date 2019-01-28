@@ -23,6 +23,8 @@ namespace uSync8.Core.Serialization
 
         SyncAttempt<XElement> Serialize(TObject item);
 
+        SyncAttempt<XElement> SerializeEmpty(TObject item, string alias);
+
         SyncAttempt<TObject> Deserialize(XElement node, bool force, bool onePass);
         SyncAttempt<TObject> DesrtializeSecondPass(TObject item, XElement node);
 

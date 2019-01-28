@@ -46,5 +46,17 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             LocalizationService.SavedLanguage += ItemSavedEvent;
             LocalizationService.DeletedLanguage += ItemDeletedEvent;
         }
+
+        protected override ILanguage GetFromService(Guid key)
+            => null;
+
+        protected override ILanguage GetFromService(string alias)
+            => localizationService.GetLanguageByIsoCode(alias);
+
+        protected override void DeleteViaService(ILanguage item)
+            => localizationService.Delete(item);
+
+        protected override string GetItemName(ILanguage item)
+            => item.IsoCode;
     }
 }
