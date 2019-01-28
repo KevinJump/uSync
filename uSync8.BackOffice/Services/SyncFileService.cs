@@ -28,7 +28,7 @@ namespace uSync8.BackOffice.Services
         private string GetAbsPath(string path)
         {
             if (path.StartsWith(mappedRoot)) return path;
-            return IOHelper.MapPath(globalSettings.rootFolder + path.TrimStart(new char[] { '/' }));
+            return IOHelper.MapPath(path.TrimStart(new char[] { '/' }));
         }
 
         public bool FileExists(string path)
@@ -41,9 +41,9 @@ namespace uSync8.BackOffice.Services
             return Directory.Exists(GetAbsPath(path));
         }
 
-        public bool RootExists()
+        public bool RootExists(string path)
         {
-            return DirectoryExists("");
+            return DirectoryExists(path);
         }
 
         public void DeleteFile(string path)

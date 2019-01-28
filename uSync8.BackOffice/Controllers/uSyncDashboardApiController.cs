@@ -56,7 +56,7 @@ namespace uSync8.BackOffice.Controllers
             var hubClient = new HubClientService(options.clientId);
             var summaryClient = new SummaryHandler(hubClient);
 
-            return uSyncService.Report("", summaryClient.PostSummary);
+            return uSyncService.Report(settings.rootFolder, summaryClient.PostSummary);
         }
 
         [HttpPost]
@@ -65,7 +65,7 @@ namespace uSync8.BackOffice.Controllers
             var hubClient = new HubClientService(options.clientId);
             var summaryClient = new SummaryHandler(hubClient);
 
-            return uSyncService.Export("", summaryClient.PostSummary);
+            return uSyncService.Export(settings.rootFolder, summaryClient.PostSummary);
         }
 
         [HttpPut]
@@ -74,7 +74,7 @@ namespace uSync8.BackOffice.Controllers
             var hubClient = new HubClientService(options.clientId);
             var summaryClient = new SummaryHandler(hubClient);
 
-            return uSyncService.Import("", options.force, summaryClient.PostSummary);
+            return uSyncService.Import(settings.rootFolder, options.force, summaryClient.PostSummary);
         }
 
         public class SummaryHandler

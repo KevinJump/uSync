@@ -40,6 +40,37 @@ namespace uSync8.Core.Extensions
             return defaultValue;
         }
 
+        public static void CreateOrSetElement(this XElement node, string name, string value)
+        {
+            if (node == null) return;
+
+            var element = node.Element(name);
+            if (element == null)
+            {
+                element = new XElement(name);
+                node.Add(element);
+            }
+            element.Value = value;
+        }
+
+        public static void CreateOrSetElement<TObject>(this XElement node, string name, TObject value)
+        {
+            if (node == null) return;
+
+            var attempt = value.TryConvertTo<string>();
+            if (attempt.Success)
+            {
+                var element = node.Element(name);
+                if (element == null)
+                {
+                    element = new XElement(name);
+                    node.Add(element);
+                }
+
+                element.Value = attempt.Result;
+            }
+        }
+
         /// <summary>
         ///  gets a value from an element, if its is missing throws an ArgumentNullException
         /// </summary>

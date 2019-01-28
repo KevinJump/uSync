@@ -36,6 +36,7 @@ namespace uSync8.BackOffice
 
         public void Initialize()
         {
+            globalSettings.LoadSettings(syncHandlers);
 
             using (logger.DebugDuration<uSyncBackOfficeComposer>("uSync Starting"))
             {
@@ -45,14 +46,14 @@ namespace uSync8.BackOffice
 
         private void InitBackOffice()
         {
-            if (globalSettings.ExportAtStartup || (globalSettings.ExportOnSave && !syncFileService.RootExists()))
+            if (globalSettings.ExportAtStartup || (globalSettings.ExportOnSave && !syncFileService.RootExists(globalSettings.rootFolder)))
             {
-                uSyncService.Export("");
+                uSyncService.Export(globalSettings.rootFolder);
             }
 
             if (globalSettings.ImportAtStartup)
             {
-                uSyncService.Import("",false);
+                uSyncService.Import(globalSettings.rootFolder,false);
             }
 
             if (globalSettings.ExportOnSave)

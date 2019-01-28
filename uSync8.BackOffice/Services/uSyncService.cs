@@ -33,12 +33,13 @@ namespace uSync8.BackOffice
         {
             var actions = new List<uSyncAction>();
 
-            var handlers = syncHandlers.Where(x => x.Enabled).ToList();
+            var configuredHandlers = settings.Handlers.Where(x => x.Config.Enabled == true).ToList();
 
-            var summary = new SyncProgressSummary(handlers, "Reporting", handlers.Count);
+            var summary = new SyncProgressSummary(configuredHandlers.Select(x => x.Handler), "Reporting", configuredHandlers.Count);
             
-            foreach (var handler in handlers)
+            foreach (var configuredHandler in configuredHandlers)
             {
+                var handler = configuredHandler.Handler;
                 summary.Processed++;
 
                 summary.UpdateHandler(
@@ -46,7 +47,7 @@ namespace uSync8.BackOffice
 
                 callback?.Invoke(summary);
 
-                actions.AddRange(handler.Report($"{folder}/{handler.DefaultFolder}"));
+                actions.AddRange(handler.Report($"{folder}/{handler.DefaultFolder}", configuredHandler.Config));
 
                 summary.UpdateHandler(handler.Name, HandlerStatus.Complete);
             }
@@ -61,8 +62,9 @@ namespace uSync8.BackOffice
         {
             var actions = new List<uSyncAction>();
 
-            var handlers = syncHandlers.Where(x => x.Enabled).ToList();
-            var summary = new SyncProgressSummary(handlers, "Importing", handlers.Count + 1);
+            var configuredHandlers = settings.Handlers.Where(x => x.Config.Enabled == true).ToList();
+
+            var summary = new SyncProgressSummary(configuredHandlers.Select(x => x.Handler), "Importing", configuredHandlers.Count + 1);
             summary.Handlers.Add(new SyncHandlerSummary()
             {
                 Icon = "icon-traffic",
@@ -70,8 +72,10 @@ namespace uSync8.BackOffice
                 Status = HandlerStatus.Pending
             });
 
-            foreach (var handler in handlers)
+            foreach (var configuredHandler in configuredHandlers)
             {
+                var handler = configuredHandler.Handler;
+
                 summary.Processed++;
 
                 summary.UpdateHandler(
@@ -79,7 +83,7 @@ namespace uSync8.BackOffice
 
                 callback?.Invoke(summary);
 
-                actions.AddRange(handler.ImportAll($"{folder}/{handler.DefaultFolder}", force));
+                actions.AddRange(handler.ImportAll($"{folder}/{handler.DefaultFolder}", force, configuredHandler.Config));
 
                 summary.UpdateHandler(handler.Name, HandlerStatus.Complete);
             }
@@ -96,8 +100,10 @@ namespace uSync8.BackOffice
                                         && x.Change > Core.ChangeType.NoChange
                                         && x.RequiresPostProcessing);
 
-            foreach(var handler in handlers)
+            foreach(var configuredHandler in configuredHandlers)
             {
+                var handler = configuredHandler.Handler;
+
                 if (handler is ISyncPostImportHandler postHandler)
                 {
                     var handlerActions = postImportActions.Where(x => x.ItemType == handler.ItemType);
@@ -121,11 +127,13 @@ namespace uSync8.BackOffice
         {
             var actions = new List<uSyncAction>();
 
-            var handlers = syncHandlers.Where(x => x.Enabled).ToList();
-            var summary = new SyncProgressSummary(handlers, "Exporting", handlers.Count);
+            var configuredHandlers = settings.Handlers.Where(x => x.Config.Enabled == true).ToList();
 
-            foreach (var handler in handlers)
+            var summary = new SyncProgressSummary(configuredHandlers.Select(x => x.Handler), "Exporting", configuredHandlers.Count);
+
+            foreach (var configuredHandler in configuredHandlers)
             {
+                var handler = configuredHandler.Handler;
                 summary.Processed++;
 
                 summary.UpdateHandler(
@@ -133,7 +141,7 @@ namespace uSync8.BackOffice
 
                 callback?.Invoke(summary);
 
-                actions.AddRange(handler.ExportAll($"{folder}/{handler.DefaultFolder}"));
+                actions.AddRange(handler.ExportAll($"{folder}/{handler.DefaultFolder}", configuredHandler.Config));
 
                 summary.UpdateHandler(handler.Name, HandlerStatus.Complete);
             }

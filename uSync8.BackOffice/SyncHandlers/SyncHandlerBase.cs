@@ -30,14 +30,21 @@ namespace uSync8.BackOffice.SyncHandlers
         protected readonly ISyncSerializer<TObject> serializer;
         protected readonly ISyncTracker<TObject> tracker;
 
+        // handler things 
         public string Alias { get; private set; }
         public string Name { get; private set; }
         public string DefaultFolder { get; private set; }
         public int Priority { get; private set; }
-        public bool Enabled { get; protected set; } = true;
-        protected bool IsTwoPass = false;
         public string Icon { get; private set; }
-        public Type ItemType { get; protected set;} = typeof(TObject);
+
+        protected bool IsTwoPass = false;
+
+        public Type ItemType { get; protected set; } = typeof(TObject);
+
+        /// settings can be loaded for these.
+        public bool Enabled { get; set; } = true;
+        public Dictionary<string, string> Settings { get; set; } = new Dictionary<string, string>();
+
 
         protected UmbracoObjectTypes itemObjectType = UmbracoObjectTypes.Unknown;
         protected UmbracoObjectTypes itemContainerType = UmbracoObjectTypes.Unknown;
@@ -73,7 +80,7 @@ namespace uSync8.BackOffice.SyncHandlers
         }
 
         #region Importing 
-        public IEnumerable<uSyncAction> ImportAll(string folder, bool force)
+        public IEnumerable<uSyncAction> ImportAll(string folder, bool force, uSyncHandlerSettings config = null)
         {
             logger.Info<uSync8BackOffice>("Running Import: {0}", Path.GetFileName(folder));
 
@@ -151,7 +158,7 @@ namespace uSync8.BackOffice.SyncHandlers
         #endregion
 
         #region Exporting
-        virtual public IEnumerable<uSyncAction> ExportAll(string folder)
+        virtual public IEnumerable<uSyncAction> ExportAll(string folder, uSyncHandlerSettings config = null)
         {
             return ExportAll(-1, folder);
         }
@@ -206,7 +213,7 @@ namespace uSync8.BackOffice.SyncHandlers
 
         #region reporting 
 
-        public IEnumerable<uSyncAction> Report(string folder)
+        public IEnumerable<uSyncAction> Report(string folder, uSyncHandlerSettings config = null)
         {
             List<uSyncAction> actions = new List<uSyncAction>();
 
