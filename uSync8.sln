@@ -12,6 +12,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionFiles", "SolutionFiles", "{6E911B34-61DC-471A-9AD7-97A74E9B3BE5}"
 	ProjectSection(SolutionItems) = preProject
 		gulpfile.js = gulpfile.js
+		Dist\package.cmd = Dist\package.cmd
 	EndProjectSection
 EndProject
 Global

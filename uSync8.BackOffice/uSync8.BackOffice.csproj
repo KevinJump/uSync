@@ -255,7 +255,9 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="App_Plugins\uSync8\package.manifest" />
+    <Content Include="Config\uSync8.config" />
     <None Include="packages.config" />
+    <None Include="uSync.nuspec" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\uSync8.Core\uSync8.Core.csproj">
