@@ -219,6 +219,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configuration\BackOfficeConfig.cs" />
+    <Compile Include="Configuration\ConfigExtensions.cs" />
+    <Compile Include="Configuration\OverriddenValue.cs" />
+    <Compile Include="Configuration\uSyncHandlerSettings.cs" />
     <Compile Include="Controllers\uSyncDashboardApiController.cs" />
     <Compile Include="Hubs\HubClientService.cs" />
     <Compile Include="Hubs\uSyncHub.cs" />
@@ -246,7 +250,7 @@
     <Compile Include="uSync8BackOffice.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="BackOfficeConstants.cs" />
-    <Compile Include="uSyncBackOfficeSettings.cs" />
+    <Compile Include="Configuration\uSyncSettings.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

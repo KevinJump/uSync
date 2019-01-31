@@ -10,6 +10,7 @@ using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
+using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
 using uSync8.Core;
 using uSync8.Core.Extensions;
@@ -36,9 +37,8 @@ namespace uSync8.BackOffice.SyncHandlers
             IProfilingLogger logger, 
             ISyncSerializer<TObject> serializer,
             ISyncTracker<TObject> tracker,
-            SyncFileService syncFileService, 
-            uSyncBackOfficeSettings settings) 
-            : base(entityService, logger, serializer, tracker, syncFileService, settings)
+            SyncFileService syncFileService) 
+            : base(entityService, logger, serializer, tracker, syncFileService)
         {
         }
 
@@ -53,11 +53,11 @@ namespace uSync8.BackOffice.SyncHandlers
         /// <param name="force"></param>
         /// <param name="updates"></param>
         /// <returns></returns>
-        protected override IEnumerable<uSyncAction> ImportFolder(string folder, uSyncHandlerSettings config, Dictionary<string, TObject> updates, bool force)
+        protected override IEnumerable<uSyncAction> ImportFolder(string folder, HandlerSettings config, Dictionary<string, TObject> updates, bool force)
         {
             // if not using flat, then directory structure is doing
             // this for us. 
-            if (globalSettings.UseFlatStructure == false)
+            if (config.UseFlatStructure == false)
                 return base.ImportFolder(folder, config, updates, force);
 
             List<uSyncAction> actions = new List<uSyncAction>();
@@ -103,7 +103,7 @@ namespace uSync8.BackOffice.SyncHandlers
 
         }
 
-        public virtual IEnumerable<uSyncAction> ProcessPostImport(string folder, IEnumerable<uSyncAction> actions, uSyncHandlerSettings config)
+        public virtual IEnumerable<uSyncAction> ProcessPostImport(string folder, IEnumerable<uSyncAction> actions, HandlerSettings config)
         {
             if (actions == null || !actions.Any())
                 return null;
@@ -150,28 +150,28 @@ namespace uSync8.BackOffice.SyncHandlers
 
 
         // path helpers
-        virtual protected string GetItemFileName(IUmbracoEntity item)
+        virtual protected string GetItemFileName(IUmbracoEntity item, bool useGuid)
         {
             if (item != null)
             {
-                if (globalSettings.UseFlatStructure)
+                if (useGuid)
                     return item.Key.ToString();
 
-                return item.Name.ToSafeFileName();
+               return item.Name.ToSafeFileName();
             }
 
             return Guid.NewGuid().ToString();
         }
 
-        override protected string GetItemPath(TObject item)
+        override protected string GetItemPath(TObject item, bool useGuid, bool isFlat)
         {
-            if (globalSettings.UseFlatStructure)
-                return GetItemFileName((IUmbracoEntity)item);
+            if (isFlat)
+                return GetItemFileName((IUmbracoEntity)item, useGuid);
 
-            return GetEntityPath((IUmbracoEntity)item);
+            return GetEntityPath((IUmbracoEntity)item, useGuid, true);
         }
 
-        protected string GetEntityPath(IUmbracoEntity item)
+        protected string GetEntityPath(IUmbracoEntity item, bool useGuid, bool isTop)
         {
             var path = string.Empty;
             if (item != null)
@@ -181,11 +181,12 @@ namespace uSync8.BackOffice.SyncHandlers
                     var parent = entityService.Get(item.ParentId);
                     if (parent != null)
                     {
-                        path = GetEntityPath(parent);
+                        path = GetEntityPath(parent, useGuid, false);
                     }
                 }
 
-                path = Path.Combine(path, GetItemFileName(item));
+                // we only want the guid file name at the top of the tree 
+                path = Path.Combine(path, GetItemFileName(item, useGuid && isTop));
             }
 
             return path;

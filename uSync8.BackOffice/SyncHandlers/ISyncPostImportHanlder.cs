@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using uSync8.BackOffice.Configuration;
 
 namespace uSync8.BackOffice.SyncHandlers
 {
@@ -13,6 +14,6 @@ namespace uSync8.BackOffice.SyncHandlers
     /// </summary>
     public interface ISyncPostImportHandler
     {
-        IEnumerable<uSyncAction> ProcessPostImport(string folder, IEnumerable<uSyncAction> actions, uSyncHandlerSettings config);
+        IEnumerable<uSyncAction> ProcessPostImport(string folder, IEnumerable<uSyncAction> actions, HandlerSettings config);
     }
 }

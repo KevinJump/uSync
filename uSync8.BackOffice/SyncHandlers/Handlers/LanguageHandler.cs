@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 using Umbraco.Core;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
+using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
 using Umbraco.Core.Services.Implement;
+using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
 using uSync8.Core.Serialization;
 using uSync8.Core.Tracking;
@@ -25,9 +27,8 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             ILocalizationService localizationService,
             ISyncSerializer<ILanguage> serializer,
             ISyncTracker<ILanguage> tracker,
-            SyncFileService syncFileService, 
-            uSyncBackOfficeSettings settings) 
-            : base(entityService, logger, serializer, tracker, syncFileService, settings)
+            SyncFileService syncFileService)
+            : base(entityService, logger, serializer, tracker, syncFileService)
         {
             this.localizationService = localizationService;
 
@@ -38,13 +39,22 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
         protected override ILanguage GetFromService(int id)
             => localizationService.GetLanguageById(id);
 
-        protected override string GetItemPath(ILanguage item)
+        // language guids are not consistant (at least in alpha)
+        protected override string GetItemPath(ILanguage item, bool useGuid, bool isFlat)
             => item.IsoCode.ToSafeFileName();
 
-        protected override void InitializeEvents()
+        protected override void InitializeEvents(HandlerSettings settings)
         {
             LocalizationService.SavedLanguage += EventSavedItem;
             LocalizationService.DeletedLanguage += EventDeletedItem;
+        }
+
+        protected override IEnumerable<IEntity> GetExportItems(int parent, UmbracoObjectTypes objectType)
+        {
+            if (parent == -1)
+                return localizationService.GetAllLanguages();
+
+            return Enumerable.Empty<IEntity>();
         }
 
         protected override ILanguage GetFromService(Guid key)

@@ -20,7 +20,7 @@ namespace uSync8.Core.Tracking.Impliment
 
         protected override TrackedItem TrackChanges()
         {
-            return new TrackedItem(serializer.ItemType)
+            return new TrackedItem(serializer.ItemType, true)
             {
                 Children = new List<TrackedItem>
                 {

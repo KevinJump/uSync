@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Umbraco.Core;
+using uSync8.BackOffice.Configuration;
 
 namespace uSync8.BackOffice.SyncHandlers
 {
@@ -17,13 +18,13 @@ namespace uSync8.BackOffice.SyncHandlers
         Type ItemType { get; }
 
         bool Enabled { get; set; }
-        uSyncHandlerSettings DefaultConfig { get; set; }
+        HandlerSettings DefaultConfig { get; set; }
 
-        void Initialize();
+        void Initialize(HandlerSettings settings);
 
-        IEnumerable<uSyncAction> ExportAll(string folder, uSyncHandlerSettings setting);
-        IEnumerable<uSyncAction> ImportAll(string folder, uSyncHandlerSettings setting, bool force);
-        IEnumerable<uSyncAction> Report(string folder, uSyncHandlerSettings setting);
+        IEnumerable<uSyncAction> ExportAll(string folder, HandlerSettings settings);
+        IEnumerable<uSyncAction> ImportAll(string folder, HandlerSettings settings, bool force);
+        IEnumerable<uSyncAction> Report(string folder, HandlerSettings settings);
 
         // uSyncAction Import(string file, bool force);
 

@@ -147,6 +147,7 @@
     <Compile Include="Serialization\SyncTreeSerializerBase.cs" />
     <Compile Include="Models\SyncAttempt.cs" />
     <Compile Include="Serialization\SyncSerializerCollectionBuilder.cs" />
+    <Compile Include="Tracking\Impliment\ContentTypeBaseTracker.cs" />
     <Compile Include="Tracking\Impliment\ContentTypeTracker.cs" />
     <Compile Include="Tracking\Impliment\DataTypeTracker.cs" />
     <Compile Include="Tracking\Impliment\LanguageTracker.cs" />

@@ -151,7 +151,7 @@ namespace uSync8.Core.Serialization.Serializers
             var info = node.Element("Info");
             if (info == null) return;
 
-            var alias = info.GetAlias();
+            var alias = node.GetAlias();
             if (item.Alias != alias)
                 item.Alias = alias;
 

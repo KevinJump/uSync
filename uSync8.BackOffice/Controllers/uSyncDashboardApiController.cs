@@ -4,9 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Http;
+using Umbraco.Core.Composing;
 using Umbraco.Web.Mvc;
 using Umbraco.Web.WebApi;
 using Umbraco.Web.WebApi.Filters;
+using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Hubs;
 using uSync8.BackOffice.SyncHandlers;
 using Constants = Umbraco.Core.Constants;
@@ -18,22 +20,32 @@ namespace uSync8.BackOffice.Controllers
     public class uSyncDashboardApiController : UmbracoAuthorizedApiController
     {
         private readonly uSyncService uSyncService;
-
-        private readonly uSyncBackOfficeSettings settings;
         private readonly SyncHandlerCollection syncHandlers;
+
+        private uSyncSettings settings;
+        private uSyncConfig Config;
 
         public uSyncDashboardApiController(
             uSyncService uSyncService,
             SyncHandlerCollection syncHandlers,
-            uSyncBackOfficeSettings settings)
+            uSyncConfig config)
         {
+            this.Config = config;
             this.uSyncService = uSyncService;
-            this.settings = settings;
+
+            this.settings = Current.Configs.uSync();
             this.syncHandlers = syncHandlers;
+
+            uSyncConfig.Reloaded += BackOfficeConfig_Reloaded;
+        }
+
+        private void BackOfficeConfig_Reloaded(uSyncSettings settings)
+        {
+            this.settings = settings;
         }
 
         [HttpGet]
-        public uSyncBackOfficeSettings GetSettings()
+        public uSyncSettings GetSettings()
         {
             return settings;
         }
@@ -56,7 +68,7 @@ namespace uSync8.BackOffice.Controllers
             var hubClient = new HubClientService(options.clientId);
             var summaryClient = new SummaryHandler(hubClient);
 
-            return uSyncService.Report(settings.rootFolder, summaryClient.PostSummary);
+            return uSyncService.Report(settings.RootFolder, summaryClient.PostSummary);
         }
 
         [HttpPost]
@@ -65,7 +77,7 @@ namespace uSync8.BackOffice.Controllers
             var hubClient = new HubClientService(options.clientId);
             var summaryClient = new SummaryHandler(hubClient);
 
-            return uSyncService.Export(settings.rootFolder, summaryClient.PostSummary);
+            return uSyncService.Export(settings.RootFolder, summaryClient.PostSummary);
         }
 
         [HttpPut]
@@ -74,8 +86,17 @@ namespace uSync8.BackOffice.Controllers
             var hubClient = new HubClientService(options.clientId);
             var summaryClient = new SummaryHandler(hubClient);
 
-            return uSyncService.Import(settings.rootFolder, options.force, summaryClient.PostSummary);
+            return uSyncService.Import(settings.RootFolder, options.force, summaryClient.PostSummary);
         }
+
+        [HttpPost]
+        public void SaveSettings(uSyncSettings settings)
+        {
+            Config.SaveSettings(settings, true);
+        }
+
+        
+
 
         public class SummaryHandler
         {

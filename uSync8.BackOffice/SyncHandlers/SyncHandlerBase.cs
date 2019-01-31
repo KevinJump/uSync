@@ -4,10 +4,12 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using Umbraco.Core;
+using Umbraco.Core.Composing;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
+using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Models;
 using uSync8.BackOffice.Services;
 using uSync8.Core;
@@ -25,7 +27,6 @@ namespace uSync8.BackOffice.SyncHandlers
         protected readonly IProfilingLogger logger;
         protected readonly IEntityService entityService;
 
-        protected readonly uSyncBackOfficeSettings globalSettings;
         protected readonly SyncFileService syncFileService;
 
         protected readonly ISyncSerializer<TObject> serializer;
@@ -44,7 +45,9 @@ namespace uSync8.BackOffice.SyncHandlers
 
         /// settings can be loaded for these.
         public bool Enabled { get; set; } = true;
-        public uSyncHandlerSettings DefaultConfig { get; set; }
+        public HandlerSettings DefaultConfig { get; set; }
+
+        protected string rootFolder { get; set; }
 
         protected UmbracoObjectTypes itemObjectType = UmbracoObjectTypes.Unknown;
         protected UmbracoObjectTypes itemContainerType = UmbracoObjectTypes.Unknown;
@@ -56,15 +59,16 @@ namespace uSync8.BackOffice.SyncHandlers
             IProfilingLogger logger,
             ISyncSerializer<TObject> serializer,
             ISyncTracker<TObject> tracker,
-            SyncFileService syncFileService,
-            uSyncBackOfficeSettings settings)
+            SyncFileService syncFileService)
         {
-            this.entityService = entityService;
             this.logger = logger;
 
-            this.globalSettings = settings;
+
+            this.entityService = entityService;
+
             this.serializer = serializer;
             this.tracker = tracker;
+
             this.syncFileService = syncFileService;
 
             var thisType = GetType();
@@ -79,10 +83,26 @@ namespace uSync8.BackOffice.SyncHandlers
             IsTwoPass = meta.IsTwoPass;
             Icon = string.IsNullOrWhiteSpace(meta.Icon) ? "icon-umb-content" : meta.Icon;
 
+            GetDefaultConfig(Current.Configs.uSync());
+            uSyncConfig.Reloaded += BackOfficeConfig_Reloaded;
+        }
+
+        private void GetDefaultConfig(uSyncSettings setting)
+        {
+            var config = setting.Handlers.FirstOrDefault(x => x.Alias == this.Alias);
+            if (config != null)
+                this.DefaultConfig = config;
+
+            rootFolder = setting.RootFolder;
+        }
+
+        private void BackOfficeConfig_Reloaded(uSyncSettings settings)
+        {
+            GetDefaultConfig(settings);
         }
 
         #region Importing 
-        public IEnumerable<uSyncAction> ImportAll(string folder, uSyncHandlerSettings config = null, bool force = false)
+        public IEnumerable<uSyncAction> ImportAll(string folder, HandlerSettings config = null, bool force = false)
         {
             logger.Info<uSync8BackOffice>("Running Import: {0}", Path.GetFileName(folder));
 
@@ -103,7 +123,7 @@ namespace uSync8.BackOffice.SyncHandlers
             return actions;
         }
 
-        protected virtual IEnumerable<uSyncAction> ImportFolder(string folder, uSyncHandlerSettings config, Dictionary<string, TObject> updates, bool force)
+        protected virtual IEnumerable<uSyncAction> ImportFolder(string folder, HandlerSettings config, Dictionary<string, TObject> updates, bool force)
         {
             List<uSyncAction> actions = new List<uSyncAction>();
 
@@ -117,7 +137,11 @@ namespace uSync8.BackOffice.SyncHandlers
                     updates.Add(file, attempt.Item);
                 }
 
-                actions.Add(uSyncActionHelper<TObject>.SetAction(attempt, file, IsTwoPass));
+                var action = uSyncActionHelper<TObject>.SetAction(attempt, file, IsTwoPass);
+                if (attempt.Details != null && attempt.Details.Any())
+                    action.Details = attempt.Details;
+
+                actions.Add(action);
             }
 
             var folders = syncFileService.GetDirectories(folder);
@@ -130,7 +154,7 @@ namespace uSync8.BackOffice.SyncHandlers
             return actions;
         }
 
-        virtual public SyncAttempt<TObject> Import(string filePath, uSyncHandlerSettings config, bool force = false)
+        virtual public SyncAttempt<TObject> Import(string filePath, HandlerSettings config, bool force = false)
         {
             syncFileService.EnsureFileExists(filePath);
 
@@ -142,7 +166,7 @@ namespace uSync8.BackOffice.SyncHandlers
             }
         }
 
-        virtual public void ImportSecondPass(string file, TObject item, uSyncHandlerSettings config)
+        virtual public void ImportSecondPass(string file, TObject item, HandlerSettings config)
         {
             if (IsTwoPass)
             {
@@ -160,12 +184,15 @@ namespace uSync8.BackOffice.SyncHandlers
         #endregion
 
         #region Exporting
-        virtual public IEnumerable<uSyncAction> ExportAll(string folder, uSyncHandlerSettings config = null)
+        virtual public IEnumerable<uSyncAction> ExportAll(string folder, HandlerSettings config = null)
         {
+            // we clean the folder out on an export all. 
+            syncFileService.CleanFolder(folder);
+
             return ExportAll(-1, folder, config);
         }
 
-        virtual public IEnumerable<uSyncAction> ExportAll(int parent, string folder, uSyncHandlerSettings config)
+        virtual public IEnumerable<uSyncAction> ExportAll(int parent, string folder, HandlerSettings config)
         {
             var actions = new List<uSyncAction>();
 
@@ -178,11 +205,11 @@ namespace uSync8.BackOffice.SyncHandlers
                 }
             }
 
-            var items = entityService.GetChildren(parent, this.itemObjectType);
+            var items = GetExportItems(parent, itemObjectType);
             foreach (var item in items)
             {
-                var contentType = GetFromService(item.Id);
-                actions.Add(Export(contentType, folder, config));
+                var concreateType = GetFromService(item.Id);
+                actions.Add(Export(concreateType, folder, config));
 
                 actions.AddRange(ExportAll(item.Id, folder, config));
             }
@@ -190,12 +217,17 @@ namespace uSync8.BackOffice.SyncHandlers
             return actions;
         }
 
-        virtual public uSyncAction Export(TObject item, string folder, uSyncHandlerSettings config)
+        // almost everything does this - but languages can't so we need to 
+        // let the language Handler override this. 
+        virtual protected IEnumerable<IEntity> GetExportItems(int parent, UmbracoObjectTypes objectType)
+            => entityService.GetChildren(parent, objectType);
+
+        virtual public uSyncAction Export(TObject item, string folder, HandlerSettings config)
         {
             if (item == null)
                 return uSyncAction.Fail(nameof(item), typeof(TObject), ChangeType.Fail, "Item not set");
 
-            var filename = GetPath(folder, item, config.GuidNames);
+            var filename = GetPath(folder, item, config.GuidNames, config.UseFlatStructure);
 
             var attempt = serializer.Serialize(item);
             if (attempt.Success)
@@ -210,7 +242,7 @@ namespace uSync8.BackOffice.SyncHandlers
 
         #region reporting 
 
-        public IEnumerable<uSyncAction> Report(string folder, uSyncHandlerSettings config = null)
+        public IEnumerable<uSyncAction> Report(string folder, HandlerSettings config = null)
         {
             var actions = new List<uSyncAction>();
             actions.AddRange(ProcessActions(true));
@@ -218,7 +250,7 @@ namespace uSync8.BackOffice.SyncHandlers
             return actions;
         }
 
-        public IEnumerable<uSyncAction> ReportFolder(string folder, uSyncHandlerSettings config)
+        public IEnumerable<uSyncAction> ReportFolder(string folder, HandlerSettings config)
         {
             List<uSyncAction> actions = new List<uSyncAction>();
 
@@ -252,10 +284,18 @@ namespace uSync8.BackOffice.SyncHandlers
                 var action = uSyncActionHelper<TObject>
                     .ReportAction(!current, node.GetAlias());
 
-                action.Message = nameof(TObject);
+                action.Message = "";
 
                 if (action.Change > ChangeType.NoChange)
+                {
                     action.Details = tracker.GetChanges(node);
+                    if (action.Details == null || action.Details.Count() == 0)
+                    {
+                        action.Message = "Change details cannot be calculated";
+                    }
+
+                    action.Message = "Would update";
+                }
 
                 return action;
             }
@@ -274,7 +314,7 @@ namespace uSync8.BackOffice.SyncHandlers
 
             foreach (var item in e.DeletedEntities)
             {
-                ExportDeletedItem(item, Path.Combine(globalSettings.rootFolder, this.DefaultFolder), DefaultConfig);
+                ExportDeletedItem(item, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
                 actionService.AddAction(item.Key, GetItemName(item), SyncActionType.Delete);
             }
 
@@ -290,7 +330,7 @@ namespace uSync8.BackOffice.SyncHandlers
 
             foreach (var item in e.SavedEntities)
             {
-                var attempt = Export(item, Path.Combine(globalSettings.rootFolder, this.DefaultFolder), DefaultConfig);
+                var attempt = Export(item, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
                 if (attempt.Success)
                 {
                     if (!DefaultConfig.GuidNames)
@@ -302,10 +342,10 @@ namespace uSync8.BackOffice.SyncHandlers
             actionService.SaveActions();
         }
 
-        protected virtual void ExportDeletedItem(TObject item, string folder, uSyncHandlerSettings config)
+        protected virtual void ExportDeletedItem(TObject item, string folder, HandlerSettings config)
         {
             if (item == null) return;
-            var filename = GetPath(folder, item, config.GuidNames);
+            var filename = GetPath(folder, item, config.GuidNames, config.UseFlatStructure);
 
             var attempt = serializer.SerializeEmpty(item, GetItemName(item));
             if (attempt.Success)
@@ -377,8 +417,16 @@ namespace uSync8.BackOffice.SyncHandlers
 
             if (item != null)
             {
-                if (!report) DeleteViaService(item);
-                return uSyncAction.SetAction(true, keyString, typeof(TObject), ChangeType.Delete);
+                var message = "";
+                if (!report)
+                {
+                    DeleteViaService(item);
+                }
+                else
+                {
+                    message = "Would be deleted";
+                }
+                return uSyncAction.SetAction(true, keyString, typeof(TObject), ChangeType.Delete, message);
             }
 
             return uSyncAction.SetAction(false, keyString, typeof(TObject), ChangeType.Removed);
@@ -391,27 +439,27 @@ namespace uSync8.BackOffice.SyncHandlers
         abstract protected TObject GetFromService(string alias);
         abstract protected void DeleteViaService(TObject item);
 
-        abstract protected string GetItemPath(TObject item);
+        abstract protected string GetItemPath(TObject item, bool useGuid, bool isFlat);
         abstract protected string GetItemName(TObject item);
 
-        virtual protected string GetPath(string folder, TObject item, bool GuidNames)
+        virtual protected string GetPath(string folder, TObject item, bool GuidNames, bool isFlat)
         {
-            if (GuidNames) return $"{folder}/{item.Key}.config";
+            if (isFlat && GuidNames) return $"{folder}/{item.Key}.config";
 
-            return $"{folder}/{this.GetItemPath(item)}.config";
+            return $"{folder}/{this.GetItemPath(item, GuidNames, isFlat)}.config";
         }
 
         virtual public uSyncAction Rename(TObject item)
             => new uSyncAction();
 
 
-        public void Initialize()
+        public void Initialize(HandlerSettings settings)
         {
-            actionFile = Path.Combine(globalSettings.rootFolder, $"_Actions/actions_{DefaultFolder}.config");
-            InitializeEvents();
+            actionFile = Path.Combine(rootFolder, $"_Actions/actions_{DefaultFolder}.config");
+            InitializeEvents(settings);
         }
 
-        protected abstract void InitializeEvents();
+        protected abstract void InitializeEvents(HandlerSettings settings);
 
     }
 }

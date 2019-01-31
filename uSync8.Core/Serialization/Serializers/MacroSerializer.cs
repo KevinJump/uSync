@@ -18,7 +18,7 @@ namespace uSync8.Core.Serialization.Serializers
 
         public MacroSerializer(
             IEntityService entityService,
-            IMacroService macroService) 
+            IMacroService macroService)
             : base(entityService)
         {
             this.macroService = macroService;
@@ -26,6 +26,8 @@ namespace uSync8.Core.Serialization.Serializers
 
         protected override SyncAttempt<IMacro> DeserializeCore(XElement node)
         {
+            var changes = new List<uSyncChange>();
+
             if (node.Element("Name") == null)
                 throw new ArgumentNullException("XML missing Name parameter");
 
@@ -40,7 +42,6 @@ namespace uSync8.Core.Serialization.Serializers
 
             item = macroService.GetById(key);
 
-
             if (item == null)
             {
                 item = macroService.GetByAlias(alias);
@@ -49,6 +50,7 @@ namespace uSync8.Core.Serialization.Serializers
             if (item == null)
             {
                 item = new Macro(alias, name, macroSource, macroType);
+                changes.Add(uSyncChange.Create(alias, name, "New Macro"));
             }
 
             item.Name = name;
@@ -56,8 +58,9 @@ namespace uSync8.Core.Serialization.Serializers
             item.MacroSource = macroSource;
             item.MacroType = macroType;
 
+
             item.UseInEditor = node.Element("UseInEditor").ValueOrDefault(false);
-            item.DontRender = node.Element("DontRender").ValueOrDefault(false);
+            item.DontRender =  node.Element("DontRender").ValueOrDefault(false);
             item.CacheByMember = node.Element("CachedByMember").ValueOrDefault(false);
             item.CacheByPage = node.Element("CachedByPage").ValueOrDefault(false);
             item.CacheDuration = node.Element("CachedDuration").ValueOrDefault(0);
@@ -65,12 +68,14 @@ namespace uSync8.Core.Serialization.Serializers
             var properties = node.Element("Properties");
             if (properties != null && properties.HasElements)
             {
-                foreach(var propNode in properties.Elements("Property"))
+                foreach (var propNode in properties.Elements("Property"))
                 {
                     var propertyAlias = propNode.Element("Alias").ValueOrDefault(string.Empty);
                     var editorAlias = propNode.Element("EditorAlias").ValueOrDefault(string.Empty);
                     var propertyName = propNode.Element("Name").ValueOrDefault(string.Empty);
                     var sortOrder = propNode.Element("SortOrder").ValueOrDefault(0);
+
+                    var propPath = $"{alias}: {propertyName}";
 
                     if (item.Properties.ContainsKey(propertyAlias))
                     {
@@ -78,16 +83,49 @@ namespace uSync8.Core.Serialization.Serializers
                     }
                     else
                     {
+                        changes.Add(uSyncChange.Create(propPath, "Property", propertyAlias));
                         item.Properties.Add(new MacroProperty(propertyAlias, propertyName, sortOrder, editorAlias));
                     }
                 }
+
             }
+
+            RemoveOrphanProperties(item, properties);
 
             macroService.Save(item);
 
-            return SyncAttempt<IMacro>.Succeed(item.Name, item, ChangeType.Import);
+            var attempt = SyncAttempt<IMacro>.Succeed(item.Name, item, ChangeType.Import);
+            if (changes.Any())
+                attempt.Details = changes;
+
+            return attempt;
         }
 
+        private void RemoveOrphanProperties(IMacro item, XElement properties)
+        {
+            var removalKeys = new List<string>();
+            if (properties == null)
+            {
+                removalKeys = item.Properties.Keys.ToList();
+            }
+            else
+            {
+                var aliases = properties.Elements("Property")
+                    .Where(x => x.Element("Alias").ValueOrDefault(string.Empty) != string.Empty)
+                    .Select(x => x.Element("Alias").ValueOrDefault(string.Empty))
+                    .ToList();
+
+                removalKeys = item.Properties.Values.Where(x => !aliases.Contains(x.Alias))
+                    .Select(x => x.Alias)
+                    .ToList();
+            }
+
+            foreach (var propKey in removalKeys)
+            {
+                item.Properties.Remove(propKey);
+            }
+
+        }
 
         protected override SyncAttempt<XElement> SerializeCore(IMacro item)
         {
@@ -103,14 +141,14 @@ namespace uSync8.Core.Serialization.Serializers
             node.Add(new XElement("CachedDuration", item.CacheDuration));
 
             var properties = new XElement("Properties");
-            foreach(var property in item.Properties)
+            foreach (var property in item.Properties)
             {
                 properties.Add(new XElement("Property",
                     new XElement("Key", property.Key),
-                    new XElement("Name", property.Name)),
+                    new XElement("Name", property.Name),
                     new XElement("Alias", property.Alias),
                     new XElement("SortOrder", property.SortOrder),
-                    new XElement("EditorAlias", property.EditorAlias));
+                    new XElement("EditorAlias", property.EditorAlias)));
             }
 
             node.Add(properties);

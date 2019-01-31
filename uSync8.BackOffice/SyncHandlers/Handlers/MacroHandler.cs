@@ -8,6 +8,7 @@ using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Services;
 using Umbraco.Core.Services.Implement;
+using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
 using uSync8.Core.Serialization;
 using uSync8.Core.Tracking;
@@ -24,9 +25,8 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             IMacroService macroService,
             ISyncSerializer<IMacro> serializer,
             ISyncTracker<IMacro> tracker,
-            SyncFileService syncFileService, 
-            uSyncBackOfficeSettings settings) 
-            : base(entityService, logger, serializer, tracker, syncFileService, settings)
+            SyncFileService syncFileService) 
+            : base(entityService, logger, serializer, tracker, syncFileService)
         {
             this.macroService = macroService;
         }
@@ -34,7 +34,7 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
         /// <summary>
         ///  overrider the default export, because macros, don't exist as an object type???
         /// </summary>
-        public override IEnumerable<uSyncAction> ExportAll(int parent, string folder, uSyncHandlerSettings config = null)
+        public override IEnumerable<uSyncAction> ExportAll(int parent, string folder, HandlerSettings config = null)
         {
             var actions = new List<uSyncAction>();
 
@@ -50,10 +50,14 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
         protected override IMacro GetFromService(int id)
             => macroService.GetById(id);
 
-        protected override string GetItemPath(IMacro item)
-            => item.Alias.ToSafeFileName();
+        // not sure we can trust macro guids in the path just yet.
+        protected override string GetItemPath(IMacro item, bool useGuid, bool isFlat)
+        {
+            if (useGuid) return item.Key.ToString();
+            return item.Alias.ToSafeAlias();
+        }
 
-        protected override void InitializeEvents()
+        protected override void InitializeEvents(HandlerSettings settings)
         {
             MacroService.Saved += EventSavedItem;
             MacroService.Deleted += EventDeletedItem;

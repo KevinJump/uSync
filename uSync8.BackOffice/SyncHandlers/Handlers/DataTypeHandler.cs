@@ -9,6 +9,7 @@ using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
 using Umbraco.Core.Services.Implement;
+using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
 using uSync8.Core;
 using uSync8.Core.Serialization;
@@ -27,30 +28,33 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             IProfilingLogger logger, 
             ISyncSerializer<IDataType> serializer, 
             ISyncTracker<IDataType> tracker,
-            SyncFileService syncFileService, 
-            uSyncBackOfficeSettings settings) 
-            : base(entityService, logger, serializer, tracker, syncFileService, settings)
+            SyncFileService syncFileService)
+            : base(entityService, logger, serializer, tracker, syncFileService)
         {
             this.dataTypeService = dataTypeService;
             this.itemObjectType = UmbracoObjectTypes.DataType;
+            this.itemContainerType = UmbracoObjectTypes.DataTypeContainer;
         }
 
         protected override IDataType GetFromService(int id)
             => dataTypeService.GetDataType(id);
 
-        protected override void InitializeEvents()
+        protected override void InitializeEvents(HandlerSettings settings)
         {
             DataTypeService.Saved += EventSavedItem;
             DataTypeService.Deleted += EventDeletedItem;
         }
 
-        protected override string GetItemFileName(IUmbracoEntity item)
-            => item.Name.ToSafeFileName();
+        protected override string GetItemFileName(IUmbracoEntity item, bool useGuid)
+        {
+            if (useGuid) return item.Key.ToString();
+            return item.Name.ToSafeAlias();
+        }
 
         protected override void DeleteFolder(int id)
             => dataTypeService.DeleteContainer(id);
 
-        public override IEnumerable<uSyncAction> ProcessPostImport(string folder, IEnumerable<uSyncAction> actions, uSyncHandlerSettings config)
+        public override IEnumerable<uSyncAction> ProcessPostImport(string folder, IEnumerable<uSyncAction> actions, HandlerSettings config)
         {
             if (actions == null || !actions.Any())
                 return null;

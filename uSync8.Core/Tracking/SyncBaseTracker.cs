@@ -10,7 +10,7 @@ using uSync8.Core.Serialization;
 
 namespace uSync8.Core.Tracking
 {
-    public abstract class SyncBaseTracker<TObject> 
+    public abstract class SyncBaseTracker<TObject>
         where TObject : IEntity
     {
         protected readonly ISyncSerializer<TObject> serializer;
@@ -39,11 +39,12 @@ namespace uSync8.Core.Tracking
             var changes = TrackChanges();
 
             var item = serializer.GetItem(node);
-            if (item != null) {
+            if (item != null)
+            {
                 var current = serializer.Serialize(item);
                 if (current.Success)
                 {
-                    return CalculateChanges(changes, current.Item, node);
+                    return CalculateChanges(changes, current.Item, node, "", "");
                 }
             }
 
@@ -51,115 +52,252 @@ namespace uSync8.Core.Tracking
         }
 
 
-        private IEnumerable<uSyncChange> CalculateChanges(TrackedItem change, XElement current, XElement target)
+        private IEnumerable<uSyncChange> CalculateChanges(TrackedItem change, XElement current, XElement target, string name, string path)
+        {
+            if (change == null) return Enumerable.Empty<uSyncChange>();
+
+            var changePath = GetChangePath(path, change.Path);
+            var changeName = GetChangeName(name, change.Name);
+
+            if (change.Repeating == null)
+                return CalculateSingleChange(change, current, target, changeName, changePath);
+
+
+            return CalculateRepeatingChanges(change, current, target, changeName, changePath);
+        }
+
+        private IEnumerable<uSyncChange> CalculateSingleChange(TrackedItem change, XElement current, XElement target, string name, string path)
         {
             var updates = new List<uSyncChange>();
 
-            if (change == null) return Enumerable.Empty<uSyncChange>();
+            var currentNode = current;
+            var targetNode = target;
 
-            if (string.IsNullOrWhiteSpace(change.Name) || string.IsNullOrWhiteSpace(change.Path))
-                return Enumerable.Empty<uSyncChange>();
-
-            var currentNode = current.XPathSelectElement(change.Path);
-            var targetNode = target.XPathSelectElement(change.Path);
-
-            if (currentNode == null)
+            if (!string.IsNullOrEmpty(path))
             {
-                updates.Add(new uSyncChange()
+                currentNode = current.XPathSelectElement(path);
+                targetNode = target.XPathSelectElement(path);
+
+                if (currentNode == null)
                 {
-                    Change = ChangeDetailType.Create,
-                    Path = change.Path,
-                    Name = change.Name,
-                    OldValue = change.CompareValue ? targetNode.ValueOrDefault(string.Empty) : "New Property",
-                    NewValue = ""
-                });
-            }
+                    return uSyncChange.Create(path, name, targetNode.ValueOrDefault(string.Empty), change.CompareValue)
+                        .AsEnumerableOfOne();
 
-            if (targetNode == null)
-            {
-                // its a delete (not in target)
-                updates.Add(new uSyncChange()
+                }
+
+                if (targetNode == null)
                 {
-                    Change = ChangeDetailType.Delete,
-                    Path = change.Path,
-                    Name = change.Name,
-                    OldValue = change.CompareValue ? currentNode.ValueOrDefault(string.Empty) : "Missing Property",
-                    NewValue = ""
-                });
-            }
+                    // its a delete (not in target)
+                    return uSyncChange.Delete(path, name, currentNode.ValueOrDefault(string.Empty), change.CompareValue)
+                        .AsEnumerableOfOne();
+                }
 
-            if (change.CompareValue)
-            {
-                // actual change 
-                updates.AddNotNull(Compare(change.Name, change.Path,
-                    currentNode.ValueOrDefault(string.Empty),
-                    targetNode.ValueOrDefault(string.Empty)));
-            }
+                // this happens if both exist, we compare values in them.
 
-            if (change.Attributes != null && change.Attributes.Any())
-            {
-                foreach(var attribute in change.Attributes)
+                if (change.CompareValue)
                 {
-                    var currentValue = currentNode.Attribute(attribute).ValueOrDefault(string.Empty);
-                    var targetValue = targetNode.Attribute(attribute).ValueOrDefault(string.Empty);
-                    updates.AddNotNull(Compare($"{change.Name} [{attribute}]", change.Path, currentValue, targetValue));
+                    // actual change 
+                    updates.AddNotNull(Compare(path, name,
+                        currentNode.ValueOrDefault(string.Empty),
+                        targetNode.ValueOrDefault(string.Empty)));
+                }
+
+                if (change.Attributes != null && change.Attributes.Any())
+                {
+                    foreach (var attribute in change.Attributes)
+                    {
+                        var currentValue = currentNode.Attribute(attribute).ValueOrDefault(string.Empty);
+                        var targetValue = targetNode.Attribute(attribute).ValueOrDefault(string.Empty);
+                        updates.AddNotNull(Compare(path, $"{name} [{attribute}]", currentValue, targetValue));
+                    }
                 }
             }
 
             if (change.Children != null && change.Children.Any())
             {
-                foreach(var child in change.Children)
+                foreach (var child in change.Children)
                 {
-                    updates.AddRange(CalculateChanges(child, current, target));
+                    updates.AddRange(CalculateChanges(child, currentNode, targetNode, name, path));
                 }
             }
 
             return updates;
         }
-  
 
-        protected uSyncChange Compare(string name, string path, string current, string target)
+        /// <summary>
+        ///  works out changes when we have a repeating block (e.g all the properties on a content type)
+        /// </summary>
+        private IEnumerable<uSyncChange> CalculateRepeatingChanges(TrackedItem change, XElement current, XElement target, string name, string path)
+        {
+            var updates = new List<uSyncChange>();
+
+            var currentItems = current.XPathSelectElements(path);
+            var targetItems = target.XPathSelectElements(path);
+
+            // loop through the nodes in the current item 
+            foreach (var currentNode in currentItems)
+            {
+                var currentNodePath = path;
+                var currentNodeName = name;
+
+                XElement targetNode = null;
+
+
+                // if the key is blank we just compare the values in the elements
+                if (string.IsNullOrWhiteSpace(change.Repeating.Key))
+                {
+                    targetNode = targetItems.FirstOrDefault(x => x.Value == currentNode.Value);
+                }
+                else
+                {
+                    // we need to find the current key value 
+                    var currentKey = GetKeyValue(currentNode, change.Repeating.Key, change.Repeating.KeyIsAttribute);
+                    if (currentKey == string.Empty) continue;
+
+                    // now we need to make the XPath for the children this will be [key = ''] or [@key =''] 
+                    // depending if its an attribute or element key
+                    currentNodePath += MakeKeyPath(change.Repeating.Key, currentKey, change.Repeating.KeyIsAttribute);
+                    if (!string.IsNullOrWhiteSpace(change.Repeating.Name))
+                        currentNodeName += $": {currentNode.Element(change.Repeating.Name).ValueOrDefault(change.Repeating.Value)}";
+
+                    // now see if we can find that node in the target elements we have loaded 
+                    targetNode = GetTarget(targetItems, change.Repeating.Key, currentKey, change.Repeating.KeyIsAttribute);
+                }
+
+                if (targetNode == null)
+                {
+                    // no target, this element will get deleted
+                    var oldValue = currentNode.Value;
+                    if (!string.IsNullOrWhiteSpace(change.Repeating.Name))
+                    {
+                        oldValue = $"{currentNode.Element(change.Repeating.Name).ValueOrDefault(string.Empty)}";
+                    }
+
+                    updates.Add(uSyncChange.Delete(path, name, oldValue));
+                    continue;
+                }
+
+                // check all the children of the current and target for changes 
+                if (change.Children != null && change.Children.Any())
+                {
+                    foreach (var child in change.Children)
+                    {
+                        updates.AddRange(CalculateChanges(child, currentNode, targetNode, currentNodeName, currentNodePath));
+                    }
+                }
+                else
+                {
+                    // if there are no children, they we are comparing the actual text of the nodes
+                    updates.AddNotNull(Compare(path, name, 
+                        currentNode.ValueOrDefault(string.Empty),
+                        targetNode.ValueOrDefault(string.Empty)));
+                }
+            }
+
+            // look for things in target but not current (for they will be removed)
+            List<XElement> missing = new List<XElement>();
+
+            if (string.IsNullOrWhiteSpace(change.Repeating.Key))
+            {
+                missing = targetItems.Where(x => !currentItems.Any(t => t.Value == x.Value))
+                    .ToList();
+            }
+            else
+            {
+                missing = targetItems.Where(x =>
+                !currentItems.Any(t => t.Element(change.Repeating.Key).ValueOrDefault(string.Empty) == x.Element(change.Repeating.Key).ValueOrDefault(string.Empty)))
+                .ToList();
+            }
+
+            if (missing.Any())
+            {
+                foreach (var missingItem in missing)
+                {
+                    var oldValue = missingItem.Value;
+                    if (!string.IsNullOrWhiteSpace(change.Repeating.Name))
+                        oldValue = $"{missingItem.Element(change.Repeating.Name).ValueOrDefault(string.Empty)}";
+
+                    updates.Add(uSyncChange.Create(path, name, oldValue));
+                }
+            }
+
+            return updates;
+        }
+
+        protected uSyncChange Compare(string path, string name, string current, string target)
         {
             if (current == target) return null;
-
-            return new uSyncChange()
-            {
-                Name = name,
-                Path = path,
-                Change = ChangeDetailType.Update,
-                NewValue = target,
-                OldValue = current
-            };
+            return uSyncChange.Update(path, name, current, target);
         }
 
-        private uSyncChange Compare<TValue>(string name, string path, TValue current, TValue target)
+        private uSyncChange Compare<TValue>(string path, string name, TValue current, TValue target)
         {
             if (current.Equals(target)) return null;
-
-            return Compare(name, path, current.ToString(), target.ToString());
+            return Compare(path, name, current.ToString(), target.ToString());
         }
 
-        protected virtual bool XmlMatches(XElement oldNode, XElement newNode)
+        private string GetChangePath(string path, string child)
         {
-            return false;
+            return path + child.Replace("//", "/");
+        }
+
+        private string GetChangeName(string parent, string name)
+        {
+            if (!string.IsNullOrWhiteSpace(parent))
+                return $"{parent}: " + name;
+
+            return name;
+        }
+
+        private string GetKeyValue(XElement node, string key, bool isAttribute)
+        {
+            if (isAttribute)
+            {
+                return node.Attribute(key).ValueOrDefault(string.Empty);
+            }
+
+            return node.Element(key).ValueOrDefault(string.Empty);
+        }
+
+        private string MakeKeyPath(string key, string keyValue, bool isAttribute)
+        {
+            if (isAttribute)
+            {
+                return $"[@{key} = '{keyValue}']";
+            }
+
+            return $"[{key} = '{keyValue}']";
+        }
+
+        private XElement GetTarget(IEnumerable<XElement> items, string key, string value, bool isAttribute)
+        {
+            if (isAttribute)
+                return items.FirstOrDefault(x => x.Attribute(key).ValueOrDefault(string.Empty) == value);
+
+            return items.FirstOrDefault(x => x.Element(key).ValueOrDefault(string.Empty) == value);
         }
     }
 
 
     public class TrackedItem
     {
-        public TrackedItem(string name)
+        private TrackedItem(string name)
         {
             Name = name;
             Path = "/";
+        }
 
-            Attributes = new List<string>
+        public TrackedItem(string name, bool root)
+            : this(name)
+        {
+            if (root == true)
             {
-                "Key",
-                "Alias"
-            };
-
-            Children = new List<TrackedItem>();
+                Attributes = new List<string>
+                {
+                    "Key",
+                    "Alias"
+                };
+            }
         }
 
         public TrackedItem(string name, string path)
@@ -170,15 +308,50 @@ namespace uSync8.Core.Tracking
         }
 
         public TrackedItem(string name, string path, bool compareValue)
-            :this(name, path)
+            : this(name, path)
         {
             CompareValue = compareValue;
         }
 
+        public RepeatingInfo Repeating { get; set; }
+
         public bool CompareValue { get; set; }
         public string Path { get; set; }
         public string Name { get; set; }
-        public List<string> Attributes { get; set; }
-        public List<TrackedItem> Children { get; set; }
+        public List<string> Attributes { get; set; } = new List<string>();
+        public List<TrackedItem> Children { get; set; } = new List<TrackedItem>();
+    }
+
+    public class RepeatingInfo
+    {
+        public RepeatingInfo(string key, string value, string name)
+        {
+            Key = key;
+            Value = value;
+            Name = name;
+        }
+
+        /// <summary>
+        ///  Element used to match items in a collection of nodes
+        ///  (e.g Key)
+        /// </summary>
+        public string Key { get; set; }
+
+        /// <summary>
+        ///  The repeating element name 
+        ///  (e.g GenericProperty)
+        /// </summary>
+        public string Value { get; set; }
+
+        /// <summary>
+        ///  the node we use to display the name of any item in the 
+        ///  repeater (e.g Alias)
+        /// </summary>
+        public string Name { get; set; }
+
+        /// <summary>
+        /// indicates if the key is actually an attribute on the node.
+        /// </summary>
+        public bool KeyIsAttribute { get; set; }
     }
 }

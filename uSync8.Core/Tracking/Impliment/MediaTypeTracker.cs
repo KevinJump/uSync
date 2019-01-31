@@ -8,7 +8,7 @@ using uSync8.Core.Serialization;
 
 namespace uSync8.Core.Tracking.Impliment
 {
-    public class MediaTypeTracker : SyncBaseTracker<IMediaType>, ISyncTracker<IMediaType>
+    public class MediaTypeTracker : ContentTypeBaseTracker<IMediaType>, ISyncTracker<IMediaType>
     {
         public MediaTypeTracker(ISyncSerializer<IMediaType> serializer) : base(serializer)
         {
@@ -16,7 +16,21 @@ namespace uSync8.Core.Tracking.Impliment
 
         protected override TrackedItem TrackChanges()
         {
-            return new TrackedItem(serializer.ItemType);
+            var tracker = base.TrackChanges();
+
+            tracker.Children.Add(
+                    new TrackedItem("Structure", "/Structure")
+                    {
+                        Children = new List<TrackedItem>()
+                        {
+                            new TrackedItem("MediaType", "/MediaType")
+                            {
+                                Repeating = new RepeatingInfo(string.Empty, string.Empty, string.Empty)
+                            }
+                        }
+                    });
+
+            return tracker;
         }
     }
 }

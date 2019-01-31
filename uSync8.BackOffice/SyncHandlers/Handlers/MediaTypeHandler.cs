@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Umbraco.Core;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
 using Umbraco.Core.Services.Implement;
+using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
 using uSync8.Core;
 using uSync8.Core.Serialization;
@@ -26,9 +28,8 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             IProfilingLogger logger, 
             ISyncSerializer<IMediaType> serializer,
             ISyncTracker<IMediaType> tracker,
-            SyncFileService syncFileService, 
-            uSyncBackOfficeSettings settings) 
-            : base(entityService, logger, serializer, tracker, syncFileService, settings)
+            SyncFileService syncFileService)
+            : base(entityService, logger, serializer, tracker, syncFileService)
         {
             this.mediaTypeService = mediaTypeService;
 
@@ -37,20 +38,29 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
         }
 
 
-        protected override IMediaType GetFromService(int id)
-            => mediaTypeService.Get(id);
 
-        protected override string GetItemFileName(IUmbracoEntity item)
-            => item.Name;
-
-        protected override void InitializeEvents()
+        protected override void InitializeEvents(HandlerSettings settings)
         {
             MediaTypeService.Saved += EventSavedItem;
             MediaTypeService.Deleted += EventDeletedItem;
         }
 
-        protected override void DeleteFolder(int id)
-            => mediaTypeService.DeleteContainer(id);
+        protected override string GetItemFileName(IUmbracoEntity item, bool useGuid)
+        {
+            if (useGuid) return item.Key.ToString();
+
+            if (item is IMediaType mediaType)
+            {
+                return mediaType.Alias.ToSafeFileName();
+            }
+
+            return item.Name.ToSafeFileName();
+        }
+          
+
+
+        protected override IMediaType GetFromService(int id)
+            => mediaTypeService.Get(id);
 
         protected override IMediaType GetFromService(Guid key)
             => mediaTypeService.Get(key);
@@ -60,5 +70,8 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 
         protected override void DeleteViaService(IMediaType item)
             => mediaTypeService.Delete(item);
+
+        protected override void DeleteFolder(int id)
+            => mediaTypeService.DeleteContainer(id);
     }
 }

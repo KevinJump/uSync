@@ -29,13 +29,43 @@
     font-weight: 700;
 }
 
+.usync-detail-count {
+    padding: 6px 0;
+}
+
 .usync-item-details {
     border-left: 4px solid #aaa;
 }
 
+    .usync-item-details .umb-table-head .umb-table-row {
+        background-color: rgba(0,0,0,0.05);
+        border-bottom: 1px solid black;
+    }
+
     .usync-item-details .umb-table {
         background-color: #f3f3f5;
     }
+
+    .usync-item-details .usync-detail-action-cell {
+        flex: 0 0 110px;
+    }
+
+    .usync-item-details .usync-old-value {
+        text-decoration: line-through;
+        color: #C62828;
+    }
+
+    .usync-item-details .usync-new-value {
+        color: #2e7d32
+    }
+
+.usync-row-delete {
+    background-color: #ffebee;
+}
+
+.usync-row-create {
+    background-color: #E8F5E9;
+}
 
 .usync-handler-icon {
     padding: 0.75em;
@@ -67,4 +97,28 @@
 
     .usync-handler-icon.usync-complete {
         color: #35c786;
+    }
+
+
+.usync-settings {
+    display: flex;
+}
+
+.usync-settings > div {
+    width: 50%;
+}
+
+    .usync-settings .usync-main-settings {
+        margin-right: 14px;
+    }
+
+    .usync-control {
+        position: relative;
+        padding: 10px 0;
+    }
+
+    .usync-control input[type="text"] {
+        position: absolute;
+        top: 10px;
+        width: 200px;
     }

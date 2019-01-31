@@ -17,7 +17,7 @@ namespace uSync8.Core.Tracking.Impliment
 
         protected override TrackedItem TrackChanges()
         {
-            return new TrackedItem(serializer.ItemType)
+            return new TrackedItem(serializer.ItemType, true)
             {
                 Children =  new List<TrackedItem>()
                 {
@@ -25,10 +25,10 @@ namespace uSync8.Core.Tracking.Impliment
                     {
                         Children = new List<TrackedItem>()
                         {
-                            new TrackedItem("Name", "/Info/Name", true),
-                            new TrackedItem("EditorAlias", "/Info/EditorAlias", true),
-                            new TrackedItem("DatabaseType", "/Info/DatabaseType", true),
-                            new TrackedItem("SortOrder", "/Info/SortOrder")
+                            new TrackedItem("Name", "/Name", true),
+                            new TrackedItem("EditorAlias", "/EditorAlias", true),
+                            new TrackedItem("DatabaseType", "/DatabaseType", true),
+                            new TrackedItem("SortOrder", "/SortOrder")
                         }
                     },
                     new TrackedItem("Config", "/Config", true)

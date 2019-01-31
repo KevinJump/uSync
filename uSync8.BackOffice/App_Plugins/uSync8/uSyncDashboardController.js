@@ -31,6 +31,7 @@
         vm.runmode = modes.NONE;
 
         vm.showAll = false;
+        vm.settingsView = false;
 
         vm.settings = {};
         vm.handlers = [];
@@ -38,16 +39,37 @@
 
         vm.reportAction = '';
 
+        // buttons 
+
+        vm.importButton = {
+            state: 'init',
+            defaultButton: {
+                labelKey: "usync_import",
+                handler: importItems
+            },
+            subButtons: [{
+                labelKey: "usync_importforce",
+                handler: importForce
+            }]
+        };
+            
+
         // functions 
         vm.report = report;
         vm.exportItems = exportItems;
+        vm.importForce = importForce;
         vm.importItems = importItems;
+
+        vm.saveSettings = saveSettings;
 
         vm.toggleDetails = toggleDetails;
         vm.getTypeName = getTypeName;
         vm.toggleAll = toggleAll;
         vm.countChanges = countChanges;
         vm.calcPercentage = calcPercentage;
+
+        vm.toggleSettings = toggleSettings;
+        vm.toggle = toggle;
 
         vm.showChange = showChange;
 
@@ -80,14 +102,35 @@
                 });
         }
 
+        function importForce() {
+            importItems(true);
+        }
+
         function importItems(force) {
             resetStatus(modes.IMPORT);
+            vm.importButton.state = 'busy';
 
             uSync8DashboardService.importItems(force, getClientId())
                 .then(function (result) {
                     vm.results = result.data;
                     vm.working = false;
                     vm.reported = true;
+                    vm.importButton.state = 'success';
+                }, function (error) {
+                    vm.importButton.state = 'error';
+                    notificationsService.error('Failed', error.data.ExceptionMessage);
+
+                    vm.working = false;
+                    vm.reported = true;
+                });
+        }
+
+        function saveSettings() {
+            vm.working = false;
+            uSync8DashboardService.saveSettings(vm.settings)
+                .then(function (result) {
+                    vm.working = false;
+                    notificationsService.success('Saved', 'Settings updated');
                 });
         }
 
@@ -122,6 +165,14 @@
 
         function calcPercentage(status) {
             return (100 * status.Processed) / status.TotalSteps;
+        }
+
+        function toggle(item) {
+            item = !item;
+        }
+
+        function toggleSettings() {
+            vm.settingsView = !vm.settingsView;
         }
 
         ////// private 

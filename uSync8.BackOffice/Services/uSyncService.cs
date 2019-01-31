@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Umbraco.Core.Composing;
 using Umbraco.Core.Logging;
+using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.SyncHandlers;
 
 namespace uSync8.BackOffice
@@ -16,15 +18,22 @@ namespace uSync8.BackOffice
     /// </summary>
     public class uSyncService
     {
-        private readonly uSyncBackOfficeSettings settings;
+        private uSyncSettings settings;
         private readonly SyncHandlerCollection syncHandlers;
 
-        public uSyncService(            
-            SyncHandlerCollection syncHandlers,
-            uSyncBackOfficeSettings settings)
+        public uSyncService(
+            SyncHandlerCollection syncHandlers
+            )
         {
             this.syncHandlers = syncHandlers;
-            this.settings = settings;
+            this.settings = Current.Configs.uSync();
+
+            uSyncConfig.Reloaded += BackOfficeConfig_Reloaded;
+        }
+
+        private void BackOfficeConfig_Reloaded(uSyncSettings settings)
+        {
+            this.settings = Current.Configs.uSync();
         }
 
         public delegate void SyncEventCallback(SyncProgressSummary summary);
@@ -33,21 +42,22 @@ namespace uSync8.BackOffice
         {
             var actions = new List<uSyncAction>();
 
-            var configuredHandlers = settings.Handlers.Where(x => x.Config.Enabled == true).ToList();
+            var configuredHandlers = syncHandlers.GetValidHandlers("report", settings).ToList();
 
             var summary = new SyncProgressSummary(configuredHandlers.Select(x => x.Handler), "Reporting", configuredHandlers.Count);
-            
+
             foreach (var configuredHandler in configuredHandlers)
             {
                 var handler = configuredHandler.Handler;
+                var handlerSettings = configuredHandler.Settings;
+
                 summary.Processed++;
 
-                summary.UpdateHandler(
-                    handler.Name, HandlerStatus.Processing, $"Reporting {handler.Name}");
+                summary.UpdateHandler(handler.Name, HandlerStatus.Processing, $"Reporting {handler.Name}");
 
                 callback?.Invoke(summary);
 
-                actions.AddRange(handler.Report($"{folder}/{handler.DefaultFolder}", configuredHandler.Config));
+                actions.AddRange(handler.Report($"{folder}/{handler.DefaultFolder}", handlerSettings));
 
                 summary.UpdateHandler(handler.Name, HandlerStatus.Complete);
             }
@@ -70,7 +80,7 @@ namespace uSync8.BackOffice
 
                     var actions = new List<uSyncAction>();
 
-                    var configuredHandlers = settings.Handlers.Where(x => x.Config.Enabled == true).ToList();
+                    var configuredHandlers = syncHandlers.GetValidHandlers("import", settings).ToList();
 
                     var summary = new SyncProgressSummary(configuredHandlers.Select(x => x.Handler), "Importing", configuredHandlers.Count + 1);
                     summary.Handlers.Add(new SyncHandlerSummary()
@@ -83,6 +93,7 @@ namespace uSync8.BackOffice
                     foreach (var configuredHandler in configuredHandlers)
                     {
                         var handler = configuredHandler.Handler;
+                        var handlerSettings = configuredHandler.Settings;
 
                         summary.Processed++;
 
@@ -91,7 +102,7 @@ namespace uSync8.BackOffice
 
                         callback?.Invoke(summary);
 
-                        actions.AddRange(handler.ImportAll($"{folder}/{handler.DefaultFolder}", configuredHandler.Config, force));
+                        actions.AddRange(handler.ImportAll($"{folder}/{handler.DefaultFolder}", handlerSettings, force));
 
                         summary.UpdateHandler(handler.Name, HandlerStatus.Complete);
                     }
@@ -111,6 +122,7 @@ namespace uSync8.BackOffice
                     foreach (var configuredHandler in configuredHandlers)
                     {
                         var handler = configuredHandler.Handler;
+                        var handlerSettings = configuredHandler.Settings;
 
                         if (handler is ISyncPostImportHandler postHandler)
                         {
@@ -118,7 +130,7 @@ namespace uSync8.BackOffice
 
                             if (handlerActions.Any())
                             {
-                                var postActions = postHandler.ProcessPostImport($"{folder}/{handler.DefaultFolder}", handlerActions, configuredHandler.Config);
+                                var postActions = postHandler.ProcessPostImport($"{folder}/{handler.DefaultFolder}", handlerActions, handlerSettings);
                                 if (postActions != null)
                                     actions.AddRange(postActions);
                             }
@@ -130,7 +142,7 @@ namespace uSync8.BackOffice
 
                     return actions;
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     throw ex;
                 }
@@ -145,7 +157,7 @@ namespace uSync8.BackOffice
         {
             var actions = new List<uSyncAction>();
 
-            var configuredHandlers = settings.Handlers.Where(x => x.Config.Enabled == true).ToList();
+            var configuredHandlers = syncHandlers.GetValidHandlers("export", settings).ToList();
 
             var summary = new SyncProgressSummary(configuredHandlers.Select(x => x.Handler), "Exporting", configuredHandlers.Count);
 
@@ -159,7 +171,7 @@ namespace uSync8.BackOffice
 
                 callback?.Invoke(summary);
 
-                actions.AddRange(handler.ExportAll($"{folder}/{handler.DefaultFolder}", configuredHandler.Config));
+                actions.AddRange(handler.ExportAll($"{folder}/{handler.DefaultFolder}", configuredHandler.Settings));
 
                 summary.UpdateHandler(handler.Name, HandlerStatus.Complete);
             }
@@ -171,4 +183,5 @@ namespace uSync8.BackOffice
 
         }
     }
+   
 }

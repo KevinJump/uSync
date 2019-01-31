@@ -8,7 +8,7 @@ using uSync8.Core.Serialization;
 
 namespace uSync8.Core.Tracking.Impliment
 {
-    public class ContentTypeTracker : SyncBaseTracker<IContentType>, ISyncTracker<IContentType>
+    public class ContentTypeTracker : ContentTypeBaseTracker<IContentType>, ISyncTracker<IContentType>
     {
         public ContentTypeTracker(ISyncSerializer<IContentType> serializer) : base(serializer)
         {
@@ -16,7 +16,56 @@ namespace uSync8.Core.Tracking.Impliment
 
         protected override TrackedItem TrackChanges()
         {
-            return new TrackedItem(serializer.ItemType);
+            var tracker = base.TrackChanges();
+            tracker.Children[0]
+                .Children.Add(new TrackedItem("DefaultTemplate", "/DefaultTemplate", true));
+
+            tracker.Children[0]
+                .Children.Add(new TrackedItem("Parent", "/Master", true));
+
+            tracker.Children[0]
+                .Children.Add(new TrackedItem("AllowedTemplates", "/AllowedTemplates")
+                {
+                    Children = new List<TrackedItem>()
+                    {
+                        new TrackedItem("Template", "/Template")
+                        {
+                            Repeating = new RepeatingInfo("Key", string.Empty, "Template")
+                            {
+                                KeyIsAttribute = true
+                            }
+                        }
+                    }
+                });
+
+            tracker.Children[0]
+                .Children.Add(new TrackedItem("Compositions", "/Compositions")
+                {
+                    Children = new List<TrackedItem>()
+                    {
+                        new TrackedItem("Composition", "/Composition")
+                        {
+                            Repeating = new RepeatingInfo("Key", string.Empty, "Template")
+                            {
+                                KeyIsAttribute = true
+                            }
+                        }
+                    }
+                });
+
+            tracker.Children.Add(
+                new TrackedItem("Structure", "/Structure")
+                {
+                    Children = new List<TrackedItem>()
+                    {
+                        new TrackedItem("ContentType", "/ContentType")
+                        {
+                            Repeating = new RepeatingInfo(string.Empty, string.Empty, string.Empty)
+                        }
+                    }
+                });
+
+            return tracker;
         }
     }
 }

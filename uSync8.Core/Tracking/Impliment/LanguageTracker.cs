@@ -16,7 +16,16 @@ namespace uSync8.Core.Tracking.Impliment
 
         protected override TrackedItem TrackChanges()
         {
-            return new TrackedItem(serializer.ItemType);
+            return new TrackedItem(serializer.ItemType, true)
+            {
+                Children = new List<TrackedItem>()
+                {
+                    new TrackedItem("IsoCode", "/IsoCode", true),
+                    new TrackedItem("CultureName", "/CultureName", true),
+                    new TrackedItem("Mandatory", "/IsMandatory", true),
+                    new TrackedItem("Default Lanaguage", "/IsDefault", true),
+                }
+            };
         }
     }
 }

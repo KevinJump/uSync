@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Umbraco.Core;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
 using Umbraco.Core.Services.Implement;
+using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
 using uSync8.Core.Serialization;
 using uSync8.Core.Tracking;
@@ -25,9 +27,8 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             IMemberTypeService memberTypeService,
             ISyncSerializer<IMemberType> serializer,
             ISyncTracker<IMemberType> tracker,
-            SyncFileService syncFileService, 
-            uSyncBackOfficeSettings settings) 
-            : base(entityService, logger, serializer, tracker, syncFileService, settings)
+            SyncFileService syncFileService)
+            : base(entityService, logger, serializer, tracker, syncFileService)
         {
             this.memberTypeService = memberTypeService;
 
@@ -40,8 +41,7 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             this.Enabled = false; 
             // turn it off it appears to break things in current build
         }
-
-        protected override void InitializeEvents()
+        protected override void InitializeEvents(HandlerSettings settings)
         {
             MemberTypeService.Saved += EventSavedItem;
             MemberTypeService.Deleted += EventDeletedItem;
@@ -62,7 +62,16 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
         protected override IMemberType GetFromService(string alias)
             => memberTypeService.Get(alias);
 
-        protected override string GetItemFileName(IUmbracoEntity item)
-            => item.Name;
+        protected override string GetItemFileName(IUmbracoEntity item, bool useGuid)
+        {
+            if (useGuid) return item.Key.ToString();
+
+            if (item is IMemberType memberType)
+            {
+                return memberType.Alias.ToSafeFileName();
+            }
+
+            return item.Name.ToSafeFileName();
+        }
     }
 }

@@ -12,6 +12,7 @@ using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
 using Umbraco.Core.Services.Implement;
+using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
 using uSync8.Core;
 using uSync8.Core.Serialization;
@@ -32,9 +33,8 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             IContentTypeService contentTypeService,
             ISyncSerializer<IContentType> serializer,
             ISyncTracker<IContentType> tracker,
-            SyncFileService fileService,
-            uSyncBackOfficeSettings settings)
-            : base(entityService, logger, serializer, tracker, fileService, settings)
+            SyncFileService fileService)
+            : base(entityService, logger, serializer, tracker, fileService)
         {
             this.contentTypeService = contentTypeService;
 
@@ -55,15 +55,24 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
         #endregion
       
             
-        protected override void InitializeEvents()
+        protected override void InitializeEvents(HandlerSettings settings)
         {
             ContentTypeService.Saved += EventSavedItem;
             ContentTypeService.Deleted += EventDeletedItem;
         }
 
 
-        protected override string GetItemFileName(IUmbracoEntity item)
-            => item.Name;
+        protected override string GetItemFileName(IUmbracoEntity item, bool useGuid)
+        {
+            if (useGuid) return item.Key.ToString();
+
+            if (item is IContentType contentItem)
+            {
+                return contentItem.Alias.ToSafeFileName();
+            }
+
+            return item.Name.ToSafeFileName();
+        }
 
         protected override IContentType GetFromService(int id)
             => contentTypeService.Get(id);

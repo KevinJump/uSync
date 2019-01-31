@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Umbraco.Core;
 using Umbraco.Core.Components;
+using Umbraco.Core.Composing;
 using Umbraco.Core.Logging;
+using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
 using uSync8.BackOffice.SyncHandlers;
 
@@ -16,22 +19,23 @@ namespace uSync8.BackOffice
         private readonly SyncHandlerCollection syncHandlers;
 
         private readonly SyncFileService syncFileService;
-        private readonly uSyncBackOfficeSettings globalSettings;
+        private readonly uSyncSettings globalSettings;
         private readonly uSyncService uSyncService;
 
         public uSyncBackofficeComponent(
             SyncHandlerCollection syncHandlers,
             IProfilingLogger logger,
-            SyncFileService fileService,
-            uSyncBackOfficeSettings settings,
+            SyncFileService fileService,            
             uSyncService uSyncService)
         {
+            globalSettings = Current.Configs.uSync();
+
             this.syncHandlers = syncHandlers;
             this.logger = logger;
 
             this.syncFileService = fileService;
-            this.globalSettings = settings;
             this.uSyncService = uSyncService;
+
         }
 
         public void Initialize()
@@ -39,40 +43,29 @@ namespace uSync8.BackOffice
 
             using (logger.DebugDuration<uSyncBackOfficeComposer>("uSync Starting"))
             {
-                InitSettings();
-
                 InitBackOffice();
             }
         }
 
-        private void InitSettings()
-        {
-            globalSettings.LoadSettings(syncHandlers);
-            foreach(var syncHandler in globalSettings.Handlers)
-            {
-                syncHandler.Handler.DefaultConfig = syncHandler.Config;
-            }
-
-        }
-
         private void InitBackOffice()
         {
-            if (globalSettings.ExportAtStartup || (globalSettings.ExportOnSave && !syncFileService.RootExists(globalSettings.rootFolder)))
+            if (globalSettings.ExportAtStartup || (globalSettings.ExportOnSave && !syncFileService.RootExists(globalSettings.RootFolder)))
             {
-                uSyncService.Export(globalSettings.rootFolder);
+                uSyncService.Export(globalSettings.RootFolder);
             }
 
             if (globalSettings.ImportAtStartup)
             {
-                uSyncService.Import(globalSettings.rootFolder,false);
+                uSyncService.Import(globalSettings.RootFolder,false);
             }
 
             if (globalSettings.ExportOnSave)
             {
-                foreach (var syncHandler in globalSettings.Handlers.Where(x => x.Config.Enabled))
+                var handlers = syncHandlers.GetValidHandlers("Save", globalSettings);
+                foreach (var syncHandler in handlers)
                 {
                     logger.Debug<uSyncBackofficeComponent>($"Starting up Handler {syncHandler.Handler.Name}");
-                    syncHandler.Handler.Initialize();
+                    syncHandler.Handler.Initialize(syncHandler.Settings);
                 }
             }
 

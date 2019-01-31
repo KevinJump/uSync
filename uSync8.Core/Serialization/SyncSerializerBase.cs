@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
 using System.Xml.Linq;
@@ -199,6 +201,7 @@ namespace uSync8.Core.Serialization
         }
 
         protected virtual XElement CleanseNode(XElement node) => node;
+
 
     }
 }

@@ -20,7 +20,8 @@
 
             report: report,
             exportItems: exportItems,
-            importItems: importItems
+            importItems: importItems,
+            saveSettings: saveSettings
         };
 
         return service;
@@ -45,6 +46,10 @@
 
         function importItems(force, clientId) {
             return $http.put(serviceRoot + 'import', { force: force, clientId: clientId });
+        }
+
+        function saveSettings(settings) {
+            return $http.post(serviceRoot + 'savesettings', settings);
         }
     }
 

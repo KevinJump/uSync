@@ -6,7 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using System.Xml.Serialization;
+using Umbraco.Core.Composing;
 using Umbraco.Core.IO;
+using uSync8.BackOffice.Configuration;
 
 namespace uSync8.BackOffice.Services
 {
@@ -16,15 +18,22 @@ namespace uSync8.BackOffice.Services
     /// </summary>
     public class SyncFileService
     {
-        private readonly uSyncBackOfficeSettings globalSettings;
-        private readonly string mappedRoot;
+        private uSyncSettings globalSettings;
+        private string mappedRoot;
 
-        public SyncFileService(uSyncBackOfficeSettings settings)
+        public SyncFileService()
         {
-            this.globalSettings = settings;
-            this.mappedRoot = IOHelper.MapPath(globalSettings.rootFolder);
+            this.globalSettings = Current.Configs.uSync();
+            this.mappedRoot = IOHelper.MapPath(globalSettings.RootFolder);
+
+            uSyncConfig.Reloaded += BackOfficeConfig_Reloaded;
         }
 
+        private void BackOfficeConfig_Reloaded(uSyncSettings settings)
+        {
+            this.globalSettings = Current.Configs.uSync();
+            this.mappedRoot = IOHelper.MapPath(globalSettings.RootFolder);
+        }
 
         private string GetAbsPath(string path)
         {
@@ -86,6 +95,13 @@ namespace uSync8.BackOffice.Services
                 Directory.CreateDirectory(absPath);
         }
 
+        public void CleanFolder(string folder)
+        {
+            var absPath = GetAbsPath(folder);
+
+            if (Directory.Exists(absPath))
+                Directory.Delete(absPath, true);
+        }
 
         public IEnumerable<string> GetFiles(string folder, string extensions)
         {

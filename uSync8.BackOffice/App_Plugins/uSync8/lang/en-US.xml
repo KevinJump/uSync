@@ -9,11 +9,13 @@
     <key alias="intro">Database elements to and from disk</key>
     
     <key alias="import">Import</key>
+    <key alias="importforce">Full Import</key>
     <key alias="report">Report</key>
     <key alias="export">Export</key>
 
     <key alias="details">Details</key>
   
     <key alias="handlers">Item Handlers</key>
+    <key alias="savesettings">Save Settings</key>
   </area>
 </language>
