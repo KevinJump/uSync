@@ -257,6 +257,8 @@
     <None Include="App_Plugins\uSync8\package.manifest" />
     <Content Include="Config\uSync8.config" />
     <None Include="packages.config" />
+    <None Include="Targets\uSync.props" />
+    <None Include="Targets\uSync.targets" />
     <None Include="uSync.nuspec" />
   </ItemGroup>
   <ItemGroup>

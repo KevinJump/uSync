@@ -18,6 +18,7 @@
     </dependencies>
   </metadata>
   <files>
+    <file src="Targets\**\*.*" target="build" />
     <file src="bin\release\uSync8.BackOffice.dll" target="lib\net472" />
     <file src="Config\**\*" target="content\Config" />
     <file src="App_Plugins\uSync8\**\*.*" target="content\App_Plugins\uSync8" />
