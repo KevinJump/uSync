@@ -100,7 +100,7 @@ namespace uSync8.Core.Serialization
                 itemType = info.Element(typeElement).ValueOrDefault(string.Empty);
             }
 
-            return CreateItem(alias, parent, treeItem, string.Empty);
+            return CreateItem(alias, parent, treeItem, itemType);
         }
 
         protected abstract TObject CreateItem(string alias, TObject parent, ITreeEntity treeItem, string itemType);

@@ -35,7 +35,7 @@ namespace uSync8.Core.Serialization.Serializers
 
             var key = node.GetKey();
 
-            var item = FindOrCreate(node);
+            var item = FindOrCreate(node, "EditorAlias");
 
             // basic
             item.Name = name;
