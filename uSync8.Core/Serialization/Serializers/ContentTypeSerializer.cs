@@ -68,6 +68,11 @@ namespace uSync8.Core.Serialization.Serializers
             return SyncAttempt<XElement>.Succeed(item.Name, node, typeof(IContentType), ChangeType.Export);
         }
 
+        protected override void SerializeExtraProperties(XElement node, IContentType item, PropertyType property)
+        {
+            node.Add(new XElement("Variations", property.Variations));
+        }
+
         private XElement SerailizeTemplates(IContentType item)
         {
             var node = new XElement("AllowedTemplates");
@@ -108,6 +113,11 @@ namespace uSync8.Core.Serialization.Serializers
                 item,
                 ChangeType.Import,
                 "");
+        }
+
+        protected override void DeserializeExtraProperties(IContentType item, PropertyType property, XElement node)
+        {
+            property.Variations = node.Element("Variations").ValueOrDefault(ContentVariation.Nothing);
         }
 
         public override SyncAttempt<IContentType> DesrtializeSecondPass(IContentType item, XElement node)
