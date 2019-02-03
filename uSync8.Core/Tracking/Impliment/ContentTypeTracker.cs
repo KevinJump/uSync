@@ -21,7 +21,7 @@ namespace uSync8.Core.Tracking.Impliment
                 .Children.Add(new TrackedItem("DefaultTemplate", "/DefaultTemplate", true));
 
             tracker.Children[0]
-                .Children.Add(new TrackedItem("Parent", "/Master", true));
+                .Children.Add(new TrackedItem("Parent", "/Parent", true));
 
             tracker.Children[0]
                 .Children.Add(new TrackedItem("AllowedTemplates", "/AllowedTemplates")

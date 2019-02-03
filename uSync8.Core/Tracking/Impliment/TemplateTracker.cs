@@ -25,7 +25,7 @@ namespace uSync8.Core.Tracking.Impliment
                 Children = new List<TrackedItem>
                 {
                     new TrackedItem("Name", "/Name", true),
-                    new TrackedItem("Parent", "/Master", true)
+                    new TrackedItem("Parent", "/Parent", true)
                 }
             };
         }
