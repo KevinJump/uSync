@@ -72,7 +72,7 @@ namespace uSync8.Core.Serialization.Serializers
             if (item.Alias != alias)
                 item.Alias = alias;
 
-            var master = node.Element("Master").ValueOrDefault(string.Empty);
+            var master = node.Element("Parent").ValueOrDefault(string.Empty);
             if (master != string.Empty)
             {
                 var masterItem = fileService.GetTemplate(master);
@@ -91,7 +91,7 @@ namespace uSync8.Core.Serialization.Serializers
             var node = this.InitializeBaseNode(item, item.Alias, this.CalculateLevel(item));
 
             node.Add(new XElement("Name", item.Name));
-            node.Add(new XElement("Master", item.MasterTemplateAlias));
+            node.Add(new XElement("Parent", item.MasterTemplateAlias));
 
             return SyncAttempt<XElement>.Succeed(item.Name, node, typeof(ITemplate), ChangeType.Export);
         }

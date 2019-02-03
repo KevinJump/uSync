@@ -66,7 +66,7 @@ namespace uSync8.Core.Serialization
             var treeItem = default(ITreeEntity);
 
             var info = node.Element("Info");
-            var master = info.Element("Master");
+            var master = info.Element("Parent");
             if (master != null)
             {
                 var parentKey = master.Attribute("Key").ValueOrDefault(Guid.Empty);

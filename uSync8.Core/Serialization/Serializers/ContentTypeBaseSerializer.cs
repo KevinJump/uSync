@@ -183,7 +183,7 @@ namespace uSync8.Core.Serialization.Serializers
             if (item.IsElement != isElement)
                 item.IsElement = isElement;
 
-            SetMasterFromElement(item, info.Element("Master"));
+            SetMasterFromElement(item, info.Element("Parent"));
 
         }
 
