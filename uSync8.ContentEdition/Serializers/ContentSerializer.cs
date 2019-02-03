@@ -15,7 +15,7 @@ using uSync8.Core.Serialization;
 namespace uSync8.ContentEdition.Serializers
 {
     [SyncSerializer("5CB57139-8AF7-4813-95AD-C075D74636C2", "ContentSerializer", uSyncConstants.Serialization.Content)]
-    public class ContentSerializer : SyncTreeSerializerBase<IContent>
+    public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerializer<IContent>
     {
         private readonly IContentService contentService;
 
@@ -27,67 +27,65 @@ namespace uSync8.ContentEdition.Serializers
             this.contentService = contentService;
         }
 
-
         protected override SyncAttempt<XElement> SerializeCore(IContent item)
         {
-            var node = new XElement(item.ContentType.Alias,
-                    new XAttribute("Key", item.Key),
-                    new XAttribute("Alias", item.Name),
-                    new XAttribute("Level", item.Level));
+            var node = InitializeNode(item, item.ContentType.Alias);
 
+            foreach(var property in item.Properties.OrderBy(x => x.Alias))
+            {
+                var propertyNode = new XElement(property.Alias);
 
+                foreach(var value in property.Values)
+                {
+                    var valueNode = new XElement("Value",
+                        new XAttribute("Culture", value.Culture ?? string.Empty),
+                        new XAttribute("Segment", value.Segment ?? string.Empty));
+
+                    valueNode.Value = value.EditedValue.ToString();
+
+                    propertyNode.Add(valueNode);
+                }
+
+                node.Add(propertyNode);
+            }
 
             return SyncAttempt<XElement>.Succeed(item.Name, node, typeof(IContent), ChangeType.Export);
         }
 
         protected override SyncAttempt<IContent> DeserializeCore(XElement node)
         {
-
-            // TODO: We will need to override (or extend) the find and create (we need to pass the type)
-            var item = FindOrCreate(node);
-
-            return SyncAttempt<IContent>.Succeed(
-                item.Name,
-                item,
-                ChangeType.Import, "");
+            throw new NotImplementedException();
         }
 
         protected override IContent CreateItem(string alias, IContent parent, ITreeEntity treeItem, string itemType)
         {
-            IContent item;
-            if (parent != null)
-                item = contentService.Create(alias, parent.Key, itemType);
-            else
-                item = contentService.Create(alias, -1, itemType);
-
-            return item;
-        }
-
-
-        #region Container Stuff (we might not use this?)
-        protected override EntityContainer GetContainer(Guid key)
-        {
             throw new NotImplementedException();
         }
 
-        protected override IEnumerable<EntityContainer> GetContainers(string folder, int level)
-        {
-            throw new NotImplementedException();
-        }
+        // /////////////
 
-        protected override Attempt<OperationResult<OperationResultType, EntityContainer>> CreateContainer(int parentId, string name)
-        {
-            throw new NotImplementedException();
-        }
-        #endregion
+        protected override IContent GetItem(int id)
+            => contentService.GetById(id);
 
         protected override IContent GetItem(Guid key)
             => contentService.GetById(key);
 
-        protected override IContent GetItem(string alias)
+        protected override IContent GetItem(string alias, Guid parent)
         {
-            throw new NotImplementedException();
+            var parentItem = contentService.GetById(parent);
+            if (parentItem != null)
+            {
+                var children = entityService.GetChildren(parentItem.Id, UmbracoObjectTypes.Document);
+                var child = children.FirstOrDefault(x => x.Name.InvariantEquals(alias));
+                if (child != null)
+                    return contentService.GetById(child.Id);
+            }
+
+            return null;
+
         }
+
+
 
     }
 }

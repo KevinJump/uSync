@@ -45,20 +45,17 @@ namespace uSync8.Core.Serialization
 
         }
 
-
-        protected TObject FindOrCreate(XElement node, string typeElement = "")
+        protected TObject GetItem(Guid key, string alias)
         {
-            TObject item = default(TObject);
-            var key = node.GetKey();
-            if (key == Guid.Empty) return default(TObject);
-
-            item = GetItem(key);
+            var item = GetItem(key);
             if (item != null) return item;
 
-            var alias = node.GetAlias();
-            if (alias == string.Empty) return default(TObject);
-            item = GetItem(alias);
-            if (item != null) return item;
+            return GetItem(alias);
+        }
+
+        protected virtual TObject FindOrCreate(XElement node)
+        {
+            TObject item = GetItem(node);
 
             // create
             var parentId = -1;
@@ -66,11 +63,11 @@ namespace uSync8.Core.Serialization
             var treeItem = default(ITreeEntity);
 
             var info = node.Element("Info");
-            var master = info.Element("Parent");
-            if (master != null)
+            var parentNode = info.Element("Parent");
+            if (parentNode != null)
             {
-                var parentKey = master.Attribute("Key").ValueOrDefault(Guid.Empty);
-                parent = GetItem(parentKey, master.Value);
+                var parentKey = parentNode.Attribute("Key").ValueOrDefault(Guid.Empty);
+                parent = GetItem(parentKey, parentNode.Value);
 
                 if (parent != null)
                 {
@@ -93,15 +90,16 @@ namespace uSync8.Core.Serialization
                     }
                 }
             }
+          
+            var itemType = GetItemBaseType(node);
 
-            var itemType = string.Empty;
-            if (!string.IsNullOrWhiteSpace(typeElement))
-            {
-                itemType = info.Element(typeElement).ValueOrDefault(string.Empty);
-            }
+            var alias = node.GetAlias();
 
             return CreateItem(alias, parent, treeItem, itemType);
         }
+
+        protected virtual string GetItemBaseType(XElement node)
+            => string.Empty;
 
         protected abstract TObject CreateItem(string alias, TObject parent, ITreeEntity treeItem, string itemType);
 

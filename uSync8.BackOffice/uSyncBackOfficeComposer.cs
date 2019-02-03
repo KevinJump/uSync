@@ -8,9 +8,11 @@ using Umbraco.Core.Composing;
 using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
 using uSync8.BackOffice.SyncHandlers;
+using uSync8.Core;
 
 namespace uSync8.BackOffice
 {
+    [ComposeAfter(typeof(uSyncCoreComposer))]
     public class uSyncBackOfficeComposer : IUserComposer
     {
         public void Compose(Composition composition)

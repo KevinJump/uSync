@@ -35,7 +35,7 @@ namespace uSync8.Core.Serialization.Serializers
 
             var key = node.GetKey();
 
-            var item = FindOrCreate(node, "EditorAlias");
+            var item = FindOrCreate(node);
 
             // basic
             item.Name = name;
@@ -133,6 +133,9 @@ namespace uSync8.Core.Serialization.Serializers
 
             return item;
         }
+
+        protected override string GetItemBaseType(XElement node)
+            => node.Element("Info").Element("EditorAlias").ValueOrDefault(string.Empty);
 
         protected override IDataType GetItem(Guid key)
             => dataTypeService.GetDataType(key);

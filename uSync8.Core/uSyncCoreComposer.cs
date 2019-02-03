@@ -13,7 +13,7 @@ using uSync8.Core.Tracking.Impliment;
 
 namespace uSync8.Core
 {
-    public class USyncCoreComposer : IUserComposer
+    public class uSyncCoreComposer : IUserComposer
     {
         public void Compose(Composition composition)
         {

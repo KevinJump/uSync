@@ -116,22 +116,6 @@ namespace uSync8.Core.Serialization
         protected bool IsEmpty(XElement node)
             => node.Name.LocalName == uSyncConstants.Serialization.Empty;
 
-        public TObject GetItem(XElement node)
-        {
-            var (key, alias) = FindKeyAndAlias(node);
-
-            if (key != Guid.Empty)
-            {
-                var item = GetItem(key);
-                if (item != null) return item;
-            }
-
-            if (!string.IsNullOrWhiteSpace(alias))
-                return GetItem(alias);
-
-            return default(TObject);
-        }
-
         protected (Guid key, string alias) FindKeyAndAlias(XElement node)
         {
             if (IsValid(node))
@@ -146,14 +130,21 @@ namespace uSync8.Core.Serialization
         protected abstract TObject GetItem(Guid key);
         protected abstract TObject GetItem(string alias);
 
-        protected TObject GetItem(Guid key, string alias)
+        public virtual TObject GetItem(XElement node)
         {
-            var item = GetItem(key);
-            if (item != null) return item;
+            var (key, alias) = FindKeyAndAlias(node);
 
-            return GetItem(alias);
+            if (key != Guid.Empty)
+            {
+                var item = GetItem(key);
+                if (item != null) return item;
+            }
+
+            if (!string.IsNullOrWhiteSpace(alias))
+                return GetItem(alias);
+
+            return default(TObject);
         }
-
 
         public bool IsCurrent(XElement node)
         {

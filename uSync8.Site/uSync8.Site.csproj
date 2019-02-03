@@ -463,6 +463,10 @@
       <Project>{f2dfcb19-c9ee-471e-b8e2-e0b4dd31761d}</Project>
       <Name>uSync8.BackOffice</Name>
     </ProjectReference>
+    <ProjectReference Include="..\uSync8.ContentEdition\uSync8.ContentEdition.csproj">
+      <Project>{875ecd47-2dce-475a-bddd-3b578a832419}</Project>
+      <Name>uSync8.ContentEdition</Name>
+    </ProjectReference>
     <ProjectReference Include="..\uSync8.Core\uSync8.Core.csproj">
       <Project>{79011408-c423-479f-9b0a-8da465de92eb}</Project>
       <Name>uSync8.Core</Name>

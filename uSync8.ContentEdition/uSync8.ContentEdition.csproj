@@ -210,6 +210,8 @@
   <ItemGroup>
     <Compile Include="Handlers\ContentHandler.cs" />
     <Compile Include="Serializers\ContentSerializer.cs" />
+    <Compile Include="Serializers\ContentSerializerBase.cs" />
+    <Compile Include="Tracker\ContentTracker.cs" />
     <Compile Include="uSync8ContentEdition.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

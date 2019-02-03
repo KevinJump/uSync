@@ -7,6 +7,7 @@ using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Services;
 using Umbraco.Core.Services.Implement;
+using uSync8.BackOffice;
 using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
 using uSync8.BackOffice.SyncHandlers;
@@ -15,17 +16,19 @@ using uSync8.Core.Tracking;
 
 namespace uSync8.ContentEdition.Handlers
 {
+    [SyncHandler("contentHandler", "Content", "Content", uSyncBackOfficeConstants.Priorites.Content
+        , Icon = "icon-document")]
     public class ContentHandler : SyncHandlerTreeBase<IContent, IContentService>, ISyncHandler
     {
         private readonly IContentService contentService;
 
         public ContentHandler(
-            IEntityService entityService, 
-            IProfilingLogger logger, 
+            IEntityService entityService,
+            IProfilingLogger logger,
             IContentService contentService,
-            ISyncSerializer<IContent> serializer, 
-            ISyncTracker<IContent> tracker, 
-            SyncFileService syncFileService) 
+            ISyncSerializer<IContent> serializer,
+            ISyncTracker<IContent> tracker,
+            SyncFileService syncFileService)
             : base(entityService, logger, serializer, tracker, syncFileService)
         {
             this.contentService = contentService;
@@ -35,9 +38,7 @@ namespace uSync8.ContentEdition.Handlers
         }
 
         protected override void DeleteFolder(int id)
-        {
-            throw new NotImplementedException();
-        }
+        { }
 
         protected override void DeleteViaService(IContent item)
             => contentService.Delete(item);
@@ -49,9 +50,7 @@ namespace uSync8.ContentEdition.Handlers
             => contentService.GetById(key);
 
         protected override IContent GetFromService(string alias)
-        {
-            throw new NotImplementedException();
-        }
+            => null;
 
         protected override void InitializeEvents(HandlerSettings settings)
         {
