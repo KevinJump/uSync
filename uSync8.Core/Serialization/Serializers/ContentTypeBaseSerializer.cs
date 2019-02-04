@@ -16,12 +16,12 @@ namespace uSync8.Core.Serialization.Serializers
     {
         private readonly IDataTypeService dataTypeService;
 
-        private readonly IContentTypeServiceBase<TObject> baseService;
+        private readonly IContentTypeBaseService<TObject> baseService;
 
         public ContentTypeBaseSerializer(
             IEntityService entityService,
             IDataTypeService dataTypeService,
-            IContentTypeServiceBase<TObject> baseService,
+            IContentTypeBaseService<TObject> baseService,
             UmbracoObjectTypes containerType)
             : base(entityService, containerType)
         {
