@@ -38,7 +38,7 @@ namespace uSync8.Core.Tracking
 
             var changes = TrackChanges();
 
-            var item = serializer.GetItem(node);
+            var item = serializer.FindItem(node);
             if (item != null)
             {
                 var current = serializer.Serialize(item);

@@ -21,7 +21,7 @@ namespace uSync8.Core.Serialization.Serializers
             IDataTypeService dataTypeService,
             IContentTypeService contentTypeService,
             IFileService fileService)
-            : base(entityService, dataTypeService, contentTypeService)
+            : base(entityService, dataTypeService, contentTypeService, UmbracoObjectTypes.DocumentTypeContainer)
         {
             this.contentTypeService = contentTypeService;
             this.fileService = fileService;
@@ -120,7 +120,7 @@ namespace uSync8.Core.Serialization.Serializers
             property.Variations = node.Element("Variations").ValueOrDefault(ContentVariation.Nothing);
         }
 
-        public override SyncAttempt<IContentType> DesrtializeSecondPass(IContentType item, XElement node)
+        public override SyncAttempt<IContentType> DeserializeSecondPass(IContentType item, XElement node)
         {
             DeserializeCompositions(item, node);
             DeserializeStructure(item, node);

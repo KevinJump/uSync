@@ -115,10 +115,10 @@ namespace uSync8.Core.Serialization.Serializers
         }
 
 
-        protected override ITemplate GetItem(string alias)
+        protected override ITemplate FindItem(string alias)
             => fileService.GetTemplate(alias);
 
-        protected override ITemplate GetItem(Guid key)
+        protected override ITemplate FindItem(Guid key)
             => fileService.GetTemplate(key);
 
 

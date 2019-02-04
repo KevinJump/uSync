@@ -8,7 +8,7 @@ namespace uSync8.Core.Serialization
    
     public interface ISyncSerializerBase
     {
-        Type UmbracoObjectType { get; }
+        Type objectType { get; }
     }
 
     /// <summary>
@@ -19,14 +19,14 @@ namespace uSync8.Core.Serialization
     public interface ISyncSerializer<TObject> : ISyncSerializerBase
         where TObject : IEntity
     {
-        TObject GetItem(XElement node);
+        TObject FindItem(XElement node);
 
         SyncAttempt<XElement> Serialize(TObject item);
 
         SyncAttempt<XElement> SerializeEmpty(TObject item, string alias);
 
         SyncAttempt<TObject> Deserialize(XElement node, bool force, bool onePass);
-        SyncAttempt<TObject> DesrtializeSecondPass(TObject item, XElement node);
+        SyncAttempt<TObject> DeserializeSecondPass(TObject item, XElement node);
 
         /// <summary>
         ///  Returns true if the peice of xml is valid for this serializer

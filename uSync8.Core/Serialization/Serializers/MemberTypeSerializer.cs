@@ -19,7 +19,7 @@ namespace uSync8.Core.Serialization.Serializers
             IEntityService entityService, 
             IDataTypeService dataTypeService,
             IMemberTypeService memberTypeService) 
-            : base(entityService, dataTypeService, memberTypeService)
+            : base(entityService, dataTypeService, memberTypeService, UmbracoObjectTypes.Unknown)
         {
             this.memberTypeService = memberTypeService;
         }

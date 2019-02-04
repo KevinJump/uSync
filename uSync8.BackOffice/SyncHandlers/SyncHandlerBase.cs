@@ -184,7 +184,7 @@ namespace uSync8.BackOffice.SyncHandlers
                 using (var stream = syncFileService.OpenRead(file))
                 {
                     var node = XElement.Load(stream);
-                    serializer.DesrtializeSecondPass(item, node);
+                    serializer.DeserializeSecondPass(item, node);
                     stream.Dispose();
                 }
             }

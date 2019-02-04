@@ -23,37 +23,52 @@ namespace uSync8.ContentEdition.Serializers
         public ContentSerializer(
             IEntityService entityService,
             IContentService contentService)
-            : base(entityService)
+            : base(entityService, UmbracoObjectTypes.Document)
         {
             this.contentService = contentService;
         }
+
+        #region Serialization
 
         protected override SyncAttempt<XElement> SerializeCore(IContent item)
         {
             var node = InitializeNode(item, item.ContentType.Alias);
 
-            node.Add(new XAttribute("Published", item.Published));
+            var info = SerializeInfo(item);
+            var properties = SerializeProperties(item);
 
-            foreach(var property in item.Properties.OrderBy(x => x.Alias))
-            {
-                var propertyNode = new XElement(property.Alias);
-
-                foreach(var value in property.Values)
-                {
-                    var valueNode = new XElement("Value",
-                        new XAttribute("Culture", value.Culture ?? string.Empty),
-                        new XAttribute("Segment", value.Segment ?? string.Empty));
-
-                    valueNode.Value = value.EditedValue.ToString();
-
-                    propertyNode.Add(valueNode);
-                }
-
-                node.Add(propertyNode);
-            }
+            node.Add(info);
+            node.Add(properties);
 
             return SyncAttempt<XElement>.Succeed(item.Name, node, typeof(IContent), ChangeType.Export);
         }
+
+        protected override XElement SerializeInfo(IContent item)
+        {
+            var info = base.SerializeInfo(item);
+
+            info.Add(new XElement("Published", item.Published));
+
+            var published = new XElement("PublishedCultures");
+            foreach(var culture in item.PublishedCultures)
+            {
+                published.Add(new XElement("Culture", culture));
+            }
+
+            var cultures = new XElement("Cultures");
+            foreach(var culture in item.AvailableCultures)
+            {
+                cultures.Add(new XElement("Culture", culture));
+            }
+
+            info.Add(new XElement("SortOrder", item.SortOrder));
+            
+            return info;
+        }
+
+        #endregion
+
+        #region Deserialization
 
         protected override SyncAttempt<IContent> DeserializeCore(XElement node)
         {
@@ -64,21 +79,13 @@ namespace uSync8.ContentEdition.Serializers
                 // TODO: Where has changed trashed state gone?
             }
 
-            var name = node.Attribute("alias").ValueOrDefault(string.Empty);
+            var name = node.Name.LocalName;
             if (name != string.Empty)
                 item.Name = name;
 
-            var parentId = -1;
-            var parentKey = node.Attribute("parent").ValueOrDefault(Guid.Empty);
-            if (parentKey != Guid.Empty) {
-                var parent = GetItem(parentKey);
-                parentId = parent.Id;
-            }
+            DeserializeBase(item, node);
 
-            if (item.ParentId != parentId)
-                item.ParentId = parentId;
-
-
+            contentService.Save(item);
 
             return SyncAttempt<IContent>.Succeed(
                 item.Name,
@@ -87,6 +94,42 @@ namespace uSync8.ContentEdition.Serializers
                 "");
         }
 
+
+        public override SyncAttempt<IContent> DeserializeSecondPass(IContent item, XElement node)
+        {
+            DeserializeProperties(item, node);
+
+            // sort order
+            var sortOrder = node.Element("Info").Element("SortOrder").ValueOrDefault(-1);
+            if (sortOrder != -1)
+            {
+                item.SortOrder = sortOrder;
+            }
+
+            // published status
+            // this does the last save and publish
+            if (DeserializePublishedStatuses(item, node))
+            {
+                return SyncAttempt<IContent>.Succeed(item.Name, ChangeType.Import);
+            }
+
+            return SyncAttempt<IContent>.Fail(item.Name, ChangeType.ImportFail, "");
+            // second pass, is when we do the publish and stuff.
+        }
+
+        private Attempt<string> DeserializePublishedStatuses(IContent item, XElement node)
+        {
+            var info = node.Element("Info");
+
+
+            contentService.SaveAndPublish(item);
+
+            return Attempt.Succeed("Done");
+
+        }
+
+        #endregion
+
         protected override IContent CreateItem(string alias, IContent parent, ITreeEntity treeItem, string itemType)
         {
             var parentId = parent != null ? parent.Id : -1;
@@ -94,29 +137,15 @@ namespace uSync8.ContentEdition.Serializers
             return item; 
         }
 
-        // /////////////
+        #region Finders
 
-        protected override IContent GetItem(int id)
+        protected override IContent FindItem(int id)
             => contentService.GetById(id);
 
-        protected override IContent GetItem(Guid key)
+        protected override IContent FindItem(Guid key)
             => contentService.GetById(key);
 
-        protected override IContent GetItem(string alias, Guid parent)
-        {
-            var parentItem = contentService.GetById(parent);
-            if (parentItem != null)
-            {
-                var children = entityService.GetChildren(parentItem.Id, UmbracoObjectTypes.Document);
-                var child = children.FirstOrDefault(x => x.Name.InvariantEquals(alias));
-                if (child != null)
-                    return contentService.GetById(child.Id);
-            }
-
-            return null;
-
-        }
-
+        #endregion
 
 
     }

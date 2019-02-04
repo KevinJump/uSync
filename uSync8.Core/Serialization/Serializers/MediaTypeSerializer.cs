@@ -18,7 +18,7 @@ namespace uSync8.Core.Serialization.Serializers
             IEntityService entityService, 
             IDataTypeService dataTypeService,
             IMediaTypeService mediaTypeService) 
-            : base(entityService, dataTypeService, mediaTypeService)
+            : base(entityService, dataTypeService, mediaTypeService, UmbracoObjectTypes.MediaTypeContainer)
         {
             this.mediaTypeService = mediaTypeService;
         }
@@ -77,7 +77,7 @@ namespace uSync8.Core.Serialization.Serializers
                 "");
         }
 
-        public override SyncAttempt<IMediaType> DesrtializeSecondPass(IMediaType item, XElement node)
+        public override SyncAttempt<IMediaType> DeserializeSecondPass(IMediaType item, XElement node)
         {
             DeserializeCompositions(item, node);
             DeserializeStructure(item, node);

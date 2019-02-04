@@ -161,10 +161,10 @@ namespace uSync8.Core.Serialization.Serializers
                 ChangeType.Export);
         }
 
-        protected override IMacro GetItem(Guid key)
+        protected override IMacro FindItem(Guid key)
             => macroService.GetById(key);
 
-        protected override IMacro GetItem(string alias)
+        protected override IMacro FindItem(string alias)
             => macroService.GetByAlias(alias);
 
     }

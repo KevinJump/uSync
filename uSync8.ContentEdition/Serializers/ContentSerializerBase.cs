@@ -8,6 +8,7 @@ using Umbraco.Core;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
+using uSync8.Core;
 using uSync8.Core.Extensions;
 using uSync8.Core.Models;
 using uSync8.Core.Serialization;
@@ -17,9 +18,13 @@ namespace uSync8.ContentEdition.Serializers
     public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TObject>
         where TObject : IContentBase
     {
-        public ContentSerializerBase(IEntityService entityService) 
+
+        protected UmbracoObjectTypes umbracoObjectType;
+
+        public ContentSerializerBase(IEntityService entityService, UmbracoObjectTypes umbracoObjectType) 
             : base(entityService)
         {
+            this.umbracoObjectType = umbracoObjectType;
         }
 
         protected virtual XElement InitializeNode(TObject item, string typeName)
@@ -28,25 +33,139 @@ namespace uSync8.ContentEdition.Serializers
                 new XAttribute("Key", item.Key),
                 new XAttribute("Level", item.Level));
 
+            return node;
+        }
+
+        protected virtual XElement SerializeInfo(TObject item)
+        {
+            var info = new XElement("Info");
+
             var parentKey = Guid.Empty;
+            var parentName = "";
             if (item.ParentId != -1)
             {
-                var parent = GetItem(item.ParentId);
+                var parent = FindItem(item.ParentId);
                 if (parent != null)
+                {
                     parentKey = parent.Key;
+                    parentName = parent.Name;
+                }
             }
 
-            node.Add(new XAttribute("Parent", parentKey));
-            node.Add(new XAttribute("Path", GetItemPath(item)));
+            info.Add(new XElement("Parent", new XAttribute("Key", parentKey), parentName));
+            info.Add(new XElement("Path", GetItemPath(item)));
+
+            return info;
+        }
+
+        protected virtual XElement SerializeProperties(TObject item)
+        {
+            var node = new XElement("Properties");
+
+            foreach(var property in item.Properties.OrderBy(x => x.Alias))
+            {
+                var propertyNode = new XElement(property.Alias);
+
+                foreach(var value in property.Values)
+                {
+                    var valueNode = new XElement("Value",
+                        new XAttribute("Culture", value.Culture ?? string.Empty),
+                        new XAttribute("Segment", value.Segment ?? string.Empty));
+
+                    valueNode.Value = value.EditedValue.ToString();
+
+                    propertyNode.Add(valueNode);
+                }
+
+                node.Add(propertyNode);
+            }
 
             return node;
         }
+
+
+        protected virtual Attempt<string> DeserializeBase(TObject item, XElement node)
+        {
+            if (node == null || node.Element("Info") == null) return Attempt.Fail("Missing Node info XML Invalid");
+            var info = node.Element("Info");
+
+            var parentId = -1;
+            var parentNode = info.Element("Parent");
+            if (parentNode != null)
+            {
+                var parent = FindParent(parentNode, false);
+                if (parent == null)
+                {
+                    var path = info.Element("Path").ValueOrDefault(string.Empty);
+                    if (!string.IsNullOrWhiteSpace(path))
+                    {
+                        parent = FindParentByPath(path);
+                    }
+                }
+
+                if (parent != null)
+                    parentId = parent.Id;
+            }
+
+            if (item.ParentId != parentId)
+                item.ParentId = parentId;
+
+            return Attempt.Succeed("Info Deserialized");
+        }
+
+        protected Attempt<TObject> DeserializeProperties(TObject item, XElement node)
+        {
+            var properties = node.Element("Properties");
+            if (properties == null || !properties.HasElements)
+                return Attempt.Fail(item, new Exception("No Properties in the content node"));
+
+            foreach(var property in properties.Elements())
+            {
+                var alias = property.Name.LocalName;
+                if (item.HasProperty(alias))
+                {
+                    var current = item.Properties[alias];
+
+                    foreach (var value in property.Elements("Value"))
+                    {
+                        var culture = value.Attribute("Culture").ValueOrDefault(string.Empty);
+                        var segment = value.Attribute("Segment").ValueOrDefault(string.Empty);
+                        var propValue = value.ValueOrDefault(string.Empty);
+
+                        var itemValue = GetImportValue(current.PropertyType, propValue, culture, segment);
+                        item.SetValue(alias, itemValue, culture, segment);
+                    }
+
+                }
+            }
+
+            return Attempt.Succeed(item);
+        }
+
+        protected string GetExportValue(PropertyType propertyType, object value, string culture, string segment)
+        {
+            // this is where the mapping magic will happen. 
+            return (string)value;
+        }
+
+        protected string GetImportValue(PropertyType propertyType, string value, string culture, string segment)
+        {
+            // this is where the mapping magic will happen. 
+            return value;
+        }
+
+        public override bool IsValid(XElement node)
+             => node != null 
+                && node.GetKey() != null
+                && node.GetAlias() != null
+                && node.Element("Info") != null;
+
 
         // these are the functions using the simple 'getItem(alias)' 
         // that we cannot use for content/media trees.
         protected override TObject FindOrCreate(XElement node)
         {
-            TObject item = GetItem(node);
+            TObject item = FindItem(node);
             if (item != null) return item;
 
             var alias = node.GetAlias();
@@ -54,7 +173,7 @@ namespace uSync8.ContentEdition.Serializers
             var parentKey = node.Attribute("Parent").ValueOrDefault(Guid.Empty);
             if (parentKey != Guid.Empty)
             {
-                item = GetItem(alias, parentKey);
+                item = FindItem(alias, parentKey);
                 if (item != null) return item;
             }
 
@@ -62,7 +181,7 @@ namespace uSync8.ContentEdition.Serializers
             var parent = default(TObject);
 
             if (parentKey != Guid.Empty) {
-                parent = GetItem(parentKey);
+                parent = FindItem(parentKey);
             }
 
             var contentTypeAlias = node.Name.LocalName;
@@ -73,45 +192,12 @@ namespace uSync8.ContentEdition.Serializers
         protected override string GetItemBaseType(XElement node)
             => node.Name.LocalName;
 
-        public override TObject GetItem(XElement node)
-        {
-            var (key, alias) = FindKeyAndAlias(node);
-            if (key != Guid.Empty)
-            {
-                var item = GetItem(key);
-                if (item != null) return item;
-            }
-
-            // else by level 
-            var parentKey = node.Attribute("Parent").ValueOrDefault(Guid.Empty);
-            if (parentKey != Guid.Empty)
-            {
-                var item = GetItem(alias, parentKey);
-                if (item != null)
-                    return item;
-            }
-
-            // if we get here, we could try for parent alias, alias ??
-            // (really we would need full path e.g home/blog/2019/posts/)
-            return default(TObject);
-        }
-
-        protected abstract TObject GetItem(int id);
-        protected abstract TObject GetItem(string alias, Guid parent);
-
-        // we can't relaibly do this - because names can be the same
-        // across the content treee.
-        // but we should have overridden all classes that call this 
-        // function above.
-        protected override TObject GetItem(string alias)
-            => default(TObject);
-
         protected virtual string GetItemPath(TObject item)
         {
             var entity = entityService.Get(item.Id);
             return GetItemPath(entity);
         }
-        
+
         protected virtual string GetItemPath(IEntitySlim item)
         {
             var path = "";
@@ -125,18 +211,106 @@ namespace uSync8.ContentEdition.Serializers
             return path += item.Name;
         }
 
-        // we don't do containers in this one.
-        // but as we are inheriting the tree base
-        // (Maybe there should be another class between tree and
-        // things like contenttypes, and templates ?
-        protected override EntityContainer GetContainer(Guid key)
-            => null;
+        #region Finders 
+        // Finders - used on importing, getting things that are already there (or maybe not)
 
-        protected override IEnumerable<EntityContainer> GetContainers(string folder, int level)
-            => Enumerable.Empty<EntityContainer>();
+        public override TObject FindItem(XElement node)
+        {
+            var (key, alias) = FindKeyAndAlias(node);
+            if (key != Guid.Empty)
+            {
+                var item = FindItem(key);
+                if (item != null) return item;
+            }
 
-        protected override Attempt<OperationResult<OperationResultType, EntityContainer>> CreateContainer(int parentId, string name)
-            => Attempt.Fail<OperationResult<OperationResultType, EntityContainer>>();
+            // else by level 
+            var parentKey = node.Attribute("Parent").ValueOrDefault(Guid.Empty);
+            if (parentKey != Guid.Empty)
+            {
+                var item = FindItem(alias, parentKey);
+                if (item != null)
+                    return item;
+            }
 
+            // if we get here, we could try for parent alias, alias ??
+            // (really we would need full path e.g home/blog/2019/posts/)
+            return default(TObject);
+        }
+
+        protected abstract TObject FindItem(int id);
+
+        protected override TObject FindItem(string alias)
+        {
+            // we can't relaibly do this - because names can be the same
+            // across the content treee. but we should have overridden all classes that call this 
+            // function above.
+            return default(TObject);
+        }
+
+        protected virtual TObject FindItem(string alias, Guid parent)
+        {
+            return FindItem(alias, FindItem(parent));
+        }
+
+        protected virtual TObject FindItem(string alias, TObject parent)
+        {
+            if (parent != null)
+            {
+                var children = entityService.GetChildren(parent.Id, this.umbracoObjectType);
+                var child = children.FirstOrDefault(x => x.Name.InvariantEquals(alias));
+                if (child != null)
+                    return FindItem(child.Id);
+            }
+
+            return default(TObject);
+        }
+
+
+        protected TObject FindParent(XElement node, bool searchByAlias = false)
+        {
+            var item = default(TObject);
+
+            if (node == null) return default(TObject);
+
+            var key = node.Attribute("Key").ValueOrDefault(Guid.Empty);
+            if (key == Guid.Empty)
+            {
+                item = FindItem(key);
+                if (item != null) return item;
+            }
+
+            if (item == null && searchByAlias)
+            {
+                var alias = node.ValueOrDefault(string.Empty);
+                if (!string.IsNullOrEmpty(alias))
+                {
+                    item = FindItem(node.ValueOrDefault(alias));
+                }
+            }
+
+            return item;
+        }
+        protected TObject FindParentByPath(string path)
+        {
+            var folders = path.ToDelimitedList().ToList();
+            return FindByPath(folders.Take(folders.Count - 1));
+        }
+        protected TObject FindByPath(IEnumerable<string> folders)
+        {
+            var item = default(TObject);
+            foreach (var folder in folders)
+            {
+                var next = FindItem(folder, item);
+                if (next == null)
+                    return item;
+
+                item = next;
+            }
+
+            return item;
+
+        }
+
+        #endregion
     }
 }

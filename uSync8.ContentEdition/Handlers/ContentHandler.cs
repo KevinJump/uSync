@@ -17,7 +17,7 @@ using uSync8.Core.Tracking;
 namespace uSync8.ContentEdition.Handlers
 {
     [SyncHandler("contentHandler", "Content", "Content", uSyncBackOfficeConstants.Priorites.Content
-        , Icon = "icon-document")]
+        , Icon = "icon-document", IsTwoPass = true)]
     public class ContentHandler : SyncHandlerTreeBase<IContent, IContentService>, ISyncHandler
     {
         private readonly IContentService contentService;
