@@ -103,35 +103,6 @@ namespace uSync8.BackOffice.SyncHandlers
 
         }
 
-        public virtual IEnumerable<uSyncAction> ProcessPostImport(string folder, IEnumerable<uSyncAction> actions, HandlerSettings config)
-        {
-            if (actions == null || !actions.Any())
-                return null;
-
-            return CleanFolders(folder, -1);
-        }
-
-        protected IEnumerable<uSyncAction> CleanFolders(string folder, int parent)
-        {
-            var actions = new List<uSyncAction>();
-
-            var folders = entityService.GetChildren(parent, this.itemContainerType);
-            foreach (var fdlr in folders)
-            {
-                actions.AddRange(CleanFolders(folder, fdlr.Id));
-
-                if (!entityService.GetChildren(fdlr.Id).Any())
-                {
-                    actions.Add(uSyncAction.SetAction(true, fdlr.Name, typeof(EntityContainer), ChangeType.Delete, "Empty Container"));
-                    DeleteFolder(fdlr.Id);
-                }
-            }
-
-            return actions;
-        }
-
-        protected abstract void DeleteFolder(int id);
-
         private class LeveledFile
         {
             public int Level { get; set; }

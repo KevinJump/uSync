@@ -37,9 +37,6 @@ namespace uSync8.ContentEdition.Handlers
 
         }
 
-        protected override void DeleteFolder(int id)
-        { }
-
         protected override void DeleteViaService(IContent item)
             => contentService.Delete(item);
 

@@ -9,6 +9,7 @@ using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
 using uSync8.Core;
+using uSync8.Core.Extensions;
 using uSync8.Core.Models;
 using uSync8.Core.Serialization;
 
@@ -30,6 +31,8 @@ namespace uSync8.ContentEdition.Serializers
         protected override SyncAttempt<XElement> SerializeCore(IContent item)
         {
             var node = InitializeNode(item, item.ContentType.Alias);
+
+            node.Add(new XAttribute("Published", item.Published));
 
             foreach(var property in item.Properties.OrderBy(x => x.Alias))
             {
@@ -54,12 +57,41 @@ namespace uSync8.ContentEdition.Serializers
 
         protected override SyncAttempt<IContent> DeserializeCore(XElement node)
         {
-            throw new NotImplementedException();
+            var item = FindOrCreate(node);
+
+            if (item.Trashed)
+            {
+                // TODO: Where has changed trashed state gone?
+            }
+
+            var name = node.Attribute("alias").ValueOrDefault(string.Empty);
+            if (name != string.Empty)
+                item.Name = name;
+
+            var parentId = -1;
+            var parentKey = node.Attribute("parent").ValueOrDefault(Guid.Empty);
+            if (parentKey != Guid.Empty) {
+                var parent = GetItem(parentKey);
+                parentId = parent.Id;
+            }
+
+            if (item.ParentId != parentId)
+                item.ParentId = parentId;
+
+
+
+            return SyncAttempt<IContent>.Succeed(
+                item.Name,
+                item,
+                ChangeType.Import,
+                "");
         }
 
         protected override IContent CreateItem(string alias, IContent parent, ITreeEntity treeItem, string itemType)
         {
-            throw new NotImplementedException();
+            var parentId = parent != null ? parent.Id : -1;
+            var item = contentService.Create(alias, parentId, itemType);
+            return item; 
         }
 
         // /////////////

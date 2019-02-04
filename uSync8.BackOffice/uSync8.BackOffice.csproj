@@ -239,6 +239,7 @@
     <Compile Include="SyncHandlers\Handlers\TemplateHandler.cs" />
     <Compile Include="SyncHandlers\ISyncPostImportHanlder.cs" />
     <Compile Include="SyncHandlers\SyncHandlerBase.cs" />
+    <Compile Include="SyncHandlers\SyncHandlerContainerBase.cs" />
     <Compile Include="SyncHandlers\SyncHandlerTreeBase.cs" />
     <Compile Include="uSyncAction.cs" />
     <Compile Include="uSyncBackofficeComponent.cs" />
