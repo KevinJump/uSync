@@ -17,7 +17,87 @@ namespace uSync8.ContentEdition.Tracker
 
         protected override TrackedItem TrackChanges()
         {
-            return new TrackedItem(serializer.ItemType, true);
+            return new TrackedItem(serializer.ItemType, true)
+            {
+                Children = new List<TrackedItem>()
+                {
+                    new TrackedItem("", "/Info")
+                    {
+                        Children = new List<TrackedItem>()
+                        {
+                            new TrackedItem("Parent", "/Parent", true),
+                            new TrackedItem("Path", "/Path", true),
+                            new TrackedItem("SortOrder", "/SortOrder", true),
+
+                            new TrackedItem("Name", "/NodeName", false)
+                            {
+                                Attributes = new List<string>() { "Default" },
+                                Children = new List<TrackedItem>()
+                                {
+                                    new TrackedItem("", "/Name")
+                                    {
+                                        Repeating = new RepeatingInfo("Culture", string.Empty, "Culture")
+                                        {
+                                            KeyIsAttribute = true,
+                                            NameIsAttribute = true
+                                        }
+                                    }
+                                }
+                            },
+
+                            new TrackedItem("Published", "/Published")
+                            {
+                                Attributes = new List<string>() { "Default" },
+                                Children = new List<TrackedItem>()
+                                {
+                                    new TrackedItem("", "/Published")
+                                    {
+                                        Repeating = new RepeatingInfo("Culture", string.Empty, "Culture")
+                                        {
+                                            KeyIsAttribute = true,
+                                            NameIsAttribute = true
+                                        }
+                                    }
+                                }
+                            },
+                            new TrackedItem("Schedule", "/Schedule")
+                            {
+                                Children = new List<TrackedItem>()
+                                {
+                                    new TrackedItem("", "/ContentSchedule")
+                                    {
+                                        Repeating = new RepeatingInfo("Key", "/ContentSchedule", "Date"){
+                                            KeyIsAttribute = true
+                                        },
+                                        Children = new List<TrackedItem>()
+                                        {
+                                            new TrackedItem("Culture", "/Culture", true),
+                                            new TrackedItem("Date", "/Date", true),
+                                            new TrackedItem("Action", "/Action", true)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+
+                    new TrackedItem("Property", "/Properties")
+                    {
+                        HasChildProperties = true,
+                        Children = new List<TrackedItem>()
+                        {
+                            new TrackedItem("", "/Value")
+                            {
+                                Repeating = new RepeatingInfo("Culture", string.Empty, "Culture")
+                                {
+                                    KeyIsAttribute = true,
+                                    NameIsAttribute = true
+                                }
+                            }
+                        }
+                    }
+                }
+            };
         }
     }
 }

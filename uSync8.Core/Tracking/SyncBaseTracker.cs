@@ -60,7 +60,16 @@ namespace uSync8.Core.Tracking
             var changeName = GetChangeName(name, change.Name);
 
             if (change.Repeating == null)
-                return CalculateSingleChange(change, current, target, changeName, changePath);
+            {
+                if (change.HasChildProperties)
+                {
+                    return CalculatePropertyChanges(change, current, target, changeName, changePath);
+                }
+                else
+                {
+                    return CalculateSingleChange(change, current, target, changeName, changePath);
+                }
+            }
 
 
             return CalculateRepeatingChanges(change, current, target, changeName, changePath);
@@ -158,7 +167,13 @@ namespace uSync8.Core.Tracking
                     // depending if its an attribute or element key
                     currentNodePath += MakeKeyPath(change.Repeating.Key, currentKey, change.Repeating.KeyIsAttribute);
                     if (!string.IsNullOrWhiteSpace(change.Repeating.Name))
-                        currentNodeName += $": {currentNode.Element(change.Repeating.Name).ValueOrDefault(change.Repeating.Value)}";
+                    {
+                        var itemName = GetKeyValue(currentNode, change.Repeating.Name, change.Repeating.NameIsAttribute);
+                        if (!string.IsNullOrWhiteSpace(itemName))
+                        {
+                            currentNodeName += $": {itemName}";
+                        }
+                    }
 
                     // now see if we can find that node in the target elements we have loaded 
                     targetNode = GetTarget(targetItems, change.Repeating.Key, currentKey, change.Repeating.KeyIsAttribute);
@@ -170,7 +185,7 @@ namespace uSync8.Core.Tracking
                     var oldValue = currentNode.Value;
                     if (!string.IsNullOrWhiteSpace(change.Repeating.Name))
                     {
-                        oldValue = $"{currentNode.Element(change.Repeating.Name).ValueOrDefault(string.Empty)}";
+                        oldValue = GetKeyValue(currentNode, change.Repeating.Name, change.Repeating.NameIsAttribute);
                     }
 
                     updates.Add(uSyncChange.Delete(path, name, oldValue));
@@ -188,7 +203,7 @@ namespace uSync8.Core.Tracking
                 else
                 {
                     // if there are no children, they we are comparing the actual text of the nodes
-                    updates.AddNotNull(Compare(path, name, 
+                    updates.AddNotNull(Compare(currentNodePath, currentNodeName, 
                         currentNode.ValueOrDefault(string.Empty),
                         targetNode.ValueOrDefault(string.Empty)));
                 }
@@ -215,9 +230,56 @@ namespace uSync8.Core.Tracking
                 {
                     var oldValue = missingItem.Value;
                     if (!string.IsNullOrWhiteSpace(change.Repeating.Name))
-                        oldValue = $"{missingItem.Element(change.Repeating.Name).ValueOrDefault(string.Empty)}";
+                        oldValue = GetKeyValue(missingItem, change.Repeating.Name, change.Repeating.NameIsAttribute);
 
                     updates.Add(uSyncChange.Create(path, name, oldValue));
+                }
+            }
+
+            return updates;
+        }
+
+        /// <summary>
+        ///  works out changes, when the child elements are all properties (and have their own node names)
+        ///  this only works when each property is unique (no duplicates in a list)
+        /// </summary>
+        private IEnumerable<uSyncChange> CalculatePropertyChanges(TrackedItem change, XElement current, XElement target, string name, string path)
+        {
+            var updates = new List<uSyncChange>();
+
+            var currentNode = current.XPathSelectElement(path);
+            var targetNode = target.XPathSelectElement(path);
+
+            foreach (var childNode in currentNode.Elements())
+            {
+                var currentNodePath = GetChangePath(change.Path, $"/{childNode.Name.LocalName}");
+                var currentNodeName = GetChangeName(change.Name, childNode.Name.LocalName);
+
+                // we basically compare to target now.
+                var targetChildNode = targetNode.Element(childNode.Name.LocalName);
+
+                if (targetChildNode == null)
+                {
+                    // no target, this element will get deleted
+                    var oldValue = childNode.Name.LocalName;
+                    updates.Add(uSyncChange.Delete(path, name, oldValue));
+                    continue;
+                }
+
+                // check all the children of the current and target for changes 
+                if (change.Children != null && change.Children.Any())
+                {
+                    foreach (var child in change.Children)
+                    {
+                        updates.AddRange(CalculateChanges(child, currentNode, targetNode, currentNodeName, currentNodePath));
+                    }
+                }
+                else
+                {
+                    // if there are no children, they we are comparing the actual text of the nodes
+                    updates.AddNotNull(Compare(currentNodePath, currentNodeName,
+                        childNode.ValueOrDefault(string.Empty),
+                        targetChildNode.ValueOrDefault(string.Empty)));
                 }
             }
 
@@ -243,6 +305,8 @@ namespace uSync8.Core.Tracking
 
         private string GetChangeName(string parent, string name)
         {
+            if (string.IsNullOrWhiteSpace(name)) return parent;
+
             if (!string.IsNullOrWhiteSpace(parent))
                 return $"{parent}: " + name;
 
@@ -320,6 +384,8 @@ namespace uSync8.Core.Tracking
         public string Name { get; set; }
         public List<string> Attributes { get; set; } = new List<string>();
         public List<TrackedItem> Children { get; set; } = new List<TrackedItem>();
+
+        public bool HasChildProperties { get; set; }
     }
 
     public class RepeatingInfo
@@ -353,5 +419,7 @@ namespace uSync8.Core.Tracking
         /// indicates if the key is actually an attribute on the node.
         /// </summary>
         public bool KeyIsAttribute { get; set; }
+
+        public bool NameIsAttribute { get; set; }
     }
 }

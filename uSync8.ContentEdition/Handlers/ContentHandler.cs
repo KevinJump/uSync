@@ -44,7 +44,14 @@ namespace uSync8.ContentEdition.Handlers
             => contentService.GetById(id);
 
         protected override IContent GetFromService(Guid key)
-            => contentService.GetById(key);
+        {
+            // FIX: alpha bug - getby key is not always uptodate 
+            var entity = entityService.Get(key);
+            if (entity != null)
+                return contentService.GetById(entity.Id);
+
+            return null;
+        }
 
         protected override IContent GetFromService(string alias)
             => null;

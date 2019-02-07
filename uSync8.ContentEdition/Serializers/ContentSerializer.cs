@@ -46,24 +46,42 @@ namespace uSync8.ContentEdition.Serializers
         protected override XElement SerializeInfo(IContent item)
         {
             var info = base.SerializeInfo(item);
-
-            info.Add(new XElement("Published", item.Published));
-
-            var published = new XElement("PublishedCultures");
-            foreach(var culture in item.PublishedCultures)
-            {
-                published.Add(new XElement("Culture", culture));
-            }
-
-            var cultures = new XElement("Cultures");
-            foreach(var culture in item.AvailableCultures)
-            {
-                cultures.Add(new XElement("Culture", culture));
-            }
-
             info.Add(new XElement("SortOrder", item.SortOrder));
+
+            info.Add(SerailizePublishedStatus(item));
+            info.Add(SerializeSchedule(item));
             
             return info;
+        }
+
+        private XElement SerailizePublishedStatus(IContent item)
+        {
+            var published = new XElement("Published", new XAttribute("Default", item.Published));
+            foreach (var culture in item.AvailableCultures.OrderBy(x => x))
+            {
+                published.Add(new XElement("Published", item.IsCulturePublished(culture),
+                    new XAttribute("Culture", culture)));
+            }
+            return published;
+        }
+
+        private XElement SerializeSchedule(IContent item)
+        {
+            var node = new XElement("Schedule");
+            var schedules = item.ContentSchedule.FullSchedule;
+            if (schedules != null)
+            {
+                foreach (var schedule in schedules.OrderBy(x => x.Id))
+                {
+                    node.Add(new XElement("ContentSchedule",
+                        new XAttribute("Key", schedule.Id),
+                        new XElement("Culture", schedule.Culture),
+                        new XElement("Action", schedule.Action),
+                        new XElement("Date", schedule.Date)));
+                }
+            }
+
+            return node;
         }
 
         #endregion
@@ -121,10 +139,26 @@ namespace uSync8.ContentEdition.Serializers
         {
             var info = node.Element("Info");
 
+            var published = info.Element("Published")?.Attribute("Default").ValueOrDefault(false) ?? false;
 
-            contentService.SaveAndPublish(item);
+            if (published)
+            {
+                var publishResult = contentService.SaveAndPublish(item);
+                if (publishResult.Success)
+                    return Attempt.Succeed("Published");
 
-            return Attempt.Succeed("Done");
+                return Attempt.Fail("Publish Failed " + publishResult.EventMessages);
+            }
+            else
+            {
+                var result = contentService.Save(item);
+                if (result.Success)
+                    return Attempt.Succeed("Saved");
+
+                return Attempt.Fail("Save Failed " + result.EventMessages);
+            }
+
+            // TODO: Culture based publishing
 
         }
 
@@ -143,7 +177,14 @@ namespace uSync8.ContentEdition.Serializers
             => contentService.GetById(id);
 
         protected override IContent FindItem(Guid key)
-            => contentService.GetById(key);
+        {
+            // TODO: Alpha version bug, the key isn sometimes an old version
+            var entity = entityService.Get(key);
+            if (entity != null)
+                return contentService.GetById(entity.Id);
+
+            return null;
+        }
 
         #endregion
 

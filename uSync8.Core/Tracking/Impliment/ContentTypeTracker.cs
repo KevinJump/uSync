@@ -45,7 +45,7 @@ namespace uSync8.Core.Tracking.Impliment
                     {
                         new TrackedItem("Composition", "/Composition")
                         {
-                            Repeating = new RepeatingInfo("Key", string.Empty, "Template")
+                            Repeating = new RepeatingInfo("Key", string.Empty, "Composition")
                             {
                                 KeyIsAttribute = true
                             }

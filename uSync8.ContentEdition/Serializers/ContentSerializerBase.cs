@@ -31,6 +31,7 @@ namespace uSync8.ContentEdition.Serializers
         {
             var node = new XElement(typeName,
                 new XAttribute("Key", item.Key),
+                new XAttribute("Alias", item.Name),
                 new XAttribute("Level", item.Level));
 
             return node;
@@ -54,6 +55,14 @@ namespace uSync8.ContentEdition.Serializers
 
             info.Add(new XElement("Parent", new XAttribute("Key", parentKey), parentName));
             info.Add(new XElement("Path", GetItemPath(item)));
+
+            var title = new XElement("NodeName", new XAttribute("Default", item.Name));
+            foreach(var culture in item.AvailableCultures)
+            {
+                title.Add(new XElement("Name", item.GetCultureName(culture),
+                    new XAttribute("Culture", culture)));
+            }
+            info.Add(title);
 
             return info;
         }
@@ -110,7 +119,34 @@ namespace uSync8.ContentEdition.Serializers
             if (item.ParentId != parentId)
                 item.ParentId = parentId;
 
+            DeserializeName(item, node);
+
             return Attempt.Succeed("Info Deserialized");
+        }
+
+        protected Attempt<TObject> DeserializeName(TObject item, XElement node)
+        {
+            var nameNode = node.Element("Info")?.Element("NodeName");
+            if (nameNode == null)
+                return Attempt.Fail(item, new Exception("Missing Nodename"));
+
+            var name = nameNode.Attribute("Default").ValueOrDefault(string.Empty);
+            if (name != string.Empty)
+                item.Name = name;
+
+            foreach(var cultureNode in nameNode.Elements("Name"))
+            {
+                var culture = cultureNode.Attribute("Culture").ValueOrDefault(string.Empty);
+                if (culture == string.Empty) continue;
+
+                var cultureName = cultureNode.ValueOrDefault(string.Empty);
+                if (cultureName != string.Empty)
+                {
+                    item.SetCultureName(cultureName, culture);
+                }
+            }
+
+            return Attempt.Succeed(item);
         }
 
         protected Attempt<TObject> DeserializeProperties(TObject item, XElement node)
@@ -205,10 +241,10 @@ namespace uSync8.ContentEdition.Serializers
             {
                 var parent = entityService.Get(item.ParentId);
                 if (parent != null)
-                    path += "/" + GetItemPath(parent);
+                    path += GetItemPath(parent);
             }
 
-            return path += item.Name;
+            return path += "/" + item.Name;
         }
 
         #region Finders 
@@ -273,7 +309,7 @@ namespace uSync8.ContentEdition.Serializers
             if (node == null) return default(TObject);
 
             var key = node.Attribute("Key").ValueOrDefault(Guid.Empty);
-            if (key == Guid.Empty)
+            if (key != Guid.Empty)
             {
                 item = FindItem(key);
                 if (item != null) return item;
