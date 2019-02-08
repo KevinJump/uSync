@@ -4,7 +4,8 @@
         <umb-box-content>
             <div class="flex justify-between items-center">
                 <div>
-                    <h3 class="bold"><localize key="usync_name">uSync 8</localize></h3>
+                    <h3 class="bold"><localize key="usync_name">uSync 8</localize>
+                    <small ng-if="vm.addOnString.length > 0">+ {{vm.addOnString}}</small></h3>
                     <localize key="usync_intro"></localize>
                 </div>
                 <div class="flex flex-column usync-header-buttons">
@@ -55,7 +56,7 @@
             </umb-box-content>
 
             <umb-box-content ng-if="vm.working || vm.reported">
-                <div class="flex justify-center items-center">
+                <div class="flex flex-wrap justify-center items-center">
                     <div ng-repeat="handler in vm.status.Handlers"
                          class="text-center usync-handler-icon"
                          ng-class="{'usync-pending' : handler.Status == 0, 'usync-progress' : handler.Status == 1, 'usync-complete' : handler.Status == 2}">

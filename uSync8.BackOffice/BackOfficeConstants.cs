@@ -20,8 +20,8 @@ namespace uSync8.BackOffice
             public const int MediaTypes = USYNC_RESERVED_LOWER + 40;
             public const int MemberTypes = USYNC_RESERVED_LOWER + 45;
 
-            public const int Languages = USYNC_RESERVED_LOWER + 50;
-            public const int DictionaryItems = USYNC_RESERVED_LOWER + 60;
+            public const int Languages = USYNC_RESERVED_LOWER + 5;
+            public const int DictionaryItems = USYNC_RESERVED_LOWER + 6;
             public const int Macros = USYNC_RESERVED_LOWER + 70;
 
             public const int Media = USYNC_RESERVED_LOWER + 200;

@@ -8,6 +8,9 @@ namespace uSync8.Core
 {
     public static partial class uSyncConstants
     {
+        /// <summary>
+        ///  names of the root xml elements that are seralized in/out
+        /// </summary>
         public static class Serialization
         {
             public const string ContentType = "ContentType";
@@ -23,6 +26,8 @@ namespace uSync8.Core
             public const string Media = "Media";
             public const string Users = "Users";
             public const string Members = "Members";
+
+            public const string Domain = "Domain";
 
             public const string Empty = "Empty";
         }

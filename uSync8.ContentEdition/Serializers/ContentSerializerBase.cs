@@ -64,6 +64,8 @@ namespace uSync8.ContentEdition.Serializers
             }
             info.Add(title);
 
+            info.Add(new XElement("SortOrder", item.SortOrder));
+
             return info;
         }
 

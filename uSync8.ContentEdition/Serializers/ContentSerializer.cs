@@ -18,7 +18,7 @@ namespace uSync8.ContentEdition.Serializers
     [SyncSerializer("5CB57139-8AF7-4813-95AD-C075D74636C2", "ContentSerializer", uSyncConstants.Serialization.Content)]
     public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerializer<IContent>
     {
-        private readonly IContentService contentService;
+        protected readonly IContentService contentService;
 
         public ContentSerializer(
             IEntityService entityService,
@@ -46,11 +46,10 @@ namespace uSync8.ContentEdition.Serializers
         protected override XElement SerializeInfo(IContent item)
         {
             var info = base.SerializeInfo(item);
-            info.Add(new XElement("SortOrder", item.SortOrder));
 
             info.Add(SerailizePublishedStatus(item));
             info.Add(SerializeSchedule(item));
-            
+
             return info;
         }
 
@@ -90,8 +89,8 @@ namespace uSync8.ContentEdition.Serializers
 
         protected override SyncAttempt<IContent> DeserializeCore(XElement node)
         {
-            var item = FindOrCreate(node);
 
+            var item = FindOrCreate(node);
             if (item.Trashed)
             {
                 // TODO: Where has changed trashed state gone?
@@ -126,7 +125,7 @@ namespace uSync8.ContentEdition.Serializers
 
             // published status
             // this does the last save and publish
-            if (DeserializePublishedStatuses(item, node))
+            if (DoSaveOrPublish(item, node))
             {
                 return SyncAttempt<IContent>.Succeed(item.Name, ChangeType.Import);
             }
@@ -135,7 +134,7 @@ namespace uSync8.ContentEdition.Serializers
             // second pass, is when we do the publish and stuff.
         }
 
-        private Attempt<string> DeserializePublishedStatuses(IContent item, XElement node)
+        protected virtual Attempt<string> DoSaveOrPublish(IContent item, XElement node)
         {
             var info = node.Element("Info");
 
@@ -168,11 +167,10 @@ namespace uSync8.ContentEdition.Serializers
         {
             var parentId = parent != null ? parent.Id : -1;
             var item = contentService.Create(alias, parentId, itemType);
-            return item; 
+            return item;
         }
 
         #region Finders
-
         protected override IContent FindItem(int id)
             => contentService.GetById(id);
 

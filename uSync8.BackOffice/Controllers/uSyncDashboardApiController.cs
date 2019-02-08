@@ -10,6 +10,7 @@ using Umbraco.Web.WebApi;
 using Umbraco.Web.WebApi.Filters;
 using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Hubs;
+using uSync8.BackOffice.Models;
 using uSync8.BackOffice.SyncHandlers;
 using Constants = Umbraco.Core.Constants;
 
@@ -54,6 +55,23 @@ namespace uSync8.BackOffice.Controllers
         public IEnumerable<object> GetLoadedHandlers()
         {
             return syncHandlers.ToList();
+        }
+
+        [HttpGet]
+        public string GetAddOnString()
+        {
+            var value = "";
+            var addOns = TypeFinder.FindClassesOfType<ISyncAddOn>();
+            foreach(var addOn in addOns)
+            {
+                var instance = Activator.CreateInstance(addOn) as ISyncAddOn;
+                if (instance != null)
+                {
+                    value += $"{instance.Name} "; // [{instance.Version}] ";
+                }
+            }
+
+            return value;
         }
 
         [HttpGet]

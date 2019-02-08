@@ -206,6 +206,11 @@
                 .then(function (result) {
                     vm.settings.Handlers = result.data;
                 });
+
+            uSync8DashboardService.getAddOnString()
+                .then(function (result) {
+                    vm.addOnString = result.data;
+                });
         }
 
         function getHandlers() {

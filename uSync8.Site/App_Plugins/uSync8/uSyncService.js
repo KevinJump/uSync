@@ -22,7 +22,8 @@
             exportItems: exportItems,
             importItems: importItems,
             saveSettings: saveSettings,
-            getLoadedHandlers: getLoadedHandlers
+            getLoadedHandlers: getLoadedHandlers,
+            getAddOnString: getAddOnString
         };
 
         return service;
@@ -39,6 +40,10 @@
 
         function getLoadedHandlers() {
             return $http.get(serviceRoot + 'GetLoadedHandlers');
+        }
+
+        function getAddOnString() {
+            return $http.get(serviceRoot + 'GetAddOnString');
         }
 
         function report(clientId) {

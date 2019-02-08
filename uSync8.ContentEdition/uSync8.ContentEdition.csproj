@@ -212,9 +212,21 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Handlers\ContentHandler.cs" />
+    <Compile Include="Handlers\ContentTemplateHandler.cs" />
+    <Compile Include="Handlers\DictionaryHandler.cs" />
+    <Compile Include="Handlers\DomainHandler.cs" />
+    <Compile Include="Handlers\MediaHandler.cs" />
     <Compile Include="Serializers\ContentSerializer.cs" />
     <Compile Include="Serializers\ContentSerializerBase.cs" />
+    <Compile Include="Serializers\ContentTemplateSerializer.cs" />
+    <Compile Include="Serializers\DictionaryItemSerializer.cs" />
+    <Compile Include="Serializers\DomainSerializer.cs" />
+    <Compile Include="Serializers\MediaSerializer.cs" />
+    <Compile Include="Tracker\ContentBaseTracker.cs" />
     <Compile Include="Tracker\ContentTracker.cs" />
+    <Compile Include="Tracker\DictionaryItemTracker.cs" />
+    <Compile Include="Tracker\DomainTracker.cs" />
+    <Compile Include="Tracker\MediaTracker.cs" />
     <Compile Include="uSync8ContentEdition.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

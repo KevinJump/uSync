@@ -48,7 +48,7 @@ namespace uSync8.BackOffice.SyncHandlers
                 }
             }
 
-            return validHandlers;
+            return validHandlers.OrderBy(x => x.Handler.Priority);
         }
     }
 

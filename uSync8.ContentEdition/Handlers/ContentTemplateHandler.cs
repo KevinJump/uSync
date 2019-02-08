@@ -17,50 +17,41 @@ using uSync8.Core.Tracking;
 
 namespace uSync8.ContentEdition.Handlers
 {
-    [SyncHandler("contentHandler", "Content", "Content", uSyncBackOfficeConstants.Priorites.Content
-        , Icon = "icon-document usync-addon-icon", IsTwoPass = true)]
-    public class ContentHandler : SyncHandlerTreeBase<IContent, IContentService>, ISyncHandler
+    [SyncHandler("contentTypeHandler", "Blueprints", "Blueprints", uSyncBackOfficeConstants.Priorites.ContentTemplate
+        , Icon = "icon-document-dashed-line usync-addon-icon", IsTwoPass = true)]
+    public class ContentTemplateHandler : SyncHandlerTreeBase<IContent, IContentService>, ISyncHandler
     {
         private readonly IContentService contentService;
 
-        public ContentHandler(
-            IEntityService entityService,
-            IProfilingLogger logger,
+        public ContentTemplateHandler(
+            IEntityService entityService, 
+            IProfilingLogger logger, 
             IContentService contentService,
-            ISyncSerializer<IContent> serializer, 
-            ISyncTracker<IContent> tracker,
-            SyncFileService syncFileService)
+            ContentTemplateSerializer serializer, // concreate because we want to make sure we get the blueprint one.
+            ISyncTracker<IContent> tracker, 
+            SyncFileService syncFileService) 
             : base(entityService, logger, serializer, tracker, syncFileService)
         {
             this.contentService = contentService;
-
-            this.itemObjectType = UmbracoObjectTypes.Document;
-
+            this.itemObjectType = UmbracoObjectTypes.DocumentBlueprint;
         }
 
         protected override void DeleteViaService(IContent item)
-            => contentService.Delete(item);
+            => contentService.DeleteBlueprint(item);
 
         protected override IContent GetFromService(int id)
-            => contentService.GetById(id);
+            => contentService.GetBlueprintById(id);
 
         protected override IContent GetFromService(Guid key)
-        {
-            // FIX: alpha bug - getby key is not always uptodate 
-            var entity = entityService.Get(key);
-            if (entity != null)
-                return contentService.GetById(entity.Id);
-
-            return null;
-        }
+            => contentService.GetBlueprintById(key);
 
         protected override IContent GetFromService(string alias)
             => null;
 
         protected override void InitializeEvents(HandlerSettings settings)
         {
-            ContentService.Saved += EventSavedItem;
-            ContentService.Deleted += EventDeletedItem;
+            ContentService.SavedBlueprint += EventSavedItem;
+            ContentService.DeletedBlueprint += EventDeletedItem;
         }
     }
 }
