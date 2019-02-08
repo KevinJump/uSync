@@ -200,7 +200,11 @@
                 .then(function (result) {
                     vm.settings = result.data;
                     vm.loading = false;
+                });
 
+            uSync8DashboardService.getLoadedHandlers()
+                .then(function (result) {
+                    vm.settings.Handlers = result.data;
                 });
         }
 

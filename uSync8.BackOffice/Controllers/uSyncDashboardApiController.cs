@@ -51,6 +51,12 @@ namespace uSync8.BackOffice.Controllers
         }
 
         [HttpGet]
+        public IEnumerable<object> GetLoadedHandlers()
+        {
+            return syncHandlers.ToList();
+        }
+
+        [HttpGet]
         public IEnumerable<object> GetHandlers()
         {
             return syncHandlers.Select(x => new SyncHandlerSummary()

@@ -272,11 +272,11 @@
                                     checked="handler.Enabled"
                                     on-click="handler.Enabled = !handler.Enabled">
                         </umb-toggle>
-                        <div class="umb-permission__content" ng-click="vm.settings.ExportOnSave= !vm.settings.ExportOnSave">
+                        <div class="umb-permission__content">
                             <div>
                                 {{handler.Alias}}
                             </div>
-                            <div class="umb-permission__description">Enabled for : {{handler.Actions}}</div>
+                            <div class="umb-permission__description">Enabled for : {{handler.DefaultConfig.Actions}}</div>
                         </div>
                     </div>
                 </umb-box-content>
