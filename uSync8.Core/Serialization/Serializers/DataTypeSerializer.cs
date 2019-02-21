@@ -36,6 +36,7 @@ namespace uSync8.Core.Serialization.Serializers
             var key = node.GetKey();
 
             var item = FindOrCreate(node);
+            if (item == null) throw new ArgumentException($"Cannot find underling datatype for {name}");
 
             // basic
             item.Name = name;
@@ -120,7 +121,7 @@ namespace uSync8.Core.Serialization.Serializers
 
         protected override IDataType CreateItem(string alias, IDataType parent, ITreeEntity treeItem, string itemType)
         {
-            var editorType = Current.DataEditors.FirstOrDefault(x => x.Name.InvariantEquals(itemType));
+            var editorType = Current.DataEditors.FirstOrDefault(x => x.Alias.InvariantEquals(itemType));
             if (editorType == null) return null;
 
             var item = new DataType(editorType, -1)
