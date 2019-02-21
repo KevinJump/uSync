@@ -1,10 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Umbraco.Core;
-using Umbraco.Core.Components;
 using Umbraco.Core.Composing;
 using Umbraco.Core.Logging;
 using uSync8.BackOffice.Configuration;
