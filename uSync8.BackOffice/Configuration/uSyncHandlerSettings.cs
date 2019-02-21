@@ -7,7 +7,7 @@ namespace uSync8.BackOffice.Configuration
         public string Alias { get; }
         public bool Enabled { get; set; }
 
-        public string[] Actions { get; set; }
+        public string[] Actions { get; set; } = new string[] { "All" };
 
         public OverriddenValue<bool> UseFlatStructure { get; set; } = new OverriddenValue<bool>();
         public OverriddenValue<bool> GuidNames { get; set; } = new OverriddenValue<bool>();

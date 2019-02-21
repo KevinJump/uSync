@@ -4,7 +4,8 @@
         <umb-box-content>
             <div class="flex justify-between items-center">
                 <div>
-                    <h3 class="bold"><localize key="usync_name">uSync 8</localize></h3>
+                    <h3 class="bold"><localize key="usync_name">uSync 8</localize>
+                    <small ng-if="vm.addOnString.length > 0">+ {{vm.addOnString}}</small></h3>
                     <localize key="usync_intro"></localize>
                 </div>
                 <div class="flex flex-column usync-header-buttons">
@@ -55,7 +56,7 @@
             </umb-box-content>
 
             <umb-box-content ng-if="vm.working || vm.reported">
-                <div class="flex justify-center items-center">
+                <div class="flex flex-wrap justify-center items-center">
                     <div ng-repeat="handler in vm.status.Handlers"
                          class="text-center usync-handler-icon"
                          ng-class="{'usync-pending' : handler.Status == 0, 'usync-progress' : handler.Status == 1, 'usync-complete' : handler.Status == 2}">
@@ -272,11 +273,11 @@
                                     checked="handler.Enabled"
                                     on-click="handler.Enabled = !handler.Enabled">
                         </umb-toggle>
-                        <div class="umb-permission__content" ng-click="vm.settings.ExportOnSave= !vm.settings.ExportOnSave">
+                        <div class="umb-permission__content">
                             <div>
                                 {{handler.Alias}}
                             </div>
-                            <div class="umb-permission__description">Enabled for : {{handler.Actions}}</div>
+                            <div class="umb-permission__description">Enabled for : {{handler.DefaultConfig.Actions}}</div>
                         </div>
                     </div>
                 </umb-box-content>

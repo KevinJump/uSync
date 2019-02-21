@@ -11,18 +11,19 @@ using uSync8.Core.Extensions;
 
 namespace uSync8.Core.Serialization.Serializers
 {
-    public abstract class ContentTypeBaseSerializer<TObject> : SyncTreeSerializerBase<TObject>
+    public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializerBase<TObject>
         where TObject : IContentTypeComposition
     {
         private readonly IDataTypeService dataTypeService;
 
-        private readonly IContentTypeServiceBase<TObject> baseService;
+        private readonly IContentTypeBaseService<TObject> baseService;
 
         public ContentTypeBaseSerializer(
             IEntityService entityService,
             IDataTypeService dataTypeService,
-            IContentTypeServiceBase<TObject> baseService)
-            : base(entityService)
+            IContentTypeBaseService<TObject> baseService,
+            UmbracoObjectTypes containerType)
+            : base(entityService, containerType)
         {
             this.dataTypeService = dataTypeService;
             this.baseService = baseService;
@@ -117,7 +118,7 @@ namespace uSync8.Core.Serialization.Serializers
 
             foreach (var allowedType in item.AllowedContentTypes.OrderBy(x => x.Alias))
             {
-                var allowedItem = LookupById(allowedType.Id.Value);
+                var allowedItem = FindItem(allowedType.Id.Value);
                 if (allowedItem != null)
                 {
                     node.Add(new XElement(ItemType, allowedItem.Key.ToString()));
@@ -183,7 +184,7 @@ namespace uSync8.Core.Serialization.Serializers
             if (item.IsElement != isElement)
                 item.IsElement = isElement;
 
-            SetMasterFromElement(item, info.Element("Master"));
+            SetMasterFromElement(item, info.Element("Parent"));
 
         }
 
@@ -205,13 +206,13 @@ namespace uSync8.Core.Serialization.Serializers
                 if (key != Guid.Empty)
                 {
                     // lookup by key (our prefered way)
-                    baseItem = GetItem(key);
+                    baseItem = FindItem(key);
                 }
 
                 if (baseItem == null)
                 {
                     // lookup by alias (less nice)
-                    baseItem = GetItem(alias);
+                    baseItem = FindItem(alias);
                 }
 
                 if (baseItem != null)
@@ -385,7 +386,7 @@ namespace uSync8.Core.Serialization.Serializers
                 var alias = compositionNode.Value;
                 var key = compositionNode.Attribute("Key").ValueOrDefault(Guid.Empty);
 
-                var type = GetItem(key, alias);
+                var type = FindItem(key, alias);
                 if (type != null)
                     compositions.Add(type);
             }
@@ -539,27 +540,30 @@ namespace uSync8.Core.Serialization.Serializers
 
             return allProperties.Any(x => x.Any(y => y.Alias == alias));
         }
-      
 
-        protected virtual TObject LookupById(int id)
+
+        #region Finders
+
+        protected virtual TObject FindItem(int id)
             => baseService.Get(id);
 
-        override protected TObject GetItem(Guid key)
+        override protected TObject FindItem(Guid key)
             => baseService.Get(key);
 
-        override protected TObject GetItem(string alias)
+        override protected TObject FindItem(string alias)
             => baseService.Get(alias);
 
 
-        override protected EntityContainer GetContainer(Guid key)
+        override protected EntityContainer FindContainer(Guid key)
             => baseService.GetContainer(key);
 
-        override protected IEnumerable<EntityContainer> GetContainers(string folder, int level)
+        override protected IEnumerable<EntityContainer> FindContainers(string folder, int level)
             => baseService.GetContainers(folder, level);
 
-        override protected Attempt<OperationResult<OperationResultType, EntityContainer>> CreateContainer(int parentId, string name)
+        override protected Attempt<OperationResult<OperationResultType, EntityContainer>> FindContainers(int parentId, string name)
             => baseService.CreateContainer(parentId, name);
 
+        #endregion
 
     }
 }

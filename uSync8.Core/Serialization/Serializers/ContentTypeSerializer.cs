@@ -21,7 +21,7 @@ namespace uSync8.Core.Serialization.Serializers
             IDataTypeService dataTypeService,
             IContentTypeService contentTypeService,
             IFileService fileService)
-            : base(entityService, dataTypeService, contentTypeService)
+            : base(entityService, dataTypeService, contentTypeService, UmbracoObjectTypes.DocumentTypeContainer)
         {
             this.contentTypeService = contentTypeService;
             this.fileService = fileService;
@@ -35,7 +35,7 @@ namespace uSync8.Core.Serialization.Serializers
             var parent = item.ContentTypeComposition.FirstOrDefault(x => x.Id == item.ParentId);
             if (parent != null)
             {
-                info.Add(new XElement("Master", parent.Alias,
+                info.Add(new XElement("Parent", parent.Alias,
                             new XAttribute("Key", parent.Key)));
             }
             else if (item.Level != 1)
@@ -66,6 +66,11 @@ namespace uSync8.Core.Serialization.Serializers
             node.Add(SerializeTabs(item));
 
             return SyncAttempt<XElement>.Succeed(item.Name, node, typeof(IContentType), ChangeType.Export);
+        }
+
+        protected override void SerializeExtraProperties(XElement node, IContentType item, PropertyType property)
+        {
+            node.Add(new XElement("Variations", property.Variations));
         }
 
         private XElement SerailizeTemplates(IContentType item)
@@ -110,7 +115,12 @@ namespace uSync8.Core.Serialization.Serializers
                 "");
         }
 
-        public override SyncAttempt<IContentType> DesrtializeSecondPass(IContentType item, XElement node)
+        protected override void DeserializeExtraProperties(IContentType item, PropertyType property, XElement node)
+        {
+            property.Variations = node.Element("Variations").ValueOrDefault(ContentVariation.Nothing);
+        }
+
+        public override SyncAttempt<IContentType> DeserializeSecondPass(IContentType item, XElement node)
         {
             DeserializeCompositions(item, node);
             DeserializeStructure(item, node);

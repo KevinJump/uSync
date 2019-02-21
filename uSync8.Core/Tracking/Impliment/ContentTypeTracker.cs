@@ -21,7 +21,7 @@ namespace uSync8.Core.Tracking.Impliment
                 .Children.Add(new TrackedItem("DefaultTemplate", "/DefaultTemplate", true));
 
             tracker.Children[0]
-                .Children.Add(new TrackedItem("Parent", "/Master", true));
+                .Children.Add(new TrackedItem("Parent", "/Parent", true));
 
             tracker.Children[0]
                 .Children.Add(new TrackedItem("AllowedTemplates", "/AllowedTemplates")
@@ -45,7 +45,7 @@ namespace uSync8.Core.Tracking.Impliment
                     {
                         new TrackedItem("Composition", "/Composition")
                         {
-                            Repeating = new RepeatingInfo("Key", string.Empty, "Template")
+                            Repeating = new RepeatingInfo("Key", string.Empty, "Composition")
                             {
                                 KeyIsAttribute = true
                             }

@@ -18,7 +18,7 @@ using uSync8.Core.Tracking;
 namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("dataTypeHandler", "Datatypes", "DataTypes", uSyncBackOfficeConstants.Priorites.DataTypes, Icon = "icon-autofill")]
-    public class DataTypeHandler : SyncHandlerTreeBase<IDataType, IDataTypeService>, ISyncHandler, ISyncPostImportHandler
+    public class DataTypeHandler : SyncHandlerContainerBase<IDataType, IDataTypeService>, ISyncHandler, ISyncPostImportHandler
     {
         private readonly IDataTypeService dataTypeService;
 

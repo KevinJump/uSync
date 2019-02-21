@@ -99,6 +99,10 @@
         color: #35c786;
     }
 
+        .usync-handler-icon.usync-complete .usync-addon-icon {
+            color: #7b1fa2;
+        }
+
 
 .usync-settings {
     display: flex;

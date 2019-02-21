@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Umbraco.Core.Components;
+using Umbraco.Core;
 using Umbraco.Core.Models;
 using Umbraco.Core.Composing;
 using uSync8.Core.Serialization;
@@ -13,7 +13,7 @@ using uSync8.Core.Tracking.Impliment;
 
 namespace uSync8.Core
 {
-    public class USyncCoreComposer : IUserComposer
+    public class uSyncCoreComposer : IUserComposer
     {
         public void Compose(Composition composition)
         {

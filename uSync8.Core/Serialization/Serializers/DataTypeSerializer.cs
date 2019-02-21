@@ -17,13 +17,13 @@ using uSync8.Core.Models;
 namespace uSync8.Core.Serialization.Serializers
 {
     [SyncSerializer("C06E92B7-7440-49B7-B4D2-AF2BF4F3D75D", "DataType Serializer", uSyncConstants.Serialization.DataType)]
-    public class DataTypeSerializer : SyncTreeSerializerBase<IDataType>, ISyncSerializer<IDataType>
+    public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncSerializer<IDataType>
     {
         private readonly IDataTypeService dataTypeService;
 
         public DataTypeSerializer(IEntityService entityService,
             IDataTypeService dataTypeService)
-            : base(entityService)
+            : base(entityService, UmbracoObjectTypes.DataTypeContainer)
         {
             this.dataTypeService = dataTypeService;
         }
@@ -134,19 +134,22 @@ namespace uSync8.Core.Serialization.Serializers
             return item;
         }
 
-        protected override IDataType GetItem(Guid key)
+        protected override string GetItemBaseType(XElement node)
+            => node.Element("Info").Element("EditorAlias").ValueOrDefault(string.Empty);
+
+        protected override IDataType FindItem(Guid key)
             => dataTypeService.GetDataType(key);
 
-        protected override IDataType GetItem(string alias)
+        protected override IDataType FindItem(string alias)
             => dataTypeService.GetDataType(alias);
 
-        protected override EntityContainer GetContainer(Guid key)
+        protected override EntityContainer FindContainer(Guid key)
             => dataTypeService.GetContainer(key);
 
-        protected override IEnumerable<EntityContainer> GetContainers(string folder, int level)
+        protected override IEnumerable<EntityContainer> FindContainers(string folder, int level)
             => dataTypeService.GetContainers(folder, level);
 
-        protected override Attempt<OperationResult<OperationResultType, EntityContainer>> CreateContainer(int parentId, string name)
+        protected override Attempt<OperationResult<OperationResultType, EntityContainer>> FindContainers(int parentId, string name)
             => dataTypeService.CreateContainer(parentId, name);
     }
 }

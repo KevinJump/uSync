@@ -77,10 +77,10 @@ namespace uSync8.Core.Serialization.Serializers
         public override bool IsValid(XElement node)
             => (base.IsValid(node) && node.Element("CultureName") != null && node.Element("IsoCode") != null);
 
-        protected override ILanguage GetItem(string alias) =>
+        protected override ILanguage FindItem(string alias) =>
             localizationService.GetLanguageByIsoCode(alias);
 
-        protected override ILanguage GetItem(Guid key) => default(ILanguage);
+        protected override ILanguage FindItem(Guid key) => default(ILanguage);
 
         protected override XElement CleanseNode(XElement node)
         {

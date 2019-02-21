@@ -19,7 +19,7 @@ namespace uSync8.Core.Serialization.Serializers
             IEntityService entityService, 
             IDataTypeService dataTypeService,
             IMemberTypeService memberTypeService) 
-            : base(entityService, dataTypeService, memberTypeService)
+            : base(entityService, dataTypeService, memberTypeService, UmbracoObjectTypes.Unknown)
         {
             this.memberTypeService = memberTypeService;
         }
@@ -32,7 +32,7 @@ namespace uSync8.Core.Serialization.Serializers
             var parent = item.ContentTypeComposition.FirstOrDefault(x => x.Id == item.ParentId);
             if (parent != null)
             {
-                info.Add(new XElement("Master", parent.Alias,
+                info.Add(new XElement("Parent", parent.Alias,
                     new XAttribute("Key", parent.Key)));
             }
             else if (item.Level != 1)

@@ -92,6 +92,15 @@ namespace uSync8.BackOffice.SyncHandlers
             var config = setting.Handlers.FirstOrDefault(x => x.Alias == this.Alias);
             if (config != null)
                 this.DefaultConfig = config;
+            else
+            {
+                // handler isn't in the config, but need one ?
+                this.DefaultConfig = new HandlerSettings(this.Alias, setting.EnableMissingHandlers)
+                {
+                    GuidNames = new OverriddenValue<bool>(setting.UseGuidNames, false),
+                    UseFlatStructure = new OverriddenValue<bool>(setting.UseFlatStructure, false),
+                };
+            }
 
             rootFolder = setting.RootFolder;
         }
@@ -175,7 +184,7 @@ namespace uSync8.BackOffice.SyncHandlers
                 using (var stream = syncFileService.OpenRead(file))
                 {
                     var node = XElement.Load(stream);
-                    serializer.DesrtializeSecondPass(item, node);
+                    serializer.DeserializeSecondPass(item, node);
                     stream.Dispose();
                 }
             }

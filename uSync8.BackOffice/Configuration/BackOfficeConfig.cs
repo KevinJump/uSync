@@ -94,7 +94,13 @@ namespace uSync8.BackOffice.Configuration
                     SaveHandlerConfig(handlerNode, handler, settings);
                 }
             }
+            else
+            {
+                // if the handlers is null, we should write out the handlers we have loaded,
+                // so that there is something in the config
 
+
+            }
             SaveSettingsFile(node);
 
             if (fireReload)
