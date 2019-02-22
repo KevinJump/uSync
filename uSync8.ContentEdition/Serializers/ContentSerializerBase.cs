@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Umbraco.Core;
+using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
@@ -21,8 +22,8 @@ namespace uSync8.ContentEdition.Serializers
 
         protected UmbracoObjectTypes umbracoObjectType;
 
-        public ContentSerializerBase(IEntityService entityService, UmbracoObjectTypes umbracoObjectType) 
-            : base(entityService)
+        public ContentSerializerBase(IEntityService entityService, ILogger logger, UmbracoObjectTypes umbracoObjectType) 
+            : base(entityService, logger)
         {
             this.umbracoObjectType = umbracoObjectType;
         }

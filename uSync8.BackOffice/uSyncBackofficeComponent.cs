@@ -67,7 +67,7 @@ namespace uSync8.BackOffice
 
         public void Terminate()
         {
-            throw new NotImplementedException();
+            logger.Debug<uSyncBackofficeComponent>("Terminiating Component");
         }
     }
 }

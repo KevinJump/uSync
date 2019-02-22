@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Xml.Linq;
+using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
@@ -15,10 +16,10 @@ namespace uSync8.Core.Serialization.Serializers
         private readonly IMediaTypeService mediaTypeService;
 
         public MediaTypeSerializer(
-            IEntityService entityService, 
+            IEntityService entityService, ILogger logger,
             IDataTypeService dataTypeService,
             IMediaTypeService mediaTypeService) 
-            : base(entityService, dataTypeService, mediaTypeService, UmbracoObjectTypes.MediaTypeContainer)
+            : base(entityService, logger, dataTypeService, mediaTypeService, UmbracoObjectTypes.MediaTypeContainer)
         {
             this.mediaTypeService = mediaTypeService;
         }

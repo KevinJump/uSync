@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Xml.Linq;
+using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
@@ -16,10 +17,10 @@ namespace uSync8.Core.Serialization.Serializers
         private readonly IMemberTypeService memberTypeService;
 
         public MemberTypeSerializer(
-            IEntityService entityService, 
+            IEntityService entityService, ILogger logger,
             IDataTypeService dataTypeService,
             IMemberTypeService memberTypeService) 
-            : base(entityService, dataTypeService, memberTypeService, UmbracoObjectTypes.Unknown)
+            : base(entityService, logger, dataTypeService, memberTypeService, UmbracoObjectTypes.Unknown)
         {
             this.memberTypeService = memberTypeService;
         }

@@ -5,6 +5,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Xml.Linq;
 using Umbraco.Core;
+using Umbraco.Core.Logging;
 using Umbraco.Core.Composing;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
@@ -17,9 +18,13 @@ namespace uSync8.Core.Serialization
         where TObject : IEntity
     {
         protected readonly IEntityService entityService;
+        protected readonly ILogger logger;
 
-        protected SyncSerializerBase(IEntityService entityService)
+        protected SyncSerializerBase(
+            IEntityService entityService, ILogger logger)
         {
+            this.logger = logger;
+
             // read the attribute
             var thisType = GetType();
             var meta = thisType.GetCustomAttribute<SyncSerializerAttribute>(false);
@@ -56,6 +61,7 @@ namespace uSync8.Core.Serialization
         {
             if (IsEmpty(node))
             {
+                logger.Debug<TObject>("Base: Empty Node - No Action");
                 // empty node do nothing...
                 return SyncAttempt<TObject>.Succeed(node.GetKey().ToString(), ChangeType.Removed);
             }
@@ -66,9 +72,11 @@ namespace uSync8.Core.Serialization
 
             if (force || !IsCurrent(node))
             {
+                logger.Debug<TObject>("Base: Deserializing");
                 var result = DeserializeCore(node);
                 if (OnePass && result.Success)
                 {
+                    logger.Debug<TObject>("Base: Second Pass");
                     DeserializeSecondPass(result.Item, node);
                 }
 
@@ -136,6 +144,8 @@ namespace uSync8.Core.Serialization
 
         public virtual SyncAttempt<XElement> SerializeEmpty(TObject item, string alias)
         {
+            logger.Debug<TObject>("Base: Serializing Empty Element (Delete or rename) {0}", alias);
+
             var node = new XElement(uSyncConstants.Serialization.Empty,
                 new XAttribute("Key", item.Key),
                 new XAttribute("Alias", alias));
@@ -185,6 +195,8 @@ namespace uSync8.Core.Serialization
         {
             var (key, alias) = FindKeyAndAlias(node);
 
+            logger.Debug<TObject>("Base: Find Item {0} [{1}]", key, alias);
+
             if (key != Guid.Empty)
             {
                 var item = FindItem(key);
@@ -192,7 +204,10 @@ namespace uSync8.Core.Serialization
             }
 
             if (!string.IsNullOrWhiteSpace(alias))
+            {
+                logger.Debug<TObject>("Base: Lookup by Alias: {0}", alias);
                 return FindItem(alias);
+            }
 
             return default(TObject);
         }

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Umbraco.Core.Models;
+using Umbraco.Core.Logging;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
 using uSync8.Core;
@@ -20,9 +21,9 @@ namespace uSync8.ContentEdition.Serializers
         private readonly IMediaService mediaService;
 
         public MediaSerializer(
-            IEntityService entityService, 
+            IEntityService entityService, ILogger logger,
             IMediaService mediaService) 
-            : base(entityService, UmbracoObjectTypes.Media)
+            : base(entityService, logger, UmbracoObjectTypes.Media)
         {
             this.mediaService = mediaService;
         }

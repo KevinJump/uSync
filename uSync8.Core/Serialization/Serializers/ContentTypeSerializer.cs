@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
+using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
@@ -17,11 +18,11 @@ namespace uSync8.Core.Serialization.Serializers
         private readonly IFileService fileService;
 
         public ContentTypeSerializer(
-            IEntityService entityService,
+            IEntityService entityService, ILogger logger,
             IDataTypeService dataTypeService,
             IContentTypeService contentTypeService,
             IFileService fileService)
-            : base(entityService, dataTypeService, contentTypeService, UmbracoObjectTypes.DocumentTypeContainer)
+            : base(entityService, logger, dataTypeService, contentTypeService, UmbracoObjectTypes.DocumentTypeContainer)
         {
             this.contentTypeService = contentTypeService;
             this.fileService = fileService;
@@ -126,6 +127,8 @@ namespace uSync8.Core.Serialization.Serializers
             DeserializeStructure(item, node);
             contentTypeService.Save(item);
 
+            CleanFolder(item, node);
+
             return SyncAttempt<IContentType>.Succeed(item.Name, item, ChangeType.Import);
         }
 
@@ -192,6 +195,12 @@ namespace uSync8.Core.Serialization.Serializers
             
 
             return item;
+        }
+
+        protected override void SaveContainer(EntityContainer container)
+        {
+            logger.Debug<IContentType>("Saving Container (In main class) {0}", container.Key.ToString());
+            contentTypeService.SaveContainer(container);
         }
     }
 }

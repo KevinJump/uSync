@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Xml.Linq;
 using Umbraco.Core;
+using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
@@ -17,8 +18,8 @@ namespace uSync8.Core.Serialization
     public abstract class SyncTreeSerializerBase<TObject> : SyncSerializerBase<TObject>
         where TObject : ITreeEntity
     {
-        protected SyncTreeSerializerBase(IEntityService entityService)
-            : base(entityService)
+        protected SyncTreeSerializerBase(IEntityService entityService, ILogger logger)
+            : base(entityService, logger)
         {
         }
 

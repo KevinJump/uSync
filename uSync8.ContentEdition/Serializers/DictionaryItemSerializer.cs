@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Services;
 using uSync8.Core;
@@ -18,9 +19,9 @@ namespace uSync8.ContentEdition.Serializers
     {
         private readonly ILocalizationService localizationService;
 
-        public DictionaryItemSerializer(IEntityService entityService,
+        public DictionaryItemSerializer(IEntityService entityService, ILogger logger,
             ILocalizationService localizationService) 
-            : base(entityService)
+            : base(entityService, logger)
         {
             this.localizationService = localizationService;
         }

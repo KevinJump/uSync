@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Xml.Linq;
 using Umbraco.Core;
+using Umbraco.Core.Logging;
 using Umbraco.Core.Composing;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
@@ -21,9 +22,9 @@ namespace uSync8.Core.Serialization.Serializers
     {
         private readonly IDataTypeService dataTypeService;
 
-        public DataTypeSerializer(IEntityService entityService,
+        public DataTypeSerializer(IEntityService entityService, ILogger logger,
             IDataTypeService dataTypeService)
-            : base(entityService, UmbracoObjectTypes.DataTypeContainer)
+            : base(entityService, logger, UmbracoObjectTypes.DataTypeContainer)
         {
             this.dataTypeService = dataTypeService;
         }
@@ -152,5 +153,8 @@ namespace uSync8.Core.Serialization.Serializers
 
         protected override Attempt<OperationResult<OperationResultType, EntityContainer>> FindContainers(int parentId, string name)
             => dataTypeService.CreateContainer(parentId, name);
+
+        protected override void SaveContainer(EntityContainer container)
+            => dataTypeService.SaveContainer(container);
     }
 }

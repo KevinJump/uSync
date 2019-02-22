@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web;
 using System.Xml.Linq;
 using Umbraco.Core;
+using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
@@ -19,11 +20,11 @@ namespace uSync8.Core.Serialization.Serializers
         private readonly IContentTypeBaseService<TObject> baseService;
 
         public ContentTypeBaseSerializer(
-            IEntityService entityService,
+            IEntityService entityService, ILogger logger,
             IDataTypeService dataTypeService,
             IContentTypeBaseService<TObject> baseService,
             UmbracoObjectTypes containerType)
-            : base(entityService, containerType)
+            : base(entityService, logger, containerType)
         {
             this.dataTypeService = dataTypeService;
             this.baseService = baseService;
@@ -57,7 +58,6 @@ namespace uSync8.Core.Serialization.Serializers
             foreach (var tab in item.PropertyGroups.OrderBy(x => x.SortOrder))
             {
                 tabs.Add(new XElement("Tab",
-                            new XElement("Key", tab.Key),
                             new XElement("Caption", tab.Name),
                             new XElement("SortOrder", tab.SortOrder)));
             }
@@ -121,7 +121,7 @@ namespace uSync8.Core.Serialization.Serializers
                 var allowedItem = FindItem(allowedType.Id.Value);
                 if (allowedItem != null)
                 {
-                    node.Add(new XElement(ItemType, allowedItem.Key.ToString()));
+                    node.Add(new XElement(ItemType, new XAttribute("Key", allowedItem.Key.ToString()), allowedItem.Alias));
                 }
             }
 
@@ -140,6 +140,7 @@ namespace uSync8.Core.Serialization.Serializers
 
             return compNode;
         }
+
         #endregion
 
         #region Deserialization
@@ -147,7 +148,13 @@ namespace uSync8.Core.Serialization.Serializers
 
         protected void DeserializeBase(TObject item, XElement node)
         {
+            logger.Debug<TObject>("Deserializing Base");
+
             if (node == null) return;
+
+            var key = node.GetKey();
+            if (item.Key != key)
+                item.Key = key;
 
             var info = node.Element("Info");
             if (info == null) return;
@@ -190,6 +197,9 @@ namespace uSync8.Core.Serialization.Serializers
 
         protected void DeserializeStructure(TObject item, XElement node)
         {
+            logger.Debug<TObject>("Deserializing Structure");
+
+
             var structure = node.Element("Structure");
             if (structure == null) return;
 
@@ -198,25 +208,32 @@ namespace uSync8.Core.Serialization.Serializers
 
             foreach (var baseNode in structure.Elements(ItemType))
             {
+                logger.Debug<TObject>("baseNode {0}", baseNode.ToString());
                 var alias = baseNode.Value;
                 var key = baseNode.Attribute("Key").ValueOrDefault(Guid.Empty);
+
+                logger.Debug<TObject>("Structure: {0}", key);
 
                 IContentTypeBase baseItem = default(IContentTypeBase);
 
                 if (key != Guid.Empty)
                 {
+                    logger.Debug<TObject>("Structure By Key {0}", key);
                     // lookup by key (our prefered way)
                     baseItem = FindItem(key);
                 }
 
                 if (baseItem == null)
                 {
+                    logger.Debug<TObject>("Structure By Alias: {0}", alias);
                     // lookup by alias (less nice)
                     baseItem = FindItem(alias);
                 }
 
                 if (baseItem != null)
                 {
+                    logger.Debug<TObject>("Structure Found {0}", baseItem.Alias);
+
                     allowed.Add(new ContentTypeSort(
                         new Lazy<int>(() => baseItem.Id), sortOrder, baseItem.Alias));
 
@@ -224,11 +241,15 @@ namespace uSync8.Core.Serialization.Serializers
                 }
             }
 
+            logger.Debug<TObject>("Structure: {0} items", allowed.Count);
             item.AllowedContentTypes = allowed;
         }
 
         protected void DeserializeProperties(TObject item, XElement node)
         {
+            logger.Debug<TObject>("Deserializing Properties");
+
+
             if (node == null) return;
 
             var propertiesNode = node.Element("GenericProperties");
@@ -316,6 +337,9 @@ namespace uSync8.Core.Serialization.Serializers
 
         protected void DeserializeTabs(TObject item, XElement node)
         {
+            logger.Debug<TObject>("Deserializing Tabs");
+
+
             var tabNode = node.Element("Tabs");
             if (tabNode == null) return;
 
@@ -351,6 +375,8 @@ namespace uSync8.Core.Serialization.Serializers
 
         protected void CleanTabs(TObject item, XElement node)
         {
+            logger.Debug<TObject>("Cleaning Tabs Base");
+
             var tabNode = node.Element("Tabs");
 
             if (tabNode == null) return;
@@ -375,8 +401,31 @@ namespace uSync8.Core.Serialization.Serializers
             }
         }
 
+        protected void CleanFolder(TObject item, XElement node)
+        {
+            var folderNode = node.Element("Info").Element("Folder");
+            if (folderNode != null)
+            {
+                logger.Debug<TObject>("Cleaing Folder");
+
+                var key = folderNode.Attribute("Key").ValueOrDefault(Guid.Empty);
+                if (key != Guid.Empty)
+                {
+                    logger.Debug<TObject>("Folder Key {0}", key.ToString());
+                    var folder = FindContainer(key);
+                    if (folder == null)
+                    {
+                        logger.Debug<TObject>("Folder Key doesn't not match");
+                        FindFolder(key, folderNode.Value);
+                    }
+                }
+            }
+        }
+
         protected void DeserializeCompositions(TObject item, XElement node)
         {
+            logger.Debug<TObject>("Deserializing Compositions");
+
             var comps = node.Element("Info").Element("Compositions");
             if (comps == null) return;
             List<IContentTypeComposition> compositions = new List<IContentTypeComposition>();
@@ -399,6 +448,8 @@ namespace uSync8.Core.Serialization.Serializers
 
         private void SetMasterFromElement(IContentTypeBase item, XElement masterNode)
         {
+            logger.Debug<TObject>("SetMasterFromElement");
+
             if (masterNode == null) return;
 
             var key = masterNode.Attribute("Key").ValueOrDefault(Guid.Empty);
@@ -417,6 +468,7 @@ namespace uSync8.Core.Serialization.Serializers
             string propertyEditorAlias,
             out bool IsNew)
         {
+            logger.Debug<TObject>("GetOrCreateProperty {0} [{1}]", key, alias);
 
             IsNew = false;
 
@@ -484,6 +536,8 @@ namespace uSync8.Core.Serialization.Serializers
 
         private void MoveProperties(IContentTypeBase item, IDictionary<string, string> moves)
         {
+            logger.Debug<TObject>("MoveProperties");
+
             foreach (var move in moves)
             {
                 item.MovePropertyType(move.Key, move.Value);
@@ -492,6 +546,8 @@ namespace uSync8.Core.Serialization.Serializers
 
         private void RemoveProperties(IContentTypeBase item, XElement properties)
         {
+            logger.Debug<TObject>("RemoveProperties");
+
             List<string> removals = new List<string>();
 
             var nodes = properties.Elements("GenericProperty")
@@ -563,6 +619,12 @@ namespace uSync8.Core.Serialization.Serializers
         override protected Attempt<OperationResult<OperationResultType, EntityContainer>> FindContainers(int parentId, string name)
             => baseService.CreateContainer(parentId, name);
 
+
+        protected override void SaveContainer(EntityContainer container)
+        {
+            logger.Debug<TObject>("Saving Container: {0}", container.Key);
+            baseService.SaveContainer(container);
+        }
         #endregion
 
     }

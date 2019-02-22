@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Services;
 using uSync8.Core.Extensions;
@@ -17,9 +18,9 @@ namespace uSync8.Core.Serialization.Serializers
         private readonly IMacroService macroService;
 
         public MacroSerializer(
-            IEntityService entityService,
+            IEntityService entityService, ILogger logger,
             IMacroService macroService)
-            : base(entityService)
+            : base(entityService, logger)
         {
             this.macroService = macroService;
         }
@@ -40,15 +41,18 @@ namespace uSync8.Core.Serialization.Serializers
             var macroSource = node.Element("MacroSource").ValueOrDefault(string.Empty);
             var macroType = node.Element("MacroType").ValueOrDefault(MacroTypes.PartialView);
 
+            logger.Debug<IMacro>("Macro by Key [{0}]", key);
             item = macroService.GetById(key);
 
             if (item == null)
             {
+                logger.Debug<IMacro>("Macro by Alias [{0}]", key);
                 item = macroService.GetByAlias(alias);
             }
 
             if (item == null)
             {
+                logger.Debug<IMacro>("Creating New [{0}]", key);
                 item = new Macro(alias, name, macroSource, macroType);
                 changes.Add(uSyncChange.Create(alias, name, "New Macro"));
             }

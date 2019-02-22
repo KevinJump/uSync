@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Services;
 using uSync8.Core.Extensions;
@@ -16,9 +17,9 @@ namespace uSync8.Core.Serialization.Serializers
     {
         private readonly ILocalizationService localizationService;
 
-        public LanguageSerializer(IEntityService entityService,
+        public LanguageSerializer(IEntityService entityService, ILogger logger,
             ILocalizationService localizationService)
-            : base(entityService)
+            : base(entityService, logger)
         {
             this.localizationService = localizationService;
         }
@@ -32,11 +33,15 @@ namespace uSync8.Core.Serialization.Serializers
             }
 
             var isoCode = node.Element("IsoCode").ValueOrDefault(string.Empty);
+            logger.Debug<LanguageSerializer>("Derserializing {0}", isoCode);
 
             var item = localizationService.GetLanguageByIsoCode(isoCode);
 
             if (item == null)
+            {
+                logger.Debug<ILanguage>("Creating New Language: {0}", isoCode);
                 item = new Language(isoCode);
+            }
 
             item.IsoCode = isoCode;
             item.CultureName = node.Element("CultureName").ValueOrDefault(string.Empty);
@@ -47,6 +52,7 @@ namespace uSync8.Core.Serialization.Serializers
             if (fallback > 0)
                 item.FallbackLanguageId = fallback;
 
+            logger.Debug<ILanguage>("Saving Language");
             localizationService.Save(item);
 
             return SyncAttempt<ILanguage>.Succeed(item.CultureName, item, ChangeType.Import);

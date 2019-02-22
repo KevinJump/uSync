@@ -7,6 +7,7 @@ using System.Xml.Linq;
 using Umbraco.Core;
 using Umbraco.Core.IO;
 using Umbraco.Core.Models;
+using Umbraco.Core.Logging;
 using Umbraco.Core.Services;
 using uSync8.Core.Extensions;
 using uSync8.Core.Models;
@@ -18,8 +19,9 @@ namespace uSync8.Core.Serialization.Serializers
     {
         private readonly IFileService fileService;
 
-        public TemplateSerializer(IEntityService entityService, IFileService fileService) 
-            : base(entityService)
+        public TemplateSerializer(IEntityService entityService, ILogger logger,
+            IFileService fileService) 
+            : base(entityService, logger)
         {
             this.fileService = fileService;
         }

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Umbraco.Core;
+using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
@@ -21,10 +22,10 @@ namespace uSync8.ContentEdition.Serializers
         private readonly IContentTypeService contentTypeService;
 
         public ContentTemplateSerializer(
-            IEntityService entityService,
+            IEntityService entityService, ILogger logger,
             IContentService contentService,
             IContentTypeService contentTypeService)
-            : base(entityService, contentService)
+            : base(entityService, logger, contentService)
         {
             this.contentTypeService = contentTypeService;
         }

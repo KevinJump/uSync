@@ -17,6 +17,7 @@ using uSync8.Core.Extensions;
 using uSync8.Core.Models;
 using uSync8.Core.Serialization;
 using uSync8.Core.Tracking;
+using static uSync8.BackOffice.uSyncService;
 
 namespace uSync8.BackOffice.SyncHandlers
 {

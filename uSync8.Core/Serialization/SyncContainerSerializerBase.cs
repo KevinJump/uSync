@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Xml.Linq;
 using Umbraco.Core;
+using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
@@ -19,8 +20,8 @@ namespace uSync8.Core.Serialization
     {
         protected UmbracoObjectTypes containerType;
 
-        public SyncContainerSerializerBase(IEntityService entityService, UmbracoObjectTypes containerType) 
-            : base(entityService)
+        public SyncContainerSerializerBase(IEntityService entityService, ILogger logger, UmbracoObjectTypes containerType) 
+            : base(entityService, logger)
         {
             this.containerType = containerType;
         }
@@ -109,8 +110,8 @@ namespace uSync8.Core.Serialization
             if (folders.Any())
             {
                 var path = string.Join("/", folders);
-                return new XElement("Folder", path,
-                    new XAttribute("Key", parentKey));
+                return new XElement("Folder", path);
+                    //new XAttribute("Key", parentKey));
             }
 
             return null;
@@ -159,7 +160,16 @@ namespace uSync8.Core.Serialization
                 }
 
                 if (current != null)
+                {
+                    logger.Debug<TObject>("Folder Found");
+                    if (current.Key != key)
+                    {
+                        logger.Debug<TObject>("Folder Found: Key Diffrent");
+                        current.Key = key;
+                        SaveContainer((EntityContainer)current);
+                    }
                     return current;
+                }
             }
 
             return null;
@@ -167,6 +177,8 @@ namespace uSync8.Core.Serialization
 
         #endregion
 
-
+        #region Container stuff
+        protected abstract void SaveContainer(EntityContainer container);
+        #endregion
     }
 }
