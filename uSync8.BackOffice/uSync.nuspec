@@ -10,7 +10,7 @@
     <description>Database syncing for Umbraco</description>
     <summary></summary>
     <releaseNotes>
-      8.0 - Alpha release for Umbraco 8
+      8.0 - Beta release for Umbraco 8
     </releaseNotes>
     <dependencies>
       <dependency id="uSync.Core" version="8.0.0-beta1"/>
