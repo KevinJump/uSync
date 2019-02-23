@@ -252,6 +252,7 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
+    <None Include="uSync.ContentEdition.nuspec" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\uSync8.BackOffice\uSync8.BackOffice.csproj">
