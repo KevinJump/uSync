@@ -99,6 +99,8 @@
                     vm.results = result.data;
                     vm.working = false;
                     vm.reported = true;
+                }, function (error) {
+                    notificationsService.error('Exporting', error.data.Message);
                 });
         }
 
@@ -131,6 +133,8 @@
                 .then(function (result) {
                     vm.working = false;
                     notificationsService.success('Saved', 'Settings updated');
+                }, function (error) {
+                    notificationsService.error('Saving', error.data.Message);
                 });
         }
 
@@ -201,11 +205,6 @@
                     vm.settings = result.data;
                     vm.loading = false;
                 });
-            /*
-            uSync8DashboardService.getLoadedHandlers()
-                .then(function (result) {
-                    vm.settings.Handlers = result.data;
-                });*/
 
             uSync8DashboardService.getAddOnString()
                 .then(function (result) {
