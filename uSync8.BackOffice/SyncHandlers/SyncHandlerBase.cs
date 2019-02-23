@@ -84,6 +84,7 @@ namespace uSync8.BackOffice.SyncHandlers
             IsTwoPass = meta.IsTwoPass;
             Icon = string.IsNullOrWhiteSpace(meta.Icon) ? "icon-umb-content" : meta.Icon;
 
+
             GetDefaultConfig(Current.Configs.uSync());
             uSyncConfig.Reloaded += BackOfficeConfig_Reloaded;
         }
@@ -104,6 +105,8 @@ namespace uSync8.BackOffice.SyncHandlers
             }
 
             rootFolder = setting.RootFolder;
+
+            actionFile = Path.Combine(rootFolder, $"_Actions/actions_{DefaultFolder}.config");
         }
 
         private void BackOfficeConfig_Reloaded(uSyncSettings settings)
@@ -465,7 +468,6 @@ namespace uSync8.BackOffice.SyncHandlers
 
         public void Initialize(HandlerSettings settings)
         {
-            actionFile = Path.Combine(rootFolder, $"_Actions/actions_{DefaultFolder}.config");
             InitializeEvents(settings);
         }
 

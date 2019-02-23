@@ -4,8 +4,9 @@
         <umb-box-content>
             <div class="flex justify-between items-center">
                 <div>
-                    <h3 class="bold"><localize key="usync_name">uSync 8</localize>
+                    <h3 class="bold"><localize key="usync_name">uSync 8</localize> 
                     <small ng-if="vm.addOnString.length > 0">+ {{vm.addOnString}}</small></h3>
+                    <em class="color-red">8.0-beta1</em>
                     <localize key="usync_intro"></localize>
                 </div>
                 <div class="flex flex-column usync-header-buttons">
@@ -96,7 +97,7 @@
                             <div class="umb-table-cell">
                                 Type
                             </div>
-                            <div class="umb-table-cell">
+                            <div class="umb-table-cell umb-table__name">
                                 Name
                             </div>
                             <div class="umb-table-cell">
@@ -120,7 +121,7 @@
                                 <div class="umb-table-cell">
                                     {{vm.getTypeName(result.ItemType)}}
                                 </div>
-                                <div class="umb-table-cell">
+                                <div class="umb-table-cell umb-table__name">
                                     {{result.Name}}
                                 </div>
                                 <div class="umb-table-cell">
@@ -254,12 +255,13 @@
                                 <div class="umb-permission__description">use the guid of an item as the filename</div>
                             </div>
                         </div>
-                        <div class="usync-control">
-                            <umb-control-group label="Root Folder"
-                                               description="Default folder uSync stores the files in">
-                                <input type="text" class="umb-textstring"
-                                       ng-model="vm.settings.RootFolder" />
-                            </umb-control-group>
+                        <div class="umb-el-wrap usync-root-folder">
+                            <label for="rootFolder" class="control-label">Root Folder</label>
+                            <div class="controls">
+                                <div class="db">
+                                    <input type="text" class="umb-textstring" id="rootFolder" ng-model="vm.settings.RootFolder" />
+                                </div>
+                            </div>
                         </div>
 
                     </umb-box-content>
@@ -273,6 +275,7 @@
                                     checked="handler.Enabled"
                                     on-click="handler.Enabled = !handler.Enabled">
                         </umb-toggle>
+                       
                         <div class="umb-permission__content">
                             <div>
                                 {{handler.Alias}}

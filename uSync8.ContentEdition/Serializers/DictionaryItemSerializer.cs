@@ -20,7 +20,7 @@ namespace uSync8.ContentEdition.Serializers
         private readonly ILocalizationService localizationService;
 
         public DictionaryItemSerializer(IEntityService entityService, ILogger logger,
-            ILocalizationService localizationService) 
+            ILocalizationService localizationService)
             : base(entityService, logger)
         {
             this.localizationService = localizationService;
@@ -28,7 +28,66 @@ namespace uSync8.ContentEdition.Serializers
 
         protected override SyncAttempt<IDictionaryItem> DeserializeCore(XElement node)
         {
-            return SyncAttempt<IDictionaryItem>.Fail(node.GetAlias(), ChangeType.Fail, new NotImplementedException());
+            var item = FindItem(node);
+
+            var info = node.Element("Info");
+            var alias = node.GetAlias();
+
+            Guid? parentKey = null;
+            var parentItemKey = info.Element("Parent").ValueOrDefault(string.Empty);
+            if (parentItemKey != string.Empty)
+            {
+                var parent = localizationService.GetDictionaryItemByKey(parentItemKey);
+                if (parent != null)
+                {
+                    parentKey = parent.Key;
+                }
+            }
+
+            if (item == null)
+            {
+                item = new DictionaryItem(parentKey, alias);
+            }
+            else
+            {
+                item.ParentId = parentKey;
+            }
+
+            DeserializeTranslations(item, node);
+
+            return SyncAttempt<IDictionaryItem>.Succeed(item.ItemKey, item, ChangeType.Import);
+        }
+
+        private void DeserializeTranslations(IDictionaryItem item, XElement node)
+        {
+            var translationNode = node.Element("Translations");
+            if (translationNode == null) return;
+
+            var currentTranslations = item.Translations.ToList();
+
+            foreach(var translation in translationNode.Elements("Translation"))
+            {
+                var language = translation.Attribute("Language").ValueOrDefault(string.Empty);
+                if (language == string.Empty) continue;
+
+                var itemTranslation = item.Translations.FirstOrDefault(x => x.Language.IsoCode == language);
+                if (itemTranslation != null)
+                {
+                    itemTranslation.Value = translation.Value;
+                }
+                else
+                {
+                    var lang = localizationService.GetLanguageByIsoCode(language);
+                    if (lang != null)
+                    {
+                        currentTranslations.Add(new DictionaryTranslation(lang, translation.Value));
+                    }
+                }
+            }
+
+            item.Translations = currentTranslations;
+
+            localizationService.Save(item);
         }
 
         protected override SyncAttempt<XElement> SerializeCore(IDictionaryItem item)
@@ -42,14 +101,13 @@ namespace uSync8.ContentEdition.Serializers
                 var parent = FindItem(item.ParentId.Value);
                 if (parent != null)
                 {
-                    info.Add(new XElement("Parent", parent.ItemKey,
-                        new XAttribute("Key", item.ParentId)));
+                    info.Add(new XElement("Parent", parent.ItemKey));
                 }
             }
 
             var translationsNode = new XElement("Translations");
 
-            foreach(var translation in item.Translations)
+            foreach (var translation in item.Translations)
             {
                 translationsNode.Add(new XElement("Translation", translation.Value,
                     new XAttribute("Language", translation.Language.IsoCode)));

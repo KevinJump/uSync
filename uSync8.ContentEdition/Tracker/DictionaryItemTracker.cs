@@ -30,9 +30,15 @@ namespace uSync8.ContentEdition.Tracker
                     },
                     new TrackedItem("Translations", "/Translations")
                     {
-                        Repeating = new RepeatingInfo("Language", string.Empty, string.Empty)
+                        Children = new List<TrackedItem>()
                         {
-                            KeyIsAttribute = true
+                            new TrackedItem("Translation", "/Translation")
+                            {
+                                Repeating = new RepeatingInfo("Language", string.Empty, string.Empty)
+                                {
+                                    KeyIsAttribute = true
+                                }
+                            }
                         }
                     }
                 }

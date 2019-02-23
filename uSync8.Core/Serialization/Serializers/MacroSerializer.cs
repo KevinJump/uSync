@@ -148,7 +148,6 @@ namespace uSync8.Core.Serialization.Serializers
             foreach (var property in item.Properties)
             {
                 properties.Add(new XElement("Property",
-                    new XElement("Key", property.Key),
                     new XElement("Name", property.Name),
                     new XElement("Alias", property.Alias),
                     new XElement("SortOrder", property.SortOrder),

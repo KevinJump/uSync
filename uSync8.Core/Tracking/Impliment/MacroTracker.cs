@@ -35,10 +35,9 @@ namespace uSync8.Core.Tracking.Impliment
                         {
                             new TrackedItem("Property", "/Property")
                             {
-                                Repeating = new RepeatingInfo("Key", "/Property", "Name"),
+                                Repeating = new RepeatingInfo("Alias", "/Property", "Name"),
                                 Children = new List<TrackedItem>()
                                 {
-                                    new TrackedItem("Key", "/Key", true),
                                     new TrackedItem("Name", "/Name", true),
                                     new TrackedItem("Alias", "/Alias", true),
                                     new TrackedItem("SortOrder", "/SortOrder", true),

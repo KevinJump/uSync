@@ -116,13 +116,6 @@
         margin-right: 14px;
     }
 
-    .usync-control {
-        position: relative;
-        padding: 10px 0;
-    }
-
-    .usync-control input[type="text"] {
-        position: absolute;
-        top: 10px;
-        width: 200px;
+    .usync-root-folder input {
+        width: 100%;
     }

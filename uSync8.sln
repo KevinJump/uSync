@@ -11,6 +11,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionFiles", "SolutionFi
 	ProjectSection(SolutionItems) = preProject
 		gulpfile.js = gulpfile.js
 		Dist\package.cmd = Dist\package.cmd
+		readme.txt = readme.txt
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "uSync8.ContentEdition", "uSync8.ContentEdition\uSync8.ContentEdition.csproj", "{875ECD47-2DCE-475A-BDDD-3B578A832419}"
