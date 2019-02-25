@@ -380,7 +380,9 @@ namespace uSync8.BackOffice.SyncHandlers
                     var node = syncFileService.LoadXElement(file);
                     if (node.GetKey() == item.Key)
                     {
-                        serializer.SerializeEmpty(item, GetItemName(item));
+                        var attempt = serializer.SerializeEmpty(item, GetItemName(item));
+                        if (attempt.Success)
+                            attempt.Item.Save(file);
                     }
                 }
             }
