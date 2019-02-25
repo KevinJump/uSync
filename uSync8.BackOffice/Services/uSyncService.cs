@@ -38,7 +38,7 @@ namespace uSync8.BackOffice
 
         public delegate void SyncEventCallback(SyncProgressSummary summary);
 
-        public IEnumerable<uSyncAction> Report(string folder, SyncEventCallback callback = null)
+        public IEnumerable<uSyncAction> Report(string folder, SyncEventCallback callback = null, SyncUpdateCallback update = null)
         {
             var actions = new List<uSyncAction>();
 
@@ -51,13 +51,13 @@ namespace uSync8.BackOffice
                 var handler = configuredHandler.Handler;
                 var handlerSettings = configuredHandler.Settings;
 
-                summary.Processed++;
+                summary.Count++;
 
                 summary.UpdateHandler(handler.Name, HandlerStatus.Processing, $"Reporting {handler.Name}");
 
                 callback?.Invoke(summary);
 
-                actions.AddRange(handler.Report($"{folder}/{handler.DefaultFolder}", handlerSettings));
+                actions.AddRange(handler.Report($"{folder}/{handler.DefaultFolder}", handlerSettings, update));
 
                 summary.UpdateHandler(handler.Name, HandlerStatus.Complete);
             }
@@ -70,7 +70,7 @@ namespace uSync8.BackOffice
 
         private static object _importLock = new object();
 
-        public IEnumerable<uSyncAction> Import(string folder, bool force, SyncEventCallback callback = null)
+        public IEnumerable<uSyncAction> Import(string folder, bool force, SyncEventCallback callback = null, SyncUpdateCallback update = null)
         {
             lock (_importLock)
             {
@@ -95,14 +95,14 @@ namespace uSync8.BackOffice
                         var handler = configuredHandler.Handler;
                         var handlerSettings = configuredHandler.Settings;
 
-                        summary.Processed++;
+                        summary.Count++;
 
                         summary.UpdateHandler(
                             handler.Name, HandlerStatus.Processing, $"Importing {handler.Name}");
 
                         callback?.Invoke(summary);
 
-                        actions.AddRange(handler.ImportAll($"{folder}/{handler.DefaultFolder}", handlerSettings, force));
+                        actions.AddRange(handler.ImportAll($"{folder}/{handler.DefaultFolder}", handlerSettings, force, update));
 
                         summary.UpdateHandler(handler.Name, HandlerStatus.Complete);
                     }
@@ -110,7 +110,7 @@ namespace uSync8.BackOffice
 
                     // postImport things (mainly cleaning up folders)
 
-                    summary.Processed++;
+                    summary.Count++;
                     summary.UpdateHandler("Post Import", HandlerStatus.Pending, "Post Import Actions");
 
                     callback?.Invoke(summary);
@@ -153,7 +153,7 @@ namespace uSync8.BackOffice
             }
         }
 
-        public IEnumerable<uSyncAction> Export(string folder, SyncEventCallback callback = null)
+        public IEnumerable<uSyncAction> Export(string folder, SyncEventCallback callback = null, SyncUpdateCallback update = null)
         {
             var actions = new List<uSyncAction>();
 
@@ -164,14 +164,14 @@ namespace uSync8.BackOffice
             foreach (var configuredHandler in configuredHandlers)
             {
                 var handler = configuredHandler.Handler;
-                summary.Processed++;
+                summary.Count++;
 
                 summary.UpdateHandler(
                     handler.Name, HandlerStatus.Processing, $"Exporting {handler.Name}");
 
                 callback?.Invoke(summary);
 
-                actions.AddRange(handler.ExportAll($"{folder}/{handler.DefaultFolder}", configuredHandler.Settings));
+                actions.AddRange(handler.ExportAll($"{folder}/{handler.DefaultFolder}", configuredHandler.Settings, update));
 
                 summary.UpdateHandler(handler.Name, HandlerStatus.Complete);
             }

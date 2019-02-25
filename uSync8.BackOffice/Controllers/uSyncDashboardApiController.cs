@@ -92,7 +92,7 @@ namespace uSync8.BackOffice.Controllers
             var hubClient = new HubClientService(options.clientId);
             var summaryClient = new SummaryHandler(hubClient);
 
-            return uSyncService.Report(settings.RootFolder, summaryClient.PostSummary);
+            return uSyncService.Report(settings.RootFolder, summaryClient.PostSummary, summaryClient.PostUdate);
         }
 
         [HttpPost]
@@ -101,7 +101,7 @@ namespace uSync8.BackOffice.Controllers
             var hubClient = new HubClientService(options.clientId);
             var summaryClient = new SummaryHandler(hubClient);
 
-            return uSyncService.Export(settings.RootFolder, summaryClient.PostSummary);
+            return uSyncService.Export(settings.RootFolder, summaryClient.PostSummary, summaryClient.PostUdate);
         }
 
         [HttpPut]
@@ -110,7 +110,7 @@ namespace uSync8.BackOffice.Controllers
             var hubClient = new HubClientService(options.clientId);
             var summaryClient = new SummaryHandler(hubClient);
 
-            return uSyncService.Import(settings.RootFolder, options.force, summaryClient.PostSummary);
+            return uSyncService.Import(settings.RootFolder, options.force, summaryClient.PostSummary, summaryClient.PostUdate);
         }
 
         [HttpPost]
@@ -134,6 +134,16 @@ namespace uSync8.BackOffice.Controllers
             public void PostSummary(SyncProgressSummary summary)
             {
                 hubClient.SendMessage(summary);
+            }
+
+            public void PostUdate(string message, int count, int total)
+            {
+                hubClient.SendUpdate(new
+                {
+                    Message = message,
+                    Count = count, 
+                    Total = total
+                });
             }
 
         }

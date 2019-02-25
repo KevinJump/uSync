@@ -168,7 +168,7 @@
         }
 
         function calcPercentage(status) {
-            return (100 * status.Processed) / status.TotalSteps;
+            return (100 * status.Count) / status.Total;
         }
 
         function toggle(item) {
@@ -189,6 +189,10 @@
 
                 vm.hub.on('add', function (data) {
                     vm.status = data;
+                });
+
+                vm.hub.on('update', function (update) {
+                    vm.update = update;
                 });
 
                 vm.hub.start();
@@ -226,10 +230,16 @@
             vm.showAll = false;
 
             vm.status = {
-                Processed: 0,
-                TotalSteps: 1,
+                Count: 0,
+                Total: 1,
                 Message: "Initializing",
                 Handlers: []
+            };  
+
+            vm.update = {
+                Message: "",
+                Count: 0,
+                Total: 1
             };
 
             switch (mode) {

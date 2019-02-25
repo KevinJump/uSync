@@ -9,6 +9,8 @@ using static uSync8.BackOffice.uSyncService;
 
 namespace uSync8.BackOffice.SyncHandlers
 {
+    public delegate void SyncUpdateCallback(string message, int count, int total);
+
     public interface ISyncHandler
     {
         string Alias { get; }
@@ -23,9 +25,9 @@ namespace uSync8.BackOffice.SyncHandlers
 
         void Initialize(HandlerSettings settings);
 
-        IEnumerable<uSyncAction> ExportAll(string folder, HandlerSettings settings);
-        IEnumerable<uSyncAction> ImportAll(string folder, HandlerSettings settings, bool force);
-        IEnumerable<uSyncAction> Report(string folder, HandlerSettings settings);
+        IEnumerable<uSyncAction> ExportAll(string folder, HandlerSettings settings, SyncUpdateCallback callback);
+        IEnumerable<uSyncAction> ImportAll(string folder, HandlerSettings settings, bool force, SyncUpdateCallback callback);
+        IEnumerable<uSyncAction> Report(string folder, HandlerSettings settings, SyncUpdateCallback callback);
 
         // uSyncAction Import(string file, bool force);
 

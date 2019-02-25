@@ -55,18 +55,20 @@ namespace uSync8.BackOffice.SyncHandlers
         /// <param name="force"></param>
         /// <param name="updates"></param>
         /// <returns></returns>
-        protected override IEnumerable<uSyncAction> ImportFolder(string folder, HandlerSettings config, Dictionary<string, TObject> updates, bool force)
+        protected override IEnumerable<uSyncAction> ImportFolder(string folder, HandlerSettings config, Dictionary<string, TObject> updates, bool force, SyncUpdateCallback callback)
         {
             // if not using flat, then directory structure is doing
             // this for us. 
             if (config.UseFlatStructure == false)
-                return base.ImportFolder(folder, config, updates, force);
+                return base.ImportFolder(folder, config, updates, force, callback);
 
             List<uSyncAction> actions = new List<uSyncAction>();
 
             var files = syncFileService.GetFiles(folder, "*.config");
 
             List<LeveledFile> nodes = new List<LeveledFile>();
+
+            callback?.Invoke("Calculating import order", 0, 1);
 
             foreach(var file in files)
             {
@@ -93,8 +95,12 @@ namespace uSync8.BackOffice.SyncHandlers
 
             // loaded - now process.
 
+            var count = 0;
             foreach(var node in nodes.OrderBy(x => x.Level))
             {
+                count++;
+                callback?.Invoke($"{Path.GetFileName(node.File)}", count, nodes.Count);
+
                 var attempt = Import(node.File, config, force);
                 if (attempt.Success && attempt.Item != null)
                 {
@@ -107,9 +113,10 @@ namespace uSync8.BackOffice.SyncHandlers
             var folders = syncFileService.GetDirectories(folder);
             foreach (var children in folders)
             {
-                actions.AddRange(ImportFolder(children, config, updates, force));
+                actions.AddRange(ImportFolder(children, config, updates, force, callback));
             }
 
+            callback?.Invoke("", 1,1);
 
             return actions;
 

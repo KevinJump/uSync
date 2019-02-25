@@ -34,17 +34,26 @@ namespace uSync8.ContentEdition.Handlers
             this.domainService = domainService;
         }
 
-        public override IEnumerable<uSyncAction> ExportAll(string folder, HandlerSettings config = null)
+        public override IEnumerable<uSyncAction> ExportAll(string folder, HandlerSettings config, SyncUpdateCallback callback)
         {
+            // we clean the folder out on an export all. 
+            syncFileService.CleanFolder(folder);
+
             var actions = new List<uSyncAction>();
 
-            var domains = domainService.GetAll(true);
+            var domains = domainService.GetAll(true).ToList();
+            int count = 0;
             foreach(var domain in domains)
             {
+                count++;
                 if (domain != null)
+                {
+                    callback?.Invoke(domain.DomainName, count, domains.Count);
                     actions.Add(Export(domain, folder, config));
+                }
             }
 
+            callback?.Invoke("done", 1, 1);
             return actions;
         }
 

@@ -66,7 +66,13 @@
                     </div>
                 </div>
                 <div class="flex justify-center">
-                    <h4 class="usync-action-message">{{vm.status.Message}}</h4>
+                    <div class="text-center">
+                        <h4 class="usync-action-message">{{vm.status.Message}}</h4>
+                        <small>{{vm.update.Message}}</small>
+                        <div class="progress" style="height: 3px;">
+                            <div class="bar" role="progressbar" style="width: {{vm.calcPercentage(vm.update)}}%;" aria-valuenow="{{vm.calcPercentage(vm.update)}}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
                 </div>
                 <div class="progress" style="height: 1px;">
                     <div class="bar" role="progressbar" style="width: {{vm.calcPercentage(vm.status)}}%;" aria-valuenow="{{vm.calcPercentage(vm.status)}}" aria-valuemin="0" aria-valuemax="100"></div>

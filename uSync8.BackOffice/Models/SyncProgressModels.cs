@@ -6,8 +6,8 @@ namespace uSync8.BackOffice
 {
     public class SyncProgressSummary
     {
-        public int Processed { get; set; }
-        public int TotalSteps { get; set; }
+        public int Count { get; set; }
+        public int Total { get; set; }
         public string Message { get; set; }
         public List<SyncHandlerSummary> Handlers { get; set; }
 
@@ -16,7 +16,7 @@ namespace uSync8.BackOffice
             string message,
             int totalSteps)
         {
-            this.TotalSteps = totalSteps;
+            this.Total = totalSteps;
             this.Message = message;
 
             this.Handlers = handlers.Select(x => new SyncHandlerSummary()

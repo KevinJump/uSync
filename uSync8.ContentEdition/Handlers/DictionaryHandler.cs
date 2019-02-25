@@ -35,17 +35,16 @@ namespace uSync8.ContentEdition.Handlers
 
         }
 
-        public override IEnumerable<uSyncAction> ExportAll(string folder, HandlerSettings config = null)
+        public override IEnumerable<uSyncAction> ExportAll(string folder, HandlerSettings config, SyncUpdateCallback callback)
         {
             syncFileService.CleanFolder(folder);
-
-            return ExportAll(Guid.Empty, folder, config);
+            return ExportAll(Guid.Empty, folder, config, callback);
         }
 
         /// <summary>
         ///  don't think you can get dictionary items via the entity service :( 
         /// </summary>
-        public IEnumerable<uSyncAction> ExportAll(Guid parent, string folder, HandlerSettings config)
+        public IEnumerable<uSyncAction> ExportAll(Guid parent, string folder, HandlerSettings config, SyncUpdateCallback callback)
         {
             var actions = new List<uSyncAction>();
 
@@ -59,12 +58,15 @@ namespace uSync8.ContentEdition.Handlers
             {
                 items = localizationService.GetDictionaryItemChildren(parent).ToList();
             }
-                 
+
+            int count = 0;
             foreach(var item in items)
             {
-                actions.Add(Export(item, folder, config));
+                count++;
+                callback?.Invoke(item.ItemKey, count, items.Count);
 
-                actions.AddRange(ExportAll(item.Key, folder, config));
+                actions.Add(Export(item, folder, config));
+                actions.AddRange(ExportAll(item.Key, folder, config, callback));
             }
 
             return actions;

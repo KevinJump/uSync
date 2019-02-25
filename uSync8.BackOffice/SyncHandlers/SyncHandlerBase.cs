@@ -115,7 +115,7 @@ namespace uSync8.BackOffice.SyncHandlers
         }
 
         #region Importing 
-        public IEnumerable<uSyncAction> ImportAll(string folder, HandlerSettings config = null, bool force = false)
+        public IEnumerable<uSyncAction> ImportAll(string folder, HandlerSettings config, bool force, SyncUpdateCallback callback = null)
         {
             logger.Info<uSync8BackOffice>("Running Import: {0}", Path.GetFileName(folder));
 
@@ -123,27 +123,37 @@ namespace uSync8.BackOffice.SyncHandlers
             var updates = new Dictionary<string, TObject>();
 
             actions.AddRange(ProcessActions(false));
-            actions.AddRange(ImportFolder(folder, config, updates, force));
+            actions.AddRange(ImportFolder(folder, config, updates, force, callback));
 
             if (updates.Any())
             {
+                int count = 0;
                 foreach (var update in updates)
                 {
-                    ImportSecondPass(update.Key, update.Value, config);
+                    count++;
+                    callback?.Invoke($"Second Pass {Path.GetFileName(update.Key)}", count, updates.Count);
+                    ImportSecondPass(update.Key, update.Value, config, callback);
                 }
             }
 
+            callback?.Invoke("Done",1,1);
             return actions;
         }
 
-        protected virtual IEnumerable<uSyncAction> ImportFolder(string folder, HandlerSettings config, Dictionary<string, TObject> updates, bool force)
+        protected virtual IEnumerable<uSyncAction> ImportFolder(string folder, HandlerSettings config, Dictionary<string, TObject> updates, bool force, SyncUpdateCallback callback)
         {
             List<uSyncAction> actions = new List<uSyncAction>();
 
             var files = syncFileService.GetFiles(folder, "*.config");
 
+            int count = 0;
+            int total = files.Count();
             foreach (string file in files)
             {
+                count++;
+
+                callback?.Invoke($"Importing {Path.GetFileName(file)}", count, total);
+
                 var attempt = Import(file, config, force);
                 if (attempt.Success && attempt.Item != null)
                 {
@@ -160,9 +170,10 @@ namespace uSync8.BackOffice.SyncHandlers
             var folders = syncFileService.GetDirectories(folder);
             foreach (var children in folders)
             {
-                actions.AddRange(ImportFolder(children, config, updates, force));
+                actions.AddRange(ImportFolder(children, config, updates, force, callback));
             }
 
+            callback?.Invoke("", 1, 1);
 
             return actions;
         }
@@ -190,7 +201,7 @@ namespace uSync8.BackOffice.SyncHandlers
             }
         }
 
-        virtual public void ImportSecondPass(string file, TObject item, HandlerSettings config)
+        virtual public void ImportSecondPass(string file, TObject item, HandlerSettings config, SyncUpdateCallback callback)
         {
             if (IsTwoPass)
             {
@@ -215,16 +226,17 @@ namespace uSync8.BackOffice.SyncHandlers
         #endregion
 
         #region Exporting
-        virtual public IEnumerable<uSyncAction> ExportAll(string folder, HandlerSettings config = null)
+        virtual public IEnumerable<uSyncAction> ExportAll(string folder, HandlerSettings config, SyncUpdateCallback callback)
         {
             // we clean the folder out on an export all. 
             syncFileService.CleanFolder(folder);
 
-            return ExportAll(-1, folder, config);
+            return ExportAll(-1, folder, config, callback);
         }
 
-        virtual public IEnumerable<uSyncAction> ExportAll(int parent, string folder, HandlerSettings config)
+        virtual public IEnumerable<uSyncAction> ExportAll(int parent, string folder, HandlerSettings config, SyncUpdateCallback callback)
         {
+            int count = 0;
             var actions = new List<uSyncAction>();
 
             if (itemContainerType != UmbracoObjectTypes.Unknown)
@@ -232,19 +244,22 @@ namespace uSync8.BackOffice.SyncHandlers
                 var containers = entityService.GetChildren(parent, this.itemContainerType);
                 foreach (var container in containers)
                 {
-                    actions.AddRange(ExportAll(container.Id, folder, config));
+                    actions.AddRange(ExportAll(container.Id, folder, config, callback));
                 }
             }
 
-            var items = GetExportItems(parent, itemObjectType);
+            var items = GetExportItems(parent, itemObjectType).ToList();
             foreach (var item in items)
             {
-                var concreateType = GetFromService(item.Id);
-                actions.Add(Export(concreateType, folder, config));
+                count++;
+                var concreateType = GetFromService(item.Id);               
+                callback?.Invoke(item.Id.ToString(), count, items.Count);
 
-                actions.AddRange(ExportAll(item.Id, folder, config));
+                actions.Add(Export(concreateType, folder, config));
+                actions.AddRange(ExportAll(item.Id, folder, config, callback));
             }
 
+            callback?.Invoke("Done", 1, 1);
             return actions;
         }
 
@@ -273,28 +288,35 @@ namespace uSync8.BackOffice.SyncHandlers
 
         #region reporting 
 
-        public IEnumerable<uSyncAction> Report(string folder, HandlerSettings config = null)
+        public IEnumerable<uSyncAction> Report(string folder, HandlerSettings config, SyncUpdateCallback callback)
         {
             var actions = new List<uSyncAction>();
+            callback?.Invoke("Checking Actions", 0, 1);
             actions.AddRange(ProcessActions(true));
-            actions.AddRange(ReportFolder(folder, config));
+            actions.AddRange(ReportFolder(folder, config, callback));
+            callback?.Invoke("Done", 1, 1);
             return actions;
         }
 
-        public IEnumerable<uSyncAction> ReportFolder(string folder, HandlerSettings config)
+        public IEnumerable<uSyncAction> ReportFolder(string folder, HandlerSettings config, SyncUpdateCallback callback)
         {
             List<uSyncAction> actions = new List<uSyncAction>();
 
             var files = syncFileService.GetFiles(folder, "*.config");
 
+            int count = 0;
+            int total = files.Count();
             foreach (string file in files)
             {
+                count++;
+                callback?.Invoke(Path.GetFileName(file), count, total);
+
                 actions.Add(ReportItem(file));
             }
 
             foreach (var children in syncFileService.GetDirectories(folder))
             {
-                actions.AddRange(ReportFolder(children, config));
+                actions.AddRange(ReportFolder(children, config, callback));
             }
 
 

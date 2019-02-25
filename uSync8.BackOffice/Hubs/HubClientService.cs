@@ -34,5 +34,23 @@ namespace uSync8.BackOffice.Hubs
                 hubContext.Clients.All.Add(item);
             }
         }
+
+        public void SendUpdate(Object message)
+        {
+            if (hubContext != null)
+            {
+                if (!string.IsNullOrWhiteSpace(clientId))
+                {
+                    var client = hubContext.Clients.Client(clientId);
+                    if (client != null)
+                    {
+                        client.Update(message);
+                        return;
+                    }
+                }
+
+                hubContext.Clients.All.Update(message);
+            }
+        }
     }
 }

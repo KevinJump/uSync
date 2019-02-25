@@ -34,13 +34,19 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
         /// <summary>
         ///  overrider the default export, because macros, don't exist as an object type???
         /// </summary>
-        public override IEnumerable<uSyncAction> ExportAll(int parent, string folder, HandlerSettings config = null)
+        public override IEnumerable<uSyncAction> ExportAll(int parent, string folder, HandlerSettings config, SyncUpdateCallback callback)
         {
+            // we clean the folder out on an export all. 
+            syncFileService.CleanFolder(folder);
+
             var actions = new List<uSyncAction>();
 
-            var items = macroService.GetAll();
+            var items = macroService.GetAll().ToList();
+            int count = 0;
             foreach(var item in items)
             {
+                count++;
+                callback?.Invoke(item.Name, count, items.Count);
                 actions.Add(Export(item, folder, config));
             }
 

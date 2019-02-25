@@ -107,7 +107,7 @@ namespace uSync8.ContentEdition.Serializers
                 if (rootNode != null)
                 {
                     info.Add(new XElement("Root", GetItemPath(rootNode),
-                        new XElement("Key", rootNode.Key)));
+                        new XAttribute("Key", rootNode.Key)));
                 }
             }
 
