@@ -114,5 +114,10 @@ namespace uSync8.BackOffice
                 willUpdate ? ChangeType.Update : ChangeType.NoChange,
                 message, null, string.Empty);
         }
+
+        public static uSyncAction ReportActionFail(string name, string message)
+        {
+            return new uSyncAction(false, name, typeof(T), ChangeType.Fail, message, null, string.Empty);
+        }
     }
 }

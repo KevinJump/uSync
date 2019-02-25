@@ -17,7 +17,7 @@ using uSync8.Core.Tracking;
 
 namespace uSync8.ContentEdition.Handlers
 {
-    [SyncHandler("contentTypeHandler", "Blueprints", "Blueprints", uSyncBackOfficeConstants.Priorites.ContentTemplate
+    [SyncHandler("contentTemplateHandler", "Blueprints", "Blueprints", uSyncBackOfficeConstants.Priorites.ContentTemplate
         , Icon = "icon-document-dashed-line usync-addon-icon", IsTwoPass = true)]
     public class ContentTemplateHandler : SyncHandlerTreeBase<IContent, IContentService>, ISyncHandler
     {

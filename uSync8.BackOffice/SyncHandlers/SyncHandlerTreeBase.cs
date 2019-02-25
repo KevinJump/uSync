@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 using System.Xml.Linq;
 using Umbraco.Core;
 using Umbraco.Core.Logging;
@@ -14,6 +15,7 @@ using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
 using uSync8.Core;
 using uSync8.Core.Extensions;
+using uSync8.Core.Models;
 using uSync8.Core.Serialization;
 using uSync8.Core.Tracking;
 
@@ -68,14 +70,24 @@ namespace uSync8.BackOffice.SyncHandlers
 
             foreach(var file in files)
             {
-                var node = LoadNode(file);
-                if (node != null)
+                try
                 {
-                    nodes.Add(new LeveledFile
+                    var node = LoadNode(file);
+                    if (node != null)
                     {
-                        Level = node.GetLevel(),
-                        File = file
-                    });
+                        nodes.Add(new LeveledFile
+                        {
+                            Level = node.GetLevel(),
+                            File = file
+                        });
+                    }
+                }
+                catch(XmlException ex)
+                {
+                    // one of the files is wrong. (do we stop or carry on)
+                    logger.Warn<TObject>($"Error loading file: {file} [{ex.Message}]");
+                    actions.Add(uSyncActionHelper<TObject>.SetAction(
+                        SyncAttempt<TObject>.Fail(Path.GetFileName(file), ChangeType.Fail, $"Failed to Load: {ex.Message}"), file, false)); 
                 }
             }
 

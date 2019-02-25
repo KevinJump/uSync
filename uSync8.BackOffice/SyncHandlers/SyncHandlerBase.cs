@@ -169,13 +169,24 @@ namespace uSync8.BackOffice.SyncHandlers
 
         virtual public SyncAttempt<TObject> Import(string filePath, HandlerSettings config, bool force = false)
         {
-            syncFileService.EnsureFileExists(filePath);
-
-            using (var stream = syncFileService.OpenRead(filePath))
+            try
             {
-                var node = XElement.Load(stream);
-                var attempt = serializer.Deserialize(node, force, false);
-                return attempt;
+                syncFileService.EnsureFileExists(filePath);
+
+                using (var stream = syncFileService.OpenRead(filePath))
+                {
+                    var node = XElement.Load(stream);
+                    var attempt = serializer.Deserialize(node, force, false);
+                    return attempt;
+                }
+            }
+            catch(FileNotFoundException notFoundException)
+            {
+                return SyncAttempt<TObject>.Fail(Path.GetFileName(filePath), ChangeType.Fail, $"File not found {notFoundException.Message}");
+            }
+            catch(Exception ex)
+            {
+                return SyncAttempt<TObject>.Fail(Path.GetFileName(filePath), ChangeType.Fail, $"Import Fail: {ex.Message}");
             }
         }
 
@@ -183,13 +194,20 @@ namespace uSync8.BackOffice.SyncHandlers
         {
             if (IsTwoPass)
             {
-                syncFileService.EnsureFileExists(file);
-
-                using (var stream = syncFileService.OpenRead(file))
+                try
                 {
-                    var node = XElement.Load(stream);
-                    serializer.DeserializeSecondPass(item, node);
-                    stream.Dispose();
+                    syncFileService.EnsureFileExists(file);
+
+                    using (var stream = syncFileService.OpenRead(file))
+                    {
+                        var node = XElement.Load(stream);
+                        serializer.DeserializeSecondPass(item, node);
+                        stream.Dispose();
+                    }
+                }
+                catch(Exception ex)
+                {
+                    logger.Warn<TObject>($"Second Import Failed: {ex.Message}");
                 }
             }
         }
@@ -285,33 +303,50 @@ namespace uSync8.BackOffice.SyncHandlers
 
         protected uSyncAction ReportItem(string file)
         {
-            var node = syncFileService.LoadXElement(file);
-            if (node.IsEmptyItem())
+            try
             {
-                return uSyncAction.SetAction(true, node.GetAlias(), typeof(TObject), ChangeType.Removed, "Deleted Item");
-            }
-            else
-            {
-                var current = serializer.IsCurrent(node);
-
-                var action = uSyncActionHelper<TObject>
-                    .ReportAction(!current, node.GetAlias());
-
-                action.Message = "";
-
-                if (action.Change > ChangeType.NoChange)
+                var node = syncFileService.LoadXElement(file);
+                if (node.IsEmptyItem())
                 {
-                    action.Details = tracker.GetChanges(node);
-                    if (action.Details == null || action.Details.Count() == 0)
-                    {
-                        action.Message = "Change details cannot be calculated";
-                    }
-
-                    action.Message = "Would update";
+                    return uSyncAction.SetAction(true, node.GetAlias(), typeof(TObject), ChangeType.Removed, "Removed Item");
                 }
+                else
+                {
+                    try
+                    {
+                        var current = serializer.IsCurrent(node);
 
-                return action;
+                        var action = uSyncActionHelper<TObject>
+                            .ReportAction(!current, node.GetAlias());
+
+                        action.Message = "";
+
+                        if (action.Change > ChangeType.NoChange)
+                        {
+                            action.Details = tracker.GetChanges(node);
+                            if (action.Details == null || action.Details.Count() == 0)
+                            {
+                                action.Message = "Change details cannot be calculated";
+                            }
+
+                            action.Message = $"Would update {action.Change.ToString()}";
+                        }
+
+                        return action;
+                    }
+                    catch (FormatException fex)
+                    {
+                        return uSyncActionHelper<TObject>
+                            .ReportActionFail(Path.GetFileName(file), $"format error {fex.Message}");
+                    }
+                }
             }
+            catch (Exception ex)
+            {
+                return uSyncActionHelper<TObject>
+                    .ReportActionFail(Path.GetFileName(file), $"Reporing error {ex.Message}");
+            }
+
         }
 
         #endregion

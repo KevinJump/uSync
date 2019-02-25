@@ -61,13 +61,13 @@ namespace uSync8.Core.Serialization
         {
             if (IsEmpty(node))
             {
-                logger.Debug<TObject>("Base: Empty Node - No Action");
                 // empty node do nothing...
-                return SyncAttempt<TObject>.Succeed(node.GetKey().ToString(), ChangeType.Removed);
+                logger.Debug<TObject>("Base: Empty Node - No Action");
+                return SyncAttempt<TObject>.Succeed(node.GetAlias().ToString(), default(TObject), ChangeType.Removed, "Old Item (rename)");
             }
 
             if (!IsValid(node))
-                throw new ArgumentException($"XML Not valid for type {ItemType}");
+                throw new FormatException($"XML Not valid for type {ItemType}");
 
 
             if (force || !IsCurrent(node))
@@ -127,6 +127,8 @@ namespace uSync8.Core.Serialization
         public bool IsCurrent(XElement node)
         {
             if (node == null) return false;
+
+            if (!IsValid(node)) throw new FormatException($"Invalid Xml File {node.Name.LocalName}");
 
             var item = FindItem(node);
             if (item == null) return false;
