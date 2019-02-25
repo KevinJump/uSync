@@ -164,7 +164,7 @@ namespace uSync8.ContentEdition.Serializers
 
         #endregion
 
-        protected override IContent CreateItem(string alias, IContent parent, ITreeEntity treeItem, string itemType)
+        protected override IContent CreateItem(string alias, ITreeEntity parent, string itemType)
         {
             var parentId = parent != null ? parent.Id : -1;
             var item = contentService.Create(alias, parentId, itemType);

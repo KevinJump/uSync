@@ -79,7 +79,7 @@ namespace uSync8.ContentEdition.Serializers
                 ChangeType.Export);
         }
 
-        protected override IMedia CreateItem(string alias, IMedia parent, ITreeEntity treeItem, string itemType)
+        protected override IMedia CreateItem(string alias, ITreeEntity parent, string itemType)
         {
             var parentId = parent != null ? parent.Id : -1;
             var item = mediaService.CreateMedia(alias, parentId, itemType);

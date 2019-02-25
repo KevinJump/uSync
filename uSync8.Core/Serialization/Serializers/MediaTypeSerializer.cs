@@ -87,7 +87,7 @@ namespace uSync8.Core.Serialization.Serializers
             return SyncAttempt<IMediaType>.Succeed(item.Name, item, ChangeType.Import);
         }
 
-        protected override IMediaType CreateItem(string alias, IMediaType parent, ITreeEntity treeItem, string itemType)
+        protected override IMediaType CreateItem(string alias, ITreeEntity parent, string itemType)
         {
             var item = new MediaType(-1)
             {
@@ -95,10 +95,12 @@ namespace uSync8.Core.Serialization.Serializers
             };
 
             if (parent != null)
-                item.AddContentType(parent);
+            {
+                if (parent is IMediaType mediaParent)
+                item.AddContentType(mediaParent);
 
-            if (treeItem != null)
-                item.SetParent(treeItem);
+                item.SetParent(parent);
+            }
 
             return item;
         }

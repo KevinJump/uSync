@@ -225,7 +225,7 @@ namespace uSync8.ContentEdition.Serializers
 
             var contentTypeAlias = node.Name.LocalName;
 
-            return CreateItem(alias, parent, null, contentTypeAlias);
+            return CreateItem(alias, parent, contentTypeAlias);
         }
 
         protected override string GetItemBaseType(XElement node)

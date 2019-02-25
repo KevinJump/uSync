@@ -107,7 +107,7 @@ namespace uSync8.Core.Serialization
         /// <returns></returns>
         protected virtual XElement InitializeBaseNode(TObject item, string alias, int level = 0)
             => new XElement(ItemType,
-                new XAttribute("Key", item.Key),
+                new XAttribute("Key", item.Key.ToString().ToLower()),
                 new XAttribute("Alias", alias),
                 new XAttribute("Level", level));
 

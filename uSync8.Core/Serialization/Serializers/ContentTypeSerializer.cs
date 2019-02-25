@@ -179,7 +179,7 @@ namespace uSync8.Core.Serialization.Serializers
         }
 
 
-        protected override IContentType CreateItem(string alias, IContentType parent, ITreeEntity treeItem, string itemType)
+        protected override IContentType CreateItem(string alias, ITreeEntity parent, string itemType)
         {
             var item = new ContentType(-1)
             {
@@ -187,12 +187,14 @@ namespace uSync8.Core.Serialization.Serializers
             };
 
             if (parent != null)
-                item.AddContentType(parent);
+            {
+                if (parent is IContentType parentContent)
+                {
+                    item.AddContentType(parentContent);
+                }
 
-            if (treeItem != null)
-                item.SetParent(treeItem);
-
-            
+                item.SetParent(parent);
+            }
 
             return item;
         }

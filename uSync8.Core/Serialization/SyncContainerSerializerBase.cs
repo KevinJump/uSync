@@ -43,7 +43,6 @@ namespace uSync8.Core.Serialization
             {
                 var parentKey = parentNode.Attribute("Key").ValueOrDefault(Guid.Empty);
                 parent = FindItem(parentKey, parentNode.Value);
-
                 if (parent != null)
                 {
                     treeItem = parent;
@@ -70,10 +69,8 @@ namespace uSync8.Core.Serialization
 
             var alias = node.GetAlias();
 
-            return CreateItem(alias, parent, treeItem, itemType);
-        }
-
-
+            return CreateItem(alias, parent != null ? parent : treeItem,itemType);
+        }   
 
         private ITreeEntity TryCreateContainer(string name, ITreeEntity parent)
         {

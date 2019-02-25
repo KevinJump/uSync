@@ -55,7 +55,7 @@ namespace uSync8.Core.Serialization.Serializers
             }
 
             item.SortOrder = info.Element("SortOrder").ValueOrDefault(0);
-            // item.DatabaseType = info.Element("DatabaseType").ValueOrDefault(ValueStorageType.Nvarchar);
+            item.DatabaseType = info.Element("DatabaseType").ValueOrDefault(ValueStorageType.Nvarchar);
 
             // config 
             DeserializeConfiguration(item, node);
@@ -120,7 +120,7 @@ namespace uSync8.Core.Serialization.Serializers
         }
             
 
-        protected override IDataType CreateItem(string alias, IDataType parent, ITreeEntity treeItem, string itemType)
+        protected override IDataType CreateItem(string alias, ITreeEntity parent, string itemType)
         {
             var editorType = Current.DataEditors.FirstOrDefault(x => x.Alias.InvariantEquals(itemType));
             if (editorType == null) return null;
@@ -130,7 +130,7 @@ namespace uSync8.Core.Serialization.Serializers
                 Name = alias
             };
 
-            if (treeItem != null)
+            if (parent != null)
                 item.SetParent(parent);
 
             return item;

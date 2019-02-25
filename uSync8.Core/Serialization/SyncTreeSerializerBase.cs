@@ -23,7 +23,7 @@ namespace uSync8.Core.Serialization
         {
         }
 
-        protected abstract TObject CreateItem(string alias, TObject parent, ITreeEntity treeItem, string itemType);
+        protected abstract TObject CreateItem(string alias, ITreeEntity parent, string itemType);
 
 
         #region Getters

@@ -57,6 +57,7 @@ namespace uSync8.Core.Serialization.Serializers
                 changes.Add(uSyncChange.Create(alias, name, "New Macro"));
             }
 
+            item.Key = key;
             item.Name = name;
             item.Alias = alias;
             item.MacroSource = macroSource;

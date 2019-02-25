@@ -66,12 +66,12 @@ namespace uSync8.ContentEdition.Serializers
         protected override IContent FindItem(int id)
             => contentService.GetBlueprintById(id);
 
-        protected override IContent CreateItem(string alias, IContent parent, ITreeEntity treeItem, string itemType)
+        protected override IContent CreateItem(string alias, ITreeEntity parent, string itemType)
         {
             var contentType = contentTypeService.Get(ItemType);
             if (contentType == null) return null;
 
-            var item = new Content(alias, parent, contentType);
+            var item = new Content(alias, (IContent)parent , contentType);
             return item;
         }
 

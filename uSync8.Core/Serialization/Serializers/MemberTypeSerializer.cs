@@ -89,7 +89,7 @@ namespace uSync8.Core.Serialization.Serializers
 
         }
 
-        protected override IMemberType CreateItem(string alias, IMemberType parent, ITreeEntity treeItem, string extra)
+        protected override IMemberType CreateItem(string alias, ITreeEntity parent, string extra)
         {
             var item = new MemberType(-1)
             {
@@ -97,9 +97,13 @@ namespace uSync8.Core.Serialization.Serializers
             };
 
             if (parent != null)
-                item.AddContentType(parent);
-            if (treeItem != null)
-                item.SetParent(treeItem);
+            {
+                if (parent is IMediaType mediaTypeParent)
+                    item.AddContentType(mediaTypeParent);
+
+                item.SetParent(parent);
+            }
+
 
             return item;
         }
