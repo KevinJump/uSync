@@ -349,6 +349,7 @@ namespace uSync8.BackOffice.SyncHandlers
                     if (!DefaultConfig.GuidNames)
                     {
                         actionService.CleanActions(item.Key, GetItemName(item));
+                        this.CleanUp(item, attempt.FileName, Path.Combine(rootFolder, this.DefaultFolder));
                     }
                 }
             }
@@ -372,17 +373,21 @@ namespace uSync8.BackOffice.SyncHandlers
         /// </summary>
         protected void CleanUp(TObject item, string newFile, string folder)
         {
+            var physicalFile = syncFileService.GetAbsPath(newFile);
+
             var files = syncFileService.GetFiles(folder, "*.config");
 
             foreach (string file in files)
             {
-                if (!file.InvariantEquals(newFile)) {
+                if (!file.InvariantEquals(physicalFile)) {
                     var node = syncFileService.LoadXElement(file);
                     if (node.GetKey() == item.Key)
                     {
                         var attempt = serializer.SerializeEmpty(item, GetItemName(item));
                         if (attempt.Success)
-                            attempt.Item.Save(file);
+                        {
+                            syncFileService.SaveXElement(attempt.Item, file);
+                        }
                     }
                 }
             }

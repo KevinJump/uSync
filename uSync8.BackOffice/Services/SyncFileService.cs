@@ -35,7 +35,7 @@ namespace uSync8.BackOffice.Services
             this.mappedRoot = IOHelper.MapPath(globalSettings.RootFolder);
         }
 
-        private string GetAbsPath(string path)
+        public string GetAbsPath(string path)
         {
             if (path.StartsWith(mappedRoot)) return path;
             return IOHelper.MapPath(path.TrimStart(new char[] { '/' }));
