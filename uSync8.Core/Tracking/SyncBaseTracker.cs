@@ -27,7 +27,7 @@ namespace uSync8.Core.Tracking
             if (!serializer.IsValid(node))
                 return Enumerable.Empty<uSyncChange>();
 
-            if (serializer.IsCurrent(node))
+            if (serializer.IsCurrent(node) == ChangeType.NoChange)
             {
                 return new uSyncChange()
                 {
@@ -87,11 +87,18 @@ namespace uSync8.Core.Tracking
                 currentNode = current.XPathSelectElement(path);
                 targetNode = target.XPathSelectElement(path);
 
+
+
                 if (currentNode == null)
                 {
-                    return uSyncChange.Create(path, name, targetNode.ValueOrDefault(string.Empty), change.CompareValue)
-                        .AsEnumerableOfOne();
+                    if (targetNode != null)
+                    {
+                        return uSyncChange.Create(path, name, targetNode.ValueOrDefault(string.Empty), change.CompareValue)
+                            .AsEnumerableOfOne();
+                    }
 
+                    // if both are null, just return nothing.
+                    return updates;
                 }
 
                 if (targetNode == null)

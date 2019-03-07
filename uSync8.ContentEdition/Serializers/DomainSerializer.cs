@@ -93,7 +93,9 @@ namespace uSync8.ContentEdition.Serializers
 
         protected override SyncAttempt<XElement> SerializeCore(IDomain item)
         {
-            var node = InitializeBaseNode(item, item.DomainName);
+            var node = new XElement(ItemType,
+                new XAttribute("Key", item.Id.ToGuid()),
+                new XAttribute("Alias", item.DomainName));
 
             var info = new XElement("Info",
                 new XElement("IsWildcard", item.IsWildcard),

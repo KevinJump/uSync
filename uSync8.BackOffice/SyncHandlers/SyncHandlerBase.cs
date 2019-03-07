@@ -336,10 +336,10 @@ namespace uSync8.BackOffice.SyncHandlers
                 {
                     try
                     {
-                        var current = serializer.IsCurrent(node);
+                        var change = serializer.IsCurrent(node);
 
                         var action = uSyncActionHelper<TObject>
-                            .ReportAction(!current, node.GetAlias());
+                            .ReportAction(change, node.GetAlias());
 
                         action.Message = "";
 
@@ -351,7 +351,7 @@ namespace uSync8.BackOffice.SyncHandlers
                                 action.Message = "Change details cannot be calculated";
                             }
 
-                            action.Message = $"Would update {action.Change.ToString()}";
+                            action.Message = $"{action.Change.ToString()}";
                         }
 
                         return action;

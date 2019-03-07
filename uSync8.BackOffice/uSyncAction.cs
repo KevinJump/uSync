@@ -101,11 +101,9 @@ namespace uSync8.BackOffice
             return new uSyncAction(attempt.Success, attempt.Name, attempt.ItemType, attempt.Change, attempt.Message, attempt.Exception, filename, requirePostProcessing);
         }
 
-        public static uSyncAction ReportAction(bool willUpdate, string name)
+        public static uSyncAction ReportAction(ChangeType changeType, string name)
         {
-            return new uSyncAction(true, name, typeof(T),
-                willUpdate ? ChangeType.Update : ChangeType.NoChange,
-                string.Empty, null, string.Empty);
+            return new uSyncAction(true, name, typeof(T), changeType, string.Empty, null, string.Empty);
         }
 
         public static uSyncAction ReportAction(bool willUpdate, string name, string message)

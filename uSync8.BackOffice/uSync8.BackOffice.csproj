@@ -276,6 +276,8 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="App_Plugins\uSync8\package.manifest" />
+    <Content Include="App_Plugins\uSync8\changeDialog.html" />
+    <Content Include="App_Plugins\uSync8\changeDialogController.js" />
     <Content Include="Config\uSync8.config" />
     <None Include="packages.config" />
     <None Include="Targets\uSync.props" />

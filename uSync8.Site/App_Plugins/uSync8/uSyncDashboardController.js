@@ -11,6 +11,7 @@
 
     function uSyncDashboardController($scope,
         notificationsService,
+        editorService,
         uSync8DashboardService,
         uSyncHub) {
 
@@ -72,6 +73,8 @@
         vm.toggle = toggle;
 
         vm.showChange = showChange;
+
+        vm.openDetail = openDetail;
 
         // kick it all off
         init();
@@ -177,6 +180,20 @@
 
         function toggleSettings() {
             vm.settingsView = !vm.settingsView;
+        }
+
+        function openDetail(item) {
+
+            var options = {
+                item: item,
+                title: 'uSync Change',
+                view: "/App_Plugins/uSync8/changeDialog.html",
+                close: function () {
+                    editorService.close();
+                }
+            };
+            editorService.open(options);
+
         }
 
         ////// private 

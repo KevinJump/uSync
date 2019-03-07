@@ -70,7 +70,7 @@ namespace uSync8.Core.Serialization
                 throw new FormatException($"XML Not valid for type {ItemType}");
 
 
-            if (force || !IsCurrent(node))
+            if (force || IsCurrent(node) > ChangeType.NoChange)
             {
                 logger.Debug<TObject>("Base: Deserializing");
                 var result = DeserializeCore(node);
@@ -124,24 +124,24 @@ namespace uSync8.Core.Serialization
         protected bool IsEmpty(XElement node)
             => node.Name.LocalName == uSyncConstants.Serialization.Empty;
 
-        public bool IsCurrent(XElement node)
+        public ChangeType IsCurrent(XElement node)
         {
-            if (node == null) return false;
+            if (node == null) return ChangeType.Update;
 
             if (!IsValid(node)) throw new FormatException($"Invalid Xml File {node.Name.LocalName}");
 
             var item = FindItem(node);
-            if (item == null) return false;
+            if (item == null) return ChangeType.Create;
 
             var newHash = MakeHash(node);
 
             var currentNode = Serialize(item);
-            if (!currentNode.Success) return false;
+            if (!currentNode.Success) return ChangeType.Create;
 
             var currentHash = MakeHash(currentNode.Item);
-            if (string.IsNullOrEmpty(currentHash)) return false;
+            if (string.IsNullOrEmpty(currentHash)) return ChangeType.Update;
 
-            return currentHash == newHash;
+            return currentHash == newHash ? ChangeType.NoChange : ChangeType.Update;
         }
 
         public virtual SyncAttempt<XElement> SerializeEmpty(TObject item, string alias)

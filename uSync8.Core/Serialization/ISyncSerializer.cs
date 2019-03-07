@@ -32,7 +32,7 @@ namespace uSync8.Core.Serialization
         ///  Returns true if the peice of xml is valid for this serializer
         /// </summary>
         bool IsValid(XElement node);
-        bool IsCurrent(XElement node);
+        ChangeType IsCurrent(XElement node);
 
         bool IsTwoPass { get; }
 
