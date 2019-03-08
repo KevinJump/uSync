@@ -17,6 +17,8 @@ namespace uSync8.Core.Tracking.Impliment
         protected override TrackedItem TrackChanges()
         {
             var tracker = base.TrackChanges();
+            tracker.Children[0]
+                .Children.Add(new TrackedItem("Folder", "/Folder", true));
 
             tracker.Children.Add(
                     new TrackedItem("Structure", "/Structure")

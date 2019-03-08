@@ -59,6 +59,7 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
         {
             ContentTypeService.Saved += EventSavedItem;
             ContentTypeService.Deleted += EventDeletedItem;
+            ContentTypeService.Moved += EventMovedItem;
         }
 
 

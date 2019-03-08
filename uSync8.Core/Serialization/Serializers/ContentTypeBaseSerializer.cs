@@ -191,7 +191,10 @@ namespace uSync8.Core.Serialization.Serializers
             if (item.IsElement != isElement)
                 item.IsElement = isElement;
 
-            SetMasterFromElement(item, info.Element("Parent"));
+            if (!SetMasterFromElement(item, info.Element("Parent")))
+            {
+                SetFolderFromElement(item, info.Element("Folder"));
+            }
 
         }
 
@@ -444,21 +447,37 @@ namespace uSync8.Core.Serialization.Serializers
         }
 
 
+        private void SetFolderFromElement(IContentTypeBase item, XElement folderNode)
+        {
+            var folder = folderNode.ValueOrDefault(string.Empty);
+            if (string.IsNullOrWhiteSpace(folder)) return;
+
+            var container = FindFolder(folderNode.GetKey(), folder);
+            if (container != null)
+            {
+                item.SetParent(container);
+            }
+        }
 
 
-        private void SetMasterFromElement(IContentTypeBase item, XElement masterNode)
+        private bool SetMasterFromElement(IContentTypeBase item, XElement masterNode)
         {
             logger.Debug<TObject>("SetMasterFromElement");
 
-            if (masterNode == null) return;
+            if (masterNode == null) return false;
 
             var key = masterNode.Attribute("Key").ValueOrDefault(Guid.Empty);
             if (key != Guid.Empty)
             {
                 var entity = entityService.Get(key);
                 if (entity != null)
+                {
                     item.SetParent(entity);
+                    return true;
+                }
             }
+
+            return false;
         }
 
         private PropertyType GetOrCreateProperty(TObject item,

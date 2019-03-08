@@ -60,11 +60,26 @@ namespace uSync8.Core.Serialization.Serializers
             // config 
             DeserializeConfiguration(item, node);
 
+            SetFolderFromElement(item, info.Element("Folder"));
+
             dataTypeService.Save(item);
 
             return SyncAttempt<IDataType>.Succeed(item.Name, item, ChangeType.Import);
 
         }
+
+        private void SetFolderFromElement(IDataType item, XElement folderNode)
+        {
+            var folder = folderNode.ValueOrDefault(string.Empty);
+            if (string.IsNullOrWhiteSpace(folder)) return;
+
+            var container = FindFolder(folderNode.GetKey(), folder);
+            if (container != null)
+            {
+                item.SetParent(container);
+            }
+        }
+
 
         private void DeserializeConfiguration(IDataType item, XElement node)
         {

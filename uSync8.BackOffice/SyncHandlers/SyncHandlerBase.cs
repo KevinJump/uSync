@@ -5,6 +5,7 @@ using System.Linq;
 using System.Xml.Linq;
 using Umbraco.Core;
 using Umbraco.Core.Composing;
+using Umbraco.Core.Events;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
@@ -391,7 +392,7 @@ namespace uSync8.BackOffice.SyncHandlers
             actionService.SaveActions();
         }
 
-        protected virtual void EventSavedItem(IService sender, Umbraco.Core.Events.SaveEventArgs<TObject> e)
+        protected virtual void EventSavedItem(IService sender, SaveEventArgs<TObject> e)
         {
             if (uSync8BackOffice.eventsPaused) return;
 
@@ -412,6 +413,28 @@ namespace uSync8.BackOffice.SyncHandlers
             }
             actionService.SaveActions();
         }
+
+        protected virtual void EventMovedItem(IService sender, MoveEventArgs<TObject> e)
+        {
+            if (uSync8BackOffice.eventsPaused) return;
+
+            var actionService = new SyncActionService(syncFileService, actionFile);
+            actionService.GetActions();
+
+            foreach(var item in e.MoveInfoCollection)
+            {
+                var attempt = Export(item.Entity, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
+                if (attempt.Success)
+                {
+                    if (!DefaultConfig.GuidNames)
+                    {
+                        actionService.CleanActions(item.Entity.Key, GetItemName(item.Entity));
+                        this.CleanUp(item.Entity, attempt.FileName, Path.Combine(rootFolder, this.DefaultFolder));
+                    }
+                }
+            }
+        }
+
 
         protected virtual void ExportDeletedItem(TObject item, string folder, HandlerSettings config)
         {

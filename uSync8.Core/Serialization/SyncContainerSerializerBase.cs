@@ -61,6 +61,18 @@ namespace uSync8.Core.Serialization
                     if (container != null)
                     {
                         treeItem = container;
+
+                        // update the container key if its diffrent (because we don't serialize folders on their own)
+                        if (container.Key != folderKey)
+                        {
+                            if (container.Key != folderKey)
+                            {
+                                logger.Debug<TObject>("Folder Found: Key Diffrent");
+                                container.Key = folderKey;
+                                SaveContainer(container);
+                            }
+
+                        }
                     }
                 }
             }
@@ -72,18 +84,19 @@ namespace uSync8.Core.Serialization
             return CreateItem(alias, parent != null ? parent : treeItem,itemType);
         }   
 
-        private ITreeEntity TryCreateContainer(string name, ITreeEntity parent)
+        private EntityContainer TryCreateContainer(string name, ITreeEntity parent)
         {
             var children = entityService.GetChildren(parent.Id, containerType);
             if (children != null && children.Any(x => x.Name.InvariantEquals(name)))
             {
-                return children.Single(x => x.Name.InvariantEquals(name));
+                var item = children.Single(x => x.Name.InvariantEquals(name));
+                return FindContainer(item.Key);
             }
 
             // else create 
             var attempt = FindContainers(parent.Id, name);
             if (attempt)
-                return (ITreeEntity)attempt.Result.Entity;
+                return attempt.Result.Entity;
 
             return null;
         }
@@ -107,8 +120,8 @@ namespace uSync8.Core.Serialization
             if (folders.Any())
             {
                 var path = string.Join("/", folders);
-                return new XElement("Folder", path);
-                    //new XAttribute("Key", parentKey));
+                return new XElement("Folder", path); 
+                    // new XAttribute("Key", parentKey));
             }
 
             return null;
@@ -123,7 +136,7 @@ namespace uSync8.Core.Serialization
         protected abstract IEnumerable<EntityContainer> FindContainers(string folder, int level);
         protected abstract Attempt<OperationResult<OperationResultType, EntityContainer>> FindContainers(int parentId, string name);
 
-        protected virtual ITreeEntity FindFolder(Guid key, string path)
+        protected virtual EntityContainer FindFolder(Guid key, string path)
         {
             var container = FindContainer(key);
             if (container != null) return container;
@@ -148,7 +161,7 @@ namespace uSync8.Core.Serialization
 
             if (root != null)
             {
-                var current = (ITreeEntity)root;
+                var current = root;
                 for (int i = 1; i < bits.Length; i++)
                 {
                     var name = HttpUtility.UrlDecode(bits[i]);
@@ -159,12 +172,6 @@ namespace uSync8.Core.Serialization
                 if (current != null)
                 {
                     logger.Debug<TObject>("Folder Found");
-                    if (current.Key != key)
-                    {
-                        logger.Debug<TObject>("Folder Found: Key Diffrent");
-                        current.Key = key;
-                        SaveContainer((EntityContainer)current);
-                    }
                     return current;
                 }
             }

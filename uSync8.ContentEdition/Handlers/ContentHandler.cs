@@ -61,6 +61,7 @@ namespace uSync8.ContentEdition.Handlers
         {
             ContentService.Saved += EventSavedItem;
             ContentService.Deleted += EventDeletedItem;
+            ContentService.Moved += EventMovedItem;
         }
     }
 }

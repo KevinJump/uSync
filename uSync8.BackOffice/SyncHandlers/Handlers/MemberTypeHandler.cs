@@ -45,6 +45,7 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
         {
             MemberTypeService.Saved += EventSavedItem;
             MemberTypeService.Deleted += EventDeletedItem;
+            MemberTypeService.Moved += EventMovedItem;
         }
 
         protected override void DeleteFolder(int id)
