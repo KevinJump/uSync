@@ -14,6 +14,8 @@ using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
 using uSync8.Core.Extensions;
 using uSync8.Core.Models;
+using Umbraco.Core.Configuration.UmbracoSettings;
+using Umbraco.Core.PropertyEditors;
 
 namespace uSync8.Core.Serialization.Serializers
 {
@@ -21,12 +23,14 @@ namespace uSync8.Core.Serialization.Serializers
     public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncSerializer<IDataType>
     {
         private readonly IDataTypeService dataTypeService;
+        private IContentSection contentSection;
 
         public DataTypeSerializer(IEntityService entityService, ILogger logger,
-            IDataTypeService dataTypeService)
+            IDataTypeService dataTypeService, IContentSection contentSection)
             : base(entityService, logger, UmbracoObjectTypes.DataTypeContainer)
         {
             this.dataTypeService = dataTypeService;
+            this.contentSection = contentSection;
         }
 
         protected override SyncAttempt<IDataType> DeserializeCore(XElement node)
@@ -137,7 +141,7 @@ namespace uSync8.Core.Serialization.Serializers
 
         protected override IDataType CreateItem(string alias, ITreeEntity parent, string itemType)
         {
-            var editorType = Current.DataEditors.FirstOrDefault(x => x.Alias.InvariantEquals(itemType));
+            var editorType = FindDataEditor(alias);
             if (editorType == null) return null;
 
             var item = new DataType(editorType, -1)
@@ -149,6 +153,13 @@ namespace uSync8.Core.Serialization.Serializers
                 item.SetParent(parent);
 
             return item;
+        }
+
+        private IDataEditor FindDataEditor(string alias)
+        {
+            return Current.PropertyEditors
+                .FirstOrDefault(x => !x.IsDeprecated || contentSection.ShowDeprecatedPropertyEditors && x.Alias == alias);
+                
         }
 
         protected override string GetItemBaseType(XElement node)
