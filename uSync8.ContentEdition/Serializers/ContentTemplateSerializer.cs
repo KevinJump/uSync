@@ -37,6 +37,31 @@ namespace uSync8.ContentEdition.Serializers
             return info;
         }
 
+        protected override SyncAttempt<IContent> DeserializeCore(XElement node)
+        {
+            var item = FindOrCreate(node);
+            if (item.Trashed)
+            {
+                // TODO: Where has changed trashed state gone?
+            }
+
+            var name = node.Name.LocalName;
+            if (name != string.Empty)
+                item.Name = name;
+
+            item.Blueprint = true;
+
+            DeserializeBase(item, node);
+
+            contentService.SaveBlueprint(item);
+
+            return SyncAttempt<IContent>.Succeed(
+                item.Name,
+                item,
+                ChangeType.Import,
+                "");
+        }
+
         public override IContent FindItem(XElement node)
         {
             var key = node.GetKey();
@@ -68,11 +93,14 @@ namespace uSync8.ContentEdition.Serializers
 
         protected override IContent CreateItem(string alias, ITreeEntity parent, string itemType)
         {
-            var contentType = contentTypeService.Get(ItemType);
+            var contentType = contentTypeService.Get(itemType);
             if (contentType == null) return null;
 
-            var item = new Content(alias, (IContent)parent , contentType);
-            return item;
+            if (parent != null)
+            {
+                return new Content(alias, (IContent)parent, contentType);
+            }
+            return new Content(alias, -1, contentType);
         }
 
         protected override Attempt<string> DoSaveOrPublish(IContent item, XElement node)
