@@ -141,7 +141,7 @@ namespace uSync8.Core.Serialization.Serializers
 
         protected override IDataType CreateItem(string alias, ITreeEntity parent, string itemType)
         {
-            var editorType = FindDataEditor(alias);
+            var editorType = FindDataEditor(itemType);
             if (editorType == null) return null;
 
             var item = new DataType(editorType, -1)
@@ -158,7 +158,7 @@ namespace uSync8.Core.Serialization.Serializers
         private IDataEditor FindDataEditor(string alias)
         {
             return Current.PropertyEditors
-                .FirstOrDefault(x => !x.IsDeprecated || contentSection.ShowDeprecatedPropertyEditors && x.Alias == alias);
+                .FirstOrDefault(x => x.Alias == alias);
                 
         }
 
