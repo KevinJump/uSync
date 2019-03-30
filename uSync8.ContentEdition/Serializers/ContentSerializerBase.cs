@@ -80,11 +80,17 @@ namespace uSync8.ContentEdition.Serializers
 
                 foreach(var value in property.Values)
                 {
-                    var valueNode = new XElement("Value",
-                        new XAttribute("Culture", value.Culture ?? string.Empty),
-                        new XAttribute("Segment", value.Segment ?? string.Empty));
+                    var valueNode = new XElement("Value");
 
-                    valueNode.Value = value.EditedValue.ToString();
+                    if (!string.IsNullOrWhiteSpace(value.Culture)) {
+                        valueNode.Add(new XAttribute("Culture", value.Culture ?? string.Empty));
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(value.Segment)) {
+                       valueNode.Add(new XAttribute("Segment", value.Segment ?? string.Empty));
+                    }
+
+                    valueNode.Value = value.EditedValue?.ToString() ?? string.Empty;
 
                     propertyNode.Add(valueNode);
                 }
