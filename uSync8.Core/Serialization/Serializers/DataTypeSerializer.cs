@@ -78,7 +78,7 @@ namespace uSync8.Core.Serialization.Serializers
             if (string.IsNullOrWhiteSpace(folder)) return;
 
             var container = FindFolder(folderNode.GetKey(), folder);
-            if (container != null)
+            if (container != null && container.Id != item.ParentId)
             {
                 item.SetParent(container);
             }

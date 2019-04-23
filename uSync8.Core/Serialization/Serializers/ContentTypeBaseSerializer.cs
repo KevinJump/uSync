@@ -453,7 +453,7 @@ namespace uSync8.Core.Serialization.Serializers
             if (string.IsNullOrWhiteSpace(folder)) return;
 
             var container = FindFolder(folderNode.GetKey(), folder);
-            if (container != null)
+            if (container != null && container.Id != item.ParentId)
             {
                 item.SetParent(container);
             }
@@ -470,7 +470,7 @@ namespace uSync8.Core.Serialization.Serializers
             if (key != Guid.Empty)
             {
                 var entity = entityService.Get(key);
-                if (entity != null)
+                if (entity != null && entity.Id != item.ParentId)
                 {
                     item.SetParent(entity);
                     return true;
