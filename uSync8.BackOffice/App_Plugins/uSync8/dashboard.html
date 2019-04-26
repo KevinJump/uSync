@@ -6,7 +6,7 @@
                 <div>
                     <h3 class="bold"><localize key="usync_name">uSync 8</localize> 
                     <small ng-if="vm.addOnString.length > 0">+ {{vm.addOnString}}</small></h3>
-                    <em class="color-red">8.0-beta2</em>
+                    <em class="color-red">8.0-beta5</em>
                     <localize key="usync_intro"></localize>
                 </div>
                 <div class="flex flex-column usync-header-buttons">
@@ -249,7 +249,10 @@
                             <div>
                                 {{handler.Alias}}
                             </div>
-                            <div class="umb-permission__description">Enabled for : {{handler.DefaultConfig.Actions}}</div>
+                            <div class="umb-permission__description">Enabled for : 
+                                <span ng-if="handler.DefaultConfig.Actions.length > 0">{{handler.DefaultConfig.Actions}}</span>
+                                <span ng-if="!handler.DefaultConfig.Actions">All</span>
+                            </div>
                         </div>
                     </div>
                 </umb-box-content>
