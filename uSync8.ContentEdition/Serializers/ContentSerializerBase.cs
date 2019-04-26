@@ -128,6 +128,10 @@ namespace uSync8.ContentEdition.Serializers
             if (item.ParentId != parentId)
                 item.ParentId = parentId;
 
+            var key = node.GetKey();
+            if (key != Guid.Empty && item.Key != key)
+                item.Key = key;
+
             DeserializeName(item, node);
 
             return Attempt.Succeed("Info Deserialized");
