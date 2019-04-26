@@ -11,6 +11,7 @@ using Umbraco.Core.Services;
 using Umbraco.Core.Services.Implement;
 using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
+using uSync8.Core.Models;
 using uSync8.Core.Serialization;
 using uSync8.Core.Tracking;
 using uSync8.Core.Tracking.Impliment;
@@ -18,7 +19,7 @@ using uSync8.Core.Tracking.Impliment;
 namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("templateHandler", "Templates", "Templates", uSyncBackOfficeConstants.Priorites.Templates, Icon = "icon-layout")]
-    public class TemplateHandler : SyncHandlerBase<ITemplate, IFileService>, ISyncHandler
+    public class TemplateHandler : SyncHandlerLevelBase<ITemplate, IFileService>, ISyncHandler
     {
         private readonly IFileService fileService;
 
@@ -38,6 +39,7 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             // this might need some work - because its not a container thing ?
             this.itemContainerType = UmbracoObjectTypes.Unknown;
         }
+
 
         protected override ITemplate GetFromService(int id)
             => fileService.GetTemplate(id);

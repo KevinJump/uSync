@@ -261,6 +261,7 @@
     <Compile Include="SyncHandlers\SyncHandlerBase.cs" />
     <Compile Include="SyncHandlers\SyncHandlerContainerBase.cs" />
     <Compile Include="SyncHandlers\SyncHandlerTreeBase.cs" />
+    <Compile Include="SyncHandlers\SyncHandlerLevelBase.cs" />
     <Compile Include="uSyncAction.cs" />
     <Compile Include="uSyncBackofficeComponent.cs" />
     <Compile Include="uSyncBackOfficeComposer.cs" />
