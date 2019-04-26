@@ -12,6 +12,7 @@ using uSync8.Core;
 using uSync8.Core.Extensions;
 using uSync8.Core.Models;
 using uSync8.Core.Serialization;
+using Umbraco.Core;
 
 namespace uSync8.ContentEdition.Serializers
 {
@@ -91,5 +92,16 @@ namespace uSync8.ContentEdition.Serializers
 
         protected override IMedia FindItem(Guid key)
             => mediaService.GetById(key);
+
+        protected override IMedia FindAtRoot(string alias)
+        {
+            var rootNodes = mediaService.GetRootMedia();
+            if (rootNodes.Any())
+            {
+                return rootNodes.FirstOrDefault(x => x.Name.ToSafeAlias().InvariantEquals(alias));
+            }
+
+            return null;
+        }
     }
 }

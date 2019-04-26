@@ -253,7 +253,7 @@ namespace uSync8.ContentEdition.Serializers
                     path += GetItemPath(parent);
             }
 
-            return path += "/" + item.Name;
+            return path += "/" + item.Name.ToSafeAlias();
         }
 
         #region Finders 
@@ -302,13 +302,19 @@ namespace uSync8.ContentEdition.Serializers
             if (parent != null)
             {
                 var children = entityService.GetChildren(parent.Id, this.umbracoObjectType);
-                var child = children.FirstOrDefault(x => x.Name.InvariantEquals(alias));
+                var child = children.FirstOrDefault(x => x.Name.ToSafeAlias().InvariantEquals(alias));
                 if (child != null)
                     return FindItem(child.Id);
+            }
+            else
+            {
+                return FindAtRoot(alias);
             }
 
             return default(TObject);
         }
+
+        protected abstract TObject FindAtRoot(string alias);
 
 
         protected TObject FindParent(XElement node, bool searchByAlias = false)
@@ -337,7 +343,7 @@ namespace uSync8.ContentEdition.Serializers
         }
         protected TObject FindParentByPath(string path)
         {
-            var folders = path.ToDelimitedList().ToList();
+            var folders = path.ToDelimitedList("/").ToList();
             return FindByPath(folders.Take(folders.Count - 1));
         }
         protected TObject FindByPath(IEnumerable<string> folders)

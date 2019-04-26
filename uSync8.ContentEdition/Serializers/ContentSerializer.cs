@@ -185,6 +185,17 @@ namespace uSync8.ContentEdition.Serializers
             return null;
         }
 
+        protected override IContent FindAtRoot(string alias)
+        {
+            var rootNodes = contentService.GetRootContent();
+            if (rootNodes.Any())
+            {
+                return rootNodes.FirstOrDefault(x => x.Name.ToSafeAlias().InvariantEquals(alias));
+            }
+
+            return null;
+        }
+
         #endregion
 
 
