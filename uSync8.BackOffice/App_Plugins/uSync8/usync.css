@@ -119,3 +119,7 @@
     .usync-root-folder input {
         width: 100%;
     }
+
+.usync-not-animated .bar {
+    transition: none;
+}

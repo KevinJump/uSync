@@ -69,7 +69,7 @@ namespace uSync8.Core.Serialization.Serializers
 
             CleanTabs(item, node);
 
-            mediaTypeService.Save(item);
+            // mediaTypeService.Save(item);
 
             return SyncAttempt<IMediaType>.Succeed(
                 item.Name,
@@ -82,7 +82,8 @@ namespace uSync8.Core.Serialization.Serializers
         {
             DeserializeCompositions(item, node);
             DeserializeStructure(item, node);
-            mediaTypeService.Save(item);
+
+            // mediaTypeService.Save(item);
 
             return SyncAttempt<IMediaType>.Succeed(item.Name, item, ChangeType.Import);
         }

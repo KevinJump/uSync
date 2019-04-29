@@ -82,7 +82,8 @@ namespace uSync8.Core.Serialization.Serializers
                     item.SetMasterTemplate(masterItem);
             }
 
-            fileService.SaveTemplate(item);
+            // Deserialize now takes care of the save.
+            // fileService.SaveTemplate(item);
 
             return SyncAttempt<ITemplate>.Succeed(item.Name, item, ChangeType.Import);
         }
@@ -123,7 +124,10 @@ namespace uSync8.Core.Serialization.Serializers
         protected override ITemplate FindItem(Guid key)
             => fileService.GetTemplate(key);
 
+        protected override void SaveItem(ITemplate item)
+            => fileService.SaveTemplate(item);
 
-
+        public override void Save(IEnumerable<ITemplate> items)
+            => fileService.SaveTemplate(items);
     }
 }

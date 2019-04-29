@@ -53,6 +53,7 @@ namespace uSync8.BackOffice.SyncHandlers
         /// <returns></returns>
         protected override IEnumerable<uSyncAction> ImportFolder(string folder, HandlerSettings config, Dictionary<string, TObject> updates, bool force, SyncUpdateCallback callback)
         {
+
             // if not using flat, then directory structure is doing
             // this for us. 
             if (config.UseFlatStructure == false)
@@ -90,6 +91,9 @@ namespace uSync8.BackOffice.SyncHandlers
             }
 
             // loaded - now process.
+            var flags = SerializerFlags.None;
+            if (force) flags |= SerializerFlags.Force;
+            if (config.BatchSave) flags |= SerializerFlags.DoNotSave;
 
             var count = 0;
             foreach (var node in nodes.OrderBy(x => x.Level))
@@ -97,13 +101,20 @@ namespace uSync8.BackOffice.SyncHandlers
                 count++;
                 callback?.Invoke($"{Path.GetFileName(node.File)}", count, nodes.Count);
 
-                var attempt = Import(node.File, config, force);
+                var attempt = Import(node.File, config, flags);
                 if (attempt.Success && attempt.Item != null)
                 {
                     updates.Add(node.File, attempt.Item);
                 }
 
                 actions.Add(uSyncActionHelper<TObject>.SetAction(attempt, node.File, IsTwoPass));
+            }
+
+            if (flags.HasFlag(SerializerFlags.DoNotSave) && updates.Any())
+            {
+                // bulk save - should be the fastest way to do this
+                callback?.Invoke($"Saving {updates.Count()} changes", 1, 1);
+                serializer.Save(updates.Select(x => x.Value));
             }
 
             var folders = syncFileService.GetDirectories(folder);

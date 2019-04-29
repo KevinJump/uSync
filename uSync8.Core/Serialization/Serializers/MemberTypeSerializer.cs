@@ -72,7 +72,7 @@ namespace uSync8.Core.Serialization.Serializers
 
             CleanTabs(item, node);
 
-            memberTypeService.Save(item);
+            // memberTypeService.Save(item);
 
             return SyncAttempt<IMemberType>.Succeed(
                 item.Name,

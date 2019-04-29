@@ -1,11 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Xml.Linq;
+
 using Umbraco.Core.Models.Entities;
+
 using uSync8.Core.Models;
 
 namespace uSync8.Core.Serialization
 {
-   
+
     public interface ISyncSerializerBase
     {
         Type objectType { get; }
@@ -25,7 +28,7 @@ namespace uSync8.Core.Serialization
 
         SyncAttempt<XElement> SerializeEmpty(TObject item, string alias);
 
-        SyncAttempt<TObject> Deserialize(XElement node, bool force, bool onePass);
+        SyncAttempt<TObject> Deserialize(XElement node, SerializerFlags flags);
         SyncAttempt<TObject> DeserializeSecondPass(TObject item, XElement node);
 
         /// <summary>
@@ -37,5 +40,7 @@ namespace uSync8.Core.Serialization
         bool IsTwoPass { get; }
 
         string ItemType { get; }
+
+        void Save(IEnumerable<TObject> items);
     }
 }

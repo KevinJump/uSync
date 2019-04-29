@@ -97,7 +97,7 @@ namespace uSync8.Core.Serialization.Serializers
 
             RemoveOrphanProperties(item, properties);
 
-            macroService.Save(item);
+            // macroService.Save(item);
 
             var attempt = SyncAttempt<IMacro>.Succeed(item.Name, item, ChangeType.Import);
             if (changes.Any())
@@ -171,5 +171,7 @@ namespace uSync8.Core.Serialization.Serializers
         protected override IMacro FindItem(string alias)
             => macroService.GetByAlias(alias);
 
+        protected override void SaveItem(IMacro item)
+            => macroService.Save(item);
     }
 }

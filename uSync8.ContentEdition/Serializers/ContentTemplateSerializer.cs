@@ -53,7 +53,7 @@ namespace uSync8.ContentEdition.Serializers
 
             DeserializeBase(item, node);
 
-            contentService.SaveBlueprint(item);
+            // contentService.SaveBlueprint(item);
 
             return SyncAttempt<IContent>.Succeed(
                 item.Name,
@@ -108,5 +108,9 @@ namespace uSync8.ContentEdition.Serializers
             contentService.SaveBlueprint(item);
             return Attempt.Succeed<string>("blueprint saved");
         }
+
+        protected override void SaveItem(IContent item)
+            => contentService.SaveBlueprint(item);
     }
+
 }

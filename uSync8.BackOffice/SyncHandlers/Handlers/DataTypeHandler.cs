@@ -62,7 +62,7 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 
             foreach (var action in actions)
             {
-                var attempt = Import(action.FileName, config);
+                var attempt = Import(action.FileName, config, SerializerFlags.None);
                 if (attempt.Success)
                 {
                     ImportSecondPass(action.FileName, attempt.Item, config, null);

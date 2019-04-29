@@ -76,7 +76,7 @@ namespace uSync8.ContentEdition.Serializers
             }
 
 
-            domainService.Save(item);
+            // domainService.Save(item);
 
             return SyncAttempt<IDomain>.Succeed(item.DomainName, item, ChangeType.Import);
 
@@ -179,5 +179,8 @@ namespace uSync8.ContentEdition.Serializers
             return default(IContent);
         }
 
+
+        protected override void SaveItem(IDomain item)
+            => domainService.Save(item);
     }
 }

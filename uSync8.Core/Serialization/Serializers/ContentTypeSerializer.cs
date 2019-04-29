@@ -107,7 +107,7 @@ namespace uSync8.Core.Serialization.Serializers
             // templates 
             DeserializeTemplates(item, node);
 
-            contentTypeService.Save(item);
+            // contentTypeService.Save(item);
 
             return SyncAttempt<IContentType>.Succeed(
                 item.Name,
@@ -125,7 +125,8 @@ namespace uSync8.Core.Serialization.Serializers
         {
             DeserializeCompositions(item, node);
             DeserializeStructure(item, node);
-            contentTypeService.Save(item);
+            
+            // contentTypeService.Save(item);
 
             CleanFolder(item, node);
 

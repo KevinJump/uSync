@@ -34,6 +34,8 @@ namespace uSync8.BackOffice.Configuration
             settings.ExportAtStartup = node.Element("ExportAtStartup").ValueOrDefault(false);
             settings.ExportOnSave = node.Element("ExportOnSave").ValueOrDefault(true);
             settings.UseGuidNames = node.Element("UseGuidFilenames").ValueOrDefault(false);
+            settings.BatchSave = node.Element("BatchSave").ValueOrDefault(false);
+            settings.ReportDebug = node.Element("ReportDebug").ValueOrDefault(false);
 
             var handlerConfig = node.Element("Handlers");
 
@@ -64,6 +66,8 @@ namespace uSync8.BackOffice.Configuration
             node.CreateOrSetElement("ExportAtStartup", settings.ExportAtStartup);
             node.CreateOrSetElement("ExportOnSave", settings.ExportOnSave);
             node.CreateOrSetElement("UseGuidFilenames", settings.UseGuidNames);
+            node.CreateOrSetElement("BatchSave", settings.BatchSave);
+            node.CreateOrSetElement("ReportDebug", settings.ReportDebug);
 
             if (settings.Handlers != null && settings.Handlers.Any())
             {
@@ -83,6 +87,9 @@ namespace uSync8.BackOffice.Configuration
 
                     if (!handler.UseFlatStructure.IsOverridden)
                         handler.UseFlatStructure.SetDefaultValue(settings.UseFlatStructure);
+
+                    if (!handler.BatchSave.IsOverridden)
+                        handler.BatchSave.SetDefaultValue(settings.BatchSave);
 
                     var handlerNode = handlerConfig.Elements("Handler").FirstOrDefault(x => x.Attribute("Alias").Value == handler.Alias);
                     if (handlerNode == null)
@@ -128,7 +135,7 @@ namespace uSync8.BackOffice.Configuration
             // we get them from the global setting.
             settings.GuidNames = GetLocalValue(node.Attribute("GuidNames"), defaultSettings.UseGuidNames);
             settings.UseFlatStructure = GetLocalValue(node.Attribute("UseFlatStructure"), defaultSettings.UseFlatStructure);
-
+            settings.BatchSave = GetLocalValue(node.Attribute("BatchSave"), defaultSettings.BatchSave);
             settings.Actions = node.Attribute("Actions").ValueOrDefault("All").ToDelimitedList().ToArray();
 
             var settingNode = node.Element("Settings");
@@ -173,6 +180,9 @@ namespace uSync8.BackOffice.Configuration
 
             if (config.UseFlatStructure.IsOverridden)
                 node.SetAttributeValue("UseFlatStructure", config.UseFlatStructure);
+
+            if (config.BatchSave.IsOverridden)
+                node.SetAttributeValue("BatchSave", config.BatchSave);
 
             if (config.Actions.Length > 0 && !(config.Actions.Length == 1 && config.Actions[0].InvariantEquals("all")))
                 node.SetAttributeValue("Actions", string.Join(",", config.Actions));

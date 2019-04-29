@@ -9,6 +9,7 @@ using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
 using uSync8.Core.Extensions;
+using uSync8.Core.Models;
 
 namespace uSync8.Core.Serialization.Serializers
 {
@@ -638,6 +639,11 @@ namespace uSync8.Core.Serialization.Serializers
         override protected Attempt<OperationResult<OperationResultType, EntityContainer>> FindContainers(int parentId, string name)
             => baseService.CreateContainer(parentId, name);
 
+        protected override void SaveItem(TObject item)
+            => baseService.Save(item);
+
+        public override void Save(IEnumerable<TObject> items)
+            => baseService.Save(items);
 
         protected override void SaveContainer(EntityContainer container)
         {

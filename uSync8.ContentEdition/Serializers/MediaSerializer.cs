@@ -39,7 +39,7 @@ namespace uSync8.ContentEdition.Serializers
 
             DeserializeBase(item, node);
 
-            mediaService.Save(item);
+            // mediaService.Save(item);
 
             return SyncAttempt<IMedia>.Succeed(
                 item.Name, item, ChangeType.Import, "");
@@ -103,5 +103,12 @@ namespace uSync8.ContentEdition.Serializers
 
             return null;
         }
+
+        public override void Save(IEnumerable<IMedia> items)
+            => mediaService.Save(items);
+
+        protected override void SaveItem(IMedia item)
+            => mediaService.Save(item);
     }
+
 }

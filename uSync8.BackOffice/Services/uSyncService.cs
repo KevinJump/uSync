@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -46,6 +47,16 @@ namespace uSync8.BackOffice
 
             var summary = new SyncProgressSummary(configuredHandlers.Select(x => x.Handler), "Reporting", configuredHandlers.Count);
 
+            if (settings.ReportDebug)
+            {
+                // debug - full export into a dated folder. 
+                summary.Message = "Debug: Creating Extract in Tracker folder";
+                callback?.Invoke(summary);
+            }
+
+            this.Export($"~/uSync/Tracker/{DateTime.Now.ToString("yyyyMMdd_HHmmss")}/", null, null);
+
+
             foreach (var configuredHandler in configuredHandlers)
             {
                 var handler = configuredHandler.Handler;
@@ -74,6 +85,8 @@ namespace uSync8.BackOffice
         {
             lock (_importLock)
             {
+                var sw = Stopwatch.StartNew();
+
                 try
                 {
                     uSync8BackOffice.eventsPaused = true;
@@ -137,7 +150,8 @@ namespace uSync8.BackOffice
                         }
                     }
 
-                    summary.UpdateHandler("Post Import", HandlerStatus.Complete, "Import Completed");
+                    sw.Stop();
+                    summary.UpdateHandler("Post Import", HandlerStatus.Complete, $"Import Completed ({sw.ElapsedMilliseconds}ms)");
                     callback?.Invoke(summary);
 
                     return actions;

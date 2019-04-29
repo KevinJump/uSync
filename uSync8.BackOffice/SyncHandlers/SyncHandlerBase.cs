@@ -144,8 +144,11 @@ namespace uSync8.BackOffice.SyncHandlers
         protected virtual IEnumerable<uSyncAction> ImportFolder(string folder, HandlerSettings config, Dictionary<string, TObject> updates, bool force, SyncUpdateCallback callback)
         {
             List<uSyncAction> actions = new List<uSyncAction>();
-
             var files = syncFileService.GetFiles(folder, "*.config");
+
+            var flags = SerializerFlags.None;
+            if (force) flags |= SerializerFlags.Force;
+            if (config.BatchSave) flags |= SerializerFlags.DoNotSave;
 
             int count = 0;
             int total = files.Count();
@@ -155,7 +158,7 @@ namespace uSync8.BackOffice.SyncHandlers
 
                 callback?.Invoke($"Importing {Path.GetFileName(file)}", count, total);
 
-                var attempt = Import(file, config, force);
+                var attempt = Import(file, config, flags);
                 if (attempt.Success && attempt.Item != null)
                 {
                     updates.Add(file, attempt.Item);
@@ -166,6 +169,13 @@ namespace uSync8.BackOffice.SyncHandlers
                     action.Details = attempt.Details;
 
                 actions.Add(action);
+            }
+
+            // bulk save ..
+            if (flags.HasFlag(SerializerFlags.DoNotSave) && updates.Any())
+            {
+                callback?.Invoke($"Saving {updates.Count()} changes", 1, 1);
+                serializer.Save(updates.Select(x => x.Value));
             }
 
             var folders = syncFileService.GetDirectories(folder);
@@ -179,7 +189,7 @@ namespace uSync8.BackOffice.SyncHandlers
             return actions;
         }
 
-        virtual public SyncAttempt<TObject> Import(string filePath, HandlerSettings config, bool force = false)
+        virtual public SyncAttempt<TObject> Import(string filePath, HandlerSettings config, SerializerFlags flags)
         {
             try
             {
@@ -188,7 +198,7 @@ namespace uSync8.BackOffice.SyncHandlers
                 using (var stream = syncFileService.OpenRead(filePath))
                 {
                     var node = XElement.Load(stream);
-                    var attempt = serializer.Deserialize(node, force, false);
+                    var attempt = serializer.Deserialize(node, flags);
                     return attempt;
                 }
             }

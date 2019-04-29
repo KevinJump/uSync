@@ -152,6 +152,7 @@
     <Compile Include="Extensions\XElementExtensions.cs" />
     <Compile Include="Models\uSyncChange.cs" />
     <Compile Include="Serialization\ISyncSerializer.cs" />
+    <Compile Include="Serialization\SerializerFlags.cs" />
     <Compile Include="Serialization\Serializers\ContentTypeBaseSerializer.cs" />
     <Compile Include="Serialization\Serializers\ContentTypeSerializer.cs" />
     <Compile Include="Serialization\Serializers\DataTypeSerializer.cs" />

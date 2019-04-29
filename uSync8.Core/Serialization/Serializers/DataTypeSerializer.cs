@@ -23,14 +23,12 @@ namespace uSync8.Core.Serialization.Serializers
     public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncSerializer<IDataType>
     {
         private readonly IDataTypeService dataTypeService;
-        private IContentSection contentSection;
 
         public DataTypeSerializer(IEntityService entityService, ILogger logger,
-            IDataTypeService dataTypeService, IContentSection contentSection)
+            IDataTypeService dataTypeService)
             : base(entityService, logger, UmbracoObjectTypes.DataTypeContainer)
         {
             this.dataTypeService = dataTypeService;
-            this.contentSection = contentSection;
         }
 
         protected override SyncAttempt<IDataType> DeserializeCore(XElement node)
@@ -66,7 +64,7 @@ namespace uSync8.Core.Serialization.Serializers
 
             SetFolderFromElement(item, info.Element("Folder"));
 
-            dataTypeService.Save(item);
+            // dataTypeService.Save(item);
 
             return SyncAttempt<IDataType>.Succeed(item.Name, item, ChangeType.Import);
 
@@ -179,6 +177,12 @@ namespace uSync8.Core.Serialization.Serializers
 
         protected override Attempt<OperationResult<OperationResultType, EntityContainer>> FindContainers(int parentId, string name)
             => dataTypeService.CreateContainer(parentId, name);
+
+        protected override void SaveItem(IDataType item)
+            => dataTypeService.Save(item);
+
+        public override void Save(IEnumerable<IDataType> items)
+            => dataTypeService.Save(items);
 
         protected override void SaveContainer(EntityContainer container)
             => dataTypeService.SaveContainer(container);
