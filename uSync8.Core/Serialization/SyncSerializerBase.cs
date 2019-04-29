@@ -14,6 +14,7 @@ using uSync8.Core.Models;
 
 namespace uSync8.Core.Serialization
 {
+
     public abstract class SyncSerializerBase<TObject> : IDiscoverable
         where TObject : IEntity
     {
@@ -56,8 +57,9 @@ namespace uSync8.Core.Serialization
         {
             return SerializeCore(item);
         }
+     
 
-        public SyncAttempt<TObject> Deserialize(XElement node, bool force, bool OnePass)
+        public SyncAttempt<TObject> Deserialize(XElement node, SerializerFlags flags)
         {
             if (IsEmpty(node))
             {
@@ -70,14 +72,33 @@ namespace uSync8.Core.Serialization
                 throw new FormatException($"XML Not valid for type {ItemType}");
 
 
-            if (force || IsCurrent(node) > ChangeType.NoChange)
+            if ( flags.HasFlag(SerializerFlags.Force) || IsCurrent(node) > ChangeType.NoChange)
             {
                 logger.Debug<TObject>("Base: Deserializing");
                 var result = DeserializeCore(node);
-                if (OnePass && result.Success)
+
+                if (result.Success)
                 {
-                    logger.Debug<TObject>("Base: Second Pass");
-                    DeserializeSecondPass(result.Item, node);
+                    if (!flags.HasFlag(SerializerFlags.DoNotSave))
+                    {
+                        // save 
+                        SaveItem(result.Item);
+                    }
+
+                    if (flags.HasFlag(SerializerFlags.OnePass))
+                    {
+                        logger.Debug<TObject>("Base: Second Pass");
+                        var secondAttempt = DeserializeSecondPass(result.Item, node);
+                        if (secondAttempt.Success)
+                        {
+
+                            if (!flags.HasFlag(SerializerFlags.DoNotSave))
+                            {
+                                // save (again)
+                                SaveItem(secondAttempt.Item);
+                            }
+                        }
+                    }
                 }
 
                 return result;
@@ -192,6 +213,20 @@ namespace uSync8.Core.Serialization
 
         protected abstract TObject FindItem(Guid key);
         protected abstract TObject FindItem(string alias);
+
+        protected abstract void SaveItem(TObject item);
+
+        /// <summary>
+        ///  for bulk saving, some services do this, it causes less cache hits and 
+        ///  so should be faster. 
+        /// </summary>
+        public virtual void Save(IEnumerable<TObject> items)
+        {
+            foreach(var item in items)
+            {
+                this.SaveItem(item);
+            }
+        }
 
         public virtual TObject FindItem(XElement node)
         {

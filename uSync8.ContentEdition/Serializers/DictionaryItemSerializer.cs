@@ -87,7 +87,7 @@ namespace uSync8.ContentEdition.Serializers
 
             item.Translations = currentTranslations;
 
-            localizationService.Save(item);
+            // localizationService.Save(item);
         }
 
         protected override SyncAttempt<XElement> SerializeCore(IDictionaryItem item)
@@ -137,6 +137,9 @@ namespace uSync8.ContentEdition.Serializers
 
             return level;
         }
+
+        protected override void SaveItem(IDictionaryItem item)
+            => localizationService.Save(item);
 
     }
 }

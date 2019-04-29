@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -74,6 +75,8 @@ namespace uSync8.BackOffice
         {
             lock (_importLock)
             {
+                var sw = Stopwatch.StartNew();
+
                 try
                 {
                     uSync8BackOffice.eventsPaused = true;
@@ -137,7 +140,8 @@ namespace uSync8.BackOffice
                         }
                     }
 
-                    summary.UpdateHandler("Post Import", HandlerStatus.Complete, "Import Completed");
+                    sw.Stop();
+                    summary.UpdateHandler("Post Import", HandlerStatus.Complete, $"Import Completed ({sw.ElapsedMilliseconds}ms)");
                     callback?.Invoke(summary);
 
                     return actions;

@@ -52,8 +52,8 @@ namespace uSync8.Core.Serialization.Serializers
             if (fallback > 0)
                 item.FallbackLanguageId = fallback;
 
-            logger.Debug<ILanguage>("Saving Language");
-            localizationService.Save(item);
+            // logger.Debug<ILanguage>("Saving Language");
+            //localizationService.Save(item);
 
             return SyncAttempt<ILanguage>.Succeed(item.CultureName, item, ChangeType.Import);
         }
@@ -87,6 +87,9 @@ namespace uSync8.Core.Serialization.Serializers
             localizationService.GetLanguageByIsoCode(alias);
 
         protected override ILanguage FindItem(Guid key) => default(ILanguage);
+
+        protected override void SaveItem(ILanguage item)
+            => localizationService.Save(item);
 
         protected override XElement CleanseNode(XElement node)
         {

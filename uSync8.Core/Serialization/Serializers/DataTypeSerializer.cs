@@ -66,7 +66,7 @@ namespace uSync8.Core.Serialization.Serializers
 
             SetFolderFromElement(item, info.Element("Folder"));
 
-            dataTypeService.Save(item);
+            // dataTypeService.Save(item);
 
             return SyncAttempt<IDataType>.Succeed(item.Name, item, ChangeType.Import);
 
@@ -179,6 +179,12 @@ namespace uSync8.Core.Serialization.Serializers
 
         protected override Attempt<OperationResult<OperationResultType, EntityContainer>> FindContainers(int parentId, string name)
             => dataTypeService.CreateContainer(parentId, name);
+
+        protected override void SaveItem(IDataType item)
+            => dataTypeService.Save(item);
+
+        public override void Save(IEnumerable<IDataType> items)
+            => dataTypeService.Save(items);
 
         protected override void SaveContainer(EntityContainer container)
             => dataTypeService.SaveContainer(container);

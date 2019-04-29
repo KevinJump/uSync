@@ -103,7 +103,7 @@ namespace uSync8.ContentEdition.Serializers
 
             DeserializeBase(item, node);
 
-            contentService.Save(item);
+            // contentService.Save(item);
 
             return SyncAttempt<IContent>.Succeed(
                 item.Name,
@@ -198,6 +198,11 @@ namespace uSync8.ContentEdition.Serializers
 
         #endregion
 
+        public override void Save(IEnumerable<IContent> items)
+            => contentService.Save(items);
+
+        protected override void SaveItem(IContent item)
+            => contentService.Save(item);
 
     }
 }
