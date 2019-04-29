@@ -23,14 +23,12 @@ namespace uSync8.Core.Serialization.Serializers
     public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncSerializer<IDataType>
     {
         private readonly IDataTypeService dataTypeService;
-        private IContentSection contentSection;
 
         public DataTypeSerializer(IEntityService entityService, ILogger logger,
-            IDataTypeService dataTypeService, IContentSection contentSection)
+            IDataTypeService dataTypeService)
             : base(entityService, logger, UmbracoObjectTypes.DataTypeContainer)
         {
             this.dataTypeService = dataTypeService;
-            this.contentSection = contentSection;
         }
 
         protected override SyncAttempt<IDataType> DeserializeCore(XElement node)

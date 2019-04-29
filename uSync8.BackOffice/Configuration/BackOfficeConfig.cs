@@ -35,6 +35,7 @@ namespace uSync8.BackOffice.Configuration
             settings.ExportOnSave = node.Element("ExportOnSave").ValueOrDefault(true);
             settings.UseGuidNames = node.Element("UseGuidFilenames").ValueOrDefault(false);
             settings.BatchSave = node.Element("BatchSave").ValueOrDefault(false);
+            settings.ReportDebug = node.Element("ReportDebug").ValueOrDefault(false);
 
             var handlerConfig = node.Element("Handlers");
 
@@ -66,6 +67,7 @@ namespace uSync8.BackOffice.Configuration
             node.CreateOrSetElement("ExportOnSave", settings.ExportOnSave);
             node.CreateOrSetElement("UseGuidFilenames", settings.UseGuidNames);
             node.CreateOrSetElement("BatchSave", settings.BatchSave);
+            node.CreateOrSetElement("ReportDebug", settings.ReportDebug);
 
             if (settings.Handlers != null && settings.Handlers.Any())
             {
@@ -134,7 +136,6 @@ namespace uSync8.BackOffice.Configuration
             settings.GuidNames = GetLocalValue(node.Attribute("GuidNames"), defaultSettings.UseGuidNames);
             settings.UseFlatStructure = GetLocalValue(node.Attribute("UseFlatStructure"), defaultSettings.UseFlatStructure);
             settings.BatchSave = GetLocalValue(node.Attribute("BatchSave"), defaultSettings.BatchSave);
-
             settings.Actions = node.Attribute("Actions").ValueOrDefault("All").ToDelimitedList().ToArray();
 
             var settingNode = node.Element("Settings");

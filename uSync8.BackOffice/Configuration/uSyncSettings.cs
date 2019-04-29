@@ -14,7 +14,6 @@ namespace uSync8.BackOffice.Configuration
 
         public bool UseFlatStructure { get; set; } = true;
         public bool UseGuidNames { get; set; } = false;
-
         public bool BatchSave { get; set; } = false; 
 
         public bool ImportAtStartup { get; set; } = false;
@@ -23,6 +22,8 @@ namespace uSync8.BackOffice.Configuration
 
         public bool EnableMissingHandlers { get; set; } = true;
         public List<HandlerSettings> Handlers { get; set; } = new List<HandlerSettings>();
+
+        public bool ReportDebug { get; set; } = false;
     }
 
 }

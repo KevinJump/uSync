@@ -172,9 +172,9 @@ namespace uSync8.BackOffice.SyncHandlers
             }
 
             // bulk save ..
-            if (flags.HasFlag(SerializerFlags.DoNotSave))
+            if (flags.HasFlag(SerializerFlags.DoNotSave) && updates.Any())
             {
-                callback?.Invoke("Saving all changes", 1, 1);
+                callback?.Invoke($"Saving {updates.Count()} changes", 1, 1);
                 serializer.Save(updates.Select(x => x.Value));
             }
 

@@ -93,6 +93,7 @@ namespace uSync8.BackOffice.SyncHandlers
             // loaded - now process.
             var flags = SerializerFlags.None;
             if (force) flags |= SerializerFlags.Force;
+            if (config.BatchSave) flags |= SerializerFlags.DoNotSave;
 
             var count = 0;
             foreach (var node in nodes.OrderBy(x => x.Level))
@@ -109,10 +110,10 @@ namespace uSync8.BackOffice.SyncHandlers
                 actions.Add(uSyncActionHelper<TObject>.SetAction(attempt, node.File, IsTwoPass));
             }
 
-            if (flags.HasFlag(SerializerFlags.DoNotSave))
+            if (flags.HasFlag(SerializerFlags.DoNotSave) && updates.Any())
             {
                 // bulk save - should be the fastest way to do this
-                callback?.Invoke("Saving", 1, 1);
+                callback?.Invoke($"Saving {updates.Count()} changes", 1, 1);
                 serializer.Save(updates.Select(x => x.Value));
             }
 

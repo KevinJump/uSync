@@ -22,7 +22,7 @@ namespace uSync8.ContentEdition.Serializers
 
         protected UmbracoObjectTypes umbracoObjectType;
 
-        public ContentSerializerBase(IEntityService entityService, ILogger logger, UmbracoObjectTypes umbracoObjectType) 
+        public ContentSerializerBase(IEntityService entityService, ILogger logger, UmbracoObjectTypes umbracoObjectType)
             : base(entityService, logger)
         {
             this.umbracoObjectType = umbracoObjectType;
@@ -58,7 +58,7 @@ namespace uSync8.ContentEdition.Serializers
             info.Add(new XElement("Path", GetItemPath(item)));
 
             var title = new XElement("NodeName", new XAttribute("Default", item.Name));
-            foreach(var culture in item.AvailableCultures)
+            foreach (var culture in item.AvailableCultures)
             {
                 title.Add(new XElement("Name", item.GetCultureName(culture),
                     new XAttribute("Culture", culture)));
@@ -74,27 +74,29 @@ namespace uSync8.ContentEdition.Serializers
         {
             var node = new XElement("Properties");
 
-            foreach(var property in item.Properties.OrderBy(x => x.Alias))
+            foreach (var property in item.Properties.OrderBy(x => x.Alias))
             {
                 var propertyNode = new XElement(property.Alias);
 
-                foreach(var value in property.Values)
+                // this can cause us false change readings
+                // but we need to preserve the values if they are blank
+                // because we have to be able to set them to blank on deserialization
+                foreach (var value in property.Values)
                 {
                     var valueNode = new XElement("Value");
-
-                    if (!string.IsNullOrWhiteSpace(value.Culture)) {
+                    if (!string.IsNullOrWhiteSpace(value.Culture))
+                    {
                         valueNode.Add(new XAttribute("Culture", value.Culture ?? string.Empty));
                     }
 
-                    if (!string.IsNullOrWhiteSpace(value.Segment)) {
-                       valueNode.Add(new XAttribute("Segment", value.Segment ?? string.Empty));
+                    if (!string.IsNullOrWhiteSpace(value.Segment))
+                    {
+                        valueNode.Add(new XAttribute("Segment", value.Segment ?? string.Empty));
                     }
 
                     valueNode.Value = value.EditedValue?.ToString() ?? string.Empty;
-
                     propertyNode.Add(valueNode);
                 }
-
                 node.Add(propertyNode);
             }
 
@@ -147,7 +149,7 @@ namespace uSync8.ContentEdition.Serializers
             if (name != string.Empty)
                 item.Name = name;
 
-            foreach(var cultureNode in nameNode.Elements("Name"))
+            foreach (var cultureNode in nameNode.Elements("Name"))
             {
                 var culture = cultureNode.Attribute("Culture").ValueOrDefault(string.Empty);
                 if (culture == string.Empty) continue;
@@ -168,7 +170,7 @@ namespace uSync8.ContentEdition.Serializers
             if (properties == null || !properties.HasElements)
                 return Attempt.Fail(item, new Exception("No Properties in the content node"));
 
-            foreach(var property in properties.Elements())
+            foreach (var property in properties.Elements())
             {
                 var alias = property.Name.LocalName;
                 if (item.HasProperty(alias))
@@ -204,7 +206,7 @@ namespace uSync8.ContentEdition.Serializers
         }
 
         public override bool IsValid(XElement node)
-             => node != null 
+             => node != null
                 && node.GetKey() != null
                 && node.GetAlias() != null
                 && node.Element("Info") != null;
@@ -229,7 +231,8 @@ namespace uSync8.ContentEdition.Serializers
             // create
             var parent = default(TObject);
 
-            if (parentKey != Guid.Empty) {
+            if (parentKey != Guid.Empty)
+            {
                 parent = FindItem(parentKey);
             }
 

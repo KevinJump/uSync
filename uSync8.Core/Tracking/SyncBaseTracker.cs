@@ -1,8 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using System.Xml.XPath;
 using Umbraco.Core;
+using Umbraco.Core.IO;
 using Umbraco.Core.Models.Entities;
 using uSync8.Core.Extensions;
 using uSync8.Core.Models;
