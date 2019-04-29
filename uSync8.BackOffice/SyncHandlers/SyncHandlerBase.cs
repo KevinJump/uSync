@@ -263,8 +263,8 @@ namespace uSync8.BackOffice.SyncHandlers
             foreach (var item in items)
             {
                 count++;
-                var concreateType = GetFromService(item.Id);               
-                callback?.Invoke(item.Id.ToString(), count, items.Count);
+                var concreateType = GetFromService(item.Id);  
+                callback?.Invoke(GetItemName(concreateType), count, items.Count);
 
                 actions.Add(Export(concreateType, folder, config));
                 actions.AddRange(ExportAll(item.Id, folder, config, callback));
