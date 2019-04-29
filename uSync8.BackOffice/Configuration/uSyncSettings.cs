@@ -15,6 +15,8 @@ namespace uSync8.BackOffice.Configuration
         public bool UseFlatStructure { get; set; } = true;
         public bool UseGuidNames { get; set; } = false;
 
+        public bool BatchSave { get; set; } = false; 
+
         public bool ImportAtStartup { get; set; } = false;
         public bool ExportAtStartup { get; set; } = false;
         public bool ExportOnSave { get; set; } = true;

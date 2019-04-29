@@ -148,6 +148,7 @@ namespace uSync8.BackOffice.SyncHandlers
 
             var flags = SerializerFlags.None;
             if (force) flags |= SerializerFlags.Force;
+            if (config.BatchSave) flags |= SerializerFlags.DoNotSave;
 
             int count = 0;
             int total = files.Count();
@@ -173,7 +174,7 @@ namespace uSync8.BackOffice.SyncHandlers
             // bulk save ..
             if (flags.HasFlag(SerializerFlags.DoNotSave))
             {
-                callback?.Invoke("Saving", 1, 1);
+                callback?.Invoke("Saving all changes", 1, 1);
                 serializer.Save(updates.Select(x => x.Value));
             }
 
