@@ -242,6 +242,7 @@
     <Compile Include="Configuration\ConfigExtensions.cs" />
     <Compile Include="Configuration\OverriddenValue.cs" />
     <Compile Include="Configuration\uSyncHandlerSettings.cs" />
+    <Compile Include="Controllers\Trees\uSyncTreeController.cs" />
     <Compile Include="Controllers\uSyncDashboardApiController.cs" />
     <Compile Include="Hubs\HubClientService.cs" />
     <Compile Include="Hubs\uSyncHub.cs" />
@@ -277,8 +278,15 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="App_Plugins\uSync8\package.manifest" />
+    <Content Include="App_Plugins\uSync8\backoffice\uSync8\dashboard.html" />
+    <Content Include="App_Plugins\uSync8\backoffice\uSync8\uSyncDashboardController.js" />
     <Content Include="App_Plugins\uSync8\changeDialog.html" />
     <Content Include="App_Plugins\uSync8\changeDialogController.js" />
+    <Content Include="App_Plugins\uSync8\settings\default.html" />
+    <Content Include="App_Plugins\uSync8\settings\expansion.html" />
+    <Content Include="App_Plugins\uSync8\settings\settings.html" />
+    <Content Include="App_Plugins\uSync8\settings\settingsController.js" />
+    <Content Include="App_Plugins\uSync8\settings\uSyncController.js" />
     <Content Include="Config\uSync8.config" />
     <None Include="packages.config" />
     <None Include="Targets\uSync.props" />
@@ -292,7 +300,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="App_Plugins\uSync8\dashboard.html" />
     <Content Include="App_Plugins\uSync8\lang\en-US.xml" />
     <Content Include="App_Plugins\uSync8\usync.css" />
     <Content Include="App_Plugins\uSync8\uSyncDashboardController.js" />

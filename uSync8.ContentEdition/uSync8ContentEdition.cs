@@ -17,6 +17,17 @@ namespace uSync8.ContentEdition
     {
         public string Name => "Content Edition";
         public string Version => "8.0.0";
+
+
+        /// the following if you are an add on that displays like an app
+
+        // but content edition doesn't have an interface, so the view is empty. this hides it. 
+        public string View => string.Empty;
+        public string Icon => "icon-globe";
+        public string Alias => "Content";
+        public string DisplayName => "Content";
+
+        public int SortOrder => 10;
     }
 
     [ComposeAfter(typeof(uSyncCoreComposer))]
