@@ -291,6 +291,7 @@
     <None Include="packages.config" />
     <None Include="Targets\uSync.props" />
     <None Include="Targets\uSync.targets" />
+    <None Include="uSync.Backoffice.Core.nuspec" />
     <None Include="uSync.nuspec" />
   </ItemGroup>
   <ItemGroup>
