@@ -129,12 +129,12 @@ namespace uSync8.BackOffice.Controllers
                 var instance = Activator.CreateInstance(addOn) as ISyncAddOn;
                 if (instance != null)
                 {
-                    addOnInfo.AddOnString += $"{instance.Name} "; // [{instance.Version}] ";
                     addOnInfo.AddOns.Add(instance);
                 }
             }
 
             addOnInfo.AddOns = addOnInfo.AddOns.OrderBy(x => x.SortOrder).ToList();
+            addOnInfo.AddOnString = string.Join(", ", addOnInfo.AddOns.Select(x => x.Name));
 
             return addOnInfo;
         }
