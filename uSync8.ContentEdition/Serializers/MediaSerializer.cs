@@ -65,7 +65,7 @@ namespace uSync8.ContentEdition.Serializers
 
         protected override SyncAttempt<XElement> SerializeCore(IMedia item)
         {
-            var node = InitializeBaseNode(item, item.ContentType.Alias);
+            var node = InitializeNode(item, item.ContentType.Alias);
 
             var info = SerializeInfo(item);
             var properties = SerializeProperties(item);
