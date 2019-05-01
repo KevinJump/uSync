@@ -121,12 +121,13 @@ namespace uSync8.Core.Serialization.Serializers
             property.Variations = node.Element("Variations").ValueOrDefault(ContentVariation.Nothing);
         }
 
-        public override SyncAttempt<IContentType> DeserializeSecondPass(IContentType item, XElement node)
+        public override SyncAttempt<IContentType> DeserializeSecondPass(IContentType item, XElement node, SerializerFlags flags)
         {
             DeserializeCompositions(item, node);
             DeserializeStructure(item, node);
             
-            // contentTypeService.Save(item);
+            if (!flags.HasFlag(SerializerFlags.DoNotSave))
+                contentTypeService.Save(item);
 
             CleanFolder(item, node);
 

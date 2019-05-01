@@ -88,10 +88,9 @@ namespace uSync8.Core.Serialization
                     if (flags.HasFlag(SerializerFlags.OnePass))
                     {
                         logger.Debug<TObject>("Base: Second Pass");
-                        var secondAttempt = DeserializeSecondPass(result.Item, node);
+                        var secondAttempt = DeserializeSecondPass(result.Item, node, flags);
                         if (secondAttempt.Success)
                         {
-
                             if (!flags.HasFlag(SerializerFlags.DoNotSave))
                             {
                                 // save (again)
@@ -107,10 +106,9 @@ namespace uSync8.Core.Serialization
             return SyncAttempt<TObject>.Succeed(node.Name.LocalName, default(TObject), ChangeType.NoChange);
         }
 
-        public virtual SyncAttempt<TObject> DeserializeSecondPass(TObject item, XElement node)
+        public virtual SyncAttempt<TObject> DeserializeSecondPass(TObject item, XElement node, SerializerFlags flags)
         {
             return SyncAttempt<TObject>.Succeed(nameof(item), item, typeof(TObject), ChangeType.NoChange);
-
         }
 
         protected abstract SyncAttempt<XElement> SerializeCore(TObject item);

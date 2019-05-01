@@ -220,10 +220,14 @@ namespace uSync8.BackOffice.SyncHandlers
                 {
                     syncFileService.EnsureFileExists(file);
 
+                    var flags = SerializerFlags.None;
+                    if (config.BatchSave)
+                        flags |= SerializerFlags.DoNotSave;
+
                     using (var stream = syncFileService.OpenRead(file))
                     {
                         var node = XElement.Load(stream);
-                        serializer.DeserializeSecondPass(item, node);
+                        serializer.DeserializeSecondPass(item, node, flags);
                         stream.Dispose();
                     }
                 }

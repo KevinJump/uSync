@@ -45,7 +45,7 @@ namespace uSync8.ContentEdition.Serializers
                 item.Name, item, ChangeType.Import, "");
         }
 
-        public override SyncAttempt<IMedia> DeserializeSecondPass(IMedia item, XElement node)
+        public override SyncAttempt<IMedia> DeserializeSecondPass(IMedia item, XElement node, SerializerFlags flags)
         {
             DeserializeProperties(item, node);
 

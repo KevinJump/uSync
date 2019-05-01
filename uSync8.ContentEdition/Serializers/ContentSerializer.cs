@@ -113,7 +113,7 @@ namespace uSync8.ContentEdition.Serializers
         }
 
 
-        public override SyncAttempt<IContent> DeserializeSecondPass(IContent item, XElement node)
+        public override SyncAttempt<IContent> DeserializeSecondPass(IContent item, XElement node, SerializerFlags flags)
         {
             DeserializeProperties(item, node);
 
