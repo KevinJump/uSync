@@ -23,12 +23,13 @@
                     'icon': 'icon-settings',
                     'view': '/App_Plugins/uSync8/settings/settings.html'
                 },
+/*
                 {
                     'name': 'Add ons',
                     'alias': 'expansion',
                     'icon': 'icon-box',
                     'view': '/App_plugins/usync8/settings/expansion.html'
-                }
+                } */
             ]
         };
 
