@@ -29,7 +29,7 @@ namespace uSync8.Core.Serialization
         SyncAttempt<XElement> SerializeEmpty(TObject item, string alias);
 
         SyncAttempt<TObject> Deserialize(XElement node, SerializerFlags flags);
-        SyncAttempt<TObject> DeserializeSecondPass(TObject item, XElement node);
+        SyncAttempt<TObject> DeserializeSecondPass(TObject item, XElement node, SerializerFlags flags);
 
         /// <summary>
         ///  Returns true if the peice of xml is valid for this serializer

@@ -247,7 +247,10 @@ namespace uSync8.ContentEdition.Serializers
         protected virtual string GetItemPath(TObject item)
         {
             var entity = entityService.Get(item.Id);
-            return GetItemPath(entity);
+            if (entity != null)
+                return GetItemPath(entity);
+
+            return "";
         }
 
         protected virtual string GetItemPath(IEntitySlim item)

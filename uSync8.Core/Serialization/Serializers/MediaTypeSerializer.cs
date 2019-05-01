@@ -78,12 +78,13 @@ namespace uSync8.Core.Serialization.Serializers
                 "");
         }
 
-        public override SyncAttempt<IMediaType> DeserializeSecondPass(IMediaType item, XElement node)
+        public override SyncAttempt<IMediaType> DeserializeSecondPass(IMediaType item, XElement node, SerializerFlags flags)
         {
             DeserializeCompositions(item, node);
             DeserializeStructure(item, node);
 
-            // mediaTypeService.Save(item);
+            if (!flags.HasFlag(SerializerFlags.DoNotSave))
+                mediaTypeService.Save(item);
 
             return SyncAttempt<IMediaType>.Succeed(item.Name, item, ChangeType.Import);
         }

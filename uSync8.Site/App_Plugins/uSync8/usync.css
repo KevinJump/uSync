@@ -120,6 +120,23 @@
         width: 100%;
     }
 
+.usync-root-folder {
+    display: flex;
+    padding: 10px 0;
+    align-items: center;
+}
+
+    .usync-root-folder > .controls {
+        width: 100%; 
+        margin: auto;
+    }
+
+    .usync-root-folder > .control-label {
+        width: auto;
+        white-space: nowrap;
+        margin-bottom: 0;
+    }
+
 .usync-not-animated .bar {
     transition: none;
 }

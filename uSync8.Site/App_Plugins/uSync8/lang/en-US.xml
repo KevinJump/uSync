@@ -4,6 +4,9 @@
     <name>Jumoo</name>
     <link>http://jumoo.uk</link>
   </creator>
+  <area alias="treeHeaders">
+    <key alias="uSync8">uSync</key>
+  </area>
   <area alias="usync">
     <key alias="name">uSync 8</key>
     <key alias="intro">Database elements to and from disk</key>

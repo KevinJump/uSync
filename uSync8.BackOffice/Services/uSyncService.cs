@@ -52,10 +52,8 @@ namespace uSync8.BackOffice
                 // debug - full export into a dated folder. 
                 summary.Message = "Debug: Creating Extract in Tracker folder";
                 callback?.Invoke(summary);
+                this.Export($"~/uSync/Tracker/{DateTime.Now.ToString("yyyyMMdd_HHmmss")}/", null, null);
             }
-
-            this.Export($"~/uSync/Tracker/{DateTime.Now.ToString("yyyyMMdd_HHmmss")}/", null, null);
-
 
             foreach (var configuredHandler in configuredHandlers)
             {

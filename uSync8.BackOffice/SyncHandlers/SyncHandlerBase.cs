@@ -220,10 +220,14 @@ namespace uSync8.BackOffice.SyncHandlers
                 {
                     syncFileService.EnsureFileExists(file);
 
+                    var flags = SerializerFlags.None;
+                    if (config.BatchSave)
+                        flags |= SerializerFlags.DoNotSave;
+
                     using (var stream = syncFileService.OpenRead(file))
                     {
                         var node = XElement.Load(stream);
-                        serializer.DeserializeSecondPass(item, node);
+                        serializer.DeserializeSecondPass(item, node, flags);
                         stream.Dispose();
                     }
                 }
@@ -263,8 +267,8 @@ namespace uSync8.BackOffice.SyncHandlers
             foreach (var item in items)
             {
                 count++;
-                var concreateType = GetFromService(item.Id);               
-                callback?.Invoke(item.Id.ToString(), count, items.Count);
+                var concreateType = GetFromService(item.Id);  
+                callback?.Invoke(GetItemName(concreateType), count, items.Count);
 
                 actions.Add(Export(concreateType, folder, config));
                 actions.AddRange(ExportAll(item.Id, folder, config, callback));

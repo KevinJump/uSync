@@ -1,6 +1,10 @@
 {
   "javascript": [
-    "~/app_plugins/uSync8/uSyncDashboardController.js",
+    "~/app_plugins/uSync8/backoffice/uSync8/uSyncDashboardController.js",
+    "~/app_plugins/uSync8/settings/settingsController.js",
+    "~/app_plugins/uSync8/settings/uSyncController.js",
+
+
     "~/app_plugins/uSync8/uSyncService.js",
     "~/app_plugins/uSync8/uSyncHub.js",
     "~/app_plugins/uSync8/changeDialogController.js"
@@ -8,12 +12,5 @@
   "css": [
     "~/app_plugins/uSync8/usync.css"
   ],
-  "dashboards": [
-    {
-      "alias": "uSync8",
-      "name": "uSync",
-      "sections": [ "settings" ],
-      "view": "~/app_plugins/uSync8/dashboard.html"
-    }
-  ]
+
 }

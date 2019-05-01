@@ -119,8 +119,31 @@ namespace uSync8.BackOffice.Controllers
             Config.SaveSettings(settings, true);
         }
 
-        
+        public AddOnInfo GetAddOns()
+        {
+            var addOnInfo = new AddOnInfo();
 
+            var addOns = TypeFinder.FindClassesOfType<ISyncAddOn>();
+            foreach (var addOn in addOns)
+            {
+                var instance = Activator.CreateInstance(addOn) as ISyncAddOn;
+                if (instance != null)
+                {
+                    addOnInfo.AddOns.Add(instance);
+                }
+            }
+
+            addOnInfo.AddOns = addOnInfo.AddOns.OrderBy(x => x.SortOrder).ToList();
+            addOnInfo.AddOnString = string.Join(", ", addOnInfo.AddOns.Select(x => x.Name));
+
+            return addOnInfo;
+        }
+
+        public class AddOnInfo
+        {
+            public string AddOnString { get; set; }
+            public List<ISyncAddOn> AddOns { get; set; } = new List<ISyncAddOn>();
+        }
 
         public class SummaryHandler
         {
