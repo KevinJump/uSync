@@ -17,7 +17,7 @@ namespace uSync8.BackOffice
         internal class Trees
         {
             internal const string uSync = "uSync8";
-            internal const string Group = "uSync8";
+            internal const string Group = "sync";
         }
     }
 }

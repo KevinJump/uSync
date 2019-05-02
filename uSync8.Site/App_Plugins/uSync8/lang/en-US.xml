@@ -5,7 +5,7 @@
     <link>http://jumoo.uk</link>
   </creator>
   <area alias="treeHeaders">
-    <key alias="uSync8">uSync</key>
+    <key alias="sync">Synchronization</key>
   </area>
   <area alias="usync">
     <key alias="name">uSync 8</key>

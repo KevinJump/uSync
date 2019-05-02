@@ -8,7 +8,7 @@
 
         vm.page = {
             title: 'uSync 8',
-            description: 'beta6',
+            description: 'Release candidate',
             navigation: [
                 {
                     'name': 'uSync',
@@ -23,20 +23,22 @@
                     'icon': 'icon-settings',
                     'view': '/App_Plugins/uSync8/settings/settings.html'
                 },
-/*
                 {
                     'name': 'Add ons',
                     'alias': 'expansion',
                     'icon': 'icon-box',
                     'view': '/App_plugins/usync8/settings/expansion.html'
-                } */
+                } 
             ]
         };
 
 
         uSync8DashboardService.getAddOns()
             .then(function (result) {
-                vm.page.description += ' + ' + result.data.AddOnString;
+
+                if (result.data.AddOnString.length > 0) {
+                    vm.page.description += ' + ' + result.data.AddOnString;
+                }
                 vm.addOns = result.data.AddOns;
 
                 vm.addOns.forEach(function (value, key) {
