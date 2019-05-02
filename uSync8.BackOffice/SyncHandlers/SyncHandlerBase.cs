@@ -242,8 +242,12 @@ namespace uSync8.BackOffice.SyncHandlers
         #region Exporting
         virtual public IEnumerable<uSyncAction> ExportAll(string folder, HandlerSettings config, SyncUpdateCallback callback)
         {
-            // we clean the folder out on an export all. 
-            syncFileService.CleanFolder(folder);
+            // we dont clean the folder out on an export all. 
+            // because the actions (renames/deletes) live in the folder
+            //
+            // there will have to be a diffrent clean option
+            ///
+            // syncFileService.CleanFolder(folder);
 
             return ExportAll(-1, folder, config, callback);
         }
