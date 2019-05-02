@@ -9,6 +9,7 @@ using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
+using uSync8.ContentEdition.Mappers;
 using uSync8.Core;
 using uSync8.Core.Extensions;
 using uSync8.Core.Models;
@@ -21,11 +22,17 @@ namespace uSync8.ContentEdition.Serializers
     {
 
         protected UmbracoObjectTypes umbracoObjectType;
+        protected SyncValueMapperCollection syncMappers;
 
-        public ContentSerializerBase(IEntityService entityService, ILogger logger, UmbracoObjectTypes umbracoObjectType)
+        public ContentSerializerBase(
+            IEntityService entityService, 
+            ILogger logger, 
+            UmbracoObjectTypes umbracoObjectType,
+            SyncValueMapperCollection syncMappers)
             : base(entityService, logger)
         {
             this.umbracoObjectType = umbracoObjectType;
+            this.syncMappers = syncMappers;
         }
 
         protected virtual XElement InitializeNode(TObject item, string typeName)
@@ -184,7 +191,7 @@ namespace uSync8.ContentEdition.Serializers
                         var segment = value.Attribute("Segment").ValueOrDefault(string.Empty);
                         var propValue = value.ValueOrDefault(string.Empty);
 
-                        var itemValue = GetImportValue(current.PropertyType, propValue, culture, segment);
+                        var itemValue = GetImportValue(propValue, current.PropertyType, culture, segment);
                         item.SetValue(alias, itemValue, culture, segment);
                     }
 
@@ -194,16 +201,20 @@ namespace uSync8.ContentEdition.Serializers
             return Attempt.Succeed(item);
         }
 
-        protected string GetExportValue(PropertyType propertyType, object value, string culture, string segment)
+        protected string GetExportValue(object value, PropertyType propertyType, string culture, string segment)
         {
             // this is where the mapping magic will happen. 
-            return (string)value;
+            // at the moment there are no value mappers, but if we need
+            // them they plug in as ISyncMapper things
+            return syncMappers.GetExportValue(value, propertyType.PropertyEditorAlias);
         }
 
-        protected string GetImportValue(PropertyType propertyType, string value, string culture, string segment)
+        protected object GetImportValue(string value, PropertyType propertyType, string culture, string segment)
         {
             // this is where the mapping magic will happen. 
-            return value;
+            // at the moment there are no value mappers, but if we need
+            // them they plug in as ISyncMapper things
+            return syncMappers.GetImportValue(value, propertyType.PropertyEditorAlias);
         }
 
         public override bool IsValid(XElement node)

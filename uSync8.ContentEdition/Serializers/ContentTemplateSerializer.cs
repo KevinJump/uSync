@@ -9,6 +9,7 @@ using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
+using uSync8.ContentEdition.Mappers;
 using uSync8.Core;
 using uSync8.Core.Extensions;
 using uSync8.Core.Models;
@@ -24,8 +25,9 @@ namespace uSync8.ContentEdition.Serializers
         public ContentTemplateSerializer(
             IEntityService entityService, ILogger logger,
             IContentService contentService,
-            IContentTypeService contentTypeService)
-            : base(entityService, logger, contentService)
+            IContentTypeService contentTypeService,
+            SyncValueMapperCollection syncMappers)
+            : base(entityService, logger, contentService,syncMappers)
         {
             this.contentTypeService = contentTypeService;
         }

@@ -13,6 +13,7 @@ using uSync8.Core.Extensions;
 using uSync8.Core.Models;
 using uSync8.Core.Serialization;
 using Umbraco.Core;
+using uSync8.ContentEdition.Mappers;
 
 namespace uSync8.ContentEdition.Serializers
 {
@@ -23,8 +24,9 @@ namespace uSync8.ContentEdition.Serializers
 
         public MediaSerializer(
             IEntityService entityService, ILogger logger,
-            IMediaService mediaService) 
-            : base(entityService, logger, UmbracoObjectTypes.Media)
+            IMediaService mediaService,
+            SyncValueMapperCollection syncMappers)
+            : base(entityService, logger, UmbracoObjectTypes.Media, syncMappers)
         {
             this.mediaService = mediaService;
         }

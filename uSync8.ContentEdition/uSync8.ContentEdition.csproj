@@ -235,6 +235,9 @@
     <Compile Include="Handlers\DictionaryHandler.cs" />
     <Compile Include="Handlers\DomainHandler.cs" />
     <Compile Include="Handlers\MediaHandler.cs" />
+    <Compile Include="Mappers\ISyncMapper.cs" />
+    <Compile Include="Mappers\SyncValueMapperCollection.cs" />
+    <Compile Include="Mappers\SyncValueMapperFactory.cs" />
     <Compile Include="Serializers\ContentSerializer.cs" />
     <Compile Include="Serializers\ContentSerializerBase.cs" />
     <Compile Include="Serializers\ContentTemplateSerializer.cs" />

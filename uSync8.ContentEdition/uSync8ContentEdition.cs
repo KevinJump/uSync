@@ -10,6 +10,7 @@ using uSync8.ContentEdition.Tracker;
 using uSync8.Core;
 using uSync8.BackOffice;
 using uSync8.BackOffice.Models;
+using uSync8.ContentEdition.Mappers;
 
 namespace uSync8.ContentEdition
 {
@@ -46,6 +47,9 @@ namespace uSync8.ContentEdition
             composition.Register<ISyncTracker<IMedia>, MediaTracker>();
             composition.Register<ISyncTracker<IDictionaryItem>, DictionaryItemTracker>();
             composition.Register<ISyncTracker<IDomain>, DomainTracker>();
+
+            composition.WithCollectionBuilder<SyncValueMapperCollectionBuilder>()
+                .Add(() => composition.TypeLoader.GetTypes<ISyncMapper>());
 
         }
     }
