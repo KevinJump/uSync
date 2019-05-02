@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -45,8 +46,33 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 
         protected override void InitializeEvents(HandlerSettings settings)
         {
-            LocalizationService.SavedLanguage += EventSavedItem;
+            // LocalizationService.SavedLanguage += EventSavedItem;
             LocalizationService.DeletedLanguage += EventDeletedItem;
+
+            LocalizationService.SavedLanguage += LocalizationService_SavedLanguage;
+        }
+
+        private void LocalizationService_SavedLanguage(ILocalizationService sender, Umbraco.Core.Events.SaveEventArgs<ILanguage> e)
+        {
+            if (uSync8BackOffice.eventsPaused) return;
+
+            foreach (var item in e.SavedEntities)
+            {
+                if (item.WasPropertyDirty("IsDefault"))
+                {
+                    // changeing, this change doesn't trigger a save of the other languages.
+                    // so we need to save all language files. 
+                    this.ExportAll(Path.Combine(rootFolder, DefaultFolder), DefaultConfig, null);
+                }
+                else
+                {
+                    var attempt = Export(item, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
+                    if (attempt.Success)
+                    {
+                        this.CleanUp(item, attempt.FileName, Path.Combine(rootFolder, this.DefaultFolder));
+                    }
+                }
+            }
         }
 
         protected override IEnumerable<IEntity> GetExportItems(int parent, UmbracoObjectTypes objectType)
