@@ -132,5 +132,8 @@ namespace uSync8.Core.Serialization.Serializers
 
         protected override void DeleteItem(ITemplate item)
             => fileService.DeleteTemplate(item.Alias);
+
+        protected override string ItemAlias(ITemplate item)
+            => item.Alias;
     }
 }

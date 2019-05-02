@@ -326,6 +326,8 @@ namespace uSync8.ContentEdition.Serializers
 
         protected abstract TObject FindAtRoot(string alias);
 
+        protected override string ItemAlias(TObject item)
+            => item.Name;
 
         protected TObject FindParent(XElement node, bool searchByAlias = false)
         {

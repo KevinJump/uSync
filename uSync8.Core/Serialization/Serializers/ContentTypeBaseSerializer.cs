@@ -51,7 +51,6 @@ namespace uSync8.Core.Serialization.Serializers
                             new XElement("IsElement", item.IsElement));
         }
 
-
         protected XElement SerializeTabs(TObject item)
         {
             var tabs = new XElement("Tabs");
@@ -191,6 +190,10 @@ namespace uSync8.Core.Serialization.Serializers
             var isElement = info.Element("IsElement").ValueOrDefault(false);
             if (item.IsElement != isElement)
                 item.IsElement = isElement;
+
+            var isContainer = info.Element("IsContainer").ValueOrDefault(true);
+            if (item.IsContainer != isContainer)
+                item.IsContainer = isContainer;
 
             if (!SetMasterFromElement(item, info.Element("Parent")))
             {
@@ -653,6 +656,9 @@ namespace uSync8.Core.Serialization.Serializers
 
         protected override void DeleteItem(TObject item)
             => baseService.Delete(item);
+
+        protected override string ItemAlias(TObject item)
+            => item.Alias;
 
         #endregion
 

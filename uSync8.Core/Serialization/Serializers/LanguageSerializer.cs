@@ -100,5 +100,8 @@ namespace uSync8.Core.Serialization.Serializers
             return node;
         }
 
+        protected override string ItemAlias(ILanguage item)
+            => item.IsoCode;
+
     }
 }

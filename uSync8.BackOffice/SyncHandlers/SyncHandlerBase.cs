@@ -136,7 +136,7 @@ namespace uSync8.BackOffice.SyncHandlers
                 }
             }
 
-            callback?.Invoke("Done",1,1);
+            callback?.Invoke("Done", 1, 1);
             return actions;
         }
 
@@ -201,11 +201,11 @@ namespace uSync8.BackOffice.SyncHandlers
                     return attempt;
                 }
             }
-            catch(FileNotFoundException notFoundException)
+            catch (FileNotFoundException notFoundException)
             {
                 return SyncAttempt<TObject>.Fail(Path.GetFileName(filePath), ChangeType.Fail, $"File not found {notFoundException.Message}");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return SyncAttempt<TObject>.Fail(Path.GetFileName(filePath), ChangeType.Fail, $"Import Fail: {ex.Message}");
             }
@@ -230,7 +230,7 @@ namespace uSync8.BackOffice.SyncHandlers
                         stream.Dispose();
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     logger.Warn<TObject>($"Second Import Failed: {ex.Message}");
                 }
@@ -266,7 +266,7 @@ namespace uSync8.BackOffice.SyncHandlers
             foreach (var item in items)
             {
                 count++;
-                var concreateType = GetFromService(item.Id);  
+                var concreateType = GetFromService(item.Id);
                 callback?.Invoke(GetItemName(concreateType), count, items.Count);
 
                 actions.Add(Export(concreateType, folder, config));
@@ -341,39 +341,38 @@ namespace uSync8.BackOffice.SyncHandlers
             try
             {
                 var node = syncFileService.LoadXElement(file);
+                /*
                 if (node.IsEmptyItem())
                 {
                     return uSyncAction.SetAction(true, node.GetAlias(), typeof(TObject), ChangeType.Removed, "Removed Item");
                 }
-                else
+                */
+                try
                 {
-                    try
+                    var change = serializer.IsCurrent(node);
+
+                    var action = uSyncActionHelper<TObject>
+                        .ReportAction(change, node.GetAlias());
+
+                    action.Message = "";
+
+                    if (action.Change > ChangeType.NoChange)
                     {
-                        var change = serializer.IsCurrent(node);
-
-                        var action = uSyncActionHelper<TObject>
-                            .ReportAction(change, node.GetAlias());
-
-                        action.Message = "";
-
-                        if (action.Change > ChangeType.NoChange)
+                        action.Details = tracker.GetChanges(node);
+                        if (action.Details == null || action.Details.Count() == 0)
                         {
-                            action.Details = tracker.GetChanges(node);
-                            if (action.Details == null || action.Details.Count() == 0)
-                            {
-                                action.Message = "Change details cannot be calculated";
-                            }
-
-                            action.Message = $"{action.Change.ToString()}";
+                            action.Message = "Change details cannot be calculated";
                         }
 
-                        return action;
+                        action.Message = $"{action.Change.ToString()}";
                     }
-                    catch (FormatException fex)
-                    {
-                        return uSyncActionHelper<TObject>
-                            .ReportActionFail(Path.GetFileName(file), $"format error {fex.Message}");
-                    }
+
+                    return action;
+                }
+                catch (FormatException fex)
+                {
+                    return uSyncActionHelper<TObject>
+                        .ReportActionFail(Path.GetFileName(file), $"format error {fex.Message}");
                 }
             }
             catch (Exception ex)
@@ -415,7 +414,7 @@ namespace uSync8.BackOffice.SyncHandlers
         {
             if (uSync8BackOffice.eventsPaused) return;
 
-            foreach(var item in e.MoveInfoCollection)
+            foreach (var item in e.MoveInfoCollection)
             {
                 var attempt = Export(item.Entity, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
                 if (attempt.Success)
@@ -431,7 +430,7 @@ namespace uSync8.BackOffice.SyncHandlers
             if (item == null) return;
             var filename = GetPath(folder, item, config.GuidNames, config.UseFlatStructure);
 
-            var attempt = serializer.SerializeEmpty(item, GetItemName(item), SyncActionType.Delete);
+            var attempt = serializer.SerializeEmpty(item, SyncActionType.Delete, string.Empty);
             if (attempt.Success)
                 syncFileService.SaveXElement(attempt.Item, filename);
         }
@@ -449,11 +448,12 @@ namespace uSync8.BackOffice.SyncHandlers
 
             foreach (string file in files)
             {
-                if (!file.InvariantEquals(physicalFile)) {
+                if (!file.InvariantEquals(physicalFile))
+                {
                     var node = syncFileService.LoadXElement(file);
                     if (node.GetKey() == item.Key)
                     {
-                        var attempt = serializer.SerializeEmpty(item, GetItemName(item), SyncActionType.Rename);
+                        var attempt = serializer.SerializeEmpty(item, SyncActionType.Rename, node.GetAlias());
                         if (attempt.Success)
                         {
                             syncFileService.SaveXElement(attempt.Item, file);

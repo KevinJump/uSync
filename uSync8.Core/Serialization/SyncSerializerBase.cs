@@ -213,6 +213,8 @@ namespace uSync8.Core.Serialization
                 }
             }
 
+            if (IsEmpty(node)) return CalculateEmptyChange(node, item);
+
             var newHash = MakeHash(node);
 
             var currentNode = Serialize(item);
@@ -224,9 +226,49 @@ namespace uSync8.Core.Serialization
             return currentHash == newHash ? ChangeType.NoChange : ChangeType.Update;
         }
 
-        public virtual SyncAttempt<XElement> SerializeEmpty(TObject item, string alias, SyncActionType change)
+        private ChangeType CalculateEmptyChange(XElement node, TObject item)
+        {
+            // this shouldn't happen, but check.
+            if (item == null) return ChangeType.NoChange;
+
+            // simple logic, if it's a delete we say so, 
+            // renames are picked up by the check on the new file
+            if (node.GetEmptyAction() == SyncActionType.Delete) return ChangeType.Delete;
+            return ChangeType.NoChange;
+
+            //
+            //  if we want to do more with this, then this logic is needed 
+            /*
+            switch (node.GetEmptyAction())
+            {
+                case SyncActionType.Delete:
+                    return ChangeType.Delete;
+                case SyncActionType.Rename:
+                    // possiblity the rename has already happened ?
+                    // We are going to serialize the current item.
+                    // and then see if the names are the same. 
+                    var existingNode = Serialize(item);
+                    if (existingNode.Success)
+                    {
+                        if (existingNode.Item.GetAlias() == node.GetAlias())
+                        {
+                            // they are the same, so the rename hasn't happened yet.
+                            return ChangeType.NoChange;
+                        }
+                        logger.Info<TObject>("Current: {0} New: {1}", existingNode.Item.GetAlias(), node.GetAlias());
+                    }
+                    return ChangeType.NoChange;
+                default:
+                    return ChangeType.NoChange;
+            }*/
+        }
+
+        public virtual SyncAttempt<XElement> SerializeEmpty(TObject item, SyncActionType change, string alias)
         {
             logger.Debug<TObject>("Base: Serializing Empty Element (Delete or rename) {0}", alias);
+
+            if (string.IsNullOrEmpty(alias))
+                alias = ItemAlias(item);
 
             var node = new XElement(uSyncConstants.Serialization.Empty,
                 new XAttribute("Key", item.Key),
@@ -277,6 +319,8 @@ namespace uSync8.Core.Serialization
         protected abstract void SaveItem(TObject item);
 
         protected abstract void DeleteItem(TObject item);
+
+        protected abstract string ItemAlias(TObject item);
 
         /// <summary>
         ///  for bulk saving, some services do this, it causes less cache hits and 

@@ -143,5 +143,8 @@ namespace uSync8.ContentEdition.Serializers
 
         protected override void DeleteItem(IDictionaryItem item)
             => localizationService.Delete(item);
+
+        protected override string ItemAlias(IDictionaryItem item)
+            => item.ItemKey;
     }
 }

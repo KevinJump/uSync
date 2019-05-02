@@ -189,5 +189,9 @@ namespace uSync8.Core.Serialization.Serializers
 
         protected override void DeleteItem(IDataType item)
             => dataTypeService.Delete(item);
+
+
+        protected override string ItemAlias(IDataType item)
+            => item.Name;
     }
 }

@@ -33,6 +33,14 @@ namespace uSync8.Core.Extensions
             return node.Name.LocalName == uSyncConstants.Serialization.Empty;
         }
 
+        public static SyncActionType GetEmptyAction(this XElement node)
+        {
+            if (IsEmptyItem(node))
+                return node.Attribute("Change").ValueOrDefault<SyncActionType>(SyncActionType.None);
+
+            return SyncActionType.None;
+        }
+
         public static TObject ValueOrDefault<TObject>(this XElement node, TObject defaultValue)
         {
             var value = ValueOrDefault(node, string.Empty);

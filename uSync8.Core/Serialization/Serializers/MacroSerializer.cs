@@ -176,5 +176,8 @@ namespace uSync8.Core.Serialization.Serializers
 
         protected override void DeleteItem(IMacro item)
             => macroService.Delete(item);
+
+        protected override string ItemAlias(IMacro item)
+            => item.Alias;
     }
 }
