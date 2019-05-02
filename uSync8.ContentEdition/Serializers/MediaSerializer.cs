@@ -33,10 +33,6 @@ namespace uSync8.ContentEdition.Serializers
         {
             var item = FindOrCreate(node);
 
-            var name = node.Name.LocalName;
-            if (name != string.Empty)
-                item.Name = name;
-
             DeserializeBase(item, node);
 
             // mediaService.Save(item);

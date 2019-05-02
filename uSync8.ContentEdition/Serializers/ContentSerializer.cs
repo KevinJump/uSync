@@ -97,10 +97,6 @@ namespace uSync8.ContentEdition.Serializers
                 // TODO: Where has changed trashed state gone?
             }
 
-            var name = node.Name.LocalName;
-            if (name != string.Empty)
-                item.Name = name;
-
             DeserializeBase(item, node);
 
             // contentService.Save(item);
