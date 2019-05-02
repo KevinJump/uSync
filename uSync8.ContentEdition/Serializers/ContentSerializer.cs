@@ -175,13 +175,6 @@ namespace uSync8.ContentEdition.Serializers
 
         }
 
-        private void TrashItem(IContent item, XElement node)
-        {
-            var info = node.Element("Info");
-
-
-        }
-
         #endregion
 
         protected override IContent CreateItem(string alias, ITreeEntity parent, string itemType)

@@ -16,7 +16,7 @@ using uSync8.Core.Tracking;
 
 namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
-    [SyncHandler("memberTypeHandler", "Member Types", "MemberTypes", uSyncBackOfficeConstants.Priorites.MemberTypes, IsTwoPass = true, Icon = "icon-item-arrangement")]
+    [SyncHandler("memberTypeHandler", "Member Types", "MemberTypes", uSyncBackOfficeConstants.Priorites.MemberTypes, IsTwoPass = true, Icon = "icon-users")]
     public class MemberTypeHandler : SyncHandlerContainerBase<IMemberType, IMemberTypeService>, ISyncHandler
     {
         private readonly IMemberTypeService memberTypeService;

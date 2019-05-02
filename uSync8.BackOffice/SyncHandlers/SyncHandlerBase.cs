@@ -54,8 +54,6 @@ namespace uSync8.BackOffice.SyncHandlers
         protected UmbracoObjectTypes itemObjectType = UmbracoObjectTypes.Unknown;
         protected UmbracoObjectTypes itemContainerType = UmbracoObjectTypes.Unknown;
 
-        private string actionFile;
-
         public SyncHandlerBase(
             IEntityService entityService,
             IProfilingLogger logger,
@@ -106,8 +104,6 @@ namespace uSync8.BackOffice.SyncHandlers
             }
 
             rootFolder = setting.RootFolder;
-
-            actionFile = Path.Combine(rootFolder, $"_Actions/actions_{DefaultFolder}.config");
         }
 
         private void BackOfficeConfig_Reloaded(uSyncSettings settings)
@@ -155,7 +151,7 @@ namespace uSync8.BackOffice.SyncHandlers
             {
                 count++;
 
-                callback?.Invoke($"Importing {Path.GetFileName(file)}", count, total);
+                callback?.Invoke($"Importing {Path.GetFileNameWithoutExtension(file)}", count, total);
 
                 var attempt = Import(file, config, flags);
                 if (attempt.Success && attempt.Item != null)
@@ -326,7 +322,7 @@ namespace uSync8.BackOffice.SyncHandlers
             foreach (string file in files)
             {
                 count++;
-                callback?.Invoke(Path.GetFileName(file), count, total);
+                callback?.Invoke(Path.GetFileNameWithoutExtension(file), count, total);
 
                 actions.Add(ReportItem(file));
             }
@@ -345,12 +341,7 @@ namespace uSync8.BackOffice.SyncHandlers
             try
             {
                 var node = syncFileService.LoadXElement(file);
-                /*
-                if (node.IsEmptyItem())
-                {
-                    return uSyncAction.SetAction(true, node.GetAlias(), typeof(TObject), ChangeType.Removed, "Removed Item");
-                }
-                */
+
                 try
                 {
                     var change = serializer.IsCurrent(node);
