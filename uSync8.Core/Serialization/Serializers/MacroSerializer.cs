@@ -146,13 +146,18 @@ namespace uSync8.Core.Serialization.Serializers
             node.Add(new XElement("CachedDuration", item.CacheDuration));
 
             var properties = new XElement("Properties");
-            foreach (var property in item.Properties)
+            foreach (var propertyKey in item.Properties.Keys.OrderBy(x => x))
             {
-                properties.Add(new XElement("Property",
-                    new XElement("Name", property.Name),
-                    new XElement("Alias", property.Alias),
-                    new XElement("SortOrder", property.SortOrder),
-                    new XElement("EditorAlias", property.EditorAlias)));
+                var property = item.Properties[propertyKey];
+
+                if (property != null)
+                {
+                    properties.Add(new XElement("Property",
+                        new XElement("Name", property.Name),
+                        new XElement("Alias", property.Alias),
+                        new XElement("SortOrder", property.SortOrder),
+                        new XElement("EditorAlias", property.EditorAlias)));
+                }
             }
 
             node.Add(properties);
