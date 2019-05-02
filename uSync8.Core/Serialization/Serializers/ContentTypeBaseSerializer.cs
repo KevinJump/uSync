@@ -133,7 +133,7 @@ namespace uSync8.Core.Serialization.Serializers
         {
             var compNode = new XElement("Compositions");
             var compositions = item.ContentTypeComposition;
-            foreach (var composition in compositions.OrderBy(x => x.Key))
+            foreach (var composition in compositions.OrderBy(x => x.Alias))
             {
                 compNode.Add(new XElement("Composition", composition.Alias,
                     new XAttribute("Key", composition.Key)));
