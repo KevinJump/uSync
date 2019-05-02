@@ -90,7 +90,14 @@ namespace uSync8.ContentEdition.Serializers
         }
 
         protected override IContent FindItem(Guid key)
-            => contentService.GetBlueprintById(key);
+        {
+            // TODO: Umbraco 8 bug, the key isn sometimes an old version
+            var entity = entityService.Get(key);
+            if (entity != null)
+                return contentService.GetBlueprintById(entity.Id);
+
+            return null;
+        }
 
         protected override IContent FindItem(int id)
             => contentService.GetBlueprintById(id);

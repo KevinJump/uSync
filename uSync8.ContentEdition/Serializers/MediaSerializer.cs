@@ -87,7 +87,14 @@ namespace uSync8.ContentEdition.Serializers
             => mediaService.GetById(id);
 
         protected override IMedia FindItem(Guid key)
-            => mediaService.GetById(key);
+        {
+            // TODO: Umbraco 8 bug, find by key sometimes returns an old version
+            var entity = entityService.Get(key);
+            if (entity != null)
+                return mediaService.GetById(entity.Id);
+
+            return null;
+        }
 
         protected override IMedia FindAtRoot(string alias)
         {

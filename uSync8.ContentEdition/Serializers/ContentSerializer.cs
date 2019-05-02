@@ -173,7 +173,7 @@ namespace uSync8.ContentEdition.Serializers
 
         protected override IContent FindItem(Guid key)
         {
-            // TODO: Alpha version bug, the key isn sometimes an old version
+            // TODO: Umbraco 8 bug, the key isn sometimes an old version
             var entity = entityService.Get(key);
             if (entity != null)
                 return contentService.GetById(entity.Id);
