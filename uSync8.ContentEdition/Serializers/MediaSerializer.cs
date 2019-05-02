@@ -35,6 +35,8 @@ namespace uSync8.ContentEdition.Serializers
 
             DeserializeBase(item, node);
 
+            
+
             // mediaService.Save(item);
 
             return SyncAttempt<IMedia>.Succeed(
@@ -45,10 +47,29 @@ namespace uSync8.ContentEdition.Serializers
         {
             DeserializeProperties(item, node);
 
-            var sortOrder = node.Element("Info").Element("SortOrder").ValueOrDefault(-1);
+            var info = node.Element("Info");
+
+            var sortOrder = info.Element("SortOrder").ValueOrDefault(-1);
             if (sortOrder != -1)
             {
                 item.SortOrder = sortOrder;
+            }
+
+
+            var trashed = info.Element("Trashed").ValueOrDefault(false);
+            if (trashed)
+            {
+                if (!item.Trashed)
+                {
+                    mediaService.MoveToRecycleBin(item);
+                }
+                return SyncAttempt<IMedia>.Succeed(item.Name, ChangeType.Import); 
+            }
+
+            if (item.Trashed)
+            {
+                // remove from bin.
+                // ?
             }
 
             var attempt = mediaService.Save(item);

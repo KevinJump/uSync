@@ -56,6 +56,7 @@ namespace uSync8.ContentEdition.Serializers
 
             info.Add(new XElement("Parent", new XAttribute("Key", parentKey), parentName));
             info.Add(new XElement("Path", GetItemPath(item)));
+            info.Add(new XElement("Trashed", item.Trashed));
 
             var title = new XElement("NodeName", new XAttribute("Default", item.Name));
             foreach (var culture in item.AvailableCultures)

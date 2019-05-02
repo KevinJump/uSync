@@ -44,14 +44,23 @@ namespace uSync8.ContentEdition.Serializers
                 }
             }
 
+            var key = node.GetKey();
+
             if (item == null)
             {
                 item = new DictionaryItem(parentKey, alias);
+                item.Key = key;
             }
             else
             {
                 item.ParentId = parentKey;
             }
+
+            if (item.ItemKey != alias)
+                item.ItemKey = alias;
+
+            if (item.Key != key)
+                item.Key = key;
 
             DeserializeTranslations(item, node);
 
@@ -119,8 +128,7 @@ namespace uSync8.ContentEdition.Serializers
             return SyncAttempt<XElement>.Succeed(
                 item.ItemKey, node, typeof(IDictionaryItem), ChangeType.Export);
         }
-
-
+        
         protected override IDictionaryItem FindItem(Guid key)
             => localizationService.GetDictionaryItemById(key);
 

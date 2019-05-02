@@ -92,6 +92,7 @@ namespace uSync8.ContentEdition.Serializers
         {
 
             var item = FindOrCreate(node);
+
             if (item.Trashed)
             {
                 // TODO: Where has changed trashed state gone?
@@ -135,6 +136,22 @@ namespace uSync8.ContentEdition.Serializers
         {
             var info = node.Element("Info");
 
+            var trashed = info.Element("Trashed").ValueOrDefault(false);
+            if (trashed)
+            {
+                if (!item.Trashed)
+                {
+                    contentService.MoveToRecycleBin(item);
+                }
+                return Attempt.Succeed("Trashed");
+            }
+
+
+            if (item.Trashed)
+            {
+                // need to move it out of the trash.
+            }
+
             var published = info.Element("Published")?.Attribute("Default").ValueOrDefault(false) ?? false;
 
             if (published)
@@ -155,6 +172,13 @@ namespace uSync8.ContentEdition.Serializers
             }
 
             // TODO: Culture based publishing
+
+        }
+
+        private void TrashItem(IContent item, XElement node)
+        {
+            var info = node.Element("Info");
+
 
         }
 
