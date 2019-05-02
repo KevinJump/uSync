@@ -247,8 +247,6 @@
     <Compile Include="Hubs\HubClientService.cs" />
     <Compile Include="Hubs\uSyncHub.cs" />
     <Compile Include="Models\ISyncAddOn.cs" />
-    <Compile Include="Models\SyncAction.cs" />
-    <Compile Include="Services\SyncActionService.cs" />
     <Compile Include="Services\SyncFileService.cs" />
     <Compile Include="Models\SyncProgressModels.cs" />
     <Compile Include="Services\uSyncService.cs" />

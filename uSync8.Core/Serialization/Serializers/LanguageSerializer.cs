@@ -91,6 +91,9 @@ namespace uSync8.Core.Serialization.Serializers
         protected override void SaveItem(ILanguage item)
             => localizationService.Save(item);
 
+        protected override void DeleteItem(ILanguage item)
+            => localizationService.Delete(item);
+
         protected override XElement CleanseNode(XElement node)
         {
             node.Attribute("Key").Value = "";

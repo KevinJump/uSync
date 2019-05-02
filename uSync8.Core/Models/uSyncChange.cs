@@ -60,6 +60,16 @@ namespace uSync8.Core.Models
         {
             return Update(path, name, oldValue.ToString(), newValue.ToString());
         }
+
+        public static uSyncChange NoChange(string path, string name)
+        {
+            return new uSyncChange()
+            {
+                Name = name,
+                Path = path,
+                Change = ChangeDetailType.NoChange
+            };
+        }
     }
 
     public enum ChangeDetailType

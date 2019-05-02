@@ -72,6 +72,10 @@ namespace uSync8.ContentEdition.Serializers
             }
 
             var contentTypeAlias = node.Name.LocalName;
+            if (this.IsEmpty(node)) {
+                contentTypeAlias = node.GetAlias();
+            }
+
             var contentType = contentTypeService.Get(contentTypeAlias);
             if (contentType != null) {
                 var blueprints = contentService.GetBlueprintsForContentTypes(contentType.Id);
@@ -111,6 +115,9 @@ namespace uSync8.ContentEdition.Serializers
 
         protected override void SaveItem(IContent item)
             => contentService.SaveBlueprint(item);
+
+        protected override void DeleteItem(IContent item)
+            => contentService.DeleteBlueprint(item);
     }
 
 }

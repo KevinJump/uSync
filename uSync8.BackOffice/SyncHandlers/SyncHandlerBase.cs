@@ -123,7 +123,6 @@ namespace uSync8.BackOffice.SyncHandlers
             var actions = new List<uSyncAction>();
             var updates = new Dictionary<string, TObject>();
 
-            actions.AddRange(ProcessActions(false));
             actions.AddRange(ImportFolder(folder, config, updates, force, callback));
 
             if (updates.Any())
@@ -307,7 +306,6 @@ namespace uSync8.BackOffice.SyncHandlers
         {
             var actions = new List<uSyncAction>();
             callback?.Invoke("Checking Actions", 0, 1);
-            actions.AddRange(ProcessActions(true));
             actions.AddRange(ReportFolder(folder, config, callback));
             callback?.Invoke("Done", 1, 1);
             return actions;
@@ -393,58 +391,36 @@ namespace uSync8.BackOffice.SyncHandlers
         protected virtual void EventDeletedItem(IService sender, Umbraco.Core.Events.DeleteEventArgs<TObject> e)
         {
             if (uSync8BackOffice.eventsPaused) return;
-
-            var actionService = new SyncActionService(syncFileService, actionFile);
-            actionService.GetActions();
-
             foreach (var item in e.DeletedEntities)
             {
                 ExportDeletedItem(item, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
-                actionService.AddAction(item.Key, GetItemName(item), SyncActionType.Delete);
             }
-
-            actionService.SaveActions();
         }
 
         protected virtual void EventSavedItem(IService sender, SaveEventArgs<TObject> e)
         {
             if (uSync8BackOffice.eventsPaused) return;
 
-            var actionService = new SyncActionService(syncFileService, actionFile);
-            actionService.GetActions();
-
             foreach (var item in e.SavedEntities)
             {
                 var attempt = Export(item, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
                 if (attempt.Success)
                 {
-                    if (!DefaultConfig.GuidNames)
-                    {
-                        actionService.CleanActions(item.Key, GetItemName(item));
-                        this.CleanUp(item, attempt.FileName, Path.Combine(rootFolder, this.DefaultFolder));
-                    }
+                    this.CleanUp(item, attempt.FileName, Path.Combine(rootFolder, this.DefaultFolder));
                 }
             }
-            actionService.SaveActions();
         }
 
         protected virtual void EventMovedItem(IService sender, MoveEventArgs<TObject> e)
         {
             if (uSync8BackOffice.eventsPaused) return;
 
-            var actionService = new SyncActionService(syncFileService, actionFile);
-            actionService.GetActions();
-
             foreach(var item in e.MoveInfoCollection)
             {
                 var attempt = Export(item.Entity, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
                 if (attempt.Success)
                 {
-                    if (!DefaultConfig.GuidNames)
-                    {
-                        actionService.CleanActions(item.Entity.Key, GetItemName(item.Entity));
-                        this.CleanUp(item.Entity, attempt.FileName, Path.Combine(rootFolder, this.DefaultFolder));
-                    }
+                    this.CleanUp(item.Entity, attempt.FileName, Path.Combine(rootFolder, this.DefaultFolder));
                 }
             }
         }
@@ -455,7 +431,7 @@ namespace uSync8.BackOffice.SyncHandlers
             if (item == null) return;
             var filename = GetPath(folder, item, config.GuidNames, config.UseFlatStructure);
 
-            var attempt = serializer.SerializeEmpty(item, GetItemName(item));
+            var attempt = serializer.SerializeEmpty(item, GetItemName(item), SyncActionType.Delete);
             if (attempt.Success)
                 syncFileService.SaveXElement(attempt.Item, filename);
         }
@@ -477,7 +453,7 @@ namespace uSync8.BackOffice.SyncHandlers
                     var node = syncFileService.LoadXElement(file);
                     if (node.GetKey() == item.Key)
                     {
-                        var attempt = serializer.SerializeEmpty(item, GetItemName(item));
+                        var attempt = serializer.SerializeEmpty(item, GetItemName(item), SyncActionType.Rename);
                         if (attempt.Success)
                         {
                             syncFileService.SaveXElement(attempt.Item, file);
@@ -491,59 +467,6 @@ namespace uSync8.BackOffice.SyncHandlers
             {
                 CleanUp(item, newFile, children);
             }
-        }
-
-        #endregion
-
-        #region Actions
-
-
-        protected IEnumerable<uSyncAction> ProcessActions(bool report)
-        {
-            var updates = new List<uSyncAction>();
-
-            var actionService = new SyncActionService(syncFileService, actionFile);
-            var actions = actionService.GetActions();
-
-            if (actions != null && actions.Any())
-            {
-                foreach (var action in actions)
-                {
-                    switch (action.Action)
-                    {
-                        case SyncActionType.Delete:
-                            updates.Add(ProcessDelete(action.Key, action.Alias, report));
-                            break;
-                    }
-                }
-            }
-
-            return updates;
-        }
-
-        virtual public uSyncAction ProcessDelete(Guid key, string keyString, bool report)
-        {
-            var item = GetFromService(key);
-            if (item == null && !string.IsNullOrWhiteSpace(keyString))
-            {
-                item = GetFromService(keyString);
-            }
-
-            if (item != null)
-            {
-                var message = "";
-                if (!report)
-                {
-                    DeleteViaService(item);
-                }
-                else
-                {
-                    message = "Would be deleted";
-                }
-                return uSyncAction.SetAction(true, keyString, typeof(TObject), ChangeType.Delete, message);
-            }
-
-            return uSyncAction.SetAction(false, keyString, typeof(TObject), ChangeType.Removed);
         }
 
         #endregion

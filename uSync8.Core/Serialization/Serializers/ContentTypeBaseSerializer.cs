@@ -650,6 +650,10 @@ namespace uSync8.Core.Serialization.Serializers
             logger.Debug<TObject>("Saving Container: {0}", container.Key);
             baseService.SaveContainer(container);
         }
+
+        protected override void DeleteItem(TObject item)
+            => baseService.Delete(item);
+
         #endregion
 
     }

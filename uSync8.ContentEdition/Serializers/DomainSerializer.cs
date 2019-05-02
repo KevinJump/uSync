@@ -182,5 +182,8 @@ namespace uSync8.ContentEdition.Serializers
 
         protected override void SaveItem(IDomain item)
             => domainService.Save(item);
+
+        protected override void DeleteItem(IDomain item)
+            => domainService.Delete(item);
     }
 }

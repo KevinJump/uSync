@@ -204,5 +204,7 @@ namespace uSync8.ContentEdition.Serializers
         protected override void SaveItem(IContent item)
             => contentService.Save(item);
 
+        protected override void DeleteItem(IContent item)
+            => contentService.Delete(item);
     }
 }

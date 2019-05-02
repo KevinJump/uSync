@@ -63,9 +63,9 @@ namespace uSync8.Core.Serialization
         {
             if (IsEmpty(node))
             {
-                // empty node do nothing...
-                logger.Debug<TObject>("Base: Empty Node - No Action");
-                return SyncAttempt<TObject>.Succeed(node.GetAlias().ToString(), default(TObject), ChangeType.Removed, "Old Item (rename)");
+                // new behavior when a node is 'empty' that is a marker for a delete or rename
+                // so we process that action here, no more action file/folders
+                return ProcessAction(node, flags);
             }
 
             if (!IsValid(node))
@@ -140,17 +140,78 @@ namespace uSync8.Core.Serialization
                 && node.GetKey() != Guid.Empty
                 && node.GetAlias() != string.Empty;
 
-        protected bool IsEmpty(XElement node)
+        public bool IsEmpty(XElement node)
             => node.Name.LocalName == uSyncConstants.Serialization.Empty;
+
+        public bool IsValidOrEmpty(XElement node)
+            => IsEmpty(node) || IsValid(node);
+
+        protected SyncAttempt<TObject> ProcessAction(XElement node, SerializerFlags flags)
+        {
+            if (!IsEmpty(node))
+                throw new ArgumentException("Cannot process actions on a non-empty node");
+
+            var actionType = node.Attribute("Change").ValueOrDefault<SyncActionType>(SyncActionType.None);
+
+            var (key, alias) = FindKeyAndAlias(node);
+            
+            switch(actionType)
+            {
+                case SyncActionType.Delete:
+                    return ProcessDelete(key, alias, flags);
+                case SyncActionType.Rename:
+                    return ProcessRename(key, alias, flags);
+                default:
+                    return SyncAttempt<TObject>.Succeed(alias, ChangeType.NoChange);
+            }
+        }
+
+        protected virtual SyncAttempt<TObject> ProcessDelete(Guid key, string alias, SerializerFlags flags)
+        {
+            var item = this.FindItem(key);
+            if (item == null && !string.IsNullOrWhiteSpace(alias))
+            {
+                // we need to build in some awareness of alias matching in the folder
+                // because if someone deletes something in one place and creates it 
+                // somewhere else the alias will exist, so we don't want to delete 
+                // it from over there - this needs to be done at save time 
+                // (bascially if a create happens) - turn any delete files into renames
+                item = this.FindItem(alias);
+            }
+
+            if (item != null)
+            {
+                DeleteItem(item);
+                return SyncAttempt<TObject>.Succeed(alias, ChangeType.Delete);
+            }
+
+            return SyncAttempt<TObject>.Succeed(alias, ChangeType.NoChange);
+        }
+
+        protected virtual SyncAttempt<TObject> ProcessRename(Guid key, string alias, SerializerFlags flags)
+        {
+            return SyncAttempt<TObject>.Succeed(alias, ChangeType.NoChange);
+        }
 
         public ChangeType IsCurrent(XElement node)
         {
             if (node == null) return ChangeType.Update;
 
-            if (!IsValid(node)) throw new FormatException($"Invalid Xml File {node.Name.LocalName}");
+            if (!IsValidOrEmpty(node)) throw new FormatException($"Invalid Xml File {node.Name.LocalName}");
 
             var item = FindItem(node);
-            if (item == null) return ChangeType.Create;
+            if (item == null)
+            {
+                if (IsEmpty(node))
+                {
+                    // at this point its possible the file is for a rename or delete that has already happened
+                    return ChangeType.NoChange;
+                }
+                else
+                {
+                    return ChangeType.Create;
+                }
+            }
 
             var newHash = MakeHash(node);
 
@@ -163,13 +224,14 @@ namespace uSync8.Core.Serialization
             return currentHash == newHash ? ChangeType.NoChange : ChangeType.Update;
         }
 
-        public virtual SyncAttempt<XElement> SerializeEmpty(TObject item, string alias)
+        public virtual SyncAttempt<XElement> SerializeEmpty(TObject item, string alias, SyncActionType change)
         {
             logger.Debug<TObject>("Base: Serializing Empty Element (Delete or rename) {0}", alias);
 
             var node = new XElement(uSyncConstants.Serialization.Empty,
                 new XAttribute("Key", item.Key),
-                new XAttribute("Alias", alias));
+                new XAttribute("Alias", alias),
+                new XAttribute("Change", change));
 
             return SyncAttempt<XElement>.Succeed("Empty", node, ChangeType.Removed);
         }
@@ -200,7 +262,7 @@ namespace uSync8.Core.Serialization
 
         protected (Guid key, string alias) FindKeyAndAlias(XElement node)
         {
-            if (IsValid(node))
+            if (IsValidOrEmpty(node))
                 return (
                         key: node.Attribute("Key").ValueOrDefault(Guid.Empty),
                         alias: node.Attribute("Alias").ValueOrDefault(string.Empty)
@@ -213,6 +275,8 @@ namespace uSync8.Core.Serialization
         protected abstract TObject FindItem(string alias);
 
         protected abstract void SaveItem(TObject item);
+
+        protected abstract void DeleteItem(TObject item);
 
         /// <summary>
         ///  for bulk saving, some services do this, it causes less cache hits and 

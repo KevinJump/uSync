@@ -109,6 +109,9 @@ namespace uSync8.ContentEdition.Serializers
 
         protected override void SaveItem(IMedia item)
             => mediaService.Save(item);
+
+        protected override void DeleteItem(IMedia item)
+            => mediaService.Delete(item);
     }
 
 }

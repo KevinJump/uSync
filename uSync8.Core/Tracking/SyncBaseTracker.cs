@@ -27,8 +27,20 @@ namespace uSync8.Core.Tracking
 
         public virtual IEnumerable<uSyncChange> GetChanges(XElement node)
         {
+            if (serializer.IsEmpty(node))
+            {
+                return GetEmptyFileChanges(node).AsEnumerableOfOne();
+            }
+
             if (!serializer.IsValid(node))
-                return Enumerable.Empty<uSyncChange>();
+            {
+                // not valid 
+                return new uSyncChange() {
+                        Change = ChangeDetailType.Error,
+                        Name = "Invalid File",
+                        OldValue = node.Name.LocalName
+                }.AsEnumerableOfOne(); ;
+            }
 
             if (serializer.IsCurrent(node) == ChangeType.NoChange)
             {
@@ -54,6 +66,27 @@ namespace uSync8.Core.Tracking
             return Enumerable.Empty<uSyncChange>();
         }
 
+        private uSyncChange GetEmptyFileChanges(XElement node)
+        {
+            if (!serializer.IsEmpty(node))
+                throw new ArgumentException("Cannot calculate empty changes on a non empty file");
+
+            var item = serializer.FindItem(node);
+
+            if (item == null) return uSyncChange.NoChange("", node.GetAlias());
+
+            var action = node.Attribute("Change").ValueOrDefault<SyncActionType>(SyncActionType.None);
+
+            switch(action)
+            {
+                case SyncActionType.Delete:
+                    return uSyncChange.Delete(node.GetAlias(), "Delete", node.GetAlias());
+                case SyncActionType.Rename:
+                    return uSyncChange.Update(node.GetAlias(), "Rename", node.GetAlias(), "new name");
+                default:
+                    return uSyncChange.NoChange("", node.GetAlias());
+            }           
+        }
 
         private IEnumerable<uSyncChange> CalculateChanges(TrackedItem change, XElement current, XElement target, string name, string path)
         {

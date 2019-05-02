@@ -186,5 +186,8 @@ namespace uSync8.Core.Serialization.Serializers
 
         protected override void SaveContainer(EntityContainer container)
             => dataTypeService.SaveContainer(container);
+
+        protected override void DeleteItem(IDataType item)
+            => dataTypeService.Delete(item);
     }
 }

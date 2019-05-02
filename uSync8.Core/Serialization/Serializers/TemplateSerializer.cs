@@ -129,5 +129,8 @@ namespace uSync8.Core.Serialization.Serializers
 
         public override void Save(IEnumerable<ITemplate> items)
             => fileService.SaveTemplate(items);
+
+        protected override void DeleteItem(ITemplate item)
+            => fileService.DeleteTemplate(item.Alias);
     }
 }
