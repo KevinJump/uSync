@@ -71,10 +71,30 @@
     padding: 0.75em;
     margin-right: 14px;
     transition: all .3s ease-in;
+    position: relative;
 }
 
     .usync-handler-icon i {
         font-size: 40px;
+    }
+
+    .usync-handler-icon .handler-badge {
+        position: absolute;
+        top: 0;
+        right: 0;
+    }
+
+    .usync-handler-icon .badge.type-info {
+        background-color: #fad634;
+    }
+
+    .usync-handler-icon .badge.type-complete {
+        background-color: #35c786;
+    }
+
+    .usync-handler-icon .handler-badge i {
+        font-size: 16px;
+        color: #35c786;
     }
 
     .usync-handler-icon .usync-handler-name {
@@ -108,17 +128,17 @@
     display: flex;
 }
 
-.usync-settings > div {
-    width: 50%;
-}
+    .usync-settings > div {
+        width: 50%;
+    }
 
     .usync-settings .usync-main-settings {
         margin-right: 14px;
     }
 
-    .usync-root-folder input {
-        width: 100%;
-    }
+.usync-root-folder input {
+    width: 100%;
+}
 
 .usync-root-folder {
     display: flex;
@@ -127,7 +147,7 @@
 }
 
     .usync-root-folder > .controls {
-        width: 100%; 
+        width: 100%;
         margin: auto;
     }
 

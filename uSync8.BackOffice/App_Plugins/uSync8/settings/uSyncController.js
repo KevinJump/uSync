@@ -152,6 +152,15 @@
             return vm.showAll || (change !== 'NoChange' && change !== 'Removed');
         }
 
+        function setFilter(type) {  
+
+            if (vm.filter === type) {
+                vm.filter = '';
+            }
+            else {
+                vm.filter = type;
+            }
+        }
 
         ///////////
 

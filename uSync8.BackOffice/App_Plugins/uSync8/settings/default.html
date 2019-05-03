@@ -1,5 +1,5 @@
 ﻿<div ng-controller="uSync8Controller as vm">
-    <umb-box>
+    <umb-box> 
         <umb-box-content>
             <div>
                 <umb-button type="button"
@@ -32,9 +32,12 @@
             <div class="flex flex-wrap justify-center items-center">
                 <div ng-repeat="handler in vm.status.Handlers"
                      class="text-center usync-handler-icon"
-                     ng-class="{'usync-pending' : handler.Status == 0, 'usync-progress' : handler.Status == 1, 'usync-complete' : handler.Status == 2}">
+                     ng-class="{'usync-pending' : handler.Status == 0, 'usync-progress' : handler.Status == 1, 'usync-complete' : handler.Status == 2}"
+                     ng-click="vm.setFilter(handler.ItemType)">
                     <i class="icon {{handler.Icon}}"></i>
                     <div class="usync-handler-name">{{handler.Name}}</div>
+                    <div class="handler-badge badge type-complete" ng-if="handler.Changes > 0" title="{{handler.Changes}} changes">{{handler.Changes}}</div>
+                    <div class="handler-badge type-complete" ng-if="handler.Changes == 0 && handler.Status == 2"><i class="icon icon-check"></i></div>
                 </div>
             </div>
             <div class="flex justify-center">

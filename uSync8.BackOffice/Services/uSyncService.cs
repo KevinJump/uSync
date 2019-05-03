@@ -62,13 +62,14 @@ namespace uSync8.BackOffice
 
                 summary.Count++;
 
-                summary.UpdateHandler(handler.Name, HandlerStatus.Processing, $"Reporting {handler.Name}");
+                summary.UpdateHandler(handler.Name, HandlerStatus.Processing, $"Reporting {handler.Name}", 0);
 
                 callback?.Invoke(summary);
 
-                actions.AddRange(handler.Report($"{folder}/{handler.DefaultFolder}", handlerSettings, update));
+                var handlerActions = handler.Report($"{folder}/{handler.DefaultFolder}", handlerSettings, update);
+                actions.AddRange(handlerActions);
 
-                summary.UpdateHandler(handler.Name, HandlerStatus.Complete);
+                summary.UpdateHandler(handler.Name, HandlerStatus.Complete, ChangeCount(handlerActions));
             }
 
             summary.Message = "Report Complete";
@@ -109,20 +110,21 @@ namespace uSync8.BackOffice
                         summary.Count++;
 
                         summary.UpdateHandler(
-                            handler.Name, HandlerStatus.Processing, $"Importing {handler.Name}");
+                            handler.Name, HandlerStatus.Processing, $"Importing {handler.Name}", 0);
 
                         callback?.Invoke(summary);
 
-                        actions.AddRange(handler.ImportAll($"{folder}/{handler.DefaultFolder}", handlerSettings, force, update));
+                        var handlerActions = handler.ImportAll($"{folder}/{handler.DefaultFolder}", handlerSettings, force, update);
+                        actions.AddRange(handlerActions);
 
-                        summary.UpdateHandler(handler.Name, HandlerStatus.Complete);
+                        summary.UpdateHandler(handler.Name, HandlerStatus.Complete, ChangeCount(handlerActions));
                     }
 
 
                     // postImport things (mainly cleaning up folders)
 
                     summary.Count++;
-                    summary.UpdateHandler("Post Import", HandlerStatus.Pending, "Post Import Actions");
+                    summary.UpdateHandler("Post Import", HandlerStatus.Pending, "Post Import Actions", 0);
 
                     callback?.Invoke(summary);
 
@@ -149,7 +151,8 @@ namespace uSync8.BackOffice
                     }
 
                     sw.Stop();
-                    summary.UpdateHandler("Post Import", HandlerStatus.Complete, $"Import Completed ({sw.ElapsedMilliseconds}ms)");
+                    summary.UpdateHandler("Post Import", HandlerStatus.Complete,
+                        $"Import Completed ({sw.ElapsedMilliseconds}ms)", 0);
                     callback?.Invoke(summary);
 
                     return actions;
@@ -179,20 +182,28 @@ namespace uSync8.BackOffice
                 summary.Count++;
 
                 summary.UpdateHandler(
-                    handler.Name, HandlerStatus.Processing, $"Exporting {handler.Name}");
+                    handler.Name, HandlerStatus.Processing, $"Exporting {handler.Name}", 0);
 
                 callback?.Invoke(summary);
 
-                actions.AddRange(handler.ExportAll($"{folder}/{handler.DefaultFolder}", configuredHandler.Settings, update));
+                var handlerActions = handler.ExportAll($"{folder}/{handler.DefaultFolder}", configuredHandler.Settings, update);
 
-                summary.UpdateHandler(handler.Name, HandlerStatus.Complete);
+                actions.AddRange(handlerActions);
+
+                summary.UpdateHandler(handler.Name, HandlerStatus.Complete, ChangeCount(handlerActions));
             }
+
 
             summary.Message = "Export Completed";
             callback?.Invoke(summary);
 
             return actions;
 
+        }
+
+        private int ChangeCount(IEnumerable<uSyncAction> actions)
+        {
+            return actions.Count(x => x.Change > Core.ChangeType.NoChange);
         }
     }
    

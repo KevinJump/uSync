@@ -27,16 +27,26 @@ namespace uSync8.BackOffice
             }).ToList();
         }
 
+        /*
         public void UpdateHandler(string name, HandlerStatus status)
+        {
+            UpdateHandler(name, status, 0);
+        }*/
+
+        public void UpdateHandler(string name, HandlerStatus status, int changeCount)
         {
             var item = this.Handlers.FirstOrDefault(x => x.Name == name);
             if (item != null)
+            {
                 item.Status = status;
+                item.Changes = changeCount;
+            }
+
         }
 
-        public void UpdateHandler(string name, HandlerStatus status, string message)
+        public void UpdateHandler(string name, HandlerStatus status, string message, int changeCount)
         {
-            UpdateHandler(name, status);
+            UpdateHandler(name, status, changeCount);
             this.Message = message;
         }
 
@@ -47,6 +57,8 @@ namespace uSync8.BackOffice
         public string Icon { get; set; }
         public string Name { get; set; }
         public HandlerStatus Status { get; set; }
+
+        public int Changes { get; set; }
     }
 
     public enum HandlerStatus
