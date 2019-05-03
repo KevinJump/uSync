@@ -24,6 +24,8 @@ namespace uSync8.BackOffice.Configuration
         public List<HandlerSettings> Handlers { get; set; } = new List<HandlerSettings>();
 
         public bool ReportDebug { get; set; } = false;
+
+        public bool AddOnPing { get; set; } = true;
     }
 
 }

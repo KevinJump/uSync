@@ -2,8 +2,8 @@
   "javascript": [
     "~/app_plugins/uSync8/backoffice/uSync8/uSyncDashboardController.js",
     "~/app_plugins/uSync8/settings/settingsController.js",
+    "~/app_plugins/uSync8/settings/expansionController.js",
     "~/app_plugins/uSync8/settings/uSyncController.js",
-
 
     "~/app_plugins/uSync8/uSyncService.js",
     "~/app_plugins/uSync8/uSyncHub.js",

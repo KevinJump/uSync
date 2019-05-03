@@ -275,6 +275,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="App_Plugins\uSync8\addons.json" />
     <None Include="App_Plugins\uSync8\package.manifest" />
     <Content Include="App_Plugins\uSync8\backoffice\uSync8\dashboard.html" />
     <Content Include="App_Plugins\uSync8\backoffice\uSync8\uSyncDashboardController.js" />
@@ -282,6 +283,7 @@
     <Content Include="App_Plugins\uSync8\changeDialogController.js" />
     <Content Include="App_Plugins\uSync8\settings\default.html" />
     <Content Include="App_Plugins\uSync8\settings\expansion.html" />
+    <Content Include="App_Plugins\uSync8\settings\expansionController.js" />
     <Content Include="App_Plugins\uSync8\settings\settings.html" />
     <Content Include="App_Plugins\uSync8\settings\settingsController.js" />
     <Content Include="App_Plugins\uSync8\settings\uSyncController.js" />

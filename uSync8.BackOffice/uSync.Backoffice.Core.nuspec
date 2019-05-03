@@ -10,7 +10,7 @@
     <description>Just the core dll's from uSync (for extension development purposes)</description>
     <summary></summary>
     <releaseNotes>
-      8.0 - Beta release for Umbraco 8
+      8.0 - Release for Umbraco 8
     </releaseNotes>
     <dependencies>
       <dependency id="uSync.Core" version="$depends$"/>

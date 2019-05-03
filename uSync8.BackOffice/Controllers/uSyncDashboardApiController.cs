@@ -1,10 +1,16 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Http;
+using Umbraco.Core.Cache;
 using Umbraco.Core.Composing;
+using Umbraco.Core.IO;
 using Umbraco.Web.Mvc;
 using Umbraco.Web.WebApi;
 using Umbraco.Web.WebApi.Filters;
@@ -119,6 +125,66 @@ namespace uSync8.BackOffice.Controllers
             Config.SaveSettings(settings, true);
         }
 
+        [HttpGet]
+        public JObject GetAddOnSplash()
+        {
+            try
+            {
+                return JsonConvert.DeserializeObject<JObject>(GetContent());
+            }
+            catch(Exception ex)
+            {
+                // we need to just fail :( 
+            }
+
+            return new JObject();
+        }
+
+        private string GetContent()
+        {
+            if (!Config.Settings.AddOnPing) return GetLocal();
+
+            var cachedContent = AppCaches.RuntimeCache.GetCacheItem<string>("usync_addon");
+            if (!string.IsNullOrEmpty(cachedContent)) return cachedContent;
+
+            var remote = "https://jumoo.co.uk/usync/addon/";
+            try
+            {
+                using (var client = new WebClient())
+                {
+                    var content = client.DownloadString(remote);
+                    if (!string.IsNullOrWhiteSpace(content))
+                    {
+                        AppCaches.RuntimeCache.InsertCacheItem<string>("usync_addon", () => content);
+                    }
+
+                    return content;
+                }
+            }
+            catch
+            {
+                return GetLocal();
+            }
+        }
+
+        private string GetLocal()
+        {
+            try
+            {
+                var localFile = IOHelper.MapPath("~/App_Plugins/uSync8/addons.json");
+                if (File.Exists(localFile))
+                {
+                    return File.ReadAllText(localFile);
+                }
+            }
+            catch
+            {
+            }
+
+            return "{}";
+        }
+
+        [HttpGet]
         public AddOnInfo GetAddOns()
         {
             var addOnInfo = new AddOnInfo();

@@ -36,6 +36,7 @@ namespace uSync8.BackOffice.Configuration
             settings.UseGuidNames = node.Element("UseGuidFilenames").ValueOrDefault(false);
             settings.BatchSave = node.Element("BatchSave").ValueOrDefault(false);
             settings.ReportDebug = node.Element("ReportDebug").ValueOrDefault(false);
+            settings.AddOnPing = node.Element("AddOnPing").ValueOrDefault(true);
 
             var handlerConfig = node.Element("Handlers");
 

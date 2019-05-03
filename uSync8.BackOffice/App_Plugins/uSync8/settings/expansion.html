@@ -1,6 +1,39 @@
-﻿<umb-box>
-    <umb-box-header title="Expansion Packs"></umb-box-header>
-    <umb-box-content>
-        This is the placeholder for the Expansion packs page, things like uSync.Snapshots, and Audit.
-    </umb-box-content>
-</umb-box>
+﻿<div ng-controller="uSyncExpansionController as vm">
+    <umb-load-indicator ng-if="vm.loading"></umb-load-indicator>
+    <div ng-if="!vm.loading">
+        <umb-box>
+            <umb-box-header title="Expansion Packs"></umb-box-header>
+            <umb-box-content>
+                {{vm.addons.intro}}
+            </umb-box-content>
+        </umb-box>
+
+        <div class="usync-boxes">
+            <umb-box class="usync-box" ng-repeat="expansion in vm.addons.expansions"
+                     ng-class="{'usync-box-inprogress' : expansion.state === 'working'}">
+                <umb-box-header title="{{expansion.name}}"
+                                description="{{expansion.summary}}"></umb-box-header>
+                <umb-box-content>
+                    <div class="usync-box-icon">
+                        <i class="icon {{expansion.icon}}"></i>
+                    </div>
+                    <div>
+                        {{expansion.description}}
+                    </div>
+                    <div ng-if="expansion.state !== 'working'">
+                        <a href="{{expansion.url}}" target="_blank">More Info</a>
+                    </div>
+                    <div class="usync-box-nuget" ng-if="expansion.state !== 'working'">
+                        <a href="https://nuget.org/packages/{{expansion.package}}">
+                            install-package {{expansion.package}}
+                            <span ng-if="expansion.state === 'preview'">pre</span>
+                        </a>
+                    </div>
+                    <div ng-if="expansion.state === 'working'" class="text-success">
+                        Coming Soon!
+                    </div>
+                </umb-box-content>
+            </umb-box>
+        </div>
+    </div>
+</div>

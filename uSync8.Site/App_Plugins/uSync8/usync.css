@@ -160,3 +160,52 @@
 .usync-not-animated .bar {
     transition: none;
 }
+
+
+.usync-boxes {
+    display: grid;
+    grid-gap: 0;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    margin-left: -10px;
+    margin-right: -10px;
+}
+
+.usync-box {
+    max-width: 100%;
+    padding: 10px;
+    margin: 10px;
+    box-sizing: border-box;
+}
+
+.usync-box-icon {
+    font-size: 40px;
+}
+
+.usync-box .umb-box-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+    .usync-box .umb-box-content > * {
+        padding: 10px 0;
+    }
+
+.usync-box-nuget {
+    width: 100%;
+    text-align: left;
+}
+
+.usync-box-nuget a {
+    background-color: black;
+    display: block;
+    color: #fff;
+    font-family: monospace;
+    padding: 10px 10px;
+    border-radius: 4px;
+    margin: 10px 0;
+}
+
+.usync-box-inprogress { 
+    opacity: 0.5;
+}

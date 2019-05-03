@@ -23,7 +23,8 @@
             importItems: importItems,
             saveSettings: saveSettings,
             getLoadedHandlers: getLoadedHandlers,
-            getAddOns: getAddOns
+            getAddOns: getAddOns,
+            getAddOnSplash: getAddOnSplash
         };
 
         return service;
@@ -45,6 +46,11 @@
         function getAddOns() {
             return $http.get(serviceRoot + 'GetAddOns');
         }
+
+        function getAddOnSplash() {
+            return $http.get(serviceRoot + 'GetAddOnSplash');
+        }
+
 
         function report(clientId) {
             return $http.post(serviceRoot + 'report', { clientId: clientId });

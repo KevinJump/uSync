@@ -10,7 +10,7 @@
     <description>Database syncing for Umbraco Content, Media and Dictionary Items</description>
     <summary></summary>
     <releaseNotes>
-      8.0 - Beta release for Umbraco 8
+      8.0 - Release for Umbraco 8
     </releaseNotes>
     <dependencies>
       <dependency id="uSync" version="$depends$" />
