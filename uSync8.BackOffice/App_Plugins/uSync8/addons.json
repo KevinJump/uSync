@@ -1,0 +1,50 @@
+{
+  "intro": "Get more out of uSync",
+  "expansions": [
+    {
+      "name": "uSync Content Edition",
+      "summary": "Add content to your sync",
+      "icon": "icon-document",
+      "description": "Add Content, Media, Dictionary Items and Domain Settings to your uSync syncs",
+      "url": "https://jumoo.co.uk/usync/content/",
+      "package": "uSync.ContentEdition",
+      "state": "preview"
+    },
+    {
+      "name": "uSync Snapshots",
+      "summary": "Moment in time snapshots of your umbraco state",
+      "icon": "icon-flash",
+      "description": "Take moment in time snapshots of your umbraco site, and combine and apply them to target sites",
+      "url": "https://jumoo.co.uk/usync/snapshots/",
+      "package": "uSync.Snapshots",
+      "state": "working"
+    },
+    {
+      "name": "uSync Audit",
+      "summary": "Keep track of things",
+      "icon": "icon-ordered-list",
+      "description": "Log and audit the changes to your doctypes, datatypes and more, with links to slack",
+      "url": "https://jumoo.co.uk/usync/audit",
+      "package": "uSync.Audit",
+      "state": "working"
+    },
+    {
+      "name": "uSync People Edition",
+      "summary": "Users and Members",
+      "icon": "icon-user",
+      "description": "Sync user and membership accounts",
+      "url": "https://jumoo.co.uk/usync/people",
+      "package": "uSync.PeopleEdition",
+      "state": "working"
+    },
+    {
+      "name": "More soon",
+      "summary": "We're always adding options",
+      "icon": "icon-add",
+      "description": "Keep an eye out for new uSync expansion packages",
+      "url": "https://jumoo.co.uk/usync/expansion",
+      "package": " ",
+      "state": "working"
+    }
+  ]
+}
