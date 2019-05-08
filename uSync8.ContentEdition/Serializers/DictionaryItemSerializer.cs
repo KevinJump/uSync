@@ -14,7 +14,7 @@ using uSync8.Core.Serialization;
 
 namespace uSync8.ContentEdition.Serializers
 {
-    [SyncSerializer("4D18F4C3-6EBC-4AAD-8D20-6353BDBBD484", "Dicrionary Serializer", uSyncConstants.Serialization.Dicrionary)]
+    [SyncSerializer("4D18F4C3-6EBC-4AAD-8D20-6353BDBBD484", "Dicrionary Serializer", uSyncConstants.Serialization.Dictionary)]
     public class DictionaryItemSerializer : SyncSerializerBase<IDictionaryItem>, ISyncSerializer<IDictionaryItem>
     {
         private readonly ILocalizationService localizationService;

@@ -21,7 +21,7 @@ namespace uSync8.Core
             public const string Macro = "Macro";
             public const string Language = "Language";
 
-            public const string Dicrionary = "Dicrionary";
+            public const string Dictionary = "Dictionary";
             public const string Content = "Content";
             public const string Media = "Media";
             public const string Users = "Users";
