@@ -7,7 +7,7 @@
       <license url="https://opensource.org/licenses/MPL-2.0">Mozilla Public License 2.0</license>
       <url>http://jumoo.uk/uSync</url>
       <iconUrl>http://jumoo.co.uk/img/usyncicon.png</iconUrl>
-      <requirements>
+      <requirements type="Strict">
         <major>8</major>
         <minor>0</minor>
         <patch>0</patch>

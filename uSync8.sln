@@ -9,8 +9,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "uSync8.BackOffice", "uSync8
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionFiles", "SolutionFiles", "{6E911B34-61DC-471A-9AD7-97A74E9B3BE5}"
 	ProjectSection(SolutionItems) = preProject
+		Dist\createpackages.cmd = Dist\createpackages.cmd
 		gulpfile.js = gulpfile.js
 		Dist\package.cmd = Dist\package.cmd
+		Dist\package.ContentEdition.xml = Dist\package.ContentEdition.xml
 		Dist\package.xml = Dist\package.xml
 		readme.txt = readme.txt
 	EndProjectSection
@@ -18,6 +20,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "uSync8.ContentEdition", "uSync8.ContentEdition\uSync8.ContentEdition.csproj", "{875ECD47-2DCE-475A-BDDD-3B578A832419}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "uSync8.Site", "uSync8.Site\uSync8.Site.csproj", "{4DC0EA5C-B104-479C-9D84-DA64A039F98B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{AA729092-F6BF-43C2-8EB9-F92BCBD89C08}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
