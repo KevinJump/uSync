@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<umbPackage>
+  <info>
+    <package>
+      <name>uSync.ContentEdition</name>
+      <version>0.0.0</version>
+      <license url="https://opensource.org/licenses/MPL-2.0">Mozilla Public License 2.0</license>
+      <url>http://jumoo.uk/uSync</url>
+      <iconUrl>http://jumoo.co.uk/img/usyncicon.png</iconUrl>
+      <requirements>
+        <major>8</major>
+        <minor>0</minor>
+        <patch>0</patch>
+      </requirements>
+    </package>
+    <author>
+      <name>Kevin Jump</name>
+      <website>http://jumoo.uk</website>
+    </author>
+    <readme>
+      <![CDATA[
+      <p>
+      Adds Content/Media/Dicrionary Items/and Domains to uSync Process
+      </p>]]>
+    </readme>
+  </info>
+
+  <DocumentTypes />
+  <Templates />
+  <Stylesheets />
+  <Macros />
+  <DictionaryItems />
+  <Languages />
+  <DataTypes />
+
+  <Actions>
+  </Actions>
+
+  <control />
+
+  <files base="../uSync8.ContentEdition">
+    <file path="../uSync8.ContentEdition/Bin/Release/uSync8.ContentEdition.dll" orgPath="~/bin" />
+  </files>
+
+</umbPackage>
