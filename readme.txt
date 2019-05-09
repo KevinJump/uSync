@@ -5,19 +5,32 @@
  \__,_//____/\__, /_/ /_/\___/ 
 ----------- /____/ --- 8.x ------
 
-Thanks for trying out uSync 8.0 beta #H5YR
+Welcome to uSync 8 for Umbraco 8
 
-Note : uSync 8 - is not just an upgrade of uSync.
+I be not for Umbraco 7 :
 
-uSync deals with some fairly base stuff inside Umbraco and 
-when Umbraco changes uSync has to change too.
+  uSync 8 works only on Umbraco 8.x - if you have just installed
+  it on a Umbraco 7.x, you should uninstall now and go get a v4.x 
+  version.
 
-We have taken this opertunity to clean up some of the code
-in uSync - which means almost everything has changed .
+uSync 8 - is not just an upgrade of uSync
 
-As a result this beta is likely to be a little less stable
-then v4 of uSync, but as we iron out issues and work 
-towards a release we think we get an even more stable
-uSync then before. 
+ uSync deals with some fairly base stuff inside Umbraco and when
+ Umbraco changes uSync has to change too.
+ 
+ We have taken this opportunity to clean up some of the code in
+ uSync - which means underneath almost everything has changed, 
+ but we think this means we are more stable and changes should 
+ be more reliable. 
 
-Feedback and Join id : https://github.com/KevinJump/uSync8
+ Operationally it's very similar to uSync 4.x, but the files are
+ not 100% compatible so you can't upgrade a Umbraco 7 site to
+ Umbraco 8 with uSync (for now).
+
+ The action file is gone, now when you delete or rename something
+ we create overwrite the uSync file for that item with one telling
+ us it was a delete/rename. this makes deployment much nicer - and
+ less likely to break. 
+
+
+Feedback and Join in: https://github.com/KevinJump/uSync8
