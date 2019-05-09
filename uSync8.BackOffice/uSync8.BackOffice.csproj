@@ -303,7 +303,6 @@
   <ItemGroup>
     <Content Include="App_Plugins\uSync8\lang\en-US.xml" />
     <Content Include="App_Plugins\uSync8\usync.css" />
-    <Content Include="App_Plugins\uSync8\uSyncDashboardController.js" />
     <Content Include="App_Plugins\uSync8\uSyncHub.js" />
     <Content Include="App_Plugins\uSync8\uSyncService.js" />
   </ItemGroup>
