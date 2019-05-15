@@ -1,10 +1,12 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Http;
@@ -95,7 +97,7 @@ namespace uSync8.BackOffice.Controllers
         [HttpPost]
         public IEnumerable<uSyncAction> Report(uSyncOptions options)
         {
-            var hubClient = new HubClientService(options.clientId);
+            var hubClient = new HubClientService(options.ClientId);
             var summaryClient = new SummaryHandler(hubClient);
 
             return uSyncService.Report(settings.RootFolder, summaryClient.PostSummary, summaryClient.PostUdate);
@@ -104,7 +106,7 @@ namespace uSync8.BackOffice.Controllers
         [HttpPost]
         public IEnumerable<uSyncAction> Export(uSyncOptions options)
         {
-            var hubClient = new HubClientService(options.clientId);
+            var hubClient = new HubClientService(options.ClientId);
             var summaryClient = new SummaryHandler(hubClient);
 
             return uSyncService.Export(settings.RootFolder, summaryClient.PostSummary, summaryClient.PostUdate);
@@ -113,10 +115,10 @@ namespace uSync8.BackOffice.Controllers
         [HttpPut]
         public IEnumerable<uSyncAction> Import(uSyncOptions options)
         {
-            var hubClient = new HubClientService(options.clientId);
+            var hubClient = new HubClientService(options.ClientId);
             var summaryClient = new SummaryHandler(hubClient);
 
-            return uSyncService.Import(settings.RootFolder, options.force, summaryClient.PostSummary, summaryClient.PostUdate);
+            return uSyncService.Import(settings.RootFolder, options.Force, summaryClient.PostSummary, summaryClient.PostUdate);
         }
 
         [HttpPost]
@@ -205,6 +207,7 @@ namespace uSync8.BackOffice.Controllers
             return addOnInfo;
         }
 
+        [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
         public class AddOnInfo
         {
             public string AddOnString { get; set; }
@@ -237,11 +240,17 @@ namespace uSync8.BackOffice.Controllers
 
         }
 
+        [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
         public class uSyncOptions
         {
-            public string clientId { get; set; }
-            public bool force { get; set; }
-            public bool clean { get; set; }
+            [DataMember(Name = "clientId")]
+            public string ClientId { get; set; }
+
+            [DataMember(Name = "force")]
+            public bool Force { get; set; }
+
+            [DataMember(Name = "clean")]
+            public bool Clean { get; set; }
         }
     }
 }

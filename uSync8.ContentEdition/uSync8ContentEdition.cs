@@ -11,9 +11,12 @@ using uSync8.Core;
 using uSync8.BackOffice;
 using uSync8.BackOffice.Models;
 using uSync8.ContentEdition.Mappers;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace uSync8.ContentEdition
 {
+    [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
     public class uSyncContent : ISyncAddOn
     {
         public string Name => "Content Edition";

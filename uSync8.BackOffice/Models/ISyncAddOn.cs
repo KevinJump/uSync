@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,6 +12,7 @@ namespace uSync8.BackOffice.Models
     ///  An add on to usync, which allows you to inject a view onto the usync page
     ///  just like a content app. 
     /// </summary>
+    [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
     public interface ISyncAddOn
     {
         /// <summary>

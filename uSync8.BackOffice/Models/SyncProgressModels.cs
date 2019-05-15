@@ -1,9 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+using System.Collections.Generic;
 using System.Linq;
 using uSync8.BackOffice.SyncHandlers;
 
 namespace uSync8.BackOffice
 {
+    [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
     public class SyncProgressSummary
     {
         public int Count { get; set; }
@@ -25,13 +28,7 @@ namespace uSync8.BackOffice
                 Name = x.Name,
                 Status = HandlerStatus.Pending
             }).ToList();
-        }
-
-        /*
-        public void UpdateHandler(string name, HandlerStatus status)
-        {
-            UpdateHandler(name, status, 0);
-        }*/
+        }       
 
         public void UpdateHandler(string name, HandlerStatus status, int changeCount)
         {
@@ -52,6 +49,7 @@ namespace uSync8.BackOffice
 
     }
 
+    [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
     public class SyncHandlerSummary
     {
         public string Icon { get; set; }
