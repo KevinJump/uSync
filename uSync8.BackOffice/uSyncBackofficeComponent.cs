@@ -44,6 +44,12 @@ namespace uSync8.BackOffice
                 return;
             }
 
+            if (runtimeState.ServerRole == Umbraco.Core.Sync.ServerRole.Replica)
+            {
+                logger.Info<uSyncBackofficeComponent>("This is a replica server, uSync will not run any of the startup events");
+                return;
+            }
+
             using (logger.DebugDuration<uSyncBackofficeComponent>("uSync Starting"))
             {
                 InitBackOffice();
