@@ -1,4 +1,5 @@
 ﻿using System;
+using Umbraco.Core;
 using Umbraco.Core.Composing;
 using Umbraco.Core.Logging;
 using uSync8.BackOffice.Configuration;
@@ -15,15 +16,18 @@ namespace uSync8.BackOffice
         private readonly SyncFileService syncFileService;
         private readonly uSyncSettings globalSettings;
         private readonly uSyncService uSyncService;
+        private readonly IRuntimeState runtimeState;
 
         public uSyncBackofficeComponent(
             SyncHandlerCollection syncHandlers,
             IProfilingLogger logger,
             SyncFileService fileService,            
-            uSyncService uSyncService)
+            uSyncService uSyncService,
+            IRuntimeState runtimeState)
         {
             globalSettings = Current.Configs.uSync();
 
+            this.runtimeState = runtimeState;
             this.syncHandlers = syncHandlers;
             this.logger = logger;
 
@@ -34,8 +38,13 @@ namespace uSync8.BackOffice
 
         public void Initialize()
         {
+            if (runtimeState.Level <= RuntimeLevel.Run)
+            {
+                logger.Info<uSyncBackofficeComponent>("Umbraco is not in Run Mode {0} so uSync is not going to run", runtimeState.Level);
+                return;
+            }
 
-            using (logger.DebugDuration<uSyncBackOfficeComposer>("uSync Starting"))
+            using (logger.DebugDuration<uSyncBackofficeComponent>("uSync Starting"))
             {
                 InitBackOffice();
             }
