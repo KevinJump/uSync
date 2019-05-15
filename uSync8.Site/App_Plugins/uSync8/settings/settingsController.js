@@ -16,10 +16,6 @@
         ///////////
 
         function init() {
-
-            console.log('init settings');
-
-
             getSettings();
         }
 

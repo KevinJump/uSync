@@ -43,8 +43,6 @@
 
                 vm.addOns.forEach(function (value, key) {
                     if (value.View !== '') {
-                        console.log(value);
-
                         vm.page.navigation.splice(vm.page.navigation.length-2, 0, 
                         {
                             'name': value.DisplayName,
