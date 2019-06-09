@@ -49,7 +49,7 @@ namespace uSync8.Core.Serialization.Serializers
             if (editorAlias != item.EditorAlias)
             {
                 // change the editor type.....
-                var newEditor = Current.DataEditors.FirstOrDefault(x => x.Name.InvariantEquals(editorAlias));
+                var newEditor = Current.DataEditors.FirstOrDefault(x => x.Alias.InvariantEquals(editorAlias));
                 if (newEditor != null)
                 {
                     item.Editor = newEditor;
