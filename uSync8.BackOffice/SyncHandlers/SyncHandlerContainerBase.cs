@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Umbraco.Core.Events;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
@@ -41,7 +43,6 @@ namespace uSync8.BackOffice.SyncHandlers
         protected IEnumerable<uSyncAction> CleanFolders(string folder, int parent)
         {
             var actions = new List<uSyncAction>();
-
             var folders = entityService.GetChildren(parent, this.itemContainerType);
             foreach (var fdlr in folders)
             {
@@ -67,5 +68,50 @@ namespace uSync8.BackOffice.SyncHandlers
             return CleanFolders(folder, -1);
         }
 
+        /// <summary>
+        ///  will resave everything in a folder (and beneath)
+        ///  we need to this when it's renamed
+        /// </summary>
+        /// <param name="folderId"></param>
+        /// <param name="folder"></param>
+        /// <param name="config"></param>
+        /// <returns></returns>
+        protected IEnumerable<uSyncAction> UpdateFolder(int folderId, string folder, HandlerSettings config)
+        {
+            var actions = new List<uSyncAction>();
+            var folders = entityService.GetChildren(folderId, this.itemContainerType);
+            foreach (var fdlr in folders)
+            {
+                actions.AddRange(UpdateFolder(fdlr.Id, folder, config));
+            }
+
+            var items = entityService.GetChildren(folderId, this.itemObjectType);
+            foreach(var item in items)
+            {
+                var obj = GetFromService(item.Id);
+                if (obj != null)
+                {
+                    var attempt = Export(obj, folder, config);
+                    if (attempt.Success)
+                    {
+                        CleanUp(obj, attempt.FileName, folder);
+                    }
+                    actions.Add(attempt);
+                }
+            }
+
+            return actions;
+
+        }
+
+        protected void EventContainerSaved(IService service, SaveEventArgs<EntityContainer> e)
+        {
+            if (uSync8BackOffice.eventsPaused) return;
+
+            foreach(var folder in e.SavedEntities)
+            {
+                UpdateFolder(folder.Id, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
+            }
+        }
     }
 }

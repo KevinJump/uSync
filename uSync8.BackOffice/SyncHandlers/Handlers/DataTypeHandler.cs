@@ -43,7 +43,9 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
         {
             DataTypeService.Saved += EventSavedItem;
             DataTypeService.Deleted += EventDeletedItem;
-            DataTypeService.Moved += EventMovedItem; ;
+            DataTypeService.Moved += EventMovedItem;
+
+            DataTypeService.SavedContainer += EventContainerSaved;
         }
 
         protected override string GetItemFileName(IUmbracoEntity item, bool useGuid)

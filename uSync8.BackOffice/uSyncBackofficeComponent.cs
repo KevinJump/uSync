@@ -49,7 +49,7 @@ namespace uSync8.BackOffice
         {
             ServerVariablesParser.Parsing += ServerVariablesParser_Parsing;
 
-            if (runtimeState.Level <= RuntimeLevel.Run)
+            if (runtimeState.Level < RuntimeLevel.Run)
             {
                 logger.Info<uSyncBackofficeComponent>("Umbraco is not in Run Mode {0} so uSync is not going to run", runtimeState.Level);
                 return;
