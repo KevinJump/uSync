@@ -14,20 +14,20 @@
                     'name': 'uSync',
                     'alias': 'uSync',
                     'icon': 'icon-infinity',
-                    'view': '/App_plugins/usync8/settings/default.html',
+                    'view': Umbraco.Sys.ServerVariables.umbracoSettings.appPluginsPath + '/usync8/settings/default.html',
                     'active': true
                 },
                 {
                     'name': 'Settings',
                     'alias': 'settings',
                     'icon': 'icon-settings',
-                    'view': '/App_Plugins/uSync8/settings/settings.html'
+                    'view': Umbraco.Sys.ServerVariables.umbracoSettings.appPluginsPath + '/uSync8/settings/settings.html'
                 },
                 {
                     'name': 'Add ons',
                     'alias': 'expansion',
                     'icon': 'icon-box',
-                    'view': '/App_plugins/usync8/settings/expansion.html'
+                    'view': Umbraco.Sys.ServerVariables.umbracoSettings.appPluginsPath + '/usync8/settings/expansion.html'
                 } 
             ]
         };

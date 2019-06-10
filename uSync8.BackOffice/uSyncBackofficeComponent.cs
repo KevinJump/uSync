@@ -1,8 +1,17 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Web;
+using System.Web.Mvc;
+using System.Web.Routing;
+
 using Umbraco.Core;
 using Umbraco.Core.Composing;
 using Umbraco.Core.Logging;
+using Umbraco.Web;
+using Umbraco.Web.JavaScript;
+
 using uSync8.BackOffice.Configuration;
+using uSync8.BackOffice.Controllers;
 using uSync8.BackOffice.Services;
 using uSync8.BackOffice.SyncHandlers;
 
@@ -38,6 +47,8 @@ namespace uSync8.BackOffice
 
         public void Initialize()
         {
+            ServerVariablesParser.Parsing += ServerVariablesParser_Parsing;
+
             if (runtimeState.Level <= RuntimeLevel.Run)
             {
                 logger.Info<uSyncBackofficeComponent>("Umbraco is not in Run Mode {0} so uSync is not going to run", runtimeState.Level);
@@ -54,9 +65,23 @@ namespace uSync8.BackOffice
             {
                 InitBackOffice();
             }
+
         }
 
-        private void InitBackOffice()
+        private void ServerVariablesParser_Parsing(object sender, Dictionary<string, object> e)
+        {
+            if (HttpContext.Current == null)
+                throw new InvalidOperationException("This method requires that an HttpContext be active");
+
+            var urlHelper = new UrlHelper(new RequestContext(new HttpContextWrapper(HttpContext.Current), new RouteData()));
+
+            e.Add("uSync", new Dictionary<string, object>
+            {
+                { "uSyncService", urlHelper.GetUmbracoApiServiceBaseUrl<uSyncDashboardApiController>(controller => controller.GetApi()) }
+            });
+        }
+
+            private void InitBackOffice()
         {
             if (globalSettings.ExportAtStartup || (globalSettings.ExportOnSave && !syncFileService.RootExists(globalSettings.RootFolder)))
             {

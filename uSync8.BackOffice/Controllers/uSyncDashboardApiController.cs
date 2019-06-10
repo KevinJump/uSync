@@ -48,6 +48,11 @@ namespace uSync8.BackOffice.Controllers
             uSyncConfig.Reloaded += BackOfficeConfig_Reloaded;
         }
 
+        public bool GetApi()
+        {
+            return true;
+        }
+
         private void BackOfficeConfig_Reloaded(uSyncSettings settings)
         {
             this.settings = settings;

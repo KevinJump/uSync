@@ -12,7 +12,7 @@
 
     function uSyncServiceController($http) {
 
-        var serviceRoot = 'backoffice/uSync/uSyncDashboardApi/';
+        var serviceRoot = Umbraco.Sys.ServerVariables.uSync.uSyncService;
 
         var service = {
             getSettings: getSettings,
