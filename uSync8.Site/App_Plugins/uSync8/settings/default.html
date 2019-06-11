@@ -1,6 +1,7 @@
 <div ng-controller="uSync8Controller as vm">
-    <umb-box> 
-        <umb-box-content>
+
+    <umb-editor-sub-header>
+        <umb-editor-sub-header-content-left>
             <div>
                 <umb-button type="button"
                             button-style="info"
@@ -24,8 +25,8 @@
                             disabled="vm.working">
                 </umb-button>
             </div>
-        </umb-box-content>
-    </umb-box>
+        </umb-editor-sub-header-content-left>
+    </umb-editor-sub-header>
 
     <umb-box>
         <umb-box-content ng-if="vm.working || vm.reported">
