@@ -23,16 +23,18 @@ namespace uSync8.BackOffice.Controllers.Trees
         protected override TreeNode CreateRootNode(FormDataCollection queryStrings)
         {
             var root = base.CreateRootNode(queryStrings);
-            root.RoutePath = $"{Constants.Applications.Settings}/{uSync.Trees.uSync}/dashboard/";
+
+            root.RoutePath = $"{Constants.Applications.Settings}/{uSync.Trees.uSync}/dashboard";
             root.Icon = "icon-infinity";
             root.HasChildren = false;
-            root.Name = Services.TextService.Localize("usync", "name");
+            root.MenuUrl = null;
+
             return root;
         }
 
         protected override MenuItemCollection GetMenuForNode(string id, [ModelBinder(typeof(HttpQueryStringModelBinder))] FormDataCollection queryStrings)
         {
-            return new MenuItemCollection();
+            return null;
         }
 
         protected override TreeNodeCollection GetTreeNodes(string id, [ModelBinder(typeof(HttpQueryStringModelBinder))] FormDataCollection queryStrings)

@@ -6,6 +6,7 @@
   </creator>
   <area alias="treeHeaders">
     <key alias="sync">Synchronization</key>
+    <key alias="uSync8">uSync</key>
   </area>
   <area alias="usync">
     <key alias="name">uSync 8</key>
