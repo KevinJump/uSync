@@ -2,7 +2,7 @@
     'use strict';
 
     function dashboardController(
-        $scope, notificationsService, uSync8DashboardService) {
+        $scope, $timeout, navigationService, notificationsService, uSync8DashboardService) {
 
         var vm = this;
 
@@ -31,6 +31,10 @@
                 } 
             ]
         };
+
+        $timeout(function () {
+            navigationService.syncTree({ tree: "uSync8", path: "-1" });
+        });
 
 
         uSync8DashboardService.getAddOns()
