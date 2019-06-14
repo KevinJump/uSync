@@ -10,6 +10,7 @@ using uSync8.Core.Serialization;
 using uSync8.Core.Serialization.Serializers;
 using uSync8.Core.Tracking;
 using uSync8.Core.Tracking.Impliment;
+using uSync8.Core.DataTypes;
 
 namespace uSync8.Core
 {
@@ -22,6 +23,12 @@ namespace uSync8.Core
             composition.WithCollectionBuilder<USyncSerializerCollectionBuilder>()
                 .Add(() => composition.TypeLoader.GetTypes<ISyncSerializerBase>());
                 */
+
+            // register *all* ConfigurationSerializers except those marked [HideFromTypeFinder]
+            // has to happen before the DataTypeSerializer is loaded, because that is where
+            // they are used
+            composition.WithCollectionBuilder<ConfigurationSerializerCollectionBuilder>()
+                .Add(() => composition.TypeLoader.GetTypes<IConfigurationSerializer>());
 
             // register the core handlers (we will refactor to make this dynamic)
             composition.Register<ISyncSerializer<IContentType>, ContentTypeSerializer>();
@@ -41,6 +48,7 @@ namespace uSync8.Core
             composition.Register<ISyncTracker<ILanguage>, LanguageTracker>();
             composition.Register<ISyncTracker<IMacro>, MacroTracker>();
             composition.Register<ISyncTracker<IDataType>, DataTypeTracker>();
+
         }
     }
 }

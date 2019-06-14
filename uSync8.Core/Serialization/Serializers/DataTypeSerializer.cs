@@ -16,6 +16,7 @@ using uSync8.Core.Extensions;
 using uSync8.Core.Models;
 using Umbraco.Core.Configuration.UmbracoSettings;
 using Umbraco.Core.PropertyEditors;
+using uSync8.Core.DataTypes;
 
 namespace uSync8.Core.Serialization.Serializers
 {
@@ -23,12 +24,15 @@ namespace uSync8.Core.Serialization.Serializers
     public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncSerializer<IDataType>
     {
         private readonly IDataTypeService dataTypeService;
+        private readonly ConfigurationSerializerCollection configurationSerializers;
 
         public DataTypeSerializer(IEntityService entityService, ILogger logger,
-            IDataTypeService dataTypeService)
+            IDataTypeService dataTypeService,
+            ConfigurationSerializerCollection configurationSerializers)
             : base(entityService, logger, UmbracoObjectTypes.DataTypeContainer)
         {
             this.dataTypeService = dataTypeService;
+            this.configurationSerializers = configurationSerializers;
         }
 
         protected override SyncAttempt<IDataType> DeserializeCore(XElement node)
@@ -89,9 +93,16 @@ namespace uSync8.Core.Serialization.Serializers
 
             if (!string.IsNullOrWhiteSpace(config))
             {
-                // should be one of thesE ? 
-                // item.Configuration = JsonConvert.DeserializeObject<Dictionary<string, object>>(config);
-                item.Configuration = JsonConvert.DeserializeObject(config, item.Configuration.GetType());
+
+                var serializer = this.configurationSerializers.GetSerializer(item.EditorAlias);
+                if (serializer == null)
+                {
+                    item.Configuration = JsonConvert.DeserializeObject(config, item.Configuration.GetType());
+                }
+                else
+                {
+                    item.Configuration = serializer.DeserializeConfig(config, item.Configuration.GetType());
+                }
             }
         }
   
@@ -130,7 +141,19 @@ namespace uSync8.Core.Serialization.Serializers
             // item.Configuration
             if (item.Configuration != null)
             {
-                return new XElement("Config", new XCData(JsonConvert.SerializeObject(item.Configuration, Formatting.Indented)));
+                var serializer = this.configurationSerializers.GetSerializer(item.EditorAlias);
+
+                string config;
+                if (serializer != null)
+                {
+                    config = serializer.SerializeConfig(item.Configuration);
+                }
+                else
+                {
+                    config = JsonConvert.SerializeObject(item.Configuration, Formatting.Indented);
+                }
+
+                return new XElement("Config", new XCData(config));
             }
 
             return null;
