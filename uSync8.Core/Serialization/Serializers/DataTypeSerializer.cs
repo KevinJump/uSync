@@ -101,6 +101,7 @@ namespace uSync8.Core.Serialization.Serializers
                 }
                 else
                 {
+                    logger.Debug<DataTypeSerializer>("Deserializing Config via {0}", serializer.Name);
                     item.Configuration = serializer.DeserializeConfig(config, item.Configuration.GetType());
                 }
             }
@@ -150,6 +151,7 @@ namespace uSync8.Core.Serialization.Serializers
                 }
                 else
                 {
+                    logger.Debug<DataTypeSerializer>("Serializing Config via {0}", serializer.Name);
                     config = serializer.SerializeConfig(item.Configuration);
                 }
 
