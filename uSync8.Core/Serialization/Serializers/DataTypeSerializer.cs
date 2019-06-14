@@ -105,7 +105,7 @@ namespace uSync8.Core.Serialization.Serializers
                 }
             }
         }
-  
+
 
         ///////////////////////
 
@@ -143,14 +143,14 @@ namespace uSync8.Core.Serialization.Serializers
             {
                 var serializer = this.configurationSerializers.GetSerializer(item.EditorAlias);
 
-                string config;
-                if (serializer != null)
+                string config ;
+                if (serializer == null)
                 {
-                    config = serializer.SerializeConfig(item.Configuration);
+                    config = JsonConvert.SerializeObject(item.Configuration, Formatting.Indented);
                 }
                 else
                 {
-                    config = JsonConvert.SerializeObject(item.Configuration, Formatting.Indented);
+                    config = serializer.SerializeConfig(item.Configuration);
                 }
 
                 return new XElement("Config", new XCData(config));
@@ -158,7 +158,7 @@ namespace uSync8.Core.Serialization.Serializers
 
             return null;
         }
-            
+
 
         protected override IDataType CreateItem(string alias, ITreeEntity parent, string itemType)
         {
@@ -180,7 +180,7 @@ namespace uSync8.Core.Serialization.Serializers
         {
             return Current.PropertyEditors
                 .FirstOrDefault(x => x.Alias == alias);
-                
+
         }
 
         protected override string GetItemBaseType(XElement node)
