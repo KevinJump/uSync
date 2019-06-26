@@ -66,7 +66,7 @@ namespace uSync8.Core.Serialization.Serializers
             var key = Int2Guid(item.CultureInfo.LCID);
 
             return new XElement(ItemType, new XAttribute("Key", key.ToString().ToLower()),
-                new XAttribute("alias", alias),
+                new XAttribute("Alias", alias),
                 new XAttribute("Level", level));
         }
 
