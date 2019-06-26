@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using Umbraco.Core;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Services;
@@ -58,6 +59,23 @@ namespace uSync8.Core.Serialization.Serializers
             return SyncAttempt<ILanguage>.Succeed(item.CultureName, item, ChangeType.Import);
         }
 
+        protected override XElement InitializeBaseNode(ILanguage item, string alias, int level = 0)
+        {
+            // language guids change all the time ! we ignore them, but here we set them to the 'id' 
+            // this means the file stays the same! 
+            var key = Int2Guid(item.CultureInfo.LCID);
+
+            return new XElement(ItemType, new XAttribute("Key", key.ToString().ToLower()),
+                new XAttribute("Alias", alias),
+                new XAttribute("Level", level));
+        }
+
+        private Guid Int2Guid(int value)
+        {
+            byte[] bytes = new byte[16];
+            BitConverter.GetBytes(value).CopyTo(bytes, 0);
+            return new Guid(bytes);
+        }
 
         protected override SyncAttempt<XElement> SerializeCore(ILanguage item)
         {
