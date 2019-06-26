@@ -7,7 +7,10 @@
 
     "~/app_plugins/uSync8/uSyncService.js",
     "~/app_plugins/uSync8/uSyncHub.js",
-    "~/app_plugins/uSync8/changeDialogController.js"
+    "~/app_plugins/uSync8/changeDialogController.js",
+
+    "~/app_plugins/uSync8/components/uSyncReportViewComponent.js",
+    "~/app_plugins/uSync8/components/uSyncProgressViewComponent.js"
   ],
   "css": [
     "~/app_plugins/uSync8/usync.css"

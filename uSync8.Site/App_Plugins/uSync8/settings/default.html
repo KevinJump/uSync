@@ -30,106 +30,14 @@
 
     <umb-box>
         <umb-box-content ng-if="vm.working || vm.reported">
-            <div class="flex flex-wrap justify-center items-center">
-                <div ng-repeat="handler in vm.status.Handlers"
-                     class="text-center usync-handler-icon"
-                     ng-class="{'usync-pending' : handler.Status == 0, 'usync-progress' : handler.Status == 1, 'usync-complete' : handler.Status == 2}"
-                     ng-click="vm.setFilter(handler.ItemType)">
-                    <i class="icon {{handler.Icon}}"></i>
-                    <div class="usync-handler-name">{{handler.Name}}</div>
-                    <div class="handler-badge badge type-complete" ng-if="handler.Changes > 0" title="{{handler.Changes}} changes">{{handler.Changes}}</div>
-                    <div class="handler-badge type-complete" ng-if="handler.Changes == 0 && handler.Status == 2"><i class="icon icon-check"></i></div>
-                </div>
-            </div>
-            <div class="flex justify-center">
-                <div class="text-center">
-                    <h4 class="usync-action-message">{{vm.status.Message}}</h4>
-                    <small>{{vm.update.Message}}</small>
-                    <div class="progress usync-not-animated" style="height: 3px;">
-                        <div class="bar" role="progressbar" style="width: {{vm.calcPercentage(vm.update)}}%;" aria-valuenow="{{vm.calcPercentage(vm.update)}}" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="progress" style="height: 1px;">
-                <div class="bar" role="progressbar" style="width: {{vm.calcPercentage(vm.status)}}%;" aria-valuenow="{{vm.calcPercentage(vm.status)}}" aria-valuemin="0" aria-valuemax="100"></div>
-            </div>
+            <usync-progress-view update="vm.update" 
+                                 status="vm.status"
+                                 hide-labels="false" />
         </umb-box-content>
     </umb-box>
 
-    <umb-box ng-if="vm.reported">
-        <div class="umb-box-header flex justify-between items-center">
-            <div>
-                <div class="umb-box-header-title">{{vm.action}}</div>
-                <div class="umb-box-header-description">{{vm.countChanges(vm.results)}} changes across {{vm.results.length}} items</div>
-            </div>
-            <umb-toggle checked="vm.showAll"
-                        on-click="vm.showAll = !vm.showAll"
-                        show-labels="true"
-                        label-on="Show all"
-                        label-off="Changes only"
-                        label-position="left"
-                        ng-if="vm.runMode = 'report'"></umb-toggle>
-        </div>
-        <umb-box-content>
-            <div class="umb-table" ng-show="vm.countChanges(vm.results) > 0 || vm.showAll">
-                <div class="umb-table-head">
-                    <div class="umb-table-row">
-                        <div class="umb-table-cell">
-                        </div>
-                        <div class="umb-table-cell">
-                            Type
-                        </div>
-                        <div class="umb-table-cell umb-table__name">
-                            Name
-                        </div>
-                        <div class="umb-table-cell">
-                            Change
-                        </div>
-                        <div class="umb-table-cell">
-                            Message
-                        </div>
-                        <div class="umb-table-cell"></div>
-                    </div>
-                </div>
-                <div class="umb-table-body">
-                    <div ng-repeat="result in vm.results">
-                        <div class="umb-table-row"
-                             ng-if="vm.showChange(result.Change)">
-                            <div class="umb-table-cell">
-                                <i ng-if="result.Change == 'NoChange'" class="icon icon-check color-green"></i>
-                                <i ng-if="result.Change == 'Update'" class="icon icon-sync color-orange"></i>
-                                <i ng-if="result.Change == 'Delete'" class="icon icon-wrong color-red"></i>
-                            </div>
-                            <div class="umb-table-cell">
-                                {{vm.getTypeName(result.ItemType)}}
-                            </div>
-                            <div class="umb-table-cell umb-table__name">
-                                {{result.Name}}
-                            </div>
-                            <div class="umb-table-cell">
-                                {{result.Change}}
-                            </div>
-                            <div class="umb-table-cell">
-                                {{result.Message}}
-                            </div>
-                            <div class="umb-table-cell">
-                                <umb-button type="button"
-                                            button-style="link"
-                                            label-key="usync_details"
-                                            action="vm.openDetail(result)"
-                                            ng-if="result.Details != null"></umb-button>
-                                <div ng-if="result.Details != null" class="usync-detail-count">
-                                    ({{result.Details.length}} items)
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="flex justify-center items-center" ng-if="vm.countChanges(vm.results) == 0">
-                <h4>No Changes</h4>
-            </div>
-        </umb-box-content>
-    </umb-box>
+    <div ng-if="vm.reported">
+        <usync-report-view actions="vm.actions" results="vm.results" />
+    </div>
 
 </div>

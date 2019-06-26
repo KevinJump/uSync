@@ -1,0 +1,27 @@
+﻿<div>
+    <div class="flex flex-wrap justify-center items-center">
+        <div ng-repeat="handler in vm.status.Handlers"
+             class="text-center usync-handler-icon"
+             ng-class="{'usync-pending' : handler.Status == 0, 'usync-progress' : handler.Status == 1, 'usync-complete' : handler.Status == 2}"
+             ng-click="vm.setFilter(handler.ItemType)">
+            <i class="icon {{handler.Icon}}"></i>
+            <div class="usync-handler-name">{{handler.Name}}</div>
+            <div ng-if="!vm.hideLabels">
+                <div class="handler-badge badge type-complete" ng-if="handler.Changes > 0" title="{{handler.Changes}} changes">{{handler.Changes}}</div>
+                <div class="handler-badge type-complete" ng-if="handler.Changes == 0 && handler.Status == 2"><i class="icon icon-check"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="flex justify-center">
+        <div class="text-center">
+            <h4 class="usync-action-message">{{vm.status.Message}}</h4>
+            <small>{{vm.update.Message}}</small>
+            <div class="progress usync-not-animated" style="height: 3px;">
+                <div class="bar" role="progressbar" style="width: {{vm.calcPercentage(vm.update)}}%;" aria-valuenow="{{vm.calcPercentage(vm.update)}}" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+        </div>
+    </div>
+    <div class="progress" style="height: 1px;">
+        <div class="bar" role="progressbar" style="width: {{vm.calcPercentage(vm.status)}}%;" aria-valuenow="{{vm.calcPercentage(vm.status)}}" aria-valuemin="0" aria-valuemax="100"></div>
+    </div>
+</div>
