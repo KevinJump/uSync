@@ -209,3 +209,20 @@
 .usync-box-inprogress { 
     opacity: 0.5;
 }
+
+/* umb 8.1 style things */
+.umb-permission {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+    .umb-permission > * {
+        padding-right: 10px;
+    }
+
+.umb-permission__description {
+    font-style: italic;
+    color: #444;
+    margin-top: 2px;
+}

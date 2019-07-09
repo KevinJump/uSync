@@ -10,7 +10,8 @@
     <description>Database syncing for Umbraco Content, Media and Dictionary Items</description>
     <summary></summary>
     <releaseNotes>
-      8.0 - Release for Umbraco 8
+      8.0 - Initial Release for Umbraco 8
+      8.1 - Compatability Release for Umbraco 8.1
     </releaseNotes>
     <dependencies>
       <dependency id="uSync" version="$depends$" />

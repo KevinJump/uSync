@@ -8,7 +8,7 @@
 
         vm.page = {
             title: 'uSync 8',
-            description: '8.0.1',
+            description: '8.1.0',
             navigation: [
                 {
                     'name': 'uSync',

@@ -9,7 +9,8 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Database syncing for Umbraco 8</description>
     <summary>Core Dll's for uSync 8</summary>
-    <releaseNotes>Alpha Release for Umbraco 8</releaseNotes>
+    <releaseNotes>8.0 - Initial Release for Umbraco 8
+8.1 - Compatability Release for Umbraco 8.1</releaseNotes>
   </metadata>
   <files>
     <file src="bin\release\uSync8.Core.dll" target="lib\net472" />
