@@ -32,5 +32,13 @@ namespace uSync8.BackOffice
 
             public const int DataTypeMappings = USYNC_RESERVED_LOWER + 220;
         }
+
+        public static class Groups
+        {
+            public const string Settings = "Settings";
+            public const string Content = "Content";
+            public const string People = "People";
+
+        }
     }
 }

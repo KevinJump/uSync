@@ -12,6 +12,8 @@ namespace uSync8.BackOffice
 {
     public struct uSyncAction
     {
+        public string HandlerAlias { get; set; }
+
         public bool Success { get; set; }
         public Type ItemType { get; set; }
         public string Message { get; set; }
@@ -26,8 +28,7 @@ namespace uSync8.BackOffice
         public bool RequiresPostProcessing { get; set; }
         public IEnumerable<uSyncChange> Details { get; set; }
 
-
-        internal uSyncAction(bool success, string name, Type type, ChangeType change, string message, Exception ex, string filename, bool postProcess = false) : this()
+        internal uSyncAction(bool success, string name, Type type, ChangeType change, string message, Exception ex, string filename, string handlerAlias, bool postProcess = false) : this()
         {
             Success = success;
             Name = name;
@@ -37,6 +38,27 @@ namespace uSync8.BackOffice
             Exception = ex;
             FileName = filename;
             RequiresPostProcessing = postProcess;
+
+            HandlerAlias = handlerAlias;
+
+        }
+
+        internal uSyncAction(bool success, string name, Type type, ChangeType change, string message, Exception ex, string filename, bool postProcess = false)
+            : this(success, name, type, change, message, ex, filename, null, postProcess)
+        { }
+
+
+        public static uSyncAction SetAction(
+            bool success,
+            string name,
+            string handlerAlias,
+            Type type = null,
+            ChangeType change = ChangeType.NoChange,
+            string message = null,
+            Exception ex = null,
+            string filename = null)
+        {
+            return new uSyncAction(success, name, type, change, message, ex, filename, handlerAlias);
         }
 
         public static uSyncAction SetAction(
@@ -96,6 +118,12 @@ namespace uSync8.BackOffice
 
     public struct uSyncActionHelper<T>
     {
+
+        public static uSyncAction SetAction(SyncAttempt<T> attempt, string filename, string handlerAlias, bool requirePostProcessing = true)
+        {
+            return new uSyncAction(attempt.Success, attempt.Name, attempt.ItemType, attempt.Change, attempt.Message, attempt.Exception, filename, handlerAlias, requirePostProcessing);
+        }
+
         public static uSyncAction SetAction(SyncAttempt<T> attempt, string filename, bool requirePostProcessing = true)
         {
             return new uSyncAction(attempt.Success, attempt.Name, attempt.ItemType, attempt.Change, attempt.Message, attempt.Exception, filename, requirePostProcessing);
@@ -106,11 +134,24 @@ namespace uSync8.BackOffice
             return new uSyncAction(true, name, typeof(T), changeType, string.Empty, null, string.Empty);
         }
 
+        public static uSyncAction ReportAction(ChangeType changeType, string name, string file, string handlerAlias)
+        {
+            return new uSyncAction(true, name, typeof(T), changeType, string.Empty, null, file, handlerAlias);
+        }
+
         public static uSyncAction ReportAction(bool willUpdate, string name, string message)
         {
             return new uSyncAction(true, name, typeof(T),
                 willUpdate ? ChangeType.Update : ChangeType.NoChange,
                 message, null, string.Empty);
+        }
+
+        public static uSyncAction ReportAction(bool willUpdate, string name, string message, string handlerAlias)
+        {
+            return new uSyncAction(true, name, typeof(T),
+                willUpdate ? ChangeType.Update : ChangeType.NoChange,
+                message, null, string.Empty, handlerAlias);
+
         }
 
         public static uSyncAction ReportActionFail(string name, string message)

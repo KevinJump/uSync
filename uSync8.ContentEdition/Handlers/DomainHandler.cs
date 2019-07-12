@@ -19,8 +19,10 @@ namespace uSync8.ContentEdition.Handlers
 {
     [SyncHandler("domainHandler", "Domains", "Domains", uSyncBackOfficeConstants.Priorites.DomainSettings
         , Icon = "icon-home usync-addon-icon")]
-    public class DomainHandler : SyncHandlerBase<IDomain, IDomainService>, ISyncHandler
+    public class DomainHandler : SyncHandlerBase<IDomain, IDomainService>, ISyncHandler, IGroupedSyncHandler
     {
+        public string Group => uSyncBackOfficeConstants.Groups.Content;
+
         private readonly IDomainService domainService;
 
         public DomainHandler(IEntityService entityService,

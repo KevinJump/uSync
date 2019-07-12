@@ -18,8 +18,10 @@ namespace uSync8.ContentEdition.Handlers
 {
     [SyncHandler("mediaHandler", "Media", "Media", uSyncBackOfficeConstants.Priorites.Media,
         Icon = "icon-picture usync-addon-icon", IsTwoPass = true)]
-    public class MediaHandler : SyncHandlerTreeBase<IMedia, IMediaService>, ISyncHandler
+    public class MediaHandler : SyncHandlerTreeBase<IMedia, IMediaService>, ISyncHandler, IGroupedSyncHandler
     {
+        public string Group => uSyncBackOfficeConstants.Groups.Content;
+
         private readonly IMediaService mediaService;
 
         public MediaHandler(

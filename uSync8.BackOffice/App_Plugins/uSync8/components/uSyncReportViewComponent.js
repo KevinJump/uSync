@@ -21,6 +21,9 @@
         vm.openDetail = openDetail;
         vm.showAll = false; 
 
+        vm.apply = apply;
+        vm.status = status;
+
         /////////
 
         function showChange(change) {
@@ -54,6 +57,17 @@
                 }
             };
             editorService.open(options);
+        }
+
+        function apply(item) {
+
+            // do some application thing (apply just one item)
+            item.applyState = 'busy';
+        }
+
+        function status(item) {
+            if (item.applyState === undefined) return 'init';
+            return item.applyState;
         }
 
     }

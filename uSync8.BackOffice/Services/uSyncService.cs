@@ -168,6 +168,20 @@ namespace uSync8.BackOffice
             }
         }
 
+        public uSyncAction Import(uSyncAction action)
+        {
+            var configuredHandlers = syncHandlers.GetValidHandlers("import", settings).ToList();
+
+            var handler = configuredHandlers.FirstOrDefault(x => x.Handler.Alias == action.HandlerAlias);
+            if (handler != null)
+            {
+                // handler.Handler.ImportAll(action.FileName);
+            }
+
+            return new uSyncAction();
+
+        }
+
         public IEnumerable<uSyncAction> Export(string folder, SyncEventCallback callback = null, SyncUpdateCallback update = null)
         {
             var actions = new List<uSyncAction>();

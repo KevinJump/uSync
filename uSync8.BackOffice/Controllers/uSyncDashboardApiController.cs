@@ -71,6 +71,12 @@ namespace uSync8.BackOffice.Controllers
         }
 
         [HttpGet]
+        public IEnumerable<string> GetHandlerGroups()
+        {
+            return syncHandlers.GetGroups();
+        }
+
+        [HttpGet]
         public string GetAddOnString()
         {
             var value = "";
@@ -124,6 +130,12 @@ namespace uSync8.BackOffice.Controllers
             var summaryClient = new SummaryHandler(hubClient);
 
             return uSyncService.Import(settings.RootFolder, options.Force, summaryClient.PostSummary, summaryClient.PostUdate);
+        }
+
+        [HttpPut]
+        public uSyncAction Import(uSyncAction item)
+        {
+            return uSyncService.Import(item);
         }
 
         [HttpPost]

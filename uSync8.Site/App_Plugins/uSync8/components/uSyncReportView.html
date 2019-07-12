@@ -32,6 +32,7 @@
                             Message
                         </div>
                         <div class="umb-table-cell"></div>
+                        <div class="umb-table-cell"></div>
                     </div>
                 </div>
                 <div class="umb-table-body">
@@ -63,6 +64,16 @@
                                             ng-if="result.Details != null"></umb-button>
                                 <div ng-if="result.Details != null" class="usync-detail-count">
                                     ({{result.Details.length}} items)
+                                </div>
+                            </div>
+                            <div class="umb-table-cell">
+                                <div class="text-right">
+                                    <umb-button type="button"
+                                                button-style="action"
+                                                label="Apply"
+                                                action="vm.apply(result)"
+                                                state="vm.status(result)"
+                                                ng-if="result.Details != null"></umb-button>
                                 </div>
                             </div>
                         </div>

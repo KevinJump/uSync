@@ -19,8 +19,10 @@ namespace uSync8.ContentEdition.Handlers
 {
     [SyncHandler("contentHandler", "Content", "Content", uSyncBackOfficeConstants.Priorites.Content
         , Icon = "icon-document usync-addon-icon", IsTwoPass = true)]
-    public class ContentHandler : SyncHandlerTreeBase<IContent, IContentService>, ISyncHandler
+    public class ContentHandler : SyncHandlerTreeBase<IContent, IContentService>, ISyncHandler, IGroupedSyncHandler
     {
+        public string Group => uSyncBackOfficeConstants.Groups.Content;
+
         private readonly IContentService contentService;
 
         public ContentHandler(
@@ -37,6 +39,7 @@ namespace uSync8.ContentEdition.Handlers
             this.itemObjectType = UmbracoObjectTypes.Document;
 
         }
+
 
         protected override void DeleteViaService(IContent item)
             => contentService.Delete(item);

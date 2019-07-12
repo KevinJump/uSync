@@ -159,7 +159,7 @@ namespace uSync8.BackOffice.SyncHandlers
                     updates.Add(file, attempt.Item);
                 }
 
-                var action = uSyncActionHelper<TObject>.SetAction(attempt, file, IsTwoPass);
+                var action = uSyncActionHelper<TObject>.SetAction(attempt, file, this.Alias, IsTwoPass);
                 if (attempt.Details != null && attempt.Details.Any())
                     action.Details = attempt.Details;
 
@@ -347,7 +347,7 @@ namespace uSync8.BackOffice.SyncHandlers
                     var change = serializer.IsCurrent(node);
 
                     var action = uSyncActionHelper<TObject>
-                        .ReportAction(change, node.GetAlias());
+                        .ReportAction(change, node.GetAlias(), file, this.Alias);
 
                     action.Message = "";
 

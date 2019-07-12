@@ -19,8 +19,10 @@ namespace uSync8.ContentEdition.Handlers
 {
     [SyncHandler("dictionaryHandler", "Dictionary", "Dictionary", uSyncBackOfficeConstants.Priorites.DictionaryItems
         , Icon = "icon-book-alt usync-addon-icon")]
-    public class DictionaryHandler : SyncHandlerBase<IDictionaryItem, ILocalizationService>, ISyncHandler
+    public class DictionaryHandler : SyncHandlerBase<IDictionaryItem, ILocalizationService>, ISyncHandler, IGroupedSyncHandler
     {
+        public string Group => uSyncBackOfficeConstants.Groups.Content;
+
         private readonly ILocalizationService localizationService;
 
         public DictionaryHandler(IEntityService entityService,
