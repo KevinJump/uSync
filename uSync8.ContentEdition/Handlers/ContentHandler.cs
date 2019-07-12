@@ -19,7 +19,7 @@ namespace uSync8.ContentEdition.Handlers
 {
     [SyncHandler("contentHandler", "Content", "Content", uSyncBackOfficeConstants.Priorites.Content
         , Icon = "icon-document usync-addon-icon", IsTwoPass = true)]
-    public class ContentHandler : SyncHandlerTreeBase<IContent, IContentService>, ISyncHandler, IGroupedSyncHandler
+    public class ContentHandler : SyncHandlerTreeBase<IContent, IContentService>, ISyncHandler, ISyncHandler2
     {
         public string Group => uSyncBackOfficeConstants.Groups.Content;
 
@@ -65,6 +65,12 @@ namespace uSync8.ContentEdition.Handlers
             ContentService.Saved += EventSavedItem;
             ContentService.Deleted += EventDeletedItem;
             ContentService.Moved += EventMovedItem;
+        }
+
+        public uSyncAction Import(string file)
+        {
+            var attempt = this.Import(file, DefaultConfig, SerializerFlags.OnePass);
+            return uSyncActionHelper<IContent>.SetAction(attempt, file, this.Alias, IsTwoPass);
         }
     }
 }

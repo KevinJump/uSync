@@ -173,8 +173,9 @@ namespace uSync8.BackOffice
             var configuredHandlers = syncHandlers.GetValidHandlers("import", settings).ToList();
 
             var handler = configuredHandlers.FirstOrDefault(x => x.Handler.Alias == action.HandlerAlias);
-            if (handler != null)
+            if (handler != null && handler is ISyncHandler2 handler2)
             {
+                handler2.Import(action.FileName);
                 // handler.Handler.ImportAll(action.FileName);
             }
 

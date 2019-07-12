@@ -61,7 +61,7 @@ namespace uSync8.BackOffice.SyncHandlers
 
             foreach (var pair in handlers)
             {
-                if (pair.Handler is IGroupedSyncHandler groupedHandler)
+                if (pair.Handler is ISyncHandler2 groupedHandler)
                 {
                     if (groupedHandler.Group.InvariantEquals(group))
                     {
@@ -85,7 +85,7 @@ namespace uSync8.BackOffice.SyncHandlers
             foreach(var handler in this)
             {
                 var group = uSyncBackOfficeConstants.Groups.Settings;
-                if (handler is IGroupedSyncHandler groupedHandler)
+                if (handler is ISyncHandler2 groupedHandler)
                 {
                     group = groupedHandler.Group;
                 }

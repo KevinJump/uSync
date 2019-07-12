@@ -32,8 +32,9 @@ namespace uSync8.BackOffice.SyncHandlers
         IEnumerable<uSyncAction> Report(string folder, HandlerSettings settings, SyncUpdateCallback callback);
     }
 
-    public interface IGroupedSyncHandler
+    public interface ISyncHandler2
     {
         string Group { get; }
+        uSyncAction Import(string file);
     }
 }
