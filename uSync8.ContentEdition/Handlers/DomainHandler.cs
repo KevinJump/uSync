@@ -36,9 +36,6 @@ namespace uSync8.ContentEdition.Handlers
 
         public override IEnumerable<uSyncAction> ExportAll(string folder, HandlerSettings config, SyncUpdateCallback callback)
         {
-            // we clean the folder out on an export all. 
-            syncFileService.CleanFolder(folder);
-
             var actions = new List<uSyncAction>();
 
             var domains = domainService.GetAll(true).ToList();
