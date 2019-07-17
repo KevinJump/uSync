@@ -31,7 +31,7 @@ namespace uSync8.Core.Dependency
                 Udi = item.GetUdi()
             });
 
-            GetParents(item, DependencyOrders.Templates - 1);
+            dependencies.AddRange(GetParents(item, DependencyOrders.Templates - 1));
 
             return dependencies;
         }
@@ -39,7 +39,6 @@ namespace uSync8.Core.Dependency
         private IEnumerable<uSyncDependency> GetParents(ITemplate item, int order)
         {
             var templates = new List<uSyncDependency>();
-
 
             if (!string.IsNullOrWhiteSpace(item.MasterTemplateAlias))
             {

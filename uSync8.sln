@@ -14,6 +14,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionFiles", "SolutionFi
 		Dist\package.cmd = Dist\package.cmd
 		Dist\package.ContentEdition.xml = Dist\package.ContentEdition.xml
 		Dist\package.xml = Dist\package.xml
+		Dist\packageCore.cmd = Dist\packageCore.cmd
 		readme.txt = readme.txt
 	EndProjectSection
 EndProject
