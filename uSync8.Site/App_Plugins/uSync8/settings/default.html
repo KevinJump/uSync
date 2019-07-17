@@ -19,14 +19,28 @@
                 </umb-button-group>
 
                 <umb-button type="button"
-                            button-style="neutral"
+                            button-style="info"
                             label-key="usync_export"
                             action="vm.exportItems()"
                             disabled="vm.working">
                 </umb-button>
+
+                <!--
+                <umb-button type="button"
+                            button-style="link"
+                            label-key="usync_advanced"
+                            action="vm.showAdvanced = !vm.showAdvanced"></umb-button> -->
             </div>
         </umb-editor-sub-header-content-left>
     </umb-editor-sub-header>
+
+    <!--
+    <umb-box ng-if="vm.showAdvanced">
+        <umb-box-header title="Advanced Settings" description="change the way the sync works">
+        </umb-box-header>
+        <umb-box-content>
+        </umb-box-content>
+    </umb-box> -->
 
     <umb-box>
         <umb-box-content ng-if="vm.working || vm.reported">

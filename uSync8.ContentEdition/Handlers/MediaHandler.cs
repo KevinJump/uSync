@@ -18,7 +18,7 @@ namespace uSync8.ContentEdition.Handlers
 {
     [SyncHandler("mediaHandler", "Media", "Media", uSyncBackOfficeConstants.Priorites.Media,
         Icon = "icon-picture usync-addon-icon", IsTwoPass = true)]
-    public class MediaHandler : SyncHandlerTreeBase<IMedia, IMediaService>, ISyncHandler, ISyncHandler2
+    public class MediaHandler : SyncHandlerTreeBase<IMedia, IMediaService>, ISyncHandler
     {
         public string Group => uSyncBackOfficeConstants.Groups.Content;
 
@@ -29,12 +29,12 @@ namespace uSync8.ContentEdition.Handlers
             IProfilingLogger logger, 
             IMediaService mediaService,
             ISyncSerializer<IMedia> serializer, 
-            ISyncTracker<IMedia> tracker, 
+            ISyncTracker<IMedia> tracker,
             SyncFileService syncFileService)
             : base(entityService, logger, serializer, tracker, syncFileService)
         {
             this.mediaService = mediaService;
-            this.itemObjectType = UmbracoObjectTypes.Media;
+            this.ItemObjectType = UmbracoObjectTypes.Media;
         }
 
         protected override void DeleteViaService(IMedia item)

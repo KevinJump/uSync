@@ -12,13 +12,14 @@ using Umbraco.Core.Services.Implement;
 using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
 using uSync8.Core;
+using uSync8.Core.Dependency;
 using uSync8.Core.Serialization;
 using uSync8.Core.Tracking;
 
 namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("dataTypeHandler", "Datatypes", "DataTypes", uSyncBackOfficeConstants.Priorites.DataTypes, Icon = "icon-autofill")]
-    public class DataTypeHandler : SyncHandlerContainerBase<IDataType, IDataTypeService>, ISyncHandler, ISyncPostImportHandler
+    public class DataTypeHandler : SyncHandlerContainerBase<IDataType, IDataTypeService>, ISyncSingleItemHandler, ISyncPostImportHandler
     {
         private readonly IDataTypeService dataTypeService;
 
@@ -26,13 +27,15 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             IEntityService entityService,
             IDataTypeService dataTypeService,
             IProfilingLogger logger, 
-            ISyncSerializer<IDataType> serializer, 
+            ISyncSerializer<IDataType> serializer,
+            ISyncDependencyChecker<IDataType> checker,
             ISyncTracker<IDataType> tracker,
+
             SyncFileService syncFileService)
-            : base(entityService, logger, serializer, tracker, syncFileService)
+            : base(entityService, logger, serializer, tracker, checker, syncFileService)
         {
             this.dataTypeService = dataTypeService;
-            this.itemObjectType = UmbracoObjectTypes.DataType;
+            this.ItemObjectType = UmbracoObjectTypes.DataType;
             this.itemContainerType = UmbracoObjectTypes.DataTypeContainer;
         }
 

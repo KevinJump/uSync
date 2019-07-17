@@ -19,7 +19,7 @@ namespace uSync8.ContentEdition.Handlers
 {
     [SyncHandler("contentTemplateHandler", "Blueprints", "Blueprints", uSyncBackOfficeConstants.Priorites.ContentTemplate
         , Icon = "icon-document-dashed-line usync-addon-icon", IsTwoPass = true)]
-    public class ContentTemplateHandler : SyncHandlerTreeBase<IContent, IContentService>, ISyncHandler, ISyncHandler2
+    public class ContentTemplateHandler : SyncHandlerTreeBase<IContent, IContentService>, ISyncHandler
     {
         public string Group => uSyncBackOfficeConstants.Groups.Content;
 
@@ -30,12 +30,12 @@ namespace uSync8.ContentEdition.Handlers
             IProfilingLogger logger, 
             IContentService contentService,
             ContentTemplateSerializer serializer, // concreate because we want to make sure we get the blueprint one.
-            ISyncTracker<IContent> tracker, 
+            ISyncTracker<IContent> tracker,
             SyncFileService syncFileService) 
             : base(entityService, logger, serializer, tracker, syncFileService)
         {
             this.contentService = contentService;
-            this.itemObjectType = UmbracoObjectTypes.DocumentBlueprint;
+            this.ItemObjectType = UmbracoObjectTypes.DocumentBlueprint;
         }
 
         protected override void DeleteViaService(IContent item)
@@ -55,5 +55,6 @@ namespace uSync8.ContentEdition.Handlers
             ContentService.SavedBlueprint += EventSavedItem;
             ContentService.DeletedBlueprint += EventDeletedItem;
         }
+
     }
 }

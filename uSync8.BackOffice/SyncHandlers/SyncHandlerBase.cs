@@ -14,6 +14,7 @@ using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Models;
 using uSync8.BackOffice.Services;
 using uSync8.Core;
+using uSync8.Core.Dependency;
 using uSync8.Core.Extensions;
 using uSync8.Core.Models;
 using uSync8.Core.Serialization;
@@ -30,6 +31,8 @@ namespace uSync8.BackOffice.SyncHandlers
         protected readonly IEntityService entityService;
 
         protected readonly SyncFileService syncFileService;
+
+        protected readonly ISyncDependencyChecker<TObject> dependencyChecker;
 
         protected readonly ISyncSerializer<TObject> serializer;
         protected readonly ISyncTracker<TObject> tracker;
@@ -51,7 +54,8 @@ namespace uSync8.BackOffice.SyncHandlers
 
         protected string rootFolder { get; set; }
 
-        protected UmbracoObjectTypes itemObjectType = UmbracoObjectTypes.Unknown;
+        public UmbracoObjectTypes ItemObjectType { get; protected set; } = UmbracoObjectTypes.Unknown;
+        public string TypeName { get; protected set; }
         protected UmbracoObjectTypes itemContainerType = UmbracoObjectTypes.Unknown;
 
         public SyncHandlerBase(
@@ -60,14 +64,24 @@ namespace uSync8.BackOffice.SyncHandlers
             ISyncSerializer<TObject> serializer,
             ISyncTracker<TObject> tracker,
             SyncFileService syncFileService)
+        : this(entityService, logger, serializer, tracker, null, syncFileService) { }
+
+
+        public SyncHandlerBase(
+            IEntityService entityService,
+            IProfilingLogger logger,
+            ISyncSerializer<TObject> serializer,
+            ISyncTracker<TObject> tracker,
+            ISyncDependencyChecker<TObject> dependencyChecker,
+            SyncFileService syncFileService)
         {
             this.logger = logger;
-
 
             this.entityService = entityService;
 
             this.serializer = serializer;
             this.tracker = tracker;
+            this.dependencyChecker = dependencyChecker;
 
             this.syncFileService = syncFileService;
 
@@ -82,6 +96,8 @@ namespace uSync8.BackOffice.SyncHandlers
             Priority = meta.Priority;
             IsTwoPass = meta.IsTwoPass;
             Icon = string.IsNullOrWhiteSpace(meta.Icon) ? "icon-umb-content" : meta.Icon;
+
+            TypeName = serializer.ItemType;
 
 
             GetDefaultConfig(Current.Configs.uSync());
@@ -184,6 +200,7 @@ namespace uSync8.BackOffice.SyncHandlers
             return actions;
         }
 
+
         virtual public SyncAttempt<TObject> Import(string filePath, HandlerSettings config, SerializerFlags flags)
         {
             try
@@ -262,7 +279,7 @@ namespace uSync8.BackOffice.SyncHandlers
                 }
             }
 
-            var items = GetExportItems(parent, itemObjectType).ToList();
+            var items = GetExportItems(parent, ItemObjectType).ToList();
             foreach (var item in items)
             {
                 count++;
@@ -491,6 +508,67 @@ namespace uSync8.BackOffice.SyncHandlers
         }
 
         protected abstract void InitializeEvents(HandlerSettings settings);
+
+
+        #region ISyncHandler2 Methods 
+
+        public string Group { get; protected set; } = uSyncBackOfficeConstants.Groups.Settings;
+
+
+        virtual public uSyncAction Import(string file, HandlerSettings config, bool force)
+        {
+            var flags = SerializerFlags.OnePass;
+            if (force) flags |= SerializerFlags.Force;
+
+            var attempt = Import(file, config, flags);
+            return uSyncActionHelper<TObject>.SetAction(attempt, file, this.Alias, IsTwoPass);
+        }
+
+        virtual public uSyncAction ImportElement(XElement node, bool force)
+        {
+            var flags = SerializerFlags.OnePass;
+            if (force) flags |= SerializerFlags.Force;
+
+            var attempt = serializer.Deserialize(node, flags);
+            return uSyncActionHelper<TObject>.SetAction(attempt, node.GetAlias(), this.Alias, IsTwoPass);
+        }
+
+        public uSyncAction Report(string file, HandlerSettings config)
+        {
+            return ReportItem(file);
+        }
+
+
+        public uSyncAction Export(int id, string folder, HandlerSettings settings)
+        {
+            var item = this.GetFromService(id);
+            return this.Export(item, folder, settings);
+        }
+
+        public SyncAttempt<XElement> GetElement(Udi udi)
+        {
+            if (udi is GuidUdi guidUdi)
+            {
+                var element = this.GetFromService(guidUdi.Guid);
+                return this.serializer.Serialize(element);
+            }
+
+            return SyncAttempt<XElement>.Fail(udi.ToString(), ChangeType.Fail);
+        }
+
+        public IEnumerable<uSyncDependency> GetDependencies(int id)
+        {
+            var item = this.GetFromService(id);
+            if (item != null)
+            {
+                return dependencyChecker.GetDependencies(item);
+            }
+
+            return Enumerable.Empty<uSyncDependency>();
+        }
+
+
+        #endregion
 
     }
 }

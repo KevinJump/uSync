@@ -21,6 +21,11 @@
   
     <key alias="handlers">Item Handlers</key>
     <key alias="savesettings">Save Settings</key>
+
+    <key alias="import-content">Import Content/Media</key>
+    <key alias="import-settings">Import Settings</key>
+    <key alias="import-members">Import Members</key>
+    <key alias="import-users">Import Users</key>
   </area>
   <area alias="dashboardTabs">
     <key alias="uSync8">uSync</key>

@@ -12,6 +12,7 @@ using Umbraco.Core.Services;
 using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
 using uSync8.Core;
+using uSync8.Core.Dependency;
 using uSync8.Core.Serialization;
 using uSync8.Core.Tracking;
 
@@ -35,8 +36,23 @@ namespace uSync8.BackOffice.SyncHandlers
         where TObject : ITreeEntity
         where TService : IService
     {
-        protected SyncHandlerContainerBase(IEntityService entityService, IProfilingLogger logger, ISyncSerializer<TObject> serializer, ISyncTracker<TObject> tracker, SyncFileService syncFileService)
+        protected SyncHandlerContainerBase(
+            IEntityService entityService,
+            IProfilingLogger logger,
+            ISyncSerializer<TObject> serializer,
+            ISyncTracker<TObject> tracker,
+            SyncFileService syncFileService)
             : base(entityService, logger, serializer, tracker, syncFileService)
+        { }
+
+        protected SyncHandlerContainerBase(
+            IEntityService entityService,
+            IProfilingLogger logger,
+            ISyncSerializer<TObject> serializer,
+            ISyncTracker<TObject> tracker,
+            ISyncDependencyChecker<TObject> checker,
+            SyncFileService syncFileService)
+            : base(entityService, logger, serializer, tracker, checker, syncFileService)
         {
         }
 
@@ -85,7 +101,7 @@ namespace uSync8.BackOffice.SyncHandlers
                 actions.AddRange(UpdateFolder(fdlr.Id, folder, config));
             }
 
-            var items = entityService.GetChildren(folderId, this.itemObjectType);
+            var items = entityService.GetChildren(folderId, this.ItemObjectType);
             foreach(var item in items)
             {
                 var obj = GetFromService(item.Id);

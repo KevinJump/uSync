@@ -23,7 +23,7 @@ namespace uSync8.BackOffice
         public ChangeType Change { get; set; }
 
 
-        public string FileName { get; private set; }
+        public string FileName { get; set; }
         public string Name { get; set; }
         public bool RequiresPostProcessing { get; set; }
         public IEnumerable<uSyncChange> Details { get; set; }

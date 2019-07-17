@@ -11,13 +11,14 @@ using Umbraco.Core.Services;
 using Umbraco.Core.Services.Implement;
 using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
+using uSync8.Core.Dependency;
 using uSync8.Core.Serialization;
 using uSync8.Core.Tracking;
 
 namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("memberTypeHandler", "Member Types", "MemberTypes", uSyncBackOfficeConstants.Priorites.MemberTypes, IsTwoPass = true, Icon = "icon-users")]
-    public class MemberTypeHandler : SyncHandlerContainerBase<IMemberType, IMemberTypeService>, ISyncHandler
+    public class MemberTypeHandler : SyncHandlerContainerBase<IMemberType, IMemberTypeService>, ISyncSingleItemHandler
     {
         private readonly IMemberTypeService memberTypeService;
 
@@ -27,12 +28,13 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             IMemberTypeService memberTypeService,
             ISyncSerializer<IMemberType> serializer,
             ISyncTracker<IMemberType> tracker,
+            ISyncDependencyChecker<IMemberType> checker,
             SyncFileService syncFileService)
-            : base(entityService, logger, serializer, tracker, syncFileService)
+            : base(entityService, logger, serializer, tracker, checker, syncFileService)
         {
             this.memberTypeService = memberTypeService;
 
-            this.itemObjectType = UmbracoObjectTypes.MemberType;
+            this.ItemObjectType = UmbracoObjectTypes.MemberType;
 
             // this is also set in base, but explity here so you know
             //    no folders for membertypes

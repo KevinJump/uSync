@@ -256,6 +256,7 @@
     <Compile Include="SyncHandlers\Handlers\MediaTypeHandler.cs" />
     <Compile Include="SyncHandlers\Handlers\MemberTypeHandler.cs" />
     <Compile Include="SyncHandlers\Handlers\TemplateHandler.cs" />
+    <Compile Include="SyncHandlers\ISyncSingleItemHandler.cs" />
     <Compile Include="SyncHandlers\ISyncPostImportHanlder.cs" />
     <Compile Include="SyncHandlers\SyncHandlerBase.cs" />
     <Compile Include="SyncHandlers\SyncHandlerContainerBase.cs" />

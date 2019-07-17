@@ -15,6 +15,7 @@ using Umbraco.Core.Services.Implement;
 using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
 using uSync8.Core;
+using uSync8.Core.Dependency;
 using uSync8.Core.Serialization;
 using uSync8.Core.Serialization.Serializers;
 using uSync8.Core.Tracking;
@@ -23,7 +24,7 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("contentTypeHandler", "DocTypes", "ContentTypes", uSyncBackOfficeConstants.Priorites.ContentTypes, 
             IsTwoPass = true, Icon = "icon-item-arrangement")]
-    public class ContentTypeHandler : SyncHandlerContainerBase<IContentType, IContentTypeService>, ISyncHandler, ISyncPostImportHandler
+    public class ContentTypeHandler : SyncHandlerContainerBase<IContentType, IContentTypeService>, ISyncSingleItemHandler, ISyncPostImportHandler
     {
         private readonly IContentTypeService contentTypeService;
 
@@ -33,12 +34,13 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             IContentTypeService contentTypeService,
             ISyncSerializer<IContentType> serializer,
             ISyncTracker<IContentType> tracker,
+            ISyncDependencyChecker<IContentType> checker,
             SyncFileService fileService)
-            : base(entityService, logger, serializer, tracker, fileService)
+            : base(entityService, logger, serializer, tracker, checker, fileService)
         {
             this.contentTypeService = contentTypeService;
 
-            this.itemObjectType = UmbracoObjectTypes.DocumentType;
+            this.ItemObjectType = UmbracoObjectTypes.DocumentType;
             this.itemContainerType = UmbracoObjectTypes.DocumentTypeContainer;
 
         }

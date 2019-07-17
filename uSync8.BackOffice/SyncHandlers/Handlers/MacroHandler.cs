@@ -10,13 +10,14 @@ using Umbraco.Core.Services;
 using Umbraco.Core.Services.Implement;
 using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
+using uSync8.Core.Dependency;
 using uSync8.Core.Serialization;
 using uSync8.Core.Tracking;
 
 namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("macroHandler", "Macros", "Macros", uSyncBackOfficeConstants.Priorites.Macros, Icon = "icon-settings-alt")]
-    public class MacroHandler : SyncHandlerBase<IMacro, IMacroService>, ISyncHandler
+    public class MacroHandler : SyncHandlerBase<IMacro, IMacroService>, ISyncSingleItemHandler
     {
         private readonly IMacroService macroService;
 
@@ -25,8 +26,9 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             IMacroService macroService,
             ISyncSerializer<IMacro> serializer,
             ISyncTracker<IMacro> tracker,
+            ISyncDependencyChecker<IMacro> checker,
             SyncFileService syncFileService) 
-            : base(entityService, logger, serializer, tracker, syncFileService)
+            : base(entityService, logger, serializer, tracker, checker, syncFileService)
         {
             this.macroService = macroService;
         }

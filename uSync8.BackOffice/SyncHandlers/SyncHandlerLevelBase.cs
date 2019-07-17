@@ -13,6 +13,7 @@ using Umbraco.Core.Services;
 using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
 using uSync8.Core;
+using uSync8.Core.Dependency;
 using uSync8.Core.Extensions;
 using uSync8.Core.Models;
 using uSync8.Core.Serialization;
@@ -31,6 +32,7 @@ namespace uSync8.BackOffice.SyncHandlers
         where TObject : IEntity
         where TService : IService
     {
+
         protected SyncHandlerLevelBase(
             IEntityService entityService,
             IProfilingLogger logger,
@@ -38,6 +40,16 @@ namespace uSync8.BackOffice.SyncHandlers
             ISyncTracker<TObject> tracker,
             SyncFileService syncFileService)
             : base(entityService, logger, serializer, tracker, syncFileService)
+        { }
+
+        protected SyncHandlerLevelBase(
+            IEntityService entityService,
+            IProfilingLogger logger,
+            ISyncSerializer<TObject> serializer,
+            ISyncTracker<TObject> tracker,
+            ISyncDependencyChecker<TObject> checker,
+            SyncFileService syncFileService)
+            : base(entityService, logger, serializer, tracker, checker, syncFileService)
         {  }
 
         /// <summary>

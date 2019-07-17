@@ -133,7 +133,7 @@ namespace uSync8.BackOffice.Controllers
         }
 
         [HttpPut]
-        public uSyncAction Import(uSyncAction item)
+        public uSyncAction ImportItem(uSyncAction item)
         {
             return uSyncService.Import(item);
         }

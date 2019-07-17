@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Umbraco.Core;
 using Umbraco.Core.Composing;
+using Umbraco.Core.Models;
 using uSync8.BackOffice.Configuration;
 
 namespace uSync8.BackOffice.SyncHandlers
@@ -17,9 +18,28 @@ namespace uSync8.BackOffice.SyncHandlers
 
     public class SyncHandlerCollection : BuilderCollectionBase<ISyncHandler>
     {
+        /// <summary>
+        ///  handlers that impliment the ISyncHandler2 interface, can be used for other things.
+        /// </summary>
+        private List<ISyncSingleItemHandler> handlerTwos;
+
         public SyncHandlerCollection(IEnumerable<ISyncHandler> items)
             : base(items)
         {
+            handlerTwos = items
+                .Where(x => x is ISyncSingleItemHandler)
+                .Select(x => x as ISyncSingleItemHandler)
+                .ToList();
+        }
+
+        public ISyncSingleItemHandler GetHandlerByType(UmbracoObjectTypes objectType)
+        {
+            return handlerTwos.FirstOrDefault(x => x.ItemObjectType == objectType);
+        }
+
+        public ISyncSingleItemHandler GetHandlerByTypeName(string typeName)
+        {
+            return handlerTwos.FirstOrDefault(x => x.TypeName == typeName);
         }
 
         public IEnumerable<HandlerConfigPair> GetValidHandlers(string actionName, uSyncSettings settings)
@@ -61,7 +81,7 @@ namespace uSync8.BackOffice.SyncHandlers
 
             foreach (var pair in handlers)
             {
-                if (pair.Handler is ISyncHandler2 groupedHandler)
+                if (pair.Handler is ISyncSingleItemHandler groupedHandler)
                 {
                     if (groupedHandler.Group.InvariantEquals(group))
                     {
@@ -80,21 +100,7 @@ namespace uSync8.BackOffice.SyncHandlers
 
         public IEnumerable<string> GetGroups()
         {
-            var groups = new List<string>();
-
-            foreach(var handler in this)
-            {
-                var group = uSyncBackOfficeConstants.Groups.Settings;
-                if (handler is ISyncHandler2 groupedHandler)
-                {
-                    group = groupedHandler.Group;
-                }
-
-                if (!groups.Contains(group))
-                    groups.Add(group);
-            }
-
-            return groups;
+            return handlerTwos.Select(x => x.Group).Distinct().ToList();
         }
 
     }

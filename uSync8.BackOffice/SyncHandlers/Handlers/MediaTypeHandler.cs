@@ -12,13 +12,14 @@ using Umbraco.Core.Services.Implement;
 using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
 using uSync8.Core;
+using uSync8.Core.Dependency;
 using uSync8.Core.Serialization;
 using uSync8.Core.Tracking;
 
 namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("mediaTypeHandler", "Media Types", "MediaTypes", uSyncBackOfficeConstants.Priorites.MediaTypes, IsTwoPass = true, Icon = "icon-thumbnails")]
-    public class MediaTypeHandler : SyncHandlerContainerBase<IMediaType, IMediaTypeService>, ISyncHandler
+    public class MediaTypeHandler : SyncHandlerContainerBase<IMediaType, IMediaTypeService>, ISyncSingleItemHandler
     {
         private readonly IMediaTypeService mediaTypeService;
 
@@ -28,12 +29,13 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             IProfilingLogger logger, 
             ISyncSerializer<IMediaType> serializer,
             ISyncTracker<IMediaType> tracker,
+            ISyncDependencyChecker<IMediaType> checker,
             SyncFileService syncFileService)
-            : base(entityService, logger, serializer, tracker, syncFileService)
+            : base(entityService, logger, serializer, tracker, checker, syncFileService)
         {
             this.mediaTypeService = mediaTypeService;
 
-            this.itemObjectType = UmbracoObjectTypes.MediaType;
+            this.ItemObjectType = UmbracoObjectTypes.MediaType;
             this.itemContainerType = UmbracoObjectTypes.MediaTypeContainer;
         }
 

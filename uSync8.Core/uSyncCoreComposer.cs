@@ -11,6 +11,7 @@ using uSync8.Core.Serialization.Serializers;
 using uSync8.Core.Tracking;
 using uSync8.Core.Tracking.Impliment;
 using uSync8.Core.DataTypes;
+using uSync8.Core.Dependency;
 
 namespace uSync8.Core
 {
@@ -48,6 +49,21 @@ namespace uSync8.Core
             composition.Register<ISyncTracker<ILanguage>, LanguageTracker>();
             composition.Register<ISyncTracker<IMacro>, MacroTracker>();
             composition.Register<ISyncTracker<IDataType>, DataTypeTracker>();
+
+            // the dependency checkers, they build up dependency trees for objects
+            // this might just merge into the serializers ?
+            composition.Register<ISyncDependencyChecker<IContentType>, ContentTypeChecker>();
+            composition.Register<ISyncDependencyChecker<IMediaType>, MediaTypeChecker>();
+            composition.Register<ISyncDependencyChecker<IMemberType>, MemberTypeChecker>();
+            composition.Register<ISyncDependencyChecker<ITemplate>, TemplateChecker>();
+            composition.Register<ISyncDependencyChecker<ILanguage>, LanguageChecker>();
+            composition.Register<ISyncDependencyChecker<IMacro>, MacroChecker>();
+            composition.Register<ISyncDependencyChecker<IDataType>, DataTypeChecker>();
+
+            // load them as types ? - not sure we ever need this now ? 
+           
+            //composition.WithCollectionBuilder<SyncDependencyCollectionBuilder>()
+            //    .Add(() => composition.TypeLoader.GetTypes<ISyncDependencyItem>());
 
         }
     }

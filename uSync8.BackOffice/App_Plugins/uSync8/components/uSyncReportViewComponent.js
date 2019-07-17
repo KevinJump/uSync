@@ -11,7 +11,7 @@
         controller: uSyncReportViewController
     };
 
-    function uSyncReportViewController($scope, editorService) {
+    function uSyncReportViewController($scope, editorService, uSync8DashboardService) {
 
         var vm = this;
 
@@ -19,7 +19,7 @@
         vm.getTypeName = getTypeName;
         vm.countChanges = countChanges;
         vm.openDetail = openDetail;
-        vm.showAll = false; 
+        vm.showAll = false;
 
         vm.apply = apply;
         vm.status = status;
@@ -63,6 +63,14 @@
 
             // do some application thing (apply just one item)
             item.applyState = 'busy';
+            uSync8DashboardService.importItem(item)
+                .then(function (result) {
+                    console.log(result.data);
+                    item.applyState = 'success';
+                }, function (error) {
+                    console.log(error);
+                    item.applyState = 'error';
+                });
         }
 
         function status(item) {

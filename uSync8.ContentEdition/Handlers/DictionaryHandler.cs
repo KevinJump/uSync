@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Umbraco.Core;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
@@ -12,6 +13,7 @@ using uSync8.BackOffice;
 using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
 using uSync8.BackOffice.SyncHandlers;
+using uSync8.Core.Dependency;
 using uSync8.Core.Serialization;
 using uSync8.Core.Tracking;
 
@@ -19,7 +21,7 @@ namespace uSync8.ContentEdition.Handlers
 {
     [SyncHandler("dictionaryHandler", "Dictionary", "Dictionary", uSyncBackOfficeConstants.Priorites.DictionaryItems
         , Icon = "icon-book-alt usync-addon-icon")]
-    public class DictionaryHandler : SyncHandlerBase<IDictionaryItem, ILocalizationService>, ISyncHandler, ISyncHandler2
+    public class DictionaryHandler : SyncHandlerBase<IDictionaryItem, ILocalizationService>, ISyncHandler
     {
         public string Group => uSyncBackOfficeConstants.Groups.Content;
 
@@ -31,7 +33,7 @@ namespace uSync8.ContentEdition.Handlers
             ISyncSerializer<IDictionaryItem> serializer,
             ISyncTracker<IDictionaryItem> tracker,
             SyncFileService syncFileService) 
-            : base(entityService, logger, serializer, tracker, syncFileService)
+            : base(entityService, logger, serializer, tracker,  syncFileService)
         {
             this.localizationService = localizationService;
 

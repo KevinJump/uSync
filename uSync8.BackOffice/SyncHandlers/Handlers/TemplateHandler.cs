@@ -11,6 +11,7 @@ using Umbraco.Core.Services;
 using Umbraco.Core.Services.Implement;
 using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
+using uSync8.Core.Dependency;
 using uSync8.Core.Models;
 using uSync8.Core.Serialization;
 using uSync8.Core.Tracking;
@@ -19,7 +20,7 @@ using uSync8.Core.Tracking.Impliment;
 namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("templateHandler", "Templates", "Templates", uSyncBackOfficeConstants.Priorites.Templates, Icon = "icon-layout")]
-    public class TemplateHandler : SyncHandlerLevelBase<ITemplate, IFileService>, ISyncHandler
+    public class TemplateHandler : SyncHandlerLevelBase<ITemplate, IFileService>, ISyncSingleItemHandler
     {
         private readonly IFileService fileService;
 
@@ -29,12 +30,13 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             IFileService fileService,
             ISyncSerializer<ITemplate> serializer, 
             ISyncTracker<ITemplate> tracker,
+            ISyncDependencyChecker<ITemplate> checker,
             SyncFileService syncFileService)
-            : base(entityService, logger, serializer, tracker, syncFileService)
+            : base(entityService, logger, serializer, tracker, checker, syncFileService)
         {
             this.fileService = fileService;
 
-            this.itemObjectType = UmbracoObjectTypes.Template;
+            this.ItemObjectType = UmbracoObjectTypes.Template;
 
             // this might need some work - because its not a container thing ?
             this.itemContainerType = UmbracoObjectTypes.Unknown;

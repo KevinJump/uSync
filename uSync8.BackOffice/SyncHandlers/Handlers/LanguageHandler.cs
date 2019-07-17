@@ -12,13 +12,14 @@ using Umbraco.Core.Services;
 using Umbraco.Core.Services.Implement;
 using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
+using uSync8.Core.Dependency;
 using uSync8.Core.Serialization;
 using uSync8.Core.Tracking;
 
 namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("languageHandler", "Languages", "Languages", uSyncBackOfficeConstants.Priorites.Languages, Icon = "icon-globe")]
-    public class LanguageHandler : SyncHandlerBase<ILanguage, ILocalizationService>, ISyncHandler
+    public class LanguageHandler : SyncHandlerBase<ILanguage, ILocalizationService>, ISyncSingleItemHandler
     {
         private readonly ILocalizationService localizationService;
 
@@ -28,12 +29,13 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             ILocalizationService localizationService,
             ISyncSerializer<ILanguage> serializer,
             ISyncTracker<ILanguage> tracker,
+            ISyncDependencyChecker<ILanguage> checker,
             SyncFileService syncFileService)
-            : base(entityService, logger, serializer, tracker, syncFileService)
+            : base(entityService, logger, serializer, tracker, checker, syncFileService)
         {
             this.localizationService = localizationService;
 
-            this.itemObjectType = UmbracoObjectTypes.Language;
+            this.ItemObjectType = UmbracoObjectTypes.Language;
             this.itemContainerType = UmbracoObjectTypes.Unknown;
         }
 

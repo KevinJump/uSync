@@ -1,13 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Umbraco.Core;
+
 using uSync8.BackOffice.Configuration;
-using uSync8.Core.Models;
-using uSync8.Core.Serialization;
-using static uSync8.BackOffice.uSyncService;
 
 namespace uSync8.BackOffice.SyncHandlers
 {
@@ -30,11 +24,7 @@ namespace uSync8.BackOffice.SyncHandlers
         IEnumerable<uSyncAction> ExportAll(string folder, HandlerSettings settings, SyncUpdateCallback callback);
         IEnumerable<uSyncAction> ImportAll(string folder, HandlerSettings settings, bool force, SyncUpdateCallback callback);
         IEnumerable<uSyncAction> Report(string folder, HandlerSettings settings, SyncUpdateCallback callback);
-    }
 
-    public interface ISyncHandler2
-    {
-        string Group { get; }
-        uSyncAction Import(string file);
+
     }
 }

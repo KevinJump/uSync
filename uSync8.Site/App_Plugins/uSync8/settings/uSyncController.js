@@ -13,6 +13,8 @@
         vm.reported = false;
         vm.syncing = false; 
 
+        vm.showAdvanced = false;
+
         var modes = {
             NONE: 0,
             REPORT: 1,
@@ -54,6 +56,7 @@
 
         function init() {
             InitHub();
+            getHandlerGroups();
 
             // just so there is something there when you start 
             uSync8DashboardService.getHandlers()
@@ -111,6 +114,28 @@
                     vm.working = false;
                     vm.reported = true;
                 });
+        }
+
+        //////////////
+
+        function getHandlerGroups() {
+            uSync8DashboardService.getHandlerGroups()
+                .then(function (result) {
+                    console.log(result.data);
+
+                    angular.forEach(result.data, function (group, key) {
+                        vm.importButton.subButtons.push({
+                            handler: function () {
+                                importGroup(group);
+                            },
+                            labelKey: 'usync_import-' + group.toLowerCase()
+                        });
+                    });
+                });
+        }
+
+        function importGroup(group) {
+            console.log('Import of type', group);
         }
 
         //////////////

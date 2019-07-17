@@ -21,10 +21,14 @@
             report: report,
             exportItems: exportItems,
             importItems: importItems,
+            importItem: importItem,
             saveSettings: saveSettings,
+
             getLoadedHandlers: getLoadedHandlers,
             getAddOns: getAddOns,
-            getAddOnSplash: getAddOnSplash
+            getAddOnSplash: getAddOnSplash,
+
+            getHandlerGroups: getHandlerGroups
         };
 
         return service;
@@ -64,8 +68,16 @@
             return $http.put(serviceRoot + 'import', { force: force, clientId: clientId });
         }
 
+        function importItem(item) {
+            return $http.put(serviceRoot + 'importItem', item);
+        }
+
         function saveSettings(settings) {
             return $http.post(serviceRoot + 'savesettings', settings);
+        }
+
+        function getHandlerGroups() {
+            return $http.get(serviceRoot + 'getHandlerGroups');
         }
     }
 
