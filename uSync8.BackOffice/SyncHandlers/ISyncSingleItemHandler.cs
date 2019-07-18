@@ -26,6 +26,7 @@ namespace uSync8.BackOffice.SyncHandlers
 
         SyncAttempt<XElement> GetElement(Udi udi);
         uSyncAction ImportElement(XElement element, bool force);
+        uSyncAction ReportElement(XElement element);
 
         IEnumerable<uSyncDependency> GetDependencies(int id);
     }

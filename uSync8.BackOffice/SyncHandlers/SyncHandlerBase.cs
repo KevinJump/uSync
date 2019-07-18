@@ -353,39 +353,44 @@ namespace uSync8.BackOffice.SyncHandlers
             return actions;
         }
 
+        public uSyncAction ReportElement(XElement node)
+        {
+
+            try
+            {
+                var change = serializer.IsCurrent(node);
+
+                var action = uSyncActionHelper<TObject>
+                    .ReportAction(change, node.GetAlias(), node.GetAlias(), this.Alias);
+
+                action.Message = "";
+
+                if (action.Change > ChangeType.NoChange)
+                {
+                    action.Details = tracker.GetChanges(node);
+                    if (action.Details == null || action.Details.Count() == 0)
+                    {
+                        action.Message = "Change details cannot be calculated";
+                    }
+
+                    action.Message = $"{action.Change.ToString()}";
+                }
+
+                return action;
+            }
+            catch (FormatException fex)
+            {
+                return uSyncActionHelper<TObject>
+                    .ReportActionFail(Path.GetFileName(node.GetAlias()), $"format error {fex.Message}");
+            }
+        }
+
         protected uSyncAction ReportItem(string file)
         {
             try
             {
                 var node = syncFileService.LoadXElement(file);
-
-                try
-                {
-                    var change = serializer.IsCurrent(node);
-
-                    var action = uSyncActionHelper<TObject>
-                        .ReportAction(change, node.GetAlias(), file, this.Alias);
-
-                    action.Message = "";
-
-                    if (action.Change > ChangeType.NoChange)
-                    {
-                        action.Details = tracker.GetChanges(node);
-                        if (action.Details == null || action.Details.Count() == 0)
-                        {
-                            action.Message = "Change details cannot be calculated";
-                        }
-
-                        action.Message = $"{action.Change.ToString()}";
-                    }
-
-                    return action;
-                }
-                catch (FormatException fex)
-                {
-                    return uSyncActionHelper<TObject>
-                        .ReportActionFail(Path.GetFileName(file), $"format error {fex.Message}");
-                }
+                return ReportElement(node);
             }
             catch (Exception ex)
             {
@@ -561,12 +566,47 @@ namespace uSync8.BackOffice.SyncHandlers
             var item = this.GetFromService(id);
             if (item != null)
             {
+                logger.Info<uSync8Core>("Found Item {0}", item.Id);
                 return dependencyChecker.GetDependencies(item);
+            }
+            else
+            {
+                return GetContainerDependencies(id);
             }
 
             return Enumerable.Empty<uSyncDependency>();
         }
 
+        private IEnumerable<uSyncDependency> GetContainerDependencies(int id)
+        {
+            var dependencies = new List<uSyncDependency>();
+
+            var containers = entityService.GetChildren(id, this.itemContainerType);
+            if (containers != null && containers.Any())
+            {
+                foreach (var container in containers)
+                {
+                    dependencies.AddRange(GetContainerDependencies(container.Id));
+                }
+            }
+
+            var children = entityService.GetChildren(id, this.ItemObjectType);
+            if (children != null && children.Any())
+            {
+
+                foreach (var child in children)
+                {
+                    var childItem = GetFromService(child.Id);
+                    if (childItem != null)
+                    {
+                        dependencies.AddRange(dependencyChecker.GetDependencies(childItem));
+                    }
+                }
+            }
+
+
+            return dependencies.DistinctBy(x => x.Udi.ToString()).OrderByDescending(x => x.Order);
+        }
 
         #endregion
 
