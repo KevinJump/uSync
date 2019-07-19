@@ -101,8 +101,18 @@ namespace uSync8.Core.Serialization.Serializers
         public override bool IsValid(XElement node)
             => (base.IsValid(node) && node.Element("CultureName") != null && node.Element("IsoCode") != null);
 
-        protected override ILanguage FindItem(string alias) =>
-            localizationService.GetLanguageByIsoCode(alias);
+        protected override ILanguage FindItem(string alias)
+        {
+            // GetLanguageByIsoCode - doesn't only return the language of the code you specify
+            // it will fallback to the primary one (e.g en-US might return en), 
+            //
+            // based on that we need to check that the language we get back actually has the 
+            // code we asked for from the api.
+            var item = localizationService.GetLanguageByIsoCode(alias);
+            if (item == null || !item.CultureInfo.Name.InvariantEquals(alias)) return null;
+            return item;
+        }
+            
 
         protected override ILanguage FindItem(Guid key) => default(ILanguage);
 
