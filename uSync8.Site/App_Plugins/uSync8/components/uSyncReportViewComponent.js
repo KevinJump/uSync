@@ -5,7 +5,8 @@
         templateUrl: Umbraco.Sys.ServerVariables.application.applicationPath + 'App_Plugins/uSync8/Components/uSyncReportView.html',
         bindings: {
             action: '<',
-            results: '<'
+            results: '<',
+            hideAction: '<'
         },
         controllerAs: 'vm',
         controller: uSyncReportViewController
