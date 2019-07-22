@@ -21,7 +21,7 @@ namespace uSync8.Core.Dependency
 
         public UmbracoObjectTypes ObjectType => UmbracoObjectTypes.Template;
 
-        public IEnumerable<uSyncDependency> GetDependencies(ITemplate item)
+        public IEnumerable<uSyncDependency> GetDependencies(ITemplate item, DependencyFlags flags)
         {
             var dependencies = new List<uSyncDependency>();
 
@@ -31,7 +31,15 @@ namespace uSync8.Core.Dependency
                 Udi = item.GetUdi()
             });
 
-            dependencies.AddRange(GetParents(item, DependencyOrders.Templates - 1));
+            if (flags.HasFlag(DependencyFlags.IncludeAncestors))
+            {
+                dependencies.AddRange(GetParents(item, DependencyOrders.Templates - 1));
+            }
+
+            if (flags.HasFlag(DependencyFlags.IncludeChildren))
+            {
+                // children check.
+            }
 
             return dependencies;
         }

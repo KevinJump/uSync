@@ -28,6 +28,6 @@ namespace uSync8.BackOffice.SyncHandlers
         uSyncAction ImportElement(XElement element, bool force);
         uSyncAction ReportElement(XElement element);
 
-        IEnumerable<uSyncDependency> GetDependencies(int id);
+        IEnumerable<uSyncDependency> GetDependencies(int id, DependencyFlags flags);
     }
 }

@@ -560,23 +560,23 @@ namespace uSync8.BackOffice.SyncHandlers
             return SyncAttempt<XElement>.Fail(udi.ToString(), ChangeType.Fail);
         }
 
-        public IEnumerable<uSyncDependency> GetDependencies(int id)
+        public IEnumerable<uSyncDependency> GetDependencies(int id, DependencyFlags flags)
         {
             var item = this.GetFromService(id);
             if (item != null)
             {
                 logger.Info<uSync8Core>("Found Item {0}", item.Id);
-                return dependencyChecker.GetDependencies(item);
+                return dependencyChecker.GetDependencies(item, flags);
             }
             else
             {
-                return GetContainerDependencies(id);
+                return GetContainerDependencies(id, flags);
             }
 
             return Enumerable.Empty<uSyncDependency>();
         }
 
-        private IEnumerable<uSyncDependency> GetContainerDependencies(int id)
+        private IEnumerable<uSyncDependency> GetContainerDependencies(int id, DependencyFlags flags)
         {
             var dependencies = new List<uSyncDependency>();
 
@@ -585,7 +585,7 @@ namespace uSync8.BackOffice.SyncHandlers
             {
                 foreach (var container in containers)
                 {
-                    dependencies.AddRange(GetContainerDependencies(container.Id));
+                    dependencies.AddRange(GetContainerDependencies(container.Id, flags));
                 }
             }
 
@@ -598,7 +598,7 @@ namespace uSync8.BackOffice.SyncHandlers
                     var childItem = GetFromService(child.Id);
                     if (childItem != null)
                     {
-                        dependencies.AddRange(dependencyChecker.GetDependencies(childItem));
+                        dependencies.AddRange(dependencyChecker.GetDependencies(childItem, flags));
                     }
                 }
             }

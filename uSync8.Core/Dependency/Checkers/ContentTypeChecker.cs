@@ -19,7 +19,7 @@ namespace uSync8.Core.Dependency
 
         public UmbracoObjectTypes ObjectType => UmbracoObjectTypes.DocumentType;
 
-        public IEnumerable<uSyncDependency> GetDependencies(IContentType item)
+        public IEnumerable<uSyncDependency> GetDependencies(IContentType item, DependencyFlags flags)
         {
             var dependencies = new List<uSyncDependency>();
 
@@ -29,9 +29,13 @@ namespace uSync8.Core.Dependency
                 Order = DependencyOrders.ContentTypes
             });
 
-            dependencies.AddRange(CalcDataTypeDependencies(item)); ;
-            dependencies.AddRange(CalcCompositions(item, DependencyOrders.ContentTypes - 1));
-            dependencies.AddRange(CalcTemplateDependencies(item));
+
+            if (!flags.HasFlag(DependencyFlags.NoDependencies)) {
+                dependencies.AddRange(CalcDataTypeDependencies(item)); ;
+                dependencies.AddRange(CalcCompositions(item, DependencyOrders.ContentTypes - 1));
+                dependencies.AddRange(CalcTemplateDependencies(item));
+            }
+
             return dependencies;
         }
 

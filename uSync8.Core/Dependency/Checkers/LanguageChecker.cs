@@ -12,7 +12,7 @@ namespace uSync8.Core.Dependency
     {
         public UmbracoObjectTypes ObjectType => UmbracoObjectTypes.Language;
 
-        public IEnumerable<uSyncDependency> GetDependencies(ILanguage item)
+        public IEnumerable<uSyncDependency> GetDependencies(ILanguage item, DependencyFlags flags)
         {
             var dependencies = new List<uSyncDependency>
             {

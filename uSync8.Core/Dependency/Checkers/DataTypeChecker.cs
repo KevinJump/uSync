@@ -12,7 +12,7 @@ namespace uSync8.Core.Dependency
     {
         public UmbracoObjectTypes ObjectType => UmbracoObjectTypes.DataType;
 
-        public IEnumerable<uSyncDependency> GetDependencies(IDataType item)
+        public IEnumerable<uSyncDependency> GetDependencies(IDataType item, DependencyFlags flags)
         {
             var dependencies = new List<uSyncDependency>();
             dependencies.Add(new uSyncDependency()

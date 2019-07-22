@@ -37,7 +37,7 @@ namespace uSync8.ContentEdition.Serializers
 
         protected virtual XElement InitializeNode(TObject item, string typeName)
         {
-            var node = new XElement(typeName,
+            var node = new XElement(this.ItemType,
                 new XAttribute("Key", item.Key),
                 new XAttribute("Alias", item.Name),
                 new XAttribute("Level", item.Level));
@@ -64,6 +64,7 @@ namespace uSync8.ContentEdition.Serializers
             info.Add(new XElement("Parent", new XAttribute("Key", parentKey), parentName));
             info.Add(new XElement("Path", GetItemPath(item)));
             info.Add(new XElement("Trashed", item.Trashed));
+            info.Add(new XElement("ContentType", item.ContentType.Alias));
 
             var title = new XElement("NodeName", new XAttribute("Default", item.Name));
             foreach (var culture in item.AvailableCultures)
@@ -248,7 +249,9 @@ namespace uSync8.ContentEdition.Serializers
                 parent = FindItem(parentKey);
             }
 
-            var contentTypeAlias = node.Name.LocalName;
+            var contentTypeAlias = node.Element("Info").Element("ContentType").ValueOrDefault(node.Name.LocalName);
+            
+            // var contentTypeAlias = node.Name.LocalName;
 
             return CreateItem(alias, parent, contentTypeAlias);
         }

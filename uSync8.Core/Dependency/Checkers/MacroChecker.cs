@@ -12,7 +12,7 @@ namespace uSync8.Core.Dependency
     {
         public UmbracoObjectTypes ObjectType => UmbracoObjectTypes.Unknown;
 
-        public IEnumerable<uSyncDependency> GetDependencies(IMacro item)
+        public IEnumerable<uSyncDependency> GetDependencies(IMacro item, DependencyFlags flags)
         {
             var dependencies = new List<uSyncDependency>
             {

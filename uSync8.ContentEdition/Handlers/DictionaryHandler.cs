@@ -21,7 +21,7 @@ namespace uSync8.ContentEdition.Handlers
 {
     [SyncHandler("dictionaryHandler", "Dictionary", "Dictionary", uSyncBackOfficeConstants.Priorites.DictionaryItems
         , Icon = "icon-book-alt usync-addon-icon")]
-    public class DictionaryHandler : SyncHandlerBase<IDictionaryItem, ILocalizationService>, ISyncHandler
+    public class DictionaryHandler : SyncHandlerBase<IDictionaryItem, ILocalizationService>, ISyncHandler, ISyncSingleItemHandler
     {
         public string Group => uSyncBackOfficeConstants.Groups.Content;
 
@@ -32,8 +32,9 @@ namespace uSync8.ContentEdition.Handlers
             ILocalizationService localizationService,
             ISyncSerializer<IDictionaryItem> serializer,
             ISyncTracker<IDictionaryItem> tracker,
+            ISyncDependencyChecker<IDictionaryItem> checker,
             SyncFileService syncFileService) 
-            : base(entityService, logger, serializer, tracker,  syncFileService)
+            : base(entityService, logger, serializer, tracker, checker, syncFileService)
         {
             this.localizationService = localizationService;
 

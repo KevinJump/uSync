@@ -20,7 +20,7 @@ namespace uSync8.Core.Dependency
 
         public UmbracoObjectTypes ObjectType => UmbracoObjectTypes.MediaType;
 
-        public IEnumerable<uSyncDependency> GetDependencies(IMediaType item)
+        public IEnumerable<uSyncDependency> GetDependencies(IMediaType item, DependencyFlags flags)
         {
             var dependencies = new List<uSyncDependency>();
 
@@ -30,8 +30,11 @@ namespace uSync8.Core.Dependency
                 Order = DependencyOrders.MediaTypes
             });
 
+            if (flags.HasFlag(DependencyFlags.NoDependencies)) return dependencies;
+
             dependencies.AddRange(CalcDataTypeDependencies(item));
             dependencies.AddRange(CalcCompositions(item, DependencyOrders.MediaTypes - 1));
+
             return dependencies;
         }
     }

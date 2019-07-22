@@ -20,7 +20,7 @@ namespace uSync8.Core.Dependency
 
         public UmbracoObjectTypes ObjectType => UmbracoObjectTypes.MemberType;
 
-        public IEnumerable<uSyncDependency> GetDependencies(IMemberType item)
+        public IEnumerable<uSyncDependency> GetDependencies(IMemberType item, DependencyFlags flags)
         {
             var dependencies = new List<uSyncDependency>();
 
@@ -29,6 +29,8 @@ namespace uSync8.Core.Dependency
                 Udi = item.GetUdi(),
                 Order = DependencyOrders.MemberTypes
             });
+
+            if (flags.HasFlag(DependencyFlags.NoDependencies)) return dependencies;
 
             dependencies.AddRange(CalcDataTypeDependencies(item));
             dependencies.AddRange(CalcCompositions(item, DependencyOrders.MemberTypes - 1));

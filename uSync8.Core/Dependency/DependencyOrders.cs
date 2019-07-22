@@ -31,5 +31,9 @@ namespace uSync8.Core.Dependency
         public static int MemberTypes = 700;
 
         public static int Macros = 800;
+
+        public static int Media = 900;
+        public static int Content = 1000;
+
     }
 }

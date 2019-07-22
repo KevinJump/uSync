@@ -11,6 +11,7 @@ using uSync8.BackOffice;
 using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
 using uSync8.BackOffice.SyncHandlers;
+using uSync8.Core.Dependency;
 using uSync8.Core.Serialization;
 using uSync8.Core.Tracking;
 
@@ -18,7 +19,7 @@ namespace uSync8.ContentEdition.Handlers
 {
     [SyncHandler("mediaHandler", "Media", "Media", uSyncBackOfficeConstants.Priorites.Media,
         Icon = "icon-picture usync-addon-icon", IsTwoPass = true)]
-    public class MediaHandler : SyncHandlerTreeBase<IMedia, IMediaService>, ISyncHandler
+    public class MediaHandler : SyncHandlerTreeBase<IMedia, IMediaService>, ISyncHandler, ISyncSingleItemHandler
     {
         public string Group => uSyncBackOfficeConstants.Groups.Content;
 
@@ -30,8 +31,9 @@ namespace uSync8.ContentEdition.Handlers
             IMediaService mediaService,
             ISyncSerializer<IMedia> serializer, 
             ISyncTracker<IMedia> tracker,
+            ISyncDependencyChecker<IMedia> checker,
             SyncFileService syncFileService)
-            : base(entityService, logger, serializer, tracker, syncFileService)
+            : base(entityService, logger, serializer, tracker, checker, syncFileService)
         {
             this.mediaService = mediaService;
             this.ItemObjectType = UmbracoObjectTypes.Media;

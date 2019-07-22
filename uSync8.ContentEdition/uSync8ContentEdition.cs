@@ -13,6 +13,8 @@ using uSync8.BackOffice.Models;
 using uSync8.ContentEdition.Mappers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using uSync8.Core.Dependency;
+using uSync8.ContentEdition.Checkers;
 
 namespace uSync8.ContentEdition
 {
@@ -50,6 +52,10 @@ namespace uSync8.ContentEdition
             composition.Register<ISyncTracker<IMedia>, MediaTracker>();
             composition.Register<ISyncTracker<IDictionaryItem>, DictionaryItemTracker>();
             composition.Register<ISyncTracker<IDomain>, DomainTracker>();
+
+            composition.Register<ISyncDependencyChecker<IContent>, ContentChecker>();
+            composition.Register<ISyncDependencyChecker<IMedia>, MediaChecker>();
+            composition.Register<ISyncDependencyChecker<IDictionaryItem>, DictionaryItemChecker>();
 
             composition.WithCollectionBuilder<SyncValueMapperCollectionBuilder>()
                 .Add(() => composition.TypeLoader.GetTypes<ISyncMapper>());

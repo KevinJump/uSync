@@ -12,6 +12,7 @@ using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
 using uSync8.BackOffice.SyncHandlers;
 using uSync8.ContentEdition.Serializers;
+using uSync8.Core.Dependency;
 using uSync8.Core.Serialization;
 using uSync8.Core.Tracking;
 
@@ -19,7 +20,7 @@ namespace uSync8.ContentEdition.Handlers
 {
     [SyncHandler("contentHandler", "Content", "Content", uSyncBackOfficeConstants.Priorites.Content
         , Icon = "icon-document usync-addon-icon", IsTwoPass = true)]
-    public class ContentHandler : SyncHandlerTreeBase<IContent, IContentService>, ISyncHandler //, ISyncSingleItemHandler (we need to write dependencyCheckers first)
+    public class ContentHandler : SyncHandlerTreeBase<IContent, IContentService>, ISyncHandler, ISyncSingleItemHandler 
     {
         public string Group => uSyncBackOfficeConstants.Groups.Content;
 
@@ -31,8 +32,9 @@ namespace uSync8.ContentEdition.Handlers
             IContentService contentService,
             ISyncSerializer<IContent> serializer, 
             ISyncTracker<IContent> tracker,
+            ISyncDependencyChecker<IContent> checker,
             SyncFileService syncFileService)
-            : base(entityService, logger, serializer, tracker, syncFileService)
+            : base(entityService, logger, serializer, tracker, checker, syncFileService)
         {
             this.contentService = contentService;
 
