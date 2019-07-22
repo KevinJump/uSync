@@ -6,7 +6,8 @@
         bindings: {
             action: '<',
             results: '<',
-            hideAction: '<'
+            hideAction: '<',
+            showAll: '<'
         },
         controllerAs: 'vm',
         controller: uSyncReportViewController
@@ -20,7 +21,7 @@
         vm.getTypeName = getTypeName;
         vm.countChanges = countChanges;
         vm.openDetail = openDetail;
-        vm.showAll = false;
+        vm.showAll = vm.showAll || false;
 
         vm.apply = apply;
         vm.status = status;
