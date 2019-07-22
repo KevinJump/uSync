@@ -19,7 +19,7 @@ namespace uSync8.ContentEdition.Handlers
 {
     [SyncHandler("contentHandler", "Content", "Content", uSyncBackOfficeConstants.Priorites.Content
         , Icon = "icon-document usync-addon-icon", IsTwoPass = true)]
-    public class ContentHandler : SyncHandlerTreeBase<IContent, IContentService>, ISyncHandler
+    public class ContentHandler : SyncHandlerTreeBase<IContent, IContentService>, ISyncHandler //, ISyncSingleItemHandler (we need to write dependencyCheckers first)
     {
         public string Group => uSyncBackOfficeConstants.Groups.Content;
 

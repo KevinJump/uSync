@@ -517,8 +517,7 @@ namespace uSync8.BackOffice.SyncHandlers
 
         #region ISyncHandler2 Methods 
 
-        public string Group { get; protected set; } = uSyncBackOfficeConstants.Groups.Settings;
-
+        public virtual string Group { get; protected set; } = uSyncBackOfficeConstants.Groups.Settings;
 
         virtual public uSyncAction Import(string file, HandlerSettings config, bool force)
         {

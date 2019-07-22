@@ -36,6 +36,8 @@ namespace uSync8.Core.Dependency
                         Order = DependencyOrders.DataTypes
                     });
                 }
+
+                // TODO: Dictionary Item Dependencies, when labels start with #
             }
 
             return dataTypes;
