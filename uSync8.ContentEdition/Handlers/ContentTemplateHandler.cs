@@ -14,11 +14,12 @@ using uSync8.BackOffice.SyncHandlers;
 using uSync8.ContentEdition.Serializers;
 using uSync8.Core.Serialization;
 using uSync8.Core.Tracking;
+using static Umbraco.Core.Constants;
 
 namespace uSync8.ContentEdition.Handlers
 {
     [SyncHandler("contentTemplateHandler", "Blueprints", "Blueprints", uSyncBackOfficeConstants.Priorites.ContentTemplate
-        , Icon = "icon-document-dashed-line usync-addon-icon", IsTwoPass = true)]
+        , Icon = "icon-document-dashed-line usync-addon-icon", IsTwoPass = true, EntityType = UdiEntityType.DocumentBlueprint)]
     public class ContentTemplateHandler : SyncHandlerTreeBase<IContent, IContentService>, ISyncHandler
     {
         public string Group => uSyncBackOfficeConstants.Groups.Content;

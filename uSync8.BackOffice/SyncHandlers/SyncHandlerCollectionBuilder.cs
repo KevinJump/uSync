@@ -32,9 +32,21 @@ namespace uSync8.BackOffice.SyncHandlers
                 .ToList();
         }
 
+        /*
         public ISyncSingleItemHandler GetHandlerByType(UmbracoObjectTypes objectType)
         {
             return handlerTwos.FirstOrDefault(x => x.ItemObjectType == objectType);
+        }
+        */
+
+        public ISyncSingleItemHandler GetHandlerFromUdi(Udi udi)
+        {
+            return GetHandlerByEntityType(udi.EntityType);
+        }
+
+        public ISyncSingleItemHandler GetHandlerByEntityType(string entityType)
+        {
+            return handlerTwos.FirstOrDefault(x => x.EntityType == entityType);
         }
 
         public ISyncSingleItemHandler GetHandlerByTypeName(string typeName)

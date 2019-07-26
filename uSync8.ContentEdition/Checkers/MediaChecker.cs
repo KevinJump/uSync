@@ -13,7 +13,7 @@ namespace uSync8.ContentEdition.Checkers
     public class MediaChecker : ContentBaseChecker, ISyncDependencyChecker<IMedia>
     {
         public MediaChecker(IEntityService entityService)
-            : base(entityService, DependencyOrders.Media, UmbracoObjectTypes.MediaType)
+            : base(entityService, UmbracoObjectTypes.MediaType)
         {
             ObjectType = UmbracoObjectTypes.Media;
         }
@@ -30,19 +30,19 @@ namespace uSync8.ContentEdition.Checkers
 
             if (!flags.HasFlag(DependencyFlags.NoDependencies))
             {
-                var contentType = CalcDocTypeDependency(item);
+                var contentType = CalcDocTypeDependency(item, flags);
                 if (contentType != null)
                     dependencies.Add(contentType);
             }
 
             if (flags.HasFlag(DependencyFlags.IncludeAncestors))
             {
-                dependencies.AddRange(GetParentDependencies(item.Id));
+                dependencies.AddRange(GetParentDependencies(item.Id, DependencyOrders.Media - 1, flags));
             }
 
             if (flags.HasFlag(DependencyFlags.IncludeChildren))
             {
-                dependencies.AddRange(GetChildDepencies(item.Id));
+                dependencies.AddRange(GetChildDepencies(item.Id, DependencyOrders.Media + 1 , flags));
             }
 
             return dependencies;

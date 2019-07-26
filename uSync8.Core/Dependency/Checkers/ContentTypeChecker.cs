@@ -13,8 +13,8 @@ namespace uSync8.Core.Dependency
         ISyncDependencyChecker<IContentType>
     {
 
-        public ContentTypeChecker(IDataTypeService dataTypeService)
-            : base(dataTypeService)
+        public ContentTypeChecker(IDataTypeService dataTypeService, ILocalizationService localizationService)
+            : base(dataTypeService, localizationService)
         { }
 
         public UmbracoObjectTypes ObjectType => UmbracoObjectTypes.DocumentType;
@@ -26,21 +26,22 @@ namespace uSync8.Core.Dependency
             dependencies.Add(new uSyncDependency()
             {
                 Udi = item.GetUdi(),
-                Order = DependencyOrders.ContentTypes
+                Order = DependencyOrders.ContentTypes,
+                Flags = flags
             });
 
 
             if (!flags.HasFlag(DependencyFlags.NoDependencies)) {
-                dependencies.AddRange(CalcDataTypeDependencies(item)); ;
-                dependencies.AddRange(CalcCompositions(item, DependencyOrders.ContentTypes - 1));
-                dependencies.AddRange(CalcTemplateDependencies(item));
+                dependencies.AddRange(CalcDataTypeDependencies(item, flags)); ;
+                dependencies.AddRange(CalcCompositions(item, DependencyOrders.ContentTypes - 1, flags));
+                dependencies.AddRange(CalcTemplateDependencies(item, flags));
             }
 
             return dependencies;
         }
 
 
-        private IEnumerable<uSyncDependency> CalcTemplateDependencies(IContentType item)
+        private IEnumerable<uSyncDependency> CalcTemplateDependencies(IContentType item, DependencyFlags flags)
         {
             var templates = new List<uSyncDependency>();
 
@@ -49,7 +50,8 @@ namespace uSync8.Core.Dependency
                 templates.Add(new uSyncDependency()
                 {
                     Udi = template.GetUdi(),
-                    Order = DependencyOrders.Templates
+                    Order = DependencyOrders.Templates,
+                    Flags = flags
                 });
             }
 

@@ -16,11 +16,12 @@ using uSync8.BackOffice.SyncHandlers;
 using uSync8.Core.Dependency;
 using uSync8.Core.Serialization;
 using uSync8.Core.Tracking;
+using static Umbraco.Core.Constants;
 
 namespace uSync8.ContentEdition.Handlers
 {
     [SyncHandler("dictionaryHandler", "Dictionary", "Dictionary", uSyncBackOfficeConstants.Priorites.DictionaryItems
-        , Icon = "icon-book-alt usync-addon-icon")]
+        , Icon = "icon-book-alt usync-addon-icon", EntityType = UdiEntityType.DictionaryItem)]
     public class DictionaryHandler : SyncHandlerBase<IDictionaryItem, ILocalizationService>, ISyncHandler, ISyncSingleItemHandler
     {
         public string Group => uSyncBackOfficeConstants.Groups.Content;

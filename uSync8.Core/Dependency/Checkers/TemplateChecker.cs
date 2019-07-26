@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 using Umbraco.Core;
@@ -25,26 +26,30 @@ namespace uSync8.Core.Dependency
         {
             var dependencies = new List<uSyncDependency>();
 
+            if (flags.HasFlag(DependencyFlags.NoTemplates)) return dependencies;
+
             dependencies.Add(new uSyncDependency()
             {
                 Order = DependencyOrders.Templates,
-                Udi = item.GetUdi()
+                Udi = item.GetUdi(),
+                Flags = flags
             });
 
             if (flags.HasFlag(DependencyFlags.IncludeAncestors))
             {
-                dependencies.AddRange(GetParents(item, DependencyOrders.Templates - 1));
+                dependencies.AddRange(GetParents(item, DependencyOrders.Templates - 1, flags));
             }
 
             if (flags.HasFlag(DependencyFlags.IncludeChildren))
             {
                 // children check.
+                dependencies.AddRange(GetChildren(item, DependencyOrders.Templates + 1, flags));
             }
 
             return dependencies;
         }
 
-        private IEnumerable<uSyncDependency> GetParents(ITemplate item, int order)
+        private IEnumerable<uSyncDependency> GetParents(ITemplate item, int order, DependencyFlags flags)
         {
             var templates = new List<uSyncDependency>();
 
@@ -56,13 +61,36 @@ namespace uSync8.Core.Dependency
                     templates.Add(new uSyncDependency()
                     {
                         Order = order,
-                        Udi = master.GetUdi()
+                        Udi = master.GetUdi(),
+                        Flags = flags
                     });
 
-                    templates.AddRange(GetParents(master, order - 1)); 
+                    templates.AddRange(GetParents(master, order - 1, flags));
                 }
             }
 
+            return templates;
+        }
+
+        private IEnumerable<uSyncDependency> GetChildren(ITemplate item, int order, DependencyFlags flags)
+        {
+            var templates = new List<uSyncDependency>();
+
+            var children = fileService.GetTemplateChildren(item.Id);
+            if (children != null && children.Any())
+            {
+                foreach(var child in children)
+                {
+                    templates.Add(new uSyncDependency()
+                    {
+                        Order = order,
+                        Udi = child.GetUdi(),
+                        Flags = flags
+                    });
+
+                    GetChildren(child, order + 1, flags);
+                }
+            }
 
             return templates;
         }

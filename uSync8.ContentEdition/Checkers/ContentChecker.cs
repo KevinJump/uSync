@@ -13,7 +13,7 @@ namespace uSync8.ContentEdition.Checkers
     public class ContentChecker : ContentBaseChecker, ISyncDependencyChecker<IContent>
     {
         public ContentChecker(IEntityService entityService)
-            : base(entityService, DependencyOrders.Content, UmbracoObjectTypes.DocumentType)
+            : base(entityService, UmbracoObjectTypes.DocumentType)
         {
             ObjectType = UmbracoObjectTypes.Document;
         }
@@ -25,24 +25,25 @@ namespace uSync8.ContentEdition.Checkers
             dependencies.Add(new uSyncDependency()
             {
                 Udi = item.GetUdi(),
-                Order = DependencyOrders.Content
+                Order = DependencyOrders.Content,
+                Flags = flags                
             });
 
             if (!flags.HasFlag(DependencyFlags.NoDependencies))
             {
-                var contentType = CalcDocTypeDependency(item);
+                var contentType = CalcDocTypeDependency(item, flags);
                 if (contentType != null)
                     dependencies.Add(contentType);
             }
 
             if (flags.HasFlag(DependencyFlags.IncludeAncestors))
             {
-                dependencies.AddRange(GetParentDependencies(item.Id));
+                dependencies.AddRange(GetParentDependencies(item.Id, DependencyOrders.Content - 1, flags));
             }
 
             if (flags.HasFlag(DependencyFlags.IncludeChildren))
             {
-                dependencies.AddRange(GetChildDepencies(item.Id));
+                dependencies.AddRange(GetChildDepencies(item.Id, DependencyOrders.Content + 1, flags));
             }
 
             return dependencies;

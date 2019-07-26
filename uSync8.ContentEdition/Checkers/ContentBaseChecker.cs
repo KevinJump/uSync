@@ -14,21 +14,19 @@ namespace uSync8.ContentEdition.Checkers
     public class ContentBaseChecker
     {
         protected readonly IEntityService entityService;
-        protected int baseOrder;
 
         private UmbracoObjectTypes contentTypeObjectType;
 
         public UmbracoObjectTypes ObjectType { get; protected set; } = UmbracoObjectTypes.Unknown;
 
-        public ContentBaseChecker(IEntityService entityService, int baseOrder, UmbracoObjectTypes contentTypeObjectType)
+        public ContentBaseChecker(IEntityService entityService, UmbracoObjectTypes contentTypeObjectType)
         {
             this.entityService = entityService;
-            this.baseOrder = baseOrder;
 
             this.contentTypeObjectType = contentTypeObjectType;
         }
 
-        protected uSyncDependency CalcDocTypeDependency(IContentBase item)
+        protected uSyncDependency CalcDocTypeDependency(IContentBase item, DependencyFlags flags)
         {
             if (item.ContentType == null) return null;
 
@@ -42,7 +40,8 @@ namespace uSync8.ContentEdition.Checkers
                 return new uSyncDependency()
                 {
                     Udi = udi,
-                    Order = DependencyOrders.ContentTypes
+                    Order = DependencyOrders.ContentTypes,
+                    Flags = flags
                 };
             }
 
@@ -50,7 +49,7 @@ namespace uSync8.ContentEdition.Checkers
         }
 
 
-        protected IEnumerable<uSyncDependency> GetParentDependencies(int id)
+        protected IEnumerable<uSyncDependency> GetParentDependencies(int id, int order, DependencyFlags flags)
         {
             var dependencies = new List<uSyncDependency>();
 
@@ -60,16 +59,17 @@ namespace uSync8.ContentEdition.Checkers
                 dependencies.Add(new uSyncDependency()
                 {
                     Udi = Udi.Create(this.ObjectType.GetUdiType(), parent.Key),
-                    Order = baseOrder
+                    Order = order,
+                    Flags = flags
                 }); 
 
-                dependencies.AddRange(GetParentDependencies(parent.Id));
+                dependencies.AddRange(GetParentDependencies(parent.Id, order - 1, flags));
             }
 
             return dependencies;
         }
 
-        protected IEnumerable<uSyncDependency> GetChildDepencies(int id)
+        protected IEnumerable<uSyncDependency> GetChildDepencies(int id, int order, DependencyFlags flags)
         {
             var dependencies = new List<uSyncDependency>();
 
@@ -80,10 +80,11 @@ namespace uSync8.ContentEdition.Checkers
                 dependencies.Add(new uSyncDependency()
                 {
                     Udi = Udi.Create(this.ObjectType.GetUdiType(), child.Key),
-                    Order = baseOrder
+                    Order = order,
+                    Flags = flags
                 });
 
-                dependencies.AddRange(GetChildDepencies(child.Id));
+                dependencies.AddRange(GetChildDepencies(child.Id, order + 1, flags));
             }
 
             return dependencies;
@@ -96,7 +97,7 @@ namespace uSync8.ContentEdition.Checkers
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        protected IEnumerable<uSyncDependency> GetPropertyDependencies(IContentBase item)
+        protected IEnumerable<uSyncDependency> GetPropertyDependencies(IContentBase item, DependencyFlags flags)
         {
             var dependencies = new List<uSyncDependency>();
 

@@ -296,6 +296,12 @@ namespace uSync8.Core.Serialization
             }
         }
 
+        /// <summary>
+        ///  cleans up the node, removing things that are not generic (like internal Ids)
+        ///  so that the comparisions are like for like.
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
         protected virtual XElement CleanseNode(XElement node) => node;
 
 

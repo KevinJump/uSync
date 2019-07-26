@@ -135,5 +135,17 @@ namespace uSync8.Core.Serialization.Serializers
 
         protected override string ItemAlias(ITemplate item)
             => item.Alias;
+
+        /// <summary>
+        ///  we clean the content out of the template,
+        ///  We don't care if the content has changed during a normal serialization
+        /// </summary>
+        protected override XElement CleanseNode(XElement node)
+        {
+            var contentNode = node.Element("Content");
+            if (contentNode != null) contentNode.Remove();
+
+            return base.CleanseNode(node);
+        }
     }
 }

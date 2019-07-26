@@ -14,10 +14,12 @@ using uSync8.BackOffice.Services;
 using uSync8.Core.Dependency;
 using uSync8.Core.Serialization;
 using uSync8.Core.Tracking;
+using static Umbraco.Core.Constants;
 
 namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
-    [SyncHandler("memberTypeHandler", "Member Types", "MemberTypes", uSyncBackOfficeConstants.Priorites.MemberTypes, IsTwoPass = true, Icon = "icon-users")]
+    [SyncHandler("memberTypeHandler", "Member Types", "MemberTypes", uSyncBackOfficeConstants.Priorites.MemberTypes, 
+        IsTwoPass = true, Icon = "icon-users", EntityType = UdiEntityType.MemberType)]
     public class MemberTypeHandler : SyncHandlerContainerBase<IMemberType, IMemberTypeService>, ISyncSingleItemHandler
     {
         private readonly IMemberTypeService memberTypeService;

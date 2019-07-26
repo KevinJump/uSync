@@ -14,11 +14,12 @@ using uSync8.BackOffice.SyncHandlers;
 using uSync8.Core.Dependency;
 using uSync8.Core.Serialization;
 using uSync8.Core.Tracking;
+using static Umbraco.Core.Constants;
 
 namespace uSync8.ContentEdition.Handlers
 {
     [SyncHandler("mediaHandler", "Media", "Media", uSyncBackOfficeConstants.Priorites.Media,
-        Icon = "icon-picture usync-addon-icon", IsTwoPass = true)]
+        Icon = "icon-picture usync-addon-icon", IsTwoPass = true, EntityType = UdiEntityType.Media)]
     public class MediaHandler : SyncHandlerTreeBase<IMedia, IMediaService>, ISyncHandler, ISyncSingleItemHandler
     {
         public string Group => uSyncBackOfficeConstants.Groups.Content;

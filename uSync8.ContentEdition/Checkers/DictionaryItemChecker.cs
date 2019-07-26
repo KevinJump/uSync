@@ -22,7 +22,8 @@ namespace uSync8.ContentEdition.Checkers
             dependencies.Add(new uSyncDependency()
             {
                 Order = DependencyOrders.DictionaryItems,
-                Udi = item.GetUdi()
+                Udi = item.GetUdi(),
+                Flags = flags
             });
 
             return dependencies;

@@ -24,5 +24,7 @@ namespace uSync8.BackOffice.SyncHandlers
         public bool IsTwoPass { get; set; } = false;
 
         public string Icon { get; set; }
+
+        public string EntityType { get; set; }
     }
 }

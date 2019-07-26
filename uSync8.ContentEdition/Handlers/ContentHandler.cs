@@ -15,11 +15,12 @@ using uSync8.ContentEdition.Serializers;
 using uSync8.Core.Dependency;
 using uSync8.Core.Serialization;
 using uSync8.Core.Tracking;
+using static Umbraco.Core.Constants;
 
 namespace uSync8.ContentEdition.Handlers
 {
     [SyncHandler("contentHandler", "Content", "Content", uSyncBackOfficeConstants.Priorites.Content
-        , Icon = "icon-document usync-addon-icon", IsTwoPass = true)]
+        , Icon = "icon-document usync-addon-icon", IsTwoPass = true, EntityType = UdiEntityType.Document)]
     public class ContentHandler : SyncHandlerTreeBase<IContent, IContentService>, ISyncHandler, ISyncSingleItemHandler 
     {
         public string Group => uSyncBackOfficeConstants.Groups.Content;

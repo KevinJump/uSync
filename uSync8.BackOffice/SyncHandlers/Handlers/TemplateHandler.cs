@@ -16,10 +16,12 @@ using uSync8.Core.Models;
 using uSync8.Core.Serialization;
 using uSync8.Core.Tracking;
 using uSync8.Core.Tracking.Impliment;
+using static Umbraco.Core.Constants;
 
 namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
-    [SyncHandler("templateHandler", "Templates", "Templates", uSyncBackOfficeConstants.Priorites.Templates, Icon = "icon-layout")]
+    [SyncHandler("templateHandler", "Templates", "Templates", uSyncBackOfficeConstants.Priorites.Templates,
+        Icon = "icon-layout", EntityType = UdiEntityType.Template)]
     public class TemplateHandler : SyncHandlerLevelBase<ITemplate, IFileService>, ISyncSingleItemHandler
     {
         private readonly IFileService fileService;

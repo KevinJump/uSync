@@ -25,6 +25,7 @@ namespace uSync8.Core.Dependency
         None = 0,
         IncludeChildren = 2,
         IncludeAncestors = 4,
-        NoDependencies = 8
+        NoDependencies = 8,
+        NoTemplates = 16
     }
 }

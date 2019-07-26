@@ -15,10 +15,12 @@ using uSync8.BackOffice.Services;
 using uSync8.Core.Dependency;
 using uSync8.Core.Serialization;
 using uSync8.Core.Tracking;
+using static Umbraco.Core.Constants;
 
 namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
-    [SyncHandler("languageHandler", "Languages", "Languages", uSyncBackOfficeConstants.Priorites.Languages, Icon = "icon-globe")]
+    [SyncHandler("languageHandler", "Languages", "Languages", uSyncBackOfficeConstants.Priorites.Languages,
+        Icon = "icon-globe", EntityType = UdiEntityType.Language)]
     public class LanguageHandler : SyncHandlerBase<ILanguage, ILocalizationService>, ISyncSingleItemHandler
     {
         private readonly ILocalizationService localizationService;

@@ -13,8 +13,8 @@ namespace uSync8.Core.Dependency
         ISyncDependencyChecker<IMemberType>
     {
         public MemberTypeChecker(
-            IDataTypeService dataTypeService) 
-            : base(dataTypeService)
+            IDataTypeService dataTypeService, ILocalizationService localizationService) 
+            : base(dataTypeService, localizationService)
         {
         }
 
@@ -27,13 +27,14 @@ namespace uSync8.Core.Dependency
             dependencies.Add(new uSyncDependency()
             {
                 Udi = item.GetUdi(),
-                Order = DependencyOrders.MemberTypes
+                Order = DependencyOrders.MemberTypes,
+                Flags = flags
             });
 
             if (flags.HasFlag(DependencyFlags.NoDependencies)) return dependencies;
 
-            dependencies.AddRange(CalcDataTypeDependencies(item));
-            dependencies.AddRange(CalcCompositions(item, DependencyOrders.MemberTypes - 1));
+            dependencies.AddRange(CalcDataTypeDependencies(item, flags));
+            dependencies.AddRange(CalcCompositions(item, DependencyOrders.MemberTypes - 1, flags));
             return dependencies;
         }
     }

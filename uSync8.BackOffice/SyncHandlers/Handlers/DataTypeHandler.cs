@@ -15,10 +15,12 @@ using uSync8.Core;
 using uSync8.Core.Dependency;
 using uSync8.Core.Serialization;
 using uSync8.Core.Tracking;
+using static Umbraco.Core.Constants;
 
 namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
-    [SyncHandler("dataTypeHandler", "Datatypes", "DataTypes", uSyncBackOfficeConstants.Priorites.DataTypes, Icon = "icon-autofill")]
+    [SyncHandler("dataTypeHandler", "Datatypes", "DataTypes", uSyncBackOfficeConstants.Priorites.DataTypes, 
+        Icon = "icon-autofill", EntityType = UdiEntityType.DataType)]
     public class DataTypeHandler : SyncHandlerContainerBase<IDataType, IDataTypeService>, ISyncSingleItemHandler, ISyncPostImportHandler
     {
         private readonly IDataTypeService dataTypeService;

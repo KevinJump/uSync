@@ -14,11 +14,12 @@ using uSync8.BackOffice.Services;
 using uSync8.BackOffice.SyncHandlers;
 using uSync8.Core.Serialization;
 using uSync8.Core.Tracking;
+using static Umbraco.Core.Constants;
 
 namespace uSync8.ContentEdition.Handlers
 {
     [SyncHandler("domainHandler", "Domains", "Domains", uSyncBackOfficeConstants.Priorites.DomainSettings
-        , Icon = "icon-home usync-addon-icon")]
+        , Icon = "icon-home usync-addon-icon", EntityType = UdiEntityType.Unknown)]
     public class DomainHandler : SyncHandlerBase<IDomain, IDomainService>, ISyncHandler
     {
         public string Group => uSyncBackOfficeConstants.Groups.Content;

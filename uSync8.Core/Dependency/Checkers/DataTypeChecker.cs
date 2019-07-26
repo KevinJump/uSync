@@ -18,12 +18,15 @@ namespace uSync8.Core.Dependency
             dependencies.Add(new uSyncDependency()
             {
                 Order = DependencyOrders.DataTypes,
-                Udi = item.GetUdi()
+                Udi = item.GetUdi(),
+                Flags = flags
+
             });
 
             // what can datatypes depend on? 
 
             return dependencies;
         }
+
     }
 }

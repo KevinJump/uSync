@@ -17,7 +17,9 @@ namespace uSync8.BackOffice.SyncHandlers
     public interface ISyncSingleItemHandler : ISyncHandler
     {
         string Group { get; }
-        UmbracoObjectTypes ItemObjectType { get; }
+        // UmbracoObjectTypes ItemObjectType { get; }
+
+        string EntityType { get; }
         string TypeName { get; }
 
         uSyncAction Import(string file, HandlerSettings settings, bool force);

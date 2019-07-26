@@ -19,11 +19,12 @@ using uSync8.Core.Dependency;
 using uSync8.Core.Serialization;
 using uSync8.Core.Serialization.Serializers;
 using uSync8.Core.Tracking;
+using static Umbraco.Core.Constants;
 
 namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("contentTypeHandler", "DocTypes", "ContentTypes", uSyncBackOfficeConstants.Priorites.ContentTypes, 
-            IsTwoPass = true, Icon = "icon-item-arrangement")]
+            IsTwoPass = true, Icon = "icon-item-arrangement", EntityType = UdiEntityType.DocumentType)]
     public class ContentTypeHandler : SyncHandlerContainerBase<IContentType, IContentTypeService>, ISyncSingleItemHandler, ISyncPostImportHandler
     {
         private readonly IContentTypeService contentTypeService;

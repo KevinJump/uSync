@@ -54,7 +54,10 @@ namespace uSync8.BackOffice.SyncHandlers
 
         protected string rootFolder { get; set; }
 
-        public UmbracoObjectTypes ItemObjectType { get; protected set; } = UmbracoObjectTypes.Unknown;
+        protected UmbracoObjectTypes ItemObjectType { get; set; } = UmbracoObjectTypes.Unknown;
+
+        public string EntityType { get; protected set; }
+
         public string TypeName { get; protected set; }
         protected UmbracoObjectTypes itemContainerType = UmbracoObjectTypes.Unknown;
 
@@ -96,6 +99,7 @@ namespace uSync8.BackOffice.SyncHandlers
             Priority = meta.Priority;
             IsTwoPass = meta.IsTwoPass;
             Icon = string.IsNullOrWhiteSpace(meta.Icon) ? "icon-umb-content" : meta.Icon;
+            EntityType = meta.EntityType;
 
             TypeName = serializer.ItemType;
 
