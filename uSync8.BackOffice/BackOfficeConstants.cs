@@ -37,7 +37,9 @@ namespace uSync8.BackOffice
         {
             public const string Settings = "Settings";
             public const string Content = "Content";
-            public const string People = "People";
+
+            public const string Members = "Members";
+            public const string Users = "Users";
 
         }
     }

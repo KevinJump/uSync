@@ -3,6 +3,9 @@
 
     function uSyncHub($rootScope, $q, assetsService) {
 
+        var starting = false;
+        var callbacks = [];
+
         var scripts = [
             Umbraco.Sys.ServerVariables.umbracoSettings.umbracoPath + '/lib/signalr/jquery.signalR.js',
             Umbraco.Sys.ServerVariables.umbracoSettings.umbracoPath + '/backoffice/signalr/hubs'];
@@ -14,8 +17,6 @@
         return resource;
 
         //////////////
-        var starting = false;
-        var callbacks = [];
 
         function initHub(callback) {
 
