@@ -54,6 +54,38 @@ namespace uSync8.BackOffice.SyncHandlers
             return handlerTwos.FirstOrDefault(x => x.TypeName == typeName);
         }
 
+        public IEnumerable<HandlerConfigPair> GetHandlersByType(IEnumerable<string> entityTypes, uSyncSettings settings)
+        {
+            var validHandlers = new List<HandlerConfigPair>();
+
+            foreach (var syncHandler in handlerTwos)
+            {
+                if (entityTypes.InvariantContains(syncHandler.EntityType))
+                {
+                    var config = settings.Handlers.FirstOrDefault(x => x.Alias.InvariantEquals(syncHandler.Alias));
+                    if (config == null)
+                    {
+                        config = new HandlerSettings(syncHandler.Alias, settings.EnableMissingHandlers)
+                        {
+                            GuidNames = new OverriddenValue<bool>(settings.UseGuidNames, false),
+                            UseFlatStructure = new OverriddenValue<bool>(settings.UseFlatStructure, false)
+                        };
+                    }
+
+                    if (config != null)
+                    {
+                        validHandlers.Add(new HandlerConfigPair()
+                        {
+                            Handler = syncHandler,
+                            Settings = config
+                        });
+                    }
+                }
+            }
+
+            return validHandlers.OrderBy(x => x.Handler.Priority);
+        }
+
         public IEnumerable<HandlerConfigPair> GetValidHandlers(string actionName, uSyncSettings settings)
         {
             var validHandlers = new List<HandlerConfigPair>();

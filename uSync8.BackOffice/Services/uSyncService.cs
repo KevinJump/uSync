@@ -19,6 +19,8 @@ namespace uSync8.BackOffice
     /// </summary>
     public class uSyncService
     {
+        public delegate void SyncEventCallback(SyncProgressSummary summary);
+
         private uSyncSettings settings;
         private readonly SyncHandlerCollection syncHandlers;
 
@@ -37,15 +39,24 @@ namespace uSync8.BackOffice
             this.settings = Current.Configs.uSync();
         }
 
-        public delegate void SyncEventCallback(SyncProgressSummary summary);
-
         public IEnumerable<uSyncAction> Report(string folder, SyncEventCallback callback = null, SyncUpdateCallback update = null)
+        {
+            var configuredHandlers = syncHandlers.GetValidHandlers("report", settings).ToList();
+            return Report(folder, configuredHandlers, callback, update);
+        }
+
+        public IEnumerable<uSyncAction> Report(string folder, IEnumerable<string> handlerTypes, SyncEventCallback callback = null, SyncUpdateCallback update = null)
+        {
+            var handlers = syncHandlers.GetHandlersByType(handlerTypes, settings);
+            return Report(folder, handlers, callback, update);
+        }
+
+        private IEnumerable<uSyncAction> Report(string folder, IEnumerable<HandlerConfigPair> handlers, SyncEventCallback callback, SyncUpdateCallback update)
         {
             var actions = new List<uSyncAction>();
 
-            var configuredHandlers = syncHandlers.GetValidHandlers("report", settings).ToList();
 
-            var summary = new SyncProgressSummary(configuredHandlers.Select(x => x.Handler), "Reporting", configuredHandlers.Count);
+            var summary = new SyncProgressSummary(handlers.Select(x => x.Handler), "Reporting", handlers.Count());
 
             if (settings.ReportDebug)
             {
@@ -55,7 +66,7 @@ namespace uSync8.BackOffice
                 this.Export($"~/uSync/Tracker/{DateTime.Now.ToString("yyyyMMdd_HHmmss")}/", null, null);
             }
 
-            foreach (var configuredHandler in configuredHandlers)
+            foreach (var configuredHandler in handlers)
             {
                 var handler = configuredHandler.Handler;
                 var handlerSettings = configuredHandler.Settings;
@@ -82,6 +93,18 @@ namespace uSync8.BackOffice
 
         public IEnumerable<uSyncAction> Import(string folder, bool force, SyncEventCallback callback = null, SyncUpdateCallback update = null)
         {
+            var handlers = syncHandlers.GetValidHandlers("import", settings).ToList();
+            return Import(folder, force, handlers, callback, update);
+        }
+
+        public IEnumerable<uSyncAction> Import(string folder, bool force, IEnumerable<string> handlerTypes, SyncEventCallback callback = null, SyncUpdateCallback update = null)
+        {
+            var handlers = syncHandlers.GetHandlersByType(handlerTypes, settings);
+            return Import(folder, force, handlers, callback, update);
+        }
+
+        private IEnumerable<uSyncAction> Import(string folder, bool force, IEnumerable<HandlerConfigPair> handlers, SyncEventCallback callback, SyncUpdateCallback update)
+        {
             lock (_importLock)
             {
                 var sw = Stopwatch.StartNew();
@@ -92,9 +115,9 @@ namespace uSync8.BackOffice
 
                     var actions = new List<uSyncAction>();
 
-                    var configuredHandlers = syncHandlers.GetValidHandlers("import", settings).ToList();
+                    // var configuredHandlers = syncHandlers.GetValidHandlers("import", settings).ToList();
 
-                    var summary = new SyncProgressSummary(configuredHandlers.Select(x => x.Handler), "Importing", configuredHandlers.Count + 1);
+                    var summary = new SyncProgressSummary(handlers.Select(x => x.Handler), "Importing", handlers.Count() + 1);
                     summary.Handlers.Add(new SyncHandlerSummary()
                     {
                         Icon = "icon-traffic",
@@ -102,7 +125,7 @@ namespace uSync8.BackOffice
                         Status = HandlerStatus.Pending
                     });
 
-                    foreach (var configuredHandler in configuredHandlers)
+                    foreach (var configuredHandler in handlers)
                     {
                         var handler = configuredHandler.Handler;
                         var handlerSettings = configuredHandler.Settings;
@@ -132,7 +155,7 @@ namespace uSync8.BackOffice
                                                 && x.Change > Core.ChangeType.NoChange
                                                 && x.RequiresPostProcessing);
 
-                    foreach (var configuredHandler in configuredHandlers)
+                    foreach (var configuredHandler in handlers)
                     {
                         var handler = configuredHandler.Handler;
                         var handlerSettings = configuredHandler.Settings;
@@ -184,13 +207,22 @@ namespace uSync8.BackOffice
 
         public IEnumerable<uSyncAction> Export(string folder, SyncEventCallback callback = null, SyncUpdateCallback update = null)
         {
-            var actions = new List<uSyncAction>();
-
             var configuredHandlers = syncHandlers.GetValidHandlers("export", settings).ToList();
+            return Export(folder, configuredHandlers, callback, update);
+        }
 
-            var summary = new SyncProgressSummary(configuredHandlers.Select(x => x.Handler), "Exporting", configuredHandlers.Count);
+        public IEnumerable<uSyncAction> Export(string folder, IEnumerable<string> handlerTypes, SyncEventCallback callback = null, SyncUpdateCallback update = null)
+        {
+            var handlers = syncHandlers.GetHandlersByType(handlerTypes, settings);
+            return Export(folder, handlers, callback, update);
+        }
 
-            foreach (var configuredHandler in configuredHandlers)
+        private IEnumerable<uSyncAction> Export(string folder, IEnumerable<HandlerConfigPair> handlers, SyncEventCallback callback, SyncUpdateCallback update)
+        {
+            var actions = new List<uSyncAction>();
+            var summary = new SyncProgressSummary(handlers.Select(x => x.Handler), "Exporting", handlers.Count());
+
+            foreach (var configuredHandler in handlers)
             {
                 var handler = configuredHandler.Handler;
                 summary.Count++;
