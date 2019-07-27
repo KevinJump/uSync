@@ -14,32 +14,45 @@
         return resource;
 
         //////////////
+        var starting = false;
+        var callbacks = [];
 
         function initHub(callback) {
 
-            if ($.connection === undefined) {
-                // nothing else is using signalR (yet)
-                // on this site.
-                //
-                // You should load it only after a check
-                // because if you just initialize the 
-                // scripts each time, then when something 
-                // else is using signalR the settings
-                // will get wiped. 
+            callbacks.push(callback);
 
-                var promises = [];
-                scripts.forEach(function (script) {
-                    promises.push(assetsService.loadJs(script));
-                });
+            if (!starting) {
+                if ($.connection === undefined) {
+                    starting = true;
+                    // nothing else is using signalR (yet)
+                    // on this site.
+                    //
+                    // You should load it only after a check
+                    // because if you just initialize the 
+                    // scripts each time, then when something 
+                    // else is using signalR the settings
+                    // will get wiped. 
 
-                // when everything is loaded setup the hub
-                $q.all(promises)
-                    .then(function () {
-                        hubSetup(callback);
+                    var promises = [];
+                    scripts.forEach(function (script) {
+                        promises.push(assetsService.loadJs(script));
                     });
-            }
-            else {
-                hubSetup(callback);
+
+                    // when everything is loaded setup the hub
+                    $q.all(promises)
+                        .then(function () {
+                            while (callbacks.length) {
+                                var cb = callbacks.pop();
+                                hubSetup(cb);
+                            }
+                        });
+                }
+                else {
+                    while (callbacks.length) {
+                        var cb = callbacks.pop();
+                        hubSetup(cb);
+                    }
+                }
             }
         }
 
