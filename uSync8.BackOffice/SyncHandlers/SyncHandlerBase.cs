@@ -159,7 +159,7 @@ namespace uSync8.BackOffice.SyncHandlers
         protected virtual IEnumerable<uSyncAction> ImportFolder(string folder, HandlerSettings config, Dictionary<string, TObject> updates, bool force, SyncUpdateCallback callback)
         {
             List<uSyncAction> actions = new List<uSyncAction>();
-            var files = syncFileService.GetFiles(folder, "*.config");
+            var files = GetImportFiles(folder);
 
             var flags = SerializerFlags.None;
             if (force) flags |= SerializerFlags.Force;
@@ -203,6 +203,9 @@ namespace uSync8.BackOffice.SyncHandlers
 
             return actions;
         }
+
+        protected virtual IEnumerable<string> GetImportFiles(string folder)
+            => syncFileService.GetFiles(folder, "*.config");
 
 
         virtual public SyncAttempt<TObject> Import(string filePath, HandlerSettings config, SerializerFlags flags)
@@ -332,11 +335,11 @@ namespace uSync8.BackOffice.SyncHandlers
             return actions;
         }
 
-        public IEnumerable<uSyncAction> ReportFolder(string folder, HandlerSettings config, SyncUpdateCallback callback)
+        public virtual IEnumerable<uSyncAction> ReportFolder(string folder, HandlerSettings config, SyncUpdateCallback callback)
         {
             List<uSyncAction> actions = new List<uSyncAction>();
 
-            var files = syncFileService.GetFiles(folder, "*.config");
+            var files = GetImportFiles(folder);
 
             int count = 0;
             int total = files.Count();
@@ -359,7 +362,6 @@ namespace uSync8.BackOffice.SyncHandlers
 
         public uSyncAction ReportElement(XElement node)
         {
-
             try
             {
                 var change = serializer.IsCurrent(node);
