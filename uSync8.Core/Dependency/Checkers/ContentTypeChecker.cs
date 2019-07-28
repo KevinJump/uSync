@@ -45,14 +45,17 @@ namespace uSync8.Core.Dependency
         {
             var templates = new List<uSyncDependency>();
 
-            foreach (var template in item.AllowedTemplates)
+            if (!flags.HasFlag(DependencyFlags.NoTemplates))
             {
-                templates.Add(new uSyncDependency()
+                foreach (var template in item.AllowedTemplates)
                 {
-                    Udi = template.GetUdi(),
-                    Order = DependencyOrders.Templates,
-                    Flags = flags
-                });
+                    templates.Add(new uSyncDependency()
+                    {
+                        Udi = template.GetUdi(),
+                        Order = DependencyOrders.Templates,
+                        Flags = flags
+                    });
+                }
             }
 
             return templates;
