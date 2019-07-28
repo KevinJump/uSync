@@ -252,6 +252,58 @@ namespace uSync8.BackOffice.Configuration
         public static event uSyncSettingsEvent Reloaded;
 
         public delegate void uSyncSettingsEvent(uSyncSettings settings);
+
+        #region extension settings 
+
+        public string GetExtensionSetting(string app, string key, string defaultValue)
+        {
+            return GetExtensionSetting<string>(app, key, defaultValue);
+        }
+
+        public TObject GetExtensionSetting<TObject>(string app, string key, TObject defaultValue)
+        {
+            var node = GetSettingsFile();
+            if (node == null) return defaultValue;
+
+            var section = node.Element(app);
+            if (section != null)
+                return section.Element(key).ValueOrDefault(defaultValue);
+
+            return defaultValue;
+
+        }
+
+        public void SaveExtensionSetting<TObject>(string app, string key, TObject value)
+        {
+            var node = GetSettingsFile();
+            if (node == null) return;
+
+            var section = node.Element(app);
+            if (section == null)
+            {
+                section = new XElement(app);
+                node.Add(section);
+            }
+
+            var keyNode = section.Element(key);
+            if (keyNode == null)
+            {
+                keyNode = new XElement(app);
+                section.Add(keyNode);
+            }
+
+            keyNode.Value = value.ToString();
+        }
+
+        public void FlushSettings()
+        {
+            var node = GetSettingsFile();
+            if (node == null) return;
+
+            this.SaveSettingsFile(node);
+        }
+
+        #endregion
     }
 
 }
