@@ -5,6 +5,7 @@ using System.Linq;
 using Umbraco.Core;
 using Umbraco.Core.Models;
 using Umbraco.Core.Services;
+using static Umbraco.Core.Constants;
 
 namespace uSync8.Core.Dependency
 {
@@ -13,11 +14,13 @@ namespace uSync8.Core.Dependency
         ISyncDependencyChecker<IContentType>
     {
 
-        public ContentTypeChecker(IDataTypeService dataTypeService, ILocalizationService localizationService)
-            : base(dataTypeService, localizationService)
-        { }
+        public override UmbracoObjectTypes ObjectType => UmbracoObjectTypes.DocumentType;
 
-        public UmbracoObjectTypes ObjectType => UmbracoObjectTypes.DocumentType;
+        public ContentTypeChecker(IDataTypeService dataTypeService, ILocalizationService localizationService, IEntityService entityService)
+            : base(entityService, dataTypeService, localizationService)
+        {
+        }
+
 
         public IEnumerable<uSyncDependency> GetDependencies(IContentType item, DependencyFlags flags)
         {
@@ -36,6 +39,8 @@ namespace uSync8.Core.Dependency
                 dependencies.AddRange(CalcCompositions(item, DependencyOrders.ContentTypes - 1, flags));
                 dependencies.AddRange(CalcTemplateDependencies(item, flags));
             }
+
+            dependencies.AddRange(CalcChildren(item.Id, flags));
 
             return dependencies;
         }
@@ -60,5 +65,6 @@ namespace uSync8.Core.Dependency
 
             return templates;
         }
+
     }
 }

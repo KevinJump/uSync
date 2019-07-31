@@ -13,12 +13,13 @@ namespace uSync8.Core.Dependency
         ISyncDependencyChecker<IMemberType>
     {
         public MemberTypeChecker(
+            IEntityService entityService,
             IDataTypeService dataTypeService, ILocalizationService localizationService) 
-            : base(dataTypeService, localizationService)
+            : base(entityService, dataTypeService, localizationService)
         {
         }
 
-        public UmbracoObjectTypes ObjectType => UmbracoObjectTypes.MemberType;
+        public override UmbracoObjectTypes ObjectType => UmbracoObjectTypes.MemberType;
 
         public IEnumerable<uSyncDependency> GetDependencies(IMemberType item, DependencyFlags flags)
         {
@@ -31,10 +32,14 @@ namespace uSync8.Core.Dependency
                 Flags = flags
             });
 
-            if (flags.HasFlag(DependencyFlags.NoDependencies)) return dependencies;
+            if (!flags.HasFlag(DependencyFlags.NoDependencies))
+            {
+                dependencies.AddRange(CalcDataTypeDependencies(item, flags));
+                dependencies.AddRange(CalcCompositions(item, DependencyOrders.MemberTypes - 1, flags));
+            }
 
-            dependencies.AddRange(CalcDataTypeDependencies(item, flags));
-            dependencies.AddRange(CalcCompositions(item, DependencyOrders.MemberTypes - 1, flags));
+            dependencies.AddRange(CalcChildren(item.Id, flags));
+
             return dependencies;
         }
     }

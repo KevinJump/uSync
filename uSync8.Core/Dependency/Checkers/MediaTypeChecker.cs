@@ -14,11 +14,13 @@ namespace uSync8.Core.Dependency
         ISyncDependencyChecker<IMediaType>
     {
         public MediaTypeChecker(
-            IDataTypeService dataTypeService, ILocalizationService localizationService)
-            : base(dataTypeService, localizationService)
+            IEntityService entityService,
+            IDataTypeService dataTypeService,
+            ILocalizationService localizationService)
+            : base(entityService, dataTypeService, localizationService)
         { }
 
-        public UmbracoObjectTypes ObjectType => UmbracoObjectTypes.MediaType;
+        public override UmbracoObjectTypes ObjectType => UmbracoObjectTypes.MediaType;
 
         public IEnumerable<uSyncDependency> GetDependencies(IMediaType item, DependencyFlags flags)
         {
@@ -31,10 +33,13 @@ namespace uSync8.Core.Dependency
                 Flags = flags
             });
 
-            if (flags.HasFlag(DependencyFlags.NoDependencies)) return dependencies;
+            if (!flags.HasFlag(DependencyFlags.NoDependencies))
+            {
+                dependencies.AddRange(CalcDataTypeDependencies(item, flags));
+                dependencies.AddRange(CalcCompositions(item, DependencyOrders.MediaTypes - 1, flags));
+            }
 
-            dependencies.AddRange(CalcDataTypeDependencies(item, flags));
-            dependencies.AddRange(CalcCompositions(item, DependencyOrders.MediaTypes - 1, flags));
+            dependencies.AddRange(CalcChildren(item.Id, flags));
 
             return dependencies;
         }

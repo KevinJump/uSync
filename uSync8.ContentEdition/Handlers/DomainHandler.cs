@@ -22,7 +22,7 @@ namespace uSync8.ContentEdition.Handlers
         , Icon = "icon-home usync-addon-icon", EntityType = UdiEntityType.Unknown)]
     public class DomainHandler : SyncHandlerBase<IDomain, IDomainService>, ISyncHandler
     {
-        public string Group => uSyncBackOfficeConstants.Groups.Content;
+        public override string Group => uSyncBackOfficeConstants.Groups.Content;
 
         private readonly IDomainService domainService;
 

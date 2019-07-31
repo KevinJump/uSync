@@ -22,13 +22,28 @@ namespace uSync8.BackOffice
             this.Total = totalSteps;
             this.Message = message;
 
-            this.Handlers = handlers.Select(x => new SyncHandlerSummary()
+            if (handlers != null)
             {
-                Icon = x.Icon,
-                Name = x.Name,
-                Status = HandlerStatus.Pending
-            }).ToList();
+                this.Handlers = handlers.Select(x => new SyncHandlerSummary()
+                {
+                    Icon = x.Icon,
+                    Name = x.Name,
+                    Status = HandlerStatus.Pending
+                }).ToList();
+            }
+            else
+            {
+                this.Handlers = new List<SyncHandlerSummary>();
+            }
         }       
+
+        public SyncProgressSummary(IEnumerable<SyncHandlerSummary> summaries, 
+            string message, int totalSteps)
+        {
+            this.Total = totalSteps;
+            this.Message = message;
+            this.Handlers = summaries.ToList();
+        }
 
         public void UpdateHandler(string name, HandlerStatus status, int changeCount)
         {

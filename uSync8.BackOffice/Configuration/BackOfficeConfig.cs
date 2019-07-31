@@ -293,6 +293,7 @@ namespace uSync8.BackOffice.Configuration
             }
 
             keyNode.Value = value.ToString();
+            SaveSettingsFile(node);
         }
 
         public void FlushSettings()

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Umbraco.Core;
 using Umbraco.Core.Models;
 using Umbraco.Core.Services;
+using static Umbraco.Core.Constants;
 
 namespace uSync8.Core.Dependency
 {
@@ -13,13 +14,19 @@ namespace uSync8.Core.Dependency
         where TObject : IContentTypeComposition
     {
 
+        private readonly IEntityService entityService;
         private readonly IDataTypeService dataTypeService;
         private readonly ILocalizationService localizationService;
 
+        public virtual UmbracoObjectTypes ObjectType { get; }
+
+
         public ContentTypeBaseChecker(
+            IEntityService entityService,
             IDataTypeService dataTypeService,
             ILocalizationService localizationService)
         {
+            this.entityService = entityService;
             this.dataTypeService = dataTypeService;
             this.localizationService = localizationService;
         }
@@ -105,5 +112,34 @@ namespace uSync8.Core.Dependency
             return contentTypes;
         }
 
+
+
+        protected IEnumerable<uSyncDependency> CalcChildren(int itemId, DependencyFlags flags)
+        {
+            var childItems = new List<uSyncDependency>();
+
+            if (flags.HasFlag(DependencyFlags.IncludeChildren))
+            {
+                var children = entityService.GetDescendants(itemId, UmbracoObjectTypes.DocumentType);
+
+                if (children != null && children.Any())
+                {
+                    foreach (var child in children.OrderBy(x => x.Level))
+                    {
+                        if (child != null)
+                        {
+                            childItems.Add(new uSyncDependency()
+                            {
+                                Udi = Udi.Create(UdiEntityType.FromUmbracoObjectType(this.ObjectType), child.Key),
+                                Flags = flags,
+                                Order = DependencyOrders.ContentTypes + child.Level
+                            });
+                        }
+                    }
+                }
+            }
+
+            return childItems;
+        }
     }
 }
