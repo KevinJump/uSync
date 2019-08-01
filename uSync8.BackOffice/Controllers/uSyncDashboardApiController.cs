@@ -65,9 +65,20 @@ namespace uSync8.BackOffice.Controllers
         public IEnumerable<object> GetLoadedHandlers()
             => syncHandlers.ToList();
 
+        /// <summary>
+        ///  return handler groups for all enabled handlers
+        /// </summary>
         [HttpGet]
         public IEnumerable<string> GetHandlerGroups()
             => syncHandlers.GetValidGroups(settings);
+
+        /// <summary>
+        ///  returns the handler groups, even if the handlers
+        ///  in them are disabled 
+        /// </summary>
+        [HttpGet]
+        public IEnumerable<string> GetAllHandlerGroups()
+            => syncHandlers.GetGroups();
 
         /*
         [HttpGet]

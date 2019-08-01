@@ -57,12 +57,12 @@ namespace uSync8.BackOffice.SyncHandlers
         public IEnumerable<HandlerConfigPair> GetHandlersByType(IEnumerable<string> entityTypes, string actionName, uSyncSettings settings)
         {
             var handlers = handlerTwos.Where(x => entityTypes.InvariantContains(x.EntityType));
-            return GetConfiguredHandlers(handlers, actionName, settings);
+            return GetConfiguredHandlers(handlers, actionName, settings, true);
         }
 
         public IEnumerable<HandlerConfigPair> GetValidHandlers(string actionName, uSyncSettings settings)
         {
-            return GetConfiguredHandlers(this, actionName, settings);
+            return GetConfiguredHandlers(this, actionName, settings, false);
         }
 
         public IEnumerable<HandlerConfigPair> GetValidHandlers(string actionName, string group, uSyncSettings settings)
@@ -110,7 +110,7 @@ namespace uSync8.BackOffice.SyncHandlers
             return handlerTwos.Where(x => x.Group.InvariantEquals(groupName));
         }
 
-        public IEnumerable<HandlerConfigPair> GetConfiguredHandlers(IEnumerable<ISyncHandler> handlers, string actionName, uSyncSettings settings)
+        public IEnumerable<HandlerConfigPair> GetConfiguredHandlers(IEnumerable<ISyncHandler> handlers, string actionName, uSyncSettings settings, bool includeDisabled)
         {
             var configPairs = new List<HandlerConfigPair>();
 
@@ -126,7 +126,7 @@ namespace uSync8.BackOffice.SyncHandlers
                     };
                 }
 
-                if (config != null && config.Enabled)
+                if (config != null && (includeDisabled || config.Enabled))
                 {
                     configPairs.Add(new HandlerConfigPair() { Handler = handler, Settings = config });
                 }

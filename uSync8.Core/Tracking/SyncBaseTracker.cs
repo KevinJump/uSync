@@ -151,7 +151,8 @@ namespace uSync8.Core.Tracking
                     // actual change 
                     updates.AddNotNull(Compare(path, name,
                         currentNode.ValueOrDefault(string.Empty),
-                        targetNode.ValueOrDefault(string.Empty)));
+                        targetNode.ValueOrDefault(string.Empty),
+                        change.MaskValue));
                 }
 
                 if (change.Attributes != null && change.Attributes.Any())
@@ -160,7 +161,7 @@ namespace uSync8.Core.Tracking
                     {
                         var currentValue = currentNode.Attribute(attribute).ValueOrDefault(string.Empty);
                         var targetValue = targetNode.Attribute(attribute).ValueOrDefault(string.Empty);
-                        updates.AddNotNull(Compare(path, $"{name} [{attribute}]", currentValue, targetValue));
+                        updates.AddNotNull(Compare(path, $"{name} [{attribute}]", currentValue, targetValue, change.MaskValue));
                     }
                 }
             }
@@ -260,7 +261,8 @@ namespace uSync8.Core.Tracking
                     // if there are no children, they we are comparing the actual text of the nodes
                     updates.AddNotNull(Compare(currentNodePath, currentNodeName, 
                         currentNode.ValueOrDefault(string.Empty),
-                        targetNode.ValueOrDefault(string.Empty)));
+                        targetNode.ValueOrDefault(string.Empty),
+                        change.MaskValue));
                 }
 
                 currentIndex++;
@@ -350,23 +352,26 @@ namespace uSync8.Core.Tracking
                     // if there are no children, they we are comparing the actual text of the nodes
                     updates.AddNotNull(Compare(currentNodePath, currentNodeName,
                         childNode.ValueOrDefault(string.Empty),
-                        targetChildNode.ValueOrDefault(string.Empty)));
+                        targetChildNode.ValueOrDefault(string.Empty), 
+                        change.MaskValue));
                 }
             }
 
             return updates;
         }
 
-        protected uSyncChange Compare(string path, string name, string current, string target)
+        protected uSyncChange Compare(string path, string name, string current, string target, bool maskValue)
         {
             if (current == target) return null;
-            return uSyncChange.Update(path, name, current, target);
+            return uSyncChange.Update(path, name, 
+                maskValue ? "*******" : current, 
+                maskValue ? "*******" : target);
         }
 
-        private uSyncChange Compare<TValue>(string path, string name, TValue current, TValue target)
+        private uSyncChange Compare<TValue>(string path, string name, TValue current, TValue target, bool maskValue)
         {
             if (current.Equals(target)) return null;
-            return Compare(path, name, current.ToString(), target.ToString());
+            return Compare(path, name, current.ToString(), target.ToString(), maskValue);
         }
 
         private string GetChangePath(string path, string child)
@@ -458,6 +463,8 @@ namespace uSync8.Core.Tracking
         public List<TrackedItem> Children { get; set; } = new List<TrackedItem>();
 
         public bool HasChildProperties { get; set; }
+
+        public bool MaskValue { get; set; }
     }
 
     public class RepeatingInfo

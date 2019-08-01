@@ -133,8 +133,6 @@
         function getHandlerGroups() {
             uSync8DashboardService.getHandlerGroups()
                 .then(function (result) {
-                    console.log(result.data);
-
                     angular.forEach(result.data, function (group, key) {
                         vm.importButton.subButtons.push({
                             handler: function () {

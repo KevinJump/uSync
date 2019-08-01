@@ -36,13 +36,16 @@ namespace uSync8.BackOffice
 
         private uSyncSettings settings;
         private readonly SyncHandlerCollection syncHandlers;
+        private readonly IProfilingLogger logger;
 
         public uSyncService(
-            SyncHandlerCollection syncHandlers
-            )
+            SyncHandlerCollection syncHandlers,
+            IProfilingLogger logger)
         {
             this.syncHandlers = syncHandlers;
             this.settings = Current.Configs.uSync();
+
+            this.logger = logger;
 
             uSyncConfig.Reloaded += BackOfficeConfig_Reloaded;
         }
@@ -72,8 +75,9 @@ namespace uSync8.BackOffice
 
         private IEnumerable<uSyncAction> Report(string folder, IEnumerable<HandlerConfigPair> handlers, uSyncCallbacks callbacks)
         {
-            var actions = new List<uSyncAction>();
+            logger.Debug<uSyncService>("Reporting For [{0}]", string.Join(",", handlers.Select(x => x.Handler.Name)));
 
+            var actions = new List<uSyncAction>();
 
             var summary = new SyncProgressSummary(handlers.Select(x => x.Handler), "Reporting", handlers.Count());
 
