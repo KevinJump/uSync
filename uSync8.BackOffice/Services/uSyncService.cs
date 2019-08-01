@@ -282,7 +282,7 @@ namespace uSync8.BackOffice
 
 
             summary.Message = "Export Completed";
-            callbacks.Callback?.Invoke(summary);
+            callbacks?.Callback?.Invoke(summary);
 
             return actions;
         }

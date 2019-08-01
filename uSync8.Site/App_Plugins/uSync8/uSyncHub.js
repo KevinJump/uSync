@@ -46,6 +46,7 @@
                                 var cb = callbacks.pop();
                                 hubSetup(cb);
                             }
+                            starting = false;
                         });
                 }
                 else {
@@ -53,6 +54,7 @@
                         var cb = callbacks.pop();
                         hubSetup(cb);
                     }
+                    starting = false;
                 }
             }
         }
