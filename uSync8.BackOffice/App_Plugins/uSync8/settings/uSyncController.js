@@ -40,7 +40,19 @@
             }]
         };
 
+        vm.reportButton = {
+            state: 'init',
+            defaultButton: {
+                labelKey: 'usync_report',
+                handler: function () {
+                    report('');
+                }
+            },
+            subButtons: []
+        };
+
         vm.report = report;
+
         vm.exportItems = exportItems;
         vm.importForce = importForce;
         vm.importItems = importItems;
@@ -67,10 +79,10 @@
         }
 
         ///////////
-        function report() {
+        function report(group) {
             resetStatus(modes.REPORT);
 
-            uSync8DashboardService.report(getClientId())
+            uSync8DashboardService.report(group, getClientId())
                 .then(function (result) {
                     vm.results = result.data;
                     vm.working = false;
@@ -97,11 +109,11 @@
             importItems(true);
         }
 
-        function importItems(force) {
+        function importItems(force, group) {
             resetStatus(modes.IMPORT);
             vm.importButton.state = 'busy';
 
-            uSync8DashboardService.importItems(force, getClientId())
+            uSync8DashboardService.importItems(force, group, getClientId())
                 .then(function (result) {
                     vm.results = result.data;
                     vm.working = false;
@@ -130,12 +142,18 @@
                             },
                             labelKey: 'usync_import-' + group.toLowerCase()
                         });
+                        vm.reportButton.subButtons.push({
+                            handler: function () {
+                                report(group);
+                            },
+                            labelKey: 'usync_report-' + group.toLowerCase()
+                        });
                     });
                 });
         }
 
         function importGroup(group) {
-            console.log('Import of type', group);
+            importItems(false, group);
         }
 
         //////////////

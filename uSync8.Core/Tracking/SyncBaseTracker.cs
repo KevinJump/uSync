@@ -186,6 +186,7 @@ namespace uSync8.Core.Tracking
             var currentItems = current.XPathSelectElements(path);
             var targetItems = target.XPathSelectElements(path);
 
+            var currentIndex = 0;
             // loop through the nodes in the current item 
             foreach (var currentNode in currentItems)
             {
@@ -198,7 +199,18 @@ namespace uSync8.Core.Tracking
                 // if the key is blank we just compare the values in the elements
                 if (string.IsNullOrWhiteSpace(change.Repeating.Key))
                 {
-                    targetNode = targetItems.FirstOrDefault(x => x.Value == currentNode.Value);
+                    if (change.Repeating.ElementsInOrder)
+                    {
+                        if (targetItems.Count() > currentIndex)
+                            targetNode = targetItems.ElementAt(currentIndex);
+                    }
+                    else
+                    {
+                        // if the element isn't the key, then we get the first one (by value)
+                        // if the value is diffrent in this case we will consider this a delete
+                        targetNode = targetItems.FirstOrDefault(x => x.Value == currentNode.Value);
+                    }
+                    
                 }
                 else
                 {
@@ -250,32 +262,48 @@ namespace uSync8.Core.Tracking
                         currentNode.ValueOrDefault(string.Empty),
                         targetNode.ValueOrDefault(string.Empty)));
                 }
+
+                currentIndex++;
             }
 
-            // look for things in target but not current (for they will be removed)
-            List<XElement> missing = new List<XElement>();
+            if (!change.Repeating.ElementsInOrder)
+            {
+                // look for things in target but not current (for they will be removed)
+                List<XElement> missing = new List<XElement>();
 
-            if (string.IsNullOrWhiteSpace(change.Repeating.Key))
-            {
-                missing = targetItems.Where(x => !currentItems.Any(t => t.Value == x.Value))
-                    .ToList();
-            }
-            else
-            {
-                missing = targetItems.Where(x =>
-                !currentItems.Any(t => t.Element(change.Repeating.Key).ValueOrDefault(string.Empty) == x.Element(change.Repeating.Key).ValueOrDefault(string.Empty)))
-                .ToList();
-            }
-
-            if (missing.Any())
-            {
-                foreach (var missingItem in missing)
+                if (string.IsNullOrWhiteSpace(change.Repeating.Key))
                 {
-                    var oldValue = missingItem.Value;
-                    if (!string.IsNullOrWhiteSpace(change.Repeating.Name))
-                        oldValue = GetKeyValue(missingItem, change.Repeating.Name, change.Repeating.NameIsAttribute);
+                    missing = targetItems.Where(x => !currentItems.Any(t => t.Value == x.Value))
+                        .ToList();
+                }
+                else
+                {
+                    foreach(var targetItem in targetItems)
+                    {
+                        var targetNodePath = path;
 
-                    updates.Add(uSyncChange.Create(path, name, oldValue));
+                        var targetKey = GetKeyValue(targetItem, change.Repeating.Key, change.Repeating.KeyIsAttribute);
+                        if (string.IsNullOrEmpty(targetKey)) continue;
+
+                        targetNodePath += MakeKeyPath(change.Repeating.Key, targetKey, change.Repeating.KeyIsAttribute);
+                        var currentNode = GetTarget(currentItems, change.Repeating.Key, targetKey, change.Repeating.KeyIsAttribute);
+                        if (currentNode == null)
+                        {
+                            missing.Add(targetItem);
+                        }
+                    }
+                }
+
+                if (missing.Any())
+                {
+                    foreach (var missingItem in missing)
+                    {
+                        var oldValue = missingItem.Value;
+                        if (!string.IsNullOrWhiteSpace(change.Repeating.Name))
+                            oldValue = GetKeyValue(missingItem, change.Repeating.Name, change.Repeating.NameIsAttribute);
+
+                        updates.Add(uSyncChange.Create(path, name, oldValue));
+                    }
                 }
             }
 
@@ -392,19 +420,20 @@ namespace uSync8.Core.Tracking
         {
             Name = name;
             Path = "/";
+
+            Attributes = new List<string>
+            {
+                "Key",
+                "Alias"
+            };
         }
 
         public TrackedItem(string name, bool root)
             : this(name)
         {
-            if (root == true)
-            {
-                Attributes = new List<string>
-                {
-                    "Key",
-                    "Alias"
-                };
-            }
+            // if (root == true)
+            // {
+            // }
         }
 
         public TrackedItem(string name, string path)
@@ -464,5 +493,11 @@ namespace uSync8.Core.Tracking
         public bool KeyIsAttribute { get; set; }
 
         public bool NameIsAttribute { get; set; }
+
+        /// <summary>
+        ///  when the element is the key, so if the value doesn't match
+        ///  that just means the value has been updated (not deleted)
+        /// </summary>
+        public bool ElementsInOrder { get; set; }
     }
 }

@@ -1,25 +1,27 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
+
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
 using System.Web.Http;
+
 using Umbraco.Core.Cache;
 using Umbraco.Core.Composing;
 using Umbraco.Core.IO;
 using Umbraco.Web.Mvc;
 using Umbraco.Web.WebApi;
 using Umbraco.Web.WebApi.Filters;
+
 using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Hubs;
 using uSync8.BackOffice.Models;
 using uSync8.BackOffice.SyncHandlers;
+
 using Constants = Umbraco.Core.Constants;
 
 namespace uSync8.BackOffice.Controllers
@@ -48,36 +50,28 @@ namespace uSync8.BackOffice.Controllers
             uSyncConfig.Reloaded += BackOfficeConfig_Reloaded;
         }
 
-        public bool GetApi()
-        {
-            return true;
-        }
-
+        public bool GetApi() => true;
+        
         private void BackOfficeConfig_Reloaded(uSyncSettings settings)
-        {
-            this.settings = settings;
+        { 
+           this.settings = settings;
         }
 
         [HttpGet]
         public uSyncSettings GetSettings()
-        {
-            return settings;
-        }
+            => settings;
 
         [HttpGet]
         public IEnumerable<object> GetLoadedHandlers()
-        {
-            return syncHandlers.ToList();
-        }
+            => syncHandlers.ToList();
 
         [HttpGet]
         public IEnumerable<string> GetHandlerGroups()
-        {
-            return syncHandlers.GetGroups();
-        }
+            => syncHandlers.GetValidGroups(settings);
 
+        /*
         [HttpGet]
-        public string GetAddOnString()
+        public (string version, string addons) GetAddOnString()
         {
             var value = "";
             var addOns = TypeFinder.FindClassesOfType<ISyncAddOn>();
@@ -90,8 +84,11 @@ namespace uSync8.BackOffice.Controllers
                 }
             }
 
-            return value;
+            var version = typeof(uSync8.BackOffice.uSync8BackOffice).Assembly.GetName().Version.ToString();
+
+            return (version, value);
         }
+        */
 
         [HttpGet]
         public IEnumerable<object> GetHandlers()
@@ -111,7 +108,16 @@ namespace uSync8.BackOffice.Controllers
             var hubClient = new HubClientService(options.ClientId);
             var summaryClient = new SummaryHandler(hubClient);
 
-            return uSyncService.Report(settings.RootFolder, summaryClient.PostSummary, summaryClient.PostUdate);
+            if (string.IsNullOrWhiteSpace(options.Group))
+            {
+                return uSyncService.Report(settings.RootFolder,
+                    new uSyncCallbacks(summaryClient.PostSummary, summaryClient.PostUdate));
+            }
+            else
+            {
+                return uSyncService.Report(settings.RootFolder, options.Group,
+                    new uSyncCallbacks(summaryClient.PostSummary, summaryClient.PostUdate));
+            }
         }
 
         [HttpPost]
@@ -120,7 +126,17 @@ namespace uSync8.BackOffice.Controllers
             var hubClient = new HubClientService(options.ClientId);
             var summaryClient = new SummaryHandler(hubClient);
 
-            return uSyncService.Export(settings.RootFolder, summaryClient.PostSummary, summaryClient.PostUdate);
+            if (string.IsNullOrWhiteSpace(options.Group))
+            {
+                return uSyncService.Export(settings.RootFolder,
+                    new uSyncCallbacks(summaryClient.PostSummary, summaryClient.PostUdate));
+            }
+            else
+            {
+                return uSyncService.Export(settings.RootFolder, options.Group,
+                    new uSyncCallbacks(summaryClient.PostSummary, summaryClient.PostUdate));
+
+            }
         }
 
         [HttpPut]
@@ -129,14 +145,22 @@ namespace uSync8.BackOffice.Controllers
             var hubClient = new HubClientService(options.ClientId);
             var summaryClient = new SummaryHandler(hubClient);
 
-            return uSyncService.Import(settings.RootFolder, options.Force, summaryClient.PostSummary, summaryClient.PostUdate);
+            if (string.IsNullOrWhiteSpace(options.Group))
+            {
+                return uSyncService.Import(settings.RootFolder, options.Force,
+                    new uSyncCallbacks(summaryClient.PostSummary, summaryClient.PostUdate));
+            }
+            else
+            {
+                return uSyncService.Import(settings.RootFolder, options.Force, options.Group,
+                    new uSyncCallbacks(summaryClient.PostSummary, summaryClient.PostUdate));
+
+            }
         }
 
         [HttpPut]
         public uSyncAction ImportItem(uSyncAction item)
-        {
-            return uSyncService.Import(item);
-        }
+            => uSyncService.Import(item);
 
         [HttpPost]
         public void SaveSettings(uSyncSettings settings)
@@ -151,7 +175,7 @@ namespace uSync8.BackOffice.Controllers
             {
                 return JsonConvert.DeserializeObject<JObject>(GetContent());
             }
-            catch(Exception ex)
+            catch
             {
                 // we need to just fail :( 
             }
@@ -218,6 +242,8 @@ namespace uSync8.BackOffice.Controllers
                 }
             }
 
+            addOnInfo.Version = typeof(uSync8.BackOffice.uSync8BackOffice).Assembly.GetName().Version.ToString();
+
             addOnInfo.AddOns = addOnInfo.AddOns.OrderBy(x => x.SortOrder).ToList();
             addOnInfo.AddOnString = string.Join(", ", addOnInfo.AddOns.Select(x => x.Name));
 
@@ -227,6 +253,8 @@ namespace uSync8.BackOffice.Controllers
         [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
         public class AddOnInfo
         {
+            public string Version { get; set; }
+
             public string AddOnString { get; set; }
             public List<ISyncAddOn> AddOns { get; set; } = new List<ISyncAddOn>();
         }
@@ -268,6 +296,9 @@ namespace uSync8.BackOffice.Controllers
 
             [DataMember(Name = "clean")]
             public bool Clean { get; set; }
+
+            [DataMember(Name = "group")]
+            public string Group { get; set; }
         }
     }
 }

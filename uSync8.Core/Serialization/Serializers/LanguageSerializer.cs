@@ -99,7 +99,10 @@ namespace uSync8.Core.Serialization.Serializers
         }
 
         public override bool IsValid(XElement node)
-            => (base.IsValid(node) && node.Element("CultureName") != null && node.Element("IsoCode") != null);
+            => node.Name.LocalName == this.ItemType
+                && node.GetAlias() != string.Empty
+                && node.Element("CultureName") != null 
+                && node.Element("IsoCode") != null;
 
         protected override ILanguage FindItem(string alias)
         {

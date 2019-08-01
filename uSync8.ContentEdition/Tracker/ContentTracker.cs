@@ -88,10 +88,9 @@ namespace uSync8.ContentEdition.Tracker
                         {
                             new TrackedItem("", "/Value")
                             {
-                                Repeating = new RepeatingInfo("Culture", string.Empty, "Culture")
+                                Repeating = new RepeatingInfo(string.Empty, string.Empty,string.Empty)
                                 {
-                                    KeyIsAttribute = true,
-                                    NameIsAttribute = true
+                                    ElementsInOrder = true
                                 }
                             }
                         }

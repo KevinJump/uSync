@@ -29,6 +29,7 @@ namespace uSync8.ContentEdition.Tracker
                             new TrackedItem("Parent", "/Parent", true),
                             new TrackedItem("Path", "/Path", true),
                             new TrackedItem("SortOrder", "/SortOrder", true),
+                            new TrackedItem("ContentType", "/ContentType", true),
 
                             new TrackedItem("Name", "/NodeName", false)
                             {
@@ -55,10 +56,9 @@ namespace uSync8.ContentEdition.Tracker
                         {
                             new TrackedItem("", "/Value")
                             {
-                                Repeating = new RepeatingInfo("Culture", string.Empty, "Culture")
+                                Repeating = new RepeatingInfo(String.Empty, string.Empty, String.Empty)
                                 {
-                                    KeyIsAttribute = true,
-                                    NameIsAttribute = true
+                                    ElementsInOrder = true
                                 }
                             }
                         }

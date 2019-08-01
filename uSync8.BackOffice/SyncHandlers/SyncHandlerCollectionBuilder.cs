@@ -54,65 +54,15 @@ namespace uSync8.BackOffice.SyncHandlers
             return handlerTwos.FirstOrDefault(x => x.TypeName == typeName);
         }
 
-        public IEnumerable<HandlerConfigPair> GetHandlersByType(IEnumerable<string> entityTypes, uSyncSettings settings)
+        public IEnumerable<HandlerConfigPair> GetHandlersByType(IEnumerable<string> entityTypes, string actionName, uSyncSettings settings)
         {
-            var validHandlers = new List<HandlerConfigPair>();
-
-            foreach (var syncHandler in handlerTwos)
-            {
-                if (entityTypes.InvariantContains(syncHandler.EntityType))
-                {
-                    var config = settings.Handlers.FirstOrDefault(x => x.Alias.InvariantEquals(syncHandler.Alias));
-                    if (config == null)
-                    {
-                        config = new HandlerSettings(syncHandler.Alias, settings.EnableMissingHandlers)
-                        {
-                            GuidNames = new OverriddenValue<bool>(settings.UseGuidNames, false),
-                            UseFlatStructure = new OverriddenValue<bool>(settings.UseFlatStructure, false)
-                        };
-                    }
-
-                    if (config != null)
-                    {
-                        validHandlers.Add(new HandlerConfigPair()
-                        {
-                            Handler = syncHandler,
-                            Settings = config
-                        });
-                    }
-                }
-            }
-
-            return validHandlers.OrderBy(x => x.Handler.Priority);
+            var handlers = handlerTwos.Where(x => entityTypes.InvariantContains(x.EntityType));
+            return GetConfiguredHandlers(handlers, actionName, settings);
         }
 
         public IEnumerable<HandlerConfigPair> GetValidHandlers(string actionName, uSyncSettings settings)
         {
-            var validHandlers = new List<HandlerConfigPair>();
-
-            foreach (var syncHandler in this)
-            {
-                var config = settings.Handlers.FirstOrDefault(x => x.Alias.InvariantEquals(syncHandler.Alias));
-                if (config == null)
-                {
-                    config = new HandlerSettings(syncHandler.Alias, settings.EnableMissingHandlers)
-                    {
-                        GuidNames = new OverriddenValue<bool>(settings.UseGuidNames, false),
-                        UseFlatStructure = new OverriddenValue<bool>(settings.UseFlatStructure, false)
-                    };
-                }
-
-                if (config != null && config.Enabled)
-                {
-                    validHandlers.Add(new HandlerConfigPair()
-                    {
-                        Handler = syncHandler,
-                        Settings = config
-                    });
-                }
-            }
-
-            return validHandlers.OrderBy(x => x.Handler.Priority);
+            return GetConfiguredHandlers(this, actionName, settings);
         }
 
         public IEnumerable<HandlerConfigPair> GetValidHandlers(string actionName, string group, uSyncSettings settings)
@@ -147,6 +97,43 @@ namespace uSync8.BackOffice.SyncHandlers
             return handlerTwos.Select(x => x.Group).Distinct().ToList();
         }
 
+        public IEnumerable<string> GetValidGroups(uSyncSettings settings)
+        {
+            var handlers = GetValidHandlers(HandlerActionNames.All, settings)
+                .Where(x => x.Handler is ISyncSingleItemHandler)
+                .Select(x => x.Handler as ISyncSingleItemHandler);
+
+            return handlers.Select(x => x.Group).Distinct().ToList();
+        }
+
+        public IEnumerable<ISyncSingleItemHandler> GetHandlersByGroup(string groupName) {
+            return handlerTwos.Where(x => x.Group.InvariantEquals(groupName));
+        }
+
+        public IEnumerable<HandlerConfigPair> GetConfiguredHandlers(IEnumerable<ISyncHandler> handlers, string actionName, uSyncSettings settings)
+        {
+            var configPairs = new List<HandlerConfigPair>();
+
+            foreach(var handler in handlers)
+            {
+                var config = settings.Handlers.FirstOrDefault(x => x.Alias.InvariantEquals(handler.Alias));
+                if (config == null)
+                {
+                    config = new HandlerSettings(handler.Alias, settings.EnableMissingHandlers)
+                    {
+                        GuidNames = new OverriddenValue<bool>(settings.UseGuidNames, false),
+                        UseFlatStructure = new OverriddenValue<bool>(settings.UseFlatStructure, false)
+                    };
+                }
+
+                if (config != null && config.Enabled)
+                {
+                    configPairs.Add(new HandlerConfigPair() { Handler = handler, Settings = config });
+                }
+            }
+
+            return configPairs.OrderBy(x => x.Handler.Priority);
+        }
     }
 
     public class HandlerConfigPair

@@ -28,7 +28,8 @@ namespace uSync8.Core.Tracking.Impliment
                             new TrackedItem("Name", "/Name", true),
                             new TrackedItem("EditorAlias", "/EditorAlias", true),
                             new TrackedItem("DatabaseType", "/DatabaseType", true),
-                            new TrackedItem("SortOrder", "/SortOrder")
+                            new TrackedItem("SortOrder", "/SortOrder", true),
+                            new TrackedItem("Folder", "/Folder", true)
                         }
                     },
                     new TrackedItem("Config", "/Config", true)

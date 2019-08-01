@@ -22,7 +22,8 @@ namespace uSync8.ContentEdition.Tracker
                 Children = new List<TrackedItem>()
                 {
                     new TrackedItem("Language", "/Language", true),
-                    new TrackedItem("Content Root", "/Root", true)
+                    new TrackedItem("Content Root", "/Root", true),
+                    new TrackedItem("Wildcard", "/IsWildcard", true)
                 }
             };
         }

@@ -53,7 +53,8 @@ namespace uSync8.Core.Tracking.Impliment
                                     new TrackedItem("Validation", "/Validation", true),
                                     new TrackedItem("Description", "/Description", true),
                                     new TrackedItem("SortOrder", "/SortOrder", true),
-                                    new TrackedItem("Tab", "/Tab", true)
+                                    new TrackedItem("Tab", "/Tab", true),
+                                    new TrackedItem("Variations", "/Variations", true)
                                 }
                             }
                         }
@@ -64,10 +65,9 @@ namespace uSync8.Core.Tracking.Impliment
                         {
                             new TrackedItem("Tab", "/Tab")
                             {
-                                Repeating = new RepeatingInfo("Key", "/Tab", "Caption"),
+                                Repeating = new RepeatingInfo("Caption", "/Tab", "Caption"),
                                 Children = new List<TrackedItem>()
                                 {
-                                    new TrackedItem("Key", "/Key", true),
                                     new TrackedItem("Caption", "/Caption", true),
                                     new TrackedItem("SortOrder", "/SortOrder", true)
                                 }

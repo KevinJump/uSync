@@ -4,19 +4,22 @@
         <umb-box-content>
 
             <div class="usync-main-buttons">
-                <umb-button type="button"
-                            button-style="info"
-                            label-key="usync_report"
-                            action="vm.report()"
-                            disabled="vm.working">
-                </umb-button>
+
+                <umb-button-group default-button="vm.reportButton.defaultButton"
+                                  sub-buttons="vm.reportButton.subButtons"
+                                  direction="down"
+                                  float="left"
+                                  button-style="action"
+                                  state="vm.reportButton.state">
+
+                </umb-button-group>
+
                 <umb-button-group default-button="vm.importButton.defaultButton"
                                   sub-buttons="vm.importButton.subButtons"
                                   direction="down"
-                                  float="right"
+                                  float="left"
                                   button-style="success"
-                                  state="vm.impotButton.state">
-
+                                  state="vm.importButton.state">
                 </umb-button-group>
 
                 <umb-button type="button"
@@ -25,23 +28,10 @@
                             action="vm.exportItems()"
                             disabled="vm.working">
                 </umb-button>
-
-                <!--
-                <umb-button type="button"
-                            button-style="link"
-                            label-key="usync_advanced"
-                            action="vm.showAdvanced = !vm.showAdvanced"></umb-button> -->
+               
             </div>
         </umb-box-content>
     </umb-box>
-
-    <!--
-    <umb-box ng-if="vm.showAdvanced">
-        <umb-box-header title="Advanced Settings" description="change the way the sync works">
-        </umb-box-header>
-        <umb-box-content>
-        </umb-box-content>
-    </umb-box> -->
 
     <umb-box>
         <umb-box-content ng-if="vm.working || vm.reported">
@@ -52,7 +42,9 @@
     </umb-box>
 
     <div ng-if="vm.reported">
-        <usync-report-view actions="vm.actions" results="vm.results" />
+        <usync-report-view actions="vm.actions" 
+                           results="vm.results" 
+                           hide-action="true"/>
     </div>
 
 </div>

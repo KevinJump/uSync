@@ -64,7 +64,8 @@ namespace uSync8.BackOffice.SyncHandlers
             {
                 actions.AddRange(CleanFolders(folder, fdlr.Id));
 
-                if (!entityService.GetChildren(fdlr.Id).Any())
+                if (!entityService.GetChildren(fdlr.Id, this.ItemObjectType).Any()
+                    && !entityService.GetChildren(fdlr.Id, this.itemContainerType).Any())
                 {
                     actions.Add(uSyncAction.SetAction(true, fdlr.Name, typeof(EntityContainer), ChangeType.Delete, "Empty Container"));
                     DeleteFolder(fdlr.Id);

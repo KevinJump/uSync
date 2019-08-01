@@ -56,16 +56,21 @@
         }
 
 
-        function report(clientId) {
-            return $http.post(serviceRoot + 'report', { clientId: clientId });
+        function report(group, clientId) {
+            return $http.post(serviceRoot + 'report', { clientId: clientId, group: group });
         }
 
         function exportItems (clientId) {
             return $http.post(serviceRoot + 'export', { clientId: clientId });
         }
 
-        function importItems(force, clientId) {
-            return $http.put(serviceRoot + 'import', { force: force, clientId: clientId });
+        function importItems(force, group, clientId) {
+            return $http.put(serviceRoot + 'import',
+                {
+                    force: force,
+                    group: group,
+                    clientId: clientId
+                });
         }
 
         function importItem(item) {
@@ -77,7 +82,7 @@
         }
 
         function getHandlerGroups() {
-            return $http.get(serviceRoot + 'getHandlerGroups');
+            return $http.get(serviceRoot + 'GetHandlerGroups');
         }
     }
 

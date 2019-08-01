@@ -85,12 +85,12 @@ namespace uSync8.BackOffice
         {
             if (globalSettings.ExportAtStartup || (globalSettings.ExportOnSave && !syncFileService.RootExists(globalSettings.RootFolder)))
             {
-                uSyncService.Export(globalSettings.RootFolder);
+                uSyncService.Export(globalSettings.RootFolder, null);
             }
 
             if (globalSettings.ImportAtStartup)
             {
-                uSyncService.Import(globalSettings.RootFolder,false);
+                uSyncService.Import(globalSettings.RootFolder,false, null);
             }
 
             if (globalSettings.ExportOnSave)

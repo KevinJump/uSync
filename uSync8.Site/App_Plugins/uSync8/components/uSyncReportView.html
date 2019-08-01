@@ -13,7 +13,6 @@
                         label-position="left"
                         ng-if="vm.runMode = 'report'"></umb-toggle>
         </div>
-        <umb-box-content>
             <div class="umb-table" ng-show="vm.countChanges(vm.results) > 0 || vm.showAll">
                 <div class="umb-table-head">
                     <div class="umb-table-row">
@@ -70,7 +69,7 @@
                             <div class="umb-table-cell">
                                 <div class="text-right" ng-if="vm.hideAction == false">
                                     <umb-button type="button"
-                                                button-style="action"
+                                                button-style="action btn-sm"
                                                 label="Apply"
                                                 action="vm.apply(result)"
                                                 state="vm.status(result)"
@@ -84,6 +83,5 @@
             <div class="flex justify-center items-center" ng-if="vm.countChanges(vm.results) == 0 && !vm.showAll">
                 <h4>No Changes</h4>
             </div>
-        </umb-box-content>
     </umb-box>
 </div>

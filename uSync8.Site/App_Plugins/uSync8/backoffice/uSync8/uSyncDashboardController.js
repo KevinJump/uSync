@@ -41,7 +41,7 @@
             .then(function (result) {
 
                 if (result.data.AddOnString.length > 0) {
-                    vm.page.description += ' + ' + result.data.AddOnString;
+                    vm.page.description = 'v' + result.data.Version + ' + ' + result.data.AddOnString;
                 }
                 vm.addOns = result.data.AddOns;
 
