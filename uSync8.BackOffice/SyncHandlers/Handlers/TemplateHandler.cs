@@ -37,11 +37,6 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             : base(entityService, logger, serializer, tracker, checker, syncFileService)
         {
             this.fileService = fileService;
-
-            this.ItemObjectType = UmbracoObjectTypes.Template;
-
-            // this might need some work - because its not a container thing ?
-            this.itemContainerType = UmbracoObjectTypes.Unknown;
         }
 
 

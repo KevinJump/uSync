@@ -37,7 +37,6 @@ namespace uSync8.ContentEdition.Handlers
             : base(entityService, logger, serializer, tracker, checker, syncFileService)
         {
             this.mediaService = mediaService;
-            this.ItemObjectType = UmbracoObjectTypes.Media;
         }
 
         protected override void DeleteViaService(IMedia item)

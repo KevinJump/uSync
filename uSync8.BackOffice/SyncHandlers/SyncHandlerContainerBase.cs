@@ -59,13 +59,12 @@ namespace uSync8.BackOffice.SyncHandlers
         protected IEnumerable<uSyncAction> CleanFolders(string folder, int parent)
         {
             var actions = new List<uSyncAction>();
-            var folders = entityService.GetChildren(parent, this.itemContainerType);
+            var folders = GetFolders(parent);
             foreach (var fdlr in folders)
             {
                 actions.AddRange(CleanFolders(folder, fdlr.Id));
 
-                if (!entityService.GetChildren(fdlr.Id, this.ItemObjectType).Any()
-                    && !entityService.GetChildren(fdlr.Id, this.itemContainerType).Any())
+                if (HasChildren(fdlr.Id))
                 {
                     actions.Add(uSyncAction.SetAction(true, fdlr.Name, typeof(EntityContainer), ChangeType.Delete, "Empty Container"));
                     DeleteFolder(fdlr.Id);
@@ -96,13 +95,13 @@ namespace uSync8.BackOffice.SyncHandlers
         protected IEnumerable<uSyncAction> UpdateFolder(int folderId, string folder, HandlerSettings config)
         {
             var actions = new List<uSyncAction>();
-            var folders = entityService.GetChildren(folderId, this.itemContainerType);
+            var folders = GetFolders(folderId);
             foreach (var fdlr in folders)
             {
                 actions.AddRange(UpdateFolder(fdlr.Id, folder, config));
             }
 
-            var items = entityService.GetChildren(folderId, this.ItemObjectType);
+            var items = GetChildItems(folderId);
             foreach(var item in items)
             {
                 var obj = GetFromService(item.Id);

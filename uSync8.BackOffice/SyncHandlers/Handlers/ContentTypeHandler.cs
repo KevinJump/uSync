@@ -40,10 +40,6 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             : base(entityService, logger, serializer, tracker, checker, fileService)
         {
             this.contentTypeService = contentTypeService;
-
-            this.ItemObjectType = UmbracoObjectTypes.DocumentType;
-            this.itemContainerType = UmbracoObjectTypes.DocumentTypeContainer;
-
         }
 
 

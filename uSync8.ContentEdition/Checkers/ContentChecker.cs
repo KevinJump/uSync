@@ -26,10 +26,11 @@ namespace uSync8.ContentEdition.Checkers
             {
                 Udi = item.GetUdi(),
                 Order = DependencyOrders.Content,
-                Flags = flags                
+                Flags = flags,
+                Level = item.Level
             });
 
-            if (!flags.HasFlag(DependencyFlags.NoDependencies))
+            if (flags.HasFlag(DependencyFlags.IncludeDependencies))
             {
                 var contentType = CalcDocTypeDependency(item, flags);
                 if (contentType != null)

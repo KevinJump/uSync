@@ -37,8 +37,6 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             : base(entityService, logger, serializer, tracker, checker, syncFileService)
         {
             this.dataTypeService = dataTypeService;
-            this.ItemObjectType = UmbracoObjectTypes.DataType;
-            this.itemContainerType = UmbracoObjectTypes.DataTypeContainer;
         }
 
         protected override IDataType GetFromService(int id)

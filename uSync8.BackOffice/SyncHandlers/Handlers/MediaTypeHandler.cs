@@ -36,9 +36,6 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             : base(entityService, logger, serializer, tracker, checker, syncFileService)
         {
             this.mediaTypeService = mediaTypeService;
-
-            this.ItemObjectType = UmbracoObjectTypes.MediaType;
-            this.itemContainerType = UmbracoObjectTypes.MediaTypeContainer;
         }
 
 

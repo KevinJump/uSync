@@ -30,11 +30,12 @@ namespace uSync8.Core.Dependency
             {
                 Udi = item.GetUdi(),
                 Order = DependencyOrders.ContentTypes,
-                Flags = flags
+                Flags = flags,
+                Level = item.Level
             });
 
 
-            if (!flags.HasFlag(DependencyFlags.NoDependencies)) {
+            if (flags.HasFlag(DependencyFlags.IncludeDependencies)) {
                 dependencies.AddRange(CalcDataTypeDependencies(item, flags)); ;
                 dependencies.AddRange(CalcCompositions(item, DependencyOrders.ContentTypes - 1, flags));
                 dependencies.AddRange(CalcTemplateDependencies(item, flags));
@@ -50,7 +51,7 @@ namespace uSync8.Core.Dependency
         {
             var templates = new List<uSyncDependency>();
 
-            if (!flags.HasFlag(DependencyFlags.NoTemplates))
+            if (flags.HasFlag(DependencyFlags.IncludeFiles))
             {
                 foreach (var template in item.AllowedTemplates)
                 {
@@ -58,7 +59,8 @@ namespace uSync8.Core.Dependency
                     {
                         Udi = template.GetUdi(),
                         Order = DependencyOrders.Templates,
-                        Flags = flags
+                        Flags = flags,
+                        Level = template.Path.ToDelimitedList().Count()
                     });
                 }
             }

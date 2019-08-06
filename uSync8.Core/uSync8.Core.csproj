@@ -154,6 +154,7 @@
     <Compile Include="Dependency\Checkers\ContentTypeBaseChecker.cs" />
     <Compile Include="Dependency\Checkers\ContentTypeChecker.cs" />
     <Compile Include="Dependency\Checkers\DataTypeChecker.cs" />
+    <Compile Include="Dependency\DependencyFlags.cs" />
     <Compile Include="Dependency\DependencyOrders.cs" />
     <Compile Include="Dependency\ISyncDependencyChecker.cs" />
     <Compile Include="Dependency\Checkers\LanguageChecker.cs" />
@@ -197,6 +198,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="uSyncConstants.cs" />
     <Compile Include="uSyncCoreComposer.cs" />
+    <Compile Include="uSyncObjectType.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

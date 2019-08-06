@@ -20,7 +20,8 @@ namespace uSync8.Core.Dependency
                 {
                     Udi = item.GetUdi(),
                     Order = DependencyOrders.Languages,
-                    Flags = flags
+                    Flags = flags,
+                    Level = 0
                 }
             };
 

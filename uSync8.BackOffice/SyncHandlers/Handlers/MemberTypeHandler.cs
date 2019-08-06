@@ -36,12 +36,6 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
         {
             this.memberTypeService = memberTypeService;
 
-            this.ItemObjectType = UmbracoObjectTypes.MemberType;
-
-            // this is also set in base, but explity here so you know
-            //    no folders for membertypes
-            this.itemContainerType = UmbracoObjectTypes.Unknown;
-
             this.Enabled = false; 
             // turn it off it appears to break things in current build
         }

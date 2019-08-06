@@ -19,6 +19,7 @@ using uSync8.Core.Extensions;
 using uSync8.Core.Models;
 using uSync8.Core.Serialization;
 using uSync8.Core.Tracking;
+using static Umbraco.Core.Constants;
 using static uSync8.BackOffice.uSyncService;
 
 namespace uSync8.BackOffice.SyncHandlers
@@ -54,12 +55,14 @@ namespace uSync8.BackOffice.SyncHandlers
 
         protected string rootFolder { get; set; }
 
-        protected UmbracoObjectTypes ItemObjectType { get; set; } = UmbracoObjectTypes.Unknown;
 
         public string EntityType { get; protected set; }
 
         public string TypeName { get; protected set; }
-        protected UmbracoObjectTypes itemContainerType = UmbracoObjectTypes.Unknown;
+
+        // we calculate these now based on the entityType ? 
+        private UmbracoObjectTypes ItemObjectType { get; set; } = UmbracoObjectTypes.Unknown;
+        private UmbracoObjectTypes itemContainerType = UmbracoObjectTypes.Unknown;
 
         public SyncHandlerBase(
             IEntityService entityService,
@@ -103,6 +106,8 @@ namespace uSync8.BackOffice.SyncHandlers
 
             TypeName = serializer.ItemType;
 
+            this.ItemObjectType = uSyncObjectType.ToUmbracoObjectType(EntityType);
+            this.itemContainerType = uSyncObjectType.ToContainerUmbracoObjectType(EntityType);
 
             GetDefaultConfig(Current.Configs.uSync());
             uSyncConfig.Reloaded += BackOfficeConfig_Reloaded;
@@ -279,14 +284,14 @@ namespace uSync8.BackOffice.SyncHandlers
 
             if (itemContainerType != UmbracoObjectTypes.Unknown)
             {
-                var containers = entityService.GetChildren(parent, this.itemContainerType);
+                var containers = GetFolders(parent);
                 foreach (var container in containers)
                 {
                     actions.AddRange(ExportAll(container.Id, folder, config, callback));
                 }
             }
 
-            var items = GetExportItems(parent, ItemObjectType).ToList();
+            var items = GetChildItems(parent).ToList();
             foreach (var item in items)
             {
                 count++;
@@ -303,8 +308,28 @@ namespace uSync8.BackOffice.SyncHandlers
 
         // almost everything does this - but languages can't so we need to 
         // let the language Handler override this. 
-        virtual protected IEnumerable<IEntity> GetExportItems(int parent, UmbracoObjectTypes objectType)
-            => entityService.GetChildren(parent, objectType);
+        virtual protected IEnumerable<IEntity> GetChildItems(int parent)
+        {
+            if (this.ItemObjectType != UmbracoObjectTypes.Unknown)
+                return entityService.GetChildren(parent, this.ItemObjectType);
+
+            return Enumerable.Empty<IEntity>();
+        }
+
+
+        virtual protected IEnumerable<IEntitySlim> GetFolders(int parent)
+        {
+            if (this.itemContainerType != UmbracoObjectTypes.Unknown)
+                return entityService.GetChildren(parent, this.itemContainerType);
+
+            return Enumerable.Empty<IEntitySlim>();
+        }
+
+
+        public bool HasChildren(int id)
+        {
+            return GetFolders(id).Any() || GetChildItems(id).Any();
+        }
 
         virtual public uSyncAction Export(TObject item, string folder, HandlerSettings config)
         {
@@ -586,7 +611,7 @@ namespace uSync8.BackOffice.SyncHandlers
         {
             var dependencies = new List<uSyncDependency>();
 
-            var containers = entityService.GetChildren(id, this.itemContainerType);
+            var containers = GetFolders(id);
             if (containers != null && containers.Any())
             {
                 foreach (var container in containers)
@@ -595,7 +620,7 @@ namespace uSync8.BackOffice.SyncHandlers
                 }
             }
 
-            var children = entityService.GetChildren(id, this.ItemObjectType);
+            var children = GetChildItems(id);
             if (children != null && children.Any())
             {
 

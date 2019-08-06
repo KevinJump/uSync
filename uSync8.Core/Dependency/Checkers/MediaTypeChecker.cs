@@ -30,10 +30,11 @@ namespace uSync8.Core.Dependency
             {
                 Udi = item.GetUdi(),
                 Order = DependencyOrders.MediaTypes,
-                Flags = flags
+                Flags = flags,
+                Level = item.Level
             });
 
-            if (!flags.HasFlag(DependencyFlags.NoDependencies))
+            if (flags.HasFlag(DependencyFlags.IncludeDependencies))
             {
                 dependencies.AddRange(CalcDataTypeDependencies(item, flags));
                 dependencies.AddRange(CalcCompositions(item, DependencyOrders.MediaTypes - 1, flags));

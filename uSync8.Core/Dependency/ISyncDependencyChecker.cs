@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,15 +16,5 @@ namespace uSync8.Core.Dependency
         where TObject : IEntity
     {
         IEnumerable<uSyncDependency> GetDependencies(TObject item, DependencyFlags flags);
-    }
-
-    [FlagsAttribute]
-    public enum DependencyFlags
-    {
-        None = 0,
-        IncludeChildren = 2,
-        IncludeAncestors = 4,
-        NoDependencies = 8,
-        NoTemplates = 16
     }
 }

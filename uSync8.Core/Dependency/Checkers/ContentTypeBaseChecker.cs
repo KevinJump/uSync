@@ -20,7 +20,6 @@ namespace uSync8.Core.Dependency
 
         public virtual UmbracoObjectTypes ObjectType { get; }
 
-
         public ContentTypeBaseChecker(
             IEntityService entityService,
             IDataTypeService dataTypeService,
@@ -46,7 +45,8 @@ namespace uSync8.Core.Dependency
                     {
                         Udi = dataType.GetUdi(),
                         Order = DependencyOrders.DataTypes,
-                        Flags = flags
+                        Flags = flags,
+                        Level = item.Level 
                     });
                 }
 
@@ -82,6 +82,7 @@ namespace uSync8.Core.Dependency
                     {
                         Flags = flags,
                         Order = DependencyOrders.DictionaryItems,
+                        Level = 0,
                         Udi = item.GetUdi() // strong chance you can't do this with a dictionary item :( 
                     });
                 }
@@ -100,6 +101,7 @@ namespace uSync8.Core.Dependency
                 {
                     Udi = composition.GetUdi(),
                     Order = priority,
+                    Level = composition.Level,
                     Flags = flags
                 });
 
@@ -120,7 +122,7 @@ namespace uSync8.Core.Dependency
 
             if (flags.HasFlag(DependencyFlags.IncludeChildren))
             {
-                var children = entityService.GetDescendants(itemId, UmbracoObjectTypes.DocumentType);
+                var children = entityService.GetDescendants(itemId, this.ObjectType);
 
                 if (children != null && children.Any())
                 {
@@ -132,6 +134,7 @@ namespace uSync8.Core.Dependency
                             {
                                 Udi = Udi.Create(UdiEntityType.FromUmbracoObjectType(this.ObjectType), child.Key),
                                 Flags = flags,
+                                Level = child.Level,
                                 Order = DependencyOrders.ContentTypes + child.Level
                             });
                         }

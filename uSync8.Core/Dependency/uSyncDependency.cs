@@ -11,6 +11,9 @@ namespace uSync8.Core.Dependency
     {
         public Udi Udi { get; set; }
         public int Order { get; set; }
+
+        public int Level { get; set; }
+
         public DependencyMode Mode { get; set; }
 
         public DependencyFlags Flags { get; set; }

@@ -21,6 +21,7 @@ namespace uSync8.Core.Dependency
                     Udi = item.GetUdi(),
                     Order = DependencyOrders.Macros,
                     Flags = flags
+
                 }
             };
 

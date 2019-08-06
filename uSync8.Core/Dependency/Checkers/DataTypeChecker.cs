@@ -19,8 +19,8 @@ namespace uSync8.Core.Dependency
             {
                 Order = DependencyOrders.DataTypes,
                 Udi = item.GetUdi(),
-                Flags = flags
-
+                Flags = flags,
+                Level = item.Level
             });
 
             // what can datatypes depend on? 

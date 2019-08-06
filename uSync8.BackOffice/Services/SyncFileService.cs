@@ -68,7 +68,7 @@ namespace uSync8.BackOffice.Services
                 throw new FileNotFoundException("Missing File",  path);
         }
 
-        public Stream OpenRead(string path)
+        public FileStream OpenRead(string path)
         {
             if (!FileExists(path)) return null;
 
@@ -76,7 +76,7 @@ namespace uSync8.BackOffice.Services
             return File.OpenRead(absPath);
         }
 
-        public Stream OpenWrite(string path)
+        public FileStream OpenWrite(string path)
         {
             if (FileExists(path))
                 DeleteFile(path);
@@ -133,6 +133,28 @@ namespace uSync8.BackOffice.Services
             }
         }
 
+        public void SaveFile(string filename, Stream stream)
+        {
+            using(Stream fileStream = OpenWrite(filename))
+            {
+                stream.CopyTo(fileStream);
+                fileStream.Flush();
+                fileStream.Close();
+            }
+        }
+
+        public void SaveFile(string filename, string content)
+        {
+            
+            using (Stream stream = OpenWrite(filename))
+            {
+                byte[] info = new UTF8Encoding(true).GetBytes(content);
+                stream.Write(info, 0, info.Length);
+                stream.Flush();
+                stream.Dispose();
+            }
+        }
+
         public void SaveXElement(XElement node, string filename)
         {
             using (var stream = OpenWrite(filename))
@@ -156,6 +178,17 @@ namespace uSync8.BackOffice.Services
                 }
             }
             return default(TObject);
+        }
+
+        public string LoadContent(string file)
+        {
+            if (FileExists(file))
+            {
+                var absPath = this.GetAbsPath(file);
+                return File.ReadAllText(absPath);
+            }
+
+            return string.Empty;
         }
 
         public static object _saveLock = new object();

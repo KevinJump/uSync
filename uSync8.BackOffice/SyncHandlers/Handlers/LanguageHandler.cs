@@ -36,9 +36,6 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             : base(entityService, logger, serializer, tracker, checker, syncFileService)
         {
             this.localizationService = localizationService;
-
-            this.ItemObjectType = UmbracoObjectTypes.Language;
-            this.itemContainerType = UmbracoObjectTypes.Unknown;
         }
 
         protected override ILanguage GetFromService(int id)
@@ -79,7 +76,7 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             }
         }
 
-        protected override IEnumerable<IEntity> GetExportItems(int parent, UmbracoObjectTypes objectType)
+        protected override IEnumerable<IEntity> GetChildItems(int parent)
         {
             if (parent == -1)
                 return localizationService.GetAllLanguages();

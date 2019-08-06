@@ -36,7 +36,6 @@ namespace uSync8.ContentEdition.Handlers
             : base(entityService, logger, serializer, tracker, syncFileService)
         {
             this.contentService = contentService;
-            this.ItemObjectType = UmbracoObjectTypes.DocumentBlueprint;
         }
 
         protected override void DeleteViaService(IContent item)

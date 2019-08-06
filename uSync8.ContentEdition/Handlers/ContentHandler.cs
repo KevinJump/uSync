@@ -38,9 +38,6 @@ namespace uSync8.ContentEdition.Handlers
             : base(entityService, logger, serializer, tracker, checker, syncFileService)
         {
             this.contentService = contentService;
-
-            this.ItemObjectType = UmbracoObjectTypes.Document;
-
         }
 
 

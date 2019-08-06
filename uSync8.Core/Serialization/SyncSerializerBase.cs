@@ -91,11 +91,14 @@ namespace uSync8.Core.Serialization
                         var secondAttempt = DeserializeSecondPass(result.Item, node, flags);
                         if (secondAttempt.Success)
                         {
+                            // the secondPass is responsible for saving the item. 
+                            /*
                             if (!flags.HasFlag(SerializerFlags.DoNotSave))
                             {
                                 // save (again)
                                 SaveItem(secondAttempt.Item);
                             }
+                            */
                         }
                     }
                 }

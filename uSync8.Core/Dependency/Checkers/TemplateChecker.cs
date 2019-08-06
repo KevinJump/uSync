@@ -26,13 +26,15 @@ namespace uSync8.Core.Dependency
         {
             var dependencies = new List<uSyncDependency>();
 
-            if (flags.HasFlag(DependencyFlags.NoTemplates)) return dependencies;
+            // only get teh dependencies for templates if the flag is set. 
+            if (!flags.HasFlag(DependencyFlags.IncludeFiles)) return dependencies;
 
             dependencies.Add(new uSyncDependency()
             {
                 Order = DependencyOrders.Templates,
                 Udi = item.GetUdi(),
-                Flags = flags
+                Flags = flags,
+                Level = CalculateLevel(item)
             });
 
             if (flags.HasFlag(DependencyFlags.IncludeAncestors))
@@ -62,6 +64,7 @@ namespace uSync8.Core.Dependency
                     {
                         Order = order,
                         Udi = master.GetUdi(),
+                        Level = CalculateLevel(master),
                         Flags = flags
                     });
 
@@ -85,7 +88,8 @@ namespace uSync8.Core.Dependency
                     {
                         Order = order,
                         Udi = child.GetUdi(),
-                        Flags = flags
+                        Flags = flags,
+                        Level = CalculateLevel(child)
                     });
 
                     GetChildren(child, order + 1, flags);
@@ -93,6 +97,28 @@ namespace uSync8.Core.Dependency
             }
 
             return templates;
+        }
+
+        private int CalculateLevel(ITemplate item)
+        {
+            return item.Path.ToDelimitedList().Count();
+
+            /*
+            if (item.MasterTemplateAlias.IsNullOrWhiteSpace()) return 1;
+
+            int level = 1;
+            var current = item;
+            while (!string.IsNullOrWhiteSpace(current.MasterTemplateAlias) && level < 20)
+            {
+                level++;
+                var parent = fileService.GetTemplate(current.MasterTemplateAlias);
+                if (parent == null) return level;
+
+                current = parent;
+            }
+
+            return level;
+            */
         }
     }
 }

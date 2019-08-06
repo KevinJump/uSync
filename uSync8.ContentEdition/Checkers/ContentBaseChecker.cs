@@ -41,7 +41,8 @@ namespace uSync8.ContentEdition.Checkers
                 {
                     Udi = udi,
                     Order = DependencyOrders.ContentTypes,
-                    Flags = flags
+                    Flags = flags,
+                    Level = item.Level
                 };
             }
 
@@ -60,7 +61,8 @@ namespace uSync8.ContentEdition.Checkers
                 {
                     Udi = Udi.Create(this.ObjectType.GetUdiType(), parent.Key),
                     Order = order,
-                    Flags = flags
+                    Flags = flags,
+                    Level = parent.Level
                 }); 
 
                 dependencies.AddRange(GetParentDependencies(parent.Id, order - 1, flags));
@@ -81,7 +83,8 @@ namespace uSync8.ContentEdition.Checkers
                 {
                     Udi = Udi.Create(this.ObjectType.GetUdiType(), child.Key),
                     Order = order,
-                    Flags = flags
+                    Flags = flags,
+                    Level = child.Level
                 });
 
                 dependencies.AddRange(GetChildDepencies(child.Id, order + 1, flags));
