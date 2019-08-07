@@ -24,6 +24,7 @@ namespace uSync8.BackOffice.SyncHandlers
         uSyncAction Import(string file, HandlerSettings settings, bool force);
         uSyncAction Report(string file, HandlerSettings settings);
         uSyncAction Export(int id, string folder, HandlerSettings settings);
+        uSyncAction Export(Udi udi, string folder, HandlerSettings settings);
 
         SyncAttempt<XElement> GetElement(Udi udi);
         uSyncAction ImportElement(XElement element, bool force);

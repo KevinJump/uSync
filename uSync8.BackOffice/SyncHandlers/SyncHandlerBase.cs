@@ -580,6 +580,18 @@ namespace uSync8.BackOffice.SyncHandlers
             return this.Export(item, folder, settings);
         }
 
+        public uSyncAction Export(Udi udi, string folder, HandlerSettings settings)
+        {
+            if (udi is GuidUdi guidUdi)
+            {
+                var item = this.GetFromService(guidUdi.Guid);
+                if (item != null)
+                    return Export(item, folder, settings);
+            }
+
+            return uSyncAction.Fail(nameof(udi), typeof(TObject), ChangeType.Fail, "Item not found");
+        }
+
         public SyncAttempt<XElement> GetElement(Udi udi)
         {
             if (udi is GuidUdi guidUdi)
