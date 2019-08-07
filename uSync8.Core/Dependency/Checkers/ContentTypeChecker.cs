@@ -28,6 +28,7 @@ namespace uSync8.Core.Dependency
 
             dependencies.Add(new uSyncDependency()
             {
+                Name = item.Name,
                 Udi = item.GetUdi(),
                 Order = DependencyOrders.ContentTypes,
                 Flags = flags,
@@ -57,6 +58,7 @@ namespace uSync8.Core.Dependency
                 {
                     templates.Add(new uSyncDependency()
                     {
+                        Name = item.Name,
                         Udi = template.GetUdi(),
                         Order = DependencyOrders.Templates,
                         Flags = flags,

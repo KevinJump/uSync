@@ -43,6 +43,7 @@ namespace uSync8.Core.Dependency
                 {
                     dataTypes.Add(new uSyncDependency()
                     {
+                        Name = dataType.Name,
                         Udi = dataType.GetUdi(),
                         Order = DependencyOrders.DataTypes,
                         Flags = flags,
@@ -80,6 +81,7 @@ namespace uSync8.Core.Dependency
 
                     dependencies.Add(new uSyncDependency()
                     {
+                        Name = item.ItemKey,
                         Flags = flags,
                         Order = DependencyOrders.DictionaryItems,
                         Level = 0,
@@ -99,6 +101,7 @@ namespace uSync8.Core.Dependency
             {
                 contentTypes.Add(new uSyncDependency()
                 {
+                    Name = item.Name,
                     Udi = composition.GetUdi(),
                     Order = priority,
                     Level = composition.Level,
@@ -132,6 +135,7 @@ namespace uSync8.Core.Dependency
                         {
                             childItems.Add(new uSyncDependency()
                             {
+                                Name = child.Name,
                                 Udi = Udi.Create(UdiEntityType.FromUmbracoObjectType(this.ObjectType), child.Key),
                                 Flags = flags,
                                 Level = child.Level,

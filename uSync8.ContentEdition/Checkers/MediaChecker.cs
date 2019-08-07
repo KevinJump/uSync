@@ -23,6 +23,7 @@ namespace uSync8.ContentEdition.Checkers
 
             dependencies.Add(new uSyncDependency()
             {
+                Name = item.Name,
                 Udi = item.GetUdi(),
                 Order = DependencyOrders.Media,
                 Flags = flags,

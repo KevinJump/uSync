@@ -40,6 +40,7 @@ namespace uSync8.ContentEdition.Checkers
 
                 return new uSyncDependency()
                 {
+                    Name = item.Name,
                     Udi = udi,
                     Order = DependencyOrders.ContentTypes,
                     Flags = flags,
@@ -60,6 +61,7 @@ namespace uSync8.ContentEdition.Checkers
             {
                 dependencies.Add(new uSyncDependency()
                 {
+                    Name = parent.Name,
                     Udi = Udi.Create(this.ObjectType.GetUdiType(), parent.Key),
                     Order = order,
                     Flags = flags,
@@ -82,6 +84,7 @@ namespace uSync8.ContentEdition.Checkers
             {
                 dependencies.Add(new uSyncDependency()
                 {
+                    Name = child.Name,
                     Udi = Udi.Create(this.ObjectType.GetUdiType(), child.Key),
                     Order = order,
                     Flags = flags,

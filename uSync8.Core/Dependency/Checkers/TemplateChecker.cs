@@ -31,6 +31,7 @@ namespace uSync8.Core.Dependency
 
             dependencies.Add(new uSyncDependency()
             {
+                Name = item.Name,
                 Order = DependencyOrders.Templates,
                 Udi = item.GetUdi(),
                 Flags = flags,
@@ -62,6 +63,7 @@ namespace uSync8.Core.Dependency
                 {
                     templates.Add(new uSyncDependency()
                     {
+                        Name = item.Name,
                         Order = order,
                         Udi = master.GetUdi(),
                         Level = CalculateLevel(master),
@@ -86,6 +88,7 @@ namespace uSync8.Core.Dependency
                 {
                     templates.Add(new uSyncDependency()
                     {
+                        Name = item.Name,
                         Order = order,
                         Udi = child.GetUdi(),
                         Flags = flags,

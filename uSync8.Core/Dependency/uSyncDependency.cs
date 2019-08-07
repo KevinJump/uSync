@@ -9,6 +9,11 @@ namespace uSync8.Core.Dependency
 {
     public class uSyncDependency
     {
+        /// <summary>
+        ///  name to display to user (not critical for deployment of a dependency)
+        /// </summary>
+        public string Name { get; set; }
+
         public Udi Udi { get; set; }
         public int Order { get; set; }
 

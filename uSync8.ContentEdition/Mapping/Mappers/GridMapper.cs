@@ -24,8 +24,6 @@ namespace uSync8.ContentEdition.Mapping.Mappers
     /// </remarks>
     public class GridMapper : SyncValueMapperBase, ISyncMapper
     {
-
-
         public override string Name => "Grid Mapper";
 
         public override string[] Editors => new string[] { "Umbraco.Grid" };
@@ -57,6 +55,8 @@ namespace uSync8.ContentEdition.Mapping.Mappers
 
             // look based on the view 
             var viewAlias = editor.Value<string>("view");
+            if (viewAlias == null) return (alias, null);
+
             if (viewAlias.IndexOf('.') != -1)
                 viewAlias = viewAlias.Substring(viewAlias.LastIndexOf('.'));
 

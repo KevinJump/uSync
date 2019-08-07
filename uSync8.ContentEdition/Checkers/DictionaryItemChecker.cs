@@ -21,6 +21,7 @@ namespace uSync8.ContentEdition.Checkers
             var dependencies = new List<uSyncDependency>();
             dependencies.Add(new uSyncDependency()
             {
+                Name = item.ItemKey,
                 Order = DependencyOrders.DictionaryItems,
                 Udi = item.GetUdi(),
                 Flags = flags,

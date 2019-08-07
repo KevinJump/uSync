@@ -17,6 +17,7 @@ namespace uSync8.Core.Dependency
             var dependencies = new List<uSyncDependency>();
             dependencies.Add(new uSyncDependency()
             {
+                Name = item.Name,
                 Order = DependencyOrders.DataTypes,
                 Udi = item.GetUdi(),
                 Flags = flags,

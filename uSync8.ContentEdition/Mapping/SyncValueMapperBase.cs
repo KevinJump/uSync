@@ -59,6 +59,7 @@ namespace uSync8.ContentEdition.Mapping
         {          
             return new uSyncDependency()
             {
+                Name = udi.ToString(),
                 Udi = udi,
                 Flags = flags,
                 Order = DependencyOrders.OrderFromEntityType(udi.EntityType)

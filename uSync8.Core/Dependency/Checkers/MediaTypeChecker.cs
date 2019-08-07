@@ -28,6 +28,7 @@ namespace uSync8.Core.Dependency
 
             dependencies.Add(new uSyncDependency()
             {
+                Name = item.Name,
                 Udi = item.GetUdi(),
                 Order = DependencyOrders.MediaTypes,
                 Flags = flags,
