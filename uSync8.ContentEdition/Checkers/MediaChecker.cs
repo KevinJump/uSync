@@ -1,19 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+
 using Umbraco.Core;
 using Umbraco.Core.Models;
 using Umbraco.Core.Services;
+
+using uSync8.ContentEdition.Mapping;
 using uSync8.Core.Dependency;
 
 namespace uSync8.ContentEdition.Checkers
 {
     public class MediaChecker : ContentBaseChecker, ISyncDependencyChecker<IMedia>
     {
-        public MediaChecker(IEntityService entityService)
-            : base(entityService, UmbracoObjectTypes.MediaType)
+        public MediaChecker(IEntityService entityService, SyncValueMapperCollection mappers)
+            : base(entityService, UmbracoObjectTypes.MediaType, mappers)
         {
             ObjectType = UmbracoObjectTypes.Media;
         }

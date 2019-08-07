@@ -10,6 +10,8 @@ namespace uSync8.Core.Dependency
         IncludeAncestors = 4,
         IncludeDependencies = 8,
         IncludeFiles = 16,
-        IncludeMedia = 32
+        IncludeMedia = 32,
+        IncludeLinked = 64
+
     }
 }

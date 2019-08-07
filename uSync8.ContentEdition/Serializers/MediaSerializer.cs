@@ -13,7 +13,7 @@ using uSync8.Core.Extensions;
 using uSync8.Core.Models;
 using uSync8.Core.Serialization;
 using Umbraco.Core;
-using uSync8.ContentEdition.Mappers;
+using uSync8.ContentEdition.Mapping;
 
 namespace uSync8.ContentEdition.Serializers
 {

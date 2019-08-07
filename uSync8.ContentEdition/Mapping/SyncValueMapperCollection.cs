@@ -7,7 +7,7 @@ using Umbraco.Core;
 using Umbraco.Core.Composing;
 using Umbraco.Core.Models;
 
-namespace uSync8.ContentEdition.Mappers
+namespace uSync8.ContentEdition.Mapping
 {
     public class SyncValueMapperCollection
             : BuilderCollectionBase<ISyncMapper>
@@ -28,6 +28,8 @@ namespace uSync8.ContentEdition.Mappers
 
         public string GetExportValue(object value, string editorAlias)
         {
+            if (value == null) return string.Empty;
+
             var mapper = GetSyncMapper(editorAlias);
             if (mapper == null) return value.ToString();
 
@@ -36,6 +38,8 @@ namespace uSync8.ContentEdition.Mappers
 
         public object GetImportValue(string value, string editorAlias)
         {
+            if (string.IsNullOrWhiteSpace(value)) return null;
+
             var mapper = GetSyncMapper(editorAlias);
             if (mapper == null) return value;
 

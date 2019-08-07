@@ -1,19 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+
 using Umbraco.Core;
 using Umbraco.Core.Models;
 using Umbraco.Core.Services;
+
+using uSync8.ContentEdition.Mapping;
 using uSync8.Core.Dependency;
 
 namespace uSync8.ContentEdition.Checkers
 {
     public class ContentChecker : ContentBaseChecker, ISyncDependencyChecker<IContent>
     {
-        public ContentChecker(IEntityService entityService)
-            : base(entityService, UmbracoObjectTypes.DocumentType)
+        public ContentChecker(IEntityService entityService, SyncValueMapperCollection mappers)
+            : base(entityService, UmbracoObjectTypes.DocumentType, mappers)
         {
             ObjectType = UmbracoObjectTypes.Document;
         }
@@ -35,6 +34,11 @@ namespace uSync8.ContentEdition.Checkers
                 var contentType = CalcDocTypeDependency(item, flags);
                 if (contentType != null)
                     dependencies.Add(contentType);
+            }
+
+            if (flags.HasFlag(DependencyFlags.IncludeLinked))
+            { 
+                dependencies.AddRange(GetPropertyDependencies(item, flags));
             }
 
             if (flags.HasFlag(DependencyFlags.IncludeAncestors))

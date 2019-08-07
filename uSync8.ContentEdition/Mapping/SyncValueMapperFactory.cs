@@ -7,7 +7,7 @@ using Umbraco.Core;
 using Umbraco.Core.Composing;
 
 
-namespace uSync8.ContentEdition.Mappers
+namespace uSync8.ContentEdition.Mapping
 {
     public static class SyncValueMapperFactory
     {

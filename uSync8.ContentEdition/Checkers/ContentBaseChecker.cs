@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+
 using Umbraco.Core;
 using Umbraco.Core.Models;
-using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
+
+using uSync8.ContentEdition.Mapping;
 using uSync8.Core.Dependency;
 
 namespace uSync8.ContentEdition.Checkers
@@ -14,16 +12,19 @@ namespace uSync8.ContentEdition.Checkers
     public class ContentBaseChecker
     {
         protected readonly IEntityService entityService;
-
         private UmbracoObjectTypes contentTypeObjectType;
+        private SyncValueMapperCollection mappers;
 
         public UmbracoObjectTypes ObjectType { get; protected set; } = UmbracoObjectTypes.Unknown;
 
-        public ContentBaseChecker(IEntityService entityService, UmbracoObjectTypes contentTypeObjectType)
+        public ContentBaseChecker(IEntityService entityService, 
+            UmbracoObjectTypes contentTypeObjectType,
+            SyncValueMapperCollection mappers)
         {
             this.entityService = entityService;
-
             this.contentTypeObjectType = contentTypeObjectType;
+
+            this.mappers = mappers;
         }
 
         protected uSyncDependency CalcDocTypeDependency(IContentBase item, DependencyFlags flags)
@@ -106,11 +107,18 @@ namespace uSync8.ContentEdition.Checkers
 
             foreach (var property in item.Properties)
             {
-
+                var editorAlias = property.PropertyType.PropertyEditorAlias;
+                var mapper = mappers.GetSyncMapper(editorAlias);
+                if (mapper != null)
+                {
+                    foreach(var value in property.Values)
+                    {
+                        dependencies.AddRange(mapper.GetDependencies(value.EditedValue, editorAlias, flags));
+                    }
+                }
             }
 
             return dependencies;
-
         }
 
     }

@@ -9,7 +9,7 @@ using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
-using uSync8.ContentEdition.Mappers;
+using uSync8.ContentEdition.Mapping;
 using uSync8.Core;
 using uSync8.Core.Extensions;
 using uSync8.Core.Models;
@@ -103,7 +103,9 @@ namespace uSync8.ContentEdition.Serializers
                         valueNode.Add(new XAttribute("Segment", value.Segment ?? string.Empty));
                     }
 
-                    valueNode.Value = value.EditedValue?.ToString() ?? string.Empty;
+
+                    valueNode.Value = GetExportValue(value.EditedValue, property.PropertyType, value.Culture, value.Segment);
+                    // valueNode.Value = value.EditedValue?.ToString() ?? string.Empty;
                     propertyNode.Add(valueNode);
                 }
                 node.Add(propertyNode);

@@ -10,7 +10,7 @@ using uSync8.ContentEdition.Tracker;
 using uSync8.Core;
 using uSync8.BackOffice;
 using uSync8.BackOffice.Models;
-using uSync8.ContentEdition.Mappers;
+using uSync8.ContentEdition.Mapping;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using uSync8.Core.Dependency;
@@ -24,9 +24,8 @@ namespace uSync8.ContentEdition
         public string Name => "Content Edition";
         public string Version => "8.0.1";
 
-
-        /// the following if you are an add on that displays like an app
-
+        /// The following if you are an add on that displays like an app
+        
         // but content edition doesn't have an interface, so the view is empty. this hides it. 
         public string View => string.Empty;
         public string Icon => "icon-globe";
@@ -59,7 +58,6 @@ namespace uSync8.ContentEdition
 
             composition.WithCollectionBuilder<SyncValueMapperCollectionBuilder>()
                 .Add(() => composition.TypeLoader.GetTypes<ISyncMapper>());
-
         }
     }
 }

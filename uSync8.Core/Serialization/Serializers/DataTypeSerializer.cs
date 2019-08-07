@@ -138,8 +138,6 @@ namespace uSync8.Core.Serialization.Serializers
 
         private XElement SerializeConfiguration(IDataType item)
         {
-            // item.Configuration;
-            // item.Configuration
             if (item.Configuration != null)
             {
                 var serializer = this.configurationSerializers.GetSerializer(item.EditorAlias);
@@ -179,11 +177,7 @@ namespace uSync8.Core.Serialization.Serializers
         }
 
         private IDataEditor FindDataEditor(string alias)
-        {
-            return Current.PropertyEditors
-                .FirstOrDefault(x => x.Alias == alias);
-
-        }
+            => Current.PropertyEditors.FirstOrDefault(x => x.Alias == alias);
 
         protected override string GetItemBaseType(XElement node)
             => node.Element("Info").Element("EditorAlias").ValueOrDefault(string.Empty);

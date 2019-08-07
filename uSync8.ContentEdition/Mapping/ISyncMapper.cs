@@ -1,6 +1,9 @@
-﻿using Umbraco.Core.Models;
+﻿using System.Collections;
+using System.Collections.Generic;
+using Umbraco.Core.Models;
+using uSync8.Core.Dependency;
 
-namespace uSync8.ContentEdition.Mappers
+namespace uSync8.ContentEdition.Mapping
 {
     public interface ISyncMapper
     {
@@ -11,6 +14,7 @@ namespace uSync8.ContentEdition.Mappers
 
         string GetExportValue(object value, string editorAlias);
         string GetImportValue(string value, string editorAlias);
-            
+
+        IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags);
     }
 }

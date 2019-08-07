@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Umbraco.Core.Constants;
 
 namespace uSync8.Core.Dependency
 {
@@ -35,5 +36,34 @@ namespace uSync8.Core.Dependency
         public static int Media = 900;
         public static int Content = 1000;
 
+        public static int OrderFromEntityType(string entityType)
+        {
+            switch(entityType)
+            {
+                case UdiEntityType.Document:
+                    return Content;
+                case UdiEntityType.Media:
+                    return Media;
+                case UdiEntityType.DataTypeContainer:
+                case UdiEntityType.DataType:
+                    return DataTypes;
+                case UdiEntityType.DocumentType:
+                case UdiEntityType.DocumentTypeContainer:
+                    return ContentTypes;
+                case UdiEntityType.MediaType:
+                case UdiEntityType.MediaTypeContainer:
+                    return MediaTypes;
+                case UdiEntityType.DictionaryItem:
+                    return DictionaryItems;
+                case UdiEntityType.Template:
+                    return Templates;
+                case UdiEntityType.Macro:
+                    return Macros;
+                case UdiEntityType.Language:
+                    return Languages;
+                default:
+                    return 2000;
+            }
+        }
     }
 }
