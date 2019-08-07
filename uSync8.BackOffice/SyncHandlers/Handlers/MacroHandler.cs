@@ -73,8 +73,8 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             MacroService.Deleted += EventDeletedItem;
         }
 
-        protected override IMacro GetFromService(Guid key) 
-            => null;
+        protected override IMacro GetFromService(Guid key)
+            => macroService.GetById(key);
 
         protected override IMacro GetFromService(string alias) 
             => macroService.GetByAlias(alias);

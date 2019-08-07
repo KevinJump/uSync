@@ -585,7 +585,15 @@ namespace uSync8.BackOffice.SyncHandlers
             if (udi is GuidUdi guidUdi)
             {
                 var element = this.GetFromService(guidUdi.Guid);
-                return this.serializer.Serialize(element);
+                if (element == null)
+                {
+                    var entity = entityService.Get(guidUdi.Guid);
+                    if (entity != null)
+                        element = GetFromService(entity.Id);
+                }
+
+                if (element != null)
+                    return this.serializer.Serialize(element);
             }
 
             return SyncAttempt<XElement>.Fail(udi.ToString(), ChangeType.Fail);

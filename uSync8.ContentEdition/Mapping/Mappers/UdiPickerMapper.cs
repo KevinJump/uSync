@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 
 using Umbraco.Core;
-
+using Umbraco.Core.Services;
 using uSync8.Core.Dependency;
 
 namespace uSync8.ContentEdition.Mapping
@@ -21,6 +21,10 @@ namespace uSync8.ContentEdition.Mapping
     /// </remarks>
     public class UdiPickerMapper : SyncValueMapperBase, ISyncMapper
     {
+        public UdiPickerMapper(IEntityService entityService) : base(entityService)
+        {
+        }
+
         public override string Name => "Content Picker Mapper";
 
         public override string[] Editors => new string[] {

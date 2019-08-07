@@ -5,13 +5,17 @@ using System.Collections.Generic;
 using System.Linq;
 
 using Umbraco.Core;
-
+using Umbraco.Core.Services;
 using uSync8.Core.Dependency;
 
 namespace uSync8.ContentEdition.Mapping.Mappers
 {
     public class GridImageMapper : SyncValueMapperBase, ISyncMapper
     {
+        public GridImageMapper(IEntityService entityService) : base(entityService)
+        {
+        }
+
         public override string Name => "Grid Image Mapper";
 
         public override string[] Editors => new string[] { "Umbraco.Grid.media" };

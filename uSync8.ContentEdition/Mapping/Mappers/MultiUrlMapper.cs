@@ -4,13 +4,17 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 using Umbraco.Core;
-
+using Umbraco.Core.Services;
 using uSync8.Core.Dependency;
 
 namespace uSync8.ContentEdition.Mapping.Mappers
 {
     public class MultiUrlMapper : SyncValueMapperBase, ISyncMapper
     {
+        public MultiUrlMapper(IEntityService entityService) : base(entityService)
+        {
+        }
+
         public override string Name => "MultiUrl Mapper";
 
         public override string[] Editors => new string[] { "Umbraco.MultiUrlPicker" };

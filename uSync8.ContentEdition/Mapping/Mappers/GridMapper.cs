@@ -4,7 +4,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using Umbraco.Core.Services;
 using uSync8.Core.Dependency;
 
 namespace uSync8.ContentEdition.Mapping.Mappers
@@ -24,6 +24,10 @@ namespace uSync8.ContentEdition.Mapping.Mappers
     /// </remarks>
     public class GridMapper : SyncValueMapperBase, ISyncMapper
     {
+        public GridMapper(IEntityService entityService) : base(entityService)
+        {
+        }
+
         public override string Name => "Grid Mapper";
 
         public override string[] Editors => new string[] { "Umbraco.Grid" };

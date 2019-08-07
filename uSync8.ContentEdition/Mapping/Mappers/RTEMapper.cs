@@ -3,7 +3,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 
 using Umbraco.Core;
-
+using Umbraco.Core.Services;
 using uSync8.Core.Dependency;
 
 namespace uSync8.ContentEdition.Mapping.Mappers
@@ -22,6 +22,10 @@ namespace uSync8.ContentEdition.Mapping.Mappers
         // private string linkRegEx = "((?&lt;=localLink:)([0-9]+)|(?&lt;=data-id=&quot;)([0-9]+))";
         private Regex UdiRegEx = new Regex(@"(umb:\\[a-zA-Z-]+/[a-zA-Z0-9-]+)",
             RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace);
+
+        public RTEMapper(IEntityService entityService) : base(entityService)
+        {
+        }
 
         public override string Name => "TinyMCE RTE Mapper";
 

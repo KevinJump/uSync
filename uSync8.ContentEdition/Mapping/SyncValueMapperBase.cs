@@ -5,12 +5,21 @@ using System.Text;
 using System.Threading.Tasks;
 using Umbraco.Core;
 using Umbraco.Core.Models;
+using Umbraco.Core.Models.Entities;
+using Umbraco.Core.Services;
 using uSync8.Core.Dependency;
 
 namespace uSync8.ContentEdition.Mapping
 {
     public abstract class SyncValueMapperBase
     {
+        private readonly IEntityService entityService;
+
+        public SyncValueMapperBase(IEntityService entityService)
+        {
+            this.entityService = entityService;
+        }
+
         public abstract string Name { get; }
 
         public abstract string[] Editors { get; }
@@ -56,14 +65,26 @@ namespace uSync8.ContentEdition.Mapping
         }
 
         protected uSyncDependency CreateDependency(Udi udi, DependencyFlags flags)
-        {          
+        {
+            var entity = GetElement(udi);
+
             return new uSyncDependency()
             {
-                Name = udi.ToString(),
+                Name = entity == null ? udi.ToString() : entity.Name,
                 Udi = udi,
                 Flags = flags,
-                Order = DependencyOrders.OrderFromEntityType(udi.EntityType)
+                Order = DependencyOrders.OrderFromEntityType(udi.EntityType),
+                Level = entity == null ? 0 : entity.Level
             };
+        }
+
+        private IEntitySlim GetElement(Udi udi)
+        {
+            if (udi is GuidUdi guidUdi)
+            {
+                return entityService.Get(guidUdi.Guid);
+            }
+            return null;
         }
     }
 }
