@@ -95,6 +95,9 @@ namespace uSync8.BackOffice.Services
                 Directory.CreateDirectory(absPath);
         }
 
+        /// <summary>
+        ///  remove a folder and all its contents
+        /// </summary>
         public void CleanFolder(string folder)
         {
             var absPath = GetAbsPath(folder);
