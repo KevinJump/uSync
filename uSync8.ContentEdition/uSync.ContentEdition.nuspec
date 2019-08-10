@@ -18,6 +18,6 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="bin\release\uSync8.ContentEdition.dll" target="lib\net472" />
+    <file src="bin\$Configuration$\uSync8.ContentEdition.dll" target="lib\net472" />
   </files>
 </package>
