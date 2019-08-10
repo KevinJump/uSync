@@ -19,7 +19,9 @@ Umbraco_Client/
 Bin/
 # Config/
 Archive/
-uSync8.Site/Media/
+uSync8.Site/Media/*
+!uSync8.Site/Media/web.config
+
 
 # Build results
 [Dd]ebug/
