@@ -37,7 +37,8 @@ namespace uSync8.ContentEdition.Checkers
                     dependencies.Add(contentType);
             }
 
-            if (flags.HasFlag(DependencyFlags.IncludeLinked))
+            // if we are getting linked items or media, include in the look up.
+            if (flags.HasFlagAny(DependencyFlags.IncludeLinked | DependencyFlags.IncludeMedia))
             { 
                 dependencies.AddRange(GetPropertyDependencies(item, flags));
             }

@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
-
+using System.Linq;
 using Umbraco.Core;
 using Umbraco.Core.Models;
 using Umbraco.Core.Services;
 
 using uSync8.ContentEdition.Mapping;
 using uSync8.Core.Dependency;
+using static Umbraco.Core.Constants;
 
 namespace uSync8.ContentEdition.Checkers
 {
@@ -116,6 +117,21 @@ namespace uSync8.ContentEdition.Checkers
                 {
                     foreach(var value in property.Values)
                     {
+                        var linkedDependencies = mapper.GetDependencies(value.EditedValue, editorAlias, flags);
+
+                        // include linked means all content we link to 
+                        if (flags.HasFlag(DependencyFlags.IncludeLinked))
+                        {
+                            dependencies.AddRange(linkedDependencies.Where(x => x.Udi.EntityType == UdiEntityType.Document));
+                        }
+
+                        // media means we include media items (the files are checked)
+                        if (flags.HasFlag(DependencyFlags.IncludeMedia))
+                        {
+                            dependencies.AddRange(linkedDependencies.Where(x => x.Udi.EntityType == UdiEntityType.Media));
+                        }
+
+
                         dependencies.AddRange(mapper.GetDependencies(value.EditedValue, editorAlias, flags));
                     }
                 }
