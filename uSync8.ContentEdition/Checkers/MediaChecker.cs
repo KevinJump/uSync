@@ -11,9 +11,15 @@ namespace uSync8.ContentEdition.Checkers
 {
     public class MediaChecker : ContentBaseChecker, ISyncDependencyChecker<IMedia>
     {
-        public MediaChecker(IEntityService entityService, SyncValueMapperCollection mappers)
+        private readonly IMediaService mediaService;
+
+        public MediaChecker(IEntityService entityService,
+            IMediaService mediaService,
+            SyncValueMapperCollection mappers)
             : base(entityService, UmbracoObjectTypes.MediaType, mappers)
         {
+            this.mediaService = mediaService;
+
             ObjectType = UmbracoObjectTypes.Media;
         }
 
@@ -49,5 +55,8 @@ namespace uSync8.ContentEdition.Checkers
 
             return dependencies;
         }
+
+        protected override IContentBase GetItemById(int id)
+            => mediaService.GetById(id);
     }
 }

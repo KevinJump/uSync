@@ -10,7 +10,7 @@ using static Umbraco.Core.Constants;
 
 namespace uSync8.ContentEdition.Checkers
 {
-    public class ContentBaseChecker
+    public abstract class ContentBaseChecker
     {
         protected readonly IEntityService entityService;
         private UmbracoObjectTypes contentTypeObjectType;
@@ -92,11 +92,19 @@ namespace uSync8.ContentEdition.Checkers
                     Level = child.Level
                 });
 
+                if (flags.HasFlagAny(DependencyFlags.IncludeLinked | DependencyFlags.IncludeMedia))
+                {
+                    var contentChild = GetItemById(child.Id);
+                    dependencies.AddRange(GetPropertyDependencies(contentChild, flags));
+                }
+
                 dependencies.AddRange(GetChildDepencies(child.Id, order + 1, flags));
             }
 
             return dependencies;
         }
+
+        protected abstract IContentBase GetItemById(int id);
 
 
         /// <summary>

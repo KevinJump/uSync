@@ -11,9 +11,15 @@ namespace uSync8.ContentEdition.Checkers
 {
     public class ContentChecker : ContentBaseChecker, ISyncDependencyChecker<IContent>
     {
-        public ContentChecker(IEntityService entityService, SyncValueMapperCollection mappers)
+        private readonly IContentService contentService;
+
+        public ContentChecker(IEntityService entityService, 
+            IContentService contentService,
+            SyncValueMapperCollection mappers)
             : base(entityService, UmbracoObjectTypes.DocumentType, mappers)
         {
+            this.contentService = contentService;
+
             ObjectType = UmbracoObjectTypes.Document;
         }
 
@@ -56,5 +62,7 @@ namespace uSync8.ContentEdition.Checkers
             return dependencies;
         }
 
+        protected override IContentBase GetItemById(int id)
+            => contentService.GetById(id);
     }
 }
