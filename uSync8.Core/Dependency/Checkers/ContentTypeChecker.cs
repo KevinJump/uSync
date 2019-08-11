@@ -52,7 +52,7 @@ namespace uSync8.Core.Dependency
         {
             var templates = new List<uSyncDependency>();
 
-            if (flags.HasFlag(DependencyFlags.IncludeFiles))
+            if (flags.HasFlag(DependencyFlags.IncludeViews))
             {
                 foreach (var template in item.AllowedTemplates)
                 {

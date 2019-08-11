@@ -27,7 +27,7 @@ namespace uSync8.Core.Dependency
             var dependencies = new List<uSyncDependency>();
 
             // only get teh dependencies for templates if the flag is set. 
-            if (!flags.HasFlag(DependencyFlags.IncludeFiles)) return dependencies;
+            if (!flags.HasFlag(DependencyFlags.IncludeViews)) return dependencies;
 
             dependencies.Add(new uSyncDependency()
             {
