@@ -14,7 +14,7 @@ variables:
   solution: '**/*.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'PackageOnlyBuild'
-  packageVersion: '8.2.0-build-$(Build.BuildId)'
+  packageVersion: '8.2.0-alpha-$(Build.BuildId)'
 
 steps:
 - task: NuGetToolInstaller@1
