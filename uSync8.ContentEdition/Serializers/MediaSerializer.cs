@@ -1,19 +1,25 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+
+using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Security.Cryptography;
 using System.Xml.Linq;
-using Umbraco.Core.Models;
+
+using Umbraco.Core;
 using Umbraco.Core.Logging;
+using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
+using Umbraco.Core.PropertyEditors.ValueConverters;
 using Umbraco.Core.Services;
+
+using uSync8.ContentEdition.Mapping;
 using uSync8.Core;
 using uSync8.Core.Extensions;
 using uSync8.Core.Models;
 using uSync8.Core.Serialization;
-using Umbraco.Core;
-using uSync8.ContentEdition.Mapping;
 
 namespace uSync8.ContentEdition.Serializers
 {
@@ -36,8 +42,6 @@ namespace uSync8.ContentEdition.Serializers
             var item = FindOrCreate(node);
 
             DeserializeBase(item, node);
-
-            
 
             // mediaService.Save(item);
 
@@ -92,11 +96,59 @@ namespace uSync8.ContentEdition.Serializers
             node.Add(info);
             node.Add(properties);
 
+            info.Add(SerializeFileHash(item));
+
             return SyncAttempt<XElement>.Succeed(
                 item.Name,
                 node,
                 typeof(IMedia),
                 ChangeType.Export);
+        }
+
+        private XElement SerializeFileHash(IMedia item)
+        {
+            if (item.HasProperty("umbracoFile"))
+            {
+                var value = item.GetValue<string>("umbracoFile");
+                var path = GetFilePath(value);
+
+                if (!string.IsNullOrWhiteSpace(path))
+                {
+                    using (var stream = mediaService.GetMediaFileContentStream(path))
+                    {
+                        if (stream != null)
+                        {
+                            using (MD5 md5 = MD5.Create())
+                            {
+                                stream.Seek(0, SeekOrigin.Begin);
+                                var hash = md5.ComputeHash(stream);
+
+                                return new XElement("FileHash", hash);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return new XElement("Hash", "");
+            
+        }
+
+        private string GetFilePath(string value)
+        {
+            if (value.DetectIsJson())
+            {
+                // image cropper.
+                var imageCrops = JsonConvert.DeserializeObject<ImageCropperValue>(value, new JsonSerializerSettings
+                {
+                    Culture = CultureInfo.InvariantCulture,
+                    FloatParseHandling = FloatParseHandling.Decimal
+                });
+
+                return imageCrops.Src;
+            }
+
+            return value;
         }
 
         protected override IMedia CreateItem(string alias, ITreeEntity parent, string itemType)
