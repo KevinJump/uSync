@@ -386,13 +386,16 @@ namespace uSync8.BackOffice.SyncHandlers
         }
 
         public uSyncAction ReportElement(XElement node)
+            => ReportElement(node, string.Empty);
+
+        private uSyncAction ReportElement(XElement node, string filename)
         {
             try
             {
                 var change = serializer.IsCurrent(node);
 
                 var action = uSyncActionHelper<TObject>
-                    .ReportAction(change, node.GetAlias(), node.GetAlias(), this.Alias);
+                    .ReportAction(change, node.GetAlias(), !string.IsNullOrWhiteSpace(filename) ? filename : node.GetAlias(), node.GetKey(), this.Alias);
 
                 action.Message = "";
 
@@ -421,7 +424,7 @@ namespace uSync8.BackOffice.SyncHandlers
             try
             {
                 var node = syncFileService.LoadXElement(file);
-                return ReportElement(node);
+                return ReportElement(node, file);
             }
             catch (Exception ex)
             {

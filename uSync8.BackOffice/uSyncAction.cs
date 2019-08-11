@@ -22,11 +22,12 @@ namespace uSync8.BackOffice
         [JsonConverter(typeof(StringEnumConverter))]
         public ChangeType Change { get; set; }
 
-
         public string FileName { get; set; }
         public string Name { get; set; }
         public bool RequiresPostProcessing { get; set; }
         public IEnumerable<uSyncChange> Details { get; set; }
+
+        public Guid key { get; set; }
 
         internal uSyncAction(bool success, string name, Type type, ChangeType change, string message, Exception ex, string filename, string handlerAlias, bool postProcess = false) : this()
         {
@@ -40,6 +41,7 @@ namespace uSync8.BackOffice
             RequiresPostProcessing = postProcess;
 
             HandlerAlias = handlerAlias;
+            key = Guid.Empty;
 
         }
 
@@ -134,9 +136,18 @@ namespace uSync8.BackOffice
             return new uSyncAction(true, name, typeof(T), changeType, string.Empty, null, string.Empty);
         }
 
+        [Obsolete("You should report the key back so it can be found")]
         public static uSyncAction ReportAction(ChangeType changeType, string name, string file, string handlerAlias)
         {
             return new uSyncAction(true, name, typeof(T), changeType, string.Empty, null, file, handlerAlias);
+        }
+
+        public static uSyncAction ReportAction(ChangeType changeType, string name, string file, Guid key, string handlerAlias)
+        {
+            return new uSyncAction(true, name, typeof(T), changeType, string.Empty, null, file, handlerAlias)
+            {
+                key = key
+            };
         }
 
         public static uSyncAction ReportAction(bool willUpdate, string name, string message)
