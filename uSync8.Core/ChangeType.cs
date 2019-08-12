@@ -3,6 +3,7 @@
 
     public enum ChangeType : int
     {
+        Clean = -2,
         Removed = -1,
         NoChange = 0,
         Create,
@@ -13,7 +14,6 @@
         WillChange,
         Information,
         Rolledback,
-        Clean,
         Fail = 11,
         ImportFail,
         Mismatch

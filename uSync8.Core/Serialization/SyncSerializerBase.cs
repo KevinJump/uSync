@@ -241,8 +241,16 @@ namespace uSync8.Core.Serialization
 
             // simple logic, if it's a delete we say so, 
             // renames are picked up by the check on the new file
-            if (node.GetEmptyAction() == SyncActionType.Delete) return ChangeType.Delete;
-            return ChangeType.NoChange;
+
+            switch(node.GetEmptyAction())
+            {
+                case SyncActionType.Delete:
+                    return ChangeType.Delete;
+                case SyncActionType.Clean:
+                    return ChangeType.Clean;
+                default:
+                    return ChangeType.NoChange;
+            }
 
             //
             //  if we want to do more with this, then this logic is needed 
