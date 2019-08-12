@@ -1,22 +1,21 @@
 ﻿using Newtonsoft.Json;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Web;
 using System.Xml.Linq;
+
 using Umbraco.Core;
-using Umbraco.Core.Logging;
 using Umbraco.Core.Composing;
+using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
+using Umbraco.Core.PropertyEditors;
 using Umbraco.Core.Services;
+
+using uSync8.Core.DataTypes;
 using uSync8.Core.Extensions;
 using uSync8.Core.Models;
-using Umbraco.Core.Configuration.UmbracoSettings;
-using Umbraco.Core.PropertyEditors;
-using uSync8.Core.DataTypes;
 
 namespace uSync8.Core.Serialization.Serializers
 {
@@ -60,7 +59,10 @@ namespace uSync8.Core.Serialization.Serializers
                 }
             }
 
-            item.SortOrder = info.Element("SortOrder").ValueOrDefault(0);
+            // removing sort order - as its not used on datatypes, 
+            // and can change based on minor things (so gives false out of sync results)
+
+            // item.SortOrder = info.Element("SortOrder").ValueOrDefault(0);
             item.DatabaseType = info.Element("DatabaseType").ValueOrDefault(ValueStorageType.Nvarchar);
 
             // config 
@@ -68,6 +70,7 @@ namespace uSync8.Core.Serialization.Serializers
 
             SetFolderFromElement(item, info.Element("Folder"));
 
+            // save is responsiblity of caller 
             // dataTypeService.Save(item);
 
             return SyncAttempt<IDataType>.Succeed(item.Name, item, ChangeType.Import);
@@ -117,8 +120,8 @@ namespace uSync8.Core.Serialization.Serializers
             var info = new XElement("Info",
                 new XElement("Name", item.Name),
                 new XElement("EditorAlias", item.EditorAlias),
-                new XElement("DatabaseType", item.DatabaseType),
-                new XElement("SortOrder", item.SortOrder));
+                new XElement("DatabaseType", item.DatabaseType));
+                // new XElement("SortOrder", item.SortOrder));
 
             if (item.Level != 1)
             {
