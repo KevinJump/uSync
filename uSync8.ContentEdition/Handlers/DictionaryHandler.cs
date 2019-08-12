@@ -24,7 +24,7 @@ namespace uSync8.ContentEdition.Handlers
         , Icon = "icon-book-alt usync-addon-icon", EntityType = UdiEntityType.DictionaryItem)]
     public class DictionaryHandler : SyncHandlerBase<IDictionaryItem, ILocalizationService>, ISyncHandler, ISyncSingleItemHandler
     {
-        public string Group => uSyncBackOfficeConstants.Groups.Content;
+        public override string Group => uSyncBackOfficeConstants.Groups.Content;
 
         private readonly ILocalizationService localizationService;
 

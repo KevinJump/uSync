@@ -24,7 +24,7 @@ namespace uSync8.Core
             {
                 return UdiEntityType.ToUmbracoObjectType(entityType);
             }
-            catch(NotSupportedException ex)
+            catch(NotSupportedException)
             {
                 // this gets thrown, when its not a known type, but for 
                 // use we want to carry on with Unknown

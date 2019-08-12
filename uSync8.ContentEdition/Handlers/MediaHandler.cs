@@ -22,7 +22,7 @@ namespace uSync8.ContentEdition.Handlers
         Icon = "icon-picture usync-addon-icon", IsTwoPass = true, EntityType = UdiEntityType.Media)]
     public class MediaHandler : SyncHandlerTreeBase<IMedia, IMediaService>, ISyncHandler, ISyncSingleItemHandler
     {
-        public string Group => uSyncBackOfficeConstants.Groups.Content;
+        public override string Group => uSyncBackOfficeConstants.Groups.Content;
 
         private readonly IMediaService mediaService;
 

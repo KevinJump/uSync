@@ -626,8 +626,6 @@ namespace uSync8.BackOffice.SyncHandlers
             {
                 return GetContainerDependencies(id, flags);
             }
-
-            return Enumerable.Empty<uSyncDependency>();
         }
 
         private IEnumerable<uSyncDependency> GetContainerDependencies(int id, DependencyFlags flags)

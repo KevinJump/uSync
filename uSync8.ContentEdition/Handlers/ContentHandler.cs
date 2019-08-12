@@ -23,7 +23,7 @@ namespace uSync8.ContentEdition.Handlers
         , Icon = "icon-document usync-addon-icon", IsTwoPass = true, EntityType = UdiEntityType.Document)]
     public class ContentHandler : SyncHandlerTreeBase<IContent, IContentService>, ISyncHandler, ISyncSingleItemHandler 
     {
-        public string Group => uSyncBackOfficeConstants.Groups.Content;
+        public override string Group => uSyncBackOfficeConstants.Groups.Content;
 
         private readonly IContentService contentService;
 
