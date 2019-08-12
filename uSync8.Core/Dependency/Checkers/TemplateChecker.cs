@@ -67,7 +67,7 @@ namespace uSync8.Core.Dependency
                         Order = order,
                         Udi = master.GetUdi(),
                         Level = CalculateLevel(master),
-                        Flags = flags | ~DependencyFlags.IncludeAncestors
+                        Flags = flags & ~DependencyFlags.IncludeAncestors
                     });
 
                     templates.AddRange(GetParents(master, order - 1, flags));
@@ -91,7 +91,7 @@ namespace uSync8.Core.Dependency
                         Name = item.Name,
                         Order = order,
                         Udi = child.GetUdi(),
-                        Flags = flags | ~DependencyFlags.IncludeAncestors,
+                        Flags = flags & ~DependencyFlags.IncludeAncestors,
                         Level = CalculateLevel(child)
                     });
 

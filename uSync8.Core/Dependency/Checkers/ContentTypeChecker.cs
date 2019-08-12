@@ -25,7 +25,7 @@ namespace uSync8.Core.Dependency
         public IEnumerable<uSyncDependency> GetDependencies(IContentType item, DependencyFlags flags)
         {
 
-            var dependentflags = flags | ~DependencyFlags.IncludeChildren;
+            var dependentflags = flags & ~DependencyFlags.IncludeChildren;
 
             var dependencies = new List<uSyncDependency>();
 

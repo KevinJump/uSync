@@ -88,7 +88,7 @@ namespace uSync8.ContentEdition.Checkers
                     Name = child.Name,
                     Udi = Udi.Create(this.ObjectType.GetUdiType(), child.Key),
                     Order = order,
-                    Flags = flags | ~DependencyFlags.IncludeAncestors,
+                    Flags = flags & ~DependencyFlags.IncludeAncestors,
                     Level = child.Level
                 });
 
@@ -117,7 +117,7 @@ namespace uSync8.ContentEdition.Checkers
         {
             var dependencies = new List<uSyncDependency>();
 
-            var propertyFlags = flags | ~DependencyFlags.IncludeChildren;
+            var propertyFlags = flags & ~DependencyFlags.IncludeChildren;
 
             foreach (var property in item.Properties)
             {
