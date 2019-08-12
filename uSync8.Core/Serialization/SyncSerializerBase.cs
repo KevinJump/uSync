@@ -164,6 +164,8 @@ namespace uSync8.Core.Serialization
                     return ProcessDelete(key, alias, flags);
                 case SyncActionType.Rename:
                     return ProcessRename(key, alias, flags);
+                case SyncActionType.Clean:
+                    return SyncAttempt<TObject>.Succeed(alias, ChangeType.Clean);
                 default:
                     return SyncAttempt<TObject>.Succeed(alias, ChangeType.NoChange);
             }
@@ -273,10 +275,7 @@ namespace uSync8.Core.Serialization
             if (string.IsNullOrEmpty(alias))
                 alias = ItemAlias(item);
 
-            var node = new XElement(uSyncConstants.Serialization.Empty,
-                new XAttribute("Key", item.Key),
-                new XAttribute("Alias", alias),
-                new XAttribute("Change", change));
+            var node = XElementExtensions.MakeEmpty<TObject>(item, change, alias);
 
             return SyncAttempt<XElement>.Succeed("Empty", node, ChangeType.Removed);
         }

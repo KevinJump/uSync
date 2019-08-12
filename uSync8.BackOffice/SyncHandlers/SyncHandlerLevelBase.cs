@@ -107,6 +107,8 @@ namespace uSync8.BackOffice.SyncHandlers
             if (force) flags |= SerializerFlags.Force;
             if (config.BatchSave) flags |= SerializerFlags.DoNotSave;
 
+            var cleanMarkers = new List<string>();
+
             var count = 0;
             foreach (var node in nodes.OrderBy(x => x.Level))
             {
@@ -114,9 +116,16 @@ namespace uSync8.BackOffice.SyncHandlers
                 callback?.Invoke($"{Path.GetFileName(node.File)}", count, nodes.Count);
 
                 var attempt = Import(node.File, config, flags);
-                if (attempt.Success && attempt.Item != null)
+                if (attempt.Success)
                 {
-                    updates.Add(node.File, attempt.Item);
+                    if (attempt.Change == ChangeType.Clean)
+                    {
+                        cleanMarkers.Add(node.File);
+                    }
+                    else if (attempt.Item != null)
+                    {
+                        updates.Add(node.File, attempt.Item);
+                    }
                 }
 
                 actions.Add(uSyncActionHelper<TObject>.SetAction(attempt, node.File, IsTwoPass));
@@ -135,12 +144,22 @@ namespace uSync8.BackOffice.SyncHandlers
                 actions.AddRange(ImportFolder(children, config, updates, force, callback));
             }
 
+            if (actions.All(x => x.Success))
+            {
+                // only if there are no fails. 
+                // then we consider the folder safe to clean 
+                foreach (var cleanfile in cleanMarkers)
+                {
+                    actions.AddRange(CleanFolder(cleanfile));
+                }
+            }
+
             callback?.Invoke("", 1, 1);
 
             return actions;
 
         }
-
+   
         private class LeveledFile
         {
             public int Level { get; set; }

@@ -170,6 +170,8 @@ namespace uSync8.BackOffice.SyncHandlers
             if (force) flags |= SerializerFlags.Force;
             if (config.BatchSave) flags |= SerializerFlags.DoNotSave;
 
+            var cleanMarkers = new List<string>();
+
             int count = 0;
             int total = files.Count();
             foreach (string file in files)
@@ -179,9 +181,16 @@ namespace uSync8.BackOffice.SyncHandlers
                 callback?.Invoke($"Importing {Path.GetFileNameWithoutExtension(file)}", count, total);
 
                 var attempt = Import(file, config, flags);
-                if (attempt.Success && attempt.Item != null)
+                if (attempt.Success)
                 {
-                    updates.Add(file, attempt.Item);
+                    if (attempt.Change == ChangeType.Clean)
+                    {
+                        cleanMarkers.Add(file);
+                    }
+                    else if (attempt.Item != null)
+                    {
+                        updates.Add(file, attempt.Item);
+                    }
                 }
 
                 var action = uSyncActionHelper<TObject>.SetAction(attempt, file, this.Alias, IsTwoPass);
@@ -204,16 +213,88 @@ namespace uSync8.BackOffice.SyncHandlers
                 actions.AddRange(ImportFolder(children, config, updates, force, callback));
             }
 
+            if (actions.All(x => x.Success))
+            {
+                foreach (var cleanFile in cleanMarkers)
+                {
+                    actions.AddRange(CleanFolder(cleanFile));
+                }
+            }
+
             callback?.Invoke("", 1, 1);
 
             return actions;
         }
 
+
+        /// <summary>
+        ///  given a folder we calculate what items we can remove, becuase they are 
+        ///  not in one the the files in the folder.
+        /// </summary>
+        /// <param name="cleanFile"></param>
+        /// <returns></returns>
+        protected virtual IEnumerable<uSyncAction> CleanFolder(string cleanFile)
+        {
+            var folder = Path.GetDirectoryName(cleanFile);
+
+            var parent = GetCleanParent(cleanFile);
+            if (parent == null) return Enumerable.Empty<uSyncAction>();
+
+            // get the keys for every item in this folder. 
+
+            // this would works on the flat folder stucture too, 
+            // there we are being super defensive, so if an item
+            // is anywhere in the folder it won't get removed
+            // even if the folder is wrong
+            // be a little slower (not much though)
+            var keys = new List<Guid>();
+            var files = syncFileService.GetFiles(folder, "*.config");
+            foreach(var file in files)
+            {
+                var node = XElement.Load(file);
+                var key = node.GetKey();
+                if (!keys.Contains(key))
+                    keys.Add(key);
+            }
+
+            return DeleteMissingItems(parent, keys);
+        }
+
+        protected TObject GetCleanParent(string file)
+        {
+            var node = XElement.Load(file);
+            var key = node.GetKey();
+            if (key == Guid.Empty) return default;
+
+            return GetFromService(key);
+        }
+
+        protected IEnumerable<uSyncAction> DeleteMissingItems(TObject parent, IEnumerable<Guid> keys)
+        {
+            var items = GetChildItems(parent.Id).ToList();
+            var actions = new List<uSyncAction>();
+            foreach (var item in items)
+            {
+                if (!keys.Contains(item.Key))
+                {
+                    var actualItem = GetFromService(item.Key);
+                    var name = actualItem.Id;
+
+                    DeleteViaService(actualItem);
+
+                    actions.Add(uSyncActionHelper<TObject>.SetAction(SyncAttempt<TObject>.Succeed(name.ToString(), ChangeType.Delete), string.Empty));
+                }
+            }
+
+            return actions;
+        }
+
+
         protected virtual IEnumerable<string> GetImportFiles(string folder)
             => syncFileService.GetFiles(folder, "*.config");
 
 
-        virtual public SyncAttempt<TObject> Import(string filePath, HandlerSettings config, SerializerFlags flags)
+        public virtual SyncAttempt<TObject> Import(string filePath, HandlerSettings config, SerializerFlags flags)
         {
             try
             {

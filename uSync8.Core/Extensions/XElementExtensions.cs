@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using System.Xml.XPath;
 using Umbraco.Core;
+using Umbraco.Core.Models.Entities;
 
 namespace uSync8.Core.Extensions
 {
@@ -31,6 +32,23 @@ namespace uSync8.Core.Extensions
         public static bool IsEmptyItem(this XElement node)
         {
             return node.Name.LocalName == uSyncConstants.Serialization.Empty;
+        }
+
+        /// <summary>
+        ///  makes an uSync empty file
+        /// </summary>
+        /// <remarks>
+        ///  When the changetype is Clean, the key should be the parent folder 
+        ///  you want to clean. 
+        /// </remarks>
+        /// <typeparam name="TObject">type of object (IEntity based)</typeparam>
+        public static XElement MakeEmpty<TObject>(TObject item, SyncActionType change, string alias)
+            where TObject : IEntity
+        {
+            return new XElement(uSyncConstants.Serialization.Empty,
+                new XAttribute("Key", item.Key),
+                new XAttribute("Alias", alias),
+                new XAttribute("Change", change));
         }
 
         public static SyncActionType GetEmptyAction(this XElement node)

@@ -3,6 +3,7 @@
 
     public enum ChangeType
     {
+        Clean = -2,
         Removed = -1,
         NoChange = 0,
         Create,

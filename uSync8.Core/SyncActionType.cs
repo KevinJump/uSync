@@ -14,6 +14,7 @@ namespace uSync8.Core
     {
         None = 0,
         Rename = 1,
-        Delete = 2
+        Delete = 2,
+        Clean = 3
     }
 }
