@@ -197,7 +197,8 @@ namespace uSync8.BackOffice.SyncHandlers
                 if (attempt.Details != null && attempt.Details.Any())
                     action.Details = attempt.Details;
 
-                actions.Add(action);
+                if (attempt.Change != ChangeType.Clean)
+                    actions.Add(action);
             }
 
             // bulk save ..

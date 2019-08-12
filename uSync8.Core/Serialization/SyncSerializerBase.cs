@@ -209,6 +209,9 @@ namespace uSync8.Core.Serialization
             {
                 if (IsEmpty(node))
                 {
+                    // we tell people it's a clean.
+                    if (node.GetEmptyAction() == SyncActionType.Clean) return ChangeType.Clean;
+
                     // at this point its possible the file is for a rename or delete that has already happened
                     return ChangeType.NoChange;
                 }
