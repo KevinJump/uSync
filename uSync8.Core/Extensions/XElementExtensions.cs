@@ -42,11 +42,10 @@ namespace uSync8.Core.Extensions
         ///  you want to clean. 
         /// </remarks>
         /// <typeparam name="TObject">type of object (IEntity based)</typeparam>
-        public static XElement MakeEmpty<TObject>(TObject item, SyncActionType change, string alias)
-            where TObject : IEntity
+        public static XElement MakeEmpty(Guid key, SyncActionType change, string alias)
         {
             return new XElement(uSyncConstants.Serialization.Empty,
-                new XAttribute("Key", item.Key),
+                new XAttribute("Key", key),
                 new XAttribute("Alias", alias),
                 new XAttribute("Change", change));
         }

@@ -275,7 +275,7 @@ namespace uSync8.Core.Serialization
             if (string.IsNullOrEmpty(alias))
                 alias = ItemAlias(item);
 
-            var node = XElementExtensions.MakeEmpty<TObject>(item, change, alias);
+            var node = XElementExtensions.MakeEmpty(item.Key, change, alias);
 
             return SyncAttempt<XElement>.Succeed("Empty", node, ChangeType.Removed);
         }
