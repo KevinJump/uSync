@@ -25,6 +25,9 @@ namespace uSync8.Core.Dependency
         {
             var dependencies = new List<uSyncDependency>();
 
+            var dependentFlags = flags | ~DependencyFlags.IncludeChildren;
+
+
             dependencies.Add(new uSyncDependency()
             {
                 Name = item.Name,
@@ -36,8 +39,8 @@ namespace uSync8.Core.Dependency
 
             if (flags.HasFlag(DependencyFlags.IncludeDependencies))
             {
-                dependencies.AddRange(CalcDataTypeDependencies(item, flags));
-                dependencies.AddRange(CalcCompositions(item, DependencyOrders.MemberTypes - 1, flags));
+                dependencies.AddRange(CalcDataTypeDependencies(item, dependentFlags));
+                dependencies.AddRange(CalcCompositions(item, DependencyOrders.MemberTypes - 1, dependentFlags));
             }
 
             dependencies.AddRange(CalcChildren(item.Id, flags));

@@ -137,7 +137,7 @@ namespace uSync8.Core.Dependency
                             {
                                 Name = child.Name,
                                 Udi = Udi.Create(UdiEntityType.FromUmbracoObjectType(this.ObjectType), child.Key),
-                                Flags = flags,
+                                Flags = flags | ~DependencyFlags.IncludeAncestors,
                                 Level = child.Level,
                                 Order = DependencyOrders.ContentTypes + child.Level
                             });

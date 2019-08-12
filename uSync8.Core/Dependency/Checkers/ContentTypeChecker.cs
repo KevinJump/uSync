@@ -24,6 +24,9 @@ namespace uSync8.Core.Dependency
 
         public IEnumerable<uSyncDependency> GetDependencies(IContentType item, DependencyFlags flags)
         {
+
+            var dependentflags = flags | ~DependencyFlags.IncludeChildren;
+
             var dependencies = new List<uSyncDependency>();
 
             dependencies.Add(new uSyncDependency()
@@ -31,15 +34,15 @@ namespace uSync8.Core.Dependency
                 Name = item.Name,
                 Udi = item.GetUdi(),
                 Order = DependencyOrders.ContentTypes,
-                Flags = flags,
+                Flags = dependentflags,
                 Level = item.Level
             });
 
 
             if (flags.HasFlag(DependencyFlags.IncludeDependencies)) {
-                dependencies.AddRange(CalcDataTypeDependencies(item, flags)); ;
-                dependencies.AddRange(CalcCompositions(item, DependencyOrders.ContentTypes - 1, flags));
-                dependencies.AddRange(CalcTemplateDependencies(item, flags));
+                dependencies.AddRange(CalcDataTypeDependencies(item, dependentflags)); ;
+                dependencies.AddRange(CalcCompositions(item, DependencyOrders.ContentTypes - 1, dependentflags));
+                dependencies.AddRange(CalcTemplateDependencies(item, dependentflags));
             }
 
             dependencies.AddRange(CalcChildren(item.Id, flags));

@@ -88,7 +88,7 @@ namespace uSync8.ContentEdition.Checkers
                     Name = child.Name,
                     Udi = Udi.Create(this.ObjectType.GetUdiType(), child.Key),
                     Order = order,
-                    Flags = flags,
+                    Flags = flags | ~DependencyFlags.IncludeAncestors,
                     Level = child.Level
                 });
 
@@ -117,6 +117,8 @@ namespace uSync8.ContentEdition.Checkers
         {
             var dependencies = new List<uSyncDependency>();
 
+            var propertyFlags = flags | ~DependencyFlags.IncludeChildren;
+
             foreach (var property in item.Properties)
             {
                 var editorAlias = property.PropertyType.PropertyEditorAlias;
@@ -125,7 +127,7 @@ namespace uSync8.ContentEdition.Checkers
                 {
                     foreach(var value in property.Values)
                     {
-                        var linkedDependencies = mapper.GetDependencies(value.EditedValue, editorAlias, flags);
+                        var linkedDependencies = mapper.GetDependencies(value.EditedValue, editorAlias, propertyFlags);
 
                         // include linked means all content we link to 
                         if (flags.HasFlag(DependencyFlags.IncludeLinked))
@@ -140,7 +142,7 @@ namespace uSync8.ContentEdition.Checkers
                         }
 
 
-                        dependencies.AddRange(mapper.GetDependencies(value.EditedValue, editorAlias, flags));
+                        // dependencies.AddRange(mapper.GetDependencies(value.EditedValue, editorAlias, propertyFlags));
                     }
                 }
             }
