@@ -117,17 +117,14 @@ namespace uSync8.BackOffice.Controllers
         public IEnumerable<uSyncAction> Report(uSyncOptions options)
         {
             var hubClient = new HubClientService(options.ClientId);
-            var summaryClient = new SummaryHandler(hubClient);
 
             if (string.IsNullOrWhiteSpace(options.Group))
             {
-                return uSyncService.Report(settings.RootFolder,
-                    new uSyncCallbacks(summaryClient.PostSummary, summaryClient.PostUdate));
+                return uSyncService.Report(settings.RootFolder, hubClient.Callbacks());
             }
             else
             {
-                return uSyncService.Report(settings.RootFolder, options.Group,
-                    new uSyncCallbacks(summaryClient.PostSummary, summaryClient.PostUdate));
+                return uSyncService.Report(settings.RootFolder, options.Group, hubClient.Callbacks());
             }
         }
 
@@ -135,18 +132,14 @@ namespace uSync8.BackOffice.Controllers
         public IEnumerable<uSyncAction> Export(uSyncOptions options)
         {
             var hubClient = new HubClientService(options.ClientId);
-            var summaryClient = new SummaryHandler(hubClient);
 
             if (string.IsNullOrWhiteSpace(options.Group))
             {
-                return uSyncService.Export(settings.RootFolder,
-                    new uSyncCallbacks(summaryClient.PostSummary, summaryClient.PostUdate));
+                return uSyncService.Export(settings.RootFolder, hubClient.Callbacks());
             }
             else
             {
-                return uSyncService.Export(settings.RootFolder, options.Group,
-                    new uSyncCallbacks(summaryClient.PostSummary, summaryClient.PostUdate));
-
+                return uSyncService.Export(settings.RootFolder, options.Group, hubClient.Callbacks());
             }
         }
 
@@ -154,18 +147,15 @@ namespace uSync8.BackOffice.Controllers
         public IEnumerable<uSyncAction> Import(uSyncOptions options)
         {
             var hubClient = new HubClientService(options.ClientId);
-            var summaryClient = new SummaryHandler(hubClient);
 
             if (string.IsNullOrWhiteSpace(options.Group))
             {
-                return uSyncService.Import(settings.RootFolder, options.Force,
-                    new uSyncCallbacks(summaryClient.PostSummary, summaryClient.PostUdate));
+                return uSyncService.Import(settings.RootFolder, options.Force, hubClient.Callbacks());
+                    
             }
             else
             {
-                return uSyncService.Import(settings.RootFolder, options.Force, options.Group,
-                    new uSyncCallbacks(summaryClient.PostSummary, summaryClient.PostUdate));
-
+                return uSyncService.Import(settings.RootFolder, options.Force, options.Group, hubClient.Callbacks());
             }
         }
 
@@ -268,32 +258,6 @@ namespace uSync8.BackOffice.Controllers
 
             public string AddOnString { get; set; }
             public List<ISyncAddOn> AddOns { get; set; } = new List<ISyncAddOn>();
-        }
-
-        public class SummaryHandler
-        {
-            private readonly HubClientService hubClient;
-
-            public SummaryHandler(HubClientService hubClient)
-            {
-                this.hubClient = hubClient;
-            }
-
-            public void PostSummary(SyncProgressSummary summary)
-            {
-                hubClient.SendMessage(summary);
-            }
-
-            public void PostUdate(string message, int count, int total)
-            {
-                hubClient.SendUpdate(new
-                {
-                    Message = message,
-                    Count = count, 
-                    Total = total
-                });
-            }
-
         }
 
         [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
