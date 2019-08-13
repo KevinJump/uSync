@@ -117,7 +117,9 @@ namespace uSync8.ContentEdition.Checkers
         {
             var dependencies = new List<uSyncDependency>();
 
-            var propertyFlags = flags & ~DependencyFlags.IncludeChildren;
+            var propertyFlags = flags
+                & ~DependencyFlags.IncludeChildren;
+               
 
             foreach (var property in item.Properties)
             {
@@ -138,7 +140,10 @@ namespace uSync8.ContentEdition.Checkers
                         // media means we include media items (the files are checked)
                         if (flags.HasFlag(DependencyFlags.IncludeMedia))
                         {
-                            dependencies.AddRange(linkedDependencies.Where(x => x.Udi.EntityType == UdiEntityType.Media));
+                            var media = linkedDependencies.Where(x => x.Udi.EntityType == UdiEntityType.Media).ToList();
+                            media.ForEach(x => { x.Flags |= DependencyFlags.IncludeAncestors; });
+
+                            dependencies.AddRange(media);
                         }
 
 
