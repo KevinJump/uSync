@@ -696,9 +696,20 @@ namespace uSync8.BackOffice.SyncHandlers
             return SyncAttempt<XElement>.Fail(udi.ToString(), ChangeType.Fail);
         }
 
+        public IEnumerable<uSyncDependency> GetDependencies(Guid key, DependencyFlags flags)
+        {
+            var item = this.GetFromService(key);
+            return GetDependencies(item, flags);
+        }
+
         public IEnumerable<uSyncDependency> GetDependencies(int id, DependencyFlags flags)
         {
             var item = this.GetFromService(id);
+            return GetDependencies(item, flags);
+        }
+
+        protected IEnumerable<uSyncDependency> GetDependencies(TObject item, DependencyFlags flags)
+        { 
             if (item != null)
             {
                 logger.Info<uSync8Core>("Found Item {0}", item.Id);
@@ -706,7 +717,7 @@ namespace uSync8.BackOffice.SyncHandlers
             }
             else
             {
-                return GetContainerDependencies(id, flags);
+                return GetContainerDependencies(item.Id, flags);
             }
         }
 

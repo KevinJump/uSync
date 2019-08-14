@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Xml.Linq;
 
 using Umbraco.Core;
@@ -31,5 +32,6 @@ namespace uSync8.BackOffice.SyncHandlers
         uSyncAction ReportElement(XElement element);
 
         IEnumerable<uSyncDependency> GetDependencies(int id, DependencyFlags flags);
+        IEnumerable<uSyncDependency> GetDependencies(Guid key, DependencyFlags flags);
     }
 }
