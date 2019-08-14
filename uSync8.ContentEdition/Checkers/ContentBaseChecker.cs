@@ -44,7 +44,7 @@ namespace uSync8.ContentEdition.Checkers
                     Name = item.Name,
                     Udi = udi,
                     Order = DependencyOrders.ContentTypes,
-                    Flags = flags,
+                    Flags = flags & ~DependencyFlags.IncludeAncestors,
                     Level = item.Level
                 };
             }
