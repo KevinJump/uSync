@@ -20,7 +20,7 @@ namespace uSync8.ContentEdition.Mapping.Mappers
     {
         // would prefere the link regex - less likely to get rouge ones 
         // private string linkRegEx = "((?&lt;=localLink:)([0-9]+)|(?&lt;=data-id=&quot;)([0-9]+))";
-        private Regex UdiRegEx = new Regex(@"(umb:\\[a-zA-Z-]+/[a-zA-Z0-9-]+)",
+        private Regex UdiRegEx = new Regex(@"(umb:[/\\]+[a-zA-Z-]+[/\\][a-zA-Z0-9-]+)",
             RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace);
 
         public RTEMapper(IEntityService entityService) : base(entityService)
