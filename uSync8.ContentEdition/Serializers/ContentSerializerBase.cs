@@ -79,11 +79,15 @@ namespace uSync8.ContentEdition.Serializers
             return info;
         }
 
+        protected string[] dontSerialize = new string[] { };
+
         protected virtual XElement SerializeProperties(TObject item)
         {
             var node = new XElement("Properties");
 
-            foreach (var property in item.Properties.OrderBy(x => x.Alias))
+            foreach (var property in item.Properties
+                .Where(x => !dontSerialize.InvariantContains(x.Alias))
+                .OrderBy(x => x.Alias))
             {
                 var propertyNode = new XElement(property.Alias);
 

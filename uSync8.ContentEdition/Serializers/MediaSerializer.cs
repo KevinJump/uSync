@@ -35,6 +35,16 @@ namespace uSync8.ContentEdition.Serializers
             : base(entityService, logger, UmbracoObjectTypes.Media, syncMappers)
         {
             this.mediaService = mediaService;
+
+            // we don't serialize the media properties, 
+            // you can't set them on an node in the backoffice,
+            // and they are auto calculated by umbraco anyway. 
+            // & sometimes they just lead to false postives. 
+            this.dontSerialize = new string[]
+            {
+                "umbracoWidth", "umbracoHeight", "umbracoBytes", "umbracoExtension"
+            };
+            
         }
 
         protected override SyncAttempt<IMedia> DeserializeCore(XElement node)
