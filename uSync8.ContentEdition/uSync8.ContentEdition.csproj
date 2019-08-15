@@ -280,6 +280,7 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
+    <None Include="uSync.ContentEdition.Core.nuspec" />
     <None Include="uSync.ContentEdition.nuspec" />
   </ItemGroup>
   <ItemGroup>
