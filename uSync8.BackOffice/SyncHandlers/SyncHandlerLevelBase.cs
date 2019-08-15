@@ -109,26 +109,24 @@ namespace uSync8.BackOffice.SyncHandlers
 
             var cleanMarkers = new List<string>();
 
-            var count = 0;
-            foreach (var node in nodes.OrderBy(x => x.Level))
+            foreach (var item in nodes.OrderBy(x => x.Level).Select((Node, Index) => new { Node, Index }))
             {
-                count++;
-                callback?.Invoke($"{Path.GetFileName(node.File)}", count, nodes.Count);
+                callback?.Invoke($"{Path.GetFileName(item.Node.File)}", item.Index, nodes.Count);
 
-                var attempt = Import(node.File, config, flags);
+                var attempt = Import(item.Node.File, config, flags);
                 if (attempt.Success)
                 {
                     if (attempt.Change == ChangeType.Clean)
                     {
-                        cleanMarkers.Add(node.File);
+                        cleanMarkers.Add(item.Node.File);
                     }
                     else if (attempt.Item != null)
                     {
-                        updates.Add(node.File, attempt.Item);
+                        updates.Add(item.Node.File, attempt.Item);
                     }
                 }
 
-                actions.Add(uSyncActionHelper<TObject>.SetAction(attempt, node.File, IsTwoPass));
+                actions.Add(uSyncActionHelper<TObject>.SetAction(attempt, item.Node.File, IsTwoPass));
             }
 
             if (flags.HasFlag(SerializerFlags.DoNotSave) && updates.Any())
@@ -146,6 +144,10 @@ namespace uSync8.BackOffice.SyncHandlers
 
             if (actions.All(x => x.Success))
             {
+
+                // LINQ 
+                // actions.AddRange(cleanMarkers.Select(x => CleanFolder(x)).SelectMany(a => a));
+
                 // only if there are no fails. 
                 // then we consider the folder safe to clean 
                 foreach (var cleanfile in cleanMarkers)

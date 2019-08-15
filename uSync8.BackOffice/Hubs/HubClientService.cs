@@ -45,7 +45,6 @@ namespace uSync8.BackOffice.Hubs
                     client.Update(message);
                     return;
                 }
-
                 hubContext.Clients.All.Update(message);
             }
         }

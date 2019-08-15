@@ -145,9 +145,6 @@ namespace uSync8.ContentEdition.Checkers
 
                             dependencies.AddRange(media);
                         }
-
-
-                        // dependencies.AddRange(mapper.GetDependencies(value.EditedValue, editorAlias, propertyFlags));
                     }
                 }
             }

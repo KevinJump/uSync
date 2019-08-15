@@ -10,8 +10,6 @@ namespace uSync8.BackOffice.Hubs
     public class uSyncHub : Hub
     {
         public string GetTime()
-        {
-            return DateTime.Now.ToString();
-        }
+            => DateTime.Now.ToString();
     }
 }

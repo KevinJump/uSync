@@ -20,7 +20,7 @@ namespace uSync8.ContentEdition.Handlers
 {
     [SyncHandler("contentTemplateHandler", "Blueprints", "Blueprints", uSyncBackOfficeConstants.Priorites.ContentTemplate
         , Icon = "icon-document-dashed-line usync-addon-icon", IsTwoPass = true, EntityType = UdiEntityType.DocumentBlueprint)]
-    public class ContentTemplateHandler : SyncHandlerTreeBase<IContent, IContentService>, ISyncHandler
+    public class ContentTemplateHandler : SyncHandlerTreeBase<IContent, IContentService>, ISyncHandler, ISyncExtendedHandler
     {
         public override string Group => uSyncBackOfficeConstants.Groups.Content;
 

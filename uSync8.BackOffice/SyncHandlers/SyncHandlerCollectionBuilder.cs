@@ -32,6 +32,8 @@ namespace uSync8.BackOffice.SyncHandlers
                 .ToList();
         }
 
+        public IEnumerable<ISyncHandler> Handlers => this;
+
         public IEnumerable<ISyncExtendedHandler> ExtendedHandlers
             => extendedHandlers;
 
@@ -63,17 +65,9 @@ namespace uSync8.BackOffice.SyncHandlers
         }
     }
 
-    [Obsolete("Use ExtendedHandlerConfig Pair to do more")]
     public class HandlerConfigPair
     {
         public ISyncHandler Handler { get; set; }
         public HandlerSettings Settings { get; set; }
     }
-
-    public class ExtendedHandlerConfigPair
-    {
-        public ISyncExtendedHandler Handler { get; set; }
-        public HandlerSettings Settings { get; set; }
-    }
-
 }

@@ -63,7 +63,7 @@ namespace uSync8.BackOffice.Controllers
 
         [HttpGet]
         public IEnumerable<object> GetLoadedHandlers()
-            => handlerFactory.GetAll();
+            => handlerFactory.GetAll(false);
 
         /// <summary>
         ///  return handler groups for all enabled handlers
@@ -82,7 +82,7 @@ namespace uSync8.BackOffice.Controllers
 
         [HttpGet]
         public IEnumerable<object> GetHandlers()
-            => handlerFactory.GetAll()
+            => handlerFactory.GetAll(false)
                 .Select(x => new SyncHandlerSummary()
                 {
                     Icon = x.Icon,
@@ -95,46 +95,21 @@ namespace uSync8.BackOffice.Controllers
         public IEnumerable<uSyncAction> Report(uSyncOptions options)
         {
             var hubClient = new HubClientService(options.ClientId);
-
-            if (string.IsNullOrWhiteSpace(options.Group))
-            {
-                return uSyncService.Report(settings.RootFolder, hubClient.Callbacks());
-            }
-            else
-            {
-                return uSyncService.Report(settings.RootFolder, options.Group, hubClient.Callbacks());
-            }
+            return uSyncService.Report(settings.RootFolder, options.Group, hubClient.Callbacks());
         }
 
         [HttpPost]
         public IEnumerable<uSyncAction> Export(uSyncOptions options)
         {
             var hubClient = new HubClientService(options.ClientId);
-
-            if (string.IsNullOrWhiteSpace(options.Group))
-            {
-                return uSyncService.Export(settings.RootFolder, hubClient.Callbacks());
-            }
-            else
-            {
-                return uSyncService.Export(settings.RootFolder, options.Group, hubClient.Callbacks());
-            }
+            return uSyncService.Export(settings.RootFolder, options.Group, hubClient.Callbacks());
         }
 
         [HttpPut]
         public IEnumerable<uSyncAction> Import(uSyncOptions options)
         {
             var hubClient = new HubClientService(options.ClientId);
-
-            if (string.IsNullOrWhiteSpace(options.Group))
-            {
-                return uSyncService.Import(settings.RootFolder, options.Force, hubClient.Callbacks());
-                    
-            }
-            else
-            {
-                return uSyncService.Import(settings.RootFolder, options.Force, options.Group, hubClient.Callbacks());
-            }
+            return uSyncService.Import(settings.RootFolder, options.Force, options.Group, hubClient.Callbacks());
         }
 
         [HttpPut]

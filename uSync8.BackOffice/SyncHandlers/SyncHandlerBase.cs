@@ -150,12 +150,10 @@ namespace uSync8.BackOffice.SyncHandlers
 
             if (updates.Any())
             {
-                int count = 0;
-                foreach (var update in updates)
+                foreach (var item in updates.Select((update, Index) => new { update, Index }))
                 {
-                    count++;
-                    callback?.Invoke($"Second Pass {Path.GetFileName(update.Key)}", count, updates.Count);
-                    ImportSecondPass(update.Key, update.Value, config, callback);
+                    callback?.Invoke($"Second Pass {Path.GetFileName(item.update.Key)}", item.Index, updates.Count);
+                    ImportSecondPass(item.update.Key, item.update.Value, config, callback);
                 }
             }
 
@@ -376,14 +374,13 @@ namespace uSync8.BackOffice.SyncHandlers
             }
 
             var items = GetChildItems(parent).ToList();
-            foreach (var item in items)
+            foreach (var item in items.Select((Value, Index) => new { Value, Index }))
             {
-                count++;
-                var concreateType = GetFromService(item.Id);
-                callback?.Invoke(GetItemName(concreateType), count, items.Count);
+                var concreateType = GetFromService(item.Value.Id);
+                callback?.Invoke(GetItemName(concreateType), item.Index, items.Count);
 
                 actions.Add(Export(concreateType, folder, config));
-                actions.AddRange(ExportAll(item.Id, folder, config, callback));
+                actions.AddRange(ExportAll(item.Value.Id, folder, config, callback));
             }
 
             callback?.Invoke("Done", 1, 1);

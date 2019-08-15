@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 using Umbraco.Core.Composing;
 using Umbraco.Core.Logging;
+
 using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.SyncHandlers;
+
 using static uSync8.BackOffice.uSyncService;
 
 namespace uSync8.BackOffice
@@ -68,7 +69,7 @@ namespace uSync8.BackOffice
             return Report(folder, handlers, callbacks);
         }
 
-        private IEnumerable<uSyncAction> Report(string folder, IEnumerable<ExtendedHandlerConfigPair> handlers, uSyncCallbacks callbacks)
+        private IEnumerable<uSyncAction> Report(string folder, IEnumerable<HandlerConfigPair> handlers, uSyncCallbacks callbacks)
         {
             logger.Debug<uSyncService>("Reporting For [{0}]", string.Join(",", handlers.Select(x => x.Handler.Name)));
 
@@ -124,7 +125,7 @@ namespace uSync8.BackOffice
             return Import(folder, force, handlers, callbacks);
         }
 
-        private IEnumerable<uSyncAction> Import(string folder, bool force, IEnumerable<ExtendedHandlerConfigPair> handlers,  uSyncCallbacks callbacks)
+        private IEnumerable<uSyncAction> Import(string folder, bool force, IEnumerable<HandlerConfigPair> handlers,  uSyncCallbacks callbacks)
         {
             lock (_importLock)
             {
@@ -239,7 +240,7 @@ namespace uSync8.BackOffice
             return Export(folder, handlers, callbacks);
         }
 
-        private IEnumerable<uSyncAction> Export(string folder, IEnumerable<ExtendedHandlerConfigPair> handlers, uSyncCallbacks callbacks)
+        private IEnumerable<uSyncAction> Export(string folder, IEnumerable<HandlerConfigPair> handlers, uSyncCallbacks callbacks)
         {
             var actions = new List<uSyncAction>();
             var summary = new SyncProgressSummary(handlers.Select(x => x.Handler), "Exporting", handlers.Count());
@@ -289,9 +290,6 @@ namespace uSync8.BackOffice
         #endregion
 
         private int ChangeCount(IEnumerable<uSyncAction> actions)
-        {
-            return actions.Count(x => x.Change > Core.ChangeType.NoChange);
-        }
+            => actions.Count(x => x.Change > Core.ChangeType.NoChange);
     }
-
 }

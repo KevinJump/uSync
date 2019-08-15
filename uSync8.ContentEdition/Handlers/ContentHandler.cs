@@ -31,7 +31,7 @@ namespace uSync8.ContentEdition.Handlers
             IEntityService entityService,
             IProfilingLogger logger,
             IContentService contentService,
-            ISyncSerializer<IContent> serializer, 
+            ISyncSerializer<IContent> serializer,
             ISyncTracker<IContent> tracker,
             ISyncDependencyChecker<IContent> checker,
             SyncFileService syncFileService)
