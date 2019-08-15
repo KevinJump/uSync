@@ -24,7 +24,7 @@ namespace uSync8.BackOffice.Configuration
 
             var node = GetSettingsFile();
             if (node == null)
-            {               
+            {
                 return SaveSettings(settings);
             }
 
@@ -38,22 +38,57 @@ namespace uSync8.BackOffice.Configuration
             settings.ReportDebug = node.Element("ReportDebug").ValueOrDefault(false);
             settings.AddOnPing = node.Element("AddOnPing").ValueOrDefault(true);
 
-            var handlerConfig = node.Element("Handlers");
-
-            if (handlerConfig != null && handlerConfig.HasElements)
+            // load the handlers 
+            var handlerSets = node.Element("HandlerSets");
+            if (handlerSets != null)
             {
-                settings.EnableMissingHandlers = handlerConfig.Attribute("EnableMissing").ValueOrDefault(true);
-
-                foreach (var handlerNode in handlerConfig.Elements("Handler"))
+                settings.HandlerSets = LoadHandlerSets(handlerSets, settings, out string defaultSet);
+                settings.DefaultSet = defaultSet;
+            }
+            else
+            {
+                var handlers = node.Element("Handlers");
+                if (handlers != null)
                 {
-                    var handlerSetting = LoadHandlerConfig(handlerNode, settings);
-
-                    if (handlerSetting != null)
-                        settings.Handlers.Add(handlerSetting);
+                    // old config, load as default :( 
+                    settings.HandlerSets = new List<HandlerSet>();
+                    var defaultSet = LoadSingleHandlerSet(handlers, settings);
+                    settings.HandlerSets.Add(defaultSet);
                 }
             }
 
             return settings;
+        }
+
+        private IList<HandlerSet> LoadHandlerSets(XElement node, uSyncSettings defaultSettings, out string defaultSet)
+        {
+            var sets = new List<HandlerSet>();
+            defaultSet = node.Attribute("default").ValueOrDefault("default");
+
+            foreach(var setNode in node.Elements("Handlers"))
+            {
+                var handlerSet = LoadSingleHandlerSet(setNode, defaultSettings);
+                if (handlerSet.Handlers.Count > 0)
+                    sets.Add(handlerSet);
+            }
+
+            return sets;
+        }
+
+        private HandlerSet LoadSingleHandlerSet(XElement setNode, uSyncSettings defaultSettings)
+        {
+            var handlerSet = new HandlerSet();
+            handlerSet.Name = setNode.Attribute("Name").ValueOrDefault("default");
+
+            foreach (var handlerNode in setNode.Elements("Handler"))
+            {
+                var handlerSettings = LoadHandlerConfig(handlerNode, defaultSettings);
+                if (handlerSettings != null)
+                    handlerSet.Handlers.Add(handlerSettings);
+            }
+
+            return handlerSet;
+
         }
 
 
@@ -70,45 +105,35 @@ namespace uSync8.BackOffice.Configuration
             node.CreateOrSetElement("BatchSave", settings.BatchSave);
             node.CreateOrSetElement("ReportDebug", settings.ReportDebug);
 
-            if (settings.Handlers != null && settings.Handlers.Any())
+            if (settings.HandlerSets.Count > 0)
             {
-                var handlerConfig = node.Element("Handlers");
-                if (handlerConfig == null)
+                // remove the existing handlerSets node?
+                var handlerSets = node.FindOrCreate("HandlerSets");
+                handlerSets.SetAttributeValue("default", settings.DefaultSet);
+
+                foreach(var set in settings.HandlerSets)
                 {
-                    handlerConfig = new XElement("Handlers",
-                        new XAttribute("EnableMissing", true));
-                    node.Add(handlerConfig);
-                }
+                    // find the handler node for this set. 
+                    var setNode = handlerSets.FindOrCreate("Handlers", "Name", set.Name);
 
-
-                foreach (var handler in settings.Handlers)
-                {
-                    if (!handler.GuidNames.IsOverridden)
-                        handler.GuidNames.SetDefaultValue(settings.UseGuidNames);
-
-                    if (!handler.UseFlatStructure.IsOverridden)
-                        handler.UseFlatStructure.SetDefaultValue(settings.UseFlatStructure);
-
-                    if (!handler.BatchSave.IsOverridden)
-                        handler.BatchSave.SetDefaultValue(settings.BatchSave);
-
-                    var handlerNode = handlerConfig.Elements("Handler").FirstOrDefault(x => x.Attribute("Alias").Value == handler.Alias);
-                    if (handlerNode == null)
+                    foreach (var handler in set.Handlers)
                     {
-                        handlerNode = new XElement("Handler");
-                        handlerConfig.Add(handlerNode);
+                        var handlerNode = setNode.FindOrCreate("Handler", "Alias", handler.Alias);
+                        SetHandlerValues(handlerNode, handler, settings);
                     }
 
-                    SaveHandlerConfig(handlerNode, handler, settings);
+                    // remove and missing handlers (so on disk but not in settings)
+                    setNode.RemoveMissingElements("Handler", "Alias", set.Handlers.Select(x => x.Alias));
                 }
-            }
-            else
-            {
-                // if the handlers is null, we should write out the handlers we have loaded,
-                // so that there is something in the config
 
+                // remove missing HandlerSets (on disk not in settings)
+                handlerSets.RemoveMissingElements("Handlers", "Name", settings.HandlerSets.Select(x => x.Name));
 
+                var legacyNode = node.Element("Handlers");
+                if (legacyNode != null)
+                    legacyNode.Remove();
             }
+
             SaveSettingsFile(node);
 
             if (fireReload)
@@ -118,6 +143,36 @@ namespace uSync8.BackOffice.Configuration
             }
 
             return settings;
+        }
+
+        private void SetHandlerValues(XElement node, HandlerSettings handler, uSyncSettings defaultSettings)
+        {
+            node.SetAttributeValue("Alias", handler.Alias);
+            node.SetAttributeValue("Enabled", handler.Enabled);
+
+            if (handler.GuidNames.IsOverridden)
+                node.SetAttributeValue("GuidNames", handler.GuidNames.Value);
+
+            if (handler.UseFlatStructure.IsOverridden)
+                node.SetAttributeValue("UseFlatStructure", handler.UseFlatStructure.Value);
+
+            if (handler.BatchSave.IsOverridden)
+                node.SetAttributeValue("BatchSave", handler.BatchSave.Value);
+
+            node.SetAttributeValue("Actions", string.Join(",", handler.Actions));
+
+            if (handler.Settings != null && handler.Settings.Count > 0)
+            {
+                var settingsNode = node.FindOrCreate("Settings");
+
+                foreach(var setting in handler.Settings)
+                {
+                    var s = settingsNode.FindOrCreate("Add", "Key", setting.Key);
+                    s.SetAttributeValue("Value", setting.Value);
+                }
+
+                settingsNode.RemoveMissingElements("Add", "Key", handler.Settings.Keys.ToList());
+            }
         }
 
         #region Default Handler Loading Stuff
@@ -176,7 +231,7 @@ namespace uSync8.BackOffice.Configuration
             node.SetAttributeValue("Alias", config.Alias);
             node.SetAttributeValue("Enabled", config.Enabled);
 
-            if (config.GuidNames.IsOverridden) 
+            if (config.GuidNames.IsOverridden)
                 node.SetAttributeValue("GuidNames", config.GuidNames);
 
             if (config.UseFlatStructure.IsOverridden)

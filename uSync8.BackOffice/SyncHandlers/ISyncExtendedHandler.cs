@@ -12,10 +12,10 @@ using uSync8.Core.Models;
 namespace uSync8.BackOffice.SyncHandlers
 {
     /// <summary>
-    ///  A Single Item Handler, lets you do things to just one item, 
+    ///  A Extended Handler, lets you do things to just one item, 
     ///  like import/export it, or work out what dependencies it has. 
     /// </summary>
-    public interface ISyncSingleItemHandler : ISyncHandler
+    public interface ISyncExtendedHandler : ISyncHandler
     {
         string Group { get; }
 

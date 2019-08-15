@@ -24,6 +24,8 @@ namespace uSync8.BackOffice
             composition.WithCollectionBuilder<SyncHandlerCollectionBuilder>()
                 .Add(() => composition.TypeLoader.GetTypes<ISyncHandler>());
 
+            composition.RegisterUnique<SyncHandlerFactory>();
+
             composition.Components().Append<uSyncBackofficeComponent>();
 
             composition.RegisterUnique<uSyncService>();

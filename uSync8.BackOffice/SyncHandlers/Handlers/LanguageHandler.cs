@@ -21,7 +21,7 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("languageHandler", "Languages", "Languages", uSyncBackOfficeConstants.Priorites.Languages,
         Icon = "icon-globe", EntityType = UdiEntityType.Language)]
-    public class LanguageHandler : SyncHandlerBase<ILanguage, ILocalizationService>, ISyncSingleItemHandler
+    public class LanguageHandler : SyncHandlerBase<ILanguage, ILocalizationService>, ISyncExtendedHandler
     {
         private readonly ILocalizationService localizationService;
 

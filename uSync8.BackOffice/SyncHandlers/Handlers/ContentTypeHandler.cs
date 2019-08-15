@@ -25,7 +25,7 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("contentTypeHandler", "DocTypes", "ContentTypes", uSyncBackOfficeConstants.Priorites.ContentTypes, 
             IsTwoPass = true, Icon = "icon-item-arrangement", EntityType = UdiEntityType.DocumentType)]
-    public class ContentTypeHandler : SyncHandlerContainerBase<IContentType, IContentTypeService>, ISyncSingleItemHandler, ISyncPostImportHandler
+    public class ContentTypeHandler : SyncHandlerContainerBase<IContentType, IContentTypeService>, ISyncExtendedHandler, ISyncPostImportHandler
     {
         private readonly IContentTypeService contentTypeService;
 

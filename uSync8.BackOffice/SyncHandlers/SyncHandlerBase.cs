@@ -115,13 +115,15 @@ namespace uSync8.BackOffice.SyncHandlers
 
         private void GetDefaultConfig(uSyncSettings setting)
         {
-            var config = setting.Handlers.FirstOrDefault(x => x.Alias == this.Alias);
+            var config = setting.DefaultHandlerSet().Handlers.Where(x => x.Alias.InvariantEquals(this.Alias))
+                .FirstOrDefault();
+
             if (config != null)
                 this.DefaultConfig = config;
             else
             {
                 // handler isn't in the config, but need one ?
-                this.DefaultConfig = new HandlerSettings(this.Alias, setting.EnableMissingHandlers)
+                this.DefaultConfig = new HandlerSettings(this.Alias, false)
                 {
                     GuidNames = new OverriddenValue<bool>(setting.UseGuidNames, false),
                     UseFlatStructure = new OverriddenValue<bool>(setting.UseFlatStructure, false),

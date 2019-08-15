@@ -11,6 +11,7 @@ namespace uSync8.BackOffice.SyncHandlers
         public const string Report = "report";
         public const string Import = "import";
         public const string Export = "export";
+        public const string Save = "save";
         public const string All = "all";
     }
 }

@@ -31,21 +31,21 @@ namespace uSync8.BackOffice.Controllers
     public class uSyncDashboardApiController : UmbracoAuthorizedApiController
     {
         private readonly uSyncService uSyncService;
-        private readonly SyncHandlerCollection syncHandlers;
+        private readonly SyncHandlerFactory handlerFactory;
 
         private uSyncSettings settings;
         private uSyncConfig Config;
 
         public uSyncDashboardApiController(
             uSyncService uSyncService,
-            SyncHandlerCollection syncHandlers,
+            SyncHandlerFactory handlerFactory,
             uSyncConfig config)
         {
             this.Config = config;
             this.uSyncService = uSyncService;
 
             this.settings = Current.Configs.uSync();
-            this.syncHandlers = syncHandlers;
+            this.handlerFactory = handlerFactory;
 
             uSyncConfig.Reloaded += BackOfficeConfig_Reloaded;
         }
@@ -63,14 +63,14 @@ namespace uSync8.BackOffice.Controllers
 
         [HttpGet]
         public IEnumerable<object> GetLoadedHandlers()
-            => syncHandlers.ToList();
+            => handlerFactory.GetAll();
 
         /// <summary>
         ///  return handler groups for all enabled handlers
         /// </summary>
         [HttpGet]
         public IEnumerable<string> GetHandlerGroups()
-            => syncHandlers.GetValidGroups(settings);
+            => handlerFactory.GetValidGroups(uSync.Handlers.DefaultSet);
 
         /// <summary>
         ///  returns the handler groups, even if the handlers
@@ -78,39 +78,17 @@ namespace uSync8.BackOffice.Controllers
         /// </summary>
         [HttpGet]
         public IEnumerable<string> GetAllHandlerGroups()
-            => syncHandlers.GetGroups();
-
-        /*
-        [HttpGet]
-        public (string version, string addons) GetAddOnString()
-        {
-            var value = "";
-            var addOns = TypeFinder.FindClassesOfType<ISyncAddOn>();
-            foreach(var addOn in addOns)
-            {
-                var instance = Activator.CreateInstance(addOn) as ISyncAddOn;
-                if (instance != null)
-                {
-                    value += $"{instance.Name} "; // [{instance.Version}] ";
-                }
-            }
-
-            var version = typeof(uSync8.BackOffice.uSync8BackOffice).Assembly.GetName().Version.ToString();
-
-            return (version, value);
-        }
-        */
+            => handlerFactory.GetGroups();
 
         [HttpGet]
         public IEnumerable<object> GetHandlers()
-        {
-            return syncHandlers.Select(x => new SyncHandlerSummary()
-            {
-                Icon = x.Icon,
-                Name = x.Name,
-                Status = HandlerStatus.Pending
-            });
-        }
+            => handlerFactory.GetAll()
+                .Select(x => new SyncHandlerSummary()
+                {
+                    Icon = x.Icon,
+                    Name = x.Name,
+                    Status = HandlerStatus.Pending
+                });
 
 
         [HttpPost]
@@ -161,7 +139,7 @@ namespace uSync8.BackOffice.Controllers
 
         [HttpPut]
         public uSyncAction ImportItem(uSyncAction item)
-            => uSyncService.Import(item);
+            => uSyncService.ImportSingleAction(item);
 
         [HttpPost]
         public void SaveSettings(uSyncSettings settings)

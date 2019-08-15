@@ -77,28 +77,34 @@
                 </umb-box-content>
             </umb-box>
         </div>
-        <umb-box>
-            <umb-box-header title="Handlers" description="Controllers for each type of object"></umb-box-header>
-            <umb-box-content>
-                <div ng-repeat="handler in vm.settings.Handlers" class="umb-permission">
-                    <umb-toggle class="umb-permission__toggle"
-                                checked="handler.Enabled"
-                                on-click="handler.Enabled = !handler.Enabled">
-                    </umb-toggle>
+        <div>
+            <umb-box>
+                <umb-box-header title="Handlers" description="Controllers for each type of object"></umb-box-header>
+                <umb-box-content>Default Set : <strong>{{vm.settings.DefaultSet}}</strong></umb-box-content>
+            </umb-box>
+            <umb-box ng-repeat="handlerSet in vm.settings.HandlerSets">
+                <umb-box-header title="Handler Set: {{handlerSet.Name}}"></umb-box-header>
+                <umb-box-content>
+                    <div ng-repeat="handler in handlerSet.Handlers" class="umb-permission">
+                        <umb-toggle class="umb-permission__toggle"
+                                    checked="handler.Enabled"
+                                    on-click="handler.Enabled = !handler.Enabled">
+                        </umb-toggle>
 
-                    <div class="umb-permission__content">
-                        <div>
-                            {{handler.Alias}}
-                        </div>
-                        <div class="umb-permission__description">
-                            Enabled for :
-                            <span ng-if="handler.DefaultConfig.Actions.length > 0">{{handler.DefaultConfig.Actions}}</span>
-                            <span ng-if="!handler.DefaultConfig.Actions">All</span>
+                        <div class="umb-permission__content">
+                            <div>
+                                {{handler.Alias}}
+                            </div>
+                            <div class="umb-permission__description">
+                                Enabled for :
+                                <span ng-if="handler.DefaultConfig.Actions.length > 0">{{handler.DefaultConfig.Actions}}</span>
+                                <span ng-if="!handler.DefaultConfig.Actions">All</span>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </umb-box-content>
-        </umb-box>
+                </umb-box-content>
+            </umb-box>
+        </div>
     </div>
     <umb-button type="button"
                 button-style="success"

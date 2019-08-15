@@ -22,7 +22,7 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("templateHandler", "Templates", "Templates", uSyncBackOfficeConstants.Priorites.Templates,
         Icon = "icon-layout", EntityType = UdiEntityType.Template)]
-    public class TemplateHandler : SyncHandlerLevelBase<ITemplate, IFileService>, ISyncSingleItemHandler
+    public class TemplateHandler : SyncHandlerLevelBase<ITemplate, IFileService>, ISyncExtendedHandler
     {
         private readonly IFileService fileService;
 

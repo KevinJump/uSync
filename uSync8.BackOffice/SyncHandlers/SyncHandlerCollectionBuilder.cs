@@ -19,107 +19,41 @@ namespace uSync8.BackOffice.SyncHandlers
     public class SyncHandlerCollection : BuilderCollectionBase<ISyncHandler>
     {
         /// <summary>
-        ///  handlers that impliment the ISyncHandler2 interface, can be used for other things.
+        ///  handlers that impliment the Extended Handler interface, can be used for other things.
         /// </summary>
-        private List<ISyncSingleItemHandler> handlerTwos;
+        private List<ISyncExtendedHandler> extendedHandlers;
 
         public SyncHandlerCollection(IEnumerable<ISyncHandler> items)
             : base(items)
         {
-            handlerTwos = items
-                .Where(x => x is ISyncSingleItemHandler)
-                .Select(x => x as ISyncSingleItemHandler)
+            extendedHandlers = items
+                .Where(x => x is ISyncExtendedHandler)
+                .Select(x => x as ISyncExtendedHandler)
                 .ToList();
         }
 
-        public ISyncSingleItemHandler GetHandlerFromUdi(Udi udi)
-        {
-            return GetHandlerByEntityType(udi.EntityType);
-        }
+        public IEnumerable<ISyncExtendedHandler> ExtendedHandlers
+            => extendedHandlers;
 
-        public ISyncSingleItemHandler GetHandlerByEntityType(string entityType)
-        {
-            return handlerTwos.FirstOrDefault(x => x.EntityType == entityType);
-        }
-
-        public ISyncSingleItemHandler GetHandlerByTypeName(string typeName)
-        {
-            return handlerTwos.FirstOrDefault(x => x.TypeName == typeName);
-        }
-
-        public IEnumerable<HandlerConfigPair> GetHandlersByType(IEnumerable<string> entityTypes, string actionName, uSyncSettings settings)
-        {
-            var handlers = handlerTwos.Where(x => entityTypes.InvariantContains(x.EntityType));
-            return GetConfiguredHandlers(handlers, actionName, settings, true);
-        }
-
+        // v8.1
+        [Obsolete("Use Handler Factory for better results")]
         public IEnumerable<HandlerConfigPair> GetValidHandlers(string actionName, uSyncSettings settings)
-        {
-            return GetConfiguredHandlers(this, actionName, settings, false);
-        }
-
-        public IEnumerable<HandlerConfigPair> GetValidHandlers(string actionName, string group, uSyncSettings settings)
-        {
-            var handlers = GetValidHandlers(actionName, settings);
-
-            if (string.IsNullOrWhiteSpace(group)) return handlers;
-
-            var groupedHandlers = new List<HandlerConfigPair>();
-
-            foreach (var pair in handlers)
-            {
-                if (pair.Handler is ISyncSingleItemHandler groupedHandler)
-                {
-                    if (groupedHandler.Group.InvariantEquals(group))
-                    {
-                        groupedHandlers.Add(pair);
-                    }
-                }
-                else if (group == uSyncBackOfficeConstants.Groups.Settings)
-                {
-                    groupedHandlers.Add(pair);
-                }
-
-            }
-
-            return groupedHandlers;
-        }
-
-        public IEnumerable<string> GetGroups()
-        {
-            return handlerTwos.Select(x => x.Group).Distinct().ToList();
-        }
-
-        public IEnumerable<string> GetValidGroups(uSyncSettings settings)
-        {
-            var handlers = GetValidHandlers(HandlerActionNames.All, settings)
-                .Where(x => x.Handler is ISyncSingleItemHandler)
-                .Select(x => x.Handler as ISyncSingleItemHandler);
-
-            return handlers.Select(x => x.Group).Distinct().ToList();
-        }
-
-        public IEnumerable<ISyncSingleItemHandler> GetHandlersByGroup(string groupName) {
-            return handlerTwos.Where(x => x.Group.InvariantEquals(groupName));
-        }
-
-        public IEnumerable<HandlerConfigPair> GetConfiguredHandlers(IEnumerable<ISyncHandler> handlers, string actionName, uSyncSettings settings, bool includeDisabled)
         {
             var configPairs = new List<HandlerConfigPair>();
 
-            foreach(var handler in handlers)
+            foreach(var handler in this)
             {
-                var config = settings.Handlers.FirstOrDefault(x => x.Alias.InvariantEquals(handler.Alias));
+                var config = settings.DefaultHandlerSet().Handlers.FirstOrDefault(x => x.Alias.InvariantEquals(handler.Alias));
                 if (config == null)
                 {
-                    config = new HandlerSettings(handler.Alias, settings.EnableMissingHandlers)
+                    config = new HandlerSettings(handler.Alias, false)
                     {
                         GuidNames = new OverriddenValue<bool>(settings.UseGuidNames, false),
                         UseFlatStructure = new OverriddenValue<bool>(settings.UseFlatStructure, false)
                     };
                 }
 
-                if (config != null && (includeDisabled || config.Enabled))
+                if (config != null && config.Enabled)
                 {
                     configPairs.Add(new HandlerConfigPair() { Handler = handler, Settings = config });
                 }
@@ -129,9 +63,17 @@ namespace uSync8.BackOffice.SyncHandlers
         }
     }
 
+    [Obsolete("Use ExtendedHandlerConfig Pair to do more")]
     public class HandlerConfigPair
     {
         public ISyncHandler Handler { get; set; }
         public HandlerSettings Settings { get; set; }
     }
+
+    public class ExtendedHandlerConfigPair
+    {
+        public ISyncExtendedHandler Handler { get; set; }
+        public HandlerSettings Settings { get; set; }
+    }
+
 }

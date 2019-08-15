@@ -70,6 +70,40 @@ namespace uSync8.Core.Extensions
             return defaultValue;
         }
 
+        public static XElement FindOrCreate(this XElement node, string name)
+        {
+            if (node == null) return null;
+
+            var element = node.Element(name);
+            if (element == null)
+            {
+                element = new XElement(name);
+                node.Add(element);
+            }
+            return element;
+        }
+
+        public static XElement FindOrCreate(this XElement node, string name, string attributeName, string value)
+        {
+            var elements = node.Elements(name);
+            if (elements != null)
+            {
+                var foundElement = elements
+                    .Where(x => x.Attribute(attributeName)
+                    .ValueOrDefault(string.Empty).InvariantEquals(value))
+                    .FirstOrDefault();
+
+                if (foundElement != null) return foundElement;
+            }
+
+            // else 
+            var element = new XElement(name,
+                new XAttribute(attributeName, value));
+            node.Add(element);
+
+            return element;   
+        }
+
         public static void CreateOrSetElement(this XElement node, string name, string value)
         {
             if (node == null) return;
@@ -101,6 +135,34 @@ namespace uSync8.Core.Extensions
             }
         }
 
+        /// <summary>
+        ///  strips any missing attribute based values from the element list if they are not in the keys list.
+        /// </summary>
+        public static void RemoveMissingElements(this XElement node, string elements, string keyName, IEnumerable<string> keys)
+        {
+            var stripped = new XElement(node.Name.LocalName);
+            bool changed = false;
+
+            foreach(var element in node.Elements(elements))
+            {
+                var key = element.Attribute(keyName).ValueOrDefault(string.Empty);
+                if (keys.Contains(key))
+                {
+                    stripped.Add(element);
+                }
+                else
+                {
+                    changed = true;
+                }
+            }
+
+            if (changed)
+            {
+                node.Parent.Add(stripped);
+                node.Remove();
+            }
+        }
+             
         /// <summary>
         ///  gets a value from an element, if its is missing throws an ArgumentNullException
         /// </summary>

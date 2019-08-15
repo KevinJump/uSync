@@ -19,5 +19,10 @@ namespace uSync8.BackOffice
             internal const string uSync = "uSync8";
             internal const string Group = "sync";
         }
+
+        internal class Handlers
+        {
+            internal const string DefaultSet = "default";
+        }
     }
 }

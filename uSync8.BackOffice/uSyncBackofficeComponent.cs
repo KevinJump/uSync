@@ -20,7 +20,7 @@ namespace uSync8.BackOffice
     public class uSyncBackofficeComponent : IComponent
     {
         private readonly IProfilingLogger logger;
-        private readonly SyncHandlerCollection syncHandlers;
+        private readonly SyncHandlerFactory handlerFactory;
 
         private readonly SyncFileService syncFileService;
         private readonly uSyncSettings globalSettings;
@@ -28,7 +28,7 @@ namespace uSync8.BackOffice
         private readonly IRuntimeState runtimeState;
 
         public uSyncBackofficeComponent(
-            SyncHandlerCollection syncHandlers,
+            SyncHandlerFactory handlerFactory,
             IProfilingLogger logger,
             SyncFileService fileService,            
             uSyncService uSyncService,
@@ -36,9 +36,10 @@ namespace uSync8.BackOffice
         {
             globalSettings = Current.Configs.uSync();
 
-            this.runtimeState = runtimeState;
-            this.syncHandlers = syncHandlers;
+            this.runtimeState = runtimeState;           
             this.logger = logger;
+
+            this.handlerFactory = handlerFactory;
 
             this.syncFileService = fileService;
             this.uSyncService = uSyncService;
@@ -95,7 +96,7 @@ namespace uSync8.BackOffice
 
             if (globalSettings.ExportOnSave)
             {
-                var handlers = syncHandlers.GetValidHandlers("Save", globalSettings);
+                var handlers = handlerFactory.GetValidHandlers(handlerFactory.DefaultSet, string.Empty, HandlerActionNames.Save);
                 foreach (var syncHandler in handlers)
                 {
                     logger.Debug<uSyncBackofficeComponent>($"Starting up Handler {syncHandler.Handler.Name}");

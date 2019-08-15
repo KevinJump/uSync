@@ -20,7 +20,7 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("memberTypeHandler", "Member Types", "MemberTypes", uSyncBackOfficeConstants.Priorites.MemberTypes, 
         IsTwoPass = true, Icon = "icon-users", EntityType = UdiEntityType.MemberType)]
-    public class MemberTypeHandler : SyncHandlerContainerBase<IMemberType, IMemberTypeService>, ISyncSingleItemHandler
+    public class MemberTypeHandler : SyncHandlerContainerBase<IMemberType, IMemberTypeService>, ISyncExtendedHandler
     {
         private readonly IMemberTypeService memberTypeService;
 
