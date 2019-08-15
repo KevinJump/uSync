@@ -39,6 +39,9 @@ namespace uSync8.BackOffice.SyncHandlers
         public ISyncExtendedHandler GetHandler(Udi udi)
             => GetHandlerByEntityType(udi.EntityType);
 
+        public IEnumerable<ISyncHandler> GetHandlers(params string[] aliases)
+            => syncHandlers.Where(x => aliases.InvariantContains(x.Alias));
+
         public ISyncExtendedHandler GetHandlerByEntityType(string entityType)
             => syncHandlers.ExtendedHandlers
                 .FirstOrDefault(x => x.EntityType == entityType);
@@ -68,7 +71,11 @@ namespace uSync8.BackOffice.SyncHandlers
              => GetValidHandlers(setName, group, action)
                  .FirstOrDefault(x => x.Handler.Alias.InvariantEquals(alias));
 
-        public IEnumerable<HandlerConfigPair> GetValidHandlerByEntityType(IEnumerable<string> entityTypes, string setName, string group, string action)
+        public IEnumerable<HandlerConfigPair> GetValidHandlers(string[] aliases, string setName, string group, string action)
+            => GetValidHandlers(setName, group, action)
+                .Where(x => aliases.InvariantContains(x.Handler.Alias));
+
+        public IEnumerable<HandlerConfigPair> GetValidHandlersByEntityType(IEnumerable<string> entityTypes, string setName, string group, string action)
             => GetValidHandlers(setName, action, group)
                 .Where(x => x is ISyncExtendedHandler 
                     && entityTypes.InvariantContains(((ISyncExtendedHandler)x.Handler).EntityType));
