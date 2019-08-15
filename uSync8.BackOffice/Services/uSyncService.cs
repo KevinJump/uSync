@@ -69,16 +69,16 @@ namespace uSync8.BackOffice
             return Report(folder, handlers, callbacks);
         }
 
-        public IEnumerable<uSyncAction> Report(string folder, bool force, IEnumerable<string> handlerAliases, uSyncCallbacks callbacks)
-            => Report(folder, force, string.Empty, handlerAliases, callbacks);
+        public IEnumerable<uSyncAction> Report(string folder, IEnumerable<string> handlerAliases, uSyncCallbacks callbacks)
+            => Report(folder, string.Empty, handlerAliases, callbacks);
 
-        public IEnumerable<uSyncAction> Report(string folder, bool force, string groupName, IEnumerable<string> handlerAliases, uSyncCallbacks callbacks)
-            => Report(folder, force, uSync.Handlers.DefaultSet, groupName, handlerAliases, callbacks);
+        public IEnumerable<uSyncAction> Report(string folder, string groupName, IEnumerable<string> handlerAliases, uSyncCallbacks callbacks)
+            => Report(folder, uSync.Handlers.DefaultSet, groupName, handlerAliases, callbacks);
 
-        public IEnumerable<uSyncAction> Report(string folder, bool force, string setName, string groupName, IEnumerable<string> handlerAliases, uSyncCallbacks callbacks)
+        public IEnumerable<uSyncAction> Report(string folder, string setName, string groupName, IEnumerable<string> handlerAliases, uSyncCallbacks callbacks)
         {
             var handlers = handlerFactory.GetValidHandlers(handlerAliases.ToArray(), setName, groupName, HandlerActionNames.Report);
-            return Import(folder, force, handlers, callbacks);
+            return Report(folder, handlers, callbacks);
         }
 
 
@@ -266,16 +266,16 @@ namespace uSync8.BackOffice
             return Export(folder, handlers, callbacks);
         }
 
-        public IEnumerable<uSyncAction> Export(string folder, bool force, IEnumerable<string> handlerAliases, uSyncCallbacks callbacks)
-            => Export(folder, force, string.Empty, handlerAliases, callbacks);
+        public IEnumerable<uSyncAction> Export(string folder, IEnumerable<string> handlerAliases, uSyncCallbacks callbacks)
+            => Export(folder, string.Empty, handlerAliases, callbacks);
 
-        public IEnumerable<uSyncAction> Export(string folder, bool force, string groupName, IEnumerable<string> handlerAliases, uSyncCallbacks callbacks)
-            => Export(folder, force, uSync.Handlers.DefaultSet, groupName, handlerAliases, callbacks);
+        public IEnumerable<uSyncAction> Export(string folder, string groupName, IEnumerable<string> handlerAliases, uSyncCallbacks callbacks)
+            => Export(folder, uSync.Handlers.DefaultSet, groupName, handlerAliases, callbacks);
 
-        public IEnumerable<uSyncAction> Export(string folder, bool force, string setName, string groupName, IEnumerable<string> handlerAliases, uSyncCallbacks callbacks)
+        public IEnumerable<uSyncAction> Export(string folder, string setName, string groupName, IEnumerable<string> handlerAliases, uSyncCallbacks callbacks)
         {
             var handlers = handlerFactory.GetValidHandlers(handlerAliases.ToArray(), setName, groupName, HandlerActionNames.Export);
-            return Import(folder, force, handlers, callbacks);
+            return Export(folder, handlers, callbacks);
         }
 
         public IEnumerable<uSyncAction> Export(string folder, IEnumerable<HandlerConfigPair> handlers, uSyncCallbacks callbacks)
