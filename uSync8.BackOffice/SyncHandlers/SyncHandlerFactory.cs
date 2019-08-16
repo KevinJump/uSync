@@ -60,33 +60,33 @@ namespace uSync8.BackOffice.SyncHandlers
 
         #region Valid Loaders (need set, group, action)
 
-        public HandlerConfigPair GetValidHandler(string alias)
+        public ExtendedHandlerConfigPair GetValidHandler(string alias)
             => GetValidHandler(alias, uSync.Handlers.DefaultSet);
 
-        public HandlerConfigPair GetValidHandler(Udi udi, string setName, HandlerActions action)
+        public ExtendedHandlerConfigPair GetValidHandler(Udi udi, string setName, HandlerActions action)
             => GetValidHandlerByEntityType(udi.EntityType, setName, action);
 
-        public HandlerConfigPair GetValidHandler(string alias, string setName)
+        public ExtendedHandlerConfigPair GetValidHandler(string alias, string setName)
             => GetValidHandler(alias, setName, string.Empty);
 
-        public HandlerConfigPair GetValidHandler(string alias, string setName, string group)
+        public ExtendedHandlerConfigPair GetValidHandler(string alias, string setName, string group)
             => GetValidHandler(alias, setName, group, HandlerActions.None);
 
-        public HandlerConfigPair GetValidHandler(string alias, string setName, string group, HandlerActions action)
+        public ExtendedHandlerConfigPair GetValidHandler(string alias, string setName, string group, HandlerActions action)
              => GetValidHandlers(setName, group, action)
                  .FirstOrDefault(x => x.Handler.Alias.InvariantEquals(alias));
 
-        public HandlerConfigPair GetValidHandlerByTypeName(string typeName, string setName, HandlerActions action)
+        public ExtendedHandlerConfigPair GetValidHandlerByTypeName(string typeName, string setName, HandlerActions action)
             => GetValidHandlers(setName, string.Empty, action)
                 .Where(x => x.Handler is ISyncExtendedHandler && typeName.InvariantEquals(((ISyncExtendedHandler)x.Handler).TypeName))
                 .FirstOrDefault();
 
-        public HandlerConfigPair GetValidHandlerByEntityType(string entityType, string setName, HandlerActions action)
+        public ExtendedHandlerConfigPair GetValidHandlerByEntityType(string entityType, string setName, HandlerActions action)
             => GetValidHandlers(setName, string.Empty, action)
                 .Where(x => x.Handler is ISyncExtendedHandler && entityType.InvariantEquals(((ISyncExtendedHandler)x.Handler).EntityType))
                 .FirstOrDefault();
 
-        public IEnumerable<HandlerConfigPair> GetValidHandlersByEntityType(IEnumerable<string> entityTypes, string setName, string group, HandlerActions action)
+        public IEnumerable<ExtendedHandlerConfigPair> GetValidHandlersByEntityType(IEnumerable<string> entityTypes, string setName, string group, HandlerActions action)
             => GetValidHandlers(setName, group, action)
                 .Where(x => x.Handler is ISyncExtendedHandler
                     && entityTypes.InvariantContains(((ISyncExtendedHandler)x.Handler).EntityType));
@@ -100,14 +100,14 @@ namespace uSync8.BackOffice.SyncHandlers
                 .Select(x => ((ISyncExtendedHandler)x.Handler).Group)
                 .Distinct();
 
-        public IEnumerable<HandlerConfigPair> GetValidHandlers(string setName, string group)
+        public IEnumerable<ExtendedHandlerConfigPair> GetValidHandlers(string setName, string group)
             => GetValidHandlers(setName, group, HandlerActions.None);
 
-        public IEnumerable<HandlerConfigPair> GetValidHandlers(string[] aliases, string setName, string group, HandlerActions action)
+        public IEnumerable<ExtendedHandlerConfigPair> GetValidHandlers(string[] aliases, string setName, string group, HandlerActions action)
             => GetValidHandlers(setName, group, action)
                 .Where(x => aliases.InvariantContains(x.Handler.Alias));
 
-        public IEnumerable<HandlerConfigPair> GetValidHandlers(string setName, string group, HandlerActions action)
+        public IEnumerable<ExtendedHandlerConfigPair> GetValidHandlers(string setName, string group, HandlerActions action)
         {
             if (string.IsNullOrWhiteSpace(setName))
                 setName = this.DefaultSet;
@@ -116,13 +116,13 @@ namespace uSync8.BackOffice.SyncHandlers
                 .Where(x => x.Name.InvariantEquals(setName))
                 .FirstOrDefault();
 
-            if (set == null) return Enumerable.Empty<HandlerConfigPair>();
+            if (set == null) return Enumerable.Empty<ExtendedHandlerConfigPair>();
 
-            var configs = new List<HandlerConfigPair>();
+            var configs = new List<ExtendedHandlerConfigPair>();
 
             foreach (var settings in set.Handlers)
             {
-                var handler = syncHandlers.Handlers
+                var handler = syncHandlers.ExtendedHandlers
                     .Where(x => x.Alias.InvariantEquals(settings.Alias))
                     .FirstOrDefault();
 
@@ -136,14 +136,12 @@ namespace uSync8.BackOffice.SyncHandlers
                         if (action == HandlerActions.None || IsValidAction(settings.Actions, action))
                         // if (string.IsNullOrWhiteSpace(action) || IsValidAction(settings.Actions, action))
                         {
-                            configs.Add(new HandlerConfigPair()
+                            configs.Add(new ExtendedHandlerConfigPair()
                             {
                                 Handler = handler,
                                 Settings = settings
                             });
-
                         }
-
                     }
                 }
 

@@ -250,7 +250,7 @@ namespace uSync8.BackOffice.SyncHandlers
             // be a little slower (not much though)
             var keys = new List<Guid>();
             var files = syncFileService.GetFiles(folder, "*.config");
-            foreach(var file in files)
+            foreach (var file in files)
             {
                 var node = XElement.Load(file);
                 var key = node.GetKey();
@@ -408,9 +408,7 @@ namespace uSync8.BackOffice.SyncHandlers
 
 
         public bool HasChildren(int id)
-        {
-            return GetFolders(id).Any() || GetChildItems(id).Any();
-        }
+            => GetFolders(id).Any() || GetChildItems(id).Any();
 
         virtual public IEnumerable<uSyncAction> Export(TObject item, string folder, HandlerSettings config)
         {
@@ -482,7 +480,7 @@ namespace uSync8.BackOffice.SyncHandlers
 
                 action.Message = "";
 
-                switch(action.Change)
+                switch (action.Change)
                 {
                     case ChangeType.Clean:
                         actions.AddRange(CleanFolder(filename, true));
@@ -546,7 +544,8 @@ namespace uSync8.BackOffice.SyncHandlers
             {
                 var attempts = Export(item, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
 
-                foreach(var attempt in attempts.Where(x => x.Success)) { 
+                foreach (var attempt in attempts.Where(x => x.Success))
+                {
                     this.CleanUp(item, attempt.FileName, Path.Combine(rootFolder, this.DefaultFolder));
                 }
             }
@@ -559,7 +558,7 @@ namespace uSync8.BackOffice.SyncHandlers
             foreach (var item in e.MoveInfoCollection)
             {
                 var attempts = Export(item.Entity, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
-                foreach(var attempt in attempts.Where(x => x.Success)) 
+                foreach (var attempt in attempts.Where(x => x.Success))
                 {
                     this.CleanUp(item.Entity, attempt.FileName, Path.Combine(rootFolder, this.DefaultFolder));
                 }
@@ -715,20 +714,17 @@ namespace uSync8.BackOffice.SyncHandlers
         public IEnumerable<uSyncDependency> GetDependencies(int id, DependencyFlags flags)
         {
             var item = this.GetFromService(id);
+            if (item == null) return GetContainerDependencies(id, flags);
             return GetDependencies(item, flags);
         }
 
         protected IEnumerable<uSyncDependency> GetDependencies(TObject item, DependencyFlags flags)
-        { 
-            if (item != null)
-            {
-                logger.Info<uSync8Core>("Found Item {0}", item.Id);
-                return dependencyChecker.GetDependencies(item, flags);
-            }
-            else
-            {
-                return GetContainerDependencies(item.Id, flags);
-            }
+        {
+            if (item == null) return Enumerable.Empty<uSyncDependency>();
+
+            logger.Info<uSync8Core>("Found Item {0}", item.Id);
+            return dependencyChecker.GetDependencies(item, flags);
+
         }
 
         private IEnumerable<uSyncDependency> GetContainerDependencies(int id, DependencyFlags flags)

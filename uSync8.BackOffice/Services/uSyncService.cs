@@ -83,7 +83,7 @@ namespace uSync8.BackOffice
 
 
 
-        public IEnumerable<uSyncAction> Report(string folder, IEnumerable<HandlerConfigPair> handlers, uSyncCallbacks callbacks)
+        public IEnumerable<uSyncAction> Report(string folder, IEnumerable<ExtendedHandlerConfigPair> handlers, uSyncCallbacks callbacks)
         {
             logger.Debug<uSyncService>("Reporting For [{0}]", string.Join(",", handlers.Select(x => x.Handler.Name)));
 
@@ -151,7 +151,7 @@ namespace uSync8.BackOffice
             return Import(folder, force, handlers, callbacks);
         }
 
-        public IEnumerable<uSyncAction> Import(string folder, bool force, IEnumerable<HandlerConfigPair> handlers, uSyncCallbacks callbacks)
+        public IEnumerable<uSyncAction> Import(string folder, bool force, IEnumerable<ExtendedHandlerConfigPair> handlers, uSyncCallbacks callbacks)
         {
             lock (_importLock)
             {
@@ -278,7 +278,7 @@ namespace uSync8.BackOffice
             return Export(folder, handlers, callbacks);
         }
 
-        public IEnumerable<uSyncAction> Export(string folder, IEnumerable<HandlerConfigPair> handlers, uSyncCallbacks callbacks)
+        public IEnumerable<uSyncAction> Export(string folder, IEnumerable<ExtendedHandlerConfigPair> handlers, uSyncCallbacks callbacks)
         {
             var actions = new List<uSyncAction>();
             var summary = new SyncProgressSummary(handlers.Select(x => x.Handler), "Exporting", handlers.Count());
