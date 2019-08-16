@@ -480,20 +480,19 @@ namespace uSync8.BackOffice.SyncHandlers
 
                 action.Message = "";
 
-                switch (action.Change)
+                if (action.Change == ChangeType.Clean)
                 {
-                    case ChangeType.Clean:
-                        actions.AddRange(CleanFolder(filename, true));
-                        break;
-                    case ChangeType.Delete:
-                        action.Details = tracker.GetChanges(node);
-                        if (action.Details == null || action.Details.Count() == 0)
-                        {
-                            action.Message = "Change details cannot be calculated";
-                        }
+                    actions.AddRange(CleanFolder(filename, true));
+                }
+                else if (action.Change > ChangeType.NoChange)
+                {
+                    action.Details = tracker.GetChanges(node);
+                    if (action.Details == null || action.Details.Count() == 0)
+                    {
+                        action.Message = "Change details cannot be calculated";
+                    }
 
-                        action.Message = $"{action.Change.ToString()}";
-                        break;
+                    action.Message = $"{action.Change.ToString()}";
                 }
 
                 actions.Add(action);
