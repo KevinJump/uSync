@@ -28,6 +28,12 @@
         {
             this.Set = setName;
         }
+
+        public SyncHandlerOptions(string setName, HandlerActions action)
+            : this(setName)
+        {
+            this.Action = action;
+        }
     }
 
 

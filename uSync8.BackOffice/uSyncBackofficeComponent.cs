@@ -96,10 +96,7 @@ namespace uSync8.BackOffice
 
             if (globalSettings.ExportOnSave)
             {
-                var handlers = handlerFactory.GetValidHandlers(new SyncHandlerOptions(handlerFactory.DefaultSet)
-                {
-                    Action = HandlerActions.Save
-                });
+                var handlers = handlerFactory.GetValidHandlers(new SyncHandlerOptions(handlerFactory.DefaultSet, HandlerActions.Save));
                 
                 foreach (var syncHandler in handlers)
                 {
