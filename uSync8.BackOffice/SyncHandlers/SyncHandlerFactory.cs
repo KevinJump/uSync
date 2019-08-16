@@ -78,17 +78,17 @@ namespace uSync8.BackOffice.SyncHandlers
 
         public HandlerConfigPair GetValidHandlerByTypeName(string typeName, string setName, HandlerActions action)
             => GetValidHandlers(setName, string.Empty, action)
-                .Where(x => x is ISyncExtendedHandler && typeName.InvariantEquals(((ISyncExtendedHandler)x.Handler).TypeName))
+                .Where(x => x.Handler is ISyncExtendedHandler && typeName.InvariantEquals(((ISyncExtendedHandler)x.Handler).TypeName))
                 .FirstOrDefault();
 
         public HandlerConfigPair GetValidHandlerByEntityType(string entityType, string setName, HandlerActions action)
             => GetValidHandlers(setName, string.Empty, action)
-                .Where(x => x is ISyncExtendedHandler && entityType.InvariantEquals(((ISyncExtendedHandler)x.Handler).EntityType))
+                .Where(x => x.Handler is ISyncExtendedHandler && entityType.InvariantEquals(((ISyncExtendedHandler)x.Handler).EntityType))
                 .FirstOrDefault();
 
         public IEnumerable<HandlerConfigPair> GetValidHandlersByEntityType(IEnumerable<string> entityTypes, string setName, string group, HandlerActions action)
             => GetValidHandlers(setName, group, action)
-                .Where(x => x is ISyncExtendedHandler
+                .Where(x => x.Handler is ISyncExtendedHandler
                     && entityTypes.InvariantContains(((ISyncExtendedHandler)x.Handler).EntityType));
 
         public IEnumerable<string> GetValidGroups(string setName)
