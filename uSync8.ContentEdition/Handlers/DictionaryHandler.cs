@@ -71,7 +71,7 @@ namespace uSync8.ContentEdition.Handlers
                 count++;
                 callback?.Invoke(item.ItemKey, count, items.Count);
 
-                actions.Add(Export(item, folder, config));
+                actions.AddRange(Export(item, folder, config));
                 actions.AddRange(ExportAll(item.Key, folder, config, callback));
             }
 

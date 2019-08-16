@@ -51,7 +51,7 @@ namespace uSync8.ContentEdition.Handlers
                 if (domain != null)
                 {
                     callback?.Invoke(domain.DomainName, count, domains.Count);
-                    actions.Add(Export(domain, folder, config));
+                    actions.AddRange(Export(domain, folder, config));
                 }
             }
 

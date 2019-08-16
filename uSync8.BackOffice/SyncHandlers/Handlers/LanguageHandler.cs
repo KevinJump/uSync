@@ -67,8 +67,8 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
                 }
                 else
                 {
-                    var attempt = Export(item, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
-                    if (attempt.Success)
+                    var attempts = Export(item, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
+                    foreach(var attempt in attempts.Where(x => x.Success))
                     {
                         this.CleanUp(item, attempt.FileName, Path.Combine(rootFolder, this.DefaultFolder));
                     }

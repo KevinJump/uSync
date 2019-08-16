@@ -152,7 +152,7 @@ namespace uSync8.BackOffice.SyncHandlers
                 // then we consider the folder safe to clean 
                 foreach (var cleanfile in cleanMarkers)
                 {
-                    actions.AddRange(CleanFolder(cleanfile));
+                    actions.AddRange(CleanFolder(cleanfile, true));
                 }
             }
 

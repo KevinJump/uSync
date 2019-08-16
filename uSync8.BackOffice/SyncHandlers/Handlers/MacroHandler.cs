@@ -51,7 +51,7 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             {
                 count++;
                 callback?.Invoke(item.Name, count, items.Count);
-                actions.Add(Export(item, folder, config));
+                actions.AddRange(Export(item, folder, config));
             }
 
             return actions;

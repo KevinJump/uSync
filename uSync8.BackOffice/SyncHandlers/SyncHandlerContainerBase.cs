@@ -107,12 +107,12 @@ namespace uSync8.BackOffice.SyncHandlers
                 var obj = GetFromService(item.Id);
                 if (obj != null)
                 {
-                    var attempt = Export(obj, folder, config);
-                    if (attempt.Success)
+                    var attempts = Export(obj, folder, config);
+                    foreach(var attempt in attempts.Where(x => x.Success))
                     {
                         CleanUp(obj, attempt.FileName, folder);
+                        actions.Add(attempt);
                     }
-                    actions.Add(attempt);
                 }
             }
 

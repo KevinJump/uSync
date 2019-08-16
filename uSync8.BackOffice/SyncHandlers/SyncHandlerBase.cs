@@ -218,7 +218,7 @@ namespace uSync8.BackOffice.SyncHandlers
             {
                 foreach (var cleanFile in cleanMarkers)
                 {
-                    actions.AddRange(CleanFolder(cleanFile));
+                    actions.AddRange(CleanFolder(cleanFile, false));
                 }
             }
 
@@ -234,7 +234,7 @@ namespace uSync8.BackOffice.SyncHandlers
         /// </summary>
         /// <param name="cleanFile"></param>
         /// <returns></returns>
-        protected virtual IEnumerable<uSyncAction> CleanFolder(string cleanFile)
+        protected virtual IEnumerable<uSyncAction> CleanFolder(string cleanFile, bool reportOnly)
         {
             var folder = Path.GetDirectoryName(cleanFile);
 
@@ -258,7 +258,7 @@ namespace uSync8.BackOffice.SyncHandlers
                     keys.Add(key);
             }
 
-            return DeleteMissingItems(parent, keys);
+            return DeleteMissingItems(parent, keys, reportOnly);
         }
 
         protected TObject GetCleanParent(string file)
@@ -270,7 +270,7 @@ namespace uSync8.BackOffice.SyncHandlers
             return GetFromService(key);
         }
 
-        protected IEnumerable<uSyncAction> DeleteMissingItems(TObject parent, IEnumerable<Guid> keys)
+        protected IEnumerable<uSyncAction> DeleteMissingItems(TObject parent, IEnumerable<Guid> keys, bool reportOnly)
         {
             var items = GetChildItems(parent.Id).ToList();
             var actions = new List<uSyncAction>();
@@ -281,7 +281,8 @@ namespace uSync8.BackOffice.SyncHandlers
                     var actualItem = GetFromService(item.Key);
                     var name = actualItem.Id;
 
-                    DeleteViaService(actualItem);
+                    if (!reportOnly)
+                        DeleteViaService(actualItem);
 
                     actions.Add(uSyncActionHelper<TObject>.SetAction(SyncAttempt<TObject>.Succeed(name.ToString(), ChangeType.Delete), string.Empty));
                 }
@@ -378,7 +379,7 @@ namespace uSync8.BackOffice.SyncHandlers
                 var concreateType = GetFromService(item.Value.Id);
                 callback?.Invoke(GetItemName(concreateType), item.Index, items.Count);
 
-                actions.Add(Export(concreateType, folder, config));
+                actions.AddRange(Export(concreateType, folder, config));
                 actions.AddRange(ExportAll(item.Value.Id, folder, config, callback));
             }
 
@@ -411,10 +412,10 @@ namespace uSync8.BackOffice.SyncHandlers
             return GetFolders(id).Any() || GetChildItems(id).Any();
         }
 
-        virtual public uSyncAction Export(TObject item, string folder, HandlerSettings config)
+        virtual public IEnumerable<uSyncAction> Export(TObject item, string folder, HandlerSettings config)
         {
             if (item == null)
-                return uSyncAction.Fail(nameof(item), typeof(TObject), ChangeType.Fail, "Item not set");
+                return uSyncAction.Fail(nameof(item), typeof(TObject), ChangeType.Fail, "Item not set").AsEnumerableOfOne();
 
             var filename = GetPath(folder, item, config.GuidNames, config.UseFlatStructure);
 
@@ -424,7 +425,7 @@ namespace uSync8.BackOffice.SyncHandlers
                 syncFileService.SaveXElement(attempt.Item, filename);
             }
 
-            return uSyncActionHelper<XElement>.SetAction(attempt, filename);
+            return uSyncActionHelper<XElement>.SetAction(attempt, filename).AsEnumerableOfOne();
         }
 
         #endregion
@@ -453,7 +454,7 @@ namespace uSync8.BackOffice.SyncHandlers
                 count++;
                 callback?.Invoke(Path.GetFileNameWithoutExtension(file), count, total);
 
-                actions.Add(ReportItem(file));
+                actions.AddRange(ReportItem(file));
             }
 
             foreach (var children in syncFileService.GetDirectories(folder))
@@ -465,41 +466,50 @@ namespace uSync8.BackOffice.SyncHandlers
             return actions;
         }
 
-        public uSyncAction ReportElement(XElement node)
+        public IEnumerable<uSyncAction> ReportElement(XElement node)
             => ReportElement(node, string.Empty);
 
-        private uSyncAction ReportElement(XElement node, string filename)
+        private IEnumerable<uSyncAction> ReportElement(XElement node, string filename)
         {
+
             try
             {
-                var change = serializer.IsCurrent(node);
+                var actions = new List<uSyncAction>();
 
+                var change = serializer.IsCurrent(node);
                 var action = uSyncActionHelper<TObject>
-                    .ReportAction(change, node.GetAlias(), !string.IsNullOrWhiteSpace(filename) ? filename : node.GetAlias(), node.GetKey(), this.Alias);
+                        .ReportAction(change, node.GetAlias(), !string.IsNullOrWhiteSpace(filename) ? filename : node.GetAlias(), node.GetKey(), this.Alias);
 
                 action.Message = "";
 
-                if (action.Change > ChangeType.NoChange)
+                switch(action.Change)
                 {
-                    action.Details = tracker.GetChanges(node);
-                    if (action.Details == null || action.Details.Count() == 0)
-                    {
-                        action.Message = "Change details cannot be calculated";
-                    }
+                    case ChangeType.Clean:
+                        actions.AddRange(CleanFolder(filename, true));
+                        break;
+                    case ChangeType.Delete:
+                        action.Details = tracker.GetChanges(node);
+                        if (action.Details == null || action.Details.Count() == 0)
+                        {
+                            action.Message = "Change details cannot be calculated";
+                        }
 
-                    action.Message = $"{action.Change.ToString()}";
+                        action.Message = $"{action.Change.ToString()}";
+                        break;
                 }
 
-                return action;
+                actions.Add(action);
+                return actions;
             }
             catch (FormatException fex)
             {
                 return uSyncActionHelper<TObject>
-                    .ReportActionFail(Path.GetFileName(node.GetAlias()), $"format error {fex.Message}");
+                    .ReportActionFail(Path.GetFileName(node.GetAlias()), $"format error {fex.Message}")
+                    .AsEnumerableOfOne();
             }
         }
 
-        protected uSyncAction ReportItem(string file)
+        protected IEnumerable<uSyncAction> ReportItem(string file)
         {
             try
             {
@@ -509,7 +519,8 @@ namespace uSync8.BackOffice.SyncHandlers
             catch (Exception ex)
             {
                 return uSyncActionHelper<TObject>
-                    .ReportActionFail(Path.GetFileName(file), $"Reporing error {ex.Message}");
+                    .ReportActionFail(Path.GetFileName(file), $"Reporing error {ex.Message}")
+                    .AsEnumerableOfOne();
             }
 
         }
@@ -533,9 +544,9 @@ namespace uSync8.BackOffice.SyncHandlers
 
             foreach (var item in e.SavedEntities)
             {
-                var attempt = Export(item, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
-                if (attempt.Success)
-                {
+                var attempts = Export(item, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
+
+                foreach(var attempt in attempts.Where(x => x.Success)) { 
                     this.CleanUp(item, attempt.FileName, Path.Combine(rootFolder, this.DefaultFolder));
                 }
             }
@@ -547,8 +558,8 @@ namespace uSync8.BackOffice.SyncHandlers
 
             foreach (var item in e.MoveInfoCollection)
             {
-                var attempt = Export(item.Entity, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
-                if (attempt.Success)
+                var attempts = Export(item.Entity, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
+                foreach(var attempt in attempts.Where(x => x.Success)) 
                 {
                     this.CleanUp(item.Entity, attempt.FileName, Path.Combine(rootFolder, this.DefaultFolder));
                 }
@@ -633,37 +644,37 @@ namespace uSync8.BackOffice.SyncHandlers
 
         public virtual string Group { get; protected set; } = uSyncBackOfficeConstants.Groups.Settings;
 
-        virtual public uSyncAction Import(string file, HandlerSettings config, bool force)
+        virtual public IEnumerable<uSyncAction> Import(string file, HandlerSettings config, bool force)
         {
             var flags = SerializerFlags.OnePass;
             if (force) flags |= SerializerFlags.Force;
 
             var attempt = Import(file, config, flags);
-            return uSyncActionHelper<TObject>.SetAction(attempt, file, this.Alias, IsTwoPass);
+            return uSyncActionHelper<TObject>.SetAction(attempt, file, this.Alias, IsTwoPass)
+                .AsEnumerableOfOne();
         }
 
-        virtual public uSyncAction ImportElement(XElement node, bool force)
+        virtual public IEnumerable<uSyncAction> ImportElement(XElement node, bool force)
         {
             var flags = SerializerFlags.OnePass;
             if (force) flags |= SerializerFlags.Force;
 
             var attempt = serializer.Deserialize(node, flags);
-            return uSyncActionHelper<TObject>.SetAction(attempt, node.GetAlias(), this.Alias, IsTwoPass);
+            return uSyncActionHelper<TObject>.SetAction(attempt, node.GetAlias(), this.Alias, IsTwoPass)
+                .AsEnumerableOfOne();
         }
 
-        public uSyncAction Report(string file, HandlerSettings config)
-        {
-            return ReportItem(file);
-        }
+        public IEnumerable<uSyncAction> Report(string file, HandlerSettings config)
+            => ReportItem(file);
 
 
-        public uSyncAction Export(int id, string folder, HandlerSettings settings)
+        public IEnumerable<uSyncAction> Export(int id, string folder, HandlerSettings settings)
         {
             var item = this.GetFromService(id);
             return this.Export(item, folder, settings);
         }
 
-        public uSyncAction Export(Udi udi, string folder, HandlerSettings settings)
+        public IEnumerable<uSyncAction> Export(Udi udi, string folder, HandlerSettings settings)
         {
             if (udi is GuidUdi guidUdi)
             {
@@ -672,7 +683,8 @@ namespace uSync8.BackOffice.SyncHandlers
                     return Export(item, folder, settings);
             }
 
-            return uSyncAction.Fail(nameof(udi), typeof(TObject), ChangeType.Fail, "Item not found");
+            return uSyncAction.Fail(nameof(udi), typeof(TObject), ChangeType.Fail, "Item not found")
+                .AsEnumerableOfOne();
         }
 
         public SyncAttempt<XElement> GetElement(Udi udi)

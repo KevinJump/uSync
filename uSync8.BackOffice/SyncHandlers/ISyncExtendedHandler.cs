@@ -22,14 +22,15 @@ namespace uSync8.BackOffice.SyncHandlers
         string EntityType { get; }
         string TypeName { get; }
 
-        uSyncAction Import(string file, HandlerSettings settings, bool force);
-        uSyncAction Report(string file, HandlerSettings settings);
-        uSyncAction Export(int id, string folder, HandlerSettings settings);
-        uSyncAction Export(Udi udi, string folder, HandlerSettings settings);
+        IEnumerable<uSyncAction> Import(string file, HandlerSettings settings, bool force);
+        IEnumerable<uSyncAction> Report(string file, HandlerSettings settings);
+        IEnumerable<uSyncAction> Export(int id, string folder, HandlerSettings settings);
+        IEnumerable<uSyncAction> Export(Udi udi, string folder, HandlerSettings settings);
 
         SyncAttempt<XElement> GetElement(Udi udi);
-        uSyncAction ImportElement(XElement element, bool force);
-        uSyncAction ReportElement(XElement element);
+
+        IEnumerable<uSyncAction> ImportElement(XElement element, bool force);
+        IEnumerable<uSyncAction> ReportElement(XElement element);
 
         IEnumerable<uSyncDependency> GetDependencies(int id, DependencyFlags flags);
         IEnumerable<uSyncDependency> GetDependencies(Guid key, DependencyFlags flags);
