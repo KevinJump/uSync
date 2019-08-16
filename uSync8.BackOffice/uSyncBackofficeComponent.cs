@@ -86,17 +86,21 @@ namespace uSync8.BackOffice
         {
             if (globalSettings.ExportAtStartup || (globalSettings.ExportOnSave && !syncFileService.RootExists(globalSettings.RootFolder)))
             {
-                uSyncService.Export(globalSettings.RootFolder, null);
+                uSyncService.Export(globalSettings.RootFolder, default(SyncHandlerOptions));
             }
 
             if (globalSettings.ImportAtStartup)
             {
-                uSyncService.Import(globalSettings.RootFolder,false, null);
+                uSyncService.Import(globalSettings.RootFolder, false, default(SyncHandlerOptions));
             }
 
             if (globalSettings.ExportOnSave)
             {
-                var handlers = handlerFactory.GetValidHandlers(handlerFactory.DefaultSet, string.Empty, HandlerActions.Save);
+                var handlers = handlerFactory.GetValidHandlers(new SyncHandlerOptions(handlerFactory.DefaultSet)
+                {
+                    Action = HandlerActions.Save
+                });
+                
                 foreach (var syncHandler in handlers)
                 {
                     logger.Debug<uSyncBackofficeComponent>($"Starting up Handler {syncHandler.Handler.Name}");

@@ -64,18 +64,4 @@ namespace uSync8.BackOffice.SyncHandlers
             return configPairs.OrderBy(x => x.Handler.Priority);
         }
     }
-
-    [Obsolete("Extended Handler Config gives better results")]
-    public class HandlerConfigPair
-    {
-        public ISyncHandler Handler { get; set; }
-        public HandlerSettings Settings { get; set; }
-    }
-
-    public class ExtendedHandlerConfigPair
-    {
-        public ISyncExtendedHandler Handler { get; set; }
-        public HandlerSettings Settings { get; set; }
-
-    }
 }

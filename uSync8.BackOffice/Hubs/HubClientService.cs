@@ -1,6 +1,4 @@
 ﻿using Microsoft.AspNet.SignalR;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -67,13 +65,5 @@ namespace uSync8.BackOffice.Hubs
 
         public uSyncCallbacks Callbacks() =>
             new uSyncCallbacks(this.PostSummary, this.PostUpdate);
-    }
-
-    [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
-    public class uSyncUpdateMessage
-    {
-        public string Message { get; set; }
-        public int Count { get; set; }
-        public int Total { get; set; }
     }
 }

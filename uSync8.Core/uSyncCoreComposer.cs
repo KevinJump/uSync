@@ -59,12 +59,6 @@ namespace uSync8.Core
             composition.Register<ISyncDependencyChecker<ILanguage>, LanguageChecker>();
             composition.Register<ISyncDependencyChecker<IMacro>, MacroChecker>();
             composition.Register<ISyncDependencyChecker<IDataType>, DataTypeChecker>();
-
-            // load them as types ? - not sure we ever need this now ? 
-           
-            //composition.WithCollectionBuilder<SyncDependencyCollectionBuilder>()
-            //    .Add(() => composition.TypeLoader.GetTypes<ISyncDependencyItem>());
-
         }
     }
 }

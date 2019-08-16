@@ -176,7 +176,6 @@
     <Compile Include="Dependency\Checkers\MacroChecker.cs" />
     <Compile Include="Dependency\Checkers\MediaTypeChecker.cs" />
     <Compile Include="Dependency\Checkers\MemberTypeChecker.cs" />
-    <Compile Include="Dependency\SyncDependencyCollectionBuilder.cs" />
     <Compile Include="Dependency\Checkers\TemplateChecker.cs" />
     <Compile Include="Dependency\uSyncDependency.cs" />
     <Compile Include="Extensions\ListExtensions.cs" />

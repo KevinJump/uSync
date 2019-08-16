@@ -1,13 +1,11 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Serialization;
 
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Runtime.Serialization;
 using System.Web.Http;
 
 using Umbraco.Core.Cache;
@@ -63,14 +61,14 @@ namespace uSync8.BackOffice.Controllers
 
         [HttpGet]
         public IEnumerable<object> GetLoadedHandlers()
-            => handlerFactory.GetAll(false);
+            => handlerFactory.GetAll();
 
         /// <summary>
         ///  return handler groups for all enabled handlers
         /// </summary>
         [HttpGet]
         public IEnumerable<string> GetHandlerGroups()
-            => handlerFactory.GetValidGroups(uSync.Handlers.DefaultSet);
+            => handlerFactory.GetValidGroups(new SyncHandlerOptions(uSync.Handlers.DefaultSet));
 
         /// <summary>
         ///  returns the handler groups, even if the handlers
@@ -82,7 +80,7 @@ namespace uSync8.BackOffice.Controllers
 
         [HttpGet]
         public IEnumerable<object> GetHandlers()
-            => handlerFactory.GetAll(false)
+            => handlerFactory.GetAll()
                 .Select(x => new SyncHandlerSummary()
                 {
                     Icon = x.Icon,
@@ -95,21 +93,33 @@ namespace uSync8.BackOffice.Controllers
         public IEnumerable<uSyncAction> Report(uSyncOptions options)
         {
             var hubClient = new HubClientService(options.ClientId);
-            return uSyncService.Report(settings.RootFolder, options.Group, hubClient.Callbacks());
+            return uSyncService.Report(settings.RootFolder, new SyncHandlerOptions()
+            {
+                Group = options.Group
+            },
+            hubClient.Callbacks());
         }
 
         [HttpPost]
         public IEnumerable<uSyncAction> Export(uSyncOptions options)
         {
             var hubClient = new HubClientService(options.ClientId);
-            return uSyncService.Export(settings.RootFolder, options.Group, hubClient.Callbacks());
+            return uSyncService.Export(settings.RootFolder, new SyncHandlerOptions()
+            {
+                Group = options.Group
+            },
+            hubClient.Callbacks());
         }
 
         [HttpPut]
         public IEnumerable<uSyncAction> Import(uSyncOptions options)
         {
             var hubClient = new HubClientService(options.ClientId);
-            return uSyncService.Import(settings.RootFolder, options.Force, options.Group, hubClient.Callbacks());
+            return uSyncService.Import(settings.RootFolder, options.Force, new SyncHandlerOptions()
+            {
+                Group = options.Group
+            },
+            callbacks: hubClient.Callbacks());
         }
 
         [HttpPut]
@@ -202,31 +212,6 @@ namespace uSync8.BackOffice.Controllers
             addOnInfo.AddOnString = string.Join(", ", addOnInfo.AddOns.Select(x => x.Name));
 
             return addOnInfo;
-        }
-
-        [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
-        public class AddOnInfo
-        {
-            public string Version { get; set; }
-
-            public string AddOnString { get; set; }
-            public List<ISyncAddOn> AddOns { get; set; } = new List<ISyncAddOn>();
-        }
-
-        [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
-        public class uSyncOptions
-        {
-            [DataMember(Name = "clientId")]
-            public string ClientId { get; set; }
-
-            [DataMember(Name = "force")]
-            public bool Force { get; set; }
-
-            [DataMember(Name = "clean")]
-            public bool Clean { get; set; }
-
-            [DataMember(Name = "group")]
-            public string Group { get; set; }
         }
     }
 }

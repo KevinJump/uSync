@@ -9,21 +9,8 @@ using Umbraco.Core.Logging;
 using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.SyncHandlers;
 
-using static uSync8.BackOffice.uSyncService;
-
 namespace uSync8.BackOffice
 {
-    public class uSyncCallbacks
-    {
-        public SyncEventCallback Callback { get; private set; }
-        public SyncUpdateCallback Update { get; private set; }
-
-        public uSyncCallbacks(SyncEventCallback callback, SyncUpdateCallback update)
-        {
-            this.Callback = callback;
-            this.Update = update;
-        }
-    }
 
     /// <summary>
     ///  the service that does all the processing,
@@ -57,31 +44,21 @@ namespace uSync8.BackOffice
         }
 
         #region Reporting 
-        public IEnumerable<uSyncAction> Report(string folder, uSyncCallbacks callbacks)
-            => Report(folder, uSync.Handlers.DefaultSet, string.Empty, callbacks);
 
-        public IEnumerable<uSyncAction> Report(string folder, string group, uSyncCallbacks callbacks)
-            => Report(folder, uSync.Handlers.DefaultSet, group, callbacks);
-
-        public IEnumerable<uSyncAction> Report(string folder, string handlerSet, string group, uSyncCallbacks callbacks)
+        public IEnumerable<uSyncAction> Report(string folder, SyncHandlerOptions handlerOptions , uSyncCallbacks callbacks = null)
         {
-            var handlers = handlerFactory.GetValidHandlers(handlerSet, group, HandlerActions.Report);
+            if (handlerOptions == null) handlerOptions = new SyncHandlerOptions();
+            handlerOptions.Action = HandlerActions.Report;
+
+            var handlers = handlerFactory.GetValidHandlers(handlerOptions);
             return Report(folder, handlers, callbacks);
         }
 
         public IEnumerable<uSyncAction> Report(string folder, IEnumerable<string> handlerAliases, uSyncCallbacks callbacks)
-            => Report(folder, string.Empty, handlerAliases, callbacks);
-
-        public IEnumerable<uSyncAction> Report(string folder, string groupName, IEnumerable<string> handlerAliases, uSyncCallbacks callbacks)
-            => Report(folder, uSync.Handlers.DefaultSet, groupName, handlerAliases, callbacks);
-
-        public IEnumerable<uSyncAction> Report(string folder, string setName, string groupName, IEnumerable<string> handlerAliases, uSyncCallbacks callbacks)
         {
-            var handlers = handlerFactory.GetValidHandlers(handlerAliases.ToArray(), setName, groupName, HandlerActions.Report);
+            var handlers = handlerFactory.GetDefaultHandlers(handlerAliases);
             return Report(folder, handlers, callbacks);
         }
-
-
 
         public IEnumerable<uSyncAction> Report(string folder, IEnumerable<ExtendedHandlerConfigPair> handlers, uSyncCallbacks callbacks)
         {
@@ -96,7 +73,7 @@ namespace uSync8.BackOffice
                 // debug - full export into a dated folder. 
                 summary.Message = "Debug: Creating Extract in Tracker folder";
                 callbacks?.Callback?.Invoke(summary);
-                this.Export($"~/uSync/Tracker/{DateTime.Now.ToString("yyyyMMdd_HHmmss")}/", null);
+                this.Export($"~/uSync/Tracker/{DateTime.Now.ToString("yyyyMMdd_HHmmss")}/", handlers, callbacks);
             }
 
             foreach (var configuredHandler in handlers)
@@ -127,32 +104,35 @@ namespace uSync8.BackOffice
         #region Importing
         private static object _importLock = new object();
 
-        public IEnumerable<uSyncAction> Import(string folder, bool force, uSyncCallbacks callbacks)
-            => Import(folder, force, string.Empty, callbacks);
-
-        public IEnumerable<uSyncAction> Import(string folder, bool force, string groupName, uSyncCallbacks callbacks)
-            => Import(folder, force, uSync.Handlers.DefaultSet, groupName, callbacks);
-
-        public IEnumerable<uSyncAction> Import(string folder, bool force, string setName, string groupName, uSyncCallbacks callbacks)
+        public IEnumerable<uSyncAction> Import(string folder, bool force, SyncHandlerOptions handlerOptions, uSyncCallbacks callbacks = null)
         {
-            var handlers = handlerFactory.GetValidHandlers(setName, groupName, HandlerActions.Import);
+            if (handlerOptions == null) handlerOptions = new SyncHandlerOptions();
+            handlerOptions.Action = HandlerActions.Import;
+
+            var handlers = handlerFactory.GetValidHandlers(handlerOptions);
             return Import(folder, force, handlers, callbacks);
         }
 
+        /// <summary>
+        ///  Import using the speicifed handlers - regardless of config settings 
+        /// </summary>
+        /// <remarks>
+        ///  When importing, with aliases, unless we say so - we ignore the sets, because we know what we want 
+        /// </remarks>
+        /// <returns>
+        ///  Collection of uSyncActions detailed what imports took place. 
+        /// </returns>
         public IEnumerable<uSyncAction> Import(string folder, bool force, IEnumerable<string> handlerAliases, uSyncCallbacks callbacks)
-            => Import(folder, force, string.Empty, handlerAliases, callbacks);
-
-        public IEnumerable<uSyncAction> Import(string folder, bool force, string groupName, IEnumerable<string> handlerAliases, uSyncCallbacks callbacks)
-            => Import(folder, force, uSync.Handlers.DefaultSet, groupName, handlerAliases, callbacks);
-
-        public IEnumerable<uSyncAction> Import(string folder, bool force, string setName, string groupName, IEnumerable<string> handlerAliases, uSyncCallbacks callbacks)
-        {
-            var handlers = handlerFactory.GetValidHandlers(handlerAliases.ToArray(), setName, groupName, HandlerActions.Import);
+        { 
+            var handlers = handlerFactory.GetDefaultHandlers(handlerAliases);
             return Import(folder, force, handlers, callbacks);
         }
 
         public IEnumerable<uSyncAction> Import(string folder, bool force, IEnumerable<ExtendedHandlerConfigPair> handlers, uSyncCallbacks callbacks)
         {
+            // if its blank, we just throw it back empty. 
+            if (handlers == null || !handlers.Any()) return Enumerable.Empty<uSyncAction>();
+
             lock (_importLock)
             {
                 var sw = Stopwatch.StartNew();
@@ -162,8 +142,6 @@ namespace uSync8.BackOffice
                     uSync8BackOffice.eventsPaused = true;
 
                     var actions = new List<uSyncAction>();
-
-                    // var configuredHandlers = syncHandlers.GetValidHandlers("import", settings).ToList();
 
                     var summary = new SyncProgressSummary(handlers.Select(x => x.Handler), "Importing", handlers.Count() + 1);
                     summary.Handlers.Add(new SyncHandlerSummary()
@@ -241,7 +219,7 @@ namespace uSync8.BackOffice
 
         public uSyncAction ImportSingleAction(uSyncAction action)
         {
-            var handlerConfig = handlerFactory.GetValidHandler(action.HandlerAlias, uSync.Handlers.DefaultSet);
+            var handlerConfig = handlerFactory.GetValidHandler(action.HandlerAlias);
             if (handlerConfig != null && handlerConfig.Handler is ISyncExtendedHandler extendedHandler)
             {
                 extendedHandler.Import(action.FileName, handlerConfig.Settings, true);
@@ -254,28 +232,20 @@ namespace uSync8.BackOffice
         #endregion
 
         #region Exporting 
-        public IEnumerable<uSyncAction> Export(string folder, uSyncCallbacks callbacks)
-            => Export(folder, string.Empty, callbacks);
 
-        public IEnumerable<uSyncAction> Export(string folder, string groupName, uSyncCallbacks callbacks)
-            => Export(folder, uSync.Handlers.DefaultSet, groupName, callbacks);
-
-        public IEnumerable<uSyncAction> Export(string folder, string setName, string groupName, uSyncCallbacks callbacks)
+        public IEnumerable<uSyncAction> Export(string folder, SyncHandlerOptions handlerOptions,  uSyncCallbacks callbacks = null)
         {
-            var handlers = handlerFactory.GetValidHandlers(setName, groupName, HandlerActions.Export);
+            if (handlerOptions == null) handlerOptions = new SyncHandlerOptions();
+            handlerOptions.Action = HandlerActions.Export;
+
+            var handlers = handlerFactory.GetValidHandlers(handlerOptions);
             return Export(folder, handlers, callbacks);
         }
 
         public IEnumerable<uSyncAction> Export(string folder, IEnumerable<string> handlerAliases, uSyncCallbacks callbacks)
-            => Export(folder, string.Empty, handlerAliases, callbacks);
-
-        public IEnumerable<uSyncAction> Export(string folder, string groupName, IEnumerable<string> handlerAliases, uSyncCallbacks callbacks)
-            => Export(folder, uSync.Handlers.DefaultSet, groupName, handlerAliases, callbacks);
-
-        public IEnumerable<uSyncAction> Export(string folder, string setName, string groupName, IEnumerable<string> handlerAliases, uSyncCallbacks callbacks)
         {
-            var handlers = handlerFactory.GetValidHandlers(handlerAliases.ToArray(), setName, groupName, HandlerActions.Export);
-            return Export(folder, handlers, callbacks);
+            var handlers = handlerFactory.GetDefaultHandlers(handlerAliases);
+            return Export(folder, handlers , callbacks);
         }
 
         public IEnumerable<uSyncAction> Export(string folder, IEnumerable<ExtendedHandlerConfigPair> handlers, uSyncCallbacks callbacks)
@@ -315,15 +285,15 @@ namespace uSync8.BackOffice
 
         [Obsolete("Use the new uSyncCallbacks group when calling")]
         public IEnumerable<uSyncAction> Import(string folder, bool force, SyncEventCallback callback = null, SyncUpdateCallback update = null)
-            => Import(folder, force, new uSyncCallbacks(callback, update));
+            => Import(folder, force, default(SyncHandlerOptions), new uSyncCallbacks(callback, update));
 
         [Obsolete("Use the new uSyncCallbacks group when calling")]
         public IEnumerable<uSyncAction> Report(string folder, SyncEventCallback callback = null, SyncUpdateCallback update = null)
-            => Report(folder, new uSyncCallbacks(callback, update));
+            => Report(folder, default(SyncHandlerOptions), new uSyncCallbacks(callback, update));
 
         [Obsolete("Use the new uSyncCallbacks group when calling")]
         public IEnumerable<uSyncAction> Export(string folder, SyncEventCallback callback = null, SyncUpdateCallback update = null)
-            => Export(folder, new uSyncCallbacks(callback, update));
+            => Export(folder, default(SyncHandlerOptions), new uSyncCallbacks(callback, update));
 
         #endregion
 
