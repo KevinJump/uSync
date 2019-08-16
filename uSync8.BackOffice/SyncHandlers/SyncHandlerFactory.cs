@@ -78,26 +78,24 @@ namespace uSync8.BackOffice.SyncHandlers
 
         public ExtendedHandlerConfigPair GetValidHandlerByTypeName(string typeName, string setName, HandlerActions action)
             => GetValidHandlers(setName, string.Empty, action)
-                .Where(x => x.Handler is ISyncExtendedHandler && typeName.InvariantEquals(((ISyncExtendedHandler)x.Handler).TypeName))
+                .Where(x => typeName.InvariantEquals(x.Handler.TypeName))
                 .FirstOrDefault();
 
         public ExtendedHandlerConfigPair GetValidHandlerByEntityType(string entityType, string setName, HandlerActions action)
             => GetValidHandlers(setName, string.Empty, action)
-                .Where(x => x.Handler is ISyncExtendedHandler && entityType.InvariantEquals(((ISyncExtendedHandler)x.Handler).EntityType))
+                .Where(x => entityType.InvariantEquals(x.Handler.EntityType))
                 .FirstOrDefault();
 
         public IEnumerable<ExtendedHandlerConfigPair> GetValidHandlersByEntityType(IEnumerable<string> entityTypes, string setName, string group, HandlerActions action)
             => GetValidHandlers(setName, group, action)
-                .Where(x => x.Handler is ISyncExtendedHandler
-                    && entityTypes.InvariantContains(((ISyncExtendedHandler)x.Handler).EntityType));
+                .Where(x => entityTypes.InvariantContains(x.Handler.EntityType));
 
         public IEnumerable<string> GetValidGroups(string setName)
             => GetValidGroups(setName, HandlerActions.None);
 
         public IEnumerable<string> GetValidGroups(string setName, HandlerActions action)
             => GetValidHandlers(setName, string.Empty, action)
-                .Where(x => x.Handler is ISyncExtendedHandler)
-                .Select(x => ((ISyncExtendedHandler)x.Handler).Group)
+                .Select(x => x.Handler.Group)
                 .Distinct();
 
         public IEnumerable<ExtendedHandlerConfigPair> GetValidHandlers(string setName, string group)
@@ -131,10 +129,8 @@ namespace uSync8.BackOffice.SyncHandlers
                     // is this filtered by group ?
                     if (string.IsNullOrWhiteSpace(group) || HandlerInGroup(handler, group))
                     {
-
                         // is this filtered by action 
                         if (action == HandlerActions.None || IsValidAction(settings.Actions, action))
-                        // if (string.IsNullOrWhiteSpace(action) || IsValidAction(settings.Actions, action))
                         {
                             configs.Add(new ExtendedHandlerConfigPair()
                             {
