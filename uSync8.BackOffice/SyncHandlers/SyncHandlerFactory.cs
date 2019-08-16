@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Umbraco.Core;
 using uSync8.BackOffice.Configuration;
 
@@ -78,15 +76,11 @@ namespace uSync8.BackOffice.SyncHandlers
              => GetValidHandlers(setName, group, action)
                  .FirstOrDefault(x => x.Handler.Alias.InvariantEquals(alias));
 
-        public IEnumerable<HandlerConfigPair> GetValidHandlers(string[] aliases, string setName, string group, HandlerActions action)
-            => GetValidHandlers(setName, group, action)
-                .Where(x => aliases.InvariantContains(x.Handler.Alias));
-
         public HandlerConfigPair GetValidHandlerByTypeName(string typeName, string setName, HandlerActions action)
             => GetValidHandlers(setName, string.Empty, action)
                 .Where(x => x is ISyncExtendedHandler && typeName.InvariantEquals(((ISyncExtendedHandler)x.Handler).TypeName))
                 .FirstOrDefault();
-        
+
         public HandlerConfigPair GetValidHandlerByEntityType(string entityType, string setName, HandlerActions action)
             => GetValidHandlers(setName, string.Empty, action)
                 .Where(x => x is ISyncExtendedHandler && entityType.InvariantEquals(((ISyncExtendedHandler)x.Handler).EntityType))
@@ -94,7 +88,7 @@ namespace uSync8.BackOffice.SyncHandlers
 
         public IEnumerable<HandlerConfigPair> GetValidHandlersByEntityType(IEnumerable<string> entityTypes, string setName, string group, HandlerActions action)
             => GetValidHandlers(setName, group, action)
-                .Where(x => x is ISyncExtendedHandler 
+                .Where(x => x is ISyncExtendedHandler
                     && entityTypes.InvariantContains(((ISyncExtendedHandler)x.Handler).EntityType));
 
         public IEnumerable<string> GetValidGroups(string setName)
@@ -107,7 +101,11 @@ namespace uSync8.BackOffice.SyncHandlers
                 .Distinct();
 
         public IEnumerable<HandlerConfigPair> GetValidHandlers(string setName, string group)
-            => GetValidHandlers(setName, group);
+            => GetValidHandlers(setName, group, HandlerActions.None);
+
+        public IEnumerable<HandlerConfigPair> GetValidHandlers(string[] aliases, string setName, string group, HandlerActions action)
+            => GetValidHandlers(setName, group, action)
+                .Where(x => aliases.InvariantContains(x.Handler.Alias));
 
         public IEnumerable<HandlerConfigPair> GetValidHandlers(string setName, string group, HandlerActions action)
         {
