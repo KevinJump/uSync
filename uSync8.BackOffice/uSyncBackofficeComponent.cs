@@ -96,7 +96,7 @@ namespace uSync8.BackOffice
 
             if (globalSettings.ExportOnSave)
             {
-                var handlers = handlerFactory.GetValidHandlers(handlerFactory.DefaultSet, string.Empty, HandlerActionNames.Save);
+                var handlers = handlerFactory.GetValidHandlers(handlerFactory.DefaultSet, string.Empty, HandlerActions.Save);
                 foreach (var syncHandler in handlers)
                 {
                     logger.Debug<uSyncBackofficeComponent>($"Starting up Handler {syncHandler.Handler.Name}");

@@ -361,7 +361,6 @@ namespace uSync8.BackOffice.SyncHandlers
 
         virtual public IEnumerable<uSyncAction> ExportAll(int parent, string folder, HandlerSettings config, SyncUpdateCallback callback)
         {
-            int count = 0;
             var actions = new List<uSyncAction>();
 
             if (itemContainerType != UmbracoObjectTypes.Unknown)
