@@ -46,7 +46,15 @@ namespace uSync8.ContentEdition.Handlers
             => mediaService.GetById(id);
 
         protected override IMedia GetFromService(Guid key)
-            => mediaService.GetById(key);
+        {
+            // FIX: alpha bug - getby key is not always uptodate 
+            var entity = entityService.Get(key);
+            if (entity != null)
+                return mediaService.GetById(entity.Id);
+
+            return null;
+        }
+
 
         protected override IMedia GetFromService(string alias)
             => null;
