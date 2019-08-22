@@ -154,7 +154,7 @@ namespace uSync8.BackOffice.Controllers
             var cachedContent = AppCaches.RuntimeCache.GetCacheItem<string>("usync_addon");
             if (!string.IsNullOrEmpty(cachedContent)) return cachedContent;
 
-            var remote = "https://jumoo.co.uk/usync/addon/";
+            var remote = "https://jumoo.co.uk/usync/addon/82/";
             try
             {
                 using (var client = new WebClient())
