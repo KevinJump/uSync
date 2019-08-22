@@ -290,3 +290,7 @@
     margin: -20px;
     background: linear-gradient(#e3e3f1, #f6f4f4);
 }
+
+.usync-handler-box .umb-box-header {
+    cursor: pointer;
+}

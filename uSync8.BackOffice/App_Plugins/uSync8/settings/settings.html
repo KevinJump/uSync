@@ -2,7 +2,13 @@
     <div class="usync-settings">
         <div class="usync-main-settings">
             <umb-box>
-                <umb-box-header title="Settings" description="Controls what uSync does and when"></umb-box-header>
+                <umb-box-header title="Settings" description="Controls what uSync does and when">
+                    <umb-button type="button"
+                                button-style="success"
+                                label-key="usync_savesettings"
+                                action="vm.saveSettings()"
+                                disabled="vm.working">
+                </umb-box-header>
                 <umb-box-content>
 
                     <div class="umb-permission">
@@ -82,9 +88,9 @@
                 <umb-box-header title="Handlers" description="Controllers for each type of object"></umb-box-header>
                 <umb-box-content>Default Set : <strong>{{vm.settings.DefaultSet}}</strong></umb-box-content>
             </umb-box>
-            <umb-box ng-repeat="handlerSet in vm.settings.HandlerSets">
-                <umb-box-header title="Handler Set: {{handlerSet.Name}}"></umb-box-header>
-                <umb-box-content>
+            <umb-box ng-repeat="handlerSet in vm.settings.HandlerSets" class="usync-handler-box">
+                <umb-box-header title="Handler Set: {{handlerSet.Name}}" ng-click="handlerSet.show = !handlerSet.show"></umb-box-header>
+                <umb-box-content ng-if="handlerSet.show">
                     <div ng-repeat="handler in handlerSet.Handlers" class="umb-permission">
                         <umb-toggle class="umb-permission__toggle"
                                     checked="handler.Enabled"
@@ -106,9 +112,4 @@
             </umb-box>
         </div>
     </div>
-    <umb-button type="button"
-                button-style="success"
-                label-key="usync_savesettings"
-                action="vm.saveSettings()"
-                disabled="vm.working">
 </div>
