@@ -63,7 +63,7 @@ namespace uSync8.BackOffice.Configuration
         private IList<HandlerSet> LoadHandlerSets(XElement node, uSyncSettings defaultSettings, out string defaultSet)
         {
             var sets = new List<HandlerSet>();
-            defaultSet = node.Attribute("default").ValueOrDefault("default");
+            defaultSet = node.Attribute("Default").ValueOrDefault("default");
 
             foreach(var setNode in node.Elements("Handlers"))
             {
@@ -109,7 +109,7 @@ namespace uSync8.BackOffice.Configuration
             {
                 // remove the existing handlerSets node?
                 var handlerSets = node.FindOrCreate("HandlerSets");
-                handlerSets.SetAttributeValue("default", settings.DefaultSet);
+                handlerSets.SetAttributeValue("Default", settings.DefaultSet);
 
                 foreach(var set in settings.HandlerSets)
                 {
