@@ -196,17 +196,17 @@
     text-align: left;
 }
 
-.usync-box-nuget a {
-    background-color: black;
-    display: block;
-    color: #fff;
-    font-family: monospace;
-    padding: 10px 10px;
-    border-radius: 4px;
-    margin: 10px 0;
-}
+    .usync-box-nuget a {
+        background-color: #1b264f;
+        display: block;
+        color: #fff;
+        font-family: monospace;
+        padding: 10px 10px;
+        border-radius: 4px;
+        margin: 10px 0;
+    }
 
-.usync-box-inprogress { 
+.usync-box-inprogress {
     opacity: 0.5;
 }
 
@@ -225,4 +225,68 @@
     font-style: italic;
     color: #444;
     margin-top: 2px;
+}
+
+.usync-extras {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    .usync-extras > div {
+        padding: 10vh 0;
+        text-align: center;
+        font-size: 120%;
+    }
+
+.usync-banner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+    .usync-banner h2 {
+        display: flex;
+        justify-content: center;
+        font-weight: 700;
+        padding: 10px 0;
+    }
+
+        .usync-banner h2 > i {
+            padding-right: 15px;
+            font-size: 60px;
+        }
+
+    .usync-banner p {
+        font-size: 120%;
+        max-width: 50%;
+        margin: 20px;
+    }
+
+    .usync-banner .btn {
+        margin-top: 40px;
+    }
+
+.banner-icons {
+    display: flex;
+    width: 80%;
+    justify-content: space-between;
+    margin: 25px 0;
+}
+
+    .banner-icons > div {
+        display: flex;
+        flex-direction: column;
+    }
+
+        .banner-icons > div > i {
+            display: block;
+            padding: 20px;
+            font-size: 160%;
+            color: rgba(0,0,0,0.5);
+        }
+
+.usync-pane-fade {
+    margin: -20px;
+    background: linear-gradient(#e3e3f1, #f6f4f4);
 }

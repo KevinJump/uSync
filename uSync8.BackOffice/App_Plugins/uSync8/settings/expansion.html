@@ -1,39 +1,18 @@
-﻿<div ng-controller="uSyncExpansionController as vm">
+﻿<div ng-controller="uSyncExpansionController as vm" class="usync-pane-fade">
     <umb-load-indicator ng-if="vm.loading"></umb-load-indicator>
-    <div ng-if="!vm.loading">
-        <umb-box>
-            <umb-box-header title="Expansion Packs"></umb-box-header>
-            <umb-box-content>
-                {{vm.addons.intro}}
-            </umb-box-content>
-        </umb-box>
+    <div ng-if="!vm.loading" class="usync-extras">
+        <div class="usync-banner">
+            <h2><i class="{{vm.addons.banner.icon}}"></i> {{vm.addons.banner.title}}</h2>
+            <p>{{vm.addons.banner.text}}</p>
 
-        <div class="usync-boxes">
-            <umb-box class="usync-box" ng-repeat="expansion in vm.addons.expansions"
-                     ng-class="{'usync-box-inprogress' : expansion.state === 'working'}">
-                <umb-box-header title="{{expansion.name}}"
-                                description="{{expansion.summary}}"></umb-box-header>
-                <umb-box-content>
-                    <div class="usync-box-icon">
-                        <i class="icon {{expansion.icon}}"></i>
-                    </div>
-                    <div>
-                        {{expansion.description}}
-                    </div>
-                    <div ng-if="expansion.state !== 'working'">
-                        <a href="{{expansion.url}}" target="_blank">More Info</a>
-                    </div>
-                    <div class="usync-box-nuget" ng-if="expansion.state !== 'working'">
-                        <a href="https://nuget.org/packages/{{expansion.package}}" target="_blank">
-                            install-package {{expansion.package}}
-                            <span ng-if="expansion.state === 'preview'">pre</span>
-                        </a>
-                    </div>
-                    <div ng-if="expansion.state === 'working'" class="text-success">
-                        Coming Soon!
-                    </div>
-                </umb-box-content>
-            </umb-box>
+            <div class="banner-icons">
+                <div ng-repeat="icon in vm.addons.banner.icons">
+                    <i class="icon {{icon.icon}}"></i>
+                    {{icon.name}}
+                </div>
+            </div>
+
+            <a href="{{vm.addons.banner.link}}" target="_blank" class="btn btn-success btn-large">Find out more</a>
         </div>
     </div>
 </div>
