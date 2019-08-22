@@ -74,6 +74,22 @@ namespace uSync8.Core.Serialization.Serializers
             if (item.Alias != alias)
                 item.Alias = alias;
 
+            //var master = node.Element("Parent").ValueOrDefault(string.Empty);
+            //if (master != string.Empty)
+            //{
+            //    var masterItem = fileService.GetTemplate(master);
+            //    if (masterItem != null)
+            //        item.SetMasterTemplate(masterItem);
+            //}
+
+            // Deserialize now takes care of the save.
+            // fileService.SaveTemplate(item);
+
+            return SyncAttempt<ITemplate>.Succeed(item.Name, item, ChangeType.Import);
+        }
+
+        public override SyncAttempt<ITemplate> DeserializeSecondPass(ITemplate item, XElement node, SerializerFlags flags)
+        {
             var master = node.Element("Parent").ValueOrDefault(string.Empty);
             if (master != string.Empty)
             {
@@ -82,10 +98,12 @@ namespace uSync8.Core.Serialization.Serializers
                     item.SetMasterTemplate(masterItem);
             }
 
-            // Deserialize now takes care of the save.
-            // fileService.SaveTemplate(item);
+
+            if (!flags.HasFlag(SerializerFlags.DoNotSave))
+                SaveItem(item);
 
             return SyncAttempt<ITemplate>.Succeed(item.Name, item, ChangeType.Import);
+
         }
 
 
