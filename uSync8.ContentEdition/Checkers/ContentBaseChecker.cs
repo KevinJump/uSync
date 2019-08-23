@@ -107,6 +107,11 @@ namespace uSync8.ContentEdition.Checkers
         protected abstract IContentBase GetItemById(int id);
 
 
+        protected readonly string[] settingsTypes = new string[]
+        {
+            UdiEntityType.Macro, UdiEntityType.DocumentType, UdiEntityType.DataType, UdiEntityType.DictionaryItem
+        };
+
         /// <summary>
         ///  so do we want this ? go through all the picked values in the content, 
         ///  and include them in the things to export ? 
@@ -135,6 +140,12 @@ namespace uSync8.ContentEdition.Checkers
                         if (flags.HasFlag(DependencyFlags.IncludeLinked))
                         {
                             dependencies.AddRange(linkedDependencies.Where(x => x.Udi.EntityType == UdiEntityType.Document));
+                        }
+
+                        // include any settings things we would be dependent on for this property. 
+                        if (flags.HasFlag(DependencyFlags.IncludeDependencies))
+                        {
+                            dependencies.AddRange(linkedDependencies.Where(x => settingsTypes.InvariantContains(x.Udi.EntityType)));
                         }
 
                         // media means we include media items (the files are checked)

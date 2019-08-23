@@ -13,7 +13,7 @@ namespace uSync8.ContentEdition.Mapping
 {
     public abstract class SyncValueMapperBase
     {
-        private readonly IEntityService entityService;
+        protected readonly IEntityService entityService;
 
         public SyncValueMapperBase(IEntityService entityService)
         {
@@ -85,6 +85,20 @@ namespace uSync8.ContentEdition.Mapping
                 return entityService.Get(guidUdi.Guid);
             }
             return null;
+        }
+        
+        /// <summary>
+        ///  helper to convert object to a string (with all the checks)
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        protected TObject GetValueAs<TObject>(object value)
+        {
+            if (value == null) return default;
+            var attempt = value.TryConvertTo<TObject>();
+            if (!attempt) return default;
+
+            return attempt.Result;
         }
     }
 }

@@ -259,6 +259,7 @@
     <Compile Include="Mapping\Mappers\GridMapper.cs" />
     <Compile Include="Mapping\Mappers\MacroMapper.cs" />
     <Compile Include="Mapping\Mappers\MultiUrlMapper.cs" />
+    <Compile Include="Mapping\Mappers\NestedContentMapper.cs" />
     <Compile Include="Mapping\Mappers\RTEMapper.cs" />
     <Compile Include="Mapping\Mappers\UdiPickerMapper.cs" />
     <Compile Include="Mapping\SyncValueMapperBase.cs" />
