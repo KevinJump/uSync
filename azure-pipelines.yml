@@ -30,7 +30,7 @@ steps:
     configuration: '$(buildConfiguration)'
 
 - task: NuGetCommand@2
-  displayName: 'Creating NuGet Packages'
+  displayName: 'Creating NuGet Packages $(packageVersion)'
   inputs:
     command: 'pack'
     packagesToPack: '**/*.nuspec'
