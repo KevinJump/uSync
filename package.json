@@ -17,6 +17,6 @@
   },
   "homepage": "https://github.com/KevinJump/uSync8#readme",
   "devDependencies": {
-    "gulp": "^4.0.0"
+    "gulp": "^4.0.2"
   }
 }
