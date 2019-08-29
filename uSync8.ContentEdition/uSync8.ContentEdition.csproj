@@ -262,6 +262,7 @@
     <Compile Include="Mapping\Mappers\NestedContentMapper.cs" />
     <Compile Include="Mapping\Mappers\RTEMapper.cs" />
     <Compile Include="Mapping\Mappers\UdiPickerMapper.cs" />
+    <Compile Include="Mapping\SyncNestedValueMapperBase.cs" />
     <Compile Include="Mapping\SyncValueMapperBase.cs" />
     <Compile Include="Mapping\SyncValueMapperCollection.cs" />
     <Compile Include="Mapping\SyncValueMapperFactory.cs" />

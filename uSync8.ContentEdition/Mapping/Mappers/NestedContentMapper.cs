@@ -9,17 +9,14 @@ using uSync8.Core.Dependency;
 
 namespace uSync8.ContentEdition.Mapping.Mappers
 {
-    public class NestedContentMapper : SyncValueMapperBase, ISyncMapper
+    public class NestedContentMapper : SyncNestedValueMapperBase, ISyncMapper
     {
-        private readonly IContentTypeService contentTypeService;
-
         public NestedContentMapper(
+            IEntityService entityService,
             IContentTypeService contentTypeService,
-            IEntityService entityService) 
-            : base(entityService)
-        {
-            this.contentTypeService = contentTypeService;
-        }
+            IDataTypeService dataTypeService) 
+            : base(entityService, contentTypeService, dataTypeService)
+        { }
 
         public override string Name => "Nested Content Mapper";
 
@@ -40,9 +37,12 @@ namespace uSync8.ContentEdition.Mapping.Mappers
 
             var dependencies = new List<uSyncDependency>();
 
-            foreach(var item in nestedJson)
+            foreach(var item in nestedJson.Cast<JObject>())
             {
                 var docTypeAlias = item["ncContentTypeAlias"].ToString();
+
+                var docType = contentTypeService.Get(docTypeAlias);
+                if (docType == null) continue;
 
                 if (flags.HasFlag(DependencyFlags.IncludeDependencies))
                 {
@@ -50,27 +50,12 @@ namespace uSync8.ContentEdition.Mapping.Mappers
                     if (docTypeDep != null)
                         dependencies.Add(docTypeDep);
                 }
+
+                dependencies.AddRange(GetPropertyDependencies(item,
+                    docType.CompositionPropertyTypes, flags));
             }
 
             return dependencies;
-        }
-
-        private uSyncDependency CreateDocTypeDependency(string alias, DependencyFlags flags)
-        {
-            var item = contentTypeService.Get(alias);
-            if (item != null)
-            {
-                return new uSyncDependency()
-                {
-                    Name = item.Name,
-                    Udi = item.GetUdi(),
-                    Order = DependencyOrders.ContentTypes,
-                    Flags = flags & ~DependencyFlags.IncludeAncestors,
-                    Level = item.Level
-                };
-            }
-
-            return null;
         }
     }
 }

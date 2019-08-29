@@ -1,0 +1,43 @@
+﻿/*.dtge-dialog fieldset legend {
+    display: none;
+}*/
+
+.dtge-dialog input.ng-invalid {
+    border-color: #9d261d;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
+    -moz-box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
+    box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
+}
+
+.dtge-dialog .help-inline {
+    color: #9d261d;
+}
+
+.dtge-dialog textarea.textstring {
+    resize: both;
+    border: 1px solid #bbbabf;
+}
+
+/*
+    Style the doc type grid editor previews
+
+.dtge-editor-placeholder {
+    background-color: #f8f8f8;
+    background-color: rgba(0,0,0,0.03);
+    padding: 20px;
+}
+
+.dtge-editor-placeholder .icon {
+    text-align: center;
+    display: block;
+    color: #ddd;
+    color: rgba(0,0,0,0.1);
+    font-size: 50px;
+    line-height: 50px;
+}
+
+.dtge-editor-placeholder .help-text {
+    text-align: center;
+    display: block;
+}
+*/
