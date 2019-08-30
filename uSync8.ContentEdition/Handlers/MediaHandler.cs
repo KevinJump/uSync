@@ -64,6 +64,7 @@ namespace uSync8.ContentEdition.Handlers
             MediaService.Saved += EventSavedItem;
             MediaService.Deleted += EventDeletedItem;
             MediaService.Moved += EventMovedItem;
+            MediaService.Trashed += EventMovedItem;
         }
     }
 }
