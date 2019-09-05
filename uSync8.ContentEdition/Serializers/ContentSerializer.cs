@@ -61,7 +61,7 @@ namespace uSync8.ContentEdition.Serializers
             return info;
         }
 
-        private XElement SerializeTemplate(IContent item)
+        protected virtual XElement SerializeTemplate(IContent item)
         {
             if (item.TemplateId != null && item.TemplateId.HasValue)
             {
@@ -132,7 +132,7 @@ namespace uSync8.ContentEdition.Serializers
                 "");
         }
 
-        private void DeserializeTemplate(IContent item, XElement node)
+        protected virtual void DeserializeTemplate(IContent item, XElement node)
         {
             var templateNode = node.Element("Info")?.Element("Template");
 
