@@ -15,6 +15,7 @@
     </releaseNotes>
     <dependencies>
       <dependency id="uSync" version="$depends$" />
+      <dependency id="uSync.Community.Contrib" version="$depends$"/>
     </dependencies>
   </metadata>
   <files>

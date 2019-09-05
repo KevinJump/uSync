@@ -158,6 +158,8 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
+    <None Include="readme.md" />
+    <None Include="uSync.Community.Contrib.nuspec" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\uSync8.ContentEdition\uSync8.ContentEdition.csproj">

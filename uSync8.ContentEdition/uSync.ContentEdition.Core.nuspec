@@ -16,6 +16,7 @@
     </releaseNotes>
     <dependencies>
       <dependency id="uSync.BackOffice.Core" version="$depends$"/>
+      <dependency id="uSync.Community.Contrib" version="$depends$"/>
       <!-- <dependency id="Microsoft.AspNet.SignalR.Core" version="2.4.0"/> -->
     </dependencies>
   </metadata>
