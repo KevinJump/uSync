@@ -21,14 +21,17 @@ namespace uSync8.ContentEdition.Serializers
     public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerializer<IContent>
     {
         protected readonly IContentService contentService;
+        protected readonly IFileService fileService;
 
         public ContentSerializer(
             IEntityService entityService, ILogger logger,
             IContentService contentService,
+            IFileService fileService,
             SyncValueMapperCollection syncMappers)
             : base(entityService, logger, UmbracoObjectTypes.Document, syncMappers)
         {
             this.contentService = contentService;
+            this.fileService = fileService;
         }
 
         #region Serialization
@@ -38,6 +41,7 @@ namespace uSync8.ContentEdition.Serializers
             var node = InitializeNode(item, item.ContentType.Alias);
 
             var info = SerializeInfo(item);
+            
             var properties = SerializeProperties(item);
 
             node.Add(info);
@@ -52,8 +56,24 @@ namespace uSync8.ContentEdition.Serializers
 
             info.Add(SerailizePublishedStatus(item));
             info.Add(SerializeSchedule(item));
+            info.Add(SerializeTemplate(item));
 
             return info;
+        }
+
+        private XElement SerializeTemplate(IContent item)
+        {
+            if (item.TemplateId != null && item.TemplateId.HasValue)
+            {
+                var template = fileService.GetTemplate(item.TemplateId.Value);
+                if (template != null)
+                {
+                    return new XElement("Template", 
+                        new XAttribute("Key", template.Key),
+                        template.Alias);
+                }
+            }
+            return new XElement("Template");
         }
 
         private XElement SerailizePublishedStatus(IContent item)
@@ -101,6 +121,7 @@ namespace uSync8.ContentEdition.Serializers
             }
 
             DeserializeBase(item, node);
+            DeserializeTemplate(item, node);
 
             // contentService.Save(item);
 
@@ -109,6 +130,33 @@ namespace uSync8.ContentEdition.Serializers
                 item,
                 ChangeType.Import,
                 "");
+        }
+
+        private void DeserializeTemplate(IContent item, XElement node)
+        {
+            var templateNode = node.Element("Info")?.Element("Template");
+
+            if (templateNode != null)
+            {
+                var key = templateNode.ValueOrDefault(Guid.Empty);
+                if (key != Guid.Empty)
+                {
+                    var template = fileService.GetTemplate(key);
+                    if (template != null)
+                    {
+                        item.TemplateId = template.Id;
+                        return;
+                    }
+                }
+
+                var alias = templateNode.ValueOrDefault(string.Empty);
+                if (!string.IsNullOrWhiteSpace(alias))
+                {
+                    var template = fileService.GetTemplate(alias);
+                    if (template != null)
+                        item.TemplateId = template.Id;
+                }
+            }
         }
 
 

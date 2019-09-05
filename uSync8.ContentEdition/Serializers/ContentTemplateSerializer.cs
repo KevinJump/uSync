@@ -25,9 +25,10 @@ namespace uSync8.ContentEdition.Serializers
         public ContentTemplateSerializer(
             IEntityService entityService, ILogger logger,
             IContentService contentService,
+            IFileService fileService,
             IContentTypeService contentTypeService,
             SyncValueMapperCollection syncMappers)
-            : base(entityService, logger, contentService,syncMappers)
+            : base(entityService, logger, contentService,fileService, syncMappers)
         {
             this.contentTypeService = contentTypeService;
         }
