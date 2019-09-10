@@ -16,6 +16,7 @@
       <dependency id="uSync.Core" version="$depends$"/>
       <dependency id="Microsoft.AspNet.SignalR.Core" version="2.4.0"/>
     </dependencies>
+    <tags>umbraco usync</tags>
   </metadata>
   <files>
     <file src="..\readme.txt" target="readme.txt" />

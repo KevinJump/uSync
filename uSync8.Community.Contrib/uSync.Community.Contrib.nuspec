@@ -15,6 +15,7 @@
     <dependencies>
       <dependency id="uSync.BackOffice.Core" version="$depends$"/>
     </dependencies>
+    <tags>umbraco usync</tags>
   </metadata>
   <files>
     <file src="bin\$Configuration$\uSync8.Community.Contrib.dll" target="lib\net472" />

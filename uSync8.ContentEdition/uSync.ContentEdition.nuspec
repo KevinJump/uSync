@@ -17,6 +17,7 @@
       <dependency id="uSync" version="$depends$" />
       <dependency id="uSync.Community.Contrib" version="$depends$"/>
     </dependencies>
+    <tags>umbraco usync</tags>
   </metadata>
   <files>
     <file src="bin\$Configuration$\uSync8.ContentEdition.dll" target="lib\net472" />

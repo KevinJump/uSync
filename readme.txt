@@ -1,26 +1,20 @@
-﻿          _____                  
-   __  __/ ___/__  ______  _____ 
-  / / / /\__ \/ / / / __ \/ ___/ 
- / /_/ /___/ / /_/ / / / / /__ 
- \__,_//____/\__, /_/ /_/\___/ 🛴🛒
------------ /____/ --- 8.x ---------
+﻿           _____                  
+    __  __/ ___/__  ______  _____ 
+   / / / /\__ \/ / / / __ \/ ___/ 
+  / /_/ /___/ / /_/ / / / / /__ 
+  \__,_//____/\__, /_/ /_/\___/ 🛴🛒
+ ----------- /____/ --- 8.2.x --------
+                                             
 
-## 8.2 Beta 2 #############################################################
-#                                                                         #
-# This is a beta release of uSync, for stable installs use version 8.1.x  #
-#                                                                         #
-###########################################################################
- 
+ Welcome to uSync 8 for Umbraco 8
 
-Welcome to uSync 8 for Umbraco 8
-
-I be not for Umbraco 7 :
+ I be not for Umbraco 7 :
 
   uSync 8 works only on Umbraco 8.x - if you have just installed
   it on a Umbraco 7.x, you should uninstall now and go get a v4.x 
   version.
 
-uSync 8 - is not just an upgrade of uSync
+ uSync 8 - is not just an upgrade of uSync
 
  uSync deals with some fairly base stuff inside Umbraco and when
  Umbraco changes uSync has to change too.

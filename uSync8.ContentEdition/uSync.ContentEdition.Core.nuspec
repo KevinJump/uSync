@@ -19,6 +19,7 @@
       <dependency id="uSync.Community.Contrib" version="$depends$"/>
       <!-- <dependency id="Microsoft.AspNet.SignalR.Core" version="2.4.0"/> -->
     </dependencies>
+    <tags>umbraco usync</tags>
   </metadata>
   <files>
     <file src="bin\$Configuration$\uSync8.ContentEdition.dll" target="lib\net472" />

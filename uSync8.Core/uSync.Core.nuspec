@@ -11,6 +11,7 @@
     <summary>Core Dll's for uSync 8</summary>
     <releaseNotes>8.0 - Initial Release for Umbraco 8
 8.1 - Compatability Release for Umbraco 8.1</releaseNotes>
+    <tags>umbraco usync</tags>
   </metadata>
   <files>
     <file src="bin\$Configuration$\uSync8.Core.dll" target="lib\net472" />
