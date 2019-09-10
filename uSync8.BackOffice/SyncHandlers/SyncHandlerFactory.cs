@@ -121,7 +121,7 @@ namespace uSync8.BackOffice.SyncHandlers
 
             var configs = new List<ExtendedHandlerConfigPair>();
 
-            foreach (var settings in set.Handlers)
+            foreach (var settings in set.Handlers.Where(x => x.Enabled))
             {
                 // Get the handler 
                 var handler = syncHandlers.ExtendedHandlers
