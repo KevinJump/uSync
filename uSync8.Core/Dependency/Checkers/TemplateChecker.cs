@@ -38,10 +38,12 @@ namespace uSync8.Core.Dependency
                 Level = CalculateLevel(item)
             });
 
-            if (flags.HasFlag(DependencyFlags.IncludeAncestors))
-            {
+            // always get the parents of a template??
+            
+            // if (flags.HasFlag(DependencyFlags.IncludeAncestors))
+            // {
                 dependencies.AddRange(GetParents(item, DependencyOrders.Templates - 1, flags));
-            }
+            // }
 
             if (flags.HasFlag(DependencyFlags.IncludeChildren))
             {
