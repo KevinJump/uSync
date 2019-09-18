@@ -269,6 +269,7 @@
     <Compile Include="Models\SyncProgressModels.cs" />
     <Compile Include="Hubs\uSyncCallbacks.cs" />
     <Compile Include="Services\uSyncService.cs" />
+    <Compile Include="Services\uSyncService_Events.cs" />
     <Compile Include="SyncHandlers\Models\ExtendedHandlerConfigPair.cs" />
     <Compile Include="SyncHandlers\Models\HandlerActionNames.cs" />
     <Compile Include="SyncHandlers\Models\HandlerConfigPair.cs" />

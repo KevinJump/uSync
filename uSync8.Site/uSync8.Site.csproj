@@ -495,6 +495,10 @@
       <Project>{875ecd47-2dce-475a-bddd-3b578a832419}</Project>
       <Name>uSync8.ContentEdition</Name>
     </ProjectReference>
+    <ProjectReference Include="..\uSync8.EventTriggers\uSync8.EventTriggers.csproj">
+      <Project>{b3afc1f9-9398-4d8e-be98-1c78bab20ec9}</Project>
+      <Name>uSync8.EventTriggers</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup />
   <PropertyGroup>

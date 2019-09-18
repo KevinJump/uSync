@@ -18,7 +18,7 @@ namespace uSync8.BackOffice
     ///  uSync, it is where imports, exports and reports
     ///  are actually ran from. 
     /// </summary>
-    public class uSyncService
+    public partial class uSyncService
     {
         public delegate void SyncEventCallback(SyncProgressSummary summary);
 
@@ -62,6 +62,8 @@ namespace uSync8.BackOffice
 
         public IEnumerable<uSyncAction> Report(string folder, IEnumerable<ExtendedHandlerConfigPair> handlers, uSyncCallbacks callbacks)
         {
+            fireBulkStarting(ReportStarting);
+
             logger.Debug<uSyncService>("Reporting For [{0}]", string.Join(",", handlers.Select(x => x.Handler.Name)));
 
             var actions = new List<uSyncAction>();
@@ -95,6 +97,8 @@ namespace uSync8.BackOffice
 
             summary.Message = "Report Complete";
             callbacks?.Callback?.Invoke(summary);
+
+            fireBulkComplete(ReportComplete, actions);
 
             return actions;
         }
@@ -140,6 +144,9 @@ namespace uSync8.BackOffice
                 try
                 {
                     uSync8BackOffice.eventsPaused = true;
+
+                    // pre import event
+                    fireBulkStarting(ImportStarting);
 
                     var actions = new List<uSyncAction>();
 
@@ -204,6 +211,9 @@ namespace uSync8.BackOffice
                         $"Import Completed ({sw.ElapsedMilliseconds}ms)", 0);
                     callbacks?.Callback?.Invoke(summary);
 
+                    // fire complete
+                    fireBulkComplete(ImportComplete, actions);
+
                     return actions;
                 }
                 catch (Exception ex)
@@ -250,6 +260,8 @@ namespace uSync8.BackOffice
 
         public IEnumerable<uSyncAction> Export(string folder, IEnumerable<ExtendedHandlerConfigPair> handlers, uSyncCallbacks callbacks)
         {
+            fireBulkStarting(ExportStarting);
+
             var actions = new List<uSyncAction>();
             var summary = new SyncProgressSummary(handlers.Select(x => x.Handler), "Exporting", handlers.Count());
 
@@ -273,6 +285,8 @@ namespace uSync8.BackOffice
 
             summary.Message = "Export Completed";
             callbacks?.Callback?.Invoke(summary);
+
+            fireBulkComplete(ExportComplete, actions);
 
             return actions;
         }
