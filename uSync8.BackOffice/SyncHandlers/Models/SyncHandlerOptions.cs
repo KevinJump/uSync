@@ -1,5 +1,9 @@
-﻿namespace uSync8.BackOffice.SyncHandlers
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+
+namespace uSync8.BackOffice.SyncHandlers
 {
+    [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
     /// <summary>
     ///  options that define how we define a handler 
     /// </summary>

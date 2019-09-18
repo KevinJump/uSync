@@ -1,15 +1,14 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+
 using System.Collections.Generic;
-using System.Configuration;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.XPath;
+
 using Umbraco.Core;
-using uSync8.BackOffice.SyncHandlers;
 
 namespace uSync8.BackOffice.Configuration
 {
+    [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
     public class uSyncSettings
     {
         public string RootFolder { get; set; } = "~/uSync/v8/";

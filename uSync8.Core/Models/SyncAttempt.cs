@@ -1,8 +1,12 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+
+using System;
 using System.Collections.Generic;
 
 namespace uSync8.Core.Models
 {
+    [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
     public struct SyncAttempt<TObject>
     {
         public bool Success { get; private set; }

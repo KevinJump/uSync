@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
@@ -7,6 +9,7 @@ using uSync8.Core.Extensions;
 
 namespace uSync8.BackOffice.Configuration
 {
+    [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
     public class uSyncConfig
     {
         public uSyncSettings Settings { get; set; }

@@ -1,14 +1,10 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Newtonsoft.Json.Serialization;
 
 namespace uSync8.Core.Models
 {
+    [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
     public class uSyncChange
     {
         public string Name { get; set; }

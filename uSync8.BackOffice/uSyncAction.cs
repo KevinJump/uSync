@@ -1,15 +1,17 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
+
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 using uSync8.Core;
 using uSync8.Core.Models;
 
 namespace uSync8.BackOffice
 {
+    [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
+
     public struct uSyncAction
     {
         public string HandlerAlias { get; set; }
