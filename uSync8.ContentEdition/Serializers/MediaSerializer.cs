@@ -88,14 +88,13 @@ namespace uSync8.ContentEdition.Serializers
                 // ?
             }
 
-            if (!flags.HasFlag(SerializerFlags.DoNotSave)) {
 
-                var attempt = mediaService.Save(item);
-                if (!attempt.Success)
-                    return SyncAttempt<IMedia>.Fail(item.Name, ChangeType.Fail, "");
-            }
+            var attempt = mediaService.Save(item);
+            if (!attempt.Success) 
+                return SyncAttempt<IMedia>.Fail(item.Name, ChangeType.Fail, "");
 
-            return SyncAttempt<IMedia>.Succeed(item.Name, ChangeType.Import);
+            // we return no-change so we don't trigger the second save 
+            return SyncAttempt<IMedia>.Succeed(item.Name, ChangeType.NoChange );
 
 
         }
