@@ -647,7 +647,7 @@ namespace uSync8.Core.Serialization.Serializers
 
         public override void Save(IEnumerable<TObject> items)
             => baseService.Save(items);
-
+            
         protected override void SaveContainer(EntityContainer container)
         {
             logger.Debug<TObject>("Saving Container: {0}", container.Key);

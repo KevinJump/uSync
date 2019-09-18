@@ -150,15 +150,33 @@ namespace uSync8.BackOffice.SyncHandlers
 
             if (updates.Any())
             {
-                foreach (var item in updates.Select((update, Index) => new { update, Index }))
+                ProcessSecondPasses(updates, config, callback);
+            }
+
+            callback?.Invoke("Done", 3, 3);
+            return actions;
+        }
+
+        private void ProcessSecondPasses(IDictionary<string, TObject> updates, HandlerSettings config, SyncUpdateCallback callback = null)
+        {
+            List<TObject> updatedItems = new List<TObject>();
+            foreach (var item in updates.Select((update, Index) => new { update, Index }))
+            {
+                callback?.Invoke($"Second Pass {Path.GetFileName(item.update.Key)}", item.Index, updates.Count);
+                var attempt = ImportSecondPass(item.update.Key, item.update.Value, config, callback);
+                if (attempt.Success && attempt.Change > ChangeType.NoChange)
                 {
-                    callback?.Invoke($"Second Pass {Path.GetFileName(item.update.Key)}", item.Index, updates.Count);
-                    ImportSecondPass(item.update.Key, item.update.Value, config, callback);
+                    updatedItems.Add(attempt.Item);
                 }
             }
 
-            callback?.Invoke("Done", 1, 1);
-            return actions;
+            if (config.BatchSave)
+            {
+                callback?.Invoke($"Saving {updatedItems.Count} Second Pass Items", 2, 3);
+                serializer.Save(updatedItems);
+            }
+
+            
         }
 
         protected virtual IEnumerable<uSyncAction> ImportFolder(string folder, HandlerSettings config, Dictionary<string, TObject> updates, bool force, SyncUpdateCallback callback)
@@ -319,7 +337,7 @@ namespace uSync8.BackOffice.SyncHandlers
             }
         }
 
-        virtual public void ImportSecondPass(string file, TObject item, HandlerSettings config, SyncUpdateCallback callback)
+        virtual public SyncAttempt<TObject> ImportSecondPass(string file, TObject item, HandlerSettings config, SyncUpdateCallback callback)
         {
             if (IsTwoPass)
             {
@@ -334,8 +352,9 @@ namespace uSync8.BackOffice.SyncHandlers
                     using (var stream = syncFileService.OpenRead(file))
                     {
                         var node = XElement.Load(stream);
-                        serializer.DeserializeSecondPass(item, node, flags);
+                        var attempt = serializer.DeserializeSecondPass(item, node, flags);
                         stream.Dispose();
+                        return attempt;
                     }
                 }
                 catch (Exception ex)
@@ -343,6 +362,8 @@ namespace uSync8.BackOffice.SyncHandlers
                     logger.Warn<TObject>($"Second Import Failed: {ex.Message}");
                 }
             }
+
+            return SyncAttempt<TObject>.Succeed(item.Id.ToString(), ChangeType.NoChange);
         }
 
         #endregion

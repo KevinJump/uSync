@@ -11,6 +11,8 @@
     <summary></summary>
     <releaseNotes>
       8.0 - Release for Umbraco 8
+      8.1 - Compatability Release for Umbraco 8.1
+      8.2 - uSync Complete Companion release.
     </releaseNotes>
     <dependencies>
       <dependency id="uSync.Core" version="$depends$"/>

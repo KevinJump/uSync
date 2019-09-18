@@ -175,7 +175,9 @@ namespace uSync8.ContentEdition.Serializers
             // this does the last save and publish
             if (DoSaveOrPublish(item, node))
             {
-                return SyncAttempt<IContent>.Succeed(item.Name, ChangeType.Import);
+                // we say no change back, this stops the core second pass function from saving 
+                // this item (which we have just done with DoSaveOrPublish)
+                return SyncAttempt<IContent>.Succeed(item.Name, ChangeType.NoChange);
             }
 
             return SyncAttempt<IContent>.Fail(item.Name, ChangeType.ImportFail, "");

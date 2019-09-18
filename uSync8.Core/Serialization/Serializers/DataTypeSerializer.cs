@@ -201,10 +201,10 @@ namespace uSync8.Core.Serialization.Serializers
             => dataTypeService.CreateContainer(parentId, name);
 
         protected override void SaveItem(IDataType item)
-            => dataTypeService.Save(item);
+            => dataTypeService.Save(item.AsEnumerableOfOne(), -1, false);
 
         public override void Save(IEnumerable<IDataType> items)
-            => dataTypeService.Save(items);
+            => dataTypeService.Save(items, -1, false);
 
         protected override void SaveContainer(EntityContainer container)
             => dataTypeService.SaveContainer(container);
