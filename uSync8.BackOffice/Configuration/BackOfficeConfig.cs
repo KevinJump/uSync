@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
@@ -31,12 +32,14 @@ namespace uSync8.BackOffice.Configuration
                 return SaveSettings(settings);
             }
 
-            settings.RootFolder = node.Element("Folder").ValueOrDefault(settings.RootFolder);
-            settings.UseFlatStructure = node.Element("FlatFolders").ValueOrDefault(true);
-            settings.ImportAtStartup = node.Element("ImportAtStartup").ValueOrDefault(true);
-            settings.ExportAtStartup = node.Element("ExportAtStartup").ValueOrDefault(false);
-            settings.ExportOnSave = node.Element("ExportOnSave").ValueOrDefault(true);
-            settings.UseGuidNames = node.Element("UseGuidFilenames").ValueOrDefault(false);
+
+
+            settings.RootFolder = ValueFromWebConfigOrDefault("Folder", node.Element("Folder").ValueOrDefault(settings.RootFolder));
+            settings.UseFlatStructure = ValueFromWebConfigOrDefault("FlatFolders", node.Element("FlatFolders").ValueOrDefault(true));
+            settings.ImportAtStartup = ValueFromWebConfigOrDefault("ImportAtStartup", node.Element("ImportAtStartup").ValueOrDefault(true));
+            settings.ExportAtStartup = ValueFromWebConfigOrDefault("ExportAtStartup", node.Element("ExportAtStartup").ValueOrDefault(false));
+            settings.ExportOnSave = ValueFromWebConfigOrDefault("ExportOnSave", node.Element("ExportOnSave").ValueOrDefault(true));
+            settings.UseGuidNames = ValueFromWebConfigOrDefault("UseGuidFilenames", node.Element("UseGuidFilenames").ValueOrDefault(false));
             settings.BatchSave = node.Element("BatchSave").ValueOrDefault(false);
             settings.ReportDebug = node.Element("ReportDebug").ValueOrDefault(false);
             settings.AddOnPing = node.Element("AddOnPing").ValueOrDefault(true);
@@ -66,7 +69,7 @@ namespace uSync8.BackOffice.Configuration
         private IList<HandlerSet> LoadHandlerSets(XElement node, uSyncSettings defaultSettings, out string defaultSet)
         {
             var sets = new List<HandlerSet>();
-            defaultSet = node.Attribute("Default").ValueOrDefault("default");
+            defaultSet = ValueFromWebConfigOrDefault("DefaultHandlerSet", node.Attribute("Default").ValueOrDefault("default"));
 
             foreach(var setNode in node.Elements("Handlers"))
             {
@@ -363,6 +366,20 @@ namespace uSync8.BackOffice.Configuration
         }
 
         #endregion
+
+        private TObject ValueFromWebConfigOrDefault<TObject>(string alias, TObject defaultValue)
+        {
+            var result = ConfigurationManager.AppSettings[$"uSync.{alias.ToFirstUpper()}"];
+            if (result != null)
+            {
+                var attempt = result.TryConvertTo<TObject>();
+                if (attempt)
+                    return attempt.Result;
+
+            }
+            return defaultValue;
+        }
+
     }
 
 }
