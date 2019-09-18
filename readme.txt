@@ -33,5 +33,10 @@
  us it was a delete/rename. this makes deployment much nicer - and
  less likely to break. 
 
+ ********************************************************************
+ ** Using ModelsBuilder in PureLive mode?                          **
+ **          Read this:  https://jumoo.co.uk/usync/modelsbuilder   **
+ ********************************************************************
+
 
 Feedback and Join in: https://github.com/KevinJump/uSync8
