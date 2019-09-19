@@ -39,9 +39,9 @@
 
         uSync8DashboardService.getAddOns()
             .then(function (result) {
-
+                vm.page.description = 'v' + result.data.Version;
                 if (result.data.AddOnString.length > 0) {
-                    vm.page.description = 'v' + result.data.Version + ' + ' + result.data.AddOnString;
+                    vm.page.description += ' + ' + result.data.AddOnString;
                 }
                 vm.addOns = result.data.AddOns;
 
