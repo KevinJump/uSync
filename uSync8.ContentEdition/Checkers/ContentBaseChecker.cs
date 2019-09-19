@@ -65,7 +65,7 @@ namespace uSync8.ContentEdition.Checkers
                     Name = parent.Name,
                     Udi = Udi.Create(this.ObjectType.GetUdiType(), parent.Key),
                     Order = order,
-                    Flags = flags,
+                    Flags = flags & ~DependencyFlags.IncludeChildren,
                     Level = parent.Level
                 }); 
 
