@@ -115,16 +115,18 @@ namespace uSync8.Core.Serialization.Serializers
         protected XElement SerializeStructure(TObject item)
         {
             var node = new XElement("Structure");
-
-            foreach (var allowedType in item.AllowedContentTypes.OrderBy(x => x.Alias))
+            List<KeyValuePair<string, string>> items = new List<KeyValuePair<string, string>>();
+           
+            foreach (var allowedType in item.AllowedContentTypes)
             {
                 var allowedItem = FindItem(allowedType.Id.Value);
                 if (allowedItem != null)
                 {
-                    node.Add(new XElement(ItemType, new XAttribute("Key", allowedItem.Key.ToString()), allowedItem.Alias));
+                    items.Add(new KeyValuePair<string, string>(allowedItem.Key.ToString(), allowedItem.Alias));
                 }
             }
-
+            if (items.Count > 0)
+                node.Add(items.OrderBy(x => x.Value).Select(x => new XElement(ItemType, new XAttribute("Key", x.Key), x.Value)).ToArray());
             return node;
         }
 
