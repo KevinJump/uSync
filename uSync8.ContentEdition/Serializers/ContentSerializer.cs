@@ -115,15 +115,8 @@ namespace uSync8.ContentEdition.Serializers
 
             var item = FindOrCreate(node);
 
-            if (item.Trashed)
-            {
-                // TODO: Where has changed trashed state gone?
-            }
-
             DeserializeBase(item, node);
             DeserializeTemplate(item, node);
-
-            // contentService.Save(item);
 
             return SyncAttempt<IContent>.Succeed(
                 item.Name,
@@ -166,10 +159,11 @@ namespace uSync8.ContentEdition.Serializers
 
             // sort order
             var sortOrder = node.Element("Info").Element("SortOrder").ValueOrDefault(-1);
-            if (sortOrder != -1)
-            {
-                item.SortOrder = sortOrder;
-            }
+            HandleSortOrder(item, sortOrder);
+
+
+            var trashed = node.Element("Info").Element("Trashed").ValueOrDefault(false);
+            HandleTrashedState(item, trashed);
 
             // published status
             // this does the last save and publish
@@ -182,6 +176,21 @@ namespace uSync8.ContentEdition.Serializers
 
             return SyncAttempt<IContent>.Fail(item.Name, ChangeType.ImportFail, "");
             // second pass, is when we do the publish and stuff.
+        }
+
+        protected override void HandleTrashedState(IContent item, bool trashed)
+        {
+            if (!trashed && item.Trashed)
+            {
+                // if the item is trashed, then the change of it's parent 
+                // should restore it (as long as we do a move!)
+                contentService.Move(item, item.ParentId);
+            }
+            else if (trashed && !item.Trashed)
+            {
+                // move to the recycle bin
+                contentService.MoveToRecycleBin(item);
+            }
         }
 
         protected virtual Attempt<string> DoSaveOrPublish(IContent item, XElement node)
@@ -227,6 +236,8 @@ namespace uSync8.ContentEdition.Serializers
 
         }
 
+
+      
         #endregion
 
         protected override IContent CreateItem(string alias, ITreeEntity parent, string itemType)

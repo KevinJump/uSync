@@ -66,28 +66,10 @@ namespace uSync8.ContentEdition.Serializers
             var info = node.Element("Info");
 
             var sortOrder = info.Element("SortOrder").ValueOrDefault(-1);
-            if (sortOrder != -1)
-            {
-                item.SortOrder = sortOrder;
-            }
-
+            HandleSortOrder(item, sortOrder);
 
             var trashed = info.Element("Trashed").ValueOrDefault(false);
-            if (trashed)
-            {
-                if (!item.Trashed)
-                {
-                    mediaService.MoveToRecycleBin(item);
-                }
-                return SyncAttempt<IMedia>.Succeed(item.Name, ChangeType.Import); 
-            }
-
-            if (item.Trashed)
-            {
-                // remove from bin.
-                // ?
-            }
-
+            HandleTrashedState(item, trashed);
 
             var attempt = mediaService.Save(item);
             if (!attempt.Success) 
@@ -95,9 +77,23 @@ namespace uSync8.ContentEdition.Serializers
 
             // we return no-change so we don't trigger the second save 
             return SyncAttempt<IMedia>.Succeed(item.Name, ChangeType.NoChange );
-
-
         }
+
+        protected override void HandleTrashedState(IMedia item, bool trashed)
+        {
+            if (!trashed && item.Trashed)
+            {
+                // if the item is trashed, then moving it back to the parent value 
+                // restores it.
+                mediaService.Move(item, item.ParentId);
+            }
+            else if (trashed && !item.Trashed)
+            {
+                // move to the recycle bin
+                mediaService.MoveToRecycleBin(item);
+            }
+        }
+
 
         protected override SyncAttempt<XElement> SerializeCore(IMedia item)
         {
@@ -203,6 +199,7 @@ namespace uSync8.ContentEdition.Serializers
 
         protected override void DeleteItem(IMedia item)
             => mediaService.Delete(item);
+
     }
 
 }

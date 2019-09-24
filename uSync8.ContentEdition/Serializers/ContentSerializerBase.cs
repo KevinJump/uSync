@@ -25,8 +25,8 @@ namespace uSync8.ContentEdition.Serializers
         protected SyncValueMapperCollection syncMappers;
 
         public ContentSerializerBase(
-            IEntityService entityService, 
-            ILogger logger, 
+            IEntityService entityService,
+            ILogger logger,
             UmbracoObjectTypes umbracoObjectType,
             SyncValueMapperCollection syncMappers)
             : base(entityService, logger)
@@ -208,6 +208,15 @@ namespace uSync8.ContentEdition.Serializers
             return Attempt.Succeed(item);
         }
 
+        protected void HandleSortOrder(TObject item, int sortOrder)
+        {
+            if (sortOrder != -1)
+                item.SortOrder = sortOrder;
+        }
+
+        protected abstract void HandleTrashedState(TObject item, bool trashed);
+
+
         protected string GetExportValue(object value, PropertyType propertyType, string culture, string segment)
         {
             // this is where the mapping magic will happen. 
@@ -256,7 +265,7 @@ namespace uSync8.ContentEdition.Serializers
             }
 
             var contentTypeAlias = node.Element("Info").Element("ContentType").ValueOrDefault(node.Name.LocalName);
-            
+
             // var contentTypeAlias = node.Name.LocalName;
 
             return CreateItem(alias, parent, contentTypeAlias);
@@ -394,6 +403,8 @@ namespace uSync8.ContentEdition.Serializers
             return item;
 
         }
+
+
 
         #endregion
     }
