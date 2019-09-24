@@ -214,8 +214,11 @@ namespace uSync8.ContentEdition.Serializers
 
                     if (publishedCultures.Count > 0)
                     {
-                        contentService.SaveAndPublish(item, publishedCultures.ToArray());
-                        return Attempt.Succeed($"Published {publishedCultures.Count} Cultures");
+                        var culturePublishResult = contentService.SaveAndPublish(item, publishedCultures.ToArray());
+                        if (culturePublishResult.Success)
+                            return Attempt.Succeed($"Published {publishedCultures.Count} Cultures");
+
+                        return Attempt.Fail("Publish Failed " + culturePublishResult.EventMessages);
                     }
                 }
                 else
