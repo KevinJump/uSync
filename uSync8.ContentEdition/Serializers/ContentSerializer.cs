@@ -41,7 +41,7 @@ namespace uSync8.ContentEdition.Serializers
             var node = InitializeNode(item, item.ContentType.Alias);
 
             var info = SerializeInfo(item);
-            
+
             var properties = SerializeProperties(item);
 
             node.Add(info);
@@ -68,7 +68,7 @@ namespace uSync8.ContentEdition.Serializers
                 var template = fileService.GetTemplate(item.TemplateId.Value);
                 if (template != null)
                 {
-                    return new XElement("Template", 
+                    return new XElement("Template",
                         new XAttribute("Key", template.Key),
                         template.Alias);
                 }
@@ -195,49 +195,51 @@ namespace uSync8.ContentEdition.Serializers
 
         protected virtual Attempt<string> DoSaveOrPublish(IContent item, XElement node)
         {
-            var info = node.Element("Info");
 
-            var trashed = info.Element("Trashed").ValueOrDefault(false);
-            if (trashed)
+            var publishedNode = node.Element("Info")?.Element("Published");
+            if (publishedNode != null)
             {
-                if (!item.Trashed)
+                if (publishedNode.HasElements)
                 {
-                    contentService.MoveToRecycleBin(item);
+                    // culture based publishing.
+                    var publishedCultures = new List<string>();
+                    foreach (var culturePublish in publishedNode.Elements("Published"))
+                    {
+                        var culture = culturePublish.Attribute("Culture").ValueOrDefault(string.Empty);
+                        var status = culturePublish.ValueOrDefault(false);
+
+                        if (!string.IsNullOrWhiteSpace(culture) && status)
+                            publishedCultures.Add(culture);
+                    }
+
+                    if (publishedCultures.Count > 0)
+                    {
+                        contentService.SaveAndPublish(item, publishedCultures.ToArray());
+                        return Attempt.Succeed($"Published {publishedCultures.Count} Cultures");
+                    }
                 }
-                return Attempt.Succeed("Trashed");
+                else
+                {
+                    // default publish the lot. 
+                    if (publishedNode.Attribute("Default").ValueOrDefault(false))
+                    {
+                        var publishResult = contentService.SaveAndPublish(item);
+                        if (publishResult.Success)
+                            return Attempt.Succeed("Published");
+
+                        return Attempt.Fail("Publish Failed " + publishResult.EventMessages);
+                    }
+                }
             }
 
+            // if we get here, save 
+            var result = contentService.Save(item);
+            if (result.Success)
+                return Attempt.Succeed("Saved");
 
-            if (item.Trashed)
-            {
-                // need to move it out of the trash.
-            }
-
-            var published = info.Element("Published")?.Attribute("Default").ValueOrDefault(false) ?? false;
-
-            if (published)
-            {
-                var publishResult = contentService.SaveAndPublish(item);
-                if (publishResult.Success)
-                    return Attempt.Succeed("Published");
-
-                return Attempt.Fail("Publish Failed " + publishResult.EventMessages);
-            }
-            else
-            {
-                var result = contentService.Save(item);
-                if (result.Success)
-                    return Attempt.Succeed("Saved");
-
-                return Attempt.Fail("Save Failed " + result.EventMessages);
-            }
-
-            // TODO: Culture based publishing
-
+            return Attempt.Fail("Save Failed " + result.EventMessages);
         }
 
-
-      
         #endregion
 
         protected override IContent CreateItem(string alias, ITreeEntity parent, string itemType)
