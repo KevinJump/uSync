@@ -45,8 +45,11 @@ namespace uSync8.Core.Serialization.Serializers
             if (item == null) throw new ArgumentException($"Cannot find underling datatype for {name}");
 
             // basic
-            item.Name = name;
-            item.Key = key;
+            if (item.Name != name)
+                item.Name = name;
+
+            if (item.Key != key)
+                item.Key = key;
 
             var editorAlias = info.Element("EditorAlias").ValueOrDefault(string.Empty);
             if (editorAlias != item.EditorAlias)
@@ -63,7 +66,9 @@ namespace uSync8.Core.Serialization.Serializers
             // and can change based on minor things (so gives false out of sync results)
 
             // item.SortOrder = info.Element("SortOrder").ValueOrDefault(0);
-            item.DatabaseType = info.Element("DatabaseType").ValueOrDefault(ValueStorageType.Nvarchar);
+            var dbType = info.Element("DatabaseType").ValueOrDefault(ValueStorageType.Nvarchar);
+            if (item.DatabaseType != dbType)
+                item.DatabaseType = dbType;
 
             // config 
             DeserializeConfiguration(item, node);
@@ -96,18 +101,33 @@ namespace uSync8.Core.Serialization.Serializers
 
             if (!string.IsNullOrWhiteSpace(config))
             {
-
                 var serializer = this.configurationSerializers.GetSerializer(item.EditorAlias);
                 if (serializer == null)
                 {
-                    item.Configuration = JsonConvert.DeserializeObject(config, item.Configuration.GetType());
+                    var configObject = JsonConvert.DeserializeObject(config, item.Configuration.GetType());
+                    if (!IsJsonEqual(item.Configuration, configObject))
+                        item.Configuration = configObject;
                 }
                 else
                 {
                     logger.Debug<DataTypeSerializer>("Deserializing Config via {0}", serializer.Name);
-                    item.Configuration = serializer.DeserializeConfig(config, item.Configuration.GetType());
+                    var configObject = serializer.DeserializeConfig(config, item.Configuration.GetType());
+                    if (!IsJsonEqual(item.Configuration, configObject))
+                        item.Configuration = configObject;
                 }
             }
+        }
+
+        /// <summary>
+        ///  tells us if the json for an object is equal, helps when the config objects don't have their
+        ///  own Equals functions
+        /// </summary>
+        private bool IsJsonEqual(object currentObject, object newObject)
+        {
+            var currentString = JsonConvert.SerializeObject(currentObject, Formatting.None);
+            var newString = JsonConvert.SerializeObject(newObject, Formatting.None);
+
+            return currentString == newString;
         }
 
 
