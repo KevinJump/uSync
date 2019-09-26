@@ -8,8 +8,10 @@ using uSync8.BackOffice.Configuration;
 
 namespace uSync8.BackOffice.Cache
 {
+    [ComposeBefore(typeof(uSyncBackOfficeComposer))]
     public class RebuildCacheComposer : ComponentComposer<RebuildCacheComponent> { }
 
+    
     public class RebuildCacheComponent : IComponent
     {
         private readonly IPublishedSnapshotService snapshotService;
