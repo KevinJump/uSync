@@ -91,19 +91,19 @@ namespace uSync8.Core.Serialization.Serializers
         public override SyncAttempt<ITemplate> DeserializeSecondPass(ITemplate item, XElement node, SerializerFlags flags)
         {
             var master = node.Element("Parent").ValueOrDefault(string.Empty);
-            if (master != string.Empty)
+            if (master != string.Empty && item.MasterTemplateAlias != master)
             {
                 var masterItem = fileService.GetTemplate(master);
                 if (masterItem != null)
+                {
                     item.SetMasterTemplate(masterItem);
+
+                    if (!flags.HasFlag(SerializerFlags.DoNotSave))
+                        SaveItem(item);
+                }
             }
 
-
-            if (!flags.HasFlag(SerializerFlags.DoNotSave))
-                SaveItem(item);
-
             return SyncAttempt<ITemplate>.Succeed(item.Name, item, ChangeType.Import);
-
         }
 
 

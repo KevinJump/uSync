@@ -126,7 +126,7 @@ namespace uSync8.Core.Serialization.Serializers
             DeserializeCompositions(item, node);
             DeserializeStructure(item, node);
             
-            if (!flags.HasFlag(SerializerFlags.DoNotSave))
+            if (!flags.HasFlag(SerializerFlags.DoNotSave) && item.IsDirty())
                 contentTypeService.Save(item);
 
             CleanFolder(item, node);

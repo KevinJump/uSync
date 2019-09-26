@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Umbraco.Core.Composing;
 using Umbraco.Core.Logging;
+using Umbraco.Core.Services.Implement;
 using uSync8.BackOffice;
 
 namespace uSync8.EventTriggers
@@ -33,6 +34,18 @@ namespace uSync8.EventTriggers
 
             uSyncService.ReportStarting += BulkEventStarting;
             uSyncService.ReportComplete += BulkEventComplete;
+
+            // ContentTypeService.ScopedRefreshedEntity += ContentTypeService_ScopedRefreshedEntity;
+        }
+
+        private void ContentTypeService_ScopedRefreshedEntity(Umbraco.Core.Services.IContentTypeService sender, Umbraco.Core.Services.Changes.ContentTypeChange<Umbraco.Core.Models.IContentType>.EventArgs e)
+        {
+            foreach(var change in e.Changes)
+            {
+                // do some debugging.... 
+                var x = change.ChangeTypes;
+                var y = change.Item.Name;
+            }
         }
 
         private void BulkEventStarting(uSyncBulkEventArgs e)

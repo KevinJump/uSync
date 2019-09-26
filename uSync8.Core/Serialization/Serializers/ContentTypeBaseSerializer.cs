@@ -251,7 +251,9 @@ namespace uSync8.Core.Serialization.Serializers
             }
 
             logger.Debug<TObject>("Structure: {0} items", allowed.Count);
-            item.AllowedContentTypes = allowed;
+
+            if (!Enumerable.SequenceEqual(item.AllowedContentTypes, allowed))
+                item.AllowedContentTypes = allowed;
         }
 
         protected void DeserializeProperties(TObject item, XElement node)
@@ -449,7 +451,8 @@ namespace uSync8.Core.Serialization.Serializers
                     compositions.Add(type);
             }
 
-            item.ContentTypeComposition = compositions;
+            if (!Enumerable.SequenceEqual(item.ContentTypeComposition, compositions))
+                item.ContentTypeComposition = compositions;
         }
 
 
@@ -645,7 +648,10 @@ namespace uSync8.Core.Serialization.Serializers
             => baseService.CreateContainer(parentId, name);
 
         protected override void SaveItem(TObject item)
-            => baseService.Save(item);
+        {
+            if (item.IsDirty()) baseService.Save(item);
+        }
+                
 
         public override void Save(IEnumerable<TObject> items)
             => baseService.Save(items);
