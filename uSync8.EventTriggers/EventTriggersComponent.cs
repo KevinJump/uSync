@@ -1,62 +1,70 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq;
 using Umbraco.Core.Composing;
 using Umbraco.Core.Logging;
-using Umbraco.Core.Services.Implement;
+using Umbraco.Core.Services.Changes;
+using Umbraco.Web.Cache;
+using Umbraco.Web.PublishedCache;
+
 using uSync8.BackOffice;
 
 namespace uSync8.EventTriggers
 {
+    /// <summary>
+    ///  Composer to register the events. 
+    /// </summary>
     public class EventTriggersComposer : ComponentComposer<EventTriggersComponent> { }
 
     /// <summary>
-    ///  testing the even triggers fire when we expect them to. 
+    ///  Component, will trigger a cache rebuild when an import is completed. (and there are changes)
     /// </summary>
     public class EventTriggersComponent : IComponent
     {
-        private readonly IProfilingLogger logger;
+        private readonly IPublishedSnapshotService snapshotService;
 
-        public EventTriggersComponent(IProfilingLogger logger)
+        public EventTriggersComponent(IPublishedSnapshotService snapshotService)
         {
-            this.logger = logger;
+            this.snapshotService = snapshotService;
         }
 
         public void Initialize()
         {
-            uSyncService.ImportStarting += BulkEventStarting;
             uSyncService.ImportComplete += BulkEventComplete;
-
-            uSyncService.ExportStarting += BulkEventStarting;
-            uSyncService.ExportComplete += BulkEventComplete;
-
-            uSyncService.ReportStarting += BulkEventStarting;
-            uSyncService.ReportComplete += BulkEventComplete;
-
-            // ContentTypeService.ScopedRefreshedEntity += ContentTypeService_ScopedRefreshedEntity;
-        }
-
-        private void ContentTypeService_ScopedRefreshedEntity(Umbraco.Core.Services.IContentTypeService sender, Umbraco.Core.Services.Changes.ContentTypeChange<Umbraco.Core.Models.IContentType>.EventArgs e)
-        {
-            foreach(var change in e.Changes)
-            {
-                // do some debugging.... 
-                var x = change.ChangeTypes;
-                var y = change.Item.Name;
-            }
-        }
-
-        private void BulkEventStarting(uSyncBulkEventArgs e)
-        {
-            logger.Info<EventTriggersComponent>("BulkEvent Start Triggered");
         }
 
         private void BulkEventComplete(uSyncBulkEventArgs e)
         {
-            logger.Info<EventTriggersComponent>("BulkEvent Complete Triggered");
+            if (e.Actions.Any(x => x.Change > Core.ChangeType.NoChange))
+            {
+                // change happened. - rebuild
+                snapshotService.Rebuild();
+
+                // then refresh the cache : 
+
+                // there is a function for this but it is internal, so we have extracted bits.
+                // mimics => DistributedCache.RefreshAllPublishedSnapshot
+
+                RefreshContentCache(Umbraco.Web.Composing.Current.DistributedCache);
+                RefreshMediaCache(Umbraco.Web.Composing.Current.DistributedCache);
+                RefreshAllDomainCache(Umbraco.Web.Composing.Current.DistributedCache);
+            }
         }
+
+        private void RefreshContentCache(DistributedCache dc) {
+            var payloads = new[] { new ContentCacheRefresher.JsonPayload(0, TreeChangeTypes.RefreshAll) };
+            Umbraco.Web.Composing.Current.DistributedCache.RefreshByPayload(ContentCacheRefresher.UniqueId, payloads);
+        }
+
+        private void RefreshMediaCache(DistributedCache dc) {
+            var payloads = new[] { new MediaCacheRefresher.JsonPayload(0, TreeChangeTypes.RefreshAll) };
+            dc.RefreshByPayload(MediaCacheRefresher.UniqueId, payloads);
+        }
+
+        public void RefreshAllDomainCache(DistributedCache dc)
+        {
+            var payloads = new[] { new DomainCacheRefresher.JsonPayload(0, DomainChangeTypes.RefreshAll) };
+            dc.RefreshByPayload(DomainCacheRefresher.UniqueId, payloads);
+        }
+
 
         public void Terminate()
         {
