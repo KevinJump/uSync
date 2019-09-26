@@ -13,11 +13,19 @@ using uSync8.Core;
 namespace uSync8.BackOffice
 {
     [ComposeAfter(typeof(uSyncCoreComposer))]
-    public class uSyncBackOfficeComposer : IUserComposer
+    public class uSyncBackOfficeConfigComposer : IUserComposer
     {
         public void Compose(Composition composition)
         {
             composition.Configs.Add<uSyncConfig>(() => new uSyncConfig());
+        }
+    }
+
+    [ComposeAfter(typeof(uSyncBackOfficeConfigComposer))]
+    public class uSyncBackOfficeComposer : IUserComposer
+    {
+        public void Compose(Composition composition)
+        {
 
             composition.RegisterUnique<SyncFileService>();
 
@@ -26,7 +34,7 @@ namespace uSync8.BackOffice
 
             composition.RegisterUnique<SyncHandlerFactory>();
 
-            composition.Components().Append<uSyncBackofficeComponent>();
+            composition.Configs.Add<uSyncConfig>(() => new uSyncConfig());
 
             composition.RegisterUnique<uSyncService>();
         }

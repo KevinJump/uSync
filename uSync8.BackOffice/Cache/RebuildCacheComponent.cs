@@ -8,7 +8,7 @@ using uSync8.BackOffice.Configuration;
 
 namespace uSync8.BackOffice.Cache
 {
-    [ComposeBefore(typeof(uSyncBackOfficeComposer))]
+    [ComposeBefore(typeof(uSyncBackOfficeConfigComposer))]
     public class RebuildCacheComposer : ComponentComposer<RebuildCacheComponent> { }
 
     
