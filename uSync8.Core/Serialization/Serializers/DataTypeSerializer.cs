@@ -201,12 +201,15 @@ namespace uSync8.Core.Serialization.Serializers
             => dataTypeService.CreateContainer(parentId, name);
 
         protected override void SaveItem(IDataType item)
-            => dataTypeService.Save(item);
+        {
+            if (item.IsDirty())
+                dataTypeService.Save(item);
+        }
 
         public override void Save(IEnumerable<IDataType> items)
         {
             // if we don't trigger then the cache doesn't get updated :(
-            dataTypeService.Save(items);
+            dataTypeService.Save(items.Where(x => x.IsDirty()));
         }
 
         protected override void SaveContainer(EntityContainer container)
