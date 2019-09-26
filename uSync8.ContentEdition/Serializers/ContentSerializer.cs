@@ -248,8 +248,7 @@ namespace uSync8.ContentEdition.Serializers
         protected override IContent CreateItem(string alias, ITreeEntity parent, string itemType)
         {
             var parentId = parent != null ? parent.Id : -1;
-            var item = contentService.Create(alias, parentId, itemType);
-            return item;
+            return contentService.Create(alias, parentId, itemType);
         }
 
         #region Finders
