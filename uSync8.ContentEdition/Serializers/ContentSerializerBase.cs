@@ -107,11 +107,21 @@ namespace uSync8.ContentEdition.Serializers
                         valueNode.Add(new XAttribute("Segment", value.Segment ?? string.Empty));
                     }
 
-
                     valueNode.Value = GetExportValue(value.EditedValue, property.PropertyType, value.Culture, value.Segment);
                     // valueNode.Value = value.EditedValue?.ToString() ?? string.Empty;
                     propertyNode.Add(valueNode);
                 }
+
+                if (property.Values == null || property.Values.Count == 0)
+                {
+                    // add a blank one, for change clarity
+                    // we do it like this because then it doesn't get collapsed in the XML
+                    var emptyValue = new XElement("Value");
+                    emptyValue.Value = string.Empty;
+
+                    propertyNode.Add(emptyValue);
+                }
+
                 node.Add(propertyNode);
             }
 
