@@ -177,7 +177,7 @@ namespace uSync8.Core.Serialization.Serializers
             if (item.Thumbnail != thumbnail)
                 item.Thumbnail = thumbnail;
 
-            var description = info.Element("Description").ValueOrDefault("");
+            var description = info.Element("Description").ValueOrDefault(null);
             if (item.Description != description)
                 item.Description = description;
 
