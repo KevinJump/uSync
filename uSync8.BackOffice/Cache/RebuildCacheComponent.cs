@@ -1,60 +1,68 @@
 ﻿using System.Linq;
+
 using Umbraco.Core.Composing;
-using Umbraco.Core.Logging;
 using Umbraco.Core.Services.Changes;
 using Umbraco.Web.Cache;
 using Umbraco.Web.PublishedCache;
+using uSync8.BackOffice.Configuration;
 
-using uSync8.BackOffice;
-
-namespace uSync8.EventTriggers
+namespace uSync8.BackOffice.Cache
 {
-    /// <summary>
-    ///  Composer to register the events. 
-    /// </summary>
-    public class EventTriggersComposer : ComponentComposer<EventTriggersComponent> { }
+    [ComposeBefore(typeof(uSyncBackOfficeComposer))]
+    public class RebuildCacheComposer : ComponentComposer<RebuildCacheComponent> { }
 
-    /// <summary>
-    ///  Component, will trigger a cache rebuild when an import is completed. (and there are changes)
-    /// </summary>
-    public class EventTriggersComponent : IComponent
+    
+    public class RebuildCacheComponent : IComponent
     {
         private readonly IPublishedSnapshotService snapshotService;
+        private uSyncSettings settings;
 
-        public EventTriggersComponent(IPublishedSnapshotService snapshotService)
+        public RebuildCacheComponent(IPublishedSnapshotService snapshotService)
         {
             this.snapshotService = snapshotService;
+
+            this.settings = Current.Configs.uSync();
+
+            uSyncConfig.Reloaded += Config_Reloaded;
+        }
+
+        private void Config_Reloaded(uSyncSettings settings)
+        {
+            this.settings = Current.Configs.uSync();
         }
 
         public void Initialize()
         {
-            uSyncService.ImportComplete += BulkEventComplete;
+            uSyncService.ImportComplete += ImportComplete;
+           
         }
 
-        private void BulkEventComplete(uSyncBulkEventArgs e)
+        private void ImportComplete(uSyncBulkEventArgs e)
         {
-            if (e.Actions.Any(x => x.Change > uSync8.Core.ChangeType.NoChange))
+            if (settings.RebuildCacheOnCompleation &&
+                e.Actions.Any(x => x.Change > uSync8.Core.ChangeType.NoChange))
             {
                 // change happened. - rebuild
                 snapshotService.Rebuild();
 
                 // then refresh the cache : 
-
                 // there is a function for this but it is internal, so we have extracted bits.
                 // mimics => DistributedCache.RefreshAllPublishedSnapshot
-
                 RefreshContentCache(Umbraco.Web.Composing.Current.DistributedCache);
                 RefreshMediaCache(Umbraco.Web.Composing.Current.DistributedCache);
                 RefreshAllDomainCache(Umbraco.Web.Composing.Current.DistributedCache);
             }
         }
 
-        private void RefreshContentCache(DistributedCache dc) {
+
+        private void RefreshContentCache(DistributedCache dc)
+        {
             var payloads = new[] { new ContentCacheRefresher.JsonPayload(0, TreeChangeTypes.RefreshAll) };
-            Umbraco.Web.Composing.Current.DistributedCache.RefreshByPayload(ContentCacheRefresher.UniqueId, payloads);
+            dc.RefreshByPayload(ContentCacheRefresher.UniqueId, payloads);
         }
 
-        private void RefreshMediaCache(DistributedCache dc) {
+        private void RefreshMediaCache(DistributedCache dc)
+        {
             var payloads = new[] { new MediaCacheRefresher.JsonPayload(0, TreeChangeTypes.RefreshAll) };
             dc.RefreshByPayload(MediaCacheRefresher.UniqueId, payloads);
         }
@@ -68,7 +76,7 @@ namespace uSync8.EventTriggers
 
         public void Terminate()
         {
-            // end
+            // end. 
         }
     }
 }

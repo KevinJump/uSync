@@ -44,6 +44,19 @@
                             <div class="umb-permission__description">Generate uSync files when items are saved</div>
                         </div>
                     </div>
+
+                    <div class="umb-permission">
+                        <umb-toggle class="umb-permission__toggle"
+                                    checked="vm.settings.RebuildCacheOnCompleation"
+                                    on-click="vm.settings.RebuildCacheOnCompleation = !vm.settings.RebuildCacheOnCompleation">
+                        </umb-toggle>
+                        <div class="umb-permission__content" ng-click="vm.settings.RebuildCacheOnCompleation = !vm.settings.RebuildCacheOnCompleation">
+                            <div>Rebuild Cache after import</div>
+                            <div class="umb-permission__description">Request that Umbraco rebuilds its cache after an import</div>
+                        </div>
+                    </div>
+
+
                 </umb-box-content>
             </umb-box>
 
