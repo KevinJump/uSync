@@ -35,6 +35,8 @@ namespace uSync8.BackOffice
             composition.RegisterUnique<SyncHandlerFactory>();
 
             composition.RegisterUnique<uSyncService>();
+
+            composition.Components().Append<uSyncBackofficeComponent>();
         }
     }
 }
