@@ -43,6 +43,7 @@ namespace uSync8.BackOffice.Configuration
             settings.BatchSave = node.Element("BatchSave").ValueOrDefault(false);
             settings.ReportDebug = node.Element("ReportDebug").ValueOrDefault(false);
             settings.AddOnPing = node.Element("AddOnPing").ValueOrDefault(true);
+            settings.RebuildCacheOnCompleation = node.Element("RebuildCacheOnCompleation").ValueOrDefault(true);
 
             // load the handlers 
             var handlerSets = node.Element("HandlerSets");
@@ -110,6 +111,7 @@ namespace uSync8.BackOffice.Configuration
             node.CreateOrSetElement("UseGuidFilenames", settings.UseGuidNames);
             node.CreateOrSetElement("BatchSave", settings.BatchSave);
             node.CreateOrSetElement("ReportDebug", settings.ReportDebug);
+            node.CreateOrSetElement("RebuildCacheOnCompleation", settings.RebuildCacheOnCompleation);
 
             if (settings.HandlerSets.Count > 0)
             {

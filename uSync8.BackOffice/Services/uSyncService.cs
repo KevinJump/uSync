@@ -5,7 +5,7 @@ using System.Linq;
 
 using Umbraco.Core.Composing;
 using Umbraco.Core.Logging;
-
+using Umbraco.Web.PublishedCache;
 using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.SyncHandlers;
 
@@ -27,6 +27,7 @@ namespace uSync8.BackOffice
         private readonly IProfilingLogger logger;
 
         public uSyncService(
+            IPublishedSnapshotService snapshotService,
             SyncHandlerFactory handlerFactory,
             IProfilingLogger logger)
         {
@@ -209,6 +210,7 @@ namespace uSync8.BackOffice
                     sw.Stop();
                     summary.UpdateHandler("Post Import", HandlerStatus.Complete,
                         $"Import Completed ({sw.ElapsedMilliseconds}ms)", 0);
+
                     callbacks?.Callback?.Invoke(summary);
 
                     // fire complete

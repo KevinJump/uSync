@@ -253,6 +253,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Cache\RebuildCacheComponent.cs" />
     <Compile Include="Configuration\BackOfficeConfig.cs" />
     <Compile Include="Configuration\ConfigExtensions.cs" />
     <Compile Include="Configuration\OverriddenValue.cs" />
