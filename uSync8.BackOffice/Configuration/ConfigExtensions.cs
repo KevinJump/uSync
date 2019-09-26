@@ -10,6 +10,16 @@ namespace uSync8.BackOffice.Configuration
     public static class ConfigExtensions
     {
         public static uSyncSettings uSync(this Configs configs)
-            => configs.GetConfig<uSyncConfig>().Settings;
+        {
+            try
+            {
+                return configs.GetConfig<uSyncConfig>().Settings;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+            
     }
 }

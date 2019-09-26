@@ -15,31 +15,31 @@ namespace uSync8.BackOffice.Cache
     public class RebuildCacheComponent : IComponent
     {
         private readonly IPublishedSnapshotService snapshotService;
-        private uSyncSettings settings;
+        private bool rebuildCacheOnCompleaton;
 
         public RebuildCacheComponent(IPublishedSnapshotService snapshotService)
         {
             this.snapshotService = snapshotService;
-
-            this.settings = Current.Configs.uSync();
-
             uSyncConfig.Reloaded += Config_Reloaded;
         }
 
         private void Config_Reloaded(uSyncSettings settings)
         {
-            this.settings = Current.Configs.uSync();
+            rebuildCacheOnCompleaton = settings.RebuildCacheOnCompleation;
         }
 
         public void Initialize()
         {
+            var config = Current.Configs.uSync();
+            if (config != null)
+                Config_Reloaded(config);
+
             uSyncService.ImportComplete += ImportComplete;
-           
         }
 
         private void ImportComplete(uSyncBulkEventArgs e)
         {
-            if (settings.RebuildCacheOnCompleation &&
+            if (rebuildCacheOnCompleaton &&
                 e.Actions.Any(x => x.Change > uSync8.Core.ChangeType.NoChange))
             {
                 // change happened. - rebuild
