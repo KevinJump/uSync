@@ -209,7 +209,9 @@ namespace uSync8.ContentEdition.Serializers
                         var status = culturePublish.ValueOrDefault(false);
 
                         if (!string.IsNullOrWhiteSpace(culture) && status)
+                        {
                             publishedCultures.Add(culture);
+                        }
                     }
 
                     if (publishedCultures.Count > 0)
@@ -231,6 +233,11 @@ namespace uSync8.ContentEdition.Serializers
                             return Attempt.Succeed("Published");
 
                         return Attempt.Fail("Publish Failed " + publishResult.EventMessages);
+                    }
+                    else if (item.Published) 
+                    {
+                        // unpublish
+                        contentService.Unpublish(item);
                     }
                 }
             }
