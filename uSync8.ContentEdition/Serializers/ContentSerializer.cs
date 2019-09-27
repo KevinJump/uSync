@@ -9,6 +9,7 @@ using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
+using uSync8.BackOffice;
 using uSync8.ContentEdition.Mapping;
 using uSync8.Core;
 using uSync8.Core.Extensions;
@@ -195,59 +196,65 @@ namespace uSync8.ContentEdition.Serializers
 
         protected virtual Attempt<string> DoSaveOrPublish(IContent item, XElement node)
         {
-
-            var publishedNode = node.Element("Info")?.Element("Published");
-            if (publishedNode != null)
+            // at the moment <= 8.1.5 we can't publish during startup.
+            if (!uSync8BackOffice.inStartup)
             {
-                if (publishedNode.HasElements)
+                var publishedNode = node.Element("Info")?.Element("Published");
+                if (publishedNode != null)
                 {
-                    // culture based publishing.
-                    var publishedCultures = new List<string>();
-                    foreach (var culturePublish in publishedNode.Elements("Published"))
+                    if (publishedNode.HasElements)
                     {
-                        var culture = culturePublish.Attribute("Culture").ValueOrDefault(string.Empty);
-                        var status = culturePublish.ValueOrDefault(false);
-
-                        if (!string.IsNullOrWhiteSpace(culture) && status)
+                        // culture based publishing.
+                        var publishedCultures = new List<string>();
+                        foreach (var culturePublish in publishedNode.Elements("Published"))
                         {
-                            publishedCultures.Add(culture);
+                            var culture = culturePublish.Attribute("Culture").ValueOrDefault(string.Empty);
+                            var status = culturePublish.ValueOrDefault(false);
+
+                            if (!string.IsNullOrWhiteSpace(culture) && status)
+                            {
+                                publishedCultures.Add(culture);
+                            }
+                        }
+
+                        if (publishedCultures.Count > 0)
+                        {
+                            var culturePublishResult = contentService.SaveAndPublish(item, publishedCultures.ToArray());
+                            if (culturePublishResult.Success)
+                                return Attempt.Succeed($"Published {publishedCultures.Count} Cultures");
+
+                            return Attempt.Fail("Publish Failed " + culturePublishResult.EventMessages);
                         }
                     }
-
-                    if (publishedCultures.Count > 0)
+                    else
                     {
-                        var culturePublishResult = contentService.SaveAndPublish(item, publishedCultures.ToArray());
-                        if (culturePublishResult.Success)
-                            return Attempt.Succeed($"Published {publishedCultures.Count} Cultures");
+                        // default publish the lot. 
+                        if (publishedNode.Attribute("Default").ValueOrDefault(false))
+                        {
+                            var publishResult = contentService.SaveAndPublish(item);
+                            if (publishResult.Success)
+                                return Attempt.Succeed("Published");
 
-                        return Attempt.Fail("Publish Failed " + culturePublishResult.EventMessages);
-                    }
-                }
-                else
-                {
-                    // default publish the lot. 
-                    if (publishedNode.Attribute("Default").ValueOrDefault(false))
-                    {
-                        var publishResult = contentService.SaveAndPublish(item);
-                        if (publishResult.Success)
-                            return Attempt.Succeed("Published");
-
-                        return Attempt.Fail("Publish Failed " + publishResult.EventMessages);
-                    }
-                    else if (item.Published) 
-                    {
-                        // unpublish
-                        contentService.Unpublish(item);
+                            return Attempt.Fail("Publish Failed " + publishResult.EventMessages);
+                        }
+                        else if (item.Published)
+                        {
+                            // unpublish
+                            contentService.Unpublish(item);
+                        }
                     }
                 }
             }
 
             // if we get here, save 
+            /*
             var result = contentService.Save(item);
-            if (result.Success)
-                return Attempt.Succeed("Saved");
+            if (result.Success) */
 
-            return Attempt.Fail("Save Failed " + result.EventMessages);
+            this.SaveItem(item);
+            return Attempt.Succeed("Saved");
+
+            // return Attempt.Fail("Save Failed " + result.EventMessages);
         }
 
         #endregion
@@ -289,7 +296,18 @@ namespace uSync8.ContentEdition.Serializers
             => contentService.Save(items);
 
         protected override void SaveItem(IContent item)
-            => contentService.Save(item);
+        {
+            try
+            {
+                contentService.Save(item);
+            }
+            catch (ArgumentNullException ex)
+            {
+                // we can get thrown a null argument exception by the notifer, 
+                // which is non critical! but we are ignoring this error. ! <= 8.1.5
+                if (!ex.Message.Contains("siteUri")) throw ex;
+            }
+        }
 
         protected override void DeleteItem(IContent item)
             => contentService.Delete(item);

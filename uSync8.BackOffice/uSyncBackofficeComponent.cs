@@ -30,13 +30,13 @@ namespace uSync8.BackOffice
         public uSyncBackofficeComponent(
             SyncHandlerFactory handlerFactory,
             IProfilingLogger logger,
-            SyncFileService fileService,            
+            SyncFileService fileService,
             uSyncService uSyncService,
             IRuntimeState runtimeState)
         {
             globalSettings = Current.Configs.uSync();
 
-            this.runtimeState = runtimeState;           
+            this.runtimeState = runtimeState;
             this.logger = logger;
 
             this.handlerFactory = handlerFactory;
@@ -82,27 +82,40 @@ namespace uSync8.BackOffice
             });
         }
 
-            private void InitBackOffice()
+        private void InitBackOffice()
         {
-            if (globalSettings.ExportAtStartup || (globalSettings.ExportOnSave && !syncFileService.RootExists(globalSettings.RootFolder)))
+            try
             {
-                uSyncService.Export(globalSettings.RootFolder, default(SyncHandlerOptions));
-            }
+                uSync8BackOffice.inStartup = true;
 
-            if (globalSettings.ImportAtStartup)
-            {
-                uSyncService.Import(globalSettings.RootFolder, false, default(SyncHandlerOptions));
-            }
-
-            if (globalSettings.ExportOnSave)
-            {
-                var handlers = handlerFactory.GetValidHandlers(new SyncHandlerOptions(handlerFactory.DefaultSet, HandlerActions.Save));
-                
-                foreach (var syncHandler in handlers)
+                if (globalSettings.ExportAtStartup || (globalSettings.ExportOnSave && !syncFileService.RootExists(globalSettings.RootFolder)))
                 {
-                    logger.Debug<uSyncBackofficeComponent>($"Starting up Handler {syncHandler.Handler.Name}");
-                    syncHandler.Handler.Initialize(syncHandler.Settings);
+                    uSyncService.Export(globalSettings.RootFolder, default(SyncHandlerOptions));
                 }
+
+                if (globalSettings.ImportAtStartup)
+                {
+                    uSyncService.Import(globalSettings.RootFolder, false, default(SyncHandlerOptions));
+                }
+
+                if (globalSettings.ExportOnSave)
+                {
+                    var handlers = handlerFactory.GetValidHandlers(new SyncHandlerOptions(handlerFactory.DefaultSet, HandlerActions.Save));
+
+                    foreach (var syncHandler in handlers)
+                    {
+                        logger.Debug<uSyncBackofficeComponent>($"Starting up Handler {syncHandler.Handler.Name}");
+                        syncHandler.Handler.Initialize(syncHandler.Settings);
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                logger.Warn<uSyncBackofficeComponent>($"Error Importing at startup {ex.Message}");
+            }
+            finally
+            {
+                uSync8BackOffice.inStartup = true;
             }
 
         }
