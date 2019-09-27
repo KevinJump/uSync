@@ -643,9 +643,31 @@ namespace uSync8.BackOffice.SyncHandlers
         virtual protected string GetPath(string folder, TObject item, bool GuidNames, bool isFlat)
         {
             if (isFlat && GuidNames) return $"{folder}/{item.Key}.config";
+            var path = $"{folder}/{this.GetItemPath(item, GuidNames, isFlat)}.config";
 
-            return $"{folder}/{this.GetItemPath(item, GuidNames, isFlat)}.config";
+            // if this is flat but not using guid filenames, then we check for clashes.
+            if (isFlat && !GuidNames) return CheckAndFixFileClash(path, item.Key);
+            return path;
         }
+        private string CheckAndFixFileClash(string path, Guid key)
+        {
+            if (syncFileService.FileExists(path))
+            {
+                var node = syncFileService.LoadXElement(path);
+                if (node != null && node.GetKey() != key)
+                {
+                    // clash, we should append something
+                    var append = key.ToShortKeyString(8); // (this is the shortened guid like media folders do)
+                    return Path.Combine(Path.GetDirectoryName(path),
+                        Path.GetFileNameWithoutExtension(path) + "_" + append + Path.GetExtension(path));
+                }
+
+            }
+            return path;
+        }
+
+
+
 
         virtual public uSyncAction Rename(TObject item)
             => new uSyncAction();
