@@ -334,8 +334,7 @@ namespace uSync8.Core.Tracking
                 if (targetChildNode == null)
                 {
                     // no target, this element will get deleted
-                    var oldValue = childNode.Name.LocalName;
-                    updates.Add(uSyncChange.Delete(path, name, oldValue));
+                    updates.Add(uSyncChange.Delete(path, $"{name} [{childNode.Name.LocalName}]", GetElementValues(childNode)));
                     continue;
                 }
 
@@ -357,7 +356,31 @@ namespace uSync8.Core.Tracking
                 }
             }
 
+            // missing from current (so new)
+            foreach(var targetChild in targetNode.Elements())
+            {
+                var currentChildNode = currentNode.Element(targetChild.Name.LocalName);
+                if (currentChildNode == null)
+                {
+                    // not in current, its a new property.
+                    updates.Add(uSyncChange.Create(path, $"{name} [{targetChild.Name.LocalName}]", GetElementValues(targetChild)));
+                }
+            }
             return updates;
+        }
+
+        /// <summary>
+        ///  combines all the possible values from child nodes into a comma seperated list.
+        /// </summary>
+        /// <returns>list of values or (blank)</returns>
+        private string GetElementValues(XElement node)
+        {
+            var value = string.Empty;
+            if (node != null)
+                value = string.Join(",", node.Elements().Select(x => x.Value));
+
+            if (string.IsNullOrWhiteSpace(value)) value = "(blank)";
+            return value;
         }
 
         protected uSyncChange Compare(string path, string name, string current, string target, bool maskValue)
