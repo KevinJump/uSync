@@ -27,22 +27,27 @@ namespace uSync8.BackOffice
         private readonly uSyncService uSyncService;
         private readonly IRuntimeState runtimeState;
 
+        private readonly IUmbracoContextFactory umbracoContextFactory;
+
         public uSyncBackofficeComponent(
             SyncHandlerFactory handlerFactory,
             IProfilingLogger logger,
-            SyncFileService fileService,            
+            SyncFileService fileService,
             uSyncService uSyncService,
-            IRuntimeState runtimeState)
+            IRuntimeState runtimeState,
+            IUmbracoContextFactory umbracoContextFactory)
         {
             globalSettings = Current.Configs.uSync();
 
-            this.runtimeState = runtimeState;           
+            this.runtimeState = runtimeState;
             this.logger = logger;
 
             this.handlerFactory = handlerFactory;
 
             this.syncFileService = fileService;
             this.uSyncService = uSyncService;
+
+            this.umbracoContextFactory = umbracoContextFactory;
 
         }
 
@@ -82,27 +87,39 @@ namespace uSync8.BackOffice
             });
         }
 
-            private void InitBackOffice()
+        private void InitBackOffice()
         {
-            if (globalSettings.ExportAtStartup || (globalSettings.ExportOnSave && !syncFileService.RootExists(globalSettings.RootFolder)))
+            try
             {
-                uSyncService.Export(globalSettings.RootFolder, default(SyncHandlerOptions));
-            }
 
-            if (globalSettings.ImportAtStartup)
-            {
-                uSyncService.Import(globalSettings.RootFolder, false, default(SyncHandlerOptions));
-            }
-
-            if (globalSettings.ExportOnSave)
-            {
-                var handlers = handlerFactory.GetValidHandlers(new SyncHandlerOptions(handlerFactory.DefaultSet, HandlerActions.Save));
-                
-                foreach (var syncHandler in handlers)
+                using (var reference = umbracoContextFactory.EnsureUmbracoContext())
                 {
-                    logger.Debug<uSyncBackofficeComponent>($"Starting up Handler {syncHandler.Handler.Name}");
-                    syncHandler.Handler.Initialize(syncHandler.Settings);
+
+                    if (globalSettings.ExportAtStartup || (globalSettings.ExportOnSave && !syncFileService.RootExists(globalSettings.RootFolder)))
+                    {
+                        uSyncService.Export(globalSettings.RootFolder, default(SyncHandlerOptions));
+                    }
+
+                    if (globalSettings.ImportAtStartup)
+                    {
+                        uSyncService.Import(globalSettings.RootFolder, false, default(SyncHandlerOptions));
+                    }
+
+                    if (globalSettings.ExportOnSave)
+                    {
+                        var handlers = handlerFactory.GetValidHandlers(new SyncHandlerOptions(handlerFactory.DefaultSet, HandlerActions.Save));
+
+                        foreach (var syncHandler in handlers)
+                        {
+                            logger.Debug<uSyncBackofficeComponent>($"Starting up Handler {syncHandler.Handler.Name}");
+                            syncHandler.Handler.Initialize(syncHandler.Settings);
+                        }
+                    }
                 }
+            }
+            catch(Exception ex)
+            {
+                logger.Warn<uSyncBackofficeComponent>($"Error Importing at startup {ex.Message}");
             }
 
         }

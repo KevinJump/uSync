@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
+
 using Umbraco.Core;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
+
 using uSync8.ContentEdition.Mapping;
 using uSync8.Core;
 using uSync8.Core.Extensions;
@@ -195,7 +195,6 @@ namespace uSync8.ContentEdition.Serializers
 
         protected virtual Attempt<string> DoSaveOrPublish(IContent item, XElement node)
         {
-
             var publishedNode = node.Element("Info")?.Element("Published");
             if (publishedNode != null)
             {
@@ -216,11 +215,7 @@ namespace uSync8.ContentEdition.Serializers
 
                     if (publishedCultures.Count > 0)
                     {
-                        var culturePublishResult = contentService.SaveAndPublish(item, publishedCultures.ToArray());
-                        if (culturePublishResult.Success)
-                            return Attempt.Succeed($"Published {publishedCultures.Count} Cultures");
-
-                        return Attempt.Fail("Publish Failed " + culturePublishResult.EventMessages);
+                        return PublishItem(item, publishedCultures.ToArray());
                     }
                 }
                 else
@@ -228,13 +223,9 @@ namespace uSync8.ContentEdition.Serializers
                     // default publish the lot. 
                     if (publishedNode.Attribute("Default").ValueOrDefault(false))
                     {
-                        var publishResult = contentService.SaveAndPublish(item);
-                        if (publishResult.Success)
-                            return Attempt.Succeed("Published");
-
-                        return Attempt.Fail("Publish Failed " + publishResult.EventMessages);
+                        return PublishItem(item, null);
                     }
-                    else if (item.Published) 
+                    else if (item.Published)
                     {
                         // unpublish
                         contentService.Unpublish(item);
@@ -243,11 +234,33 @@ namespace uSync8.ContentEdition.Serializers
             }
 
             // if we get here, save 
+            /*
             var result = contentService.Save(item);
-            if (result.Success)
-                return Attempt.Succeed("Saved");
+            if (result.Success) */
 
-            return Attempt.Fail("Save Failed " + result.EventMessages);
+            this.SaveItem(item);
+            return Attempt.Succeed("Saved");
+
+            // return Attempt.Fail("Save Failed " + result.EventMessages);
+        }
+
+        private Attempt<string> PublishItem(IContent item, string[] cultures)
+        {
+            try
+            {
+                var culturePublishResult = contentService.SaveAndPublish(item, cultures);
+                if (culturePublishResult.Success)
+                    return Attempt.Succeed($"Published {cultures != null: cultures.Count : 'All'} Cultures");
+
+                return Attempt.Fail("Publish Failed " + culturePublishResult.EventMessages);
+            }
+            catch (ArgumentNullException ex)
+            {
+                // we can get thrown a null argument exception by the notifer, 
+                // which is non critical! but we are ignoring this error. ! <= 8.1.5
+                if (!ex.Message.Contains("siteUri")) throw ex;
+                return Attempt.Succeed($"Published");
+            }
         }
 
         #endregion
@@ -289,7 +302,18 @@ namespace uSync8.ContentEdition.Serializers
             => contentService.Save(items);
 
         protected override void SaveItem(IContent item)
-            => contentService.Save(item);
+        {
+            try
+            {
+                contentService.Save(item);
+            }
+            catch (ArgumentNullException ex)
+            {
+                // we can get thrown a null argument exception by the notifer, 
+                // which is non critical! but we are ignoring this error. ! <= 8.1.5
+                if (!ex.Message.Contains("siteUri")) throw ex;
+            }
+        }
 
         protected override void DeleteItem(IContent item)
             => contentService.Delete(item);
