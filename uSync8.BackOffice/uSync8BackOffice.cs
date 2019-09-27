@@ -9,8 +9,6 @@ namespace uSync8.BackOffice
     public class uSync8BackOffice
     {
         public static bool eventsPaused { get; set; }
-
-        public static bool inStartup { get; set; }
     }
 
     internal class uSync
