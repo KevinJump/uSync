@@ -248,11 +248,20 @@ namespace uSync8.ContentEdition.Serializers
         {
             try
             {
-                var culturePublishResult = contentService.SaveAndPublish(item, cultures);
-                if (culturePublishResult.Success)
-                    return Attempt.Succeed($"Published {cultures != null: cultures.Count : 'All'} Cultures");
+                PublishResult result;
+                if (cultures != null)
+                {
+                    result = contentService.SaveAndPublish(item, cultures);
+                }
+                else
+                {
+                    result = contentService.SaveAndPublish(item);
+                }
 
-                return Attempt.Fail("Publish Failed " + culturePublishResult.EventMessages);
+                if (result.Success)
+                    return Attempt.Succeed("Published");
+
+                return Attempt.Fail("Publish Failed " + result.EventMessages);
             }
             catch (ArgumentNullException ex)
             {
