@@ -23,8 +23,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "uSync8.ContentEdition", "uS
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "uSync8.Site", "uSync8.Site\uSync8.Site.csproj", "{4DC0EA5C-B104-479C-9D84-DA64A039F98B}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{AA729092-F6BF-43C2-8EB9-F92BCBD89C08}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "uSync8.Community.DataTypeSerializers", "uSync8.Community.DataTypeSerializers\uSync8.Community.DataTypeSerializers.csproj", "{A0B9C603-A7DC-4593-8059-19BA035E5CC3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "uSync8.Community.Contrib", "uSync8.Community.Contrib\uSync8.Community.Contrib.csproj", "{0813D306-4E5A-4E9D-B8D0-3F257CAE8FA2}"
