@@ -19,16 +19,16 @@
                         <div class="umb-table-cell">
                         </div>
                         <div class="umb-table-cell">
-                            Type
+                            <localize key="usync_tableType"></localize>
                         </div>
                         <div class="umb-table-cell umb-table__name">
-                            Name
+                            <localize key="usync_tableName"></localize>
                         </div>
                         <div class="umb-table-cell">
-                            Change
+                            <localize key="usync_tableChange"></localize>
                         </div>
                         <div class="umb-table-cell">
-                            Message
+                            <localize key="usync_tableMessage"></localize>
                         </div>
                         <div class="umb-table-cell"></div>
                         <div class="umb-table-cell"></div>
@@ -70,7 +70,7 @@
                                 <div class="text-right" ng-if="vm.hideAction == false">
                                     <umb-button type="button"
                                                 button-style="action btn-sm"
-                                                label="Apply"
+                                                label-key="usync_apply"
                                                 action="vm.apply(result)"
                                                 state="vm.status(result)"
                                                 ng-if="result.Details != null"></umb-button>
@@ -81,7 +81,7 @@
                 </div>
             </div>
             <div class="flex justify-center items-center" ng-if="vm.countChanges(vm.results) == 0 && !vm.showAll">
-                <h4>No Changes</h4>
+                <localize key="usync_nochange"></localize>
             </div>
     </umb-box>
 </div>

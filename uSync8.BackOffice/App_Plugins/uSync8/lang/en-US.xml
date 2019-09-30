@@ -16,6 +16,7 @@
     <key alias="importforce">Full Import</key>
     <key alias="report">Report</key>
     <key alias="export">Export</key>
+    <key alias="apply">Apply</key>
 
     <key alias="details">Details</key>
   
@@ -31,6 +32,14 @@
     <key alias="report-settings">Report Settings</key>
     <key alias="report-members">Report Members</key>
     <key alias="report-users">Report Users</key>
+
+    <key alias="tableType">Type</key>
+    <key alias="tableName">Name</key>
+    <key alias="tableChange">Change</key>
+    <key alias="tableMessage">Message</key>
+
+    <key alias="nochange"><![CDATA[<h4>No Changes</h4>]]></key>
+    
   </area>
   <area alias="dashboardTabs">
     <key alias="uSync8">uSync</key>
