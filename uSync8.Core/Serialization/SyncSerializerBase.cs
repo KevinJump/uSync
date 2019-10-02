@@ -165,6 +165,8 @@ namespace uSync8.Core.Serialization
                 case SyncActionType.Rename:
                     return ProcessRename(key, alias, flags);
                 case SyncActionType.Clean:
+                    // we return a 'clean' success, but this is then picked up 
+                    // in the handler, as something to clean, so the handler does it. 
                     return SyncAttempt<TObject>.Succeed(alias, ChangeType.Clean);
                 default:
                     return SyncAttempt<TObject>.Succeed(alias, ChangeType.NoChange);

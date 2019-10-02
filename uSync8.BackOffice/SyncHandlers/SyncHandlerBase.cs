@@ -176,7 +176,7 @@ namespace uSync8.BackOffice.SyncHandlers
                 serializer.Save(updatedItems);
             }
 
-            
+
         }
 
         protected virtual IEnumerable<uSyncAction> ImportFolder(string folder, HandlerSettings config, Dictionary<string, TObject> updates, bool force, SyncUpdateCallback callback)
@@ -238,6 +238,8 @@ namespace uSync8.BackOffice.SyncHandlers
                 {
                     actions.AddRange(CleanFolder(cleanFile, false));
                 }
+                // remove the actual cleans (they will have been replaced by the deletes
+                actions.RemoveAll(x => x.Change == ChangeType.Clean);
             }
 
             callback?.Invoke("", 1, 1);
@@ -297,12 +299,12 @@ namespace uSync8.BackOffice.SyncHandlers
                 if (!keys.Contains(item.Key))
                 {
                     var actualItem = GetFromService(item.Key);
-                    var name = actualItem.Id;
+                    var name = GetItemName(actualItem);
 
                     if (!reportOnly)
                         DeleteViaService(actualItem);
 
-                    actions.Add(uSyncActionHelper<TObject>.SetAction(SyncAttempt<TObject>.Succeed(name.ToString(), ChangeType.Delete), string.Empty));
+                    actions.Add(uSyncActionHelper<TObject>.SetAction(SyncAttempt<TObject>.Succeed(name, ChangeType.Delete), string.Empty));
                 }
             }
 
@@ -514,9 +516,13 @@ namespace uSync8.BackOffice.SyncHandlers
                     }
 
                     action.Message = $"{action.Change.ToString()}";
+                    actions.Add(action);
+                }
+                else
+                {
+                    actions.Add(action);
                 }
 
-                actions.Add(action);
                 return actions;
             }
             catch (FormatException fex)
