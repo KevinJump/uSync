@@ -182,6 +182,8 @@ namespace uSync8.ContentEdition.Mapping.Mappers
             var viewAlias = editor.Value<string>("view");
             if (viewAlias == null) return (alias, null);
 
+            viewAlias = viewAlias.ToLower().TrimEnd(".html");
+
             if (viewAlias.IndexOf('.') != -1)
                 viewAlias = viewAlias.Substring(viewAlias.LastIndexOf('.'));
 
