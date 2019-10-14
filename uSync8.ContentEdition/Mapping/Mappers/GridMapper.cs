@@ -40,7 +40,6 @@ namespace uSync8.ContentEdition.Mapping.Mappers
             return GetGridDependencies<uSyncDependency>(stringValue, ProcessControl, flags);
         }
 
-        /*
         public override string GetImportValue(string value, string editorAlias)
         {
             var gridContent = this.GetValueAs<string>(value);
@@ -116,7 +115,6 @@ namespace uSync8.ContentEdition.Mapping.Mappers
         {
             return mapper.GetExportValue(value, editorAlias);
         }
-        */
 
         #region Dependency Checking 
 
@@ -184,8 +182,8 @@ namespace uSync8.ContentEdition.Mapping.Mappers
 
             viewAlias = viewAlias.ToLower().TrimEnd(".html");
 
-            if (viewAlias.IndexOf('.') != -1)
-                viewAlias = viewAlias.Substring(viewAlias.LastIndexOf('.'));
+            if (viewAlias.IndexOf('/') != -1)
+                viewAlias = viewAlias.Substring(viewAlias.LastIndexOf('/')+1);
 
             alias = $"Umbraco.Grid.{viewAlias}";
             return (alias, SyncValueMapperFactory.GetMapper(alias));

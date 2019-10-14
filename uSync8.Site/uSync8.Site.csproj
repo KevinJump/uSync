@@ -491,6 +491,10 @@
       <Project>{f2dfcb19-c9ee-471e-b8e2-e0b4dd31761d}</Project>
       <Name>uSync8.BackOffice</Name>
     </ProjectReference>
+    <ProjectReference Include="..\uSync8.Community.Contrib\uSync8.Community.Contrib.csproj">
+      <Project>{0813d306-4e5a-4e9d-b8d0-3f257cae8fa2}</Project>
+      <Name>uSync8.Community.Contrib</Name>
+    </ProjectReference>
     <ProjectReference Include="..\uSync8.ContentEdition\uSync8.ContentEdition.csproj">
       <Project>{875ecd47-2dce-475a-bddd-3b578a832419}</Project>
       <Name>uSync8.ContentEdition</Name>
