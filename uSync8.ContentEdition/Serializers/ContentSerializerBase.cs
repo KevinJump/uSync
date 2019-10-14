@@ -105,7 +105,7 @@ namespace uSync8.ContentEdition.Serializers
                         valueNode.Add(new XAttribute("Segment", value.Segment ?? string.Empty));
                     }
 
-                    valueNode.Value = GetExportValue(value.EditedValue, property.PropertyType, value.Culture, value.Segment);
+                    valueNode.Add(new XCData(GetExportValue(value.EditedValue, property.PropertyType, value.Culture, value.Segment)));
                     // valueNode.Value = value.EditedValue?.ToString() ?? string.Empty;
                     propertyNode.Add(valueNode);
                 }
