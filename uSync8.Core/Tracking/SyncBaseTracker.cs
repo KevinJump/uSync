@@ -348,11 +348,16 @@ namespace uSync8.Core.Tracking
                 }
                 else
                 {
-                    // if there are no children, they we are comparing the actual text of the nodes
-                    updates.AddNotNull(Compare(currentNodePath, currentNodeName,
-                        childNode.ValueOrDefault(string.Empty),
-                        targetChildNode.ValueOrDefault(string.Empty), 
-                        change.MaskValue));
+                    var childValue = childNode.ValueOrDefault(string.Empty);
+                    var targetChildValue = targetChildNode.ValueOrDefault(string.Empty);
+
+                    if (!childValue.Equals(targetChildValue))
+                    {
+                        // if there are no children, they we are comparing the actual text of the nodes
+                        updates.AddNotNull(Compare(currentNodePath, currentNodeName,
+                            childValue, targetChildValue,
+                            change.MaskValue));
+                    }
                 }
             }
 
@@ -385,7 +390,7 @@ namespace uSync8.Core.Tracking
 
         protected uSyncChange Compare(string path, string name, string current, string target, bool maskValue)
         {
-            if (current == target) return null;
+            if (current.Equals(target)) return null;
             return uSyncChange.Update(path, name, 
                 maskValue ? "*******" : current, 
                 maskValue ? "*******" : target);
