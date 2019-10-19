@@ -102,7 +102,15 @@ namespace uSync8.BackOffice
 
                     if (globalSettings.ImportAtStartup)
                     {
-                        uSyncService.Import(globalSettings.RootFolder, false, default(SyncHandlerOptions));
+                        if (!HasStopFile(globalSettings.RootFolder))
+                        {
+                            uSyncService.Import(globalSettings.RootFolder, false, default(SyncHandlerOptions));
+                            ProcessOnceFile(globalSettings.RootFolder);
+                        }
+                        else
+                        {
+                            logger.Info<uSyncBackofficeComponent>("Startup Import blocked by usync.stop file");
+                        }
                     }
 
                     if (globalSettings.ExportOnSave)
@@ -127,6 +135,21 @@ namespace uSync8.BackOffice
         public void Terminate()
         {
             logger.Debug<uSyncBackofficeComponent>("Terminiating Component");
+        }
+
+
+
+        private bool HasStopFile(string folder)
+            => syncFileService.FileExists($"{folder}/usync.stop");
+
+        private void ProcessOnceFile(string folder) 
+        {
+            if (syncFileService.FileExists($"{folder}/usync.once"))
+            {
+                syncFileService.DeleteFile($"{folder}/usync.once");
+                syncFileService.SaveFile($"{folder}/usync.stop", "uSync Stop file, prevents startup import");
+                logger.Info<uSyncBackofficeComponent>("usync.once file replaced by usync.stop file");
+            }
         }
     }
 }
