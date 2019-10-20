@@ -1,5 +1,9 @@
 [
   {
+    "name": "All uSync Log Entries",
+    "query": "StartsWith(SourceContext, 'uSync8')"
+  },
+  {
     "name": "Find all logs where the Level is NOT Verbose and NOT Debug",
     "query": "Not(@Level='Verbose') and Not(@Level='Debug')"
   },
