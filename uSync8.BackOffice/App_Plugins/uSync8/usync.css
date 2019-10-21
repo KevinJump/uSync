@@ -89,12 +89,12 @@
     }
 
     .usync-handler-icon .badge.type-complete {
-        background-color: #35c786;
+        background-color: #27b171;
     }
 
     .usync-handler-icon .handler-badge i {
         font-size: 16px;
-        color: #35c786;
+        color: #27b171;
     }
 
     .usync-handler-icon .usync-handler-name {
@@ -116,7 +116,7 @@
     }
 
     .usync-handler-icon.usync-complete {
-        color: #35c786;
+        color: #1b264f;
     }
 
         .usync-handler-icon.usync-complete .usync-addon-icon {
@@ -259,8 +259,8 @@
 
     .usync-banner p {
         font-size: 120%;
-        max-width: 50%;
         margin: 20px;
+        line-height: 1.5;
     }
 
     .usync-banner .btn {
@@ -272,6 +272,7 @@
     width: 80%;
     justify-content: space-between;
     margin: 25px 0;
+    font-weight: bold;
 }
 
     .banner-icons > div {

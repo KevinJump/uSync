@@ -13,12 +13,14 @@ using Umbraco.Core.Services;
 namespace uSync8.ContentEdition.Mapping.Mappers
 {
     /// <summary>
-    ///  Mapper for images in an image cropper 
+    ///  Mapper for file path in an image cropper / upload control
     /// </summary>
     /// <remarks>
-    ///  this image cropper, removes / adds any virtual folder properties 
-    ///  to a site (so if you have your umbraco install in virtual folder paths)
+    ///  this removes / adds any virtual folder properties 
+    ///  to a path (so if you have your umbraco install in virtual folder paths)
     ///  
+    /// {"src":"/subfolder/media/2cud1lzo/15656993711_ccd199b83e_k.jpg","crops":null}
+    /// becomes 
     /// {"src":"/media/2cud1lzo/15656993711_ccd199b83e_k.jpg","crops":null}
     /// </remarks>
     public class ImagePathMapper : SyncValueMapperBase, ISyncMapper
