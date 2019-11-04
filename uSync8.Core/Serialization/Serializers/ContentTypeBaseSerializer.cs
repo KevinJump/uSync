@@ -553,8 +553,11 @@ namespace uSync8.Core.Serialization.Serializers
 
             // thing that could break if they where blank. 
             // update, only set this if its not already set (because we don't want to break things!)
-            if (string.IsNullOrWhiteSpace(property.PropertyEditorAlias) && !string.IsNullOrWhiteSpace(propertyEditorAlias))
-                property.PropertyEditorAlias = propertyEditorAlias;
+            // also update it if its not the same as the datatype, (because that has to match)
+            if (!property.PropertyEditorAlias.Equals(editorAlias))
+            {
+                property.PropertyEditorAlias = editorAlias;
+            }
 
             if (property.DataTypeId != dataType.Id)
                 property.DataTypeId = dataType.Id;
