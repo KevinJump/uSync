@@ -516,23 +516,24 @@ namespace uSync8.Core.Serialization.Serializers
                 property = item.PropertyTypes.SingleOrDefault(x => x.Alias == alias);
             }
 
+            var editorAlias = propertyEditorAlias;
+
             IDataType dataType = default(IDataType);
             if (definitionKey != Guid.Empty)
             {
                 dataType = dataTypeService.GetDataType(definitionKey);
             }
 
-            if (dataType == null)
+            if (dataType == null && !string.IsNullOrEmpty(propertyEditorAlias))
             {
-                // look the datatype up by alias ?
-                if (!string.IsNullOrEmpty(propertyEditorAlias))
-                {
-                    dataType = dataTypeService.GetDataType(propertyEditorAlias);
-                }
-
+                dataType = dataTypeService.GetDataType(propertyEditorAlias);
             }
 
             if (dataType == null) return null;
+
+            // we set it here, this means if the file is in conflict (because its changed in the datatype), 
+            // we shouldn't reset it later on should we set the editor alias value. 
+            editorAlias = dataType.EditorAlias;
 
             // if it's null then it doesn't exist (so it's new)
             if (property == null)
@@ -551,7 +552,8 @@ namespace uSync8.Core.Serialization.Serializers
 
 
             // thing that could break if they where blank. 
-            if (!string.IsNullOrWhiteSpace(propertyEditorAlias))
+            // update, only set this if its not already set (because we don't want to break things!)
+            if (string.IsNullOrWhiteSpace(property.PropertyEditorAlias) && !string.IsNullOrWhiteSpace(propertyEditorAlias))
                 property.PropertyEditorAlias = propertyEditorAlias;
 
             if (property.DataTypeId != dataType.Id)
