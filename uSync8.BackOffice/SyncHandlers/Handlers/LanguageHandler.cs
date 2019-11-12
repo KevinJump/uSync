@@ -70,6 +70,8 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 
         private void LocalizationService_SavingLanguage(ILocalizationService sender, Umbraco.Core.Events.SaveEventArgs<ILanguage> e)
         {
+            if (uSync8BackOffice.eventsPaused) return;
+
             foreach(var item in e.SavedEntities)
             {
                 // 
