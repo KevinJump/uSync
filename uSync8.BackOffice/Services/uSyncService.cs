@@ -35,6 +35,9 @@ namespace uSync8.BackOffice
             this.logger = logger;
 
             uSyncConfig.Reloaded += BackOfficeConfig_Reloaded;
+
+            uSyncTriggers.DoExport += USyncTriggers_DoExport;
+            uSyncTriggers.DoImport += USyncTriggers_DoImport;
         }
 
         private void BackOfficeConfig_Reloaded(uSyncSettings settings)
@@ -313,5 +316,54 @@ namespace uSync8.BackOffice
 
         private int ChangeCount(IEnumerable<uSyncAction> actions)
             => actions.Count(x => x.Change > Core.ChangeType.NoChange);
+
+
+
+        /// <summary>
+        ///  do an import triggered by an event.
+        /// </summary>
+        /// <param name="e"></param>
+        private void USyncTriggers_DoImport(uSyncTriggerArgs e)
+        {
+            logger.Info<uSyncService>("Import Triggered by downlevel change");
+            if (e.EntityTypes != null && !string.IsNullOrWhiteSpace(e.Folder))
+            {
+                var handlers = GetHandlers(e.EntityTypes, e.HandlerOptions);
+                if (handlers.Count > 0)
+                    this.Import(e.Folder, false, handlers, null);
+            }
+        }
+
+        /// <summary>
+        ///  do an export triggered by events. 
+        /// </summary>
+        /// <param name="e"></param>
+        private void USyncTriggers_DoExport(uSyncTriggerArgs e)
+        {
+            logger.Info<uSyncService>("Export Triggered by downlevel change");
+            if (e.EntityTypes != null && !string.IsNullOrWhiteSpace(e.Folder))
+            {
+                var handlers = GetHandlers(e.EntityTypes, e.HandlerOptions);
+                if (handlers.Count > 0)
+                {
+                    this.Export(e.Folder, handlers, null);
+                }
+            }
+        }
+
+        private IList<ExtendedHandlerConfigPair> GetHandlers(IEnumerable<string> entityTypes, SyncHandlerOptions handlerOptions)
+        {
+            var handlers = new List<ExtendedHandlerConfigPair>();
+
+            foreach (var entityType in entityTypes)
+            {
+                var handler = handlerFactory.GetValidHandlerByEntityType(entityType, handlerOptions);
+                if (handler != null)
+                    handlers.Add(handler);
+            }
+
+            return handlers;
+        }
+
     }
 }
