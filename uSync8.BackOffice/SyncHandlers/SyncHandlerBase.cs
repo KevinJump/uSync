@@ -607,7 +607,7 @@ namespace uSync8.BackOffice.SyncHandlers
         ///  (and we are using the name in the file) this will
         ///  clean anything else in the folder that has that key
         /// </summary>
-        protected void CleanUp(TObject item, string newFile, string folder)
+        protected virtual void CleanUp(TObject item, string newFile, string folder)
         {
             var physicalFile = syncFileService.GetAbsPath(newFile);
 
