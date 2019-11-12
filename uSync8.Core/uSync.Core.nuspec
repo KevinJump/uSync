@@ -10,7 +10,9 @@
     <description>Database syncing for Umbraco 8</description>
     <summary>Core Dll's for uSync 8</summary>
     <releaseNotes>8.0 - Initial Release for Umbraco 8
-8.1 - Compatability Release for Umbraco 8.1</releaseNotes>
+8.1 - Compatability Release for Umbraco 8.1
+8.2 - uSync.Complete companion release 
+8.3 - Language Rename support for Umbraco 8.3</releaseNotes>
     <tags>umbraco usync</tags>
   </metadata>
   <files>

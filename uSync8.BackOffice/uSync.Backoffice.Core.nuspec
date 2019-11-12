@@ -13,6 +13,7 @@
       8.0 - Initial Release for Umbraco 8
       8.1 - Compatability Release for Umbraco 8.1
       8.2 - uSync Complete Companion release.
+      8.3 - Language Rename support for Umbraco 8.3
     </releaseNotes>
     <dependencies>
       <dependency id="uSync.Core" version="$depends$"/>
