@@ -110,7 +110,12 @@ namespace uSync8.BackOffice.SyncHandlers
                     var attempts = Export(obj, folder, config);
                     foreach(var attempt in attempts.Where(x => x.Success))
                     {
-                        CleanUp(obj, attempt.FileName, folder);
+                        // when its flat structure and use guidNames, we don't need to cleanup.
+                        if (!(this.DefaultConfig.GuidNames && this.DefaultConfig.UseFlatStructure))
+                        {
+                            CleanUp(obj, attempt.FileName, folder);
+                        }
+
                         actions.Add(attempt);
                     }
                 }

@@ -570,9 +570,13 @@ namespace uSync8.BackOffice.SyncHandlers
             {
                 var attempts = Export(item, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
 
-                foreach (var attempt in attempts.Where(x => x.Success))
+                // if we are using guid names and a flat structure then the clean doesn't need to happen
+                if (!(this.DefaultConfig.GuidNames && this.DefaultConfig.UseFlatStructure))
                 {
-                    this.CleanUp(item, attempt.FileName, Path.Combine(rootFolder, this.DefaultFolder));
+                    foreach (var attempt in attempts.Where(x => x.Success))
+                    {
+                        this.CleanUp(item, attempt.FileName, Path.Combine(rootFolder, this.DefaultFolder));
+                    }
                 }
             }
         }
@@ -584,9 +588,13 @@ namespace uSync8.BackOffice.SyncHandlers
             foreach (var item in e.MoveInfoCollection)
             {
                 var attempts = Export(item.Entity, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
-                foreach (var attempt in attempts.Where(x => x.Success))
+
+                if (!(this.DefaultConfig.GuidNames && this.DefaultConfig.UseFlatStructure))
                 {
-                    this.CleanUp(item.Entity, attempt.FileName, Path.Combine(rootFolder, this.DefaultFolder));
+                    foreach (var attempt in attempts.Where(x => x.Success))
+                    {
+                        this.CleanUp(item.Entity, attempt.FileName, Path.Combine(rootFolder, this.DefaultFolder));
+                    }
                 }
             }
         }

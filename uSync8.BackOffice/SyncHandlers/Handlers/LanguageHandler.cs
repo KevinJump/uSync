@@ -104,8 +104,9 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
                     this.ExportAll(Path.Combine(rootFolder, DefaultFolder), DefaultConfig, null);
                 }
 
-
                 var attempts = Export(item, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
+                
+                // we always clean up languages, because of the way they are stored. 
                 foreach(var attempt in attempts.Where(x => x.Success))
                 {
                     this.CleanUp(item, attempt.FileName, Path.Combine(rootFolder, this.DefaultFolder));
