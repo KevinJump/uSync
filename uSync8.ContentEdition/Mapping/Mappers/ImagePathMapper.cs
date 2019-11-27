@@ -36,8 +36,8 @@ namespace uSync8.ContentEdition.Mapping.Mappers
 
         public override string[] Editors => new string[]
         {
-            "Umbraco.ImageCropper",
-            "Umbraco.UploadField"
+            Constants.PropertyEditors.Aliases.ImageCropper,
+            Constants.PropertyEditors.Aliases.UploadField
         };
 
         public override string GetExportValue(object value, string editorAlias)

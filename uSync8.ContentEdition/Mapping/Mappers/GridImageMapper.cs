@@ -18,7 +18,9 @@ namespace uSync8.ContentEdition.Mapping.Mappers
 
         public override string Name => "Grid Image Mapper";
 
-        public override string[] Editors => new string[] { "Umbraco.Grid.media" };
+        public override string[] Editors => new string[] { 
+            $"{Constants.PropertyEditors.Aliases.Grid}.media"
+        };
 
         public override IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)
         {

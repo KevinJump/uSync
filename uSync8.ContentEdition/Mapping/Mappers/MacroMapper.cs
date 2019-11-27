@@ -18,9 +18,9 @@ namespace uSync8.ContentEdition.Mapping.Mappers
         public override string Name => "Macro Mapper";
 
         public override string[] Editors => new string[] {
-            "Umbraco.Grid.macro",
-            "Umbraco.TinyMCE.Macro",
-            "Umbraco.Grid.rte.Macro"
+            $"{Constants.PropertyEditors.Aliases.TinyMce}.Macro",
+            $"{Constants.PropertyEditors.Aliases.Grid}.Macro",
+            $"{Constants.PropertyEditors.Aliases.Grid}.rte.Macro"
         };
 
         public MacroMapper(IEntityService entityService,

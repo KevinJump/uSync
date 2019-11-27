@@ -34,7 +34,9 @@ namespace uSync8.ContentEdition.Mapping.Mappers
         public override string Name => "TinyMCE RTE Mapper";
 
         public override string[] Editors => new string[] {
-            "Umbraco.TinyMCE", "Umbraco.Grid.rte" };
+            Constants.PropertyEditors.Aliases.TinyMce, 
+            $"{Constants.PropertyEditors.Aliases.Grid}.rte"
+        };
 
         public override IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)
         {

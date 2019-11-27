@@ -17,7 +17,9 @@ namespace uSync8.ContentEdition.Mapping.Mappers
 
         public override string Name => "MultiUrl Mapper";
 
-        public override string[] Editors => new string[] { "Umbraco.MultiUrlPicker" };
+        public override string[] Editors => new string[] { 
+            Constants.PropertyEditors.Aliases.MultiUrlPicker
+        };
 
         public override IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)
         {

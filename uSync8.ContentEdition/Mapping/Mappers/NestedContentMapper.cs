@@ -22,7 +22,7 @@ namespace uSync8.ContentEdition.Mapping.Mappers
 
         public override string[] Editors => new string[] {
             "Our.Umbraco.NestedContent",
-            "Umbraco.NestedContent"
+            Constants.PropertyEditors.Aliases.NestedContent
         };
 
         public override IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)

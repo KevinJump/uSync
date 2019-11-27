@@ -30,7 +30,9 @@ namespace uSync8.ContentEdition.Mapping.Mappers
 
         public override string Name => "Grid Mapper";
 
-        public override string[] Editors => new string[] { "Umbraco.Grid" };
+        public override string[] Editors => new string[] { 
+            Constants.PropertyEditors.Aliases.Grid
+        };
 
         public override IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)
         {
@@ -171,7 +173,7 @@ namespace uSync8.ContentEdition.Mapping.Mappers
         /// <returns></returns>
         private (string alias, ISyncMapper mapper) FindMapper(JObject editor)
         {
-            var alias = $"Umbraco.Grid.{editor.Value<string>("alias")}";
+            var alias = $"{Constants.PropertyEditors.Aliases.Grid}.{editor.Value<string>("alias")}";
 
             var mapper = SyncValueMapperFactory.GetMapper(alias);
             if (mapper != null) return (alias, mapper);
@@ -185,7 +187,7 @@ namespace uSync8.ContentEdition.Mapping.Mappers
             if (viewAlias.IndexOf('/') != -1)
                 viewAlias = viewAlias.Substring(viewAlias.LastIndexOf('/')+1);
 
-            alias = $"Umbraco.Grid.{viewAlias}";
+            alias = $"{Constants.PropertyEditors.Aliases.Grid}.{viewAlias}";
             return (alias, SyncValueMapperFactory.GetMapper(alias));
         }
 

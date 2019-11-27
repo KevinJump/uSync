@@ -28,10 +28,11 @@ namespace uSync8.ContentEdition.Mapping
         public override string Name => "Content Picker Mapper";
 
         public override string[] Editors => new string[] {
-            "Umbraco.ContentPicker",
-            "Umbraco.MediaPicker",
-            "Umbraco.MultiNodeTreePicker",
-            "Umbraco.MemberPicker" };
+            Constants.PropertyEditors.Aliases.ContentPicker,
+            Constants.PropertyEditors.Aliases.MediaPicker,
+            Constants.PropertyEditors.Aliases.MultiNodeTreePicker,
+            Constants.PropertyEditors.Aliases.MemberPicker
+        };
 
         public override IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)
         {
