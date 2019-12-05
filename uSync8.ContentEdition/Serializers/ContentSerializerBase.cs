@@ -115,7 +115,7 @@ namespace uSync8.ContentEdition.Serializers
                     // add a blank one, for change clarity
                     // we do it like this because then it doesn't get collapsed in the XML
                     var emptyValue = new XElement("Value");
-                    emptyValue.Value = string.Empty;
+                    emptyValue.Add(new XCData(string.Empty));
 
                     propertyNode.Add(emptyValue);
                 }
