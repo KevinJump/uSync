@@ -1,25 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 using Umbraco.Core;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
 using Umbraco.Core.Services.Implement;
+
 using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
-using uSync8.Core;
 using uSync8.Core.Dependency;
 using uSync8.Core.Serialization;
 using uSync8.Core.Tracking;
+
 using static Umbraco.Core.Constants;
 
 namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
-    [SyncHandler("dataTypeHandler", "Datatypes", "DataTypes", uSyncBackOfficeConstants.Priorites.DataTypes, 
+    [SyncHandler("dataTypeHandler", "Datatypes", "DataTypes", uSyncBackOfficeConstants.Priorites.DataTypes,
         Icon = "icon-autofill", EntityType = UdiEntityType.DataType)]
     public class DataTypeHandler : SyncHandlerContainerBase<IDataType, IDataTypeService>, ISyncExtendedHandler, ISyncPostImportHandler
     {
@@ -28,7 +28,7 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
         public DataTypeHandler(
             IEntityService entityService,
             IDataTypeService dataTypeService,
-            IProfilingLogger logger, 
+            IProfilingLogger logger,
             ISyncSerializer<IDataType> serializer,
             ISyncDependencyChecker<IDataType> checker,
             ISyncTracker<IDataType> tracker,

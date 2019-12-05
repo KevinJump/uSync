@@ -1,12 +1,13 @@
-﻿using HtmlAgilityPack;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
+using HtmlAgilityPack;
+
+using Newtonsoft.Json;
+
 using Umbraco.Core;
 using Umbraco.Core.Services;
+
 using uSync8.Core.Dependency;
 
 namespace uSync8.ContentEdition.Mapping.Mappers
@@ -24,7 +25,7 @@ namespace uSync8.ContentEdition.Mapping.Mappers
         };
 
         public MacroMapper(IEntityService entityService,
-            IMacroService macroService) 
+            IMacroService macroService)
             : base(entityService)
         {
             this.macroService = macroService;
@@ -57,7 +58,7 @@ namespace uSync8.ContentEdition.Mapping.Mappers
         }
 
 
-        private  MacroValue LoadMacroValue(string macroString)
+        private MacroValue LoadMacroValue(string macroString)
         {
             if (!macroString.DetectIsJson())
             {

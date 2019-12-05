@@ -25,6 +25,5 @@ namespace uSync8.BackOffice.SyncHandlers
         IEnumerable<uSyncAction> ImportAll(string folder, HandlerSettings settings, bool force, SyncUpdateCallback callback);
         IEnumerable<uSyncAction> Report(string folder, HandlerSettings settings, SyncUpdateCallback callback);
 
-
     }
 }

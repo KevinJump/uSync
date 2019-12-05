@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+
 using Umbraco.Core;
+
 using uSync8.BackOffice.Configuration;
 
 namespace uSync8.BackOffice.SyncHandlers
@@ -78,7 +80,7 @@ namespace uSync8.BackOffice.SyncHandlers
 
 
         #region Valid Loaders (need set, group, action)
-        
+
         public ExtendedHandlerConfigPair GetValidHandler(string alias, SyncHandlerOptions options = null)
              => GetValidHandlers(options)
                  .FirstOrDefault(x => x.Handler.Alias.InvariantEquals(alias));

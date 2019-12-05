@@ -1,6 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿using System.Runtime.Serialization;
+
+using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using System.Runtime.Serialization;
 
 namespace uSync8.BackOffice.Controllers
 {

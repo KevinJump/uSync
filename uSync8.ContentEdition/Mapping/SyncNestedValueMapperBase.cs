@@ -1,12 +1,12 @@
-﻿using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
+using Newtonsoft.Json.Linq;
+
 using Umbraco.Core;
 using Umbraco.Core.Models;
 using Umbraco.Core.Services;
+
 using uSync8.Core.Dependency;
 
 namespace uSync8.ContentEdition.Mapping
@@ -24,7 +24,7 @@ namespace uSync8.ContentEdition.Mapping
         protected readonly IDataTypeService dataTypeService;
 
         public SyncNestedValueMapperBase(IEntityService entityService,
-            IContentTypeService contentTypeService, 
+            IContentTypeService contentTypeService,
             IDataTypeService dataTypeService)
             : base(entityService)
         {
@@ -33,7 +33,7 @@ namespace uSync8.ContentEdition.Mapping
         }
 
 
-        protected IEnumerable<uSyncDependency> GetPropertyDependencies(JObject value, 
+        protected IEnumerable<uSyncDependency> GetPropertyDependencies(JObject value,
             IEnumerable<PropertyType> propertyTypes, DependencyFlags flags)
         {
             var dependencies = new List<uSyncDependency>();

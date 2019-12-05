@@ -1,11 +1,14 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
+
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+
 using Umbraco.Core;
+
 using uSync8.Core.Extensions;
 
 namespace uSync8.BackOffice.Configuration
@@ -72,7 +75,7 @@ namespace uSync8.BackOffice.Configuration
             var sets = new List<HandlerSet>();
             defaultSet = ValueFromWebConfigOrDefault("DefaultHandlerSet", node.Attribute("Default").ValueOrDefault("default"));
 
-            foreach(var setNode in node.Elements("Handlers"))
+            foreach (var setNode in node.Elements("Handlers"))
             {
                 var handlerSet = LoadSingleHandlerSet(setNode, defaultSettings);
                 if (handlerSet.Handlers.Count > 0)
@@ -119,7 +122,7 @@ namespace uSync8.BackOffice.Configuration
                 var handlerSets = node.FindOrCreate("HandlerSets");
                 handlerSets.SetAttributeValue("Default", settings.DefaultSet);
 
-                foreach(var set in settings.HandlerSets)
+                foreach (var set in settings.HandlerSets)
                 {
                     // find the handler node for this set. 
                     var setNode = handlerSets.FindOrCreate("Handlers", "Name", set.Name);
@@ -173,7 +176,7 @@ namespace uSync8.BackOffice.Configuration
             {
                 var settingsNode = node.FindOrCreate("Settings");
 
-                foreach(var setting in handler.Settings)
+                foreach (var setting in handler.Settings)
                 {
                     var s = settingsNode.FindOrCreate("Add", "Key", setting.Key);
                     s.SetAttributeValue("Value", setting.Value);

@@ -3,14 +3,14 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 using Umbraco.Core;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
 using Umbraco.Core.Services.Implement;
+
 using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
 using uSync8.Core;
@@ -18,6 +18,7 @@ using uSync8.Core.Dependency;
 using uSync8.Core.Extensions;
 using uSync8.Core.Serialization;
 using uSync8.Core.Tracking;
+
 using static Umbraco.Core.Constants;
 
 namespace uSync8.BackOffice.SyncHandlers.Handlers
@@ -29,8 +30,8 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
         private readonly ILocalizationService localizationService;
 
         public LanguageHandler(
-            IEntityService entityService, 
-            IProfilingLogger logger, 
+            IEntityService entityService,
+            IProfilingLogger logger,
             ILocalizationService localizationService,
             ISyncSerializer<ILanguage> serializer,
             ISyncTracker<ILanguage> tracker,
@@ -44,7 +45,7 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
         protected override ILanguage GetFromService(int id)
             => localizationService.GetLanguageById(id);
 
-        
+
         // language guids are not consistant (at least in alpha)
         // so we don't save by Guid we save by ISO name everytime.           
         protected override string GetPath(string folder, ILanguage item, bool GuidNames, bool isFlat)
@@ -62,7 +63,7 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 
             LocalizationService.SavedLanguage += LocalizationService_SavedLanguage;
             LocalizationService.SavingLanguage += LocalizationService_SavingLanguage;
-                
+
         }
 
         private static ConcurrentDictionary<string, string> newLanguages = new ConcurrentDictionary<string, string>();
@@ -72,7 +73,7 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
         {
             if (uSync8BackOffice.eventsPaused) return;
 
-            foreach(var item in e.SavedEntities)
+            foreach (var item in e.SavedEntities)
             {
                 // 
                 if (item.Id == 0)
@@ -105,9 +106,9 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
                 }
 
                 var attempts = Export(item, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
-                
+
                 // we always clean up languages, because of the way they are stored. 
-                foreach(var attempt in attempts.Where(x => x.Success))
+                foreach (var attempt in attempts.Where(x => x.Success))
                 {
                     this.CleanUp(item, attempt.FileName, Path.Combine(rootFolder, this.DefaultFolder));
                 }

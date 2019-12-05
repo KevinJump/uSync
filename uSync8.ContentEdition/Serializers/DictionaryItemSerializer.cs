@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
+
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Services;
+
 using uSync8.Core;
 using uSync8.Core.Extensions;
 using uSync8.Core.Models;
@@ -74,7 +73,7 @@ namespace uSync8.ContentEdition.Serializers
 
             var currentTranslations = item.Translations.ToList();
 
-            foreach(var translation in translationNode.Elements("Translation"))
+            foreach (var translation in translationNode.Elements("Translation"))
             {
                 var language = translation.Attribute("Language").ValueOrDefault(string.Empty);
                 if (language == string.Empty) continue;
@@ -128,7 +127,7 @@ namespace uSync8.ContentEdition.Serializers
             return SyncAttempt<XElement>.Succeed(
                 item.ItemKey, node, typeof(IDictionaryItem), ChangeType.Export);
         }
-        
+
         protected override IDictionaryItem FindItem(Guid key)
             => localizationService.GetDictionaryItemById(key);
 

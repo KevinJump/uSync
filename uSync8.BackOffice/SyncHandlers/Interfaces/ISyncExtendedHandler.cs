@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Xml.Linq;
 
 using Umbraco.Core;
-using Umbraco.Core.Models;
 
 using uSync8.BackOffice.Configuration;
 using uSync8.Core.Dependency;

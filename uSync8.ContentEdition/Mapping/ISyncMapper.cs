@@ -1,6 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+
 using Umbraco.Core.Models;
+
 using uSync8.Core.Dependency;
 
 namespace uSync8.ContentEdition.Mapping
@@ -8,7 +9,7 @@ namespace uSync8.ContentEdition.Mapping
     public interface ISyncMapper
     {
         string Name { get; }
-        string[] Editors {get;}
+        string[] Editors { get; }
 
         bool IsMapper(PropertyType propertyType);
 

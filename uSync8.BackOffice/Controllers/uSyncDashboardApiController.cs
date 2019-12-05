@@ -1,12 +1,12 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Web.Http;
+
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 using Umbraco.Core.Cache;
 using Umbraco.Core.Composing;
@@ -49,10 +49,10 @@ namespace uSync8.BackOffice.Controllers
         }
 
         public bool GetApi() => true;
-        
+
         private void BackOfficeConfig_Reloaded(uSyncSettings settings)
-        { 
-           this.settings = settings;
+        {
+            this.settings = settings;
         }
 
         [HttpGet]

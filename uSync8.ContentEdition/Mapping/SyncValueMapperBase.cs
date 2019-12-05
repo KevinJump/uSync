@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 using Umbraco.Core;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
+
 using uSync8.Core.Dependency;
 
 namespace uSync8.ContentEdition.Mapping
@@ -86,7 +85,7 @@ namespace uSync8.ContentEdition.Mapping
             }
             return null;
         }
-        
+
         /// <summary>
         ///  helper to convert object to a string (with all the checks)
         /// </summary>

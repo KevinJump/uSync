@@ -1,19 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Services;
 using Umbraco.Core.Services.Implement;
+
 using uSync8.BackOffice;
 using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
 using uSync8.BackOffice.SyncHandlers;
 using uSync8.ContentEdition.Serializers;
-using uSync8.Core.Serialization;
 using uSync8.Core.Tracking;
+
 using static Umbraco.Core.Constants;
 
 namespace uSync8.ContentEdition.Handlers
@@ -27,12 +25,12 @@ namespace uSync8.ContentEdition.Handlers
         private readonly IContentService contentService;
 
         public ContentTemplateHandler(
-            IEntityService entityService, 
-            IProfilingLogger logger, 
+            IEntityService entityService,
+            IProfilingLogger logger,
             IContentService contentService,
             ContentTemplateSerializer serializer, // concreate because we want to make sure we get the blueprint one.
             ISyncTracker<IContent> tracker,
-            SyncFileService syncFileService) 
+            SyncFileService syncFileService)
             : base(entityService, logger, serializer, tracker, syncFileService)
         {
             this.contentService = contentService;

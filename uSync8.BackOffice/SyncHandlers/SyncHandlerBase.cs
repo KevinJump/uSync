@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
+
 using Umbraco.Core;
 using Umbraco.Core.Composing;
 using Umbraco.Core.Events;
@@ -10,8 +11,8 @@ using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
+
 using uSync8.BackOffice.Configuration;
-using uSync8.BackOffice.Models;
 using uSync8.BackOffice.Services;
 using uSync8.Core;
 using uSync8.Core.Dependency;
@@ -19,8 +20,6 @@ using uSync8.Core.Extensions;
 using uSync8.Core.Models;
 using uSync8.Core.Serialization;
 using uSync8.Core.Tracking;
-using static Umbraco.Core.Constants;
-using static uSync8.BackOffice.uSyncService;
 
 namespace uSync8.BackOffice.SyncHandlers
 {

@@ -125,7 +125,7 @@ namespace uSync8.BackOffice
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 logger.Warn<uSyncBackofficeComponent>($"Error Importing at startup {ex.Message}");
             }
@@ -142,7 +142,7 @@ namespace uSync8.BackOffice
         private bool HasStopFile(string folder)
             => syncFileService.FileExists($"{folder}/usync.stop");
 
-        private void ProcessOnceFile(string folder) 
+        private void ProcessOnceFile(string folder)
         {
             if (syncFileService.FileExists($"{folder}/usync.once"))
             {

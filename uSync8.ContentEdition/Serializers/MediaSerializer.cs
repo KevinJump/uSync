@@ -1,12 +1,12 @@
-﻿using Newtonsoft.Json;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Xml.Linq;
+
+using Newtonsoft.Json;
 
 using Umbraco.Core;
 using Umbraco.Core.Logging;
@@ -44,7 +44,7 @@ namespace uSync8.ContentEdition.Serializers
             {
                 "umbracoWidth", "umbracoHeight", "umbracoBytes", "umbracoExtension"
             };
-            
+
         }
 
         protected override SyncAttempt<IMedia> DeserializeCore(XElement node)
@@ -72,11 +72,11 @@ namespace uSync8.ContentEdition.Serializers
             HandleTrashedState(item, trashed);
 
             var attempt = mediaService.Save(item);
-            if (!attempt.Success) 
+            if (!attempt.Success)
                 return SyncAttempt<IMedia>.Fail(item.Name, ChangeType.Fail, "");
 
             // we return no-change so we don't trigger the second save 
-            return SyncAttempt<IMedia>.Succeed(item.Name, ChangeType.NoChange );
+            return SyncAttempt<IMedia>.Succeed(item.Name, ChangeType.NoChange);
         }
 
         protected override void HandleTrashedState(IMedia item, bool trashed)
@@ -140,7 +140,7 @@ namespace uSync8.ContentEdition.Serializers
             }
 
             return new XElement("Hash", "");
-            
+
         }
 
         private string GetFilePath(string value)

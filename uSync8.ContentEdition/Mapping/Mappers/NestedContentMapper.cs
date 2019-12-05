@@ -1,10 +1,12 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+
 using Umbraco.Core;
 using Umbraco.Core.Services;
+
 using uSync8.Core.Dependency;
 
 namespace uSync8.ContentEdition.Mapping.Mappers
@@ -14,7 +16,7 @@ namespace uSync8.ContentEdition.Mapping.Mappers
         public NestedContentMapper(
             IEntityService entityService,
             IContentTypeService contentTypeService,
-            IDataTypeService dataTypeService) 
+            IDataTypeService dataTypeService)
             : base(entityService, contentTypeService, dataTypeService)
         { }
 
@@ -37,7 +39,7 @@ namespace uSync8.ContentEdition.Mapping.Mappers
 
             var dependencies = new List<uSyncDependency>();
 
-            foreach(var item in nestedJson.Cast<JObject>())
+            foreach (var item in nestedJson.Cast<JObject>())
             {
                 var docTypeAlias = item["ncContentTypeAlias"].ToString();
 

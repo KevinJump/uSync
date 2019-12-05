@@ -3,8 +3,8 @@ using System.Linq;
 using System.Text.RegularExpressions;
 
 using Umbraco.Core;
-using Umbraco.Core.Models;
 using Umbraco.Core.Services;
+
 using uSync8.Core.Dependency;
 
 namespace uSync8.ContentEdition.Mapping.Mappers
@@ -34,7 +34,7 @@ namespace uSync8.ContentEdition.Mapping.Mappers
         public override string Name => "TinyMCE RTE Mapper";
 
         public override string[] Editors => new string[] {
-            Constants.PropertyEditors.Aliases.TinyMce, 
+            Constants.PropertyEditors.Aliases.TinyMce,
             $"{Constants.PropertyEditors.Aliases.Grid}.rte"
         };
 
@@ -47,8 +47,8 @@ namespace uSync8.ContentEdition.Mapping.Mappers
             if (string.IsNullOrWhiteSpace(stringValue)) return Enumerable.Empty<uSyncDependency>();
 
             var dependencies = new List<uSyncDependency>();
-           
-            foreach(Match m in UdiRegEx.Matches(stringValue))
+
+            foreach (Match m in UdiRegEx.Matches(stringValue))
             {
                 if (Udi.TryParse(m.Value, out Udi udi))
                 {

@@ -2,6 +2,7 @@
 
 using Umbraco.Core;
 using Umbraco.Core.Services;
+
 using uSync8.Core.Dependency;
 
 namespace uSync8.ContentEdition.Mapping

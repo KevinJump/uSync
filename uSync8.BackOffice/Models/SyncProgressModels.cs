@@ -1,7 +1,9 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+
 using uSync8.BackOffice.SyncHandlers;
 
 namespace uSync8.BackOffice
@@ -15,7 +17,7 @@ namespace uSync8.BackOffice
         public List<SyncHandlerSummary> Handlers { get; set; }
 
         public SyncProgressSummary(
-            IEnumerable<ISyncHandler> handlers, 
+            IEnumerable<ISyncHandler> handlers,
             string message,
             int totalSteps)
         {
@@ -35,9 +37,9 @@ namespace uSync8.BackOffice
             {
                 this.Handlers = new List<SyncHandlerSummary>();
             }
-        }       
+        }
 
-        public SyncProgressSummary(IEnumerable<SyncHandlerSummary> summaries, 
+        public SyncProgressSummary(IEnumerable<SyncHandlerSummary> summaries,
             string message, int totalSteps)
         {
             this.Total = totalSteps;

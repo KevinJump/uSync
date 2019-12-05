@@ -1,13 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 using System.Xml.Serialization;
+
 using Umbraco.Core.Composing;
 using Umbraco.Core.IO;
+
 using uSync8.BackOffice.Configuration;
 
 namespace uSync8.BackOffice.Services
@@ -65,7 +65,7 @@ namespace uSync8.BackOffice.Services
         public void EnsureFileExists(string path)
         {
             if (!FileExists(path))
-                throw new FileNotFoundException("Missing File",  path);
+                throw new FileNotFoundException("Missing File", path);
         }
 
         public FileStream OpenRead(string path)
@@ -138,7 +138,7 @@ namespace uSync8.BackOffice.Services
 
         public void SaveFile(string filename, Stream stream)
         {
-            using(Stream fileStream = OpenWrite(filename))
+            using (Stream fileStream = OpenWrite(filename))
             {
                 stream.CopyTo(fileStream);
                 fileStream.Flush();
@@ -148,7 +148,7 @@ namespace uSync8.BackOffice.Services
 
         public void SaveFile(string filename, string content)
         {
-            
+
             using (Stream stream = OpenWrite(filename))
             {
                 byte[] info = new UTF8Encoding(true).GetBytes(content);
@@ -198,7 +198,7 @@ namespace uSync8.BackOffice.Services
 
         public void SaveXml<TObject>(string file, TObject item)
         {
-            lock(_saveLock)
+            lock (_saveLock)
             {
                 if (FileExists(file))
                     DeleteFile(file);

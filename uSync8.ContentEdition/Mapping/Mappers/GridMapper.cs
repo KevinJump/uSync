@@ -1,11 +1,13 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+
 using Umbraco.Core;
 using Umbraco.Core.Services;
+
 using uSync8.Core.Dependency;
 
 namespace uSync8.ContentEdition.Mapping.Mappers
@@ -30,7 +32,7 @@ namespace uSync8.ContentEdition.Mapping.Mappers
 
         public override string Name => "Grid Mapper";
 
-        public override string[] Editors => new string[] { 
+        public override string[] Editors => new string[] {
             Constants.PropertyEditors.Aliases.Grid
         };
 
@@ -64,22 +66,22 @@ namespace uSync8.ContentEdition.Mapping.Mappers
         ///  Passing the callback lets us have the grid traversal code only
         ///  once for both import and exporting.
         /// </remarks>       
-        private string ProcessGridValues(string gridContent, Func<ISyncMapper, string , object, string> callback)
+        private string ProcessGridValues(string gridContent, Func<ISyncMapper, string, object, string> callback)
         {
             var grid = JsonConvert.DeserializeObject<JObject>(gridContent);
             if (grid == null) return gridContent;
 
             var sections = GetArray(grid, "sections");
-            foreach(var section in sections.Cast<JObject>())
+            foreach (var section in sections.Cast<JObject>())
             {
                 var rows = GetArray(section, "rows");
-                foreach(var row in rows.Cast<JObject>())
+                foreach (var row in rows.Cast<JObject>())
                 {
                     var areas = GetArray(row, "areas");
-                    foreach(var area in areas.Cast<JObject>())
+                    foreach (var area in areas.Cast<JObject>())
                     {
                         var controls = GetArray(area, "controls");
-                        foreach(var control in controls.Cast<JObject>())
+                        foreach (var control in controls.Cast<JObject>())
                         {
                             var editor = control.Value<JObject>("editor");
                             var value = control.Value<Object>("value");
@@ -138,16 +140,16 @@ namespace uSync8.ContentEdition.Mapping.Mappers
             var items = new List<TObject>();
 
             var sections = GetArray(grid, "sections");
-            foreach(var section in sections.Cast<JObject>())
+            foreach (var section in sections.Cast<JObject>())
             {
                 var rows = GetArray(section, "rows");
-                foreach(var row in rows.Cast<JObject>())
+                foreach (var row in rows.Cast<JObject>())
                 {
                     var areas = GetArray(row, "areas");
-                    foreach(var area in areas.Cast<JObject>())
+                    foreach (var area in areas.Cast<JObject>())
                     {
                         var controls = GetArray(area, "controls");
-                        foreach(var control in controls.Cast<JObject>())
+                        foreach (var control in controls.Cast<JObject>())
                         {
                             var result = callback(control, flags);
                             if (result != null)
@@ -185,7 +187,7 @@ namespace uSync8.ContentEdition.Mapping.Mappers
             viewAlias = viewAlias.ToLower().TrimEnd(".html");
 
             if (viewAlias.IndexOf('/') != -1)
-                viewAlias = viewAlias.Substring(viewAlias.LastIndexOf('/')+1);
+                viewAlias = viewAlias.Substring(viewAlias.LastIndexOf('/') + 1);
 
             alias = $"{Constants.PropertyEditors.Aliases.Grid}.{viewAlias}";
             return (alias, SyncValueMapperFactory.GetMapper(alias));

@@ -1,11 +1,12 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 using Umbraco.Core;
 using Umbraco.Core.Services;
+
 using uSync8.Core.Dependency;
 
 namespace uSync8.ContentEdition.Mapping.Mappers
@@ -18,7 +19,7 @@ namespace uSync8.ContentEdition.Mapping.Mappers
 
         public override string Name => "Grid Image Mapper";
 
-        public override string[] Editors => new string[] { 
+        public override string[] Editors => new string[] {
             $"{Constants.PropertyEditors.Aliases.Grid}.media"
         };
 

@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
+
 using Umbraco.Core;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Services;
 using Umbraco.Core.Services.Implement;
+
 using uSync8.BackOffice;
 using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
@@ -16,6 +15,7 @@ using uSync8.BackOffice.SyncHandlers;
 using uSync8.Core.Dependency;
 using uSync8.Core.Serialization;
 using uSync8.Core.Tracking;
+
 using static Umbraco.Core.Constants;
 
 namespace uSync8.ContentEdition.Handlers
@@ -29,12 +29,12 @@ namespace uSync8.ContentEdition.Handlers
         private readonly ILocalizationService localizationService;
 
         public DictionaryHandler(IEntityService entityService,
-            IProfilingLogger logger, 
+            IProfilingLogger logger,
             ILocalizationService localizationService,
             ISyncSerializer<IDictionaryItem> serializer,
             ISyncTracker<IDictionaryItem> tracker,
             ISyncDependencyChecker<IDictionaryItem> checker,
-            SyncFileService syncFileService) 
+            SyncFileService syncFileService)
             : base(entityService, logger, serializer, tracker, checker, syncFileService)
         {
             this.localizationService = localizationService;
@@ -66,7 +66,7 @@ namespace uSync8.ContentEdition.Handlers
             }
 
             int count = 0;
-            foreach(var item in items)
+            foreach (var item in items)
             {
                 count++;
                 callback?.Invoke(item.ItemKey, count, items.Count);

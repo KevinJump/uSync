@@ -1,14 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 using Umbraco.Core.Events;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
+
 using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
 using uSync8.Core;
@@ -102,13 +101,13 @@ namespace uSync8.BackOffice.SyncHandlers
             }
 
             var items = GetChildItems(folderId);
-            foreach(var item in items)
+            foreach (var item in items)
             {
                 var obj = GetFromService(item.Id);
                 if (obj != null)
                 {
                     var attempts = Export(obj, folder, config);
-                    foreach(var attempt in attempts.Where(x => x.Success))
+                    foreach (var attempt in attempts.Where(x => x.Success))
                     {
                         // when its flat structure and use guidNames, we don't need to cleanup.
                         if (!(this.DefaultConfig.GuidNames && this.DefaultConfig.UseFlatStructure))
@@ -129,7 +128,7 @@ namespace uSync8.BackOffice.SyncHandlers
         {
             if (uSync8BackOffice.eventsPaused) return;
 
-            foreach(var folder in e.SavedEntities)
+            foreach (var folder in e.SavedEntities)
             {
                 UpdateFolder(folder.Id, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
             }

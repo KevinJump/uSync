@@ -5,6 +5,7 @@ using System.Linq;
 
 using Umbraco.Core.Composing;
 using Umbraco.Core.Logging;
+
 using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.SyncHandlers;
 
@@ -47,7 +48,7 @@ namespace uSync8.BackOffice
 
         #region Reporting 
 
-        public IEnumerable<uSyncAction> Report(string folder, SyncHandlerOptions handlerOptions , uSyncCallbacks callbacks = null)
+        public IEnumerable<uSyncAction> Report(string folder, SyncHandlerOptions handlerOptions, uSyncCallbacks callbacks = null)
         {
             if (handlerOptions == null) handlerOptions = new SyncHandlerOptions();
             handlerOptions.Action = HandlerActions.Report;
@@ -129,7 +130,7 @@ namespace uSync8.BackOffice
         ///  Collection of uSyncActions detailed what imports took place. 
         /// </returns>
         public IEnumerable<uSyncAction> Import(string folder, bool force, IEnumerable<string> handlerAliases, uSyncCallbacks callbacks)
-        { 
+        {
             var handlers = handlerFactory.GetDefaultHandlers(handlerAliases);
             return Import(folder, force, handlers, callbacks);
         }
@@ -246,7 +247,7 @@ namespace uSync8.BackOffice
 
         #region Exporting 
 
-        public IEnumerable<uSyncAction> Export(string folder, SyncHandlerOptions handlerOptions,  uSyncCallbacks callbacks = null)
+        public IEnumerable<uSyncAction> Export(string folder, SyncHandlerOptions handlerOptions, uSyncCallbacks callbacks = null)
         {
             if (handlerOptions == null) handlerOptions = new SyncHandlerOptions();
             handlerOptions.Action = HandlerActions.Export;
@@ -258,7 +259,7 @@ namespace uSync8.BackOffice
         public IEnumerable<uSyncAction> Export(string folder, IEnumerable<string> handlerAliases, uSyncCallbacks callbacks)
         {
             var handlers = handlerFactory.GetDefaultHandlers(handlerAliases);
-            return Export(folder, handlers , callbacks);
+            return Export(folder, handlers, callbacks);
         }
 
         public IEnumerable<uSyncAction> Export(string folder, IEnumerable<ExtendedHandlerConfigPair> handlers, uSyncCallbacks callbacks)

@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 using Umbraco.Core;
 using Umbraco.Core.Composing;
-using Umbraco.Core.Models;
+
 using uSync8.BackOffice.Configuration;
 
 namespace uSync8.BackOffice.SyncHandlers
@@ -43,7 +42,7 @@ namespace uSync8.BackOffice.SyncHandlers
         {
             var configPairs = new List<HandlerConfigPair>();
 
-            foreach(var handler in this)
+            foreach (var handler in this)
             {
                 var config = settings.DefaultHandlerSet().Handlers.FirstOrDefault(x => x.Alias.InvariantEquals(handler.Alias));
                 if (config == null)

@@ -1,29 +1,23 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
+
 using Umbraco.Core;
-using Umbraco.Core.IO;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
 using Umbraco.Core.Services.Implement;
+
 using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
-using uSync8.Core;
 using uSync8.Core.Dependency;
 using uSync8.Core.Serialization;
-using uSync8.Core.Serialization.Serializers;
 using uSync8.Core.Tracking;
+
 using static Umbraco.Core.Constants;
 
 namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
-    [SyncHandler("contentTypeHandler", "DocTypes", "ContentTypes", uSyncBackOfficeConstants.Priorites.ContentTypes, 
+    [SyncHandler("contentTypeHandler", "DocTypes", "ContentTypes", uSyncBackOfficeConstants.Priorites.ContentTypes,
             IsTwoPass = true, Icon = "icon-item-arrangement", EntityType = UdiEntityType.DocumentType)]
     public class ContentTypeHandler : SyncHandlerContainerBase<IContentType, IContentTypeService>, ISyncExtendedHandler, ISyncPostImportHandler
     {
@@ -44,16 +38,16 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 
 
         #region Import
-            // default import behavior is in the base class.
+        // default import behavior is in the base class.
         #endregion
 
         #region Export
-            // most of export is now in the base 
+        // most of export is now in the base 
 
 
         #endregion
-      
-            
+
+
         protected override void InitializeEvents(HandlerSettings settings)
         {
             ContentTypeService.Saved += EventSavedItem;

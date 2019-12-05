@@ -1,14 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
+
 using Umbraco.Core;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
+
 using uSync8.ContentEdition.Mapping;
 using uSync8.Core;
 using uSync8.Core.Extensions;
@@ -28,7 +27,7 @@ namespace uSync8.ContentEdition.Serializers
             IFileService fileService,
             IContentTypeService contentTypeService,
             SyncValueMapperCollection syncMappers)
-            : base(entityService, logger, contentService,fileService, syncMappers)
+            : base(entityService, logger, contentService, fileService, syncMappers)
         {
             this.contentTypeService = contentTypeService;
         }
@@ -75,12 +74,14 @@ namespace uSync8.ContentEdition.Serializers
             }
 
             var contentTypeAlias = node.Name.LocalName;
-            if (this.IsEmpty(node)) {
+            if (this.IsEmpty(node))
+            {
                 contentTypeAlias = node.GetAlias();
             }
 
             var contentType = contentTypeService.Get(contentTypeAlias);
-            if (contentType != null) {
+            if (contentType != null)
+            {
                 var blueprints = contentService.GetBlueprintsForContentTypes(contentType.Id);
                 if (blueprints != null && blueprints.Any())
                 {
@@ -89,7 +90,7 @@ namespace uSync8.ContentEdition.Serializers
             }
 
             return null;
-         
+
         }
 
         protected override IContent FindItem(Guid key)

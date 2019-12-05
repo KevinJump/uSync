@@ -1,10 +1,11 @@
-﻿using Newtonsoft.Json;
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Runtime.Serialization;
+
+using Newtonsoft.Json;
 
 using Umbraco.Core;
 using Umbraco.Core.Services;
+
 using uSync8.Core.Dependency;
 
 namespace uSync8.ContentEdition.Mapping.Mappers
@@ -17,7 +18,7 @@ namespace uSync8.ContentEdition.Mapping.Mappers
 
         public override string Name => "MultiUrl Mapper";
 
-        public override string[] Editors => new string[] { 
+        public override string[] Editors => new string[] {
             Constants.PropertyEditors.Aliases.MultiUrlPicker
         };
 
@@ -27,7 +28,7 @@ namespace uSync8.ContentEdition.Mapping.Mappers
 
             var dependencies = new List<uSyncDependency>();
 
-            foreach(var link in links)
+            foreach (var link in links)
             {
                 if (link.Udi != null)
                 {

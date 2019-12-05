@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
+
 using Umbraco.Core;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
+
 using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
 using uSync8.Core;
@@ -50,7 +50,7 @@ namespace uSync8.BackOffice.SyncHandlers
             ISyncDependencyChecker<TObject> checker,
             SyncFileService syncFileService)
             : base(entityService, logger, serializer, tracker, checker, syncFileService)
-        {  }
+        { }
 
         /// <summary>
         ///  this is the simple interface, based purely on level, 
@@ -164,7 +164,7 @@ namespace uSync8.BackOffice.SyncHandlers
             return actions;
 
         }
-   
+
         private class LeveledFile
         {
             public int Level { get; set; }
