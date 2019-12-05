@@ -111,7 +111,7 @@ namespace uSync8.BackOffice.SyncHandlers
 
             foreach (var item in nodes.OrderBy(x => x.Level).Select((Node, Index) => new { Node, Index }))
             {
-                callback?.Invoke($"{Path.GetFileName(item.Node.File)}", item.Index, nodes.Count);
+                callback?.Invoke($"{Path.GetFileNameWithoutExtension(item.Node.File)}", item.Index, nodes.Count);
 
                 var attempt = Import(item.Node.File, config, flags);
                 if (attempt.Success)
