@@ -626,7 +626,7 @@ namespace uSync8.BackOffice.SyncHandlers
                 if (!file.InvariantEquals(physicalFile))
                 {
                     var node = syncFileService.LoadXElement(file);
-                    if (node.GetKey() == item.Key)
+                    if (node.GetKey() == GetItemKey(item))
                     {
                         var attempt = serializer.SerializeEmpty(item, SyncActionType.Rename, node.GetAlias());
                         if (attempt.Success)
@@ -656,13 +656,16 @@ namespace uSync8.BackOffice.SyncHandlers
 
         virtual protected string GetPath(string folder, TObject item, bool GuidNames, bool isFlat)
         {
-            if (isFlat && GuidNames) return $"{folder}/{item.Key}.config";
+            if (isFlat && GuidNames) return $"{folder}/{GetItemKey(item)}.config";
             var path = $"{folder}/{this.GetItemPath(item, GuidNames, isFlat)}.config";
 
             // if this is flat but not using guid filenames, then we check for clashes.
-            if (isFlat && !GuidNames) return CheckAndFixFileClash(path, item.Key);
+            if (isFlat && !GuidNames) return CheckAndFixFileClash(path, GetItemKey(item));
             return path;
         }
+
+        virtual protected Guid GetItemKey(TObject item) => item.Key;
+
         private string CheckAndFixFileClash(string path, Guid key)
         {
             if (syncFileService.FileExists(path))

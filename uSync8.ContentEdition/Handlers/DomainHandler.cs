@@ -29,11 +29,11 @@ namespace uSync8.ContentEdition.Handlers
         private readonly IDomainService domainService;
 
         public DomainHandler(IEntityService entityService,
-            IProfilingLogger logger, 
+            IProfilingLogger logger,
             IDomainService domainService,
             ISyncSerializer<IDomain> serializer,
             ISyncTracker<IDomain> tracker,
-            SyncFileService syncFileService) 
+            SyncFileService syncFileService)
             : base(entityService, logger, serializer, tracker, syncFileService)
         {
             this.domainService = domainService;
@@ -45,7 +45,7 @@ namespace uSync8.ContentEdition.Handlers
 
             var domains = domainService.GetAll(true).ToList();
             int count = 0;
-            foreach(var domain in domains)
+            foreach (var domain in domains)
             {
                 count++;
                 if (domain != null)
@@ -68,6 +68,9 @@ namespace uSync8.ContentEdition.Handlers
         protected override IDomain GetFromService(Guid key)
             => null;
 
+        protected override Guid GetItemKey(IDomain item)
+            => item.Id.ToGuid();
+
         protected override IDomain GetFromService(string alias)
             => domainService.GetByName(alias);
 
@@ -75,7 +78,7 @@ namespace uSync8.ContentEdition.Handlers
             => item.DomainName;
 
         protected override string GetItemPath(IDomain item, bool useGuid, bool isFlat)
-            => item.DomainName.ToSafeFileName();
+            => $"{item.DomainName.ToSafeFileName()}_{item.LanguageIsoCode.ToSafeFileName()}";
 
         protected override void InitializeEvents(HandlerSettings settings)
         {
