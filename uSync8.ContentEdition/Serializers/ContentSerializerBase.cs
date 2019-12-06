@@ -22,6 +22,8 @@ namespace uSync8.ContentEdition.Serializers
         protected UmbracoObjectTypes umbracoObjectType;
         protected SyncValueMapperCollection syncMappers;
 
+        protected Dictionary<string, string> pathCache; 
+
         public ContentSerializerBase(
             IEntityService entityService,
             ILogger logger,
@@ -31,6 +33,8 @@ namespace uSync8.ContentEdition.Serializers
         {
             this.umbracoObjectType = umbracoObjectType;
             this.syncMappers = syncMappers;
+
+            this.pathCache = new Dictionary<string, string>();
         }
 
         protected virtual XElement InitializeNode(TObject item, string typeName)
@@ -184,6 +188,9 @@ namespace uSync8.ContentEdition.Serializers
                 }
             }
 
+            // clear the path cache of anything with this id.
+            pathCache.RemoveAll(x => x.Key.Contains(item.Id.ToString()));
+
             return Attempt.Succeed(item);
         }
 
@@ -293,15 +300,19 @@ namespace uSync8.ContentEdition.Serializers
 
         protected virtual string GetItemPath(IEntitySlim item)
         {
+            // path caching, stops us looking up the same path all the time.
+            if (pathCache.ContainsKey(item.Path)) return pathCache[item.Path];
+
             var path = "";
             if (item.ParentId != -1)
             {
-                var parent = entityService.Get(item.ParentId);
+                var parent = entityService.Get(item.ParentId); 
                 if (parent != null)
                     path += GetItemPath(parent);
             }
 
-            return path += "/" + item.Name.ToSafeAlias();
+            pathCache[item.Path] = path + "/" + item.Name.ToSafeAlias();
+            return pathCache[item.Path];
         }
 
         #region Finders 
