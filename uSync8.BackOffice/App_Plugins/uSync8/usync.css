@@ -303,3 +303,7 @@
 .usync-detail-link-cell .btn {
     padding: 6px;
 }
+
+.usync-main-progress {
+    margin: 0 -20px -20px -20px;
+}
