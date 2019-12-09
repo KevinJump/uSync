@@ -513,8 +513,10 @@ namespace uSync8.BackOffice.SyncHandlers
                     {
                         action.Message = "Change details cannot be calculated";
                     }
-
-                    action.Message = $"{action.Change.ToString()}";
+                    else
+                    {
+                        action.Message = $"{action.Change.ToString()}";
+                    }
                     actions.Add(action);
                 }
                 else

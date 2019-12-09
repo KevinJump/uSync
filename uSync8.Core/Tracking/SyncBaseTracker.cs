@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using System.Xml.XPath;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Umbraco.Core;
 using Umbraco.Core.IO;
 using Umbraco.Core.Models.Entities;
@@ -35,10 +37,11 @@ namespace uSync8.Core.Tracking
             if (!serializer.IsValid(node))
             {
                 // not valid 
-                return new uSyncChange() {
-                        Change = ChangeDetailType.Error,
-                        Name = "Invalid File",
-                        OldValue = node.Name.LocalName
+                return new uSyncChange()
+                {
+                    Change = ChangeDetailType.Error,
+                    Name = "Invalid File",
+                    OldValue = node.Name.LocalName
                 }.AsEnumerableOfOne(); ;
             }
 
@@ -77,7 +80,7 @@ namespace uSync8.Core.Tracking
 
             var action = node.Attribute("Change").ValueOrDefault<SyncActionType>(SyncActionType.None);
 
-            switch(action)
+            switch (action)
             {
                 case SyncActionType.Delete:
                     return uSyncChange.Delete(node.GetAlias(), "Delete", node.GetAlias());
@@ -85,7 +88,7 @@ namespace uSync8.Core.Tracking
                     return uSyncChange.Update(node.GetAlias(), "Rename", node.GetAlias(), "new name");
                 default:
                     return uSyncChange.NoChange("", node.GetAlias());
-            }           
+            }
         }
 
         private IEnumerable<uSyncChange> CalculateChanges(TrackedItem change, XElement current, XElement target, string name, string path)
@@ -211,7 +214,7 @@ namespace uSync8.Core.Tracking
                         // if the value is diffrent in this case we will consider this a delete
                         targetNode = targetItems.FirstOrDefault(x => x.Value == currentNode.Value);
                     }
-                    
+
                 }
                 else
                 {
@@ -259,7 +262,7 @@ namespace uSync8.Core.Tracking
                 else
                 {
                     // if there are no children, they we are comparing the actual text of the nodes
-                    updates.AddNotNull(Compare(currentNodePath, currentNodeName, 
+                    updates.AddNotNull(Compare(currentNodePath, currentNodeName,
                         currentNode.ValueOrDefault(string.Empty),
                         targetNode.ValueOrDefault(string.Empty),
                         change.MaskValue));
@@ -280,7 +283,7 @@ namespace uSync8.Core.Tracking
                 }
                 else
                 {
-                    foreach(var targetItem in targetItems)
+                    foreach (var targetItem in targetItems)
                     {
                         var targetNodePath = path;
 
@@ -362,7 +365,7 @@ namespace uSync8.Core.Tracking
             }
 
             // missing from current (so new)
-            foreach(var targetChild in targetNode.Elements())
+            foreach (var targetChild in targetNode.Elements())
             {
                 var currentChildNode = currentNode.Element(targetChild.Name.LocalName);
                 if (currentChildNode == null)
@@ -390,10 +393,38 @@ namespace uSync8.Core.Tracking
 
         protected uSyncChange Compare(string path, string name, string current, string target, bool maskValue)
         {
-            if (current.Equals(target)) return null;
-            return uSyncChange.Update(path, name, 
-                maskValue ? "*******" : current, 
-                maskValue ? "*******" : target);
+            if (current.DetectIsJson())
+            {
+                return JsonChange(current, target, path, name);
+            }
+            else
+            {
+                if (current.Equals(target)) return null;
+                
+                return uSyncChange.Update(path, name,
+                    maskValue ? "*******" : current,
+                    maskValue ? "*******" : target);
+            }
+
+        }
+
+        private uSyncChange JsonChange(string current, string target, string path, string name)
+        {
+            try
+            {
+                // jsoncompare. for sanity, we serialize and deserialize into
+                var currentJson = JsonConvert.DeserializeObject<JToken>(current);
+                var targetJson = JsonConvert.DeserializeObject<JToken>(target);
+
+                if (JToken.DeepEquals(currentJson, targetJson)) return null;
+
+                return uSyncChange.Update(path, name, currentJson, targetJson);
+            }
+            catch
+            {
+                // malformed json etc, shouldn't make a details check fail.
+                return null;
+            }
         }
 
         private uSyncChange Compare<TValue>(string path, string name, TValue current, TValue target, bool maskValue)
