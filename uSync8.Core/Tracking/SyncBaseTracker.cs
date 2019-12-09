@@ -395,20 +395,23 @@ namespace uSync8.Core.Tracking
         {
             if (current.DetectIsJson())
             {
-                return JsonChange(current, target, path, name);
+                return JsonChange(path, name, current, target, maskValue);
             }
             else
             {
-                if (current.Equals(target)) return null;
-                
-                return uSyncChange.Update(path, name,
-                    maskValue ? "*******" : current,
-                    maskValue ? "*******" : target);
+                return StringChange(path, name, current, target, maskValue);
             }
-
         }
 
-        private uSyncChange JsonChange(string current, string target, string path, string name)
+        private uSyncChange StringChange(string path, string name, string current, string target, bool maskValue)
+        {
+            if (current.Equals(target)) return null;
+            return uSyncChange.Update(path, name,
+                maskValue ? "*******" : current,
+                maskValue ? "*******" : target);
+        }
+
+        private uSyncChange JsonChange(string path, string name, string current, string target, bool maskValue)
         {
             try
             {
@@ -422,8 +425,7 @@ namespace uSync8.Core.Tracking
             }
             catch
             {
-                // malformed json etc, shouldn't make a details check fail.
-                return null;
+                return StringChange(path, name, current, target, maskValue);
             }
         }
 
