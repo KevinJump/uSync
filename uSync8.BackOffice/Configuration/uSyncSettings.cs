@@ -30,7 +30,7 @@ namespace uSync8.BackOffice.Configuration
 
         public bool AddOnPing { get; set; } = true;
 
-        public bool RebuildCacheOnCompleation { get; set; } = true;
+        public bool RebuildCacheOnCompletion { get; set; } = true;
 
         public HandlerSet DefaultHandlerSet()
             => this.HandlerSets.Where(x => x.Name.InvariantEquals(this.DefaultSet)).FirstOrDefault();

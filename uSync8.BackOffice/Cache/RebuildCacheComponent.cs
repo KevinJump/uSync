@@ -26,7 +26,7 @@ namespace uSync8.BackOffice.Cache
 
         private void Config_Reloaded(uSyncSettings settings)
         {
-            rebuildCacheOnCompleaton = settings.RebuildCacheOnCompleation;
+            rebuildCacheOnCompleaton = settings.RebuildCacheOnCompletion;
         }
 
         public void Initialize()
