@@ -44,7 +44,8 @@ namespace uSync8.ContentEdition.Tracker
                                         }
                                     }
                                 }
-                            }
+                            },
+                            new TrackedItem("File Contents (Hash)", "/FileHash", true)
                         }
                     },
 

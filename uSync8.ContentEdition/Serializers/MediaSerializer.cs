@@ -139,7 +139,7 @@ namespace uSync8.ContentEdition.Serializers
                 }
             }
 
-            return new XElement("Hash", "");
+            return new XElement("FileHash", "");
 
         }
 
