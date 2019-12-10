@@ -45,7 +45,7 @@
                         </div>
                     </div>
 
-                    <div class="umb-permission">
+                    <div class="umb-permission" ng-if="vm.umbracoVersion < '8.4.0'">
                         <umb-toggle class="umb-permission__toggle"
                                     checked="vm.settings.RebuildCacheOnCompletion"
                                     on-click="vm.settings.RebuildCacheOnCompletion = !vm.settings.RebuildCacheOnCompletion">
@@ -55,8 +55,6 @@
                             <div class="umb-permission__description">Request that Umbraco rebuilds its cache after an import</div>
                         </div>
                     </div>
-
-
                 </umb-box-content>
             </umb-box>
 

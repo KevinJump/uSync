@@ -9,6 +9,8 @@
         vm.working = false; 
         vm.loading = true; 
 
+        vm.umbracoVersion = Umbraco.Sys.ServerVariables.application.version;
+
         vm.saveSettings = saveSettings;
 
         init();
