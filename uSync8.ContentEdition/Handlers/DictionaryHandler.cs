@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using System.Xml.Linq;
 using Umbraco.Core;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
@@ -12,7 +12,9 @@ using uSync8.BackOffice;
 using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
 using uSync8.BackOffice.SyncHandlers;
+using uSync8.Core;
 using uSync8.Core.Dependency;
+using uSync8.Core.Models;
 using uSync8.Core.Serialization;
 using uSync8.Core.Tracking;
 
@@ -38,7 +40,41 @@ namespace uSync8.ContentEdition.Handlers
             : base(entityService, logger, serializer, tracker, checker, syncFileService)
         {
             this.localizationService = localizationService;
+        }
 
+        public override SyncAttempt<IDictionaryItem> Import(string filePath, HandlerSettings config, SerializerFlags flags)
+        {
+            if (config.Settings.ContainsKey("OneWay")
+                && config.Settings["OneWay"].InvariantEquals("true"))
+            {
+                // only sync dictionary items if they are new
+                // so if it already exists we don't do the sync
+
+                //
+                // <Handler Alias="dictionaryHandler" Enabled="true">
+                //    <Add Key="OneWay" Value="true" />
+                // </Handler>
+                //
+                var item = GetExistingItem(filePath);
+                if (item != null)
+                {
+                    return SyncAttempt<IDictionaryItem>.Succeed(item.ItemKey, ChangeType.NoChange);
+                }
+            }
+            
+            return base.Import(filePath, config, flags);
+            
+        }
+
+        private IDictionaryItem GetExistingItem(string filePath)
+        {
+            syncFileService.EnsureFileExists(filePath);
+
+            using (var stream = syncFileService.OpenRead(filePath))
+            {
+                var node = XElement.Load(stream);
+                return serializer.FindItem(node);
+            }
         }
 
         public override IEnumerable<uSyncAction> ExportAll(string folder, HandlerSettings config, SyncUpdateCallback callback)
