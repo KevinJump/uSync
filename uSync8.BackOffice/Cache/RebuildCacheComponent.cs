@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 
 using Umbraco.Core.Composing;
+using Umbraco.Core.Configuration;
 using Umbraco.Core.Services.Changes;
 using Umbraco.Web.Cache;
 using Umbraco.Web.PublishedCache;
@@ -46,12 +47,17 @@ namespace uSync8.BackOffice.Cache
                 // change happened. - rebuild
                 snapshotService.Rebuild();
 
-                // then refresh the cache : 
-                // there is a function for this but it is internal, so we have extracted bits.
-                // mimics => DistributedCache.RefreshAllPublishedSnapshot
-                RefreshContentCache(Umbraco.Web.Composing.Current.DistributedCache);
-                RefreshMediaCache(Umbraco.Web.Composing.Current.DistributedCache);
-                RefreshAllDomainCache(Umbraco.Web.Composing.Current.DistributedCache);
+                if (UmbracoVersion.LocalVersion.Major == 8 && UmbracoVersion.LocalVersion.Minor < 4)
+                {
+                    // we only do this on v8.3 and below. 
+
+                    // then refresh the cache : 
+                    // there is a function for this but it is internal, so we have extracted bits.
+                    // mimics => DistributedCache.RefreshAllPublishedSnapshot
+                    RefreshContentCache(Umbraco.Web.Composing.Current.DistributedCache);
+                    RefreshMediaCache(Umbraco.Web.Composing.Current.DistributedCache);
+                    RefreshAllDomainCache(Umbraco.Web.Composing.Current.DistributedCache);
+                }
             }
         }
 

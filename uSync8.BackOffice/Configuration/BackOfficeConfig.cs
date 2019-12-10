@@ -35,8 +35,6 @@ namespace uSync8.BackOffice.Configuration
                 return SaveSettings(settings);
             }
 
-
-
             settings.RootFolder = ValueFromWebConfigOrDefault("Folder", node.Element("Folder").ValueOrDefault(settings.RootFolder));
             settings.UseFlatStructure = ValueFromWebConfigOrDefault("FlatFolders", node.Element("FlatFolders").ValueOrDefault(true));
             settings.ImportAtStartup = ValueFromWebConfigOrDefault("ImportAtStartup", node.Element("ImportAtStartup").ValueOrDefault(true));
@@ -66,6 +64,9 @@ namespace uSync8.BackOffice.Configuration
                     settings.HandlerSets.Add(defaultSet);
                 }
             }
+
+            // fire the loaded event, so things can tell when they are loaded. 
+            Reloaded?.Invoke(settings);
 
             return settings;
         }
@@ -150,7 +151,6 @@ namespace uSync8.BackOffice.Configuration
             if (fireReload)
             {
                 this.Settings = LoadSettings();
-                Reloaded?.Invoke(settings);
             }
 
             return settings;

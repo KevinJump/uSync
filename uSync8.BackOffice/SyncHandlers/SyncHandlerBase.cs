@@ -509,9 +509,9 @@ namespace uSync8.BackOffice.SyncHandlers
                 else if (action.Change > ChangeType.NoChange)
                 {
                     action.Details = tracker.GetChanges(node);
-                    if (action.Details == null || action.Details.Count() == 0)
+                    if (action.Change != ChangeType.Create && (action.Details == null || action.Details.Count() == 0))
                     {
-                        action.Message = "Change details cannot be calculated";
+                        action.Message = "Change details not calculated";
                     }
                     else
                     {
