@@ -1,19 +1,19 @@
 {
   "javascript": [
-    "~/app_plugins/uSync8/backoffice/uSync8/uSyncDashboardController.js",
-    "~/app_plugins/uSync8/settings/settingsController.js",
-    "~/app_plugins/uSync8/settings/expansionController.js",
-    "~/app_plugins/uSync8/settings/uSyncController.js",
+    "~/App_Plugins/uSync8/backoffice/uSync8/uSyncDashboardController.js?",
+    "~/App_Plugins/uSync8/settings/settingsController.js",
+    "~/App_Plugins/uSync8/settings/expansionController.js",
+    "~/App_Plugins/uSync8/settings/uSyncController.js",
 
-    "~/app_plugins/uSync8/uSyncService.js",
-    "~/app_plugins/uSync8/uSyncHub.js",
-    "~/app_plugins/uSync8/changeDialogController.js",
+    "~/App_Plugins/uSync8/uSyncService.js",
+    "~/App_Plugins/uSync8/uSyncHub.js",
+    "~/App_Plugins/uSync8/changeDialogController.js",
 
-    "~/app_plugins/uSync8/components/uSyncReportViewComponent.js",
-    "~/app_plugins/uSync8/components/uSyncProgressViewComponent.js"
+    "~/App_Plugins/uSync8/components/uSyncReportViewComponent.js",
+    "~/App_Plugins/uSync8/components/uSyncProgressViewComponent.js"
   ],
   "css": [
-    "~/app_plugins/uSync8/usync.css"
+    "~/App_Plugins/uSync8/usync.css"
   ],
 
 }
