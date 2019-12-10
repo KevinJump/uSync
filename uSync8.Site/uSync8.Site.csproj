@@ -475,6 +475,9 @@
     <Content Include="Views\Partials\Grid\Editors\Base.cshtml" />
     <Content Include="Views\Partials\Grid\Bootstrap3.cshtml" />
     <Content Include="Views\Partials\Grid\Bootstrap3-Fluid.cshtml" />
+    <Content Include="Views\aASuperSimple.cshtml" />
+    <Content Include="Views\aSimpleDocType.cshtml" />
+    <Content Include="Views\ANewViewHere.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -487,6 +490,10 @@
     <Analyzer Include="..\packages\Microsoft.CodeAnalysis.Analyzers.2.6.1\analyzers\dotnet\cs\Microsoft.CodeAnalysis.CSharp.Analyzers.dll" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\uSync.TemplateTracker\uSync.TemplateTracker.csproj">
+      <Project>{6d7486dc-0b84-4914-9c01-297467a6b706}</Project>
+      <Name>uSync.TemplateTracker</Name>
+    </ProjectReference>
     <ProjectReference Include="..\uSync8.BackOffice\uSync8.BackOffice.csproj">
       <Project>{f2dfcb19-c9ee-471e-b8e2-e0b4dd31761d}</Project>
       <Name>uSync8.BackOffice</Name>
