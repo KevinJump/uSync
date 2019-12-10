@@ -61,6 +61,13 @@
                                 is processed.
                             </p>
                         </div>
+
+                        <div ng-if="vm.item.Change == 'Create'" class="alert alert-success">
+                            <h4>Create</h4>
+                            <p>
+                                This item doesn't currently exist, and will be created on import.
+                            </p>
+                        </div>
                     </umb-box-content>
                 </umb-box-container>
             </umb-box>
