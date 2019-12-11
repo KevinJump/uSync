@@ -47,7 +47,6 @@ namespace uSync8.Core.Serialization.Serializers
                 if (System.IO.File.Exists(templatePath))
                 {
                     var content = System.IO.File.ReadAllText(templatePath);
-
                     item = new Template(name, alias);
                     item.Path = templatePath;
                     item.Content = content;
@@ -56,6 +55,7 @@ namespace uSync8.Core.Serialization.Serializers
                 {
                     // template is missing
                     // we can't create 
+                    return SyncAttempt<ITemplate>.Fail(name, ChangeType.Import, "The template '.cshtml' file is missing.");
                 }
             }
 
