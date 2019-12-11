@@ -29,10 +29,12 @@ namespace uSync8.ContentEdition.Serializers
         private readonly IMediaService mediaService;
 
         public MediaSerializer(
-            IEntityService entityService, ILogger logger,
+            IEntityService entityService,
+            ILocalizationService localizationService,
+            ILogger logger,
             IMediaService mediaService,
             SyncValueMapperCollection syncMappers)
-            : base(entityService, logger, UmbracoObjectTypes.Media, syncMappers)
+            : base(entityService, localizationService, logger, UmbracoObjectTypes.Media, syncMappers)
         {
             this.mediaService = mediaService;
 

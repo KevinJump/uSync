@@ -24,11 +24,13 @@ namespace uSync8.ContentEdition.Serializers
         protected readonly IFileService fileService;
 
         public ContentSerializer(
-            IEntityService entityService, ILogger logger,
+            IEntityService entityService,
+            ILocalizationService localizationService,
+            ILogger logger,
             IContentService contentService,
             IFileService fileService,
             SyncValueMapperCollection syncMappers)
-            : base(entityService, logger, UmbracoObjectTypes.Document, syncMappers)
+            : base(entityService, localizationService, logger, UmbracoObjectTypes.Document, syncMappers)
         {
             this.contentService = contentService;
             this.fileService = fileService;
@@ -155,7 +157,11 @@ namespace uSync8.ContentEdition.Serializers
 
         public override SyncAttempt<IContent> DeserializeSecondPass(IContent item, XElement node, SerializerFlags flags)
         {
-            DeserializeProperties(item, node);
+            var attempt = DeserializeProperties(item, node);
+            if (!attempt.Success)
+            {
+                return SyncAttempt<IContent>.Fail(item.Name, ChangeType.ImportFail, attempt.Exception);
+            }
 
             // sort order
             var sortOrder = node.Element("Info").Element("SortOrder").ValueOrDefault(-1);
@@ -173,6 +179,7 @@ namespace uSync8.ContentEdition.Serializers
                 // this item (which we have just done with DoSaveOrPublish)
                 return SyncAttempt<IContent>.Succeed(item.Name, ChangeType.NoChange);
             }
+
 
             return SyncAttempt<IContent>.Fail(item.Name, ChangeType.ImportFail, "");
             // second pass, is when we do the publish and stuff.

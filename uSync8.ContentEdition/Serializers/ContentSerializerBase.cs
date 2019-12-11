@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Xml.Linq;
 
@@ -18,14 +19,16 @@ namespace uSync8.ContentEdition.Serializers
     public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TObject>
         where TObject : IContentBase
     {
-
         protected UmbracoObjectTypes umbracoObjectType;
         protected SyncValueMapperCollection syncMappers;
 
-        protected Dictionary<string, string> pathCache; 
+        protected ILocalizationService localizationService;
+
+        protected Dictionary<string, string> pathCache;
 
         public ContentSerializerBase(
             IEntityService entityService,
+            ILocalizationService localizationService,
             ILogger logger,
             UmbracoObjectTypes umbracoObjectType,
             SyncValueMapperCollection syncMappers)
@@ -33,6 +36,8 @@ namespace uSync8.ContentEdition.Serializers
         {
             this.umbracoObjectType = umbracoObjectType;
             this.syncMappers = syncMappers;
+
+            this.localizationService = localizationService;
 
             this.pathCache = new Dictionary<string, string>();
         }
@@ -198,7 +203,7 @@ namespace uSync8.ContentEdition.Serializers
         {
             var properties = node.Element("Properties");
             if (properties == null || !properties.HasElements)
-                return Attempt.Fail(item, new Exception("No Properties in the content node"));
+                return Attempt.Succeed(item); // new Exception("No Properties in the content node"));
 
             foreach (var property in properties.Elements())
             {
@@ -213,13 +218,39 @@ namespace uSync8.ContentEdition.Serializers
                         var segment = value.Attribute("Segment").ValueOrDefault(string.Empty);
                         var propValue = value.ValueOrDefault(string.Empty);
 
+                        if (!string.IsNullOrEmpty(culture))
+                        {
+                            //
+                            // check the culture is something we should and can be setting.
+                            //
+                            if (!current.PropertyType.VariesByCulture())
+                            {
+                                    // if we get here, then things are wrong, so we will try to fix them.
+                                    //
+                                    // if the content config thinks it should vary by culture, but the document type doesn't
+                                    // then we can check if this is default language, and use that to se the value
+                                    if (!culture.InvariantEquals(localizationService.GetDefaultLanguageIsoCode()))
+                                    {
+                                        // this culture is not the default for the site, so don't use it to 
+                                        // set the single language value.
+                                        break;
+                                    }
+                                    logger.Warn<ContentSerializer>($"Cannot set value on culture {culture} because it is not avalible for this property - value in default language will be used");
+                                    culture = string.Empty;
+                            }
+                            else if (!item.AvailableCultures.InvariantContains(culture))
+                            {
+                                // this culture isn't one of the ones, that can be set on this language. 
+                                logger.Warn<ContentSerializer>($"Culture {culture} is not one of the avalible cultures, so we cannot set this value");
+                                break;
+                            }                           
+                        }
                         var itemValue = GetImportValue(propValue, current.PropertyType, culture, segment);
                         item.SetValue(alias, itemValue, culture, segment);
                     }
 
                 }
             }
-
             return Attempt.Succeed(item);
         }
 
