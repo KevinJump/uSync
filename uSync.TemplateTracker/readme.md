@@ -2,7 +2,7 @@
 
 Experimenting with tracking file changes in the view folder, 
 and automagically creating the templates in umbraco when you 
-create a view 
+create a view in visual studio.
 
 ### Progress
 - [x] find views that don't have a template in umbraco
