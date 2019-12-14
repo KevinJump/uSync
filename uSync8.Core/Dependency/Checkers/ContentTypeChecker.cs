@@ -24,6 +24,7 @@ namespace uSync8.Core.Dependency
 
         public IEnumerable<uSyncDependency> GetDependencies(IContentType item, DependencyFlags flags)
         {
+            uSyncDependency.FireUpdate(item.Name);
 
             var dependentflags = flags & ~DependencyFlags.IncludeChildren;
 

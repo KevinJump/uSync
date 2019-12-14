@@ -24,6 +24,8 @@ namespace uSync8.Core.Dependency
 
         public IEnumerable<uSyncDependency> GetDependencies(ITemplate item, DependencyFlags flags)
         {
+            uSyncDependency.FireUpdate(item.Name);
+
             var dependencies = new List<uSyncDependency>();
 
             // only get teh dependencies for templates if the flag is set. 

@@ -14,6 +14,8 @@ namespace uSync8.Core.Dependency
 
         public IEnumerable<uSyncDependency> GetDependencies(ILanguage item, DependencyFlags flags)
         {
+            uSyncDependency.FireUpdate(item.CultureName);
+
             var dependencies = new List<uSyncDependency>
             {
                 new uSyncDependency()

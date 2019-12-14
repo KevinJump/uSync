@@ -18,6 +18,8 @@ namespace uSync8.ContentEdition.Checkers
 
         public IEnumerable<uSyncDependency> GetDependencies(IDictionaryItem item, DependencyFlags flags)
         {
+            uSyncDependency.FireUpdate(item.ItemKey);
+
             var dependencies = new List<uSyncDependency>();
             dependencies.Add(new uSyncDependency()
             {

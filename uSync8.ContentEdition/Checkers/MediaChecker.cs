@@ -25,6 +25,8 @@ namespace uSync8.ContentEdition.Checkers
 
         public IEnumerable<uSyncDependency> GetDependencies(IMedia item, DependencyFlags flags)
         {
+            uSyncDependency.FireUpdate(item.Name);
+
             var dependencies = new List<uSyncDependency>();
 
             dependencies.Add(new uSyncDependency()
