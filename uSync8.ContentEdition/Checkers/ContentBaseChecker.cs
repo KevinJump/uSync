@@ -75,15 +75,19 @@ namespace uSync8.ContentEdition.Checkers
             return dependencies;
         }
 
-        protected IEnumerable<uSyncDependency> GetChildDepencies(int id, int order, DependencyFlags flags)
+        protected IEnumerable<uSyncDependency> GetChildDepencies(int id, int order, DependencyFlags flags, int min, int max)
         {
             var dependencies = new List<uSyncDependency>();
 
             var children = entityService.GetChildren(id).ToList();
 
+            var step = (max - min) / children.Count;
+
             foreach (var item in children.Select((Child, Index) => new { Child, Index }))
             {
-                uSyncDependency.FireUpdate($"Content {item.Child.Name}", item.Index, children.Count);
+                var stepCount = min + item.Index * step;
+
+                uSyncDependency.FireUpdate($"Child Content : {item.Child.Name}", stepCount, max);
 
                 dependencies.Add(new uSyncDependency()
                 {
@@ -100,7 +104,7 @@ namespace uSync8.ContentEdition.Checkers
                     dependencies.AddRange(GetPropertyDependencies(contentChild, flags));
                 }
 
-                dependencies.AddRange(GetChildDepencies(item.Child.Id, order + 1, flags));
+                dependencies.AddRange(GetChildDepencies(item.Child.Id, order + 1, flags, stepCount, stepCount + step));
             }
 
             return dependencies;

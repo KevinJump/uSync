@@ -52,7 +52,7 @@ namespace uSync8.ContentEdition.Checkers
 
             if (flags.HasFlag(DependencyFlags.IncludeChildren))
             {
-                dependencies.AddRange(GetChildDepencies(item.Id, DependencyOrders.Media + 1 , flags));
+                dependencies.AddRange(GetChildDepencies(item.Id, DependencyOrders.Media + 1 , flags, 1, 204800));
             }
 
             return dependencies;
