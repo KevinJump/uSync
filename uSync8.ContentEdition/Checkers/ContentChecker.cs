@@ -47,17 +47,20 @@ namespace uSync8.ContentEdition.Checkers
 
             // if we are getting linked items or media, include in the look up.
             if (flags.HasFlagAny(DependencyFlags.IncludeLinked | DependencyFlags.IncludeMedia | DependencyFlags.IncludeDependencies))
-            { 
+            {
+                uSyncDependency.FireUpdate($"{item.Name} Property Dependencies");
                 dependencies.AddRange(GetPropertyDependencies(item, flags));
             }
 
             if (flags.HasFlag(DependencyFlags.IncludeAncestors))
             {
+                uSyncDependency.FireUpdate($"{item.Name} Ancestors");
                 dependencies.AddRange(GetParentDependencies(item.Id, DependencyOrders.Content - 1, flags));
             }
 
             if (flags.HasFlag(DependencyFlags.IncludeChildren))
             {
+                uSyncDependency.FireUpdate($"{item.Name} Children");
                 dependencies.AddRange(GetChildDepencies(item.Id, DependencyOrders.Content + 1, flags));
             }
 

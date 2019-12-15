@@ -83,6 +83,8 @@ namespace uSync8.ContentEdition.Checkers
 
             foreach(var child in children)
             {
+                uSyncDependency.FireUpdate($"Content {child.Name}");
+
                 dependencies.Add(new uSyncDependency()
                 {
                     Name = child.Name,
