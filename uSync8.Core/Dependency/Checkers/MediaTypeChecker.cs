@@ -24,8 +24,6 @@ namespace uSync8.Core.Dependency
 
         public IEnumerable<uSyncDependency> GetDependencies(IMediaType item, DependencyFlags flags)
         {
-            uSyncDependency.FireUpdate(item.Name);
-
             var dependencies = new List<uSyncDependency>();
 
             var dependentFlags = flags & ~DependencyFlags.IncludeChildren;

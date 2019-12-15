@@ -79,28 +79,28 @@ namespace uSync8.ContentEdition.Checkers
         {
             var dependencies = new List<uSyncDependency>();
 
-            var children = entityService.GetChildren(id);
+            var children = entityService.GetChildren(id).ToList();
 
-            foreach(var child in children)
+            foreach (var item in children.Select((Child, Index) => new { Child, Index }))
             {
-                uSyncDependency.FireUpdate($"Content {child.Name}");
+                uSyncDependency.FireUpdate($"Content {item.Child.Name}", item.Index, children.Count);
 
                 dependencies.Add(new uSyncDependency()
                 {
-                    Name = child.Name,
-                    Udi = Udi.Create(this.ObjectType.GetUdiType(), child.Key),
+                    Name = item.Child.Name,
+                    Udi = Udi.Create(this.ObjectType.GetUdiType(), item.Child.Key),
                     Order = order,
                     Flags = flags & ~DependencyFlags.IncludeAncestors,
-                    Level = child.Level
+                    Level = item.Child.Level
                 });
 
                 if (flags.HasFlagAny(DependencyFlags.IncludeLinked | DependencyFlags.IncludeMedia))
                 {
-                    var contentChild = GetItemById(child.Id);
+                    var contentChild = GetItemById(item.Child.Id);
                     dependencies.AddRange(GetPropertyDependencies(contentChild, flags));
                 }
 
-                dependencies.AddRange(GetChildDepencies(child.Id, order + 1, flags));
+                dependencies.AddRange(GetChildDepencies(item.Child.Id, order + 1, flags));
             }
 
             return dependencies;
@@ -125,8 +125,7 @@ namespace uSync8.ContentEdition.Checkers
             var dependencies = new List<uSyncDependency>();
 
             var propertyFlags = flags
-                & ~DependencyFlags.IncludeChildren;
-               
+                & ~DependencyFlags.IncludeChildren;              
 
             foreach (var property in item.Properties)
             {

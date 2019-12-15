@@ -10,6 +10,8 @@ namespace uSync8.Core.Dependency
     public class DependencyMessageArgs
     {
         public string Message { get; set; }
+        public int Count { get; set; }
+        public int Total { get; set; }
     }
 
 
@@ -31,13 +33,21 @@ namespace uSync8.Core.Dependency
 
         public DependencyFlags Flags { get; set; }
 
+       
         public static event uSyncDependencyUpdate DependencyUpdate;
 
         public static void FireUpdate(string message)
         {
+            FireUpdate(message, 1, 2);
+        }
+
+        public static void FireUpdate(string message, int count, int total)
+        {
             DependencyUpdate?.Invoke(new DependencyMessageArgs
             {
-                Message = message
+                Message = message,
+                Count = count,
+                Total = total
             });
         }
     }

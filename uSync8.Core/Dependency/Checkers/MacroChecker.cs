@@ -14,8 +14,6 @@ namespace uSync8.Core.Dependency
 
         public IEnumerable<uSyncDependency> GetDependencies(IMacro item, DependencyFlags flags)
         {
-            uSyncDependency.FireUpdate(item.Name);
-
             var dependencies = new List<uSyncDependency>
             {
                 new uSyncDependency()
