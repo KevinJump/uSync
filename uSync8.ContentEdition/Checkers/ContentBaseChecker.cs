@@ -77,9 +77,10 @@ namespace uSync8.ContentEdition.Checkers
 
         protected IEnumerable<uSyncDependency> GetChildDepencies(int id, int order, DependencyFlags flags, int min, int max)
         {
-            var dependencies = new List<uSyncDependency>();
-
             var children = entityService.GetChildren(id).ToList();
+            if (children.Count == 0) return Enumerable.Empty<uSyncDependency>();
+
+            var dependencies = new List<uSyncDependency>();
 
             var step = (max - min) / children.Count;
 
@@ -87,7 +88,7 @@ namespace uSync8.ContentEdition.Checkers
             {
                 var stepCount = min + item.Index * step;
 
-                uSyncDependency.FireUpdate($"Child Content : {item.Child.Name}", stepCount, max);
+                uSyncDependency.FireUpdate($"Child Content : {item.Child.Name}", stepCount, uSyncContent.DependencyCountMax);
 
                 dependencies.Add(new uSyncDependency()
                 {

@@ -61,7 +61,7 @@ namespace uSync8.ContentEdition.Checkers
             if (flags.HasFlag(DependencyFlags.IncludeChildren))
             {
                 uSyncDependency.FireUpdate($"{item.Name} Children");
-                dependencies.AddRange(GetChildDepencies(item.Id, DependencyOrders.Content + 1, flags, 1, 204800));
+                dependencies.AddRange(GetChildDepencies(item.Id, DependencyOrders.Content + 1, flags, 1, uSyncContent.DependencyCountMax));
             }
 
             return dependencies;

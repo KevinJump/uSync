@@ -33,6 +33,8 @@ namespace uSync8.ContentEdition
         public string DisplayName => "Content";
 
         public int SortOrder => 10;
+
+        public static int DependencyCountMax = 204800;
     }
 
     [ComposeAfter(typeof(uSyncCoreComposer))]
