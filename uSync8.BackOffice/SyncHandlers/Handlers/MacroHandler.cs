@@ -5,6 +5,7 @@ using System.Linq;
 using Umbraco.Core;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
+using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
 using Umbraco.Core.Services.Implement;
 
@@ -85,6 +86,17 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 
         protected override string GetItemName(IMacro item)
             => item.Name;
+
+        protected override IEnumerable<IEntity> GetChildItems(int parent)
+        {
+            if (parent == -1)
+            {
+                return macroService.GetAll().Where(x => x is IEntity)
+                    .Select(x => x as IEntity);
+            }
+
+            return Enumerable.Empty<IEntity>();
+        }
     }
 
 }

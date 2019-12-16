@@ -9,7 +9,7 @@ using uSync8.Core.Dependency;
 
 namespace uSync8.ContentEdition.Checkers
 {
-    public class DomanChecker : ISyncDependencyChecker<IDomain>
+    public class DomainChecker : ISyncDependencyChecker<IDomain>
     {
         public UmbracoObjectTypes ObjectType => UmbracoObjectTypes.Unknown;
 

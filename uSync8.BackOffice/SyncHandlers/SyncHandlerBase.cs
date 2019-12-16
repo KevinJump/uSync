@@ -421,12 +421,12 @@ namespace uSync8.BackOffice.SyncHandlers
         }
 
 
-        virtual protected IEnumerable<IEntitySlim> GetFolders(int parent)
+        virtual protected IEnumerable<IEntity> GetFolders(int parent)
         {
             if (this.itemContainerType != UmbracoObjectTypes.Unknown)
                 return entityService.GetChildren(parent, this.itemContainerType);
 
-            return Enumerable.Empty<IEntitySlim>();
+            return Enumerable.Empty<IEntity>();
         }
 
 
@@ -781,6 +781,7 @@ namespace uSync8.BackOffice.SyncHandlers
 
         protected IEnumerable<uSyncDependency> GetDependencies(TObject item, DependencyFlags flags)
         {
+            if (dependencyChecker == null) return Enumerable.Empty<uSyncDependency>();
             if (item == null) return Enumerable.Empty<uSyncDependency>();
 
             logger.Info<uSync8Core>("Found Item {0}", item.Id);
@@ -790,6 +791,8 @@ namespace uSync8.BackOffice.SyncHandlers
 
         private IEnumerable<uSyncDependency> GetContainerDependencies(int id, DependencyFlags flags)
         {
+            if (dependencyChecker == null) return Enumerable.Empty<uSyncDependency>();
+
             var dependencies = new List<uSyncDependency>();
 
             var containers = GetFolders(id);
@@ -804,7 +807,6 @@ namespace uSync8.BackOffice.SyncHandlers
             var children = GetChildItems(id);
             if (children != null && children.Any())
             {
-
                 foreach (var child in children)
                 {
                     var childItem = GetFromService(child.Id);

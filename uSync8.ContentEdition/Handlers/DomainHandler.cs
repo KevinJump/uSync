@@ -13,15 +13,14 @@ using uSync8.BackOffice;
 using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
 using uSync8.BackOffice.SyncHandlers;
+using uSync8.Core.Dependency;
 using uSync8.Core.Serialization;
 using uSync8.Core.Tracking;
-
-using static Umbraco.Core.Constants;
 
 namespace uSync8.ContentEdition.Handlers
 {
     [SyncHandler("domainHandler", "Domains", "Domains", uSyncBackOfficeConstants.Priorites.DomainSettings
-        , Icon = "icon-home usync-addon-icon", EntityType = UdiEntityType.Unknown)]
+        , Icon = "icon-home usync-addon-icon", EntityType = "domain")]
     public class DomainHandler : SyncHandlerBase<IDomain, IDomainService>, ISyncHandler, ISyncExtendedHandler
     {
         public override string Group => uSyncBackOfficeConstants.Groups.Content;
@@ -33,8 +32,9 @@ namespace uSync8.ContentEdition.Handlers
             IDomainService domainService,
             ISyncSerializer<IDomain> serializer,
             ISyncTracker<IDomain> tracker,
+            ISyncDependencyChecker<IDomain> checker,
             SyncFileService syncFileService)
-            : base(entityService, logger, serializer, tracker, syncFileService)
+            : base(entityService, logger, serializer, tracker, checker, syncFileService)
         {
             this.domainService = domainService;
         }
@@ -66,7 +66,7 @@ namespace uSync8.ContentEdition.Handlers
             => domainService.GetById(id);
 
         protected override IDomain GetFromService(Guid key)
-            => null;
+            => domainService.GetAll(true).FirstOrDefault(x => x.Key == key);
 
         protected override Guid GetItemKey(IDomain item)
             => item.Id.ToGuid();
@@ -85,13 +85,15 @@ namespace uSync8.ContentEdition.Handlers
             DomainService.Saved += EventSavedItem;
             DomainService.Deleted += EventDeletedItem;
         }
-
-        protected override IEnumerable<IEntitySlim> GetFolders(int parent)
+        protected override IEnumerable<IEntity> GetChildItems(int parent)
         {
             if (parent == -1)
-                return domainService.GetAll(true).Select(x => x as IEntitySlim);
+                return domainService.GetAll(true)
+                    .Where(x => x is IEntity)
+                    .Select(x => x as IEntity);
 
-            return Enumerable.Empty<IEntitySlim>();
+            return base.GetChildItems(parent);
+
         }
     }
 }

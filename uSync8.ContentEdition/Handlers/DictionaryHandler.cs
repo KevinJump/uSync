@@ -115,18 +115,25 @@ namespace uSync8.ContentEdition.Handlers
             return actions;
         }
 
-        protected override IEnumerable<IEntitySlim> GetFolders(int parent)
-        {
+        protected override IEnumerable<IEntity> GetFolders(int parent)
+            => GetChildItems(parent);
+
+        protected override IEnumerable<IEntity> GetChildItems(int parent)
+        { 
             if (parent == -1)
-                return localizationService.GetRootDictionaryItems().Select(x => x as IEntitySlim);
+            {
+                return localizationService.GetRootDictionaryItems()
+                    .Where(x => x is IEntity)
+                    .Select(x => x as IEntity);
+            }
             else
             {
                 var item = localizationService.GetDictionaryItemById(parent);
-                if (item != null) {
-                    return localizationService.GetDictionaryItemChildren(item.Key).Select(x => x as IEntitySlim);
-                }
+                if (item != null)
+                    return localizationService.GetDictionaryItemChildren(item.Key);
             }
-            return base.GetFolders(parent);
+
+            return Enumerable.Empty<IEntity>();
         }
 
         protected override void DeleteViaService(IDictionaryItem item)

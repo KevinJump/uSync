@@ -1,8 +1,10 @@
 ﻿using System;
-
+using System.Collections.Generic;
+using System.Linq;
 using Umbraco.Core;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
+using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
 using Umbraco.Core.Services.Implement;
 
@@ -59,5 +61,13 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 
         protected override string GetItemName(ITemplate item)
             => item.Name;
+
+
+        protected override IEnumerable<IEntity> GetChildItems(int parent)
+            => fileService.GetTemplates(parent).Where(x => x is IEntity)
+            .Select(x => x as IEntity);
+
+        protected override IEnumerable<IEntity> GetFolders(int parent)
+            => GetChildItems(parent);
     }
 }

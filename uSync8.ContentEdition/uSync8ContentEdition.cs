@@ -57,6 +57,7 @@ namespace uSync8.ContentEdition
             composition.Register<ISyncDependencyChecker<IContent>, ContentChecker>();
             composition.Register<ISyncDependencyChecker<IMedia>, MediaChecker>();
             composition.Register<ISyncDependencyChecker<IDictionaryItem>, DictionaryItemChecker>();
+            composition.Register<ISyncDependencyChecker<IDomain>, DomainChecker>();
 
             composition.WithCollectionBuilder<SyncValueMapperCollectionBuilder>()
                 .Add(() => composition.TypeLoader.GetTypes<ISyncMapper>());
