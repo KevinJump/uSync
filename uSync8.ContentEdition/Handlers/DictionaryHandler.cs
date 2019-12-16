@@ -5,6 +5,7 @@ using System.Xml.Linq;
 using Umbraco.Core;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
+using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
 using Umbraco.Core.Services.Implement;
 
@@ -112,6 +113,20 @@ namespace uSync8.ContentEdition.Handlers
             }
 
             return actions;
+        }
+
+        protected override IEnumerable<IEntitySlim> GetFolders(int parent)
+        {
+            if (parent == -1)
+                return localizationService.GetRootDictionaryItems().Select(x => x as IEntitySlim);
+            else
+            {
+                var item = localizationService.GetDictionaryItemById(parent);
+                if (item != null) {
+                    return localizationService.GetDictionaryItemChildren(item.Key).Select(x => x as IEntitySlim);
+                }
+            }
+            return base.GetFolders(parent);
         }
 
         protected override void DeleteViaService(IDictionaryItem item)
