@@ -36,6 +36,8 @@ namespace uSync8.Core.Dependency
         public static int Media = 900;
         public static int Content = 1000;
 
+        public static int Domain = 1100;
+
         public static int OrderFromEntityType(string entityType)
         {
             switch(entityType)

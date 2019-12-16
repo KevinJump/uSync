@@ -5,6 +5,7 @@ using System.Linq;
 using Umbraco.Core;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
+using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
 using Umbraco.Core.Services.Implement;
 
@@ -83,6 +84,14 @@ namespace uSync8.ContentEdition.Handlers
         {
             DomainService.Saved += EventSavedItem;
             DomainService.Deleted += EventDeletedItem;
+        }
+
+        protected override IEnumerable<IEntitySlim> GetFolders(int parent)
+        {
+            if (parent == -1)
+                return domainService.GetAll(true).Select(x => x as IEntitySlim);
+
+            return Enumerable.Empty<IEntitySlim>();
         }
     }
 }

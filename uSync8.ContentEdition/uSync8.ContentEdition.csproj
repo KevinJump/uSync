@@ -248,6 +248,7 @@
     <Compile Include="Checkers\ContentBaseChecker.cs" />
     <Compile Include="Checkers\ContentChecker.cs" />
     <Compile Include="Checkers\DictionaryItemChecker.cs" />
+    <Compile Include="Checkers\DomanChecker.cs" />
     <Compile Include="Checkers\MediaChecker.cs" />
     <Compile Include="Handlers\ContentHandler.cs" />
     <Compile Include="Handlers\ContentTemplateHandler.cs" />
