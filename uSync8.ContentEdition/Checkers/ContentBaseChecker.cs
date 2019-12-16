@@ -75,30 +75,37 @@ namespace uSync8.ContentEdition.Checkers
             return dependencies;
         }
 
-        protected IEnumerable<uSyncDependency> GetChildDepencies(int id, int order, DependencyFlags flags)
+        protected IEnumerable<uSyncDependency> GetChildDepencies(int id, int order, DependencyFlags flags, int min, int max)
         {
+            var children = entityService.GetChildren(id).ToList();
+            if (children.Count == 0) return Enumerable.Empty<uSyncDependency>();
+
             var dependencies = new List<uSyncDependency>();
 
-            var children = entityService.GetChildren(id);
+            var step = (max - min) / children.Count;
 
-            foreach(var child in children)
+            foreach (var item in children.Select((Child, Index) => new { Child, Index }))
             {
+                var stepCount = min + item.Index * step;
+
+                uSyncDependency.FireUpdate($"Child Content : {item.Child.Name}", stepCount, uSyncContent.DependencyCountMax);
+
                 dependencies.Add(new uSyncDependency()
                 {
-                    Name = child.Name,
-                    Udi = Udi.Create(this.ObjectType.GetUdiType(), child.Key),
+                    Name = item.Child.Name,
+                    Udi = Udi.Create(this.ObjectType.GetUdiType(), item.Child.Key),
                     Order = order,
                     Flags = flags & ~DependencyFlags.IncludeAncestors,
-                    Level = child.Level
+                    Level = item.Child.Level
                 });
 
                 if (flags.HasFlagAny(DependencyFlags.IncludeLinked | DependencyFlags.IncludeMedia))
                 {
-                    var contentChild = GetItemById(child.Id);
+                    var contentChild = GetItemById(item.Child.Id);
                     dependencies.AddRange(GetPropertyDependencies(contentChild, flags));
                 }
 
-                dependencies.AddRange(GetChildDepencies(child.Id, order + 1, flags));
+                dependencies.AddRange(GetChildDepencies(item.Child.Id, order + 1, flags, stepCount, stepCount + step));
             }
 
             return dependencies;
@@ -123,8 +130,7 @@ namespace uSync8.ContentEdition.Checkers
             var dependencies = new List<uSyncDependency>();
 
             var propertyFlags = flags
-                & ~DependencyFlags.IncludeChildren;
-               
+                & ~DependencyFlags.IncludeChildren;              
 
             foreach (var property in item.Properties)
             {

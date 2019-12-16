@@ -25,6 +25,8 @@ namespace uSync8.ContentEdition.Checkers
 
         public IEnumerable<uSyncDependency> GetDependencies(IMedia item, DependencyFlags flags)
         {
+            uSyncDependency.FireUpdate(item.Name);
+
             var dependencies = new List<uSyncDependency>();
 
             dependencies.Add(new uSyncDependency()
@@ -50,7 +52,7 @@ namespace uSync8.ContentEdition.Checkers
 
             if (flags.HasFlag(DependencyFlags.IncludeChildren))
             {
-                dependencies.AddRange(GetChildDepencies(item.Id, DependencyOrders.Media + 1 , flags));
+                dependencies.AddRange(GetChildDepencies(item.Id, DependencyOrders.Media + 1 , flags, 1, uSyncContent.DependencyCountMax));
             }
 
             return dependencies;

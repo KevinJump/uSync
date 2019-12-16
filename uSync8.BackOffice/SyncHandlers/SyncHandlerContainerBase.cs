@@ -65,7 +65,13 @@ namespace uSync8.BackOffice.SyncHandlers
 
                 if (!HasChildren(fdlr.Id))
                 {
-                    actions.Add(uSyncAction.SetAction(true, fdlr.Name, typeof(EntityContainer), ChangeType.Delete, "Empty Container"));
+                    // get the name (from the slim)
+                    var name = fdlr.Id.ToString();
+                    if (fdlr is IEntitySlim slim) {
+                        name = slim.Name;
+                    }
+
+                    actions.Add(uSyncAction.SetAction(true, name, typeof(EntityContainer), ChangeType.Delete, "Empty Container"));
                     DeleteFolder(fdlr.Id);
                 }
             }

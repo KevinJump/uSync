@@ -33,6 +33,8 @@ namespace uSync8.ContentEdition
         public string DisplayName => "Content";
 
         public int SortOrder => 10;
+
+        public static int DependencyCountMax = 204800;
     }
 
     [ComposeAfter(typeof(uSyncCoreComposer))]
@@ -55,6 +57,7 @@ namespace uSync8.ContentEdition
             composition.Register<ISyncDependencyChecker<IContent>, ContentChecker>();
             composition.Register<ISyncDependencyChecker<IMedia>, MediaChecker>();
             composition.Register<ISyncDependencyChecker<IDictionaryItem>, DictionaryItemChecker>();
+            composition.Register<ISyncDependencyChecker<IDomain>, DomainChecker>();
 
             composition.WithCollectionBuilder<SyncValueMapperCollectionBuilder>()
                 .Add(() => composition.TypeLoader.GetTypes<ISyncMapper>());

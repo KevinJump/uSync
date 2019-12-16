@@ -9,23 +9,20 @@ using uSync8.Core.Dependency;
 
 namespace uSync8.ContentEdition.Checkers
 {
-    public class DictionaryItemChecker : ISyncDependencyChecker<IDictionaryItem>
+    public class DomainChecker : ISyncDependencyChecker<IDomain>
     {
         public UmbracoObjectTypes ObjectType => UmbracoObjectTypes.Unknown;
 
-        // public UmbracoObjectTypes ObjectType => UmbracoObjectTypes.DictionaryItem
-
-
-        public IEnumerable<uSyncDependency> GetDependencies(IDictionaryItem item, DependencyFlags flags)
+        public IEnumerable<uSyncDependency> GetDependencies(IDomain item, DependencyFlags flags)
         {
-            uSyncDependency.FireUpdate(item.ItemKey);
+            uSyncDependency.FireUpdate(item.DomainName);
 
             var dependencies = new List<uSyncDependency>();
             dependencies.Add(new uSyncDependency()
             {
-                Name = item.ItemKey,
-                Order = DependencyOrders.DictionaryItems,
-                Udi = item.GetUdi(),
+                Name = item.DomainName,
+                Order = DependencyOrders.Domain,
+                Udi = new GuidUdi("domain", item.Key),
                 Flags = flags,
                 Level = 0
             });

@@ -14,6 +14,8 @@ namespace uSync8.Core.Dependency
 
         public IEnumerable<uSyncDependency> GetDependencies(IDataType item, DependencyFlags flags)
         {
+            uSyncDependency.FireUpdate(item.Name, 1, 1);
+
             var dependencies = new List<uSyncDependency>();
             dependencies.Add(new uSyncDependency()
             {
