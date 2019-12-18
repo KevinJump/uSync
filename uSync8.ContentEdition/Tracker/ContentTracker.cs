@@ -28,6 +28,7 @@ namespace uSync8.ContentEdition.Tracker
                             new TrackedItem("SortOrder", "/SortOrder", true),
                             new TrackedItem("FileHash", "/FileHash", true),
                             new TrackedItem("Template", "/Template", true),
+                            new TrackedItem("CreateDate", "/CreateDate", true),
 
                             new TrackedItem("Name", "/NodeName", false)
                             {

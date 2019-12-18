@@ -72,6 +72,7 @@ namespace uSync8.ContentEdition.Serializers
             info.Add(new XElement("Path", GetItemPath(item)));
             info.Add(new XElement("Trashed", item.Trashed));
             info.Add(new XElement("ContentType", item.ContentType.Alias));
+            info.Add(new XElement("CreateDate", item.CreateDate));
 
             var title = new XElement("NodeName", new XAttribute("Default", item.Name));
             foreach (var culture in item.AvailableCultures)
@@ -165,6 +166,10 @@ namespace uSync8.ContentEdition.Serializers
             var key = node.GetKey();
             if (key != Guid.Empty && item.Key != key)
                 item.Key = key;
+
+            var createDate = info.Element("CreateDate").ValueOrDefault(item.CreateDate);
+            if (item.CreateDate != createDate)
+                item.CreateDate = createDate;
 
             DeserializeName(item, node);
 

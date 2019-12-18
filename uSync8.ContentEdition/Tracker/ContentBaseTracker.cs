@@ -29,6 +29,7 @@ namespace uSync8.ContentEdition.Tracker
                             new TrackedItem("Path", "/Path", true),
                             new TrackedItem("SortOrder", "/SortOrder", true),
                             new TrackedItem("ContentType", "/ContentType", true),
+                            new TrackedItem("CreateDate", "/CreateDate", true),
 
                             new TrackedItem("Name", "/NodeName", false)
                             {
