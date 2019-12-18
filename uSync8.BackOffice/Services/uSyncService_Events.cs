@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using uSync8.BackOffice.SyncHandlers;
 
 namespace uSync8.BackOffice
 {
@@ -6,6 +7,9 @@ namespace uSync8.BackOffice
 
     public partial class uSyncService
     {
+        public static event SyncUpdateCallback UpdateMsg;
+        public static event SyncEventCallback EventMsg;
+
         public static event uSyncBulkEventHandler ImportStarting;
         public static event uSyncBulkEventHandler ImportComplete;
 
@@ -26,6 +30,16 @@ namespace uSync8.BackOffice
             {
                 Actions = actions
             });
+        }
+
+        public static void FireUpdateMsg(string message, int count, int total)
+        {
+            UpdateMsg?.Invoke(message, count, total);
+        }
+
+        public static void FireEventMsg(SyncProgressSummary summary)
+        {
+            EventMsg?.Invoke(summary);
         }
     }
 
