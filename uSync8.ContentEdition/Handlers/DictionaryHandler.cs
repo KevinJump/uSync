@@ -45,8 +45,7 @@ namespace uSync8.ContentEdition.Handlers
 
         public override SyncAttempt<IDictionaryItem> Import(string filePath, HandlerSettings config, SerializerFlags flags)
         {
-            if (config.Settings.ContainsKey("OneWay")
-                && config.Settings["OneWay"].InvariantEquals("true"))
+            if (IsOneWay(config))
             {
                 // only sync dictionary items if they are new
                 // so if it already exists we don't do the sync
@@ -158,6 +157,28 @@ namespace uSync8.ContentEdition.Handlers
         {
             LocalizationService.SavedDictionaryItem += EventSavedItem;
             LocalizationService.DeletedDictionaryItem += EventDeletedItem;
+        }
+
+        protected override IEnumerable<uSyncAction> ReportElement(XElement node, string filename, HandlerSettings config)
+        {
+            if (config != null && IsOneWay(config))
+            {
+                // if we find it then there is no change. 
+                var item = GetExistingItem(filename);
+                if (item != null)
+                {
+                    return uSyncActionHelper<IDictionaryItem>
+                        .ReportAction(false, item.ItemKey, "Existing Item will not be overwritten")
+                        .AsEnumerableOfOne<uSyncAction>();
+                }
+            }
+
+            return base.ReportElement(node, filename, config);
+        }
+
+        private bool IsOneWay(HandlerSettings config)
+        {
+            return (config.Settings.ContainsKey("OneWay") && config.Settings["OneWay"].InvariantEquals("true"));
         }
     }
 }

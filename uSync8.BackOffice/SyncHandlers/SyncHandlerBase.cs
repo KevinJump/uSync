@@ -475,7 +475,7 @@ namespace uSync8.BackOffice.SyncHandlers
                 count++;
                 callback?.Invoke(Path.GetFileNameWithoutExtension(file), count, total);
 
-                actions.AddRange(ReportItem(file));
+                actions.AddRange(ReportItem(file, config));
             }
 
             foreach (var children in syncFileService.GetDirectories(folder))
@@ -483,16 +483,14 @@ namespace uSync8.BackOffice.SyncHandlers
                 actions.AddRange(ReportFolder(children, config, callback));
             }
 
-
             return actions;
         }
 
         public IEnumerable<uSyncAction> ReportElement(XElement node)
-            => ReportElement(node, string.Empty);
+            => ReportElement(node, string.Empty, null);
 
-        private IEnumerable<uSyncAction> ReportElement(XElement node, string filename)
+        protected virtual IEnumerable<uSyncAction> ReportElement(XElement node, string filename, HandlerSettings config)
         {
-
             try
             {
                 var actions = new List<uSyncAction>();
@@ -535,12 +533,12 @@ namespace uSync8.BackOffice.SyncHandlers
             }
         }
 
-        protected IEnumerable<uSyncAction> ReportItem(string file)
+        protected IEnumerable<uSyncAction> ReportItem(string file, HandlerSettings config)
         {
             try
             {
                 var node = syncFileService.LoadXElement(file);
-                return ReportElement(node, file);
+                return ReportElement(node, file, config);
             }
             catch (Exception ex)
             {
@@ -725,7 +723,7 @@ namespace uSync8.BackOffice.SyncHandlers
         }
 
         public IEnumerable<uSyncAction> Report(string file, HandlerSettings config)
-            => ReportItem(file);
+            => ReportItem(file, config);
 
 
         public IEnumerable<uSyncAction> Export(int id, string folder, HandlerSettings settings)
