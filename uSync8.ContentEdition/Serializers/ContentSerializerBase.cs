@@ -322,6 +322,8 @@ namespace uSync8.ContentEdition.Serializers
 
         protected virtual string GetItemPath(TObject item)
         {
+            if (pathCache.ContainsKey(item.Path)) return pathCache[item.Path];
+
             var entity = entityService.Get(item.Id);
             if (entity != null)
                 return GetItemPath(entity);
