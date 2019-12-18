@@ -222,7 +222,7 @@ namespace uSync8.BackOffice.SyncHandlers
             // bulk save ..
             if (flags.HasFlag(SerializerFlags.DoNotSave) && updates.Any())
             {
-                callback?.Invoke($"Saving {updates.Count()} changes", 1, 1);
+                // callback?.Invoke($"Saving {updates.Count()} changes", 1, 1);
                 serializer.Save(updates.Select(x => x.Value));
             }
 
@@ -242,7 +242,7 @@ namespace uSync8.BackOffice.SyncHandlers
                 actions.RemoveAll(x => x.Change == ChangeType.Clean);
             }
 
-            callback?.Invoke("", 1, 1);
+            // callback?.Invoke("", 1, 1);
 
             return actions;
         }
@@ -407,7 +407,7 @@ namespace uSync8.BackOffice.SyncHandlers
                 actions.AddRange(ExportAll(item.Value.Id, folder, config, callback));
             }
 
-            callback?.Invoke("Done", 1, 1);
+            // callback?.Invoke("Done", 1, 1);
             return actions;
         }
 
