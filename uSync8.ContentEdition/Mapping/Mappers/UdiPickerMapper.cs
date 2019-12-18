@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-
+using System.Linq;
 using Umbraco.Core;
 using Umbraco.Core.Services;
 
@@ -37,8 +37,13 @@ namespace uSync8.ContentEdition.Mapping
 
         public override IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)
         {
-            var udiStrings = value.ToString().ToDelimitedList();
-            return CreateDependencies(udiStrings, flags);
+            if (value != null)
+            {
+                var udiStrings = value.ToString().ToDelimitedList();
+                return CreateDependencies(udiStrings, flags);
+            }
+
+            return Enumerable.Empty<uSyncDependency>();
         }
     }
 }

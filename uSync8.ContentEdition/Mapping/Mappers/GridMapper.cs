@@ -38,6 +38,8 @@ namespace uSync8.ContentEdition.Mapping.Mappers
 
         public override IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)
         {
+            if (value == null) return Enumerable.Empty<uSyncDependency>();
+
             var stringValue = value.ToString();
             if (string.IsNullOrWhiteSpace(stringValue)) return Enumerable.Empty<uSyncDependency>();
 
@@ -128,7 +130,7 @@ namespace uSync8.ContentEdition.Mapping.Mappers
             var value = control.Value<object>("value");
 
             var (alias, mapper) = FindMapper(editor);
-            if (mapper == null) return Enumerable.Empty<uSyncDependency>();
+            if (mapper == null || value == null) return Enumerable.Empty<uSyncDependency>();
             return mapper.GetDependencies(value, alias, flags);
         }
 

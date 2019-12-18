@@ -140,6 +140,8 @@ namespace uSync8.ContentEdition.Checkers
                 {
                     foreach(var value in property.Values)
                     {
+                        if (value.EditedValue == null) continue;
+
                         var linkedDependencies = mapper.GetDependencies(value.EditedValue, editorAlias, propertyFlags);
 
                         // include linked means all content we link to 

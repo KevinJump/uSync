@@ -54,13 +54,14 @@ namespace uSync8.BackOffice.SyncHandlers
 
         protected string rootFolder { get; set; }
 
-
         public string EntityType { get; protected set; }
 
         public string TypeName { get; protected set; }
 
         // we calculate these now based on the entityType ? 
-        private UmbracoObjectTypes ItemObjectType { get; set; } = UmbracoObjectTypes.Unknown;
+        private UmbracoObjectTypes itemObjectType { get; set; } = UmbracoObjectTypes.Unknown;
+        
+        
         private UmbracoObjectTypes itemContainerType = UmbracoObjectTypes.Unknown;
 
         public SyncHandlerBase(
@@ -105,7 +106,7 @@ namespace uSync8.BackOffice.SyncHandlers
 
             TypeName = serializer.ItemType;
 
-            this.ItemObjectType = uSyncObjectType.ToUmbracoObjectType(EntityType);
+            this.itemObjectType = uSyncObjectType.ToUmbracoObjectType(EntityType);
             this.itemContainerType = uSyncObjectType.ToContainerUmbracoObjectType(EntityType);
 
             GetDefaultConfig(Current.Configs.uSync());
@@ -414,8 +415,8 @@ namespace uSync8.BackOffice.SyncHandlers
         // let the language Handler override this. 
         virtual protected IEnumerable<IEntity> GetChildItems(int parent)
         {
-            if (this.ItemObjectType != UmbracoObjectTypes.Unknown)
-                return entityService.GetChildren(parent, this.ItemObjectType);
+            if (this.itemObjectType != UmbracoObjectTypes.Unknown)
+                return entityService.GetChildren(parent, this.itemObjectType);
 
             return Enumerable.Empty<IEntity>();
         }
