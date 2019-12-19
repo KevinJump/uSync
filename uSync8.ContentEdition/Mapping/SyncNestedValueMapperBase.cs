@@ -77,7 +77,6 @@ namespace uSync8.ContentEdition.Mapping
             }
 
             return dependencies;
-
         }
 
 

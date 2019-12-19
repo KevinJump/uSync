@@ -50,7 +50,7 @@ namespace uSync8.ContentEdition.Mapping.Mappers
 
             foreach (Match m in UdiRegEx.Matches(stringValue))
             {
-                if (Udi.TryParse(m.Value, out Udi udi))
+                if (GuidUdi.TryParse(m.Value, out GuidUdi udi))
                 {
                     if (!dependencies.Any(x => x.Udi == udi))
                         dependencies.Add(CreateDependency(udi, flags));

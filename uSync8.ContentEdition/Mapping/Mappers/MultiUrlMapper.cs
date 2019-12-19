@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Serialization;
 
 using Newtonsoft.Json;
@@ -26,17 +27,10 @@ namespace uSync8.ContentEdition.Mapping.Mappers
         {
             var links = JsonConvert.DeserializeObject<IEnumerable<LinkDto>>(value.ToString());
 
-            var dependencies = new List<uSyncDependency>();
+            if (links == null || !links.Any()) return Enumerable.Empty<uSyncDependency>();
 
-            foreach (var link in links)
-            {
-                if (link.Udi != null)
-                {
-                    dependencies.Add(CreateDependency(link.Udi, flags));
-                }
-            }
-
-            return dependencies;
+            return links.Where(x => x.Udi != null)
+                .Select(link => CreateDependency(link.Udi, flags));
         }
 
         // taken from umbraco source - this is how it's stored 

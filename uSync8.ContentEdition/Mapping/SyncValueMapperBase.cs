@@ -39,23 +39,18 @@ namespace uSync8.ContentEdition.Mapping
 
         protected IEnumerable<uSyncDependency> CreateDependencies(IEnumerable<string> udiStrings, DependencyFlags flags)
         {
-            if (udiStrings == null || !udiStrings.Any()) return Enumerable.Empty<uSyncDependency>();
-
-            var dependencies = new List<uSyncDependency>();
+            if (udiStrings == null || !udiStrings.Any()) yield break;
 
             foreach (var udiString in udiStrings)
             {
                 var dependency = CreateDependency(udiString, flags);
-                if (dependency != null)
-                    dependencies.Add(dependency);
+                if (dependency != null) yield return dependency;
             }
-
-            return dependencies;
         }
 
         protected uSyncDependency CreateDependency(string udiString, DependencyFlags flags)
         {
-            if (Udi.TryParse(udiString, out Udi udi))
+            if (GuidUdi.TryParse(udiString, out GuidUdi udi))
             {
                 return CreateDependency(udi, flags);
             }
@@ -63,7 +58,7 @@ namespace uSync8.ContentEdition.Mapping
             return null;
         }
 
-        protected uSyncDependency CreateDependency(Udi udi, DependencyFlags flags)
+        protected uSyncDependency CreateDependency(GuidUdi udi, DependencyFlags flags)
         {
             var entity = GetElement(udi);
 
@@ -77,12 +72,11 @@ namespace uSync8.ContentEdition.Mapping
             };
         }
 
-        private IEntitySlim GetElement(Udi udi)
+        private IEntitySlim GetElement(GuidUdi udi)
         {
-            if (udi is GuidUdi guidUdi)
-            {
-                return entityService.Get(guidUdi.Guid);
-            }
+            if (udi != null)
+                return entityService.Get(udi.Guid);
+
             return null;
         }
 
