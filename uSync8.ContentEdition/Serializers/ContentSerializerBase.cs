@@ -74,6 +74,8 @@ namespace uSync8.ContentEdition.Serializers
             info.Add(new XElement("ContentType", item.ContentType.Alias));
             info.Add(new XElement("CreateDate", item.CreateDate));
 
+            info.Add(new XElement("Version", item.VersionId));
+
             var title = new XElement("NodeName", new XAttribute("Default", item.Name));
             foreach (var culture in item.AvailableCultures)
             {

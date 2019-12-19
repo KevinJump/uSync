@@ -4,6 +4,7 @@ using System.Linq;
 using System.Xml.Linq;
 
 using Umbraco.Core;
+using Umbraco.Core.Configuration;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
@@ -23,6 +24,8 @@ namespace uSync8.ContentEdition.Serializers
         protected readonly IContentService contentService;
         protected readonly IFileService fileService;
 
+        private bool performDoubleLookup; 
+
         public ContentSerializer(
             IEntityService entityService,
             ILocalizationService localizationService,
@@ -34,6 +37,8 @@ namespace uSync8.ContentEdition.Serializers
         {
             this.contentService = contentService;
             this.fileService = fileService;
+
+            performDoubleLookup = UmbracoVersion.LocalVersion.Major != 8 || UmbracoVersion.LocalVersion.Minor < 4;
         }
 
         #region Serialization
@@ -293,10 +298,17 @@ namespace uSync8.ContentEdition.Serializers
 
         protected override IContent FindItem(Guid key)
         {
-            // TODO: Umbraco 8 bug, the key isn sometimes an old version
-            var entity = entityService.Get(key);
-            if (entity != null)
-                return contentService.GetById(entity.Id);
+            if (performDoubleLookup)
+            {
+                // fixed v8.4+ by https://github.com/umbraco/Umbraco-CMS/issues/2997
+                var entity = entityService.Get(key);
+                if (entity != null)
+                    return contentService.GetById(entity.Id);
+            }
+            else
+            {
+                return contentService.GetById(key);
+            }
 
             return null;
         }

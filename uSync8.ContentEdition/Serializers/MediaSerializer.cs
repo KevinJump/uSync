@@ -9,6 +9,7 @@ using System.Xml.Linq;
 using Newtonsoft.Json;
 
 using Umbraco.Core;
+using Umbraco.Core.Configuration;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
@@ -28,6 +29,9 @@ namespace uSync8.ContentEdition.Serializers
     {
         private readonly IMediaService mediaService;
 
+        private bool performDoubleLookup;
+
+
         public MediaSerializer(
             IEntityService entityService,
             ILocalizationService localizationService,
@@ -46,6 +50,8 @@ namespace uSync8.ContentEdition.Serializers
             {
                 "umbracoWidth", "umbracoHeight", "umbracoBytes", "umbracoExtension"
             };
+
+            performDoubleLookup = UmbracoVersion.LocalVersion.Major != 8 || UmbracoVersion.LocalVersion.Minor < 4;
 
         }
 
@@ -174,10 +180,17 @@ namespace uSync8.ContentEdition.Serializers
 
         protected override IMedia FindItem(Guid key)
         {
-            // TODO: Umbraco 8 bug, find by key sometimes returns an old version
-            var entity = entityService.Get(key);
-            if (entity != null)
-                return mediaService.GetById(entity.Id);
+            if (performDoubleLookup)
+            {
+                // fixed v8.4+ by https://github.com/umbraco/Umbraco-CMS/issues/2997
+                var entity = entityService.Get(key);
+                if (entity != null)
+                    return mediaService.GetById(entity.Id);
+            }
+            else
+            {
+                return mediaService.GetById(key);
+            }
 
             return null;
         }
