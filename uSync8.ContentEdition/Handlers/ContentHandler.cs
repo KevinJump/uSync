@@ -1,5 +1,5 @@
 ﻿using System;
-
+using Umbraco.Core.Configuration;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Services;
@@ -24,6 +24,7 @@ namespace uSync8.ContentEdition.Handlers
         public override string Group => uSyncBackOfficeConstants.Groups.Content;
 
         private readonly IContentService contentService;
+        private bool performDoubleLookup = true;
 
         public ContentHandler(
             IEntityService entityService,
@@ -36,6 +37,9 @@ namespace uSync8.ContentEdition.Handlers
             : base(entityService, logger, serializer, tracker, checker, syncFileService)
         {
             this.contentService = contentService;
+
+            performDoubleLookup = UmbracoVersion.LocalVersion.Major != 8 || UmbracoVersion.LocalVersion.Minor < 4;
+
         }
 
 
@@ -47,12 +51,19 @@ namespace uSync8.ContentEdition.Handlers
 
         protected override IContent GetFromService(Guid key)
         {
-            // FIX: alpha bug - getby key is not always uptodate 
-            var entity = entityService.Get(key);
-            if (entity != null)
-                return contentService.GetById(entity.Id);
+            if (performDoubleLookup)
+            {
+                // FIX: alpha bug - getby key is not always uptodate 
+                var entity = entityService.Get(key);
+                if (entity != null)
+                    return contentService.GetById(entity.Id);
 
-            return null;
+                return null;
+            }
+            else
+            {
+                return contentService.GetById(key);
+            }
         }
 
         protected override IContent GetFromService(string alias)

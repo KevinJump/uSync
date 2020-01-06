@@ -1,5 +1,5 @@
 ﻿using System;
-
+using Umbraco.Core.Configuration;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Services;
@@ -25,6 +25,8 @@ namespace uSync8.ContentEdition.Handlers
 
         private readonly IMediaService mediaService;
 
+        private readonly bool performDoubleLookup;
+
         public MediaHandler(
             IEntityService entityService,
             IProfilingLogger logger,
@@ -36,6 +38,8 @@ namespace uSync8.ContentEdition.Handlers
             : base(entityService, logger, serializer, tracker, checker, syncFileService)
         {
             this.mediaService = mediaService;
+            performDoubleLookup = UmbracoVersion.LocalVersion.Major != 8 || UmbracoVersion.LocalVersion.Minor < 4;
+
         }
 
         protected override void DeleteViaService(IMedia item)
@@ -46,10 +50,17 @@ namespace uSync8.ContentEdition.Handlers
 
         protected override IMedia GetFromService(Guid key)
         {
-            // FIX: alpha bug - getby key is not always uptodate 
-            var entity = entityService.Get(key);
-            if (entity != null)
-                return mediaService.GetById(entity.Id);
+            if (performDoubleLookup)
+            {
+                // fixed v8.4+ by https://github.com/umbraco/Umbraco-CMS/issues/2997
+                var entity = entityService.Get(key);
+                if (entity != null)
+                    return mediaService.GetById(entity.Id);
+            }
+            else
+            {
+                return mediaService.GetById(key);
+            }
 
             return null;
         }
