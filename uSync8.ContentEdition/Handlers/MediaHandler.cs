@@ -76,5 +76,65 @@ namespace uSync8.ContentEdition.Handlers
             MediaService.Moved += EventMovedItem;
             MediaService.Trashed += EventMovedItem;
         }
+
+        /*
+         *  Config options. 
+         *    Include = Paths (comma seperated) (only include if path starts with one of these)
+         *    Exclude = Paths (comma seperated) (exclude if path starts with one of these)
+         *    
+         *    RulesOnExport = bool (do we apply the rules on export as well as import?)
+         */
+
+        protected override bool ShouldImport(XElement node, HandlerSettings config)
+        {
+            if (config.Settings.ContainsKey("Include"))
+            {
+                var include = config.Settings["Include"].Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                if (include.Length > 0)
+                {
+                    var path = node.Element("Info")?.Element("Path").ValueOrDefault(string.Empty);
+                    if (!string.IsNullOrWhiteSpace(path) && !include.Any(x => path.InvariantStartsWith(x)))
+                    {
+                        logger.Debug<ContentHandler>("Not processing item, {0} path {1} not in include path", node.Attribute("Alias").ValueOrDefault("unknown"), path);
+                        return false;
+                    }
+                }
+            }
+
+            if (config.Settings.ContainsKey("Exclude"))
+            {
+                var exclude = config.Settings["Exclude"].Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                if (exclude.Length > 0)
+                {
+                    var path = node.Element("Info")?.Element("Path").ValueOrDefault(string.Empty);
+                    if (!string.IsNullOrWhiteSpace(path) && exclude.Any(x => path.InvariantStartsWith(x)))
+                    {
+                        logger.Debug<ContentHandler>("Not processing item, {0} path {1} is excluded", node.Attribute("Alias").ValueOrDefault("unknown"), path);
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        ///  Should we save this value to disk?
+        /// </summary>
+        /// <remarks>
+        ///  In general we save everything to disk, even if we are not going to remimport it later
+        ///  but you can stop this with RulesOnExport = true in the settings 
+        /// </remarks>
+
+        protected override bool ShouldExport(XElement node, HandlerSettings config)
+        {
+            if (config.Settings.ContainsKey("RulesOnExport") && config.Settings["RulesOnExport"].InvariantEquals("true"))
+            {
+                return ShouldImport(node, config);
+            }
+
+            return true;
+        }
+
     }
 }

@@ -205,12 +205,12 @@ namespace uSync8.BackOffice.Configuration
             settings.BatchSave = GetLocalValue(node.Attribute("BatchSave"), defaultSettings.BatchSave);
             settings.Actions = node.Attribute("Actions").ValueOrDefault("All").ToDelimitedList().ToArray();
 
-            var settingNode = node.Element("Settings");
-            if (settingNode != null)
-            {
+            // var settingNode = node.Element("Settings");
+            // if (settingNode != null)
+            // {
                 var perHandlerSettings = new Dictionary<string, string>();
 
-                foreach (var settingItem in settingNode.Elements("Add"))
+                foreach (var settingItem in node.Elements("Add"))
                 {
                     var key = settingItem.Attribute("Key").ValueOrDefault(string.Empty);
                     var value = settingItem.Attribute("Value").ValueOrDefault(string.Empty);
@@ -222,7 +222,7 @@ namespace uSync8.BackOffice.Configuration
                 }
 
                 settings.Settings = perHandlerSettings;
-            }
+            // }
 
             return settings;
         }

@@ -321,12 +321,18 @@ namespace uSync8.BackOffice.SyncHandlers
             try
             {
                 syncFileService.EnsureFileExists(filePath);
-
                 using (var stream = syncFileService.OpenRead(filePath))
                 {
                     var node = XElement.Load(stream);
-                    var attempt = serializer.Deserialize(node, flags);
-                    return attempt;
+                    if (ShouldImport(node, config))
+                    {
+                        var attempt = serializer.Deserialize(node, flags);
+                        return attempt;
+                    }
+                    else
+                    {
+                        return SyncAttempt<TObject>.Succeed(Path.GetFileName(filePath), default(TObject) ,ChangeType.NoChange, "Not Imported (Based on config)");
+                    }
                 }
             }
             catch (FileNotFoundException notFoundException)
@@ -338,6 +344,16 @@ namespace uSync8.BackOffice.SyncHandlers
                 return SyncAttempt<TObject>.Fail(Path.GetFileName(filePath), ChangeType.Fail, $"Import Fail: {ex.Message}");
             }
         }
+
+        /// <summary>
+        ///  check to see if this element should be imported as part of the process.
+        /// </summary>
+        virtual protected bool ShouldImport(XElement node, HandlerSettings config) => true;
+        
+        /// <summary>
+        ///  Check to see if this elment should be exported. 
+        /// </summary>
+        virtual protected bool ShouldExport(XElement node, HandlerSettings config) => true;
 
         virtual public SyncAttempt<TObject> ImportSecondPass(string file, TObject item, HandlerSettings config, SyncUpdateCallback callback)
         {
@@ -444,7 +460,15 @@ namespace uSync8.BackOffice.SyncHandlers
             var attempt = serializer.Serialize(item);
             if (attempt.Success)
             {
-                syncFileService.SaveXElement(attempt.Item, filename);
+                if (ShouldExport(attempt.Item, config))
+                {
+                    // only write the file to disk if it should be exported.
+                    syncFileService.SaveXElement(attempt.Item, filename);
+                }
+                else
+                {
+                    return uSyncAction.SetAction(true, filename, type: typeof(TObject), change: ChangeType.NoChange, message: "Not Exported (Based on config)").AsEnumerableOfOne();
+                }
             }
 
             return uSyncActionHelper<XElement>.SetAction(attempt, filename).AsEnumerableOfOne();
