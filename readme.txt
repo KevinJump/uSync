@@ -2,18 +2,17 @@
     __  __/ ___/__  ______  _____ 
    / / / /\__ \/ / / / __ \/ ___/ 
   / /_/ /___/ / /_/ / / / / /__ 
-  \__,_//____/\__, /_/ /_/\___/ 🛴🛒
- ----------- /____/ --- 8.3.x --------
-                                             
+  \__,_//____/\__, /_/ /_/\___/ 🛴🛒🎄
+ ----------- /____/ --- 8.4.x ----------
 
  Welcome to uSync 8 for Umbraco 8
 
- I be not for Umbraco 7 :
-
+ I be not for Umbraco 7 
+ ======================
   uSync 8 works only on Umbraco 8.x - if you have just installed
   it on a Umbraco 7.x, you should uninstall now and go get a v4.x 
   version.
-
+ 
  uSync 8 - is not just an upgrade of uSync
 
  uSync deals with some fairly base stuff inside Umbraco and when
@@ -33,10 +32,7 @@
  us it was a delete/rename. this makes deployment much nicer - and
  less likely to break. 
 
- ********************************************************************
- ** Using ModelsBuilder in PureLive mode?                          **
- **          Read this:  https://jumoo.co.uk/usync/modelsbuilder   **
- ********************************************************************
-
+ If you haven't already Upgrade to Umbraco 8.4, things are faster
+ and stablerer.
 
 Feedback and Join in: https://github.com/KevinJump/uSync8

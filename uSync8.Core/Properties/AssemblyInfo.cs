@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Jumoo")]
 [assembly: AssemblyProduct("uSync8.Core")]
-[assembly: AssemblyCopyright("Copyright ©  2019")]
+[assembly: AssemblyCopyright("Copyright © 2019-20")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

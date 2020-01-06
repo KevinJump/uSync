@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Linq;
+using System.Xml.Linq;
+using Umbraco.Core;
 using Umbraco.Core.Configuration;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
@@ -10,6 +13,7 @@ using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
 using uSync8.BackOffice.SyncHandlers;
 using uSync8.Core.Dependency;
+using uSync8.Core.Extensions;
 using uSync8.Core.Serialization;
 using uSync8.Core.Tracking;
 
