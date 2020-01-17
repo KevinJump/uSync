@@ -45,7 +45,7 @@ namespace uSync8.Community.Contrib.Mappers
 
         public override string Name => "DocType Grid Mapper";
 
-        public override string[] Editors => new string[] { "Umbraco.Grid.docType" };
+        public override string[] Editors => new string[] { "Umbraco.Grid.docType", "Umbraco.Grid.doctypegrideditor" };
 
         public override IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)
         {
