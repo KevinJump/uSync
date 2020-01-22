@@ -7,7 +7,7 @@ using System.Xml.Serialization;
 
 using Umbraco.Core.Composing;
 using Umbraco.Core.IO;
-
+using Umbraco.Core.Logging;
 using uSync8.BackOffice.Configuration;
 
 namespace uSync8.BackOffice.Services
@@ -20,9 +20,11 @@ namespace uSync8.BackOffice.Services
     {
         private uSyncSettings globalSettings;
         private string mappedRoot;
+        private readonly IProfilingLogger logger;
 
-        public SyncFileService()
+        public SyncFileService(IProfilingLogger logger)
         {
+            this.logger = logger;
             this.globalSettings = Current.Configs.uSync();
             this.mappedRoot = IOHelper.MapPath(globalSettings.RootFolder);
 
@@ -138,6 +140,8 @@ namespace uSync8.BackOffice.Services
 
         public void SaveFile(string filename, Stream stream)
         {
+            logger.Debug<SyncFileService>("Saving File: {0}", filename);
+
             using (Stream fileStream = OpenWrite(filename))
             {
                 stream.CopyTo(fileStream);
@@ -148,6 +152,7 @@ namespace uSync8.BackOffice.Services
 
         public void SaveFile(string filename, string content)
         {
+            logger.Debug<SyncFileService>("Saving File: {0} [{1}]", filename, content.Length);
 
             using (Stream stream = OpenWrite(filename))
             {
