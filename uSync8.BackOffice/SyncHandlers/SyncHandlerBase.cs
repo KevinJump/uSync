@@ -807,9 +807,7 @@ namespace uSync8.BackOffice.SyncHandlers
             if (dependencyChecker == null) return Enumerable.Empty<uSyncDependency>();
             if (item == null) return Enumerable.Empty<uSyncDependency>();
 
-            logger.Info<uSync8Core>("Found Item {0}", item.Id);
             return dependencyChecker.GetDependencies(item, flags);
-
         }
 
         private IEnumerable<uSyncDependency> GetContainerDependencies(int id, DependencyFlags flags)

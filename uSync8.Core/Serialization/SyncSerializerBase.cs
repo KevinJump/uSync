@@ -253,32 +253,6 @@ namespace uSync8.Core.Serialization
                 default:
                     return ChangeType.NoChange;
             }
-
-            //
-            //  if we want to do more with this, then this logic is needed 
-            /*
-            switch (node.GetEmptyAction())
-            {
-                case SyncActionType.Delete:
-                    return ChangeType.Delete;
-                case SyncActionType.Rename:
-                    // possiblity the rename has already happened ?
-                    // We are going to serialize the current item.
-                    // and then see if the names are the same. 
-                    var existingNode = Serialize(item);
-                    if (existingNode.Success)
-                    {
-                        if (existingNode.Item.GetAlias() == node.GetAlias())
-                        {
-                            // they are the same, so the rename hasn't happened yet.
-                            return ChangeType.NoChange;
-                        }
-                        logger.Info<TObject>("Current: {0} New: {1}", existingNode.Item.GetAlias(), node.GetAlias());
-                    }
-                    return ChangeType.NoChange;
-                default:
-                    return ChangeType.NoChange;
-            }*/
         }
 
         public virtual SyncAttempt<XElement> SerializeEmpty(TObject item, SyncActionType change, string alias)
