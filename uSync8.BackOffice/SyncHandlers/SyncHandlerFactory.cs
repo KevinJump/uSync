@@ -65,7 +65,7 @@ namespace uSync8.BackOffice.SyncHandlers
         ///  returns the list of handler sets in the config 
         /// </summary>
         public IEnumerable<string> GetSets()
-            => config.Settings.HandlerSets.Select(x => x.Name)
+            => config.Settings.HandlerSets.Select(x => x.Name);
 
         #endregion
 
