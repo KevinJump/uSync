@@ -53,10 +53,19 @@ namespace uSync8.BackOffice.SyncHandlers
             => syncHandlers.ExtendedHandlers
                 .FirstOrDefault(x => x.TypeName == typeName);
 
+        /// <summary>
+        ///  returns the handler groups (settings, content, users, etc) that stuff can be grouped into
+        /// </summary>
         public IEnumerable<string> GetGroups()
             => syncHandlers.ExtendedHandlers
                 .Select(x => x.Group)
                 .Distinct();
+
+        /// <summary>
+        ///  returns the list of handler sets in the config 
+        /// </summary>
+        public IEnumerable<string> GetSets()
+            => config.Settings.HandlerSets.Select(x => x.Name)
 
         #endregion
 
