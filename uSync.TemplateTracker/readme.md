@@ -12,6 +12,9 @@ create a view in visual studio.
 - [ ] run a filewatcher for file changes while project is running
 - [ ] handle movement of templates (change the layout changes the parent)
 
+### Filewatcher 
+The file watcher stuff is potentially quite dangorous (many hanldes, lots of memeory, espeically if it ran near a live site), as such it might not be worth approaching it from this angle, a health check might be a better way to do this.
+
 ### Notes
 - this may or may not be practical. 
 The main issue is how filewatchers can trigger 'alot' so we will need
