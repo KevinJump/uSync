@@ -100,7 +100,7 @@ namespace uSync8.ContentEdition.Handlers
         {
             // unless the setting is explicit we don't import trashed items. 
             var trashed = node.Element("Info")?.Element("Trashed").ValueOrDefault(false);
-            if (trashed.GetValueOrDefault(false) && !GetConfigValue(config, "ImportTrashed", false)) return false;
+            if (trashed.GetValueOrDefault(false) && !GetConfigValue(config, "ImportTrashed", true)) return false;
 
             var include = GetConfigValue(config, "Include", "")
                 .Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
