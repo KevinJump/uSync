@@ -9,6 +9,6 @@ namespace uSync8.ContentEdition.Serializers
 {
     public interface ISyncContentSerializer<TObject>
     {
-        int GetLevel(TObject item);
+        string GetItemPath(TObject item);
     }
 }

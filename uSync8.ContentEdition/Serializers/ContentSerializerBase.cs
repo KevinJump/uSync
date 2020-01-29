@@ -60,20 +60,9 @@ namespace uSync8.ContentEdition.Serializers
             return node;
         }
 
-        public virtual int GetLevel(TObject item)
-        {
-            if (!item.Trashed || string.IsNullOrWhiteSpace(relationAlias)) return item.Level;
-
-            // if the item is trashed,then it's level is going to be wrong. 
-            // we need to go to the relations service, work out who the parent was,
-            // and get the level of that + 1;
-            var parent = GetTrashedParent(item);
-            if (parent != null)
-                return parent.Level + 1;
-
-
-            return item.Level;
-        }
+        // Trashed items have a level of 100+ this ensures they are done last.
+        protected virtual int GetLevel(TObject item)
+            => item.Trashed ? 100 + item.Level : item.Level;
 
         private IEntitySlim GetTrashedParent(TObject item)
         {
@@ -375,9 +364,18 @@ namespace uSync8.ContentEdition.Serializers
         protected override string GetItemBaseType(XElement node)
             => node.Name.LocalName;
 
-        protected virtual string GetItemPath(TObject item)
+        public virtual string GetItemPath(TObject item)
         {
             if (pathCache.ContainsKey(item.Path)) return pathCache[item.Path];
+
+            if (item.Trashed)
+            {
+                var parent = GetTrashedParent(item);
+                if (parent != null)
+                {
+                    return GetItemPath(parent) + "/" + item.Name.ToSafeAlias();
+                }
+            }
 
             var entity = entityService.Get(item.Id);
             if (entity != null)

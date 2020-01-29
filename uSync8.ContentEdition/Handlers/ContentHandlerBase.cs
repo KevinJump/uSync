@@ -70,16 +70,19 @@ namespace uSync8.ContentEdition.Handlers
 
         protected virtual string GetItemMatchString(TObject item)
         { 
-            var level = item.Level;
+            var itemPath = item.Level.ToString();
             if (item.Trashed && serializer is ISyncContentSerializer<TObject> contentSerializer)
             {
-                level = contentSerializer.GetLevel(item);
+                itemPath = contentSerializer.GetItemPath(item);
             }
-            return $"{item.Name}_{level}".ToLower();
+            return $"{item.Name}_{itemPath}".ToLower();
         }
 
         protected virtual string GetXmlMatchString(XElement node)
-            => $"{node.GetAlias()}_{node.GetLevel()}".ToLower();
+        {
+            var path = node.Element("Info")?.Element("Path").ValueOrDefault(node.GetLevel().ToString());
+            return $"{node.GetAlias()}_{path}".ToLower();
+        }
 
 
     }
