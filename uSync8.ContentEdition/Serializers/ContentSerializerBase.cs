@@ -97,7 +97,7 @@ namespace uSync8.ContentEdition.Serializers
             info.Add(new XElement("Path", GetItemPath(item)));
             info.Add(GetTrashedInfo(item));
             info.Add(new XElement("ContentType", item.ContentType.Alias));
-            info.Add(new XElement("CreateDate", item.CreateDate));
+            info.Add(new XElement("CreateDate", item.CreateDate.ToString("s")));
 
             var title = new XElement("NodeName", new XAttribute("Default", item.Name));
             foreach (var culture in item.AvailableCultures)
