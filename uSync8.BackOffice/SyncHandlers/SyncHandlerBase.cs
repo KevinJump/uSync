@@ -115,7 +115,7 @@ namespace uSync8.BackOffice.SyncHandlers
 
         private void GetDefaultConfig(uSyncSettings setting)
         {
-            var config = setting.DefaultHandlerSet().Handlers.Where(x => x.Alias.InvariantEquals(this.Alias))
+            var config = setting.DefaultHandlerSet()?.Handlers.Where(x => x.Alias.InvariantEquals(this.Alias))
                 .FirstOrDefault();
 
             if (config != null)
