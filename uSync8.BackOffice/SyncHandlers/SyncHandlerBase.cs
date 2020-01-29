@@ -467,7 +467,7 @@ namespace uSync8.BackOffice.SyncHandlers
                 }
                 else
                 {
-                    return uSyncAction.SetAction(true, filename, type: typeof(TObject), change: ChangeType.NoChange, message: "Not Exported (Based on config)").AsEnumerableOfOne();
+                    return uSyncAction.SetAction(true, filename, type: typeof(TObject), change: ChangeType.NoChange, message: "Not Exported (Based on config)", filename: filename).AsEnumerableOfOne();
                 }
             }
 
@@ -685,31 +685,28 @@ namespace uSync8.BackOffice.SyncHandlers
             var path = $"{folder}/{this.GetItemPath(item, GuidNames, isFlat)}.config";
 
             // if this is flat but not using guid filenames, then we check for clashes.
-            if (isFlat && !GuidNames) return CheckAndFixFileClash(path, GetItemKey(item));
+            if (isFlat && !GuidNames) return CheckAndFixFileClash(path, item);
             return path;
         }
 
         virtual protected Guid GetItemKey(TObject item) => item.Key;
 
-        private string CheckAndFixFileClash(string path, Guid key)
-        {
-            if (syncFileService.FileExists(path))
-            {
-                var node = syncFileService.LoadXElement(path);
-                if (node != null && node.GetKey() != key)
-                {
-                    // clash, we should append something
-                    var append = key.ToShortKeyString(8); // (this is the shortened guid like media folders do)
-                    return Path.Combine(Path.GetDirectoryName(path),
-                        Path.GetFileNameWithoutExtension(path) + "_" + append + Path.GetExtension(path));
-                }
+        /// <summary>
+        ///  clashes we want to resolve can only occur, when the 
+        ///  items can be called the same but in be in diffrent places (e.g content, media).
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        virtual protected string CheckAndFixFileClash(string path, TObject item)
+            => path;
 
-            }
-            return path;
-        }
-
-
-
+        /// <summary>
+        ///  any class that overrides FixFileClash will need to get a match string
+        ///  from the xml, so its on the base class to avoid duplication
+        /// </summary>
+        protected virtual string GetXmlMatchString(XElement node)
+            => $"{node.GetAlias()}_{node.GetLevel()}".ToLower();
 
         virtual public uSyncAction Rename(TObject item)
             => new uSyncAction();

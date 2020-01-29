@@ -29,14 +29,17 @@ namespace uSync8.ContentEdition.Serializers
         public ContentSerializer(
             IEntityService entityService,
             ILocalizationService localizationService,
+            IRelationService relationService,
             ILogger logger,
             IContentService contentService,
             IFileService fileService,
             SyncValueMapperCollection syncMappers)
-            : base(entityService, localizationService, logger, UmbracoObjectTypes.Document, syncMappers)
+            : base(entityService, localizationService, relationService, logger, UmbracoObjectTypes.Document, syncMappers)
         {
             this.contentService = contentService;
             this.fileService = fileService;
+
+            this.relationAlias = Constants.Conventions.RelationTypes.RelateParentDocumentOnDeleteAlias;
 
             performDoubleLookup = UmbracoVersion.LocalVersion.Major != 8 || UmbracoVersion.LocalVersion.Minor < 4;
         }

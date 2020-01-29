@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Xml.Linq;
 
@@ -11,24 +10,30 @@ using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
 
 using uSync8.ContentEdition.Mapping;
+using uSync8.Core;
 using uSync8.Core.Extensions;
+using uSync8.Core.Models;
 using uSync8.Core.Serialization;
 
 namespace uSync8.ContentEdition.Serializers
 {
-    public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TObject>
+    public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TObject>, ISyncContentSerializer<TObject>
         where TObject : IContentBase
     {
         protected UmbracoObjectTypes umbracoObjectType;
         protected SyncValueMapperCollection syncMappers;
 
         protected ILocalizationService localizationService;
+        protected IRelationService relationService;
 
         protected Dictionary<string, string> pathCache;
+
+        protected string relationAlias;
 
         public ContentSerializerBase(
             IEntityService entityService,
             ILocalizationService localizationService,
+            IRelationService relationService,
             ILogger logger,
             UmbracoObjectTypes umbracoObjectType,
             SyncValueMapperCollection syncMappers)
@@ -38,8 +43,11 @@ namespace uSync8.ContentEdition.Serializers
             this.syncMappers = syncMappers;
 
             this.localizationService = localizationService;
+            this.relationService = relationService;
 
             this.pathCache = new Dictionary<string, string>();
+
+
         }
 
         protected virtual XElement InitializeNode(TObject item, string typeName)
@@ -47,9 +55,37 @@ namespace uSync8.ContentEdition.Serializers
             var node = new XElement(this.ItemType,
                 new XAttribute("Key", item.Key),
                 new XAttribute("Alias", item.Name),
-                new XAttribute("Level", item.Level));
+                new XAttribute("Level", GetLevel(item)));
 
             return node;
+        }
+
+        public virtual int GetLevel(TObject item)
+        {
+            if (!item.Trashed || string.IsNullOrWhiteSpace(relationAlias)) return item.Level;
+
+            // if the item is trashed,then it's level is going to be wrong. 
+            // we need to go to the relations service, work out who the parent was,
+            // and get the level of that + 1;
+            var parent = GetTrashedParent(item);
+            if (parent != null)
+                return parent.Level + 1;
+
+
+            return item.Level;
+        }
+
+        private IEntitySlim GetTrashedParent(TObject item)
+        {
+            if (!item.Trashed || string.IsNullOrWhiteSpace(relationAlias)) return null;
+
+            var parents = relationService.GetByChild(item, relationAlias);
+            if (parents != null && parents.Any())
+            {
+                return entityService.Get(parents.FirstOrDefault().ParentId);
+            }
+
+            return null;
         }
 
         protected virtual XElement SerializeInfo(TObject item)
@@ -70,7 +106,7 @@ namespace uSync8.ContentEdition.Serializers
 
             info.Add(new XElement("Parent", new XAttribute("Key", parentKey), parentName));
             info.Add(new XElement("Path", GetItemPath(item)));
-            info.Add(new XElement("Trashed", item.Trashed));
+            info.Add(GetTrashedInfo(item));
             info.Add(new XElement("ContentType", item.ContentType.Alias));
             info.Add(new XElement("CreateDate", item.CreateDate));
 
@@ -85,6 +121,20 @@ namespace uSync8.ContentEdition.Serializers
             info.Add(new XElement("SortOrder", item.SortOrder));
 
             return info;
+        }
+
+        private XElement GetTrashedInfo(TObject item)
+        {
+            var trashed = new XElement("Trashed", item.Trashed);
+            if (item.Trashed)
+            {
+                var trashedParent = GetTrashedParent(item);
+                if (trashedParent != null)
+                {
+                    trashed.Add(new XAttribute("Parent", trashedParent.Key));
+                }
+            }
+            return trashed;
         }
 
         protected string[] dontSerialize = new string[] { };
@@ -230,25 +280,25 @@ namespace uSync8.ContentEdition.Serializers
                             //
                             if (!current.PropertyType.VariesByCulture())
                             {
-                                    // if we get here, then things are wrong, so we will try to fix them.
-                                    //
-                                    // if the content config thinks it should vary by culture, but the document type doesn't
-                                    // then we can check if this is default language, and use that to se the value
-                                    if (!culture.InvariantEquals(localizationService.GetDefaultLanguageIsoCode()))
-                                    {
-                                        // this culture is not the default for the site, so don't use it to 
-                                        // set the single language value.
-                                        break;
-                                    }
-                                    logger.Warn<ContentSerializer>($"Cannot set value on culture {culture} because it is not avalible for this property - value in default language will be used");
-                                    culture = string.Empty;
+                                // if we get here, then things are wrong, so we will try to fix them.
+                                //
+                                // if the content config thinks it should vary by culture, but the document type doesn't
+                                // then we can check if this is default language, and use that to se the value
+                                if (!culture.InvariantEquals(localizationService.GetDefaultLanguageIsoCode()))
+                                {
+                                    // this culture is not the default for the site, so don't use it to 
+                                    // set the single language value.
+                                    break;
+                                }
+                                logger.Warn<ContentSerializer>($"Cannot set value on culture {culture} because it is not avalible for this property - value in default language will be used");
+                                culture = string.Empty;
                             }
                             else if (!item.AvailableCultures.InvariantContains(culture))
                             {
                                 // this culture isn't one of the ones, that can be set on this language. 
                                 logger.Warn<ContentSerializer>($"Culture {culture} is not one of the avalible cultures, so we cannot set this value");
                                 break;
-                            }                           
+                            }
                         }
                         var itemValue = GetImportValue(propValue, current.PropertyType, culture, segment);
                         item.SetValue(alias, itemValue, culture, segment);
@@ -344,13 +394,23 @@ namespace uSync8.ContentEdition.Serializers
             var path = "";
             if (item.ParentId != -1)
             {
-                var parent = entityService.Get(item.ParentId); 
+                var parent = entityService.Get(item.ParentId);
                 if (parent != null)
                     path += GetItemPath(parent);
             }
 
             pathCache[item.Path] = path + "/" + item.Name.ToSafeAlias();
             return pathCache[item.Path];
+        }
+
+        public override SyncAttempt<XElement> SerializeEmpty(TObject item, SyncActionType change, string alias)
+        {
+            var attempt = base.SerializeEmpty(item, change, alias);
+            if (attempt.Success)
+            {
+                attempt.Item.Add(new XAttribute("Level", GetLevel(item)));
+            }
+            return attempt;
         }
 
         #region Finders 

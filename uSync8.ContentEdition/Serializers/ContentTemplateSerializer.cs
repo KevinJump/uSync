@@ -24,12 +24,13 @@ namespace uSync8.ContentEdition.Serializers
         public ContentTemplateSerializer(
             IEntityService entityService, 
             ILocalizationService localizationService,
+            IRelationService relationService,
             ILogger logger,
             IContentService contentService,
             IFileService fileService,
             IContentTypeService contentTypeService,
             SyncValueMapperCollection syncMappers)
-            : base(entityService, localizationService, logger, contentService, fileService, syncMappers)
+            : base(entityService, localizationService, relationService, logger, contentService, fileService, syncMappers)
         {
             this.contentTypeService = contentTypeService;
         }

@@ -35,12 +35,14 @@ namespace uSync8.ContentEdition.Serializers
         public MediaSerializer(
             IEntityService entityService,
             ILocalizationService localizationService,
+            IRelationService relationService,
             ILogger logger,
             IMediaService mediaService,
             SyncValueMapperCollection syncMappers)
-            : base(entityService, localizationService, logger, UmbracoObjectTypes.Media, syncMappers)
+            : base(entityService, localizationService, relationService, logger, UmbracoObjectTypes.Media, syncMappers)
         {
             this.mediaService = mediaService;
+            this.relationAlias = Constants.Conventions.RelationTypes.RelateParentMediaFolderOnDeleteAlias;
 
             // we don't serialize the media properties, 
             // you can't set them on an node in the backoffice,
