@@ -701,13 +701,6 @@ namespace uSync8.BackOffice.SyncHandlers
         virtual protected string CheckAndFixFileClash(string path, TObject item)
             => path;
 
-        /// <summary>
-        ///  any class that overrides FixFileClash will need to get a match string
-        ///  from the xml, so its on the base class to avoid duplication
-        /// </summary>
-        protected virtual string GetXmlMatchString(XElement node)
-            => $"{node.GetAlias()}_{node.GetLevel()}".ToLower();
-
         virtual public uSyncAction Rename(TObject item)
             => new uSyncAction();
 

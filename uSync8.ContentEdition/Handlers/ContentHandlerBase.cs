@@ -1,5 +1,5 @@
 ﻿using System.IO;
-
+using System.Xml.Linq;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Services;
@@ -77,6 +77,10 @@ namespace uSync8.ContentEdition.Handlers
             }
             return $"{item.Name}_{level}".ToLower();
         }
+
+        protected virtual string GetXmlMatchString(XElement node)
+            => $"{node.GetAlias()}_{node.GetLevel()}".ToLower();
+
 
     }
 }
