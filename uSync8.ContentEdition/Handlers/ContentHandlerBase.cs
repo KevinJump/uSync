@@ -1,9 +1,12 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.Linq;
 using System.Xml.Linq;
+using Umbraco.Core;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Services;
-
+using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
 using uSync8.BackOffice.SyncHandlers;
 using uSync8.ContentEdition.Serializers;
@@ -28,21 +31,21 @@ namespace uSync8.ContentEdition.Handlers
         where TService : IService
     {
         protected ContentHandlerBase(
-            IEntityService entityService, 
-            IProfilingLogger logger, 
-            ISyncSerializer<TObject> serializer, 
-            ISyncTracker<TObject> tracker, 
-            SyncFileService syncFileService) 
+            IEntityService entityService,
+            IProfilingLogger logger,
+            ISyncSerializer<TObject> serializer,
+            ISyncTracker<TObject> tracker,
+            SyncFileService syncFileService)
             : base(entityService, logger, serializer, tracker, syncFileService)
         { }
 
         protected ContentHandlerBase(
-            IEntityService entityService, 
-            IProfilingLogger logger, 
-            ISyncSerializer<TObject> serializer, 
-            ISyncTracker<TObject> tracker, 
-            ISyncDependencyChecker<TObject> checker, 
-            SyncFileService syncFileService) 
+            IEntityService entityService,
+            IProfilingLogger logger,
+            ISyncSerializer<TObject> serializer,
+            ISyncTracker<TObject> tracker,
+            ISyncDependencyChecker<TObject> checker,
+            SyncFileService syncFileService)
             : base(entityService, logger, serializer, tracker, checker, syncFileService)
         { }
 
@@ -69,7 +72,7 @@ namespace uSync8.ContentEdition.Handlers
         }
 
         protected virtual string GetItemMatchString(TObject item)
-        { 
+        {
             var itemPath = item.Level.ToString();
             if (item.Trashed && serializer is ISyncContentSerializer<TObject> contentSerializer)
             {
@@ -82,6 +85,86 @@ namespace uSync8.ContentEdition.Handlers
         {
             var path = node.Element("Info")?.Element("Path").ValueOrDefault(node.GetLevel().ToString());
             return $"{node.GetAlias()}_{path}".ToLower();
+        }
+
+
+        /*
+         *  Config options. 
+         *    Include = Paths (comma seperated) (only include if path starts with one of these)
+         *    Exclude = Paths (comma seperated) (exclude if path starts with one of these)
+         *    
+         *    RulesOnExport = bool (do we apply the rules on export as well as import?)
+         */
+
+        protected override bool ShouldImport(XElement node, HandlerSettings config)
+        {
+            // unless the setting is explicit we don't import trashed items. 
+            var trashed = node.Element("Info")?.Element("Trashed").ValueOrDefault(false);
+            if (trashed.GetValueOrDefault(false) && !GetConfigValue(config, "ImportTrashed", false)) return false;
+
+            var include = GetConfigValue(config, "Include", "")
+                .Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+            if (include.Length > 0)
+            {
+                var path = node.Element("Info")?.Element("Path").ValueOrDefault(string.Empty);
+                if (!string.IsNullOrWhiteSpace(path) && !include.Any(x => path.InvariantStartsWith(x)))
+                {
+                    logger.Debug<ContentHandler>("Not processing item, {0} path {1} not in include path", node.Attribute("Alias").ValueOrDefault("unknown"), path);
+                    return false;
+                }
+            }
+
+            var exclude = GetConfigValue(config, "Exclude", "")
+                .Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            if (exclude.Length > 0)
+            {
+                var path = node.Element("Info")?.Element("Path").ValueOrDefault(string.Empty);
+                if (!string.IsNullOrWhiteSpace(path) && exclude.Any(x => path.InvariantStartsWith(x)))
+                {
+                    logger.Debug<ContentHandler>("Not processing item, {0} path {1} is excluded", node.Attribute("Alias").ValueOrDefault("unknown"), path);
+                    return false;
+                }
+            }
+
+
+            return true;
+        }
+
+
+        /// <summary>
+        ///  Should we save this value to disk?
+        /// </summary>
+        /// <remarks>
+        ///  In general we save everything to disk, even if we are not going to remimport it later
+        ///  but you can stop this with RulesOnExport = true in the settings 
+        /// </remarks>
+
+        protected override bool ShouldExport(XElement node, HandlerSettings config)
+        {
+            // We export trashed items by default, (but we don't import them by default)
+            var trashed = node.Element("Info")?.Element("Trashed").ValueOrDefault(false);
+            if (trashed.GetValueOrDefault(false) && !GetConfigValue(config, "ExportTrashed", true)) return false;
+
+            if (GetConfigValue(config, "RulesOnExport", false))
+            {
+                return ShouldImport(node, config);
+            }
+
+            return true;
+        }
+
+        private bool GetConfigValue(HandlerSettings config, string setting, bool defaultValue)
+        {
+            if (!config.Settings.ContainsKey(setting)) return defaultValue;
+            return config.Settings[setting].InvariantEquals("true");
+        }
+
+        private string GetConfigValue(HandlerSettings config, string setting, string defaultValue)
+        {
+            if (!config.Settings.ContainsKey(setting)) return defaultValue;
+            if (!string.IsNullOrWhiteSpace(config.Settings[setting])) return defaultValue;
+            return config.Settings[setting];
         }
 
 

@@ -563,7 +563,15 @@ namespace uSync8.BackOffice.SyncHandlers
             try
             {
                 var node = syncFileService.LoadXElement(file);
-                return ReportElement(node, file, config);
+                if (ShouldImport(node, config))
+                {
+                    return ReportElement(node, file, config);
+                }
+                else
+                {
+                    return uSyncActionHelper<TObject>.ReportAction(false, node.GetAlias(), "Will not be imported (Based on config)")
+                        .AsEnumerableOfOne<uSyncAction>();
+                }
             }
             catch (Exception ex)
             {
