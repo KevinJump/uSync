@@ -232,17 +232,31 @@ namespace uSync8.BackOffice.SyncHandlers
                 actions.AddRange(ImportFolder(children, config, updates, force, callback));
             }
 
-            if (actions.All(x => x.Success))
+            if (actions.All(x => x.Success) && cleanMarkers.Count > 0)
             {
-                foreach (var cleanFile in cleanMarkers)
+                // this is just extra messaging, given how quickly the next message will be sent.
+                // callback?.Invoke("Cleaning Folders", 1, cleanMarkers.Count);
+
+                foreach (var item in cleanMarkers.Select((filePath, Index) => new { filePath, Index }))
                 {
-                    actions.AddRange(CleanFolder(cleanFile, false));
+                    var folderName = Path.GetFileName(item.filePath);
+                    callback?.Invoke($"Cleaning {folderName}", item.Index, cleanMarkers.Count);
+
+                    var cleanActions = CleanFolder(item.filePath, false);
+                    if (cleanActions.Any()) {
+                        actions.AddRange(cleanActions);
+                    }
+                    else
+                    {
+                        // nothing to delete, we report this as a no change 
+                        actions.Add(uSyncAction.SetAction(true, $"Folder {Path.GetFileName(item.filePath)}", change: ChangeType.NoChange, filename: item.filePath));
+                    }
                 }
                 // remove the actual cleans (they will have been replaced by the deletes
                 actions.RemoveAll(x => x.Change == ChangeType.Clean);
             }
 
-            // callback?.Invoke("", 1, 1);
+            callback?.Invoke("Import Complete", 1, 1);
 
             return actions;
         }
