@@ -256,8 +256,6 @@ namespace uSync8.BackOffice.SyncHandlers
                 actions.RemoveAll(x => x.Change == ChangeType.Clean);
             }
 
-            callback?.Invoke("Import Complete", 1, 1);
-
             return actions;
         }
 
