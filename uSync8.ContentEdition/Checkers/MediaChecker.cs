@@ -47,7 +47,8 @@ namespace uSync8.ContentEdition.Checkers
 
             if (flags.HasFlag(DependencyFlags.IncludeAncestors))
             {
-                dependencies.AddRange(GetParentDependencies(item.Id, DependencyOrders.Media - 1, flags));
+                // dependencies.AddRange(GetParentDependencies(item.Id, DependencyOrders.Media - 1, flags));
+                dependencies.AddRange(GetParentDependencies(item.Path, DependencyOrders.Media - 1, flags));
             }
 
             if (flags.HasFlag(DependencyFlags.IncludeChildren))

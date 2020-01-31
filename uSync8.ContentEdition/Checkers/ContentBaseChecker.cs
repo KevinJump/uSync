@@ -52,6 +52,26 @@ namespace uSync8.ContentEdition.Checkers
             return null;
         }
 
+        protected IEnumerable<uSyncDependency> GetParentDependencies(string path, int order, DependencyFlags flags)
+        {
+            var ids = path.Split(new char[] { ',' }, System.StringSplitOptions.RemoveEmptyEntries)
+                .Select(x => int.Parse(x))
+                .ToArray();
+
+            var items = entityService.GetAll(this.ObjectType, ids);
+            foreach(var item in items)
+            {
+                order--;
+                yield return new uSyncDependency
+                {
+                    Name = item.Name,
+                    Udi = Udi.Create(this.ObjectType.GetUdiType(), item.Key),
+                    Order = order,
+                    Flags = flags & ~DependencyFlags.IncludeChildren,
+                    Level = item.Level
+                };
+            }
+        }
 
         protected IEnumerable<uSyncDependency> GetParentDependencies(int id, int order, DependencyFlags flags)
         {

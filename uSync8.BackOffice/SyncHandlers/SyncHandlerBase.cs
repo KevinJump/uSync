@@ -353,6 +353,7 @@ namespace uSync8.BackOffice.SyncHandlers
             }
             catch (Exception ex)
             {
+                logger.Warn<uSync8BackOffice>("Base: Import Failed : {0}", ex.ToString());
                 return SyncAttempt<TObject>.Fail(Path.GetFileName(filePath), ChangeType.Fail, $"Import Fail: {ex.Message}");
             }
         }
