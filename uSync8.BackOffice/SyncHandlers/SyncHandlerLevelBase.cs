@@ -6,6 +6,7 @@ using System.Xml;
 using System.Xml.Linq;
 
 using Umbraco.Core;
+using Umbraco.Core.Cache;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
@@ -38,8 +39,9 @@ namespace uSync8.BackOffice.SyncHandlers
             IProfilingLogger logger,
             ISyncSerializer<TObject> serializer,
             ISyncTracker<TObject> tracker,
+            AppCaches appCaches,
             SyncFileService syncFileService)
-            : base(entityService, logger, serializer, tracker, syncFileService)
+            : base(entityService, logger, serializer, tracker, appCaches, syncFileService)
         { }
 
         protected SyncHandlerLevelBase(
@@ -47,9 +49,10 @@ namespace uSync8.BackOffice.SyncHandlers
             IProfilingLogger logger,
             ISyncSerializer<TObject> serializer,
             ISyncTracker<TObject> tracker,
+            AppCaches appCaches,
             ISyncDependencyChecker<TObject> checker,
             SyncFileService syncFileService)
-            : base(entityService, logger, serializer, tracker, checker, syncFileService)
+            : base(entityService, logger, serializer, tracker, appCaches, checker, syncFileService)
         { }
 
         /// <summary>

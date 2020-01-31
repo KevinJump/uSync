@@ -1,5 +1,5 @@
 ﻿using System;
-
+using Umbraco.Core.Cache;
 using Umbraco.Core.Configuration;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
@@ -34,9 +34,10 @@ namespace uSync8.ContentEdition.Handlers
             IMediaService mediaService,
             ISyncSerializer<IMedia> serializer,
             ISyncTracker<IMedia> tracker,
+            AppCaches appCaches,
             ISyncDependencyChecker<IMedia> checker,
             SyncFileService syncFileService)
-            : base(entityService, logger, serializer, tracker, checker, syncFileService)
+            : base(entityService, logger, serializer, tracker, appCaches, checker, syncFileService)
         {
             this.mediaService = mediaService;
             performDoubleLookup = UmbracoVersion.LocalVersion.Major != 8 || UmbracoVersion.LocalVersion.Minor < 4;

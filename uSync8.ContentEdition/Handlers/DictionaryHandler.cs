@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 using Umbraco.Core;
+using Umbraco.Core.Cache;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
@@ -36,9 +37,10 @@ namespace uSync8.ContentEdition.Handlers
             ILocalizationService localizationService,
             ISyncSerializer<IDictionaryItem> serializer,
             ISyncTracker<IDictionaryItem> tracker,
+            AppCaches appCaches,
             ISyncDependencyChecker<IDictionaryItem> checker,
             SyncFileService syncFileService)
-            : base(entityService, logger, serializer, tracker, checker, syncFileService)
+            : base(entityService, logger, serializer, tracker, appCaches, checker, syncFileService)
         {
             this.localizationService = localizationService;
         }

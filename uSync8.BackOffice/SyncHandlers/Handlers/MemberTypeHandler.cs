@@ -1,6 +1,7 @@
 ﻿using System;
 
 using Umbraco.Core;
+using Umbraco.Core.Cache;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
@@ -29,9 +30,10 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             IMemberTypeService memberTypeService,
             ISyncSerializer<IMemberType> serializer,
             ISyncTracker<IMemberType> tracker,
+            AppCaches appCaches,
             ISyncDependencyChecker<IMemberType> checker,
             SyncFileService syncFileService)
-            : base(entityService, logger, serializer, tracker, checker, syncFileService)
+            : base(entityService, logger, serializer, tracker, appCaches, checker, syncFileService)
         {
             this.memberTypeService = memberTypeService;
 

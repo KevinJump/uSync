@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Xml.Linq;
 
 using Umbraco.Core;
+using Umbraco.Core.Cache;
 using Umbraco.Core.Composing;
 using Umbraco.Core.Events;
 using Umbraco.Core.Logging;
@@ -36,6 +38,7 @@ namespace uSync8.BackOffice.SyncHandlers
 
         protected readonly ISyncSerializer<TObject> serializer;
         protected readonly ISyncTracker<TObject> tracker;
+        protected readonly IAppPolicyCache runtimeCache;
 
         // handler things 
         public string Alias { get; private set; }
@@ -69,8 +72,9 @@ namespace uSync8.BackOffice.SyncHandlers
             IProfilingLogger logger,
             ISyncSerializer<TObject> serializer,
             ISyncTracker<TObject> tracker,
+            AppCaches appCaches,
             SyncFileService syncFileService)
-        : this(entityService, logger, serializer, tracker, null, syncFileService) { }
+        : this(entityService, logger, serializer, tracker, appCaches, null, syncFileService) { }
 
 
         public SyncHandlerBase(
@@ -78,6 +82,7 @@ namespace uSync8.BackOffice.SyncHandlers
             IProfilingLogger logger,
             ISyncSerializer<TObject> serializer,
             ISyncTracker<TObject> tracker,
+            AppCaches appCaches,
             ISyncDependencyChecker<TObject> dependencyChecker,
             SyncFileService syncFileService)
         {
@@ -90,6 +95,8 @@ namespace uSync8.BackOffice.SyncHandlers
             this.dependencyChecker = dependencyChecker;
 
             this.syncFileService = syncFileService;
+
+            this.runtimeCache = appCaches.RuntimeCache; 
 
             var thisType = GetType();
             var meta = thisType.GetCustomAttribute<SyncHandlerAttribute>(false);
@@ -146,6 +153,8 @@ namespace uSync8.BackOffice.SyncHandlers
             var actions = new List<uSyncAction>();
             var updates = new Dictionary<string, TObject>();
 
+            runtimeCache.ClearByKey($"keycache_{this.Alias}");
+
             actions.AddRange(ImportFolder(folder, config, updates, force, callback));
 
             if (updates.Any())
@@ -153,6 +162,7 @@ namespace uSync8.BackOffice.SyncHandlers
                 ProcessSecondPasses(updates, config, callback);
             }
 
+            runtimeCache.ClearByKey($"keycache_{this.Alias}");
             callback?.Invoke("Done", 3, 3);
             return actions;
         }
@@ -280,17 +290,31 @@ namespace uSync8.BackOffice.SyncHandlers
             // is anywhere in the folder it won't get removed
             // even if the folder is wrong
             // be a little slower (not much though)
-            var keys = new List<Guid>();
-            var files = syncFileService.GetFiles(folder, "*.config");
-            foreach (var file in files)
-            {
-                var node = XElement.Load(file);
-                var key = node.GetKey();
-                if (!keys.Contains(key))
-                    keys.Add(key);
-            }
+
+            // we cache this, (it is cleared on an ImportAll)
+            var keys = GetFolderKeys(folder);
 
             return DeleteMissingItems(parent, keys, reportOnly);
+        }
+
+        private IList<Guid> GetFolderKeys(string folder)
+        {
+
+            var cacheKey = $"uSyncKeyList_{folder.GetHashCode()}_{this.Alias}";
+            return runtimeCache.GetCacheItem(cacheKey, () => {
+                var keys = new List<Guid>();
+                var files = syncFileService.GetFiles(folder, "*.config");
+                foreach (var file in files)
+                {
+                    var node = XElement.Load(file);
+                    var key = node.GetKey();
+                    if (!keys.Contains(key))
+                        keys.Add(key);
+                }
+
+                return keys;
+
+            }, null);
         }
 
         protected TObject GetCleanParent(string file)
@@ -310,12 +334,19 @@ namespace uSync8.BackOffice.SyncHandlers
             {
                 if (!keys.Contains(item.Key))
                 {
-                    var actualItem = GetFromService(item.Key);
-                    var name = GetItemName(actualItem);
+                    var name = String.Empty;
+                    if (item is IEntitySlim slim) name = slim.Name;
+                    if (string.IsNullOrEmpty(name) || !reportOnly)
+                    {
+                        var actualItem = GetFromService(item.Key);
+                        name = GetItemName(actualItem);
 
-                    if (!reportOnly)
-                        DeleteViaService(actualItem);
+                        // actually do the delete if we are really not reporting
+                        if (!reportOnly) DeleteViaService(actualItem);
+                    }
 
+                    // for reporting - we use the entity name,
+                    // this stops an extra lookup - which we may not need later
                     actions.Add(uSyncActionHelper<TObject>.SetAction(SyncAttempt<TObject>.Succeed(name, ChangeType.Delete), string.Empty));
                 }
             }

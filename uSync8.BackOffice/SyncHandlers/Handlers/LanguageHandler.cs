@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 
 using Umbraco.Core;
+using Umbraco.Core.Cache;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
@@ -35,9 +36,10 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             ILocalizationService localizationService,
             ISyncSerializer<ILanguage> serializer,
             ISyncTracker<ILanguage> tracker,
+            AppCaches appCaches,
             ISyncDependencyChecker<ILanguage> checker,
             SyncFileService syncFileService)
-            : base(entityService, logger, serializer, tracker, checker, syncFileService)
+            : base(entityService, logger, serializer, tracker, appCaches, checker, syncFileService)
         {
             this.localizationService = localizationService;
         }

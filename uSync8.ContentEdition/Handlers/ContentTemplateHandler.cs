@@ -1,5 +1,5 @@
 ﻿using System;
-
+using Umbraco.Core.Cache;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Services;
@@ -30,8 +30,9 @@ namespace uSync8.ContentEdition.Handlers
             IContentService contentService,
             ContentTemplateSerializer serializer, // concreate because we want to make sure we get the blueprint one.
             ISyncTracker<IContent> tracker,
+            AppCaches appCaches,
             SyncFileService syncFileService)
-            : base(entityService, logger, serializer, tracker, syncFileService)
+            : base(entityService, logger, serializer, tracker, appCaches, syncFileService)
         {
             this.contentService = contentService;
         }

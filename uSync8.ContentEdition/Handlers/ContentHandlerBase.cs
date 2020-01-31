@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using Umbraco.Core;
+using Umbraco.Core.Cache;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Services;
@@ -35,8 +36,9 @@ namespace uSync8.ContentEdition.Handlers
             IProfilingLogger logger,
             ISyncSerializer<TObject> serializer,
             ISyncTracker<TObject> tracker,
+            AppCaches appCaches,
             SyncFileService syncFileService)
-            : base(entityService, logger, serializer, tracker, syncFileService)
+            : base(entityService, logger, serializer, tracker, appCaches, syncFileService)
         { }
 
         protected ContentHandlerBase(
@@ -44,9 +46,10 @@ namespace uSync8.ContentEdition.Handlers
             IProfilingLogger logger,
             ISyncSerializer<TObject> serializer,
             ISyncTracker<TObject> tracker,
+            AppCaches appCaches,
             ISyncDependencyChecker<TObject> checker,
             SyncFileService syncFileService)
-            : base(entityService, logger, serializer, tracker, checker, syncFileService)
+            : base(entityService, logger, serializer, tracker, appCaches, checker, syncFileService)
         { }
 
 

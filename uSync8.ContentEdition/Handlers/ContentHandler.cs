@@ -1,5 +1,5 @@
 ﻿using System;
-
+using Umbraco.Core.Cache;
 using Umbraco.Core.Configuration;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
@@ -33,9 +33,10 @@ namespace uSync8.ContentEdition.Handlers
             IContentService contentService,
             ISyncSerializer<IContent> serializer,
             ISyncTracker<IContent> tracker,
+            AppCaches appCaches,
             ISyncDependencyChecker<IContent> checker,
             SyncFileService syncFileService)
-            : base(entityService, logger, serializer, tracker, checker, syncFileService)
+            : base(entityService, logger, serializer, tracker, appCaches, checker, syncFileService)
         {
             this.contentService = contentService;
 
