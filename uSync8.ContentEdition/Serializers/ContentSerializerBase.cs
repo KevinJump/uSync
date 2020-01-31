@@ -50,6 +50,9 @@ namespace uSync8.ContentEdition.Serializers
 
         }
 
+        /// <summary>
+        ///  Initialize the XElement with the core Key, Name, Level values
+        /// </summary>
         protected virtual XElement InitializeNode(TObject item, string typeName)
         {
             var node = new XElement(this.ItemType,
@@ -60,7 +63,12 @@ namespace uSync8.ContentEdition.Serializers
             return node;
         }
 
-        // Trashed items have a level of 100+ this ensures they are done last.
+        /// <summary>
+        ///  Calculate the level for this item
+        /// </summary>
+        /// <remarks>
+        ///  Trashed items get a level + 100, so they get processed last
+        /// </remarks>
         protected virtual int GetLevel(TObject item)
             => item.Trashed ? 100 + item.Level : item.Level;
 
@@ -77,10 +85,14 @@ namespace uSync8.ContentEdition.Serializers
             return null;
         }
 
+        /// <summary>
+        ///  Serialize the Info - (Item Attributes) Node
+        /// </summary>
         protected virtual XElement SerializeInfo(TObject item)
         {
             var info = new XElement("Info");
 
+            // find parent. 
             var parentKey = Guid.Empty;
             var parentName = "";
             if (item.ParentId != -1)
@@ -112,6 +124,9 @@ namespace uSync8.ContentEdition.Serializers
             return info;
         }
 
+        /// <summary>
+        ///  get the trash information (including non-trashed parent)
+        /// </summary>
         private XElement GetTrashedInfo(TObject item)
         {
             var trashed = new XElement("Trashed", item.Trashed);
@@ -126,8 +141,14 @@ namespace uSync8.ContentEdition.Serializers
             return trashed;
         }
 
+        /// <summary>
+        ///  Things not to serialize (mediaSerializer overrides this, for Auto properties)
+        /// </summary>
         protected string[] dontSerialize = new string[] { };
 
+        /// <summary>
+        ///  serialize all the properties for the item
+        /// </summary>
         protected virtual XElement SerializeProperties(TObject item)
         {
             var node = new XElement("Properties");
@@ -249,6 +270,8 @@ namespace uSync8.ContentEdition.Serializers
             if (properties == null || !properties.HasElements)
                 return Attempt.Succeed(item); // new Exception("No Properties in the content node"));
 
+            logger.Debug<ContentSerializer>("Deserialize Properties: {0}", item.Name);
+
             foreach (var property in properties.Elements())
             {
                 var alias = property.Name.LocalName;
@@ -269,6 +292,7 @@ namespace uSync8.ContentEdition.Serializers
                             //
                             if (!current.PropertyType.VariesByCulture())
                             {
+                                logger.Debug<ContentSerializer>("Item does not vary by culture - but .config file contains culture");
                                 // if we get here, then things are wrong, so we will try to fix them.
                                 //
                                 // if the content config thinks it should vary by culture, but the document type doesn't
@@ -277,6 +301,7 @@ namespace uSync8.ContentEdition.Serializers
                                 {
                                     // this culture is not the default for the site, so don't use it to 
                                     // set the single language value.
+                                    logger.Warn<ContentSerializer>("Culture {0} in file, but is not default so not being used", culture);
                                     break;
                                 }
                                 logger.Warn<ContentSerializer>($"Cannot set value on culture {culture} because it is not avalible for this property - value in default language will be used");
@@ -292,8 +317,12 @@ namespace uSync8.ContentEdition.Serializers
                         var itemValue = GetImportValue(propValue, current.PropertyType, culture, segment);
                         item.SetValue(alias, itemValue, culture, segment);
                     }
-
                 }
+                else
+                {
+                    logger.Warn<ContentSerializer>("DeserializeProperties: item {0} doesn't have property {1} but its in the xml", item.Name, alias);
+                }
+
             }
             return Attempt.Succeed(item);
         }
@@ -306,12 +335,12 @@ namespace uSync8.ContentEdition.Serializers
 
         protected abstract void HandleTrashedState(TObject item, bool trashed);
 
-
         protected string GetExportValue(object value, PropertyType propertyType, string culture, string segment)
         {
             // this is where the mapping magic will happen. 
             // at the moment there are no value mappers, but if we need
             // them they plug in as ISyncMapper things
+            logger.Debug<ContentSerializer>("Getting ExportValue [{1}]", propertyType.PropertyEditorAlias);
             return syncMappers.GetExportValue(value, propertyType.PropertyEditorAlias);
         }
 
@@ -320,9 +349,13 @@ namespace uSync8.ContentEdition.Serializers
             // this is where the mapping magic will happen. 
             // at the moment there are no value mappers, but if we need
             // them they plug in as ISyncMapper things
+            logger.Debug<ContentSerializer>("Getting ImportValue [{1}]", propertyType.PropertyEditorAlias);
             return syncMappers.GetImportValue(value, propertyType.PropertyEditorAlias);
         }
 
+        /// <summary>
+        ///  validate that the node is valid
+        /// </summary>
         public override bool IsValid(XElement node)
              => node != null
                 && node.GetKey() != null
