@@ -185,7 +185,7 @@ namespace uSync8.ContentEdition.Serializers
             {
                 // we say no change back, this stops the core second pass function from saving 
                 // this item (which we have just done with DoSaveOrPublish)
-                return SyncAttempt<IContent>.Succeed(item.Name, ChangeType.NoChange);
+                return SyncAttempt<IContent>.Succeed(item.Name, item, ChangeType.NoChange, attempt.Status);
             }
 
 

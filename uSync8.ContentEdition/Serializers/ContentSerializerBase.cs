@@ -264,13 +264,13 @@ namespace uSync8.ContentEdition.Serializers
             return Attempt.Succeed(item);
         }
 
-        protected Attempt<TObject> DeserializeProperties(TObject item, XElement node)
+        protected Attempt<TObject, String> DeserializeProperties(TObject item, XElement node)
         {
+            string errors = "";
+
             var properties = node.Element("Properties");
             if (properties == null || !properties.HasElements)
-                return Attempt.Succeed(item); // new Exception("No Properties in the content node"));
-
-            logger.Debug<ContentSerializer>("Deserialize Properties: {0}", item.Name);
+                return Attempt.SucceedWithStatus(errors, item); // new Exception("No Properties in the content node"));
 
             foreach (var property in properties.Elements())
             {
@@ -320,11 +320,12 @@ namespace uSync8.ContentEdition.Serializers
                             var itemValue = GetImportValue(propValue, current.PropertyType, culture, segment);
                             item.SetValue(alias, itemValue, culture, segment);
                         }
-                        catch(Exception ex)
+                        catch (Exception ex)
                         {
                             // capture here to be less agressive with failure. 
                             // if one property fails the rest will still go in.
-                            logger.Warn<ContentSerializer>($"Failed to set [{alias}] {propValue} Ex: {0}", ex.Message);
+                            logger.Warn<ContentSerializer>($"Failed to set [{alias}] {propValue} Ex: {0}", ex.ToString());
+                            errors += $"Failed to set [{alias}] {ex.Message}";
                         }
                     }
                 }
@@ -332,10 +333,11 @@ namespace uSync8.ContentEdition.Serializers
                 {
                     logger.Warn<ContentSerializer>("DeserializeProperties: item {0} doesn't have property {1} but its in the xml", item.Name, alias);
                 }
-
             }
-            return Attempt.Succeed(item);
+
+            return Attempt.SucceedWithStatus(errors, item);
         }
+                   
 
         protected void HandleSortOrder(TObject item, int sortOrder)
         {

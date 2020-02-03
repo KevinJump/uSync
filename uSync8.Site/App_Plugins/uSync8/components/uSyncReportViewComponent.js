@@ -7,6 +7,7 @@
             action: '<',
             results: '<',
             hideAction: '<',
+            hideLink: '<',
             showAll: '<'
         },
         controllerAs: 'vm',
@@ -22,6 +23,12 @@
         vm.countChanges = countChanges;
         vm.openDetail = openDetail;
         vm.showAll = vm.showAll || false;
+
+        vm.$onInit = function () {
+            vm.hideLink = vm.hideLink ? true : false;
+            vm.hideAction = vm.hideAction ? true : false;
+        };
+
 
         vm.apply = apply;
         vm.status = status;

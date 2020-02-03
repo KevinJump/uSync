@@ -12,6 +12,7 @@
         vm.working = false;
         vm.reported = false;
         vm.syncing = false; 
+        vm.hideLink = false;
 
         vm.showAdvanced = false;
 
@@ -95,6 +96,7 @@
         function exportItems() {
             resetStatus(modes.EXPORT);
 
+            vm.hideLink = true;
             uSync8DashboardService.exportItems(getClientId())
                 .then(function (result) {
                     vm.results = result.data;
@@ -111,6 +113,7 @@
 
         function importItems(force, group) {
             resetStatus(modes.IMPORT);
+            vm.hideLink = true;
             vm.importButton.state = 'busy';
 
             uSync8DashboardService.importItems(force, group, getClientId())
@@ -210,6 +213,7 @@
             vm.reported = vm.showAll = false;
             vm.working = true;
             vm.runmode = mode;
+            vm.hideLink = false;
 
             vm.status = {
                 Count: 0,

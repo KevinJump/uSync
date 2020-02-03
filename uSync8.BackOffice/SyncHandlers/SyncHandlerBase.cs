@@ -159,7 +159,7 @@ namespace uSync8.BackOffice.SyncHandlers
 
             if (updates.Any())
             {
-                ProcessSecondPasses(updates, config, callback);
+                ProcessSecondPasses(updates, actions, config, callback);
             }
 
             runtimeCache.ClearByKey($"keycache_{this.Alias}");
@@ -167,16 +167,45 @@ namespace uSync8.BackOffice.SyncHandlers
             return actions;
         }
 
-        private void ProcessSecondPasses(IDictionary<string, TObject> updates, HandlerSettings config, SyncUpdateCallback callback = null)
+        private void ProcessSecondPasses(IDictionary<string, TObject> updates, List<uSyncAction> actions, HandlerSettings config, SyncUpdateCallback callback = null)
         {
             List<TObject> updatedItems = new List<TObject>();
             foreach (var item in updates.Select((update, Index) => new { update, Index }))
             {
                 callback?.Invoke($"Second Pass {Path.GetFileName(item.update.Key)}", item.Index, updates.Count);
                 var attempt = ImportSecondPass(item.update.Key, item.update.Value, config, callback);
-                if (attempt.Success && attempt.Change > ChangeType.NoChange)
+                if (attempt.Success)
                 {
-                    updatedItems.Add(attempt.Item);
+                    // if the second attempt has a message on it, add it to the first attempt.
+                    if (!string.IsNullOrWhiteSpace(attempt.Message))
+                    {
+                        if (actions.Any(x => x.FileName == item.update.Key))
+                        {
+                            
+                            var action = actions.FirstOrDefault(x => x.FileName == item.update.Key);
+                            actions.Remove(action);
+                            action.Message += attempt.Message;
+                            actions.Add(action);
+                        }
+                    }
+
+                    if (attempt.Change > ChangeType.NoChange)
+                    {
+                        updatedItems.Add(attempt.Item);
+                    }
+                }
+                else
+                {
+                    // the second attempt failed - update the action.
+                    if (actions.Any(x => x.FileName == item.update.Key))
+                    {
+                        var action = actions.FirstOrDefault(x => x.FileName == item.update.Key);
+                        actions.Remove(action);
+                        action.Success = attempt.Success;
+                        action.Message = "Second Pass Fail: " + attempt.Message;
+                        action.Exception = attempt.Exception;
+                        actions.Add(action);
+                    }
                 }
             }
 
@@ -185,7 +214,6 @@ namespace uSync8.BackOffice.SyncHandlers
                 callback?.Invoke($"Saving {updatedItems.Count} Second Pass Items", 2, 3);
                 serializer.Save(updatedItems);
             }
-
 
         }
 

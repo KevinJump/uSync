@@ -71,7 +71,9 @@ namespace uSync8.ContentEdition.Serializers
 
         public override SyncAttempt<IMedia> DeserializeSecondPass(IMedia item, XElement node, SerializerFlags flags)
         {
-            DeserializeProperties(item, node);
+            var propertyAttempt = DeserializeProperties(item, node);
+            if (!propertyAttempt.Success)
+                return SyncAttempt<IMedia>.Fail(item.Name, ChangeType.Fail, "Failed to save properties", propertyAttempt.Exception);
 
             var info = node.Element("Info");
 
@@ -86,7 +88,7 @@ namespace uSync8.ContentEdition.Serializers
                 return SyncAttempt<IMedia>.Fail(item.Name, ChangeType.Fail, "");
 
             // we return no-change so we don't trigger the second save 
-            return SyncAttempt<IMedia>.Succeed(item.Name, ChangeType.NoChange);
+            return SyncAttempt<IMedia>.Succeed(item.Name, item, ChangeType.NoChange, propertyAttempt.Status);
         }
 
         protected override void HandleTrashedState(IMedia item, bool trashed)

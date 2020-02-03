@@ -89,17 +89,7 @@ namespace uSync8.Core.Serialization
                     {
                         logger.Debug<TObject>("Base: Second Pass");
                         var secondAttempt = DeserializeSecondPass(result.Item, node, flags);
-                        if (secondAttempt.Success)
-                        {
-                            // the secondPass is responsible for saving the item. 
-                            /*
-                            if (!flags.HasFlag(SerializerFlags.DoNotSave))
-                            {
-                                // save (again)
-                                SaveItem(secondAttempt.Item);
-                            }
-                            */
-                        }
+
                         // if its the second pass, we return the results of that pass
                         return secondAttempt;
                     }

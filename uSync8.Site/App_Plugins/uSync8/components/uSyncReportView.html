@@ -27,11 +27,11 @@
                         <div class="umb-table-cell">
                             <localize key="usync_tableChange"></localize>
                         </div>
-                        <div class="umb-table-cell">
+                        <div class="umb-table-cell usync-table-message-cell">
                             <localize key="usync_tableMessage"></localize>
                         </div>
-                        <div class="umb-table-cell usync-detail-link-cell"></div>
-                        <div class="umb-table-cell"></div>
+                        <div class="umb-table-cell usync-detail-link-cell" ng-if="vm.hideLink == false"></div>
+                        <div class="umb-table-cell" ng-if="vm.hideAction == false"></div>
                     </div>
                 </div>
                 <div class="umb-table-body">
@@ -53,10 +53,10 @@
                             <div class="umb-table-cell">
                                 {{result.Change}}
                             </div>
-                            <div class="umb-table-cell">
+                            <div class="umb-table-cell usync-table-message-cell">
                                 {{result.Message}}
                             </div>
-                            <div class="umb-table-cell usync-detail-link-cell">
+                            <div class="umb-table-cell usync-detail-link-cell" ng-if="vm.hideLink == false">
                                 <umb-button type="button"
                                             button-style="link"
                                             label-key="usync_details"
@@ -66,8 +66,8 @@
                                     ({{result.Details.length}} items)
                                 </div>
                             </div>
-                            <div class="umb-table-cell">
-                                <div class="text-right" ng-if="vm.hideAction == false">
+                            <div class="umb-table-cell" ng-if="vm.hideAction == false">
+                                <div class="text-right">
                                     <umb-button type="button"
                                                 button-style="action btn-sm"
                                                 label-key="usync_apply"

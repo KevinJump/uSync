@@ -307,3 +307,7 @@
 .usync-main-progress {
     margin: 0 -20px -20px -20px;
 }
+
+.usync-table-message-cell {
+    flex-basis: 25%;
+}
