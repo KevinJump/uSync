@@ -285,37 +285,47 @@ namespace uSync8.ContentEdition.Serializers
                         var segment = value.Attribute("Segment").ValueOrDefault(string.Empty);
                         var propValue = value.ValueOrDefault(string.Empty);
 
-                        if (!string.IsNullOrEmpty(culture))
+                        try
                         {
-                            //
-                            // check the culture is something we should and can be setting.
-                            //
-                            if (!current.PropertyType.VariesByCulture())
+
+                            if (!string.IsNullOrEmpty(culture))
                             {
-                                logger.Debug<ContentSerializer>("Item does not vary by culture - but .config file contains culture");
-                                // if we get here, then things are wrong, so we will try to fix them.
                                 //
-                                // if the content config thinks it should vary by culture, but the document type doesn't
-                                // then we can check if this is default language, and use that to se the value
-                                if (!culture.InvariantEquals(localizationService.GetDefaultLanguageIsoCode()))
+                                // check the culture is something we should and can be setting.
+                                //
+                                if (!current.PropertyType.VariesByCulture())
                                 {
-                                    // this culture is not the default for the site, so don't use it to 
-                                    // set the single language value.
-                                    logger.Warn<ContentSerializer>("Culture {0} in file, but is not default so not being used", culture);
+                                    logger.Debug<ContentSerializer>("Item does not vary by culture - but .config file contains culture");
+                                    // if we get here, then things are wrong, so we will try to fix them.
+                                    //
+                                    // if the content config thinks it should vary by culture, but the document type doesn't
+                                    // then we can check if this is default language, and use that to se the value
+                                    if (!culture.InvariantEquals(localizationService.GetDefaultLanguageIsoCode()))
+                                    {
+                                        // this culture is not the default for the site, so don't use it to 
+                                        // set the single language value.
+                                        logger.Warn<ContentSerializer>("Culture {0} in file, but is not default so not being used", culture);
+                                        break;
+                                    }
+                                    logger.Warn<ContentSerializer>($"Cannot set value on culture {culture} because it is not avalible for this property - value in default language will be used");
+                                    culture = string.Empty;
+                                }
+                                else if (!item.AvailableCultures.InvariantContains(culture))
+                                {
+                                    // this culture isn't one of the ones, that can be set on this language. 
+                                    logger.Warn<ContentSerializer>($"Culture {culture} is not one of the avalible cultures, so we cannot set this value");
                                     break;
                                 }
-                                logger.Warn<ContentSerializer>($"Cannot set value on culture {culture} because it is not avalible for this property - value in default language will be used");
-                                culture = string.Empty;
                             }
-                            else if (!item.AvailableCultures.InvariantContains(culture))
-                            {
-                                // this culture isn't one of the ones, that can be set on this language. 
-                                logger.Warn<ContentSerializer>($"Culture {culture} is not one of the avalible cultures, so we cannot set this value");
-                                break;
-                            }
+                            var itemValue = GetImportValue(propValue, current.PropertyType, culture, segment);
+                            item.SetValue(alias, itemValue, culture, segment);
                         }
-                        var itemValue = GetImportValue(propValue, current.PropertyType, culture, segment);
-                        item.SetValue(alias, itemValue, culture, segment);
+                        catch(Exception ex)
+                        {
+                            // capture here to be less agressive with failure. 
+                            // if one property fails the rest will still go in.
+                            logger.Warn<ContentSerializer>($"Failed to set [{alias}] {propValue} Ex: {0}", ex.Message);
+                        }
                     }
                 }
                 else
