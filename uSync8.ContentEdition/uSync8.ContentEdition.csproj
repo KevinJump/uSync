@@ -257,6 +257,7 @@
     <Compile Include="Handlers\DomainHandler.cs" />
     <Compile Include="Handlers\MediaHandler.cs" />
     <Compile Include="Mapping\ISyncMapper.cs" />
+    <Compile Include="Mapping\Mappers\DateMapper.cs" />
     <Compile Include="Mapping\Mappers\GridImageMapper.cs" />
     <Compile Include="Mapping\Mappers\GridMapper.cs" />
     <Compile Include="Mapping\Mappers\ImagePathMapper.cs" />

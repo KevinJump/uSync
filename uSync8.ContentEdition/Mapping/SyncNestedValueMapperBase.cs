@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 using Umbraco.Core;
@@ -32,13 +32,32 @@ namespace uSync8.ContentEdition.Mapping
             this.dataTypeService = dataTypeService;
         }
 
+        /// <summary>
+        ///  get the export value for the properties used in this JObject
+        /// </summary>
+        protected JObject GetExportProperties(JObject item, IContentType docType)
+        {
+            foreach(var property in docType.CompositionPropertyTypes)
+            {
+                if (item.ContainsKey(property.Alias))
+                {
+                    var value = item[property.Alias];
+                    if (value != null)
+                    {
+                        item[property.Alias] = SyncValueMapperFactory.GetExportValue(value, property.PropertyEditorAlias);
+                    }
+                }
+            }
+
+            return item;
+        }
 
         protected IEnumerable<uSyncDependency> GetPropertyDependencies(JObject value,
-            IEnumerable<PropertyType> propertyTypes, DependencyFlags flags)
+            IContentType docType, DependencyFlags flags)
         {
             var dependencies = new List<uSyncDependency>();
 
-            foreach (var propertyType in propertyTypes)
+            foreach (var propertyType in docType.CompositionPropertyTypes)
             {
                 var propertyValue = value[propertyType.Alias];
                 if (propertyValue == null) continue;
@@ -99,6 +118,34 @@ namespace uSync8.ContentEdition.Mapping
             }
 
             return null;
+        }
+
+        protected JObject GetJsonValue(object value)
+        {
+            var stringValue = GetValueAs<string>(value);
+            if (string.IsNullOrWhiteSpace(stringValue)) return null;
+
+            var jsonValue = JsonConvert.DeserializeObject<JObject>(stringValue);
+            if (jsonValue == null) return null;
+
+            return jsonValue;
+        }
+
+        protected IContentType GetDocType(JObject json, string alias)
+        {
+            if (json.ContainsKey(alias))
+            {
+                var docTypeAlias = json[alias].ToString();
+                return GetDocType(docTypeAlias);
+            }
+
+            return default;
+        }
+
+        protected IContentType GetDocType(string alias)
+        {
+            if (string.IsNullOrWhiteSpace(alias)) return default;
+            return contentTypeService.Get(alias);
         }
 
 

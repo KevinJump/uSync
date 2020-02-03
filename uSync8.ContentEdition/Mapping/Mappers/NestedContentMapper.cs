@@ -13,6 +13,7 @@ namespace uSync8.ContentEdition.Mapping.Mappers
 {
     public class NestedContentMapper : SyncNestedValueMapperBase, ISyncMapper
     {
+        private readonly string docTypeAliasValue = "ncContentTypeAlias";
         public NestedContentMapper(
             IEntityService entityService,
             IContentTypeService contentTypeService,
@@ -26,6 +27,25 @@ namespace uSync8.ContentEdition.Mapping.Mappers
             "Our.Umbraco.NestedContent",
             Constants.PropertyEditors.Aliases.NestedContent
         };
+
+        public override string GetExportValue(object value, string editorAlias)
+        {
+            var stringValue = GetValueAs<string>(value);
+            if (string.IsNullOrWhiteSpace(stringValue) || !stringValue.DetectIsJson()) return value.ToString();
+
+            var nestedJson = JsonConvert.DeserializeObject<JArray>(stringValue);
+            if (nestedJson == null || !nestedJson.Any()) return value.ToString();
+
+            foreach(var item in nestedJson.Cast<JObject>())
+            {
+                var docType = GetDocType(item, this.docTypeAliasValue);
+                if (docType == null) continue;
+
+                GetExportProperties(item, docType);
+            }
+
+            return JsonConvert.SerializeObject(nestedJson, Formatting.None);
+        }
 
         public override IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)
         {
@@ -41,9 +61,8 @@ namespace uSync8.ContentEdition.Mapping.Mappers
 
             foreach (var item in nestedJson.Cast<JObject>())
             {
-                var docTypeAlias = item["ncContentTypeAlias"].ToString();
-
-                var docType = contentTypeService.Get(docTypeAlias);
+                var docTypeAlias = item[this.docTypeAliasValue].ToString();
+                var docType = GetDocType(docTypeAlias);
                 if (docType == null) continue;
 
                 if (flags.HasFlag(DependencyFlags.IncludeDependencies))
@@ -53,8 +72,7 @@ namespace uSync8.ContentEdition.Mapping.Mappers
                         dependencies.Add(docTypeDep);
                 }
 
-                dependencies.AddRange(GetPropertyDependencies(item,
-                    docType.CompositionPropertyTypes, flags));
+                dependencies.AddRange(GetPropertyDependencies(item, docType, flags));
             }
 
             return dependencies;

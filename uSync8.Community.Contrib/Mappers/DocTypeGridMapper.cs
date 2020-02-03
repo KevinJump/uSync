@@ -36,6 +36,7 @@ namespace uSync8.Community.Contrib.Mappers
     /// </remarks>
     public class DocTypeGridMapper : SyncNestedValueMapperBase, ISyncMapper
     {
+        private readonly string docTypeAliasValue = "dtgeContentTypeAlias";
 
         public DocTypeGridMapper(IEntityService entityService,
             IContentTypeService contentTypeService,
@@ -47,21 +48,43 @@ namespace uSync8.Community.Contrib.Mappers
 
         public override string[] Editors => new string[] { "Umbraco.Grid.docType", "Umbraco.Grid.doctypegrideditor" };
 
+        /// <summary>
+        ///  Get any formatted export values. 
+        /// </summary>
+        /// <remarks>
+        ///  for 99% of properties you don't need to go in and get the 
+        ///  potential internal values, but we do this on export because
+        ///  we want to ensure we trigger formatting of Umbraco.DateTime values
+        /// </remarks>
+        public override string GetExportValue(object value, string editorAlias)
+        {
+            if (value == null) return string.Empty;
+
+            var jsonValue = GetJsonValue(value);
+            if (jsonValue == null) return value.ToString();
+
+            var docType = GetDocType(jsonValue, this.docTypeAliasValue);
+            if (docType == null) return value.ToString();
+
+            // jarray of values 
+            var docValue = jsonValue.Value<JObject>("value");
+            if (docValue == null) return value.ToString();
+
+            GetExportProperties(docValue, docType);
+
+            return JsonConvert.SerializeObject(jsonValue, Formatting.Indented);
+        }
+
         public override IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)
         {
-            var dteValue = GetValueAs<string>(value);
-            if (string.IsNullOrEmpty(dteValue)) return Enumerable.Empty<uSyncDependency>();
+            var jsonValue = GetJsonValue(value);
+            if (value == null || jsonValue == null) return Enumerable.Empty<uSyncDependency>();
 
-            var jsonValue = JsonConvert.DeserializeObject<JObject>(dteValue);
-            if (jsonValue == null) return Enumerable.Empty<uSyncDependency>();
-
-            var docTypeAlias = jsonValue.Value<string>("dtgeContentTypeAlias");
             var docValue = jsonValue.Value<JObject>("value");
+            var docTypeAlias = jsonValue.Value<string>(this.docTypeAliasValue);
+            if (docValue == null || docTypeAlias == null) return Enumerable.Empty<uSyncDependency>();
 
-            if (docTypeAlias == null || docValue == null)
-                return Enumerable.Empty<uSyncDependency>();
-
-            var docType = contentTypeService.Get(docTypeAlias);
+            var docType = GetDocType(docTypeAlias);
             if (docType == null) return Enumerable.Empty<uSyncDependency>();
 
             List<uSyncDependency> dependencies = new List<uSyncDependency>();
@@ -81,7 +104,7 @@ namespace uSync8.Community.Contrib.Mappers
             // and call the mappers for each value, this gets us 
             // any internal dependencies (like media, etc) 
             // from within the content. 
-            dependencies.AddRange(GetPropertyDependencies(docValue, docType.CompositionPropertyTypes, flags));
+            dependencies.AddRange(GetPropertyDependencies(docValue, docType, flags));
 
             return dependencies;
         }
