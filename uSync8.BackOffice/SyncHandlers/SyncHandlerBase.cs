@@ -280,7 +280,7 @@ namespace uSync8.BackOffice.SyncHandlers
                     var folderName = Path.GetFileName(item.filePath);
                     callback?.Invoke($"Cleaning {folderName}", item.Index, cleanMarkers.Count);
 
-                    var cleanActions = CleanFolder(item.filePath, false);
+                    var cleanActions = CleanFolder(item.filePath, false, config.UseFlatStructure);
                     if (cleanActions.Any()) {
                         actions.AddRange(cleanActions);
                     }
@@ -304,7 +304,7 @@ namespace uSync8.BackOffice.SyncHandlers
         /// </summary>
         /// <param name="cleanFile"></param>
         /// <returns></returns>
-        protected virtual IEnumerable<uSyncAction> CleanFolder(string cleanFile, bool reportOnly)
+        protected virtual IEnumerable<uSyncAction> CleanFolder(string cleanFile, bool reportOnly, bool flat)
         {
             var folder = Path.GetDirectoryName(cleanFile);
 
@@ -320,15 +320,25 @@ namespace uSync8.BackOffice.SyncHandlers
             // be a little slower (not much though)
 
             // we cache this, (it is cleared on an ImportAll)
-            var keys = GetFolderKeys(folder);
+            var keys = GetFolderKeys(folder, flat);
 
             return DeleteMissingItems(parent, keys, reportOnly);
         }
 
-        private IList<Guid> GetFolderKeys(string folder)
+        /// <summary>
+        ///  Get the GUIDs for all items in a folder
+        /// </summary>
+        /// <remarks>
+        ///  This is disk intensive, (checking the .config files all the time)
+        ///  so we cache it, and if we are using the flat folder stucture, then
+        ///  we only do it once, so its quicker. 
+        /// </remarks>
+        private IList<Guid> GetFolderKeys(string folder, bool flat)
         {
+            // if it's flat, then we only need to load all the keys once per handler
+            var folderKey = flat == true ? 1 : folder.GetHashCode();
 
-            var cacheKey = $"uSyncKeyList_{folder.GetHashCode()}_{this.Alias}";
+            var cacheKey = $"uSyncKeyList_{folderKey}_{this.Alias}";
             return runtimeCache.GetCacheItem(cacheKey, () => {
                 var keys = new List<Guid>();
                 var files = syncFileService.GetFiles(folder, "*.config");
@@ -600,7 +610,7 @@ namespace uSync8.BackOffice.SyncHandlers
 
                 if (action.Change == ChangeType.Clean)
                 {
-                    actions.AddRange(CleanFolder(filename, true));
+                    actions.AddRange(CleanFolder(filename, true, config.UseFlatStructure));
                 }
                 else if (action.Change > ChangeType.NoChange)
                 {

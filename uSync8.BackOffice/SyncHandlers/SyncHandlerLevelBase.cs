@@ -155,7 +155,7 @@ namespace uSync8.BackOffice.SyncHandlers
                 // then we consider the folder safe to clean 
                 foreach (var cleanfile in cleanMarkers)
                 {
-                    actions.AddRange(CleanFolder(cleanfile, false));
+                    actions.AddRange(CleanFolder(cleanfile, false, config.UseFlatStructure));
                 }
                 // remove the actual cleans (they will have been replaced by the deletes
                 actions.RemoveAll(x => x.Change == ChangeType.Clean);
