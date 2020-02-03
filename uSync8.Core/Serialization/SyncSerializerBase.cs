@@ -100,6 +100,8 @@ namespace uSync8.Core.Serialization
                             }
                             */
                         }
+                        // if its the second pass, we return the results of that pass
+                        return secondAttempt;
                     }
                 }
 
