@@ -254,6 +254,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Cache\RebuildCacheComponent.cs" />
+    <Compile Include="Commands\SyncCommandFactory.cs" />
+    <Compile Include="Commands\Command\ExportCommand.cs" />
+    <Compile Include="Commands\Command\ImportCommand.cs" />
+    <Compile Include="Commands\Command\ReportCommand.cs" />
+    <Compile Include="Commands\ISyncCommand.cs" />
+    <Compile Include="Commands\SyncCommandBase.cs" />
+    <Compile Include="Commands\SyncCommandCollection.cs" />
+    <Compile Include="Commands\SyncCommandOptions.cs" />
+    <Compile Include="Commands\SyncCommandResult.cs" />
+    <Compile Include="Commands\SyncCommandServiceBase.cs" />
+    <Compile Include="Commands\SyncCommandAttribute.cs" />
     <Compile Include="Configuration\BackOfficeConfig.cs" />
     <Compile Include="Configuration\ConfigExtensions.cs" />
     <Compile Include="Configuration\OverriddenValue.cs" />
