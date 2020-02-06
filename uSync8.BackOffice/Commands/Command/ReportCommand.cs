@@ -9,6 +9,7 @@ using uSync8.Core;
 
 namespace uSync8.BackOffice.Commands.Command
 {
+    [SyncCommand("Report", "report", "Returns a list of pending changes based on the uSync folder")]
     public class ReportCommand : SyncCommandServiceBase, ISyncCommand
     {
         public ReportCommand(TextReader reader, TextWriter writer,
