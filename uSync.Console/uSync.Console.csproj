@@ -246,6 +246,7 @@
     <None Include="packages.config" />
     <None Include="scripts\init.ps1" />
     <None Include="scripts\uSyncCli.psm1" />
+    <None Include="uSync.Console.nuspec" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\uSync.Commands\uSync.Commands.csproj">

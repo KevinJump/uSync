@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
+  <metadata>
+    <id>uSync.Console</id>
+    <version>8.0.0-alpha58</version>
+    <title>uSync8 Command Line</title>
+    <authors>Kevin Jump</authors>
+    <owners>Jumoo</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Adds a command line to uSync</description>
+    <summary>uSync Command Line</summary>
+    <releaseNotes>
+      8.0 - Initial Release.
+    </releaseNotes>
+    <tags>umbraco usync</tags>
+    <dependencies>
+      <dependency id="uSync" version="$depends$"/>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="bin\$Configuration$\uSync.exe" target="lib\net472" />
+    <file src="bin\$Configuration$\uSync.Commands.dll" target="lib\net472" />
+    <file src="Scripts\**\*.*" target="tools" />
+  </files>
+</package>
