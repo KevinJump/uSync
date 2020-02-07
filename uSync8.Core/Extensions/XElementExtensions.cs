@@ -180,6 +180,9 @@ namespace uSync8.Core.Extensions
 
         #region Attribute Extensions
 
+        /// <summary>
+        ///  Get the Value from the attribute or return the default value if attribute is not set
+        /// </summary>
         public static string ValueOrDefault(this XAttribute attribute, string defaultValue)
         {
             if (attribute == null || string.IsNullOrEmpty(attribute.Value))
@@ -188,7 +191,9 @@ namespace uSync8.Core.Extensions
             return attribute.Value;
         }
 
-
+        /// <summary>
+        ///  Get the Value from the attribute or return the default value if attribute is not set
+        /// </summary>
         public static TObject ValueOrDefault<TObject>(this XAttribute attribute, TObject defaultValue)
         {
             var value = attribute.ValueOrDefault(string.Empty);
