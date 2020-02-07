@@ -1,6 +1,6 @@
 ﻿using System.IO;
 using System.Linq;
-
+using System.Threading.Tasks;
 using uSync8.BackOffice.SyncHandlers;
 
 namespace uSync8.BackOffice.Commands.Command
@@ -13,17 +13,19 @@ namespace uSync8.BackOffice.Commands.Command
             uSyncService uSyncService) : base(reader, writer, uSyncService)
         { }
 
-        public SyncCommandResult Run(string[] args)
+        public async Task<SyncCommandResult> Run(string[] args)
         {
             var options = ParseArguments(args);
 
-            writer.Write("Exporting :");
+            await writer.WriteAsync("Exporting :");
+
+            var handlerSet = options.GetSwitchValue<string>("set", uSync.Handlers.DefaultSet);
 
             var results = uSyncService.Export(options.Folder,
-                new SyncHandlerOptions(options.HandlerSet, HandlerActions.Export),
+                new SyncHandlerOptions(handlerSet, HandlerActions.Export),
                 callbacks);
 
-            writer.WriteLine("\nExported {0} items", results.Count());
+            await writer.WriteLineAsync($"\nExported {results.Count()} items");
 
             return SyncCommandResult.Success;
         }

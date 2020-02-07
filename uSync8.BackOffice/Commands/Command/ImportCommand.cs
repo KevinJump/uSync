@@ -16,22 +16,24 @@ namespace uSync8.BackOffice.Commands.Command
             uSyncService uSyncService) : base(reader, writer, uSyncService)
         { }
 
-        public SyncCommandResult Run(string[] args)
+        public async Task<SyncCommandResult> Run(string[] args)
         {
-            writer.Write("Importing ");
+            await writer.WriteAsync("Importing ");
             var options = ParseArguments(args);
 
-            if (options.Force)
-            {
-                writer.Write("(With Force) ");
-            }
-            var result = uSyncService.Import(options.Folder, options.Force,
-                new SyncHandlerOptions(options.HandlerSet, HandlerActions.Import),
+            var force = options.GetSwitchValue<bool>("force", false);
+            var handlerSet = options.GetSwitchValue<string>("set", uSync.Handlers.DefaultSet);
+
+            if (force) await writer.WriteAsync("(With Force) ");            
+
+            var result = uSyncService.Import(options.Folder, force,
+                new SyncHandlerOptions(handlerSet, HandlerActions.Import),
                 callbacks);
-            
-            writer.Write("\n");
-            writer.WriteLine("Imported {0} items {1} changes",
-                result.Count(), result.Where(x => x.Change > ChangeType.NoChange).Count());
+
+            var changeCount = result.Where(x => x.Change > ChangeType.NoChange).Count();
+
+            await writer.WriteAsync("\n");
+            await writer.WriteLineAsync($"Imported {result.Count()} items {changeCount} changes");
 
             return SyncCommandResult.Success;
         }

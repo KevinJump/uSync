@@ -1,6 +1,7 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Reflection;
-
+using System.Threading.Tasks;
 using Umbraco.Core.Composing;
 
 using uSync8.BackOffice.Configuration;
@@ -12,6 +13,9 @@ namespace uSync8.BackOffice.Commands
         public string Name { get; protected set; }
         public string Alias { get; protected set; }
         public string HelpText { get; protected set; }
+
+        public string AdvancedHelp { get; protected set; }
+
         public bool Interactive { get;set; }
 
         protected readonly TextReader reader;
@@ -34,14 +38,22 @@ namespace uSync8.BackOffice.Commands
             }
         }
 
-        public virtual void ShowHelp(bool advanced)
+        public virtual async Task ShowHelp(bool advanced)
         {
             if (!advanced)
             {
-                writer.WriteLine($" {this.Alias,-18}{this.HelpText}");
+                await writer.WriteLineAsync($" {this.Alias,-18}{this.HelpText}");
             }
             else
             {
+                if (string.IsNullOrWhiteSpace(AdvancedHelp))
+                {
+                    await writer.WriteLineAsync("No more help availible");
+                }
+                else
+                {
+                    await writer.WriteLineAsync(AdvancedHelp);
+                }
                 // show advanced help
             }
         }
@@ -50,28 +62,35 @@ namespace uSync8.BackOffice.Commands
         {
             var options = new SyncCommandOptions(setting.RootFolder);
 
-            for (int p = 0; p < args.Length; p++)
+            int position = 0;
+            foreach (var argument in args)
             {
-                var cmd = args[p].Trim().ToLower();
+                var cmd = argument.Trim().ToLower();
                 
                 if (cmd.StartsWith("-"))
                 {
                     var fragments = cmd.Split('=');
-                    switch (fragments[0].Substring(1))
+
+                    var flag = fragments[0].Substring(1);
+
+                    if (fragments.Length > 1) {
+                        options.Switches[flag] = fragments[1];
+                    }
+                    else
                     {
-                        case "force":
-                            options.Force = true;
-                            break;
-                        case "set":
-                            options.HandlerSet = fragments[1];
-                            break;
+                        options.Switches[flag] = true;
                     }
                 }
                 else
                 {
-                    if (p == 0)
+                    if (position == 0)
                     {
                         options.Folder = cmd;
+                        position++;
+                    }
+                    else
+                    {
+                        throw new ArgumentException($"{argument} not recognised");
                     }
                 }
             }

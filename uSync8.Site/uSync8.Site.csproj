@@ -490,6 +490,14 @@
     <Analyzer Include="..\packages\Microsoft.CodeAnalysis.Analyzers.2.6.1\analyzers\dotnet\cs\Microsoft.CodeAnalysis.CSharp.Analyzers.dll" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\uSync.Commands\uSync.Commands.csproj">
+      <Project>{6d3b59c1-7a78-43bb-a806-f826fd4477f6}</Project>
+      <Name>uSync.Commands</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\uSync.Console\uSync.Console.csproj">
+      <Project>{7ca1a210-6cb6-4568-9237-62c678877934}</Project>
+      <Name>uSync.Console</Name>
+    </ProjectReference>
     <ProjectReference Include="..\uSync.TemplateTracker\uSync.TemplateTracker.csproj">
       <Project>{6d7486dc-0b84-4914-9c01-297467a6b706}</Project>
       <Name>uSync.TemplateTracker</Name>

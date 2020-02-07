@@ -14,24 +14,26 @@ namespace uSync8.BackOffice.Commands.Command
     {
         public ReportCommand(TextReader reader, TextWriter writer,
             uSyncService uSyncService) : base(reader, writer, uSyncService)
-        {}
+        { }
 
-        public SyncCommandResult Run(string[] args)
+        public async Task<SyncCommandResult> Run(string[] args)
         {
-            writer.Write("Reporting");
+            await writer.WriteAsync("Reporting");
 
             var options = ParseArguments(args);
 
+            var handlerSet = options.GetSwitchValue<string>("set", uSync.Handlers.DefaultSet);
+
             var results = uSyncService.Report(options.Folder,
-                new SyncHandlerOptions(options.HandlerSet, HandlerActions.Report),
+                new SyncHandlerOptions(handlerSet, HandlerActions.Report),
                 callbacks);
 
-            writer.WriteLine("\rReport Complete {0} items", results.Count());
+            await writer.WriteLineAsync($"\rReport Complete {results.Count()} items");
 
-            foreach(var item in results.Where(x => x.Change > ChangeType.NoChange))
+            foreach (var item in results.Where(x => x.Change > ChangeType.NoChange))
             {
                 var changeCount = item.Details != null ? item.Details.Count() : 0;
-                writer.WriteLine($"{item.Change}: {item.ItemType} - {item.Name} {changeCount}");
+                await writer.WriteLineAsync($"{item.Change}: {item.ItemType} - {item.Name} {changeCount}");
             }
 
             return SyncCommandResult.Success;

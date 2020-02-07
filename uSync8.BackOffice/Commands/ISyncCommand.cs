@@ -16,9 +16,9 @@ namespace uSync8.BackOffice.Commands
 
         string Alias { get; }
 
-        SyncCommandResult Run(string[] args);
+        Task<SyncCommandResult> Run(string[] args);
 
-        void ShowHelp(bool advanced);
+        Task ShowHelp(bool advanced);
 
         bool Interactive { get; set; }
     }
