@@ -48,6 +48,13 @@ namespace uSync8.BackOffice
 
         #region Reporting 
 
+        /// <summary>
+        ///  Report the changes for a folder
+        /// </summary>
+        /// <param name="folder">Folder to run the report for</param>
+        /// <param name="handlerOptions">Options to use for the report - used to load the handlers.</param>
+        /// <param name="callbacks">Callback functions to keep UI uptodate</param>
+        /// <returns>List of actions detailing what would and wouldn't change</returns>
         public IEnumerable<uSyncAction> Report(string folder, SyncHandlerOptions handlerOptions, uSyncCallbacks callbacks = null)
         {
             if (handlerOptions == null) handlerOptions = new SyncHandlerOptions();
@@ -57,12 +64,26 @@ namespace uSync8.BackOffice
             return Report(folder, handlers, callbacks);
         }
 
+        /// <summary>
+        ///  Report the changes for a folder
+        /// </summary>
+        /// <param name="folder">Folder to run the report for</param>
+        /// <param name="handlerAliases">List of Aliases for the sync handlers to use</param>
+        /// <param name="callbacks">Callback functions to keep UI uptodate</param>
+        /// <returns>List of actions detailing what would and wouldn't change</returns>
         public IEnumerable<uSyncAction> Report(string folder, IEnumerable<string> handlerAliases, uSyncCallbacks callbacks)
         {
             var handlers = handlerFactory.GetDefaultHandlers(handlerAliases);
             return Report(folder, handlers, callbacks);
         }
 
+        /// <summary>
+        ///  Report the changes for a folder
+        /// </summary>
+        /// <param name="folder">Folder to run the report for</param>
+        /// <param name="handlers">List of SyncHandlers to use for the report</param>
+        /// <param name="callbacks">Callback functions to keep UI uptodate</param>
+        /// <returns>List of actions detailing what would and wouldn't change</returns>
         public IEnumerable<uSyncAction> Report(string folder, IEnumerable<ExtendedHandlerConfigPair> handlers, uSyncCallbacks callbacks)
         {
             fireBulkStarting(ReportStarting);
@@ -111,6 +132,14 @@ namespace uSync8.BackOffice
         #region Importing
         private static object _importLock = new object();
 
+        /// <summary>
+        ///  Import items into umbraco from a given folder
+        /// </summary>
+        /// <param name="folder">Folder to use for the import</param>
+        /// <param name="force">Push changes in even if there is no diffrence between the file and the item in umbraco</param>
+        /// <param name="handlerOptions">Handler options to use (used to calculate handlers to use)</param>
+        /// <param name="callbacks">Callbacks to keep UI informed</param>
+        /// <returns>List of actions detailing what did and didn't change</returns>
         public IEnumerable<uSyncAction> Import(string folder, bool force, SyncHandlerOptions handlerOptions, uSyncCallbacks callbacks = null)
         {
             if (handlerOptions == null) handlerOptions = new SyncHandlerOptions();
@@ -121,20 +150,27 @@ namespace uSync8.BackOffice
         }
 
         /// <summary>
-        ///  Import using the speicifed handlers - regardless of config settings 
+        ///  Import items into umbraco from a given folder
         /// </summary>
-        /// <remarks>
-        ///  When importing, with aliases, unless we say so - we ignore the sets, because we know what we want 
-        /// </remarks>
-        /// <returns>
-        ///  Collection of uSyncActions detailed what imports took place. 
-        /// </returns>
+        /// <param name="folder">Folder to use for the import</param>
+        /// <param name="force">Push changes in even if there is no diffrence between the file and the item in umbraco</param>
+        /// <param name="handlerAliases">List of aliases for the handlers you want to use</param>
+        /// <param name="callbacks">Callbacks to keep UI informed</param>
+        /// <returns>List of actions detailing what did and didn't change</returns>
         public IEnumerable<uSyncAction> Import(string folder, bool force, IEnumerable<string> handlerAliases, uSyncCallbacks callbacks)
         {
             var handlers = handlerFactory.GetDefaultHandlers(handlerAliases);
             return Import(folder, force, handlers, callbacks);
         }
 
+        /// <summary>
+        ///  Import items into umbraco from a given folder
+        /// </summary>
+        /// <param name="folder">Folder to use for the import</param>
+        /// <param name="force">Push changes in even if there is no diffrence between the file and the item in umbraco</param>
+        /// <param name="handlers">List of Handlers & config to use for import</param>
+        /// <param name="callbacks">Callbacks to keep UI informed</param>
+        /// <returns>List of actions detailing what did and didn't change</returns>
         public IEnumerable<uSyncAction> Import(string folder, bool force, IEnumerable<ExtendedHandlerConfigPair> handlers, uSyncCallbacks callbacks)
         {
             // if its blank, we just throw it back empty. 
@@ -231,6 +267,16 @@ namespace uSync8.BackOffice
             }
         }
 
+
+        /// <summary>
+        ///  Import a single item based on a uSyncAction item
+        /// </summary>
+        /// <remarks>
+        ///  Importing a single item based on an action, the action will
+        ///  detail what handler to use and the filename of the item to import
+        /// </remarks>
+        /// <param name="action">Action item, to use as basis for import</param>
+        /// <returns>Action detailing change or not</returns>
         public uSyncAction ImportSingleAction(uSyncAction action)
         {
             var handlerConfig = handlerFactory.GetValidHandler(action.HandlerAlias);
@@ -247,6 +293,13 @@ namespace uSync8.BackOffice
 
         #region Exporting 
 
+        /// <summary>
+        ///  Export items from umbraco into a given folder
+        /// </summary>
+        /// <param name="folder">folder to place items</param>
+        /// <param name="handlerOptions">Handler options to use when loading handlers</param>
+        /// <param name="callbacks">callback functions to update the UI</param>
+        /// <returns>List of actions detailing what was exported</returns>
         public IEnumerable<uSyncAction> Export(string folder, SyncHandlerOptions handlerOptions, uSyncCallbacks callbacks = null)
         {
             if (handlerOptions == null) handlerOptions = new SyncHandlerOptions();
@@ -256,12 +309,26 @@ namespace uSync8.BackOffice
             return Export(folder, handlers, callbacks);
         }
 
+        /// <summary>
+        ///  Export items from umbraco into a given folder
+        /// </summary>
+        /// <param name="folder">folder to place items</param>
+        /// <param name="handlerAliases">aliases for the handlers to use while exporting</param>
+        /// <param name="callbacks">callback functions to update the UI</param>
+        /// <returns>List of actions detailing what was exported</returns>
         public IEnumerable<uSyncAction> Export(string folder, IEnumerable<string> handlerAliases, uSyncCallbacks callbacks)
         {
             var handlers = handlerFactory.GetDefaultHandlers(handlerAliases);
             return Export(folder, handlers, callbacks);
         }
 
+        /// <summary>
+        ///  Export items from umbraco into a given folder
+        /// </summary>
+        /// <param name="folder">folder to place items</param>
+        /// <param name="handlerAliases">List of handlers to use for export</param>
+        /// <param name="callbacks">callback functions to update the UI</param>
+        /// <returns>List of actions detailing what was exported</returns>
         public IEnumerable<uSyncAction> Export(string folder, IEnumerable<ExtendedHandlerConfigPair> handlers, uSyncCallbacks callbacks)
         {
             fireBulkStarting(ExportStarting);
@@ -315,13 +382,17 @@ namespace uSync8.BackOffice
 
         #endregion
 
+        /// <summary>
+        ///  calculate the number of actions in a list that are actually changes
+        /// </summary>
+        /// <param name="actions">List of actions to parse</param>
+        /// <returns>number of actions that contain a change of some form</returns>
         private int ChangeCount(IEnumerable<uSyncAction> actions)
             => actions.Count(x => x.Change > Core.ChangeType.NoChange);
 
 
-
         /// <summary>
-        ///  do an import triggered by an event.
+        ///  Do an import triggered by an event.
         /// </summary>
         /// <param name="e"></param>
         private void USyncTriggers_DoImport(uSyncTriggerArgs e)
@@ -329,7 +400,7 @@ namespace uSync8.BackOffice
             logger.Info<uSyncService>("Import Triggered by downlevel change");
             if (e.EntityTypes != null && !string.IsNullOrWhiteSpace(e.Folder))
             {
-                var handlers = GetHandlers(e.EntityTypes, e.HandlerOptions);
+                var handlers = GetHandlersByEntitytype(e.EntityTypes, e.HandlerOptions);
                 if (handlers.Count > 0)
                     this.Import(e.Folder, false, handlers, null);
             }
@@ -344,7 +415,7 @@ namespace uSync8.BackOffice
             logger.Info<uSyncService>("Export Triggered by downlevel change");
             if (e.EntityTypes != null && !string.IsNullOrWhiteSpace(e.Folder))
             {
-                var handlers = GetHandlers(e.EntityTypes, e.HandlerOptions);
+                var handlers = GetHandlersByEntitytype(e.EntityTypes, e.HandlerOptions);
                 if (handlers.Count > 0)
                 {
                     this.Export(e.Folder, handlers, null);
@@ -352,7 +423,13 @@ namespace uSync8.BackOffice
             }
         }
 
-        private IList<ExtendedHandlerConfigPair> GetHandlers(IEnumerable<string> entityTypes, SyncHandlerOptions handlerOptions)
+        /// <summary>
+        ///  Get a list of handlers for a set of entity types.
+        /// </summary>
+        /// <param name="entityTypes">Entity types to find handlers for</param>
+        /// <param name="handlerOptions">Options to use when loading the handlers</param>
+        /// <returns>List of Handler/Config pairs for handlers for entity types</returns>
+        private IList<ExtendedHandlerConfigPair> GetHandlersByEntitytype(IEnumerable<string> entityTypes, SyncHandlerOptions handlerOptions)
         {
             var handlers = new List<ExtendedHandlerConfigPair>();
 
