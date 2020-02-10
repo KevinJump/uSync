@@ -63,8 +63,8 @@ namespace uSync8.BackOffice.SyncHandlers
 
         // we calculate these now based on the entityType ? 
         private UmbracoObjectTypes itemObjectType { get; set; } = UmbracoObjectTypes.Unknown;
-        
-        
+
+
         private UmbracoObjectTypes itemContainerType = UmbracoObjectTypes.Unknown;
 
         public SyncHandlerBase(
@@ -96,7 +96,7 @@ namespace uSync8.BackOffice.SyncHandlers
 
             this.syncFileService = syncFileService;
 
-            this.runtimeCache = appCaches.RuntimeCache; 
+            this.runtimeCache = appCaches.RuntimeCache;
 
             var thisType = GetType();
             var meta = thisType.GetCustomAttribute<SyncHandlerAttribute>(false);
@@ -181,7 +181,7 @@ namespace uSync8.BackOffice.SyncHandlers
                     {
                         if (actions.Any(x => x.FileName == item.update.Key))
                         {
-                            
+
                             var action = actions.FirstOrDefault(x => x.FileName == item.update.Key);
                             actions.Remove(action);
                             action.Message += attempt.Message;
@@ -281,7 +281,8 @@ namespace uSync8.BackOffice.SyncHandlers
                     callback?.Invoke($"Cleaning {folderName}", item.Index, cleanMarkers.Count);
 
                     var cleanActions = CleanFolder(item.filePath, false, config.UseFlatStructure);
-                    if (cleanActions.Any()) {
+                    if (cleanActions.Any())
+                    {
                         actions.AddRange(cleanActions);
                     }
                     else
@@ -339,7 +340,8 @@ namespace uSync8.BackOffice.SyncHandlers
             var folderKey = flat == true ? 1 : folder.GetHashCode();
 
             var cacheKey = $"uSyncKeyList_{folderKey}_{this.Alias}";
-            return runtimeCache.GetCacheItem(cacheKey, () => {
+            return runtimeCache.GetCacheItem(cacheKey, () =>
+            {
                 var keys = new List<Guid>();
                 var files = syncFileService.GetFiles(folder, "*.config");
                 foreach (var file in files)
@@ -412,7 +414,7 @@ namespace uSync8.BackOffice.SyncHandlers
                     }
                     else
                     {
-                        return SyncAttempt<TObject>.Succeed(Path.GetFileName(filePath), default(TObject) ,ChangeType.NoChange, "Not Imported (Based on config)");
+                        return SyncAttempt<TObject>.Succeed(Path.GetFileName(filePath), default(TObject), ChangeType.NoChange, "Not Imported (Based on config)");
                     }
                 }
             }
@@ -431,7 +433,7 @@ namespace uSync8.BackOffice.SyncHandlers
         ///  check to see if this element should be imported as part of the process.
         /// </summary>
         virtual protected bool ShouldImport(XElement node, HandlerSettings config) => true;
-        
+
         /// <summary>
         ///  Check to see if this elment should be exported. 
         /// </summary>
@@ -839,19 +841,9 @@ namespace uSync8.BackOffice.SyncHandlers
 
         public IEnumerable<uSyncAction> Export(Udi udi, string folder, HandlerSettings settings)
         {
-            if (udi is GuidUdi guidUdi)
-            {
-                var item = this.GetFromService(guidUdi.Guid);
-                if (item != null)
-                    return Export(item, folder, settings);
-            }
-            else if (udi is StringUdi stringUdi)
-            {
-                // its not a guidUdi, lets just get the section
-                var item = this.GetFromService(stringUdi.Id);
-                if (item != null)
-                    return Export(item, folder, settings);
-            }
+            var item = FindByUdi(udi);
+            if (!item.Equals(default))
+                return Export(item, folder, settings);
 
             return uSyncAction.Fail(nameof(udi), typeof(TObject), ChangeType.Fail, "Item not found")
                 .AsEnumerableOfOne();
@@ -859,23 +851,26 @@ namespace uSync8.BackOffice.SyncHandlers
 
         public SyncAttempt<XElement> GetElement(Udi udi)
         {
-            if (udi is GuidUdi guidUdi)
-            {
-                var element = this.GetFromService(guidUdi.Guid);
-                if (element == null)
-                {
-                    var entity = entityService.Get(guidUdi.Guid);
-                    if (entity != null)
-                        element = GetFromService(entity.Id);
-                }
+            var element = FindByUdi(udi);
+            if (!element.Equals(default))
+                return this.serializer.Serialize(element);
 
-                if (element != null)
-                    return this.serializer.Serialize(element);
-            }
-
-            return SyncAttempt<XElement>.Fail(udi.ToString(), ChangeType.Fail);
+            return SyncAttempt<XElement>.Fail(udi.ToString(), ChangeType.Fail, "Item not found");
         }
 
+
+        private TObject FindByUdi(Udi udi)
+        {
+            switch (udi)
+            {
+                case GuidUdi guidUdi:
+                    return GetFromService(guidUdi.Guid);
+                case StringUdi stringUdi:
+                    return GetFromService(stringUdi.Id);
+            }
+
+            return default;
+        }
         public IEnumerable<uSyncDependency> GetDependencies(Guid key, DependencyFlags flags)
         {
             var item = this.GetFromService(key);
