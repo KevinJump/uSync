@@ -845,6 +845,13 @@ namespace uSync8.BackOffice.SyncHandlers
                 if (item != null)
                     return Export(item, folder, settings);
             }
+            else if (udi is StringUdi stringUdi)
+            {
+                // its not a guidUdi, lets just get the section
+                var item = this.GetFromService(stringUdi.Id);
+                if (item != null)
+                    return Export(item, folder, settings);
+            }
 
             return uSyncAction.Fail(nameof(udi), typeof(TObject), ChangeType.Fail, "Item not found")
                 .AsEnumerableOfOne();
