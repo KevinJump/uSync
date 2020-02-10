@@ -31,6 +31,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "uSync8.EventTriggers", "uSy
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "uSync.TemplateTracker", "uSync.TemplateTracker\uSync.TemplateTracker.csproj", "{6D7486DC-0B84-4914-9C01-297467A6B706}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "uSync.Console", "uSync.Console\uSync.Console.csproj", "{7CA1A210-6CB6-4568-9237-62C678877934}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Console", "Console", "{F098B1F3-A907-4275-A831-CDBEFA6DD352}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "uSync.Commands", "uSync.Commands\uSync.Commands.csproj", "{6D3B59C1-7A78-43BB-A806-F826FD4477F6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -84,9 +90,25 @@ Global
 		{6D7486DC-0B84-4914-9C01-297467A6B706}.PackageOnlyBuild|Any CPU.Build.0 = Release|Any CPU
 		{6D7486DC-0B84-4914-9C01-297467A6B706}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6D7486DC-0B84-4914-9C01-297467A6B706}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7CA1A210-6CB6-4568-9237-62C678877934}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7CA1A210-6CB6-4568-9237-62C678877934}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7CA1A210-6CB6-4568-9237-62C678877934}.PackageOnlyBuild|Any CPU.ActiveCfg = Release|Any CPU
+		{7CA1A210-6CB6-4568-9237-62C678877934}.PackageOnlyBuild|Any CPU.Build.0 = Release|Any CPU
+		{7CA1A210-6CB6-4568-9237-62C678877934}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7CA1A210-6CB6-4568-9237-62C678877934}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D3B59C1-7A78-43BB-A806-F826FD4477F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D3B59C1-7A78-43BB-A806-F826FD4477F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D3B59C1-7A78-43BB-A806-F826FD4477F6}.PackageOnlyBuild|Any CPU.ActiveCfg = Release|Any CPU
+		{6D3B59C1-7A78-43BB-A806-F826FD4477F6}.PackageOnlyBuild|Any CPU.Build.0 = Release|Any CPU
+		{6D3B59C1-7A78-43BB-A806-F826FD4477F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D3B59C1-7A78-43BB-A806-F826FD4477F6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{7CA1A210-6CB6-4568-9237-62C678877934} = {F098B1F3-A907-4275-A831-CDBEFA6DD352}
+		{6D3B59C1-7A78-43BB-A806-F826FD4477F6} = {F098B1F3-A907-4275-A831-CDBEFA6DD352}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6168BC64-BBC4-4FEC-B81D-29A386660009}

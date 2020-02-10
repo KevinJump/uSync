@@ -135,12 +135,28 @@ namespace uSync8.Core.Serialization
                 && node.GetKey() != Guid.Empty
                 && node.GetAlias() != string.Empty;
 
+        /// <summary>
+        ///  Does the XML represent an Empty uSync Action?
+        /// </summary>
+        /// <param name="node">XML to examine</param>
+        /// <returns>true if the file is an 'empty' file</returns>
         public bool IsEmpty(XElement node)
             => node.Name.LocalName == uSyncConstants.Serialization.Empty;
 
+        /// <summary>
+        ///  Is the XML either valid or 'Empty' 
+        /// </summary>
+        /// <param name="node">XML to examine</param>
+        /// <returns>true if file is valid or empty</returns>
         public bool IsValidOrEmpty(XElement node)
             => IsEmpty(node) || IsValid(node);
 
+        /// <summary>
+        ///  Process the action in teh 'empty' XML node
+        /// </summary>
+        /// <param name="node">XML to process</param>
+        /// <param name="flags">Serializer flags to control options</param>
+        /// <returns>Sync attempt detailing changes</returns>
         protected SyncAttempt<TObject> ProcessAction(XElement node, SerializerFlags flags)
         {
             if (!IsEmpty(node))

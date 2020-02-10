@@ -2,6 +2,9 @@
 
 namespace uSync8.BackOffice.SyncHandlers
 {
+    /// <summary>
+    ///  Possible actions a handler can do (stored in config)
+    /// </summary>
     public enum HandlerActions
     {
         [SyncActionName("")]

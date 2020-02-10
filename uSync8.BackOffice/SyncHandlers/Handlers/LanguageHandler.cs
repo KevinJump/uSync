@@ -117,7 +117,7 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 
                 if (!newItem && item.WasPropertyDirty(nameof(ILanguage.IsoCode)))
                 {
-                    // the language code changed, this can mean we need to do a full content media? save. 
+                    // The language code changed, this can mean we need to do a full content export. 
                     uSyncTriggers.TriggerExport(rootFolder, new List<string>() { UdiEntityType.Document }, null);
                 }
             }

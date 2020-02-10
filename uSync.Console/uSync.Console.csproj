@@ -4,18 +4,19 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{F2DFCB19-C9EE-471E-B8E2-E0B4DD31761D}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>uSync8.BackOffice</RootNamespace>
-    <AssemblyName>uSync8.BackOffice</AssemblyName>
+    <ProjectGuid>{7CA1A210-6CB6-4568-9237-62C678877934}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>uSync.ConsoleApp</RootNamespace>
+    <AssemblyName>uSync</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -25,6 +26,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -32,19 +34,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'PackageOnlyBuild|AnyCPU'">
-    <OutputPath>bin\PackageOnlyBuild\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AutoMapper, Version=8.0.0.0, Culture=neutral, PublicKeyToken=be96cd2c38ef1005, processorArchitecture=MSIL">
-      <HintPath>..\packages\AutoMapper.8.0.0\lib\net461\AutoMapper.dll</HintPath>
-    </Reference>
     <Reference Include="ClientDependency.Core, Version=1.9.7.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\ClientDependency.1.9.7\lib\net45\ClientDependency.Core.dll</HintPath>
     </Reference>
@@ -123,9 +113,6 @@
     <Reference Include="MiniProfiler.Shared, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b44f9351044011a3, processorArchitecture=MSIL">
       <HintPath>..\packages\MiniProfiler.Shared.4.0.138\lib\net461\MiniProfiler.Shared.dll</HintPath>
     </Reference>
-    <Reference Include="MySql.Data, Version=6.10.7.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
-      <HintPath>..\packages\MySql.Data.6.10.7\lib\net452\MySql.Data.dll</HintPath>
-    </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -172,10 +159,8 @@
       <HintPath>..\packages\Superpower.2.0.0\lib\net45\Superpower.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.ComponentModel" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
-    <Reference Include="System.Configuration.Install" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.Linq" />
     <Reference Include="System.Data.SqlServerCe, Version=4.0.0.1, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
@@ -187,11 +172,8 @@
     <Reference Include="System.Diagnostics.DiagnosticSource, Version=4.0.2.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Diagnostics.DiagnosticSource.4.4.1\lib\net46\System.Diagnostics.DiagnosticSource.dll</HintPath>
     </Reference>
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Drawing.Design" />
     <Reference Include="System.IO" />
     <Reference Include="System.Linq.Expressions" />
-    <Reference Include="System.Management" />
     <Reference Include="System.Net.Http.Formatting, Version=5.2.7.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.7\lib\net45\System.Net.Http.Formatting.dll</HintPath>
     </Reference>
@@ -253,103 +235,29 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Cache\RebuildCacheComponent.cs" />
-    <Compile Include="Commands\SyncCommandFactory.cs" />
-    <Compile Include="Commands\Command\ExportCommand.cs" />
-    <Compile Include="Commands\Command\ImportCommand.cs" />
-    <Compile Include="Commands\Command\ReportCommand.cs" />
-    <Compile Include="Commands\ISyncCommand.cs" />
-    <Compile Include="Commands\SyncCommandBase.cs" />
-    <Compile Include="Commands\SyncCommandCollection.cs" />
-    <Compile Include="Commands\SyncCommandOptions.cs" />
-    <Compile Include="Commands\SyncCommandResult.cs" />
-    <Compile Include="Commands\SyncCommandServiceBase.cs" />
-    <Compile Include="Commands\SyncCommandAttribute.cs" />
-    <Compile Include="Configuration\BackOfficeConfig.cs" />
-    <Compile Include="Configuration\ConfigExtensions.cs" />
-    <Compile Include="Configuration\OverriddenValue.cs" />
-    <Compile Include="Configuration\uSyncHandlerSettings.cs" />
-    <Compile Include="Controllers\ViewModels\AddOnInfo.cs" />
-    <Compile Include="Controllers\Trees\uSyncTreeController.cs" />
-    <Compile Include="Controllers\uSyncDashboardApiController.cs" />
-    <Compile Include="Controllers\ViewModels\uSyncOptions.cs" />
-    <Compile Include="Hubs\HubClientService.cs" />
-    <Compile Include="Hubs\uSyncHub.cs" />
-    <Compile Include="Hubs\uSyncUpdateMessage.cs" />
-    <Compile Include="Models\ISyncAddOn.cs" />
-    <Compile Include="Services\SyncFileService.cs" />
-    <Compile Include="Models\SyncProgressModels.cs" />
-    <Compile Include="Hubs\uSyncCallbacks.cs" />
-    <Compile Include="Services\uSyncService.cs" />
-    <Compile Include="Services\uSyncService_Events.cs" />
-    <Compile Include="Services\uSyncTriggers.cs" />
-    <Compile Include="SyncHandlers\Models\ExtendedHandlerConfigPair.cs" />
-    <Compile Include="SyncHandlers\Models\HandlerActionNames.cs" />
-    <Compile Include="SyncHandlers\Models\HandlerConfigPair.cs" />
-    <Compile Include="SyncHandlers\Handlers\DataTypeHandler.cs" />
-    <Compile Include="SyncHandlers\Handlers\LanguageHandler.cs" />
-    <Compile Include="SyncHandlers\Handlers\MacroHandler.cs" />
-    <Compile Include="SyncHandlers\Handlers\MediaTypeHandler.cs" />
-    <Compile Include="SyncHandlers\Handlers\MemberTypeHandler.cs" />
-    <Compile Include="SyncHandlers\Handlers\TemplateHandler.cs" />
-    <Compile Include="SyncHandlers\Interfaces\ISyncExtendedHandler.cs" />
-    <Compile Include="SyncHandlers\Interfaces\ISyncPostImportHanlder.cs" />
-    <Compile Include="SyncHandlers\SyncHandlerBase.cs" />
-    <Compile Include="SyncHandlers\SyncHandlerContainerBase.cs" />
-    <Compile Include="SyncHandlers\SyncHandlerFactory.cs" />
-    <Compile Include="SyncHandlers\Models\SyncHandlerOptions.cs" />
-    <Compile Include="SyncHandlers\SyncHandlerTreeBase.cs" />
-    <Compile Include="SyncHandlers\SyncHandlerLevelBase.cs" />
-    <Compile Include="uSyncAction.cs" />
-    <Compile Include="uSyncBackofficeComponent.cs" />
-    <Compile Include="uSyncBackOfficeComposer.cs" />
-    <Compile Include="SyncHandlers\Handlers\ContentTypeHandler.cs" />
-    <Compile Include="SyncHandlers\Interfaces\ISyncHandler.cs" />
-    <Compile Include="SyncHandlers\Models\SyncHandlerAttribute.cs" />
-    <Compile Include="SyncHandlers\SyncHandlerCollectionBuilder.cs" />
-    <Compile Include="uSync8BackOffice.cs" />
+    <Compile Include="BootCommands.cs" />
+    <Compile Include="ConsoleHost.cs" />
+    <Compile Include="ConsoleRuntime.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="BackOfficeConstants.cs" />
-    <Compile Include="Configuration\uSyncSettings.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
-    <None Include="App_Plugins\uSync8\addons.json" />
-    <None Include="App_Plugins\uSync8\package.manifest" />
-    <Content Include="App_Plugins\uSync8\backoffice\uSync8\dashboard.html" />
-    <Content Include="App_Plugins\uSync8\backoffice\uSync8\uSyncDashboardController.js" />
-    <Content Include="App_Plugins\uSync8\changeDialog.html" />
-    <Content Include="App_Plugins\uSync8\changeDialogController.js" />
-    <Content Include="App_Plugins\uSync8\components\uSyncProgressView.html" />
-    <Content Include="App_Plugins\uSync8\components\usyncProgressViewComponent.js" />
-    <Content Include="App_Plugins\uSync8\components\uSyncReportView.html" />
-    <Content Include="App_Plugins\uSync8\components\uSyncReportViewComponent.js" />
-    <Content Include="App_Plugins\uSync8\settings\default.html" />
-    <Content Include="App_Plugins\uSync8\settings\expansion.html" />
-    <Content Include="App_Plugins\uSync8\settings\expansionController.js" />
-    <Content Include="App_Plugins\uSync8\settings\settings.html" />
-    <Content Include="App_Plugins\uSync8\settings\settingsController.js" />
-    <Content Include="App_Plugins\uSync8\settings\uSyncController.js" />
-    <Content Include="Config\uSync8.config" />
+    <None Include="App.config" />
     <None Include="packages.config" />
-    <None Include="Targets\uSync.props" />
-    <None Include="Targets\uSync.targets" />
-    <None Include="uSync.Backoffice.Core.nuspec" />
-    <None Include="uSync.nuspec" />
+    <None Include="scripts\init.ps1" />
+    <None Include="scripts\uSyncCli.psm1" />
+    <None Include="uSync.Console.nuspec" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\uSync8.Core\uSync8.Core.csproj">
-      <Project>{79011408-C423-479F-9B0A-8DA465DE92EB}</Project>
-      <Name>uSync8.Core</Name>
+    <ProjectReference Include="..\uSync.Commands\uSync.Commands.csproj">
+      <Project>{6D3B59C1-7A78-43BB-A806-F826FD4477F6}</Project>
+      <Name>uSync.Commands</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\uSync8.BackOffice\uSync8.BackOffice.csproj">
+      <Project>{F2DFCB19-C9EE-471E-B8E2-E0B4DD31761D}</Project>
+      <Name>uSync8.BackOffice</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Content Include="App_Plugins\uSync8\lang\en-US.xml" />
-    <Content Include="App_Plugins\uSync8\usync.css" />
-    <Content Include="App_Plugins\uSync8\uSyncHub.js" />
-    <Content Include="App_Plugins\uSync8\uSyncService.js" />
-  </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Umbraco.SqlServerCE.4.0.0.1\build\Umbraco.SqlServerCE.targets" Condition="Exists('..\packages\Umbraco.SqlServerCE.4.0.0.1\build\Umbraco.SqlServerCE.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

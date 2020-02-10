@@ -47,6 +47,12 @@ namespace uSync8.BackOffice
             this.Handlers = summaries.ToList();
         }
 
+        /// <summary>
+        ///  Updated the change status of a single handler in the list
+        /// </summary>
+        /// <param name="name">Name of handler</param>
+        /// <param name="status">current handler status</param>
+        /// <param name="changeCount">number of changes</param>
         public void UpdateHandler(string name, HandlerStatus status, int changeCount)
         {
             var item = this.Handlers.FirstOrDefault(x => x.Name == name);
@@ -55,9 +61,15 @@ namespace uSync8.BackOffice
                 item.Status = status;
                 item.Changes = changeCount;
             }
-
         }
 
+        /// <summary>
+        ///  Updated the change status of a single handler in the list
+        /// </summary>
+        /// <param name="name">Name of handler</param>
+        /// <param name="status">current handler status</param>
+        /// <param name="message">Update the main progress message for the UI</param>
+        /// <param name="changeCount">number of changes</param>
         public void UpdateHandler(string name, HandlerStatus status, string message, int changeCount)
         {
             UpdateHandler(name, status, changeCount);

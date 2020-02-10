@@ -13,7 +13,13 @@ namespace uSync8.BackOffice.Cache
     [ComposeBefore(typeof(uSyncBackOfficeComposer))]
     public class RebuildCacheComposer : ComponentComposer<RebuildCacheComponent> { }
 
-
+    /// <summary>
+    ///  Cache rebuilding, when imports are completed
+    /// </summary>
+    /// <remarks>
+    ///  This is off by default, the RebuildCacheOnCompletion setting is false in the 
+    ///  default config, and this probibly isn't needed past Umbraco 8.3.
+    /// </remarks>
     public class RebuildCacheComponent : IComponent
     {
         private readonly IPublishedSnapshotService snapshotService;
