@@ -123,6 +123,8 @@ namespace uSync8.Core.Serialization.Serializers
 
         public override SyncAttempt<IContentType> DeserializeSecondPass(IContentType item, XElement node, SerializerFlags flags)
         {
+            logger.Debug<ContentTypeSerializer>("Deserialize Second Pass {0}", item.Alias);
+
             DeserializeCompositions(item, node);
             DeserializeStructure(item, node);
             
@@ -146,7 +148,7 @@ namespace uSync8.Core.Serialization.Serializers
             if (!string.IsNullOrEmpty(masterTemplate))
             {
                 var template = fileService.GetTemplate(masterTemplate);
-                if (template != null)
+                if (template != null) 
                     item.SetDefaultTemplate(template);
             }
         }
@@ -173,6 +175,7 @@ namespace uSync8.Core.Serialization.Serializers
 
                 if (templateItem != null)
                 {
+                    logger.Debug<ContentTypeSerializer>("Adding Template: {0}", templateItem.Alias);
                     allowedTemplates.Add(templateItem);
                 }
             }
@@ -203,7 +206,7 @@ namespace uSync8.Core.Serialization.Serializers
 
         protected override void SaveContainer(EntityContainer container)
         {
-            logger.Debug<IContentType>("Saving Container (In main class) {0}", container.Key.ToString());
+            logger.Debug<ContentTypeSerializer>("Saving Container (In main class) {0}", container.Key.ToString());
             contentTypeService.SaveContainer(container);
         }
     }

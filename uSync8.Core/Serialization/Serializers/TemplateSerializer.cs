@@ -46,6 +46,7 @@ namespace uSync8.Core.Serialization.Serializers
                 var templatePath = IOHelper.MapPath(SystemDirectories.MvcViews + "/" + alias.ToSafeFileName() + ".cshtml");
                 if (System.IO.File.Exists(templatePath))
                 {
+                    logger.Debug<TemplateSerializer>("Reading {0} contents", templatePath);
                     var content = System.IO.File.ReadAllText(templatePath);
                     item = new Template(name, alias);
                     item.Path = templatePath;
@@ -93,9 +94,11 @@ namespace uSync8.Core.Serialization.Serializers
             var master = node.Element("Parent").ValueOrDefault(string.Empty);
             if (master != string.Empty && item.MasterTemplateAlias != master)
             {
+                logger.Debug<TemplateSerializer>("Looking for master {0}", master);
                 var masterItem = fileService.GetTemplate(master);
                 if (masterItem != null)
                 {
+                    logger.Debug<TemplateSerializer>("Setting Master {0}", masterItem.Alias);
                     item.SetMasterTemplate(masterItem);
 
                     if (!flags.HasFlag(SerializerFlags.DoNotSave))

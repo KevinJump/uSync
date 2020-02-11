@@ -74,22 +74,28 @@ namespace uSync8.Core.Serialization
 
             if ( flags.HasFlag(SerializerFlags.Force) || IsCurrent(node) > ChangeType.NoChange)
             {
-                logger.Debug<TObject>("Base: Deserializing");
+                logger.Debug<ISyncSerializerBase>("Base: Deserializing {0}", ItemType);
                 var result = DeserializeCore(node);
 
                 if (result.Success)
                 {
+                    logger.Debug<ISyncSerializerBase>("Base: Deserialize Core Success {0}", ItemType);
+
                     if (!flags.HasFlag(SerializerFlags.DoNotSave))
                     {
+                        logger.Debug<ISyncSerializerBase>("Base: Serializer Saving (No DoNotSaveFlag) {0}", result.Item.Id); 
                         // save 
                         SaveItem(result.Item);
                     }
 
                     if (flags.HasFlag(SerializerFlags.OnePass))
                     {
-                        logger.Debug<TObject>("Base: Second Pass");
+                        logger.Debug<ISyncSerializerBase>("Base: Processing item in one pass {0}", result.Item.Id);
+
                         var secondAttempt = DeserializeSecondPass(result.Item, node, flags);
 
+                        logger.Debug<TObject>("Base: Second Pass Result {0} {1}", result.Item.Id, secondAttempt.Success);
+                        
                         // if its the second pass, we return the results of that pass
                         return secondAttempt;
                     }
@@ -164,6 +170,8 @@ namespace uSync8.Core.Serialization
 
             var actionType = node.Attribute("Change").ValueOrDefault<SyncActionType>(SyncActionType.None);
 
+            logger.Debug<ISyncSerializerBase>("Empty Node : Processing Action {0}", actionType); 
+
             var (key, alias) = FindKeyAndAlias(node);
             
             switch(actionType)
@@ -183,6 +191,8 @@ namespace uSync8.Core.Serialization
 
         protected virtual SyncAttempt<TObject> ProcessDelete(Guid key, string alias, SerializerFlags flags)
         {
+            logger.Debug<ISyncSerializerBase>("Processing Delete {0} {1}", key, alias);
+
             var item = this.FindItem(key);
             if (item == null && !string.IsNullOrWhiteSpace(alias))
             {
@@ -196,15 +206,18 @@ namespace uSync8.Core.Serialization
 
             if (item != null)
             {
+                logger.Debug<ISyncSerializerBase>("Deleting Item : {0}", item.Id); 
                 DeleteItem(item);
                 return SyncAttempt<TObject>.Succeed(alias, ChangeType.Delete);
             }
 
+            logger.Debug<ISyncSerializerBase>("Delete Item not found");
             return SyncAttempt<TObject>.Succeed(alias, ChangeType.NoChange);
         }
 
         protected virtual SyncAttempt<TObject> ProcessRename(Guid key, string alias, SerializerFlags flags)
         {
+            logger.Debug<ISyncSerializerBase>("Process Rename (no action)");
             return SyncAttempt<TObject>.Succeed(alias, ChangeType.NoChange);
         }
 

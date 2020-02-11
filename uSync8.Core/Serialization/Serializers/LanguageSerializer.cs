@@ -40,7 +40,7 @@ namespace uSync8.Core.Serialization.Serializers
 
             if (item == null)
             {
-                logger.Debug<ILanguage>("Creating New Language: {0}", isoCode);
+                logger.Debug<LanguageSerializer>("Creating New Language: {0}", isoCode);
                 item = new Language(isoCode);
             }
 

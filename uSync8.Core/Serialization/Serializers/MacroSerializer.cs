@@ -41,18 +41,18 @@ namespace uSync8.Core.Serialization.Serializers
             var macroSource = node.Element("MacroSource").ValueOrDefault(string.Empty);
             var macroType = node.Element("MacroType").ValueOrDefault(MacroTypes.PartialView);
 
-            logger.Debug<IMacro>("Macro by Key [{0}]", key);
+            logger.Debug<MacroSerializer>("Macro by Key [{0}]", key);
             item = macroService.GetById(key);
 
             if (item == null)
             {
-                logger.Debug<IMacro>("Macro by Alias [{0}]", key);
+                logger.Debug<MacroSerializer>("Macro by Alias [{0}]", key);
                 item = macroService.GetByAlias(alias);
             }
 
             if (item == null)
             {
-                logger.Debug<IMacro>("Creating New [{0}]", key);
+                logger.Debug<MacroSerializer>("Creating New [{0}]", key);
                 item = new Macro(alias, name, macroSource, macroType);
                 changes.Add(uSyncChange.Create(alias, name, "New Macro"));
             }
@@ -75,19 +75,25 @@ namespace uSync8.Core.Serialization.Serializers
             {
                 foreach (var propNode in properties.Elements("Property"))
                 {
+
                     var propertyAlias = propNode.Element("Alias").ValueOrDefault(string.Empty);
                     var editorAlias = propNode.Element("EditorAlias").ValueOrDefault(string.Empty);
                     var propertyName = propNode.Element("Name").ValueOrDefault(string.Empty);
                     var sortOrder = propNode.Element("SortOrder").ValueOrDefault(0);
 
+                    logger.Debug<MacroSerializer>(" > Property {0} {1} {2} {3}", propertyAlias, editorAlias, propertyName, sortOrder);
+
                     var propPath = $"{alias}: {propertyName}";
 
                     if (item.Properties.ContainsKey(propertyAlias))
                     {
+                        logger.Debug<MacroSerializer>(" >> Updating {0}", propertyAlias);
                         item.Properties.UpdateProperty(propertyAlias, propertyName, sortOrder, editorAlias);
                     }
                     else
                     {
+                        logger.Debug<MacroSerializer>(" >> Adding {0}", propertyAlias);
+
                         changes.Add(uSyncChange.Create(propPath, "Property", propertyAlias));
                         item.Properties.Add(new MacroProperty(propertyAlias, propertyName, sortOrder, editorAlias));
                     }

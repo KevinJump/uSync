@@ -28,8 +28,11 @@ namespace uSync8.Core.Serialization
 
         protected override TObject FindOrCreate(XElement node)
         {
+
             TObject item = FindItem(node);
             if (item != null) return item;
+
+            logger.Debug<ISyncSerializerBase>("FindOrCreate: Creating");
 
             // create
             var parentId = -1;
@@ -41,10 +44,12 @@ namespace uSync8.Core.Serialization
             var parentNode = info.Element("Parent");
             if (parentNode != null)
             {
+                logger.Debug<ISyncSerializerBase>("Finding Parent");
                 var parentKey = parentNode.Attribute("Key").ValueOrDefault(Guid.Empty);
                 parent = FindItem(parentKey, parentNode.Value);
                 if (parent != null)
                 {
+                    logger.Debug<ISyncSerializerBase>("Parent Found {0}", parent.Id);
                     treeItem = parent;
                     parentId = parent.Id;
                 }
@@ -56,22 +61,24 @@ namespace uSync8.Core.Serialization
                 var folder = info.Element("Folder");
                 if (folder != null)
                 {
+                    logger.Debug<ISyncSerializerBase>("Searching for Parent by folder");
+
                     var folderKey = folder.Attribute("Key").ValueOrDefault(Guid.Empty);
                     var container = FindFolder(folderKey, folder.Value);
                     if (container != null)
                     {
                         treeItem = container;
+                        logger.Debug<ISyncSerializerBase>("Parent is Folder {0}", treeItem.Id);
 
                         // update the container key if its diffrent (because we don't serialize folders on their own)
                         if (container.Key != folderKey)
                         {
                             if (container.Key != folderKey)
                             {
-                                logger.Debug<TObject>("Folder Found: Key Diffrent");
+                                logger.Debug<ISyncSerializerBase>("Folder Found: Key Diffrent");
                                 container.Key = folderKey;
                                 SaveContainer(container);
                             }
-
                         }
                     }
                 }
