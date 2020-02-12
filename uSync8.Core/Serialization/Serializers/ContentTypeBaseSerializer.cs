@@ -150,7 +150,7 @@ namespace uSync8.Core.Serialization.Serializers
 
         protected void DeserializeBase(TObject item, XElement node)
         {
-            logger.Debug<ISyncSerializerBase>("Deserializing Base");
+            logger.Debug(serializerType, "Deserializing Base");
 
             if (node == null) return;
 
@@ -206,7 +206,7 @@ namespace uSync8.Core.Serialization.Serializers
 
         protected void DeserializeStructure(TObject item, XElement node)
         {
-            logger.Debug<ISyncSerializerBase>("Deserializing Structure");
+            logger.Debug(serializerType, "Deserializing Structure");
 
 
             var structure = node.Element("Structure");
@@ -217,31 +217,31 @@ namespace uSync8.Core.Serialization.Serializers
 
             foreach (var baseNode in structure.Elements(ItemType))
             {
-                logger.Debug<ISyncSerializerBase>("baseNode {0}", baseNode.ToString());
+                logger.Debug(serializerType, "baseNode {0}", baseNode.ToString());
                 var alias = baseNode.Value;
                 var key = baseNode.Attribute("Key").ValueOrDefault(Guid.Empty);
 
-                logger.Debug<ISyncSerializerBase>("Structure: {0}", key);
+                logger.Debug(serializerType, "Structure: {0}", key);
 
                 IContentTypeBase baseItem = default(IContentTypeBase);
 
                 if (key != Guid.Empty)
                 {
-                    logger.Debug<ISyncSerializerBase>("Structure By Key {0}", key);
+                    logger.Debug(serializerType, "Structure By Key {0}", key);
                     // lookup by key (our prefered way)
                     baseItem = FindItem(key);
                 }
 
                 if (baseItem == null)
                 {
-                    logger.Debug<ISyncSerializerBase>("Structure By Alias: {0}", alias);
+                    logger.Debug(serializerType, "Structure By Alias: {0}", alias);
                     // lookup by alias (less nice)
                     baseItem = FindItem(alias);
                 }
 
                 if (baseItem != null)
                 {
-                    logger.Debug<ISyncSerializerBase>("Structure Found {0}", baseItem.Alias);
+                    logger.Debug(serializerType, "Structure Found {0}", baseItem.Alias);
 
                     allowed.Add(new ContentTypeSort(
                         new Lazy<int>(() => baseItem.Id), sortOrder, baseItem.Alias));
@@ -250,7 +250,7 @@ namespace uSync8.Core.Serialization.Serializers
                 }
             }
 
-            logger.Debug<ISyncSerializerBase>("Structure: {0} items", allowed.Count);
+            logger.Debug(serializerType, "Structure: {0} items", allowed.Count);
 
             if (!Enumerable.SequenceEqual(item.AllowedContentTypes, allowed))
                 item.AllowedContentTypes = allowed;
@@ -258,7 +258,7 @@ namespace uSync8.Core.Serialization.Serializers
 
         protected void DeserializeProperties(TObject item, XElement node)
         {
-            logger.Debug<ISyncSerializerBase>("Deserializing Properties");
+            logger.Debug(serializerType, "Deserializing Properties");
 
 
             if (node == null) return;
@@ -282,7 +282,7 @@ namespace uSync8.Core.Serialization.Serializers
                 var definitionKey = propertyNode.Element("Definition").ValueOrDefault(Guid.Empty);
                 var propertyEditorAlias = propertyNode.Element("Type").ValueOrDefault(string.Empty);
 
-                logger.Debug<ISyncSerializerBase>(" > Property: {0} {1} {2} {3}", alias, key, definitionKey, propertyEditorAlias);
+                logger.Debug(serializerType, " > Property: {0} {1} {2} {3}", alias, key, definitionKey, propertyEditorAlias);
 
                 bool IsNew = false;
 
@@ -310,7 +310,7 @@ namespace uSync8.Core.Serialization.Serializers
 
                 if (IsNew)
                 {
-                    logger.Debug<ISyncSerializerBase>("Property Is new adding to tab.");
+                    logger.Debug(serializerType, "Property Is new adding to tab.");
                     if (string.IsNullOrWhiteSpace(tab))
                     {
                         item.AddPropertyType(property);
@@ -322,7 +322,7 @@ namespace uSync8.Core.Serialization.Serializers
                 }
                 else
                 {
-                    logger.Debug<ISyncSerializerBase>("Property exists, checking tab location");
+                    logger.Debug(serializerType, "Property exists, checking tab location");
                     // we need to see if this one has moved. 
                     if (!string.IsNullOrWhiteSpace(tab))
                     {
@@ -353,7 +353,7 @@ namespace uSync8.Core.Serialization.Serializers
 
         protected void DeserializeTabs(TObject item, XElement node)
         {
-            logger.Debug<ISyncSerializerBase>("Deserializing Tabs");
+            logger.Debug(serializerType, "Deserializing Tabs");
 
             var tabNode = node.Element("Tabs");
             if (tabNode == null) return;
@@ -365,7 +365,7 @@ namespace uSync8.Core.Serialization.Serializers
                 var name = tab.Element("Caption").ValueOrDefault(string.Empty);
                 var sortOrder = tab.Element("SortOrder").ValueOrDefault(defaultSort);
 
-                logger.Debug<ISyncSerializerBase>("> Tab {0} {1}", name, sortOrder);
+                logger.Debug(serializerType, "> Tab {0} {1}", name, sortOrder);
 
                 var existing = item.PropertyGroups.FirstOrDefault(x => x.Name.InvariantEquals(name));
                 if (existing != null)
@@ -392,7 +392,7 @@ namespace uSync8.Core.Serialization.Serializers
 
         protected void CleanTabs(TObject item, XElement node)
         {
-            logger.Debug<ISyncSerializerBase>("Cleaning Tabs Base");
+            logger.Debug(serializerType, "Cleaning Tabs Base");
 
             var tabNode = node.Element("Tabs");
 
@@ -414,7 +414,7 @@ namespace uSync8.Core.Serialization.Serializers
 
             foreach (var name in removals)
             {
-                logger.Debug<ISyncSerializerBase>("Removing {0}", name);
+                logger.Debug(serializerType, "Removing {0}", name);
                 item.PropertyGroups.Remove(name);
             }
         }
@@ -424,16 +424,16 @@ namespace uSync8.Core.Serialization.Serializers
             var folderNode = node.Element("Info").Element("Folder");
             if (folderNode != null)
             {
-                logger.Debug<ISyncSerializerBase>("Cleaing Folder");
+                logger.Debug(serializerType, "Cleaing Folder");
 
                 var key = folderNode.Attribute("Key").ValueOrDefault(Guid.Empty);
                 if (key != Guid.Empty)
                 {
-                    logger.Debug<ISyncSerializerBase>("Folder Key {0}", key.ToString());
+                    logger.Debug(serializerType, "Folder Key {0}", key.ToString());
                     var folder = FindContainer(key);
                     if (folder == null)
                     {
-                        logger.Debug<ISyncSerializerBase>("Folder Key doesn't not match");
+                        logger.Debug(serializerType, "Folder Key doesn't not match");
                         FindFolder(key, folderNode.Value);
                     }
                 }
@@ -442,7 +442,7 @@ namespace uSync8.Core.Serialization.Serializers
 
         protected void DeserializeCompositions(TObject item, XElement node)
         {
-            logger.Debug<ISyncSerializerBase>("Deserializing Compositions");
+            logger.Debug(serializerType, "Deserializing Compositions");
 
             var comps = node.Element("Info").Element("Compositions");
             if (comps == null) return;
@@ -453,7 +453,7 @@ namespace uSync8.Core.Serialization.Serializers
                 var alias = compositionNode.Value;
                 var key = compositionNode.Attribute("Key").ValueOrDefault(Guid.Empty);
 
-                logger.Debug<ISyncSerializerBase>(" > Comp {0} {1}", alias, key);
+                logger.Debug(serializerType, " > Comp {0} {1}", alias, key);
 
                 var type = FindItem(key, alias);
                 if (type != null)
@@ -480,7 +480,7 @@ namespace uSync8.Core.Serialization.Serializers
 
         private bool SetMasterFromElement(IContentTypeBase item, XElement masterNode)
         {
-            logger.Debug<ISyncSerializerBase>("SetMasterFromElement");
+            logger.Debug(serializerType, "SetMasterFromElement");
 
             if (masterNode == null) return false;
 
@@ -505,7 +505,7 @@ namespace uSync8.Core.Serialization.Serializers
             string propertyEditorAlias,
             out bool IsNew)
         {
-            logger.Debug<ISyncSerializerBase>("GetOrCreateProperty {0} [{1}]", key, alias);
+            logger.Debug(serializerType, "GetOrCreateProperty {0} [{1}]", key, alias);
 
             IsNew = false;
 
@@ -549,7 +549,7 @@ namespace uSync8.Core.Serialization.Serializers
             {
                 if (PropertyExistsOnComposite(item, alias))
                 {
-                    logger.Debug<ISyncSerializerBase>("Cannot create property here {0} as it exist on Composition", item.Name);
+                    logger.Debug(serializerType, "Cannot create property here {0} as it exist on Composition", item.Name);
                     // can't create here, its on a composite
                     return null;
                 }
@@ -566,7 +566,7 @@ namespace uSync8.Core.Serialization.Serializers
             // also update it if its not the same as the datatype, (because that has to match)
             if (!property.PropertyEditorAlias.Equals(editorAlias))
             {
-                logger.Debug<ISyncSerializerBase>("Property Editor Alias mismatch {0} != {1} fixing...", property.PropertyEditorAlias, editorAlias);
+                logger.Debug(serializerType, "Property Editor Alias mismatch {0} != {1} fixing...", property.PropertyEditorAlias, editorAlias);
                 property.PropertyEditorAlias = editorAlias;
             }
 
@@ -580,7 +580,7 @@ namespace uSync8.Core.Serialization.Serializers
 
         private void MoveProperties(IContentTypeBase item, IDictionary<string, string> moves)
         {
-            logger.Debug<ISyncSerializerBase>("MoveProperties");
+            logger.Debug(serializerType, "MoveProperties");
 
             foreach (var move in moves)
             {
@@ -590,7 +590,7 @@ namespace uSync8.Core.Serialization.Serializers
 
         private void RemoveProperties(IContentTypeBase item, XElement properties)
         {
-            logger.Debug<ISyncSerializerBase>("RemoveProperties");
+            logger.Debug(serializerType, "RemoveProperties");
 
             List<string> removals = new List<string>();
 
@@ -618,7 +618,7 @@ namespace uSync8.Core.Serialization.Serializers
                 {
                     // if you remove something with lots of 
                     // content this can timeout (still? - need to check on v8)
-                    logger.Debug<ISyncSerializerBase>("Removing {0}", alias);
+                    logger.Debug(serializerType, "Removing {0}", alias);
                     item.RemovePropertyType(alias);
                 }
             }
@@ -675,7 +675,7 @@ namespace uSync8.Core.Serialization.Serializers
             
         protected override void SaveContainer(EntityContainer container)
         {
-            logger.Debug<ISyncSerializerBase>("Saving Container: {0}", container.Key);
+            logger.Debug(serializerType, "Saving Container: {0}", container.Key);
             baseService.SaveContainer(container);
         }
 

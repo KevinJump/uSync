@@ -99,7 +99,7 @@ namespace uSync8.BackOffice.SyncHandlers
                 catch (XmlException ex)
                 {
                     // one of the files is wrong. (do we stop or carry on)
-                    logger.Warn<TObject>($"Error loading file: {file} [{ex.Message}]");
+                    logger.Warn(handlerType, $"Error loading file: {file} [{ex.Message}]");
                     actions.Add(uSyncActionHelper<TObject>.SetAction(
                         SyncAttempt<TObject>.Fail(Path.GetFileName(file), ChangeType.Fail, $"Failed to Load: {ex.Message}"), file, false));
                 }

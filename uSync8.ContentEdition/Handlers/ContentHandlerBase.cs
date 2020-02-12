@@ -113,7 +113,7 @@ namespace uSync8.ContentEdition.Handlers
                 var path = node.Element("Info")?.Element("Path").ValueOrDefault(string.Empty);
                 if (!string.IsNullOrWhiteSpace(path) && !include.Any(x => path.InvariantStartsWith(x)))
                 {
-                    logger.Debug<ContentHandler>("Not processing item, {0} path {1} not in include path", node.Attribute("Alias").ValueOrDefault("unknown"), path);
+                    logger.Debug(handlerType, "Not processing item, {0} path {1} not in include path", node.Attribute("Alias").ValueOrDefault("unknown"), path);
                     return false;
                 }
             }
@@ -125,7 +125,7 @@ namespace uSync8.ContentEdition.Handlers
                 var path = node.Element("Info")?.Element("Path").ValueOrDefault(string.Empty);
                 if (!string.IsNullOrWhiteSpace(path) && exclude.Any(x => path.InvariantStartsWith(x)))
                 {
-                    logger.Debug<ContentHandler>("Not processing item, {0} path {1} is excluded", node.Attribute("Alias").ValueOrDefault("unknown"), path);
+                    logger.Debug(handlerType, "Not processing item, {0} path {1} is excluded", node.Attribute("Alias").ValueOrDefault("unknown"), path);
                     return false;
                 }
             }

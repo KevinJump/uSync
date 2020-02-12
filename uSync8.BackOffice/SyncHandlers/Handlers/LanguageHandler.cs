@@ -160,7 +160,7 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
                     var node = syncFileService.LoadXElement(file);
                     if (node.Element("Id").ValueOrDefault(0) == item.Id)
                     {
-                        logger.Info<LanguageHandler>("Found Matching Lang File, cleaning");
+                        logger.Debug<LanguageHandler>("Found Matching Lang File, cleaning");
                         var attempt = serializer.SerializeEmpty(item, SyncActionType.Rename, node.GetAlias());
                         if (attempt.Success)
                         {

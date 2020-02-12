@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -64,8 +65,9 @@ namespace uSync8.BackOffice.SyncHandlers
         // we calculate these now based on the entityType ? 
         private UmbracoObjectTypes itemObjectType { get; set; } = UmbracoObjectTypes.Unknown;
 
-
         private UmbracoObjectTypes itemContainerType = UmbracoObjectTypes.Unknown;
+
+        protected Type handlerType;
 
         public SyncHandlerBase(
             IEntityService entityService,
@@ -98,10 +100,10 @@ namespace uSync8.BackOffice.SyncHandlers
 
             this.runtimeCache = appCaches.RuntimeCache;
 
-            var thisType = GetType();
-            var meta = thisType.GetCustomAttribute<SyncHandlerAttribute>(false);
+            handlerType = GetType();
+            var meta = handlerType.GetCustomAttribute<SyncHandlerAttribute>(false);
             if (meta == null)
-                throw new InvalidOperationException($"The Handler {thisType} requires a {typeof(SyncHandlerAttribute)}");
+                throw new InvalidOperationException($"The Handler {handlerType} requires a {typeof(SyncHandlerAttribute)}");
 
             Name = meta.Name;
             Alias = meta.Alias;
@@ -148,7 +150,9 @@ namespace uSync8.BackOffice.SyncHandlers
         #region Importing 
         public IEnumerable<uSyncAction> ImportAll(string folder, HandlerSettings config, bool force, SyncUpdateCallback callback = null)
         {
-            logger.Info<uSync8BackOffice>("Running Import: {0}", Path.GetFileName(folder));
+            var sw = Stopwatch.StartNew();
+
+            logger.Debug(handlerType, "ImportAll: {0}", Path.GetFileName(folder));
 
             var actions = new List<uSyncAction>();
             var updates = new Dictionary<string, TObject>();
@@ -164,6 +168,9 @@ namespace uSync8.BackOffice.SyncHandlers
 
             runtimeCache.ClearByKey($"keycache_{this.Alias}");
             callback?.Invoke("Done", 3, 3);
+            
+            sw.Stop();
+            logger.Debug(handlerType, "Import Complete {0}ms", sw.ElapsedMilliseconds);
             return actions;
         }
 
@@ -424,7 +431,7 @@ namespace uSync8.BackOffice.SyncHandlers
             }
             catch (Exception ex)
             {
-                logger.Warn<uSync8BackOffice>("Base: Import Failed : {0}", ex.ToString());
+                logger.Warn(handlerType, "Base: Import Failed : {0}", ex.ToString());
                 return SyncAttempt<TObject>.Fail(Path.GetFileName(filePath), ChangeType.Fail, $"Import Fail: {ex.Message}");
             }
         }
@@ -461,7 +468,7 @@ namespace uSync8.BackOffice.SyncHandlers
                 }
                 catch (Exception ex)
                 {
-                    logger.Warn<TObject>($"Second Import Failed: {ex.ToString()}");
+                    logger.Warn(handlerType, $"Second Import Failed: {ex.ToString()}");
                     return SyncAttempt<TObject>.Fail(item.Id.ToString(), ChangeType.Fail, ex);
                 }
             }

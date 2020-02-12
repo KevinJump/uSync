@@ -279,6 +279,8 @@ namespace uSync8.ContentEdition.Serializers
                 {
                     var current = item.Properties[alias];
 
+                    logger.Verbose(serializerType, "Derserialize Property {0} {1}", alias, current.PropertyType.PropertyEditorAlias);
+
                     foreach (var value in property.Elements("Value"))
                     {
                         var culture = value.Attribute("Culture").ValueOrDefault(string.Empty);
@@ -295,7 +297,7 @@ namespace uSync8.ContentEdition.Serializers
                                 //
                                 if (!current.PropertyType.VariesByCulture())
                                 {
-                                    logger.Debug<ContentSerializer>("Item does not vary by culture - but .config file contains culture");
+                                    logger.Debug(serializerType, "Item does not vary by culture - but .config file contains culture");
                                     // if we get here, then things are wrong, so we will try to fix them.
                                     //
                                     // if the content config thinks it should vary by culture, but the document type doesn't
@@ -304,34 +306,36 @@ namespace uSync8.ContentEdition.Serializers
                                     {
                                         // this culture is not the default for the site, so don't use it to 
                                         // set the single language value.
-                                        logger.Warn<ContentSerializer>("Culture {0} in file, but is not default so not being used", culture);
+                                        logger.Warn(serializerType, "Culture {culture} in file, but is not default so not being used", culture);
                                         break;
                                     }
-                                    logger.Warn<ContentSerializer>($"Cannot set value on culture {culture} because it is not avalible for this property - value in default language will be used");
+                                    logger.Warn(serializerType, "Cannot set value on culture {culture} because it is not avalible for this property - value in default language will be used", culture);
                                     culture = string.Empty;
                                 }
                                 else if (!item.AvailableCultures.InvariantContains(culture))
                                 {
                                     // this culture isn't one of the ones, that can be set on this language. 
-                                    logger.Warn<ContentSerializer>($"Culture {culture} is not one of the avalible cultures, so we cannot set this value");
+                                    logger.Warn(serializerType, "Culture {culture} is not one of the avalible cultures, so we cannot set this value", culture);
                                     break;
                                 }
                             }
                             var itemValue = GetImportValue(propValue, current.PropertyType, culture, segment);
                             item.SetValue(alias, itemValue, culture, segment);
+                            logger.Debug(serializerType, "Property {alias} value set", alias);
+                            logger.Verbose(serializerType, "Property [{alias}] : {itemValue}", alias, itemValue);
                         }
                         catch (Exception ex)
                         {
                             // capture here to be less agressive with failure. 
                             // if one property fails the rest will still go in.
-                            logger.Warn<ContentSerializer>($"Failed to set [{alias}] {propValue} Ex: {0}", ex.ToString());
+                            logger.Warn(serializerType, $"Failed to set [{alias}] {propValue} Ex: {0}", ex.ToString());
                             errors += $"Failed to set [{alias}] {ex.Message}";
                         }
                     }
                 }
                 else
                 {
-                    logger.Warn<ContentSerializer>("DeserializeProperties: item {0} doesn't have property {1} but its in the xml", item.Name, alias);
+                    logger.Warn(serializerType, "DeserializeProperties: item {Name} doesn't have property {alias} but its in the xml", item.Name, alias);
                 }
             }
 
@@ -352,8 +356,11 @@ namespace uSync8.ContentEdition.Serializers
             // this is where the mapping magic will happen. 
             // at the moment there are no value mappers, but if we need
             // them they plug in as ISyncMapper things
-            logger.Debug<ContentSerializer>("Getting ExportValue [{1}]", propertyType.PropertyEditorAlias);
-            return syncMappers.GetExportValue(value, propertyType.PropertyEditorAlias);
+            logger.Verbose(serializerType, "Getting ExportValue [{PropertyEditorAlias}]", propertyType.PropertyEditorAlias);
+
+            var exportValue = syncMappers.GetExportValue(value, propertyType.PropertyEditorAlias);
+            logger.Verbose(serializerType, "Export Value {PropertyEditorAlias} {exportValue}", propertyType.PropertyEditorAlias, exportValue);
+            return exportValue;
         }
 
         protected object GetImportValue(string value, PropertyType propertyType, string culture, string segment)
@@ -361,8 +368,11 @@ namespace uSync8.ContentEdition.Serializers
             // this is where the mapping magic will happen. 
             // at the moment there are no value mappers, but if we need
             // them they plug in as ISyncMapper things
-            logger.Debug<ContentSerializer>("Getting ImportValue [{1}]", propertyType.PropertyEditorAlias);
-            return syncMappers.GetImportValue(value, propertyType.PropertyEditorAlias);
+            logger.Verbose(serializerType, "Getting ImportValue [{PropertyEditorAlias}]", propertyType.PropertyEditorAlias);
+
+            var importValue = syncMappers.GetImportValue(value, propertyType.PropertyEditorAlias);
+            logger.Verbose(serializerType, "Import Value {PropertyEditorAlias} {importValue}", propertyType.PropertyEditorAlias, importValue);
+            return importValue;
         }
 
         /// <summary>

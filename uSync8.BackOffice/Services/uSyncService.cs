@@ -248,11 +248,12 @@ namespace uSync8.BackOffice
                     sw.Stop();
                     summary.UpdateHandler("Post Import", HandlerStatus.Complete,
                         $"Import Completed ({sw.ElapsedMilliseconds}ms)", 0);
-
                     callbacks?.Callback?.Invoke(summary);
 
                     // fire complete
                     fireBulkComplete(ImportComplete, actions);
+
+                    logger.Debug<uSyncService>("uSync Import completed in {ElapsedMilliseconds}ms", sw.ElapsedMilliseconds);
 
                     return actions;
                 }
@@ -397,9 +398,10 @@ namespace uSync8.BackOffice
         /// <param name="e"></param>
         private void USyncTriggers_DoImport(uSyncTriggerArgs e)
         {
-            logger.Info<uSyncService>("Import Triggered by downlevel change");
             if (e.EntityTypes != null && !string.IsNullOrWhiteSpace(e.Folder))
             {
+                logger.Info<uSyncService>("Import Triggered by downlevel change {0}", e.Folder);
+
                 var handlers = GetHandlersByEntitytype(e.EntityTypes, e.HandlerOptions);
                 if (handlers.Count > 0)
                     this.Import(e.Folder, false, handlers, null);
@@ -412,9 +414,9 @@ namespace uSync8.BackOffice
         /// <param name="e"></param>
         private void USyncTriggers_DoExport(uSyncTriggerArgs e)
         {
-            logger.Info<uSyncService>("Export Triggered by downlevel change");
             if (e.EntityTypes != null && !string.IsNullOrWhiteSpace(e.Folder))
             {
+                logger.Info<uSyncService>("Export Triggered by downlevel change {0}", e.Folder);
                 var handlers = GetHandlersByEntitytype(e.EntityTypes, e.HandlerOptions);
                 if (handlers.Count > 0)
                 {

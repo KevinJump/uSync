@@ -21,16 +21,18 @@ namespace uSync8.Core.Serialization
         protected readonly IEntityService entityService;
         protected readonly ILogger logger;
 
+        protected readonly Type serializerType;
+
         protected SyncSerializerBase(
             IEntityService entityService, ILogger logger)
         {
             this.logger = logger;
 
             // read the attribute
-            var thisType = GetType();
-            var meta = thisType.GetCustomAttribute<SyncSerializerAttribute>(false);
+            serializerType = this.GetType();
+            var meta = serializerType.GetCustomAttribute<SyncSerializerAttribute>(false);
             if (meta == null)
-                throw new InvalidOperationException($"the uSyncSerializer {thisType} requires a {typeof(SyncSerializerAttribute)}");
+                throw new InvalidOperationException($"the uSyncSerializer {serializerType} requires a {typeof(SyncSerializerAttribute)}");
 
             Name = meta.Name;
             Id = meta.Id;
@@ -74,27 +76,27 @@ namespace uSync8.Core.Serialization
 
             if ( flags.HasFlag(SerializerFlags.Force) || IsCurrent(node) > ChangeType.NoChange)
             {
-                logger.Debug<ISyncSerializerBase>("Base: Deserializing {0}", ItemType);
+                logger.Debug(serializerType, "Base: Deserializing {0}", ItemType);
                 var result = DeserializeCore(node);
 
                 if (result.Success)
                 {
-                    logger.Debug<ISyncSerializerBase>("Base: Deserialize Core Success {0}", ItemType);
+                    logger.Debug(serializerType, "Base: Deserialize Core Success {0}", ItemType);
 
                     if (!flags.HasFlag(SerializerFlags.DoNotSave))
                     {
-                        logger.Debug<ISyncSerializerBase>("Base: Serializer Saving (No DoNotSaveFlag) {0}", result.Item.Id); 
+                        logger.Debug(serializerType, "Base: Serializer Saving (No DoNotSaveFlag) {0}", result.Item.Id); 
                         // save 
                         SaveItem(result.Item);
                     }
 
                     if (flags.HasFlag(SerializerFlags.OnePass))
                     {
-                        logger.Debug<ISyncSerializerBase>("Base: Processing item in one pass {0}", result.Item.Id);
+                        logger.Debug(serializerType, "Base: Processing item in one pass {0}", result.Item.Id);
 
                         var secondAttempt = DeserializeSecondPass(result.Item, node, flags);
 
-                        logger.Debug<TObject>("Base: Second Pass Result {0} {1}", result.Item.Id, secondAttempt.Success);
+                        logger.Debug(serializerType, "Base: Second Pass Result {0} {1}", result.Item.Id, secondAttempt.Success);
                         
                         // if its the second pass, we return the results of that pass
                         return secondAttempt;
@@ -170,7 +172,7 @@ namespace uSync8.Core.Serialization
 
             var actionType = node.Attribute("Change").ValueOrDefault<SyncActionType>(SyncActionType.None);
 
-            logger.Debug<ISyncSerializerBase>("Empty Node : Processing Action {0}", actionType); 
+            logger.Debug(serializerType, "Empty Node : Processing Action {0}", actionType); 
 
             var (key, alias) = FindKeyAndAlias(node);
             
@@ -191,7 +193,7 @@ namespace uSync8.Core.Serialization
 
         protected virtual SyncAttempt<TObject> ProcessDelete(Guid key, string alias, SerializerFlags flags)
         {
-            logger.Debug<ISyncSerializerBase>("Processing Delete {0} {1}", key, alias);
+            logger.Debug(serializerType, "Processing Delete {0} {1}", key, alias);
 
             var item = this.FindItem(key);
             if (item == null && !string.IsNullOrWhiteSpace(alias))
@@ -206,18 +208,18 @@ namespace uSync8.Core.Serialization
 
             if (item != null)
             {
-                logger.Debug<ISyncSerializerBase>("Deleting Item : {0}", item.Id); 
+                logger.Debug(serializerType, "Deleting Item : {0}", item.Id); 
                 DeleteItem(item);
                 return SyncAttempt<TObject>.Succeed(alias, ChangeType.Delete);
             }
 
-            logger.Debug<ISyncSerializerBase>("Delete Item not found");
+            logger.Debug(serializerType, "Delete Item not found");
             return SyncAttempt<TObject>.Succeed(alias, ChangeType.NoChange);
         }
 
         protected virtual SyncAttempt<TObject> ProcessRename(Guid key, string alias, SerializerFlags flags)
         {
-            logger.Debug<ISyncSerializerBase>("Process Rename (no action)");
+            logger.Debug(serializerType, "Process Rename (no action)");
             return SyncAttempt<TObject>.Succeed(alias, ChangeType.NoChange);
         }
 
@@ -278,7 +280,7 @@ namespace uSync8.Core.Serialization
 
         public virtual SyncAttempt<XElement> SerializeEmpty(TObject item, SyncActionType change, string alias)
         {
-            logger.Debug<TObject>("Base: Serializing Empty Element (Delete or rename) {0}", alias);
+            logger.Debug(serializerType, "Base: Serializing Empty Element (Delete or rename) {0}", alias);
 
             if (string.IsNullOrEmpty(alias))
                 alias = ItemAlias(item);
@@ -354,7 +356,7 @@ namespace uSync8.Core.Serialization
         {
             var (key, alias) = FindKeyAndAlias(node);
 
-            logger.Debug<TObject>("Base: Find Item {0} [{1}]", key, alias);
+            logger.Verbose(serializerType, "Base: Find Item {0} [{1}]", key, alias);
 
             if (key != Guid.Empty)
             {
@@ -364,13 +366,12 @@ namespace uSync8.Core.Serialization
 
             if (!string.IsNullOrWhiteSpace(alias))
             {
-                logger.Debug<TObject>("Base: Lookup by Alias: {0}", alias);
+                logger.Verbose(serializerType, "Base: Lookup by Alias: {0}", alias);
                 return FindItem(alias);
             }
 
             return default(TObject);
         }
         #endregion
-
     }
 }
