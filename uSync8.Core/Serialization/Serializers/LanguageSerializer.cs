@@ -81,7 +81,8 @@ namespace uSync8.Core.Serialization.Serializers
         {
             var node = InitializeBaseNode(item, item.IsoCode);
 
-            node.Add(new XElement("Id", item.Id));
+            // don't serialize the ID, it changes and we don't use it! 
+            // node.Add(new XElement("Id", item.Id));
             node.Add(new XElement("IsoCode", item.IsoCode));
             node.Add(new XElement("CultureName", item.CultureName));
             node.Add(new XElement("IsMandatory", item.IsMandatory));
