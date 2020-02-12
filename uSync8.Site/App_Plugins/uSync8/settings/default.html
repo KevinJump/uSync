@@ -2,33 +2,40 @@
 
     <umb-box>
         <umb-box-content>
+            <div class="flex justify-between items-center">
+                <div class="usync-main-buttons">
 
-            <div class="usync-main-buttons">
+                    <umb-button-group default-button="vm.reportButton.defaultButton"
+                                      sub-buttons="vm.reportButton.subButtons"
+                                      direction="down"
+                                      float="left"
+                                      button-style="action"
+                                      state="vm.reportButton.state">
 
-                <umb-button-group default-button="vm.reportButton.defaultButton"
-                                  sub-buttons="vm.reportButton.subButtons"
-                                  direction="down"
-                                  float="left"
-                                  button-style="action"
-                                  state="vm.reportButton.state">
+                    </umb-button-group>
 
-                </umb-button-group>
+                    <umb-button-group default-button="vm.importButton.defaultButton"
+                                      sub-buttons="vm.importButton.subButtons"
+                                      direction="down"
+                                      float="left"
+                                      button-style="success"
+                                      state="vm.importButton.state">
+                    </umb-button-group>
 
-                <umb-button-group default-button="vm.importButton.defaultButton"
-                                  sub-buttons="vm.importButton.subButtons"
-                                  direction="down"
-                                  float="left"
-                                  button-style="success"
-                                  state="vm.importButton.state">
-                </umb-button-group>
+                    <umb-button type="button"
+                                button-style="info"
+                                label-key="usync_export"
+                                action="vm.exportItems()"
+                                disabled="vm.working">
+                    </umb-button>
 
-                <umb-button type="button"
-                            button-style="info"
-                            label-key="usync_export"
-                            action="vm.exportItems()"
-                            disabled="vm.working">
-                </umb-button>
-               
+                </div>
+
+                <div>
+                    <div ng-if="vm.savings.show">
+                        {{vm.savings.title}}  {{vm.savings.message}}
+                    </div>
+                </div>
             </div>
         </umb-box-content>
     </umb-box>

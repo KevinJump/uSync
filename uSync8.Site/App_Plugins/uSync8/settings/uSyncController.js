@@ -65,6 +65,15 @@
         vm.calcPercentage = calcPercentage;
         vm.openDetail = openDetail;
 
+        vm.savings = { show: false, title: "", message: "" };
+        vm.godo = [
+            { time: 0, message: "Worth checking" },
+            { time: 180, message: "Go make a cup of tea" },
+            { time: 300, message: "Go have a quick chat" },
+            { time: 900, message: "Go for a nice walk outside 🚶‍♀️" },
+            { time: 3600, message: "You deserve a break" }
+        ]; 
+
         init();
 
         function init() {
@@ -122,6 +131,8 @@
                     vm.working = false;
                     vm.reported = true;
                     vm.importButton.state = 'success';
+
+                    calculateTimeSaved(vm.results);
                 }, function (error) {
                     vm.importButton.state = 'error';
                     notificationsService.error('Failed', error.data.ExceptionMessage);
@@ -129,6 +140,30 @@
                     vm.working = false;
                     vm.reported = true;
                 });
+        }
+
+
+        // add a little joy to the process.
+        function calculateTimeSaved(results) {
+            var changes = countChanges(results);
+            var time = changes * 26.5; 
+
+            var duration = moment.duration(time, 'seconds');
+
+            if (time >= 180) {
+                vm.savings.show = true;
+                vm.savings.title = 'You just saved ' + duration.humanize() + "!";
+                vm.savings.message = '';
+
+                for (let x = 0; x < vm.godo.length; x++) {
+                    if (vm.godo[x].time < time) {
+                        vm.savings.message = vm.godo[x].message;
+                    }
+                    else {
+                        break;
+                    }
+                }
+            }
         }
 
         //////////////
@@ -214,6 +249,7 @@
             vm.working = true;
             vm.runmode = mode;
             vm.hideLink = false;
+            vm.savings.show = false;
 
             vm.status = {
                 Count: 0,
