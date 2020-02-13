@@ -209,6 +209,7 @@ namespace uSync8.ContentEdition.Serializers
                 var parent = FindParent(parentNode, false);
                 if (parent == null)
                 {
+                    logger.Debug(serializerType, "Find Parent failed, will search by path");
                     var path = info.Element("Path").ValueOrDefault(string.Empty);
                     if (!string.IsNullOrWhiteSpace(path))
                     {
@@ -217,19 +218,34 @@ namespace uSync8.ContentEdition.Serializers
                 }
 
                 if (parent != null)
+                {
                     parentId = parent.Id;
+                }
+                else
+                {
+                    logger.Debug(serializerType, "Unable to find parent but parent node is visible");
+                }
             }
 
             if (item.ParentId != parentId)
+            {
+                logger.Verbose(serializerType, "{Id} Setting Parent {ParentId}", item.Id, parentId);
                 item.ParentId = parentId;
+            }
 
             var key = node.GetKey();
             if (key != Guid.Empty && item.Key != key)
+            {
+                logger.Verbose(serializerType, "{Id} Setting Key {Key}", item.Id, key);
                 item.Key = key;
+            }
 
             var createDate = info.Element("CreateDate").ValueOrDefault(item.CreateDate);
             if (item.CreateDate != createDate)
+            {
+                logger.Verbose(serializerType, "{id} Setting CreateDate", item.Id, createDate);
                 item.CreateDate = createDate;
+            }
 
             DeserializeName(item, node);
 
@@ -322,7 +338,7 @@ namespace uSync8.ContentEdition.Serializers
                             var itemValue = GetImportValue(propValue, current.PropertyType, culture, segment);
                             item.SetValue(alias, itemValue, culture, segment);
                             logger.Debug(serializerType, "Property {alias} value set", alias);
-                            logger.Verbose(serializerType, "Property [{alias}] : {itemValue}", alias, itemValue);
+                            logger.Verbose(serializerType, "{Id} Property [{alias}] : {itemValue}", item.Id, alias, itemValue);
                         }
                         catch (Exception ex)
                         {
@@ -346,7 +362,10 @@ namespace uSync8.ContentEdition.Serializers
         protected void HandleSortOrder(TObject item, int sortOrder)
         {
             if (sortOrder != -1)
+            {
+                logger.Verbose(serializerType, "{id} Setting Sort Order {sortOrder}", item.Id, sortOrder);
                 item.SortOrder = sortOrder;
+            }
         }
 
         protected abstract void HandleTrashedState(TObject item, bool trashed);
@@ -538,6 +557,7 @@ namespace uSync8.ContentEdition.Serializers
             var key = node.Attribute("Key").ValueOrDefault(Guid.Empty);
             if (key != Guid.Empty)
             {
+                logger.Verbose(serializerType, "Looking for Parent by Key {Key}", key);
                 item = FindItem(key);
                 if (item != null) return item;
             }
@@ -545,6 +565,7 @@ namespace uSync8.ContentEdition.Serializers
             if (item == null && searchByAlias)
             {
                 var alias = node.ValueOrDefault(string.Empty);
+                logger.Verbose(serializerType, "Looking for Parent by Alias {Alias}", alias);
                 if (!string.IsNullOrEmpty(alias))
                 {
                     item = FindItem(node.ValueOrDefault(alias));
@@ -555,6 +576,7 @@ namespace uSync8.ContentEdition.Serializers
         }
         protected TObject FindParentByPath(string path)
         {
+            logger.Verbose(serializerType, "Looking for item by path {Path}", path);
             var folders = path.ToDelimitedList("/").ToList();
             return FindByPath(folders.Take(folders.Count - 1));
         }
@@ -563,15 +585,22 @@ namespace uSync8.ContentEdition.Serializers
             var item = default(TObject);
             foreach (var folder in folders)
             {
+                logger.Verbose(serializerType, "Looking for Item in folder {folder}", folder);
                 var next = FindItem(folder, item);
                 if (next == null)
+                {
+                    // if we get lost 1/2 way we are returning that as the path? which would put us in an odd place?
+                    logger.Verbose(serializerType, "Didn't find {folder} returning last found Parent", folder);
                     return item;
+                }
 
                 item = next;
             }
 
-            return item;
+            if (item == null) logger.Debug(serializerType, "No item(s) found in the path");
 
+            logger.Verbose(serializerType, "Returning Parent Item {Name} {id}", item.Name, item.Id);
+            return item;
         }
 
 
