@@ -25,6 +25,8 @@ namespace uSync.Commands
         }
     }
 
+
+    [ComposeAfter(typeof(uSync8.BackOffice.uSyncBackOfficeComposer))]
     public class uSyncCommandBootedComposer : IUserComposer
     {
         public void Compose(Composition composition)
