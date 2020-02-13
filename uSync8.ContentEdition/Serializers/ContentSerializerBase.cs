@@ -225,8 +225,8 @@ namespace uSync8.ContentEdition.Serializers
                 if (parent != null)
                 {
                     parentId = parent.Id;
-                    nodePath = string.Join(",", parent.Path, item.Id);
-                    nodeLevel = parent.Level + 1;
+                    nodePath = CalculateNodePath(item, parent);
+                    nodeLevel = CalculateNodeLevel(item, parent);
                 }
                 else
                 {
