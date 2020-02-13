@@ -14,6 +14,7 @@
 8.2 - uSync.Complete companion release 
 8.3 - Language Rename support for Umbraco 8.3
 8.4 - Performance improvements for Umbraco 8.4
+8.5 - Lookup caching for speed.
 </releaseNotes>
     <tags>umbraco usync</tags>
   </metadata>

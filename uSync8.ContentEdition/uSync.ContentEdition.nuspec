@@ -13,6 +13,7 @@
       8.0 - Initial Release for Umbraco 8
       8.1 - Compatability Release for Umbraco 8.1
       8.4 - One way dictionary Items, Content Creation Date in file
+      8.5 - Path and Level updates, lookup caching
     </releaseNotes>
     <dependencies>
       <dependency id="uSync" version="$depends$" />
