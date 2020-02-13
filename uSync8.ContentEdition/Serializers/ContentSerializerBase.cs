@@ -203,18 +203,21 @@ namespace uSync8.ContentEdition.Serializers
             if (node == null || node.Element("Info") == null) return Attempt.Fail("Missing Node info XML Invalid");
             var info = node.Element("Info");
 
-            var friendlyPath = info.Element("Path").ValueOrDefault(string.Empty);
 
             var parentId = -1;
+            var nodeLevel = CalculateNodeLevel(item, default(TObject));
+            var nodePath = CalculateNodePath(item, default(TObject)); 
+
             var parentNode = info.Element("Parent");
             if (parentNode != null)
             {
                 var parent = FindParent(parentNode, false);
                 if (parent == null)
                 {
-                    logger.Debug(serializerType, "Find Parent failed, will search by path");
+                    var friendlyPath = info.Element("Path").ValueOrDefault(string.Empty);
                     if (!string.IsNullOrWhiteSpace(friendlyPath))
                     {
+                        logger.Debug(serializerType, "Find Parent failed, will search by path {FriendlyPath}", friendlyPath);
                         parent = FindParentByPath(friendlyPath);
                     }
                 }
@@ -222,10 +225,12 @@ namespace uSync8.ContentEdition.Serializers
                 if (parent != null)
                 {
                     parentId = parent.Id;
+                    nodePath = string.Join(",", parent.Path, item.Id);
+                    nodeLevel = parent.Level + 1;
                 }
                 else
                 {
-                    logger.Debug(serializerType, "Unable to find parent but parent node is visible");
+                    logger.Debug(serializerType, "Unable to find parent but parent node is set in config");
                 }
             }
 
@@ -235,19 +240,18 @@ namespace uSync8.ContentEdition.Serializers
                 item.ParentId = parentId;
             }
 
-
-            var idPath = CalculateItemPath(friendlyPath);
-            if (item.Path != idPath)
+            // the following are calculated (not in the file
+            // because they might change without this node being saved).
+            if (item.Path != nodePath)
             {
-                logger.Debug(serializerType, "{Id} Setting Path {idPath} was {oldPath}", item.Id, idPath, item.Path);
-                item.Path = idPath;               
+                logger.Debug(serializerType, "{Id} Setting Path {idPath} was {oldPath}", item.Id, nodePath, item.Path);
+                item.Path = nodePath;               
             }
 
-            var level = idPath.Split(',').Length - 1;
-            if (item.Level != level)
+            if (item.Level != nodeLevel)
             {
-                logger.Debug(serializerType, "{Id} Setting Level to {Level} was {OldLevel}", item.Id, level, item.Level);                                      
-                item.Level = level;
+                logger.Debug(serializerType, "{Id} Setting Level to {Level} was {OldLevel}", item.Id, nodeLevel, item.Level);
+                item.Level = nodeLevel;
             }
 
 
@@ -492,27 +496,6 @@ namespace uSync8.ContentEdition.Serializers
             pathCache[item.Path] = path + "/" + item.Name.ToSafeAlias();
             return pathCache[item.Path];
         }
-
-        protected virtual string CalculateItemPath(string path)
-        {
-            var folders = path.ToDelimitedList("/").ToList();
-
-            var ids = new List<int>() { -1 };
-
-            TObject parent = default(TObject);
-            foreach(var folder in folders)
-            {
-                var item = FindItem(folder, parent);
-                if (item != null)
-                {
-                    ids.Add(item.Id);
-                    parent = item;
-                }
-            }
-
-            return string.Join(",", ids);
-        }
-
 
         public override SyncAttempt<XElement> SerializeEmpty(TObject item, SyncActionType change, string alias)
         {

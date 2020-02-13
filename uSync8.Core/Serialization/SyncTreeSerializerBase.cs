@@ -49,5 +49,36 @@ namespace uSync8.Core.Serialization
         #endregion
 
 
+        /// <summary>
+        ///  calculates the Umbraco Path value for an item, based on the parent
+        /// </summary>
+        protected string CalculateNodePath(TObject item, TObject parent)
+        {
+            if (parent == null)
+            {
+                return string.Join(",", -1, item.Id);
+            }
+            else
+            {
+                return string.Join(",", parent.Path, item.Id);
+            }
+        }
+
+        /// <summary>
+        ///  calculates the Level based on the parent.
+        /// </summary>
+        protected int CalculateNodeLevel(TObject item, TObject parent)
+        {
+            if (parent == null)
+            {
+                return 1;
+            }
+            else
+            {
+                return parent.Level + 1;
+            }
+        }
+
+
     }
 }
