@@ -117,7 +117,7 @@ namespace uSync8.BackOffice.SyncHandlers
             {
                 callback?.Invoke($"{Path.GetFileNameWithoutExtension(item.Node.File)}", item.Index, nodes.Count);
 
-                logger.Debug(handlerType, "{Index} Importing: {File}, [Level {Level}", item.Index, item.Node.File, item.Node.Level);
+                logger.Debug(handlerType, "{Index} Importing: {File}, [Level {Level}]", item.Index, item.Node.File, item.Node.Level);
 
                 var attempt = Import(item.Node.File, config, flags);
                 if (attempt.Success)

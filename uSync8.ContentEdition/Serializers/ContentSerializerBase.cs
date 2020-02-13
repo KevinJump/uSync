@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Xml.Linq;
 
 using Umbraco.Core;
@@ -202,6 +203,8 @@ namespace uSync8.ContentEdition.Serializers
             if (node == null || node.Element("Info") == null) return Attempt.Fail("Missing Node info XML Invalid");
             var info = node.Element("Info");
 
+            var friendlyPath = info.Element("Path").ValueOrDefault(string.Empty);
+
             var parentId = -1;
             var parentNode = info.Element("Parent");
             if (parentNode != null)
@@ -210,10 +213,9 @@ namespace uSync8.ContentEdition.Serializers
                 if (parent == null)
                 {
                     logger.Debug(serializerType, "Find Parent failed, will search by path");
-                    var path = info.Element("Path").ValueOrDefault(string.Empty);
-                    if (!string.IsNullOrWhiteSpace(path))
+                    if (!string.IsNullOrWhiteSpace(friendlyPath))
                     {
-                        parent = FindParentByPath(path);
+                        parent = FindParentByPath(friendlyPath);
                     }
                 }
 
@@ -232,6 +234,22 @@ namespace uSync8.ContentEdition.Serializers
                 logger.Verbose(serializerType, "{Id} Setting Parent {ParentId}", item.Id, parentId);
                 item.ParentId = parentId;
             }
+
+
+            var idPath = CalculateItemPath(friendlyPath);
+            if (item.Path != idPath)
+            {
+                logger.Debug(serializerType, "{Id} Setting Path {idPath} was {oldPath}", item.Id, idPath, item.Path);
+                item.Path = idPath;               
+            }
+
+            var level = idPath.Split(',').Length - 1;
+            if (item.Level != level)
+            {
+                logger.Debug(serializerType, "{Id} Setting Level to {Level} was {OldLevel}", item.Id, level, item.Level);                                      
+                item.Level = level;
+            }
+
 
             var key = node.GetKey();
             if (key != Guid.Empty && item.Key != key)
@@ -475,6 +493,27 @@ namespace uSync8.ContentEdition.Serializers
             return pathCache[item.Path];
         }
 
+        protected virtual string CalculateItemPath(string path)
+        {
+            var folders = path.ToDelimitedList("/").ToList();
+
+            var ids = new List<int>() { -1 };
+
+            TObject parent = default(TObject);
+            foreach(var folder in folders)
+            {
+                var item = FindItem(folder, parent);
+                if (item != null)
+                {
+                    ids.Add(item.Id);
+                    parent = item;
+                }
+            }
+
+            return string.Join(",", ids);
+        }
+
+
         public override SyncAttempt<XElement> SerializeEmpty(TObject item, SyncActionType change, string alias)
         {
             var attempt = base.SerializeEmpty(item, change, alias);
@@ -576,7 +615,7 @@ namespace uSync8.ContentEdition.Serializers
         }
         protected TObject FindParentByPath(string path)
         {
-            logger.Verbose(serializerType, "Looking for item by path {Path}", path);
+            logger.Debug(serializerType, "Looking for Parent by path {Path}", path);
             var folders = path.ToDelimitedList("/").ToList();
             return FindByPath(folders.Take(folders.Count - 1));
         }
@@ -597,9 +636,15 @@ namespace uSync8.ContentEdition.Serializers
                 item = next;
             }
 
-            if (item == null) logger.Debug(serializerType, "No item(s) found in the path");
+            if (item == null)
+            {
+                logger.Debug(serializerType, "Parent not found in the path");
+            }
+            else
+            {
+                logger.Verbose(serializerType, "Parent Item Found {Name} {id}", item.Name, item.Id);
+            }
 
-            logger.Verbose(serializerType, "Returning Parent Item {Name} {id}", item.Name, item.Id);
             return item;
         }
 
