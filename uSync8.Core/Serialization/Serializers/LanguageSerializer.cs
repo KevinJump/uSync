@@ -54,9 +54,25 @@ namespace uSync8.Core.Serialization.Serializers
             item.IsDefault = node.Element("IsDefault").ValueOrDefault(false);
             item.IsMandatory = node.Element("IsMandatory").ValueOrDefault(false);
 
-            var fallback = node.Element("Fallback").ValueOrDefault(0);
-            if (fallback > 0)
-                item.FallbackLanguageId = fallback;
+            var fallbackIso = node.Element("Fallback").ValueOrDefault(string.Empty);
+            if (!string.IsNullOrWhiteSpace(fallbackIso))
+            {
+                if (int.TryParse(fallbackIso, out int fallbackId))
+                {
+                    // legacy, the fallback value is an int :( 
+                    item.FallbackLanguageId = fallbackId;
+                }
+                else
+                {
+                    // 8.5+ we store the iso in the fallback value, its more reliable.
+                    var fallback = localizationService.GetLanguageByIsoCode(fallbackIso);
+                    if (fallback != null)
+                    {
+                        item.FallbackLanguageId = fallback.Id;
+                    }
+                }
+            }
+                
 
             // logger.Debug<ILanguage>("Saving Language");
             //localizationService.Save(item);
@@ -107,7 +123,13 @@ namespace uSync8.Core.Serialization.Serializers
             node.Add(new XElement("IsDefault", item.IsDefault));
 
             if (item.FallbackLanguageId != null)
-                node.Add(new XElement("Fallback", item.FallbackLanguageId.Value));
+            {
+                var fallback = localizationService.GetLanguageById(item.FallbackLanguageId.Value);
+                if (fallback != null)
+                {
+                    node.Add(new XElement("Fallback", fallback.IsoCode));
+                }
+            }
 
             return SyncAttempt<XElement>.SucceedIf(
                 node != null,
