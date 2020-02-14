@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-
+using System.Xml.Linq;
 using Umbraco.Core;
 using Umbraco.Core.Cache;
 using Umbraco.Core.Logging;
@@ -107,7 +107,16 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
                     this.ExportAll(Path.Combine(rootFolder, DefaultFolder), DefaultConfig, null);
                 }
 
+
                 var attempts = Export(item, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
+
+                if (!newItem && item.WasPropertyDirty(nameof(ILanguage.IsoCode)))
+                {
+                    // The language code changed, this can mean we need to do a full content export. 
+                    // + we should export the languages again!
+                    uSyncTriggers.TriggerExport(rootFolder, new List<string>() { 
+                        UdiEntityType.Document, UdiEntityType.Language }, null);
+                }
 
                 // we always clean up languages, because of the way they are stored. 
                 foreach (var attempt in attempts.Where(x => x.Success))
@@ -115,11 +124,6 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
                     this.CleanUp(item, attempt.FileName, Path.Combine(rootFolder, this.DefaultFolder));
                 }
 
-                if (!newItem && item.WasPropertyDirty(nameof(ILanguage.IsoCode)))
-                {
-                    // The language code changed, this can mean we need to do a full content export. 
-                    uSyncTriggers.TriggerExport(rootFolder, new List<string>() { UdiEntityType.Document }, null);
-                }
             }
         }
 
@@ -150,18 +154,37 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             // for languages we also clean up by id. 
             // this happens when the language changes .
             var physicalFile = syncFileService.GetAbsPath(newFile);
+            var installedLanguages = localizationService.GetAllLanguages()
+                .Select(x => x.IsoCode).ToList();
 
             var files = syncFileService.GetFiles(folder, "*.config");
 
             foreach (string file in files)
             {
-                if (!file.InvariantEquals(physicalFile))
+                var node = syncFileService.LoadXElement(file);
+                var IsoCode = node.Element("IsoCode").ValueOrDefault(string.Empty);
+
+                if (!String.IsNullOrWhiteSpace(IsoCode))
                 {
-                    var node = syncFileService.LoadXElement(file);
-                    if (node.Element("Id").ValueOrDefault(0) == item.Id)
+                    if (!file.InvariantEquals(physicalFile))
                     {
-                        logger.Debug<LanguageHandler>("Found Matching Lang File, cleaning");
-                        var attempt = serializer.SerializeEmpty(item, SyncActionType.Rename, node.GetAlias());
+                        // not the file we just saved, but matching IsoCode, we remove it.
+                        if (node.Element("IsoCode").ValueOrDefault(string.Empty) == item.IsoCode)
+                        {
+                            logger.Debug<LanguageHandler>("Found Matching Lang File, cleaning");
+                            var attempt = serializer.SerializeEmpty(item, SyncActionType.Rename, node.GetAlias());
+                            if (attempt.Success)
+                            {
+                                syncFileService.SaveXElement(attempt.Item, file);
+                            }
+                        }
+                    }
+
+                    if (!installedLanguages.InvariantContains(IsoCode))
+                    {
+                        // language is no longer installed, make the file empty. 
+                        logger.Debug<LanguageHandler>("Language in file is not on the site, cleaning");
+                        var attempt = serializer.SerializeEmpty(item, SyncActionType.Delete, node.GetAlias());
                         if (attempt.Success)
                         {
                             syncFileService.SaveXElement(attempt.Item, file);
@@ -169,7 +192,6 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
                     }
                 }
             }
-
         }
     }
 }

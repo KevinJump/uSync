@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -27,12 +28,6 @@ namespace uSync8.Core.Serialization.Serializers
 
         protected override SyncAttempt<ILanguage> DeserializeCore(XElement node)
         {
-            if (node.Element("CultureName") == null 
-                || node.Element("IsoCode") == null)
-            {
-                throw new ArgumentException("Invalid XML");
-            }
-
             var isoCode = node.Element("IsoCode").ValueOrDefault(string.Empty);
             logger.Debug<LanguageSerializer>("Derserializing {0}", isoCode);
 
@@ -45,7 +40,17 @@ namespace uSync8.Core.Serialization.Serializers
             }
 
             item.IsoCode = isoCode;
-            item.CultureName = node.Element("CultureName").ValueOrDefault(string.Empty);
+
+            try
+            {
+                var culture = CultureInfo.GetCultureInfo(isoCode);
+                item.CultureName = culture.DisplayName;
+            }
+            catch
+            {
+                logger.Warn<LanguageSerializer>("Can't set culture name based on IsoCode");
+            }
+
             item.IsDefault = node.Element("IsDefault").ValueOrDefault(false);
             item.IsMandatory = node.Element("IsMandatory").ValueOrDefault(false);
 
@@ -55,6 +60,20 @@ namespace uSync8.Core.Serialization.Serializers
 
             // logger.Debug<ILanguage>("Saving Language");
             //localizationService.Save(item);
+
+            return SyncAttempt<ILanguage>.Succeed(item.CultureName, item, ChangeType.Import);
+        }
+
+        /// <summary>
+        ///  second pass we set the default language again (because you can't just set it)
+        /// </summary>
+        public override SyncAttempt<ILanguage> DeserializeSecondPass(ILanguage item, XElement node, SerializerFlags flags)
+        {
+            logger.Debug<LanguageSerializer>("Language Second Pass {IsoCode}", item.IsoCode);
+            item.IsDefault = node.Element("IsDefault").ValueOrDefault(false);
+
+            if (!flags.HasFlag(SerializerFlags.DoNotSave) && item.IsDirty())
+                localizationService.Save(item);
 
             return SyncAttempt<ILanguage>.Succeed(item.CultureName, item, ChangeType.Import);
         }
@@ -84,7 +103,6 @@ namespace uSync8.Core.Serialization.Serializers
             // don't serialize the ID, it changes and we don't use it! 
             // node.Add(new XElement("Id", item.Id));
             node.Add(new XElement("IsoCode", item.IsoCode));
-            node.Add(new XElement("CultureName", item.CultureName));
             node.Add(new XElement("IsMandatory", item.IsMandatory));
             node.Add(new XElement("IsDefault", item.IsDefault));
 
@@ -102,7 +120,6 @@ namespace uSync8.Core.Serialization.Serializers
         public override bool IsValid(XElement node)
             => node.Name.LocalName == this.ItemType
                 && node.GetAlias() != string.Empty
-                && node.Element("CultureName") != null 
                 && node.Element("IsoCode") != null;
 
         protected override ILanguage FindItem(string alias)
@@ -125,6 +142,7 @@ namespace uSync8.Core.Serialization.Serializers
 
         protected override void DeleteItem(ILanguage item)
             => localizationService.Delete(item);
+            
 
         protected override XElement CleanseNode(XElement node)
         {
