@@ -319,11 +319,15 @@ namespace uSync8.ContentEdition.Serializers
 
                     logger.Verbose(serializerType, "Derserialize Property {0} {1}", alias, current.PropertyType.PropertyEditorAlias);
 
-                    foreach (var value in property.Elements("Value"))
+                    var values = property.Elements("Value").ToList();
+
+                    foreach (var value in values)
                     {
                         var culture = value.Attribute("Culture").ValueOrDefault(string.Empty);
                         var segment = value.Attribute("Segment").ValueOrDefault(string.Empty);
                         var propValue = value.ValueOrDefault(string.Empty);
+
+                        logger.Verbose(serializerType, "{Property} Culture {Culture} Segment {Segment}", alias, culture, segment);
 
                         try
                         {
@@ -357,8 +361,32 @@ namespace uSync8.ContentEdition.Serializers
                                     break;
                                 }
                             }
+                            else
+                            {
+                                // no culture, but we have to check, because if the property now varies by culture, this can have a random no-cultured value in it?
+                                if (current.PropertyType.VariesByCulture())
+                                {
+
+                                    if (values.Count == 1)
+                                    {
+                                        // there is only one value - so we should set the default variant with this for consistancy?
+                                        culture = localizationService.GetDefaultLanguageIsoCode();
+                                        logger.Info(serializerType, "Property {Alias} contains a single value that has no culture setting default culture {Culture}", alias, culture);
+                                    }
+                                    else
+                                    {
+                                        logger.Warn(serializerType, "Property {Alias} contains a value that has no culture but this property varies by culture so this value has no effect", alias);
+                                        break;
+                                    }
+                                }
+                            }
+
+                            // get here ... set the value
                             var itemValue = GetImportValue(propValue, current.PropertyType, culture, segment);
-                            item.SetValue(alias, itemValue, culture, segment);
+                            item.SetValue(alias, itemValue,
+                                string.IsNullOrEmpty(culture) ? null : culture,
+                                string.IsNullOrEmpty(segment) ? null : segment);
+
                             logger.Debug(serializerType, "Property {alias} value set", alias);
                             logger.Verbose(serializerType, "{Id} Property [{alias}] : {itemValue}", item.Id, alias, itemValue);
                         }
@@ -366,7 +394,7 @@ namespace uSync8.ContentEdition.Serializers
                         {
                             // capture here to be less agressive with failure. 
                             // if one property fails the rest will still go in.
-                            logger.Warn(serializerType, $"Failed to set [{alias}] {propValue} Ex: {0}", ex.ToString());
+                            logger.Warn(serializerType, "Failed to set [{alias}] {propValue} Ex: {Exception}", alias, propValue, ex.ToString());
                             errors += $"Failed to set [{alias}] {ex.Message}";
                         }
                     }
