@@ -54,25 +54,9 @@ namespace uSync8.Core.Serialization.Serializers
             item.IsDefault = node.Element("IsDefault").ValueOrDefault(false);
             item.IsMandatory = node.Element("IsMandatory").ValueOrDefault(false);
 
-            var fallbackIso = node.Element("Fallback").ValueOrDefault(string.Empty);
-            if (!string.IsNullOrWhiteSpace(fallbackIso))
-            {
-                if (int.TryParse(fallbackIso, out int fallbackId))
-                {
-                    // legacy, the fallback value is an int :( 
-                    item.FallbackLanguageId = fallbackId;
-                }
-                else
-                {
-                    // 8.5+ we store the iso in the fallback value, its more reliable.
-                    var fallback = localizationService.GetLanguageByIsoCode(fallbackIso);
-                    if (fallback != null)
-                    {
-                        item.FallbackLanguageId = fallback.Id;
-                    }
-                }
-            }
-                
+            var fallbackId = GetFallbackLanguageId(item, node);
+            if (fallbackId > 0)
+                item.FallbackLanguageId = fallbackId;
 
             // logger.Debug<ILanguage>("Saving Language");
             //localizationService.Save(item);
@@ -88,10 +72,39 @@ namespace uSync8.Core.Serialization.Serializers
             logger.Debug<LanguageSerializer>("Language Second Pass {IsoCode}", item.IsoCode);
             item.IsDefault = node.Element("IsDefault").ValueOrDefault(false);
 
+            var fallbackId = GetFallbackLanguageId(item, node);
+            if (fallbackId > 0)
+                item.FallbackLanguageId = fallbackId;
+
             if (!flags.HasFlag(SerializerFlags.DoNotSave) && item.IsDirty())
                 localizationService.Save(item);
 
             return SyncAttempt<ILanguage>.Succeed(item.CultureName, item, ChangeType.Import);
+        }
+
+        private int GetFallbackLanguageId(ILanguage item, XElement node)
+        {
+            var fallbackIso = node.Element("Fallback").ValueOrDefault(string.Empty);
+            if (!string.IsNullOrWhiteSpace(fallbackIso))
+            {
+                if (int.TryParse(fallbackIso, out int fallbackId))
+                {
+                    // legacy, the fallback value is an int :( 
+                    return fallbackId;
+                }
+                else
+                {
+                    // 8.5+ we store the iso in the fallback value, its more reliable.
+                    var fallback = localizationService.GetLanguageByIsoCode(fallbackIso);
+                    if (fallback != null)
+                    {
+                        return fallback.Id;
+                    }
+                }
+            }
+
+            return 0;
+
         }
 
         protected override XElement InitializeBaseNode(ILanguage item, string alias, int level = 0)
