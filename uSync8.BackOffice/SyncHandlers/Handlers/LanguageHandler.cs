@@ -25,7 +25,7 @@ using static Umbraco.Core.Constants;
 namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("languageHandler", "Languages", "Languages", uSyncBackOfficeConstants.Priorites.Languages,
-        Icon = "icon-globe", EntityType = UdiEntityType.Language)]
+        Icon = "icon-globe", EntityType = UdiEntityType.Language, IsTwoPass = true)]
     public class LanguageHandler : SyncHandlerBase<ILanguage, ILocalizationService>, ISyncExtendedHandler
     {
         private readonly ILocalizationService localizationService;
