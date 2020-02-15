@@ -9,7 +9,7 @@ using System.Xml.Linq;
 using Umbraco.Core;
 using Umbraco.Core.Composing;
 using Umbraco.Core.IO;
-using uSync.Commands;
+using uSync.BaseCommands;
 using uSync8.BackOffice.Commands;
 
 namespace uSync.ConsoleApp

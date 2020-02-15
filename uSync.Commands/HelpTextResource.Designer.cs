@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace uSync.Commands {
+namespace uSync.BaseCommands {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace uSync.Commands {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("uSync.Commands.HelpTextResource", typeof(HelpTextResource).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("uSync.BaseCommands.HelpTextResource", typeof(HelpTextResource).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

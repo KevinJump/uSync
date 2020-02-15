@@ -7,7 +7,7 @@
     <ProjectGuid>{6D3B59C1-7A78-43BB-A806-F826FD4477F6}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>uSync.Commands</RootNamespace>
+    <RootNamespace>uSync.BaseCommands</RootNamespace>
     <AssemblyName>uSync.Commands</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -243,6 +243,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\InitCommand.cs" />
+    <Compile Include="Commands\LangCommand.cs" />
     <Compile Include="Commands\QuitCommand.cs" />
     <Compile Include="HelpTextResource.Designer.cs">
       <AutoGen>True</AutoGen>

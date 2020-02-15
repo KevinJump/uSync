@@ -7,7 +7,7 @@ using Umbraco.Core;
 using Umbraco.Core.Composing;
 using uSync8.BackOffice.Commands;
 
-namespace uSync.Commands
+namespace uSync.BaseCommands
 {
     /// <summary>
     ///  when the site won't boot, we register

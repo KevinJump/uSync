@@ -15,7 +15,7 @@ using Umbraco.Core.Migrations.Install;
 using Umbraco.Core.Services;
 using uSync8.BackOffice.Commands;
 
-namespace uSync.Commands
+namespace uSync.BaseCommands
 {
     /// <summary>
     ///  Installs umbraco, assuming you have the connection string setup.
@@ -85,7 +85,11 @@ namespace uSync.Commands
             {
                 // create the sql db file.
                 result = CreateSqlCEDb(connectionString.ConnectionString);
+                if (result != SyncCommandResult.Success)
+                    return result;
             }
+
+            CreateDatabase();
 
             var parameters = args.Where(x => !x.StartsWith("-")).ToArray();
             if (parameters.Length == 2)
@@ -125,6 +129,13 @@ namespace uSync.Commands
                 engine.CreateDatabase();
                 writer.WriteLine(" Created SQL CE Database");
             }
+
+            return SyncCommandResult.Success;
+        }
+
+        private SyncCommandResult CreateDatabase() 
+        {
+            writer.WriteLine(" Creating Database Schema");
 
             var result = databaseBuilder.CreateSchemaAndData();
             if (!result.Success)

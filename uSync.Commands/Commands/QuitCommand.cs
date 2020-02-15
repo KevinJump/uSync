@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using uSync8.BackOffice.Commands;
 
-namespace uSync.Commands
+namespace uSync.BaseCommands
 {
     [SyncCommand("Quit", "quit", "Exits uSync Command line")]
     public class QuitCommand : SyncCommandBase, ISyncCommand
