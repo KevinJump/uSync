@@ -117,16 +117,16 @@ namespace uSync8.Core.Serialization.Serializers
             var node = new XElement("Structure");
             List<KeyValuePair<string, string>> items = new List<KeyValuePair<string, string>>();
            
-            foreach (var allowedType in item.AllowedContentTypes)
+            foreach (var allowedType in item.AllowedContentTypes.OrderBy(x => x.SortOrder))
             {
                 var allowedItem = FindItem(allowedType.Id.Value);
                 if (allowedItem != null)
                 {
-                    items.Add(new KeyValuePair<string, string>(allowedItem.Key.ToString(), allowedItem.Alias));
+                    node.Add(new XElement(ItemType,
+                        new XAttribute("Key", allowedItem.Key),
+                        new XAttribute("SortOrder", allowedItem.SortOrder), allowedItem.Alias));
                 }
             }
-            if (items.Count > 0)
-                node.Add(items.OrderBy(x => x.Value).Select(x => new XElement(ItemType, new XAttribute("Key", x.Key), x.Value)).ToArray());
             return node;
         }
 
@@ -223,6 +223,8 @@ namespace uSync8.Core.Serialization.Serializers
 
                 logger.Debug(serializerType, "Structure: {0}", key);
 
+                var itemSortOrder = baseNode.Attribute("SortOrder").ValueOrDefault(sortOrder);
+
                 IContentTypeBase baseItem = default(IContentTypeBase);
 
                 if (key != Guid.Empty)
@@ -244,9 +246,9 @@ namespace uSync8.Core.Serialization.Serializers
                     logger.Debug(serializerType, "Structure Found {0}", baseItem.Alias);
 
                     allowed.Add(new ContentTypeSort(
-                        new Lazy<int>(() => baseItem.Id), sortOrder, baseItem.Alias));
+                        new Lazy<int>(() => baseItem.Id), itemSortOrder, baseItem.Alias));
 
-                    sortOrder++;
+                    sortOrder = itemSortOrder + 1;
                 }
             }
 
