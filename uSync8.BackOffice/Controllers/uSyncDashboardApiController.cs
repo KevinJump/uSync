@@ -3,12 +3,16 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
 using System.Web.Http;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 
 using Umbraco.Core.Cache;
+using Umbraco.Core.Logging;
 using Umbraco.Core.Composing;
 using Umbraco.Core.IO;
 using Umbraco.Web.Mvc;
@@ -213,5 +217,93 @@ namespace uSync8.BackOffice.Controllers
 
             return addOnInfo;
         }
+
+        [HttpGet]
+        public async Task<uSyncVersionCheck> CheckVersion()
+        {
+            var cacheInfo = AppCaches.RuntimeCache.GetCacheItem<uSyncVersionCheck>("usync_vcheck");
+            if (cacheInfo != null) return cacheInfo;
+
+            var info = await PerformCheck();
+            AppCaches.RuntimeCache.InsertCacheItem("usync_vcheck", () => info, new TimeSpan(6, 0, 0));
+            return info;
+        }
+
+        private async Task<uSyncVersionCheck> PerformCheck()
+        {
+            // phone home to get the latest version
+            var addOnInfo = GetAddOns();
+
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    client.BaseAddress = new Uri("https://jumoo.co.uk");
+                    // client.BaseAddress = new Uri("http://jumoo.local");
+
+                    var url = $"/usync/version/?u={addOnInfo.Version}";
+                    if (addOnInfo.AddOns.Any())
+                    {
+                        url += "&a=" + string.Join(":", addOnInfo.AddOns.Select(x => $"{x.Name},{x.Version}"));
+                    }
+
+                    var response = await client.GetAsync(url);
+                    var content = await response.Content.ReadAsStringAsync();
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var info = JsonConvert.DeserializeObject<uSyncVersionInfo>(content);
+
+                        var check = new uSyncVersionCheck()
+                        {
+                            VersionInfo = info,
+                            Remote = true,
+                        };
+
+                        if (check.VersionInfo.Core.CompareTo(addOnInfo.Version) <= 0)
+                        {
+                            check.IsCurrent = true;
+                        }
+
+                        return check;
+                    }
+                    else
+                    {
+                        Logger.Debug<uSyncDashboardApiController>("Failed to get version info, {Content}", content);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // can't ping.
+                Logger.Debug<uSyncDashboardApiController>("Can't ping for version, {Exception}", ex.Message);
+            }
+
+            return new uSyncVersionCheck()
+            {
+                IsCurrent = true,
+                VersionInfo = new uSyncVersionInfo()
+                {
+                    Core = addOnInfo.Version
+                }
+            };
+        }
+    }
+
+    [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
+    public class uSyncVersionInfo
+    {
+        public string Core { get; set; }
+        public string Complete { get; set; }
+        public string Link { get; set; }
+        public string Message { get; set; }
+    }
+
+    [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
+    public class uSyncVersionCheck
+    {
+        public uSyncVersionInfo VersionInfo { get; set; }
+        public bool Remote { get; set; } = false;
+
+        public bool IsCurrent { get; set; }
     }
 }

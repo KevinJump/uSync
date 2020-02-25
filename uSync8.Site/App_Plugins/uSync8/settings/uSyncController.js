@@ -53,6 +53,9 @@
         };
 
         vm.report = report;
+        vm.versionInfo = {
+            IsCurrent: true
+        };
 
         vm.exportItems = exportItems;
         vm.importForce = importForce;
@@ -86,6 +89,11 @@
                     vm.handlers = result.data;
                     vm.status.Handlers = vm.handlers;
                 });
+
+            uSync8DashboardService.checkVersion()
+                .then(function (result) {
+                    vm.versionInfo = result.data;
+                })
         }
 
         ///////////
