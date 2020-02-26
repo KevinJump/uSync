@@ -43,7 +43,7 @@ namespace uSync8.Community.DataTypeSerializers.CoreTypes
 
                 if (pickerConfig?.TreeSource?.StartNodeId != null)
                 {
-                    MNTPMappedConfig.MappedPath = UdiToPath(pickerConfig.TreeSource.StartNodeId);
+                    MNTPMappedConfig.MappedPath = UdiToEntityPath(pickerConfig.TreeSource.StartNodeId);
                 }
 
                 return base.SerializeConfig(MNTPMappedConfig);

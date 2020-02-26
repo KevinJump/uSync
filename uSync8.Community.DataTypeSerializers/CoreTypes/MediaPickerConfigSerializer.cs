@@ -35,7 +35,7 @@ namespace uSync8.Community.DataTypeSerializers.CoreTypes
                 };
 
                 if (pickerConfig.StartNodeId != null)
-                    mediaPickerConfig.MappedPath = UdiToPath(pickerConfig.StartNodeId);
+                    mediaPickerConfig.MappedPath = UdiToEntityPath(pickerConfig.StartNodeId);
                 return base.SerializeConfig(mediaPickerConfig);
             }
 

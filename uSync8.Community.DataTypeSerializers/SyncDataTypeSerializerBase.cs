@@ -21,7 +21,7 @@ namespace uSync8.Community.DataTypeSerializers
             this.entityService = entityService;
         }
 
-        protected virtual string UdiToPath(Udi udi)
+        protected virtual string UdiToEntityPath(Udi udi)
         {
             if (udi is GuidUdi guidUdi)
             {
@@ -48,15 +48,14 @@ namespace uSync8.Community.DataTypeSerializers
             return path + "/" + item.Name;
         }
 
-        protected virtual Udi PathToUdi(string path)
+        protected virtual Udi PathToUdi(string entityPath)
         {
-            if (path.IndexOf(':') == -1) return null;
-
+            if (entityPath.IndexOf(':') == -1) return null;
             
-            var entityType = path.Substring(0, path.IndexOf(':'));
+            var entityType = entityPath.Substring(0, entityPath.IndexOf(':'));
             var objectType = UdiEntityType.ToUmbracoObjectType(entityType);
 
-            var names = path.Substring(path.IndexOf(':') + 1).ToDelimitedList("/");
+            var names = entityPath.Substring(entityPath.IndexOf(':') + 1).ToDelimitedList("/");
 
             int parentId = -1;
 
