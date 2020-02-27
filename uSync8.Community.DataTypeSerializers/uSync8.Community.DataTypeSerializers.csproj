@@ -247,7 +247,6 @@
   <ItemGroup>
     <Compile Include="CoreTypes\MNTPickerConfigSerializer.cs" />
     <Compile Include="CoreTypes\ContentPickerConfigSerializer.cs" />
-    <Compile Include="DataTypeSerializers.cs" />
     <Compile Include="CoreTypes\MediaPickerConfigSerializer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SyncDataTypeSerializerBase.cs" />
@@ -261,6 +260,7 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
+    <None Include="uSync.Community.DataTypeSerializers.nuspec" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Examples\" />
