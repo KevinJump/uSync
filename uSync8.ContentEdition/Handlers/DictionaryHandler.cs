@@ -26,7 +26,7 @@ namespace uSync8.ContentEdition.Handlers
 {
     [SyncHandler("dictionaryHandler", "Dictionary", "Dictionary", uSyncBackOfficeConstants.Priorites.DictionaryItems
         , Icon = "icon-book-alt usync-addon-icon", EntityType = UdiEntityType.DictionaryItem)]
-    public class DictionaryHandler : SyncHandlerBase<IDictionaryItem, ILocalizationService>, ISyncHandler, ISyncExtendedHandler
+    public class DictionaryHandler : SyncHandlerLevelBase<IDictionaryItem, ILocalizationService>, ISyncHandler, ISyncExtendedHandler
     {
         public override string Group => uSyncBackOfficeConstants.Groups.Content;
 
