@@ -45,6 +45,7 @@ namespace uSync8.BackOffice.Configuration
             settings.ReportDebug = node.Element("ReportDebug").ValueOrDefault(false);
             settings.AddOnPing = node.Element("AddOnPing").ValueOrDefault(true);
             settings.RebuildCacheOnCompletion = node.Element("RebuildCacheOnCompletion").ValueOrDefault(false);
+            settings.FailOnMissingParent = node.Element("FailOnMissingParent").ValueOrDefault(false);
 
             // load the handlers 
             var handlerSets = node.Element("HandlerSets");
@@ -116,6 +117,7 @@ namespace uSync8.BackOffice.Configuration
             node.CreateOrSetElement("BatchSave", settings.BatchSave);
             node.CreateOrSetElement("ReportDebug", settings.ReportDebug);
             node.CreateOrSetElement("RebuildCacheOnCompletion", settings.RebuildCacheOnCompletion);
+            node.CreateOrSetElement("FailOnMissingParent", settings.FailOnMissingParent);
 
             if (settings.HandlerSets.Count > 0)
             {
@@ -170,6 +172,9 @@ namespace uSync8.BackOffice.Configuration
             if (handler.BatchSave.IsOverridden)
                 node.SetAttributeValue("BatchSave", handler.BatchSave.Value);
 
+            if (handler.FailOnMissingParent.IsOverridden)
+                node.SetAttributeValue("FailOnMissingParent", handler.FailOnMissingParent.Value);
+
             node.SetAttributeValue("Actions", string.Join(",", handler.Actions));
 
             if (handler.Settings != null && handler.Settings.Count > 0)
@@ -204,6 +209,7 @@ namespace uSync8.BackOffice.Configuration
             settings.UseFlatStructure = GetLocalValue(node.Attribute("UseFlatStructure"), defaultSettings.UseFlatStructure);
             settings.BatchSave = GetLocalValue(node.Attribute("BatchSave"), defaultSettings.BatchSave);
             settings.Actions = node.Attribute("Actions").ValueOrDefault("All").ToDelimitedList().ToArray();
+            settings.FailOnMissingParent = GetLocalValue(node.Attribute("FailOnMissingParent"), defaultSettings.FailOnMissingParent);
 
             // var settingNode = node.Element("Settings");
             // if (settingNode != null)
@@ -250,6 +256,9 @@ namespace uSync8.BackOffice.Configuration
 
             if (config.BatchSave.IsOverridden)
                 node.SetAttributeValue("BatchSave", config.BatchSave);
+
+            if (config.FailOnMissingParent.IsOverridden)
+                node.SetAttributeValue("FailOnMissingParent", config.FailOnMissingParent);
 
             if (config.Actions.Length > 0 && !(config.Actions.Length == 1 && config.Actions[0].InvariantEquals("all")))
                 node.SetAttributeValue("Actions", string.Join(",", config.Actions));

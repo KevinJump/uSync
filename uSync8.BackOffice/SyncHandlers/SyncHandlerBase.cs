@@ -410,6 +410,8 @@ namespace uSync8.BackOffice.SyncHandlers
         {
             try
             {
+                if (config.FailOnMissingParent) flags |= SerializerFlags.FailMissingParent;
+
                 syncFileService.EnsureFileExists(filePath);
                 using (var stream = syncFileService.OpenRead(filePath))
                 {
@@ -572,10 +574,45 @@ namespace uSync8.BackOffice.SyncHandlers
         public IEnumerable<uSyncAction> Report(string folder, HandlerSettings config, SyncUpdateCallback callback)
         {
             var actions = new List<uSyncAction>();
-            callback?.Invoke("Checking Actions", 0, 1);
+            callback?.Invoke("Checking Actions", 1, 3);
             actions.AddRange(ReportFolder(folder, config, callback));
-            callback?.Invoke("Done", 1, 1);
+
+            if (actions.Any(x => x.Change == ChangeType.ParentMissing))
+            {
+                callback?.Invoke("Checking Parents", 2, 3);
+                ReportMissingParents(actions);
+            }
+
+            callback?.Invoke("Done", 3, 3);
             return actions;
+        }
+
+        private void ReportMissingParents(IList<uSyncAction> actions)
+        {
+            var missingParents = actions
+                .Where(x => x.Change == ChangeType.ParentMissing);
+
+            foreach(var missing in missingParents)
+            {
+                var node = XElement.Load(missing.FileName);
+                var guid = node.GetParentKey();
+
+                if (guid != Guid.Empty)
+                {
+                    if (actions.Any(x => x.key == guid && x.Change < ChangeType.Fail))
+                    {
+                        if (actions.Any(x => x.FileName == missing.FileName))
+                        {
+                            // parent is in this sync.
+                            // and this item is in the list (which really it has to be
+                            // or we would never be here, but you can never check that enough)
+                            var action = actions.FirstOrDefault(x => x.FileName == missing.FileName);
+                            action.Change = ChangeType.Create;
+                        }
+                    }
+                }
+            }
+                
         }
 
         public virtual IEnumerable<uSyncAction> ReportFolder(string folder, HandlerSettings config, SyncUpdateCallback callback)

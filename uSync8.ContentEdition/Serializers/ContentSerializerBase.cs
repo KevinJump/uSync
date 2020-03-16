@@ -197,6 +197,19 @@ namespace uSync8.ContentEdition.Serializers
             return node;
         }
 
+        protected override SyncAttempt<TObject> CanDeserialize(XElement node, SerializerFlags flags)
+        {
+            if (flags.HasFlag(SerializerFlags.FailMissingParent))
+            {
+                // check the parent exists. 
+                if (!this.HasParentItem(node))
+                {
+                    return SyncAttempt<TObject>.Fail(node.GetAlias(), ChangeType.ParentMissing, $"The parent node for this item is missing, and config is set to not import when a parent is missing");
+
+                }
+            }
+            return SyncAttempt<TObject>.Succeed("No check", ChangeType.NoChange);
+        }
 
         protected virtual Attempt<string> DeserializeBase(TObject item, XElement node)
         {
@@ -624,13 +637,13 @@ namespace uSync8.ContentEdition.Serializers
 
             return item;
         }
-        protected TObject FindParentByPath(string path)
+        protected TObject FindParentByPath(string path, bool failIfNotExact = false)
         {
             logger.Debug(serializerType, "Looking for Parent by path {Path}", path);
             var folders = path.ToDelimitedList("/").ToList();
-            return FindByPath(folders.Take(folders.Count - 1));
+            return FindByPath(folders.Take(folders.Count - 1), failIfNotExact);
         }
-        protected TObject FindByPath(IEnumerable<string> folders)
+        protected TObject FindByPath(IEnumerable<string> folders, bool failIfNotExact)
         {
             var item = default(TObject);
             foreach (var folder in folders)
@@ -641,7 +654,10 @@ namespace uSync8.ContentEdition.Serializers
                 {
                     // if we get lost 1/2 way we are returning that as the path? which would put us in an odd place?
                     logger.Verbose(serializerType, "Didn't find {folder} returning last found Parent", folder);
-                    return item;
+
+                    // if we don't fail on exact this is ok, 
+                    // else its not - so we haven't 'found' the right place.
+                    return !failIfNotExact ? item : default;
                 }
 
                 item = next;
@@ -662,5 +678,31 @@ namespace uSync8.ContentEdition.Serializers
 
 
         #endregion
+
+        /// <summary>
+        ///  will check the xml to see if the sepecified parent exists in umbraco
+        /// </summary>
+        /// <remarks>
+        ///  Will first look for the parent based on the key, if this fails
+        ///  we look based on friendly path, which might help.
+        /// </remarks>
+        protected override bool HasParentItem(XElement node)
+        {
+            var info = node.Element("Info");
+            var parentNode = info?.Element("Parent");
+            if (parentNode == null) return true;
+
+            var parent = FindParent(parentNode, false);
+            if (parent == null)
+            {
+                var friendlyPath = info.Element("Path").ValueOrDefault(string.Empty);
+                if (!string.IsNullOrWhiteSpace(friendlyPath))
+                {
+                    parent = FindParentByPath(friendlyPath, true);
+                }
+            }
+
+            return parent != null;
+        }
     }
 }

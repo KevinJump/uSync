@@ -32,6 +32,11 @@ namespace uSync8.BackOffice.Configuration
 
         public bool RebuildCacheOnCompletion { get; set; } = false;
 
+        /// <summary>
+        ///  fail if the items parent is not in umbraco or part of the batch being imported
+        /// </summary>
+        public bool FailOnMissingParent { get; set; } = false;
+
         public HandlerSet DefaultHandlerSet()
             => this.HandlerSets.Where(x => x.Name.InvariantEquals(this.DefaultSet)).FirstOrDefault();
     }

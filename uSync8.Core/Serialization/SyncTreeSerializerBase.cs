@@ -1,17 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Web;
 using System.Xml.Linq;
-using Umbraco.Core;
+
 using Umbraco.Core.Logging;
-using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
-using uSync8.Core.Extensions;
-using uSync8.Core.Models;
 
 namespace uSync8.Core.Serialization
 {
@@ -48,6 +40,40 @@ namespace uSync8.Core.Serialization
 
         #endregion
 
+        /// <summary>
+        ///  tree elements need to be parent aware (is the parent missing?)
+        /// </summary>
+        /// <remarks>
+        ///  The change will be marked as a fail if the parent is missing in Umbraco,
+        ///  but the handler will also need to confirm the parent isn't in the whole
+        ///  import. 
+        ///  
+        ///  A Serializer has to overwrite HasParentItem, or this will never really
+        ///  matter.
+        ///  
+        ///  A missing parent isn't always a fail, if the settings are such, it might
+        ///  be imported into the nearest possible place (e.g one level up), but at 
+        ///  report time we say - the parent is missing you know?
+        /// </remarks>
+        public override ChangeType IsCurrent(XElement node)
+        {
+            var change = base.IsCurrent(node);
+            if (change != ChangeType.NoChange)
+            {
+                // check parent matches. 
+                if (!HasParentItem(node))
+                {
+                    return ChangeType.ParentMissing;
+                }
+            }
+            return change;
+        }
+
+        /// <summary>
+        ///  does the parent item (as defined in the xml) exist in umbraco for this item?
+        /// </summary>
+        protected virtual bool HasParentItem(XElement node)
+            => true;
 
         /// <summary>
         ///  calculates the Umbraco Path value for an item, based on the parent
