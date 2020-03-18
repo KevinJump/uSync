@@ -344,8 +344,6 @@ namespace uSync8.ContentEdition.Serializers
 
                         try
                         {
-                            throw new NotFiniteNumberException("some random error");
-
                             if (!string.IsNullOrEmpty(culture))
                             {
                                 //
