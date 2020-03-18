@@ -54,7 +54,7 @@
                                 {{result.Change}}
                             </div>
                             <div class="umb-table-cell usync-table-message-cell">
-                                {{result.Message}}
+                                <span ng-bind-html="result.Message" title="{{result.Message}}"></span>
                             </div>
                             <div class="umb-table-cell usync-detail-link-cell" ng-if="vm.hideLink == false">
                                 <umb-button type="button"

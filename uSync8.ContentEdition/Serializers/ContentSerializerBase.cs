@@ -344,6 +344,7 @@ namespace uSync8.ContentEdition.Serializers
 
                         try
                         {
+                            throw new NotFiniteNumberException("some random error");
 
                             if (!string.IsNullOrEmpty(culture))
                             {
@@ -408,7 +409,7 @@ namespace uSync8.ContentEdition.Serializers
                             // capture here to be less agressive with failure. 
                             // if one property fails the rest will still go in.
                             logger.Warn(serializerType, "Failed to set [{alias}] {propValue} Ex: {Exception}", alias, propValue, ex.ToString());
-                            errors += $"Failed to set [{alias}] {ex.Message}";
+                            errors += $"Failed to set [{alias}] {ex.Message} <br/>";
                         }
                     }
                 }
@@ -691,6 +692,8 @@ namespace uSync8.ContentEdition.Serializers
             var info = node.Element("Info");
             var parentNode = info?.Element("Parent");
             if (parentNode == null) return true;
+
+            if (parentNode.Attribute("Key").ValueOrDefault(Guid.Empty) == Guid.Empty) return true;
 
             var parent = FindParent(parentNode, false);
             if (parent == null)

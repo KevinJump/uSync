@@ -181,16 +181,16 @@ namespace uSync8.ContentEdition.Serializers
 
             // published status
             // this does the last save and publish
-            if (DoSaveOrPublish(item, node))
+            var saveAttempt = DoSaveOrPublish(item, node);
+
+            if (saveAttempt.Success)
             {
                 // we say no change back, this stops the core second pass function from saving 
                 // this item (which we have just done with DoSaveOrPublish)
                 return SyncAttempt<IContent>.Succeed(item.Name, item, ChangeType.NoChange, attempt.Status);
             }
 
-
-            return SyncAttempt<IContent>.Fail(item.Name, ChangeType.ImportFail, "");
-            // second pass, is when we do the publish and stuff.
+            return SyncAttempt<IContent>.Fail(item.Name, item, ChangeType.ImportFail, $"{saveAttempt.Result} {attempt.Status}");
         }
 
         protected override void HandleTrashedState(IContent item, bool trashed)
@@ -276,7 +276,14 @@ namespace uSync8.ContentEdition.Serializers
                 if (result.Success)
                     return Attempt.Succeed("Published");
 
-                return Attempt.Fail("Publish Failed " + result.EventMessages);
+                var messages = "";
+                if (result.EventMessages.Count > 0) 
+                {
+                    messages = string.Join(": ", 
+                        result.EventMessages.GetAll().Select(x => $"{x.Category}: {x.Message}"));
+                }
+
+                return Attempt.Fail($"Publish Failed : {messages}<br/>");
             }
             catch (ArgumentNullException ex)
             {

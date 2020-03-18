@@ -209,7 +209,7 @@ namespace uSync8.BackOffice.SyncHandlers
                         var action = actions.FirstOrDefault(x => x.FileName == item.update.Key);
                         actions.Remove(action);
                         action.Success = attempt.Success;
-                        action.Message = "Second Pass Fail: " + attempt.Message;
+                        action.Message = $"Second Pass Fail: {attempt.Message}";
                         action.Exception = attempt.Exception;
                         actions.Add(action);
                     }
