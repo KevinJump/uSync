@@ -471,7 +471,7 @@ namespace uSync8.BackOffice.SyncHandlers
                 catch (Exception ex)
                 {
                     logger.Warn(handlerType, $"Second Import Failed: {ex.ToString()}");
-                    return SyncAttempt<TObject>.Fail(item.Id.ToString(), ChangeType.Fail, ex);
+                    return SyncAttempt<TObject>.Fail(item.Id.ToString(), ChangeType.Fail, ex.Message, ex);
                 }
             }
 
