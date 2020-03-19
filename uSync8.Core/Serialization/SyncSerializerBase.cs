@@ -203,6 +203,10 @@ namespace uSync8.Core.Serialization
                 // somewhere else the alias will exist, so we don't want to delete 
                 // it from over there - this needs to be done at save time 
                 // (bascially if a create happens) - turn any delete files into renames
+
+                // A Tree Based serializer will return null if you ask it to find 
+                // an item soley by alias, so this means we are only deleting by key 
+                // on tree's (e.g media, content)
                 item = this.FindItem(alias);
             }
 

@@ -28,7 +28,9 @@
             getAddOns: getAddOns,
             getAddOnSplash: getAddOnSplash,
 
-            getHandlerGroups: getHandlerGroups
+            getHandlerGroups: getHandlerGroups,
+
+            checkVersion: checkVersion
         };
 
         return service;
@@ -83,6 +85,10 @@
 
         function getHandlerGroups() {
             return $http.get(serviceRoot + 'GetHandlerGroups');
+        }
+
+        function checkVersion() {
+            return $http.get(serviceRoot + 'CheckVersion');
         }
     }
 

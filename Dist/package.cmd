@@ -8,6 +8,9 @@ nuget pack ..\uSync8.Community.Contrib\uSync.Community.Contrib.nuspec  -OutputDi
 nuget pack ..\uSync8.ContentEdition\uSync.ContentEdition.nuspec  -OutputDirectory %1 -build -version %1 -properties "depends=%1;Configuration=release"
 nuget pack ..\uSync8.ContentEdition\uSync.ContentEdition.Core.nuspec  -OutputDirectory %1 -build -version %1 -properties "depends=%1;Configuration=release"
 
+nuget pack ..\uSync8.Community.DataTypeSerializers\uSync.Community.DataTypeSerializers.nuspec  -OutputDirectory %1 -build -version %1 -properties "depends=%1;Configuration=release"
+
+
 nuget pack ..\uSync.Console\uSync.Console.nuspec  -OutputDirectory %1 -build -version %1 -properties "depends=%1;Configuration=release"
 
 call CreatePackages %1

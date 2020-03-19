@@ -311,3 +311,7 @@
 .usync-table-message-cell {
     flex-basis: 25%;
 }
+
+.usync-alert a {
+    text-decoration: underline;
+}

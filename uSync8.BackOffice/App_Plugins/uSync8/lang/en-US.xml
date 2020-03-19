@@ -11,6 +11,8 @@
   <area alias="usync">
     <key alias="name">uSync 8</key>
     <key alias="intro">Database elements to and from disk</key>
+
+    <key alias="newer">There is a newer version of uSync avalible</key>
     
     <key alias="import">Import</key>
     <key alias="importforce">Full Import</key>
