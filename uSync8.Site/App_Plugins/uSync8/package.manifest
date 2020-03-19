@@ -1,6 +1,6 @@
 {
   "javascript": [
-    "~/App_Plugins/uSync8/backoffice/uSync8/uSyncDashboardController.js?",
+    "~/App_Plugins/uSync8/backoffice/uSync8/uSyncDashboardController.js?uv=851",
     "~/App_Plugins/uSync8/settings/settingsController.js",
     "~/App_Plugins/uSync8/settings/expansionController.js",
     "~/App_Plugins/uSync8/settings/uSyncController.js",
