@@ -11,7 +11,7 @@
         vm.loading = true;
         vm.working = false;
         vm.reported = false;
-        vm.syncing = false; 
+        vm.syncing = false;
         vm.hideLink = false;
 
         vm.showAdvanced = false;
@@ -25,7 +25,7 @@
 
         vm.runmode = modes.NONE;
 
-        vm.showAll = false; 
+        vm.showAll = false;
         vm.status = {};
         vm.reportAction = '';
 
@@ -52,6 +52,22 @@
             subButtons: []
         };
 
+        vm.exportButton = {
+            state: 'init',
+            defaultButton: {
+                labelKey: 'usync_export',
+                handler: function () {
+                    exportItems(false);
+                }
+            },
+            subButtons: [{
+                labelKey: 'usync_exportClean',
+                handler: function () {
+                    exportItems(true);
+                }
+            }]
+        }
+
         vm.report = report;
         vm.versionInfo = {
             IsCurrent: true
@@ -75,7 +91,7 @@
             { time: 300, message: "Go have a quick chat" },
             { time: 900, message: "Go for a nice walk outside 🚶‍♀️" },
             { time: 3600, message: "You deserve a break" }
-        ]; 
+        ];
 
         init();
 
@@ -110,17 +126,29 @@
                 });
         }
 
-        function exportItems() {
+        function exportItems(clean) {
             resetStatus(modes.EXPORT);
+            vm.exportButton.state = 'busy';
+
+            if (clean && !confirm('Are you sure? A clean export will delete the contents of the uSync folder, you will may loose any delete/rename actions.')) {
+                vm.working = false;
+                vm.exportButton.state = 'success';
+                return;
+            }
 
             vm.hideLink = true;
-            uSync8DashboardService.exportItems(getClientId())
+            uSync8DashboardService.exportItems(getClientId(), clean)
                 .then(function (result) {
                     vm.results = result.data;
                     vm.working = false;
                     vm.reported = true;
+                    vm.exportButton.state = 'success';
+                    vm.savings.show = true;
+                    vm.savings.title = 'All items exported';
+                    vm.savings.message = 'Now go wash your hands 🧼!';
                 }, function (error) {
                     notificationsService.error('Exporting', error.data.Message);
+                    vm.exportButton.state = 'error';
                 });
         }
 
@@ -154,7 +182,7 @@
         // add a little joy to the process.
         function calculateTimeSaved(results) {
             var changes = countChanges(results);
-            var time = changes * 26.5; 
+            var time = changes * 26.5;
 
             var duration = moment.duration(time, 'seconds');
 
@@ -239,7 +267,7 @@
             return vm.showAll || (change !== 'NoChange' && change !== 'Removed');
         }
 
-        function setFilter(type) {  
+        function setFilter(type) {
 
             if (vm.filter === type) {
                 vm.filter = '';

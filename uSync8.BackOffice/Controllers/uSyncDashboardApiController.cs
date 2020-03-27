@@ -108,6 +108,12 @@ namespace uSync8.BackOffice.Controllers
         public IEnumerable<uSyncAction> Export(uSyncOptions options)
         {
             var hubClient = new HubClientService(options.ClientId);
+
+            if (options.Clean)
+            {
+                uSyncService.CleanExportFolder(settings.RootFolder);
+            }
+
             return uSyncService.Export(settings.RootFolder, new SyncHandlerOptions()
             {
                 Group = options.Group

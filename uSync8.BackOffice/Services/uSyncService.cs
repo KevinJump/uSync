@@ -7,6 +7,7 @@ using Umbraco.Core.Composing;
 using Umbraco.Core.Logging;
 
 using uSync8.BackOffice.Configuration;
+using uSync8.BackOffice.Services;
 using uSync8.BackOffice.SyncHandlers;
 
 namespace uSync8.BackOffice
@@ -25,12 +26,16 @@ namespace uSync8.BackOffice
         private uSyncSettings settings;
         private readonly SyncHandlerFactory handlerFactory;
         private readonly IProfilingLogger logger;
+        private SyncFileService syncFileService;
 
         public uSyncService(
             SyncHandlerFactory handlerFactory,
-            IProfilingLogger logger)
+            IProfilingLogger logger,
+            SyncFileService syncFileService)
         {
             this.handlerFactory = handlerFactory;
+
+            this.syncFileService = syncFileService;
 
             this.settings = Current.Configs.uSync();
             this.logger = logger;
@@ -293,6 +298,16 @@ namespace uSync8.BackOffice
         #endregion
 
         #region Exporting 
+
+
+        public bool CleanExportFolder(string folder)
+        {
+            if (syncFileService.DirectoryExists(folder))
+                syncFileService.CleanFolder(folder);
+
+            return true;
+        }
+
 
         /// <summary>
         ///  Export items from umbraco into a given folder

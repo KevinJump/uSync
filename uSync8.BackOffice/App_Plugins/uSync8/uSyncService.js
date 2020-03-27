@@ -62,8 +62,8 @@
             return $http.post(serviceRoot + 'report', { clientId: clientId, group: group });
         }
 
-        function exportItems (clientId) {
-            return $http.post(serviceRoot + 'export', { clientId: clientId });
+        function exportItems (clientId, clean) {
+            return $http.post(serviceRoot + 'export', { clientId: clientId, clean: clean });
         }
 
         function importItems(force, group, clientId) {
