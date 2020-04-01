@@ -55,6 +55,18 @@
                             <div class="umb-permission__description">Request that Umbraco rebuilds its cache after an import</div>
                         </div>
                     </div>
+
+                    <div class="umb-permission">
+                        <umb-toggle class="umb-permission__toggle"
+                                    checked="vm.settings.FailOnMissingParent"
+                                    on-click="vm.settings.FailOnMissingParent = !vm.settings.FailOnMissingParent">
+                        </umb-toggle>
+                        <div class="umb-permission__content" ng-click="vm.settings.FailOnMissingParent = !vm.settings.FailOnMissingParent">
+                            <div>Fail on Missing Parent</div>
+                            <div class="umb-permission__description">Import of an item will fail if it's parent is not already in Umbraco or the current Import</div>
+                        </div>
+                    </div>
+
                 </umb-box-content>
             </umb-box>
 
@@ -78,8 +90,8 @@
                                     on-click="vm.settings.UseGuidNames = !vm.settings.UseGuidNames">
                         </umb-toggle>
                         <div class="umb-permission__content" ng-click="vm.settings.UseGuidNames= !vm.settings.UseGuidNames">
-                            <div>use Guids for filenames</div>
-                            <div class="umb-permission__description">use the guid of an item as the filename</div>
+                            <div>Use Guids for filenames</div>
+                            <div class="umb-permission__description">Use the guid of an item as the filename</div>
                         </div>
                     </div>
                     <div class="umb-el-wrap usync-root-folder">
