@@ -220,6 +220,8 @@
                             },
                             labelKey: 'usync_report-' + group.toLowerCase()
                         });
+
+                        vm.loading = false;
                     });
                 });
         }
