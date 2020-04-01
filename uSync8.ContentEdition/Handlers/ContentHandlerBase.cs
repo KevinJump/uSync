@@ -166,7 +166,7 @@ namespace uSync8.ContentEdition.Handlers
         private string GetConfigValue(HandlerSettings config, string setting, string defaultValue)
         {
             if (!config.Settings.ContainsKey(setting)) return defaultValue;
-            if (!string.IsNullOrWhiteSpace(config.Settings[setting])) return defaultValue;
+            if (string.IsNullOrWhiteSpace(config.Settings[setting])) return defaultValue;
             return config.Settings[setting];
         }
 
