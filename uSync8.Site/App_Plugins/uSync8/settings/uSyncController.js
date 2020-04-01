@@ -147,7 +147,7 @@
                     vm.savings.title = 'All items exported';
                     vm.savings.message = 'Now go wash your hands 🧼!';
                 }, function (error) {
-                    notificationsService.error('Exporting', error.data.Message);
+                    notificationsService.error('Exporting', error.data.ExceptionMessage);
                     vm.exportButton.state = 'error';
                 });
         }

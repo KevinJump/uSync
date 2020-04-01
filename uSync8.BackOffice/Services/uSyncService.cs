@@ -302,8 +302,15 @@ namespace uSync8.BackOffice
 
         public bool CleanExportFolder(string folder)
         {
-            if (syncFileService.DirectoryExists(folder))
-                syncFileService.CleanFolder(folder);
+            try
+            {
+                if (syncFileService.DirectoryExists(folder))
+                    syncFileService.CleanFolder(folder);
+            }
+            catch(Exception ex)
+            {
+                throw new ApplicationException("Failed to delete uSync folder (may be in use)", ex);
+            }
 
             return true;
         }

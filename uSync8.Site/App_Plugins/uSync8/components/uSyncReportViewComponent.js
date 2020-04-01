@@ -19,6 +19,7 @@
         var vm = this;
 
         vm.showChange = showChange;
+        vm.getIcon = getIcon;
         vm.getTypeName = getTypeName;
         vm.countChanges = countChanges;
         vm.openDetail = openDetail;
@@ -37,6 +38,23 @@
 
         function showChange(change) {
             return vm.showAll || (change !== 'NoChange' && change !== 'Removed');
+        }
+
+        function getIcon(change) {
+            switch (change) {
+                case 'NoChange':
+                    return 'icon-check color-grey';
+                case 'Update':
+                    return 'icon-check color-orange';
+                case 'Delete':
+                    return 'icon-delete color-red';
+                case 'Import':
+                    return 'icon-check color-green';
+                case 'Export':
+                    return 'icon-check color-green';
+                default:
+                    return 'icon-flag color-red';
+            }
         }
 
         function getTypeName(typeName) {
