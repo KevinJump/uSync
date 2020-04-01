@@ -223,6 +223,8 @@
 
                         vm.loading = false;
                     });
+                }, function (error) {
+                    vm.loading = false;
                 });
         }
 
