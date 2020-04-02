@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using Umbraco.Core;
-
+using Umbraco.Core.Logging;
 using uSync8.BackOffice.Configuration;
 
 namespace uSync8.BackOffice.SyncHandlers
@@ -12,9 +12,14 @@ namespace uSync8.BackOffice.SyncHandlers
     {
         private SyncHandlerCollection syncHandlers;
         private uSyncConfig config;
+        private IProfilingLogger logger;
 
-        public SyncHandlerFactory(SyncHandlerCollection syncHandlers, uSyncConfig config)
+        public SyncHandlerFactory(
+            IProfilingLogger logger,
+            SyncHandlerCollection syncHandlers, 
+            uSyncConfig config)
         {
+            this.logger = logger;
             this.syncHandlers = syncHandlers;
             this.config = config;
         }
@@ -128,7 +133,11 @@ namespace uSync8.BackOffice.SyncHandlers
                 .Where(x => x.Name.InvariantEquals(options.Set))
                 .FirstOrDefault();
 
-            if (set == null) return Enumerable.Empty<ExtendedHandlerConfigPair>();
+            if (set == null || set.Handlers.Count == 0)
+            {
+                logger.Warn<SyncHandlerFactory>("No Handlers configured for requested set {setName}", options.Set);
+                return Enumerable.Empty<ExtendedHandlerConfigPair>();
+            }
 
             var configs = new List<ExtendedHandlerConfigPair>();
 
@@ -144,11 +153,17 @@ namespace uSync8.BackOffice.SyncHandlers
                     && IsValidGroup(options.Group, handler)
                     && IsValidAction(options.Action, settings.Actions))
                 {
+                    logger.Debug<SyncHandlerFactory>("Adding {handler} to ValidHandler List", handler.Alias);
+
                     configs.Add(new ExtendedHandlerConfigPair()
                     {
                         Handler = handler,
                         Settings = settings
                     });
+                }
+                else
+                {
+                    logger.Warn<SyncHandlerFactory>("No Handler with {alias} has been loaded", settings.Alias);
                 }
 
             }

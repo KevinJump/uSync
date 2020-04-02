@@ -91,6 +91,9 @@ namespace uSync8.BackOffice
         /// <returns>List of actions detailing what would and wouldn't change</returns>
         public IEnumerable<uSyncAction> Report(string folder, IEnumerable<ExtendedHandlerConfigPair> handlers, uSyncCallbacks callbacks)
         {
+
+            var sw = Stopwatch.StartNew();
+
             fireBulkStarting(ReportStarting);
 
             logger.Debug<uSyncService>("Reporting For [{0}]", string.Join(",", handlers.Select(x => x.Handler.Name)));
@@ -128,6 +131,13 @@ namespace uSync8.BackOffice
             callbacks?.Callback?.Invoke(summary);
 
             fireBulkComplete(ReportComplete, actions);
+
+
+            sw.Stop();
+
+            logger.Info<uSyncService>("uSync Report: {handlerCount} handlers, processed {itemCount} items, {changeCount} changes in {ElapsedMilliseconds}ms",
+                handlers.Count(), actions.Count, actions.Where(x => x.Change > Core.ChangeType.NoChange).Count(),
+                sw.ElapsedMilliseconds);
 
             return actions;
         }
@@ -258,7 +268,10 @@ namespace uSync8.BackOffice
                     // fire complete
                     fireBulkComplete(ImportComplete, actions);
 
-                    logger.Debug<uSyncService>("uSync Import completed in {ElapsedMilliseconds}ms", sw.ElapsedMilliseconds);
+                    logger.Info<uSyncService>("uSync Import: {handlerCount} handlers, processed {itemCount} items, {changeCount} changes in {ElapsedMilliseconds}ms",
+                        handlers.Count(), actions.Count, actions.Where(x => x.Change > Core.ChangeType.NoChange).Count(),
+                        sw.ElapsedMilliseconds);
+
 
                     return actions;
                 }
@@ -354,6 +367,8 @@ namespace uSync8.BackOffice
         /// <returns>List of actions detailing what was exported</returns>
         public IEnumerable<uSyncAction> Export(string folder, IEnumerable<ExtendedHandlerConfigPair> handlers, uSyncCallbacks callbacks)
         {
+            var sw = Stopwatch.StartNew();
+
             fireBulkStarting(ExportStarting);
 
             var actions = new List<uSyncAction>();
@@ -381,6 +396,12 @@ namespace uSync8.BackOffice
             callbacks?.Callback?.Invoke(summary);
 
             fireBulkComplete(ExportComplete, actions);
+
+            sw.Stop();
+
+            logger.Info<uSyncService>("uSync Export: {handlerCount} handlers, processed {itemCount} items, {changeCount} changes in {ElapsedMilliseconds}ms",
+                handlers.Count(), actions.Count, actions.Where(x => x.Change > Core.ChangeType.NoChange).Count(),
+                sw.ElapsedMilliseconds);
 
             return actions;
         }

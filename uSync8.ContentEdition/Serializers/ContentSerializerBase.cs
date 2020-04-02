@@ -383,7 +383,7 @@ namespace uSync8.ContentEdition.Serializers
                                     {
                                         // there is only one value - so we should set the default variant with this for consistancy?
                                         culture = localizationService.GetDefaultLanguageIsoCode();
-                                        logger.Info(serializerType, "Property {Alias} contains a single value that has no culture setting default culture {Culture}", alias, culture);
+                                        logger.Debug(serializerType, "Property {Alias} contains a single value that has no culture setting default culture {Culture}", alias, culture);
                                     }
                                     else
                                     {

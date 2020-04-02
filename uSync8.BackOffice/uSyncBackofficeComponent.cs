@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
@@ -89,6 +91,8 @@ namespace uSync8.BackOffice
 
         private void InitBackOffice()
         {
+            var sw = Stopwatch.StartNew();
+
             try
             {
 
@@ -97,11 +101,14 @@ namespace uSync8.BackOffice
 
                     if (globalSettings.ExportAtStartup || (globalSettings.ExportOnSave && !syncFileService.RootExists(globalSettings.RootFolder)))
                     {
+                        logger.Info<uSyncBackofficeComponent>("uSync: Running Export at startup");
                         uSyncService.Export(globalSettings.RootFolder, default(SyncHandlerOptions));
                     }
 
                     if (globalSettings.ImportAtStartup)
                     {
+                        logger.Info<uSyncBackofficeComponent>("uSync: Running Import at startup");
+
                         if (!HasStopFile(globalSettings.RootFolder))
                         {
                             uSyncService.Import(globalSettings.RootFolder, false, default(SyncHandlerOptions));
@@ -115,19 +122,26 @@ namespace uSync8.BackOffice
 
                     if (globalSettings.ExportOnSave)
                     {
-                        var handlers = handlerFactory.GetValidHandlers(new SyncHandlerOptions(handlerFactory.DefaultSet, HandlerActions.Save));
+                        var handlers = handlerFactory
+                            .GetValidHandlers(new SyncHandlerOptions(handlerFactory.DefaultSet, HandlerActions.Save))
+                            .ToList();
+
+                        logger.Info<uSyncBackofficeComponent>("uSync: Initializing events for {count} Handlers", handlers.Count);
 
                         foreach (var syncHandler in handlers)
                         {
-                            logger.Debug<uSyncBackofficeComponent>($"Starting up Handler {syncHandler.Handler.Name}");
+                            logger.Debug<uSyncBackofficeComponent>($"  Initializing up Handler {syncHandler.Handler.Name}");
                             syncHandler.Handler.Initialize(syncHandler.Settings);
                         }
                     }
                 }
+
+                sw.Stop();
+                logger.Info<uSyncBackofficeComponent>("uSync: Startup Processes Complete {ElapsedMilliseconds}ms", sw.ElapsedMilliseconds);
             }
             catch (Exception ex)
             {
-                logger.Warn<uSyncBackofficeComponent>($"Error Importing at startup {ex.Message}");
+                logger.Warn<uSyncBackofficeComponent>($"uSync: Error during at startup {ex.Message}");
             }
 
         }

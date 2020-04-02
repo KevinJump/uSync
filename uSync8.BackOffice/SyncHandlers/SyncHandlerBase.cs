@@ -151,8 +151,7 @@ namespace uSync8.BackOffice.SyncHandlers
         public IEnumerable<uSyncAction> ImportAll(string folder, HandlerSettings config, bool force, SyncUpdateCallback callback = null)
         {
             var sw = Stopwatch.StartNew();
-
-            logger.Debug(handlerType, "ImportAll: {0}", Path.GetFileName(folder));
+            logger.Debug(handlerType, "{alias} ImportAll: {fileName}", this.Alias, Path.GetFileName(folder));
 
             var actions = new List<uSyncAction>();
             var updates = new Dictionary<string, TObject>();
@@ -170,7 +169,7 @@ namespace uSync8.BackOffice.SyncHandlers
             callback?.Invoke("Done", 3, 3);
             
             sw.Stop();
-            logger.Debug(handlerType, "Import Complete {0}ms", sw.ElapsedMilliseconds);
+            logger.Debug(handlerType, "{alias} Import Complete {elapsedMilliseconds}ms", this.Alias, sw.ElapsedMilliseconds);
             return actions;
         }
 
@@ -433,7 +432,7 @@ namespace uSync8.BackOffice.SyncHandlers
             }
             catch (Exception ex)
             {
-                logger.Warn(handlerType, "Base: Import Failed : {0}", ex.ToString());
+                logger.Warn(handlerType, "{alias}: Import Failed : {exception}", this.Alias, ex.ToString());
                 return SyncAttempt<TObject>.Fail(Path.GetFileName(filePath), ChangeType.Fail, $"Import Fail: {ex.Message}");
             }
         }

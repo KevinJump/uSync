@@ -13,7 +13,7 @@ namespace uSync8.BackOffice
     {
         public void Compose(Composition composition)
         {
-            composition.Configs.Add<uSyncConfig>(() => new uSyncConfig());
+            composition.Configs.Add<uSyncConfig>(() => new uSyncConfig(composition.Logger));
         }
     }
 

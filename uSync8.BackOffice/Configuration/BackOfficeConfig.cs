@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
 using Umbraco.Core;
-
+using Umbraco.Core.Logging;
 using uSync8.Core.Extensions;
 
 namespace uSync8.BackOffice.Configuration
@@ -16,12 +16,15 @@ namespace uSync8.BackOffice.Configuration
     [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
     public class uSyncConfig
     {
+        private readonly IProfilingLogger logger;
+
         public uSyncSettings Settings { get; set; }
 
         private string settingsFile = Umbraco.Core.IO.SystemDirectories.Config + "/uSync8.config";
 
-        public uSyncConfig()
+        public uSyncConfig(IProfilingLogger logger)
         {
+            this.logger = logger; 
             this.Settings = LoadSettings();
         }
 
@@ -77,6 +80,8 @@ namespace uSync8.BackOffice.Configuration
             var sets = new List<HandlerSet>();
             defaultSet = ValueFromWebConfigOrDefault("DefaultHandlerSet", node.Attribute("Default").ValueOrDefault("default"));
 
+            logger.Debug<uSyncConfig>("Handlers : Default Set {defaultSet}", defaultSet);
+
             foreach (var setNode in node.Elements("Handlers"))
             {
                 var handlerSet = LoadSingleHandlerSet(setNode, defaultSettings);
@@ -96,7 +101,12 @@ namespace uSync8.BackOffice.Configuration
             {
                 var handlerSettings = LoadHandlerConfig(handlerNode, defaultSettings);
                 if (handlerSettings != null)
+                {
+                    logger.Debug<uSyncConfig>("Loading Handler {alias} {enabled} [{actions}]", 
+                        handlerSettings.Alias, handlerSettings.Enabled, string.Join(",", handlerSettings.Actions));
+
                     handlerSet.Handlers.Add(handlerSettings);
+                }
             }
 
             return handlerSet;
@@ -288,6 +298,8 @@ namespace uSync8.BackOffice.Configuration
             var filePath = Umbraco.Core.IO.IOHelper.MapPath(settingsFile);
             if (File.Exists(filePath))
             {
+                logger.Debug<uSyncConfig>("Loading Settings from {filePath}", filePath);
+
                 var node = XElement.Load(filePath);
                 var settingsNode = node.Element("BackOffice");
                 if (settingsNode != null)
@@ -306,6 +318,8 @@ namespace uSync8.BackOffice.Configuration
 
             if (loadIfBlank)
             {
+                logger.Debug<uSyncConfig>("Loading Blank (default) settings");
+
                 var file = new XElement("uSync",
                     new XElement("BackOffice"));
                 return file.Element("BackOffice");
