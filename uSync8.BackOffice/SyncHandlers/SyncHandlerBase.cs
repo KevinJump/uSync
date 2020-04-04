@@ -573,21 +573,31 @@ namespace uSync8.BackOffice.SyncHandlers
         public IEnumerable<uSyncAction> Report(string folder, HandlerSettings config, SyncUpdateCallback callback)
         {
             var actions = new List<uSyncAction>();
-            callback?.Invoke("Checking Actions", 1, 4);
+            callback?.Invoke("Checking Actions", 1, 3);
             actions.AddRange(ReportFolder(folder, config, callback));
 
-            if (actions.Any(x => x.Change == ChangeType.ParentMissing))
-            {
-                callback?.Invoke("Checking Parents", 2, 4);
-                ReportMissingParents(actions);
-            }
+            callback?.Invoke("Validating Report", 2, 3);
+            actions.AddRange(ValidateReport(actions));
 
-            callback?.Invoke("Checking report Integrity", 3, 4);
-            actions.AddRange(ReportDeleteCheck(actions));
-
-            callback?.Invoke("Done", 3, 5);
+            callback?.Invoke("Done", 3, 3);
             return actions;
         }
+
+        private IEnumerable<uSyncAction> ValidateReport(List<uSyncAction> actions)
+        {
+            var validationActions = new List<uSyncAction>();
+
+            // alters the existing list. 
+            ReportMissingParents(actions);
+            
+            // adds new actions ? (should it alter?)
+            validationActions.AddRange(ReportDeleteCheck(actions));
+
+            return validationActions;
+            
+        }
+
+       
 
         /// <summary>
         ///  check to returned report to see if there is a delete and an update 
@@ -599,6 +609,8 @@ namespace uSync8.BackOffice.SyncHandlers
             // delete checks. 
             foreach (var delete in actions.Where(x => x.Change == ChangeType.Delete))
             {
+                // todo: this is only matching by key, but non-tree based serializers also delete by alias.
+                // so this check actually has to be booted back down to the serializer.
                 if (actions.Any(x => x.key == delete.key && x.Change != ChangeType.Delete))
                 {
                     duplicates.Add(uSyncActionHelper<TObject>.ReportActionFail(delete.Name, 
