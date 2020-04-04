@@ -573,17 +573,40 @@ namespace uSync8.BackOffice.SyncHandlers
         public IEnumerable<uSyncAction> Report(string folder, HandlerSettings config, SyncUpdateCallback callback)
         {
             var actions = new List<uSyncAction>();
-            callback?.Invoke("Checking Actions", 1, 3);
+            callback?.Invoke("Checking Actions", 1, 4);
             actions.AddRange(ReportFolder(folder, config, callback));
 
             if (actions.Any(x => x.Change == ChangeType.ParentMissing))
             {
-                callback?.Invoke("Checking Parents", 2, 3);
+                callback?.Invoke("Checking Parents", 2, 4);
                 ReportMissingParents(actions);
             }
 
-            callback?.Invoke("Done", 3, 3);
+            callback?.Invoke("Checking report Integrity", 3, 4);
+            actions.AddRange(ReportDeleteCheck(actions));
+
+            callback?.Invoke("Done", 3, 5);
             return actions;
+        }
+
+        /// <summary>
+        ///  check to returned report to see if there is a delete and an update 
+        ///  because if there is then we have issues.
+        /// </summary>
+        protected virtual IEnumerable<uSyncAction> ReportDeleteCheck(IEnumerable<uSyncAction> actions)
+        {
+            var duplicates = new List<uSyncAction>();
+            // delete checks. 
+            foreach (var delete in actions.Where(x => x.Change == ChangeType.Delete))
+            {
+                if (actions.Any(x => x.key == delete.key && x.Change != ChangeType.Delete))
+                {
+                    duplicates.Add(uSyncActionHelper<TObject>.ReportActionFail(delete.Name, 
+                        $"Duplicate! {delete.Name} exists both as delete and import action"));
+                }
+            }
+
+            return duplicates;
         }
 
         private void ReportMissingParents(IList<uSyncAction> actions)
