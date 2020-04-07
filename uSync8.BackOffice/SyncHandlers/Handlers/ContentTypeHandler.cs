@@ -85,6 +85,5 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 
         protected override void DeleteViaService(IContentType item)
             => contentTypeService.Delete(item);
-
     }
 }

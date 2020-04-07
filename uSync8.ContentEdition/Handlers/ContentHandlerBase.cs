@@ -7,6 +7,7 @@ using Umbraco.Core.Cache;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Services;
+using uSync8.BackOffice;
 using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
 using uSync8.BackOffice.SyncHandlers;
@@ -170,6 +171,9 @@ namespace uSync8.ContentEdition.Handlers
             return config.Settings[setting];
         }
 
-
+        // we only match duplicate actions by key. 
+        protected override bool DoActionsMatch(uSyncAction a, uSyncAction b)
+            => a.key == b.key;
     }
+
 }

@@ -568,7 +568,7 @@ namespace uSync8.BackOffice.SyncHandlers
 
         #endregion
 
-        #region reporting 
+        #region Reporting 
 
         public IEnumerable<uSyncAction> Report(string folder, HandlerSettings config, SyncUpdateCallback callback)
         {
@@ -600,27 +600,58 @@ namespace uSync8.BackOffice.SyncHandlers
        
 
         /// <summary>
-        ///  check to returned report to see if there is a delete and an update 
+        ///  Check to returned report to see if there is a delete and an update for the same item
         ///  because if there is then we have issues.
         /// </summary>
         protected virtual IEnumerable<uSyncAction> ReportDeleteCheck(IEnumerable<uSyncAction> actions)
         {
             var duplicates = new List<uSyncAction>();
+            
             // delete checks. 
-            foreach (var delete in actions.Where(x => x.Change == ChangeType.Delete))
+            foreach (var deleteAction in actions.Where(x => x.Change == ChangeType.Delete))
             {
                 // todo: this is only matching by key, but non-tree based serializers also delete by alias.
                 // so this check actually has to be booted back down to the serializer.
-                if (actions.Any(x => x.key == delete.key && x.Change != ChangeType.Delete))
+                if (actions.Any(x => x.Change != ChangeType.Delete && DoActionsMatch(x, deleteAction)))
                 {
-                    duplicates.Add(uSyncActionHelper<TObject>.ReportActionFail(delete.Name, 
-                        $"Duplicate! {delete.Name} exists both as delete and import action"));
+                    duplicates.Add(uSyncActionHelper<TObject>.ReportActionFail(deleteAction.Name, 
+                        $"Duplicate! {deleteAction.Name} exists both as delete and import action"));
                 }
             }
 
             return duplicates;
         }
 
+        /// <summary>
+        ///  check to see if an action matches, another action. 
+        /// </summary>
+        /// <remarks>
+        ///  how two actions match can vary based on handler, in the most part they are matched by key
+        ///  but some items will also check based on the name.
+        ///  
+        ///  when we are dealing with handlers where things can have the same 
+        ///  name (tree items, such as content or media), this function has 
+        ///  to be overridden to remove the name check.
+        /// </remarks>
+        protected virtual bool DoActionsMatch(uSyncAction a, uSyncAction b)
+        {
+            if (a.key == b.key) return true;
+            if (a.Name.Equals(b.Name, StringComparison.InvariantCultureIgnoreCase)) return true;
+
+            return false;
+        }
+
+        /// <summary>
+        ///  Check report for any items that are missing their parent items 
+        /// </summary>
+        /// <remarks>
+        ///  The serializers will report if an item is missing a parent item within umbraco,
+        ///  but because the serializer isn't aware of the wider import (all the other items)
+        ///  it can't say if the parent is in the import.
+        ///  
+        ///  This method checks for the parent of an item in the wider list of items being 
+        ///  imported.
+        /// </remarks>
         private void ReportMissingParents(IList<uSyncAction> actions)
         {
             var missingParents = actions
