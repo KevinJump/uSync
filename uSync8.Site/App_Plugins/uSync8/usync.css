@@ -71,6 +71,14 @@
         color: #2e7d32
     }
 
+.usync-item-details .umb-table-cell {
+    margin-top: 10px;
+}
+
+    .usync-item-details .umb-table-row {
+        align-items: flex-start;
+    }
+
 .usync-row-delete {
     background-color: #ffebee;
 }
@@ -174,10 +182,20 @@
     height: 5px;
 }
 
+
+    .usync-not-animated.usync-complete-changes .bar {
+        background-color: #27b171;
+        background-image: linear-gradient(180deg, #31e893, #27b171);
+    }
+
+    .usync-not-animated.usync-handler-errors .bar {
+        background-color: #ff5722;
+        background-image: linear-gradient(180deg, #e85050, #ff5722);
+    }
+
 .usync-not-animated .bar {
     transition: none;
 }
-
 
 .usync-boxes {
     display: grid;
@@ -331,4 +349,36 @@
 
 .usync-alert a {
     text-decoration: underline;
+}
+
+.usync-report-no-changes {
+    margin: 50px 0;
+}
+.usync-report-no-changes h4 {
+    font-weight: 700;
+}
+
+/* diff view */
+.umb-table-cell.usync-diff-value > * {
+    white-space: pre-wrap;
+}
+
+.umb-table-cell.usync-diff-value pre {
+    border: none;
+    padding: 0;
+    font-family: monospace;
+}
+
+    .umb-table-cell.usync-diff-value pre del {
+        color: red;
+    }
+
+    .umb-table-cell.usync-diff-value pre ins {
+        color: green;
+    }
+
+
+
+.usync-change-row-Fail {
+    background-color: #FFEBEE;
 }

@@ -124,7 +124,7 @@ namespace uSync8.BackOffice
                 var handlerActions = handler.Report($"{folder}/{handler.DefaultFolder}", handlerSettings, callbacks?.Update);
                 actions.AddRange(handlerActions);
 
-                summary.UpdateHandler(handler.Name, HandlerStatus.Complete, ChangeCount(handlerActions));
+                summary.UpdateHandler(handler.Name, HandlerStatus.Complete, ChangeCount(handlerActions), ContainsErrors(handlerActions));
             }
 
             summary.Message = "Report Complete";
@@ -434,6 +434,8 @@ namespace uSync8.BackOffice
         private int ChangeCount(IEnumerable<uSyncAction> actions)
             => actions.Count(x => x.Change > Core.ChangeType.NoChange);
 
+        private bool ContainsErrors(IEnumerable<uSyncAction> actions)
+            => actions.Any(x => x.Change >= Core.ChangeType.Fail);
 
         /// <summary>
         ///  Do an import triggered by an event.
