@@ -167,7 +167,7 @@ namespace uSync8.BackOffice.SyncHandlers
 
             runtimeCache.ClearByKey($"keycache_{this.Alias}");
             callback?.Invoke("Done", 3, 3);
-            
+
             sw.Stop();
             logger.Debug(handlerType, "{alias} Import Complete {elapsedMilliseconds}ms", this.Alias, sw.ElapsedMilliseconds);
             return actions;
@@ -577,36 +577,34 @@ namespace uSync8.BackOffice.SyncHandlers
             actions.AddRange(ReportFolder(folder, config, callback));
 
             callback?.Invoke("Validating Report", 2, 3);
-            actions.AddRange(ValidateReport(actions));
+            actions.AddRange(ValidateReport(folder, actions));
 
             callback?.Invoke("Done", 3, 3);
             return actions;
         }
 
-        private IEnumerable<uSyncAction> ValidateReport(List<uSyncAction> actions)
+        private IEnumerable<uSyncAction> ValidateReport(string folder, List<uSyncAction> actions)
         {
             var validationActions = new List<uSyncAction>();
 
             // alters the existing list. 
             ReportMissingParents(actions);
-            
+
             // adds new actions ? (should it alter?)
-            validationActions.AddRange(ReportDeleteCheck(actions));
+            validationActions.AddRange(ReportDeleteCheck(folder, actions));
 
             return validationActions;
-            
-        }
 
-       
+        }
 
         /// <summary>
         ///  Check to returned report to see if there is a delete and an update for the same item
         ///  because if there is then we have issues.
         /// </summary>
-        protected virtual IEnumerable<uSyncAction> ReportDeleteCheck(IEnumerable<uSyncAction> actions)
+        protected virtual IEnumerable<uSyncAction> ReportDeleteCheck(string folder, IEnumerable<uSyncAction> actions)
         {
             var duplicates = new List<uSyncAction>();
-            
+
             // delete checks. 
             foreach (var deleteAction in actions.Where(x => x.Change == ChangeType.Delete))
             {
@@ -614,8 +612,35 @@ namespace uSync8.BackOffice.SyncHandlers
                 // so this check actually has to be booted back down to the serializer.
                 if (actions.Any(x => x.Change != ChangeType.Delete && DoActionsMatch(x, deleteAction)))
                 {
-                    duplicates.Add(uSyncActionHelper<TObject>.ReportActionFail(deleteAction.Name, 
-                        $"Duplicate! {deleteAction.Name} exists both as delete and import action"));
+                    var duplicateAction = uSyncActionHelper<TObject>.ReportActionFail(deleteAction.Name,
+                        $"Duplicate! {deleteAction.Name} exists both as delete and import action");
+
+                    // create a detail message to tell people what has happend.
+                    duplicateAction.DetailMessage = "uSync detected a duplicate actions, where am item will be both created and deleted.";
+                    var details = new List<uSyncChange>();
+
+                    // add the delete message to the list of changes
+                    details.Add(new uSyncChange()
+                    {
+                        Change = ChangeDetailType.Delete,
+                        Name = $"Delete: {deleteAction.Name} ({Path.GetFileName(deleteAction.FileName)})",
+                        OldValue = deleteAction.FileName.Substring(folder.Length),
+                        Path = Path.GetFileName(deleteAction.FileName)
+                    });
+
+                    // add all the duplicates to the list of changes.
+                    foreach (var dup in actions.Where(x => x.Change != ChangeType.Delete && DoActionsMatch(x, deleteAction)))
+                    {
+                        details.Add( new uSyncChange() {
+                            Change = ChangeDetailType.Update,
+                            Name = $"{dup.Change}: {dup.Name} ({Path.GetFileName(dup.FileName)})",
+                            OldValue = dup.FileName.Substring(folder.Length),
+                            Path = Path.GetFileName(dup.FileName)
+                        });
+                    }
+
+                    duplicateAction.Details = details;
+                    duplicates.Add(duplicateAction);
                 }
             }
 
@@ -657,7 +682,7 @@ namespace uSync8.BackOffice.SyncHandlers
             var missingParents = actions
                 .Where(x => x.Change == ChangeType.ParentMissing);
 
-            foreach(var missing in missingParents)
+            foreach (var missing in missingParents)
             {
                 var node = XElement.Load(missing.FileName);
                 var guid = node.GetParentKey();
@@ -677,7 +702,7 @@ namespace uSync8.BackOffice.SyncHandlers
                     }
                 }
             }
-                
+
         }
 
         public virtual IEnumerable<uSyncAction> ReportFolder(string folder, HandlerSettings config, SyncUpdateCallback callback)

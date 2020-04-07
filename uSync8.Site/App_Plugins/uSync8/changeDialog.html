@@ -13,6 +13,9 @@
                 </umb-box-header>
                 <umb-box-container>
                     <umb-box-content>
+                        <div ng-if="vm.item.DetailMessage.length > 0" class="usync-item-detail-message">
+                            <div ng-bind-html="vm.item.DetailMessage"></div>
+                        </div>
                         <div ng-if="vm.item.Details.length > 0">
                             <h5>Detected changes</h5>
                             <div class="usync-item-details">

@@ -27,6 +27,15 @@ namespace uSync8.BackOffice
         public string FileName { get; set; }
         public string Name { get; set; }
         public bool RequiresPostProcessing { get; set; }
+
+        /// <summary>
+        ///  text that is shown on the details screen above any details. 
+        /// </summary>
+        public string DetailMessage { get; set; }
+
+        /// <summary>
+        ///  list of detailed changes, so you can see what is changing.
+        /// </summary>
         public IEnumerable<uSyncChange> Details { get; set; }
 
         public Guid key { get; set; }

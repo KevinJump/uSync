@@ -27,10 +27,22 @@
 
 .usync-action-message {
     font-weight: 700;
+    margin: 0 0 20px;
+}
+
+.usync-action-message-step {
+    margin: 0 0 20px;
+    font-weight: 700;
 }
 
 .usync-detail-count {
     padding: 6px 0;
+}
+
+.usync-item-detail-message {
+    font-weight: 700;
+    border-left: 4px solid #ccc;
+    padding: 5px;
 }
 
 .usync-item-details {
@@ -118,7 +130,6 @@
     .usync-handler-icon.usync-complete {
         color: #1b264f;
     }
-
         .usync-handler-icon.usync-complete .usync-addon-icon {
             color: #7b1fa2;
         }
@@ -156,6 +167,12 @@
         white-space: nowrap;
         margin-bottom: 0;
     }
+
+.usync-not-animated {
+    width: calc(100% + 1.5em);
+    margin: 10px -0.75em;
+    height: 5px;
+}
 
 .usync-not-animated .bar {
     transition: none;
