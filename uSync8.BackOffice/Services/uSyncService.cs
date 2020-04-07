@@ -131,13 +131,13 @@ namespace uSync8.BackOffice
             callbacks?.Callback?.Invoke(summary);
 
             fireBulkComplete(ReportComplete, actions);
-
-
             sw.Stop();
 
             logger.Info<uSyncService>("uSync Report: {handlerCount} handlers, processed {itemCount} items, {changeCount} changes in {ElapsedMilliseconds}ms",
                 handlers.Count(), actions.Count, actions.Where(x => x.Change > Core.ChangeType.NoChange).Count(),
                 sw.ElapsedMilliseconds);
+
+            callbacks?.Update?.Invoke($"Processed {actions.Count} items in {sw.ElapsedMilliseconds}ms", 1, 1);
 
             return actions;
         }
@@ -261,8 +261,7 @@ namespace uSync8.BackOffice
                     }
 
                     sw.Stop();
-                    summary.UpdateHandler("Post Import", HandlerStatus.Complete,
-                        $"Import Completed ({sw.ElapsedMilliseconds}ms)", 0);
+                    summary.UpdateHandler("Post Import", HandlerStatus.Complete, "Import Completed", 0);
                     callbacks?.Callback?.Invoke(summary);
 
                     // fire complete
@@ -272,6 +271,7 @@ namespace uSync8.BackOffice
                         handlers.Count(), actions.Count, actions.Where(x => x.Change > Core.ChangeType.NoChange).Count(),
                         sw.ElapsedMilliseconds);
 
+                    callbacks?.Update?.Invoke($"Processed {actions.Count} items in {sw.ElapsedMilliseconds}ms", 1, 1);
 
                     return actions;
                 }
@@ -402,6 +402,8 @@ namespace uSync8.BackOffice
             logger.Info<uSyncService>("uSync Export: {handlerCount} handlers, processed {itemCount} items, {changeCount} changes in {ElapsedMilliseconds}ms",
                 handlers.Count(), actions.Count, actions.Where(x => x.Change > Core.ChangeType.NoChange).Count(),
                 sw.ElapsedMilliseconds);
+
+            callbacks?.Update?.Invoke($"Processed {actions.Count} items in {sw.ElapsedMilliseconds}ms", 1, 1);
 
             return actions;
         }
