@@ -53,7 +53,19 @@ namespace uSync8.BackOffice
         /// <param name="name">Name of handler</param>
         /// <param name="status">current handler status</param>
         /// <param name="changeCount">number of changes</param>
-        public void UpdateHandler(string name, HandlerStatus status, int changeCount, bool hasErrors = false)
+        public void UpdateHandler(string name, HandlerStatus status, int changeCount)
+        {
+            UpdateHandler(name, status, changeCount, false);
+        }
+
+        /// <summary>
+        ///  Updated the change status of a single handler in the list
+        /// </summary>
+        /// <param name="name">Name of handler</param>
+        /// <param name="status">current handler status</param>
+        /// <param name="changeCount">number of changes</param>
+        /// <param name="hasErrors">there are actions that have failed in the set</param>
+        public void UpdateHandler(string name, HandlerStatus status, int changeCount, bool hasErrors)
         {
             var item = this.Handlers.FirstOrDefault(x => x.Name == name);
             if (item != null)
