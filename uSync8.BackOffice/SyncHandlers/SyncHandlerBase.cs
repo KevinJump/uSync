@@ -662,8 +662,25 @@ namespace uSync8.BackOffice.SyncHandlers
         {
             if (a.key == b.key) return true;
             if (a.Name.Equals(b.Name, StringComparison.InvariantCultureIgnoreCase)) return true;
-
             return false;
+        }
+
+        /// <summary>
+        ///  check if a node matches a item 
+        /// </summary>
+        /// <remarks>
+        ///  Like above we want to match on key and alias, but only if the alias is unique. 
+        ///  however the GetItemAlias function is overridden by tree based handlers to return a unique 
+        ///  alias (the key again), so we don't get false positives. 
+        /// </remarks>
+        protected virtual bool DoItemsMatch(XElement node, TObject item)
+        {
+            if (item.Key == node.GetKey()) return true;
+
+            // yes this is an or, we've done it explicity, so you can tell!
+            if (node.GetAlias().Equals(this.GetItemAlias(item), StringComparison.InvariantCultureIgnoreCase)) return true;
+
+            return false; 
         }
 
         /// <summary>
@@ -865,9 +882,12 @@ namespace uSync8.BackOffice.SyncHandlers
         }
 
         /// <summary>
-        ///  cleans up the folder, so if someone renames a things
-        ///  (and we are using the name in the file) this will
-        ///  clean anything else in the folder that has that key
+        ///  Cleans up the handler folder, removing duplicate configs for this item
+        ///  </summary>
+        ///  <remarks>
+        ///   e.g if someone renames a thing (and we are using the name in the file) 
+        ///   this will clean anything else in the folder that has that key / alias
+        ///  </remarks>
         /// </summary>
         protected virtual void CleanUp(TObject item, string newFile, string folder)
         {
@@ -880,12 +900,22 @@ namespace uSync8.BackOffice.SyncHandlers
                 if (!file.InvariantEquals(physicalFile))
                 {
                     var node = syncFileService.LoadXElement(file);
-                    if (node.GetKey() == GetItemKey(item))
+
+                    // if this xml file matches the item we have just saved. 
+
+                    if (!node.IsEmptyItem() || node.GetEmptyAction() != SyncActionType.Rename)
                     {
-                        var attempt = serializer.SerializeEmpty(item, SyncActionType.Rename, node.GetAlias());
-                        if (attempt.Success)
+                        // the node isn't empty, or its not a rename (because all clashes become renames)
+
+                        if (DoItemsMatch(node, item))
                         {
-                            syncFileService.SaveXElement(attempt.Item, file);
+                            logger.Debug(handlerType, "Duplicate {file} of {alias}, saving as rename", Path.GetFileName(file), this.GetItemAlias(item));
+
+                            var attempt = serializer.SerializeEmpty(item, SyncActionType.Rename, node.GetAlias());
+                            if (attempt.Success)
+                            {
+                                syncFileService.SaveXElement(attempt.Item, file);
+                            }
                         }
                     }
                 }
@@ -907,6 +937,9 @@ namespace uSync8.BackOffice.SyncHandlers
 
         abstract protected string GetItemPath(TObject item, bool useGuid, bool isFlat);
         abstract protected string GetItemName(TObject item);
+
+        virtual protected string GetItemAlias(TObject item)
+            => GetItemName(item);
 
         virtual protected string GetPath(string folder, TObject item, bool GuidNames, bool isFlat)
         {

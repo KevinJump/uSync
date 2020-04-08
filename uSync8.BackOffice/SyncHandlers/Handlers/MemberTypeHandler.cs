@@ -75,5 +75,9 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 
             return item.Name.ToSafeFileName();
         }
+
+        protected override string GetItemAlias(IMemberType item)
+            => item.Alias;
     }
+
 }

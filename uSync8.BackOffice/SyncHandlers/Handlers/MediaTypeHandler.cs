@@ -77,5 +77,8 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 
         protected override void DeleteFolder(int id)
             => mediaTypeService.DeleteContainer(id);
+
+        protected override string GetItemAlias(IMediaType item)
+            => item.Alias;
     }
 }

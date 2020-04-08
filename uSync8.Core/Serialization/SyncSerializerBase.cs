@@ -296,7 +296,7 @@ namespace uSync8.Core.Serialization
 
         public virtual SyncAttempt<XElement> SerializeEmpty(TObject item, SyncActionType change, string alias)
         {
-            logger.Debug(serializerType, "Base: Serializing Empty Element (Delete or rename) {0}", alias);
+            logger.Debug(serializerType, "Base: Serializing Empty Element {alias} {change}", alias, change);
 
             if (string.IsNullOrEmpty(alias))
                 alias = ItemAlias(item);
