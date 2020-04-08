@@ -624,7 +624,7 @@ namespace uSync8.BackOffice.SyncHandlers
                     {
                         Change = ChangeDetailType.Delete,
                         Name = $"Delete: {deleteAction.Name} ({Path.GetFileName(deleteAction.FileName)})",
-                        OldValue = deleteAction.FileName.Substring(folder.Length),
+                        NewValue = deleteAction.FileName.Substring(folder.Length),
                         Path = Path.GetFileName(deleteAction.FileName)
                     });
 
@@ -634,7 +634,7 @@ namespace uSync8.BackOffice.SyncHandlers
                         details.Add( new uSyncChange() {
                             Change = ChangeDetailType.Update,
                             Name = $"{dup.Change}: {dup.Name} ({Path.GetFileName(dup.FileName)})",
-                            OldValue = dup.FileName.Substring(folder.Length),
+                            NewValue = dup.FileName.Substring(folder.Length),
                             Path = Path.GetFileName(dup.FileName)
                         });
                     }
@@ -858,7 +858,10 @@ namespace uSync8.BackOffice.SyncHandlers
 
             var attempt = serializer.SerializeEmpty(item, SyncActionType.Delete, string.Empty);
             if (attempt.Success)
+            {
                 syncFileService.SaveXElement(attempt.Item, filename);
+                this.CleanUp(item, filename, Path.Combine(rootFolder, this.DefaultFolder));
+            }
         }
 
         /// <summary>
