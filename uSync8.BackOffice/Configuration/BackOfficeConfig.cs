@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
 using Umbraco.Core;
-
+using Umbraco.Core.Logging;
 using uSync8.Core.Extensions;
 
 namespace uSync8.BackOffice.Configuration
@@ -16,12 +16,15 @@ namespace uSync8.BackOffice.Configuration
     [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
     public class uSyncConfig
     {
+        private readonly IProfilingLogger logger;
+
         public uSyncSettings Settings { get; set; }
 
         private string settingsFile = Umbraco.Core.IO.SystemDirectories.Config + "/uSync8.config";
 
-        public uSyncConfig()
+        public uSyncConfig(IProfilingLogger logger)
         {
+            this.logger = logger; 
             this.Settings = LoadSettings();
         }
 
@@ -45,6 +48,7 @@ namespace uSync8.BackOffice.Configuration
             settings.ReportDebug = node.Element("ReportDebug").ValueOrDefault(false);
             settings.AddOnPing = node.Element("AddOnPing").ValueOrDefault(true);
             settings.RebuildCacheOnCompletion = node.Element("RebuildCacheOnCompletion").ValueOrDefault(false);
+            settings.FailOnMissingParent = node.Element("FailOnMissingParent").ValueOrDefault(true);
 
             // load the handlers 
             var handlerSets = node.Element("HandlerSets");
@@ -76,6 +80,8 @@ namespace uSync8.BackOffice.Configuration
             var sets = new List<HandlerSet>();
             defaultSet = ValueFromWebConfigOrDefault("DefaultHandlerSet", node.Attribute("Default").ValueOrDefault("default"));
 
+            logger.Debug<uSyncConfig>("Handlers : Default Set {defaultSet}", defaultSet);
+
             foreach (var setNode in node.Elements("Handlers"))
             {
                 var handlerSet = LoadSingleHandlerSet(setNode, defaultSettings);
@@ -95,7 +101,12 @@ namespace uSync8.BackOffice.Configuration
             {
                 var handlerSettings = LoadHandlerConfig(handlerNode, defaultSettings);
                 if (handlerSettings != null)
+                {
+                    logger.Debug<uSyncConfig>("Loading Handler {alias} {enabled} [{actions}]", 
+                        handlerSettings.Alias, handlerSettings.Enabled, string.Join(",", handlerSettings.Actions));
+
                     handlerSet.Handlers.Add(handlerSettings);
+                }
             }
 
             return handlerSet;
@@ -116,6 +127,7 @@ namespace uSync8.BackOffice.Configuration
             node.CreateOrSetElement("BatchSave", settings.BatchSave);
             node.CreateOrSetElement("ReportDebug", settings.ReportDebug);
             node.CreateOrSetElement("RebuildCacheOnCompletion", settings.RebuildCacheOnCompletion);
+            node.CreateOrSetElement("FailOnMissingParent", settings.FailOnMissingParent);
 
             if (settings.HandlerSets.Count > 0)
             {
@@ -170,6 +182,9 @@ namespace uSync8.BackOffice.Configuration
             if (handler.BatchSave.IsOverridden)
                 node.SetAttributeValue("BatchSave", handler.BatchSave.Value);
 
+            if (handler.FailOnMissingParent.IsOverridden)
+                node.SetAttributeValue("FailOnMissingParent", handler.FailOnMissingParent.Value);
+
             node.SetAttributeValue("Actions", string.Join(",", handler.Actions));
 
             if (handler.Settings != null && handler.Settings.Count > 0)
@@ -204,6 +219,7 @@ namespace uSync8.BackOffice.Configuration
             settings.UseFlatStructure = GetLocalValue(node.Attribute("UseFlatStructure"), defaultSettings.UseFlatStructure);
             settings.BatchSave = GetLocalValue(node.Attribute("BatchSave"), defaultSettings.BatchSave);
             settings.Actions = node.Attribute("Actions").ValueOrDefault("All").ToDelimitedList().ToArray();
+            settings.FailOnMissingParent = GetLocalValue(node.Attribute("FailOnMissingParent"), defaultSettings.FailOnMissingParent);
 
             // var settingNode = node.Element("Settings");
             // if (settingNode != null)
@@ -251,6 +267,9 @@ namespace uSync8.BackOffice.Configuration
             if (config.BatchSave.IsOverridden)
                 node.SetAttributeValue("BatchSave", config.BatchSave);
 
+            if (config.FailOnMissingParent.IsOverridden)
+                node.SetAttributeValue("FailOnMissingParent", config.FailOnMissingParent);
+
             if (config.Actions.Length > 0 && !(config.Actions.Length == 1 && config.Actions[0].InvariantEquals("all")))
                 node.SetAttributeValue("Actions", string.Join(",", config.Actions));
 
@@ -279,6 +298,8 @@ namespace uSync8.BackOffice.Configuration
             var filePath = Umbraco.Core.IO.IOHelper.MapPath(settingsFile);
             if (File.Exists(filePath))
             {
+                logger.Debug<uSyncConfig>("Loading Settings from {filePath}", filePath);
+
                 var node = XElement.Load(filePath);
                 var settingsNode = node.Element("BackOffice");
                 if (settingsNode != null)
@@ -297,6 +318,8 @@ namespace uSync8.BackOffice.Configuration
 
             if (loadIfBlank)
             {
+                logger.Debug<uSyncConfig>("Loading Blank (default) settings");
+
                 var file = new XElement("uSync",
                     new XElement("BackOffice"));
                 return file.Element("BackOffice");

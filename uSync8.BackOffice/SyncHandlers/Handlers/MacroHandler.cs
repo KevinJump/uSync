@@ -88,6 +88,8 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 
         protected override string GetItemName(IMacro item)
             => item.Name;
+        protected override string GetItemAlias(IMacro item)
+            => item.Alias;
 
         protected override IEnumerable<IEntity> GetChildItems(int parent)
         {
@@ -99,6 +101,7 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 
             return Enumerable.Empty<IEntity>();
         }
+
     }
 
 }

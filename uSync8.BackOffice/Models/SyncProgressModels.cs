@@ -53,13 +53,14 @@ namespace uSync8.BackOffice
         /// <param name="name">Name of handler</param>
         /// <param name="status">current handler status</param>
         /// <param name="changeCount">number of changes</param>
-        public void UpdateHandler(string name, HandlerStatus status, int changeCount)
+        public void UpdateHandler(string name, HandlerStatus status, int changeCount, bool hasErrors = false)
         {
             var item = this.Handlers.FirstOrDefault(x => x.Name == name);
             if (item != null)
             {
                 item.Status = status;
                 item.Changes = changeCount;
+                item.InError = hasErrors;
             }
         }
 
@@ -86,6 +87,11 @@ namespace uSync8.BackOffice
         public HandlerStatus Status { get; set; }
 
         public int Changes { get; set; }
+
+        /// <summary>
+        ///  reports if the handler has errors
+        /// </summary>
+        public bool InError { get; set; }
     }
 
     public enum HandlerStatus

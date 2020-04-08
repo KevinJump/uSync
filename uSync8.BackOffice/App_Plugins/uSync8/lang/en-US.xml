@@ -18,6 +18,7 @@
     <key alias="importforce">Full Import</key>
     <key alias="report">Report</key>
     <key alias="export">Export</key>
+    <key alias="exportClean">Clean Export</key>
     <key alias="apply">Apply</key>
 
     <key alias="details">Details</key>

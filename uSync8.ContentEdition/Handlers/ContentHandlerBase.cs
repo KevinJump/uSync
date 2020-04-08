@@ -7,6 +7,7 @@ using Umbraco.Core.Cache;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Services;
+using uSync8.BackOffice;
 using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
 using uSync8.BackOffice.SyncHandlers;
@@ -170,6 +171,21 @@ namespace uSync8.ContentEdition.Handlers
             return config.Settings[setting];
         }
 
+        // we only match duplicate actions by key. 
+        protected override bool DoActionsMatch(uSyncAction a, uSyncAction b)
+            => a.key == b.key;
 
+        /// <summary>
+        /// </summary>
+        /// <remarks>
+        ///  content items sit in a tree, so we don't want to give them
+        ///  an alias based on their name (because of false matches)
+        ///  so we give the key as an alias.
+        /// </remarks>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        protected override string GetItemAlias(TObject item)
+            => item.Key.ToString();
     }
+
 }

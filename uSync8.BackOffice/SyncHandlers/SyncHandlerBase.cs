@@ -151,8 +151,7 @@ namespace uSync8.BackOffice.SyncHandlers
         public IEnumerable<uSyncAction> ImportAll(string folder, HandlerSettings config, bool force, SyncUpdateCallback callback = null)
         {
             var sw = Stopwatch.StartNew();
-
-            logger.Debug(handlerType, "ImportAll: {0}", Path.GetFileName(folder));
+            logger.Debug(handlerType, "{alias} ImportAll: {fileName}", this.Alias, Path.GetFileName(folder));
 
             var actions = new List<uSyncAction>();
             var updates = new Dictionary<string, TObject>();
@@ -168,9 +167,9 @@ namespace uSync8.BackOffice.SyncHandlers
 
             runtimeCache.ClearByKey($"keycache_{this.Alias}");
             callback?.Invoke("Done", 3, 3);
-            
+
             sw.Stop();
-            logger.Debug(handlerType, "Import Complete {0}ms", sw.ElapsedMilliseconds);
+            logger.Debug(handlerType, "{alias} Import Complete {elapsedMilliseconds}ms", this.Alias, sw.ElapsedMilliseconds);
             return actions;
         }
 
@@ -209,7 +208,7 @@ namespace uSync8.BackOffice.SyncHandlers
                         var action = actions.FirstOrDefault(x => x.FileName == item.update.Key);
                         actions.Remove(action);
                         action.Success = attempt.Success;
-                        action.Message = "Second Pass Fail: " + attempt.Message;
+                        action.Message = $"Second Pass Fail: {attempt.Message}";
                         action.Exception = attempt.Exception;
                         actions.Add(action);
                     }
@@ -410,6 +409,8 @@ namespace uSync8.BackOffice.SyncHandlers
         {
             try
             {
+                if (config.FailOnMissingParent) flags |= SerializerFlags.FailMissingParent;
+
                 syncFileService.EnsureFileExists(filePath);
                 using (var stream = syncFileService.OpenRead(filePath))
                 {
@@ -431,7 +432,7 @@ namespace uSync8.BackOffice.SyncHandlers
             }
             catch (Exception ex)
             {
-                logger.Warn(handlerType, "Base: Import Failed : {0}", ex.ToString());
+                logger.Warn(handlerType, "{alias}: Import Failed : {exception}", this.Alias, ex.ToString());
                 return SyncAttempt<TObject>.Fail(Path.GetFileName(filePath), ChangeType.Fail, $"Import Fail: {ex.Message}");
             }
         }
@@ -469,7 +470,7 @@ namespace uSync8.BackOffice.SyncHandlers
                 catch (Exception ex)
                 {
                     logger.Warn(handlerType, $"Second Import Failed: {ex.ToString()}");
-                    return SyncAttempt<TObject>.Fail(item.Id.ToString(), ChangeType.Fail, ex);
+                    return SyncAttempt<TObject>.Fail(item.Id.ToString(), ChangeType.Fail, ex.Message, ex);
                 }
             }
 
@@ -567,15 +568,158 @@ namespace uSync8.BackOffice.SyncHandlers
 
         #endregion
 
-        #region reporting 
+        #region Reporting 
 
         public IEnumerable<uSyncAction> Report(string folder, HandlerSettings config, SyncUpdateCallback callback)
         {
             var actions = new List<uSyncAction>();
-            callback?.Invoke("Checking Actions", 0, 1);
+            callback?.Invoke("Checking Actions", 1, 3);
             actions.AddRange(ReportFolder(folder, config, callback));
-            callback?.Invoke("Done", 1, 1);
+
+            callback?.Invoke("Validating Report", 2, 3);
+            actions.AddRange(ValidateReport(folder, actions));
+
+            callback?.Invoke("Done", 3, 3);
             return actions;
+        }
+
+        private IEnumerable<uSyncAction> ValidateReport(string folder, List<uSyncAction> actions)
+        {
+            var validationActions = new List<uSyncAction>();
+
+            // alters the existing list. 
+            ReportMissingParents(actions);
+
+            // adds new actions ? (should it alter?)
+            validationActions.AddRange(ReportDeleteCheck(folder, actions));
+
+            return validationActions;
+
+        }
+
+        /// <summary>
+        ///  Check to returned report to see if there is a delete and an update for the same item
+        ///  because if there is then we have issues.
+        /// </summary>
+        protected virtual IEnumerable<uSyncAction> ReportDeleteCheck(string folder, IEnumerable<uSyncAction> actions)
+        {
+            var duplicates = new List<uSyncAction>();
+
+            // delete checks. 
+            foreach (var deleteAction in actions.Where(x => x.Change == ChangeType.Delete))
+            {
+                // todo: this is only matching by key, but non-tree based serializers also delete by alias.
+                // so this check actually has to be booted back down to the serializer.
+                if (actions.Any(x => x.Change != ChangeType.Delete && DoActionsMatch(x, deleteAction)))
+                {
+                    var duplicateAction = uSyncActionHelper<TObject>.ReportActionFail(deleteAction.Name,
+                        $"Duplicate! {deleteAction.Name} exists both as delete and import action");
+
+                    // create a detail message to tell people what has happend.
+                    duplicateAction.DetailMessage = "uSync detected a duplicate actions, where am item will be both created and deleted.";
+                    var details = new List<uSyncChange>();
+
+                    // add the delete message to the list of changes
+                    details.Add(new uSyncChange()
+                    {
+                        Change = ChangeDetailType.Delete,
+                        Name = $"Delete: {deleteAction.Name} ({Path.GetFileName(deleteAction.FileName)})",
+                        NewValue = deleteAction.FileName.Substring(folder.Length),
+                        Path = Path.GetFileName(deleteAction.FileName)
+                    });
+
+                    // add all the duplicates to the list of changes.
+                    foreach (var dup in actions.Where(x => x.Change != ChangeType.Delete && DoActionsMatch(x, deleteAction)))
+                    {
+                        details.Add( new uSyncChange() {
+                            Change = ChangeDetailType.Update,
+                            Name = $"{dup.Change}: {dup.Name} ({Path.GetFileName(dup.FileName)})",
+                            NewValue = dup.FileName.Substring(folder.Length),
+                            Path = Path.GetFileName(dup.FileName)
+                        });
+                    }
+
+                    duplicateAction.Details = details;
+                    duplicates.Add(duplicateAction);
+                }
+            }
+
+            return duplicates;
+        }
+
+        /// <summary>
+        ///  check to see if an action matches, another action. 
+        /// </summary>
+        /// <remarks>
+        ///  how two actions match can vary based on handler, in the most part they are matched by key
+        ///  but some items will also check based on the name.
+        ///  
+        ///  when we are dealing with handlers where things can have the same 
+        ///  name (tree items, such as content or media), this function has 
+        ///  to be overridden to remove the name check.
+        /// </remarks>
+        protected virtual bool DoActionsMatch(uSyncAction a, uSyncAction b)
+        {
+            if (a.key == b.key) return true;
+            if (a.Name.Equals(b.Name, StringComparison.InvariantCultureIgnoreCase)) return true;
+            return false;
+        }
+
+        /// <summary>
+        ///  check if a node matches a item 
+        /// </summary>
+        /// <remarks>
+        ///  Like above we want to match on key and alias, but only if the alias is unique. 
+        ///  however the GetItemAlias function is overridden by tree based handlers to return a unique 
+        ///  alias (the key again), so we don't get false positives. 
+        /// </remarks>
+        protected virtual bool DoItemsMatch(XElement node, TObject item)
+        {
+            if (item.Key == node.GetKey()) return true;
+
+            // yes this is an or, we've done it explicity, so you can tell!
+            if (node.GetAlias().Equals(this.GetItemAlias(item), StringComparison.InvariantCultureIgnoreCase)) return true;
+
+            return false; 
+        }
+
+        /// <summary>
+        ///  Check report for any items that are missing their parent items 
+        /// </summary>
+        /// <remarks>
+        ///  The serializers will report if an item is missing a parent item within umbraco,
+        ///  but because the serializer isn't aware of the wider import (all the other items)
+        ///  it can't say if the parent is in the import.
+        ///  
+        ///  This method checks for the parent of an item in the wider list of items being 
+        ///  imported.
+        /// </remarks>
+        private void ReportMissingParents(IList<uSyncAction> actions)
+        {
+            var missingParents = actions
+                .Where(x => x.Change == ChangeType.ParentMissing);
+
+            foreach (var missing in missingParents)
+            {
+                var node = XElement.Load(missing.FileName);
+                var guid = node.GetParentKey();
+
+                if (guid != Guid.Empty)
+                {
+                    if (actions.Any(x => x.key == guid && x.Change < ChangeType.Fail))
+                    {
+                        if (actions.Any(x => x.FileName == missing.FileName))
+                        {
+                            // parent is in this sync.
+                            // and this item is in the list (which really it has to be
+                            // or we would never be here, but you can never check that enough)
+                            var action = actions.FirstOrDefault(x => x.FileName == missing.FileName);
+                            action.Change = ChangeType.Create;
+                        }
+                    }
+                }
+            }
+
         }
 
         public virtual IEnumerable<uSyncAction> ReportFolder(string folder, HandlerSettings config, SyncUpdateCallback callback)
@@ -731,13 +875,19 @@ namespace uSync8.BackOffice.SyncHandlers
 
             var attempt = serializer.SerializeEmpty(item, SyncActionType.Delete, string.Empty);
             if (attempt.Success)
+            {
                 syncFileService.SaveXElement(attempt.Item, filename);
+                this.CleanUp(item, filename, Path.Combine(rootFolder, this.DefaultFolder));
+            }
         }
 
         /// <summary>
-        ///  cleans up the folder, so if someone renames a things
-        ///  (and we are using the name in the file) this will
-        ///  clean anything else in the folder that has that key
+        ///  Cleans up the handler folder, removing duplicate configs for this item
+        ///  </summary>
+        ///  <remarks>
+        ///   e.g if someone renames a thing (and we are using the name in the file) 
+        ///   this will clean anything else in the folder that has that key / alias
+        ///  </remarks>
         /// </summary>
         protected virtual void CleanUp(TObject item, string newFile, string folder)
         {
@@ -750,12 +900,22 @@ namespace uSync8.BackOffice.SyncHandlers
                 if (!file.InvariantEquals(physicalFile))
                 {
                     var node = syncFileService.LoadXElement(file);
-                    if (node.GetKey() == GetItemKey(item))
+
+                    // if this xml file matches the item we have just saved. 
+
+                    if (!node.IsEmptyItem() || node.GetEmptyAction() != SyncActionType.Rename)
                     {
-                        var attempt = serializer.SerializeEmpty(item, SyncActionType.Rename, node.GetAlias());
-                        if (attempt.Success)
+                        // the node isn't empty, or its not a rename (because all clashes become renames)
+
+                        if (DoItemsMatch(node, item))
                         {
-                            syncFileService.SaveXElement(attempt.Item, file);
+                            logger.Debug(handlerType, "Duplicate {file} of {alias}, saving as rename", Path.GetFileName(file), this.GetItemAlias(item));
+
+                            var attempt = serializer.SerializeEmpty(item, SyncActionType.Rename, node.GetAlias());
+                            if (attempt.Success)
+                            {
+                                syncFileService.SaveXElement(attempt.Item, file);
+                            }
                         }
                     }
                 }
@@ -777,6 +937,9 @@ namespace uSync8.BackOffice.SyncHandlers
 
         abstract protected string GetItemPath(TObject item, bool useGuid, bool isFlat);
         abstract protected string GetItemName(TObject item);
+
+        virtual protected string GetItemAlias(TObject item)
+            => GetItemName(item);
 
         virtual protected string GetPath(string folder, TObject item, bool GuidNames, bool isFlat)
         {

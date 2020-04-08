@@ -21,6 +21,24 @@ namespace uSync8.Core.Extensions
         public static string GetAlias(this XElement node)
             => node.Attribute("Alias").ValueOrDefault(string.Empty);
 
+        /// <summary>
+        ///  Get the key of any parent value that is in the file.
+        /// </summary>
+        /// <remarks>
+        ///  Not all items have a parent
+        /// </remarks>
+        public static Guid GetParentKey(this XElement node)
+        {
+            var result = node
+                .Element("Info")?
+                .Element("Parent")?
+                .Attribute("Key").ValueOrDefault(Guid.Empty);
+
+            return result != null && result.HasValue
+                ? result.Value 
+                : Guid.Empty;
+        }
+
         public static string ValueOrDefault(this XElement node, string defaultValue)
         {
             if (node == null || string.IsNullOrEmpty(node.Value))

@@ -9,7 +9,7 @@
         </span>
     </div>
 
-    <umb-box>
+    <umb-box ng-if="!vm.loading">
         <umb-box-content>
             <div class="flex justify-between items-center">
                 <div class="usync-main-buttons">
@@ -31,12 +31,14 @@
                                       state="vm.importButton.state">
                     </umb-button-group>
 
-                    <umb-button type="button"
-                                button-style="info"
-                                label-key="usync_export"
-                                action="vm.exportItems()"
-                                disabled="vm.working">
-                    </umb-button>
+
+                    <umb-button-group default-button="vm.exportButton.defaultButton"
+                                      sub-buttons="vm.exportButton.subButtons"
+                                      direction="down"
+                                      float="left"
+                                      button-style="info"
+                                      state="vm.exportButton.state">
+                    </umb-button-group>
 
                 </div>
 

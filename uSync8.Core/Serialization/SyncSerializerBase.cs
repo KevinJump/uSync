@@ -59,7 +59,15 @@ namespace uSync8.Core.Serialization
         {
             return SerializeCore(item);
         }
-     
+
+        /// <summary>
+        ///  CanDeserialize based on the flags, used to check the model is good, for this import 
+        /// </summary>
+        /// <remarks>
+        ///  used primarliy for checking parentage, but also can be used for checking things like create only.
+        /// </remarks>
+        protected virtual SyncAttempt<TObject> CanDeserialize(XElement node, SerializerFlags flags)
+            => SyncAttempt<TObject>.Succeed("No Check", ChangeType.NoChange);
 
         public SyncAttempt<TObject> Deserialize(XElement node, SerializerFlags flags)
         {
@@ -76,6 +84,10 @@ namespace uSync8.Core.Serialization
 
             if ( flags.HasFlag(SerializerFlags.Force) || IsCurrent(node) > ChangeType.NoChange)
             {
+                // pre-deserilzation check. 
+                var check = CanDeserialize(node, flags);
+                if (!check.Success) return check;
+
                 logger.Debug(serializerType, "Base: Deserializing {0}", ItemType);
                 var result = DeserializeCore(node);
 
@@ -227,7 +239,7 @@ namespace uSync8.Core.Serialization
             return SyncAttempt<TObject>.Succeed(alias, ChangeType.NoChange);
         }
 
-        public ChangeType IsCurrent(XElement node)
+        public virtual ChangeType IsCurrent(XElement node)
         {
             if (node == null) return ChangeType.Update;
 
@@ -284,7 +296,7 @@ namespace uSync8.Core.Serialization
 
         public virtual SyncAttempt<XElement> SerializeEmpty(TObject item, SyncActionType change, string alias)
         {
-            logger.Debug(serializerType, "Base: Serializing Empty Element (Delete or rename) {0}", alias);
+            logger.Debug(serializerType, "Base: Serializing Empty Element {alias} {change}", alias, change);
 
             if (string.IsNullOrEmpty(alias))
                 alias = ItemAlias(item);

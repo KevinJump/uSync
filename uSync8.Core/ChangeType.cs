@@ -16,7 +16,8 @@
         Rolledback,
         Fail = 11,
         ImportFail,
-        Mismatch
+        Mismatch,
+        ParentMissing
     }
 
 }

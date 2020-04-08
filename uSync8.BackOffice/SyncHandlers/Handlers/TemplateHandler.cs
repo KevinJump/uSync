@@ -63,6 +63,8 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 
         protected override string GetItemName(ITemplate item)
             => item.Name;
+        protected override string GetItemAlias(ITemplate item)
+            => item.Alias;
 
 
         protected override IEnumerable<IEntity> GetChildItems(int parent)
@@ -71,5 +73,6 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 
         protected override IEnumerable<IEntity> GetFolders(int parent)
             => GetChildItems(parent);
+
     }
 }

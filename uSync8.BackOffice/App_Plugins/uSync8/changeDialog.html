@@ -13,6 +13,9 @@
                 </umb-box-header>
                 <umb-box-container>
                     <umb-box-content>
+                        <div ng-if="vm.item.DetailMessage.length > 0" class="usync-item-detail-message">
+                            <div ng-bind-html="vm.item.DetailMessage"></div>
+                        </div>
                         <div ng-if="vm.item.Details.length > 0">
                             <h5>Detected changes</h5>
                             <div class="usync-item-details">
@@ -22,8 +25,7 @@
                                             <div class="umb-table-cell"></div>
                                             <div class="umb-table-cell usync-detail-action-cell">Action</div>
                                             <div class="umb-table-cell umb-table__name">Item</div>
-                                            <div class="umb-table-cell">Old Value</div>
-                                            <div class="umb-table-cell">New Value</div>
+                                            <div class="umb-table-cell">Diffrence</div>
                                         </div>
                                     </div>
                                     <div class="umb-table-body">
@@ -41,11 +43,8 @@
                                             <div class="umb-table-cell umb-table__name">
                                                 {{detail.Name}}
                                             </div>
-                                            <div class="umb-table-cell usync-old-value">
-                                                {{detail.OldValue}}
-                                            </div>
-                                            <div class="umb-table-cell usync-new-value">
-                                                {{detail.NewValue}}
+                                            <div class="umb-table-cell usync-diff-value">
+                                                <pre><span ng-repeat="part in detail.diff"><ins ng-if="part.added">{{part.value}}</ins><del ng-if="part.removed">{{part.value}}</del><span ng-if="!part.added && !part.removed">{{part.value}}</span></span></pre>
                                             </div>
                                         </div>
                                     </div>

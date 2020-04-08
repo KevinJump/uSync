@@ -81,7 +81,7 @@ namespace uSync8.BackOffice.SyncHandlers
             List<LeveledFile> nodes = new List<LeveledFile>();
 
             callback?.Invoke("Calculating import order", 0, 1);
-            logger.Debug(handlerType, "Calculating import order");
+            logger.Verbose(handlerType, "Calculating import order");
 
             foreach (var file in files)
             {
@@ -118,7 +118,7 @@ namespace uSync8.BackOffice.SyncHandlers
                 var filename = Path.GetFileNameWithoutExtension(item.Node.File);
                 callback?.Invoke($"{filename}", item.Index, nodes.Count);
 
-                logger.Debug(handlerType, "{Index} Importing: {File}, [Level {Level}]", item.Index, filename, item.Node.Level);
+                logger.Verbose(handlerType, "{Index} Importing: {File}, [Level {Level}]", item.Index, filename, item.Node.Level);
 
                 var attempt = Import(item.Node.File, config, flags);
                 if (attempt.Success)

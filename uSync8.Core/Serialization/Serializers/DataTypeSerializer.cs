@@ -110,7 +110,7 @@ namespace uSync8.Core.Serialization.Serializers
                 }
                 else
                 {
-                    logger.Debug<DataTypeSerializer>("Deserializing Config via {0}", serializer.Name);
+                    logger.Verbose<DataTypeSerializer>("Deserializing Config via {0}", serializer.Name);
                     var configObject = serializer.DeserializeConfig(config, item.Configuration.GetType());
                     if (!IsJsonEqual(item.Configuration, configObject))
                         item.Configuration = configObject;
@@ -172,7 +172,7 @@ namespace uSync8.Core.Serialization.Serializers
                 }
                 else
                 {
-                    logger.Debug<DataTypeSerializer>("Serializing Config via {0}", serializer.Name);
+                    logger.Verbose<DataTypeSerializer>("Serializing Config via {0}", serializer.Name);
                     config = serializer.SerializeConfig(item.Configuration);
                 }
 

@@ -7,6 +7,7 @@ using Umbraco.Core.Composing;
 using Umbraco.Core.Logging;
 
 using uSync8.BackOffice.Configuration;
+using uSync8.BackOffice.Services;
 using uSync8.BackOffice.SyncHandlers;
 
 namespace uSync8.BackOffice
@@ -25,12 +26,16 @@ namespace uSync8.BackOffice
         private uSyncSettings settings;
         private readonly SyncHandlerFactory handlerFactory;
         private readonly IProfilingLogger logger;
+        private SyncFileService syncFileService;
 
         public uSyncService(
             SyncHandlerFactory handlerFactory,
-            IProfilingLogger logger)
+            IProfilingLogger logger,
+            SyncFileService syncFileService)
         {
             this.handlerFactory = handlerFactory;
+
+            this.syncFileService = syncFileService;
 
             this.settings = Current.Configs.uSync();
             this.logger = logger;
@@ -86,6 +91,9 @@ namespace uSync8.BackOffice
         /// <returns>List of actions detailing what would and wouldn't change</returns>
         public IEnumerable<uSyncAction> Report(string folder, IEnumerable<ExtendedHandlerConfigPair> handlers, uSyncCallbacks callbacks)
         {
+
+            var sw = Stopwatch.StartNew();
+
             fireBulkStarting(ReportStarting);
 
             logger.Debug<uSyncService>("Reporting For [{0}]", string.Join(",", handlers.Select(x => x.Handler.Name)));
@@ -116,13 +124,20 @@ namespace uSync8.BackOffice
                 var handlerActions = handler.Report($"{folder}/{handler.DefaultFolder}", handlerSettings, callbacks?.Update);
                 actions.AddRange(handlerActions);
 
-                summary.UpdateHandler(handler.Name, HandlerStatus.Complete, ChangeCount(handlerActions));
+                summary.UpdateHandler(handler.Name, HandlerStatus.Complete, ChangeCount(handlerActions), ContainsErrors(handlerActions));
             }
 
             summary.Message = "Report Complete";
             callbacks?.Callback?.Invoke(summary);
 
             fireBulkComplete(ReportComplete, actions);
+            sw.Stop();
+
+            logger.Info<uSyncService>("uSync Report: {handlerCount} handlers, processed {itemCount} items, {changeCount} changes in {ElapsedMilliseconds}ms",
+                handlers.Count(), actions.Count, actions.Where(x => x.Change > Core.ChangeType.NoChange).Count(),
+                sw.ElapsedMilliseconds);
+
+            callbacks?.Update?.Invoke($"Processed {actions.Count} items in {sw.ElapsedMilliseconds}ms", 1, 1);
 
             return actions;
         }
@@ -246,14 +261,17 @@ namespace uSync8.BackOffice
                     }
 
                     sw.Stop();
-                    summary.UpdateHandler("Post Import", HandlerStatus.Complete,
-                        $"Import Completed ({sw.ElapsedMilliseconds}ms)", 0);
+                    summary.UpdateHandler("Post Import", HandlerStatus.Complete, "Import Completed", 0);
                     callbacks?.Callback?.Invoke(summary);
 
                     // fire complete
                     fireBulkComplete(ImportComplete, actions);
 
-                    logger.Debug<uSyncService>("uSync Import completed in {ElapsedMilliseconds}ms", sw.ElapsedMilliseconds);
+                    logger.Info<uSyncService>("uSync Import: {handlerCount} handlers, processed {itemCount} items, {changeCount} changes in {ElapsedMilliseconds}ms",
+                        handlers.Count(), actions.Count, actions.Where(x => x.Change > Core.ChangeType.NoChange).Count(),
+                        sw.ElapsedMilliseconds);
+
+                    callbacks?.Update?.Invoke($"Processed {actions.Count} items in {sw.ElapsedMilliseconds}ms", 1, 1);
 
                     return actions;
                 }
@@ -294,6 +312,23 @@ namespace uSync8.BackOffice
 
         #region Exporting 
 
+
+        public bool CleanExportFolder(string folder)
+        {
+            try
+            {
+                if (syncFileService.DirectoryExists(folder))
+                    syncFileService.CleanFolder(folder);
+            }
+            catch(Exception ex)
+            {
+                throw new ApplicationException("Failed to delete uSync folder (may be in use)", ex);
+            }
+
+            return true;
+        }
+
+
         /// <summary>
         ///  Export items from umbraco into a given folder
         /// </summary>
@@ -332,6 +367,8 @@ namespace uSync8.BackOffice
         /// <returns>List of actions detailing what was exported</returns>
         public IEnumerable<uSyncAction> Export(string folder, IEnumerable<ExtendedHandlerConfigPair> handlers, uSyncCallbacks callbacks)
         {
+            var sw = Stopwatch.StartNew();
+
             fireBulkStarting(ExportStarting);
 
             var actions = new List<uSyncAction>();
@@ -359,6 +396,14 @@ namespace uSync8.BackOffice
             callbacks?.Callback?.Invoke(summary);
 
             fireBulkComplete(ExportComplete, actions);
+
+            sw.Stop();
+
+            logger.Info<uSyncService>("uSync Export: {handlerCount} handlers, processed {itemCount} items, {changeCount} changes in {ElapsedMilliseconds}ms",
+                handlers.Count(), actions.Count, actions.Where(x => x.Change > Core.ChangeType.NoChange).Count(),
+                sw.ElapsedMilliseconds);
+
+            callbacks?.Update?.Invoke($"Processed {actions.Count} items in {sw.ElapsedMilliseconds}ms", 1, 1);
 
             return actions;
         }
@@ -391,6 +436,8 @@ namespace uSync8.BackOffice
         private int ChangeCount(IEnumerable<uSyncAction> actions)
             => actions.Count(x => x.Change > Core.ChangeType.NoChange);
 
+        private bool ContainsErrors(IEnumerable<uSyncAction> actions)
+            => actions.Any(x => x.Change >= Core.ChangeType.Fail);
 
         /// <summary>
         ///  Do an import triggered by an event.
