@@ -638,7 +638,7 @@ namespace uSync8.ContentEdition.Serializers
         }
         protected TObject FindParentByPath(string path, bool failIfNotExact = false)
         {
-            logger.Debug(serializerType, "Looking for Parent by path {Path}", path);
+            // logger.Debug(serializerType, "Looking for Parent by path {Path}", path);
             var folders = path.ToDelimitedList("/").ToList();
             return FindByPath(folders.Take(folders.Count - 1), failIfNotExact);
         }

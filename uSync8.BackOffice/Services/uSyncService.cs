@@ -227,7 +227,7 @@ namespace uSync8.BackOffice
                         var handlerActions = handler.ImportAll($"{folder}/{handler.DefaultFolder}", handlerSettings, force, callbacks?.Update);
                         actions.AddRange(handlerActions);
 
-                        summary.UpdateHandler(handler.Name, HandlerStatus.Complete, ChangeCount(handlerActions));
+                        summary.UpdateHandler(handler.Name, HandlerStatus.Complete, ChangeCount(handlerActions), ContainsErrors(handlerActions));
                     }
 
 
@@ -388,7 +388,7 @@ namespace uSync8.BackOffice
 
                 actions.AddRange(handlerActions);
 
-                summary.UpdateHandler(handler.Name, HandlerStatus.Complete, ChangeCount(handlerActions));
+                summary.UpdateHandler(handler.Name, HandlerStatus.Complete, ChangeCount(handlerActions), ContainsErrors(handlerActions));
             }
 
 

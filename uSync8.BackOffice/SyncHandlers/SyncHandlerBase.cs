@@ -573,28 +573,26 @@ namespace uSync8.BackOffice.SyncHandlers
         public IEnumerable<uSyncAction> Report(string folder, HandlerSettings config, SyncUpdateCallback callback)
         {
             var actions = new List<uSyncAction>();
+
             callback?.Invoke("Checking Actions", 1, 3);
             actions.AddRange(ReportFolder(folder, config, callback));
 
             callback?.Invoke("Validating Report", 2, 3);
-            actions.AddRange(ValidateReport(folder, actions));
+            actions = ValidateReport(folder, actions);
 
             callback?.Invoke("Done", 3, 3);
             return actions;
         }
 
-        private IEnumerable<uSyncAction> ValidateReport(string folder, List<uSyncAction> actions)
+        private List<uSyncAction> ValidateReport(string folder, List<uSyncAction> actions)
         {
-            var validationActions = new List<uSyncAction>();
+            // Alters the existing list, by chaning the type as needed.
+            var validationActions = ReportMissingParents(actions.ToArray());
 
-            // alters the existing list. 
-            ReportMissingParents(actions);
+            // adds new actions - for delete clashes.
+            validationActions.AddRange(ReportDeleteCheck(folder, validationActions));
 
-            // adds new actions ? (should it alter?)
-            validationActions.AddRange(ReportDeleteCheck(folder, actions));
-
-            return validationActions;
-
+            return validationActions.ToList();
         }
 
         /// <summary>
@@ -694,32 +692,30 @@ namespace uSync8.BackOffice.SyncHandlers
         ///  This method checks for the parent of an item in the wider list of items being 
         ///  imported.
         /// </remarks>
-        private void ReportMissingParents(IList<uSyncAction> actions)
+        private List<uSyncAction> ReportMissingParents(uSyncAction[] actions)
         {
-            var missingParents = actions
-                .Where(x => x.Change == ChangeType.ParentMissing);
-
-            foreach (var missing in missingParents)
+            for(int i = 0; i < actions.Length; i++)
             {
-                var node = XElement.Load(missing.FileName);
+                if (actions[i].Change != ChangeType.ParentMissing) continue;
+
+                var node = XElement.Load(actions[i].FileName);
                 var guid = node.GetParentKey();
 
                 if (guid != Guid.Empty)
                 {
-                    if (actions.Any(x => x.key == guid && x.Change < ChangeType.Fail))
+                    if (actions.Any(x => x.key == guid && (x.Change < ChangeType.Fail || x.Change == ChangeType.ParentMissing)))
                     {
-                        if (actions.Any(x => x.FileName == missing.FileName))
-                        {
-                            // parent is in this sync.
-                            // and this item is in the list (which really it has to be
-                            // or we would never be here, but you can never check that enough)
-                            var action = actions.FirstOrDefault(x => x.FileName == missing.FileName);
-                            action.Change = ChangeType.Create;
-                        }
+                        logger.Debug(handlerType, "Found existing key in actions {item}", actions[i].Name);
+                        actions[i].Change = ChangeType.Create;
+                    }
+                    else
+                    {
+                        logger.Warn(handlerType, "{item} is missing a parent", actions[i].Name);
                     }
                 }
             }
 
+            return actions.ToList();
         }
 
         public virtual IEnumerable<uSyncAction> ReportFolder(string folder, HandlerSettings config, SyncUpdateCallback callback)

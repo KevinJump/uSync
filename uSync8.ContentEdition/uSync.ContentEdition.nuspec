@@ -22,6 +22,7 @@
     <tags>umbraco usync</tags>
   </metadata>
   <files>
+    <file src="..\readme-content.txt" target="readme.txt" />
     <file src="bin\$Configuration$\uSync8.ContentEdition.dll" target="lib\net472" />
   </files>
 </package>
