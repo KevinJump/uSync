@@ -124,7 +124,7 @@ namespace uSync8.Core.Serialization.Serializers
                 {
                     node.Add(new XElement(ItemType,
                         new XAttribute("Key", allowedItem.Key),
-                        new XAttribute("SortOrder", allowedItem.SortOrder), allowedItem.Alias));
+                        new XAttribute("SortOrder", allowedType.SortOrder), allowedItem.Alias));
                 }
             }
             return node;
@@ -224,6 +224,7 @@ namespace uSync8.Core.Serialization.Serializers
                 logger.Debug(serializerType, "Structure: {0}", key);
 
                 var itemSortOrder = baseNode.Attribute("SortOrder").ValueOrDefault(sortOrder);
+                logger.Debug(serializerType, "Sort Order: {0}", itemSortOrder);
 
                 IContentTypeBase baseItem = default(IContentTypeBase);
 
@@ -245,8 +246,7 @@ namespace uSync8.Core.Serialization.Serializers
                 {
                     logger.Debug(serializerType, "Structure Found {0}", baseItem.Alias);
 
-                    allowed.Add(new ContentTypeSort(
-                        new Lazy<int>(() => baseItem.Id), itemSortOrder, baseItem.Alias));
+                    allowed.Add(new ContentTypeSort(baseItem.Id, itemSortOrder));
 
                     sortOrder = itemSortOrder + 1;
                 }
@@ -254,8 +254,18 @@ namespace uSync8.Core.Serialization.Serializers
 
             logger.Debug(serializerType, "Structure: {0} items", allowed.Count);
 
-            if (!Enumerable.SequenceEqual(item.AllowedContentTypes, allowed))
+            // compare the two lists (the equality compare fails because the id value is lazy)
+            var currentHash =
+                string.Join(":", item.AllowedContentTypes.Select(x => $"{x.Id.Value}-{x.SortOrder}"));
+
+            var newHash =
+                string.Join(":", allowed.Select(x => $"{x.Id.Value}-{x.SortOrder}"));
+
+            if (!currentHash.Equals(newHash))
+            {
+                logger.Debug(serializerType, "Updating allowed content types");
                 item.AllowedContentTypes = allowed;
+            }
         }
 
         protected void DeserializeProperties(TObject item, XElement node)

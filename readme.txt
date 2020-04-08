@@ -2,8 +2,8 @@
     __  __/ ___/__  ______  _____ 
    / / / /\__ \/ / / / __ \/ ___/ 
   / /_/ /___/ / /_/ / / / / /__ 
-  \__,_//____/\__, /_/ /_/\___/ 🛴🛒🎄💻
- ----------- /____/ --- 8.5.x -----------
+  \__,_//____/\__, /_/ /_/\___/ 🛴🛒🎄💻🧼
+ ----------- /____/ --- 8.6.x -------------
 
  Welcome to uSync 8 for Umbraco 8
 
@@ -14,6 +14,7 @@
   version.
  
  uSync 8 - is not just an upgrade of uSync
+ -----------------------------------------
 
  uSync deals with some fairly base stuff inside Umbraco and when
  Umbraco changes uSync has to change too.
@@ -32,7 +33,7 @@
  us it was a delete/rename. this makes deployment much nicer - and
  less likely to break. 
 
- If you haven't already Upgrade to Umbraco 8.4, things are faster
- and stablerer.
+# If you haven't already Upgrade to Umbraco 8.4, things are faster #
+# and stablerer.                                                   #
 
-Feedback and Join in: https://github.com/KevinJump/uSync8
+ Feedback and Join in: https://github.com/KevinJump/uSync8  
