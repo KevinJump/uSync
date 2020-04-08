@@ -74,6 +74,11 @@
                 <umb-box-header title="Files and Folders"
                                 description="Control how uSync writes and reads files to disk"></umb-box-header>
                 <umb-box-content>
+                    <div>
+                        <p class="color-deep-orange">
+                            <em>If you change these settings, you should perform a 'Clean Export' as they alter the structure of the uSync folders</em>
+                        </p>
+                    </div>
                     <div class="umb-permission">
                         <umb-toggle class="umb-permission__toggle"
                                     checked="vm.settings.UseFlatStructure"
@@ -94,6 +99,7 @@
                             <div class="umb-permission__description">Use the guid of an item as the filename</div>
                         </div>
                     </div>
+
                     <div class="umb-el-wrap usync-root-folder">
                         <label for="rootFolder" class="control-label">Root Folder</label>
                         <div class="controls">
@@ -102,7 +108,6 @@
                             </div>
                         </div>
                     </div>
-
                 </umb-box-content>
             </umb-box>
         </div>
