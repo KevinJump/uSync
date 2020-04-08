@@ -48,7 +48,7 @@ namespace uSync8.BackOffice.Configuration
             settings.ReportDebug = node.Element("ReportDebug").ValueOrDefault(false);
             settings.AddOnPing = node.Element("AddOnPing").ValueOrDefault(true);
             settings.RebuildCacheOnCompletion = node.Element("RebuildCacheOnCompletion").ValueOrDefault(false);
-            settings.FailOnMissingParent = node.Element("FailOnMissingParent").ValueOrDefault(false);
+            settings.FailOnMissingParent = node.Element("FailOnMissingParent").ValueOrDefault(true);
 
             // load the handlers 
             var handlerSets = node.Element("HandlerSets");
