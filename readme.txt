@@ -7,33 +7,33 @@
 
  Welcome to uSync 8 for Umbraco 8
 
- I be not for Umbraco 7 
- ======================
-  uSync 8 works only on Umbraco 8.x - if you have just installed
-  it on a Umbraco 7.x, you should uninstall now and go get a v4.x 
-  version.
- 
- uSync 8 - is not just an upgrade of uSync
- -----------------------------------------
+ Thanks for Installing uSync 8, All the bits of your 
+ umbraco settings will now be saved to disk - if you want 
+ to also sync content and media install uSync.ContentEdition.
 
- uSync deals with some fairly base stuff inside Umbraco and when
- Umbraco changes uSync has to change too.
- 
- We have taken this opportunity to clean up some of the code in
- uSync - which means underneath almost everything has changed, 
- but we think this means we are more stable and changes should 
- be more reliable. 
+ Targets
+ -------
+ The uSync NuGet package includes build targets that mean the 
+ uSync folder is included when you package up your Umbraco
+ site so you don't need to include it in your solution view.
 
- Operationally it's very similar to uSync 4.x, but the files are
- not 100% compatible so you can't upgrade a Umbraco 7 site to
- Umbraco 8 with uSync (for now).
+ Actions
+ -------
+ uSync 8 manages actions (delete, renames, etc ) by creating an 
+ 'emtpy' action config in the place where the config file for 
+ an item was. 
 
- The action file is gone, now when you delete or rename something
- we create overwrite the uSync file for that item with one telling
- us it was a delete/rename. this makes deployment much nicer - and
- less likely to break. 
+ This means deletes exist in place within thye uSync folder which
+ makes it easier to deploy the uSync folder and not have orphaned
+ items from previous versions hanging about.
 
-# If you haven't already Upgrade to Umbraco 8.4, things are faster #
-# and stablerer.                                                   #
+ uSync is open source and free Feedback and Join in:
+   https://github.com/KevinJump/uSync8  
 
- Feedback and Join in: https://github.com/KevinJump/uSync8  
+  = uSync.Complete - free 60 day trial ===========================
+ |                                                                |
+ | You can give your editors the ability to push and pull content |
+ | and media between umbraco installations with uSync.Complete!   |
+ |   https://jumoo.co.uk/uSync/Complete                           |
+ |                                                                |
+  ================================================================

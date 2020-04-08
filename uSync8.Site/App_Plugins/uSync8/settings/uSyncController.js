@@ -144,7 +144,7 @@
                     vm.reported = true;
                     vm.exportButton.state = 'success';
                     vm.savings.show = true;
-                    vm.savings.title = 'All items exported';
+                    vm.savings.title = 'All items exported.';
                     vm.savings.message = 'Now go wash your hands 🧼!';
                 }, function (error) {
                     notificationsService.error('Exporting', error.data.ExceptionMessage);
