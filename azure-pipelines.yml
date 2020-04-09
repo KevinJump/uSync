@@ -2,7 +2,7 @@
 # creates the uSync nuget packages, pushes them to a public devops feed
 
 trigger:
-- v8/8.2
+- v8/dev
 
 pool:
   name: Default
@@ -14,7 +14,7 @@ variables:
   solution: '**/*.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'PackageOnlyBuild'
-  packageVersion: '8.5.0-alpha-$(Build.BuildId)0'
+  packageVersion: '8.6.0-alpha-$(Build.BuildId)0'
 
 steps:
 - task: NuGetToolInstaller@1
