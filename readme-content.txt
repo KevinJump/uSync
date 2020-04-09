@@ -4,8 +4,10 @@
 \_,_/___/\_, /_//_/\__(_)___/\___/_//_/\__/\__/_//_/\__/___/\_,_/_/\__/_/\___/_//_/
  -----  /___/ ----------------------------------------------- v8.6.x ---------------
 
+ 
  Thanks for installing uSync.ContentEdition for Umbraco 8.x.
 
+ 
  ContentEdition adds syncing of the "contenty" bits to uSync:
 
   - Content
@@ -14,8 +16,10 @@
   - Dictionary Items
   - Domains 
 
+
   uSync and uSync.ContentEdtion are open source and free: 
    Feedback and Join in: https://github.com/KevinJump/uSync8 
+
 
   = uSync.Complete - free 60 day trial =============================================
  |                                                                                  |
@@ -24,4 +28,3 @@
  | it out https://jumoo.co.uk/uSync/Complete                                        |
  |                                                                                  |
   ==================================================================================
-
