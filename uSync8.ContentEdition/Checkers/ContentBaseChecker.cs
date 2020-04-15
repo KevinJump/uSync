@@ -179,7 +179,7 @@ namespace uSync8.ContentEdition.Checkers
                         // media means we include media items (the files are checked)
                         if (flags.HasFlag(DependencyFlags.IncludeMedia))
                         {
-                            var media = linkedDependencies.Where(x => x.Udi.EntityType == UdiEntityType.Media).ToList();
+                            var media = linkedDependencies.Where(x => x.Udi.EntityType == UdiEntityType.Media || x.Udi.EntityType == UdiEntityType.MediaFile).ToList();
                             media.ForEach(x => { x.Flags |= DependencyFlags.IncludeAncestors; });
 
                             dependencies.AddRange(media);
