@@ -1,9 +1,13 @@
-﻿using Newtonsoft.Json;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 using Umbraco.Core;
 using Umbraco.Core.IO;
 using Umbraco.Core.Services;
+using uSync8.Core.Dependency;
 
 namespace uSync8.ContentEdition.Mapping.Mappers
 {
@@ -105,6 +109,52 @@ namespace uSync8.ContentEdition.Mapping.Mappers
             }
 
             return stringValue;
+        }
+
+        /// <summary>
+        ///  Get the actual media file as a dependency. 
+        /// </summary>
+        public override IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)
+        {
+            var stringValue = value?.ToString();
+            if (string.IsNullOrWhiteSpace(stringValue)) 
+                return Enumerable.Empty<uSyncDependency>();
+
+            var stringPath = GetImagePath(stringValue).TrimStart('/').ToLower() ;
+
+            if (!string.IsNullOrWhiteSpace(stringPath))
+            {
+                return new uSyncDependency()
+                {
+                    Name = $"File: {Path.GetFileName(stringPath)}",
+                    Udi = Udi.Create(Constants.UdiEntityType.MediaFile, stringPath),
+                    Flags = flags,
+                    Order = DependencyOrders.OrderFromEntityType(Constants.UdiEntityType.MediaFile),
+                    Level = 0
+                }.AsEnumerableOfOne();
+            }
+
+            return Enumerable.Empty<uSyncDependency>();
+        }
+
+        private string GetImagePath(string stringValue)
+        {
+            if (stringValue.DetectIsJson())
+            {
+                // json, 
+                var json = JsonConvert.DeserializeObject<JObject>(stringValue);
+                if (json != null)
+                {
+                    var source = json.Value<string>("src");
+                    if (!string.IsNullOrWhiteSpace(source)) return source;
+                }
+            }
+            else
+            {
+                return StripSitePath(stringValue);
+            }
+
+            return string.Empty;
         }
     }
 }
