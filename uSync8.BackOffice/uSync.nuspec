@@ -9,10 +9,13 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Database syncing for Umbraco</description>
     <summary></summary>
-    <releaseNotes>
-      8.0 - Release for Umbraco 8
-      8.1 - Compatability Release for Umbraco 8.1
-      8.2 - uSync Complete Companion release.
+    <releaseNotes><![CDATA[8.0 - Release for Umbraco 8
+8.1 - Compatability Release for Umbraco 8.1
+8.2 - uSync Complete Companion release.
+8.3 - Language Rename support for Umbraco 8.3
+8.4 - Dependency checking updates
+8.5 - Updates for uSync Console
+8.6 - Clean Export, Missing Parent Support]]>
     </releaseNotes>
     <dependencies>
       <dependency id="uSync.Core" version="$depends$"/>

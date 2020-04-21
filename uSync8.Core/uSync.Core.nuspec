@@ -9,12 +9,13 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Database syncing for Umbraco 8</description>
     <summary>Core Dll's for uSync 8</summary>
-    <releaseNotes>8.0 - Initial Release for Umbraco 8
+    <releaseNotes><![CDATA[8.0 - Initial Release for Umbraco 8
 8.1 - Compatability Release for Umbraco 8.1
 8.2 - uSync.Complete companion release 
 8.3 - Language Rename support for Umbraco 8.3
 8.4 - Performance improvements for Umbraco 8.4
 8.5 - Lookup caching for speed.
+8.6 - Missing parent checks and blocks]]>
 </releaseNotes>
     <tags>umbraco usync</tags>
   </metadata>
