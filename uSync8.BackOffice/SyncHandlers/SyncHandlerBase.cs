@@ -895,24 +895,32 @@ namespace uSync8.BackOffice.SyncHandlers
             {
                 if (!file.InvariantEquals(physicalFile))
                 {
-                    var node = syncFileService.LoadXElement(file);
-
-                    // if this xml file matches the item we have just saved. 
-
-                    if (!node.IsEmptyItem() || node.GetEmptyAction() != SyncActionType.Rename)
+                    try
                     {
-                        // the node isn't empty, or its not a rename (because all clashes become renames)
+                        var node = syncFileService.LoadXElement(file);
 
-                        if (DoItemsMatch(node, item))
+                        // if this xml file matches the item we have just saved. 
+
+                        if (!node.IsEmptyItem() || node.GetEmptyAction() != SyncActionType.Rename)
                         {
-                            logger.Debug(handlerType, "Duplicate {file} of {alias}, saving as rename", Path.GetFileName(file), this.GetItemAlias(item));
+                            // the node isn't empty, or its not a rename (because all clashes become renames)
 
-                            var attempt = serializer.SerializeEmpty(item, SyncActionType.Rename, node.GetAlias());
-                            if (attempt.Success)
+                            if (DoItemsMatch(node, item))
                             {
-                                syncFileService.SaveXElement(attempt.Item, file);
+                                logger.Debug(handlerType, "Duplicate {file} of {alias}, saving as rename", Path.GetFileName(file), this.GetItemAlias(item));
+
+                                var attempt = serializer.SerializeEmpty(item, SyncActionType.Rename, node.GetAlias());
+                                if (attempt.Success)
+                                {
+                                    syncFileService.SaveXElement(attempt.Item, file);
+                                }
                             }
                         }
+                    }
+                    catch(Exception ex)
+                    {
+                        logger.Warn(handlerType, "Error during cleanup of existing files {message}", ex.Message);
+                        // cleanup should fail silently ? - because it can impact on normal Umbraco operations?
                     }
                 }
             }

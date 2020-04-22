@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 
@@ -132,9 +134,17 @@ namespace uSync8.BackOffice.Services
         {
             EnsureFileExists(file);
 
-            using (var stream = OpenRead(file))
+            try
             {
-                return XElement.Load(stream);
+                using (var stream = OpenRead(file))
+                {
+                    return XElement.Load(stream);
+                }
+            }
+            catch(Exception ex)
+            {
+                logger.Warn<SyncFileService>("Error while reading in {file} {message}", file, ex.Message);
+                throw new Exception($"Error while reading in {file}", ex);
             }
         }
 
