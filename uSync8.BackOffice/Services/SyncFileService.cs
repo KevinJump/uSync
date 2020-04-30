@@ -46,19 +46,13 @@ namespace uSync8.BackOffice.Services
         }
 
         public bool FileExists(string path)
-        {
-            return File.Exists(GetAbsPath(path));
-        }
+            => File.Exists(GetAbsPath(path));
 
         public bool DirectoryExists(string path)
-        {
-            return Directory.Exists(GetAbsPath(path));
-        }
-
+            => Directory.Exists(GetAbsPath(path));
+    
         public bool RootExists(string path)
-        {
-            return DirectoryExists(path);
-        }
+            => DirectoryExists(path);
 
         public void DeleteFile(string path)
         {
@@ -66,12 +60,18 @@ namespace uSync8.BackOffice.Services
                 File.Delete(GetAbsPath(path));
         }
 
+        /// <summary>
+        ///  Check if a file exists throw an exception if it doesn't 
+        /// </summary>
         public void EnsureFileExists(string path)
         {
             if (!FileExists(path))
                 throw new FileNotFoundException("Missing File", path);
         }
 
+        /// <summary>
+        ///  open a file stream for reading a file 
+        /// </summary>
         public FileStream OpenRead(string path)
         {
             if (!FileExists(path)) return null;
@@ -80,6 +80,9 @@ namespace uSync8.BackOffice.Services
             return File.OpenRead(absPath);
         }
 
+        /// <summary>
+        ///  Open a file stream for writing a file
+        /// </summary>
         public FileStream OpenWrite(string path)
         {
             if (FileExists(path))
@@ -91,6 +94,9 @@ namespace uSync8.BackOffice.Services
             return File.OpenWrite(absPath);
         }
 
+        /// <summary>
+        ///  copy a file from one location to another - creating the directory if it is missing
+        /// </summary>
         public void CopyFile(string source, string target)
         {
             var absSource = GetAbsPath(source);
@@ -99,6 +105,10 @@ namespace uSync8.BackOffice.Services
             File.Copy(absSource, absTarget, true);
         }
 
+        /// <summary>
+        ///  create the directory for a given file. 
+        /// </summary>
+        /// <param name="filePath"></param>
         public void CreateFoldersForFile(string filePath)
         {
             var absPath = Path.GetDirectoryName(GetAbsPath(filePath));
@@ -117,16 +127,22 @@ namespace uSync8.BackOffice.Services
                 Directory.Delete(absPath, true);
         }
 
+        /// <summary>
+        ///  Get a list of files from a folder. 
+        /// </summary>
         public IEnumerable<string> GetFiles(string folder, string extensions)
         {
             if (DirectoryExists(folder))
             {
-                return Directory.GetFiles(GetAbsPath(folder));
+                return Directory.GetFiles(GetAbsPath(folder), extensions);
             }
 
             return Enumerable.Empty<string>();
         }
 
+        /// <summary>
+        ///  get a list of child folders in a folder 
+        /// </summary>
         public IEnumerable<string> GetDirectories(string folder)
         {
             if (DirectoryExists(folder))
@@ -137,6 +153,9 @@ namespace uSync8.BackOffice.Services
             return Enumerable.Empty<string>();
         }
 
+        /// <summary>
+        ///  load a file into a XElement object.
+        /// </summary>
         public XElement LoadXElement(string file)
         {
             EnsureFileExists(file);
@@ -155,6 +174,9 @@ namespace uSync8.BackOffice.Services
             }
         }
 
+        /// <summary>
+        ///  save a stream to disk
+        /// </summary>
         public void SaveFile(string filename, Stream stream)
         {
             logger.Debug<SyncFileService>("Saving File: {0}", filename);
@@ -167,6 +189,9 @@ namespace uSync8.BackOffice.Services
             }
         }
 
+        /// <summary>
+        ///  save a string to disk
+        /// </summary>
         public void SaveFile(string filename, string content)
         {
             logger.Debug<SyncFileService>("Saving File: {0} [{1}]", filename, content.Length);
@@ -180,6 +205,9 @@ namespace uSync8.BackOffice.Services
             }
         }
 
+        /// <summary>
+        ///  Save an XML Element to disk
+        /// </summary>
         public void SaveXElement(XElement node, string filename)
         {
             using (var stream = OpenWrite(filename))
@@ -190,11 +218,13 @@ namespace uSync8.BackOffice.Services
             }
         }
 
+        /// <summary>
+        ///  Load an object from XML representation on disk.
+        /// </summary>
         public TObject LoadXml<TObject>(string file)
         {
             if (FileExists(file))
             {
-
                 XmlSerializer xmlSerializer = new XmlSerializer(typeof(TObject));
                 using (var stream = OpenRead(file))
                 {
@@ -205,6 +235,9 @@ namespace uSync8.BackOffice.Services
             return default(TObject);
         }
 
+        /// <summary>
+        ///  load the contents of a file into a string
+        /// </summary>
         public string LoadContent(string file)
         {
             if (FileExists(file))
@@ -218,6 +251,12 @@ namespace uSync8.BackOffice.Services
 
         public static object _saveLock = new object();
 
+        /// <summary>
+        ///  save an object to an XML file representing it.
+        /// </summary>
+        /// <typeparam name="TObject"></typeparam>
+        /// <param name="file"></param>
+        /// <param name="item"></param>
         public void SaveXml<TObject>(string file, TObject item)
         {
             lock (_saveLock)
