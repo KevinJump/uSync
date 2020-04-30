@@ -1016,7 +1016,7 @@ namespace uSync8.BackOffice.SyncHandlers
         public IEnumerable<uSyncAction> Export(Udi udi, string folder, HandlerSettings settings)
         {
             var item = FindByUdi(udi);
-            if (!item.Equals(default))
+            if (item != null)
                 return Export(item, folder, settings);
 
             return uSyncAction.Fail(nameof(udi), typeof(TObject), ChangeType.Fail, "Item not found")
@@ -1026,7 +1026,7 @@ namespace uSync8.BackOffice.SyncHandlers
         public SyncAttempt<XElement> GetElement(Udi udi)
         {
             var element = FindByUdi(udi);
-            if (!element.Equals(default))
+            if (element != null)
                 return this.serializer.Serialize(element);
 
             return SyncAttempt<XElement>.Fail(udi.ToString(), ChangeType.Fail, "Item not found");
