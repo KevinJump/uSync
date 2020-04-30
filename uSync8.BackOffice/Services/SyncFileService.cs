@@ -91,6 +91,13 @@ namespace uSync8.BackOffice.Services
             return File.OpenWrite(absPath);
         }
 
+        public void CopyFile(string source, string target)
+        {
+            var absSource = GetAbsPath(source);
+            var absTarget = GetAbsPath(target);
+            Directory.CreateDirectory(Path.GetDirectoryName(absTarget));
+            File.Copy(absSource, absTarget, true);
+        }
 
         public void CreateFoldersForFile(string filePath)
         {
