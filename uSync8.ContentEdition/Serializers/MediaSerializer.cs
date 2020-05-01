@@ -180,7 +180,13 @@ namespace uSync8.ContentEdition.Serializers
         }
 
         protected override IMedia FindItem(int id)
-            => mediaService.GetById(id);
+        {
+            var item = mediaService.GetById(id);
+            if (!this.nameCache.ContainsKey(id))
+                this.nameCache[id] = new Tuple<Guid, string>(item.Key, item.Name);
+            return item;
+        }
+
 
         protected override IMedia FindItem(Guid key)
         {
