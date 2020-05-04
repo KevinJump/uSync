@@ -5,7 +5,6 @@ name: Build and Package
 env:
   PKG_VERSION: "8.6.2.0"
   BUILD_CONFIG: "release"
-  RELEASE_VERSION: "${{ env.PKG_VERSION }}-build-{{ github.run_number}}"
 
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the master branch
@@ -44,7 +43,7 @@ jobs:
     
     # package up the packages. 
     - name: create packages
-      run: nuget pack ..\uSync8.Core\uSync.Core.nuspec -build -version ${{ env.RELEASE_VERSION }} -properties "depends=${{ env.RELEASE_VERSION }};Configuration=${{ env.BUILD_CONFIG }}" -OutputDirectory .\output
+      run: nuget pack ..\uSync8.Core\uSync.Core.nuspec -build -version ${{ env.PKG_VERSION }}-build-${{ github.run_number}} -properties "depends=${{ env.PKG_VERSION }}-build-${{ github.run_number}};Configuration=${{ env.BUILD_CONFIG }}" -OutputDirectory .\output
 
     - name: Add Github Nuget repo
       run: |
