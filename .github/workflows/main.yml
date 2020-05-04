@@ -4,7 +4,7 @@ name: Build and Package
 
 env:
   PKG_VERSION: "8.6.2.0"
-  BUILD_CONFIG: "release"
+  BUILD_CONFIG: "PackageOnlyBuild"
 
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the master branch
@@ -33,17 +33,30 @@ jobs:
     - name: setup-msbuild
       uses: microsoft/setup-msbuild@v1
     
+    # cache nuget (improve restore speeds)  
+    - name: Cache nuget packages
+      uses: actions/cache@v1
+      env:
+        cache-name: cache-nuget-packages
+      with:
+        path: ./packages # nuget packages stored in the package folder.
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/packages.config') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
+    
     # restore packages
     - name: nuget restore
       run: nuget restore
     
     # build project 
     - name: Build with MSBuild
-      run: msbuild usync8.sln -p:Configuration=Release
+      run: msbuild usync8.sln -p:Configuration=${{ env.BUILD_CONFIG }}
     
     # package up the packages. 
     - name: create packages
-      run: nuget pack ..\uSync8.Core\uSync.Core.nuspec -build -version ${{ env.PKG_VERSION }}-build-${{ github.run_number}} -properties "depends=${{ env.PKG_VERSION }}-build-${{ github.run_number}};Configuration=${{ env.BUILD_CONFIG }}" -OutputDirectory .\output
+      run: nuget pack uSync8.Core\uSync.Core.nuspec -build -version ${{ env.PKG_VERSION }}-build-${{ github.run_number}} -properties "depends=${{ env.PKG_VERSION }}-build-${{ github.run_number}};Configuration=${{ env.BUILD_CONFIG }}" -OutputDirectory .\output
 
     - name: Add Github Nuget repo
       run: |
