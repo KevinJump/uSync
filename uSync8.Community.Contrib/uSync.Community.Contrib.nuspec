@@ -16,6 +16,7 @@
       <dependency id="uSync.BackOffice.Core" version="$depends$"/>
     </dependencies>
     <tags>umbraco usync</tags>
+    <repository type="git" url="https://github.com/KevinJump/uSync8" />
   </metadata>
   <files>
     <file src="bin\$Configuration$\uSync8.Community.Contrib.dll" target="lib\net472" />

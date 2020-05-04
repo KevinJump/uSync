@@ -20,6 +20,7 @@
       <dependency id="uSync.Community.Contrib" version="$depends$"/>
     </dependencies>
     <tags>umbraco usync</tags>
+    <repository type="git" url="https://github.com/KevinJump/uSync8" />
   </metadata>
   <files>
     <file src="..\readme-content.txt" target="readme.txt" />

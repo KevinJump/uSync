@@ -9,10 +9,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "uSync8.BackOffice", "uSync8
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionFiles", "SolutionFiles", "{6E911B34-61DC-471A-9AD7-97A74E9B3BE5}"
 	ProjectSection(SolutionItems) = preProject
-		azure-pipelines.yml = azure-pipelines.yml
 		Dist\betaBuild.cmd = Dist\betaBuild.cmd
 		Dist\createpackages.cmd = Dist\createpackages.cmd
 		gulpfile.js = gulpfile.js
+		.github\workflows\main.yml = .github\workflows\main.yml
 		Dist\package.cmd = Dist\package.cmd
 		Dist\package.ContentEdition.xml = Dist\package.ContentEdition.xml
 		Dist\package.xml = Dist\package.xml

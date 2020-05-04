@@ -43,7 +43,13 @@ jobs:
     
     # package up the packages. 
     - name: create packages
-      run: nuget pack uSync8.Core\uSync.Core.nuspec -build -version ${{ env.PKG_VERSION }}-build-${{ github.run_number}} -properties "depends=${{ env.PKG_VERSION }}-build-${{ github.run_number}};Configuration=${{ env.BUILD_CONFIG }}" -OutputDirectory .\output
+      run: | 
+        nuget pack uSync8.Core\uSync.Core.nuspec -build -version ${{ env.PKG_VERSION }}-build-${{ github.run_number}} -properties "depends=${{ env.PKG_VERSION }}-build-${{ github.run_number}};Configuration=${{ env.BUILD_CONFIG }}" -OutputDirectory .\output
+        nuget pack uSync8.BackOffice\uSync.nuspec -build -version ${{ env.PKG_VERSION }}-build-${{ github.run_number}} -properties "depends=${{ env.PKG_VERSION }}-build-${{ github.run_number}};Configuration=${{ env.BUILD_CONFIG }}" -OutputDirectory .\output
+        nuget pack uSync8.BackOffice\uSync.BackOffice.Core.nuspec -build -version ${{ env.PKG_VERSION }}-build-${{ github.run_number}} -properties "depends=${{ env.PKG_VERSION }}-build-${{ github.run_number}};Configuration=${{ env.BUILD_CONFIG }}" -OutputDirectory .\output
+        nuget pack uSync8.Community.Contrib\uSyn.Community.Contrib.nuspec -build -version ${{ env.PKG_VERSION }}-build-${{ github.run_number}} -properties "depends=${{ env.PKG_VERSION }}-build-${{ github.run_number}};Configuration=${{ env.BUILD_CONFIG }}" -OutputDirectory .\output
+        nuget pack uSync8.ContentEdition\uSync.ContentEdition.nuspec -build -version ${{ env.PKG_VERSION }}-build-${{ github.run_number}} -properties "depends=${{ env.PKG_VERSION }}-build-${{ github.run_number}};Configuration=${{ env.BUILD_CONFIG }}" -OutputDirectory .\output
+        nuget pack uSync8.ContentEdition\uSync.ContentEdition.Core.nuspec -build -version ${{ env.PKG_VERSION }}-build-${{ github.run_number}} -properties "depends=${{ env.PKG_VERSION }}-build-${{ github.run_number}};Configuration=${{ env.BUILD_CONFIG }}" -OutputDirectory .\output
 
     - name: Add Github Nuget repo
       run: |

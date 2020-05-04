@@ -22,6 +22,7 @@
       <!-- <dependency id="Microsoft.AspNet.SignalR.Core" version="2.4.0"/> -->
     </dependencies>
     <tags>umbraco usync</tags>
+    <repository type="git" url="https://github.com/KevinJump/uSync8" />
   </metadata>
   <files>
     <file src="bin\$Configuration$\uSync8.BackOffice.dll" target="lib\net472" />
