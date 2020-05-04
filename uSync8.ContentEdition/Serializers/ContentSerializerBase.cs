@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -27,7 +28,12 @@ namespace uSync8.ContentEdition.Serializers
         protected ILocalizationService localizationService;
         protected IRelationService relationService;
 
+        // cheap lookup caches, for the db heavy parts of serialization
+        // these save us 20-40% time on checks in content and media
+        // protected Dictionary<string, string> pathCache;
+        // not thread safe ??
         protected Dictionary<string, string> pathCache;
+        protected Dictionary<int, Tuple<Guid, string>> nameCache;
 
         protected string relationAlias;
 
@@ -47,8 +53,7 @@ namespace uSync8.ContentEdition.Serializers
             this.relationService = relationService;
 
             this.pathCache = new Dictionary<string, string>();
-
-
+            this.nameCache = new Dictionary<int, Tuple<Guid, string>>();
         }
 
         /// <summary>
@@ -98,11 +103,19 @@ namespace uSync8.ContentEdition.Serializers
             var parentName = "";
             if (item.ParentId != -1)
             {
-                var parent = FindItem(item.ParentId);
-                if (parent != null)
+                if (this.nameCache.ContainsKey(item.ParentId))
                 {
-                    parentKey = parent.Key;
-                    parentName = parent.Name;
+                    parentKey = this.nameCache[item.ParentId].Item1;
+                    parentName = this.nameCache[item.ParentId].Item2;
+                }
+                else
+                {
+                    var parent = FindItem(item.ParentId);
+                    if (parent != null)
+                    {
+                        parentKey = parent.Key;
+                        parentName = parent.Name;
+                    }
                 }
             }
 
@@ -309,8 +322,7 @@ namespace uSync8.ContentEdition.Serializers
                 }
             }
 
-            // clear the path cache of anything with this id.
-            pathCache.RemoveAll(x => x.Key.Contains(item.Id.ToString()));
+            CleanCaches(item.Id);
 
             return Attempt.Succeed(item);
         }
@@ -704,6 +716,15 @@ namespace uSync8.ContentEdition.Serializers
             }
 
             return parent != null;
+        }
+
+        private void CleanCaches(int id)
+        {
+            // clear the path cache of anything with this id.
+            pathCache.RemoveAll(x => x.Key.Contains(id.ToString()));
+
+            // clean the name cache for this id.
+            nameCache.Remove(id);
         }
     }
 }
