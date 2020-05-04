@@ -1,4 +1,4 @@
-# This is a basic workflow to help you get started with Actions
+# Workflow to build and package up uSync 
 
 name: Build and Package
 
@@ -32,20 +32,7 @@ jobs:
     # setup msbuild 
     - name: setup-msbuild
       uses: microsoft/setup-msbuild@v1
-    
-    # cache nuget (improve restore speeds)  
-    - name: Cache nuget packages
-      uses: actions/cache@v1
-      env:
-        cache-name: cache-nuget-packages
-      with:
-        path: ./packages # nuget packages stored in the package folder.
-        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/packages.config') }}
-        restore-keys: |
-          ${{ runner.os }}-build-${{ env.cache-name }}-
-          ${{ runner.os }}-build-
-          ${{ runner.os }}-
-    
+       
     # restore packages
     - name: nuget restore
       run: nuget restore
