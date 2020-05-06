@@ -41,7 +41,7 @@ namespace uSync8.BackOffice.Services
 
         public string GetAbsPath(string path)
         {
-            if (path.StartsWith(mappedRoot)) return path;
+            if (path.StartsWith(mappedRoot)) return path.Replace('/', '\\');
             return IOHelper.MapPath(path.TrimStart(new char[] { '/' }));
         }
 
