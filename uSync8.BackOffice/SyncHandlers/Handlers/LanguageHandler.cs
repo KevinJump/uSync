@@ -37,9 +37,9 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             ISyncSerializer<ILanguage> serializer,
             ISyncTracker<ILanguage> tracker,
             AppCaches appCaches,
-            ISyncDependencyChecker<ILanguage> checker,
+            SyncDependencyCollection checkers,
             SyncFileService syncFileService)
-            : base(entityService, logger, serializer, tracker, appCaches, checker, syncFileService)
+            : base(entityService, logger, serializer, tracker, appCaches, checkers, syncFileService)
         {
             this.localizationService = localizationService;
         }

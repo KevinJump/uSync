@@ -48,9 +48,9 @@ namespace uSync8.ContentEdition.Handlers
             ISyncSerializer<TObject> serializer,
             ISyncTracker<TObject> tracker,
             AppCaches appCaches,
-            ISyncDependencyChecker<TObject> checker,
+            SyncDependencyCollection checkers,
             SyncFileService syncFileService)
-            : base(entityService, logger, serializer, tracker, appCaches, checker, syncFileService)
+            : base(entityService, logger, serializer, tracker, appCaches, checkers, syncFileService)
         { }
 
 

@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Management;
 using System.Text;
 using System.Threading.Tasks;
 using Umbraco.Core.Models;
@@ -16,5 +18,13 @@ namespace uSync8.Core.Dependency
         where TObject : IEntity
     {
         IEnumerable<uSyncDependency> GetDependencies(TObject item, DependencyFlags flags);
+    }
+
+    public interface ISyncDependencyChecker : ISyncDependencyItem
+    {
+        Type ItemType { get; }
+        int Priority { get; }
+
+        IEnumerable<uSyncDependency> GetDependencies(IEntity item, DependencyFlags flags);
     }
 }

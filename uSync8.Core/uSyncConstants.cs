@@ -31,5 +31,12 @@ namespace uSync8.Core
 
             public const string Empty = "Empty";
         }
+
+        public static class Priorities
+        {
+            public const int DependencyNormal = 100;
+            public const int DependencyHigh = 1;
+            public const int DependencyLow = 1000;
+        }
     }
 }
