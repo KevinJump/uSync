@@ -35,7 +35,7 @@ namespace uSync8.BackOffice.SyncHandlers
 
         protected readonly SyncFileService syncFileService;
 
-        protected readonly ISyncDependencyChecker<TObject> dependencyChecker;
+        protected readonly IList<ISyncDependencyChecker<TObject>> checkers;
 
         protected readonly ISyncSerializer<TObject> serializer;
         protected readonly ISyncTracker<TObject> tracker;
@@ -76,9 +76,9 @@ namespace uSync8.BackOffice.SyncHandlers
             ISyncTracker<TObject> tracker,
             AppCaches appCaches,
             SyncFileService syncFileService)
-        : this(entityService, logger, serializer, tracker, appCaches, null, syncFileService) { }
+        : this(entityService, logger, serializer, tracker, appCaches, Enumerable.Empty<ISyncDependencyChecker<TObject>>(), syncFileService) { }
 
-
+        [Obsolete("Construct your handler using SyncDependencyCollection for better support")]
         public SyncHandlerBase(
             IEntityService entityService,
             IProfilingLogger logger,
@@ -87,14 +87,38 @@ namespace uSync8.BackOffice.SyncHandlers
             AppCaches appCaches,
             ISyncDependencyChecker<TObject> dependencyChecker,
             SyncFileService syncFileService)
+        : this(entityService, logger, serializer, tracker, appCaches, dependencyChecker.AsEnumerableOfOne(), syncFileService)
+        { }
+
+
+        public SyncHandlerBase(
+            IEntityService entityService,
+            IProfilingLogger logger,
+            ISyncSerializer<TObject> serializer,
+            ISyncTracker<TObject> tracker,
+            AppCaches appCaches,
+            SyncDependencyCollection checkers,
+            SyncFileService syncFileService)
+            : this(entityService, logger, serializer, tracker, appCaches, checkers.GetCheckers<TObject>(), syncFileService)
+        { }
+
+        public SyncHandlerBase(IEntityService entityService,
+            IProfilingLogger logger,
+            ISyncSerializer<TObject> serializer,
+            ISyncTracker<TObject> tracker,
+            AppCaches appCaches,
+            IEnumerable<ISyncDependencyChecker<TObject>> checkers,
+            SyncFileService syncFileService)
         {
+
+
             this.logger = logger;
 
             this.entityService = entityService;
 
             this.serializer = serializer;
             this.tracker = tracker;
-            this.dependencyChecker = dependencyChecker;
+            this.checkers = checkers.ToList();
 
             this.syncFileService = syncFileService;
 
@@ -629,7 +653,8 @@ namespace uSync8.BackOffice.SyncHandlers
                     // add all the duplicates to the list of changes.
                     foreach (var dup in actions.Where(x => x.Change != ChangeType.Delete && DoActionsMatch(x, deleteAction)))
                     {
-                        details.Add( new uSyncChange() {
+                        details.Add(new uSyncChange()
+                        {
                             Change = ChangeDetailType.Update,
                             Name = $"{dup.Change}: {dup.Name} ({Path.GetFileName(dup.FileName)})",
                             NewValue = dup.FileName.Substring(folder.Length),
@@ -678,7 +703,7 @@ namespace uSync8.BackOffice.SyncHandlers
             // yes this is an or, we've done it explicity, so you can tell!
             if (node.GetAlias().Equals(this.GetItemAlias(item), StringComparison.InvariantCultureIgnoreCase)) return true;
 
-            return false; 
+            return false;
         }
 
         /// <summary>
@@ -694,7 +719,7 @@ namespace uSync8.BackOffice.SyncHandlers
         /// </remarks>
         private List<uSyncAction> ReportMissingParents(uSyncAction[] actions)
         {
-            for(int i = 0; i < actions.Length; i++)
+            for (int i = 0; i < actions.Length; i++)
             {
                 if (actions[i].Change != ChangeType.ParentMissing) continue;
 
@@ -918,7 +943,7 @@ namespace uSync8.BackOffice.SyncHandlers
                             }
                         }
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         logger.Warn(handlerType, "Error during cleanup of existing files {message}", ex.Message);
                         // cleanup should fail silently ? - because it can impact on normal Umbraco operations?
@@ -1061,15 +1086,20 @@ namespace uSync8.BackOffice.SyncHandlers
 
         protected IEnumerable<uSyncDependency> GetDependencies(TObject item, DependencyFlags flags)
         {
-            if (dependencyChecker == null) return Enumerable.Empty<uSyncDependency>();
+            if (checkers == null || checkers.Count == 0) return Enumerable.Empty<uSyncDependency>();
             if (item == null) return Enumerable.Empty<uSyncDependency>();
 
-            return dependencyChecker.GetDependencies(item, flags);
+            var dependencies = new List<uSyncDependency>();
+            foreach (var checker in checkers)
+            {
+                dependencies.AddRange(checker.GetDependencies(item, flags));
+            }
+            return dependencies;
         }
 
         private IEnumerable<uSyncDependency> GetContainerDependencies(int id, DependencyFlags flags)
         {
-            if (dependencyChecker == null) return Enumerable.Empty<uSyncDependency>();
+            if (checkers == null || checkers.Count == 0) return Enumerable.Empty<uSyncDependency>();
 
             var dependencies = new List<uSyncDependency>();
 
@@ -1090,7 +1120,7 @@ namespace uSync8.BackOffice.SyncHandlers
                     var childItem = GetFromService(child.Id);
                     if (childItem != null)
                     {
-                        dependencies.AddRange(dependencyChecker.GetDependencies(childItem, flags));
+                        dependencies.AddRange(GetDependencies(childItem, flags));
                     }
                 }
             }

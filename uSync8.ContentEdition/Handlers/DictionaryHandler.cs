@@ -38,9 +38,9 @@ namespace uSync8.ContentEdition.Handlers
             ISyncSerializer<IDictionaryItem> serializer,
             ISyncTracker<IDictionaryItem> tracker,
             AppCaches appCaches,
-            ISyncDependencyChecker<IDictionaryItem> checker,
+            SyncDependencyCollection checkers,
             SyncFileService syncFileService)
-            : base(entityService, logger, serializer, tracker, appCaches, checker, syncFileService)
+            : base(entityService, logger, serializer, tracker, appCaches, checkers, syncFileService)
         {
             this.localizationService = localizationService;
         }

@@ -31,9 +31,9 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             ISyncSerializer<IContentType> serializer,
             ISyncTracker<IContentType> tracker,
             AppCaches appCaches,
-            ISyncDependencyChecker<IContentType> checker,
+            SyncDependencyCollection checkers,
             SyncFileService fileService)
-            : base(entityService, logger, serializer, tracker, appCaches, checker, fileService)
+            : base(entityService, logger, serializer, tracker, appCaches, checkers, fileService)
         {
             this.contentTypeService = contentTypeService;
         }

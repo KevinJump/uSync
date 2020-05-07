@@ -50,9 +50,9 @@ namespace uSync8.BackOffice.SyncHandlers
             ISyncSerializer<TObject> serializer,
             ISyncTracker<TObject> tracker,
             AppCaches appCaches,
-            ISyncDependencyChecker<TObject> checker,
+            SyncDependencyCollection checkers,
             SyncFileService syncFileService)
-            : base(entityService, logger, serializer, tracker, appCaches, checker, syncFileService)
+            : base(entityService, logger, serializer, tracker, appCaches, checkers, syncFileService)
         { }
 
         /// <summary>

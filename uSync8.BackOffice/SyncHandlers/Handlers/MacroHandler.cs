@@ -32,9 +32,9 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             ISyncSerializer<IMacro> serializer,
             ISyncTracker<IMacro> tracker,
             AppCaches appCaches,
-            ISyncDependencyChecker<IMacro> checker,
+            SyncDependencyCollection checkers,
             SyncFileService syncFileService) 
-            : base(entityService, logger, serializer, tracker, appCaches, checker, syncFileService)
+            : base(entityService, logger, serializer, tracker, appCaches, checkers, syncFileService)
         {
             this.macroService = macroService;
         }
