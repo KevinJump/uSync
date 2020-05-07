@@ -307,7 +307,7 @@ namespace uSync8.Core.Serialization.Serializers
                 // do we trust the core ? - because in theory 
                 // we can set the value, and it will only
                 // be updated if marked dirty and that will
-                // only happen if the value is diffrent ?
+                // only happen if the value is different ?
 
                 property.Alias = alias;
                 property.Name = propertyNode.Element("Name").ValueOrDefault(alias);

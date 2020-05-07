@@ -485,7 +485,7 @@ namespace uSync8.BackOffice.SyncHandlers
             // we dont clean the folder out on an export all. 
             // because the actions (renames/deletes) live in the folder
             //
-            // there will have to be a diffrent clean option
+            // there will have to be a different clean option
             ///
             // syncFileService.CleanFolder(folder);
 
@@ -960,7 +960,7 @@ namespace uSync8.BackOffice.SyncHandlers
 
         /// <summary>
         ///  clashes we want to resolve can only occur, when the 
-        ///  items can be called the same but in be in diffrent places (e.g content, media).
+        ///  items can be called the same but in be in different places (e.g content, media).
         /// </summary>
         /// <param name="path"></param>
         /// <param name="key"></param>

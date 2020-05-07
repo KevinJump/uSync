@@ -211,7 +211,7 @@ namespace uSync8.Core.Tracking
                     else
                     {
                         // if the element isn't the key, then we get the first one (by value)
-                        // if the value is diffrent in this case we will consider this a delete
+                        // if the value is different in this case we will consider this a delete
                         targetNode = targetItems.FirstOrDefault(x => x.Value == currentNode.Value);
                     }
 

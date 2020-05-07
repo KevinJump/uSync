@@ -73,12 +73,12 @@ namespace uSync8.Core.Serialization
                         treeItem = container;
                         logger.Debug(serializerType, "Parent is Folder {0}", treeItem.Id);
 
-                        // update the container key if its diffrent (because we don't serialize folders on their own)
+                        // update the container key if its different (because we don't serialize folders on their own)
                         if (container.Key != folderKey)
                         {
                             if (container.Key != folderKey)
                             {
-                                logger.Debug(serializerType, "Folder Found: Key Diffrent");
+                                logger.Debug(serializerType, "Folder Found: Key Different");
                                 container.Key = folderKey;
                                 SaveContainer(container);
                             }
