@@ -48,6 +48,13 @@ namespace uSync8.BackOffice.Services
         public bool FileExists(string path)
             => File.Exists(GetAbsPath(path));
 
+
+        /// <summary>
+        ///  compare two file paths, and tell us if they match 
+        /// </summary>
+        public bool PathMatches(string a, string b)
+            => GetAbsPath(a).Equals(GetAbsPath(b), StringComparison.InvariantCultureIgnoreCase);
+
         public bool DirectoryExists(string path)
             => Directory.Exists(GetAbsPath(path));
     

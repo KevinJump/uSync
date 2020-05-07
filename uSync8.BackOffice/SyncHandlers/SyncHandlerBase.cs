@@ -893,7 +893,8 @@ namespace uSync8.BackOffice.SyncHandlers
 
             foreach (string file in files)
             {
-                if (!file.InvariantEquals(physicalFile))
+                // compare the file paths. 
+                if (!syncFileService.PathMatches(physicalFile, file)) // This is not the same file, as we are saving.
                 {
                     try
                     {
