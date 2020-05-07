@@ -267,6 +267,7 @@ namespace uSync8.ContentEdition.Serializers
                 if (cultures != null)
                 {
                     result = contentService.SaveAndPublish(item, cultures);
+                    UnpublishCultures(item, cultures);
                 }
                 else
                 {
@@ -291,6 +292,24 @@ namespace uSync8.ContentEdition.Serializers
                 // which is non critical! but we are ignoring this error. ! <= 8.1.5
                 if (!ex.Message.Contains("siteUri")) throw ex;
                 return Attempt.Succeed($"Published");
+            }
+        }
+
+        /// <summary>
+        ///  unpublish any cultures that are marked as published, in umbraco but are not published
+        ///  in our *.config file.
+        /// </summary>
+        /// <param name="item"></param>
+        /// <param name="publishedCultures"></param>
+        private void UnpublishCultures(IContent item, string[] publishedCultures)
+        {
+            var cultures = item.PublishedCultures.Where(x => !publishedCultures.InvariantContains(x)).ToArray();
+            if (cultures != null && cultures.Length > 0)
+            {
+                foreach (var culture in cultures)
+                {
+                    contentService.Unpublish(item, culture);
+                }
             }
         }
 
