@@ -948,8 +948,8 @@ namespace uSync8.BackOffice.SyncHandlers
 
         virtual protected string GetPath(string folder, TObject item, bool GuidNames, bool isFlat)
         {
-            if (isFlat && GuidNames) return $"{folder}/{GetItemKey(item)}.config";
-            var path = $"{folder}/{this.GetItemPath(item, GuidNames, isFlat)}.config";
+            if (isFlat && GuidNames) return Path.Combine(folder, $"{GetItemKey(item)}.config");
+            var path = Path.Combine(folder, $"{this.GetItemPath(item, GuidNames, isFlat)}.config");
 
             // if this is flat but not using guid filenames, then we check for clashes.
             if (isFlat && !GuidNames) return CheckAndFixFileClash(path, item);
