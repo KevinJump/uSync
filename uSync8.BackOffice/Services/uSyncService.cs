@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 
 using Umbraco.Core.Composing;
+using Umbraco.Core.Configuration;
 using Umbraco.Core.Logging;
 
 using uSync8.BackOffice.Configuration;
@@ -102,8 +103,9 @@ namespace uSync8.BackOffice
 
             var summary = new SyncProgressSummary(handlers.Select(x => x.Handler), "Reporting", handlers.Count());
 
-            if (settings.ReportDebug)
+            if (GlobalSettings.DebugMode && settings.ReportDebug)
             {
+                logger.Warn<uSyncService>("Running Report Debug - this can be a slow process, don't enable unless you need it");
                 // debug - full export into a dated folder. 
                 summary.Message = "Debug: Creating Extract in Tracker folder";
                 callbacks?.Callback?.Invoke(summary);
