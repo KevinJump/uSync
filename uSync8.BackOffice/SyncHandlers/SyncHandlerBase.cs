@@ -342,10 +342,10 @@ namespace uSync8.BackOffice.SyncHandlers
         /// </remarks>
         private IList<Guid> GetFolderKeys(string folder, bool flat)
         {
-            // if it's flat, then we only need to load all the keys once per handler
-            var folderKey = flat == true ? 1 : folder.GetHashCode();
+            // We only need to load all the keys once per handler (if all items are in a folder that key will be used).
+            var folderKey = folder.GetHashCode();
 
-            var cacheKey = $"uSyncKeyList_{folderKey}_{this.Alias}";
+            var cacheKey = $"keycache_{this.Alias}_{folderKey}";
             return runtimeCache.GetCacheItem(cacheKey, () =>
             {
                 var keys = new List<Guid>();
@@ -574,11 +574,15 @@ namespace uSync8.BackOffice.SyncHandlers
         {
             var actions = new List<uSyncAction>();
 
+            runtimeCache.ClearByKey($"keycache_{this.Alias}");
+
             callback?.Invoke("Checking Actions", 1, 3);
             actions.AddRange(ReportFolder(folder, config, callback));
 
             callback?.Invoke("Validating Report", 2, 3);
             actions = ValidateReport(folder, actions);
+
+            runtimeCache.ClearByKey($"keycache_{this.Alias}");
 
             callback?.Invoke("Done", 3, 3);
             return actions;

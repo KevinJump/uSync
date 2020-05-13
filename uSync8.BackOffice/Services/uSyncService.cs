@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-
+using Umbraco.Core.Cache;
 using Umbraco.Core.Composing;
 using Umbraco.Core.Configuration;
 using Umbraco.Core.Logging;
