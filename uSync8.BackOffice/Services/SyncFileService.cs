@@ -42,7 +42,7 @@ namespace uSync8.BackOffice.Services
         public string GetAbsPath(string path)
         {
             if (IsLocalPath(path)) return CleanLocalPath(path);          
-            return IOHelper.MapPath(path.TrimStart('/'));
+            return CleanLocalPath(IOHelper.MapPath(path.TrimStart('/')));
         }
 
         /// <summary>
@@ -73,8 +73,11 @@ namespace uSync8.BackOffice.Services
         private bool IsValidDriveChar(char value)
             => ((value >= 'A' && value <= 'Z') || (value >= 'a' && value <= 'z'));
 
+        /// <summary>
+        ///  clean up the local path, and full expand any short file names
+        /// </summary>
         private string CleanLocalPath(string path)
-            => path.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+            => Path.GetFullPath(path.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar));
 
         public bool FileExists(string path)
             => File.Exists(GetAbsPath(path));
