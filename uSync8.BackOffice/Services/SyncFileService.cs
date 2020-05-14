@@ -28,7 +28,7 @@ namespace uSync8.BackOffice.Services
         {
             this.logger = logger;
             this.globalSettings = Current.Configs.uSync();
-            this.mappedRoot = IOHelper.MapPath(globalSettings.RootFolder);
+            this.mappedRoot = GetAbsPath(globalSettings.RootFolder);
 
             uSyncConfig.Reloaded += BackOfficeConfig_Reloaded;
         }
@@ -36,14 +36,45 @@ namespace uSync8.BackOffice.Services
         private void BackOfficeConfig_Reloaded(uSyncSettings settings)
         {
             this.globalSettings = Current.Configs.uSync();
-            this.mappedRoot = IOHelper.MapPath(globalSettings.RootFolder);
+            this.mappedRoot = GetAbsPath(globalSettings.RootFolder);
         }
 
         public string GetAbsPath(string path)
         {
-            if (path.StartsWith(mappedRoot)) return path.Replace('/', '\\');
-            return IOHelper.MapPath(path.TrimStart(new char[] { '/' }));
+            if (IsLocalPath(path)) return CleanLocalPath(path);          
+            return IOHelper.MapPath(path.TrimStart('/'));
         }
+
+        /// <summary>
+        ///  Is the Path local to a disk?
+        /// </summary>
+        /// <remarks>
+        ///  there are .net core IsPathFullyQualified methods for this.
+        /// </remarks>
+        public bool IsLocalPath(string path)
+        {
+            // if the path is <2 it can't be a local path (e.g C:\ is min)
+            if (path.Length < 2) return false;
+            if (path[0] == '~') return false; // path starting with ~ is a webApp Path
+
+            // If the first character is a directory seperator is't not a root path 
+            // (e.g / or \)
+            if (IsDirectorySeparator(path[0])) return false;
+
+            return path.Length >= 3 
+                && path[1] == Path.VolumeSeparatorChar 
+                && IsDirectorySeparator(path[2]) 
+                && IsValidDriveChar(path[0]);
+        }
+
+        private bool IsDirectorySeparator(char c)
+            => c == Path.DirectorySeparatorChar || c == Path.AltDirectorySeparatorChar;
+
+        private bool IsValidDriveChar(char value)
+            => ((value >= 'A' && value <= 'Z') || (value >= 'a' && value <= 'z'));
+
+        private string CleanLocalPath(string path)
+            => path.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
 
         public bool FileExists(string path)
             => File.Exists(GetAbsPath(path));
@@ -63,8 +94,9 @@ namespace uSync8.BackOffice.Services
 
         public void DeleteFile(string path)
         {
-            if (FileExists(path))
-                File.Delete(GetAbsPath(path));
+            var localPath = GetAbsPath(path);
+            if (FileExists(localPath))
+                File.Delete(localPath);
         }
 
         /// <summary>
@@ -81,10 +113,10 @@ namespace uSync8.BackOffice.Services
         /// </summary>
         public FileStream OpenRead(string path)
         {
-            if (!FileExists(path)) return null;
+            var localPath = GetAbsPath(path);
 
-            var absPath = GetAbsPath(path);
-            return File.OpenRead(absPath);
+            if (!FileExists(localPath)) return null;
+            return File.OpenRead(localPath);
         }
 
         /// <summary>
@@ -92,13 +124,13 @@ namespace uSync8.BackOffice.Services
         /// </summary>
         public FileStream OpenWrite(string path)
         {
-            if (FileExists(path))
-                DeleteFile(path);
+            var localPath = GetAbsPath(path);
+
+            if (FileExists(localPath))
+                DeleteFile(localPath);
 
             CreateFoldersForFile(path);
-
-            var absPath = GetAbsPath(path);
-            return File.OpenWrite(absPath);
+            return File.OpenWrite(localPath);
         }
 
         /// <summary>
@@ -139,9 +171,10 @@ namespace uSync8.BackOffice.Services
         /// </summary>
         public IEnumerable<string> GetFiles(string folder, string extensions)
         {
-            if (DirectoryExists(folder))
+            var localPath = GetAbsPath(folder);
+            if (DirectoryExists(localPath))
             {
-                return Directory.GetFiles(GetAbsPath(folder), extensions);
+                return Directory.GetFiles(localPath, extensions);
             }
 
             return Enumerable.Empty<string>();
@@ -152,9 +185,10 @@ namespace uSync8.BackOffice.Services
         /// </summary>
         public IEnumerable<string> GetDirectories(string folder)
         {
-            if (DirectoryExists(folder))
+            var localPath = GetAbsPath(folder);
+            if (DirectoryExists(localPath))
             {
-                return Directory.GetDirectories(GetAbsPath(folder));
+                return Directory.GetDirectories(localPath);
             }
 
             return Enumerable.Empty<string>();
@@ -201,9 +235,10 @@ namespace uSync8.BackOffice.Services
         /// </summary>
         public void SaveFile(string filename, string content)
         {
-            logger.Debug<SyncFileService>("Saving File: {0} [{1}]", filename, content.Length);
+            var localFile = GetAbsPath(filename);
+            logger.Debug<SyncFileService>("Saving File: {0} [{1}]", localFile, content.Length);
 
-            using (Stream stream = OpenWrite(filename))
+            using (Stream stream = OpenWrite(localFile))
             {
                 byte[] info = new UTF8Encoding(true).GetBytes(content);
                 stream.Write(info, 0, info.Length);
@@ -217,7 +252,8 @@ namespace uSync8.BackOffice.Services
         /// </summary>
         public void SaveXElement(XElement node, string filename)
         {
-            using (var stream = OpenWrite(filename))
+            var localPath = GetAbsPath(filename);
+            using (var stream = OpenWrite(localPath))
             {
                 node.Save(stream);
                 stream.Flush();

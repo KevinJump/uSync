@@ -52,7 +52,7 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
         // so we don't save by Guid we save by ISO name everytime.           
         protected override string GetPath(string folder, ILanguage item, bool GuidNames, bool isFlat)
         {
-            return $"{folder}/{this.GetItemPath(item, GuidNames, isFlat)}.config";
+            return Path.Combine(folder, $"{this.GetItemPath(item, GuidNames, isFlat)}.config");
         }
 
         protected override string GetItemPath(ILanguage item, bool useGuid, bool isFlat)

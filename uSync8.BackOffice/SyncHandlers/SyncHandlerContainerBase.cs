@@ -27,7 +27,7 @@ namespace uSync8.BackOffice.SyncHandlers
     /// </para>
     /// <para>
     /// you can't for example have two doctypes with the same 
-    /// alias in diffrent containers. 
+    /// alias in different containers. 
     /// </para>
     /// </remarks>
     public abstract class SyncHandlerContainerBase<TObject, TService>

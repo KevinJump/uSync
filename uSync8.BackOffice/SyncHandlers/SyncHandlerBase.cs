@@ -366,10 +366,10 @@ namespace uSync8.BackOffice.SyncHandlers
         /// </remarks>
         private IList<Guid> GetFolderKeys(string folder, bool flat)
         {
-            // if it's flat, then we only need to load all the keys once per handler
-            var folderKey = flat == true ? 1 : folder.GetHashCode();
+            // We only need to load all the keys once per handler (if all items are in a folder that key will be used).
+            var folderKey = folder.GetHashCode();
 
-            var cacheKey = $"uSyncKeyList_{folderKey}_{this.Alias}";
+            var cacheKey = $"keycache_{this.Alias}_{folderKey}";
             return runtimeCache.GetCacheItem(cacheKey, () =>
             {
                 var keys = new List<Guid>();
@@ -509,7 +509,7 @@ namespace uSync8.BackOffice.SyncHandlers
             // we dont clean the folder out on an export all. 
             // because the actions (renames/deletes) live in the folder
             //
-            // there will have to be a diffrent clean option
+            // there will have to be a different clean option
             ///
             // syncFileService.CleanFolder(folder);
 
@@ -598,11 +598,15 @@ namespace uSync8.BackOffice.SyncHandlers
         {
             var actions = new List<uSyncAction>();
 
+            runtimeCache.ClearByKey($"keycache_{this.Alias}");
+
             callback?.Invoke("Checking Actions", 1, 3);
             actions.AddRange(ReportFolder(folder, config, callback));
 
             callback?.Invoke("Validating Report", 2, 3);
             actions = ValidateReport(folder, actions);
+
+            runtimeCache.ClearByKey($"keycache_{this.Alias}");
 
             callback?.Invoke("Done", 3, 3);
             return actions;
@@ -973,8 +977,8 @@ namespace uSync8.BackOffice.SyncHandlers
 
         virtual protected string GetPath(string folder, TObject item, bool GuidNames, bool isFlat)
         {
-            if (isFlat && GuidNames) return $"{folder}/{GetItemKey(item)}.config";
-            var path = $"{folder}/{this.GetItemPath(item, GuidNames, isFlat)}.config";
+            if (isFlat && GuidNames) return Path.Combine(folder, $"{GetItemKey(item)}.config");
+            var path = Path.Combine(folder, $"{this.GetItemPath(item, GuidNames, isFlat)}.config");
 
             // if this is flat but not using guid filenames, then we check for clashes.
             if (isFlat && !GuidNames) return CheckAndFixFileClash(path, item);
@@ -985,7 +989,7 @@ namespace uSync8.BackOffice.SyncHandlers
 
         /// <summary>
         ///  clashes we want to resolve can only occur, when the 
-        ///  items can be called the same but in be in diffrent places (e.g content, media).
+        ///  items can be called the same but in be in different places (e.g content, media).
         /// </summary>
         /// <param name="path"></param>
         /// <param name="key"></param>

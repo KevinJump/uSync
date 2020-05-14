@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-
+using Umbraco.Core.Cache;
 using Umbraco.Core.Composing;
+using Umbraco.Core.Configuration;
 using Umbraco.Core.Logging;
 
 using uSync8.BackOffice.Configuration;
@@ -102,8 +103,9 @@ namespace uSync8.BackOffice
 
             var summary = new SyncProgressSummary(handlers.Select(x => x.Handler), "Reporting", handlers.Count());
 
-            if (settings.ReportDebug)
+            if (GlobalSettings.DebugMode && settings.ReportDebug)
             {
+                logger.Warn<uSyncService>("Running Report Debug - this can be a slow process, don't enable unless you need it");
                 // debug - full export into a dated folder. 
                 summary.Message = "Debug: Creating Extract in Tracker folder";
                 callbacks?.Callback?.Invoke(summary);
@@ -151,7 +153,7 @@ namespace uSync8.BackOffice
         ///  Import items into umbraco from a given folder
         /// </summary>
         /// <param name="folder">Folder to use for the import</param>
-        /// <param name="force">Push changes in even if there is no diffrence between the file and the item in umbraco</param>
+        /// <param name="force">Push changes in even if there is no difference between the file and the item in umbraco</param>
         /// <param name="handlerOptions">Handler options to use (used to calculate handlers to use)</param>
         /// <param name="callbacks">Callbacks to keep UI informed</param>
         /// <returns>List of actions detailing what did and didn't change</returns>
@@ -168,7 +170,7 @@ namespace uSync8.BackOffice
         ///  Import items into umbraco from a given folder
         /// </summary>
         /// <param name="folder">Folder to use for the import</param>
-        /// <param name="force">Push changes in even if there is no diffrence between the file and the item in umbraco</param>
+        /// <param name="force">Push changes in even if there is no difference between the file and the item in umbraco</param>
         /// <param name="handlerAliases">List of aliases for the handlers you want to use</param>
         /// <param name="callbacks">Callbacks to keep UI informed</param>
         /// <returns>List of actions detailing what did and didn't change</returns>
@@ -182,7 +184,7 @@ namespace uSync8.BackOffice
         ///  Import items into umbraco from a given folder
         /// </summary>
         /// <param name="folder">Folder to use for the import</param>
-        /// <param name="force">Push changes in even if there is no diffrence between the file and the item in umbraco</param>
+        /// <param name="force">Push changes in even if there is no difference between the file and the item in umbraco</param>
         /// <param name="handlers">List of Handlers & config to use for import</param>
         /// <param name="callbacks">Callbacks to keep UI informed</param>
         /// <returns>List of actions detailing what did and didn't change</returns>

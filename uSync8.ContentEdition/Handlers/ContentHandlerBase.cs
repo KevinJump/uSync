@@ -24,7 +24,7 @@ namespace uSync8.ContentEdition.Handlers
     ///  base for all content based handlers
     /// </summary>
     /// <remarks>
-    ///  Content based handlers can have the same name in diffrent 
+    ///  Content based handlers can have the same name in different 
     ///  places around the tree, so we have to check for file name
     ///  clashes. 
     /// </remarks>
