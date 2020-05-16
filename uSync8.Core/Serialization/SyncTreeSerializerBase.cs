@@ -55,9 +55,9 @@ namespace uSync8.Core.Serialization
         ///  be imported into the nearest possible place (e.g one level up), but at 
         ///  report time we say - the parent is missing you know?
         /// </remarks>
-        public override ChangeType IsCurrent(XElement node)
+        public override ChangeType IsCurrent(XElement node, SyncSerializerOptions options)
         {
-            var change = base.IsCurrent(node);
+            var change = base.IsCurrent(node, options);
             if (change != ChangeType.NoChange)
             {
                 // check parent matches. 

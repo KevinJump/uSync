@@ -28,7 +28,7 @@ namespace uSync8.Core.Serialization.Serializers
             this.fileService = fileService;
         }
 
-        protected override SyncAttempt<XElement> SerializeCore(IContentType item)
+        protected override SyncAttempt<XElement> SerializeCore(IContentType item, SyncSerializerOptions options)
         {
             var node = SerializeBase(item);
             var info = SerializeInfo(item);
@@ -89,7 +89,7 @@ namespace uSync8.Core.Serialization.Serializers
             return node;
         }
 
-        protected override SyncAttempt<IContentType> DeserializeCore(XElement node)
+        protected override SyncAttempt<IContentType> DeserializeCore(XElement node, SyncSerializerOptions options)
         {
             var item = FindOrCreate(node);
 
@@ -121,14 +121,14 @@ namespace uSync8.Core.Serialization.Serializers
             property.Variations = node.Element("Variations").ValueOrDefault(ContentVariation.Nothing);
         }
 
-        public override SyncAttempt<IContentType> DeserializeSecondPass(IContentType item, XElement node, SerializerFlags flags)
+        public override SyncAttempt<IContentType> DeserializeSecondPass(IContentType item, XElement node, SyncSerializerOptions options)
         {
             logger.Debug<ContentTypeSerializer>("Deserialize Second Pass {0}", item.Alias);
 
             DeserializeCompositions(item, node);
             DeserializeStructure(item, node);
             
-            if (!flags.HasFlag(SerializerFlags.DoNotSave) && item.IsDirty())
+            if (!options.DoNotSave && item.IsDirty())
                 contentTypeService.Save(item);
 
             CleanFolder(item, node);

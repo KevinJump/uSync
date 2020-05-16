@@ -34,6 +34,7 @@ namespace uSync8.Core.Serialization
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
+        [Obsolete("Use with SyncSerializerOptions")]
         SyncAttempt<XElement> Serialize(TObject item);
 
         /// <summary>
@@ -46,6 +47,7 @@ namespace uSync8.Core.Serialization
         /// </summary>
         /// <param name="node">XML representation</param>
         /// <param name="flags">Modifier flags for serialization</param>
+        [Obsolete("Use with SyncSerializerOptions")]
         SyncAttempt<TObject> Deserialize(XElement node, SerializerFlags flags);
 
         /// <summary>
@@ -56,6 +58,7 @@ namespace uSync8.Core.Serialization
         ///  else is serialized (e.g datatypes that have document type refrences in them, need the doctypes
         ///  to be created).
         /// </remarks>
+        [Obsolete("Use with SyncSerializerOptions")]
         SyncAttempt<TObject> DeserializeSecondPass(TObject item, XElement node, SerializerFlags flags);
 
         /// <summary>
@@ -73,6 +76,8 @@ namespace uSync8.Core.Serialization
         /// </summary>
         /// <param name="node"></param>
         /// <returns></returns>
+
+        [Obsolete("Use with SyncSerializerOptions")]
         ChangeType IsCurrent(XElement node);
 
         /// <summary>

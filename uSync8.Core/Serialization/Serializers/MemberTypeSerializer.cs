@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Xml.Linq;
+using NPoco.Expressions;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
@@ -25,7 +26,7 @@ namespace uSync8.Core.Serialization.Serializers
             this.memberTypeService = memberTypeService;
         }
 
-        protected override SyncAttempt<XElement> SerializeCore(IMemberType item)
+        protected override SyncAttempt<XElement> SerializeCore(IMemberType item, SyncSerializerOptions options)
         {
             var node = SerializeBase(item);
             var info = SerializeInfo(item);
@@ -62,7 +63,7 @@ namespace uSync8.Core.Serialization.Serializers
             node.Add(new XElement("IsSensitive", item.IsSensitiveProperty(property.Alias)));
         }
 
-        protected override SyncAttempt<IMemberType> DeserializeCore(XElement node)
+        protected override SyncAttempt<IMemberType> DeserializeCore(XElement node, SyncSerializerOptions options)
         {
             var item = FindOrCreate(node);
 

@@ -45,7 +45,9 @@ namespace uSync8.Core.Tracking
                 }.AsEnumerableOfOne(); ;
             }
 
-            if (serializer.IsCurrent(node) == ChangeType.NoChange)
+            var serializerOptions = new SyncSerializerOptions();
+
+            if (IsItemCurrent(node, serializerOptions) == ChangeType.NoChange)
             {
                 return new uSyncChange()
                 {
@@ -59,7 +61,7 @@ namespace uSync8.Core.Tracking
             var item = serializer.FindItem(node);
             if (item != null)
             {
-                var current = serializer.Serialize(item);
+                var current = SerializeItem(item, serializerOptions);
                 if (current.Success)
                 {
                     return CalculateChanges(changes, current.Item, node, "", "");
@@ -477,6 +479,24 @@ namespace uSync8.Core.Tracking
 
             return items.FirstOrDefault(x => x.Element(key).ValueOrDefault(string.Empty) == value);
         }
+
+#pragma warning disable 0618
+        private ChangeType IsItemCurrent(XElement node, SyncSerializerOptions options)
+        {
+            if (serializer is ISyncOptionsSerializer<TObject> optionSerializer)
+                return optionSerializer.IsCurrent(node, options);
+
+            return serializer.IsCurrent(node);
+        }
+
+        private SyncAttempt<XElement> SerializeItem(TObject item, SyncSerializerOptions options)
+        {
+            if (serializer is ISyncOptionsSerializer<TObject> optionSerializer)
+                return optionSerializer.Serialize(item, options);
+
+            return serializer.Serialize(item);
+        }
+#pragma warning restore 0618
     }
 
 

@@ -25,7 +25,7 @@ namespace uSync8.Core.Serialization.Serializers
             this.macroService = macroService;
         }
 
-        protected override SyncAttempt<IMacro> DeserializeCore(XElement node)
+        protected override SyncAttempt<IMacro> DeserializeCore(XElement node, SyncSerializerOptions options)
         {
             var changes = new List<uSyncChange>();
 
@@ -138,7 +138,7 @@ namespace uSync8.Core.Serialization.Serializers
 
         }
 
-        protected override SyncAttempt<XElement> SerializeCore(IMacro item)
+        protected override SyncAttempt<XElement> SerializeCore(IMacro item, SyncSerializerOptions options)
         {
             var node = this.InitializeBaseNode(item, item.Alias);
 

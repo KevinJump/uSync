@@ -27,7 +27,7 @@ namespace uSync8.Core.Serialization.Serializers
             this.localizationService = localizationService;
         }
 
-        protected override SyncAttempt<ILanguage> DeserializeCore(XElement node)
+        protected override SyncAttempt<ILanguage> DeserializeCore(XElement node, SyncSerializerOptions options)
         {
             var isoCode = node.Element("IsoCode").ValueOrDefault(string.Empty);
             logger.Debug<LanguageSerializer>("Derserializing {0}", isoCode);
@@ -68,7 +68,7 @@ namespace uSync8.Core.Serialization.Serializers
         /// <summary>
         ///  second pass we set the default language again (because you can't just set it)
         /// </summary>
-        public override SyncAttempt<ILanguage> DeserializeSecondPass(ILanguage item, XElement node, SerializerFlags flags)
+        public override SyncAttempt<ILanguage> DeserializeSecondPass(ILanguage item, XElement node, SyncSerializerOptions options)
         {
             logger.Debug<LanguageSerializer>("Language Second Pass {IsoCode}", item.IsoCode);
             item.IsDefault = node.Element("IsDefault").ValueOrDefault(false);
@@ -77,7 +77,7 @@ namespace uSync8.Core.Serialization.Serializers
             if (fallbackId > 0)
                 item.FallbackLanguageId = fallbackId;
 
-            if (!flags.HasFlag(SerializerFlags.DoNotSave) && item.IsDirty())
+            if (!options.DoNotSave && item.IsDirty())
                 localizationService.Save(item);
 
             return SyncAttempt<ILanguage>.Succeed(item.CultureName, item, ChangeType.Import);
@@ -126,7 +126,7 @@ namespace uSync8.Core.Serialization.Serializers
             return new Guid(bytes);
         }
 
-        protected override SyncAttempt<XElement> SerializeCore(ILanguage item)
+        protected override SyncAttempt<XElement> SerializeCore(ILanguage item, SyncSerializerOptions options)
         {
             var node = InitializeBaseNode(item, item.IsoCode);
 
@@ -169,7 +169,7 @@ namespace uSync8.Core.Serialization.Serializers
             if (item == null || !item.CultureInfo.Name.InvariantEquals(alias)) return null;
             return item;
         }
-            
+
 
         protected override ILanguage FindItem(Guid key) => default(ILanguage);
 
@@ -178,7 +178,7 @@ namespace uSync8.Core.Serialization.Serializers
 
         protected override void DeleteItem(ILanguage item)
             => localizationService.Delete(item);
-            
+
 
         protected override XElement CleanseNode(XElement node)
         {

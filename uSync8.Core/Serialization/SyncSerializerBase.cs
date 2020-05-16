@@ -11,6 +11,7 @@ using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
 using uSync8.Core.Extensions;
 using uSync8.Core.Models;
+using System.Diagnostics;
 
 namespace uSync8.Core.Serialization
 {
@@ -54,59 +55,65 @@ namespace uSync8.Core.Serialization
 
         public bool IsTwoPass { get; private set; }
 
-
-        public SyncAttempt<XElement> Serialize(TObject item)
-        {
-            return SerializeCore(item);
-        }
-
         /// <summary>
         ///  CanDeserialize based on the flags, used to check the model is good, for this import 
         /// </summary>
         /// <remarks>
         ///  used primarliy for checking parentage, but also can be used for checking things like create only.
         /// </remarks>
-        protected virtual SyncAttempt<TObject> CanDeserialize(XElement node, SerializerFlags flags)
+
+        protected virtual SyncAttempt<TObject> CanDeserialize(XElement node, SyncSerializerOptions options)
             => SyncAttempt<TObject>.Succeed("No Check", ChangeType.NoChange);
 
-        public SyncAttempt<TObject> Deserialize(XElement node, SerializerFlags flags)
+
+        /// 
+
+        /// <summary>
+        ///  Implimented by child classes to process a Derserialize.
+        /// </summary>
+#pragma warning disable 0618
+        protected virtual SyncAttempt<TObject> DeserializeCore(XElement node, SyncSerializerOptions options)
+            => DeserializeCore(node);
+#pragma warning restore 0618
+
+        public SyncAttempt<TObject> Deserialize(XElement node, SyncSerializerOptions options)
         {
             if (IsEmpty(node))
             {
                 // new behavior when a node is 'empty' that is a marker for a delete or rename
                 // so we process that action here, no more action file/folders
-                return ProcessAction(node, flags);
+                return ProcessAction(node, options);
             }
 
             if (!IsValid(node))
                 throw new FormatException($"XML Not valid for type {ItemType}");
 
 
-            if ( flags.HasFlag(SerializerFlags.Force) || IsCurrent(node) > ChangeType.NoChange)
+            if ( options.Force || IsCurrent(node, options) > ChangeType.NoChange)
             {
                 // pre-deserilzation check. 
-                var check = CanDeserialize(node, flags);
+                var check = CanDeserialize(node, options);
                 if (!check.Success) return check;
 
                 logger.Debug(serializerType, "Base: Deserializing {0}", ItemType);
-                var result = DeserializeCore(node);
+                var result = DeserializeCore(node, options);
 
                 if (result.Success)
                 {
                     logger.Debug(serializerType, "Base: Deserialize Core Success {0}", ItemType);
 
-                    if (!flags.HasFlag(SerializerFlags.DoNotSave))
+                    if (!options.DoNotSave)
                     {
                         logger.Debug(serializerType, "Base: Serializer Saving (No DoNotSaveFlag) {0}", result.Item.Id); 
                         // save 
                         SaveItem(result.Item);
                     }
 
-                    if (flags.HasFlag(SerializerFlags.OnePass))
+                    if (options.OnePass)
                     {
                         logger.Debug(serializerType, "Base: Processing item in one pass {0}", result.Item.Id);
 
-                        var secondAttempt = DeserializeSecondPass(result.Item, node, flags);
+                        var secondAttempt = DeserializeSecondPass(result.Item, node, options);
 
                         logger.Debug(serializerType, "Base: Second Pass Result {0} {1}", result.Item.Id, secondAttempt.Success);
                         
@@ -121,13 +128,22 @@ namespace uSync8.Core.Serialization
             return SyncAttempt<TObject>.Succeed(node.GetAlias(), default(TObject), ChangeType.NoChange);
         }
 
-        public virtual SyncAttempt<TObject> DeserializeSecondPass(TObject item, XElement node, SerializerFlags flags)
+        public virtual SyncAttempt<TObject> DeserializeSecondPass(TObject item, XElement node, SyncSerializerOptions options)
         {
             return SyncAttempt<TObject>.Succeed(nameof(item), item, typeof(TObject), ChangeType.NoChange);
         }
 
-        protected abstract SyncAttempt<XElement> SerializeCore(TObject item);
-        protected abstract SyncAttempt<TObject> DeserializeCore(XElement node);
+
+        public SyncAttempt<XElement> Serialize(TObject item, SyncSerializerOptions options)
+        {
+            return SerializeCore(item, options);
+        }
+
+#pragma warning disable 0618
+        protected virtual SyncAttempt<XElement> SerializeCore(TObject item, SyncSerializerOptions options)
+            => SerializeCore(item);
+#pragma warning restore 0618
+
 
         /// <summary>
         ///  all xml items now have the same top line, this makes 
@@ -171,13 +187,14 @@ namespace uSync8.Core.Serialization
         public bool IsValidOrEmpty(XElement node)
             => IsEmpty(node) || IsValid(node);
 
+
         /// <summary>
         ///  Process the action in teh 'empty' XML node
         /// </summary>
         /// <param name="node">XML to process</param>
         /// <param name="flags">Serializer flags to control options</param>
         /// <returns>Sync attempt detailing changes</returns>
-        protected SyncAttempt<TObject> ProcessAction(XElement node, SerializerFlags flags)
+        protected SyncAttempt<TObject> ProcessAction(XElement node, SyncSerializerOptions options)
         {
             if (!IsEmpty(node))
                 throw new ArgumentException("Cannot process actions on a non-empty node");
@@ -191,9 +208,9 @@ namespace uSync8.Core.Serialization
             switch(actionType)
             {
                 case SyncActionType.Delete:
-                    return ProcessDelete(key, alias, flags);
+                    return ProcessDelete(key, alias, options);
                 case SyncActionType.Rename:
-                    return ProcessRename(key, alias, flags);
+                    return ProcessRename(key, alias, options);
                 case SyncActionType.Clean:
                     // we return a 'clean' success, but this is then picked up 
                     // in the handler, as something to clean, so the handler does it. 
@@ -203,7 +220,7 @@ namespace uSync8.Core.Serialization
             }
         }
 
-        protected virtual SyncAttempt<TObject> ProcessDelete(Guid key, string alias, SerializerFlags flags)
+        protected virtual SyncAttempt<TObject> ProcessDelete(Guid key, string alias, SyncSerializerOptions options)
         {
             logger.Debug(serializerType, "Processing Delete {0} {1}", key, alias);
 
@@ -233,13 +250,13 @@ namespace uSync8.Core.Serialization
             return SyncAttempt<TObject>.Succeed(alias, ChangeType.NoChange);
         }
 
-        protected virtual SyncAttempt<TObject> ProcessRename(Guid key, string alias, SerializerFlags flags)
+        protected virtual SyncAttempt<TObject> ProcessRename(Guid key, string alias, SyncSerializerOptions options)
         {
             logger.Debug(serializerType, "Process Rename (no action)");
             return SyncAttempt<TObject>.Succeed(alias, ChangeType.NoChange);
         }
 
-        public virtual ChangeType IsCurrent(XElement node)
+        public virtual ChangeType IsCurrent(XElement node, SyncSerializerOptions options)
         {
             if (node == null) return ChangeType.Update;
 
@@ -266,7 +283,7 @@ namespace uSync8.Core.Serialization
 
             var newHash = MakeHash(node);
 
-            var currentNode = Serialize(item);
+            var currentNode = Serialize(item, options);
             if (!currentNode.Success) return ChangeType.Create;
 
             var currentHash = MakeHash(currentNode.Item);
@@ -389,5 +406,46 @@ namespace uSync8.Core.Serialization
             return default(TObject);
         }
         #endregion
+
+        [Obsolete("use with SyncSerializerOptions")]
+        protected virtual SyncAttempt<TObject> DeserializeCore(XElement node)
+            => SyncAttempt<TObject>.Succeed(node.GetAlias(), ChangeType.NoChange);
+
+        [Obsolete("use with SyncSerializerOptions")]
+        public SyncAttempt<TObject> Deserialize(XElement node, SerializerFlags flags)
+            => Deserialize(node, new SyncSerializerOptions(flags));
+
+        [Obsolete("use with SyncSerializerOptions")]
+        public virtual SyncAttempt<TObject> DeserializeSecondPass(TObject item, XElement node, SerializerFlags flags)
+            => DeserializeSecondPass(item, node, new SyncSerializerOptions(flags));
+
+        [Obsolete("use with SyncSerializerOptions")]
+        public SyncAttempt<XElement> Serialize(TObject item)
+            => Serialize(item, new SyncSerializerOptions());
+
+        [Obsolete("use with SyncSerializerOptions")]
+        protected virtual SyncAttempt<XElement> SerializeCore(TObject item)
+            => SyncAttempt<XElement>.Succeed(nameof(item), ChangeType.NoChange);
+
+        [Obsolete("use with SyncSerializerOptions")]
+        protected virtual SyncAttempt<TObject> ProcessDelete(Guid key, string alias, SerializerFlags flags)
+            => ProcessDelete(key, alias, new SyncSerializerOptions(flags));
+
+        [Obsolete("Use with SyncSerializerOptions")]
+        protected virtual SyncAttempt<TObject> ProcessRename(Guid key, string alias, SerializerFlags flags)
+            => ProcessRename(key, alias, new SyncSerializerOptions(flags));
+
+        [Obsolete("Use with SyncSerializerOptions")]
+        public virtual ChangeType IsCurrent(XElement node)
+            => IsCurrent(node, new SyncSerializerOptions());
+
+        [Obsolete("Use with SyncSerializerOptions")]
+        protected SyncAttempt<TObject> ProcessAction(XElement node, SerializerFlags flags)
+            => ProcessAction(node, new SyncSerializerOptions(flags));
+
+        [Obsolete("Use with SyncSerializerOptions")]
+        protected virtual SyncAttempt<TObject> CanDeserialize(XElement node, SerializerFlags flags)
+            => CanDeserialize(node, new SyncSerializerOptions(flags));
+
     }
 }

@@ -34,7 +34,7 @@ namespace uSync8.Core.Serialization.Serializers
             this.configurationSerializers = configurationSerializers;
         }
 
-        protected override SyncAttempt<IDataType> DeserializeCore(XElement node)
+        protected override SyncAttempt<IDataType> DeserializeCore(XElement node, SyncSerializerOptions options)
         {
             var info = node.Element("Info");
             var name = info.Element("Name").ValueOrDefault(string.Empty);
@@ -133,7 +133,7 @@ namespace uSync8.Core.Serialization.Serializers
 
         ///////////////////////
 
-        protected override SyncAttempt<XElement> SerializeCore(IDataType item)
+        protected override SyncAttempt<XElement> SerializeCore(IDataType item, SyncSerializerOptions options)
         {
             var node = InitializeBaseNode(item, item.Name, item.Level);
 
