@@ -6,6 +6,7 @@ using System.Xml.Linq;
 using System.Xml.XPath;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 using Umbraco.Core;
 using Umbraco.Core.IO;
 using Umbraco.Core.Models.Entities;
@@ -499,6 +500,7 @@ namespace uSync8.Core.Tracking
 #pragma warning restore 0618
     }
 
+    [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
 
     public class TrackedItem
     {
@@ -548,6 +550,7 @@ namespace uSync8.Core.Tracking
         public bool MaskValue { get; set; }
     }
 
+    [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
     public class RepeatingInfo
     {
         public RepeatingInfo(string key, string value, string name)
