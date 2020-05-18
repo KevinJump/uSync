@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<uSync xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">
+	<BackOffice>
+		<HandlerSets>
+			<Handlers Name="default" xdt:Locator="Match(Name)">
+				<Handler Alias="contentHandler" Enabled="true" Actions="All"
+                 xdt:Locator="Match(Alias)"
+                 xdt:Transform="Remove"/>
+
+				<Handler Alias="mediaHandler" Enabled="true" Actions="All"
+                 xdt:Locator="Match(Alias)"
+                 xdt:Transform="Remove"/>
+
+				<Handler Alias="domainHandler" Enabled="true" Actions="All"
+								 xdt:Locator="Match(Alias)"
+								 xdt:Transform="Remove"/>
+
+				<Handler Alias="dictionaryHandler" Enabled="true" Actions="All"
+                 xdt:Locator="Match(Alias)"
+                 xdt:Transform="Remove"/>
+
+				<Handler Alias="contentTemplateHandler" Enabled="true" Actions="All"
+								 xdt:Locator="Match(Alias)"
+								 xdt:Transform="Remove"/>
+
+				<Handler Alias="relationTypeHandler" Enabled="true" Actions="All"
+                 xdt:Locator="Match(Alias)"
+                 xdt:Transform="Remove"/>
+			</Handlers>
+		</HandlerSets>
+	</BackOffice>
+</uSync>

@@ -209,7 +209,7 @@ namespace uSync8.BackOffice
                     var summary = new SyncProgressSummary(handlers.Select(x => x.Handler), "Importing", handlers.Count() + 1);
                     summary.Handlers.Add(new SyncHandlerSummary()
                     {
-                        Icon = "icon-traffic",
+                        Icon = "icon-defrag",
                         Name = "Post Import",
                         Status = HandlerStatus.Pending
                     });

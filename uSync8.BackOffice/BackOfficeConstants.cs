@@ -24,7 +24,9 @@
 
             public const int DomainSettings = USYNC_RESERVED_LOWER + 219;
 
-            public const int DataTypeMappings = USYNC_RESERVED_LOWER + 220;
+            public const int RelationTypes = USYNC_RESERVED_LOWER + 220;
+
+            public const int DataTypeMappings = USYNC_RESERVED_LOWER + 250;
         }
 
         public static class Groups

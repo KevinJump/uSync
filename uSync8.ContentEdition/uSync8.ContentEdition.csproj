@@ -250,12 +250,14 @@
     <Compile Include="Checkers\DictionaryItemChecker.cs" />
     <Compile Include="Checkers\DomainChecker.cs" />
     <Compile Include="Checkers\MediaChecker.cs" />
+    <Compile Include="Checkers\RelationTypeChecker.cs" />
     <Compile Include="Handlers\ContentHandler.cs" />
     <Compile Include="Handlers\ContentHandlerBase.cs" />
     <Compile Include="Handlers\ContentTemplateHandler.cs" />
     <Compile Include="Handlers\DictionaryHandler.cs" />
     <Compile Include="Handlers\DomainHandler.cs" />
     <Compile Include="Handlers\MediaHandler.cs" />
+    <Compile Include="Handlers\RelationTypeHandler.cs" />
     <Compile Include="Mapping\ISyncMapper.cs" />
     <Compile Include="Mapping\Mappers\DateMapper.cs" />
     <Compile Include="Mapping\Mappers\GridImageMapper.cs" />
@@ -278,16 +280,20 @@
     <Compile Include="Serializers\DomainSerializer.cs" />
     <Compile Include="Serializers\ISyncContentSerializer.cs" />
     <Compile Include="Serializers\MediaSerializer.cs" />
+    <Compile Include="Serializers\RelationTypeSerializer.cs" />
     <Compile Include="Tracker\ContentBaseTracker.cs" />
     <Compile Include="Tracker\ContentTracker.cs" />
     <Compile Include="Tracker\DictionaryItemTracker.cs" />
     <Compile Include="Tracker\DomainTracker.cs" />
     <Compile Include="Tracker\MediaTracker.cs" />
+    <Compile Include="Tracker\RelationTypeTracker.cs" />
     <Compile Include="uSync8ContentEdition.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="Config\uSync8.config.install.xdt" />
+    <None Include="Config\uSync8.config.uninstall.xdf" />
     <None Include="packages.config" />
     <None Include="uSync.ContentEdition.Core.nuspec" />
     <None Include="uSync.ContentEdition.nuspec" />

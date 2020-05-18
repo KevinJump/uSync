@@ -2,6 +2,7 @@
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using Umbraco.Core;
 
 namespace uSync8.BackOffice.Configuration
 {
@@ -27,6 +28,19 @@ namespace uSync8.BackOffice.Configuration
             Alias = alias;
             Enabled = enabled;
         }
+
+        public TResult GetSetting<TResult>(string key, TResult defaultValue)
+        {
+            if (this.Settings != null && this.Settings.ContainsKey(key))
+            {
+                var attempt = this.Settings[key].TryConvertTo<TResult>();
+                if (attempt.Success)
+                    return attempt.Result;
+            }
+
+            return defaultValue;
+        }
+
     }
 
 }

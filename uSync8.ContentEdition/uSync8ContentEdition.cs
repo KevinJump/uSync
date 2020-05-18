@@ -48,11 +48,13 @@ namespace uSync8.ContentEdition
             composition.Register<ISyncSerializer<IMedia>, MediaSerializer>();
             composition.Register<ISyncSerializer<IDictionaryItem>, DictionaryItemSerializer>();
             composition.Register<ISyncSerializer<IDomain>, DomainSerializer>();
+            composition.Register<ISyncSerializer<IRelationType>, RelationTypeSerializer>();
 
             composition.Register<ISyncTracker<IContent>, ContentTracker>();
             composition.Register<ISyncTracker<IMedia>, MediaTracker>();
             composition.Register<ISyncTracker<IDictionaryItem>, DictionaryItemTracker>();
             composition.Register<ISyncTracker<IDomain>, DomainTracker>();
+            composition.Register<ISyncTracker<IRelationType>, RelationTypeTracker>();
 
             /*
              * checkers are no longer registred like this, so we can deploy them seperatly.
