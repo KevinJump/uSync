@@ -116,7 +116,7 @@
         function report(group) {
             resetStatus(modes.REPORT);
 
-            uSync8DashboardService.report(group, getClientId())
+            uSync8DashboardService.report(group, vm.hub.clientId())
                 .then(function (result) {
                     vm.results = result.data;
                     vm.working = false;
@@ -137,7 +137,7 @@
             }
 
             vm.hideLink = true;
-            uSync8DashboardService.exportItems(getClientId(), clean)
+            uSync8DashboardService.exportItems(vm.hub.clientId(), clean)
                 .then(function (result) {
                     vm.results = result.data;
                     vm.working = false;
@@ -161,7 +161,7 @@
             vm.hideLink = true;
             vm.importButton.state = 'busy';
 
-            uSync8DashboardService.importItems(force, group, getClientId())
+            uSync8DashboardService.importItems(force, group, vm.hub.clientId())
                 .then(function (result) {
                     vm.results = result.data;
                     vm.working = false;
@@ -333,13 +333,6 @@
 
                 vm.hub.start();
             });
-        }
-
-        function getClientId() {
-            if ($.connection !== undefined && $.connection.hub !== undefined) {
-                return $.connection.hub.id;
-            }
-            return "";
         }
     }
 

@@ -64,6 +64,11 @@
 
             var hub = {
                 start: function () {
+                    if ($.connection.hub.state !== $.connection.connectionState.disconnected) {
+                        // restart the hub - if it has already been started, or our callbacks won't be registered
+                        $.connection.hub.stop(true, true);
+                    }
+
                     $.connection.hub.start();
                 },
                 on: function (eventName, callback) {
@@ -84,7 +89,14 @@
                                 }
                             });
                         });
+                },
+                clientId: function () {
+                    if ($.connection !== undefined && $.connection.hub !== undefined) {
+                        return $.connection.hub.id;
+                    }
+                    return "";
                 }
+
             };
 
             return callback(hub);
