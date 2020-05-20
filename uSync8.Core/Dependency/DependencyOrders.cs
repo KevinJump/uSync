@@ -65,6 +65,8 @@ namespace uSync8.Core.Dependency
                     return Macros;
                 case UdiEntityType.Language:
                     return Languages;
+                case UdiEntityType.RelationType:
+                    return RelationTypes;
                 default:
                     return 2000;
             }
