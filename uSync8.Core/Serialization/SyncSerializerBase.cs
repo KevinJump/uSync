@@ -15,7 +15,9 @@ using System.Diagnostics;
 
 namespace uSync8.Core.Serialization
 {
-
+    /// <summary>
+    ///  Base serializer class
+    /// </summary>
     public abstract class SyncSerializerBase<TObject> : IDiscoverable
         where TObject : IEntity
     {
@@ -61,12 +63,9 @@ namespace uSync8.Core.Serialization
         /// <remarks>
         ///  used primarliy for checking parentage, but also can be used for checking things like create only.
         /// </remarks>
-
         protected virtual SyncAttempt<TObject> CanDeserialize(XElement node, SyncSerializerOptions options)
             => SyncAttempt<TObject>.Succeed("No Check", ChangeType.NoChange);
 
-
-        /// 
 
         /// <summary>
         ///  Implimented by child classes to process a Derserialize.
@@ -76,6 +75,9 @@ namespace uSync8.Core.Serialization
             => DeserializeCore(node);
 #pragma warning restore 0618
 
+        /// <summary>
+        ///  Deserialize the XML back into Umbraco.
+        /// </summary>
         public SyncAttempt<TObject> Deserialize(XElement node, SyncSerializerOptions options)
         {
             if (IsEmpty(node))
@@ -128,12 +130,17 @@ namespace uSync8.Core.Serialization
             return SyncAttempt<TObject>.Succeed(node.GetAlias(), default(TObject), ChangeType.NoChange);
         }
 
+        /// <summary>
+        ///  Implimented by child classes to process a the second pass of a deserialization.
+        /// </summary>
         public virtual SyncAttempt<TObject> DeserializeSecondPass(TObject item, XElement node, SyncSerializerOptions options)
         {
             return SyncAttempt<TObject>.Succeed(nameof(item), item, typeof(TObject), ChangeType.NoChange);
         }
 
-
+        /// <summary>
+        ///  Serialize an elment into XML 
+        /// </summary>
         public SyncAttempt<XElement> Serialize(TObject item, SyncSerializerOptions options)
         {
             return SerializeCore(item, options);
