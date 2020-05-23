@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Security.Cryptography;
 using System.Xml.Linq;
 
@@ -182,9 +183,13 @@ namespace uSync8.ContentEdition.Serializers
         protected override IMedia FindItem(int id)
         {
             var item = mediaService.GetById(id);
-            if (!this.nameCache.ContainsKey(id))
-                this.nameCache[id] = new Tuple<Guid, string>(item.Key, item.Name);
-            return item;
+            if (item != null)
+            {
+                if (!this.nameCache.ContainsKey(id))
+                    this.nameCache[id] = new Tuple<Guid, string>(item.Key, item.Name);
+                return item;
+            }
+            return null;
         }
 
 
