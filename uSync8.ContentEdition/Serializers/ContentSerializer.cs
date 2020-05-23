@@ -325,9 +325,13 @@ namespace uSync8.ContentEdition.Serializers
         protected override IContent FindItem(int id)
         {
             var item = contentService.GetById(id);
-            if (!this.nameCache.ContainsKey(id))
-                this.nameCache[id] = new Tuple<Guid, string>(item.Key, item.Name);
-            return item;
+            if (item != null)
+            {
+                if (!this.nameCache.ContainsKey(id))
+                    this.nameCache[id] = new Tuple<Guid, string>(item.Key, item.Name);
+                return item;
+            }
+            return null;
         }
 
         protected override IContent FindItem(Guid key)
