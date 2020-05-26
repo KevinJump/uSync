@@ -55,6 +55,18 @@ namespace uSync8.BackOffice.SyncHandlers
             : base(entityService, logger, serializer, tracker, appCaches, checkers, syncFileService)
         { }
 
+        [Obsolete("Construct your handler using SyncDependencyCollection for better checker support")]
+        protected SyncHandlerLevelBase(
+                  IEntityService entityService,
+                  IProfilingLogger logger,
+                  ISyncSerializer<TObject> serializer,
+                  ISyncTracker<TObject> tracker,
+                  AppCaches appCaches,
+                  ISyncDependencyChecker<TObject> checker,
+                  SyncFileService fileService)
+                  : base(entityService, logger, serializer, tracker, appCaches, checker, fileService) 
+        { }
+
         /// <summary>
         ///  this is the simple interface, based purely on level, 
         ///  we could get clever (like dependency trees for content types)

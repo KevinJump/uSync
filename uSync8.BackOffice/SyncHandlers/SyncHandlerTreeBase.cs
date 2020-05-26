@@ -1,4 +1,6 @@
-﻿using Umbraco.Core.Cache;
+﻿using System;
+
+using Umbraco.Core.Cache;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
@@ -44,7 +46,24 @@ namespace uSync8.BackOffice.SyncHandlers
             : base(entityService, logger, serializer, tracker, appCaches, checkers, syncFileService)
         {
         }
-        
+
+        [Obsolete("Construct your handler using SyncDependencyCollection for better checker support")]
+        protected SyncHandlerTreeBase(
+            IEntityService entityService,
+            IProfilingLogger logger,
+            ISyncSerializer<TObject> serializer,
+            ISyncTracker<TObject> tracker,
+            AppCaches appCaches,
+            ISyncDependencyChecker<TObject> checker,
+            SyncFileService fileService)
+            : base(entityService, logger, serializer, tracker, appCaches, checker, fileService)
+        {
+
+        }
+
+
+
+
         protected override string GetItemName(TObject item) => item.Name;
     }
 

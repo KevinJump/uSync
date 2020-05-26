@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Umbraco.Core.Cache;
@@ -56,6 +57,21 @@ namespace uSync8.BackOffice.SyncHandlers
             : base(entityService, logger, serializer, tracker, appCaches, checkers, syncFileService)
         {
         }
+
+        [Obsolete("Construct your handler using SyncDependencyCollection for better checker support")]
+        protected SyncHandlerContainerBase(
+            IEntityService entityService,
+            IProfilingLogger logger,
+            ISyncSerializer<TObject> serializer,
+            ISyncTracker<TObject> tracker,
+            AppCaches appCaches,
+            ISyncDependencyChecker<TObject> checker,
+            SyncFileService fileService)
+            : base(entityService, logger, serializer, tracker, appCaches, checker, fileService)
+        {
+
+        }
+
 
         protected IEnumerable<uSyncAction> CleanFolders(string folder, int parent)
         {

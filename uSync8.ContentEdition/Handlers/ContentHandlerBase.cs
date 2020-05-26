@@ -53,6 +53,18 @@ namespace uSync8.ContentEdition.Handlers
             : base(entityService, logger, serializer, tracker, appCaches, checkers, syncFileService)
         { }
 
+        [Obsolete("Construct your handler using SyncDependencyCollection for better checker support")]
+        protected ContentHandlerBase(
+            IEntityService entityService,
+            IProfilingLogger logger,
+            ISyncSerializer<TObject> serializer,
+            ISyncTracker<TObject> tracker,
+            AppCaches appCaches,
+            ISyncDependencyChecker<TObject> checker,
+            SyncFileService fileService)
+            : base(entityService, logger, serializer, tracker, appCaches, checker, fileService)
+        { }
+
 
 
         protected override string CheckAndFixFileClash(string path, TObject item)

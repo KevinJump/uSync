@@ -78,7 +78,7 @@ namespace uSync8.BackOffice.SyncHandlers
             SyncFileService syncFileService)
         : this(entityService, logger, serializer, tracker, appCaches, Enumerable.Empty<ISyncDependencyChecker<TObject>>(), syncFileService) { }
 
-        [Obsolete("Construct your handler using SyncDependencyCollection for better support")]
+        [Obsolete("Construct your handler using SyncDependencyCollection for better checker support")]
         public SyncHandlerBase(
             IEntityService entityService,
             IProfilingLogger logger,
