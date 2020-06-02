@@ -9,10 +9,29 @@ using Newtonsoft.Json.Serialization;
 
 using Umbraco.Core;
 using Umbraco.Core.Logging;
+
 using uSync8.Core.Extensions;
 
 namespace uSync8.BackOffice.Configuration
 {
+    /// <summary>
+    ///  uSync config loading / saving
+    /// </summary>
+    /// <remarks>
+    ///  We could just serialize this. but we don't because we don't want to wipe 
+    ///  settings from the file that we don't know about (yet). 
+    ///  
+    ///  In theory extensions can save settings in this file if they want to, so we 
+    ///  don't know the final schema. 
+    ///  
+    ///  doing this also alows us to load values from the web.config appSettings to
+    ///  override our own settings which helps people when deploying. 
+    ///  
+    ///  So instead we write each value/node out to the file individually. this gives 
+    ///  us flexiblity in what can go in the file, but if does make bits of the code
+    ///  looky messy with the repeated ValueFrom... lines.
+    /// </remarks>
+
     [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
     public class uSyncConfig
     {
@@ -24,10 +43,13 @@ namespace uSync8.BackOffice.Configuration
 
         public uSyncConfig(IProfilingLogger logger)
         {
-            this.logger = logger; 
+            this.logger = logger;
             this.Settings = LoadSettings();
         }
 
+        /// <summary>
+        /// Load the uSync settings from disk.
+        /// </summary>
         public uSyncSettings LoadSettings()
         {
             uSyncSettings settings = new uSyncSettings();
@@ -75,6 +97,9 @@ namespace uSync8.BackOffice.Configuration
             return settings;
         }
 
+        /// <summary>
+        ///  Load the Handler sets from the `Handlers` section of the file
+        /// </summary>
         private IList<HandlerSet> LoadHandlerSets(XElement node, uSyncSettings defaultSettings, out string defaultSet)
         {
             var sets = new List<HandlerSet>();
@@ -92,6 +117,12 @@ namespace uSync8.BackOffice.Configuration
             return sets;
         }
 
+        /// <summary>
+        ///  Load a handler set (a collection of handlers)
+        /// </summary>
+        /// <remarks>
+        ///  each handler set has a name, it lets us have diffrent sets for diffrent tasks
+        /// </remarks>
         private HandlerSet LoadSingleHandlerSet(XElement setNode, uSyncSettings defaultSettings)
         {
             var handlerSet = new HandlerSet();
@@ -102,7 +133,7 @@ namespace uSync8.BackOffice.Configuration
                 var handlerSettings = LoadHandlerConfig(handlerNode, defaultSettings);
                 if (handlerSettings != null)
                 {
-                    logger.Debug<uSyncConfig>("Loading Handler {alias} {enabled} [{actions}]", 
+                    logger.Debug<uSyncConfig>("Loading Handler {alias} {enabled} [{actions}]",
                         handlerSettings.Alias, handlerSettings.Enabled, string.Join(",", handlerSettings.Actions));
 
                     handlerSet.Handlers.Add(handlerSettings);
@@ -113,7 +144,12 @@ namespace uSync8.BackOffice.Configuration
 
         }
 
-
+        /// <summary>
+        ///  Save the settings to disk.
+        /// </summary>
+        /// <param name="settings"></param>
+        /// <param name="fireReload"></param>
+        /// <returns></returns>
         public uSyncSettings SaveSettings(uSyncSettings settings, bool fireReload = false)
         {
             var node = GetSettingsFile(true);
@@ -168,6 +204,9 @@ namespace uSync8.BackOffice.Configuration
             return settings;
         }
 
+        /// <summary>
+        ///  Set the values for a handler 
+        /// </summary>
         private void SetHandlerValues(XElement node, HandlerSettings handler, uSyncSettings defaultSettings)
         {
             node.SetAttributeValue("Alias", handler.Alias);
@@ -202,6 +241,10 @@ namespace uSync8.BackOffice.Configuration
         }
 
         #region Default Handler Loading Stuff
+
+        /// <summary>
+        ///  load the config for a single handler. 
+        /// </summary>
         public HandlerSettings LoadHandlerConfig(XElement node, uSyncSettings defaultSettings)
         {
             if (node == null) return null;
@@ -221,28 +264,41 @@ namespace uSync8.BackOffice.Configuration
             settings.Actions = node.Attribute("Actions").ValueOrDefault("All").ToDelimitedList().ToArray();
             settings.FailOnMissingParent = GetLocalValue(node.Attribute("FailOnMissingParent"), defaultSettings.FailOnMissingParent);
 
-            // var settingNode = node.Element("Settings");
-            // if (settingNode != null)
-            // {
-                var perHandlerSettings = new Dictionary<string, string>();
+            // handlers can have their own indivual settings beneath a node
+            //
+            // <Handler Alias="sample" ... >
+            //   <Add Key="settingName" Value="settingValue" />
+            // </Handler>
+            //
+            // These get added to a Settings dictionary for the handler, so it 
+            // can access them as needed (they are often also passed to serializers)
+            // 
+            var perHandlerSettings = new Dictionary<string, string>();
 
-                foreach (var settingItem in node.Elements("Add"))
-                {
-                    var key = settingItem.Attribute("Key").ValueOrDefault(string.Empty);
-                    var value = settingItem.Attribute("Value").ValueOrDefault(string.Empty);
+            foreach (var settingItem in node.Elements("Add"))
+            {
+                var key = settingItem.Attribute("Key").ValueOrDefault(string.Empty);
+                var value = settingItem.Attribute("Value").ValueOrDefault(string.Empty);
 
-                    if (string.IsNullOrWhiteSpace(key) || string.IsNullOrWhiteSpace(value))
-                        continue;
+                if (string.IsNullOrWhiteSpace(key) || string.IsNullOrWhiteSpace(value))
+                    continue;
 
-                    perHandlerSettings.Add(key, value);
-                }
+                perHandlerSettings.Add(key, value);
+            }
 
-                settings.Settings = perHandlerSettings;
-            // }
+            settings.Settings = perHandlerSettings;
 
             return settings;
         }
 
+        /// <summary>
+        ///  Get the value of an attribute, and check if its overriding the default
+        /// </summary>
+        /// <remarks>
+        ///  Handlers can override default values in the settings, but if the handler value
+        ///  is the same as the default, we want to know - so when we save the settings we 
+        ///  don't create reduntant settings under a handler that match the default 
+        /// </remarks>
         private OverriddenValue<TObject> GetLocalValue<TObject>(XAttribute attribute, TObject defaultValue)
         {
             if (attribute == null)
@@ -251,6 +307,9 @@ namespace uSync8.BackOffice.Configuration
             return new OverriddenValue<TObject>(attribute.ValueOrDefault(defaultValue), true);
         }
 
+        /// <summary>
+        ///  Save a handler config back to the XElement node
+        /// </summary>
         public void SaveHandlerConfig(XElement node, HandlerSettings config, uSyncSettings globalSettings)
         {
             if (node == null) return;
@@ -293,6 +352,9 @@ namespace uSync8.BackOffice.Configuration
 
         #endregion
 
+        /// <summary>
+        ///  Locate the settings file and load it into an XElement
+        /// </summary>
         private XElement GetSettingsFile(bool loadIfBlank = false)
         {
             var filePath = Umbraco.Core.IO.IOHelper.MapPath(settingsFile);
@@ -328,6 +390,10 @@ namespace uSync8.BackOffice.Configuration
             return null;
         }
 
+        /// <summary>
+        ///  Save the settings node back to the disk.
+        /// </summary>
+        /// <param name="node"></param>
         private void SaveSettingsFile(XElement node)
         {
             var root = node.Parent;
@@ -344,11 +410,34 @@ namespace uSync8.BackOffice.Configuration
 
         #region extension settings 
 
+        /// <summary>
+        ///  Get a setting for an extension
+        /// </summary>
+        /// <param name="app">name of extension</param>
+        /// <param name="key">key value</param>
+        /// <param name="defaultValue">default value to use if setting is missing</param>
         public string GetExtensionSetting(string app, string key, string defaultValue)
         {
             return GetExtensionSetting<string>(app, key, defaultValue);
         }
 
+        /// <summary>
+        ///  Get a setting for an extension
+        /// </summary>
+        /// <remarks>
+        ///  Code will look for a section node based on the appName, then get the key from 
+        ///  within it. 
+        ///  
+        /// <code><![CDATA[
+        ///   <app>
+        ///     <key>value</key>
+        ///   </app>
+        /// ]]>
+        /// </code>
+        /// </remarks>
+        /// <param name="app">name of extension</param>
+        /// <param name="key">key value</param>
+        /// <param name="defaultValue">default value to use if setting is missing</param>
         public TObject GetExtensionSetting<TObject>(string app, string key, TObject defaultValue)
         {
             var node = GetSettingsFile();
@@ -362,6 +451,9 @@ namespace uSync8.BackOffice.Configuration
 
         }
 
+        /// <summary>
+        ///  Save an extension setting to disk.
+        /// </summary>
         public void SaveExtensionSetting<TObject>(string app, string key, TObject value)
         {
             var node = GetSettingsFile();
@@ -385,6 +477,9 @@ namespace uSync8.BackOffice.Configuration
             SaveSettingsFile(node);
         }
 
+        /// <summary>
+        ///  Flush the settings back to disk.
+        /// </summary>
         public void FlushSettings()
         {
             var node = GetSettingsFile();
@@ -395,6 +490,11 @@ namespace uSync8.BackOffice.Configuration
 
         #endregion
 
+
+        /// <summary>
+        ///  Gets a value from the web.config AppSettings if present, from uSync8.config if not.
+        /// </summary>
+        /// <param name="alias">setting alias (uSync. will be appended when looking in web.config)</param>
         private TObject ValueFromWebConfigOrDefault<TObject>(string alias, TObject defaultValue)
         {
             var result = ConfigurationManager.AppSettings[$"uSync.{alias.ToFirstUpper()}"];

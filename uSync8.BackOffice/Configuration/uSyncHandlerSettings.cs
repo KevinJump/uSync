@@ -6,6 +6,9 @@ using Umbraco.Core;
 
 namespace uSync8.BackOffice.Configuration
 {
+    /// <summary>
+    ///  Settings for each handler
+    /// </summary>
     [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
     public class HandlerSettings
     {
@@ -29,6 +32,9 @@ namespace uSync8.BackOffice.Configuration
             Enabled = enabled;
         }
 
+        /// <summary>
+        ///  Get a specific setting from the Settings collection for this handler.
+        /// </summary>
         public TResult GetSetting<TResult>(string key, TResult defaultValue)
         {
             if (this.Settings != null && this.Settings.ContainsKey(key))
