@@ -645,25 +645,20 @@ namespace uSync8.BackOffice.SyncHandlers
                     duplicateAction.DetailMessage = "uSync detected a duplicate actions, where am item will be both created and deleted.";
                     var details = new List<uSyncChange>();
 
-                    // add the delete message to the list of changes
-                    details.Add(new uSyncChange()
-                    {
-                        Change = ChangeDetailType.Delete,
-                        Name = $"Delete: {deleteAction.Name} ({Path.GetFileName(deleteAction.FileName)})",
-                        NewValue = deleteAction.FileName.Substring(folder.Length),
-                        Path = Path.GetFileName(deleteAction.FileName)
-                    });
+                    details.Add(uSyncChange.Delete(
+                        Path.GetFileName(deleteAction.FileName),
+                        $"Delete: {deleteAction.Name} ({Path.GetFileName(deleteAction.FileName)}",
+                        deleteAction.FileName.Substring(folder.Length)));
 
                     // add all the duplicates to the list of changes.
                     foreach (var dup in actions.Where(x => x.Change != ChangeType.Delete && DoActionsMatch(x, deleteAction)))
                     {
-                        details.Add(new uSyncChange()
-                        {
-                            Change = ChangeDetailType.Update,
-                            Name = $"{dup.Change}: {dup.Name} ({Path.GetFileName(dup.FileName)})",
-                            NewValue = dup.FileName.Substring(folder.Length),
-                            Path = Path.GetFileName(dup.FileName)
-                        });
+
+                        details.Add(uSyncChange.Update(
+                            Path.GetFileName(dup.FileName),
+                            $"{dup.Change}: {dup.Name} ({Path.GetFileName(dup.FileName)}",
+                            "",
+                            dup.FileName.Substring(folder.Length)));
                     }
 
                     duplicateAction.Details = details;
