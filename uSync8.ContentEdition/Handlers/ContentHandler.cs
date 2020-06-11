@@ -32,11 +32,11 @@ namespace uSync8.ContentEdition.Handlers
             IProfilingLogger logger,
             IContentService contentService,
             ISyncSerializer<IContent> serializer,
-            ISyncTracker<IContent> tracker,
+            SyncTrackerCollection trackers,
             AppCaches appCaches,
             SyncDependencyCollection checkers,
             SyncFileService syncFileService)
-            : base(entityService, logger, serializer, tracker, appCaches, checkers, syncFileService)
+            : base(entityService, logger, serializer, trackers, appCaches, checkers, syncFileService)
         {
             this.contentService = contentService;
 

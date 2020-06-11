@@ -38,7 +38,7 @@ namespace uSync8.BackOffice.SyncHandlers
         protected readonly IList<ISyncDependencyChecker<TObject>> checkers;
 
         protected readonly ISyncSerializer<TObject> serializer;
-        protected readonly ISyncTracker<TObject> tracker;
+        protected readonly IList<ISyncTracker<TObject>> trackers;
         protected readonly IAppPolicyCache runtimeCache;
 
         // handler things 
@@ -76,7 +76,7 @@ namespace uSync8.BackOffice.SyncHandlers
             ISyncTracker<TObject> tracker,
             AppCaches appCaches,
             SyncFileService syncFileService)
-        : this(entityService, logger, serializer, tracker, appCaches, Enumerable.Empty<ISyncDependencyChecker<TObject>>(), syncFileService) { }
+        : this(entityService, logger, serializer, tracker.AsEnumerableOfOne(), appCaches, Enumerable.Empty<ISyncDependencyChecker<TObject>>(), syncFileService) { }
 
         [Obsolete("Construct your handler using SyncDependencyCollection for better checker support")]
         public SyncHandlerBase(
@@ -87,7 +87,7 @@ namespace uSync8.BackOffice.SyncHandlers
             AppCaches appCaches,
             ISyncDependencyChecker<TObject> dependencyChecker,
             SyncFileService syncFileService)
-        : this(entityService, logger, serializer, tracker, appCaches, dependencyChecker.AsEnumerableOfOne(), syncFileService)
+        : this(entityService, logger, serializer, tracker.AsEnumerableOfOne(), appCaches, dependencyChecker.AsEnumerableOfOne(), syncFileService)
         { }
 
 
@@ -95,17 +95,17 @@ namespace uSync8.BackOffice.SyncHandlers
             IEntityService entityService,
             IProfilingLogger logger,
             ISyncSerializer<TObject> serializer,
-            ISyncTracker<TObject> tracker,
+            SyncTrackerCollection trackers,
             AppCaches appCaches,
             SyncDependencyCollection checkers,
             SyncFileService syncFileService)
-            : this(entityService, logger, serializer, tracker, appCaches, checkers.GetCheckers<TObject>(), syncFileService)
+            : this(entityService, logger, serializer, trackers.GetTrackers<TObject>(), appCaches, checkers.GetCheckers<TObject>(), syncFileService)
         { }
 
         public SyncHandlerBase(IEntityService entityService,
             IProfilingLogger logger,
             ISyncSerializer<TObject> serializer,
-            ISyncTracker<TObject> tracker,
+            IEnumerable<ISyncTracker<TObject>> trackers,
             AppCaches appCaches,
             IEnumerable<ISyncDependencyChecker<TObject>> checkers,
             SyncFileService syncFileService)
@@ -117,7 +117,7 @@ namespace uSync8.BackOffice.SyncHandlers
             this.entityService = entityService;
 
             this.serializer = serializer;
-            this.tracker = tracker;
+            this.trackers = trackers.ToList();
             this.checkers = checkers.ToList();
 
             this.syncFileService = syncFileService;
@@ -790,7 +790,7 @@ namespace uSync8.BackOffice.SyncHandlers
                 }
                 else if (action.Change > ChangeType.NoChange)
                 {
-                    action.Details = tracker.GetChanges(node);
+                    action.Details = GetTrackerChanges(node);
                     if (action.Change != ChangeType.Create && (action.Details == null || action.Details.Count() == 0))
                     {
                         action.Message = "Change details not calculated";
@@ -814,6 +814,12 @@ namespace uSync8.BackOffice.SyncHandlers
                     .ReportActionFail(Path.GetFileName(node.GetAlias()), $"format error {fex.Message}")
                     .AsEnumerableOfOne();
             }
+        }
+
+        private IEnumerable<uSyncChange> GetTrackerChanges(XElement node)
+        {
+            if (trackers == null) return Enumerable.Empty<uSyncChange>();
+            return trackers.SelectMany(x => x.GetChanges(node));
         }
 
         protected IEnumerable<uSyncAction> ReportItem(string file, HandlerSettings config)

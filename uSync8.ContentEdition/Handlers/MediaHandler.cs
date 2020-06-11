@@ -33,11 +33,11 @@ namespace uSync8.ContentEdition.Handlers
             IProfilingLogger logger,
             IMediaService mediaService,
             ISyncSerializer<IMedia> serializer,
-            ISyncTracker<IMedia> tracker,
+            SyncTrackerCollection trackers,
             AppCaches appCaches,
             SyncDependencyCollection checkers,
             SyncFileService syncFileService)
-            : base(entityService, logger, serializer, tracker, appCaches, checkers, syncFileService)
+            : base(entityService, logger, serializer, trackers, appCaches, checkers, syncFileService)
         {
             this.mediaService = mediaService;
             performDoubleLookup = UmbracoVersion.LocalVersion.Major != 8 || UmbracoVersion.LocalVersion.Minor < 4;
