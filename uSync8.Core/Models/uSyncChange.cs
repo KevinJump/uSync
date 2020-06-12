@@ -9,14 +9,14 @@ namespace uSync8.Core.Models
     [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
     public class uSyncChange
     {
-        public string Name { get; private set; }
-        public string Path { get; private set; }
+        public string Name { get; set; }
+        public string Path { get; set; }
 
-        public string OldValue { get; private set; }
-        public string NewValue { get; private set; }
+        public string OldValue { get; set; }
+        public string NewValue { get; set; }
 
         [JsonConverter(typeof(StringEnumConverter))]
-        public ChangeDetailType Change { get; private set; }
+        public ChangeDetailType Change { get; set; }
 
         public static uSyncChange Create(string path, string name, string newValue, bool useNew = true)
             => CreateChange(ChangeDetailType.Create, path, newValue, "", useNew ? newValue : "New property");
@@ -33,7 +33,7 @@ namespace uSync8.Core.Models
         public static uSyncChange Update<TObject>(string path, string name, TObject oldValue, TObject newValue)
             => Update(path, name, oldValue.ToString(), newValue.ToString());
 
-        private static uSyncChange CreateChange(ChangeDetailType change, string path, string name, string oldValue, string newValue)
+        public static uSyncChange CreateChange(ChangeDetailType change, string path, string name, string oldValue, string newValue)
             => new uSyncChange
             {
                 Change = change,

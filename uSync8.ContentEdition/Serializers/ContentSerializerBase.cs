@@ -19,6 +19,7 @@ using uSync8.Core;
 using uSync8.Core.Extensions;
 using uSync8.Core.Models;
 using uSync8.Core.Serialization;
+using static Umbraco.Core.Models.Property;
 
 namespace uSync8.ContentEdition.Serializers
 {
@@ -201,7 +202,6 @@ namespace uSync8.ContentEdition.Serializers
         /// </summary>
         protected virtual XElement SerializeProperties(TObject item, SyncSerializerOptions options)
         {
-
             var cultures = options.GetCultures();
             var segments = options.GetSegments();
             var includeDefaults = (cultures.Count == 0 && segments.Count == 0) || options.GetSetting("DefaultValues", false);
@@ -242,7 +242,7 @@ namespace uSync8.ContentEdition.Serializers
 
                     if (validNode)
                     {
-                        valueNode.Add(new XCData(GetExportValue(value.EditedValue, property.PropertyType, value.Culture, value.Segment)));
+                        valueNode.Add(new XCData(GetExportValue(GetPropertyValue(value), property.PropertyType, value.Culture, value.Segment)));
                         propertyNode.Add(valueNode);
                     }
                 }
@@ -265,6 +265,10 @@ namespace uSync8.ContentEdition.Serializers
 
             return node;
         }
+
+        // makes overridding for published way easier. 
+        protected virtual object GetPropertyValue(PropertyValue value)
+            => value.EditedValue;
 
         protected override SyncAttempt<TObject> CanDeserialize(XElement node, SyncSerializerOptions options)
         {
