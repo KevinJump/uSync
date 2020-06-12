@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Data.OleDb;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
+
+using Microsoft.Owin.Security.OAuth;
 
 using Umbraco.Core;
 using Umbraco.Core.Logging;
@@ -59,12 +62,32 @@ namespace uSync8.ContentEdition.Serializers
         /// <summary>
         ///  Initialize the XElement with the core Key, Name, Level values
         /// </summary>
-        protected virtual XElement InitializeNode(TObject item, string typeName)
+        protected virtual XElement InitializeNode(TObject item, string typeName, SyncSerializerOptions options)
         {
             var node = new XElement(this.ItemType,
                 new XAttribute("Key", item.Key),
                 new XAttribute("Alias", item.Name),
                 new XAttribute("Level", GetLevel(item)));
+
+            // are we only serizling some cultures ? 
+            var cultures = options.GetSetting("Cultures", "");
+            if (!string.IsNullOrWhiteSpace(cultures) && item.ContentType.VariesByCulture())
+            {
+                node.Add(new XAttribute("Cultures", cultures));
+            }
+
+            // are we only serizling some segments ? 
+            var segments = options.GetSetting("Segments", "");
+            if (!string.IsNullOrWhiteSpace(segments) && item.ContentType.Variations.VariesBySegment())
+            {
+                node.Add(new XAttribute("Segments", segments));
+            }
+
+            // are we including the default (not variant) values in the serialized result? 
+            if (options.GetSetting("DefaultValues", false) && !item.ContentType.VariesByNothing())
+            {
+                node.Add(new XAttribute("DefaultValues", true));
+            }
 
             return node;
         }
@@ -94,8 +117,10 @@ namespace uSync8.ContentEdition.Serializers
         /// <summary>
         ///  Serialize the Info - (Item Attributes) Node
         /// </summary>
-        protected virtual XElement SerializeInfo(TObject item)
+        protected virtual XElement SerializeInfo(TObject item, SyncSerializerOptions options)
         {
+            var activeCultures = options.GetCultures();
+
             var info = new XElement("Info");
 
             // find parent. 
@@ -125,11 +150,22 @@ namespace uSync8.ContentEdition.Serializers
             info.Add(new XElement("ContentType", item.ContentType.Alias));
             info.Add(new XElement("CreateDate", item.CreateDate.ToString("s")));
 
-            var title = new XElement("NodeName", new XAttribute("Default", item.Name));
-            foreach (var culture in item.AvailableCultures)
+            var title = new XElement("NodeName");
+
+            if (item.AvailableCultures.Count() == 0)
             {
-                title.Add(new XElement("Name", item.GetCultureName(culture),
-                    new XAttribute("Culture", culture)));
+                title.Add(new XAttribute("Default", item.Name));
+            }
+            else
+            {
+                foreach (var culture in item.AvailableCultures)
+                {
+                    if (activeCultures.IsValid(culture))
+                    {
+                        title.Add(new XElement("Name", item.GetCultureName(culture),
+                            new XAttribute("Culture", culture)));
+                    }
+                }
             }
             info.Add(title);
 
@@ -163,8 +199,13 @@ namespace uSync8.ContentEdition.Serializers
         /// <summary>
         ///  serialize all the properties for the item
         /// </summary>
-        protected virtual XElement SerializeProperties(TObject item)
+        protected virtual XElement SerializeProperties(TObject item, SyncSerializerOptions options)
         {
+
+            var cultures = options.GetCultures();
+            var segments = options.GetSegments();
+            var includeDefaults = (cultures.Count == 0 && segments.Count == 0) || options.GetSetting("DefaultValues", false);
+
             var node = new XElement("Properties");
 
             foreach (var property in item.Properties
@@ -179,22 +220,34 @@ namespace uSync8.ContentEdition.Serializers
                 foreach (var value in property.Values)
                 {
                     var valueNode = new XElement("Value");
-                    if (!string.IsNullOrWhiteSpace(value.Culture))
+
+                    // we add this value if a) Its not culture or segment, and we are including default values.
+                    var validNode =
+                        string.IsNullOrWhiteSpace(value.Culture)
+                        && string.IsNullOrWhiteSpace(value.Segment)
+                        && includeDefaults;
+
+                    // or b) it is a valid culture or segment for this export. 
+                    if (!string.IsNullOrWhiteSpace(value.Culture) && cultures.IsValid(value.Culture))
                     {
                         valueNode.Add(new XAttribute("Culture", value.Culture ?? string.Empty));
+                        validNode = true;
                     }
 
-                    if (!string.IsNullOrWhiteSpace(value.Segment))
+                    if (!string.IsNullOrWhiteSpace(value.Segment) && segments.IsValid(value.Segment))
                     {
                         valueNode.Add(new XAttribute("Segment", value.Segment ?? string.Empty));
+                        validNode = true;
                     }
 
-                    valueNode.Add(new XCData(GetExportValue(value.EditedValue, property.PropertyType, value.Culture, value.Segment)));
-                    // valueNode.Value = value.EditedValue?.ToString() ?? string.Empty;
-                    propertyNode.Add(valueNode);
+                    if (validNode)
+                    {
+                        valueNode.Add(new XCData(GetExportValue(value.EditedValue, property.PropertyType, value.Culture, value.Segment)));
+                        propertyNode.Add(valueNode);
+                    }
                 }
 
-                if (property.Values == null || property.Values.Count == 0)
+                if (property.Values == null || property.Values.Count == 0 && includeDefaults)
                 {
                     // add a blank one, for change clarity
                     // we do it like this because then it doesn't get collapsed in the XML
@@ -204,15 +257,19 @@ namespace uSync8.ContentEdition.Serializers
                     propertyNode.Add(emptyValue);
                 }
 
-                node.Add(propertyNode);
+                if (propertyNode.HasElements)
+                {
+                    node.Add(propertyNode);
+                }
             }
 
             return node;
         }
 
-        protected override SyncAttempt<TObject> CanDeserialize(XElement node, SerializerFlags flags)
+        protected override SyncAttempt<TObject> CanDeserialize(XElement node, SyncSerializerOptions options)
         {
-            if (flags.HasFlag(SerializerFlags.FailMissingParent))
+           
+            if (options.FailOnMissingParent)
             {
                 // check the parent exists. 
                 if (!this.HasParentItem(node))
@@ -224,7 +281,7 @@ namespace uSync8.ContentEdition.Serializers
             return SyncAttempt<TObject>.Succeed("No check", ChangeType.NoChange);
         }
 
-        protected virtual Attempt<string> DeserializeBase(TObject item, XElement node)
+        protected virtual Attempt<string> DeserializeBase(TObject item, XElement node, SyncSerializerOptions options)
         {
             if (node == null || node.Element("Info") == null) return Attempt.Fail("Missing Node info XML Invalid");
             var info = node.Element("Info");
@@ -295,12 +352,12 @@ namespace uSync8.ContentEdition.Serializers
                 item.CreateDate = createDate;
             }
 
-            DeserializeName(item, node);
+            DeserializeName(item, node, options);
 
             return Attempt.Succeed("Info Deserialized");
         }
 
-        protected Attempt<TObject> DeserializeName(TObject item, XElement node)
+        protected Attempt<TObject> DeserializeName(TObject item, XElement node, SyncSerializerOptions options)
         {
             var nameNode = node.Element("Info")?.Element("NodeName");
             if (nameNode == null)
@@ -310,26 +367,39 @@ namespace uSync8.ContentEdition.Serializers
             if (name != string.Empty)
                 item.Name = name;
 
-            foreach (var cultureNode in nameNode.Elements("Name"))
+            if (nameNode.HasElements)
             {
-                var culture = cultureNode.Attribute("Culture").ValueOrDefault(string.Empty);
-                if (culture == string.Empty) continue;
+                var activeCultures = options.GetDeserializedCultures(node);
 
-                var cultureName = cultureNode.ValueOrDefault(string.Empty);
-                if (cultureName != string.Empty)
+                foreach (var cultureNode in nameNode.Elements("Name"))
                 {
-                    item.SetCultureName(cultureName, culture);
-                }
-            }
+                    var culture = cultureNode.Attribute("Culture").ValueOrDefault(string.Empty);
+                    if (string.IsNullOrEmpty(culture)) continue;
 
+                    if (activeCultures.IsValid(culture))
+                    {
+                        var cultureName = cultureNode.ValueOrDefault(string.Empty);
+                        if (!string.IsNullOrEmpty(cultureName))
+                        {
+                            item.SetCultureName(cultureName, culture);
+                        }
+                    }
+                }
+
+            }
             CleanCaches(item.Id);
 
             return Attempt.Succeed(item);
         }
 
-        protected Attempt<TObject, String> DeserializeProperties(TObject item, XElement node)
+        /// <summary>
+        ///  takes properties from the xml and set them on the item.
+        /// </summary>
+        protected Attempt<TObject, String> DeserializeProperties(TObject item, XElement node, SyncSerializerOptions options)
         {
             string errors = "";
+
+            var activeCultures = options.GetDeserializedCultures(node);
 
             var properties = node.Element("Properties");
             if (properties == null || !properties.HasElements)
@@ -356,7 +426,7 @@ namespace uSync8.ContentEdition.Serializers
 
                         try
                         {
-                            if (!string.IsNullOrEmpty(culture))
+                            if (!string.IsNullOrEmpty(culture) && activeCultures.IsValid(culture))
                             {
                                 //
                                 // check the culture is something we should and can be setting.
@@ -587,18 +657,19 @@ namespace uSync8.ContentEdition.Serializers
 
         protected abstract TObject FindItem(int id);
 
+        /// <summary>
+        /// Find by Alias 
+        /// </summary>
+        /// <remarks>
+        /// We can't relaibly find by alias for content - because names can be the same
+        /// across the content treee. but we should have overridden all classes that call this 
+        /// function above.
+        /// </remarks>
         protected override TObject FindItem(string alias)
-        {
-            // we can't relaibly do this - because names can be the same
-            // across the content treee. but we should have overridden all classes that call this 
-            // function above.
-            return default(TObject);
-        }
+            => default(TObject);
 
         protected virtual TObject FindItem(string alias, Guid parent)
-        {
-            return FindItem(alias, FindItem(parent));
-        }
+            => FindItem(alias, FindItem(parent));
 
         protected virtual TObject FindItem(string alias, TObject parent)
         {
@@ -725,6 +796,46 @@ namespace uSync8.ContentEdition.Serializers
 
             // clean the name cache for this id.
             nameCache.Remove(id);
+        }
+
+        /// <summary>
+        ///  IsCurrent Checker 
+        /// </summary>
+        /// <remarks>
+        ///  We have overridden the base IsCurrent checker, to make sure we add
+        ///  the cultures/segments settings that might be in a node to the serialization.
+        ///  
+        ///  this means if a node is marked with an attribute as a single culture
+        ///  we only check it against our internal version with that culture.
+        /// </remarks>
+        public override ChangeType IsCurrent(XElement node, SyncSerializerOptions options)
+        {
+            var nodeCultures = node.GetCultures();
+
+            if (!string.IsNullOrEmpty(nodeCultures))
+            {
+                // workout which of the cultures on the node, are in our settings
+                // (if its blank then we mean all)
+                var cultureList = nodeCultures.ToDelimitedList();
+                var avalibleCultures = options.GetCultures();
+                var validCultures = cultureList.Where(x => avalibleCultures.IsValid(x));
+
+                if (validCultures.Any())
+                {
+                    // make a copy of the options (with a new dictionary of settings).
+                    var nodeOptions = new SyncSerializerOptions(options.Flags, new Dictionary<string, string>(options.Settings));
+                    nodeOptions.Settings["Cultures "] = string.Join(",", validCultures);
+
+                    if (node.Attribute("DefaultValues").ValueOrDefault(false))
+                    {
+                        nodeOptions.Settings["DefaultValues"] = "true";
+                    }
+
+                    return base.IsCurrent(node, nodeOptions);
+                }
+            }
+
+            return base.IsCurrent(node, options);
         }
     }
 }

@@ -251,6 +251,7 @@
     <Compile Include="Checkers\DomainChecker.cs" />
     <Compile Include="Checkers\MediaChecker.cs" />
     <Compile Include="Checkers\RelationTypeChecker.cs" />
+    <Compile Include="Extensions\PublishResultExtensions.cs" />
     <Compile Include="Handlers\ContentHandler.cs" />
     <Compile Include="Handlers\ContentHandlerBase.cs" />
     <Compile Include="Handlers\ContentTemplateHandler.cs" />

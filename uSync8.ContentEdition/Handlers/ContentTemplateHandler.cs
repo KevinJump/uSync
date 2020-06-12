@@ -10,6 +10,7 @@ using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
 using uSync8.BackOffice.SyncHandlers;
 using uSync8.ContentEdition.Serializers;
+using uSync8.Core.Dependency;
 using uSync8.Core.Tracking;
 
 using static Umbraco.Core.Constants;
@@ -30,9 +31,10 @@ namespace uSync8.ContentEdition.Handlers
             AppCaches appCaches,
             ContentTemplateSerializer serializer, // concrete because we want to make sure we get the blueprint one.
             SyncTrackerCollection trackers,
+            SyncDependencyCollection checkers,
             SyncFileService syncFileService,
             IContentService contentService)
-            : base(entityService, logger, appCaches, serializer, trackers, null, syncFileService)
+            : base(entityService, logger, appCaches, serializer, trackers, checkers, syncFileService)
         {
             this.contentService = contentService;
         }

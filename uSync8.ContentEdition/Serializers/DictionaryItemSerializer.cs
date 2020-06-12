@@ -25,7 +25,7 @@ namespace uSync8.ContentEdition.Serializers
             this.localizationService = localizationService;
         }
 
-        protected override SyncAttempt<IDictionaryItem> DeserializeCore(XElement node)
+        protected override SyncAttempt<IDictionaryItem> DeserializeCore(XElement node, SyncSerializerOptions options)
         {
             var item = FindItem(node);
 
@@ -98,7 +98,7 @@ namespace uSync8.ContentEdition.Serializers
             // localizationService.Save(item);
         }
 
-        protected override SyncAttempt<XElement> SerializeCore(IDictionaryItem item)
+        protected override SyncAttempt<XElement> SerializeCore(IDictionaryItem item, SyncSerializerOptions options)
         {
             var node = InitializeBaseNode(item, item.ItemKey, GetLevel(item));
 

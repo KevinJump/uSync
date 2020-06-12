@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Umbraco.Core;
-using Umbraco.Core.Models;
+﻿using Umbraco.Core;
 using Umbraco.Core.Composing;
+using Umbraco.Core.Models;
+
+using uSync8.Core.DataTypes;
+using uSync8.Core.Dependency;
 using uSync8.Core.Serialization;
 using uSync8.Core.Serialization.Serializers;
 using uSync8.Core.Tracking;
-using uSync8.Core.Tracking.Impliment;
-using uSync8.Core.DataTypes;
-using uSync8.Core.Dependency;
 
 namespace uSync8.Core
 {
@@ -39,6 +34,7 @@ namespace uSync8.Core
             composition.Register<ISyncSerializer<ILanguage>, LanguageSerializer>();
             composition.Register<ISyncSerializer<IMacro>, MacroSerializer>();
             composition.Register<ISyncSerializer<IDataType>, DataTypeSerializer>();
+
 
             // the trackers, allow us to be more nuanced in tracking changes, should
             // mean change messages are better. 

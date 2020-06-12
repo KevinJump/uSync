@@ -35,14 +35,14 @@ namespace uSync8.ContentEdition.Serializers
             this.contentTypeService = contentTypeService;
         }
 
-        protected override XElement SerializeInfo(IContent item)
+        protected override XElement SerializeInfo(IContent item, SyncSerializerOptions options)
         {
-            var info = base.SerializeInfo(item);
+            var info = base.SerializeInfo(item, options);
             info.Add(new XElement("IsBlueprint", item.Blueprint));
             return info;
         }
 
-        protected override SyncAttempt<IContent> DeserializeCore(XElement node)
+        protected override SyncAttempt<IContent> DeserializeCore(XElement node, SyncSerializerOptions options)
         {
             var item = FindOrCreate(node);
             if (item.Trashed)
@@ -56,7 +56,7 @@ namespace uSync8.ContentEdition.Serializers
 
             item.Blueprint = true;
 
-            DeserializeBase(item, node);
+            DeserializeBase(item, node, options);
 
             // contentService.SaveBlueprint(item);
 
@@ -121,10 +121,10 @@ namespace uSync8.ContentEdition.Serializers
             return new Content(alias, -1, contentType);
         }
 
-        protected override Attempt<string> DoSaveOrPublish(IContent item, XElement node)
+        protected override Attempt<string> DoSaveOrPublish(IContent item, XElement node, SyncSerializerOptions options)
         {
-            contentService.SaveBlueprint(item);
-            return Attempt.Succeed<string>("blueprint saved");
+            this.SaveItem(item);
+            return Attempt.Succeed("blueprint saved");
         }
 
         protected override void SaveItem(IContent item)

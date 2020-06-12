@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 
+using Lucene.Net.Search.Spans;
+
 using Umbraco.Core;
 using Umbraco.Core.Configuration;
 using Umbraco.Core.Logging;
@@ -19,12 +21,12 @@ using uSync8.Core.Serialization;
 namespace uSync8.ContentEdition.Serializers
 {
     [SyncSerializer("5CB57139-8AF7-4813-95AD-C075D74636C2", "ContentSerializer", uSyncConstants.Serialization.Content)]
-    public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerializer<IContent>
+    public class ContentSerializer : ContentSerializerBase<IContent>, ISyncOptionsSerializer<IContent>
     {
         protected readonly IContentService contentService;
         protected readonly IFileService fileService;
 
-        private bool performDoubleLookup; 
+        private bool performDoubleLookup;
 
         public ContentSerializer(
             IEntityService entityService,
@@ -46,13 +48,11 @@ namespace uSync8.ContentEdition.Serializers
 
         #region Serialization
 
-        protected override SyncAttempt<XElement> SerializeCore(IContent item)
+        protected override SyncAttempt<XElement> SerializeCore(IContent item, SyncSerializerOptions options)
         {
-            var node = InitializeNode(item, item.ContentType.Alias);
-
-            var info = SerializeInfo(item);
-
-            var properties = SerializeProperties(item);
+            var node = InitializeNode(item, item.ContentType.Alias, options);
+            var info = SerializeInfo(item, options);
+            var properties = SerializeProperties(item, options);
 
             node.Add(info);
             node.Add(properties);
@@ -60,11 +60,11 @@ namespace uSync8.ContentEdition.Serializers
             return SyncAttempt<XElement>.Succeed(item.Name, node, typeof(IContent), ChangeType.Export);
         }
 
-        protected override XElement SerializeInfo(IContent item)
+        protected override XElement SerializeInfo(IContent item, SyncSerializerOptions options)
         {
-            var info = base.SerializeInfo(item);
+            var info = base.SerializeInfo(item, options);
 
-            info.Add(SerailizePublishedStatus(item));
+            info.Add(SerailizePublishedStatus(item, options));
             info.Add(SerializeSchedule(item));
             info.Add(SerializeTemplate(item));
 
@@ -86,13 +86,25 @@ namespace uSync8.ContentEdition.Serializers
             return new XElement("Template");
         }
 
-        private XElement SerailizePublishedStatus(IContent item)
+        private XElement SerailizePublishedStatus(IContent item, SyncSerializerOptions options)
         {
-            var published = new XElement("Published", new XAttribute("Default", item.Published));
-            foreach (var culture in item.AvailableCultures.OrderBy(x => x))
+            var activeCultures = options.GetCultures();
+
+            var published = new XElement("Published");
+            if (item.AvailableCultures.Count() == 0)
             {
-                published.Add(new XElement("Published", item.IsCulturePublished(culture),
-                    new XAttribute("Culture", culture)));
+                published.Add(new XAttribute("Default", item.Published));
+            }
+            else
+            {
+                foreach (var culture in item.AvailableCultures.OrderBy(x => x))
+                {
+                    if (activeCultures.IsValid(culture))
+                    {
+                        published.Add(new XElement("Published", item.IsCulturePublished(culture),
+                            new XAttribute("Culture", culture)));
+                    }
+                }
             }
             return published;
         }
@@ -120,12 +132,11 @@ namespace uSync8.ContentEdition.Serializers
 
         #region Deserialization
 
-        protected override SyncAttempt<IContent> DeserializeCore(XElement node)
+        protected override SyncAttempt<IContent> DeserializeCore(XElement node, SyncSerializerOptions options)
         {
-         
             var item = FindOrCreate(node);
 
-            DeserializeBase(item, node);
+            DeserializeBase(item, node, options);
             DeserializeTemplate(item, node);
 
             return SyncAttempt<IContent>.Succeed(
@@ -163,9 +174,9 @@ namespace uSync8.ContentEdition.Serializers
         }
 
 
-        public override SyncAttempt<IContent> DeserializeSecondPass(IContent item, XElement node, SerializerFlags flags)
+        public override SyncAttempt<IContent> DeserializeSecondPass(IContent item, XElement node, SyncSerializerOptions options)
         {
-            var attempt = DeserializeProperties(item, node);
+            var attempt = DeserializeProperties(item, node, options);
             if (!attempt.Success)
             {
                 return SyncAttempt<IContent>.Fail(item.Name, ChangeType.ImportFail, attempt.Exception);
@@ -181,7 +192,7 @@ namespace uSync8.ContentEdition.Serializers
 
             // published status
             // this does the last save and publish
-            var saveAttempt = DoSaveOrPublish(item, node);
+            var saveAttempt = DoSaveOrPublish(item, node, options);
 
             if (saveAttempt.Success)
             {
@@ -208,7 +219,7 @@ namespace uSync8.ContentEdition.Serializers
             }
         }
 
-        protected virtual Attempt<string> DoSaveOrPublish(IContent item, XElement node)
+        protected virtual Attempt<string> DoSaveOrPublish(IContent item, XElement node, SyncSerializerOptions options)
         {
             var publishedNode = node.Element("Info")?.Element("Published");
             if (publishedNode != null)
@@ -216,7 +227,12 @@ namespace uSync8.ContentEdition.Serializers
                 if (publishedNode.HasElements)
                 {
                     // culture based publishing.
-                    var publishedCultures = new List<string>();
+                    //
+                    var cultures = options.GetDeserializedCultures(node);
+                    var unpublishMissingCultures = cultures.Count > 0;
+
+                    var cultureStatuses = new Dictionary<string, bool>();
+
                     foreach (var culturePublish in publishedNode.Elements("Published"))
                     {
                         var culture = culturePublish.Attribute("Culture").ValueOrDefault(string.Empty);
@@ -224,13 +240,17 @@ namespace uSync8.ContentEdition.Serializers
 
                         if (!string.IsNullOrWhiteSpace(culture) && status)
                         {
-                            publishedCultures.Add(culture);
+                            if (cultures.IsValid(culture))
+                            {
+                                cultureStatuses[culture] = status;
+                            }
                         }
                     }
 
-                    if (publishedCultures.Count > 0)
+                    if (cultureStatuses.Count > 0)
                     {
-                        return PublishItem(item, publishedCultures.ToArray());
+                        return PublishItem(item, cultureStatuses, unpublishMissingCultures);
+                        // return PublishItem(item, publishedCultures.ToArray());
                     }
                 }
                 else
@@ -238,7 +258,7 @@ namespace uSync8.ContentEdition.Serializers
                     // default publish the lot. 
                     if (publishedNode.Attribute("Default").ValueOrDefault(false))
                     {
-                        return PublishItem(item, null);
+                        return PublishItem(item);
                     }
                     else if (item.Published)
                     {
@@ -259,32 +279,17 @@ namespace uSync8.ContentEdition.Serializers
             // return Attempt.Fail("Save Failed " + result.EventMessages);
         }
 
-        private Attempt<string> PublishItem(IContent item, string[] cultures)
+        /// <summary>
+        ///  Publish a content item.
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        private Attempt<string> PublishItem(IContent item)
         {
             try
             {
-                PublishResult result;
-                if (cultures != null)
-                {
-                    result = contentService.SaveAndPublish(item, cultures);
-                    UnpublishCultures(item, cultures);
-                }
-                else
-                {
-                    result = contentService.SaveAndPublish(item);
-                }
-
-                if (result.Success)
-                    return Attempt.Succeed("Published");
-
-                var messages = "";
-                if (result.EventMessages.Count > 0) 
-                {
-                    messages = string.Join(": ", 
-                        result.EventMessages.GetAll().Select(x => $"{x.Category}: {x.Message}"));
-                }
-
-                return Attempt.Fail($"Publish Failed : {messages}<br/>");
+                var result = contentService.SaveAndPublish(item);
+                return result.ToAttempt();
             }
             catch (ArgumentNullException ex)
             {
@@ -296,18 +301,68 @@ namespace uSync8.ContentEdition.Serializers
         }
 
         /// <summary>
-        ///  unpublish any cultures that are marked as published, in umbraco but are not published
-        ///  in our *.config file.
+        ///  Publish/unpublish Specified cultures for an item, and optionally unpublish missing cultures
         /// </summary>
         /// <param name="item"></param>
-        /// <param name="publishedCultures"></param>
-        private void UnpublishCultures(IContent item, string[] publishedCultures)
+        /// <param name="cultures"></param>
+        /// <param name="unpublishMissing"></param>
+        /// <returns></returns>
+        private Attempt<string> PublishItem(IContent item, IDictionary<string, bool> cultures, bool unpublishMissing)
         {
-            var cultures = item.PublishedCultures.Where(x => !publishedCultures.InvariantContains(x)).ToArray();
-            if (cultures != null && cultures.Length > 0)
+            if (cultures == null) return PublishItem(item);
+
+            try
             {
-                foreach (var culture in cultures)
+                var publishedCultures = cultures
+                    .Where(x => x.Value == true)
+                    .Select(x => x.Key)
+                    .ToArray();
+
+                var result = contentService.SaveAndPublish(item, publishedCultures);
+
+                if (result.Success)
                 {
+                    var unpublishedCultures = cultures
+                        .Where(x => x.Value == false)
+                        .Select(x => x.Key)
+                        .ToArray();
+
+                    foreach (var culture in unpublishedCultures)
+                    {
+                        contentService.Unpublish(item, culture);
+                    }
+
+                    if (unpublishMissing)
+                        UnpublishMissingCultures(item, cultures.Select(x => x.Key).ToArray());
+                }
+
+
+                return result.ToAttempt();
+            }
+            catch (ArgumentNullException ex)
+            {
+                // we can get thrown a null argument exception by the notifer, 
+                // which is non critical! but we are ignoring this error. ! <= 8.1.5
+                if (!ex.Message.Contains("siteUri")) throw ex;
+                return Attempt.Succeed($"Published");
+            }
+        }
+
+        /// <summary>
+        ///  Unpublish any cultures that are not explicity mentiond in the culture list.
+        /// </summary>
+        private void UnpublishMissingCultures(IContent item, string[] allCultures)
+        {
+            var missingCultures = item
+                .PublishedCultures
+                .Where(x => !allCultures.InvariantContains(x))
+                .ToArray();
+
+            if (missingCultures != null && missingCultures.Length > 0)
+            {
+                foreach (var culture in missingCultures)
+                {
+                    logger.Debug<ContentSerializer>("Unpublishing culture not defined in config file");
                     contentService.Unpublish(item, culture);
                 }
             }

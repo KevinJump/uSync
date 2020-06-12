@@ -1,8 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Configuration;
+using System.Xml.Linq;
+
 using NPoco.Expressions;
 using Superpower.Model;
 using Umbraco.Core;
+
+using uSync8.Core.Extensions;
 
 namespace uSync8.Core.Serialization
 {
@@ -69,6 +73,44 @@ namespace uSync8.Core.Serialization
             }
 
             return defaultValue;
+        }
+
+        /// <summary>
+        ///  Get the cultures defined in the settings.
+        /// </summary>
+        /// <returns></returns>
+        public IList<string> GetCultures() => GetSetting("Cultures", "").ToDelimitedList();
+
+        /// <summary>
+        ///  Gets the cultures that can be de-serialized from this node.
+        /// </summary>
+        /// <remarks>
+        ///  If a node has 'Cultures' set on the top node, then its only a partial sync
+        ///  so we need to treat all the functions like this is set on the handler..
+        /// </remarks>
+        public IList<string> GetDeserializedCultures(XElement node)
+        {
+            var nodeCultures = node.GetCultures();
+            if (!string.IsNullOrEmpty(nodeCultures)) return nodeCultures.ToDelimitedList();
+            return GetCultures();
+        }
+
+        public IList<string> GetSegments()
+            => GetSetting("Segments", "").ToDelimitedList();
+
+        public string SwapValue(string key, string newValue)
+        {
+            string oldValue = null;
+
+            if (!this.Settings.ContainsKey(key))
+                oldValue = this.Settings[key];
+
+            if (newValue == null)
+                this.Settings.Remove(key);
+            else 
+                this.Settings[key] = newValue;
+
+            return oldValue;
         }
     }
 }
