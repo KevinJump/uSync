@@ -27,12 +27,12 @@ namespace uSync8.ContentEdition.Handlers
         public ContentTemplateHandler(
             IEntityService entityService,
             IProfilingLogger logger,
-            IContentService contentService,
-            ContentTemplateSerializer serializer, // concreate because we want to make sure we get the blueprint one.
-            ISyncTracker<IContent> tracker,
             AppCaches appCaches,
-            SyncFileService syncFileService)
-            : base(entityService, logger, serializer, tracker, appCaches, syncFileService)
+            ContentTemplateSerializer serializer, // concrete because we want to make sure we get the blueprint one.
+            SyncTrackerCollection trackers,
+            SyncFileService syncFileService,
+            IContentService contentService)
+            : base(entityService, logger, appCaches, serializer, trackers, null, syncFileService)
         {
             this.contentService = contentService;
         }

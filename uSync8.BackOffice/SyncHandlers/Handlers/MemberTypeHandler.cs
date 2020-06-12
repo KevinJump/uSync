@@ -27,13 +27,13 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
         public MemberTypeHandler(
             IEntityService entityService,
             IProfilingLogger logger,
-            IMemberTypeService memberTypeService,
+            AppCaches appCaches,
             ISyncSerializer<IMemberType> serializer,
             SyncTrackerCollection trackers,
-            AppCaches appCaches,
             SyncDependencyCollection checkers,
-            SyncFileService syncFileService)
-            : base(entityService, logger, serializer, trackers, appCaches, checkers, syncFileService)
+            SyncFileService syncFileService,
+            IMemberTypeService memberTypeService)
+            : base(entityService, logger, appCaches, serializer, trackers, checkers, syncFileService)
         {
             this.memberTypeService = memberTypeService;
 

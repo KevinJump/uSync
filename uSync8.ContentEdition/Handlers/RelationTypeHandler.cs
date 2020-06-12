@@ -37,14 +37,14 @@ namespace uSync8.ContentEdition.Handlers
 
         public RelationTypeHandler(
             IEntityService entityService, 
-            IRelationService relationService,
-            IProfilingLogger logger, 
+            IProfilingLogger logger,
+            AppCaches appCaches,
             ISyncSerializer<IRelationType> serializer, 
             SyncTrackerCollection trackers, 
-            AppCaches appCaches, 
             SyncDependencyCollection checkers, 
-            SyncFileService syncFileService) 
-            : base(entityService, logger, serializer, trackers, appCaches, checkers, syncFileService)
+            SyncFileService syncFileService,
+            IRelationService relationService) 
+            : base(entityService, logger, appCaches, serializer, trackers, checkers, syncFileService)
         {
             this.relationService = relationService;
         }

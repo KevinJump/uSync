@@ -49,16 +49,16 @@ namespace uSync8.BackOffice.SyncHandlers
         protected SyncHandlerContainerBase(
             IEntityService entityService,
             IProfilingLogger logger,
+            AppCaches appCaches,
             ISyncSerializer<TObject> serializer,
             SyncTrackerCollection trackers,
-            AppCaches appCaches,
             SyncDependencyCollection checkers,
             SyncFileService syncFileService)
-            : base(entityService, logger, serializer, trackers, appCaches, checkers, syncFileService)
+            : base(entityService, logger, appCaches, serializer, trackers, checkers, syncFileService)
         {
         }
 
-        [Obsolete("Construct your handler using SyncDependencyCollection for better checker support")]
+        [Obsolete("Construct your handler using the tracker & Dependecy collections for better checker support")]
         protected SyncHandlerContainerBase(
             IEntityService entityService,
             IProfilingLogger logger,

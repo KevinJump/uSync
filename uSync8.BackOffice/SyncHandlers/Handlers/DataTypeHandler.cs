@@ -28,14 +28,14 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 
         public DataTypeHandler(
             IEntityService entityService,
-            IDataTypeService dataTypeService,
             IProfilingLogger logger,
+            AppCaches appCaches,
             ISyncSerializer<IDataType> serializer,
             SyncDependencyCollection checkers,
             SyncTrackerCollection trackers,
-            AppCaches appCaches,
-            SyncFileService syncFileService)
-            : base(entityService, logger, serializer, trackers, appCaches, checkers, syncFileService)
+            SyncFileService syncFileService,
+            IDataTypeService dataTypeService)
+            : base(entityService, logger, appCaches, serializer, trackers, checkers, syncFileService)
         {
             this.dataTypeService = dataTypeService;
         }

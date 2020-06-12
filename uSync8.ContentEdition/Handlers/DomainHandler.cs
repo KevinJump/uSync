@@ -30,13 +30,13 @@ namespace uSync8.ContentEdition.Handlers
 
         public DomainHandler(IEntityService entityService,
             IProfilingLogger logger,
-            IDomainService domainService,
+            AppCaches appCaches,
             ISyncSerializer<IDomain> serializer,
             SyncTrackerCollection trackers,
-            AppCaches appCaches,
             SyncDependencyCollection checkers,
-            SyncFileService syncFileService)
-            : base(entityService, logger, serializer, trackers, appCaches, checkers, syncFileService)
+            SyncFileService syncFileService,
+            IDomainService domainService)
+            : base(entityService, logger, appCaches, serializer, trackers, checkers, syncFileService)
         {
             this.domainService = domainService;
         }
