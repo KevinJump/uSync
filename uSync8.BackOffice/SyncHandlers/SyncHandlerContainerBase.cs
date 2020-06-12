@@ -50,11 +50,11 @@ namespace uSync8.BackOffice.SyncHandlers
             IEntityService entityService,
             IProfilingLogger logger,
             ISyncSerializer<TObject> serializer,
-            ISyncTracker<TObject> tracker,
+            SyncTrackerCollection trackers,
             AppCaches appCaches,
             SyncDependencyCollection checkers,
             SyncFileService syncFileService)
-            : base(entityService, logger, serializer, tracker, appCaches, checkers, syncFileService)
+            : base(entityService, logger, serializer, trackers, appCaches, checkers, syncFileService)
         {
         }
 

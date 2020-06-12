@@ -9,6 +9,10 @@ using uSync8.Core.Models;
 
 namespace uSync8.Core.Tracking
 {
+    public interface ISyncTrackerBase
+    {
+
+    }
     /// <summary>
     ///  Sync Tracker - Returns a list of changes for a given XML Element 
     /// </summary>
@@ -16,7 +20,7 @@ namespace uSync8.Core.Tracking
     ///  Tracking are expensive operations, so we only call tracker when 
     ///  we know that there are changes (through the serializers IsCurrent method
     /// </remarks>
-    public interface ISyncTracker<TObject>
+    public interface ISyncTracker<TObject> : ISyncTrackerBase
         where TObject : IEntity
     {
         /// <summary>

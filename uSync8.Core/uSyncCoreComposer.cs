@@ -42,30 +42,13 @@ namespace uSync8.Core
 
             // the trackers, allow us to be more nuanced in tracking changes, should
             // mean change messages are better. 
-            composition.Register<ISyncTracker<IContentType>, ContentTypeTracker>();
-            composition.Register<ISyncTracker<IMediaType>, MediaTypeTracker>();
-            composition.Register<ISyncTracker<IMemberType>, MemberTypeTracker>();
-            composition.Register<ISyncTracker<ITemplate>, TemplateTracker>();
-            composition.Register<ISyncTracker<ILanguage>, LanguageTracker>();
-            composition.Register<ISyncTracker<IMacro>, MacroTracker>();
-            composition.Register<ISyncTracker<IDataType>, DataTypeTracker>();
+            composition.WithCollectionBuilder<SyncTrackerCollectionBuilder>()
+                .Add(composition.TypeLoader.GetTypes<ISyncTrackerBase>());
 
             // load the dependency checkers from a collection
             // allows us to extend the dependency checks without changing the core. 
             composition.WithCollectionBuilder<SyncDependencyCollectionBuilder>()
                 .Add(composition.TypeLoader.GetTypes<ISyncDependencyItem>());
-
-            // the dependency checkers, they build up dependency trees for objects
-            // this might just merge into the serializers ?
-            /*
-            composition.Register<ISyncDependencyChecker<IContentType>, ContentTypeChecker>();
-            composition.Register<ISyncDependencyChecker<IMediaType>, MediaTypeChecker>();
-            composition.Register<ISyncDependencyChecker<IMemberType>, MemberTypeChecker>();
-            composition.Register<ISyncDependencyChecker<ITemplate>, TemplateChecker>();
-            composition.Register<ISyncDependencyChecker<ILanguage>, LanguageChecker>();
-            composition.Register<ISyncDependencyChecker<IMacro>, MacroChecker>();
-            composition.Register<ISyncDependencyChecker<IDataType>, DataTypeChecker>();
-            */
         }
     }
 }

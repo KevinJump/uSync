@@ -4,6 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using System.Xml.XPath;
+
+using AutoMapper.QueryableExtensions.Impl;
+
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
@@ -31,31 +34,15 @@ namespace uSync8.Core.Tracking
         public virtual IEnumerable<uSyncChange> GetChanges(XElement node)
         {
             if (serializer.IsEmpty(node))
-            {
                 return GetEmptyFileChanges(node).AsEnumerableOfOne();
-            }
 
             if (!serializer.IsValid(node))
-            {
-                // not valid 
-                return new uSyncChange()
-                {
-                    Change = ChangeDetailType.Error,
-                    Name = "Invalid File",
-                    OldValue = node.Name.LocalName
-                }.AsEnumerableOfOne(); ;
-            }
+                return uSyncChange.Error("", "Invalid File", node.Name.LocalName, "").AsEnumerableOfOne();
 
             var serializerOptions = new SyncSerializerOptions();
 
             if (IsItemCurrent(node, serializerOptions) == ChangeType.NoChange)
-            {
-                return new uSyncChange()
-                {
-                    Change = ChangeDetailType.NoChange,
-                    Name = node.GetAlias(),
-                }.AsEnumerableOfOne();
-            }
+                return uSyncChange.Error("", node.GetAlias(), "", "").AsEnumerableOfOne();
 
             var changes = TrackChanges();
 

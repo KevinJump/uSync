@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using System.Net.Configuration;
+
+using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 
@@ -7,65 +9,47 @@ namespace uSync8.Core.Models
     [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
     public class uSyncChange
     {
-        public string Name { get; set; }
-        public string Path { get; set; }
+        public string Name { get; private set; }
+        public string Path { get; private set; }
 
-        public string OldValue { get; set; }
-        public string NewValue { get; set; }
+        public string OldValue { get; private set; }
+        public string NewValue { get; private set; }
 
         [JsonConverter(typeof(StringEnumConverter))]
-        public ChangeDetailType Change { get; set; }
+        public ChangeDetailType Change { get; private set; }
 
         public static uSyncChange Create(string path, string name, string newValue, bool useNew = true)
-        {
-            return new uSyncChange()
-            {
-                Change = ChangeDetailType.Create,
-                Path = path,
-                Name = name,
-                OldValue = "",
-                NewValue = useNew ? newValue : "New Property"
-            };
-        }
+            => CreateChange(ChangeDetailType.Create, path, newValue, "", useNew ? newValue : "New property");
 
         public static uSyncChange Delete(string path, string name, string oldValue, bool useOld = true)
-        {
-            return new uSyncChange()
-            {
-                Change = ChangeDetailType.Delete,
-                Path = path,
-                Name = name,
-                OldValue = useOld ? oldValue : "Missing Property",
-                NewValue = ""
-            };
-        }
+            => CreateChange(ChangeDetailType.Delete, path, name, useOld ? oldValue : "Missing property", "");
 
         public static uSyncChange Update(string path, string name, string oldValue, string newValue)
-        {
-            return new uSyncChange()
-            {
-                Name = name,
-                Path = path,
-                Change = ChangeDetailType.Update,
-                NewValue = string.IsNullOrEmpty(newValue) ? "(Blank)" : newValue,
-                OldValue = string.IsNullOrEmpty(oldValue) ? "(Blank)" : oldValue
-            };
-        }
+            => CreateChange(ChangeDetailType.Update, path, name, oldValue, newValue);
+
+        public static uSyncChange Error(string path, string name, string oldValue, string newValue)
+            => CreateChange(ChangeDetailType.Error, path, name, oldValue, newValue);
 
         public static uSyncChange Update<TObject>(string path, string name, TObject oldValue, TObject newValue)
-        {
-            return Update(path, name, oldValue.ToString(), newValue.ToString());
-        }
+            => Update(path, name, oldValue.ToString(), newValue.ToString());
+
+        private static uSyncChange CreateChange(ChangeDetailType change, string path, string name, string oldValue, string newValue)
+            => new uSyncChange
+            {
+                Change = change,
+                Path = path,
+                Name = name,
+                NewValue = string.IsNullOrEmpty(newValue) ? "(Blank)" : newValue,
+                OldValue = string.IsNullOrEmpty(oldValue) ? "(Blank)" : newValue
+            };
 
         public static uSyncChange NoChange(string path, string name)
-        {
-            return new uSyncChange()
+            => new uSyncChange
             {
                 Name = name,
                 Path = path,
                 Change = ChangeDetailType.NoChange
             };
-        }
     }
 
     public enum ChangeDetailType

@@ -35,11 +35,11 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             IProfilingLogger logger,
             ILocalizationService localizationService,
             ISyncSerializer<ILanguage> serializer,
-            ISyncTracker<ILanguage> tracker,
+            SyncTrackerCollection trackers,
             AppCaches appCaches,
             SyncDependencyCollection checkers,
             SyncFileService syncFileService)
-            : base(entityService, logger, serializer, tracker, appCaches, checkers, syncFileService)
+            : base(entityService, logger, serializer, trackers, appCaches, checkers, syncFileService)
         {
             this.localizationService = localizationService;
         }

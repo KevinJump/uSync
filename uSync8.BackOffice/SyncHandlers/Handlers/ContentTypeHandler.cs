@@ -29,11 +29,11 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             IProfilingLogger logger,
             IContentTypeService contentTypeService,
             ISyncSerializer<IContentType> serializer,
-            ISyncTracker<IContentType> tracker,
+            SyncTrackerCollection trackers,
             AppCaches appCaches,
             SyncDependencyCollection checkers,
             SyncFileService fileService)
-            : base(entityService, logger, serializer, tracker, appCaches, checkers, fileService)
+            : base(entityService, logger, serializer, trackers, appCaches, checkers, fileService)
         {
             this.contentTypeService = contentTypeService;
         }

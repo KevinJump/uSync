@@ -212,6 +212,7 @@
     <Compile Include="Tracking\Impliment\TemplateTracker.cs" />
     <Compile Include="Tracking\ISyncTracker.cs" />
     <Compile Include="Tracking\SyncBaseTracker.cs" />
+    <Compile Include="Tracking\SyncTrackerCollection.cs" />
     <Compile Include="uSync8Core.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="uSyncConstants.cs" />
