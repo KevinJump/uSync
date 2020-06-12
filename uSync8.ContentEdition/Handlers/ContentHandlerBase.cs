@@ -54,23 +54,6 @@ namespace uSync8.ContentEdition.Handlers
             : base(entityService, logger, serializer, tracker, appCaches, checker, fileService)
         { }
 
-        protected virtual string GetItemMatchString(TObject item)
-        {
-            var itemPath = item.Level.ToString();
-            if (item.Trashed && serializer is ISyncContentSerializer<TObject> contentSerializer)
-            {
-                itemPath = contentSerializer.GetItemPath(item);
-            }
-            return $"{item.Name}_{itemPath}".ToLower();
-        }
-
-        protected virtual string GetXmlMatchString(XElement node)
-        {
-            var path = node.Element("Info")?.Element("Path").ValueOrDefault(node.GetLevel().ToString());
-            return $"{node.GetAlias()}_{path}".ToLower();
-        }
-
-
         /*
          *  Config options. 
          *    Include = Paths (comma seperated) (only include if path starts with one of these)
@@ -165,21 +148,42 @@ namespace uSync8.ContentEdition.Handlers
         protected override string CheckAndFixFileClash(string path, TObject item)
         {
             if (syncFileService.FileExists(path))
-            {
-                var itemKey = item.Key;
+            {              
                 var node = syncFileService.LoadXElement(path);
 
                 if (node == null) return path;
                 if (item.Key == node.GetKey()) return path;
-                if (GetXmlMatchString(node) == GetItemMatchString(item)) return path;
+                if (GetXmlSignatureString(node) == GetItemSignatureString(item)) return path;
 
-                // get here we have a clash, we should append something
-                var append = item.Key.ToShortKeyString(8); // (this is the shortened guid like media folders do)
+                // Get here we have a clash, we should append something
+                var append = item.Key.ToShortKeyString(8); // (this is the shortened guid like media folders do in v8)
                 return Path.Combine(Path.GetDirectoryName(path),
                     Path.GetFileNameWithoutExtension(path) + "_" + append + Path.GetExtension(path));
             }
 
             return path;
+        }
+
+        /// <summary>
+        ///  Generate a signiture for this item, that we can use for comparision
+        /// </summary>
+        protected virtual string GetItemSignatureString(TObject item)
+        {
+            var itemPath = item.Level.ToString();
+            if (item.Trashed && serializer is ISyncContentSerializer<TObject> contentSerializer)
+            {
+                itemPath = contentSerializer.GetItemPath(item);
+            }
+            return $"{item.Name}_{itemPath}".ToLower();
+        }
+
+        /// <summary>
+        ///  Generate a signiture for the xml node that we can use for comparison
+        /// </summary>
+        protected virtual string GetXmlSignatureString(XElement node)
+        {
+            var path = node.Element("Info")?.Element("Path").ValueOrDefault(node.GetLevel().ToString());
+            return $"{node.GetAlias()}_{path}".ToLower();
         }
 
     }
