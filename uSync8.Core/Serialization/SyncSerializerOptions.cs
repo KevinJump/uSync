@@ -22,15 +22,16 @@ namespace uSync8.Core.Serialization
             this.Flags = flags;
         }
 
-        public SyncSerializerOptions(Dictionary<string, string> Settings)
+        public SyncSerializerOptions(Dictionary<string, string> settings)
         {
-            this.Settings = Settings;
+            this.Settings = settings ?? new Dictionary<string, string>();
+            
         }
 
-        public SyncSerializerOptions(SerializerFlags flags, Dictionary<string, string> Settings)
+        public SyncSerializerOptions(SerializerFlags flags, Dictionary<string, string> settings)
+            : this(settings)
         {
             this.Flags = flags;
-            this.Settings = Settings;
         }
 
         /// <summary>

@@ -838,8 +838,9 @@ namespace uSync8.BackOffice.SyncHandlers
             }
             catch (Exception ex)
             {
+                logger.Warn(handlerType, ex, "Error generating report");
                 return uSyncActionHelper<TObject>
-                    .ReportActionFail(Path.GetFileName(file), $"Reporing error {ex.Message}")
+                    .ReportActionFail(Path.GetFileName(file), $"Reporting error {ex.Message}")
                     .AsEnumerableOfOne();
             }
 

@@ -827,7 +827,7 @@ namespace uSync8.ContentEdition.Serializers
                 if (validCultures.Any())
                 {
                     // make a copy of the options (with a new dictionary of settings).
-                    var nodeOptions = new SyncSerializerOptions(options.Flags, new Dictionary<string, string>(options.Settings));
+                    var nodeOptions = new SyncSerializerOptions(options.Flags, options.Settings);
                     nodeOptions.Settings["Cultures "] = string.Join(",", validCultures);
 
                     if (node.Attribute("DefaultValues").ValueOrDefault(false))
