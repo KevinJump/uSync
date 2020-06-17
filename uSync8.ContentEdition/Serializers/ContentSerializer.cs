@@ -235,7 +235,7 @@ namespace uSync8.ContentEdition.Serializers
 
                     foreach (var culturePublish in publishedNode.Elements("Published"))
                     {
-                        var culture = culturePublish.Attribute("Culture").ValueOrDefault(string.Empty);
+                        var culture = culturePublish.Attribute(uSyncConstants.CultureKey).ValueOrDefault(string.Empty);
                         var status = culturePublish.ValueOrDefault(false);
 
                         if (!string.IsNullOrWhiteSpace(culture) && status)

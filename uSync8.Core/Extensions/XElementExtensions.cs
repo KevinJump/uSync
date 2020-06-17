@@ -22,10 +22,10 @@ namespace uSync8.Core.Extensions
             => node.Attribute("Alias").ValueOrDefault(string.Empty);
 
         public static string GetCultures(this XElement node)
-            => node.Attribute("Cultures").ValueOrDefault(string.Empty);
+            => node.Attribute(uSyncConstants.CultureKey).ValueOrDefault(string.Empty);
 
         public static string GetSegments(this XElement node)
-            => node.Attribute("Segments").ValueOrDefault(string.Empty);
+            => node.Attribute(uSyncConstants.SegmentKey).ValueOrDefault(string.Empty);
             
 
         /// <summary>

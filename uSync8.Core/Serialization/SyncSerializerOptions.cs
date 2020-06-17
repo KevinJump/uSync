@@ -80,7 +80,7 @@ namespace uSync8.Core.Serialization
         ///  Get the cultures defined in the settings.
         /// </summary>
         /// <returns></returns>
-        public IList<string> GetCultures() => GetSetting("Cultures", "").ToDelimitedList();
+        public IList<string> GetCultures() => GetSetting(uSyncConstants.CultureKey, string.Empty).ToDelimitedList();
 
         /// <summary>
         ///  Gets the cultures that can be de-serialized from this node.
@@ -97,7 +97,7 @@ namespace uSync8.Core.Serialization
         }
 
         public IList<string> GetSegments()
-            => GetSetting("Segments", "").ToDelimitedList();
+            => GetSetting(uSyncConstants.SegmentKey, string.Empty).ToDelimitedList();
 
         public string SwapValue(string key, string newValue)
         {

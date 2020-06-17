@@ -39,7 +39,7 @@ namespace uSync8.Core.Tracking
             if (!serializer.IsValid(node))
                 return uSyncChange.Error("", "Invalid File", node.Name.LocalName, "").AsEnumerableOfOne();
 
-            var serializerOptions = new SyncSerializerOptions();
+            var serializerOptions = GetSerializerOptions(node);
 
             if (IsItemCurrent(node, serializerOptions) == ChangeType.NoChange)
                 return uSyncChange.Error("", node.GetAlias(), "", "").AsEnumerableOfOne();
@@ -58,6 +58,12 @@ namespace uSync8.Core.Tracking
 
             return Enumerable.Empty<uSyncChange>();
         }
+
+        /// <summary>
+        ///  get the serializer options based on the supplied xml node.
+        /// </summary>
+        protected virtual SyncSerializerOptions GetSerializerOptions(XElement node)
+            => new SyncSerializerOptions();
 
         private uSyncChange GetEmptyFileChanges(XElement node)
         {

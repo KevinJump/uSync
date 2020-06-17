@@ -796,7 +796,7 @@ namespace uSync8.BackOffice.SyncHandlers
                     }
                     else
                     {
-                        action.Message = $"{action.Change.ToString()}";
+                        action.Message = $"{action.Change}";
                     }
                     actions.Add(action);
                 }
@@ -818,7 +818,13 @@ namespace uSync8.BackOffice.SyncHandlers
         private IEnumerable<uSyncChange> GetTrackerChanges(XElement node)
         {
             if (trackers == null) return Enumerable.Empty<uSyncChange>();
-            return trackers.SelectMany(x => x.GetChanges(node));
+
+            List<uSyncChange> changes = new List<uSyncChange>();
+            foreach(var tracker in trackers)
+            {
+                changes.AddRange(tracker.GetChanges(node));
+            }
+            return changes;
         }
 
         protected IEnumerable<uSyncAction> ReportItem(string file, HandlerSettings config)

@@ -71,23 +71,23 @@ namespace uSync8.ContentEdition.Serializers
                 new XAttribute("Level", GetLevel(item)));
 
             // are we only serizling some cultures ? 
-            var cultures = options.GetSetting("Cultures", "");
+            var cultures = options.GetSetting(uSyncConstants.CultureKey, string.Empty);
             if (!string.IsNullOrWhiteSpace(cultures) && item.ContentType.VariesByCulture())
             {
-                node.Add(new XAttribute("Cultures", cultures));
+                node.Add(new XAttribute(uSyncConstants.CultureKey, cultures));
             }
 
             // are we only serizling some segments ? 
-            var segments = options.GetSetting("Segments", "");
+            var segments = options.GetSetting(uSyncConstants.SegmentKey, string.Empty);
             if (!string.IsNullOrWhiteSpace(segments) && item.ContentType.Variations.VariesBySegment())
             {
-                node.Add(new XAttribute("Segments", segments));
+                node.Add(new XAttribute(uSyncConstants.SegmentKey, segments));
             }
 
             // are we including the default (not variant) values in the serialized result? 
-            if (options.GetSetting("DefaultValues", false) && !item.ContentType.VariesByNothing())
+            if (options.GetSetting(uSyncConstants.DefaultsKey, false) && !item.ContentType.VariesByNothing())
             {
-                node.Add(new XAttribute("DefaultValues", true));
+                node.Add(new XAttribute(uSyncConstants.DefaultsKey, true));
             }
 
             return node;
@@ -204,7 +204,7 @@ namespace uSync8.ContentEdition.Serializers
         {
             var cultures = options.GetCultures();
             var segments = options.GetSegments();
-            var includeDefaults = (cultures.Count == 0 && segments.Count == 0) || options.GetSetting("DefaultValues", false);
+            var includeDefaults = (cultures.Count == 0 && segments.Count == 0) || options.GetSetting(uSyncConstants.DefaultsKey, false);
 
             var node = new XElement("Properties");
 
@@ -828,11 +828,11 @@ namespace uSync8.ContentEdition.Serializers
                 {
                     // make a copy of the options (with a new dictionary of settings).
                     var nodeOptions = new SyncSerializerOptions(options.Flags, options.Settings);
-                    nodeOptions.Settings["Cultures "] = string.Join(",", validCultures);
+                    nodeOptions.Settings[uSyncConstants.CultureKey] = string.Join(",", validCultures);
 
-                    if (node.Attribute("DefaultValues").ValueOrDefault(false))
+                    if (node.Attribute(uSyncConstants.DefaultsKey).ValueOrDefault(false))
                     {
-                        nodeOptions.Settings["DefaultValues"] = "true";
+                        nodeOptions.Settings[uSyncConstants.DefaultsKey] = true.ToString();
                     }
 
                     return base.IsCurrent(node, nodeOptions);
