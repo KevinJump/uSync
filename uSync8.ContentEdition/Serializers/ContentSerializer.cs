@@ -63,13 +63,13 @@ namespace uSync8.ContentEdition.Serializers
             var info = base.SerializeInfo(item, options);
 
             info.Add(SerailizePublishedStatus(item, options));
-            info.Add(SerializeSchedule(item));
-            info.Add(SerializeTemplate(item));
+            info.Add(SerializeSchedule(item, options));
+            info.Add(SerializeTemplate(item, options));
 
             return info;
         }
 
-        protected virtual XElement SerializeTemplate(IContent item)
+        protected virtual XElement SerializeTemplate(IContent item, SyncSerializerOptions options)
         {
             if (item.TemplateId != null && item.TemplateId.HasValue)
             {
@@ -107,7 +107,7 @@ namespace uSync8.ContentEdition.Serializers
             return published;
         }
 
-        protected virtual XElement SerializeSchedule(IContent item)
+        protected virtual XElement SerializeSchedule(IContent item, SyncSerializerOptions options)
         {
             var node = new XElement("Schedule");
             var schedules = item.ContentSchedule.FullSchedule;
