@@ -13,8 +13,6 @@ using uSync8.BackOffice.Models;
 using uSync8.ContentEdition.Mapping;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using uSync8.Core.Dependency;
-using uSync8.ContentEdition.Checkers;
 
 namespace uSync8.ContentEdition
 {
