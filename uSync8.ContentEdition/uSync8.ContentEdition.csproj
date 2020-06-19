@@ -284,6 +284,7 @@
     <Compile Include="Tracker\RelationTypeTracker.cs" />
     <Compile Include="uSync8ContentEdition.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="uSyncContentState.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
