@@ -2,6 +2,8 @@
 using System.Linq;
 using System.Xml.Linq;
 
+using Examine;
+
 using NPoco.Expressions;
 
 using Umbraco.Core;
@@ -64,21 +66,32 @@ namespace uSync8.ContentEdition.Handlers
             ContentService.DeletedBlueprint += ContentService_DeletedBlueprint;
         }
 
+        /// <summary>
+        ///  certain packages (DocTypeGridEditior) use temp ContentTemplates as a validation 
+        ///  we don't want to sync them.
+        /// </summary>
+        private static readonly string[] ignoreTemplates = new string[]
+        {
+            "dtge temp"
+        };
+
         private void ContentService_DeletedBlueprint(IContentService sender, Umbraco.Core.Events.DeleteEventArgs<IContent> e)
         {
-            if (e.DeletedEntities.Any(x => !x.Name.InvariantStartsWith("dtge temp")))
-            {
+            foreach(var item in e.DeletedEntities.Where(x => !IsIgnoredTemplate(x.Name)))
+            { 
                 EventDeletedItem(sender, e);
             }
         }
 
         private void ContentService_SavedBlueprint(IContentService sender, Umbraco.Core.Events.SaveEventArgs<IContent> e)
         {
-            // was is a dtge temp file ?
-            if (e.SavedEntities.Any(x => !x.Name.InvariantStartsWith("dtge temp")))
-            {
+            foreach(var item in e.SavedEntities.Where(x => !IsIgnoredTemplate(x.Name)))
+            { 
                 EventSavedItem(sender, e);
             }
         }
+
+        private bool IsIgnoredTemplate(string name)
+            => ignoreTemplates.Any(x => name.InvariantStartsWith(x));
     }
 }
