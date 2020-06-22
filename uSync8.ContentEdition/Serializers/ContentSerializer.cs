@@ -113,10 +113,9 @@ namespace uSync8.ContentEdition.Serializers
             var schedules = item.ContentSchedule.FullSchedule;
             if (schedules != null)
             {
-                foreach (var schedule in schedules.OrderBy(x => x.Id))
+                foreach (var schedule in schedules.OrderBy(x => x.Action).OrderBy(x => x.Culture))
                 {
                     node.Add(new XElement("ContentSchedule",
-                        // new XAttribute("Key", schedule.Id), - key cannot be trusted on save (also we can match on action/culture.
                         new XElement("Culture", schedule.Culture),
                         new XElement("Action", schedule.Action),
                         new XElement("Date", schedule.Date)));
