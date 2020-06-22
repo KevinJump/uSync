@@ -116,7 +116,7 @@ namespace uSync8.ContentEdition.Serializers
                 foreach (var schedule in schedules.OrderBy(x => x.Id))
                 {
                     node.Add(new XElement("ContentSchedule",
-                        new XAttribute("Key", schedule.Id),
+                        // new XAttribute("Key", schedule.Id), - key cannot be trusted on save (also we can match on action/culture.
                         new XElement("Culture", schedule.Culture),
                         new XElement("Action", schedule.Action),
                         new XElement("Date", schedule.Date)));
@@ -183,6 +183,9 @@ namespace uSync8.ContentEdition.Serializers
                 foreach (var schedule in schedules.Elements("ContentSchedule"))
                 {
                     var importSchedule = GetContentScheduleFromNode(schedule);
+
+                    if (importSchedule.Date < DateTime.Now) continue; // don't add schedules in the past
+
                     nodeSchedules.Add(importSchedule);
 
                     var existing = FindSchedule(currentSchedules, importSchedule);
@@ -374,8 +377,7 @@ namespace uSync8.ContentEdition.Serializers
 
         private ContentSchedule FindSchedule(IEnumerable<ContentSchedule> currentSchedules, ContentSchedule newSchedule)
         {
-            var schedule = currentSchedules.FirstOrDefault(x => (x.Id == newSchedule.Id)
-                || (x.Culture == newSchedule.Culture && x.Action == newSchedule.Action));
+            var schedule = currentSchedules.FirstOrDefault(x => x.Culture == newSchedule.Culture && x.Action == newSchedule.Action);
             if (schedule != null) return schedule;
 
             return null;
@@ -448,6 +450,7 @@ namespace uSync8.ContentEdition.Serializers
                         contentService.Unpublish(item, culture);
                     }
                 }
+
                 
                 if (unpublishMissing)
                     UnpublishMissingCultures(item, cultures.Select(x => x.Key).ToArray());
