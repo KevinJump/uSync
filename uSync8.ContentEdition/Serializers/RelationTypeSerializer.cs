@@ -171,7 +171,7 @@ namespace uSync8.ContentEdition.Serializers
 
             var node = new XElement("Relations");
 
-            foreach(var relation in relations)
+            foreach(var relation in relations.OrderBy(x => x.ChildId).OrderBy(x=> x.ParentId))
             {
                 var relationNode = new XElement("Relation");
 
