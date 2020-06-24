@@ -23,7 +23,7 @@
  'emtpy' action config in the place where the config file for 
  an item was. 
 
- This means deletes exist in place within thye uSync folder which
+ This means deletes exist in place within the uSync folder which
  makes it easier to deploy the uSync folder and not have orphaned
  items from previous versions hanging about.
 
