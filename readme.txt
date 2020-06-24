@@ -20,7 +20,7 @@
  Actions
  -------
  uSync 8 manages actions (delete, renames, etc ) by creating an 
- 'emtpy' action config in the place where the config file for 
+ 'empty' action config in the place where the config file for 
  an item was. 
 
  This means deletes exist in place within thye uSync folder which
