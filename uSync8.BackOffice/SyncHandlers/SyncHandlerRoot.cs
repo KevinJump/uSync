@@ -37,28 +37,72 @@ namespace uSync8.BackOffice.SyncHandlers
         protected readonly IList<ISyncTracker<TObject>> trackers;
         protected readonly IAppPolicyCache runtimeCache;
 
-        // handler things 
+        /// <summary>
+        ///  Alias of the handler, used when getting settings from the config file
+        /// </summary>
         public string Alias { get; private set; }
+
+        /// <summary>
+        ///  Name of handler, displayed to user during reports/imports 
+        /// </summary>
         public string Name { get; private set; }
+
+        /// <summary>
+        ///  name of the folder inside the uSync folder where items are stored
+        /// </summary>
         public string DefaultFolder { get; private set; }
+
+        /// <summary>
+        ///  priority order items are imported in
+        /// </summary>
+        /// <remarks>
+        ///   to import before anything else go below USYNC_RESERVED_LOWER (1000)
+        ///   to import after uSync has done all the other things go past USYNC_RESERVED_UPPER (2000)
+        /// </remarks>
         public int Priority { get; private set; }
+
+        /// <summary>
+        ///  Icon displayed on the screen while the import happens.
+        /// </summary>
         public string Icon { get; private set; }
 
+        /// <summary>
+        ///  does this handler require two passes at the import (e.g datatypes import once, and then again after doctypes)
+        /// </summary>
         protected bool IsTwoPass = false;
 
+        /// <summary>
+        ///  the object type of the item being processed.
+        /// </summary>
         public Type ItemType { get; protected set; } = typeof(TObject);
 
-        /// settings can be loaded for these.
+        /// <summary>
+        ///  Is the handler enabled 
+        /// </summary>
         public bool Enabled { get; set; } = true;
+
+        /// <summary>
+        ///  the default configuration for this handler 
+        /// </summary>
         public HandlerSettings DefaultConfig { get; set; }
 
+        /// <summary>
+        ///  the root folder for the handler (based on the settings)
+        /// </summary>
         protected string rootFolder { get; set; }
 
+        /// <summary>
+        ///  the UDIEntityType for the handler objects
+        /// </summary>
         public string EntityType { get; protected set; }
 
+        /// <summary>
+        ///  Name of the type (object)
+        /// </summary>
         public string TypeName { get; protected set; }
 
         // we calculate these now based on the entityType ? 
+
         protected UmbracoObjectTypes itemObjectType { get; set; } = UmbracoObjectTypes.Unknown;
 
         protected UmbracoObjectTypes itemContainerType = UmbracoObjectTypes.Unknown;
