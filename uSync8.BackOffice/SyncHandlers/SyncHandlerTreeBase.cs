@@ -25,6 +25,7 @@ namespace uSync8.BackOffice.SyncHandlers
         where TObject : ITreeEntity
         where TService : IService
     {
+        [Obsolete("Handler should take tracker and dependency checkers for completeness.")]
         protected SyncHandlerTreeBase(
             IEntityService entityService,
             IProfilingLogger logger,

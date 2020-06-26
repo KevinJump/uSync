@@ -18,7 +18,6 @@ namespace uSync8.Core.Tracking
         { }
 
         public IEnumerable<ISyncTracker<TObject>> GetTrackers<TObject>()
-            where TObject : IEntity
         {
             return this.Where(x => x is ISyncTracker<TObject> tracker)
                 .Select(x => x as ISyncTracker<TObject>);
