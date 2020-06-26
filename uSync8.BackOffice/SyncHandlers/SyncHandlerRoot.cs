@@ -11,6 +11,7 @@ using Umbraco.Core.Composing;
 using Umbraco.Core.Events;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
+using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
 
 using uSync8.BackOffice.Configuration;
@@ -103,6 +104,10 @@ namespace uSync8.BackOffice.SyncHandlers
             uSyncConfig.Reloaded += BackOfficeConfig_Reloaded;
         }
 
+        #region Default Config 
+        /// <summary>
+        ///  load the default configuration for this handler from the uSyncSettings 
+        /// </summary>
         private void GetDefaultConfig(uSyncSettings setting)
         {
             var config = setting.DefaultHandlerSet()?.Handlers.Where(x => x.Alias.InvariantEquals(this.Alias))
@@ -122,13 +127,21 @@ namespace uSync8.BackOffice.SyncHandlers
 
             rootFolder = setting.RootFolder;
         }
-
+        /// <summary>
+        ///  event triggered when settings are updated in memory, we reload the default configuration when this 
+        ///  happens.
+        /// </summary>
         private void BackOfficeConfig_Reloaded(uSyncSettings settings)
         {
             GetDefaultConfig(settings);
         }
+        #endregion
 
         #region Importing 
+
+        /// <summary>
+        ///  Import everything from a specified folder
+        /// </summary>
         public IEnumerable<uSyncAction> ImportAll(string folder, HandlerSettings config, bool force, SyncUpdateCallback callback = null)
         {
             var sw = Stopwatch.StartNew();
@@ -154,6 +167,9 @@ namespace uSync8.BackOffice.SyncHandlers
             return actions;
         }
 
+        /// <summary>
+        ///  process any items that require a second pass as part of their import 
+        /// </summary>
         private void ProcessSecondPasses(IDictionary<string, TObject> updates, List<uSyncAction> actions, HandlerSettings config, SyncUpdateCallback callback = null)
         {
             List<TObject> updatedItems = new List<TObject>();
@@ -168,7 +184,6 @@ namespace uSync8.BackOffice.SyncHandlers
                     {
                         if (actions.Any(x => x.FileName == item.update.Key))
                         {
-
                             var action = actions.FirstOrDefault(x => x.FileName == item.update.Key);
                             actions.Remove(action);
                             action.Message += attempt.Message;
@@ -204,6 +219,9 @@ namespace uSync8.BackOffice.SyncHandlers
 
         }
 
+        /// <summary>
+        ///  Import items from a folder (1st pass of a standard import)
+        /// </summary>
         protected virtual IEnumerable<uSyncAction> ImportFolder(string folder, HandlerSettings config, Dictionary<string, TObject> updates, bool force, SyncUpdateCallback callback)
         {
             List<uSyncAction> actions = new List<uSyncAction>();
@@ -247,39 +265,47 @@ namespace uSync8.BackOffice.SyncHandlers
             // bulk save ..
             if (flags.HasFlag(SerializerFlags.DoNotSave) && updates.Any())
             {
-                // callback?.Invoke($"Saving {updates.Count()} changes", 1, 1);
                 serializer.Save(updates.Select(x => x.Value));
             }
 
+            // process children.
             var folders = syncFileService.GetDirectories(folder);
             foreach (var children in folders)
             {
                 actions.AddRange(ImportFolder(children, config, updates, force, callback));
             }
 
-            if (actions.All(x => x.Success) && cleanMarkers.Count > 0)
+            if (actions.All(x => x.Success))
             {
-                // this is just extra messaging, given how quickly the next message will be sent.
-                // callback?.Invoke("Cleaning Folders", 1, cleanMarkers.Count);
-
-                foreach (var item in cleanMarkers.Select((filePath, Index) => new { filePath, Index }))
-                {
-                    var folderName = Path.GetFileName(item.filePath);
-                    callback?.Invoke($"Cleaning {folderName}", item.Index, cleanMarkers.Count);
-
-                    var cleanActions = CleanFolder(item.filePath, false, config.UseFlatStructure);
-                    if (cleanActions.Any())
-                    {
-                        actions.AddRange(cleanActions);
-                    }
-                    else
-                    {
-                        // nothing to delete, we report this as a no change 
-                        actions.Add(uSyncAction.SetAction(true, $"Folder {Path.GetFileName(item.filePath)}", change: ChangeType.NoChange, filename: item.filePath));
-                    }
-                }
-                // remove the actual cleans (they will have been replaced by the deletes
+                // if there where no errors, then we can also process the _clean files (which delete things)
+                actions.AddRange(ProcessCleanFiles(cleanMarkers, config.UseFlatStructure, callback));
                 actions.RemoveAll(x => x.Change == ChangeType.Clean);
+            }
+
+            return actions;
+        }
+
+        private IEnumerable<uSyncAction> ProcessCleanFiles(IList<string> cleanMarkers, bool useFlatStructure, SyncUpdateCallback callback)
+        {
+            if (cleanMarkers.Count == 0) return Enumerable.Empty<uSyncAction>();
+
+            var actions = new List<uSyncAction>();
+
+            foreach (var item in cleanMarkers.Select((filePath, Index) => new { filePath, Index }))
+            {
+                var folderName = Path.GetFileName(item.filePath);
+                callback?.Invoke($"Cleaning {folderName}", item.Index, cleanMarkers.Count);
+
+                var cleanActions = CleanFolder(item.filePath, false, useFlatStructure);
+                if (cleanActions.Any())
+                {
+                    actions.AddRange(cleanActions);
+                }
+                else
+                {
+                    // nothing to delete, we report this as a no change 
+                    actions.Add(uSyncAction.SetAction(true, $"Folder {Path.GetFileName(item.filePath)}", change: ChangeType.NoChange, filename: item.filePath));
+                }
             }
 
             return actions;
@@ -296,7 +322,7 @@ namespace uSync8.BackOffice.SyncHandlers
         {
             var folder = Path.GetDirectoryName(cleanFile);
 
-            var parent = GetCleanParent(cleanFile);
+            var parent = GetItemFromNode(cleanFile);
             if (parent == null) return Enumerable.Empty<uSyncAction>();
 
             // get the keys for every item in this folder. 
@@ -341,10 +367,17 @@ namespace uSync8.BackOffice.SyncHandlers
 
                 return keys;
 
-            }, null);
+            });
         }
 
-        protected TObject GetCleanParent(string file)
+        /// <summary>
+        ///  load up an item based on the key value in the file. 
+        /// </summary>
+        /// <remarks>
+        ///  assumes everthing is in sync, we use this when getting the parent 
+        ///  element during a clean operation.
+        /// </remarks>
+        protected TObject GetItemFromNode(string file)
         {
             var node = XElement.Load(file);
             var key = node.GetKey();
@@ -353,14 +386,14 @@ namespace uSync8.BackOffice.SyncHandlers
             return GetFromService(key);
         }
 
-        protected abstract IEnumerable<TBase> GetChildItems(TBase parent);
-        protected abstract IEnumerable<TBase> GetFolders(TBase parent);
-        protected abstract IEnumerable<uSyncAction> DeleteMissingItems(TObject parent, IEnumerable<Guid> keys, bool reportOnly);
+        /// <summary>
+        ///  get a list of files to import from a given folder.  
+        /// </summary>
+        protected virtual IEnumerable<string> GetImportFiles(string folder) => syncFileService.GetFiles(folder, "*.config");
 
-        protected virtual IEnumerable<string> GetImportFiles(string folder)
-            => syncFileService.GetFiles(folder, "*.config");
-
-
+        /// <summary>
+        ///  import a single item. 
+        /// </summary>
         public virtual SyncAttempt<TObject> Import(string filePath, HandlerSettings config, SerializerFlags flags)
         {
             try
@@ -394,15 +427,8 @@ namespace uSync8.BackOffice.SyncHandlers
         }
 
         /// <summary>
-        ///  check to see if this element should be imported as part of the process.
+        ///  perform the second pass of an import on a single item. 
         /// </summary>
-        virtual protected bool ShouldImport(XElement node, HandlerSettings config) => true;
-
-        /// <summary>
-        ///  Check to see if this elment should be exported. 
-        /// </summary>
-        virtual protected bool ShouldExport(XElement node, HandlerSettings config) => true;
-
         virtual public SyncAttempt<TObject> ImportSecondPass(string file, TObject item, HandlerSettings config, SyncUpdateCallback callback)
         {
             if (IsTwoPass)
@@ -476,10 +502,23 @@ namespace uSync8.BackOffice.SyncHandlers
             return actions;
         }
 
-
+        /// <summary>
+        ///  Does this item have any children (either items or containers)
+        /// </summary>
+        /// <remarks>
+        ///  Depending on what type of item this is the children might be other items of the same type 
+        ///  or container items.
+        /// </remarks>
         public bool HasChildren(TBase item)
             => GetFolders(item).Any() || GetChildItems(item).Any();
 
+        /// <summary>
+        ///  Export a single item. 
+        /// </summary>
+        /// <param name="item"></param>
+        /// <param name="folder"></param>
+        /// <param name="config"></param>
+        /// <returns></returns>
         virtual public IEnumerable<uSyncAction> Export(TObject item, string folder, HandlerSettings config)
         {
             if (item == null)
@@ -680,6 +719,9 @@ namespace uSync8.BackOffice.SyncHandlers
             return actions;
         }
 
+        /// <summary>
+        ///  report a single xml node.
+        /// </summary>
         public IEnumerable<uSyncAction> ReportElement(XElement node)
             => ReportElement(node, string.Empty, null);
 
@@ -730,6 +772,10 @@ namespace uSync8.BackOffice.SyncHandlers
             }
         }
 
+        /// <summary>
+        ///  calculate any changes that are lined up inside the XML Element for this item.
+        /// </summary>
+
         private IEnumerable<uSyncChange> GetTrackerChanges(XElement node)
         {
             if (trackers == null) return Enumerable.Empty<uSyncChange>();
@@ -770,6 +816,14 @@ namespace uSync8.BackOffice.SyncHandlers
         #endregion
 
         #region Events 
+
+        /// <summary>
+        ///  Setup the events (called for each handler when uSync starts up - if configured to ExportOnSave)
+        /// </summary>
+        public void Initialize(HandlerSettings settings)
+        {
+            InitializeEvents(settings);
+        }
 
         protected virtual void EventDeletedItem(IService sender, Umbraco.Core.Events.DeleteEventArgs<TObject> e)
         {
@@ -889,53 +943,72 @@ namespace uSync8.BackOffice.SyncHandlers
 
         #endregion
 
-        abstract protected TObject GetFromService(int id);
-        abstract protected TObject GetFromService(Guid key);
-        abstract protected TObject GetFromService(string alias);
-        abstract protected TObject GetFromService(TBase baseItem);
+        #region Dependency Checking 
 
-        abstract protected void DeleteViaService(TObject item);
-
-        abstract protected string GetItemPath(TObject item, bool useGuid, bool isFlat);
-        abstract protected string GetItemName(TObject item);
-
-        virtual protected string GetItemAlias(TObject item)
-            => GetItemName(item);
-
-        virtual protected string GetPath(string folder, TObject item, bool GuidNames, bool isFlat)
+        public IEnumerable<uSyncDependency> GetDependencies(Guid key, DependencyFlags flags)
         {
-            if (isFlat && GuidNames) return Path.Combine(folder, $"{GetItemKey(item)}.config");
-            var path = Path.Combine(folder, $"{this.GetItemPath(item, GuidNames, isFlat)}.config");
-
-            // if this is flat but not using guid filenames, then we check for clashes.
-            if (isFlat && !GuidNames) return CheckAndFixFileClash(path, item);
-            return path;
+            var item = this.GetFromService(key);
+            return GetDependencies(item, flags);
         }
 
-        abstract protected int GetItemId(TObject item);
-        abstract protected Guid GetItemKey(TObject item);
-
-        /// <summary>
-        ///  clashes we want to resolve can only occur, when the 
-        ///  items can be called the same but in be in different places (e.g content, media).
-        /// </summary>
-        /// <param name="path"></param>
-        /// <param name="key"></param>
-        /// <returns></returns>
-        virtual protected string CheckAndFixFileClash(string path, TObject item)
-            => path;
-
-        virtual public uSyncAction Rename(TObject item)
-            => new uSyncAction();
-
-
-        public void Initialize(HandlerSettings settings)
+        public IEnumerable<uSyncDependency> GetDependencies(int id, DependencyFlags flags)
         {
-            InitializeEvents(settings);
+            var item = this.GetFromService(id);
+            if (item == null)
+            {
+                var baseItem = GetNewBase(id);
+                return GetContainerDependencies(baseItem, flags);
+            }
+            return GetDependencies(item, flags);
         }
 
-        protected abstract void InitializeEvents(HandlerSettings settings);
 
+        protected IEnumerable<uSyncDependency> GetDependencies(TObject item, DependencyFlags flags)
+        {
+            if (checkers == null || checkers.Count == 0) return Enumerable.Empty<uSyncDependency>();
+            if (item == null) return Enumerable.Empty<uSyncDependency>();
+
+            var dependencies = new List<uSyncDependency>();
+            foreach (var checker in checkers)
+            {
+                dependencies.AddRange(checker.GetDependencies(item, flags));
+            }
+            return dependencies;
+        }
+
+        private IEnumerable<uSyncDependency> GetContainerDependencies(TBase parent, DependencyFlags flags)
+        {
+            if (checkers == null || checkers.Count == 0) return Enumerable.Empty<uSyncDependency>();
+
+            var dependencies = new List<uSyncDependency>();
+
+            var containers = GetFolders(parent);
+            if (containers != null && containers.Any())
+            {
+                foreach (var container in containers)
+                {
+                    dependencies.AddRange(GetContainerDependencies(container, flags));
+                }
+            }
+
+            var children = GetChildItems(parent);
+            if (children != null && children.Any())
+            {
+                foreach (var child in children)
+                {
+                    var childItem = GetFromService(child);
+                    if (childItem != null)
+                    {
+                        dependencies.AddRange(GetDependencies(childItem, flags));
+                    }
+                }
+            }
+
+            return dependencies.DistinctBy(x => x.Udi.ToString()).OrderByDescending(x => x.Order);
+        }
+
+
+        #endregion
 
         #region ISyncHandler2 Methods 
 
@@ -1003,71 +1076,11 @@ namespace uSync8.BackOffice.SyncHandlers
 
             return default;
         }
-        public IEnumerable<uSyncDependency> GetDependencies(Guid key, DependencyFlags flags)
-        {
-            var item = this.GetFromService(key);
-            return GetDependencies(item, flags);
-        }
-
-        public IEnumerable<uSyncDependency> GetDependencies(int id, DependencyFlags flags)
-        {
-            var item = this.GetFromService(id);
-            if (item == null && item is TBase baseItem)
-            {
-                return GetContainerDependencies(baseItem, flags);
-            }
-            return GetDependencies(item, flags);
-        }
-
-        protected IEnumerable<uSyncDependency> GetDependencies(TObject item, DependencyFlags flags)
-        {
-            if (checkers == null || checkers.Count == 0) return Enumerable.Empty<uSyncDependency>();
-            if (item == null) return Enumerable.Empty<uSyncDependency>();
-
-            var dependencies = new List<uSyncDependency>();
-            foreach (var checker in checkers)
-            {
-                dependencies.AddRange(checker.GetDependencies(item, flags));
-            }
-            return dependencies;
-        }
-
-        private IEnumerable<uSyncDependency> GetContainerDependencies(TBase parent, DependencyFlags flags)
-        {
-            if (checkers == null || checkers.Count == 0) return Enumerable.Empty<uSyncDependency>();
-
-            var dependencies = new List<uSyncDependency>();
-
-            var containers = GetFolders(parent);
-            if (containers != null && containers.Any())
-            {
-                foreach (var container in containers)
-                {
-                    dependencies.AddRange(GetContainerDependencies(container, flags));
-                }
-            }
-
-            var children = GetChildItems(parent);
-            if (children != null && children.Any())
-            {
-                foreach (var child in children)
-                {
-                    var childItem = GetFromService(child);
-                    if (childItem != null)
-                    {
-                        dependencies.AddRange(GetDependencies(childItem, flags));
-                    }
-                }
-            }
-
-
-            return dependencies.DistinctBy(x => x.Udi.ToString()).OrderByDescending(x => x.Order);
-        }
 
         #endregion
 
+        #region Serializer with Options calls. 
 #pragma warning disable 0618
-        //
         // Seperated out the calls to the serializer where we might use the Options - the options
         // allow us to pass things to the serializer that change how/what is serialized.
         // 
@@ -1108,7 +1121,80 @@ namespace uSync8.BackOffice.SyncHandlers
 
         }
 #pragma warning restore 0618
+        #endregion
 
+        //
+        //  Abstract and virtual methods 
+        // 
+
+        //
+        // Abstract 
+        //  These are the things that inheriting classes need to override. 
+        //
+
+        protected abstract void InitializeEvents(HandlerSettings settings);
+
+        protected abstract TObject GetFromService(int id);
+        protected abstract TObject GetFromService(Guid key);
+        protected abstract TObject GetFromService(string alias);
+        protected abstract TObject GetFromService(TBase baseItem);
+
+        protected abstract void DeleteViaService(TObject item);
+
+        protected abstract string GetItemPath(TObject item, bool useGuid, bool isFlat);
+        protected abstract string GetItemName(TObject item);
+
+        protected abstract int GetItemId(TObject item);
+        protected abstract Guid GetItemKey(TObject item);
+
+        protected abstract TBase GetNewBase(int id);
+        protected abstract IEnumerable<TBase> GetChildItems(TBase parent);
+        protected abstract IEnumerable<TBase> GetFolders(TBase parent);
+        protected abstract IEnumerable<uSyncAction> DeleteMissingItems(TObject parent, IEnumerable<Guid> keys, bool reportOnly);
+
+        //
+        // Virtual 
+        //  Handlers may override these to handle extra details of how they process data
+        //
+
+        protected virtual string GetItemAlias(TObject item)
+            => GetItemName(item);
+
+        protected virtual string GetPath(string folder, TObject item, bool GuidNames, bool isFlat)
+        {
+            if (isFlat && GuidNames) return Path.Combine(folder, $"{GetItemKey(item)}.config");
+            var path = Path.Combine(folder, $"{this.GetItemPath(item, GuidNames, isFlat)}.config");
+
+            // if this is flat but not using guid filenames, then we check for clashes.
+            if (isFlat && !GuidNames) return CheckAndFixFileClash(path, item);
+            return path;
+        }
+
+        /// <summary>
+        ///  Check to see if this element should be imported as part of the process.
+        /// </summary>
+        protected virtual bool ShouldImport(XElement node, HandlerSettings config) => true;
+
+        /// <summary>
+        ///  Check to see if this elment should be exported. 
+        /// </summary>
+        protected virtual bool ShouldExport(XElement node, HandlerSettings config) => true;
+
+
+        /// <summary>
+        ///  Clashes we want to resolve can only occur, when the 
+        ///  items can be called the same but in be in different places (e.g content, media).
+        /// </summary>
+        protected virtual string CheckAndFixFileClash(string path, TObject item)
+            => path;
+
+        /// <summary>
+        ///  rename an object
+        /// </summary>
+        /// <remarks>
+        ///  Not used, as not everything triggers this, we handle renames as saves.
+        /// </remarks>
+        public virtual uSyncAction Rename(TObject item) => new uSyncAction();
     }
 }
 

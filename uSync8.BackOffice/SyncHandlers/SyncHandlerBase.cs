@@ -25,6 +25,7 @@ namespace uSync8.BackOffice.SyncHandlers
     {
         protected readonly IEntityService entityService;
 
+        [Obsolete("Construct your handler using the tracker & Dependecy collections for better checker support")]
         public SyncHandlerBase(
             IEntityService entityService,
             IProfilingLogger logger,
@@ -46,6 +47,9 @@ namespace uSync8.BackOffice.SyncHandlers
         : this(entityService, logger, serializer, tracker.AsEnumerableOfOne(), appCaches, dependencyChecker.AsEnumerableOfOne(), syncFileService)
         { }
 
+        /// <summary>
+        ///  Prefered constructor, uses collections to load trackers and checkers. 
+        /// </summary>
         public SyncHandlerBase(
             IEntityService entityService,
             IProfilingLogger logger,
@@ -70,6 +74,9 @@ namespace uSync8.BackOffice.SyncHandlers
             this.entityService = entityService;
         }
 
+        /// <summary>
+        ///  Remove items that are child of parent and not in the list of supplied keys
+        /// </summary>
         protected override IEnumerable<uSyncAction> DeleteMissingItems(TObject parent, IEnumerable<Guid> keys, bool reportOnly)
         {
             var items = GetChildItems(parent).ToList();
@@ -98,12 +105,11 @@ namespace uSync8.BackOffice.SyncHandlers
             return actions;
         }
 
+        // Functions catering for the fact that all our items are IEntity based
         protected override int GetItemId(TObject item) => item.Id;
         protected override Guid GetItemKey(TObject item) => item.Key;
-
-        protected override TObject GetFromService(IEntity baseItem)
-            => GetFromService(baseItem.Id);
-
+        protected override TObject GetFromService(IEntity baseItem) => GetFromService(baseItem.Id);
+        protected override IEntity GetNewBase(int id) => new EntitySlim() { Id = id };
 
         // almost everything does this - but languages can't so we need to 
         // let the language Handler override this. 
@@ -134,7 +140,6 @@ namespace uSync8.BackOffice.SyncHandlers
 
             return Enumerable.Empty<IEntity>();
         }
-
 
         public virtual IEnumerable<uSyncAction> ExportAll(int parentId, string folder, HandlerSettings config, SyncUpdateCallback callback)
         {
