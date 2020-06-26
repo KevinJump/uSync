@@ -21,7 +21,6 @@ namespace uSync8.Core.Tracking
     ///  we know that there are changes (through the serializers IsCurrent method
     /// </remarks>
     public interface ISyncTracker<TObject> : ISyncTrackerBase
-        where TObject : IEntity
     {
         /// <summary>
         ///  Get details of the changes in this XML vs what is in Umbraco.

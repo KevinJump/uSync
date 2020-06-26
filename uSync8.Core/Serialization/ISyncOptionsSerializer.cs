@@ -10,7 +10,6 @@ namespace uSync8.Core.Serialization
     ///  Serializer that can take options to the main methods.
     /// </summary>
     public interface ISyncOptionsSerializer<TObject> : ISyncSerializer<TObject>
-        where TObject : IEntity
     {
         /// <summary>
         ///  Serialize and Item into uSync XML format (with options)
