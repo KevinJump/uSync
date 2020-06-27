@@ -108,9 +108,16 @@ namespace uSync8.BackOffice.SyncHandlers
         // Functions catering for the fact that all our items are IEntity based
         protected override Guid GetItemKey(TObject item) => item.Key;
         protected override TObject GetFromService(IEntity baseItem) => GetFromService(baseItem.Id);
-        protected override IEntity GetContainer(Guid key) => default;
 
-        // almost everything does this - but languages can't so we need to 
+        /// <summary>
+        ///  gets a container item
+        /// </summary>
+        /// <remarks>
+        ///  container items sometimes are diffrent to actual items (e.g doctype containers)
+        /// </remarks>
+        protected override IEntity GetContainer(Guid key) => GetFromService(key);
+
+        // almost everything does it this way - but languages can't so we need to 
         // let the language Handler override this. 
         protected override IEnumerable<IEntity> GetChildItems(IEntity parent)
         {
