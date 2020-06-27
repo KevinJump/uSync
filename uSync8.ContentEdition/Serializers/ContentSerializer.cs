@@ -311,15 +311,8 @@ namespace uSync8.ContentEdition.Serializers
                 }
             }
 
-            // if we get here, save 
-            /*
-            var result = contentService.Save(item);
-            if (result.Success) */
-
             this.SaveItem(item);
             return Attempt.Succeed("Saved");
-
-            // return Attempt.Fail("Save Failed " + result.EventMessages);
         }
 
         /// <summary>
