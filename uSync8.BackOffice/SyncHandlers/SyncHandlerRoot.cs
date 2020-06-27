@@ -110,17 +110,18 @@ namespace uSync8.BackOffice.SyncHandlers
         protected Type handlerType;
 
         protected SyncHandlerRoot(IProfilingLogger logger,
-            ISyncSerializer<TObject> serializer,
-            IEnumerable<ISyncTracker<TObject>> trackers,
             AppCaches appCaches,
-            IEnumerable<ISyncDependencyChecker<TObject>> checkers,
+            ISyncSerializer<TObject> serializer,
+            SyncTrackerCollection trackers,
+            SyncDependencyCollection checkers,
             SyncFileService syncFileService)
         {
             this.logger = logger;
 
             this.serializer = serializer;
-            this.trackers = trackers.ToList();
-            this.checkers = checkers.ToList();
+
+            this.trackers = trackers != null ? trackers.GetTrackers<TObject>().ToList() : new List<ISyncTracker<TObject>>();
+            this.checkers = checkers != null ? checkers.GetCheckers<TObject>().ToList() : new List<ISyncDependencyChecker<TObject>>();
 
             this.syncFileService = syncFileService;
 

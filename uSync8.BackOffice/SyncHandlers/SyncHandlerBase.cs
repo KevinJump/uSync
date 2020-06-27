@@ -19,33 +19,10 @@ using uSync8.Core.Tracking;
 
 namespace uSync8.BackOffice.SyncHandlers
 {
-    public abstract class SyncHandlerBase<TObject, TService> : SyncHandlerRoot<TObject, IEntity>
+    public abstract class SyncHandlerBase<TObject> : SyncHandlerRoot<TObject, IEntity>
         where TObject : IEntity
-        where TService : IService
     {
         protected readonly IEntityService entityService;
-
-        [Obsolete("Construct your handler using the tracker & Dependecy collections for better checker support")]
-        public SyncHandlerBase(
-            IEntityService entityService,
-            IProfilingLogger logger,
-            ISyncSerializer<TObject> serializer,
-            ISyncTracker<TObject> tracker,
-            AppCaches appCaches,
-            SyncFileService syncFileService)
-        : this(entityService, logger, serializer, tracker.AsEnumerableOfOne(), appCaches, Enumerable.Empty<ISyncDependencyChecker<TObject>>(), syncFileService) { }
-
-        [Obsolete("Construct your handler using the tracker & Dependecy collections for better checker support")]
-        public SyncHandlerBase(
-            IEntityService entityService,
-            IProfilingLogger logger,
-            ISyncSerializer<TObject> serializer,
-            ISyncTracker<TObject> tracker,
-            AppCaches appCaches,
-            ISyncDependencyChecker<TObject> dependencyChecker,
-            SyncFileService syncFileService)
-        : this(entityService, logger, serializer, tracker.AsEnumerableOfOne(), appCaches, dependencyChecker.AsEnumerableOfOne(), syncFileService)
-        { }
 
         /// <summary>
         ///  Prefered constructor, uses collections to load trackers and checkers. 
@@ -58,18 +35,7 @@ namespace uSync8.BackOffice.SyncHandlers
             SyncTrackerCollection trackers,
             SyncDependencyCollection checkers,
             SyncFileService syncFileService)
-            : this(entityService, logger, serializer, trackers.GetTrackers<TObject>(), appCaches, checkers.GetCheckers<TObject>(), syncFileService)
-        { }
-
-        public SyncHandlerBase(
-            IEntityService entityService,
-            IProfilingLogger logger,
-            ISyncSerializer<TObject> serializer,
-            IEnumerable<ISyncTracker<TObject>> trackers,
-            AppCaches appCaches,
-            IEnumerable<ISyncDependencyChecker<TObject>> checkers,
-            SyncFileService syncFileService)
-            : base(logger, serializer, trackers, appCaches, checkers, syncFileService)
+            : base(logger, appCaches, serializer, trackers,  checkers, syncFileService)
         {
             this.entityService = entityService;
         }
@@ -146,7 +112,7 @@ namespace uSync8.BackOffice.SyncHandlers
 
             return Enumerable.Empty<IEntity>();
         }
-
+ 
         public virtual IEnumerable<uSyncAction> ExportAll(int parentId, string folder, HandlerSettings config, SyncUpdateCallback callback)
         {
             var parent = GetFromService(parentId);
@@ -154,4 +120,3 @@ namespace uSync8.BackOffice.SyncHandlers
         }
     }
 }
-

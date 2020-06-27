@@ -28,8 +28,7 @@ namespace uSync8.ContentEdition.Handlers
             "RelationTypes", uSyncBackOfficeConstants.Priorites.RelationTypes,
             Icon = "icon-traffic usync-addon-icon",
             EntityType = UdiEntityType.RelationType, IsTwoPass = false)]
-    public class RelationTypeHandler : SyncHandlerBase<IRelationType, IRelationService>,
-        ISyncExtendedHandler
+    public class RelationTypeHandler : SyncHandlerBase<IRelationType>, ISyncExtendedHandler
     {
         private readonly IRelationService relationService;
 

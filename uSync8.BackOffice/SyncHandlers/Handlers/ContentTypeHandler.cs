@@ -20,7 +20,7 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("contentTypeHandler", "DocTypes", "ContentTypes", uSyncBackOfficeConstants.Priorites.ContentTypes,
             IsTwoPass = true, Icon = "icon-item-arrangement", EntityType = UdiEntityType.DocumentType)]
-    public class ContentTypeHandler : SyncHandlerContainerBase<IContentType, IContentTypeService>, ISyncExtendedHandler, ISyncPostImportHandler
+    public class ContentTypeHandler : SyncHandlerContainerBase<IContentType>, ISyncExtendedHandler, ISyncPostImportHandler
     {
         private readonly IContentTypeService contentTypeService;
 
@@ -37,18 +37,6 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
         {
             this.contentTypeService = contentTypeService;
         }
-
-
-        #region Import
-        // default import behavior is in the base class.
-        #endregion
-
-        #region Export
-        // most of export is now in the base 
-
-
-        #endregion
-
 
         protected override void InitializeEvents(HandlerSettings settings)
         {

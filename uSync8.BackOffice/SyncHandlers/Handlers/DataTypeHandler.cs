@@ -22,7 +22,7 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("dataTypeHandler", "Datatypes", "DataTypes", uSyncBackOfficeConstants.Priorites.DataTypes,
         Icon = "icon-autofill", EntityType = UdiEntityType.DataType)]
-    public class DataTypeHandler : SyncHandlerContainerBase<IDataType, IDataTypeService>, ISyncExtendedHandler, ISyncPostImportHandler
+    public class DataTypeHandler : SyncHandlerContainerBase<IDataType>, ISyncExtendedHandler, ISyncPostImportHandler
     {
         private readonly IDataTypeService dataTypeService;
 

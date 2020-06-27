@@ -35,32 +35,5 @@ namespace uSync8.BackOffice.SyncHandlers
 
         public IEnumerable<ISyncExtendedHandler> ExtendedHandlers
             => extendedHandlers;
-
-        // v8.1
-        [Obsolete("Use Handler Factory for better results")]
-        public IEnumerable<HandlerConfigPair> GetValidHandlers(string actionName, uSyncSettings settings)
-        {
-            var configPairs = new List<HandlerConfigPair>();
-
-            foreach (var handler in this)
-            {
-                var config = settings.DefaultHandlerSet().Handlers.FirstOrDefault(x => x.Alias.InvariantEquals(handler.Alias));
-                if (config == null)
-                {
-                    config = new HandlerSettings(handler.Alias, false)
-                    {
-                        GuidNames = new OverriddenValue<bool>(settings.UseGuidNames, false),
-                        UseFlatStructure = new OverriddenValue<bool>(settings.UseFlatStructure, false)
-                    };
-                }
-
-                if (config != null && config.Enabled)
-                {
-                    configPairs.Add(new HandlerConfigPair() { Handler = handler, Settings = config });
-                }
-            }
-
-            return configPairs.OrderBy(x => x.Handler.Priority);
-        }
     }
 }

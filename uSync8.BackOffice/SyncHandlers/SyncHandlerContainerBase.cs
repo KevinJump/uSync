@@ -32,10 +32,9 @@ namespace uSync8.BackOffice.SyncHandlers
     /// alias in different containers. 
     /// </para>
     /// </remarks>
-    public abstract class SyncHandlerContainerBase<TObject, TService>
-        : SyncHandlerTreeBase<TObject, TService>
+    public abstract class SyncHandlerContainerBase<TObject>
+        : SyncHandlerTreeBase<TObject>
         where TObject : ITreeEntity
-        where TService : IService
     {
         protected SyncHandlerContainerBase(
             IEntityService entityService,
@@ -47,30 +46,6 @@ namespace uSync8.BackOffice.SyncHandlers
             SyncFileService syncFileService)
             : base(entityService, logger, appCaches, serializer, trackers, checkers, syncFileService)
         { }
-
-        [Obsolete("Construct your handler using the tracker & Dependecy collections for better checker support")]
-        protected SyncHandlerContainerBase(
-            IEntityService entityService,
-            IProfilingLogger logger,
-            ISyncSerializer<TObject> serializer,
-            ISyncTracker<TObject> tracker,
-            AppCaches appCaches,
-            ISyncDependencyChecker<TObject> checker,
-            SyncFileService fileService)
-            : base(entityService, logger, serializer, tracker, appCaches, checker, fileService)
-        { }
-
-        [Obsolete("Handler should take tracker and dependency checkers for completeness.")]
-        protected SyncHandlerContainerBase(
-            IEntityService entityService,
-            IProfilingLogger logger,
-            ISyncSerializer<TObject> serializer,
-            ISyncTracker<TObject> tracker,
-            AppCaches appCaches,
-            SyncFileService syncFileService)
-            : base(entityService, logger, serializer, tracker, appCaches, syncFileService)
-        { }
-
 
         protected IEnumerable<uSyncAction> CleanFolders(string folder, int parent)
         {

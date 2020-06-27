@@ -41,22 +41,8 @@ namespace uSync8.BackOffice.SyncHandlers
             => syncHandlers.ExtendedHandlers
                 .FirstOrDefault(x => x.Alias.InvariantEquals(alias));
 
-        [Obsolete("You should avoid asking for a handler just by type, ask for valid based on set too")]
-        public ISyncExtendedHandler GetHandler(Udi udi)
-            => GetHandlerByEntityType(udi.EntityType);
-
         public IEnumerable<ISyncHandler> GetHandlers(params string[] aliases)
             => syncHandlers.Where(x => aliases.InvariantContains(x.Alias));
-
-        [Obsolete("You should avoid asking for a handler just by type, ask for valid based on set too")]
-        public ISyncExtendedHandler GetHandlerByEntityType(string entityType)
-            => syncHandlers.ExtendedHandlers
-                .FirstOrDefault(x => x.EntityType == entityType);
-
-        [Obsolete("You should avoid asking for a handler just by type, ask for valid based on set too")]
-        public ISyncExtendedHandler GetHandlerByTypeName(string typeName)
-            => syncHandlers.ExtendedHandlers
-                .FirstOrDefault(x => x.TypeName == typeName);
 
         /// <summary>
         ///  returns the handler groups (settings, content, users, etc) that stuff can be grouped into

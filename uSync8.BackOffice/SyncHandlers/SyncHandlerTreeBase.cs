@@ -21,21 +21,9 @@ namespace uSync8.BackOffice.SyncHandlers
     /// </summary>
     /// <typeparam name="TObject"></typeparam>
     /// <typeparam name="TService"></typeparam>
-    public abstract class SyncHandlerTreeBase<TObject, TService> : SyncHandlerLevelBase<TObject, TService>
+    public abstract class SyncHandlerTreeBase<TObject> : SyncHandlerLevelBase<TObject>
         where TObject : ITreeEntity
-        where TService : IService
     {
-        [Obsolete("Handler should take tracker and dependency checkers for completeness.")]
-        protected SyncHandlerTreeBase(
-            IEntityService entityService,
-            IProfilingLogger logger,
-            ISyncSerializer<TObject> serializer,
-            ISyncTracker<TObject> tracker,
-            AppCaches appCaches,
-            SyncFileService syncFileService)
-            : base(entityService, logger, serializer, tracker, appCaches, syncFileService)
-        {
-        }
         protected SyncHandlerTreeBase(
             IEntityService entityService,
             IProfilingLogger logger,
@@ -45,26 +33,7 @@ namespace uSync8.BackOffice.SyncHandlers
             SyncDependencyCollection checkers,
             SyncFileService syncFileService)
             : base(entityService, logger, appCaches, serializer, trackers, checkers, syncFileService)
-        {
-        }
-
-        [Obsolete("Construct your handler using the tracker & Dependecy collections for better checker support")]
-        protected SyncHandlerTreeBase(
-            IEntityService entityService,
-            IProfilingLogger logger,
-            ISyncSerializer<TObject> serializer,
-            ISyncTracker<TObject> tracker,
-            AppCaches appCaches,
-            ISyncDependencyChecker<TObject> checker,
-            SyncFileService fileService)
-            : base(entityService, logger, serializer, tracker, appCaches, checker, fileService)
-        {
-
-        }
-
-
-
-
+        { }
         protected override string GetItemName(TObject item) => item.Name;
     }
 

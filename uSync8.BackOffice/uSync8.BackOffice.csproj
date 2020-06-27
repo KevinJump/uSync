@@ -285,7 +285,6 @@
     <Compile Include="Services\uSyncTriggers.cs" />
     <Compile Include="SyncHandlers\Models\ExtendedHandlerConfigPair.cs" />
     <Compile Include="SyncHandlers\Models\HandlerActionNames.cs" />
-    <Compile Include="SyncHandlers\Models\HandlerConfigPair.cs" />
     <Compile Include="SyncHandlers\Handlers\DataTypeHandler.cs" />
     <Compile Include="SyncHandlers\Handlers\LanguageHandler.cs" />
     <Compile Include="SyncHandlers\Handlers\MacroHandler.cs" />

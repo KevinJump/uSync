@@ -28,10 +28,9 @@ namespace uSync8.BackOffice.SyncHandlers
     /// ideally this would be in SyncHandlerTreeBase, but 
     /// Templates have levels but are not ITreeEntities 
     /// </summary>
-    public abstract class SyncHandlerLevelBase<TObject, TService>
-        : SyncHandlerBase<TObject, TService>
+    public abstract class SyncHandlerLevelBase<TObject>
+        : SyncHandlerBase<TObject>
         where TObject : IEntity
-        where TService : IService
     {
         protected SyncHandlerLevelBase(
             IEntityService entityService,
@@ -42,29 +41,6 @@ namespace uSync8.BackOffice.SyncHandlers
             SyncDependencyCollection checkers,
             SyncFileService syncFileService)
             : base(entityService, logger, appCaches, serializer, trackers, checkers, syncFileService)
-        { }
-
-        [Obsolete("Construct your handler using the tracker & Dependecy collections for better checker support")]
-        protected SyncHandlerLevelBase(
-            IEntityService entityService,
-            IProfilingLogger logger,
-            ISyncSerializer<TObject> serializer,
-            ISyncTracker<TObject> tracker,
-            AppCaches appCaches,
-            SyncFileService syncFileService)
-            : base(entityService, logger, serializer, tracker, appCaches, syncFileService)
-        { }
-
-        [Obsolete("Construct your handler using the tracker & Dependecy collections for better checker support")]
-        protected SyncHandlerLevelBase(
-                  IEntityService entityService,
-                  IProfilingLogger logger,
-                  ISyncSerializer<TObject> serializer,
-                  ISyncTracker<TObject> tracker,
-                  AppCaches appCaches,
-                  ISyncDependencyChecker<TObject> checker,
-                  SyncFileService fileService)
-                  : base(entityService, logger, serializer, tracker, appCaches, checker, fileService) 
         { }
 
         /// <summary>

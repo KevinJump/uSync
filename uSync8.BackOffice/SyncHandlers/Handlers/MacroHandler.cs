@@ -22,7 +22,7 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("macroHandler", "Macros", "Macros", uSyncBackOfficeConstants.Priorites.Macros, 
         Icon = "icon-settings-alt", EntityType = UdiEntityType.Macro)]
-    public class MacroHandler : SyncHandlerBase<IMacro, IMacroService>, ISyncExtendedHandler
+    public class MacroHandler : SyncHandlerBase<IMacro>, ISyncExtendedHandler
     {
         private readonly IMacroService macroService;
 

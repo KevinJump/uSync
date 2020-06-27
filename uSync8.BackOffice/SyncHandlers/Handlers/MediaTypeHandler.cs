@@ -20,7 +20,7 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("mediaTypeHandler", "Media Types", "MediaTypes", uSyncBackOfficeConstants.Priorites.MediaTypes,
         IsTwoPass = true, Icon = "icon-thumbnails", EntityType = UdiEntityType.MediaType)]
-    public class MediaTypeHandler : SyncHandlerContainerBase<IMediaType, IMediaTypeService>, ISyncExtendedHandler
+    public class MediaTypeHandler : SyncHandlerContainerBase<IMediaType>, ISyncExtendedHandler
     {
         private readonly IMediaTypeService mediaTypeService;
 

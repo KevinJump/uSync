@@ -412,24 +412,6 @@ namespace uSync8.BackOffice
 
         #endregion
 
-        #region Obsolete calls (callback, update)
-
-        // v8.1 calls
-
-        [Obsolete("Use the new uSyncCallbacks group when calling")]
-        public IEnumerable<uSyncAction> Import(string folder, bool force, SyncEventCallback callback = null, SyncUpdateCallback update = null)
-            => Import(folder, force, default(SyncHandlerOptions), new uSyncCallbacks(callback, update));
-
-        [Obsolete("Use the new uSyncCallbacks group when calling")]
-        public IEnumerable<uSyncAction> Report(string folder, SyncEventCallback callback = null, SyncUpdateCallback update = null)
-            => Report(folder, default(SyncHandlerOptions), new uSyncCallbacks(callback, update));
-
-        [Obsolete("Use the new uSyncCallbacks group when calling")]
-        public IEnumerable<uSyncAction> Export(string folder, SyncEventCallback callback = null, SyncUpdateCallback update = null)
-            => Export(folder, default(SyncHandlerOptions), new uSyncCallbacks(callback, update));
-
-        #endregion
-
         /// <summary>
         ///  calculate the number of actions in a list that are actually changes
         /// </summary>

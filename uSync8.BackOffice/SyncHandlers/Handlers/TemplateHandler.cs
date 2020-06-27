@@ -21,7 +21,7 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("templateHandler", "Templates", "Templates", uSyncBackOfficeConstants.Priorites.Templates,
         Icon = "icon-layout", EntityType = UdiEntityType.Template, IsTwoPass = true)]
-    public class TemplateHandler : SyncHandlerLevelBase<ITemplate, IFileService>, ISyncExtendedHandler
+    public class TemplateHandler : SyncHandlerLevelBase<ITemplate>, ISyncExtendedHandler
     {
         private readonly IFileService fileService;
 
