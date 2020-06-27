@@ -33,17 +33,6 @@ namespace uSync8.BackOffice.SyncHandlers
         where TObject : IEntity
         where TService : IService
     {
-
-        protected SyncHandlerLevelBase(
-            IEntityService entityService,
-            IProfilingLogger logger,
-            ISyncSerializer<TObject> serializer,
-            ISyncTracker<TObject> tracker,
-            AppCaches appCaches,
-            SyncFileService syncFileService)
-            : base(entityService, logger, serializer, tracker, appCaches, syncFileService)
-        { }
-
         protected SyncHandlerLevelBase(
             IEntityService entityService,
             IProfilingLogger logger,
@@ -53,6 +42,17 @@ namespace uSync8.BackOffice.SyncHandlers
             SyncDependencyCollection checkers,
             SyncFileService syncFileService)
             : base(entityService, logger, appCaches, serializer, trackers, checkers, syncFileService)
+        { }
+
+        [Obsolete("Construct your handler using the tracker & Dependecy collections for better checker support")]
+        protected SyncHandlerLevelBase(
+            IEntityService entityService,
+            IProfilingLogger logger,
+            ISyncSerializer<TObject> serializer,
+            ISyncTracker<TObject> tracker,
+            AppCaches appCaches,
+            SyncFileService syncFileService)
+            : base(entityService, logger, serializer, tracker, appCaches, syncFileService)
         { }
 
         [Obsolete("Construct your handler using the tracker & Dependecy collections for better checker support")]

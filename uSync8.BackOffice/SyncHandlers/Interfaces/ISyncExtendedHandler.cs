@@ -94,6 +94,7 @@ namespace uSync8.BackOffice.SyncHandlers
         /// <param name="id">Id of item to inspect</param>
         /// <param name="flags">flags detailing what to include in dependency list</param>
         /// <returns>List of items that main item is dependent upon</returns>
+        [Obsolete("Always get dependencies by key - getting by ID doesn't work for containers", true)]
         IEnumerable<uSyncDependency> GetDependencies(int id, DependencyFlags flags);
 
         /// <summary>

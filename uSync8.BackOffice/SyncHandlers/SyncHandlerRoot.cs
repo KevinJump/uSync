@@ -25,7 +25,7 @@ using uSync8.Core.Tracking;
 
 namespace uSync8.BackOffice.SyncHandlers
 {
-    public abstract class SyncHandlerRoot<TObject, TBase>
+    public abstract class SyncHandlerRoot<TObject, TContainer>
     {
         protected readonly IProfilingLogger logger;
 
@@ -496,11 +496,11 @@ namespace uSync8.BackOffice.SyncHandlers
                 catch (Exception ex)
                 {
                     logger.Warn(handlerType, $"Second Import Failed: {ex.ToString()}");
-                    return SyncAttempt<TObject>.Fail(GetItemId(item).ToString(), ChangeType.Fail, ex.Message, ex);
+                    return SyncAttempt<TObject>.Fail(GetItemAlias(item).ToString(), ChangeType.Fail, ex.Message, ex);
                 }
             }
 
-            return SyncAttempt<TObject>.Succeed(GetItemId(item).ToString(), ChangeType.NoChange);
+            return SyncAttempt<TObject>.Succeed(GetItemAlias(item).ToString(), ChangeType.NoChange);
         }
 
         #endregion
@@ -518,7 +518,7 @@ namespace uSync8.BackOffice.SyncHandlers
             return ExportAll(default, folder, config, callback);
         }
 
-        virtual public IEnumerable<uSyncAction> ExportAll(TBase parent, string folder, HandlerSettings config, SyncUpdateCallback callback)
+        virtual public IEnumerable<uSyncAction> ExportAll(TContainer parent, string folder, HandlerSettings config, SyncUpdateCallback callback)
         {
             var actions = new List<uSyncAction>();
 
@@ -553,7 +553,7 @@ namespace uSync8.BackOffice.SyncHandlers
         ///  Depending on what type of item this is the children might be other items of the same type 
         ///  or container items.
         /// </remarks>
-        public bool HasChildren(TBase item)
+        public bool HasChildren(TContainer item)
             => GetFolders(item).Any() || GetChildItems(item).Any();
 
         /// <summary>
@@ -992,20 +992,29 @@ namespace uSync8.BackOffice.SyncHandlers
         public IEnumerable<uSyncDependency> GetDependencies(Guid key, DependencyFlags flags)
         {
             var item = this.GetFromService(key);
-            return GetDependencies(item, flags);
+            if (item != null) 
+                return GetDependencies(item, flags);
+            else
+            {
+                var container = this.GetContainer(key);
+                if (container != null) return GetContainerDependencies(container, flags);
+            }
+
+            return Enumerable.Empty<uSyncDependency>();
         }
 
+        [Obsolete("Always get dependencies by key - getting by ID doesn't work for containers", true)]
         public IEnumerable<uSyncDependency> GetDependencies(int id, DependencyFlags flags)
         {
             var item = this.GetFromService(id);
             if (item == null)
             {
-                var baseItem = GetNewBase(id);
-                return GetContainerDependencies(baseItem, flags);
+                // v8.6.75 + getting by id doesn't support container dependencies.
+                // return GetContainerDependencies(baseItem, flags);
+                return Enumerable.Empty<uSyncDependency>();
             }
             return GetDependencies(item, flags);
         }
-
 
         protected IEnumerable<uSyncDependency> GetDependencies(TObject item, DependencyFlags flags)
         {
@@ -1020,7 +1029,7 @@ namespace uSync8.BackOffice.SyncHandlers
             return dependencies;
         }
 
-        private IEnumerable<uSyncDependency> GetContainerDependencies(TBase parent, DependencyFlags flags)
+        private IEnumerable<uSyncDependency> GetContainerDependencies(TContainer parent, DependencyFlags flags)
         {
             if (checkers == null || checkers.Count == 0) return Enumerable.Empty<uSyncDependency>();
 
@@ -1080,7 +1089,6 @@ namespace uSync8.BackOffice.SyncHandlers
 
         public IEnumerable<uSyncAction> Report(string file, HandlerSettings config)
             => ReportItem(file, config);
-
 
         public IEnumerable<uSyncAction> Export(int id, string folder, HandlerSettings settings)
         {
@@ -1181,19 +1189,20 @@ namespace uSync8.BackOffice.SyncHandlers
         protected abstract TObject GetFromService(int id);
         protected abstract TObject GetFromService(Guid key);
         protected abstract TObject GetFromService(string alias);
-        protected abstract TObject GetFromService(TBase baseItem);
+        protected abstract TObject GetFromService(TContainer baseItem);
+
+        protected abstract TContainer GetContainer(Guid key);
 
         protected abstract void DeleteViaService(TObject item);
 
         protected abstract string GetItemPath(TObject item, bool useGuid, bool isFlat);
         protected abstract string GetItemName(TObject item);
 
-        protected abstract int GetItemId(TObject item);
+        // protected abstract int GetItemId(TObject item);
         protected abstract Guid GetItemKey(TObject item);
 
-        protected abstract TBase GetNewBase(int id);
-        protected abstract IEnumerable<TBase> GetChildItems(TBase parent);
-        protected abstract IEnumerable<TBase> GetFolders(TBase parent);
+        protected abstract IEnumerable<TContainer> GetChildItems(TContainer parent);
+        protected abstract IEnumerable<TContainer> GetFolders(TContainer parent);
         protected abstract IEnumerable<uSyncAction> DeleteMissingItems(TObject parent, IEnumerable<Guid> keys, bool reportOnly);
 
         //

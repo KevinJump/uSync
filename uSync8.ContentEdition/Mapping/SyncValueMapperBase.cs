@@ -72,10 +72,11 @@ namespace uSync8.ContentEdition.Mapping
             };
         }
 
+
         private IEntitySlim GetElement(GuidUdi udi)
         {
-            if (udi != null)
-                return entityService.Get(udi.Guid);
+            // TODO: We are doing a get here, just to get somethings 'name' - can we live without the name? 
+            // if (udi != null) return entityService.Get(udi.Guid);
 
             return null;
         }

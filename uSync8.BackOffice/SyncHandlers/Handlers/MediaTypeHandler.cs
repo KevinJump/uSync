@@ -72,6 +72,9 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
         protected override IMediaType GetFromService(string alias)
             => mediaTypeService.Get(alias);
 
+        protected override IEntity GetContainer(Guid key)
+            => mediaTypeService.GetContainer(key);
+
         protected override void DeleteViaService(IMediaType item)
             => mediaTypeService.Delete(item);
 

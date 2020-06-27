@@ -6,7 +6,7 @@ using Umbraco.Core.Services;
 
 namespace uSync8.Core.Serialization
 {
-    public abstract class SyncSerializerBase<TObject> : SyncSerializerRoot<TObject, int>
+    public abstract class SyncSerializerBase<TObject> : SyncSerializerRoot<TObject>
         where TObject : IEntity
     {
         protected readonly IEntityService entityService;
@@ -17,7 +17,5 @@ namespace uSync8.Core.Serialization
         }
 
         protected override Guid ItemKey(TObject item) => item.Key;
-        protected override int ItemId(TObject item) => item.Id;
-
     }
 }
