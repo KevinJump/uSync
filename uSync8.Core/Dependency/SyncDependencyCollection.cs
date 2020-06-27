@@ -15,7 +15,6 @@ namespace uSync8.Core.Dependency
             : base(items) { }
 
         public IEnumerable<ISyncDependencyChecker<TObject>> GetCheckers<TObject>()
-            where TObject : IEntity
         {
             return this.Where(x => x is ISyncDependencyChecker<TObject> checker)
                 .Select(x => x as ISyncDependencyChecker<TObject>);
@@ -24,7 +23,6 @@ namespace uSync8.Core.Dependency
 
     public class SyncDependencyCollectionBuilder
         : WeightedCollectionBuilderBase<SyncDependencyCollectionBuilder, SyncDependencyCollection, ISyncDependencyItem>
-        // : LazyCollectionBuilderBase<SyncDependencyCollectionBuilder, SyncDependencyCollection, ISyncDependencyItem>
     {
 
         protected override SyncDependencyCollectionBuilder This => this;
