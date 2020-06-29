@@ -3,7 +3,9 @@
         <div class="umb-box-header flex justify-between items-center">
             <div>
                 <div class="umb-box-header-title">{{vm.action}}</div>
-                <div class="umb-box-header-description">{{vm.countChanges(vm.results)}} changes across {{vm.results.length}} items</div>
+                <div class="umb-box-header-description">
+                    <localize key="usync_changeSummary" tokens="[vm.countChanges(vm.results),vm.results.length]"></localize>
+                </div>
             </div>
             <umb-toggle checked="vm.showAll"
                         on-click="vm.showAll = !vm.showAll"

@@ -13,6 +13,8 @@
     <key alias="intro">Database elements to and from disk</key>
 
     <key alias="newer">There is a newer version of uSync available</key>
+
+		<key alias="changeSummary">%0% changes across %1% items</key>
     
     <key alias="import">Import</key>
     <key alias="importforce">Full Import</key>
