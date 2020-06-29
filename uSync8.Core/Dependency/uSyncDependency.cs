@@ -6,6 +6,8 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
 using Umbraco.Core;
+using Umbraco.Core.Migrations.Expressions.Create;
+using Umbraco.Core.Models.Entities;
 
 namespace uSync8.Core.Dependency
 {
@@ -109,6 +111,7 @@ namespace uSync8.Core.Dependency
             if (this.Options == null) this.Options = new Dictionary<string, object>();
             Options[key] = value;
         }
+
     }
 
     public enum DependencyMode

@@ -148,7 +148,7 @@ namespace uSync8.BackOffice
 
         public void Terminate()
         {
-            logger.Debug<uSyncBackofficeComponent>("Terminiating Component");
+            logger.Debug<uSyncBackofficeComponent>("uSync signing off");
         }
 
 
