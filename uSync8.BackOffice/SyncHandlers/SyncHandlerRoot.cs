@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using System.Xml.Linq;
 
 using Umbraco.Core;
@@ -286,7 +287,7 @@ namespace uSync8.BackOffice.SyncHandlers
 
                     actions.Add(action);
 
-                    if (attempt.Success) updates[file] = attempt.Item;
+                    if (attempt.Success && attempt.Item != null) updates[file] = attempt.Item;
                 }
             }
 
