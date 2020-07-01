@@ -59,9 +59,6 @@ namespace uSync8.Core.Serialization.Serializers
             if (fallbackId > 0)
                 item.FallbackLanguageId = fallbackId;
 
-            // logger.Debug<ILanguage>("Saving Language");
-            //localizationService.Save(item);
-
             return SyncAttempt<ILanguage>.Succeed(item.CultureName, item, ChangeType.Import);
         }
 
@@ -77,10 +74,14 @@ namespace uSync8.Core.Serialization.Serializers
             if (fallbackId > 0)
                 item.FallbackLanguageId = fallbackId;
 
-            if (!options.DoNotSave && item.IsDirty())
+            if (item.IsDirty())
+            {
                 localizationService.Save(item);
+                return SyncAttempt<ILanguage>.Succeed(item.CultureName, item, ChangeType.Import, true);
+            }
 
-            return SyncAttempt<ILanguage>.Succeed(item.CultureName, item, ChangeType.Import);
+            return SyncAttempt<ILanguage>.Succeed(item.CultureName, item, ChangeType.NoChange);
+
         }
 
         private int GetFallbackLanguageId(ILanguage item, XElement node)

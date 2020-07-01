@@ -64,10 +64,7 @@ namespace uSync8.ContentEdition.Serializers
 
             DeserializeBase(item, node, options);
 
-            // mediaService.Save(item);
-
-            return SyncAttempt<IMedia>.Succeed(
-                item.Name, item, ChangeType.Import, "");
+            return SyncAttempt<IMedia>.Succeed(item.Name, item, ChangeType.Import);
         }
 
         public override SyncAttempt<IMedia> DeserializeSecondPass(IMedia item, XElement node, SyncSerializerOptions options)
@@ -88,8 +85,8 @@ namespace uSync8.ContentEdition.Serializers
             if (!attempt.Success)
                 return SyncAttempt<IMedia>.Fail(item.Name, ChangeType.Fail, "");
 
-            // we return no-change so we don't trigger the second save 
-            return SyncAttempt<IMedia>.Succeed(item.Name, item, ChangeType.NoChange, propertyAttempt.Status);
+            // setting the saved flag on the attempt to true, stops base classes from saving the item.
+            return SyncAttempt<IMedia>.Succeed(item.Name, item, ChangeType.NoChange, propertyAttempt.Status, true);
         }
 
         protected override void HandleTrashedState(IMedia item, bool trashed)

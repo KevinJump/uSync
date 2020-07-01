@@ -57,7 +57,7 @@ namespace uSync8.Core.Serialization
         /// </summary>
         public bool Force => Flags.HasFlag(SerializerFlags.Force);
 
-        public bool DoNotSave => Flags.HasFlag(SerializerFlags.DoNotSave);
+        // public bool DoNotSave => Flags.HasFlag(SerializerFlags.DoNotSave);
 
         public bool FailOnMissingParent => Flags.HasFlag(SerializerFlags.FailMissingParent);
 

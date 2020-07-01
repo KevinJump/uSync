@@ -75,9 +75,6 @@ namespace uSync8.Core.Serialization.Serializers
 
             SetFolderFromElement(item, info.Element("Folder"));
 
-            // save is responsiblity of caller 
-            // dataTypeService.Save(item);
-
             return SyncAttempt<IDataType>.Succeed(item.Name, item, ChangeType.Import);
 
         }

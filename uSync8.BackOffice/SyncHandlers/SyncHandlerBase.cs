@@ -35,7 +35,7 @@ namespace uSync8.BackOffice.SyncHandlers
             SyncTrackerCollection trackers,
             SyncDependencyCollection checkers,
             SyncFileService syncFileService)
-            : base(logger, appCaches, serializer, trackers,  checkers, syncFileService)
+            : base(logger, appCaches, serializer, trackers, checkers, syncFileService)
         {
             this.entityService = entityService;
         }
@@ -45,27 +45,28 @@ namespace uSync8.BackOffice.SyncHandlers
         /// </summary>
         protected override IEnumerable<uSyncAction> DeleteMissingItems(TObject parent, IEnumerable<Guid> keys, bool reportOnly)
         {
-            var items = GetChildItems(parent).ToList();
+            var items = GetChildItems(parent)
+                .Where(x => keys.Contains(x.Key))
+                .ToList();
+
             var actions = new List<uSyncAction>();
             foreach (var item in items)
             {
-                if (!keys.Contains(item.Key))
+                var name = String.Empty;
+                if (item is IEntitySlim slim) name = slim.Name;
+
+                if (string.IsNullOrEmpty(name) || !reportOnly)
                 {
-                    var name = String.Empty;
-                    if (item is IEntitySlim slim) name = slim.Name;
-                    if (string.IsNullOrEmpty(name) || !reportOnly)
-                    {
-                        var actualItem = GetFromService(item.Key);
-                        name = GetItemName(actualItem);
+                    var actualItem = GetFromService(item.Key);
+                    name = GetItemName(actualItem);
 
-                        // actually do the delete if we are really not reporting
-                        if (!reportOnly) DeleteViaService(actualItem);
-                    }
-
-                    // for reporting - we use the entity name,
-                    // this stops an extra lookup - which we may not need later
-                    actions.Add(uSyncActionHelper<TObject>.SetAction(SyncAttempt<TObject>.Succeed(name, ChangeType.Delete), string.Empty));
+                    // actually do the delete if we are really not reporting
+                    if (!reportOnly) DeleteViaService(actualItem);
                 }
+
+                // for reporting - we use the entity name,
+                // this stops an extra lookup - which we may not need later
+                actions.Add(uSyncActionHelper<TObject>.SetAction(SyncAttempt<TObject>.Succeed(name, ChangeType.Delete), string.Empty));
             }
 
             return actions;
@@ -112,7 +113,7 @@ namespace uSync8.BackOffice.SyncHandlers
 
             return Enumerable.Empty<IEntity>();
         }
- 
+
         public virtual IEnumerable<uSyncAction> ExportAll(int parentId, string folder, HandlerSettings config, SyncUpdateCallback callback)
         {
             var parent = GetFromService(parentId);

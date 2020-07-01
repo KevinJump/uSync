@@ -218,9 +218,6 @@ namespace uSync8.BackOffice.Configuration
             if (handler.UseFlatStructure.IsOverridden)
                 node.SetAttributeValue("UseFlatStructure", handler.UseFlatStructure.Value);
 
-            if (handler.BatchSave.IsOverridden)
-                node.SetAttributeValue("BatchSave", handler.BatchSave.Value);
-
             if (handler.FailOnMissingParent.IsOverridden)
                 node.SetAttributeValue("FailOnMissingParent", handler.FailOnMissingParent.Value);
 
@@ -260,7 +257,6 @@ namespace uSync8.BackOffice.Configuration
             // we get them from the global setting.
             settings.GuidNames = GetLocalValue(node.Attribute("GuidNames"), defaultSettings.UseGuidNames);
             settings.UseFlatStructure = GetLocalValue(node.Attribute("UseFlatStructure"), defaultSettings.UseFlatStructure);
-            settings.BatchSave = GetLocalValue(node.Attribute("BatchSave"), defaultSettings.BatchSave);
             settings.Actions = node.Attribute("Actions").ValueOrDefault("All").ToDelimitedList().ToArray();
             settings.FailOnMissingParent = GetLocalValue(node.Attribute("FailOnMissingParent"), defaultSettings.FailOnMissingParent);
 
@@ -322,9 +318,6 @@ namespace uSync8.BackOffice.Configuration
 
             if (config.UseFlatStructure.IsOverridden)
                 node.SetAttributeValue("UseFlatStructure", config.UseFlatStructure);
-
-            if (config.BatchSave.IsOverridden)
-                node.SetAttributeValue("BatchSave", config.BatchSave);
 
             if (config.FailOnMissingParent.IsOverridden)
                 node.SetAttributeValue("FailOnMissingParent", config.FailOnMissingParent);

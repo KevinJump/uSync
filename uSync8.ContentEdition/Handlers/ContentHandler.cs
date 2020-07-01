@@ -11,6 +11,7 @@ using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
 using uSync8.BackOffice.SyncHandlers;
 using uSync8.Core.Dependency;
+using uSync8.Core.Models;
 using uSync8.Core.Serialization;
 using uSync8.Core.Tracking;
 
@@ -19,7 +20,7 @@ using static Umbraco.Core.Constants;
 namespace uSync8.ContentEdition.Handlers
 {
     [SyncHandler("contentHandler", "Content", "Content", uSyncBackOfficeConstants.Priorites.Content
-        , Icon = "icon-document usync-addon-icon", IsTwoPass = true, EntityType = UdiEntityType.Document)]
+        , Icon = "icon-document usync-addon-icon", IsTwoPass = false, EntityType = UdiEntityType.Document)]
     public class ContentHandler : ContentHandlerBase<IContent>, ISyncHandler, ISyncExtendedHandler
     {
         public override string Group => uSyncBackOfficeConstants.Groups.Content;
@@ -77,13 +78,5 @@ namespace uSync8.ContentEdition.Handlers
             ContentService.Moved += EventMovedItem;
             ContentService.Trashed += EventMovedItem;
         }
-
-        public uSyncAction Import(string file)
-        {
-            var attempt = this.Import(file, DefaultConfig, SerializerFlags.OnePass);
-            return uSyncActionHelper<IContent>.SetAction(attempt, file, this.Alias, IsTwoPass);
-        }
-
-
    }
 }

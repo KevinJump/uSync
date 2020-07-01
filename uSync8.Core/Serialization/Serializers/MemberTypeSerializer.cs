@@ -73,13 +73,7 @@ namespace uSync8.Core.Serialization.Serializers
 
             CleanTabs(item, node);
 
-            // memberTypeService.Save(item);
-
-            return SyncAttempt<IMemberType>.Succeed(
-                item.Name,
-                item,
-                ChangeType.Import,
-                "");
+            return SyncAttempt<IMemberType>.Succeed(item.Name, item, ChangeType.Import);
         }
 
         protected override void DeserializeExtraProperties(IMemberType item, PropertyType property, XElement node)

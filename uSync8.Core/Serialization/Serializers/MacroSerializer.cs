@@ -103,8 +103,6 @@ namespace uSync8.Core.Serialization.Serializers
 
             RemoveOrphanProperties(item, properties);
 
-            // macroService.Save(item);
-
             var attempt = SyncAttempt<IMacro>.Succeed(item.Name, item, ChangeType.Import);
             if (changes.Any())
                 attempt.Details = changes;

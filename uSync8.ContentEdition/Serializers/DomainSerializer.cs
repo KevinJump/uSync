@@ -75,9 +75,6 @@ namespace uSync8.ContentEdition.Serializers
                 item.RootContentId = rootItem.Id;
             }
 
-
-            // domainService.Save(item);
-
             return SyncAttempt<IDomain>.Succeed(item.DomainName, item, ChangeType.Import);
 
         }

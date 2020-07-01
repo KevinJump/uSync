@@ -15,8 +15,6 @@ namespace uSync8.Core.Serialization
         public Guid Id { get; private set; }
         public string ItemType { get; private set; }
 
-        public int Priority { get; set; }
-
         public bool IsTwoPass { get; set; }
     }
 }

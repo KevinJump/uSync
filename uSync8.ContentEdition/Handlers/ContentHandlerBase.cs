@@ -15,6 +15,7 @@ using uSync8.ContentEdition.Serializers;
 using uSync8.Core;
 using uSync8.Core.Dependency;
 using uSync8.Core.Extensions;
+using uSync8.Core.Models;
 using uSync8.Core.Serialization;
 using uSync8.Core.Tracking;
 
@@ -41,6 +42,17 @@ namespace uSync8.ContentEdition.Handlers
             SyncFileService syncFileService)
             : base(entityService, logger, appCaches, serializer, trackers, checkers, syncFileService)
         { }
+
+
+        /// <summary>
+        ///  content/media is always done in a single pass.
+        /// </summary>
+        public override SyncAttempt<TObject> Import(string filePath, HandlerSettings config, SerializerFlags flags)
+        {
+            var onePass = flags | SerializerFlags.OnePass;
+            return base.Import(filePath, config, onePass);
+        }
+
 
         /*
          *  Config options. 

@@ -63,19 +63,11 @@ namespace uSync8.Core.Serialization.Serializers
             DeserializeBase(item, node);
             DeserializeTabs(item, node);
 
-            // mediaTypeService.Save(item);
-
             DeserializeProperties(item, node);
 
             CleanTabs(item, node);
 
-            // mediaTypeService.Save(item);
-
-            return SyncAttempt<IMediaType>.Succeed(
-                item.Name,
-                item,
-                ChangeType.Import,
-                "");
+            return SyncAttempt<IMediaType>.Succeed(item.Name, item, ChangeType.Import);
         }
 
         public override SyncAttempt<IMediaType> DeserializeSecondPass(IMediaType item, XElement node, SyncSerializerOptions options)
@@ -83,10 +75,14 @@ namespace uSync8.Core.Serialization.Serializers
             DeserializeCompositions(item, node);
             DeserializeStructure(item, node);
 
-            if (!options.DoNotSave && item.IsDirty())
+            if (item.IsDirty())
+            {
                 mediaTypeService.Save(item);
+                return SyncAttempt<IMediaType>.Succeed(item.Name, item, ChangeType.Import, true);
+            }
 
-            return SyncAttempt<IMediaType>.Succeed(item.Name, item, ChangeType.Import);
+            return SyncAttempt<IMediaType>.Succeed(item.Name, item, ChangeType.NoChange); 
+
         }
 
         protected override IMediaType CreateItem(string alias, ITreeEntity parent, string itemType)

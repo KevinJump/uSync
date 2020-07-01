@@ -58,13 +58,7 @@ namespace uSync8.ContentEdition.Serializers
 
             DeserializeBase(item, node, options);
 
-            // contentService.SaveBlueprint(item);
-
-            return SyncAttempt<IContent>.Succeed(
-                item.Name,
-                item,
-                ChangeType.Import,
-                "");
+            return SyncAttempt<IContent>.Succeed(item.Name, item, ChangeType.Import);
         }
 
         public override IContent FindItem(XElement node)

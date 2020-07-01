@@ -199,7 +199,7 @@ namespace uSync8.BackOffice.SyncHandlers
 
             actions.AddRange(ImportFolder(folder, config, updates, force, callback));
 
-            if (updates.Any())
+            if (updates.Count > 0)
             {
                 ProcessSecondPasses(updates, actions, config, callback);
             }
@@ -217,29 +217,24 @@ namespace uSync8.BackOffice.SyncHandlers
         /// </summary>
         private void ProcessSecondPasses(IDictionary<string, TObject> updates, List<uSyncAction> actions, HandlerSettings config, SyncUpdateCallback callback = null)
         {
-            List<TObject> updatedItems = new List<TObject>();
             foreach (var item in updates.Select((update, Index) => new { update, Index }))
             {
                 callback?.Invoke($"Second Pass {Path.GetFileName(item.update.Key)}", item.Index, updates.Count);
+                
                 var attempt = ImportSecondPass(item.update.Key, item.update.Value, config, callback);
                 if (attempt.Success)
                 {
                     // if the second attempt has a message on it, add it to the first attempt.
-                    if (!string.IsNullOrWhiteSpace(attempt.Message))
+                    if (!string.IsNullOrWhiteSpace(attempt.Message) && actions.Any(x => x.FileName == item.update.Key))
                     {
-                        if (actions.Any(x => x.FileName == item.update.Key))
-                        {
-                            var action = actions.FirstOrDefault(x => x.FileName == item.update.Key);
-                            actions.Remove(action);
-                            action.Message += attempt.Message;
-                            actions.Add(action);
-                        }
+                        var action = actions.FirstOrDefault(x => x.FileName == item.update.Key);
+                        actions.Remove(action);
+                        action.Message += attempt.Message;
+                        actions.Add(action);
                     }
 
-                    if (attempt.Change > ChangeType.NoChange)
-                    {
-                        updatedItems.Add(attempt.Item);
-                    }
+                    if (!attempt.Saved)
+                        serializer.Save(attempt.Item.AsEnumerableOfOne());
                 }
                 else
                 {
@@ -255,13 +250,6 @@ namespace uSync8.BackOffice.SyncHandlers
                     }
                 }
             }
-
-            if (config.BatchSave)
-            {
-                callback?.Invoke($"Saving {updatedItems.Count} Second Pass Items", 2, 3);
-                serializer.Save(updatedItems);
-            }
-
         }
 
         /// <summary>
@@ -270,47 +258,36 @@ namespace uSync8.BackOffice.SyncHandlers
         protected virtual IEnumerable<uSyncAction> ImportFolder(string folder, HandlerSettings config, Dictionary<string, TObject> updates, bool force, SyncUpdateCallback callback)
         {
             List<uSyncAction> actions = new List<uSyncAction>();
-            var files = GetImportFiles(folder);
+            var files = GetImportFiles(folder).ToList();
 
             var flags = SerializerFlags.None;
             if (force) flags |= SerializerFlags.Force;
-            if (config.BatchSave) flags |= SerializerFlags.DoNotSave;
 
             var cleanMarkers = new List<string>();
 
             int count = 0;
-            int total = files.Count();
             foreach (string file in files)
             {
-                count++;
-
-                callback?.Invoke($"Importing {Path.GetFileNameWithoutExtension(file)}", count, total);
+                callback?.Invoke($"Importing {Path.GetFileNameWithoutExtension(file)}", ++count, files.Count);
 
                 var attempt = Import(file, config, flags);
-                if (attempt.Success)
+
+                if (attempt.Change == ChangeType.Clean)
                 {
-                    if (attempt.Change == ChangeType.Clean)
-                    {
-                        cleanMarkers.Add(file);
-                    }
-                    else if (attempt.Item != null)
-                    {
-                        updates.Add(file, attempt.Item);
-                    }
+                    // a successful clean, gets added to the marker file. 
+                    if (attempt.Success) cleanMarkers.Add(file);
                 }
+                else
+                {
+                    // "normal" action
+                    var action = uSyncActionHelper<TObject>.SetAction(attempt, file, this.Alias, IsTwoPass);
+                    if (attempt.Details != null && attempt.Details.Any())
+                        action.Details = attempt.Details;
 
-                var action = uSyncActionHelper<TObject>.SetAction(attempt, file, this.Alias, IsTwoPass);
-                if (attempt.Details != null && attempt.Details.Any())
-                    action.Details = attempt.Details;
-
-                if (attempt.Change != ChangeType.Clean)
                     actions.Add(action);
-            }
 
-            // bulk save ..
-            if (flags.HasFlag(SerializerFlags.DoNotSave) && updates.Any())
-            {
-                serializer.Save(updates.Select(x => x.Value));
+                    if (attempt.Success) updates[file] = attempt.Item;
+                }
             }
 
             // process children.
@@ -451,8 +428,7 @@ namespace uSync8.BackOffice.SyncHandlers
                     var node = XElement.Load(stream);
                     if (ShouldImport(node, config))
                     {
-                        var attempt = DeserializeItem(node, new SyncSerializerOptions(flags, config.Settings));
-                        return attempt;
+                        return DeserializeItem(node, new SyncSerializerOptions(flags, config.Settings));
                     }
                     else
                     {
@@ -483,8 +459,6 @@ namespace uSync8.BackOffice.SyncHandlers
                     syncFileService.EnsureFileExists(file);
 
                     var flags = SerializerFlags.None;
-                    if (config.BatchSave)
-                        flags |= SerializerFlags.DoNotSave;
 
                     using (var stream = syncFileService.OpenRead(file))
                     {
@@ -543,7 +517,6 @@ namespace uSync8.BackOffice.SyncHandlers
                 actions.AddRange(ExportAll(item.Value, folder, config, callback));
             }
 
-            // callback?.Invoke("Done", 1, 1);
             return actions;
         }
 
@@ -744,14 +717,12 @@ namespace uSync8.BackOffice.SyncHandlers
         {
             List<uSyncAction> actions = new List<uSyncAction>();
 
-            var files = GetImportFiles(folder);
+            var files = GetImportFiles(folder).ToList();
 
             int count = 0;
-            int total = files.Count();
             foreach (string file in files)
             {
-                count++;
-                callback?.Invoke(Path.GetFileNameWithoutExtension(file), count, total);
+                callback?.Invoke(Path.GetFileNameWithoutExtension(file), ++count, files.Count);
 
                 actions.AddRange(ReportItem(file, config));
             }

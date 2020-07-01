@@ -95,23 +95,21 @@ namespace uSync8.Core.Serialization
                 {
                     logger.Debug(serializerType, "Base: Deserialize Core Success {0}", ItemType);
 
-                    if (!options.DoNotSave)
-                    {
-                        logger.Debug(serializerType, "Base: Serializer Saving (No DoNotSaveFlag) {0}", ItemKey(result.Item)); 
-                        // save 
-                        SaveItem(result.Item);
-                    }
-
                     if (options.OnePass)
                     {
+                        // if we are doing a single pass then it can all happen in one go. 
                         logger.Debug(serializerType, "Base: Processing item in one pass {0}", ItemKey(result.Item));
+                        result = DeserializeSecondPass(result.Item, node, options);
+                        logger.Debug(serializerType, "Base: Second Pass Result {0} {1}", ItemKey(result.Item), result.Success);
 
-                        var secondAttempt = DeserializeSecondPass(result.Item, node, options);
-
-                        logger.Debug(serializerType, "Base: Second Pass Result {0} {1}", ItemKey(result.Item), secondAttempt.Success);
-                        
-                        // if its the second pass, we return the results of that pass
-                        return secondAttempt;
+                    }
+                    
+                    // if the item wasn't saved in the pass, then we check here if we are going to save it. 
+                    // DoNotSave is set when we are in batch save mode (which might be faster in some cases).
+                    if (!result.Saved && result.Change > ChangeType.NoChange)
+                    {
+                        logger.Debug(serializerType, "Base: Serializer Saving (No DoNotSaveFlag) {0}", ItemKey(result.Item)); 
+                        SaveItem(result.Item);
                     }
                 }
 
@@ -125,17 +123,13 @@ namespace uSync8.Core.Serialization
         ///  Implimented by child classes to process a the second pass of a deserialization.
         /// </summary>
         public virtual SyncAttempt<TObject> DeserializeSecondPass(TObject item, XElement node, SyncSerializerOptions options)
-        {
-            return SyncAttempt<TObject>.Succeed(nameof(item), item, typeof(TObject), ChangeType.NoChange);
-        }
+            => SyncAttempt<TObject>.Succeed(nameof(item), item, typeof(TObject), ChangeType.NoChange);
 
         /// <summary>
         ///  Serialize an elment into XML 
         /// </summary>
         public SyncAttempt<XElement> Serialize(TObject item, SyncSerializerOptions options)
-        {
-            return SerializeCore(item, options);
-        }
+            => SerializeCore(item, options);
 
 #pragma warning disable 0618
         protected virtual SyncAttempt<XElement> SerializeCore(TObject item, SyncSerializerOptions options)

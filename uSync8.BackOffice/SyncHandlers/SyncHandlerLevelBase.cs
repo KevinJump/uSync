@@ -97,7 +97,6 @@ namespace uSync8.BackOffice.SyncHandlers
             // loaded - now process.
             var flags = SerializerFlags.None;
             if (force) flags |= SerializerFlags.Force;
-            if (config.BatchSave) flags |= SerializerFlags.DoNotSave;
 
             var cleanMarkers = new List<string>();
 
@@ -117,18 +116,11 @@ namespace uSync8.BackOffice.SyncHandlers
                     }
                     else if (attempt.Item != null)
                     {
-                        updates.Add(item.Node.File, attempt.Item);
+                        updates[item.Node.File] = attempt.Item;
                     }
                 }
 
                 actions.Add(uSyncActionHelper<TObject>.SetAction(attempt, item.Node.File, IsTwoPass));
-            }
-
-            if (flags.HasFlag(SerializerFlags.DoNotSave) && updates.Any())
-            {
-                // bulk save - should be the fastest way to do this
-                callback?.Invoke($"Saving {updates.Count()} changes", 1, 1);
-                serializer.Save(updates.Select(x => x.Value));
             }
 
             var folders = syncFileService.GetDirectories(folder);
@@ -139,7 +131,6 @@ namespace uSync8.BackOffice.SyncHandlers
 
             if (actions.All(x => x.Success))
             {
-
                 // LINQ 
                 // actions.AddRange(cleanMarkers.Select(x => CleanFolder(x)).SelectMany(a => a));
 

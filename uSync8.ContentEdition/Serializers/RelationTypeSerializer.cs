@@ -70,12 +70,17 @@ namespace uSync8.ContentEdition.Serializers
             if (item.IsBidirectional = bidirectional)
                 item.IsBidirectional = bidirectional;
 
+            var hasBeenSaved = false;
+
             if (options.GetSetting<bool>("IncludeRelations", true))
             {
+                // we have to save before we can add the relations. 
+                this.SaveItem(item);
+                hasBeenSaved = true;
                 changes.AddRange(DeserializeRelations(node, item));
             }
 
-            var attempt = SyncAttempt<IRelationType>.Succeed(item.Name, item, ChangeType.Import);
+            var attempt = SyncAttempt<IRelationType>.Succeed(item.Name, item, ChangeType.Import, hasBeenSaved);
             attempt.Details = changes;
             return attempt;
         }

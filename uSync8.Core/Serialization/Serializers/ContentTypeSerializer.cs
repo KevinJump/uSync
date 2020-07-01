@@ -107,13 +107,7 @@ namespace uSync8.Core.Serialization.Serializers
             // templates 
             DeserializeTemplates(item, node);
 
-            // contentTypeService.Save(item);
-
-            return SyncAttempt<IContentType>.Succeed(
-                item.Name,
-                item,
-                ChangeType.Import,
-                "");
+            return SyncAttempt<IContentType>.Succeed(item.Name, item, ChangeType.Import);
         }
 
         protected override void DeserializeExtraProperties(IContentType item, PropertyType property, XElement node)
@@ -127,13 +121,18 @@ namespace uSync8.Core.Serialization.Serializers
 
             DeserializeCompositions(item, node);
             DeserializeStructure(item, node);
-            
-            if (!options.DoNotSave && item.IsDirty())
+
+            var saved = false;
+
+            if (item.IsDirty())
+            {
                 contentTypeService.Save(item);
+                saved = true;
+            }
 
             CleanFolder(item, node);
 
-            return SyncAttempt<IContentType>.Succeed(item.Name, item, ChangeType.Import);
+            return SyncAttempt<IContentType>.Succeed(item.Name, item, ChangeType.Import, saved);
         }
 
         private void DeserializeContentTypeProperties(IContentType item, XElement node)

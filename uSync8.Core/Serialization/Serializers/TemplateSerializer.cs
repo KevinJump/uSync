@@ -75,24 +75,13 @@ namespace uSync8.Core.Serialization.Serializers
             if (item.Alias != alias)
                 item.Alias = alias;
 
-            //var master = node.Element("Parent").ValueOrDefault(string.Empty);
-            //if (master != string.Empty)
-            //{
-            //    var masterItem = fileService.GetTemplate(master);
-            //    if (masterItem != null)
-            //        item.SetMasterTemplate(masterItem);
-            //}
-
-            // Deserialize now takes care of the save.
-            // fileService.SaveTemplate(item);
-
             return SyncAttempt<ITemplate>.Succeed(item.Name, item, ChangeType.Import);
         }
 
         public override SyncAttempt<ITemplate> DeserializeSecondPass(ITemplate item, XElement node, SyncSerializerOptions options)
         {
             var master = node.Element("Parent").ValueOrDefault(string.Empty);
-            if (master != string.Empty && item.MasterTemplateAlias != master)
+            if (!string.IsNullOrEmpty(master) && item.MasterTemplateAlias != master)
             {
                 logger.Debug<TemplateSerializer>("Looking for master {0}", master);
                 var masterItem = fileService.GetTemplate(master);
@@ -100,13 +89,14 @@ namespace uSync8.Core.Serialization.Serializers
                 {
                     logger.Debug<TemplateSerializer>("Setting Master {0}", masterItem.Alias);
                     item.SetMasterTemplate(masterItem);
+                    
+                    SaveItem(item);
 
-                    if (!options.DoNotSave)
-                        SaveItem(item);
+                    return SyncAttempt<ITemplate>.Succeed(item.Name, item, ChangeType.Import, true);
                 }
             }
 
-            return SyncAttempt<ITemplate>.Succeed(item.Name, item, ChangeType.Import);
+            return SyncAttempt<ITemplate>.Succeed(item.Name, item, ChangeType.NoChange);
         }
 
 
