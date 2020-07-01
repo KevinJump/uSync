@@ -45,12 +45,12 @@ namespace uSync8.BackOffice.SyncHandlers
         /// </summary>
         protected override IEnumerable<uSyncAction> DeleteMissingItems(TObject parent, IEnumerable<Guid> keys, bool reportOnly)
         {
-            var items = GetChildItems(parent)
-                .Where(x => keys.Contains(x.Key))
+            var itemsToRemove = GetChildItems(parent)
+                .Where(x => !keys.Contains(x.Key))
                 .ToList();
 
             var actions = new List<uSyncAction>();
-            foreach (var item in items)
+            foreach (var item in itemsToRemove)
             {
                 var name = String.Empty;
                 if (item is IEntitySlim slim) name = slim.Name;
