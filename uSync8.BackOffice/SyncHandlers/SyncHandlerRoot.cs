@@ -234,7 +234,7 @@ namespace uSync8.BackOffice.SyncHandlers
                         actions.Add(action);
                     }
 
-                    if (!attempt.Saved)
+                    if (attempt.Change > ChangeType.NoChange && !attempt.Saved && attempt.Item != null)
                         serializer.Save(attempt.Item.AsEnumerableOfOne());
                 }
                 else
