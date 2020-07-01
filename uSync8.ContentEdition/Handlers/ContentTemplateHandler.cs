@@ -27,7 +27,7 @@ using static Umbraco.Core.Constants;
 namespace uSync8.ContentEdition.Handlers
 {
     [SyncHandler("contentTemplateHandler", "Blueprints", "Blueprints", uSyncBackOfficeConstants.Priorites.ContentTemplate
-        , Icon = "icon-document-dashed-line usync-addon-icon", IsTwoPass = true, EntityType = UdiEntityType.DocumentBlueprint)]
+        , Icon = "icon-document-dashed-line usync-addon-icon", IsTwoPass = false, EntityType = UdiEntityType.DocumentBlueprint)]
     public class ContentTemplateHandler : ContentHandlerBase<IContent>, ISyncHandler, ISyncExtendedHandler
     {
         public override string Group => uSyncBackOfficeConstants.Groups.Content;
