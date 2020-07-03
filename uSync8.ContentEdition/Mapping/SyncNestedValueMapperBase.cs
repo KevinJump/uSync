@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -37,7 +38,7 @@ namespace uSync8.ContentEdition.Mapping
         /// </summary>
         protected JObject GetExportProperties(JObject item, IContentType docType)
         {
-            foreach(var property in docType.CompositionPropertyTypes)
+            foreach (var property in docType.CompositionPropertyTypes)
             {
                 if (item.ContainsKey(property.Alias))
                 {
@@ -73,10 +74,7 @@ namespace uSync8.ContentEdition.Mapping
                 var dataType = dataTypeService.GetDataType(propertyType.DataTypeKey);
                 if (dataType == null) continue;
 
-                var mapper = SyncValueMapperFactory.GetMapper(dataType.EditorAlias);
-                if (mapper == null) continue;
-
-                dependencies.AddRange(mapper.GetDependencies(propertyValue, dataType.EditorAlias, flags));
+                dependencies.AddRange(SyncValueMapperFactory.GetDependencies(propertyValue, dataType.EditorAlias, flags));
             }
 
             return dependencies;
@@ -91,16 +89,9 @@ namespace uSync8.ContentEdition.Mapping
         {
             var dependencies = new List<uSyncDependency>();
 
-            if (properties.Any())
+            foreach (var property in properties)
             {
-                foreach (var property in properties)
-                {
-                    var mapper = SyncValueMapperFactory.GetMapper(property.Key);
-                    if (mapper != null)
-                    {
-                        dependencies.AddRange(mapper.GetDependencies(property.Value, property.Key, flags));
-                    }
-                }
+                dependencies.AddRange(SyncValueMapperFactory.GetDependencies(property.Value, property.Key, flags));
             }
 
             return dependencies;

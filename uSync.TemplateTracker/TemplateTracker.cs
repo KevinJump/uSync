@@ -18,7 +18,7 @@ namespace uSync.TemplateTracker
         readonly string viewFolderPath;
         readonly int rootLength;
 
-        FileSystemWatcher watcher;
+        // FileSystemWatcher watcher;
 
         public TemplateTracker(IFileService fileService)
         {

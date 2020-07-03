@@ -55,7 +55,7 @@ namespace uSync8.ContentEdition
             composition.Register<ISyncTracker<IRelationType>, RelationTypeTracker>();
 
             composition.WithCollectionBuilder<SyncValueMapperCollectionBuilder>()
-                .Add(() => composition.TypeLoader.GetTypes<ISyncMapper>());
+                .Add(composition.TypeLoader.GetTypes<ISyncMapper>());
         }
     }
 }

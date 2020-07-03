@@ -59,12 +59,15 @@ namespace uSync8.ContentEdition.Mapping.Mappers
 
             if (MacroRegEx.IsMatch(stringValue))
             {
-                var macroMapper = SyncValueMapperFactory.GetMapper(editorAlias + ".macro");
-                if (macroMapper != null)
+                var macroMappers = SyncValueMapperFactory.GetMappers(editorAlias + ".macro");
+                if (macroMappers.Any())
                 {
-                    foreach (var macro in MacroRegEx.Matches(stringValue))
+                    foreach (var macroMapper in macroMappers)
                     {
-                        dependencies.AddRange(macroMapper.GetDependencies(stringValue, editorAlias + ".macro", flags));
+                        foreach (var macro in MacroRegEx.Matches(stringValue))
+                        {
+                            dependencies.AddRange(macroMapper.GetDependencies(stringValue, editorAlias + ".macro", flags));
+                        }
                     }
                 }
             }
