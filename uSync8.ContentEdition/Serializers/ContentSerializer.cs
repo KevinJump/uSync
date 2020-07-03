@@ -116,9 +116,9 @@ namespace uSync8.ContentEdition.Serializers
                 foreach (var schedule in schedules.OrderBy(x => x.Action).OrderBy(x => x.Culture))
                 {
                     node.Add(new XElement("ContentSchedule",
-                        new XElement("Culture", schedule.Culture),
+                        new XElement("Culture", schedule.Culture.ToLower()),
                         new XElement("Action", schedule.Action),
-                        new XElement("Date", schedule.Date)));
+                        new XElement("Date", schedule.Date.ToString("s"))));
                 }
             }
 

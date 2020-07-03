@@ -468,9 +468,9 @@ namespace uSync8.Core.Tracking
         private XElement GetTarget(IEnumerable<XElement> items, string key, string value, bool isAttribute)
         {
             if (isAttribute)
-                return items.FirstOrDefault(x => x.Attribute(key).ValueOrDefault(string.Empty) == value);
+                return items.FirstOrDefault(x => x.Attribute(key).ValueOrDefault(string.Empty).InvariantEquals(value));
 
-            return items.FirstOrDefault(x => x.Element(key).ValueOrDefault(string.Empty) == value);
+            return items.FirstOrDefault(x => x.Element(key).ValueOrDefault(string.Empty).InvariantEquals(value));
         }
 
 #pragma warning disable 0618

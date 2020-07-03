@@ -40,7 +40,7 @@ namespace uSync8.Core.Models
                 Path = path,
                 Name = name,
                 NewValue = string.IsNullOrEmpty(newValue) ? "(Blank)" : newValue,
-                OldValue = string.IsNullOrEmpty(oldValue) ? "(Blank)" : newValue
+                OldValue = string.IsNullOrEmpty(oldValue) ? "(Blank)" : oldValue
             };
 
         public static uSyncChange NoChange(string path, string name)
