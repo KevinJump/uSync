@@ -991,7 +991,7 @@ namespace uSync8.BackOffice.SyncHandlers
             var item = this.GetFromService(id);
             if (item == null)
             {
-                // v8.6.75 + getting by id doesn't support container dependencies.
+                // v8.7.0 + getting by id doesn't support container dependencies.
                 // return GetContainerDependencies(baseItem, flags);
                 return Enumerable.Empty<uSyncDependency>();
             }
