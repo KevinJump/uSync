@@ -23,7 +23,9 @@ namespace uSync8.Community.DataTypeSerializers.CoreTypes
         {
             var MNTPMappedConfig = new MappedPathConfigBase<MultiNodePickerConfiguration>();
 
-            if (configuration is MultiNodePickerConfiguration pickerConfig)
+            if (configuration != null 
+                && configuration is MultiNodePickerConfiguration pickerConfig 
+                && pickerConfig?.TreeSource != null)
             {
                 MNTPMappedConfig.Config = new MultiNodePickerConfiguration()
                 {
@@ -44,9 +46,8 @@ namespace uSync8.Community.DataTypeSerializers.CoreTypes
                 if (pickerConfig?.TreeSource?.StartNodeId != null)
                 {
                     MNTPMappedConfig.MappedPath = UdiToEntityPath(pickerConfig.TreeSource.StartNodeId);
+                    return base.SerializeConfig(MNTPMappedConfig);
                 }
-
-                return base.SerializeConfig(MNTPMappedConfig);
             }
 
             return base.SerializeConfig(configuration);

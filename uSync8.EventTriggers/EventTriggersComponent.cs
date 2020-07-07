@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using Umbraco.Core.Composing;
+using Umbraco.Core.Configuration;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Services.Changes;
 using Umbraco.Web.Cache;
@@ -28,7 +29,10 @@ namespace uSync8.EventTriggers
 
         public void Initialize()
         {
-            uSyncService.ImportComplete += BulkEventComplete;
+            if (UmbracoVersion.LocalVersion.Major == 8 && UmbracoVersion.LocalVersion.Minor < 4)
+            {
+                uSyncService.ImportComplete += BulkEventComplete;
+            }
         }
 
         private void BulkEventComplete(uSyncBulkEventArgs e)

@@ -4,6 +4,7 @@ using System.Linq;
 
 using Umbraco.Core;
 using Umbraco.Core.Cache;
+using Umbraco.Core.Composing;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
@@ -120,4 +121,46 @@ namespace uSync8.BackOffice.SyncHandlers
             return ExportAll(parent, folder, config, callback);
         }
     }
+
+    [Obsolete]
+    public abstract class SyncHandlerBase<TObject, TService>
+        : SyncHandlerBase<TObject>
+        where TObject : IEntity
+    {
+        [Obsolete("Construct your handler using the tracker & Dependecy collections for better checker support")]
+        public SyncHandlerBase(
+            IEntityService entityService,
+            IProfilingLogger logger,
+            ISyncSerializer<TObject> serializer,
+            ISyncTracker<TObject> tracker,
+            AppCaches appCaches,
+            SyncFileService syncFileService)
+            : base(entityService, logger, appCaches, serializer, default, default, syncFileService)
+        { }
+
+        [Obsolete("Construct your handler using the tracker & Dependecy collections for better checker support")]
+        public SyncHandlerBase(
+            IEntityService entityService,
+            IProfilingLogger logger,
+            ISyncSerializer<TObject> serializer,
+            ISyncTracker<TObject> tracker,
+            AppCaches appCaches,
+            ISyncDependencyChecker<TObject> dependencyChecker,
+            SyncFileService syncFileService)
+            : base(entityService, logger, appCaches, serializer, default, default, syncFileService)
+        { }
+
+        protected SyncHandlerBase(
+            IEntityService entityService,
+            IProfilingLogger logger,
+            AppCaches appCaches,
+            ISyncSerializer<TObject> serializer,
+            SyncTrackerCollection trackers,
+            SyncDependencyCollection checkers,
+            SyncFileService syncFileService)
+            : base(entityService, logger, appCaches, serializer, trackers, checkers, syncFileService)
+        { }
+
+    }
+
 }

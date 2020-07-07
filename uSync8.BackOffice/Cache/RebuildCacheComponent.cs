@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 
+using Umbraco.Core;
 using Umbraco.Core.Composing;
 using Umbraco.Core.Configuration;
 using Umbraco.Core.Services.Changes;
@@ -38,11 +39,15 @@ namespace uSync8.BackOffice.Cache
 
         public void Initialize()
         {
-            var config = Current.Configs.uSync();
-            if (config != null)
-                Config_Reloaded(config);
+            // this only is ever required on pre v8.4 
+            if (UmbracoVersion.LocalVersion.Major != 8 || UmbracoVersion.LocalVersion.Minor < 4)
+            {
+                var config = Current.Configs.uSync();
+                if (config != null)
+                    Config_Reloaded(config);
 
-            uSyncService.ImportComplete += ImportComplete;
+                uSyncService.ImportComplete += ImportComplete;
+            }
         }
 
         private void ImportComplete(uSyncBulkEventArgs e)

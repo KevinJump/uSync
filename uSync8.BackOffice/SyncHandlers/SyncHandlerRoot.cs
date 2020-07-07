@@ -121,8 +121,11 @@ namespace uSync8.BackOffice.SyncHandlers
 
             this.serializer = serializer;
 
-            this.trackers = trackers != null ? trackers.GetTrackers<TObject>().ToList() : new List<ISyncTracker<TObject>>();
-            this.checkers = checkers != null ? checkers.GetCheckers<TObject>().ToList() : new List<ISyncDependencyChecker<TObject>>();
+            this.trackers = trackers != null ? trackers.GetTrackers<TObject>().ToList()
+                : Current.Factory.GetInstance<SyncTrackerCollection>().GetTrackers<TObject>().ToList();
+
+            this.checkers = checkers != null ? checkers.GetCheckers<TObject>().ToList()
+                : Current.Factory.GetInstance<SyncDependencyCollection>().GetCheckers<TObject>().ToList();
 
             this.syncFileService = syncFileService;
 
@@ -810,6 +813,11 @@ namespace uSync8.BackOffice.SyncHandlers
             try
             {
                 var node = syncFileService.LoadXElement(file);
+
+                logger.Debug(handlerType, "Node {node}, File {file}, Settings {count}"
+                    , node.Name.LocalName,
+                    file, config.Settings.Count);
+
                 if (ShouldImport(node, config))
                 {
                     return ReportElement(node, file, config);
@@ -824,7 +832,7 @@ namespace uSync8.BackOffice.SyncHandlers
             {
                 logger.Warn(handlerType, ex, "Error generating report");
                 return uSyncActionHelper<TObject>
-                    .ReportActionFail(Path.GetFileName(file), $"Reporting error {ex.Message}")
+                    .ReportActionFail(Path.GetFileName(file), $"Reporting error {ex.ToString()}")
                     .AsEnumerableOfOne();
             }
 
@@ -964,6 +972,7 @@ namespace uSync8.BackOffice.SyncHandlers
 
         public IEnumerable<uSyncDependency> GetDependencies(Guid key, DependencyFlags flags)
         {
+            logger.Debug(handlerType, "Calc Dependency : {key}", key);
             var item = this.GetFromService(key);
             if (item != null) 
                 return GetDependencies(item, flags);
