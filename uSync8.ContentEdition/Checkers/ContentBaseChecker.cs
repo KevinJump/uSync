@@ -155,34 +155,37 @@ namespace uSync8.ContentEdition.Checkers
             foreach (var property in item.Properties)
             {
                 var editorAlias = property.PropertyType.PropertyEditorAlias;
-                var mapper = mappers.GetSyncMapper(editorAlias);
-                if (mapper != null)
+                var valueMappers = mappers.GetSyncMappers(editorAlias);
+                if (valueMappers.Any())
                 {
                     foreach(var value in property.Values)
                     {
                         if (value.EditedValue == null) continue;
 
-                        var linkedDependencies = mapper.GetDependencies(value.EditedValue, editorAlias, propertyFlags);
-
-                        // include linked means all content we link to 
-                        if (flags.HasFlag(DependencyFlags.IncludeLinked))
+                        foreach (var mapper in mappers)
                         {
-                            dependencies.AddRange(linkedDependencies.Where(x => x.Udi.EntityType == UdiEntityType.Document));
-                        }
+                            var linkedDependencies = mapper.GetDependencies(value.EditedValue, editorAlias, propertyFlags);
 
-                        // include any settings things we would be dependent on for this property. 
-                        if (flags.HasFlag(DependencyFlags.IncludeDependencies))
-                        {
-                            dependencies.AddRange(linkedDependencies.Where(x => settingsTypes.InvariantContains(x.Udi.EntityType)));
-                        }
+                            // include linked means all content we link to 
+                            if (flags.HasFlag(DependencyFlags.IncludeLinked))
+                            {
+                                dependencies.AddRange(linkedDependencies.Where(x => x.Udi.EntityType == UdiEntityType.Document));
+                            }
 
-                        // media means we include media items (the files are checked)
-                        if (flags.HasFlag(DependencyFlags.IncludeMedia))
-                        {
-                            var media = linkedDependencies.Where(x => x.Udi.EntityType == UdiEntityType.Media || x.Udi.EntityType == UdiEntityType.MediaFile).ToList();
-                            media.ForEach(x => { x.Flags |= DependencyFlags.IncludeAncestors; });
+                            // include any settings things we would be dependent on for this property. 
+                            if (flags.HasFlag(DependencyFlags.IncludeDependencies))
+                            {
+                                dependencies.AddRange(linkedDependencies.Where(x => settingsTypes.InvariantContains(x.Udi.EntityType)));
+                            }
 
-                            dependencies.AddRange(media);
+                            // media means we include media items (the files are checked)
+                            if (flags.HasFlag(DependencyFlags.IncludeMedia))
+                            {
+                                var media = linkedDependencies.Where(x => x.Udi.EntityType == UdiEntityType.Media || x.Udi.EntityType == UdiEntityType.MediaFile).ToList();
+                                media.ForEach(x => { x.Flags |= DependencyFlags.IncludeAncestors; });
+
+                                dependencies.AddRange(media);
+                            }
                         }
                     }
                 }

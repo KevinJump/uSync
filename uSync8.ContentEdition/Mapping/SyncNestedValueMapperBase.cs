@@ -73,10 +73,7 @@ namespace uSync8.ContentEdition.Mapping
                 var dataType = dataTypeService.GetDataType(propertyType.DataTypeKey);
                 if (dataType == null) continue;
 
-                var mapper = SyncValueMapperFactory.GetMapper(dataType.EditorAlias);
-                if (mapper == null) continue;
-
-                dependencies.AddRange(mapper.GetDependencies(propertyValue, dataType.EditorAlias, flags));
+                return SyncValueMapperFactory.GetDependencies(propertyValue, dataType.EditorAlias, flags);
             }
 
             return dependencies;
@@ -95,11 +92,7 @@ namespace uSync8.ContentEdition.Mapping
             {
                 foreach (var property in properties)
                 {
-                    var mapper = SyncValueMapperFactory.GetMapper(property.Key);
-                    if (mapper != null)
-                    {
-                        dependencies.AddRange(mapper.GetDependencies(property.Value, property.Key, flags));
-                    }
+                    dependencies.AddRange(SyncValueMapperFactory.GetDependencies(property.Value, property.Key, flags));
                 }
             }
 

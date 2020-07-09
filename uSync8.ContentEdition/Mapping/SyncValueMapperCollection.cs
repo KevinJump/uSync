@@ -15,11 +15,16 @@ namespace uSync8.ContentEdition.Mapping
         public SyncValueMapperCollection(IEnumerable<ISyncMapper> items)
             : base(items) { }
 
+        [Obsolete("Request all mappers and you can chain multiple mappers")]
         public ISyncMapper GetSyncMapper(string alias)
         {
             return this.FirstOrDefault(x => x.Editors.InvariantContains(alias));
         }
 
+        public IEnumerable<ISyncMapper> GetSyncMappers(string alias)
+            => this.Where(x => x.Editors.InvariantContains(alias));
+
+        [Obsolete("Request all mappers and you can chain multiple mappers")]
         public ISyncMapper GetSyncMapper(PropertyType propertyType)
         {
             return this.FirstOrDefault(x => x.IsMapper(propertyType));
@@ -29,20 +34,37 @@ namespace uSync8.ContentEdition.Mapping
         {
             if (value == null) return string.Empty;
 
-            var mapper = GetSyncMapper(editorAlias);
-            if (mapper == null) return GetSafeValue(value);
+            var mappers = GetSyncMappers(editorAlias);
+            if (mappers.Any())
+            {
+                var mappedValue = value.ToString();
+                foreach (var mapper in mappers)
+                {
+                    mappedValue = mapper.GetExportValue(mappedValue, editorAlias);
+                }
 
-            return mapper.GetExportValue(value, editorAlias);
+                return mappedValue;
+            }
+
+            return GetSafeValue(value);
         }
 
         public object GetImportValue(string value, string editorAlias)
         {
             if (string.IsNullOrWhiteSpace(value)) return null;
 
-            var mapper = GetSyncMapper(editorAlias);
-            if (mapper == null) return value;
+            var mappers = GetSyncMappers(editorAlias);
+            if (mappers.Any())
+            {
+                var mappedValue = value;
+                foreach(var mapper in mappers)
+                {
+                    mappedValue = mapper.GetImportValue(mappedValue, editorAlias);
+                }
+                return mappedValue;
+            }
 
-            return mapper.GetImportValue(value, editorAlias);
+            return value;
         }
 
         /// <summary>
@@ -71,7 +93,7 @@ namespace uSync8.ContentEdition.Mapping
     }
 
     public class SyncValueMapperCollectionBuilder
-        : LazyCollectionBuilderBase<SyncValueMapperCollectionBuilder, SyncValueMapperCollection, ISyncMapper>
+        : WeightedCollectionBuilderBase<SyncValueMapperCollectionBuilder, SyncValueMapperCollection, ISyncMapper>
     {
         protected override SyncValueMapperCollectionBuilder This => this;
     }
