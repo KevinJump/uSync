@@ -60,7 +60,7 @@ namespace uSync8.ContentEdition
             composition.Register<ISyncDependencyChecker<IDomain>, DomainChecker>();
 
             composition.WithCollectionBuilder<SyncValueMapperCollectionBuilder>()
-                .Add(() => composition.TypeLoader.GetTypes<ISyncMapper>());
+                .Add(composition.TypeLoader.GetTypes<ISyncMapper>());
         }
     }
 }

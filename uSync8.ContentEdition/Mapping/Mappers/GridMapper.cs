@@ -5,6 +5,8 @@ using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
+using NPoco.FluentMappings;
+
 using Umbraco.Core;
 using Umbraco.Core.Services;
 
@@ -68,7 +70,7 @@ namespace uSync8.ContentEdition.Mapping.Mappers
         ///  Passing the callback lets us have the grid traversal code only
         ///  once for both import and exporting.
         /// </remarks>       
-        private string ProcessGridValues(string gridContent, Func<ISyncMapper, string, object, string> callback)
+        private string ProcessGridValues(string gridContent, Func<IEnumerable<ISyncMapper>, string, object, string> callback)
         {
             var grid = JsonConvert.DeserializeObject<JObject>(gridContent);
             if (grid == null) return gridContent;
@@ -87,11 +89,11 @@ namespace uSync8.ContentEdition.Mapping.Mappers
                         {
                             var editor = control.Value<JObject>("editor");
                             var value = control.Value<Object>("value");
-                            var (alias, mapper) = FindMapper(editor);
+                            var (alias, mappers) = FindMappers(editor);
 
-                            if (mapper != null)
+                            if (mappers.Any())
                             {
-                                var result = callback(mapper, alias, value);
+                                var result = callback(mappers, alias, value);
                                 if (result != string.Empty)
                                 {
                                     if (result.DetectIsJson())
@@ -112,14 +114,24 @@ namespace uSync8.ContentEdition.Mapping.Mappers
             return JsonConvert.SerializeObject(grid, Formatting.Indented);
         }
 
-        private string ProcessImport(ISyncMapper mapper, string editorAlias, object value)
+        private string ProcessImport(IEnumerable<ISyncMapper> mappers, string editorAlias, object value)
         {
-            return mapper.GetImportValue(value.ToString(), editorAlias);
+            var mappedValue = value.ToString();
+            foreach (var mapper in mappers)
+            {
+                mappedValue = mapper.GetImportValue(mappedValue, editorAlias);
+            }
+            return mappedValue;
         }
 
-        private string ProcessExport(ISyncMapper mapper, string editorAlias, object value)
+        private string ProcessExport(IEnumerable<ISyncMapper> mappers, string editorAlias, object value)
         {
-            return mapper.GetExportValue(value, editorAlias);
+            var mappedValue = value.ToString();
+            foreach (var mapper in mappers)
+            {
+                mappedValue = mapper.GetExportValue(mappedValue, editorAlias);
+            }
+            return mappedValue;
         }
 
         #region Dependency Checking 
@@ -129,9 +141,18 @@ namespace uSync8.ContentEdition.Mapping.Mappers
             var editor = control.Value<JObject>("editor");
             var value = control.Value<object>("value");
 
-            var (alias, mapper) = FindMapper(editor);
-            if (mapper == null || value == null) return Enumerable.Empty<uSyncDependency>();
-            return mapper.GetDependencies(value, alias, flags);
+            if (value == null) return Enumerable.Empty<uSyncDependency>();
+
+            var (alias, mappers) = FindMappers(editor);
+            if (!mappers.Any()) return Enumerable.Empty<uSyncDependency>();
+
+            var dependencies = new List<uSyncDependency>();
+
+            foreach (var mapper in mappers)
+            {
+                dependencies.AddRange(mapper.GetDependencies(value, alias, flags));
+            }
+            return dependencies;
         }
 
         private IEnumerable<TObject> GetGridDependencies<TObject>(string gridContent, Func<JObject, DependencyFlags, IEnumerable<TObject>> callback, DependencyFlags flags)
@@ -175,12 +196,12 @@ namespace uSync8.ContentEdition.Mapping.Mappers
         ///  DocTypeGridEditor have an alias of Umbraco.Grid.docType 
         /// </remarks>
         /// <returns></returns>
-        private (string alias, ISyncMapper mapper) FindMapper(JObject editor)
+        private (string alias, IEnumerable<ISyncMapper> mapper) FindMappers(JObject editor)
         {
             var alias = $"{Constants.PropertyEditors.Aliases.Grid}.{editor.Value<string>("alias")}";
 
-            var mapper = SyncValueMapperFactory.GetMapper(alias);
-            if (mapper != null) return (alias, mapper);
+            var mappers = SyncValueMapperFactory.GetMappers(alias);
+            if (mappers.Any()) return (alias, mappers);
 
             // look based on the view 
             var viewAlias = editor.Value<string>("view");
@@ -192,7 +213,7 @@ namespace uSync8.ContentEdition.Mapping.Mappers
                 viewAlias = viewAlias.Substring(viewAlias.LastIndexOf('/') + 1);
 
             alias = $"{Constants.PropertyEditors.Aliases.Grid}.{viewAlias}";
-            return (alias, SyncValueMapperFactory.GetMapper(alias));
+            return (alias, SyncValueMapperFactory.GetMappers(alias));
         }
 
         private JArray GetArray(JObject obj, string propertyName)
