@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel;
 using System.Configuration;
 using System.IO;
 using System.Linq;
@@ -32,15 +33,21 @@ namespace uSync8.ContentEdition.Mapping.Mappers
     public class ImagePathMapper : SyncValueMapperBase, ISyncMapper
     {
         private readonly string siteRoot;
-        private readonly string mediaFolder; 
+        private readonly string mediaFolder;
+        private readonly IProfilingLogger logger;
 
         public ImagePathMapper(IEntityService entityService, 
             IProfilingLogger logger, uSyncConfig config) : base(entityService)
         {
+            this.logger = logger;
+
             siteRoot = SystemDirectories.Root;
             mediaFolder = GetMediaFolderSetting(config);
 
-            logger.Debug<ImagePathMapper>("Media Folders: [{media}]", mediaFolder);
+            if (!string.IsNullOrWhiteSpace(mediaFolder))
+            {
+                logger.Debug<ImagePathMapper>("Media Folders: [{media}]", mediaFolder);
+            }
         }
 
         public override string Name => "ImageCropper Mapper";
@@ -147,6 +154,22 @@ namespace uSync8.ContentEdition.Mapping.Mappers
             var folder = ConfigurationManager.AppSettings["uSync.mediaFolder"];
             if (!string.IsNullOrWhiteSpace(folder))
                 return folder;
+
+            // azure guessing - so for most people seeing this issue, 
+            // they won't have to do any config, as we will detect it ???
+            var useDefault = ConfigurationManager.AppSettings["AzureBlobFileSystem.UseDefaultRoute:media"];
+            if (useDefault != null && bool.TryParse(useDefault, out bool usingDefaultRoute) && !usingDefaultRoute)
+            {
+                // means azure is configured to not use the default root, so the media 
+                // will be prepended with /container-name. 
+                var containerName = ConfigurationManager.AppSettings["AzureBlobFileSystem.ContainerName:media"];
+                if (!string.IsNullOrWhiteSpace(containerName))
+                {
+                    logger.Debug<ImagePathMapper>("Calculating media folder path from AzureBlobFileSystem settings");
+                    return $"/{containerName}";
+                }
+            }
+            
 
             // look in the uSync8.config 
             return config.GetExtensionSetting("media", "folder", string.Empty);
