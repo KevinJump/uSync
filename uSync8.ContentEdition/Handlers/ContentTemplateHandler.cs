@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Linq;
+
+using Umbraco.Core;
 using Umbraco.Core.Cache;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
@@ -51,9 +54,25 @@ namespace uSync8.ContentEdition.Handlers
 
         protected override void InitializeEvents(HandlerSettings settings)
         {
-            ContentService.SavedBlueprint += EventSavedItem;
-            ContentService.DeletedBlueprint += EventDeletedItem;
+            ContentService.SavedBlueprint += ContentService_SavedBlueprint;
+            ContentService.DeletedBlueprint += ContentService_DeletedBlueprint;
         }
 
+        private void ContentService_DeletedBlueprint(IContentService sender, Umbraco.Core.Events.DeleteEventArgs<IContent> e)
+        {
+            if (e.DeletedEntities.Any(x => !x.Name.InvariantStartsWith("dtge temp")))
+            {
+                EventDeletedItem(sender, e);
+            }
+        }
+
+        private void ContentService_SavedBlueprint(IContentService sender, Umbraco.Core.Events.SaveEventArgs<IContent> e)
+        {
+            // was is a dtge temp file ?
+            if (e.SavedEntities.Any(x => !x.Name.InvariantStartsWith("dtge temp")))
+            {
+                EventSavedItem(sender, e);
+            }
+        }
     }
 }
