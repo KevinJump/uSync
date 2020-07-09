@@ -13,7 +13,6 @@ namespace uSync8.Core.Dependency
     }
 
     public interface ISyncDependencyChecker<TObject> : ISyncDependencyItem
-        where TObject : IEntity
     {
         IEnumerable<uSyncDependency> GetDependencies(TObject item, DependencyFlags flags);
     }

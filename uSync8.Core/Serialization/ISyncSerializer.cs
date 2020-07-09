@@ -20,7 +20,6 @@ namespace uSync8.Core.Serialization
     /// </summary>
     /// <typeparam name="TObject"></typeparam>
     public interface ISyncSerializer<TObject> : ISyncSerializerBase
-        where TObject : IEntity
     {
         /// <summary>
         ///  Find an Item based on the XML node representation
