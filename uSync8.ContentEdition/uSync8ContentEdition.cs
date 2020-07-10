@@ -15,6 +15,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using uSync8.Core.Dependency;
 using uSync8.ContentEdition.Checkers;
+using uSync.ContentEdition.Checkers;
 
 namespace uSync8.ContentEdition
 {
@@ -48,16 +49,19 @@ namespace uSync8.ContentEdition
             composition.Register<ISyncSerializer<IMedia>, MediaSerializer>();
             composition.Register<ISyncSerializer<IDictionaryItem>, DictionaryItemSerializer>();
             composition.Register<ISyncSerializer<IDomain>, DomainSerializer>();
+            composition.Register<ISyncSerializer<IRelationType>, RelationTypeSerializer>();
 
             composition.Register<ISyncTracker<IContent>, ContentTracker>();
             composition.Register<ISyncTracker<IMedia>, MediaTracker>();
             composition.Register<ISyncTracker<IDictionaryItem>, DictionaryItemTracker>();
             composition.Register<ISyncTracker<IDomain>, DomainTracker>();
+            composition.Register<ISyncTracker<IRelationType>, RelationTypeTracker>();
 
             composition.Register<ISyncDependencyChecker<IContent>, ContentChecker>();
             composition.Register<ISyncDependencyChecker<IMedia>, MediaChecker>();
             composition.Register<ISyncDependencyChecker<IDictionaryItem>, DictionaryItemChecker>();
             composition.Register<ISyncDependencyChecker<IDomain>, DomainChecker>();
+            composition.Register<ISyncDependencyChecker<IRelationType>, RelationTypeChecker>();
 
             composition.WithCollectionBuilder<SyncValueMapperCollectionBuilder>()
                 .Add(composition.TypeLoader.GetTypes<ISyncMapper>());

@@ -38,6 +38,8 @@ namespace uSync8.Core.Dependency
 
         public static int Domain = 1100;
 
+        public static int RelationTypes = 1200;
+
         public static int OrderFromEntityType(string entityType)
         {
             switch(entityType)

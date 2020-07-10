@@ -30,6 +30,9 @@ namespace uSync8.Core
             public const string Domain = "Domain";
 
             public const string Empty = "Empty";
+
+            public const string RelationType = "RelationType";
+            public const string Relation = "Relation";
         }
     }
 }
