@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Web;
 
 using Umbraco.Core.Cache;
 using Umbraco.Core.Logging;
@@ -124,6 +125,13 @@ namespace uSync8.BackOffice.SyncHandlers
         protected override TObject GetFromService(IEntity entity)
             => GetFromService(entity.Id);
 
+        /// <summary>
+        ///  for backwards compatability up the tree.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public bool HasChildren(int id)
+            => GetFolders(id).Any() || GetChildItems(id).Any();
 
     }
 }
