@@ -8,6 +8,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
+using Examine;
+
 using Umbraco.Core;
 using Umbraco.Core.Cache;
 using Umbraco.Core.Composing;
@@ -406,7 +408,7 @@ namespace uSync8.BackOffice.SyncHandlers
                     var node = XElement.Load(stream);
                     if (ShouldImport(node, config))
                     {
-                        var attempt = serializer.Deserialize(node, flags);
+                        var attempt = DeserializeItem(node, new SyncSerializerOptions(flags, config.Settings));
                         return attempt;
                     }
                     else
@@ -449,7 +451,7 @@ namespace uSync8.BackOffice.SyncHandlers
                     using (var stream = syncFileService.OpenRead(file))
                     {
                         var node = XElement.Load(stream);
-                        var attempt = serializer.DeserializeSecondPass(item, node, flags);
+                        var attempt = DeserializeItemSecondPass(item, node, new SyncSerializerOptions(flags, config.Settings));
                         stream.Dispose();
                         return attempt;
                     }
@@ -519,7 +521,7 @@ namespace uSync8.BackOffice.SyncHandlers
 
             var filename = GetPath(folder, item, config.GuidNames, config.UseFlatStructure);
 
-            var attempt = serializer.Serialize(item);
+            var attempt = SerializeItem(item, new SyncSerializerOptions(config.Settings));
             if (attempt.Success)
             {
                 if (ShouldExport(attempt.Item, config))
@@ -726,7 +728,7 @@ namespace uSync8.BackOffice.SyncHandlers
             {
                 var actions = new List<uSyncAction>();
 
-                var change = serializer.IsCurrent(node);
+                var change = IsItemCurrent(node, new SyncSerializerOptions(config.Settings));
                 var action = uSyncActionHelper<TObject>
                         .ReportAction(change, node.GetAlias(), !string.IsNullOrWhiteSpace(filename) ? filename : node.GetAlias(), node.GetKey(), this.Alias);
 
@@ -1015,7 +1017,7 @@ namespace uSync8.BackOffice.SyncHandlers
             var flags = SerializerFlags.OnePass;
             if (force) flags |= SerializerFlags.Force;
 
-            var attempt = serializer.Deserialize(node, flags);
+            var attempt = DeserializeItem(node, new SyncSerializerOptions(flags));
             return uSyncActionHelper<TObject>.SetAction(attempt, node.GetAlias(), this.Alias, IsTwoPass)
                 .AsEnumerableOfOne();
         }
@@ -1044,7 +1046,7 @@ namespace uSync8.BackOffice.SyncHandlers
         {
             var element = FindByUdi(udi);
             if (element != null)
-                return this.serializer.Serialize(element);
+                return SerializeItem(element, new SyncSerializerOptions());
 
             return SyncAttempt<XElement>.Fail(udi.ToString(), ChangeType.Fail, "Item not found");
         }
@@ -1118,6 +1120,42 @@ namespace uSync8.BackOffice.SyncHandlers
             return dependencies.DistinctBy(x => x.Udi.ToString()).OrderByDescending(x => x.Order);
         }
 
+        #endregion
+
+
+        #region Serializer Calls 
+
+        private SyncAttempt<XElement> SerializeItem(TObject item, SyncSerializerOptions options)
+        {
+            if (serializer is ISyncOptionsSerializer<TObject> optionSerializer)
+                return optionSerializer.Serialize(item, options);
+
+            return serializer.Serialize(item);
+        }
+
+        private SyncAttempt<TObject> DeserializeItem(XElement node, SyncSerializerOptions options)
+        {
+            if (serializer is ISyncOptionsSerializer<TObject> optionSerializer)
+                return optionSerializer.Deserialize(node, options);
+
+            return serializer.Deserialize(node, options.Flags);
+        }
+
+        private SyncAttempt<TObject> DeserializeItemSecondPass(TObject item, XElement node, SyncSerializerOptions options)
+        {
+            if (serializer is ISyncOptionsSerializer<TObject> optionSerializer)
+                return optionSerializer.DeserializeSecondPass(item, node, options);
+
+            return serializer.DeserializeSecondPass(item, node, options.Flags);
+        }
+
+        private ChangeType IsItemCurrent(XElement node, SyncSerializerOptions options)
+        {
+            if (serializer is ISyncOptionsSerializer<TObject> optionSerializer)
+                return optionSerializer.IsCurrent(node, options);
+
+            return serializer.IsCurrent(node);
+        }
         #endregion
 
     }

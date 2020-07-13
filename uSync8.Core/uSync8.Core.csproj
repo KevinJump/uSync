@@ -182,6 +182,7 @@
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Extensions\XElementExtensions.cs" />
     <Compile Include="Models\uSyncChange.cs" />
+    <Compile Include="Serialization\ISyncOptionsSerializer.cs" />
     <Compile Include="Serialization\ISyncSerializer.cs" />
     <Compile Include="Serialization\SerializerFlags.cs" />
     <Compile Include="Serialization\Serializers\ContentTypeBaseSerializer.cs" />
@@ -195,6 +196,7 @@
     <Compile Include="Serialization\SyncContainerSerializerBase.cs" />
     <Compile Include="Serialization\SyncSerializerAttribute.cs" />
     <Compile Include="Serialization\SyncSerializerBase.cs" />
+    <Compile Include="Serialization\SyncSerializerOptions.cs" />
     <Compile Include="Serialization\SyncSerializerRoot.cs" />
     <Compile Include="Serialization\SyncTreeSerializerBase.cs" />
     <Compile Include="Models\SyncAttempt.cs" />

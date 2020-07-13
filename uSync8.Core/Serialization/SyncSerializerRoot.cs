@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web.UI;
 using System.Xml.Linq;
 
 using Umbraco.Core.Logging;
@@ -48,58 +50,70 @@ namespace uSync8.Core.Serialization
         public bool IsTwoPass { get; private set; }
 
 
+        [Obsolete("Serialize with options for better config support")]
         public SyncAttempt<XElement> Serialize(TObject item)
+            => Serialize(item, null);
+
+        public SyncAttempt<XElement> Serialize(TObject item, SyncSerializerOptions options)
         {
-            return SerializeCore(item);
+            return this.SerializeCore(item, options);
         }
+
+        /// <remarks>
+        ///  used primarliy for checking parentage, but also can be used for checking things like create only.
+        /// </remarks>
+        [Obsolete("deserialize with options for better config support")]
+        protected virtual SyncAttempt<TObject> CanDeserialize(XElement node, SerializerFlags flags)
+            => CanDeserialize(node, new SyncSerializerOptions(flags));
 
         /// <summary>
         ///  CanDeserialize based on the flags, used to check the model is good, for this import 
         /// </summary>
-        /// <remarks>
-        ///  used primarliy for checking parentage, but also can be used for checking things like create only.
-        /// </remarks>
-        protected virtual SyncAttempt<TObject> CanDeserialize(XElement node, SerializerFlags flags)
+        protected virtual SyncAttempt<TObject> CanDeserialize(XElement node, SyncSerializerOptions options)
             => SyncAttempt<TObject>.Succeed("No Check", ChangeType.NoChange);
 
+
+        [Obsolete("deserialize with options for better config support")]
         public SyncAttempt<TObject> Deserialize(XElement node, SerializerFlags flags)
+            => Deserialize(node, new SyncSerializerOptions(flags));
+      
+        public SyncAttempt<TObject> Deserialize(XElement node, SyncSerializerOptions options)
         {
             if (IsEmpty(node))
             {
                 // new behavior when a node is 'empty' that is a marker for a delete or rename
                 // so we process that action here, no more action file/folders
-                return ProcessAction(node, flags);
+                return ProcessAction(node, options);
             }
 
             if (!IsValid(node))
                 throw new FormatException($"XML Not valid for type {ItemType}");
 
-
-            if (flags.HasFlag(SerializerFlags.Force) || IsCurrent(node) > ChangeType.NoChange)
+            if (options.Force || IsCurrent(node, options) > ChangeType.NoChange)
             {
                 // pre-deserilzation check. 
-                var check = CanDeserialize(node, flags);
+                var check = CanDeserialize(node, options);
                 if (!check.Success) return check;
 
                 logger.Debug(serializerType, "Base: Deserializing {0}", ItemType);
-                var result = DeserializeCore(node);
+                var result = DeserializeCore(node, options);
 
                 if (result.Success)
                 {
                     logger.Debug(serializerType, "Base: Deserialize Core Success {0}", ItemType);
 
-                    if (!flags.HasFlag(SerializerFlags.DoNotSave))
+                    if (!options.Flags.HasFlag(SerializerFlags.DoNotSave))
                     {
                         logger.Debug(serializerType, "Base: Serializer Saving (No DoNotSaveFlag) {0}", ItemAlias(result.Item));
                         // save 
                         SaveItem(result.Item);
                     }
 
-                    if (flags.HasFlag(SerializerFlags.OnePass))
+                    if (options.OnePass)
                     {
                         logger.Debug(serializerType, "Base: Processing item in one pass {0}", ItemAlias(result.Item));
 
-                        var secondAttempt = DeserializeSecondPass(result.Item, node, flags);
+                        var secondAttempt = DeserializeSecondPass(result.Item, node, options);
 
                         logger.Debug(serializerType, "Base: Second Pass Result {0} {1}", ItemAlias(result.Item), secondAttempt.Success);
 
@@ -114,13 +128,27 @@ namespace uSync8.Core.Serialization
             return SyncAttempt<TObject>.Succeed(node.GetAlias(), default(TObject), ChangeType.NoChange);
         }
 
+        [Obsolete("Deserialize with options for better config support")]
         public virtual SyncAttempt<TObject> DeserializeSecondPass(TObject item, XElement node, SerializerFlags flags)
+            => DeserializeSecondPass(item, node, new SyncSerializerOptions(flags));
+
+        public virtual SyncAttempt<TObject> DeserializeSecondPass(TObject item, XElement node, SyncSerializerOptions options)
         {
             return SyncAttempt<TObject>.Succeed(nameof(item), item, typeof(TObject), ChangeType.NoChange);
         }
 
+
+        [Obsolete("Pass SyncSerializerOptions for more config control")]
         protected abstract SyncAttempt<XElement> SerializeCore(TObject item);
+
+        [Obsolete("Pass SyncSerializerOptions for more config control")]
         protected abstract SyncAttempt<TObject> DeserializeCore(XElement node);
+
+        protected virtual SyncAttempt<XElement> SerializeCore(TObject item, SyncSerializerOptions options)
+            => SerializeCore(item);
+
+        protected virtual SyncAttempt<TObject> DeserializeCore(XElement node, SyncSerializerOptions options)
+            => DeserializeCore(node);
 
         /// <summary>
         ///  all xml items now have the same top line, this makes 
@@ -164,13 +192,18 @@ namespace uSync8.Core.Serialization
         public bool IsValidOrEmpty(XElement node)
             => IsEmpty(node) || IsValid(node);
 
+        [Obsolete]
+        protected SyncAttempt<TObject> ProcessAction(XElement node, SerializerFlags flags)
+            => ProcessAction(node, new SyncSerializerOptions(flags));
+
         /// <summary>
         ///  Process the action in teh 'empty' XML node
         /// </summary>
         /// <param name="node">XML to process</param>
         /// <param name="flags">Serializer flags to control options</param>
         /// <returns>Sync attempt detailing changes</returns>
-        protected SyncAttempt<TObject> ProcessAction(XElement node, SerializerFlags flags)
+        protected SyncAttempt<TObject> ProcessAction(XElement node, SyncSerializerOptions options)
+
         {
             if (!IsEmpty(node))
                 throw new ArgumentException("Cannot process actions on a non-empty node");
@@ -184,9 +217,9 @@ namespace uSync8.Core.Serialization
             switch (actionType)
             {
                 case SyncActionType.Delete:
-                    return ProcessDelete(key, alias, flags);
+                    return ProcessDelete(key, alias, options.Flags);
                 case SyncActionType.Rename:
-                    return ProcessRename(key, alias, flags);
+                    return ProcessRename(key, alias, options.Flags);
                 case SyncActionType.Clean:
                     // we return a 'clean' success, but this is then picked up 
                     // in the handler, as something to clean, so the handler does it. 
@@ -232,7 +265,11 @@ namespace uSync8.Core.Serialization
             return SyncAttempt<TObject>.Succeed(alias, ChangeType.NoChange);
         }
 
+        [Obsolete]
         public virtual ChangeType IsCurrent(XElement node)
+            => IsCurrent(node, new SyncSerializerOptions());
+
+        public virtual ChangeType IsCurrent(XElement node, SyncSerializerOptions options)
         {
             if (node == null) return ChangeType.Update;
 
@@ -259,7 +296,7 @@ namespace uSync8.Core.Serialization
 
             var newHash = MakeHash(node);
 
-            var currentNode = Serialize(item);
+            var currentNode = Serialize(item, options);
             if (!currentNode.Success) return ChangeType.Create;
 
             var currentHash = MakeHash(currentNode.Item);

@@ -34,5 +34,22 @@ namespace uSync8.Core
             public const string RelationType = "RelationType";
             public const string Relation = "Relation";
         }
+
+        /// <summary>
+        ///  Key used in settings and xml to indicate only partial cultures are included in file
+        /// </summary>
+        public const string CultureKey = "Cultures";
+
+        /// <summary>
+        ///  Key used in settings and in xml to indicate only partial segments are included in file
+        /// </summary>
+        public const string SegmentKey = "Segments";
+
+        /// <summary>
+        ///  Key used in settings and in xml to indicate if partial file also includes fallback values.
+        /// </summary>
+        public const string DefaultsKey = "DefaultValues";
     }
+
+
 }
