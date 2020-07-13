@@ -4,6 +4,9 @@ namespace uSync8.BackOffice.Configuration
 {
     public static class ConfigExtensions
     {
+        /// <summary>
+        ///  Get the uSync config from the Configs collection
+        /// </summary>
         public static uSyncSettings uSync(this Configs configs)
         {
             try

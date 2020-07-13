@@ -17,19 +17,32 @@
             IsOverridden = overridden;
         }
 
+        /// <summary>
+        ///  Override the default value
+        /// </summary>
         public void Override(TObject value)
         {
             Value = value;
             IsOverridden = true;
         }
 
+        /// <summary>
+        ///  Set the value to the default value (not overridden)
+        /// </summary>
         public void SetDefaultValue(TObject defaultValue)
         {
             Value = defaultValue;
             IsOverridden = false;
         }
 
+        /// <summary>
+        ///  Value of the setting
+        /// </summary>
         public TObject Value { get; set; }
+
+        /// <summary>
+        ///  Is this value overriding (diffrent) from the global default for this value?
+        /// </summary>
         public bool IsOverridden { get; internal set; }
 
         public static implicit operator TObject(OverriddenValue<TObject> value)
