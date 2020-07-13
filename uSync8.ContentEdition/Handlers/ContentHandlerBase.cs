@@ -53,29 +53,7 @@ namespace uSync8.ContentEdition.Handlers
             : base(entityService, logger, serializer, tracker, appCaches, checker, syncFileService)
         { }
 
-
-
-        protected override string CheckAndFixFileClash(string path, TObject item)
-        {
-            if (syncFileService.FileExists(path))
-            {
-                var itemKey = item.Key;
-                var node = syncFileService.LoadXElement(path);
-
-                if (node == null) return path;
-                if (item.Key == node.GetKey()) return path;
-                if (GetXmlMatchString(node) == GetItemMatchString(item)) return path;
-
-                // get here we have a clash, we should append something
-                var append = item.Key.ToShortKeyString(8); // (this is the shortened guid like media folders do)
-                return Path.Combine(Path.GetDirectoryName(path),
-                    Path.GetFileNameWithoutExtension(path) + "_" + append + Path.GetExtension(path));
-            }
-
-            return path;
-        }
-
-        protected virtual string GetItemMatchString(TObject item)
+        protected override string GetItemMatchString(TObject item)
         {
             var itemPath = item.Level.ToString();
             if (item.Trashed && serializer is ISyncContentSerializer<TObject> contentSerializer)
@@ -85,7 +63,7 @@ namespace uSync8.ContentEdition.Handlers
             return $"{item.Name}_{itemPath}".ToLower();
         }
 
-        protected virtual string GetXmlMatchString(XElement node)
+        protected override string GetXmlMatchString(XElement node)
         {
             var path = node.Element("Info")?.Element("Path").ValueOrDefault(node.GetLevel().ToString());
             return $"{node.GetAlias()}_{path}".ToLower();

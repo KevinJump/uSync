@@ -1,10 +1,13 @@
-﻿using Umbraco.Core.Cache;
+﻿using System.Xml.Linq;
+
+using Umbraco.Core.Cache;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
 
 using uSync8.BackOffice.Services;
 using uSync8.Core.Dependency;
+using uSync8.Core.Extensions;
 using uSync8.Core.Serialization;
 using uSync8.Core.Tracking;
 
