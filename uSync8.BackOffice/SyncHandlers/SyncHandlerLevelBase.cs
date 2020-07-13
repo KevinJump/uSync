@@ -109,7 +109,6 @@ namespace uSync8.BackOffice.SyncHandlers
             // loaded - now process.
             var flags = SerializerFlags.None;
             if (force) flags |= SerializerFlags.Force;
-            if (config.BatchSave) flags |= SerializerFlags.DoNotSave;
 
             var cleanMarkers = new List<string>();
 

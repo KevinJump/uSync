@@ -298,6 +298,7 @@
     <Compile Include="SyncHandlers\SyncHandlerContainerBase.cs" />
     <Compile Include="SyncHandlers\SyncHandlerFactory.cs" />
     <Compile Include="SyncHandlers\Models\SyncHandlerOptions.cs" />
+    <Compile Include="SyncHandlers\SyncHandlerRoot.cs" />
     <Compile Include="SyncHandlers\SyncHandlerTreeBase.cs" />
     <Compile Include="SyncHandlers\SyncHandlerLevelBase.cs" />
     <Compile Include="uSyncAction.cs" />

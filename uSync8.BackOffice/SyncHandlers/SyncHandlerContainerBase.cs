@@ -65,7 +65,7 @@ namespace uSync8.BackOffice.SyncHandlers
             {
                 actions.AddRange(CleanFolders(folder, fdlr.Id));
 
-                if (!HasChildren(fdlr.Id))
+                if (!HasChildren(fdlr))
                 {
                     // get the name (from the slim)
                     var name = fdlr.Id.ToString();
