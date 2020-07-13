@@ -27,11 +27,6 @@ namespace uSync8.BackOffice.Configuration
         public bool UseGuidNames { get; set; } = false;
 
         /// <summary>
-        ///  items are saved in batches after being process (as opposed to one at a time during import)
-        /// </summary>
-        public bool BatchSave { get; set; } = false;
-
-        /// <summary>
         ///  Import when Umbraco boots
         /// </summary>
         public bool ImportAtStartup { get; set; } = false;

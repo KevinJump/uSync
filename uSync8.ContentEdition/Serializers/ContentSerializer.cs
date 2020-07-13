@@ -49,9 +49,7 @@ namespace uSync8.ContentEdition.Serializers
         protected override SyncAttempt<XElement> SerializeCore(IContent item)
         {
             var node = InitializeNode(item, item.ContentType.Alias);
-
             var info = SerializeInfo(item);
-
             var properties = SerializeProperties(item);
 
             node.Add(info);
@@ -127,12 +125,9 @@ namespace uSync8.ContentEdition.Serializers
 
             DeserializeBase(item, node);
             DeserializeTemplate(item, node);
+            DeserializeSchedules(item, node);
 
-            return SyncAttempt<IContent>.Succeed(
-                item.Name,
-                item,
-                ChangeType.Import,
-                "");
+            return SyncAttempt<IContent>.Succeed(item.Name, item, ChangeType.Import);
         }
 
         protected virtual void DeserializeTemplate(IContent item, XElement node)
@@ -141,6 +136,17 @@ namespace uSync8.ContentEdition.Serializers
 
             if (templateNode != null)
             {
+                var alias = templateNode.ValueOrDefault(string.Empty);
+                if (!string.IsNullOrWhiteSpace(alias))
+                {
+                    var template = fileService.GetTemplate(alias);
+                    if (template != null)
+                    {
+                        item.TemplateId = template.Id;
+                        return;
+                    }
+                }
+
                 var key = templateNode.ValueOrDefault(Guid.Empty);
                 if (key != Guid.Empty)
                 {
@@ -152,16 +158,61 @@ namespace uSync8.ContentEdition.Serializers
                     }
                 }
 
-                var alias = templateNode.ValueOrDefault(string.Empty);
-                if (!string.IsNullOrWhiteSpace(alias))
+            }
+        }
+
+        private void DeserializeSchedules(IContent item, XElement node)
+        {
+            var schedules = node.Element("Info")?.Element("Schedule");
+            if (schedules != null && schedules.HasElements)
+            {
+                var currentSchedules = item.ContentSchedule.FullSchedule;
+                var nodeSchedules = new List<ContentSchedule>();
+
+                foreach (var schedule in schedules.Elements("ContentSchedule"))
                 {
-                    var template = fileService.GetTemplate(alias);
-                    if (template != null)
-                        item.TemplateId = template.Id;
+                    var importSchedule = GetContentScheduleFromNode(schedule);
+
+                    if (importSchedule.Date < DateTime.Now) continue; // don't add schedules in the past
+
+                    nodeSchedules.Add(importSchedule);
+
+                    var existing = FindSchedule(currentSchedules, importSchedule);
+                    if (existing != null)
+                    {
+                        item.ContentSchedule.Remove(existing);
+                    }
+                    item.ContentSchedule.Add(importSchedule);
+                }
+
+                // remove things that are in the current but not the import. 
+
+                var toRemove = currentSchedules.Where(x => FindSchedule(nodeSchedules, x) == null);
+
+                foreach (var oldItem in toRemove)
+                {
+                    item.ContentSchedule.Remove(oldItem);
                 }
             }
         }
 
+        private ContentSchedule GetContentScheduleFromNode(XElement scheduleNode)
+        {
+            var key = scheduleNode.Attribute("Key").ValueOrDefault(Guid.Empty);
+            var culture = scheduleNode.Element("Culture").ValueOrDefault(string.Empty);
+            var date = scheduleNode.Element("Date").ValueOrDefault(DateTime.MinValue);
+            var action = scheduleNode.Element("Action").ValueOrDefault(ContentScheduleAction.Release);
+
+            return new ContentSchedule(key, culture, date, action);
+        }
+
+        private ContentSchedule FindSchedule(IEnumerable<ContentSchedule> currentSchedules, ContentSchedule newSchedule)
+        {
+            var schedule = currentSchedules.FirstOrDefault(x => x.Culture == newSchedule.Culture && x.Action == newSchedule.Action);
+            if (schedule != null) return schedule;
+
+            return null;
+        }
 
         public override SyncAttempt<IContent> DeserializeSecondPass(IContent item, XElement node, SerializerFlags flags)
         {
@@ -187,7 +238,7 @@ namespace uSync8.ContentEdition.Serializers
             {
                 // we say no change back, this stops the core second pass function from saving 
                 // this item (which we have just done with DoSaveOrPublish)
-                return SyncAttempt<IContent>.Succeed(item.Name, item, ChangeType.NoChange, attempt.Status);
+                return SyncAttempt<IContent>.Succeed(item.Name, item, ChangeType.NoChange, attempt.Status, true);
             }
 
             return SyncAttempt<IContent>.Fail(item.Name, item, ChangeType.ImportFail, $"{saveAttempt.Result} {attempt.Status}");
@@ -213,80 +264,122 @@ namespace uSync8.ContentEdition.Serializers
             var publishedNode = node.Element("Info")?.Element("Published");
             if (publishedNode != null)
             {
+                var schedules = GetSchedules(node.Element("Info")?.Element("Schedule"));
+
                 if (publishedNode.HasElements)
                 {
                     // culture based publishing.
-                    var publishedCultures = new List<string>();
+
+                    // if we where only publishing partial cultures, 
+                    // we wouldn't delete missing ones.
+                    var unpublishMissingCultures = true; 
+
+                    var cultureStatuses = new Dictionary<string, uSyncContentState>();
+
                     foreach (var culturePublish in publishedNode.Elements("Published"))
                     {
                         var culture = culturePublish.Attribute("Culture").ValueOrDefault(string.Empty);
-                        var status = culturePublish.ValueOrDefault(false);
 
-                        if (!string.IsNullOrWhiteSpace(culture) && status)
+                        if (!string.IsNullOrWhiteSpace(culture))
                         {
-                            publishedCultures.Add(culture);
+                            // is the item published in the config file
+                            var state = culturePublish.ValueOrDefault(false)
+                                ? uSyncContentState.Published
+                                : uSyncContentState.Unpublished;
+
+                            // pending or outstanding scheduled actions can change the action we take.
+                            cultureStatuses[culture] = CalculateScheduledState(state, schedules, culture);
                         }
+
                     }
 
-                    if (publishedCultures.Count > 0)
+                    if (cultureStatuses.Count > 0)
                     {
-                        return PublishItem(item, publishedCultures.ToArray());
+                        return PublishItem(item, cultureStatuses, unpublishMissingCultures);
                     }
                 }
                 else
                 {
-                    // default publish the lot. 
-                    if (publishedNode.Attribute("Default").ValueOrDefault(false))
+                    var state = publishedNode.Attribute("Default").ValueOrDefault(false)
+                        ? uSyncContentState.Published
+                        : uSyncContentState.Unpublished;
+
+
+                    state = CalculateScheduledState(state, schedules, string.Empty);
+
+
+                    if (state == uSyncContentState.Published)
                     {
-                        return PublishItem(item, null);
+                        return PublishItem(item);
                     }
-                    else if (item.Published)
+                    else if (state == uSyncContentState.Unpublished && item.Published == true)
                     {
-                        // unpublish
                         contentService.Unpublish(item);
                     }
                 }
             }
 
-            // if we get here, save 
-            /*
-            var result = contentService.Save(item);
-            if (result.Success) */
-
             this.SaveItem(item);
             return Attempt.Succeed("Saved");
-
-            // return Attempt.Fail("Save Failed " + result.EventMessages);
         }
 
-        private Attempt<string> PublishItem(IContent item, string[] cultures)
+        /// <summary>
+        ///  work out what the current status of the item should be. 
+        /// </summary>
+        public uSyncContentState CalculateScheduledState(uSyncContentState state, IList<ContentSchedule> schedules, string culture)
+        {
+            foreach (var schedule in schedules.Where(x => x.Culture.InvariantEquals(culture))
+                .OrderBy(x => x.Date))
+            {
+                switch (schedule.Action)
+                {
+                    case ContentScheduleAction.Release:
+                        if (schedule.Date < DateTime.Now)
+                        {
+                            state = uSyncContentState.Published;
+                        }
+                        else
+                        {
+                            // if a schedule publish hasn't happend yet,
+                            // if the whole culture is already 'published' we save it.
+                            // but if its unpublished, then we keep that, so it will get 
+                            // unpublished if it isn't 
+                            if (state == uSyncContentState.Published) state = uSyncContentState.Saved;
+                        }
+                        break;
+                    case ContentScheduleAction.Expire:
+                        if (schedule.Date < DateTime.Now)
+                        {
+                            state = uSyncContentState.Unpublished;
+                        }
+                        break;
+                }
+
+            }
+            return state;
+        }
+
+        private IList<ContentSchedule> GetSchedules(XElement schedulesNode)
+        {
+            var schedules = new List<ContentSchedule>();
+            if (schedulesNode != null && schedulesNode.HasElements)
+            {
+                foreach (var schedule in schedulesNode.Elements("ContentSchedule"))
+                {
+                    schedules.Add(GetContentScheduleFromNode(schedule));
+                }
+            }
+            return schedules;
+        }
+
+        public Attempt<string> PublishItem(IContent item)
         {
             try
             {
-                PublishResult result;
-                if (cultures != null)
-                {
-                    result = contentService.SaveAndPublish(item, cultures);
-                    UnpublishCultures(item, cultures);
-                }
-                else
-                {
-                    result = contentService.SaveAndPublish(item);
-                }
-
-                if (result.Success)
-                    return Attempt.Succeed("Published");
-
-                var messages = "";
-                if (result.EventMessages.Count > 0) 
-                {
-                    messages = string.Join(": ", 
-                        result.EventMessages.GetAll().Select(x => $"{x.Category}: {x.Message}"));
-                }
-
-                return Attempt.Fail($"Publish Failed : {messages}<br/>");
+                var result = contentService.SaveAndPublish(item);
+                return result.ToAttempt();
             }
-            catch (ArgumentNullException ex)
+            catch(ArgumentNullException ex)
             {
                 // we can get thrown a null argument exception by the notifer, 
                 // which is non critical! but we are ignoring this error. ! <= 8.1.5
@@ -296,18 +389,88 @@ namespace uSync8.ContentEdition.Serializers
         }
 
         /// <summary>
+        ///  Publish/unpublish Specified cultures for an item, and optionally unpublish missing cultures
+        /// </summary>
+        /// <param name="item"></param>
+        /// <param name="cultures"></param>
+        /// <param name="unpublishMissing"></param>
+        /// <returns></returns>
+        private Attempt<string> PublishItem(IContent item, IDictionary<string, uSyncContentState> cultures, bool unpublishMissing)
+        {
+            if (cultures == null) return PublishItem(item);
+
+            try
+            {
+                var hasBeenSaved = false;
+
+                var publishedCultures = cultures
+                    .Where(x => x.Value == uSyncContentState.Published)
+                    .Select(x => x.Key)
+                    .ToArray();
+
+                if (publishedCultures.Length > 0)
+                {
+                    var result = contentService.SaveAndPublish(item, publishedCultures);
+
+                    // if this fails, we return the result
+                    if (!result.Success) return result.ToAttempt();
+
+                    // if its published here it's also saved, so we can skip the save below.
+                    hasBeenSaved = true;
+                }
+
+                var unpublishedCultures = cultures
+                    .Where(x => x.Value == uSyncContentState.Unpublished)
+                    .Select(x => x.Key)
+                    .ToArray();
+
+                if (unpublishedCultures.Length > 0)
+                {
+
+                    foreach (var culture in unpublishedCultures)
+                    {
+                        // unpublish if the culture is currently published.
+                        if (item.PublishedCultures.InvariantContains(culture))
+                            contentService.Unpublish(item, culture);
+                    }
+                }
+
+
+                if (unpublishMissing)
+                    UnpublishMissingCultures(item, cultures.Select(x => x.Key).ToArray());
+
+                // if we get to this point and no save has been called, we should call it. 
+                if (!hasBeenSaved && item.IsDirty())
+                    contentService.Save(item);
+
+                return Attempt.Succeed("Done");
+            }
+            catch (ArgumentNullException ex)
+            {
+                // we can get thrown a null argument exception by the notifer, 
+                // which is non critical! but we are ignoring this error. ! <= 8.1.5
+                if (!ex.Message.Contains("siteUri")) throw ex;
+                return Attempt.Succeed($"Published");
+            }
+        }
+        /// <summary>
         ///  unpublish any cultures that are marked as published, in umbraco but are not published
         ///  in our *.config file.
         /// </summary>
         /// <param name="item"></param>
         /// <param name="publishedCultures"></param>
-        private void UnpublishCultures(IContent item, string[] publishedCultures)
+        private void UnpublishMissingCultures(IContent item, string[] allCultures)
         {
-            var cultures = item.PublishedCultures.Where(x => !publishedCultures.InvariantContains(x)).ToArray();
-            if (cultures != null && cultures.Length > 0)
+            var missingCultures = item
+                .PublishedCultures
+                .Where(x => !allCultures.InvariantContains(x))
+                .ToArray();
+
+            if (missingCultures != null && missingCultures.Length > 0)
             {
-                foreach (var culture in cultures)
+                foreach (var culture in missingCultures)
                 {
+                    logger.Debug<ContentSerializer>("Unpublishing culture not defined in config file");
                     contentService.Unpublish(item, culture);
                 }
             }
