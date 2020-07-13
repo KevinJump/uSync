@@ -963,14 +963,54 @@ namespace uSync8.BackOffice.SyncHandlers
         virtual protected Guid GetItemKey(TObject item) => item.Key;
 
         /// <summary>
-        ///  clashes we want to resolve can only occur, when the 
-        ///  items can be called the same but in be in different places (e.g content, media).
+        ///  Get a clean filename that doesn't clash with any existing items.
         /// </summary>
-        /// <param name="path"></param>
-        /// <param name="key"></param>
-        /// <returns></returns>
+        /// <remarks>
+        ///  clashes we want to resolve can occur when the safeFilename for an item
+        ///  matches with the safe file name for something else. e.g
+        ///     1 Special Doctype 
+        ///     2 Special Doctype 
+        ///     
+        ///  Will both resolve to SpecialDocType.Config
+        ///  
+        ///  the first item to be written to disk for a clash will get the 'normal' name
+        ///  all subsequent items will get the appended name. 
+        ///  
+        ///  this can be completely sidesteped by using guid filenames. 
+        /// </remarks>
         virtual protected string CheckAndFixFileClash(string path, TObject item)
-            => path;
+        {
+            if (syncFileService.FileExists(path))
+            {
+                var node = syncFileService.LoadXElement(path);
+
+                if (node == null) return path;
+                if (item.Key == node.GetKey()) return path;
+                if (GetXmlMatchString(node) == GetItemMatchString(item)) return path;
+
+                // get here we have a clash, we should append something
+                var append = item.Key.ToShortKeyString(8); // (this is the shortened guid like media folders do)
+                return Path.Combine(Path.GetDirectoryName(path),
+                    Path.GetFileNameWithoutExtension(path) + "_" + append + Path.GetExtension(path));
+            }
+
+            return path;
+        }
+
+        /// <summary>
+        ///  a string we use to match this item, with other (where there are levels)
+        /// </summary>
+        /// <remarks>
+        ///  this works because unless it's content/media you can't actually have 
+        ///  clashing aliases at diffrent levels in the folder structure. 
+        ///  
+        ///  So just checking the alias works, for content we overwrite these two functions.
+        /// </remarks>
+        protected virtual string GetItemMatchString(TObject item) => GetItemAlias(item);
+
+        protected virtual string GetXmlMatchString(XElement node) => node.GetAlias();
+
+
 
         virtual public uSyncAction Rename(TObject item)
             => new uSyncAction();
