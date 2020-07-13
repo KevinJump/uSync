@@ -195,6 +195,7 @@
     <Compile Include="Serialization\SyncContainerSerializerBase.cs" />
     <Compile Include="Serialization\SyncSerializerAttribute.cs" />
     <Compile Include="Serialization\SyncSerializerBase.cs" />
+    <Compile Include="Serialization\SyncSerializerRoot.cs" />
     <Compile Include="Serialization\SyncTreeSerializerBase.cs" />
     <Compile Include="Models\SyncAttempt.cs" />
     <Compile Include="Serialization\SyncSerializerCollectionBuilder.cs" />
