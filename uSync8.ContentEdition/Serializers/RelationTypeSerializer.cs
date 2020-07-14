@@ -19,7 +19,7 @@ namespace uSync8.ContentEdition.Serializers
     /// </summary>
     [SyncSerializer("19FA7E6D-3B88-44AA-AED4-94634C90A5B4", "RelationTypeSerializer", uSyncConstants.Serialization.RelationType)]
     public class RelationTypeSerializer
-        : SyncSerializerBase<IRelationType>, ISyncSerializer<IRelationType>
+        : SyncSerializerBase<IRelationType>, ISyncOptionsSerializer<IRelationType>
     {
         private IRelationService relationService;
 
@@ -31,7 +31,7 @@ namespace uSync8.ContentEdition.Serializers
             this.relationService = relationService;
         }
 
-        protected override SyncAttempt<IRelationType> DeserializeCore(XElement node)
+        protected override SyncAttempt<IRelationType> DeserializeCore(XElement node, SyncSerializerOptions options)
         {
             var key = node.GetKey();
             var alias = node.GetAlias();
@@ -70,7 +70,6 @@ namespace uSync8.ContentEdition.Serializers
             if (item.IsBidirectional = bidirectional)
                 item.IsBidirectional = bidirectional;
 
-            /*
             var hasBeenSaved = false;
             if (options.GetSetting<bool>("IncludeRelations", true))
             {
@@ -79,9 +78,8 @@ namespace uSync8.ContentEdition.Serializers
                 hasBeenSaved = true;
                 changes.AddRange(DeserializeRelations(node, item));
             }
-            */
 
-            var attempt = SyncAttempt<IRelationType>.Succeed(item.Name, item, ChangeType.Import);
+            var attempt = SyncAttempt<IRelationType>.Succeed(item.Name, item, ChangeType.Import, hasBeenSaved);
             attempt.Details = changes;
             return attempt;
         }
@@ -147,7 +145,7 @@ namespace uSync8.ContentEdition.Serializers
             return base.IsValid(node);
         }
 
-        protected override SyncAttempt<XElement> SerializeCore(IRelationType item)
+        protected override SyncAttempt<XElement> SerializeCore(IRelationType item, SyncSerializerOptions options)
         {
             var node = this.InitializeBaseNode(item, item.Alias);
 
@@ -157,11 +155,10 @@ namespace uSync8.ContentEdition.Serializers
                 new XElement("ChildType", item.ChildObjectType),
                 new XElement("Bidirectional", item.IsBidirectional)));
 
-            /*
             if (options.GetSetting<bool>("IncludeRelations", true))
             {
                 node.Add(SerializeRelations(item));
-            }*/
+            }
 
             return SyncAttempt<XElement>.SucceedIf(
                 node != null,

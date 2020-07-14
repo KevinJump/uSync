@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Umbraco.Core;
+
 namespace uSync8.Core.Extensions
 {
     public static class ListExtensions
