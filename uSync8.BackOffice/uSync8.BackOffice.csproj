@@ -331,8 +331,8 @@
     <Content Include="App_Plugins\uSync8\settings\settings.html" />
     <Content Include="App_Plugins\uSync8\settings\settingsController.js" />
     <Content Include="App_Plugins\uSync8\settings\uSyncController.js" />
-    <Content Include="App_Plugins\uSync8\usync_862.css" />
-    <Content Include="App_Plugins\uSync8\uSync_862.js" />
+    <Content Include="App_Plugins\uSync8\usync_864.css" />
+    <Content Include="App_Plugins\uSync8\uSync_864.js" />
     <Content Include="Config\uSync8.config" />
     <None Include="packages.config" />
     <None Include="Targets\uSync.props" />

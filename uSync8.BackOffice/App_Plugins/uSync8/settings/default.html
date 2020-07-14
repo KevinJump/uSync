@@ -8,8 +8,12 @@
             </a>
         </span>
     </div>
-
+    
     <umb-box ng-if="!vm.loading">
+        <div ng-if="vm.versionInfo.HandlersLoaded != undefined && vm.versionInfo.HandlersLoaded != true" class="alert alert-danger usync-alert">
+            <localize key="usync_noHandlers"></localize>
+        </div>
+
         <umb-box-content>
             <div class="flex justify-between items-center">
                 <div class="usync-main-buttons">

@@ -220,9 +220,8 @@
                             },
                             labelKey: 'usync_report-' + group.toLowerCase()
                         });
-
-                        vm.loading = false;
                     });
+                    vm.loading = false;
                 }, function (error) {
                     vm.loading = false;
                 });

@@ -231,7 +231,10 @@ namespace uSync8.BackOffice.Controllers
             if (cacheInfo != null) return cacheInfo;
 
             var info = await PerformCheck();
+            info.HandlersLoaded = settings.HandlerSets.Count > 0;
+
             AppCaches.RuntimeCache.InsertCacheItem("usync_vcheck", () => info, new TimeSpan(6, 0, 0));
+
             return info;
         }
 
@@ -311,5 +314,7 @@ namespace uSync8.BackOffice.Controllers
         public bool Remote { get; set; } = false;
 
         public bool IsCurrent { get; set; }
+
+        public bool HandlersLoaded { get; set; }
     }
 }

@@ -13,6 +13,7 @@
     <key alias="intro">Database elements to and from disk</key>
 
     <key alias="newer">There is a newer version of uSync available</key>
+		<key alias="noHandlers"><![CDATA[No Handlers have been loaded, so you can't sync anything - check your uSync8.config file it might be corrupt or missing 😢]]></key>
     
     <key alias="import">Import</key>
     <key alias="importforce">Full Import</key>

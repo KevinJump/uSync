@@ -39,7 +39,7 @@ namespace uSync8.BackOffice.Configuration
 
         public uSyncSettings Settings { get; set; }
 
-        private string settingsFile = Umbraco.Core.IO.SystemDirectories.Config + "/uSync8.config";
+        private string settingsFile = $"{Umbraco.Core.IO.SystemDirectories.Config}/{uSyncBackOfficeConstants.ConfigFile}";
 
         public uSyncConfig(IProfilingLogger logger)
         {
@@ -57,6 +57,7 @@ namespace uSync8.BackOffice.Configuration
             var node = GetSettingsFile();
             if (node == null)
             {
+                logger.Warn<uSyncConfig>($"Failed to load the {uSyncBackOfficeConstants.ConfigFile} file from disk, working with defaults.");
                 return SaveSettings(settings);
             }
 
@@ -495,7 +496,6 @@ namespace uSync8.BackOffice.Configuration
             }
             return defaultValue;
         }
-
     }
 
 }
