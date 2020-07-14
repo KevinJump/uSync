@@ -5,8 +5,6 @@ using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-using NPoco.FluentMappings;
-
 using Umbraco.Core;
 using Umbraco.Core.Services;
 
@@ -88,10 +86,10 @@ namespace uSync8.ContentEdition.Mapping.Mappers
                         foreach (var control in controls.Cast<JObject>())
                         {
                             var editor = control.Value<JObject>("editor");
-                            var value = control.Value<Object>("value");
+                            var value = control.Value<Object>("value");                           
                             var (alias, mappers) = FindMappers(editor);
 
-                            if (mappers.Any())
+                            if (mappers != null && mappers.Any())
                             {
                                 var result = callback(mappers, alias, value);
                                 if (result != string.Empty)
@@ -205,7 +203,7 @@ namespace uSync8.ContentEdition.Mapping.Mappers
 
             // look based on the view 
             var viewAlias = editor.Value<string>("view");
-            if (viewAlias == null) return (alias, null);
+            if (viewAlias == null) return (alias, Enumerable.Empty<ISyncMapper>());
 
             viewAlias = viewAlias.ToLower().TrimEnd(".html");
 
