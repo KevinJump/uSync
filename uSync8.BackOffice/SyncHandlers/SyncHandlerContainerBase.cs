@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+
 using Umbraco.Core.Cache;
 using Umbraco.Core.Events;
 using Umbraco.Core.Logging;
@@ -35,6 +37,18 @@ namespace uSync8.BackOffice.SyncHandlers
         where TObject : ITreeEntity
         where TService : IService
     {
+
+        protected SyncHandlerContainerBase(
+            IEntityService entityService,
+            IProfilingLogger logger,
+            AppCaches appCaches,
+            ISyncSerializer<TObject> serializer,
+            ISyncItemFactory syncItemFactory,
+            SyncFileService syncFileService)
+            : base(entityService, logger, appCaches, serializer, syncItemFactory, syncFileService)
+        { }
+
+        [Obsolete("Use constructors with collections")]
         protected SyncHandlerContainerBase(
             IEntityService entityService,
             IProfilingLogger logger,
@@ -45,6 +59,7 @@ namespace uSync8.BackOffice.SyncHandlers
             : base(entityService, logger, serializer, tracker, appCaches, syncFileService)
         { }
 
+        [Obsolete("Use constructors with collections")]
         protected SyncHandlerContainerBase(
             IEntityService entityService,
             IProfilingLogger logger,

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
@@ -28,6 +29,9 @@ namespace uSync8.Core.Tracking
         protected abstract TrackedItem TrackChanges();
 
         public virtual IEnumerable<uSyncChange> GetChanges(XElement node)
+            => GetChanges(node, new SyncSerializerOptions());
+
+        public virtual IEnumerable<uSyncChange> GetChanges(XElement node, SyncSerializerOptions options)
         {
             if (serializer.IsEmpty(node))
             {
@@ -59,7 +63,7 @@ namespace uSync8.Core.Tracking
             var item = serializer.FindItem(node);
             if (item != null)
             {
-                var current = serializer.Serialize(item);
+                var current = SerializeItem(item, options);
                 if (current.Success)
                 {
                     return CalculateChanges(changes, current.Item, node, "", "");
@@ -476,6 +480,17 @@ namespace uSync8.Core.Tracking
                 return items.FirstOrDefault(x => x.Attribute(key).ValueOrDefault(string.Empty) == value);
 
             return items.FirstOrDefault(x => x.Element(key).ValueOrDefault(string.Empty) == value);
+        }
+
+
+        private SyncAttempt<XElement> SerializeItem(TObject item, SyncSerializerOptions options)
+        {
+            if (serializer is ISyncOptionsSerializer<TObject> optionSerializer)
+                return optionSerializer.Serialize(item, options);
+
+#pragma warning disable CS0618 // Type or member is obsolete
+            return serializer.Serialize(item);
+#pragma warning restore CS0618 // Type or member is obsolete
         }
     }
 

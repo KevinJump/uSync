@@ -15,7 +15,7 @@ using uSync8.Core.Models;
 namespace uSync8.Core.Serialization.Serializers
 {
     [SyncSerializer("D0E0769D-CCAE-47B4-AD34-4182C587B08A", "Template Serializer", uSyncConstants.Serialization.Template)]
-    public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer<ITemplate>
+    public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncOptionsSerializer<ITemplate>
     {
         private readonly IFileService fileService;
 
@@ -26,7 +26,7 @@ namespace uSync8.Core.Serialization.Serializers
             this.fileService = fileService;
         }
 
-        protected override SyncAttempt<ITemplate> DeserializeCore(XElement node)
+        protected override SyncAttempt<ITemplate> DeserializeCore(XElement node, SyncSerializerOptions options)
         {
             var key = node.GetKey();
             var alias = node.GetAlias();
@@ -89,7 +89,7 @@ namespace uSync8.Core.Serialization.Serializers
             return SyncAttempt<ITemplate>.Succeed(item.Name, item, ChangeType.Import);
         }
 
-        public override SyncAttempt<ITemplate> DeserializeSecondPass(ITemplate item, XElement node, SerializerFlags flags)
+        public override SyncAttempt<ITemplate> DeserializeSecondPass(ITemplate item, XElement node, SyncSerializerOptions options)
         {
             var master = node.Element("Parent").ValueOrDefault(string.Empty);
             if (master != string.Empty && item.MasterTemplateAlias != master)
@@ -101,7 +101,7 @@ namespace uSync8.Core.Serialization.Serializers
                     logger.Debug<TemplateSerializer>("Setting Master {0}", masterItem.Alias);
                     item.SetMasterTemplate(masterItem);
 
-                    if (!flags.HasFlag(SerializerFlags.DoNotSave))
+                    if (!options.Flags.HasFlag(SerializerFlags.DoNotSave))
                         SaveItem(item);
                 }
             }
@@ -110,7 +110,7 @@ namespace uSync8.Core.Serialization.Serializers
         }
 
 
-        protected override SyncAttempt<XElement> SerializeCore(ITemplate item)
+        protected override SyncAttempt<XElement> SerializeCore(ITemplate item, SyncSerializerOptions options)
         {
             var node = this.InitializeBaseNode(item, item.Alias, this.CalculateLevel(item));
 

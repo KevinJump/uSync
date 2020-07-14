@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Xml.Linq;
+
 using Umbraco.Core;
 using Umbraco.Core.Cache;
 using Umbraco.Core.Logging;
@@ -31,6 +31,20 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
         private readonly ILocalizationService localizationService;
 
         public LanguageHandler(
+            ILocalizationService localizationService,
+            IEntityService entityService,
+            IProfilingLogger logger,
+            AppCaches appCaches,
+            ISyncSerializer<ILanguage> serializer,
+            ISyncItemFactory syncItemFactory,
+            SyncFileService syncFileService)
+            : base(entityService, logger, appCaches, serializer, syncItemFactory, syncFileService)
+        {
+            this.localizationService = localizationService;
+        }
+
+        [Obsolete("Use constructors with collections")]
+        protected LanguageHandler(
             IEntityService entityService,
             IProfilingLogger logger,
             ILocalizationService localizationService,

@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Umbraco.Core;
+
 namespace uSync8.Core.Extensions
 {
     public static class ListExtensions
@@ -16,5 +18,11 @@ namespace uSync8.Core.Extensions
             if (item == null) return;
             list.Add(item);
         }
+
+        /// <summary>
+        ///  Is the value valid for this list (if the list is empty, we say the value is valid).
+        /// </summary>
+        public static bool IsValid(this IList<string> list, string value)
+            => list.Count == 0 || list.InvariantContains(value) || list.InvariantContains("*");
     }
 }

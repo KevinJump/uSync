@@ -13,7 +13,7 @@ using uSync8.Core.Models;
 namespace uSync8.Core.Serialization.Serializers
 {
     [SyncSerializer("CBB3FDA1-F7B3-470E-B78F-EB316576C8C6", "Macro Serializer", uSyncConstants.Serialization.Macro)]
-    public class MacroSerializer : SyncSerializerBase<IMacro>, ISyncSerializer<IMacro>
+    public class MacroSerializer : SyncSerializerBase<IMacro>, ISyncOptionsSerializer<IMacro>
     {
         private readonly IMacroService macroService;
 
@@ -25,7 +25,7 @@ namespace uSync8.Core.Serialization.Serializers
             this.macroService = macroService;
         }
 
-        protected override SyncAttempt<IMacro> DeserializeCore(XElement node)
+        protected override SyncAttempt<IMacro> DeserializeCore(XElement node, SyncSerializerOptions options)
         {
             var changes = new List<uSyncChange>();
 
@@ -138,7 +138,7 @@ namespace uSync8.Core.Serialization.Serializers
 
         }
 
-        protected override SyncAttempt<XElement> SerializeCore(IMacro item)
+        protected override SyncAttempt<XElement> SerializeCore(IMacro item, SyncSerializerOptions options)
         {
             var node = this.InitializeBaseNode(item, item.Alias);
 

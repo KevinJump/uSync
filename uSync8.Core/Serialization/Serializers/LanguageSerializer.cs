@@ -16,7 +16,7 @@ namespace uSync8.Core.Serialization.Serializers
 {
     [SyncSerializer("8D2381C3-A0F8-43A2-8563-6F12F9F48023", "Language Serializer",
         uSyncConstants.Serialization.Language, IsTwoPass = true)]
-    public class LanguageSerializer : SyncSerializerBase<ILanguage>, ISyncSerializer<ILanguage>
+    public class LanguageSerializer : SyncSerializerBase<ILanguage>, ISyncOptionsSerializer<ILanguage>
     {
         private readonly ILocalizationService localizationService;
 
@@ -27,7 +27,7 @@ namespace uSync8.Core.Serialization.Serializers
             this.localizationService = localizationService;
         }
 
-        protected override SyncAttempt<ILanguage> DeserializeCore(XElement node)
+        protected override SyncAttempt<ILanguage> DeserializeCore(XElement node, SyncSerializerOptions options)
         {
             var isoCode = node.Element("IsoCode").ValueOrDefault(string.Empty);
             logger.Debug<LanguageSerializer>("Derserializing {0}", isoCode);
@@ -68,7 +68,7 @@ namespace uSync8.Core.Serialization.Serializers
         /// <summary>
         ///  second pass we set the default language again (because you can't just set it)
         /// </summary>
-        public override SyncAttempt<ILanguage> DeserializeSecondPass(ILanguage item, XElement node, SerializerFlags flags)
+        public override SyncAttempt<ILanguage> DeserializeSecondPass(ILanguage item, XElement node, SyncSerializerOptions options)
         {
             logger.Debug<LanguageSerializer>("Language Second Pass {IsoCode}", item.IsoCode);
             item.IsDefault = node.Element("IsDefault").ValueOrDefault(false);
@@ -77,7 +77,7 @@ namespace uSync8.Core.Serialization.Serializers
             if (fallbackId > 0)
                 item.FallbackLanguageId = fallbackId;
 
-            if (!flags.HasFlag(SerializerFlags.DoNotSave) && item.IsDirty())
+            if (!options.Flags.HasFlag(SerializerFlags.DoNotSave) && item.IsDirty())
                 localizationService.Save(item);
 
             return SyncAttempt<ILanguage>.Succeed(item.CultureName, item, ChangeType.Import);
@@ -126,7 +126,7 @@ namespace uSync8.Core.Serialization.Serializers
             return new Guid(bytes);
         }
 
-        protected override SyncAttempt<XElement> SerializeCore(ILanguage item)
+        protected override SyncAttempt<XElement> SerializeCore(ILanguage item, SyncSerializerOptions options)
         {
             var node = InitializeBaseNode(item, item.IsoCode);
 

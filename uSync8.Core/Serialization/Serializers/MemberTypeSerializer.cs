@@ -11,8 +11,7 @@ using uSync8.Core.Models;
 namespace uSync8.Core.Serialization.Serializers
 {
     [SyncSerializer("F45B5C7B-C206-4971-858B-6D349E153ACE", "MemberTypeSerializer", uSyncConstants.Serialization.MemberType)]
-    public class MemberTypeSerializer : ContentTypeBaseSerializer<IMemberType>,
-        ISyncSerializer<IMemberType>
+    public class MemberTypeSerializer : ContentTypeBaseSerializer<IMemberType>, ISyncOptionsSerializer<IMemberType>
     {
         private readonly IMemberTypeService memberTypeService;
 
@@ -25,7 +24,7 @@ namespace uSync8.Core.Serialization.Serializers
             this.memberTypeService = memberTypeService;
         }
 
-        protected override SyncAttempt<XElement> SerializeCore(IMemberType item)
+        protected override SyncAttempt<XElement> SerializeCore(IMemberType item, SyncSerializerOptions options)
         {
             var node = SerializeBase(item);
             var info = SerializeInfo(item);
@@ -62,7 +61,7 @@ namespace uSync8.Core.Serialization.Serializers
             node.Add(new XElement("IsSensitive", item.IsSensitiveProperty(property.Alias)));
         }
 
-        protected override SyncAttempt<IMemberType> DeserializeCore(XElement node)
+        protected override SyncAttempt<IMemberType> DeserializeCore(XElement node, SyncSerializerOptions options)
         {
             var item = FindOrCreate(node);
 

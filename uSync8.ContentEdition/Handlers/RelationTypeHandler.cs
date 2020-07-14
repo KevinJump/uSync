@@ -19,6 +19,7 @@ using uSync8.BackOffice;
 using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
 using uSync8.BackOffice.SyncHandlers;
+using uSync8.Core;
 using uSync8.Core.Dependency;
 using uSync8.Core.Extensions;
 using uSync8.Core.Serialization;
@@ -39,15 +40,14 @@ namespace uSync8.ContentEdition.Handlers
         public override string Group => uSyncBackOfficeConstants.Groups.Content;
 
         public RelationTypeHandler(
+            IRelationService relationService,
             IEntityService entityService,
             IProfilingLogger logger,
             AppCaches appCaches,
             ISyncSerializer<IRelationType> serializer,
-            ISyncTracker<IRelationType> tracker,
-            ISyncDependencyChecker<IRelationType> checker,
-            SyncFileService syncFileService,
-            IRelationService relationService)
-            : base(entityService, logger, serializer, tracker, appCaches, checker, syncFileService)
+            ISyncItemFactory syncItemFactory,
+            SyncFileService syncFileService)
+            : base(entityService, logger, appCaches, serializer, syncItemFactory, syncFileService)
         {
             this.relationService = relationService;
         }
@@ -67,12 +67,19 @@ namespace uSync8.ContentEdition.Handlers
             return actions;
         }
 
+
+        /// <summary>
+        ///  Relations that by default we exclude, if the exlude setting is used,then it will override these values
+        ///  and they will be included if not explicity set;
+        /// </summary>
+        private const string defaultRelations = "relateParentDocumentOnDelete,relateParentMediaFolderOnDelete,relateDocumentOnCopy";
+
         /// <summary>
         ///  Workout if we are excluding this relationType from export/import
         /// </summary>
         protected override bool ShouldExport(XElement node, HandlerSettings config)
         {
-            var exclude = config.GetSetting<string>("Exclude", string.Empty);
+            var exclude = config.GetSetting<string>("Exclude",  defaultRelations);
 
             if (!string.IsNullOrWhiteSpace(exclude) && exclude.Contains(node.GetAlias()))
                 return false;

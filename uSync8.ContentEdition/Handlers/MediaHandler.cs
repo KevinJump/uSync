@@ -10,6 +10,7 @@ using uSync8.BackOffice;
 using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
 using uSync8.BackOffice.SyncHandlers;
+using uSync8.Core;
 using uSync8.Core.Dependency;
 using uSync8.Core.Serialization;
 using uSync8.Core.Tracking;
@@ -29,6 +30,22 @@ namespace uSync8.ContentEdition.Handlers
         private readonly bool performDoubleLookup;
 
         public MediaHandler(
+            IMediaService mediaService,
+            IEntityService entityService,
+            IProfilingLogger logger,
+            AppCaches appCaches,
+            ISyncSerializer<IMedia> serializer,
+            ISyncItemFactory syncItemFactory,
+            SyncFileService syncFileService)
+            : base(entityService, logger, appCaches, serializer, syncItemFactory, syncFileService)
+        {
+            this.mediaService = mediaService;
+            performDoubleLookup = UmbracoVersion.LocalVersion.Major != 8 || UmbracoVersion.LocalVersion.Minor < 4;
+
+        }
+
+        [Obsolete("Use constructors with collections")]
+        protected MediaHandler(
             IEntityService entityService,
             IProfilingLogger logger,
             IMediaService mediaService,

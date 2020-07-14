@@ -37,6 +37,18 @@ namespace uSync8.BackOffice.SyncHandlers
         protected SyncHandlerLevelBase(
             IEntityService entityService,
             IProfilingLogger logger,
+            AppCaches appCaches,
+            ISyncSerializer<TObject> serializer,
+           ISyncItemFactory syncItemFactory,
+            SyncFileService syncFileService)
+            : base(entityService, logger, appCaches, serializer, syncItemFactory, syncFileService)
+        { }
+
+
+        [Obsolete("Use constructors with collections")]
+        protected SyncHandlerLevelBase(
+            IEntityService entityService,
+            IProfilingLogger logger,
             ISyncSerializer<TObject> serializer,
             ISyncTracker<TObject> tracker,
             AppCaches appCaches,
@@ -44,6 +56,7 @@ namespace uSync8.BackOffice.SyncHandlers
             : base(entityService, logger, serializer, tracker, appCaches, syncFileService)
         { }
 
+        [Obsolete("Use constructors with collections")]
         protected SyncHandlerLevelBase(
             IEntityService entityService,
             IProfilingLogger logger,
