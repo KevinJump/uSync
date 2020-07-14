@@ -67,12 +67,19 @@ namespace uSync8.ContentEdition.Handlers
             return actions;
         }
 
+
+        /// <summary>
+        ///  Relations that by default we exclude, if the exlude setting is used,then it will override these values
+        ///  and they will be included if not explicity set;
+        /// </summary>
+        private const string defaultRelations = "relateParentDocumentOnDelete,relateParentMediaFolderOnDelete,relateDocumentOnCopy";
+
         /// <summary>
         ///  Workout if we are excluding this relationType from export/import
         /// </summary>
         protected override bool ShouldExport(XElement node, HandlerSettings config)
         {
-            var exclude = config.GetSetting<string>("Exclude", string.Empty);
+            var exclude = config.GetSetting<string>("Exclude",  defaultRelations);
 
             if (!string.IsNullOrWhiteSpace(exclude) && exclude.Contains(node.GetAlias()))
                 return false;
