@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
+using Umbraco.Core;
 using Umbraco.Core.Cache;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
@@ -28,6 +29,21 @@ namespace uSync8.BackOffice.SyncHandlers
 
         protected readonly IEntityService entityService;
 
+
+        public SyncHandlerBase(
+            IEntityService entityService,
+            IProfilingLogger logger,
+            AppCaches appCaches,
+            ISyncSerializer<TObject> serializer,
+            ISyncItemFactory syncItemFactory,
+            SyncFileService syncFileService)
+            : base(logger, appCaches, serializer, syncItemFactory, syncFileService)
+        {
+            this.entityService = entityService;
+        }
+
+
+        [Obsolete("Use constructors with collections")]
         public SyncHandlerBase(
             IEntityService entityService,
             IProfilingLogger logger,
@@ -38,6 +54,7 @@ namespace uSync8.BackOffice.SyncHandlers
         : this(entityService, logger, serializer, tracker, appCaches, null, syncFileService) { }
 
 
+        [Obsolete("Use constructors with collections")]
         public SyncHandlerBase(
             IEntityService entityService,
             IProfilingLogger logger,
@@ -46,7 +63,11 @@ namespace uSync8.BackOffice.SyncHandlers
             AppCaches appCaches,
             ISyncDependencyChecker<TObject> dependencyChecker,
             SyncFileService syncFileService)
-            : base(logger,serializer,tracker, appCaches, dependencyChecker, syncFileService)
+            : base(logger, appCaches, 
+                  serializer,
+                  tracker.AsEnumerableOfOne(),
+                  dependencyChecker.AsEnumerableOfOne(),
+                  syncFileService)
         {
             this.entityService = entityService;
         }

@@ -20,7 +20,7 @@ using uSync8.Core.Models;
 namespace uSync8.Core.Serialization.Serializers
 {
     [SyncSerializer("C06E92B7-7440-49B7-B4D2-AF2BF4F3D75D", "DataType Serializer", uSyncConstants.Serialization.DataType)]
-    public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncSerializer<IDataType>
+    public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncOptionsSerializer<IDataType>
     {
         private readonly IDataTypeService dataTypeService;
         private readonly ConfigurationSerializerCollection configurationSerializers;
@@ -34,7 +34,7 @@ namespace uSync8.Core.Serialization.Serializers
             this.configurationSerializers = configurationSerializers;
         }
 
-        protected override SyncAttempt<IDataType> DeserializeCore(XElement node)
+        protected override SyncAttempt<IDataType> DeserializeCore(XElement node, SyncSerializerOptions options)
         {
             var info = node.Element("Info");
             var name = info.Element("Name").ValueOrDefault(string.Empty);
@@ -133,7 +133,7 @@ namespace uSync8.Core.Serialization.Serializers
 
         ///////////////////////
 
-        protected override SyncAttempt<XElement> SerializeCore(IDataType item)
+        protected override SyncAttempt<XElement> SerializeCore(IDataType item, SyncSerializerOptions options)
         {
             var node = InitializeBaseNode(item, item.Name, item.Level);
 

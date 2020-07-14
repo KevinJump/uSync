@@ -14,6 +14,7 @@ using uSync8.BackOffice;
 using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
 using uSync8.BackOffice.SyncHandlers;
+using uSync8.Core;
 using uSync8.Core.Dependency;
 using uSync8.Core.Serialization;
 using uSync8.Core.Tracking;
@@ -28,7 +29,22 @@ namespace uSync8.ContentEdition.Handlers
 
         private readonly IDomainService domainService;
 
-        public DomainHandler(IEntityService entityService,
+        public DomainHandler(
+            IDomainService domainService,
+            IEntityService entityService,
+            IProfilingLogger logger,
+            AppCaches appCaches,
+            ISyncSerializer<IDomain> serializer,
+            ISyncItemFactory syncItemFactory,
+            SyncFileService syncFileService)
+            : base(entityService, logger, appCaches, serializer, syncItemFactory, syncFileService)
+        {
+            this.domainService = domainService;
+        }
+
+
+        [Obsolete("Use constructors with collections")]
+        protected DomainHandler(IEntityService entityService,
             IProfilingLogger logger,
             IDomainService domainService,
             ISyncSerializer<IDomain> serializer,

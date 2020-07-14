@@ -322,7 +322,7 @@ namespace uSync8.BackOffice
                 if (syncFileService.DirectoryExists(folder))
                     syncFileService.CleanFolder(folder);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new ApplicationException("Failed to delete uSync folder (may be in use)", ex);
             }

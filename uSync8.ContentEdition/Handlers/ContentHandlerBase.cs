@@ -32,6 +32,18 @@ namespace uSync8.ContentEdition.Handlers
         where TObject : IContentBase
         where TService : IService
     {
+
+        protected ContentHandlerBase(
+            IEntityService entityService,
+            IProfilingLogger logger,
+            AppCaches appCaches,
+            ISyncSerializer<TObject> serializer,
+            ISyncItemFactory syncItemFactory,
+            SyncFileService syncFileService)
+            : base(entityService, logger, appCaches, serializer, syncItemFactory, syncFileService)
+        { }
+
+        [Obsolete("Use constructors with collections")]
         protected ContentHandlerBase(
             IEntityService entityService,
             IProfilingLogger logger,
@@ -42,6 +54,7 @@ namespace uSync8.ContentEdition.Handlers
             : base(entityService, logger, serializer, tracker, appCaches, syncFileService)
         { }
 
+        [Obsolete("Use constructors with collections")]
         protected ContentHandlerBase(
             IEntityService entityService,
             IProfilingLogger logger,

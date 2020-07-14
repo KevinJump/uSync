@@ -12,7 +12,7 @@ using uSync8.Core.Models;
 namespace uSync8.Core.Serialization.Serializers
 {
     [SyncSerializer("B3F7F247-6077-406D-8480-DB1004C8211C", "ContentTypeSerializer", uSyncConstants.Serialization.ContentType)]
-    public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, ISyncSerializer<IContentType>
+    public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, ISyncOptionsSerializer<IContentType>
     {
         private readonly IContentTypeService contentTypeService;
         private readonly IFileService fileService;
@@ -28,7 +28,7 @@ namespace uSync8.Core.Serialization.Serializers
             this.fileService = fileService;
         }
 
-        protected override SyncAttempt<XElement> SerializeCore(IContentType item)
+        protected override SyncAttempt<XElement> SerializeCore(IContentType item, SyncSerializerOptions options)
         {
             var node = SerializeBase(item);
             var info = SerializeInfo(item);
@@ -89,7 +89,7 @@ namespace uSync8.Core.Serialization.Serializers
             return node;
         }
 
-        protected override SyncAttempt<IContentType> DeserializeCore(XElement node)
+        protected override SyncAttempt<IContentType> DeserializeCore(XElement node, SyncSerializerOptions options)
         {
             var item = FindOrCreate(node);
 
@@ -121,14 +121,15 @@ namespace uSync8.Core.Serialization.Serializers
             property.Variations = node.Element("Variations").ValueOrDefault(ContentVariation.Nothing);
         }
 
-        public override SyncAttempt<IContentType> DeserializeSecondPass(IContentType item, XElement node, SerializerFlags flags)
+        public override SyncAttempt<IContentType> DeserializeSecondPass(IContentType item, XElement node, SyncSerializerOptions options)
         {
             logger.Debug<ContentTypeSerializer>("Deserialize Second Pass {0}", item.Alias);
 
             DeserializeCompositions(item, node);
             DeserializeStructure(item, node);
-            
-            if (!flags.HasFlag(SerializerFlags.DoNotSave) && item.IsDirty())
+
+           
+            if (!options.Flags.HasFlag(SerializerFlags.DoNotSave) && item.IsDirty())
                 contentTypeService.Save(item);
 
             CleanFolder(item, node);

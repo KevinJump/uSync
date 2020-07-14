@@ -42,6 +42,7 @@ namespace uSync8.Core
 
             // the trackers, allow us to be more nuanced in tracking changes, should
             // mean change messages are better. 
+            /*
             composition.Register<ISyncTracker<IContentType>, ContentTypeTracker>();
             composition.Register<ISyncTracker<IMediaType>, MediaTypeTracker>();
             composition.Register<ISyncTracker<IMemberType>, MemberTypeTracker>();
@@ -49,9 +50,11 @@ namespace uSync8.Core
             composition.Register<ISyncTracker<ILanguage>, LanguageTracker>();
             composition.Register<ISyncTracker<IMacro>, MacroTracker>();
             composition.Register<ISyncTracker<IDataType>, DataTypeTracker>();
+            */
 
             // the dependency checkers, they build up dependency trees for objects
             // this might just merge into the serializers ?
+            /*
             composition.Register<ISyncDependencyChecker<IContentType>, ContentTypeChecker>();
             composition.Register<ISyncDependencyChecker<IMediaType>, MediaTypeChecker>();
             composition.Register<ISyncDependencyChecker<IMemberType>, MemberTypeChecker>();
@@ -59,6 +62,20 @@ namespace uSync8.Core
             composition.Register<ISyncDependencyChecker<ILanguage>, LanguageChecker>();
             composition.Register<ISyncDependencyChecker<IMacro>, MacroChecker>();
             composition.Register<ISyncDependencyChecker<IDataType>, DataTypeChecker>();
+            */
+
+            // the trackers, allow us to be more nuanced in tracking changes, should
+            // mean change messages are better. 
+            composition.WithCollectionBuilder<SyncTrackerCollectionBuilder>()
+                .Add(composition.TypeLoader.GetTypes<ISyncTrackerBase>());
+
+            // load the dependency checkers from a collection
+            // allows us to extend checkers without changing the core. 
+            composition.WithCollectionBuilder<SyncDependencyCollectionBuilder>()
+                .Add(composition.TypeLoader.GetTypes<ISyncDependencyItem>());
+
+            // item factory, makes all the constructors of handlers way simpler
+            composition.Register<ISyncItemFactory, SyncItemFactory>();
         }
     }
 }

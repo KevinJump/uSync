@@ -177,10 +177,12 @@
     <Compile Include="Dependency\Checkers\MediaTypeChecker.cs" />
     <Compile Include="Dependency\Checkers\MemberTypeChecker.cs" />
     <Compile Include="Dependency\Checkers\TemplateChecker.cs" />
+    <Compile Include="Dependency\SyncDependencyCollection.cs" />
     <Compile Include="Dependency\uSyncDependency.cs" />
     <Compile Include="Extensions\ListExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Extensions\XElementExtensions.cs" />
+    <Compile Include="ISyncItemFactory.cs" />
     <Compile Include="Models\uSyncChange.cs" />
     <Compile Include="Serialization\ISyncOptionsSerializer.cs" />
     <Compile Include="Serialization\ISyncSerializer.cs" />
@@ -202,6 +204,7 @@
     <Compile Include="Models\SyncAttempt.cs" />
     <Compile Include="Serialization\SyncSerializerCollectionBuilder.cs" />
     <Compile Include="SyncActionType.cs" />
+    <Compile Include="SyncItemFactory.cs" />
     <Compile Include="Tracking\Impliment\ContentTypeBaseTracker.cs" />
     <Compile Include="Tracking\Impliment\ContentTypeTracker.cs" />
     <Compile Include="Tracking\Impliment\DataTypeTracker.cs" />
@@ -212,6 +215,7 @@
     <Compile Include="Tracking\Impliment\TemplateTracker.cs" />
     <Compile Include="Tracking\ISyncTracker.cs" />
     <Compile Include="Tracking\SyncBaseTracker.cs" />
+    <Compile Include="Tracking\SyncTrackerCollection.cs" />
     <Compile Include="uSync8Core.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="uSyncConstants.cs" />

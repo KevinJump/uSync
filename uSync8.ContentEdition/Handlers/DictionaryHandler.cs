@@ -32,7 +32,21 @@ namespace uSync8.ContentEdition.Handlers
 
         private readonly ILocalizationService localizationService;
 
-        public DictionaryHandler(IEntityService entityService,
+        public DictionaryHandler(
+            ILocalizationService localizationService,
+            IEntityService entityService,
+            IProfilingLogger logger,
+            AppCaches appCaches,            
+            ISyncSerializer<IDictionaryItem> serializer,
+            ISyncItemFactory syncItemFactory,
+            SyncFileService syncFileService)
+            : base(entityService, logger, appCaches, serializer, syncItemFactory, syncFileService)
+        {
+            this.localizationService = localizationService;
+        }
+
+        [Obsolete("Use constructors with collections")]
+        protected DictionaryHandler(IEntityService entityService,
             IProfilingLogger logger,
             ILocalizationService localizationService,
             ISyncSerializer<IDictionaryItem> serializer,

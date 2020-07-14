@@ -17,7 +17,7 @@ using uSync8.Core.Serialization;
 namespace uSync8.ContentEdition.Serializers
 {
     [SyncSerializer("9A5C253C-71FA-4FC0-9B7C-9D0522AAE880", "Domain Serializer", uSyncConstants.Serialization.Domain)]
-    public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncSerializer<IDomain>
+    public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncOptionsSerializer<IDomain>
     {
         private readonly IDomainService domainService;
         private readonly IContentService contentService;
@@ -34,7 +34,7 @@ namespace uSync8.ContentEdition.Serializers
             this.localizationService = localizationService;
         }
 
-        protected override SyncAttempt<IDomain> DeserializeCore(XElement node)
+        protected override SyncAttempt<IDomain> DeserializeCore(XElement node, SyncSerializerOptions options)
         {
             var item = FindOrCreate(node);
 
@@ -91,7 +91,7 @@ namespace uSync8.ContentEdition.Serializers
 
         }
 
-        protected override SyncAttempt<XElement> SerializeCore(IDomain item)
+        protected override SyncAttempt<XElement> SerializeCore(IDomain item, SyncSerializerOptions options)
         {
             var node = new XElement(ItemType,
                 new XAttribute("Key", item.Id.ToGuid()),

@@ -19,6 +19,7 @@ using uSync8.BackOffice;
 using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
 using uSync8.BackOffice.SyncHandlers;
+using uSync8.Core;
 using uSync8.Core.Dependency;
 using uSync8.Core.Extensions;
 using uSync8.Core.Serialization;
@@ -39,15 +40,14 @@ namespace uSync8.ContentEdition.Handlers
         public override string Group => uSyncBackOfficeConstants.Groups.Content;
 
         public RelationTypeHandler(
+            IRelationService relationService,
             IEntityService entityService,
             IProfilingLogger logger,
             AppCaches appCaches,
             ISyncSerializer<IRelationType> serializer,
-            ISyncTracker<IRelationType> tracker,
-            ISyncDependencyChecker<IRelationType> checker,
-            SyncFileService syncFileService,
-            IRelationService relationService)
-            : base(entityService, logger, serializer, tracker, appCaches, checker, syncFileService)
+            ISyncItemFactory syncItemFactory,
+            SyncFileService syncFileService)
+            : base(entityService, logger, appCaches, serializer, syncItemFactory, syncFileService)
         {
             this.relationService = relationService;
         }

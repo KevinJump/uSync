@@ -41,7 +41,7 @@ namespace uSync8.BackOffice.Services
 
         public string GetAbsPath(string path)
         {
-            if (IsLocalPath(path)) return CleanLocalPath(path);          
+            if (IsLocalPath(path)) return CleanLocalPath(path);
             return CleanLocalPath(IOHelper.MapPath(path.TrimStart('/')));
         }
 
@@ -61,9 +61,9 @@ namespace uSync8.BackOffice.Services
             // (e.g / or \)
             if (IsDirectorySeparator(path[0])) return false;
 
-            return path.Length >= 3 
-                && path[1] == Path.VolumeSeparatorChar 
-                && IsDirectorySeparator(path[2]) 
+            return path.Length >= 3
+                && path[1] == Path.VolumeSeparatorChar
+                && IsDirectorySeparator(path[2])
                 && IsValidDriveChar(path[0]);
         }
 
@@ -91,7 +91,7 @@ namespace uSync8.BackOffice.Services
 
         public bool DirectoryExists(string path)
             => Directory.Exists(GetAbsPath(path));
-    
+
         public bool RootExists(string path)
             => DirectoryExists(path);
 
@@ -211,7 +211,7 @@ namespace uSync8.BackOffice.Services
                     return XElement.Load(stream);
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 logger.Warn<SyncFileService>("Error while reading in {file} {message}", file, ex.Message);
                 throw new Exception($"Error while reading in {file}", ex);

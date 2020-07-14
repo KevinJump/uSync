@@ -14,7 +14,7 @@ using uSync8.Core.Serialization;
 namespace uSync8.ContentEdition.Serializers
 {
     [SyncSerializer("4D18F4C3-6EBC-4AAD-8D20-6353BDBBD484", "Dicrionary Serializer", uSyncConstants.Serialization.Dictionary)]
-    public class DictionaryItemSerializer : SyncSerializerBase<IDictionaryItem>, ISyncSerializer<IDictionaryItem>
+    public class DictionaryItemSerializer : SyncSerializerBase<IDictionaryItem>, ISyncOptionsSerializer<IDictionaryItem>
     {
         private readonly ILocalizationService localizationService;
 
@@ -25,7 +25,7 @@ namespace uSync8.ContentEdition.Serializers
             this.localizationService = localizationService;
         }
 
-        protected override SyncAttempt<IDictionaryItem> DeserializeCore(XElement node)
+        protected override SyncAttempt<IDictionaryItem> DeserializeCore(XElement node, SyncSerializerOptions options)
         {
             var item = FindItem(node);
 
@@ -98,7 +98,7 @@ namespace uSync8.ContentEdition.Serializers
             // localizationService.Save(item);
         }
 
-        protected override SyncAttempt<XElement> SerializeCore(IDictionaryItem item)
+        protected override SyncAttempt<XElement> SerializeCore(IDictionaryItem item, SyncSerializerOptions options)
         {
             var node = InitializeBaseNode(item, item.ItemKey, GetLevel(item));
 

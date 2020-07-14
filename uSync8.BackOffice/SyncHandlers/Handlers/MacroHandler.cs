@@ -12,6 +12,7 @@ using Umbraco.Core.Services.Implement;
 
 using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
+using uSync8.Core;
 using uSync8.Core.Dependency;
 using uSync8.Core.Serialization;
 using uSync8.Core.Tracking;
@@ -26,7 +27,21 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
     {
         private readonly IMacroService macroService;
 
-        public MacroHandler(IEntityService entityService,
+        public MacroHandler(
+            IMacroService macroService,
+            IEntityService entityService,
+            IProfilingLogger logger,
+            AppCaches appCaches,
+            ISyncSerializer<IMacro> serializer,
+            ISyncItemFactory syncItemFactory,
+            SyncFileService syncFileService)
+            : base(entityService, logger, appCaches, serializer, syncItemFactory, syncFileService)
+        {
+            this.macroService = macroService;
+        }
+        
+        [Obsolete("Use constructors with collections")]
+        protected MacroHandler(IEntityService entityService,
             IProfilingLogger logger, 
             IMacroService macroService,
             ISyncSerializer<IMacro> serializer,
@@ -38,7 +53,7 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
         {
             this.macroService = macroService;
         }
-
+       
         /// <summary>
         ///  overrider the default export, because macros, don't exist as an object type???
         /// </summary>

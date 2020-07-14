@@ -20,7 +20,7 @@ namespace uSync8.Core.Serialization.Serializers
 
         private readonly IContentTypeBaseService<TObject> baseService;
 
-        public ContentTypeBaseSerializer(
+        protected ContentTypeBaseSerializer(
             IEntityService entityService, ILogger logger,
             IDataTypeService dataTypeService,
             IContentTypeBaseService<TObject> baseService,

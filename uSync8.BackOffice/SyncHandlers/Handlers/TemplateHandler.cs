@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+
 using Umbraco.Core;
 using Umbraco.Core.Cache;
 using Umbraco.Core.Logging;
@@ -11,6 +12,7 @@ using Umbraco.Core.Services.Implement;
 
 using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
+using uSync8.Core;
 using uSync8.Core.Dependency;
 using uSync8.Core.Serialization;
 using uSync8.Core.Tracking;
@@ -26,10 +28,24 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
         private readonly IFileService fileService;
 
         public TemplateHandler(
-            IEntityService entityService, 
-            IProfilingLogger logger, 
             IFileService fileService,
-            ISyncSerializer<ITemplate> serializer, 
+            IEntityService entityService,
+            IProfilingLogger logger,
+            AppCaches appCaches,
+            ISyncSerializer<ITemplate> serializer,
+            ISyncItemFactory syncItemFactory,
+            SyncFileService syncFileService)
+            : base(entityService, logger, appCaches, serializer, syncItemFactory, syncFileService)
+        {
+            this.fileService = fileService;
+        }
+
+        [Obsolete("Use constructors with collections")]
+        protected TemplateHandler(
+            IEntityService entityService,
+            IProfilingLogger logger,
+            IFileService fileService,
+            ISyncSerializer<ITemplate> serializer,
             ISyncTracker<ITemplate> tracker,
             AppCaches appCaches,
             ISyncDependencyChecker<ITemplate> checker,

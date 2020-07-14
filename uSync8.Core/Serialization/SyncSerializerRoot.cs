@@ -146,11 +146,15 @@ namespace uSync8.Core.Serialization
         protected virtual SyncAttempt<TObject> DeserializeCore(XElement node)
             => DeserializeCore(node, new SyncSerializerOptions());
 
+#pragma warning disable CS0618 // Type or member is obsolete
+
         protected virtual SyncAttempt<XElement> SerializeCore(TObject item, SyncSerializerOptions options)
             => SerializeCore(item);
 
         protected virtual SyncAttempt<TObject> DeserializeCore(XElement node, SyncSerializerOptions options)
             => DeserializeCore(node);
+
+#pragma warning restore CS0618 // Type or member is obsolete
 
         /// <summary>
         ///  all xml items now have the same top line, this makes 

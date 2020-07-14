@@ -25,7 +25,7 @@ namespace uSync8.ContentEdition.Serializers
         protected readonly IContentService contentService;
         protected readonly IFileService fileService;
 
-        private bool performDoubleLookup; 
+        private bool performDoubleLookup;
 
         public ContentSerializer(
             IEntityService entityService,
@@ -91,19 +91,17 @@ namespace uSync8.ContentEdition.Serializers
             var activeCultures = options.GetCultures();
 
             var published = new XElement("Published");
-            if (item.AvailableCultures.Count() == 0)
+
+            // to make this a non-breaking change, we say default = item.published, but when 
+            // dealing with cultures it isn't used. 
+            published.Add(new XAttribute("Default", item.Published));
+
+            foreach (var culture in item.AvailableCultures.OrderBy(x => x))
             {
-                published.Add(new XAttribute("Default", item.Published));
-            }
-            else
-            {
-                foreach (var culture in item.AvailableCultures.OrderBy(x => x))
+                if (activeCultures.IsValid(culture))
                 {
-                    if (activeCultures.IsValid(culture))
-                    {
-                        published.Add(new XElement("Published", item.IsCulturePublished(culture),
-                            new XAttribute("Culture", culture)));
-                    }
+                    published.Add(new XElement("Published", item.IsCulturePublished(culture),
+                        new XAttribute("Culture", culture)));
                 }
             }
             return published;
@@ -134,7 +132,7 @@ namespace uSync8.ContentEdition.Serializers
 
         protected override SyncAttempt<IContent> DeserializeCore(XElement node, SyncSerializerOptions options)
         {
-         
+
             var item = FindOrCreate(node);
 
             DeserializeBase(item, node, options);
@@ -360,7 +358,7 @@ namespace uSync8.ContentEdition.Serializers
                 var result = contentService.SaveAndPublish(item);
                 return result.ToAttempt();
             }
-            catch(ArgumentNullException ex)
+            catch (ArgumentNullException ex)
             {
                 // we can get thrown a null argument exception by the notifer, 
                 // which is non critical! but we are ignoring this error. ! <= 8.1.5

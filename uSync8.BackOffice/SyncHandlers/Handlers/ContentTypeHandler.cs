@@ -10,6 +10,7 @@ using Umbraco.Core.Services.Implement;
 
 using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
+using uSync8.Core;
 using uSync8.Core.Dependency;
 using uSync8.Core.Serialization;
 using uSync8.Core.Tracking;
@@ -25,6 +26,20 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
         private readonly IContentTypeService contentTypeService;
 
         public ContentTypeHandler(
+            IContentTypeService contentTypeService,
+            IEntityService entityService,
+            IProfilingLogger logger,
+            AppCaches appCaches,
+            ISyncSerializer<IContentType> serializer,
+            ISyncItemFactory syncItemFactory,
+            SyncFileService syncFileService)
+            : base(entityService, logger, appCaches, serializer, syncItemFactory, syncFileService)
+        {
+            this.contentTypeService = contentTypeService;
+        }
+
+        [Obsolete("Use constructors with collections")]
+        protected ContentTypeHandler(
             IEntityService entityService,
             IProfilingLogger logger,
             IContentTypeService contentTypeService,
