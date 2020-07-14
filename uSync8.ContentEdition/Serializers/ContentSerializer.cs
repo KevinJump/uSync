@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Web.WebPages;
 using System.Xml.Linq;
+
+using NPoco.Expressions;
 
 using Umbraco.Core;
 using Umbraco.Core.Configuration;
@@ -184,8 +188,10 @@ namespace uSync8.ContentEdition.Serializers
                 foreach (var schedule in schedules.Elements("ContentSchedule"))
                 {
                     var importSchedule = GetContentScheduleFromNode(schedule);
+                    logger.Debug<ContentSerializer>("Schedule: {action} {culture} {date}", importSchedule.Action, importSchedule.Culture, importSchedule.Date);
 
-                    if (importSchedule.Date < DateTime.Now) continue; // don't add schedules in the past
+                    if (importSchedule.Date < DateTime.Now)
+                        continue; // don't add schedules in the past
 
                     nodeSchedules.Add(importSchedule);
 
@@ -210,7 +216,7 @@ namespace uSync8.ContentEdition.Serializers
 
         private ContentSchedule GetContentScheduleFromNode(XElement scheduleNode)
         {
-            var key = scheduleNode.Attribute("Key").ValueOrDefault(Guid.Empty);
+            var key = Guid.Empty;
             var culture = scheduleNode.Element("Culture").ValueOrDefault(string.Empty);
             var date = scheduleNode.Element("Date").ValueOrDefault(DateTime.MinValue);
             var action = scheduleNode.Element("Action").ValueOrDefault(ContentScheduleAction.Release);
