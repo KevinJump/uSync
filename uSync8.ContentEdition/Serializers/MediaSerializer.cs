@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Security.Cryptography;
 using System.Xml.Linq;
 
@@ -115,8 +114,12 @@ namespace uSync8.ContentEdition.Serializers
             node.Add(info);
             node.Add(properties);
 
-            info.Add(SerializeFileHash(item));
-
+            // serializing the file hash, will mean if the image changes, then the media item will
+            // trigger as a change - this doesn't mean the image will be updated other methods are
+            // used to copy media between servers (uSync.Complete)
+            if (options.GetSetting("IncludeFileHash", true))
+                info.Add(SerializeFileHash(item));
+            
             return SyncAttempt<XElement>.Succeed(
                 item.Name,
                 node,

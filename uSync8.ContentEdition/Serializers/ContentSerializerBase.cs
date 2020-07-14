@@ -240,7 +240,7 @@ namespace uSync8.ContentEdition.Serializers
                 if (property.Values == null || property.Values.Count == 0 && includeDefaults)
                 {
                     // add a blank one, for change clarity
-                    // we do it like this because then it doesn't get collapsed in the XML
+                    // we do it like this because then it doesn't get collapsed in the XML serialization
                     var emptyValue = new XElement("Value");
                     emptyValue.Add(new XCData(string.Empty));
 
