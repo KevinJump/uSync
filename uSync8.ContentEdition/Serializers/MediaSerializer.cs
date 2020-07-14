@@ -26,7 +26,7 @@ using uSync8.Core.Serialization;
 namespace uSync8.ContentEdition.Serializers
 {
     [SyncSerializer("B4060604-CF5A-46D6-8F00-257579A658E6", "MediaSerializer", uSyncConstants.Serialization.Media)]
-    public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncSerializer<IMedia>
+    public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncOptionsSerializer<IMedia>
     {
         private readonly IMediaService mediaService;
 
@@ -58,18 +58,18 @@ namespace uSync8.ContentEdition.Serializers
 
         }
 
-        protected override SyncAttempt<IMedia> DeserializeCore(XElement node)
+        protected override SyncAttempt<IMedia> DeserializeCore(XElement node, SyncSerializerOptions options)
         {
             var item = FindOrCreate(node);
 
-            DeserializeBase(item, node);
+            DeserializeBase(item, node, options);
 
             return SyncAttempt<IMedia>.Succeed(item.Name, item, ChangeType.Import);
         }
 
-        public override SyncAttempt<IMedia> DeserializeSecondPass(IMedia item, XElement node, SerializerFlags flags)
+        public override SyncAttempt<IMedia> DeserializeSecondPass(IMedia item, XElement node, SyncSerializerOptions options)
         {
-            var propertyAttempt = DeserializeProperties(item, node);
+            var propertyAttempt = DeserializeProperties(item, node, options);
             if (!propertyAttempt.Success)
                 return SyncAttempt<IMedia>.Fail(item.Name, ChangeType.Fail, "Failed to save properties", propertyAttempt.Exception);
 
@@ -105,12 +105,12 @@ namespace uSync8.ContentEdition.Serializers
         }
 
 
-        protected override SyncAttempt<XElement> SerializeCore(IMedia item)
+        protected override SyncAttempt<XElement> SerializeCore(IMedia item, SyncSerializerOptions options)
         {
-            var node = InitializeNode(item, item.ContentType.Alias);
+            var node = InitializeNode(item, item.ContentType.Alias, options);
 
-            var info = SerializeInfo(item);
-            var properties = SerializeProperties(item);
+            var info = SerializeInfo(item, options);
+            var properties = SerializeProperties(item, options);
 
             node.Add(info);
             node.Add(properties);
