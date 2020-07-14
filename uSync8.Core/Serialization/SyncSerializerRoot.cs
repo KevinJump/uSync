@@ -139,10 +139,12 @@ namespace uSync8.Core.Serialization
 
 
         [Obsolete("Pass SyncSerializerOptions for more config control")]
-        protected abstract SyncAttempt<XElement> SerializeCore(TObject item);
+        protected virtual SyncAttempt<XElement> SerializeCore(TObject item)
+            => SerializeCore(item, new SyncSerializerOptions());
 
         [Obsolete("Pass SyncSerializerOptions for more config control")]
-        protected abstract SyncAttempt<TObject> DeserializeCore(XElement node);
+        protected virtual SyncAttempt<TObject> DeserializeCore(XElement node)
+            => DeserializeCore(node, new SyncSerializerOptions());
 
         protected virtual SyncAttempt<XElement> SerializeCore(TObject item, SyncSerializerOptions options)
             => SerializeCore(item);

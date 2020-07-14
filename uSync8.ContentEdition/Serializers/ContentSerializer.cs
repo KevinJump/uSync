@@ -10,6 +10,7 @@ using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
 
+using uSync8.ContentEdition.Extensions;
 using uSync8.ContentEdition.Mapping;
 using uSync8.Core;
 using uSync8.Core.Extensions;
@@ -19,7 +20,7 @@ using uSync8.Core.Serialization;
 namespace uSync8.ContentEdition.Serializers
 {
     [SyncSerializer("5CB57139-8AF7-4813-95AD-C075D74636C2", "ContentSerializer", uSyncConstants.Serialization.Content)]
-    public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerializer<IContent>
+    public class ContentSerializer : ContentSerializerBase<IContent>, ISyncOptionsSerializer<IContent>
     {
         protected readonly IContentService contentService;
         protected readonly IFileService fileService;
@@ -46,11 +47,11 @@ namespace uSync8.ContentEdition.Serializers
 
         #region Serialization
 
-        protected override SyncAttempt<XElement> SerializeCore(IContent item)
+        protected override SyncAttempt<XElement> SerializeCore(IContent item, SyncSerializerOptions options)
         {
-            var node = InitializeNode(item, item.ContentType.Alias);
-            var info = SerializeInfo(item);
-            var properties = SerializeProperties(item);
+            var node = InitializeNode(item, item.ContentType.Alias, options);
+            var info = SerializeInfo(item, options);
+            var properties = SerializeProperties(item, options);
 
             node.Add(info);
             node.Add(properties);
@@ -58,18 +59,18 @@ namespace uSync8.ContentEdition.Serializers
             return SyncAttempt<XElement>.Succeed(item.Name, node, typeof(IContent), ChangeType.Export);
         }
 
-        protected override XElement SerializeInfo(IContent item)
+        protected override XElement SerializeInfo(IContent item, SyncSerializerOptions options)
         {
-            var info = base.SerializeInfo(item);
+            var info = base.SerializeInfo(item, options);
 
-            info.Add(SerailizePublishedStatus(item));
-            info.Add(SerializeSchedule(item));
-            info.Add(SerializeTemplate(item));
+            info.Add(SerailizePublishedStatus(item, options));
+            info.Add(SerializeSchedule(item, options));
+            info.Add(SerializeTemplate(item, options));
 
             return info;
         }
 
-        protected virtual XElement SerializeTemplate(IContent item)
+        protected virtual XElement SerializeTemplate(IContent item, SyncSerializerOptions options)
         {
             if (item.TemplateId != null && item.TemplateId.HasValue)
             {
@@ -84,18 +85,31 @@ namespace uSync8.ContentEdition.Serializers
             return new XElement("Template");
         }
 
-        private XElement SerailizePublishedStatus(IContent item)
+        private XElement SerailizePublishedStatus(IContent item, SyncSerializerOptions options)
         {
-            var published = new XElement("Published", new XAttribute("Default", item.Published));
-            foreach (var culture in item.AvailableCultures.OrderBy(x => x))
+            // get the list of cultures we are serializing from the config
+            var activeCultures = options.GetCultures();
+
+            var published = new XElement("Published");
+            if (item.AvailableCultures.Count() == 0)
             {
-                published.Add(new XElement("Published", item.IsCulturePublished(culture),
-                    new XAttribute("Culture", culture)));
+                published.Add(new XAttribute("Default", item.Published));
+            }
+            else
+            {
+                foreach (var culture in item.AvailableCultures.OrderBy(x => x))
+                {
+                    if (activeCultures.IsValid(culture))
+                    {
+                        published.Add(new XElement("Published", item.IsCulturePublished(culture),
+                            new XAttribute("Culture", culture)));
+                    }
+                }
             }
             return published;
         }
 
-        private XElement SerializeSchedule(IContent item)
+        private XElement SerializeSchedule(IContent item, SyncSerializerOptions options)
         {
             var node = new XElement("Schedule");
             var schedules = item.ContentSchedule.FullSchedule;
@@ -118,14 +132,14 @@ namespace uSync8.ContentEdition.Serializers
 
         #region Deserialization
 
-        protected override SyncAttempt<IContent> DeserializeCore(XElement node)
+        protected override SyncAttempt<IContent> DeserializeCore(XElement node, SyncSerializerOptions options)
         {
          
             var item = FindOrCreate(node);
 
-            DeserializeBase(item, node);
+            DeserializeBase(item, node, options);
             DeserializeTemplate(item, node);
-            DeserializeSchedules(item, node);
+            DeserializeSchedules(item, node, options);
 
             return SyncAttempt<IContent>.Succeed(item.Name, item, ChangeType.Import);
         }
@@ -161,7 +175,7 @@ namespace uSync8.ContentEdition.Serializers
             }
         }
 
-        private void DeserializeSchedules(IContent item, XElement node)
+        private void DeserializeSchedules(IContent item, XElement node, SyncSerializerOptions options)
         {
             var schedules = node.Element("Info")?.Element("Schedule");
             if (schedules != null && schedules.HasElements)
@@ -214,9 +228,9 @@ namespace uSync8.ContentEdition.Serializers
             return null;
         }
 
-        public override SyncAttempt<IContent> DeserializeSecondPass(IContent item, XElement node, SerializerFlags flags)
+        public override SyncAttempt<IContent> DeserializeSecondPass(IContent item, XElement node, SyncSerializerOptions options)
         {
-            var attempt = DeserializeProperties(item, node);
+            var attempt = DeserializeProperties(item, node, options);
             if (!attempt.Success)
             {
                 return SyncAttempt<IContent>.Fail(item.Name, ChangeType.ImportFail, attempt.Exception);
@@ -232,7 +246,7 @@ namespace uSync8.ContentEdition.Serializers
 
             // published status
             // this does the last save and publish
-            var saveAttempt = DoSaveOrPublish(item, node);
+            var saveAttempt = DoSaveOrPublish(item, node, options);
 
             if (saveAttempt.Success)
             {
@@ -259,7 +273,7 @@ namespace uSync8.ContentEdition.Serializers
             }
         }
 
-        protected virtual Attempt<string> DoSaveOrPublish(IContent item, XElement node)
+        protected virtual Attempt<string> DoSaveOrPublish(IContent item, XElement node, SyncSerializerOptions options)
         {
             var publishedNode = node.Element("Info")?.Element("Published");
             if (publishedNode != null)
@@ -269,10 +283,10 @@ namespace uSync8.ContentEdition.Serializers
                 if (publishedNode.HasElements)
                 {
                     // culture based publishing.
+                    var cultures = options.GetDeserializedCultures(node);
 
-                    // if we where only publishing partial cultures, 
-                    // we wouldn't delete missing ones.
-                    var unpublishMissingCultures = true; 
+                    // TODO: I think this is the wrong way around?
+                    var unpublishMissingCultures = cultures.Count > 0;
 
                     var cultureStatuses = new Dictionary<string, uSyncContentState>();
 
@@ -280,15 +294,16 @@ namespace uSync8.ContentEdition.Serializers
                     {
                         var culture = culturePublish.Attribute("Culture").ValueOrDefault(string.Empty);
 
-                        if (!string.IsNullOrWhiteSpace(culture))
+                        if (!string.IsNullOrWhiteSpace(culture) && cultures.IsValid(culture))
                         {
                             // is the item published in the config file
-                            var state = culturePublish.ValueOrDefault(false)
+                            var configState = culturePublish.ValueOrDefault(false)
                                 ? uSyncContentState.Published
                                 : uSyncContentState.Unpublished;
 
                             // pending or outstanding scheduled actions can change the action we take.
-                            cultureStatuses[culture] = CalculateScheduledState(state, schedules, culture);
+                            cultureStatuses[culture] =
+                                schedules.CalculateCultureState(culture, configState);
                         }
 
                     }
@@ -304,9 +319,7 @@ namespace uSync8.ContentEdition.Serializers
                         ? uSyncContentState.Published
                         : uSyncContentState.Unpublished;
 
-
-                    state = CalculateScheduledState(state, schedules, string.Empty);
-
+                    state = schedules.CalculateCultureState(string.Empty, state);
 
                     if (state == uSyncContentState.Published)
                     {
@@ -324,40 +337,8 @@ namespace uSync8.ContentEdition.Serializers
         }
 
         /// <summary>
-        ///  work out what the current status of the item should be. 
+        ///  work out what the current status of a given culture should be. 
         /// </summary>
-        public uSyncContentState CalculateScheduledState(uSyncContentState state, IList<ContentSchedule> schedules, string culture)
-        {
-            foreach (var schedule in schedules.Where(x => x.Culture.InvariantEquals(culture))
-                .OrderBy(x => x.Date))
-            {
-                switch (schedule.Action)
-                {
-                    case ContentScheduleAction.Release:
-                        if (schedule.Date < DateTime.Now)
-                        {
-                            state = uSyncContentState.Published;
-                        }
-                        else
-                        {
-                            // if a schedule publish hasn't happend yet,
-                            // if the whole culture is already 'published' we save it.
-                            // but if its unpublished, then we keep that, so it will get 
-                            // unpublished if it isn't 
-                            if (state == uSyncContentState.Published) state = uSyncContentState.Saved;
-                        }
-                        break;
-                    case ContentScheduleAction.Expire:
-                        if (schedule.Date < DateTime.Now)
-                        {
-                            state = uSyncContentState.Unpublished;
-                        }
-                        break;
-                }
-
-            }
-            return state;
-        }
 
         private IList<ContentSchedule> GetSchedules(XElement schedulesNode)
         {
