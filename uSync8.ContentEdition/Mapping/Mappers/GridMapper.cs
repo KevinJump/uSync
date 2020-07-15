@@ -142,7 +142,7 @@ namespace uSync8.ContentEdition.Mapping.Mappers
             if (value == null) return Enumerable.Empty<uSyncDependency>();
 
             var (alias, mappers) = FindMappers(editor);
-            if (!mappers.Any()) return Enumerable.Empty<uSyncDependency>();
+            if (mappers == null || !mappers.Any()) return Enumerable.Empty<uSyncDependency>();
 
             var dependencies = new List<uSyncDependency>();
 

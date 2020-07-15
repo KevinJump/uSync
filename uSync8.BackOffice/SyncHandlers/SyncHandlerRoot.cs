@@ -139,8 +139,8 @@ namespace uSync8.BackOffice.SyncHandlers
             this.itemFactory = itemFactory ?? Current.Factory.GetInstance<ISyncItemFactory>();
 
             this.serializer = serializer;
-            this.trackers = itemFactory.GetTrackers<TObject>().ToList();
-            this.dependencyCheckers = itemFactory.GetCheckers<TObject>().ToList();
+            this.trackers = this.itemFactory.GetTrackers<TObject>().ToList();
+            this.dependencyCheckers = this.itemFactory.GetCheckers<TObject>().ToList();
 
             this.syncFileService = syncFileService;
 

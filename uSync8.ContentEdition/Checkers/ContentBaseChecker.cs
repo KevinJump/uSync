@@ -1,5 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+
+using Serilog.Core;
+
 using Umbraco.Core;
 using Umbraco.Core.Models;
 using Umbraco.Core.Services;
@@ -14,7 +17,7 @@ namespace uSync8.ContentEdition.Checkers
     {
         protected readonly IEntityService entityService;
         private UmbracoObjectTypes contentTypeObjectType;
-        private SyncValueMapperCollection mappers;
+        private SyncValueMapperCollection mapperCollection;
 
         public UmbracoObjectTypes ObjectType { get; protected set; } = UmbracoObjectTypes.Unknown;
 
@@ -25,7 +28,7 @@ namespace uSync8.ContentEdition.Checkers
             this.entityService = entityService;
             this.contentTypeObjectType = contentTypeObjectType;
 
-            this.mappers = mappers;
+            this.mapperCollection = mappers;
         }
 
         protected uSyncDependency CalcDocTypeDependency(IContentBase item, DependencyFlags flags)
@@ -155,14 +158,14 @@ namespace uSync8.ContentEdition.Checkers
             foreach (var property in item.Properties)
             {
                 var editorAlias = property.PropertyType.PropertyEditorAlias;
-                var valueMappers = mappers.GetSyncMappers(editorAlias);
+                var valueMappers = mapperCollection.GetSyncMappers(editorAlias);
                 if (valueMappers.Any())
                 {
                     foreach(var value in property.Values)
                     {
                         if (value.EditedValue == null) continue;
 
-                        foreach (var mapper in mappers)
+                        foreach (var mapper in valueMappers)
                         {
                             var linkedDependencies = mapper.GetDependencies(value.EditedValue, editorAlias, propertyFlags);
 
