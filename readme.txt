@@ -1,39 +1,33 @@
-﻿           _____                  
-    __  __/ ___/__  ______  _____ 
-   / / / /\__ \/ / / / __ \/ ___/ 
-  / /_/ /___/ / /_/ / / / / /__ 
-  \__,_//____/\__, /_/ /_/\___/ 🛴🛒🎄💻🧼
- ----------- /____/ --- 8.6.x -------------
+﻿                       _____                 
+                __  __/ ___/__  ______  _____
+               / / / /\__ \/ / / / __ \/ ___/
+              / /_/ /___/ / /_/ / / / / /__  
+              \__,_//____/\__, /_/ /_/\___/  
+                         /____/     v8.6.x
 
- Welcome to uSync 8 for Umbraco 8
+             Welcome to uSync 8 for Umbraco 8
 
  Thanks for Installing uSync 8, All the bits of your 
  umbraco settings will now be saved to disk - if you want 
  to also sync content and media install uSync.ContentEdition.
 
- Targets
- -------
- The uSync NuGet package includes build targets that mean the 
- uSync folder is included when you package up your Umbraco
- site so you don't need to include it in your solution view.
+ Repo   : https://github.com/KevinJump/uSync8  
+ Docs   : https://docs.jumoo.co.uk/uSync/v8/
+ Forums : https://our.umbraco.com/packages/developer-tools/usync/usync/
 
- Actions
- -------
- uSync 8 manages actions (delete, renames, etc ) by creating an 
- 'empty' action config in the place where the config file for 
- an item was. 
+ uSync and uSync.ContentEdition are FREE ✔ You can use them
+ on any of your projects as many times as your like. 
 
- This means deletes exist in place within the uSync folder which
- makes it easier to deploy the uSync folder and not have orphaned
- items from previous versions hanging about.
+ 
+ --- 
+ uSync.Complete is our awesome add on package that lets you and
+ your editors push and pull content, media and settings between
+ umbraco installations.
+ 
+            https://jumoo.co.uk/uSync/Complete
 
- uSync is open source and free Feedback and Join in:
-   https://github.com/KevinJump/uSync8  
+ Its not free 💰, but the 60 day trial is - so you can have 
+ a play around show it the 👨‍💼👩‍💼 with the 💳 and they will ❤ it.   
 
-  = uSync.Complete - free 60 day trial ===========================
- |                                                                |
- | You can give your editors the ability to push and pull content |
- | and media between umbraco installations with uSync.Complete!   |
- |   https://jumoo.co.uk/uSync/Complete                           |
- |                                                                |
-  ================================================================
+ 
+ 🛴🛒🎄💻🧼😷
