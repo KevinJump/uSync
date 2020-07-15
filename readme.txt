@@ -29,5 +29,5 @@
  Its not free 💰, but the 60 day trial is - so you can have 
  a play around show it the 👨‍💼👩‍💼 with the 💳 and they will ❤ it.   
 
- 
- 🛴🛒🎄💻🧼😷
+
+ [ Release v8.6.4 - 🛴🛒🎄💻🧼😷 ]
