@@ -65,7 +65,7 @@ namespace uSync8.Core.Serialization.Serializers
             return tabs;
         }
 
-        protected XElement SerializeProperties(TObject item)
+        protected virtual XElement SerializeProperties(TObject item)
         {
             var node = new XElement("GenericProperties");
 
@@ -607,7 +607,7 @@ namespace uSync8.Core.Serialization.Serializers
             List<string> removals = new List<string>();
 
             var nodes = properties.Elements("GenericProperty")
-                .Where(x => x.Element("Key") != null)
+                .Where(x => x.Element("Key").ValueOrDefault(Guid.Empty) != Guid.Empty)
                 .Select(x =>
                     new
                     {
