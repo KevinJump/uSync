@@ -12,6 +12,7 @@ namespace uSync8.Core.Dependency
         IncludeViews = 16,
         IncludeMedia = 32,
         IncludeLinked = 64,
-        IncludeMediaFiles = 128
+        IncludeMediaFiles = 128,
+        IncludeConfig = 256
     }
 }
