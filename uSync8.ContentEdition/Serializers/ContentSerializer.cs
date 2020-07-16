@@ -111,7 +111,7 @@ namespace uSync8.ContentEdition.Serializers
             return published;
         }
 
-        private XElement SerializeSchedule(IContent item, SyncSerializerOptions options)
+        protected virtual XElement SerializeSchedule(IContent item, SyncSerializerOptions options)
         {
             var node = new XElement("Schedule");
             var schedules = item.ContentSchedule.FullSchedule;
