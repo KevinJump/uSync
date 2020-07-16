@@ -487,6 +487,7 @@ namespace uSync8.ContentEdition.Serializers
                 else
                 {
                     logger.Warn(serializerType, "DeserializeProperties: item {Name} doesn't have property {alias} but its in the xml", item.Name, alias);
+                    errors += $"Item {Name} doesn't contain {alias}";
                 }
             }
 
