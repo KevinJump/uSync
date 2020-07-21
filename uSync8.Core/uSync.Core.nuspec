@@ -15,7 +15,8 @@
 8.3 - Language Rename support for Umbraco 8.3
 8.4 - Performance improvements for Umbraco 8.4
 8.5 - Lookup caching for speed.
-8.6 - Missing parent checks and blocks]]>
+8.6 - Missing parent checks and blocks
+8.7 - Block editor support]]>
 </releaseNotes>
     <tags>umbraco usync</tags>
     <repository type="git" url="https://github.com/KevinJump/uSync8" />
