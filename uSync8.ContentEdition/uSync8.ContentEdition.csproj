@@ -245,12 +245,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Checkers\ContentBaseChecker.cs" />
-    <Compile Include="Checkers\ContentChecker.cs" />
-    <Compile Include="Checkers\DictionaryItemChecker.cs" />
-    <Compile Include="Checkers\DomainChecker.cs" />
-    <Compile Include="Checkers\MediaChecker.cs" />
-    <Compile Include="Checkers\RelationTypeChecker.cs" />
     <Compile Include="Extensions\ContentScheduleExtensions.cs" />
     <Compile Include="Extensions\PublishResultExtensions.cs" />
     <Compile Include="Handlers\ContentHandler.cs" />

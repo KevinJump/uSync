@@ -166,17 +166,9 @@
     <Compile Include="DataTypes\ConfigurationSerializerBase.cs" />
     <Compile Include="DataTypes\ConfigurationSerializerCollectionBuilder.cs" />
     <Compile Include="DataTypes\IConfigurationSerializer.cs" />
-    <Compile Include="Dependency\Checkers\ContentTypeBaseChecker.cs" />
-    <Compile Include="Dependency\Checkers\ContentTypeChecker.cs" />
-    <Compile Include="Dependency\Checkers\DataTypeChecker.cs" />
     <Compile Include="Dependency\DependencyFlags.cs" />
     <Compile Include="Dependency\DependencyOrders.cs" />
     <Compile Include="Dependency\ISyncDependencyChecker.cs" />
-    <Compile Include="Dependency\Checkers\LanguageChecker.cs" />
-    <Compile Include="Dependency\Checkers\MacroChecker.cs" />
-    <Compile Include="Dependency\Checkers\MediaTypeChecker.cs" />
-    <Compile Include="Dependency\Checkers\MemberTypeChecker.cs" />
-    <Compile Include="Dependency\Checkers\TemplateChecker.cs" />
     <Compile Include="Dependency\SyncDependencyCollection.cs" />
     <Compile Include="Dependency\uSyncDependency.cs" />
     <Compile Include="Extensions\ListExtensions.cs" />
