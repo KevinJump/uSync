@@ -52,7 +52,7 @@ namespace uSync8.Core.Serialization
 
         [Obsolete("Serialize with options for better config support")]
         public SyncAttempt<XElement> Serialize(TObject item)
-            => Serialize(item, null);
+            => Serialize(item, new SyncSerializerOptions());
 
         public SyncAttempt<XElement> Serialize(TObject item, SyncSerializerOptions options)
         {
