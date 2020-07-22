@@ -1,7 +1,7 @@
 @echo off 
 
-REM SET config=release
-SET config=debug
+SET config=release
+REM SET config=debug
 
 @Echo Packaging for %config%
 nuget pack ..\uSync8.Core\uSync.Core.nuspec -build  -OutputDirectory %1 -version %1 -properties "depends=%1;Configuration=%config%"
