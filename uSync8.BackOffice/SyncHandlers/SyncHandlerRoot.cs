@@ -1114,8 +1114,15 @@ namespace uSync8.BackOffice.SyncHandlers
         }
         public IEnumerable<uSyncDependency> GetDependencies(Guid key, DependencyFlags flags)
         {
-            var item = this.GetFromService(key);
-            return GetDependencies(item, flags);
+            if (key == Guid.Empty)
+            {
+                return GetContainerDependencies(default, flags);
+            }
+            else
+            {
+                var item = this.GetFromService(key);
+                return GetDependencies(item, flags);
+            }
         }
 
         public IEnumerable<uSyncDependency> GetDependencies(int id, DependencyFlags flags)
