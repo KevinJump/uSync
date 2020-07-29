@@ -103,5 +103,12 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 
         protected override void DeleteViaService(IDataType item)
             => dataTypeService.Delete(item);
+
+        protected override IEntity GetContainer(int id)
+            => dataTypeService.GetContainer(id);
+
+        protected override IEntity GetContainer(Guid key)
+            => dataTypeService.GetContainer(key);
+
     }
 }

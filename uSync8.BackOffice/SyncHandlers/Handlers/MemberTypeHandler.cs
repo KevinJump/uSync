@@ -80,6 +80,13 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
         protected override IMemberType GetFromService(string alias)
             => memberTypeService.Get(alias);
 
+
+        protected override IEntity GetContainer(int id)
+            => memberTypeService.GetContainer(id);
+
+        protected override IEntity GetContainer(Guid key)
+            => memberTypeService.GetContainer(key);
+
         protected override string GetItemFileName(IUmbracoEntity item, bool useGuid)
         {
             if (useGuid) return item.Key.ToString();

@@ -97,5 +97,12 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 
         protected override string GetItemAlias(IMediaType item)
             => item.Alias;
+
+        protected override IEntity GetContainer(int id)
+            => mediaTypeService.GetContainer(id);
+
+        protected override IEntity GetContainer(Guid key)
+            => mediaTypeService.GetContainer(key);
+
     }
 }

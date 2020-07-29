@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -957,6 +956,9 @@ namespace uSync8.BackOffice.SyncHandlers
         abstract protected TObject GetFromService(TContainer item);
         abstract protected void DeleteViaService(TObject item);
 
+        virtual protected TContainer GetContainer(Guid key) => default;
+        virtual protected TContainer GetContainer(int id) => default;
+
         abstract protected string GetItemPath(TObject item, bool useGuid, bool isFlat);
         abstract protected string GetItemName(TObject item);
 
@@ -1121,6 +1123,16 @@ namespace uSync8.BackOffice.SyncHandlers
             else
             {
                 var item = this.GetFromService(key);
+                if (item == null)
+                {
+                    var container = this.GetContainer(key);
+                    if (container != null)
+                    {
+                        return GetContainerDependencies(container, flags);
+                    }
+                    return Enumerable.Empty<uSyncDependency>();
+                }
+
                 return GetDependencies(item, flags);
             }
         }
@@ -1131,7 +1143,16 @@ namespace uSync8.BackOffice.SyncHandlers
             if (id == -1) return GetContainerDependencies(default, flags);
 
             var item = this.GetFromService(id);
-            if (item == null) Enumerable.Empty<uSyncDependency>();
+            if (item == null)
+            {
+                var container = this.GetContainer(id);
+                if (container != null)
+                {
+                    return GetContainerDependencies(container, flags);
+                }
+
+                return Enumerable.Empty<uSyncDependency>();
+            }
             return GetDependencies(item, flags);
         }
 

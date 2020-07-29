@@ -95,6 +95,12 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
         protected override IContentType GetFromService(string alias)
             => contentTypeService.Get(alias);
 
+        protected override IEntity GetContainer(int id)
+            => contentTypeService.GetContainer(id);
+
+        protected override IEntity GetContainer(Guid key)
+            => contentTypeService.GetContainer(key);
+
         protected override void DeleteFolder(int id)
             => contentTypeService.DeleteContainer(id);
 
