@@ -522,6 +522,10 @@
       <Project>{b3afc1f9-9398-4d8e-be98-1c78bab20ec9}</Project>
       <Name>uSync8.EventTriggers</Name>
     </ProjectReference>
+    <ProjectReference Include="..\uSync8.HistoryView\uSync8.HistoryView.csproj">
+      <Project>{05dd37aa-82a4-4763-b8ea-da82f7c7ab2c}</Project>
+      <Name>uSync8.HistoryView</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup />
   <PropertyGroup>

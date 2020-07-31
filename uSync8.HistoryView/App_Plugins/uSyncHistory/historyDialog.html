@@ -1,0 +1,34 @@
+﻿<div ng-controller="uSyncHistoryDialogController as vm">
+    <umb-editor-panel>
+        <umb-editor-header name="vm.title"
+                           description="vm.description"
+                           name-locked="true"
+                           description-locked="true"
+                           hide-alias="true"
+                           hide-icon="true"
+                           >
+        </umb-editor-header>
+
+        <umb-editor-container>
+
+            <usync-report-view action="vm.history.Action"
+                               results="vm.history.Changes"
+                               hide-action="true"
+                               hide-link="vm.hideLink" />
+
+
+        </umb-editor-container>
+
+        <umb-editor-footer>
+            <umb-editor-footer-content-right>
+                <umb-button type="button"
+                            button-style="link"
+                            label-key="general_close"
+                            action="vm.close()">
+                    t
+                </umb-button>
+            </umb-editor-footer-content-right>
+        </umb-editor-footer>
+
+    </umb-editor-panel>
+</div>

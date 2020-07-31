@@ -40,6 +40,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Console", "Console", "{F098
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "uSync.Commands", "uSync.Commands\uSync.Commands.csproj", "{6D3B59C1-7A78-43BB-A806-F826FD4477F6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "uSync8.HistoryView", "uSync8.HistoryView\uSync8.HistoryView.csproj", "{05DD37AA-82A4-4763-B8EA-DA82F7C7AB2C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -104,6 +106,12 @@ Global
 		{6D3B59C1-7A78-43BB-A806-F826FD4477F6}.PackageOnlyBuild|Any CPU.Build.0 = PackageOnlyBuild|Any CPU
 		{6D3B59C1-7A78-43BB-A806-F826FD4477F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6D3B59C1-7A78-43BB-A806-F826FD4477F6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{05DD37AA-82A4-4763-B8EA-DA82F7C7AB2C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{05DD37AA-82A4-4763-B8EA-DA82F7C7AB2C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{05DD37AA-82A4-4763-B8EA-DA82F7C7AB2C}.PackageOnlyBuild|Any CPU.ActiveCfg = Release|Any CPU
+		{05DD37AA-82A4-4763-B8EA-DA82F7C7AB2C}.PackageOnlyBuild|Any CPU.Build.0 = Release|Any CPU
+		{05DD37AA-82A4-4763-B8EA-DA82F7C7AB2C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{05DD37AA-82A4-4763-B8EA-DA82F7C7AB2C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
