@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -134,12 +135,22 @@ namespace uSync8.BackOffice
 
         public static uSyncAction SetAction(SyncAttempt<T> attempt, string filename, string handlerAlias, bool requirePostProcessing = true)
         {
-            return new uSyncAction(attempt.Success, attempt.Name, attempt.ItemType, attempt.Change, attempt.Message, attempt.Exception, filename, handlerAlias, requirePostProcessing);
+            var action = new uSyncAction(attempt.Success, attempt.Name, attempt.ItemType, attempt.Change, attempt.Message, attempt.Exception, filename, handlerAlias, requirePostProcessing);
+            if (attempt.Details != null && attempt.Details.Any())
+            {
+                action.Details = attempt.Details;
+            }
+            return action;
         }
 
         public static uSyncAction SetAction(SyncAttempt<T> attempt, string filename, bool requirePostProcessing = true)
         {
-            return new uSyncAction(attempt.Success, attempt.Name, attempt.ItemType, attempt.Change, attempt.Message, attempt.Exception, filename, requirePostProcessing);
+            var action = new uSyncAction(attempt.Success, attempt.Name, attempt.ItemType, attempt.Change, attempt.Message, attempt.Exception, filename, requirePostProcessing);
+            if (attempt.Details != null && attempt.Details.Any())
+            {
+                action.Details = attempt.Details;
+            }
+            return action;
         }
 
         public static uSyncAction ReportAction(ChangeType changeType, string name)

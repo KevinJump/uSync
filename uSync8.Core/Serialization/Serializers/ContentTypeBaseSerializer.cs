@@ -148,60 +148,89 @@ namespace uSync8.Core.Serialization.Serializers
         #region Deserialization
     
 
-        protected void DeserializeBase(TObject item, XElement node)
+        protected IEnumerable<uSyncChange> DeserializeBase(TObject item, XElement node)
         {
             logger.Debug(serializerType, "Deserializing Base");
 
-            if (node == null) return;
-
-            var key = node.GetKey();
-            if (item.Key != key)
-                item.Key = key;
+            if (node == null) return Enumerable.Empty<uSyncChange>();
 
             var info = node.Element("Info");
-            if (info == null) return;
+            if (info == null) return Enumerable.Empty<uSyncChange>();
+
+            List<uSyncChange> changes = new List<uSyncChange>();
+
+            var key = node.GetKey();
+            if (item.Key != key) {
+                changes.AddUpdate("Key", item.Key, key, "");
+                item.Key = key;
+            }
+
 
             var alias = node.GetAlias();
             if (item.Alias != alias)
+            {
+                changes.AddUpdate("Alias", item.Alias, alias, "");
                 item.Alias = alias;
+            }
 
             var name = info.Element("Name").ValueOrDefault(string.Empty);
-            if (!string.IsNullOrEmpty(name) && item.Name != name)
+            if (!string.IsNullOrEmpty(name) && item.Name != name) {
+                changes.AddUpdate("Name", item.Name, name, "");
                 item.Name = name;
+            }
 
             var icon = info.Element("Icon").ValueOrDefault(string.Empty);
-            if (item.Icon != icon)
+            if (item.Icon != icon) {
+                changes.AddUpdate("Icon", item.Icon, icon, "");
                 item.Icon = icon;
+            }
 
             var thumbnail = info.Element("Thumbnail").ValueOrDefault(string.Empty);
-            if (item.Thumbnail != thumbnail)
+            if (item.Thumbnail != thumbnail) {
+                changes.AddUpdate("Icon", item.Thumbnail, thumbnail, "");
                 item.Thumbnail = thumbnail;
+            }
 
             var description = info.Element("Description").ValueOrDefault(null);
-            if (item.Description != description)
+            if (item.Description != description) {
+                changes.AddUpdate("Description", item.Description, description, "");
                 item.Description = description;
+            }
 
             var allowedAsRoot = info.Element("AllowAtRoot").ValueOrDefault(false);
             if (item.AllowedAsRoot != allowedAsRoot)
+            {
+                changes.AddUpdate("AllowAtRoot", item.AllowedAsRoot, allowedAsRoot, "");
                 item.AllowedAsRoot = allowedAsRoot;
+            }
 
             var variations = info.Element("Variations").ValueOrDefault(ContentVariation.Nothing);
             if (item.Variations != variations)
+            {
+                changes.AddUpdate("Variations", item.Variations, variations, "");
                 item.Variations = variations;
+            }
 
             var isElement = info.Element("IsElement").ValueOrDefault(false);
             if (item.IsElement != isElement)
+            {
+                changes.AddUpdate("IsElement", item.IsElement, isElement, "");
                 item.IsElement = isElement;
+            }
 
             var isContainer = info.Element("IsListView").ValueOrDefault(false);
             if (item.IsContainer != isContainer)
+            {
+                changes.AddUpdate("IsListView", item.IsContainer, isContainer, "");
                 item.IsContainer = isContainer;
+            }
 
             if (!SetMasterFromElement(item, info.Element("Parent")))
             {
                 SetFolderFromElement(item, info.Element("Folder"));
             }
 
+            return changes;
         }
 
         protected void DeserializeStructure(TObject item, XElement node)

@@ -93,7 +93,10 @@ namespace uSync8.Core.Serialization.Serializers
         {
             var item = FindOrCreate(node);
 
-            DeserializeBase(item, node);
+            var details = new List<uSyncChange>();
+
+
+            details.AddRange(DeserializeBase(item, node));
 
             DeserializeTabs(item, node);
             DeserializeProperties(item, node);
@@ -109,11 +112,15 @@ namespace uSync8.Core.Serialization.Serializers
 
             // contentTypeService.Save(item);
 
-            return SyncAttempt<IContentType>.Succeed(
+            var attempt =  SyncAttempt<IContentType>.Succeed(
                 item.Name,
                 item,
                 ChangeType.Import,
                 "");
+
+            attempt.Details = details;
+
+            return attempt;
         }
 
         protected override void DeserializeExtraProperties(IContentType item, PropertyType property, XElement node)

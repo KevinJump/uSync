@@ -158,7 +158,7 @@
 
         function importItems(force, group) {
             resetStatus(modes.IMPORT);
-            vm.hideLink = true;
+            vm.hideLink = false;
             vm.importButton.state = 'busy';
 
             uSync8DashboardService.importItems(force, group, getClientId())
