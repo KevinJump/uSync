@@ -8,7 +8,8 @@
             results: '<',
             hideAction: '<',
             hideLink: '<',
-            showAll: '<'
+            showAll: '<',
+            hideToggle: '<'
         },
         controllerAs: 'vm',
         controller: uSyncReportViewController

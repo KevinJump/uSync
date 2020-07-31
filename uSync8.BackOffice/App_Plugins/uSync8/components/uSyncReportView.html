@@ -11,7 +11,8 @@
                         label-on="Show all"
                         label-off="Changes only"
                         label-position="left"
-                        ng-if="vm.runMode = 'report'"></umb-toggle>
+                        ng-if="!vm.hideToggle"></umb-toggle>
+            
         </div>
             <div class="umb-table" ng-show="vm.countChanges(vm.results) > 0 || vm.showAll">
                 <div class="umb-table-head">
