@@ -54,7 +54,9 @@ namespace uSync8.Core.Tracking.Impliment
                                     new TrackedItem("Description", "/Description", true),
                                     new TrackedItem("SortOrder", "/SortOrder", true),
                                     new TrackedItem("Tab", "/Tab", true),
-                                    new TrackedItem("Variations", "/Variations", true)
+                                    new TrackedItem("Variations", "/Variations", true),
+                                    new TrackedItem("MandatoryMessage", "/MandatoryMessage", true),
+                                    new TrackedItem("ValidationRegExpMessage", "/ValidationRegExpMessage", true)
                                 }
                             }
                         }

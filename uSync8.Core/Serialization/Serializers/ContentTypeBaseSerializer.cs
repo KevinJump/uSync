@@ -3,7 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Xml.Linq;
+
+using NPoco.fastJSON;
+
 using Umbraco.Core;
+using Umbraco.Core.Configuration;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
@@ -99,6 +103,14 @@ namespace uSync8.Core.Serialization.Serializers
                 var tab = item.PropertyGroups.FirstOrDefault(x => x.PropertyTypes.Contains(property));
                 propNode.Add(new XElement("Tab", tab != null ? tab.Name : ""));
 
+                // added in v8.6
+                // reflection is fast but a a quick check of version is faster !
+                if (UmbracoVersion.LocalVersion.Major >= 8 && UmbracoVersion.LocalVersion.Minor >= 6)
+                {
+                    SerializeNewProperty<string>(propNode, property, "MandatoryMessage");
+                    SerializeNewProperty<string>(propNode, property, "ValidationRegExpMessage");
+                }
+
                 SerializeExtraProperties(propNode, item, property);
 
                 node.Add(propNode);
@@ -106,6 +118,29 @@ namespace uSync8.Core.Serialization.Serializers
 
             return node;
         }
+
+        /// <summary>
+        ///  Serialize properties that have been introduced in later versions of umbraco.
+        /// </summary>
+        /// <remarks>
+        ///  by doing this like this it makes us keep our backwards compatability, while also supporting 
+        ///  newer properties. 
+        /// </remarks>
+        protected void SerializeNewProperty<TValue>(XElement node, PropertyType property, string propertyName)
+        {
+            var propertyInfo = property?.GetType()?.GetProperty(propertyName);
+            if (propertyInfo != null)
+            {
+                var value = propertyInfo.GetValue(property);
+
+                var attempt = value.TryConvertTo<TValue>();
+                if (attempt.Success)
+                {
+                    node.Add(new XElement(propertyName, attempt.Result));
+                }
+            }
+        }
+
 
         protected virtual void SerializeExtraProperties(XElement node, TObject item, PropertyType property)
         {
@@ -345,6 +380,15 @@ namespace uSync8.Core.Serialization.Serializers
                 property.ValidationRegExp = propertyNode.Element("Validation").ValueOrDefault(string.Empty);
                 property.SortOrder = propertyNode.Element("SortOrder").ValueOrDefault(0);
 
+                // added in v8.6
+                // reflection is fast but a a quick check of version is faster !
+                if (UmbracoVersion.LocalVersion.Major >= 8 && UmbracoVersion.LocalVersion.Minor >= 6)
+                {
+                    DeserializeNewProperty<string>(property, propertyNode, "MandatoryMessage");
+                    DeserializeNewProperty<string>(property, propertyNode, "ValidationRegExpMessage");
+                }
+
+
                 DeserializeExtraProperties(item, property, propertyNode);
 
                 var tab = propertyNode.Element("Tab").ValueOrDefault(string.Empty);
@@ -385,6 +429,27 @@ namespace uSync8.Core.Serialization.Serializers
 
             // remove what needs to be removed
             RemoveProperties(item, propertiesNode);
+        }
+
+        /// <summary>
+        ///  Deserialize properties added in later versions of Umbraco.
+        /// </summary>
+        /// <remarks>
+        ///  using reflection to find properties that might have been added in later versions of umbraco.
+        ///  doing it this way means we can maintain backwards compatability.
+        /// </remarks>
+        protected void DeserializeNewProperty<TValue>(PropertyType property, XElement node, string propertyName)
+        {
+            var propertyInfo = property?.GetType()?.GetProperty(propertyName);
+            if (propertyInfo != null)
+            {
+                var value = node.Element(propertyName).ValueOrDefault(string.Empty);
+                var attempt = value.TryConvertTo<TValue>();
+                if (attempt.Success)
+                {
+                    propertyInfo.SetValue(property, attempt.Result);
+                }
+            }
         }
 
         virtual protected void DeserializeExtraProperties(TObject item, PropertyType property, XElement node)
