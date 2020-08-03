@@ -35,4 +35,4 @@
  a play around show it the 👨‍💼👩‍💼 with the 💳 and they will ❤ it.   
  
 
- [ Release v8.6.4 - 🛴🛒🎄💻🧼😷 ]
+ [ 🛴🛒🎄💻🧼😷 ]
