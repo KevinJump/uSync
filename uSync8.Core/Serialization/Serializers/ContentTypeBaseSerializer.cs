@@ -1,17 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using System.Xml.Linq;
-
-using NPoco.fastJSON;
 
 using Umbraco.Core;
 using Umbraco.Core.Configuration;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
-using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
+
 using uSync8.Core.Extensions;
 using uSync8.Core.Models;
 
@@ -105,7 +102,7 @@ namespace uSync8.Core.Serialization.Serializers
 
                 // added in v8.6
                 // reflection is fast but a a quick check of version is faster !
-                if (UmbracoVersion.LocalVersion.Major >= 8 && UmbracoVersion.LocalVersion.Minor >= 6)
+                if (UmbracoVersion.LocalVersion.Major > 8 || UmbracoVersion.LocalVersion.Minor >= 6)                
                 {
                     SerializeNewProperty<string>(propNode, property, "MandatoryMessage");
                     SerializeNewProperty<string>(propNode, property, "ValidationRegExpMessage");
@@ -382,7 +379,7 @@ namespace uSync8.Core.Serialization.Serializers
 
                 // added in v8.6
                 // reflection is fast but a a quick check of version is faster !
-                if (UmbracoVersion.LocalVersion.Major >= 8 && UmbracoVersion.LocalVersion.Minor >= 6)
+                if (UmbracoVersion.LocalVersion.Major > 8 || UmbracoVersion.LocalVersion.Minor >= 6)
                 {
                     DeserializeNewProperty<string>(property, propertyNode, "MandatoryMessage");
                     DeserializeNewProperty<string>(property, propertyNode, "ValidationRegExpMessage");
