@@ -21,6 +21,7 @@ using uSync8.HistoryView.Controllers;
 
 namespace uSync8.HistoryView
 {
+    [ComposeAfter(typeof(uSyncBackOfficeComposer))]
     [RuntimeLevel(MinLevel = RuntimeLevel.Run)]
     public class HistoryComposer : ComponentComposer<HistoryComponent>
     { }
