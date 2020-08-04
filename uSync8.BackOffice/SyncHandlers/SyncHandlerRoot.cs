@@ -6,6 +6,8 @@ using System.Linq;
 using System.Reflection;
 using System.Xml.Linq;
 
+using Examine;
+
 using Umbraco.Core;
 using Umbraco.Core.Cache;
 using Umbraco.Core.Composing;
@@ -359,9 +361,16 @@ namespace uSync8.BackOffice.SyncHandlers
                         if (actions.Any(x => x.FileName == item.update.Key))
                         {
                             var action = actions.FirstOrDefault(x => x.FileName == item.update.Key);
-                            var details = action.Details.ToList();
+
+                            var details = new List<uSyncChange>();
+                            if (action.Details != null)
+                            {
+                                details.AddRange(action.Details);
+                            }
                             details.AddRange(attempt.Details);
+                            actions.Remove(action);
                             action.Details = details;
+                            actions.Add(action);
                         }
                     }
 

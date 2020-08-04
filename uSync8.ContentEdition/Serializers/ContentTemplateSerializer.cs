@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 
@@ -50,21 +51,22 @@ namespace uSync8.ContentEdition.Serializers
                 // TODO: Where has changed trashed state gone?
             }
 
+            var details = new List<uSyncChange>();
+
             var name = node.Name.LocalName;
             if (name != string.Empty)
+            {
+                details.AddUpdate("Name", item.Name, name);
                 item.Name = name;
-
+            }
+            
             item.Blueprint = true;
 
-            DeserializeBase(item, node, options);
+            details.AddRange(DeserializeBase(item, node, options));
 
             // contentService.SaveBlueprint(item);
 
-            return SyncAttempt<IContent>.Succeed(
-                item.Name,
-                item,
-                ChangeType.Import,
-                "");
+            return SyncAttempt<IContent>.Succeed(item.Name, item, ChangeType.Import, details);
         }
 
         public override IContent FindItem(XElement node)

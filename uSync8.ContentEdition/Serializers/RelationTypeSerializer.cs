@@ -53,22 +53,40 @@ namespace uSync8.ContentEdition.Serializers
             var changes = new List<uSyncChange>();
 
             if (item.Key != key)
+            {
+                changes.AddUpdate("Key", item.Key, key);
                 item.Key = key;
+            }
 
             if (item.Name != name)
+            {
+                changes.AddUpdate("Name", item.Name, name);
                 item.Name = name;
+            }
 
             if (item.Alias != alias)
+            {
+                changes.AddUpdate("Alias", item.Alias, alias);
                 item.Alias = alias;
+            }
 
             if (item.ParentObjectType != parentType)
+            {
+                changes.AddUpdate("ParentType", item.ParentObjectType, parentType);
                 item.ParentObjectType = parentType;
+            }
 
             if (item.ChildObjectType != childType)
+            {
+                changes.AddUpdate("ChildType", item.ChildObjectType, childType);
                 item.ChildObjectType = childType;
+            }
 
             if (item.IsBidirectional = bidirectional)
+            {
+                changes.AddUpdate("Bidirectional", item.IsBidirectional, bidirectional);
                 item.IsBidirectional = bidirectional;
+            }
 
             var hasBeenSaved = false;
             if (options.GetSetting<bool>("IncludeRelations", true))

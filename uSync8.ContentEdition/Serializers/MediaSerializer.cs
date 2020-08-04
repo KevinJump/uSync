@@ -60,10 +60,9 @@ namespace uSync8.ContentEdition.Serializers
         protected override SyncAttempt<IMedia> DeserializeCore(XElement node, SyncSerializerOptions options)
         {
             var item = FindOrCreate(node);
+            var details = DeserializeBase(item, node, options);
 
-            DeserializeBase(item, node, options);
-
-            return SyncAttempt<IMedia>.Succeed(item.Name, item, ChangeType.Import);
+            return SyncAttempt<IMedia>.Succeed(item.Name, item, ChangeType.Import, details.ToList());
         }
 
         public override SyncAttempt<IMedia> DeserializeSecondPass(IMedia item, XElement node, SyncSerializerOptions options)
@@ -88,19 +87,23 @@ namespace uSync8.ContentEdition.Serializers
             return SyncAttempt<IMedia>.Succeed(item.Name, item, ChangeType.NoChange, propertyAttempt.Status, true);
         }
 
-        protected override void HandleTrashedState(IMedia item, bool trashed)
+        protected override uSyncChange HandleTrashedState(IMedia item, bool trashed)
         {
             if (!trashed && item.Trashed)
             {
                 // if the item is trashed, then moving it back to the parent value 
                 // restores it.
                 mediaService.Move(item, item.ParentId);
+                return uSyncChange.Update("Restored", item.Name, "Recycle Bin", item.ParentId.ToString());
             }
             else if (trashed && !item.Trashed)
             {
                 // move to the recycle bin
                 mediaService.MoveToRecycleBin(item);
+                return uSyncChange.Update("Moved to Bin", item.Name, "", "Recycle Bin");
             }
+
+            return null;
         }
 
 

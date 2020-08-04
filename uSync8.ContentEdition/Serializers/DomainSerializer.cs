@@ -5,6 +5,7 @@ using System.Xml.Linq;
 
 using Umbraco.Core;
 using Umbraco.Core.Logging;
+using Umbraco.Core.Migrations.Expressions.Update;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
@@ -38,17 +39,20 @@ namespace uSync8.ContentEdition.Serializers
         {
             var item = FindOrCreate(node);
 
-            var info = node.Element("Info");
+            var info = node?.Element("Info");
             if (info == null)
                 return SyncAttempt<IDomain>.Fail(node.GetAlias(), ChangeType.Fail, new ArgumentNullException("Info", "Missing Info Section in XML"));
 
             var isoCode = info.Element("Language").ValueOrDefault(string.Empty) ?? string.Empty;
 
+            var changes = new List<uSyncChange>();
+
             if (!string.IsNullOrWhiteSpace(isoCode))
             {
                 var language = localizationService.GetLanguageByIsoCode(isoCode);
-                if (language != null)
+                if (language != null && item.LanguageId != language.Id)
                 {
+                    changes.AddUpdate("Id", item.LanguageId, language.Id);
                     item.LanguageId = language.Id;
                 }
             }
@@ -70,15 +74,13 @@ namespace uSync8.ContentEdition.Serializers
                 }
             }
 
-            if (rootItem != default(IContent))
+            if (rootItem != default(IContent) && item.RootContentId != rootItem.Id)
             {
+                changes.AddUpdate("RootItem", item.RootContentId, rootItem.Id);
                 item.RootContentId = rootItem.Id;
             }
 
-
-            // domainService.Save(item);
-
-            return SyncAttempt<IDomain>.Succeed(item.DomainName, item, ChangeType.Import);
+            return SyncAttempt<IDomain>.Succeed(item.DomainName, item, ChangeType.Import, changes);
 
         }
 

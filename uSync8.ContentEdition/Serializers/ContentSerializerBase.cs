@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using System.Text;
 using System.Xml.Linq;
 
 using Umbraco.Core;
@@ -274,15 +270,16 @@ namespace uSync8.ContentEdition.Serializers
             return SyncAttempt<TObject>.Succeed("No check", ChangeType.NoChange);
         }
 
-        protected virtual Attempt<string> DeserializeBase(TObject item, XElement node, SyncSerializerOptions options)
+        protected virtual IEnumerable<uSyncChange> DeserializeBase(TObject item, XElement node, SyncSerializerOptions options)
         {
-            if (node == null || node.Element("Info") == null) return Attempt.Fail("Missing Node info XML Invalid");
-            var info = node.Element("Info");
+            var info = node?.Element("Info");
+            if (info == null) return Enumerable.Empty<uSyncChange>();
 
+            var changes = new List<uSyncChange>();
 
             var parentId = -1;
             var nodeLevel = CalculateNodeLevel(item, default(TObject));
-            var nodePath = CalculateNodePath(item, default(TObject)); 
+            var nodePath = CalculateNodePath(item, default(TObject));
 
             var parentNode = info.Element("Parent");
             if (parentNode != null)
@@ -312,6 +309,7 @@ namespace uSync8.ContentEdition.Serializers
 
             if (item.ParentId != parentId)
             {
+                changes.AddUpdate("Parent", item.ParentId, parentId);
                 logger.Verbose(serializerType, "{Id} Setting Parent {ParentId}", item.Id, parentId);
                 item.ParentId = parentId;
             }
@@ -320,12 +318,14 @@ namespace uSync8.ContentEdition.Serializers
             // because they might change without this node being saved).
             if (item.Path != nodePath)
             {
+                changes.AddUpdate("Path", item.Path, nodePath);
                 logger.Debug(serializerType, "{Id} Setting Path {idPath} was {oldPath}", item.Id, nodePath, item.Path);
-                item.Path = nodePath;               
+                item.Path = nodePath;
             }
 
             if (item.Level != nodeLevel)
             {
+                changes.AddUpdate("Level", item.Level, nodeLevel);
                 logger.Debug(serializerType, "{Id} Setting Level to {Level} was {OldLevel}", item.Id, nodeLevel, item.Level);
                 item.Level = nodeLevel;
             }
@@ -334,6 +334,7 @@ namespace uSync8.ContentEdition.Serializers
             var key = node.GetKey();
             if (key != Guid.Empty && item.Key != key)
             {
+                changes.AddUpdate("Key", item.Key, key);
                 logger.Verbose(serializerType, "{Id} Setting Key {Key}", item.Id, key);
                 item.Key = key;
             }
@@ -341,24 +342,35 @@ namespace uSync8.ContentEdition.Serializers
             var createDate = info.Element("CreateDate").ValueOrDefault(item.CreateDate);
             if (item.CreateDate != createDate)
             {
+                changes.AddUpdate("CreateDate", item.CreateDate, createDate);
                 logger.Verbose(serializerType, "{id} Setting CreateDate", item.Id, createDate);
                 item.CreateDate = createDate;
             }
 
-            DeserializeName(item, node, options);
+            changes.AddRange(DeserializeName(item, node, options));
 
-            return Attempt.Succeed("Info Deserialized");
+            return changes;
         }
 
-        protected Attempt<TObject> DeserializeName(TObject item, XElement node, SyncSerializerOptions options)
+        protected IEnumerable<uSyncChange> DeserializeName(TObject item, XElement node, SyncSerializerOptions options)
         {
             var nameNode = node.Element("Info")?.Element("NodeName");
             if (nameNode == null)
-                return Attempt.Fail(item, new Exception("Missing Nodename"));
+                return Enumerable.Empty<uSyncChange>();
+
+            var updated = false;
+
+
+            var changes = new List<uSyncChange>();
 
             var name = nameNode.Attribute("Default").ValueOrDefault(string.Empty);
-            if (name != string.Empty)
+            if (name != string.Empty && item.Name != name)
+            {
+                changes.AddUpdate("Name", item.Name, name);
+                updated = true;
+
                 item.Name = name;
+            }
 
             if (nameNode.HasElements)
             {
@@ -373,28 +385,33 @@ namespace uSync8.ContentEdition.Serializers
                     {
 
                         var cultureName = cultureNode.ValueOrDefault(string.Empty);
-                        if (cultureName != string.Empty)
+                        var currentCultureName = item.GetCultureName(culture);
+                        if (cultureName != string.Empty && cultureName != currentCultureName)
                         {
+                            changes.AddUpdate($"Name ({culture})", currentCultureName, cultureName);
+                            updated = true;
+
                             item.SetCultureName(cultureName, culture);
                         }
                     }
                 }
             }
 
-            CleanCaches(item.Id);
+            if (updated) CleanCaches(item.Id);
 
-            return Attempt.Succeed(item);
+            return changes;
         }
 
-        protected Attempt<TObject, String> DeserializeProperties(TObject item, XElement node, SyncSerializerOptions options)
+        protected Attempt<List<uSyncChange>, string> DeserializeProperties(TObject item, XElement node, SyncSerializerOptions options)
         {
             string errors = "";
+            List<uSyncChange> changes = new List<uSyncChange>();
 
             var activeCultures = options.GetDeserializedCultures(node);
 
             var properties = node.Element("Properties");
             if (properties == null || !properties.HasElements)
-                return Attempt.SucceedWithStatus(errors, item); // new Exception("No Properties in the content node"));
+                return Attempt.SucceedWithStatus(errors, changes); // new Exception("No Properties in the content node"));
 
             foreach (var property in properties.Elements())
             {
@@ -468,12 +485,19 @@ namespace uSync8.ContentEdition.Serializers
 
                             // get here ... set the value
                             var itemValue = GetImportValue(propValue, current.PropertyType, culture, segment);
-                            item.SetValue(alias, itemValue,
-                                string.IsNullOrEmpty(culture) ? null : culture,
-                                string.IsNullOrEmpty(segment) ? null : segment);
+                            var currentValue = item.GetValue(alias, culture, segment);
 
-                            logger.Debug(serializerType, "Property {alias} value set", alias);
-                            logger.Verbose(serializerType, "{Id} Property [{alias}] : {itemValue}", item.Id, alias, itemValue);
+                            if (IsUpdatedValue(currentValue, itemValue))
+                            {
+                                changes.AddUpdateJson(alias, currentValue, itemValue, $"Property/{alias}");
+
+                                item.SetValue(alias, itemValue,
+                                    string.IsNullOrEmpty(culture) ? null : culture,
+                                    string.IsNullOrEmpty(segment) ? null : segment);
+
+                                logger.Debug(serializerType, "Property {alias} value set", alias);
+                                logger.Verbose(serializerType, "{Id} Property [{alias}] : {itemValue}", item.Id, alias, itemValue);
+                            }
                         }
                         catch (Exception ex)
                         {
@@ -491,20 +515,53 @@ namespace uSync8.ContentEdition.Serializers
                 }
             }
 
-            return Attempt.SucceedWithStatus(errors, item);
+            return Attempt.SucceedWithStatus(errors, changes);
         }
-                   
 
-        protected void HandleSortOrder(TObject item, int sortOrder)
+        /// <summary>
+        ///  compares to object values to see if they are the same. 
+        /// </summary>
+        /// <remarks>
+        ///   Object.Equals will check nulls, and object values. but 
+        ///   the value from the xml will not be coming back as the 
+        ///   same type as that in the object (if its set). 
+        ///   
+        ///   So we attempt to convert to the type stored in the current
+        ///   value, and then compare that. which gets us a better check.
+        /// </remarks>
+        private bool IsUpdatedValue(object current, object newValue)
         {
-            if (sortOrder != -1)
+            if (Object.Equals(current, newValue)) return false;
+
+            // diffrent types? 
+            if (current != null && newValue != null && current.GetType() != newValue.GetType())
+            {
+                var currentType = current.GetType();
+                var attempt = newValue.TryConvertTo(currentType);
+                if (attempt.Success) return !current.Equals(attempt.Result);
+            }
+
+            return true;
+        }
+
+
+        protected uSyncChange HandleSortOrder(TObject item, int sortOrder)
+        {
+            if (sortOrder != -1 && item.SortOrder != sortOrder)
             {
                 logger.Verbose(serializerType, "{id} Setting Sort Order {sortOrder}", item.Id, sortOrder);
+
+                var currentSortOrder = item.SortOrder;
+
                 item.SortOrder = sortOrder;
+
+                return uSyncChange.Update("SortOrder", "SortOrder", currentSortOrder, sortOrder);
             }
+
+            return null;
         }
 
-        protected abstract void HandleTrashedState(TObject item, bool trashed);
+        protected abstract uSyncChange HandleTrashedState(TObject item, bool trashed);
 
         protected string GetExportValue(object value, PropertyType propertyType, string culture, string segment)
         {

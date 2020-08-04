@@ -12,15 +12,6 @@ namespace uSync8.Core
 {
     public static class ChangeListExtensions
     {
-        public static void AddNotNull<TValue>(this List<TValue> list, TValue value)
-        {
-            if (list != null && value != null)
-            {
-                list.Add(value);
-            }
-        }
-
-
         public static void AddNew(this List<uSyncChange> changes, string name, string value, string path)
         {
             changes.Add(new uSyncChange

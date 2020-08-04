@@ -139,14 +139,16 @@ namespace uSync8.ContentEdition.Serializers
 
             var item = FindOrCreate(node);
 
-            DeserializeBase(item, node, options);
-            DeserializeTemplate(item, node);
-            DeserializeSchedules(item, node, options);
+            var details = new List<uSyncChange>();
 
-            return SyncAttempt<IContent>.Succeed(item.Name, item, ChangeType.Import);
+            details.AddRange(DeserializeBase(item, node, options));
+            details.AddNotNull(DeserializeTemplate(item, node));
+            details.AddRange(DeserializeSchedules(item, node, options));
+
+            return SyncAttempt<IContent>.Succeed(item.Name, item, ChangeType.Import, details);
         }
 
-        protected virtual void DeserializeTemplate(IContent item, XElement node)
+        protected virtual uSyncChange DeserializeTemplate(IContent item, XElement node)
         {
             var templateNode = node.Element("Info")?.Element("Template");
 
@@ -156,10 +158,11 @@ namespace uSync8.ContentEdition.Serializers
                 if (!string.IsNullOrWhiteSpace(alias))
                 {
                     var template = fileService.GetTemplate(alias);
-                    if (template != null)
+                    if (template != null && template.Id != item.TemplateId)
                     {
+                        var oldValue = item.TemplateId;
                         item.TemplateId = template.Id;
-                        return;
+                        return uSyncChange.Update("Template", "Template", oldValue, template.Id);
                     }
                 }
 
@@ -167,21 +170,25 @@ namespace uSync8.ContentEdition.Serializers
                 if (key != Guid.Empty)
                 {
                     var template = fileService.GetTemplate(key);
-                    if (template != null)
+                    if (template != null && template.Id != item.TemplateId)
                     {
+                        var oldValue = item.TemplateId;
                         item.TemplateId = template.Id;
-                        return;
+                        return uSyncChange.Update("Template", "Template", oldValue, template.Id);
                     }
                 }
-
             }
+
+            return null;
         }
 
-        private void DeserializeSchedules(IContent item, XElement node, SyncSerializerOptions options)
+        private IEnumerable<uSyncChange> DeserializeSchedules(IContent item, XElement node, SyncSerializerOptions options)
         {
             var schedules = node.Element("Info")?.Element("Schedule");
             if (schedules != null && schedules.HasElements)
             {
+                var changes = new List<uSyncChange>();
+
                 var currentSchedules = item.ContentSchedule.FullSchedule;
                 var nodeSchedules = new List<ContentSchedule>();
 
@@ -211,7 +218,12 @@ namespace uSync8.ContentEdition.Serializers
                 {
                     item.ContentSchedule.Remove(oldItem);
                 }
+
+                return changes;
+
             }
+
+            return Enumerable.Empty<uSyncChange>();
         }
 
         private ContentSchedule GetContentScheduleFromNode(XElement scheduleNode)
@@ -240,41 +252,48 @@ namespace uSync8.ContentEdition.Serializers
                 return SyncAttempt<IContent>.Fail(item.Name, ChangeType.ImportFail, attempt.Exception);
             }
 
+            var changes = attempt.Result;
+
             // sort order
             var sortOrder = node.Element("Info").Element("SortOrder").ValueOrDefault(-1);
-            HandleSortOrder(item, sortOrder);
-
+            changes.AddNotNull(HandleSortOrder(item, sortOrder));
 
             var trashed = node.Element("Info").Element("Trashed").ValueOrDefault(false);
-            HandleTrashedState(item, trashed);
+            changes.AddNotNull(HandleTrashedState(item, trashed));
 
             // published status
             // this does the last save and publish
             var saveAttempt = DoSaveOrPublish(item, node, options);
-
             if (saveAttempt.Success)
             {
                 // we say no change back, this stops the core second pass function from saving 
                 // this item (which we have just done with DoSaveOrPublish)
-                return SyncAttempt<IContent>.Succeed(item.Name, item, ChangeType.NoChange, attempt.Status, true);
+                var result = SyncAttempt<IContent>.Succeed(item.Name, item, ChangeType.NoChange, attempt.Status, true);
+                result.Details = changes;
+                return result;
             }
 
             return SyncAttempt<IContent>.Fail(item.Name, item, ChangeType.ImportFail, $"{saveAttempt.Result} {attempt.Status}");
         }
 
-        protected override void HandleTrashedState(IContent item, bool trashed)
+        protected override uSyncChange HandleTrashedState(IContent item, bool trashed)
         {
             if (!trashed && item.Trashed)
             {
                 // if the item is trashed, then the change of it's parent 
                 // should restore it (as long as we do a move!)
                 contentService.Move(item, item.ParentId);
+                return uSyncChange.Update("Restored", item.Name, "Recycle Bin", item.ParentId.ToString());
+
             }
             else if (trashed && !item.Trashed)
             {
                 // move to the recycle bin
                 contentService.MoveToRecycleBin(item);
+                return uSyncChange.Update("Moved to Bin", item.Name, "", "Recycle Bin");
             }
+
+            return null;
         }
 
         protected virtual Attempt<string> DoSaveOrPublish(IContent item, XElement node, SyncSerializerOptions options)
