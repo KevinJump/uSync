@@ -2,10 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
+
+using Umbraco.Core;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
+
 using uSync8.Core.Extensions;
 using uSync8.Core.Models;
 
@@ -95,20 +98,18 @@ namespace uSync8.Core.Serialization.Serializers
 
             var details = new List<uSyncChange>();
 
-
             details.AddRange(DeserializeBase(item, node));
-
-            DeserializeTabs(item, node);
-            DeserializeProperties(item, node);
+            details.AddRange(DeserializeTabs(item, node));
+            details.AddRange(DeserializeProperties(item, node));
 
             // content type only property stuff.
-            DeserializeContentTypeProperties(item, node);
+            details.AddRange(DeserializeContentTypeProperties(item, node));
 
             // clean tabs 
-            CleanTabs(item, node);
+            details.AddRange(CleanTabs(item, node));
 
             // templates 
-            DeserializeTemplates(item, node);
+            details.AddRange(DeserializeTemplates(item, node));
 
             // contentTypeService.Save(item);
 
@@ -123,50 +124,83 @@ namespace uSync8.Core.Serialization.Serializers
             return attempt;
         }
 
-        protected override void DeserializeExtraProperties(IContentType item, PropertyType property, XElement node)
+        protected override IEnumerable<uSyncChange> DeserializeExtraProperties(IContentType item, PropertyType property, XElement node)
         {
-            property.Variations = node.Element("Variations").ValueOrDefault(ContentVariation.Nothing);
+            var variations = node.Element("Variations").ValueOrDefault(ContentVariation.Nothing);
+            if (property.Variations != variations)
+            {
+                var changes = new uSyncChange
+                {
+                    Change = ChangeDetailType.Update,
+                    Name = "Variations",
+                    NewValue = variations.ToString(),
+                    OldValue = property.Variations.ToString(),
+                    Path = "Property/Variations"
+                }.AsEnumerableOfOne();
+
+                property.Variations = variations;
+
+                return changes;
+            }
+
+            return Enumerable.Empty<uSyncChange>();
         }
 
         public override SyncAttempt<IContentType> DeserializeSecondPass(IContentType item, XElement node, SyncSerializerOptions options)
         {
             logger.Debug<ContentTypeSerializer>("Deserialize Second Pass {0}", item.Alias);
 
-            DeserializeCompositions(item, node);
-            DeserializeStructure(item, node);
+            var details = new List<uSyncChange>();
 
+            details.AddRange(DeserializeCompositions(item, node));
+            details.AddRange(DeserializeStructure(item, node));
            
             if (!options.Flags.HasFlag(SerializerFlags.DoNotSave) && item.IsDirty())
                 contentTypeService.Save(item);
 
             CleanFolder(item, node);
 
-            return SyncAttempt<IContentType>.Succeed(item.Name, item, ChangeType.Import);
+            var result = SyncAttempt<IContentType>.Succeed(item.Name, item, ChangeType.Import);
+            result.Details = details;
+
+            return result;
         }
 
-        private void DeserializeContentTypeProperties(IContentType item, XElement node)
+        private IEnumerable<uSyncChange> DeserializeContentTypeProperties(IContentType item, XElement node)
         {
-            if (node == null) return;
-            var info = node.Element("Info");
-            if (info == null) return;
+            var info = node?.Element("Info");
+            if (info == null) return Enumerable.Empty<uSyncChange>();
 
-            item.IsContainer = info.Element("IsListView").ValueOrDefault(false);
+            var changes = new List<uSyncChange>();
+
+            var isContainer = info.Element("IsListView").ValueOrDefault(false);
+            if (item.IsContainer != isContainer) {
+                changes.AddUpdate("IsListView", item.IsContainer, isContainer, "Info/IsListView");
+                item.IsContainer = isContainer;
+            }
 
             var masterTemplate = info.Element("DefaultTemplate").ValueOrDefault(string.Empty);
             if (!string.IsNullOrEmpty(masterTemplate))
             {
                 var template = fileService.GetTemplate(masterTemplate);
-                if (template != null) 
+                if (template != null && template != item.DefaultTemplate)
+                {
+                    changes.AddUpdate("DefaultTemplate", item.DefaultTemplate.Alias, masterTemplate, "DefaultTemplate");
                     item.SetDefaultTemplate(template);
+                }
             }
+
+            return changes;
         }
 
-        private void DeserializeTemplates(IContentType item, XElement node)
+        private IEnumerable<uSyncChange> DeserializeTemplates(IContentType item, XElement node)
         {
-            var templates = node.Element("Info").Element("AllowedTemplates");
-            if (templates == null) return;
+            var templates = node?.Element("Info")?.Element("AllowedTemplates");
+            if (templates == null) return Enumerable.Empty<uSyncChange>();
 
             var allowedTemplates = new List<ITemplate>();
+            var changes = new List<uSyncChange>();
+
 
             foreach (var template in templates.Elements("Template"))
             {
@@ -188,7 +222,18 @@ namespace uSync8.Core.Serialization.Serializers
                 }
             }
 
+
+            var currentTemplates = string.Join(",", item.AllowedTemplates.Select(x => x.Alias).OrderBy(x => x));
+            var newTemplates = string.Join(",", allowedTemplates.Select(x => x.Alias).OrderBy(x => x));
+
+            if (currentTemplates != newTemplates)
+            {
+                changes.AddUpdate("AllowedTemplates", currentTemplates, newTemplates, "AllowedTemplates");
+            }
+
             item.AllowedTemplates = allowedTemplates;
+
+            return changes;
         }
 
 

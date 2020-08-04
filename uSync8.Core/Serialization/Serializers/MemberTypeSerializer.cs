@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 
@@ -7,6 +8,7 @@ using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
+
 using uSync8.Core.Extensions;
 using uSync8.Core.Models;
 
@@ -100,26 +102,51 @@ namespace uSync8.Core.Serialization.Serializers
         {
             var item = FindOrCreate(node);
 
-            DeserializeBase(item, node);
-            DeserializeTabs(item, node);
-            DeserializeProperties(item, node);
+            var details = new List<uSyncChange>();
+
+            details.AddRange(DeserializeBase(item, node));
+            details.AddRange(DeserializeTabs(item, node));
+            details.AddRange(DeserializeProperties(item, node));
 
             CleanTabs(item, node);
 
             // memberTypeService.Save(item);
 
-            return SyncAttempt<IMemberType>.Succeed(
+            var result = SyncAttempt<IMemberType>.Succeed(
                 item.Name,
                 item,
                 ChangeType.Import,
                 "");
+            result.Details = details;
+            return result;
         }
 
-        protected override void DeserializeExtraProperties(IMemberType item, PropertyType property, XElement node)
+        protected override IEnumerable<uSyncChange> DeserializeExtraProperties(IMemberType item, PropertyType property, XElement node)
         {
-            item.SetMemberCanEditProperty(property.Alias, node.Element("CanEdit").ValueOrDefault(false));
-            item.SetMemberCanViewProperty(property.Alias, node.Element("CanView").ValueOrDefault(false));
-            item.SetIsSensitiveProperty(property.Alias, node.Element("IsSensitive").ValueOrDefault(true));
+            var changes = new List<uSyncChange>();
+
+            var canEdit = node.Element("CanEdit").ValueOrDefault(false);
+            if (item.MemberCanEditProperty(property.Alias) != canEdit )
+            {
+                changes.AddUpdate("CanEdit", !canEdit, canEdit, $"{property.Alias}/CanEdit");
+                item.SetMemberCanEditProperty(property.Alias, canEdit);
+            }
+
+            var canView = node.Element("CanView").ValueOrDefault(false);
+            if (item.MemberCanViewProperty(property.Alias) != canView)
+            {
+                changes.AddUpdate("CanView", !canView, canView, $"{property.Alias}/CanView");
+                item.SetMemberCanViewProperty(property.Alias, canView);
+            }
+
+            var isSensitive = node.Element("IsSensitive").ValueOrDefault(true);
+            if (item.IsSensitiveProperty(property.Alias) != isSensitive) 
+            {
+                changes.AddUpdate("IsSensitive", !isSensitive, isSensitive, $"{property.Alias}/IsSensitive");
+                item.SetIsSensitiveProperty(property.Alias, isSensitive);
+            }
+
+            return changes;
         }
 
         protected override IMemberType CreateItem(string alias, ITreeEntity parent, string extra)

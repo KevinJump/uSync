@@ -57,18 +57,74 @@ namespace uSync8.Core.Serialization.Serializers
                 changes.Add(uSyncChange.Create(alias, name, "New Macro"));
             }
 
-            item.Key = key;
-            item.Name = name;
-            item.Alias = alias;
-            item.MacroSource = macroSource;
-            item.MacroType = macroType;
+            if (item.Key != key)
+            {
+                changes.AddUpdate("Key", item.Key, key);
+                item.Key = key;
+            }
+
+            if (item.Name != name)
+            {
+                changes.AddUpdate("Name", item.Name, name);
+                item.Name = name;
+            }
+
+            if (item.Alias != alias)
+            {
+                changes.AddUpdate("Alias", item.Alias, alias);
+                item.Alias = alias;
+            }
+
+            if (item.MacroSource != macroSource)
+            {
+                changes.AddUpdate("MacroSource", item.MacroSource, macroSource);
+                item.MacroSource = macroSource;
+            }
+
+            if (item.MacroType != macroType)
+            {
+                changes.AddUpdate("MacroType", item.MacroType, macroType);
+                item.MacroType = macroType;
+            }
+
+            var useInEditor = node.Element("UseInEditor").ValueOrDefault(false);
+            var dontRender =  node.Element("DontRender").ValueOrDefault(false);
+            var cacheByMember = node.Element("CachedByMember").ValueOrDefault(false);
+            var cacheByPage = node.Element("CachedByPage").ValueOrDefault(false);
+            var cacheDuration = node.Element("CachedDuration").ValueOrDefault(0);
+
+            if (item.UseInEditor != useInEditor)
+            {
+                changes.AddUpdate("UseInEditor", item.UseInEditor, useInEditor);
+                item.UseInEditor = useInEditor;
+            }
+
+            if (item.DontRender != dontRender)
+            {
+                changes.AddUpdate("DontRender", item.DontRender, dontRender);
+                item.DontRender = dontRender;
+            }
+
+            if (item.CacheByMember != cacheByMember)
+            {
+                changes.AddUpdate("CacheByMember", item.CacheByMember, cacheByMember);
+                item.CacheByMember = cacheByMember;
+            }
 
 
-            item.UseInEditor = node.Element("UseInEditor").ValueOrDefault(false);
-            item.DontRender =  node.Element("DontRender").ValueOrDefault(false);
-            item.CacheByMember = node.Element("CachedByMember").ValueOrDefault(false);
-            item.CacheByPage = node.Element("CachedByPage").ValueOrDefault(false);
-            item.CacheDuration = node.Element("CachedDuration").ValueOrDefault(0);
+            if (item.CacheByPage != cacheByPage)
+            {
+                changes.AddUpdate("CacheByPage", item.CacheByPage, cacheByPage);
+                item.CacheByPage = cacheByPage;
+            }
+
+
+            if (item.CacheDuration != cacheDuration)
+            {
+                changes.AddUpdate("CacheByMember", item.CacheDuration, cacheDuration);
+                item.CacheDuration = cacheDuration;
+            }
+
 
             var properties = node.Element("Properties");
             if (properties != null && properties.HasElements)
@@ -93,7 +149,6 @@ namespace uSync8.Core.Serialization.Serializers
                     else
                     {
                         logger.Debug<MacroSerializer>(" >> Adding {0}", propertyAlias);
-
                         changes.Add(uSyncChange.Create(propPath, "Property", propertyAlias));
                         item.Properties.Add(new MacroProperty(propertyAlias, propertyName, sortOrder, editorAlias));
                     }

@@ -38,18 +38,25 @@ namespace uSync8.Core.Serialization.Serializers
         {
             var info = node.Element("Info");
             var name = info.Element("Name").ValueOrDefault(string.Empty);
-
             var key = node.GetKey();
 
             var item = FindOrCreate(node);
             if (item == null) throw new ArgumentException($"Cannot find underling datatype for {name}");
 
+            var details = new List<uSyncChange>();
+
             // basic
             if (item.Name != name)
+            {
+                details.AddUpdate("Name", item.Name, name, "Name");
                 item.Name = name;
+            }
 
             if (item.Key != key)
+            {
+                details.AddUpdate("Key", item.Key, key, "Key");
                 item.Key = key;
+            }
 
             var editorAlias = info.Element("EditorAlias").ValueOrDefault(string.Empty);
             if (editorAlias != item.EditorAlias)
@@ -58,6 +65,7 @@ namespace uSync8.Core.Serialization.Serializers
                 var newEditor = Current.DataEditors.FirstOrDefault(x => x.Alias.InvariantEquals(editorAlias));
                 if (newEditor != null)
                 {
+                    details.AddUpdate("EditorAlias", item.EditorAlias, editorAlias, "EditorAlias");
                     item.Editor = newEditor;
                 }
             }
@@ -68,54 +76,82 @@ namespace uSync8.Core.Serialization.Serializers
             // item.SortOrder = info.Element("SortOrder").ValueOrDefault(0);
             var dbType = info.Element("DatabaseType").ValueOrDefault(ValueStorageType.Nvarchar);
             if (item.DatabaseType != dbType)
+            {
+                details.AddUpdate("DatabaseType", item.DatabaseType, dbType, "DatabaseType");
                 item.DatabaseType = dbType;
+            }
 
             // config 
-            DeserializeConfiguration(item, node);
-
-            SetFolderFromElement(item, info.Element("Folder"));
+            details.AddRange(DeserializeConfiguration(item, node));
+            details.AddNotNull(SetFolderFromElement(item, info.Element("Folder")));
 
             // save is responsiblity of caller 
             // dataTypeService.Save(item);
 
-            return SyncAttempt<IDataType>.Succeed(item.Name, item, ChangeType.Import);
+            var result = SyncAttempt<IDataType>.Succeed(item.Name, item, ChangeType.Import);
+            result.Details = details;
+            return result;
 
         }
 
-        private void SetFolderFromElement(IDataType item, XElement folderNode)
+        private uSyncChange SetFolderFromElement(IDataType item, XElement folderNode)
         {
             var folder = folderNode.ValueOrDefault(string.Empty);
-            if (string.IsNullOrWhiteSpace(folder)) return;
+            if (string.IsNullOrWhiteSpace(folder)) return null;
 
             var container = FindFolder(folderNode.GetKey(), folder);
             if (container != null && container.Id != item.ParentId)
             {
+                var change = new uSyncChange
+                {
+                    Change = ChangeDetailType.Update,
+                    Name = "Folder",
+                    OldValue = container.Id.ToString(),
+                    NewValue = item.ParentId.ToString()
+                };
+
                 item.SetParent(container);
+                return change;
             }
+
+            return null;
         }
 
 
-        private void DeserializeConfiguration(IDataType item, XElement node)
+        private IEnumerable<uSyncChange> DeserializeConfiguration(IDataType item, XElement node)
         {
             var config = node.Element("Config").ValueOrDefault(string.Empty);
 
             if (!string.IsNullOrWhiteSpace(config))
             {
+                var changes = new List<uSyncChange>();
+
                 var serializer = this.configurationSerializers.GetSerializer(item.EditorAlias);
                 if (serializer == null)
                 {
                     var configObject = JsonConvert.DeserializeObject(config, item.Configuration.GetType());
                     if (!IsJsonEqual(item.Configuration, configObject))
+                    {
+                        changes.AddUpdateJson("Config", item.Configuration, configObject, "Configuration");
                         item.Configuration = configObject;
+                    }
                 }
                 else
                 {
                     logger.Verbose<DataTypeSerializer>("Deserializing Config via {0}", serializer.Name);
                     var configObject = serializer.DeserializeConfig(config, item.Configuration.GetType());
                     if (!IsJsonEqual(item.Configuration, configObject))
+                    {
+                        changes.AddUpdateJson("Config", item.Configuration, configObject, "Configuration");
                         item.Configuration = configObject;
+                    }
                 }
+
+                return changes;
             }
+
+            return Enumerable.Empty<uSyncChange>();
+
         }
 
         /// <summary>

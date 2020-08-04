@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
+
+using Umbraco.Core;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
@@ -57,24 +60,28 @@ namespace uSync8.Core.Serialization.Serializers
             if (!IsValid(node))
                 throw new ArgumentException("Invalid XML Format");
 
+            var details = new List<uSyncChange>();
+
             var item = FindOrCreate(node);
 
-            DeserializeBase(item, node);
-            DeserializeTabs(item, node);
+            details.AddRange(DeserializeBase(item, node));
+            details.AddRange(DeserializeTabs(item, node));
 
             // mediaTypeService.Save(item);
 
-            DeserializeProperties(item, node);
+            details.AddRange(DeserializeProperties(item, node));
 
             CleanTabs(item, node);
 
             // mediaTypeService.Save(item);
 
-            return SyncAttempt<IMediaType>.Succeed(
+            var result = SyncAttempt<IMediaType>.Succeed(
                 item.Name,
                 item,
                 ChangeType.Import,
                 "");
+            result.Details = details;
+            return result;
         }
 
         public override SyncAttempt<IMediaType> DeserializeSecondPass(IMediaType item, XElement node, SyncSerializerOptions options)

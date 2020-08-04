@@ -34,7 +34,9 @@ namespace uSync8.Core.Serialization.Serializers
             var name = node.Element("Name").ValueOrDefault(string.Empty);
             var item = default(ITemplate);
 
-            if (key != Guid.Empty)
+            var details = new List<uSyncChange>();
+
+            if (key != Guid.Empty) 
                 item = fileService.GetTemplate(key);
 
             if (item == null)
@@ -51,6 +53,8 @@ namespace uSync8.Core.Serialization.Serializers
                     item = new Template(name, alias);
                     item.Path = templatePath;
                     item.Content = content;
+
+                    details.AddNew(alias, alias, "Template");
                 }
                 else
                 {
@@ -67,13 +71,22 @@ namespace uSync8.Core.Serialization.Serializers
             }
 
             if (item.Key != key)
+            {
+                details.AddUpdate("Key", item.Key, key);
                 item.Key = key;
+            }
 
             if (item.Name != name)
+            {
+                details.AddUpdate("Name", item.Name, name);
                 item.Name = name;
+            }
 
             if (item.Alias != alias)
+            {
+                details.AddUpdate("Alias", item.Alias, alias);
                 item.Alias = alias;
+            }
 
             //var master = node.Element("Parent").ValueOrDefault(string.Empty);
             //if (master != string.Empty)
@@ -86,18 +99,24 @@ namespace uSync8.Core.Serialization.Serializers
             // Deserialize now takes care of the save.
             // fileService.SaveTemplate(item);
 
-            return SyncAttempt<ITemplate>.Succeed(item.Name, item, ChangeType.Import);
+            var result = SyncAttempt<ITemplate>.Succeed(item.Name, item, ChangeType.Import);
+            result.Details = details;
+            return result;
         }
 
         public override SyncAttempt<ITemplate> DeserializeSecondPass(ITemplate item, XElement node, SyncSerializerOptions options)
         {
+            var details = new List<uSyncChange>();
+
             var master = node.Element("Parent").ValueOrDefault(string.Empty);
             if (master != string.Empty && item.MasterTemplateAlias != master)
             {
                 logger.Debug<TemplateSerializer>("Looking for master {0}", master);
                 var masterItem = fileService.GetTemplate(master);
-                if (masterItem != null)
+                if (masterItem != null && item.MasterTemplateAlias != master)
                 {
+                    details.AddUpdate("Parent", item.MasterTemplateAlias, master);
+
                     logger.Debug<TemplateSerializer>("Setting Master {0}", masterItem.Alias);
                     item.SetMasterTemplate(masterItem);
 
@@ -106,7 +125,9 @@ namespace uSync8.Core.Serialization.Serializers
                 }
             }
 
-            return SyncAttempt<ITemplate>.Succeed(item.Name, item, ChangeType.Import);
+            var result = SyncAttempt<ITemplate>.Succeed(item.Name, item, ChangeType.Import);
+            result.Details = details;
+            return result;
         }
 
 

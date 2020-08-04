@@ -265,13 +265,14 @@ namespace uSync8.Core.Serialization.Serializers
             return changes;
         }
 
-        protected void DeserializeStructure(TObject item, XElement node)
+        protected IEnumerable<uSyncChange> DeserializeStructure(TObject item, XElement node)
         {
             logger.Debug(serializerType, "Deserializing Structure");
 
-
             var structure = node.Element("Structure");
-            if (structure == null) return;
+            if (structure == null) return Enumerable.Empty<uSyncChange>();
+
+            var changes = new List<uSyncChange>();
 
             List<ContentTypeSort> allowed = new List<ContentTypeSort>();
             int sortOrder = 0;
@@ -306,9 +307,7 @@ namespace uSync8.Core.Serialization.Serializers
                 if (baseItem != null)
                 {
                     logger.Debug(serializerType, "Structure Found {0}", baseItem.Alias);
-
                     allowed.Add(new ContentTypeSort(baseItem.Id, itemSortOrder));
-
                     sortOrder = itemSortOrder + 1;
                 }
             }
@@ -324,20 +323,20 @@ namespace uSync8.Core.Serialization.Serializers
 
             if (!currentHash.Equals(newHash))
             {
+                changes.AddUpdate("Allowed", item.AllowedContentTypes.Select(x => x.Alias), allowed.Select(x => x.Alias), "/Structure");
                 logger.Debug(serializerType, "Updating allowed content types");
                 item.AllowedContentTypes = allowed;
             }
+
+            return changes;
         }
 
-        protected void DeserializeProperties(TObject item, XElement node)
+        protected IEnumerable<uSyncChange> DeserializeProperties(TObject item, XElement node)
         {
             logger.Debug(serializerType, "Deserializing Properties");
 
-
-            if (node == null) return;
-
-            var propertiesNode = node.Element("GenericProperties");
-            if (propertiesNode == null) return;
+            var propertiesNode = node?.Element("GenericProperties");
+            if (propertiesNode == null) return Enumerable.Empty<uSyncChange>(); 
 
             /// there are something we can't do in the loop, 
             /// so we store them and do them once we've put 
@@ -345,11 +344,12 @@ namespace uSync8.Core.Serialization.Serializers
             List<string> propertiesToRemove = new List<string>();
             Dictionary<string, string> propertiesToMove = new Dictionary<string, string>();
 
+            List<uSyncChange> changes = new List<uSyncChange>(); 
+
             foreach (var propertyNode in propertiesNode.Elements("GenericProperty"))
             {
                 var alias = propertyNode.Element("Alias").ValueOrDefault(string.Empty);
                 if (string.IsNullOrEmpty(alias)) continue;
-
 
                 var key = propertyNode.Element("Key").ValueOrDefault(Guid.Empty);
                 var definitionKey = propertyNode.Element("Definition").ValueOrDefault(Guid.Empty);
@@ -363,36 +363,69 @@ namespace uSync8.Core.Serialization.Serializers
                 if (property == null) continue;
 
                 if (key != Guid.Empty && property.Key != key)
+                {
+                    changes.AddUpdate("Key", property.Key, key, $"{alias}/Key");
                     property.Key = key;
+                }
 
-                // do we trust the core ? - because in theory 
-                // we can set the value, and it will only
-                // be updated if marked dirty and that will
-                // only happen if the value is different ?
+                if (property.Alias != alias)
+                {
+                    changes.AddUpdate("Alias", property.Alias, alias, $"{alias}/Alias"); 
+                    property.Alias = alias;
+                }
+                
+                var name = propertyNode.Element("Name").ValueOrDefault(alias);
+                if (property.Name != name)
+                {
+                    changes.AddUpdate("Name", property.Name, name, $"{alias}/Name");
+                    property.Name = name;
+                }
 
-                property.Alias = alias;
-                property.Name = propertyNode.Element("Name").ValueOrDefault(alias);
-                property.Description = propertyNode.Element("Description").ValueOrDefault(string.Empty);
-                property.Mandatory = propertyNode.Element("Mandatory").ValueOrDefault(false);
-                property.ValidationRegExp = propertyNode.Element("Validation").ValueOrDefault(string.Empty);
-                property.SortOrder = propertyNode.Element("SortOrder").ValueOrDefault(0);
+                var description = propertyNode.Element("Description").ValueOrDefault(string.Empty);
+                if (property.Description != description)
+                {
+                    changes.AddUpdate("Description", property.Description, description, $"{alias}/Description");
+                    property.Description = description;
+                }
+
+                var mandatory = propertyNode.Element("Mandatory").ValueOrDefault(false);
+                if (property.Mandatory != mandatory)
+                {
+                    changes.AddUpdate("Mandatory", property.Mandatory, mandatory, $"{alias}/Mandatory");
+                    property.Mandatory = mandatory;
+                }
+
+                var regEx = propertyNode.Element("Validation").ValueOrDefault(string.Empty);
+                if (property.ValidationRegExp != regEx)
+                {
+                    changes.AddUpdate("Validation", property.ValidationRegExp, regEx, $"{alias}/RegEx");
+                    property.ValidationRegExp = propertyNode.Element("Validation").ValueOrDefault(string.Empty);
+                }
+
+                var sortOrder = propertyNode.Element("SortOrder").ValueOrDefault(0);
+                if (property.SortOrder != sortOrder)
+                {
+                    changes.AddUpdate("SortOrder", property.SortOrder, sortOrder, $"{alias}/SortOrder");
+                    property.SortOrder = sortOrder;
+                }
 
                 // added in v8.6
                 // reflection is fast but a a quick check of version is faster !
                 if (UmbracoVersion.LocalVersion.Major > 8 || UmbracoVersion.LocalVersion.Minor >= 6)
                 {
-                    DeserializeNewProperty<string>(property, propertyNode, "MandatoryMessage");
-                    DeserializeNewProperty<string>(property, propertyNode, "ValidationRegExpMessage");
+                    changes.AddNotNull(DeserializeNewProperty<string>(property, propertyNode, "MandatoryMessage"));
+                    changes.AddNotNull(DeserializeNewProperty<string>(property, propertyNode, "ValidationRegExpMessage"));
                 }
 
-
-                DeserializeExtraProperties(item, property, propertyNode);
+                changes.AddRange(DeserializeExtraProperties(item, property, propertyNode));
 
                 var tab = propertyNode.Element("Tab").ValueOrDefault(string.Empty);
 
                 if (IsNew)
                 {
+                    changes.AddNew(alias, name, alias);
                     logger.Debug(serializerType, "Property Is new adding to tab.");
+
                     if (string.IsNullOrWhiteSpace(tab))
                     {
                         item.AddPropertyType(property);
@@ -419,13 +452,17 @@ namespace uSync8.Core.Serialization.Serializers
                         }
                     }
                 }
+
             }
 
             // move things between tabs. 
-            MoveProperties(item, propertiesToMove);
+            changes.AddRange(MoveProperties(item, propertiesToMove));
 
             // remove what needs to be removed
-            RemoveProperties(item, propertiesNode);
+            changes.AddRange(RemoveProperties(item, propertiesNode));
+
+            return changes;
+
         }
 
         /// <summary>
@@ -435,7 +472,7 @@ namespace uSync8.Core.Serialization.Serializers
         ///  using reflection to find properties that might have been added in later versions of umbraco.
         ///  doing it this way means we can maintain backwards compatability.
         /// </remarks>
-        protected void DeserializeNewProperty<TValue>(PropertyType property, XElement node, string propertyName)
+        protected uSyncChange DeserializeNewProperty<TValue>(PropertyType property, XElement node, string propertyName)
         {
             var propertyInfo = property?.GetType()?.GetProperty(propertyName);
             if (propertyInfo != null)
@@ -444,24 +481,43 @@ namespace uSync8.Core.Serialization.Serializers
                 var attempt = value.TryConvertTo<TValue>();
                 if (attempt.Success)
                 {
-                    propertyInfo.SetValue(property, attempt.Result);
+                    var currentValue = propertyInfo.GetValue(property);
+                    var currentAttempt = currentValue.TryConvertTo<TValue>();
+
+                    if (!currentAttempt.Success || !currentAttempt.Result.Equals(attempt.Result)) {
+                        propertyInfo.SetValue(property, attempt.Result);
+
+                        return new uSyncChange
+                        {
+                            Change = ChangeDetailType.Update,
+                            Name = propertyName,
+                            OldValue = currentAttempt.Result.ToString(),
+                            NewValue = attempt.Result.ToString(),
+                            Path = $"Property/{propertyName}"
+                        };
+                    }
                 }
             }
+
+            return null;
         }
 
-        virtual protected void DeserializeExtraProperties(TObject item, PropertyType property, XElement node)
+        virtual protected IEnumerable<uSyncChange> DeserializeExtraProperties(TObject item, PropertyType property, XElement node)
         {
-            // no op.
+            // nothing.
+            return Enumerable.Empty<uSyncChange>();
         }
 
-        protected void DeserializeTabs(TObject item, XElement node)
+        protected IEnumerable<uSyncChange> DeserializeTabs(TObject item, XElement node)
         {
             logger.Debug(serializerType, "Deserializing Tabs");
 
             var tabNode = node.Element("Tabs");
-            if (tabNode == null) return;
+            if (tabNode == null) return Enumerable.Empty<uSyncChange>();
 
             var defaultSort = 0;
+
+            var changes = new List<uSyncChange>();
 
             foreach (var tab in tabNode.Elements("Tab"))
             {
@@ -471,8 +527,9 @@ namespace uSync8.Core.Serialization.Serializers
                 logger.Debug(serializerType, "> Tab {0} {1}", name, sortOrder);
 
                 var existing = item.PropertyGroups.FirstOrDefault(x => x.Name.InvariantEquals(name));
-                if (existing != null)
+                if (existing != null && existing.SortOrder != sortOrder)
                 {
+                    changes.AddUpdate("SortOrder", existing.SortOrder, sortOrder, $"Tabs/{name}/SortOrder");
                     existing.SortOrder = sortOrder;
                 }
                 else
@@ -480,6 +537,7 @@ namespace uSync8.Core.Serialization.Serializers
                     // create the tab
                     if (item.AddPropertyGroup(name))
                     {
+                        changes.AddNew(name, name, $"Tabs/{name}");
                         var newTab = item.PropertyGroups.FirstOrDefault(x => x.Name.InvariantEquals(name));
                         if (newTab != null)
                         {
@@ -490,16 +548,17 @@ namespace uSync8.Core.Serialization.Serializers
 
                 defaultSort = sortOrder + 1;
             }
+
+            return changes;
         }
 
 
-        protected void CleanTabs(TObject item, XElement node)
+        protected IEnumerable<uSyncChange> CleanTabs(TObject item, XElement node)
         {
             logger.Debug(serializerType, "Cleaning Tabs Base");
 
-            var tabNode = node.Element("Tabs");
-
-            if (tabNode == null) return;
+            var tabNode = node?.Element("Tabs");
+            if (tabNode == null) return Enumerable.Empty<uSyncChange>();
 
             var newTabs = tabNode.Elements("Tab")
                 .Where(x => x.Element("Caption") != null)
@@ -515,11 +574,27 @@ namespace uSync8.Core.Serialization.Serializers
                 }
             }
 
-            foreach (var name in removals)
+            if (removals.Count > 0)
             {
-                logger.Debug(serializerType, "Removing {0}", name);
-                item.PropertyGroups.Remove(name);
+                var changes = new List<uSyncChange>();
+
+                foreach (var name in removals)
+                {
+                    logger.Debug(serializerType, "Removing {0}", name);
+                    changes.Add(new uSyncChange
+                    {
+                        Change = ChangeDetailType.Delete,
+                        Name = name,
+                        Path = $"Tabs/{name}"
+                    });
+
+                    item.PropertyGroups.Remove(name);
+                }
+
+                return changes;
             }
+
+            return Enumerable.Empty<uSyncChange>();
         }
 
         protected void CleanFolder(TObject item, XElement node)
@@ -543,12 +618,13 @@ namespace uSync8.Core.Serialization.Serializers
             }
         }
 
-        protected void DeserializeCompositions(TObject item, XElement node)
+        protected IEnumerable<uSyncChange> DeserializeCompositions(TObject item, XElement node)
         {
             logger.Debug(serializerType, "Deserializing Compositions");
 
-            var comps = node.Element("Info").Element("Compositions");
-            if (comps == null) return;
+            var comps = node?.Element("Info")?.Element("Compositions");
+            if (comps == null) return Enumerable.Empty<uSyncChange>();
+
             List<IContentTypeComposition> compositions = new List<IContentTypeComposition>();
 
             foreach (var compositionNode in comps.Elements("Composition"))
@@ -564,7 +640,21 @@ namespace uSync8.Core.Serialization.Serializers
             }
 
             if (!Enumerable.SequenceEqual(item.ContentTypeComposition, compositions))
+            {
+                var changes = new uSyncChange
+                {
+                    Change = ChangeDetailType.Update,
+                    Name = "Compoistions",
+                    OldValue = string.Join(",", item.ContentTypeComposition.Select(x => x.Alias)),
+                    NewValue = string.Join(",", compositions.Select(x => x.Alias))
+                };
+
                 item.ContentTypeComposition = compositions;
+
+                return changes.AsEnumerableOfOne();
+            }
+
+            return Enumerable.Empty<uSyncChange>();
         }
 
 
@@ -681,17 +771,25 @@ namespace uSync8.Core.Serialization.Serializers
         }
 
 
-        private void MoveProperties(IContentTypeBase item, IDictionary<string, string> moves)
+        private IEnumerable<uSyncChange> MoveProperties(IContentTypeBase item, IDictionary<string, string> moves)
         {
             logger.Debug(serializerType, "MoveProperties");
 
             foreach (var move in moves)
             {
                 item.MovePropertyType(move.Key, move.Value);
+                yield return new uSyncChange
+                {
+                    Change = ChangeDetailType.Update,
+                    Name = move.Key,
+                    OldValue = "",
+                    NewValue = move.Value,
+                    Path = $"{move.Key}/Tab/{move.Value}"
+                };
             }
         }
 
-        private void RemoveProperties(IContentTypeBase item, XElement properties)
+        private IEnumerable<uSyncChange> RemoveProperties(IContentTypeBase item, XElement properties)
         {
             logger.Debug(serializerType, "RemoveProperties");
 
@@ -717,14 +815,28 @@ namespace uSync8.Core.Serialization.Serializers
 
             if (removals.Any())
             {
+                var changes = new List<uSyncChange>();
+
                 foreach (var alias in removals)
                 {
                     // if you remove something with lots of 
                     // content this can timeout (still? - need to check on v8)
                     logger.Debug(serializerType, "Removing {0}", alias);
+
+                    changes.Add(new uSyncChange
+                    {
+                        Change = ChangeDetailType.Delete,
+                        Name = alias,
+                        Path = $"Property/{alias}"
+                    });
+
                     item.RemovePropertyType(alias);
                 }
+
+                return changes;
             }
+
+            return Enumerable.Empty<uSyncChange>();
         }
 
         #endregion

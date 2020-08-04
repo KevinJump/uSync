@@ -5,6 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+
+using NPoco.Expressions;
+
 using Umbraco.Core;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
@@ -34,35 +37,62 @@ namespace uSync8.Core.Serialization.Serializers
 
             var item = localizationService.GetLanguageByIsoCode(isoCode);
 
+            var details = new List<uSyncChange>();
+
             if (item == null)
             {
                 logger.Debug<LanguageSerializer>("Creating New Language: {0}", isoCode);
                 item = new Language(isoCode);
+                details.AddNew(isoCode, isoCode, "Language");
             }
 
-            item.IsoCode = isoCode;
+            if (item.IsoCode != isoCode)
+            {
+                details.AddUpdate("IsoCode", item.IsoCode, isoCode);
+                item.IsoCode = isoCode;
+            }
 
             try
             {
                 var culture = CultureInfo.GetCultureInfo(isoCode);
-                item.CultureName = culture.DisplayName;
+                if (item.CultureName != culture.DisplayName)
+                {
+                    details.AddUpdate("CultureName", item.CultureName, culture.DisplayName);
+                    item.CultureName = culture.DisplayName;
+                }
             }
             catch
             {
                 logger.Warn<LanguageSerializer>("Can't set culture name based on IsoCode");
             }
 
-            item.IsDefault = node.Element("IsDefault").ValueOrDefault(false);
-            item.IsMandatory = node.Element("IsMandatory").ValueOrDefault(false);
+            var mandatory = node.Element("IsMandatory").ValueOrDefault(false);
+            if (item.IsMandatory != mandatory)
+            {
+                details.AddUpdate("IsMandatory", item.IsMandatory, mandatory);
+                item.IsMandatory = mandatory;
+            }
+
+            var isDefault = node.Element("IsDefault").ValueOrDefault(false);
+            if (item.IsDefault != isDefault)
+            {
+                details.AddUpdate("IsDefault", item.IsDefault, isDefault);
+                item.IsDefault = isDefault;
+            }
 
             var fallbackId = GetFallbackLanguageId(item, node);
-            if (fallbackId > 0)
+            if (fallbackId > 0 && item.FallbackLanguageId != fallbackId)
+            {
+                details.AddUpdate("FallbackId", item.FallbackLanguageId, fallbackId);
                 item.FallbackLanguageId = fallbackId;
+            }
 
             // logger.Debug<ILanguage>("Saving Language");
             //localizationService.Save(item);
 
-            return SyncAttempt<ILanguage>.Succeed(item.CultureName, item, ChangeType.Import);
+            var result = SyncAttempt<ILanguage>.Succeed(item.CultureName, item, ChangeType.Import);
+            result.Details = details;
+            return result;
         }
 
         /// <summary>
@@ -71,16 +101,29 @@ namespace uSync8.Core.Serialization.Serializers
         public override SyncAttempt<ILanguage> DeserializeSecondPass(ILanguage item, XElement node, SyncSerializerOptions options)
         {
             logger.Debug<LanguageSerializer>("Language Second Pass {IsoCode}", item.IsoCode);
-            item.IsDefault = node.Element("IsDefault").ValueOrDefault(false);
+
+            var details = new List<uSyncChange>();
+
+            var isDefault = node.Element("IsDefault").ValueOrDefault(false);
+            if (item.IsDefault != isDefault)
+            {
+                details.AddUpdate("IsDefault", item.IsDefault, isDefault);
+                item.IsDefault = isDefault;
+            }
 
             var fallbackId = GetFallbackLanguageId(item, node);
-            if (fallbackId > 0)
+            if (fallbackId > 0 && item.FallbackLanguageId != fallbackId)
+            {
+                details.AddUpdate("FallbackId", item.FallbackLanguageId, fallbackId);
                 item.FallbackLanguageId = fallbackId;
+            }
 
             if (!options.Flags.HasFlag(SerializerFlags.DoNotSave) && item.IsDirty())
                 localizationService.Save(item);
 
-            return SyncAttempt<ILanguage>.Succeed(item.CultureName, item, ChangeType.Import);
+            var result = SyncAttempt<ILanguage>.Succeed(item.CultureName, item, ChangeType.Import);
+            result.Details = details;
+            return result;
         }
 
         private int GetFallbackLanguageId(ILanguage item, XElement node)

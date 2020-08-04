@@ -346,11 +346,22 @@ namespace uSync8.BackOffice.SyncHandlers
                     {
                         if (actions.Any(x => x.FileName == item.update.Key))
                         {
-
                             var action = actions.FirstOrDefault(x => x.FileName == item.update.Key);
                             actions.Remove(action);
                             action.Message += attempt.Message;
                             actions.Add(action);
+                        }
+                    }
+
+                    // If the second attemt has change details add them to the first attempt
+                    if (attempt.Details != null && attempt.Details.Any())
+                    {
+                        if (actions.Any(x => x.FileName == item.update.Key))
+                        {
+                            var action = actions.FirstOrDefault(x => x.FileName == item.update.Key);
+                            var details = action.Details.ToList();
+                            details.AddRange(attempt.Details);
+                            action.Details = details;
                         }
                     }
 
