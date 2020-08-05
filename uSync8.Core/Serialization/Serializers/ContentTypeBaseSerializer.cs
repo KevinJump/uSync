@@ -324,8 +324,7 @@ namespace uSync8.Core.Serialization.Serializers
                 var alias = propertyNode.Element("Alias").ValueOrDefault(string.Empty);
                 if (string.IsNullOrEmpty(alias)) continue;
 
-
-                var key = propertyNode.Element("Key").ValueOrDefault(Guid.Empty);
+                var key = propertyNode.Element("Key").ValueOrDefault(alias.GetHashCode().ToGuid());
                 var definitionKey = propertyNode.Element("Definition").ValueOrDefault(Guid.Empty);
                 var propertyEditorAlias = propertyNode.Element("Type").ValueOrDefault(string.Empty);
 
@@ -672,11 +671,10 @@ namespace uSync8.Core.Serialization.Serializers
             List<string> removals = new List<string>();
 
             var nodes = properties.Elements("GenericProperty")
-                .Where(x => x.Element("Key").ValueOrDefault(Guid.Empty) != Guid.Empty)
                 .Select(x =>
                     new
                     {
-                        Key = x.Element("Key").ValueOrDefault(Guid.Empty),
+                        Key = (x.Element("Key").ValueOrDefault(Guid.NewGuid()) == Guid.Empty ? Guid.NewGuid() : x.Element("Key").ValueOrDefault(Guid.NewGuid())),
                         Alias = x.Element("Alias").ValueOrDefault(string.Empty)
                     })
                 .ToDictionary(k => k.Key, a => a.Alias);
