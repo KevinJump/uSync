@@ -8,6 +8,9 @@ using uSync8.Core.Tracking;
 
 namespace uSync8.Core
 {
+    /// <summary>
+    ///  Factory for getting changes or dependencies from an item.
+    /// </summary>
     public interface ISyncItemFactory
     {
         // tracking items

@@ -1,29 +1,41 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
-using System.Xml.XPath;
+
 using Umbraco.Core;
-using Umbraco.Core.Models.Entities;
 
 namespace uSync8.Core.Extensions
 {
     public static class XElementExtensions
     {
+        /// <summary>
+        ///  Summary the level (in the tree) for the item represented by the xml
+        /// </summary>
         public static int GetLevel(this XElement node)
             => node.Attribute("Level").ValueOrDefault(0);
 
+        /// <summary>
+        ///  the Key (guid) for the item represented by the xml
+        /// </summary>
         public static Guid GetKey(this XElement node)
             => node.Attribute("Key").ValueOrDefault(Guid.Empty);
 
+        /// <summary>
+        ///  The alias for the item represented by the xml
+        /// </summary>
         public static string GetAlias(this XElement node)
             => node.Attribute("Alias").ValueOrDefault(string.Empty);
 
+        /// <summary>
+        ///  cultures contained within the xml
+        /// </summary>
         public static string GetCultures(this XElement node)
             => node.Attribute(uSyncConstants.CultureKey).ValueOrDefault(string.Empty);
 
+        /// <summary>
+        ///  Segments contained within the xml
+        /// </summary>
         public static string GetSegments(this XElement node)
             => node.Attribute(uSyncConstants.SegmentKey).ValueOrDefault(string.Empty);
 
@@ -45,14 +57,9 @@ namespace uSync8.Core.Extensions
                 : Guid.Empty;
         }
 
-        public static string ValueOrDefault(this XElement node, string defaultValue)
-        {
-            if (node == null || string.IsNullOrEmpty(node.Value))
-                return defaultValue;
-
-            return node.Value;
-        }
-
+        /// <summary>
+        ///  does the xml represent an 'Empty' item (deleted/renamed/etc)
+        /// </summary>
         public static bool IsEmptyItem(this XElement node)
         {
             return node.Name.LocalName == uSyncConstants.Serialization.Empty;
@@ -74,6 +81,9 @@ namespace uSync8.Core.Extensions
                 new XAttribute("Change", change));
         }
 
+        /// <summary>
+        ///  return the uSyncActionType of the empty XML file.
+        /// </summary>
         public static SyncActionType GetEmptyAction(this XElement node)
         {
             if (IsEmptyItem(node))
@@ -82,6 +92,20 @@ namespace uSync8.Core.Extensions
             return SyncActionType.None;
         }
 
+        /// <summary>
+        ///  Get the value of the XML Node or return a default value
+        /// </summary>
+        public static string ValueOrDefault(this XElement node, string defaultValue)
+        {
+            if (node == null || string.IsNullOrEmpty(node.Value))
+                return defaultValue;
+
+            return node.Value;
+        }
+
+        /// <summary>
+        ///  Get the value of the XML Node or return a default value
+        /// </summary>
         public static TObject ValueOrDefault<TObject>(this XElement node, TObject defaultValue)
         {
             var value = ValueOrDefault(node, string.Empty);
@@ -94,6 +118,10 @@ namespace uSync8.Core.Extensions
             return defaultValue;
         }
 
+
+        /// <summary>
+        ///  Find a node in the XML or create it if it doesn't exist
+        /// </summary>
         public static XElement FindOrCreate(this XElement node, string name)
         {
             if (node == null) return null;
@@ -107,6 +135,9 @@ namespace uSync8.Core.Extensions
             return element;
         }
 
+        /// <summary>
+        ///  Find a node in the xml by its attribute name, create it if it doesn't exist
+        /// </summary>
         public static XElement FindOrCreate(this XElement node, string name, string attributeName, string value)
         {
             var elements = node.Elements(name);
@@ -128,6 +159,9 @@ namespace uSync8.Core.Extensions
             return element;   
         }
 
+        /// <summary>
+        ///  set the value for an element in the xml, if it doesn't exist create it and set the value
+        /// </summary>
         public static void CreateOrSetElement(this XElement node, string name, string value)
         {
             if (node == null) return;
@@ -141,6 +175,9 @@ namespace uSync8.Core.Extensions
             element.Value = value;
         }
 
+        /// <summary>
+        ///  set the value for an element in the xml, if it doesn't exist create it and set the value
+        /// </summary>
         public static void CreateOrSetElement<TObject>(this XElement node, string name, TObject value)
         {
             if (node == null) return;

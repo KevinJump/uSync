@@ -90,9 +90,7 @@ namespace uSync8.Core.Serialization.Serializers
             // logger.Debug<ILanguage>("Saving Language");
             //localizationService.Save(item);
 
-            var result = SyncAttempt<ILanguage>.Succeed(item.CultureName, item, ChangeType.Import);
-            result.Details = details;
-            return result;
+            return SyncAttempt<ILanguage>.Succeed(item.CultureName, item, ChangeType.Import, details);
         }
 
         /// <summary>
@@ -121,9 +119,7 @@ namespace uSync8.Core.Serialization.Serializers
             if (!options.Flags.HasFlag(SerializerFlags.DoNotSave) && item.IsDirty())
                 localizationService.Save(item);
 
-            var result = SyncAttempt<ILanguage>.Succeed(item.CultureName, item, ChangeType.Import);
-            result.Details = details;
-            return result;
+            return SyncAttempt<ILanguage>.Succeed(item.CultureName, item, ChangeType.Import, details);
         }
 
         private int GetFallbackLanguageId(ILanguage item, XElement node)

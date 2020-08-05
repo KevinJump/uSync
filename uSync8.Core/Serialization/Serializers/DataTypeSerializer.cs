@@ -1,9 +1,9 @@
-﻿using Newtonsoft.Json;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
+
+using Newtonsoft.Json;
 
 using Umbraco.Core;
 using Umbraco.Core.Composing;
@@ -85,12 +85,7 @@ namespace uSync8.Core.Serialization.Serializers
             details.AddRange(DeserializeConfiguration(item, node));
             details.AddNotNull(SetFolderFromElement(item, info.Element("Folder")));
 
-            // save is responsiblity of caller 
-            // dataTypeService.Save(item);
-
-            var result = SyncAttempt<IDataType>.Succeed(item.Name, item, ChangeType.Import);
-            result.Details = details;
-            return result;
+            return SyncAttempt<IDataType>.Succeed(item.Name, item, ChangeType.Import, details);
 
         }
 
@@ -102,15 +97,10 @@ namespace uSync8.Core.Serialization.Serializers
             var container = FindFolder(folderNode.GetKey(), folder);
             if (container != null && container.Id != item.ParentId)
             {
-                var change = new uSyncChange
-                {
-                    Change = ChangeDetailType.Update,
-                    Name = "Folder",
-                    OldValue = container.Id.ToString(),
-                    NewValue = item.ParentId.ToString()
-                };
+                var change = uSyncChange.Update("", "Folder", container.Id, item.ParentId);
 
                 item.SetParent(container);
+
                 return change;
             }
 

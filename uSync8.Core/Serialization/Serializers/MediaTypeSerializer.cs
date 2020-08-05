@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 
-using Umbraco.Core;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
+
 using uSync8.Core.Models;
 
 namespace uSync8.Core.Serialization.Serializers
@@ -73,26 +73,20 @@ namespace uSync8.Core.Serialization.Serializers
 
             CleanTabs(item, node);
 
-            // mediaTypeService.Save(item);
-
-            var result = SyncAttempt<IMediaType>.Succeed(
-                item.Name,
-                item,
-                ChangeType.Import,
-                "");
-            result.Details = details;
-            return result;
+            return SyncAttempt<IMediaType>.Succeed(item.Name, item, ChangeType.Import, details);
         }
 
         public override SyncAttempt<IMediaType> DeserializeSecondPass(IMediaType item, XElement node, SyncSerializerOptions options)
         {
-            DeserializeCompositions(item, node);
-            DeserializeStructure(item, node);
+            var details = new List<uSyncChange>();
+
+            details.AddRange(DeserializeCompositions(item, node));
+            details.AddRange(DeserializeStructure(item, node));
 
             if (!options.Flags.HasFlag(SerializerFlags.DoNotSave) && item.IsDirty())
                 mediaTypeService.Save(item);
 
-            return SyncAttempt<IMediaType>.Succeed(item.Name, item, ChangeType.Import);
+            return SyncAttempt<IMediaType>.Succeed(item.Name, item, ChangeType.Import, details);
         }
 
         protected override IMediaType CreateItem(string alias, ITreeEntity parent, string itemType)

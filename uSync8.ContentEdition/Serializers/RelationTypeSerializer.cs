@@ -50,41 +50,41 @@ namespace uSync8.ContentEdition.Serializers
                 item = new RelationType(childType, parentType, alias);
             }
 
-            var changes = new List<uSyncChange>();
+            var details = new List<uSyncChange>();
 
             if (item.Key != key)
             {
-                changes.AddUpdate("Key", item.Key, key);
+                details.AddUpdate("Key", item.Key, key);
                 item.Key = key;
             }
 
             if (item.Name != name)
             {
-                changes.AddUpdate("Name", item.Name, name);
+                details.AddUpdate("Name", item.Name, name);
                 item.Name = name;
             }
 
             if (item.Alias != alias)
             {
-                changes.AddUpdate("Alias", item.Alias, alias);
+                details.AddUpdate("Alias", item.Alias, alias);
                 item.Alias = alias;
             }
 
             if (item.ParentObjectType != parentType)
             {
-                changes.AddUpdate("ParentType", item.ParentObjectType, parentType);
+                details.AddUpdate("ParentType", item.ParentObjectType, parentType);
                 item.ParentObjectType = parentType;
             }
 
             if (item.ChildObjectType != childType)
             {
-                changes.AddUpdate("ChildType", item.ChildObjectType, childType);
+                details.AddUpdate("ChildType", item.ChildObjectType, childType);
                 item.ChildObjectType = childType;
             }
 
             if (item.IsBidirectional = bidirectional)
             {
-                changes.AddUpdate("Bidirectional", item.IsBidirectional, bidirectional);
+                details.AddUpdate("Bidirectional", item.IsBidirectional, bidirectional);
                 item.IsBidirectional = bidirectional;
             }
 
@@ -94,12 +94,10 @@ namespace uSync8.ContentEdition.Serializers
                 // we have to save before we can add the relations. 
                 this.SaveItem(item);
                 hasBeenSaved = true;
-                changes.AddRange(DeserializeRelations(node, item));
+                details.AddRange(DeserializeRelations(node, item));
             }
 
-            var attempt = SyncAttempt<IRelationType>.Succeed(item.Name, item, ChangeType.Import, hasBeenSaved);
-            attempt.Details = changes;
-            return attempt;
+            return SyncAttempt<IRelationType>.Succeed(item.Name, item, ChangeType.Import, hasBeenSaved, details);
         }
 
         /// <summary>

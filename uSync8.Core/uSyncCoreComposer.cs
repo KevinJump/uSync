@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Umbraco.Core;
-using Umbraco.Core.Models;
+﻿using Umbraco.Core;
 using Umbraco.Core.Composing;
+using Umbraco.Core.Models;
+
+using uSync8.Core.DataTypes;
+using uSync8.Core.Dependency;
 using uSync8.Core.Serialization;
 using uSync8.Core.Serialization.Serializers;
 using uSync8.Core.Tracking;
-using uSync8.Core.Tracking.Impliment;
-using uSync8.Core.DataTypes;
-using uSync8.Core.Dependency;
 
 namespace uSync8.Core
 {
@@ -19,12 +14,6 @@ namespace uSync8.Core
     {
         public void Compose(Composition composition)
         {
-            /*
-            // register *all* serializers, except those marked [HideFromTypeFinder]
-            composition.WithCollectionBuilder<USyncSerializerCollectionBuilder>()
-                .Add(() => composition.TypeLoader.GetTypes<ISyncSerializerBase>());
-                */
-
             // register *all* ConfigurationSerializers except those marked [HideFromTypeFinder]
             // has to happen before the DataTypeSerializer is loaded, because that is where
             // they are used

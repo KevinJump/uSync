@@ -125,7 +125,7 @@ namespace uSync8.Core.Serialization
                 return result;
             }
 
-            return SyncAttempt<TObject>.Succeed(node.GetAlias(), default(TObject), ChangeType.NoChange);
+            return SyncAttempt<TObject>.Succeed(node.GetAlias(), ChangeType.NoChange);
         }
 
         [Obsolete("Deserialize with options for better config support")]

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Linq;
 using System.Linq;
 using System.Xml.Linq;
 
@@ -113,15 +114,7 @@ namespace uSync8.Core.Serialization.Serializers
 
             // contentTypeService.Save(item);
 
-            var attempt =  SyncAttempt<IContentType>.Succeed(
-                item.Name,
-                item,
-                ChangeType.Import,
-                "");
-
-            attempt.Details = details;
-
-            return attempt;
+            return SyncAttempt<IContentType>.Succeed(item.Name, item, ChangeType.Import, details);
         }
 
         protected override IEnumerable<uSyncChange> DeserializeExtraProperties(IContentType item, PropertyType property, XElement node)
@@ -129,18 +122,11 @@ namespace uSync8.Core.Serialization.Serializers
             var variations = node.Element("Variations").ValueOrDefault(ContentVariation.Nothing);
             if (property.Variations != variations)
             {
-                var changes = new uSyncChange
-                {
-                    Change = ChangeDetailType.Update,
-                    Name = "Variations",
-                    NewValue = variations.ToString(),
-                    OldValue = property.Variations.ToString(),
-                    Path = "Property/Variations"
-                }.AsEnumerableOfOne();
+                var change = uSyncChange.Update("Property/Variations", "Variations", property.Variations, variations);
 
                 property.Variations = variations;
 
-                return changes;
+                return change.AsEnumerableOfOne();
             }
 
             return Enumerable.Empty<uSyncChange>();
@@ -160,10 +146,7 @@ namespace uSync8.Core.Serialization.Serializers
 
             CleanFolder(item, node);
 
-            var result = SyncAttempt<IContentType>.Succeed(item.Name, item, ChangeType.Import);
-            result.Details = details;
-
-            return result;
+            return SyncAttempt<IContentType>.Succeed(item.Name, item, ChangeType.Import, details);
         }
 
         private IEnumerable<uSyncChange> DeserializeContentTypeProperties(IContentType item, XElement node)

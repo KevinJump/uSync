@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using System.Xml.XPath;
+
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+
 using Umbraco.Core;
-using Umbraco.Core.IO;
 using Umbraco.Core.Models.Entities;
+
 using uSync8.Core.Extensions;
 using uSync8.Core.Models;
 using uSync8.Core.Serialization;
@@ -41,21 +41,12 @@ namespace uSync8.Core.Tracking
             if (!serializer.IsValid(node))
             {
                 // not valid 
-                return new uSyncChange()
-                {
-                    Change = ChangeDetailType.Error,
-                    Name = "Invalid File",
-                    OldValue = node.Name.LocalName
-                }.AsEnumerableOfOne(); ;
+                return uSyncChange.Error("", "Invalid File", node.Name.LocalName).AsEnumerableOfOne();
             }
 
             if (serializer.IsCurrent(node) == ChangeType.NoChange)
             {
-                return new uSyncChange()
-                {
-                    Change = ChangeDetailType.NoChange,
-                    Name = node.GetAlias(),
-                }.AsEnumerableOfOne();
+                return uSyncChange.NoChange("", node.GetAlias()).AsEnumerableOfOne();
             }
 
             var changes = TrackChanges();

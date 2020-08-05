@@ -1,6 +1,8 @@
 ﻿namespace uSync8.Core
 {
-
+    /// <summary>
+    ///  Type of change performed
+    /// </summary>
     public enum ChangeType : int
     {
         Clean = -2,

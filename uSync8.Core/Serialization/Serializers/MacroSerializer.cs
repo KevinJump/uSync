@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
+
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Services;
+
 using uSync8.Core.Extensions;
 using uSync8.Core.Models;
 
@@ -27,7 +27,7 @@ namespace uSync8.Core.Serialization.Serializers
 
         protected override SyncAttempt<IMacro> DeserializeCore(XElement node, SyncSerializerOptions options)
         {
-            var changes = new List<uSyncChange>();
+            var details = new List<uSyncChange>();
 
             if (node.Element("Name") == null)
                 throw new ArgumentNullException("XML missing Name parameter");
@@ -54,36 +54,36 @@ namespace uSync8.Core.Serialization.Serializers
             {
                 logger.Debug<MacroSerializer>("Creating New [{0}]", key);
                 item = new Macro(alias, name, macroSource, macroType);
-                changes.Add(uSyncChange.Create(alias, name, "New Macro"));
+                details.Add(uSyncChange.Create(alias, name, "New Macro"));
             }
 
             if (item.Key != key)
             {
-                changes.AddUpdate("Key", item.Key, key);
+                details.AddUpdate("Key", item.Key, key);
                 item.Key = key;
             }
 
             if (item.Name != name)
             {
-                changes.AddUpdate("Name", item.Name, name);
+                details.AddUpdate("Name", item.Name, name);
                 item.Name = name;
             }
 
             if (item.Alias != alias)
             {
-                changes.AddUpdate("Alias", item.Alias, alias);
+                details.AddUpdate("Alias", item.Alias, alias);
                 item.Alias = alias;
             }
 
             if (item.MacroSource != macroSource)
             {
-                changes.AddUpdate("MacroSource", item.MacroSource, macroSource);
+                details.AddUpdate("MacroSource", item.MacroSource, macroSource);
                 item.MacroSource = macroSource;
             }
 
             if (item.MacroType != macroType)
             {
-                changes.AddUpdate("MacroType", item.MacroType, macroType);
+                details.AddUpdate("MacroType", item.MacroType, macroType);
                 item.MacroType = macroType;
             }
 
@@ -95,33 +95,33 @@ namespace uSync8.Core.Serialization.Serializers
 
             if (item.UseInEditor != useInEditor)
             {
-                changes.AddUpdate("UseInEditor", item.UseInEditor, useInEditor);
+                details.AddUpdate("UseInEditor", item.UseInEditor, useInEditor);
                 item.UseInEditor = useInEditor;
             }
 
             if (item.DontRender != dontRender)
             {
-                changes.AddUpdate("DontRender", item.DontRender, dontRender);
+                details.AddUpdate("DontRender", item.DontRender, dontRender);
                 item.DontRender = dontRender;
             }
 
             if (item.CacheByMember != cacheByMember)
             {
-                changes.AddUpdate("CacheByMember", item.CacheByMember, cacheByMember);
+                details.AddUpdate("CacheByMember", item.CacheByMember, cacheByMember);
                 item.CacheByMember = cacheByMember;
             }
 
 
             if (item.CacheByPage != cacheByPage)
             {
-                changes.AddUpdate("CacheByPage", item.CacheByPage, cacheByPage);
+                details.AddUpdate("CacheByPage", item.CacheByPage, cacheByPage);
                 item.CacheByPage = cacheByPage;
             }
 
 
             if (item.CacheDuration != cacheDuration)
             {
-                changes.AddUpdate("CacheByMember", item.CacheDuration, cacheDuration);
+                details.AddUpdate("CacheByMember", item.CacheDuration, cacheDuration);
                 item.CacheDuration = cacheDuration;
             }
 
@@ -149,7 +149,7 @@ namespace uSync8.Core.Serialization.Serializers
                     else
                     {
                         logger.Debug<MacroSerializer>(" >> Adding {0}", propertyAlias);
-                        changes.Add(uSyncChange.Create(propPath, "Property", propertyAlias));
+                        details.Add(uSyncChange.Create(propPath, "Property", propertyAlias));
                         item.Properties.Add(new MacroProperty(propertyAlias, propertyName, sortOrder, editorAlias));
                     }
                 }
@@ -158,13 +158,7 @@ namespace uSync8.Core.Serialization.Serializers
 
             RemoveOrphanProperties(item, properties);
 
-            // macroService.Save(item);
-
-            var attempt = SyncAttempt<IMacro>.Succeed(item.Name, item, ChangeType.Import);
-            if (changes.Any())
-                attempt.Details = changes;
-
-            return attempt;
+            return SyncAttempt<IMacro>.Succeed(item.Name, item, ChangeType.Import, details);
         }
 
         private void RemoveOrphanProperties(IMacro item, XElement properties)

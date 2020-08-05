@@ -16,7 +16,7 @@ namespace uSync8.Core
         }
 
         /// <summary>
-        ///  Is the value valid for this list (if the list is empty, we say the value is valid).
+        ///  Is the value valid for this list (if the list is empty, we treat it like a wildcard).
         /// </summary>
         public static bool IsValid(this IList<string> list, string value)
             => list.Count == 0 || list.InvariantContains(value) || list.InvariantContains("*");

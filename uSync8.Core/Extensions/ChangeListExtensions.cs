@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 using Newtonsoft.Json;
 
@@ -14,14 +10,7 @@ namespace uSync8.Core
     {
         public static void AddNew(this List<uSyncChange> changes, string name, string value, string path)
         {
-            changes.Add(new uSyncChange
-            {
-                Change = ChangeDetailType.Create,
-                Name = name,
-                NewValue = value,
-                OldValue = string.Empty,
-                Path = path
-            });
+            changes.Add(uSyncChange.Create(path, name, value));
         }
 
 
@@ -30,14 +19,7 @@ namespace uSync8.Core
 
         public static void AddUpdate(this List<uSyncChange> changes, string name, string oldValue, string newValue, string path = "")
         {
-            changes.Add(new uSyncChange
-            {
-                Change = ChangeDetailType.Update,
-                Name = name,
-                NewValue = string.IsNullOrWhiteSpace(newValue) ? "(blank)" : newValue,
-                OldValue = string.IsNullOrWhiteSpace(oldValue) ? "(blank)" : oldValue,
-                Path = path,
-            });
+            changes.Add(uSyncChange.Update(path, name, oldValue, newValue));
         }
 
         public static void AddUpdateJson(this List<uSyncChange> changes, string name, object oldValue, object newValue, string path = "")

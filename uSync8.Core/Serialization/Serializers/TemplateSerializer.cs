@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
+
 using Umbraco.Core;
 using Umbraco.Core.IO;
-using Umbraco.Core.Models;
 using Umbraco.Core.Logging;
+using Umbraco.Core.Models;
 using Umbraco.Core.Services;
+
 using uSync8.Core.Extensions;
 using uSync8.Core.Models;
 
@@ -99,9 +98,7 @@ namespace uSync8.Core.Serialization.Serializers
             // Deserialize now takes care of the save.
             // fileService.SaveTemplate(item);
 
-            var result = SyncAttempt<ITemplate>.Succeed(item.Name, item, ChangeType.Import);
-            result.Details = details;
-            return result;
+            return SyncAttempt<ITemplate>.Succeed(item.Name, item, ChangeType.Import, details);
         }
 
         public override SyncAttempt<ITemplate> DeserializeSecondPass(ITemplate item, XElement node, SyncSerializerOptions options)
@@ -125,9 +122,7 @@ namespace uSync8.Core.Serialization.Serializers
                 }
             }
 
-            var result = SyncAttempt<ITemplate>.Succeed(item.Name, item, ChangeType.Import);
-            result.Details = details;
-            return result;
+            return SyncAttempt<ITemplate>.Succeed(item.Name, item, ChangeType.Import, details);
         }
 
 

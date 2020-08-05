@@ -3,6 +3,7 @@ using Newtonsoft.Json.Serialization;
 
 using System;
 using System.Collections.Generic;
+using System.Web.UI.WebControls;
 
 namespace uSync8.Core.Models
 {
@@ -68,9 +69,16 @@ namespace uSync8.Core.Models
             Saved = saved;
         }
 
-        public static SyncAttempt<TObject> Succeed(string name, ChangeType change)
-                    => new SyncAttempt<TObject>(true, name, default(TObject), typeof(TObject), change, string.Empty, null, false);
+        // default object success (when we don't pass the item back)
 
+        public static SyncAttempt<TObject> Succeed(string name, ChangeType change)
+            => new SyncAttempt<TObject>(true, name, default(TObject), typeof(TObject), change, string.Empty, null, false);
+
+        public static SyncAttempt<TObject> Succeed(string name, ChangeType change, string message)
+            => new SyncAttempt<TObject>(true, name, default(TObject), typeof(TObject), change, message, null, false);
+
+
+        // item passed back versions 
         public static SyncAttempt<TObject> Succeed(string name, TObject item, ChangeType change)
             => new SyncAttempt<TObject>(true, name, item, typeof(TObject), change, string.Empty, null, false);
 
@@ -82,13 +90,27 @@ namespace uSync8.Core.Models
         }
 
         public static SyncAttempt<TObject> Succeed(string name, TObject item, ChangeType change, bool saved)
-            => new SyncAttempt<TObject>(true, name, item, typeof(TObject), change, string.Empty, null, saved);
+            => Succeed(name, item, change, saved, null);
+
+        public static SyncAttempt<TObject> Succeed(string name, TObject item, ChangeType change, bool saved, IList<uSyncChange> details)
+        {
+            var attempt = new SyncAttempt<TObject>(true, name, item, typeof(TObject), change, string.Empty, null, saved);
+            if (details != null) attempt.Details = details;
+            return attempt;
+        }
 
         public static SyncAttempt<TObject> Succeed(string name, TObject item, ChangeType change, string message)
             => new SyncAttempt<TObject>(true, name, item, typeof(TObject), change, message, null, false);
 
         public static SyncAttempt<TObject> Succeed(string name, TObject item, ChangeType change, string message, bool saved)
-            => new SyncAttempt<TObject>(true, name, item, typeof(TObject), change, message, null, saved);
+            => Succeed(name, item, change, message, saved, null);
+
+        public static SyncAttempt<TObject> Succeed(string name, TObject item, ChangeType change, string message, bool saved, IList<uSyncChange> details)
+        {
+            var attempt = new SyncAttempt<TObject>(true, name, item, typeof(TObject), change, message, null, saved);
+            if (details != null) attempt.Details = details;
+            return attempt;
+        }
 
         public static SyncAttempt<TObject> Fail(string name, TObject item, ChangeType change)
             => new SyncAttempt<TObject>(false, name, item, typeof(TObject), change, string.Empty, null, false);

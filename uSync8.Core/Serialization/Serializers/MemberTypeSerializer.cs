@@ -78,7 +78,7 @@ namespace uSync8.Core.Serialization.Serializers
         //   get removed when required. 
         // 
 
-        private static string[] buildInProperties = new string[] { 
+        private static string[] buildInProperties = new string[] {
             "umbracoMemberApproved", "umbracoMemberComments", "umbracoMemberFailedPasswordAttempts",
             "umbracoMemberLastLockoutDate", "umbracoMemberLastLogin", "umbracoMemberLastPasswordChangeDate",
             "umbracoMemberLockedOut", "umbracoMemberPasswordRetrievalAnswer", "umbracoMemberPasswordRetrievalQuestion"
@@ -87,7 +87,7 @@ namespace uSync8.Core.Serialization.Serializers
         protected override XElement SerializeProperties(IMemberType item)
         {
             var node = base.SerializeProperties(item);
-            foreach(var property in node.Elements("GenericProperty"))
+            foreach (var property in node.Elements("GenericProperty"))
             {
                 var alias = property.Element("Alias").ValueOrDefault(string.Empty);
                 if (!string.IsNullOrWhiteSpace(alias) && buildInProperties.InvariantContains(alias))
@@ -112,13 +112,7 @@ namespace uSync8.Core.Serialization.Serializers
 
             // memberTypeService.Save(item);
 
-            var result = SyncAttempt<IMemberType>.Succeed(
-                item.Name,
-                item,
-                ChangeType.Import,
-                "");
-            result.Details = details;
-            return result;
+            return SyncAttempt<IMemberType>.Succeed(item.Name, item, ChangeType.Import, details);
         }
 
         protected override IEnumerable<uSyncChange> DeserializeExtraProperties(IMemberType item, PropertyType property, XElement node)
@@ -126,7 +120,7 @@ namespace uSync8.Core.Serialization.Serializers
             var changes = new List<uSyncChange>();
 
             var canEdit = node.Element("CanEdit").ValueOrDefault(false);
-            if (item.MemberCanEditProperty(property.Alias) != canEdit )
+            if (item.MemberCanEditProperty(property.Alias) != canEdit)
             {
                 changes.AddUpdate("CanEdit", !canEdit, canEdit, $"{property.Alias}/CanEdit");
                 item.SetMemberCanEditProperty(property.Alias, canEdit);
@@ -140,7 +134,7 @@ namespace uSync8.Core.Serialization.Serializers
             }
 
             var isSensitive = node.Element("IsSensitive").ValueOrDefault(true);
-            if (item.IsSensitiveProperty(property.Alias) != isSensitive) 
+            if (item.IsSensitiveProperty(property.Alias) != isSensitive)
             {
                 changes.AddUpdate("IsSensitive", !isSensitive, isSensitive, $"{property.Alias}/IsSensitive");
                 item.SetIsSensitiveProperty(property.Alias, isSensitive);

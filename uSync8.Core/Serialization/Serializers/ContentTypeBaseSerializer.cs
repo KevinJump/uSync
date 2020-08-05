@@ -487,14 +487,10 @@ namespace uSync8.Core.Serialization.Serializers
                     if (!currentAttempt.Success || !currentAttempt.Result.Equals(attempt.Result)) {
                         propertyInfo.SetValue(property, attempt.Result);
 
-                        return new uSyncChange
-                        {
-                            Change = ChangeDetailType.Update,
-                            Name = propertyName,
-                            OldValue = currentAttempt.Result.ToString(),
-                            NewValue = attempt.Result.ToString(),
-                            Path = $"Property/{propertyName}"
-                        };
+                        return uSyncChange.Update($"property/{propertyName}",
+                            propertyName,
+                            currentAttempt.Result.ToString(),
+                            attempt.Result.ToString());                     
                     }
                 }
             }
@@ -581,12 +577,7 @@ namespace uSync8.Core.Serialization.Serializers
                 foreach (var name in removals)
                 {
                     logger.Debug(serializerType, "Removing {0}", name);
-                    changes.Add(new uSyncChange
-                    {
-                        Change = ChangeDetailType.Delete,
-                        Name = name,
-                        Path = $"Tabs/{name}"
-                    });
+                    changes.Add(uSyncChange.Delete($"Tabs/{name}", name, name));
 
                     item.PropertyGroups.Remove(name);
                 }
@@ -641,17 +632,13 @@ namespace uSync8.Core.Serialization.Serializers
 
             if (!Enumerable.SequenceEqual(item.ContentTypeComposition, compositions))
             {
-                var changes = new uSyncChange
-                {
-                    Change = ChangeDetailType.Update,
-                    Name = "Compoistions",
-                    OldValue = string.Join(",", item.ContentTypeComposition.Select(x => x.Alias)),
-                    NewValue = string.Join(",", compositions.Select(x => x.Alias))
-                };
+                var change = uSyncChange.Update("Info", "Compositions", 
+                    string.Join(",", item.ContentTypeComposition.Select(x => x.Alias)),
+                    string.Join(",", compositions.Select(x => x.Alias)));
 
                 item.ContentTypeComposition = compositions;
 
-                return changes.AsEnumerableOfOne();
+                return change.AsEnumerableOfOne();
             }
 
             return Enumerable.Empty<uSyncChange>();
@@ -778,14 +765,8 @@ namespace uSync8.Core.Serialization.Serializers
             foreach (var move in moves)
             {
                 item.MovePropertyType(move.Key, move.Value);
-                yield return new uSyncChange
-                {
-                    Change = ChangeDetailType.Update,
-                    Name = move.Key,
-                    OldValue = "",
-                    NewValue = move.Value,
-                    Path = $"{move.Key}/Tab/{move.Value}"
-                };
+
+                yield return uSyncChange.Update($"{move.Key}/Tab/{move.Value}", move.Key, "", move.Value);
             }
         }
 
@@ -823,12 +804,7 @@ namespace uSync8.Core.Serialization.Serializers
                     // content this can timeout (still? - need to check on v8)
                     logger.Debug(serializerType, "Removing {0}", alias);
 
-                    changes.Add(new uSyncChange
-                    {
-                        Change = ChangeDetailType.Delete,
-                        Name = alias,
-                        Path = $"Property/{alias}"
-                    });
+                    changes.Add(uSyncChange.Delete($"Property/{alias}", alias, ""));
 
                     item.RemovePropertyType(alias);
                 }

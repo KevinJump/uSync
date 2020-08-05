@@ -1,22 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Umbraco.Core;
+
 using Umbraco.Core.Models;
+
 using static Umbraco.Core.Constants;
 
 namespace uSync8.Core
-{   
+{
     /// we are wrapping and extending Udi's 
     /// the internal functions throw if you don't know the type
-    /// so here we capture and add...
-    /// </summary>
+    /// so here we capture and add return Unknown.
     public static class uSyncObjectType 
     {
         public const string File = "physical-file";
-
 
         public static UmbracoObjectTypes ToUmbracoObjectType(string entityType)
         {
@@ -32,6 +27,9 @@ namespace uSync8.Core
             }
         }
 
+        /// <summary>
+        ///  Get the type of container that is used for this entity type.
+        /// </summary>
         public static UmbracoObjectTypes ToContainerUmbracoObjectType(string entityType)
         {
             switch(entityType)

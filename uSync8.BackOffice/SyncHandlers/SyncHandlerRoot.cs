@@ -6,8 +6,6 @@ using System.Linq;
 using System.Reflection;
 using System.Xml.Linq;
 
-using Examine;
-
 using Umbraco.Core;
 using Umbraco.Core.Cache;
 using Umbraco.Core.Composing;
@@ -317,7 +315,8 @@ namespace uSync8.BackOffice.SyncHandlers
                     }
                     else
                     {
-                        return SyncAttempt<TObject>.Succeed(Path.GetFileName(filePath), default(TObject), ChangeType.NoChange, "Not Imported (Based on config)");
+                        return SyncAttempt<TObject>.Succeed(Path.GetFileName(filePath), 
+                            ChangeType.NoChange, "Not Imported (Based on config)");
                     }
                 }
             }
@@ -647,24 +646,23 @@ namespace uSync8.BackOffice.SyncHandlers
                     var details = new List<uSyncChange>();
 
                     // add the delete message to the list of changes
-                    details.Add(new uSyncChange()
-                    {
-                        Change = ChangeDetailType.Delete,
-                        Name = $"Delete: {deleteAction.Name} ({Path.GetFileName(deleteAction.FileName)})",
-                        NewValue = deleteAction.FileName.Substring(folder.Length),
-                        Path = Path.GetFileName(deleteAction.FileName)
-                    });
+                    var filename = Path.GetFileName(deleteAction.FileName);
+                    var relativePath = deleteAction.FileName.Substring(folder.Length);
+
+                    details.Add(uSyncChange.Delete(filename, $"Delete: {deleteAction.Name} ({filename}", relativePath));
 
                     // add all the duplicates to the list of changes.
                     foreach (var dup in actions.Where(x => x.Change != ChangeType.Delete && DoActionsMatch(x, deleteAction)))
                     {
-                        details.Add(new uSyncChange()
-                        {
-                            Change = ChangeDetailType.Update,
-                            Name = $"{dup.Change}: {dup.Name} ({Path.GetFileName(dup.FileName)})",
-                            NewValue = dup.FileName.Substring(folder.Length),
-                            Path = Path.GetFileName(dup.FileName)
-                        });
+                        var dupFilename = Path.GetFileName(dup.FileName);
+                        var dupRelativePath = dup.FileName.Substring(folder.Length);
+
+                        details.Add(
+                            uSyncChange.Update(
+                                path: dupFilename, 
+                                name: $"{dup.Change} : {dup.Name} ({dupFilename})", 
+                                oldValue: "", 
+                                newValue: dupRelativePath));
                     }
 
                     duplicateAction.Details = details;
@@ -1044,9 +1042,6 @@ namespace uSync8.BackOffice.SyncHandlers
         protected virtual string GetItemMatchString(TObject item) => GetItemAlias(item);
 
         protected virtual string GetXmlMatchString(XElement node) => node.GetAlias();
-
-
-
 
         /// <summary>
         /// Rename an item 
