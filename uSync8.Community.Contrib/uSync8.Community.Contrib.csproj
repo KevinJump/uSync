@@ -151,7 +151,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Mappers\BentoItemMapper - Copy.cs" />
+    <Compile Include="Mappers\BentoStackMapper.cs" />
     <Compile Include="Mappers\BentoItemMapper.cs" />
     <Compile Include="Mappers\DocTypeGridMapper.cs" />
     <Compile Include="uSyncContrib.cs" />

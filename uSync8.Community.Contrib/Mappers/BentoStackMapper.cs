@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-using Umbraco.Core;
 using Umbraco.Core.Services;
 
 using uSync8.ContentEdition.Mapping;
-using uSync8.Core;
 using uSync8.Core.Dependency;
 
 namespace uSync8.Community.Contrib.Mappers

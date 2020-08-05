@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -116,8 +117,13 @@ namespace uSync8.Community.Contrib.Mappers
                 var key = itemValue.Value<Guid>("key");
                 if (key != null)
                 {
+                    // we need to include the ancestors of any included 
+                    // bento items, to ensure we get the library structure
+                    // of the bento items as part of the sync.
+                    var bentoFlags = flags | DependencyFlags.IncludeAncestors;
+
                     var udi = GuidUdi.Create(Constants.UdiEntityType.Document, key);
-                    return CreateDependency(udi as GuidUdi, flags).AsEnumerableOfOne();
+                    return CreateDependency(udi as GuidUdi, bentoFlags).AsEnumerableOfOne();
                 }
             }
 
