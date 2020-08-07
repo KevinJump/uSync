@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Xml.Linq;
 
+using Umbraco.Core;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
@@ -15,7 +16,7 @@ namespace uSync8.Core.Serialization
         {
         }
 
-        protected abstract TObject CreateItem(string alias, ITreeEntity parent, string itemType);
+        protected abstract Attempt<TObject> CreateItem(string alias, ITreeEntity parent, string itemType);
 
 
         #region Getters
@@ -28,7 +29,7 @@ namespace uSync8.Core.Serialization
         #region Finders 
         // Finders - used on importing, getting things that are already there (or maybe not)
 
-        protected abstract TObject FindOrCreate(XElement node);
+        protected abstract Attempt<TObject> FindOrCreate(XElement node);
 
         protected TObject FindItem(Guid key, string alias)
         {

@@ -26,11 +26,11 @@ namespace uSync8.Core.Serialization
             this.containerType = containerType;
         }
 
-        protected override TObject FindOrCreate(XElement node)
+        protected override Attempt<TObject> FindOrCreate(XElement node)
         {
 
             TObject item = FindItem(node);
-            if (item != null) return item;
+            if (item != null) return Attempt.Succeed(item);
 
             logger.Debug(serializerType, "FindOrCreate: Creating");
 

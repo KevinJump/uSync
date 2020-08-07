@@ -40,10 +40,12 @@ namespace uSync8.Core.Serialization.Serializers
             var name = info.Element("Name").ValueOrDefault(string.Empty);
             var key = node.GetKey();
 
-            var item = FindOrCreate(node);
-            if (item == null) throw new ArgumentException($"Cannot find underling datatype for {name}");
+            var attempt = FindOrCreate(node);
+            if (!attempt.Success)
+                throw attempt.Exception;
 
             var details = new List<uSyncChange>();
+            var item = attempt.Result;
 
             // basic
             if (item.Name != name)
@@ -209,10 +211,11 @@ namespace uSync8.Core.Serialization.Serializers
         }
 
 
-        protected override IDataType CreateItem(string alias, ITreeEntity parent, string itemType)
+        protected override Attempt<IDataType> CreateItem(string alias, ITreeEntity parent, string itemType)
         {
             var editorType = FindDataEditor(itemType);
-            if (editorType == null) return null;
+            if (editorType == null)
+                return Attempt.Fail<IDataType>(null, new ArgumentException($"(Missing Package?) DataEditor {itemType} is not installed"));
 
             var item = new DataType(editorType, -1)
             {
@@ -222,7 +225,7 @@ namespace uSync8.Core.Serialization.Serializers
             if (parent != null)
                 item.SetParent(parent);
 
-            return item;
+            return Attempt.Succeed((IDataType)item);
         }
 
         private IDataEditor FindDataEditor(string alias)

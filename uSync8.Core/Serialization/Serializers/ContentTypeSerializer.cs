@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.Linq;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using System.Xml.Linq;
 
 using Umbraco.Core;
@@ -95,7 +96,10 @@ namespace uSync8.Core.Serialization.Serializers
 
         protected override SyncAttempt<IContentType> DeserializeCore(XElement node, SyncSerializerOptions options)
         {
-            var item = FindOrCreate(node);
+            var attempt = FindOrCreate(node);
+            if (!attempt.Success) throw attempt.Exception;
+
+            var item = attempt.Result;
 
             var details = new List<uSyncChange>();
 
@@ -220,7 +224,7 @@ namespace uSync8.Core.Serialization.Serializers
         }
 
 
-        protected override IContentType CreateItem(string alias, ITreeEntity parent, string itemType)
+        protected override Attempt<IContentType> CreateItem(string alias, ITreeEntity parent, string itemType)
         {
             var item = new ContentType(-1)
             {
@@ -237,7 +241,7 @@ namespace uSync8.Core.Serialization.Serializers
                 item.SetParent(parent);
             }
 
-            return item;
+            return Attempt.Succeed((IContentType)item);
         }
 
         protected override void SaveContainer(EntityContainer container)

@@ -45,11 +45,10 @@ namespace uSync8.ContentEdition.Serializers
 
         protected override SyncAttempt<IContent> DeserializeCore(XElement node, SyncSerializerOptions options)
         {
-            var item = FindOrCreate(node);
-            if (item.Trashed)
-            {
-                // TODO: Where has changed trashed state gone?
-            }
+            var attempt = FindOrCreate(node);
+            if (!attempt.Success) throw attempt.Exception;
+
+            var item = attempt.Result;
 
             var details = new List<uSyncChange>();
 
@@ -111,16 +110,22 @@ namespace uSync8.ContentEdition.Serializers
         protected override IContent FindItem(int id)
             => contentService.GetBlueprintById(id);
 
-        protected override IContent CreateItem(string alias, ITreeEntity parent, string itemType)
+        protected override Attempt<IContent> CreateItem(string alias, ITreeEntity parent, string itemType)
         {
             var contentType = contentTypeService.Get(itemType);
-            if (contentType == null) return null;
+            if (contentType == null) return
+                    Attempt.Fail<IContent>(null, new ArgumentException($"Missing content Type {itemType}"));
 
+            IContent item;
             if (parent != null)
             {
-                return new Content(alias, (IContent)parent, contentType);
+                item = new Content(alias, (IContent)parent, contentType);
             }
-            return new Content(alias, -1, contentType);
+            else {
+                item = new Content(alias, -1, contentType);
+            }
+
+            return Attempt.Succeed(item);
         }
 
         protected override Attempt<string> DoSaveOrPublish(IContent item, XElement node, SyncSerializerOptions options)

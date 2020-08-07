@@ -423,14 +423,14 @@ namespace uSync8.ContentEdition.Serializers
                     logger.Verbose(serializerType, "Derserialize Property {0} {1}", alias, current.PropertyType.PropertyEditorAlias);
 
                     var values = property.Elements("Value").ToList();
-
+                    
                     foreach (var value in values)
                     {
                         var culture = value.Attribute("Culture").ValueOrDefault(string.Empty);
                         var segment = value.Attribute("Segment").ValueOrDefault(string.Empty);
                         var propValue = value.ValueOrDefault(string.Empty);
 
-                        logger.Verbose(serializerType, "{Property} Culture {Culture} Segment {Segment}", alias, culture, segment);
+                        logger.Verbose(serializerType, "{item} {Property} Culture {Culture} Segment {Segment}", item.Name, alias, culture, segment);
 
                         try
                         {
@@ -450,16 +450,16 @@ namespace uSync8.ContentEdition.Serializers
                                     {
                                         // this culture is not the default for the site, so don't use it to 
                                         // set the single language value.
-                                        logger.Warn(serializerType, "Culture {culture} in file, but is not default so not being used", culture);
+                                        logger.Warn(serializerType, "{item} Culture {culture} in file, but is not default so not being used", item.Name, culture);
                                         continue;
                                     }
-                                    logger.Warn(serializerType, "Cannot set value on culture {culture} because it is not avalible for this property - value in default language will be used", culture);
+                                    logger.Warn(serializerType, "{item} Cannot set value on culture {culture} because it is not avalible for this property - value in default language will be used", item.Name, culture);
                                     culture = string.Empty;
                                 }
                                 else if (!item.AvailableCultures.InvariantContains(culture))
                                 {
                                     // this culture isn't one of the ones, that can be set on this language. 
-                                    logger.Warn(serializerType, "Culture {culture} is not one of the avalible cultures, so we cannot set this value", culture);
+                                    logger.Warn(serializerType, "{item} Culture {culture} is not one of the avalible cultures, so we cannot set this value", item.Name, culture);
                                     continue;
                                 }
                             }
@@ -477,7 +477,7 @@ namespace uSync8.ContentEdition.Serializers
                                     }
                                     else
                                     {
-                                        logger.Warn(serializerType, "Property {Alias} contains a value that has no culture but this property varies by culture so this value has no effect", alias);
+                                        logger.Warn(serializerType, "{item} Property {Alias} contains a value that has no culture but this property varies by culture so this value has no effect", item.Name, alias);
                                         continue;
                                     }
                                 }
@@ -495,7 +495,7 @@ namespace uSync8.ContentEdition.Serializers
                                     string.IsNullOrEmpty(culture) ? null : culture,
                                     string.IsNullOrEmpty(segment) ? null : segment);
 
-                                logger.Debug(serializerType, "Property {alias} value set", alias);
+                                logger.Debug(serializerType, "Property {item} set {alias} value", item.Name, alias);
                                 logger.Verbose(serializerType, "{Id} Property [{alias}] : {itemValue}", item.Id, alias, itemValue);
                             }
                         }
@@ -503,7 +503,7 @@ namespace uSync8.ContentEdition.Serializers
                         {
                             // capture here to be less agressive with failure. 
                             // if one property fails the rest will still go in.
-                            logger.Warn(serializerType, "Failed to set [{alias}] {propValue} Ex: {Exception}", alias, propValue, ex.ToString());
+                            logger.Warn(serializerType, "{item} Failed to set [{alias}] {propValue} Ex: {Exception}", item.Name, alias, propValue, ex.ToString());
                             errors += $"Failed to set [{alias}] {ex.Message} <br/>";
                         }
                     }
@@ -511,7 +511,7 @@ namespace uSync8.ContentEdition.Serializers
                 else
                 {
                     logger.Warn(serializerType, "DeserializeProperties: item {Name} doesn't have property {alias} but its in the xml", item.Name, alias);
-                    errors += $"Item {Name} doesn't contain {alias}";
+                    errors += $"{item.Name} does not container property {alias}";
                 }
             }
 
@@ -599,10 +599,10 @@ namespace uSync8.ContentEdition.Serializers
 
         // these are the functions using the simple 'getItem(alias)' 
         // that we cannot use for content/media trees.
-        protected override TObject FindOrCreate(XElement node)
+        protected override Attempt<TObject> FindOrCreate(XElement node)
         {
             TObject item = FindItem(node);
-            if (item != null) return item;
+            if (item != null) return Attempt.Succeed(item);
 
             var alias = node.GetAlias();
 
@@ -610,7 +610,7 @@ namespace uSync8.ContentEdition.Serializers
             if (parentKey != Guid.Empty)
             {
                 item = FindItem(alias, parentKey);
-                if (item != null) return item;
+                if (item != null) return Attempt.Succeed(item);
             }
 
             // create

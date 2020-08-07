@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 
+using Umbraco.Core;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
@@ -62,7 +63,10 @@ namespace uSync8.Core.Serialization.Serializers
 
             var details = new List<uSyncChange>();
 
-            var item = FindOrCreate(node);
+            var attempt = FindOrCreate(node);
+            if (!attempt.Success) throw attempt.Exception;
+
+            var item = attempt.Result;
 
             details.AddRange(DeserializeBase(item, node));
             details.AddRange(DeserializeTabs(item, node));
@@ -89,7 +93,7 @@ namespace uSync8.Core.Serialization.Serializers
             return SyncAttempt<IMediaType>.Succeed(item.Name, item, ChangeType.Import, details);
         }
 
-        protected override IMediaType CreateItem(string alias, ITreeEntity parent, string itemType)
+        protected override Attempt<IMediaType> CreateItem(string alias, ITreeEntity parent, string itemType)
         {
             var item = new MediaType(-1)
             {
@@ -104,7 +108,7 @@ namespace uSync8.Core.Serialization.Serializers
                 item.SetParent(parent);
             }
 
-            return item;
+            return Attempt.Succeed((IMediaType)item);
         }
     }
 }

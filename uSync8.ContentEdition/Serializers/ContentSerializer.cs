@@ -136,8 +136,10 @@ namespace uSync8.ContentEdition.Serializers
 
         protected override SyncAttempt<IContent> DeserializeCore(XElement node, SyncSerializerOptions options)
         {
+            var attempt = FindOrCreate(node);
+            if (!attempt.Success) throw attempt.Exception;
 
-            var item = FindOrCreate(node);
+            var item = attempt.Result;
 
             var details = new List<uSyncChange>();
 
@@ -480,10 +482,14 @@ namespace uSync8.ContentEdition.Serializers
 
         #endregion
 
-        protected override IContent CreateItem(string alias, ITreeEntity parent, string itemType)
+        protected override Attempt<IContent> CreateItem(string alias, ITreeEntity parent, string itemType)
         {
             var parentId = parent != null ? parent.Id : -1;
-            return contentService.Create(alias, parentId, itemType);
+            var item = contentService.Create(alias, parentId, itemType);
+            if (item == null)
+                return Attempt.Fail(item, new ArgumentException($"Unable to create content item of type {itemType}"));
+
+            return Attempt.Succeed(item);
         }
 
         #region Finders

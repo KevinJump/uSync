@@ -59,7 +59,11 @@ namespace uSync8.ContentEdition.Serializers
 
         protected override SyncAttempt<IMedia> DeserializeCore(XElement node, SyncSerializerOptions options)
         {
-            var item = FindOrCreate(node);
+            var attempt = FindOrCreate(node);
+            if (!attempt.Success) throw attempt.Exception;
+
+            var item = attempt.Result;
+
             var details = DeserializeBase(item, node, options);
 
             return SyncAttempt<IMedia>.Succeed(item.Name, item, ChangeType.Import, details.ToList());
@@ -177,11 +181,11 @@ namespace uSync8.ContentEdition.Serializers
             return value;
         }
 
-        protected override IMedia CreateItem(string alias, ITreeEntity parent, string itemType)
+        protected override Attempt<IMedia> CreateItem(string alias, ITreeEntity parent, string itemType)
         {
             var parentId = parent != null ? parent.Id : -1;
             var item = mediaService.CreateMedia(alias, parentId, itemType);
-            return item;
+            return Attempt.Succeed((IMedia)item);
         }
 
         protected override IMedia FindItem(int id)

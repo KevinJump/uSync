@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Web.Management;
 using System.Xml.Linq;
 
 using Umbraco.Core;
@@ -100,7 +101,11 @@ namespace uSync8.Core.Serialization.Serializers
 
         protected override SyncAttempt<IMemberType> DeserializeCore(XElement node, SyncSerializerOptions options)
         {
-            var item = FindOrCreate(node);
+            var attempt = FindOrCreate(node);
+            if (!attempt.Success)
+                throw attempt.Exception;
+
+            var item = attempt.Result;
 
             var details = new List<uSyncChange>();
 
@@ -143,7 +148,7 @@ namespace uSync8.Core.Serialization.Serializers
             return changes;
         }
 
-        protected override IMemberType CreateItem(string alias, ITreeEntity parent, string extra)
+        protected override Attempt<IMemberType> CreateItem(string alias, ITreeEntity parent, string extra)
         {
             var item = new MemberType(-1)
             {
@@ -159,7 +164,7 @@ namespace uSync8.Core.Serialization.Serializers
             }
 
 
-            return item;
+            return Attempt.Succeed((IMemberType)item);
         }
     }
 }
