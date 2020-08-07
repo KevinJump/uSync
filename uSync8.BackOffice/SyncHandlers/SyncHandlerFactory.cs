@@ -162,8 +162,11 @@ namespace uSync8.BackOffice.SyncHandlers
                     });
                 }
                 else
-                {
-                    logger.Warn<SyncHandlerFactory>("No Handler with {alias} has been loaded", settings.Alias);
+                { 
+                    // only log if we are doing the default 'everything' group 
+                    // because weh nfoing groups we choose not to load things. 
+                    if (string.IsNullOrWhiteSpace(options.Group)) 
+                        logger.Warn<SyncHandlerFactory>("No Handler with {alias} has been loaded", settings.Alias);
                 }
 
             }
