@@ -398,7 +398,12 @@ namespace uSync8.ContentEdition.Serializers
                     var result = contentService.SaveAndPublish(item, publishedCultures);
 
                     // if this fails, we return the result
-                    if (!result.Success) return result.ToAttempt();
+                    if (!result.Success)
+                    {
+                        var messages = string.Join(",", result.EventMessages.GetAll().Select(x => $"{x.Category} {x.MessageType} {x.Message}"));
+                        logger.Error<ContentSerializer>("Failed to Publish {result} {messages}", result.Result, messages);
+                        return result.ToAttempt();
+                    }
 
                     // if its published here it's also saved, so we can skip the save below.
                     hasBeenSaved = true;

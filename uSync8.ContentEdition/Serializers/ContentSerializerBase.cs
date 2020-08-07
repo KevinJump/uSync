@@ -434,7 +434,7 @@ namespace uSync8.ContentEdition.Serializers
                                         // this culture is not the default for the site, so don't use it to 
                                         // set the single language value.
                                         logger.Warn(serializerType, "Culture {culture} in file, but is not default so not being used", culture);
-                                        break;
+                                        continue;
                                     }
                                     logger.Warn(serializerType, "Cannot set value on culture {culture} because it is not avalible for this property - value in default language will be used", culture);
                                     culture = string.Empty;
@@ -443,7 +443,7 @@ namespace uSync8.ContentEdition.Serializers
                                 {
                                     // this culture isn't one of the ones, that can be set on this language. 
                                     logger.Warn(serializerType, "Culture {culture} is not one of the avalible cultures, so we cannot set this value", culture);
-                                    break;
+                                    continue;
                                 }
                             }
                             else
@@ -461,7 +461,7 @@ namespace uSync8.ContentEdition.Serializers
                                     else
                                     {
                                         logger.Warn(serializerType, "Property {Alias} contains a value that has no culture but this property varies by culture so this value has no effect", alias);
-                                        break;
+                                        continue; // try with the next one.
                                     }
                                 }
                             }
@@ -472,8 +472,8 @@ namespace uSync8.ContentEdition.Serializers
                                 string.IsNullOrEmpty(culture) ? null : culture,
                                 string.IsNullOrEmpty(segment) ? null : segment);
 
-                            logger.Debug(serializerType, "Property {alias} value set", alias);
-                            logger.Verbose(serializerType, "{Id} Property [{alias}] : {itemValue}", item.Id, alias, itemValue);
+                            logger.Debug(serializerType, "Property {alias} {culture} : value set", alias, culture ?? "");
+                            logger.Verbose(serializerType, "{Id} Property [{alias}] {culture} : {itemValue}", item.Id, alias,culture ?? "", itemValue);
                         }
                         catch (Exception ex)
                         {
