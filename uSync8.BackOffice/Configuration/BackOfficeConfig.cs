@@ -91,6 +91,8 @@ namespace uSync8.BackOffice.Configuration
                 }
             }
 
+            settings.CustomMappings = LoadAppKeysFromNode(node, "Mappings", true);
+
             // fire the loaded event, so things can tell when they are loaded. 
             Reloaded?.Invoke(settings);
 
@@ -142,6 +144,42 @@ namespace uSync8.BackOffice.Configuration
 
             return handlerSet;
 
+        }
+
+        /// <summary>
+        ///  Loads a selection of app keys from a given node.
+        /// </summary>
+        /// <remarks>
+        ///     lets us load a dictionary from a key/value set. 
+        ///     
+        /// <code>
+        ///     <mappings>
+        ///         <Add Key="MyCustomTextBox" value="Umbraco.Textbox" />
+        ///     </mappings>
+        /// </code>
+        /// 
+        /// </remarks>
+        private IDictionary<string, string> LoadAppKeysFromNode(XElement root, string node, bool lowerCaseKey = false)
+        {
+            var AppSettings = new Dictionary<string, string>();
+
+            var settingsNode = root.Element(node);
+            if (settingsNode != null)
+            {
+                foreach(var element in settingsNode.Elements("Add"))
+                {
+                    var key = element.Attribute("Key").ValueOrDefault(string.Empty);
+                    var value = element.Attribute("Value").ValueOrDefault(string.Empty);
+
+                    if (!string.IsNullOrWhiteSpace(key) && !string.IsNullOrWhiteSpace(value))
+                    {
+                        var keyValue = lowerCaseKey ? key.ToLower() : key;
+                        AppSettings[keyValue] = value;
+                    }
+                }
+            }
+
+            return AppSettings;
         }
 
         /// <summary>

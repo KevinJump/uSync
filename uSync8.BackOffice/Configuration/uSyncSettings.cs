@@ -78,6 +78,12 @@ namespace uSync8.BackOffice.Configuration
         /// <returns></returns>
         public HandlerSet DefaultHandlerSet()
             => this.HandlerSets.Where(x => x.Name.InvariantEquals(this.DefaultSet)).FirstOrDefault();
+
+        /// <summary>
+        ///  Custom mapping keys, allows users to add a simple config mapping
+        ///  to make one property type to behave like an existing one
+        /// </summary>
+        public IDictionary<string, string> CustomMappings { get; set; }
     }
 
     public class HandlerSet
