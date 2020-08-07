@@ -24,7 +24,7 @@ namespace uSync8.ContentEdition
                 errorMessage = string.Join(": ", result.EventMessages.GetAll().Select(x => $"{x.Category}: {x.Message}"));
             }
 
-            return Attempt.Fail($"Failed: {errorMessage}");
+            return Attempt.Fail($"Publish failed: {result.Result} {errorMessage}");
         }
     }
 }
