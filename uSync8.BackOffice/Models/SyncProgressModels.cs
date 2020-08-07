@@ -8,12 +8,30 @@ using uSync8.BackOffice.SyncHandlers;
 
 namespace uSync8.BackOffice
 {
+    /// <summary>
+    ///  Progress summary - object that tells the UI to draw the handler icons while uSync works.
+    /// </summary>
     [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
     public class SyncProgressSummary
     {
+        /// <summary>
+        ///  current count (progress) of where we are upto.
+        /// </summary>
         public int Count { get; set; }
+
+        /// <summary>
+        ///  How many steps we think we are going to take.
+        /// </summary>
         public int Total { get; set; }
+
+        /// <summary>
+        ///  Message to display to user.
+        /// </summary>
         public string Message { get; set; }
+
+        /// <summary>
+        ///  Summary (icons, state) of the handlers 
+        /// </summary>
         public List<SyncHandlerSummary> Handlers { get; set; }
 
         public SyncProgressSummary(
@@ -94,10 +112,24 @@ namespace uSync8.BackOffice
     [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
     public class SyncHandlerSummary
     {
+        /// <summary>
+        ///  The icon the user sees for this handler.
+        /// </summary>
         public string Icon { get; set; }
+        
+        /// <summary>
+        ///  Name shown under the handler
+        /// </summary>
         public string Name { get; set; }
+
+        /// <summary>
+        ///  Current status of the handler
+        /// </summary>
         public HandlerStatus Status { get; set; }
 
+        /// <summary>
+        ///  number of changes that have been processed
+        /// </summary>
         public int Changes { get; set; }
 
         /// <summary>
@@ -106,6 +138,9 @@ namespace uSync8.BackOffice
         public bool InError { get; set; }
     }
 
+    /// <summary>
+    ///  current status of a handler.
+    /// </summary>
     public enum HandlerStatus
     {
         Pending,

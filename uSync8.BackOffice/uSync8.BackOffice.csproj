@@ -273,6 +273,7 @@
     <Compile Include="Controllers\Trees\uSyncTreeController.cs" />
     <Compile Include="Controllers\uSyncDashboardApiController.cs" />
     <Compile Include="Controllers\ViewModels\uSyncOptions.cs" />
+    <Compile Include="Extensions\uSyncActionExtensions.cs" />
     <Compile Include="Hubs\HubClientService.cs" />
     <Compile Include="Hubs\uSyncHub.cs" />
     <Compile Include="Hubs\uSyncUpdateMessage.cs" />

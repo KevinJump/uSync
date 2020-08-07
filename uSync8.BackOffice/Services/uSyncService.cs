@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using Umbraco.Core.Cache;
+
 using Umbraco.Core.Composing;
 using Umbraco.Core.Configuration;
 using Umbraco.Core.Logging;
@@ -126,7 +126,9 @@ namespace uSync8.BackOffice
                 var handlerActions = handler.Report($"{folder}/{handler.DefaultFolder}", handlerSettings, callbacks?.Update);
                 actions.AddRange(handlerActions);
 
-                summary.UpdateHandler(handler.Name, HandlerStatus.Complete, ChangeCount(handlerActions), ContainsErrors(handlerActions));
+                summary.UpdateHandler(handler.Name, HandlerStatus.Complete,
+                    handlerActions.CountChanges(),
+                    handlerActions.ContainsErrors());
             }
 
             summary.Message = "Report Complete";
@@ -136,7 +138,8 @@ namespace uSync8.BackOffice
             sw.Stop();
 
             logger.Info<uSyncService>("uSync Report: {handlerCount} handlers, processed {itemCount} items, {changeCount} changes in {ElapsedMilliseconds}ms",
-                handlers.Count(), actions.Count, actions.Where(x => x.Change > Core.ChangeType.NoChange).Count(),
+                handlers.Count(), actions.Count,
+                actions.CountChanges(),
                 sw.ElapsedMilliseconds);
 
             callbacks?.Update?.Invoke($"Processed {actions.Count} items in {sw.ElapsedMilliseconds}ms", 1, 1);
@@ -229,7 +232,10 @@ namespace uSync8.BackOffice
                         var handlerActions = handler.ImportAll($"{folder}/{handler.DefaultFolder}", handlerSettings, force, callbacks?.Update);
                         actions.AddRange(handlerActions);
 
-                        summary.UpdateHandler(handler.Name, HandlerStatus.Complete, ChangeCount(handlerActions), ContainsErrors(handlerActions));
+                        summary.UpdateHandler(handler.Name, HandlerStatus.Complete,
+                            handlerActions.CountChanges(),
+                            handlerActions.ContainsErrors());
+
                     }
 
 
@@ -270,7 +276,9 @@ namespace uSync8.BackOffice
                     fireBulkComplete(ImportComplete, actions);
 
                     logger.Info<uSyncService>("uSync Import: {handlerCount} handlers, processed {itemCount} items, {changeCount} changes in {ElapsedMilliseconds}ms",
-                        handlers.Count(), actions.Count, actions.Where(x => x.Change > Core.ChangeType.NoChange).Count(),
+                        handlers.Count(), 
+                        actions.Count, 
+                        actions.CountChanges(),
                         sw.ElapsedMilliseconds);
 
                     callbacks?.Update?.Invoke($"Processed {actions.Count} items in {sw.ElapsedMilliseconds}ms", 1, 1);
@@ -390,7 +398,9 @@ namespace uSync8.BackOffice
 
                 actions.AddRange(handlerActions);
 
-                summary.UpdateHandler(handler.Name, HandlerStatus.Complete, ChangeCount(handlerActions), ContainsErrors(handlerActions));
+                summary.UpdateHandler(handler.Name, HandlerStatus.Complete, 
+                    handlerActions.CountChanges(), 
+                    handlerActions.ContainsErrors());
             }
 
 
@@ -402,7 +412,8 @@ namespace uSync8.BackOffice
             sw.Stop();
 
             logger.Info<uSyncService>("uSync Export: {handlerCount} handlers, processed {itemCount} items, {changeCount} changes in {ElapsedMilliseconds}ms",
-                handlers.Count(), actions.Count, actions.Where(x => x.Change > Core.ChangeType.NoChange).Count(),
+                handlers.Count(), actions.Count, 
+                actions.CountChanges(),
                 sw.ElapsedMilliseconds);
 
             callbacks?.Update?.Invoke($"Processed {actions.Count} items in {sw.ElapsedMilliseconds}ms", 1, 1);
@@ -431,17 +442,6 @@ namespace uSync8.BackOffice
         #endregion
 
         /// <summary>
-        ///  calculate the number of actions in a list that are actually changes
-        /// </summary>
-        /// <param name="actions">List of actions to parse</param>
-        /// <returns>number of actions that contain a change of some form</returns>
-        private int ChangeCount(IEnumerable<uSyncAction> actions)
-            => actions.Count(x => x.Change > Core.ChangeType.NoChange);
-
-        private bool ContainsErrors(IEnumerable<uSyncAction> actions)
-            => actions.Any(x => x.Change >= Core.ChangeType.Fail);
-
-        /// <summary>
         ///  Do an import triggered by an event.
         /// </summary>
         /// <param name="e"></param>
@@ -451,9 +451,10 @@ namespace uSync8.BackOffice
             {
                 logger.Info<uSyncService>("Import Triggered by downlevel change {0}", e.Folder);
 
-                var handlers = GetHandlersByEntitytype(e.EntityTypes, e.HandlerOptions);
-                if (handlers.Count > 0)
-                    this.Import(e.Folder, false, handlers, null);
+                var handlers = handlerFactory
+                    .GetValidHandlersByEntityType(e.EntityTypes, e.HandlerOptions);
+
+                if (handlers.Any()) this.Import(e.Folder, false, handlers, null);
             }
         }
 
@@ -466,33 +467,12 @@ namespace uSync8.BackOffice
             if (e.EntityTypes != null && !string.IsNullOrWhiteSpace(e.Folder))
             {
                 logger.Info<uSyncService>("Export Triggered by downlevel change {0}", e.Folder);
-                var handlers = GetHandlersByEntitytype(e.EntityTypes, e.HandlerOptions);
-                if (handlers.Count > 0)
-                {
-                    this.Export(e.Folder, handlers, null);
-                }
+
+                var handlers = handlerFactory
+                    .GetValidHandlersByEntityType(e.EntityTypes, e.HandlerOptions);
+
+                if (handlers.Any()) this.Export(e.Folder, handlers, null);
             }
         }
-
-        /// <summary>
-        ///  Get a list of handlers for a set of entity types.
-        /// </summary>
-        /// <param name="entityTypes">Entity types to find handlers for</param>
-        /// <param name="handlerOptions">Options to use when loading the handlers</param>
-        /// <returns>List of Handler/Config pairs for handlers for entity types</returns>
-        private IList<ExtendedHandlerConfigPair> GetHandlersByEntitytype(IEnumerable<string> entityTypes, SyncHandlerOptions handlerOptions)
-        {
-            var handlers = new List<ExtendedHandlerConfigPair>();
-
-            foreach (var entityType in entityTypes)
-            {
-                var handler = handlerFactory.GetValidHandlerByEntityType(entityType, handlerOptions);
-                if (handler != null)
-                    handlers.Add(handler);
-            }
-
-            return handlers;
-        }
-
     }
 }
