@@ -795,7 +795,7 @@ namespace uSync8.BackOffice.SyncHandlers
                     action.Details = GetChanges(node,serializerOptions);
                     if (action.Change != ChangeType.Create && (action.Details == null || action.Details.Count() == 0))
                     {
-                        action.Message = "Change details not calculated";
+                        action.Message = "xml is diffrent - but properties may not have changed";
                     }
                     else
                     {

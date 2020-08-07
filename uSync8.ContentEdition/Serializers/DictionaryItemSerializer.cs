@@ -129,7 +129,9 @@ namespace uSync8.ContentEdition.Serializers
 
             var translationsNode = new XElement("Translations");
 
-            foreach (var translation in item.Translations)
+            foreach (var translation in item.Translations
+                .DistinctBy(x => x.Language.IsoCode)
+                .OrderBy(x => x.Language.IsoCode))
             {
                 translationsNode.Add(new XElement("Translation", translation.Value,
                     new XAttribute("Language", translation.Language.IsoCode)));
