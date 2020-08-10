@@ -193,31 +193,36 @@ namespace uSync8.BackOffice.SyncHandlers
         }
 
         #region Importing 
+
+        /// <summary>
+        ///  Import everything from a given folder, using the supplied config settings.
+        /// </summary>
         public IEnumerable<uSyncAction> ImportAll(string folder, HandlerSettings config, bool force, SyncUpdateCallback callback = null)
         {
-            var sw = Stopwatch.StartNew();
-            logger.Debug(handlerType, "{alias} ImportAll: {fileName}", this.Alias, Path.GetFileName(folder));
-
-            var actions = new List<uSyncAction>();
-            var updates = new Dictionary<string, TObject>();
-
-            runtimeCache.ClearByKey($"keycache_{this.Alias}");
-
-            actions.AddRange(ImportFolder(folder, config, updates, force, callback));
-
-            if (updates.Count > 0)
+            using (logger.DebugDuration(handlerType, $"Importing {Alias} {Path.GetFileName(folder)}", $"Import complete {Alias}"))
             {
-                PerformSecondPassImports(updates, actions, config, callback);
+                var actions = new List<uSyncAction>();
+                var updates = new Dictionary<string, TObject>();
+
+                runtimeCache.ClearByKey($"keycache_{this.Alias}");
+
+                actions.AddRange(ImportFolder(folder, config, updates, force, callback));
+
+                if (updates.Count > 0)
+                {
+                    PerformSecondPassImports(updates, actions, config, callback);
+                }
+
+                runtimeCache.ClearByKey($"keycache_{this.Alias}");
+                callback?.Invoke("Done", 3, 3);
+
+                return actions;
             }
-
-            runtimeCache.ClearByKey($"keycache_{this.Alias}");
-            callback?.Invoke("Done", 3, 3);
-
-            sw.Stop();
-            logger.Debug(handlerType, "{alias} Import Complete {elapsedMilliseconds}ms", this.Alias, sw.ElapsedMilliseconds);
-            return actions;
         }
 
+        /// <summary>
+        ///  Import everything in a given (child) folder, based on setting
+        /// </summary>
         protected virtual IEnumerable<uSyncAction> ImportFolder(string folder, HandlerSettings config, Dictionary<string, TObject> updates, bool force, SyncUpdateCallback callback)
         {
             List<uSyncAction> actions = new List<uSyncAction>();
@@ -272,9 +277,6 @@ namespace uSync8.BackOffice.SyncHandlers
 
             if (actions.All(x => x.Success) && cleanMarkers.Count > 0)
             {
-                // this is just extra messaging, given how quickly the next message will be sent.
-                // callback?.Invoke("Cleaning Folders", 1, cleanMarkers.Count);
-
                 foreach (var item in cleanMarkers.Select((filePath, Index) => new { filePath, Index }))
                 {
                     var folderName = Path.GetFileName(item.filePath);
@@ -298,6 +300,9 @@ namespace uSync8.BackOffice.SyncHandlers
             return actions;
         }
 
+        /// <summary>
+        ///  Import a single item, from the .config file supplied
+        /// </summary>
         public virtual SyncAttempt<TObject> Import(string filePath, HandlerSettings config, SerializerFlags flags)
         {
             try
@@ -394,6 +399,9 @@ namespace uSync8.BackOffice.SyncHandlers
             }
         }
 
+        /// <summary>
+        ///  Perform a 'second pass' import on a single item.
+        /// </summary>
         virtual public SyncAttempt<TObject> ImportSecondPass(string file, TObject item, HandlerSettings config, SyncUpdateCallback callback)
         {
             if (IsTwoPass)
@@ -556,7 +564,6 @@ namespace uSync8.BackOffice.SyncHandlers
                 actions.AddRange(ExportAll(item.Value, folder, config, callback));
             }
 
-            // callback?.Invoke("Done", 1, 1);
             return actions;
         }
 
@@ -850,7 +857,20 @@ namespace uSync8.BackOffice.SyncHandlers
 
         #region Events 
 
-        protected virtual void EventDeletedItem(IService sender, Umbraco.Core.Events.DeleteEventArgs<TObject> e)
+        // 
+        // Handling the events Umbraco fires for saves/deletes/etc, 
+        //  For most things these events are all handled the same way, so the root handler can copy with 
+        //  it. If the events need to be handled a diffrent way, then that is done inside the Handler
+        //  by overriding the InitializeEvents method. 
+        //
+
+        /// <summary>
+        ///  Method to setup the events for any given service/handler.
+        /// </summary>
+        protected abstract void InitializeEvents(HandlerSettings settings);
+
+
+        protected virtual void EventDeletedItem(IService sender, DeleteEventArgs<TObject> e)
         {
             if (uSync8BackOffice.eventsPaused) return;
             foreach (var item in e.DeletedEntities)
@@ -1059,9 +1079,6 @@ namespace uSync8.BackOffice.SyncHandlers
         {
             InitializeEvents(settings);
         }
-
-        protected abstract void InitializeEvents(HandlerSettings settings);
-
 
         #region ISyncHandler2 Methods 
 
