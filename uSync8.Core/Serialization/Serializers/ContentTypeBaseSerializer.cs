@@ -1,6 +1,9 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.Remoting.Metadata.W3cXsd2001;
 using System.Xml.Linq;
 
 using Umbraco.Core;
@@ -102,7 +105,7 @@ namespace uSync8.Core.Serialization.Serializers
 
                 // added in v8.6
                 // reflection is fast but a a quick check of version is faster !
-                if (UmbracoVersion.LocalVersion.Major > 8 || UmbracoVersion.LocalVersion.Minor >= 6)                
+                if (UmbracoVersion.LocalVersion.Major > 8 || UmbracoVersion.LocalVersion.Minor >= 6)
                 {
                     SerializeNewProperty<string>(propNode, property, "MandatoryMessage");
                     SerializeNewProperty<string>(propNode, property, "ValidationRegExpMessage");
@@ -133,7 +136,14 @@ namespace uSync8.Core.Serialization.Serializers
                 var attempt = value.TryConvertTo<TValue>();
                 if (attempt.Success)
                 {
-                    node.Add(new XElement(propertyName, attempt.Result));
+                    if (attempt.Result != null)
+                    {
+                        node.Add(new XElement(propertyName, attempt.Result));
+                    }
+                    else
+                    {
+                        node.Add(new XElement(propertyName, string.Empty));
+                    }
                 }
             }
         }
@@ -148,7 +158,7 @@ namespace uSync8.Core.Serialization.Serializers
         {
             var node = new XElement("Structure");
             List<KeyValuePair<string, string>> items = new List<KeyValuePair<string, string>>();
-           
+
             foreach (var allowedType in item.AllowedContentTypes.OrderBy(x => x.SortOrder))
             {
                 var allowedItem = FindItem(allowedType.Id.Value);
@@ -178,7 +188,7 @@ namespace uSync8.Core.Serialization.Serializers
         #endregion
 
         #region Deserialization
-    
+
 
         protected IEnumerable<uSyncChange> DeserializeBase(TObject item, XElement node)
         {
@@ -336,7 +346,7 @@ namespace uSync8.Core.Serialization.Serializers
             logger.Debug(serializerType, "Deserializing Properties");
 
             var propertiesNode = node?.Element("GenericProperties");
-            if (propertiesNode == null) return Enumerable.Empty<uSyncChange>(); 
+            if (propertiesNode == null) return Enumerable.Empty<uSyncChange>();
 
             /// there are something we can't do in the loop, 
             /// so we store them and do them once we've put 
@@ -344,7 +354,7 @@ namespace uSync8.Core.Serialization.Serializers
             List<string> propertiesToRemove = new List<string>();
             Dictionary<string, string> propertiesToMove = new Dictionary<string, string>();
 
-            List<uSyncChange> changes = new List<uSyncChange>(); 
+            List<uSyncChange> changes = new List<uSyncChange>();
 
             foreach (var propertyNode in propertiesNode.Elements("GenericProperty"))
             {
@@ -370,10 +380,10 @@ namespace uSync8.Core.Serialization.Serializers
 
                 if (property.Alias != alias)
                 {
-                    changes.AddUpdate("Alias", property.Alias, alias, $"{alias}/Alias"); 
+                    changes.AddUpdate("Alias", property.Alias, alias, $"{alias}/Alias");
                     property.Alias = alias;
                 }
-                
+
                 var name = propertyNode.Element("Name").ValueOrDefault(alias);
                 if (property.Name != name)
                 {
@@ -481,22 +491,38 @@ namespace uSync8.Core.Serialization.Serializers
                 var attempt = value.TryConvertTo<TValue>();
                 if (attempt.Success)
                 {
-                    var currentValue = propertyInfo.GetValue(property);
-                    var currentAttempt = currentValue.TryConvertTo<TValue>();
+                    var current = GetPropertyAs<TValue>(propertyInfo, property);
 
-                    if (!currentAttempt.Success || !currentAttempt.Result.Equals(attempt.Result)) {
+                    if (current == null || !current.Equals(attempt.Result))
+                    {
                         propertyInfo.SetValue(property, attempt.Result);
 
                         return uSyncChange.Update($"property/{propertyName}",
                             propertyName,
-                            currentAttempt.Result.ToString(),
-                            attempt.Result.ToString());                     
+                            current?.ToString() ?? "(Blank)",
+                            attempt.Result.ToString());
                     }
                 }
             }
 
             return null;
         }
+
+        private TValue GetPropertyAs<TValue>(PropertyInfo info, PropertyType property)
+        {
+            if (info == null) return default;
+
+            var value = info.GetValue(property);
+            if (value == null) return default;
+
+            var result = value.TryConvertTo<TValue>();
+            if (result.Success)
+                return result.Result;
+
+            return default;
+
+        }
+
 
         virtual protected IEnumerable<uSyncChange> DeserializeExtraProperties(TObject item, PropertyType property, XElement node)
         {
