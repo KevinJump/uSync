@@ -41,11 +41,11 @@
 
   <control />
 
-  <files base="../uSync8.BackOffice">
-    <folder path="../uSync8.BackOffice/App_Plugins/" />
-    <file path="../uSync8.BackOffice/Bin/Release/uSync8.BackOffice.dll" orgPath="~/bin" />
-    <file path="../uSync8.BackOffice/Bin/Release/uSync8.Core.dll" orgPath="~/bin" />
-    <file path="../uSync8.BackOffice/Config/uSync8.config" orgPath="~/config" />
+  <files>
+    <folder path="../uSync8.BackOffice/App_Plugins/" orgPath="App_Plugins" />
+    <file path="../uSync8.BackOffice/Bin/Release/uSync8.BackOffice.dll" orgPath="bin/uSync8.BackOffice.dll" />
+    <file path="../uSync8.BackOffice/Bin/Release/uSync8.Core.dll" orgPath="bin/uSync8.Core.dll" />
+    <file path="../uSync8.BackOffice/Config/uSync8.config" orgPath="config/usync8.Config" />
   </files>
 
 </umbPackage>

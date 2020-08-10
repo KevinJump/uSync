@@ -38,8 +38,8 @@
 
   <control />
 
-  <files base="../uSync8.ContentEdition">
-    <file path="../uSync8.ContentEdition/Bin/Release/uSync8.ContentEdition.dll" orgPath="~/bin" />
+  <files>
+    <file path="../uSync8.ContentEdition/Bin/Release/uSync8.ContentEdition.dll" orgPath="bin/uSync8.ContentEdition.dll" />
   </files>
 
 </umbPackage>
