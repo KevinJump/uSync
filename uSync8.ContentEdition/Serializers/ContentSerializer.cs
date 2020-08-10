@@ -117,7 +117,9 @@ namespace uSync8.ContentEdition.Serializers
             var schedules = item.ContentSchedule.FullSchedule;
             if (schedules != null)
             {
-                foreach (var schedule in schedules.OrderBy(x => x.Id))
+                foreach (var schedule in schedules
+                    .OrderBy(x => x.Action.ToString())
+                    .ThenBy(x => x.Culture))
                 {
                     node.Add(new XElement("ContentSchedule",
                         // new XAttribute("Key", schedule.Id),
