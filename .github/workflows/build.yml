@@ -3,8 +3,7 @@
 name: Build
 
 env:
-  PKG_VERSION: "8.6.2.0"
-  BUILD_CONFIG: "PackageOnlyBuild"
+  BUILD_CONFIG: "Release"
 
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the master branch
@@ -29,8 +28,8 @@ jobs:
     - uses: actions/checkout@v2
     
     # get nuget
-    - name: Setup Nuget.exe
-      uses: warrenbuckley/Setup-Nuget@v1
+    - name: Setup NuGet.exe for use with actions
+      uses: NuGet/setup-nuget@v1.0.2        
     
     # setup msbuild 
     - name: setup-msbuild
@@ -42,4 +41,4 @@ jobs:
     
     # build project 
     - name: Build with MSBuild
-      run: msbuild usync8.sln -p:Configuration=${{ env.BUILD_CONFIG }} 
+      run: msbuild usync8.sln -t:Rebuild -p:Configuration=${{ env.BUILD_CONFIG }} 

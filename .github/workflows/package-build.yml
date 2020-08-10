@@ -3,23 +3,16 @@
 name: Package-Build
 
 env:
-  CONFIG: "PackageOnlyBuild"
+  CONFIG: "Release"
   OUTPUT: ./Output
-  VERSION: 8.7.0-beta-01
 
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the master branch
 
-# When its working we swap to this - to do it on release tag.
-# on:
-#  push:
-#    tags:
-#      - "release/*"
-
 on:
   push:
-    branches: 
-      - v8/8.7-main 
+    tags:
+      - "release/*"
 
 jobs:
 
@@ -30,11 +23,12 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # - name: Get Version 
-      #   id: version
-      #   run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\/release\//}
-      #   shell: bash
-      # replace ${{ env.VERSION }} with ${{ steps.version.output.VERSION }} 
+      
+      # workout the version number from the tag (e.g. relese/8.7.0-beta-01 becomes 8.7.0-beta-01)
+      - name: Get Version 
+        id: version
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\/release\//}
+        shell: bash
       
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
@@ -61,15 +55,16 @@ jobs:
 
       # Create NuGet files.
       - name: Nuget uSync Package
-        run: nuget pack ./uSync8.BackOffice/uSync.nuspec -OutputDirectory ${{ env.OUTPUT }} -version ${{ env.VERSION }} -properties "depends=${{ env.VERSION }};Configuration=${{ env.CONFIG }}"
+        run: nuget pack ./uSync8.BackOffice/uSync.nuspec -OutputDirectory ${{ env.OUTPUT }} -version ${{ steps.version.output.VERSION }} -properties "depends=${{ steps.version.output.VERSION }};Configuration=${{ env.CONFIG }}"
 
       # Umb Pack 
       - name: Create Umbraco Package
-        run: UmbPack pack ./dist/package.xml -o ${{ env.OUTPUT }} -v ${{ env.VERSION }} 
+        run: UmbPack pack ./dist/package.xml -o ${{ env.OUTPUT }} -v ${{ steps.version.output.VERSION }} 
 
+      # Upload results to the build artifacts folder
       - name: upload-artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: Build-Results-${{ env.VERSION }}
+          name: Build-Results-${{ steps.version.output.VERSION }}
           path: ${{ env.OUTPUT }}/**/*        
 
