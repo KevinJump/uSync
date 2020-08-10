@@ -1,28 +1,29 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
-  <metadata>
-    <id>uSync.ContentEdition.Core</id>
-    <version>8.0.0-alpha58</version>
-    <title>uSync for Umbraco 8</title>
-    <authors>Kevin Jump</authors>
-    <owners>Jumoo</owners>
-    <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Just the core dll's from uSync ContentEdition (for extension development purposes)</description>
-    <summary></summary>
-    <releaseNotes>
-      8.0 - Initial Release for Umbraco 8
-      8.1 - Compatability Release for Umbraco 8.1
-      8.2 - Expansions Release
-    </releaseNotes>
-    <dependencies>
-      <dependency id="uSync.BackOffice.Core" version="$depends$"/>
-      <dependency id="uSync.Community.Contrib" version="$depends$"/>
-      <!-- <dependency id="Microsoft.AspNet.SignalR.Core" version="2.4.0"/> -->
-    </dependencies>
-    <tags>umbraco usync</tags>
-    <repository type="git" url="https://github.com/KevinJump/uSync8" />
-  </metadata>
-  <files>
-    <file src="bin\$Configuration$\uSync8.ContentEdition.dll" target="lib\net472" />
-  </files>
+	<metadata>
+		<id>uSync.ContentEdition.Core</id>
+		<version>8.0.0-alpha58</version>
+		<title>uSync for Umbraco 8</title>
+		<authors>Kevin Jump</authors>
+		<owners>Jumoo</owners>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<description>Just the core dll's from uSync ContentEdition (for extension development purposes)</description>
+		<summary></summary>
+		<releaseNotes>
+			8.0 - Initial Release for Umbraco 8
+			8.1 - Compatability Release for Umbraco 8.1
+			8.2 - Expansions Release
+		</releaseNotes>
+		<dependencies>
+			<group targetFramework=".NETFramework4.7.2">
+				<dependency id="uSync.BackOffice.Core" version="$depends$"/>
+				<dependency id="uSync.Community.Contrib" version="$depends$"/>
+			</group>
+		</dependencies>
+		<tags>umbraco usync</tags>
+		<repository type="git" url="https://github.com/KevinJump/uSync8" />
+	</metadata>
+	<files>
+		<file src="bin\$Configuration$\uSync8.ContentEdition.dll" target="lib\net472" />
+	</files>
 </package>

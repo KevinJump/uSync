@@ -1,30 +1,32 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
-  <metadata>
-    <id>uSync.Community.DataTypeSerializers</id>
-    <version>8.0.0-alpha58</version>
-    <title>uSync8 Community DataType Serializers</title>
-    <authors>Kevin Jump</authors>
-    <owners>Jumoo</owners>
-    <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <summary>Mappers for Datatypes that store content or media values</summary>
-    <description>
-<![CDATA[Provides mappers that will take content and media UDI values
+	<metadata>
+		<id>uSync.Community.DataTypeSerializers</id>
+		<version>8.0.0-alpha58</version>
+		<title>uSync8 Community DataType Serializers</title>
+		<authors>Kevin Jump</authors>
+		<owners>Jumoo</owners>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<summary>Mappers for Datatypes that store content or media values</summary>
+		<description>
+			<![CDATA[Provides mappers that will take content and media UDI values
 stored within the configuration, or a DataType and Globalize it for syncing.
 
 You should only need this package if you are not using ContentEdition (Which will sync the content items)
 but you are using explict start nodes (not paths) in pickers.]]>
-  </description>
-    <releaseNotes>
-      8.2 - Core Mappers (ContentPicker, MediaPicker, MNTP Picker)
-    </releaseNotes>
-    <dependencies>
-      <dependency id="uSync.BackOffice.Core" version="$depends$"/>
-    </dependencies>
-    <tags>umbraco usync</tags>
-    <repository type="git" url="https://github.com/KevinJump/uSync8" />
-  </metadata>
-  <files>
-    <file src="bin\$Configuration$\uSync8.Community.DataTypeSerializers.dll" target="lib\net472" />
-  </files>
+		</description>
+		<releaseNotes>
+			8.2 - Core Mappers (ContentPicker, MediaPicker, MNTP Picker)
+		</releaseNotes>
+		<dependencies>
+			<group targetFramework=".NETFramework4.7.2">
+				<dependency id="uSync.BackOffice.Core" version="$depends$"/>
+			</group>
+		</dependencies>
+		<tags>umbraco usync</tags>
+		<repository type="git" url="https://github.com/KevinJump/uSync8" />
+	</metadata>
+	<files>
+		<file src="bin\$Configuration$\uSync8.Community.DataTypeSerializers.dll" target="lib\net472" />
+	</files>
 </package>
