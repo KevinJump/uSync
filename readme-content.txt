@@ -5,9 +5,9 @@
               \__,_//____/\__, /_/ /_/\___/  
                          /____/  ContentEdition
  
- Thanks for Installing uSync.ContentEdtion,
+         Thanks for Installing uSync.ContentEdtion!
  
- uSync.ContentEdition adds syncing of the "contenty" bits:
+ uSync.ContentEdition adds syncing of the "contenty" bits of Umbraco:
 
   - Content
   - Media
@@ -23,7 +23,6 @@
  uSync and uSync.ContentEdition are FREE ✔ You can use them
  on any of your projects as many times as your like. 
  
-
  --- 
  uSync.Complete is our awesome add on package that lets you and
  your editors push and pull content, media and settings between
@@ -34,5 +33,4 @@
  Its not free 💰, but the 60 day trial is - so you can have 
  a play around show it the 👨‍💼👩‍💼 with the 💳 and they will ❤ it.   
  
-
- - 🛴🛒🎄💻🧼😷🦕🚲
+  - 🛴🛒🎄💻🧼😷🦕🚲
