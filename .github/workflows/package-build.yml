@@ -55,16 +55,16 @@ jobs:
 
       # Create NuGet files.
       - name: Nuget uSync Package
-        run: nuget pack ./uSync8.BackOffice/uSync.nuspec -OutputDirectory ${{ env.OUTPUT }} -version ${{ steps.version.output.VERSION }} -properties "depends=${{ steps.version.output.VERSION }};Configuration=${{ env.CONFIG }}"
+        run: nuget pack ./uSync8.BackOffice/uSync.nuspec -OutputDirectory ${{ env.OUTPUT }} -version ${{ steps.version.outputs.VERSION }} -properties "depends=${{ steps.version.outputs.VERSION }};Configuration=${{ env.CONFIG }}"
 
       # Umb Pack 
       - name: Create Umbraco Package
-        run: UmbPack pack ./dist/package.xml -o ${{ env.OUTPUT }} -v ${{ steps.version.output.VERSION }} 
+        run: UmbPack pack ./dist/package.xml -o ${{ env.OUTPUT }} -v ${{ steps.version.outputs.VERSION }} 
 
       # Upload results to the build artifacts folder
       - name: upload-artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: Build-Results-${{ steps.version.output.VERSION }}
+          name: Build-Results-${{ steps.version.outputs.VERSION }}
           path: ${{ env.OUTPUT }}/**/*        
 
