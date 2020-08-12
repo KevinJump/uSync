@@ -72,6 +72,8 @@ namespace uSync8.BackOffice.Configuration
             settings.RebuildCacheOnCompletion = node.Element("RebuildCacheOnCompletion").ValueOrDefault(false);
             settings.FailOnMissingParent = node.Element("FailOnMissingParent").ValueOrDefault(true);
 
+            settings.CacheFolderKeys = node.Element("CacheFolderKeys").ValueOrDefault(true);
+
             // load the handlers 
             var handlerSets = node.Element("HandlerSets");
             if (handlerSets != null)
