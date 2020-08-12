@@ -440,10 +440,22 @@ namespace uSync8.BackOffice.SyncHandlers
             // even if the folder is wrong
             // be a little slower (not much though)
 
-            // we cache this, (it is cleared on an ImportAll)
+            // we cache this, (it is cleared at the end of ImportAll/ReportAll)
             var keys = GetFolderKeys(folder, flat);
 
-            return DeleteMissingItems(parent, keys, reportOnly);
+            if (keys.Count > 0)
+            {
+                // keys should aways have at least one entry (the key from cleanFile)
+                // if it doesn't then something might have gone wrong.
+                // because we are being defensive when it comes to deletes, 
+                // we only then do deletes when we know we have loaded some keys!
+                return DeleteMissingItems(parent, keys, reportOnly);
+            }
+            else 
+            {
+                logger.Warn(handlerType, "Failed to get the keys for items in the folder, there might be a disk issue {folder}", folder);
+                return Enumerable.Empty<uSyncAction>();
+            }
         }
 
         /// <summary>
