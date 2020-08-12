@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Xml.Linq;
 
 using Umbraco.Core;
@@ -144,8 +144,6 @@ namespace uSync8.BackOffice.SyncHandlers
 
             this.syncFileService = syncFileService;
 
-            this.runtimeCache = appCaches.RuntimeCache;
-
             handlerType = GetType();
             var meta = handlerType.GetCustomAttribute<SyncHandlerAttribute>(false);
             if (meta == null)
@@ -164,8 +162,20 @@ namespace uSync8.BackOffice.SyncHandlers
             this.itemObjectType = uSyncObjectType.ToUmbracoObjectType(EntityType);
             this.itemContainerType = uSyncObjectType.ToContainerUmbracoObjectType(EntityType);
 
-            GetDefaultConfig(Current.Configs.uSync());
+            var settings = Current.Configs.uSync();
+            GetDefaultConfig(settings);
             uSyncConfig.Reloaded += BackOfficeConfig_Reloaded;
+
+            if (settings.CacheFolderKeys)
+            {
+                this.runtimeCache = appCaches.RuntimeCache;
+            }
+            else
+            {
+                logger.Info(handlerType, "No caching of handler key lookups (CacheFolderKeys = false)");
+                this.runtimeCache = NoAppCache.Instance;
+            }
+
         }
 
         private void GetDefaultConfig(uSyncSettings setting)
@@ -202,7 +212,10 @@ namespace uSync8.BackOffice.SyncHandlers
             var actions = new List<uSyncAction>();
             var updates = new Dictionary<string, TObject>();
 
-            runtimeCache.ClearByKey($"keycache_{this.Alias}");
+            var cacheKey = GetCacheKeyBase();
+
+            logger.Debug(handlerType, "Clearing Key Cache for {Alias} [{key}]", this.Alias, cacheKey);
+            runtimeCache.ClearByKey(cacheKey);
 
             actions.AddRange(ImportFolder(folder, config, updates, force, callback));
 
@@ -211,7 +224,8 @@ namespace uSync8.BackOffice.SyncHandlers
                 PerformSecondPassImports(updates, actions, config, callback);
             }
 
-            runtimeCache.ClearByKey($"keycache_{this.Alias}");
+            logger.Debug(handlerType, "Clearing Key Cache for {Alias} [{key}]", this.Alias, cacheKey);
+            runtimeCache.ClearByKey(cacheKey);
             callback?.Invoke("Done", 3, 3);
 
             sw.Stop();
@@ -445,8 +459,8 @@ namespace uSync8.BackOffice.SyncHandlers
             // We only need to load all the keys once per handler (if all items are in a folder that key will be used).
             var folderKey = folder.GetHashCode();
 
-            var cacheKey = $"keycache_{this.Alias}_{folderKey}";
-            return runtimeCache.GetCacheItem(cacheKey, () =>
+            var cacheKey = $"{GetCacheKeyBase()}_{folderKey}";
+            var result = runtimeCache.GetCacheItem(cacheKey, () =>
             {
                 var keys = new List<Guid>();
                 var files = syncFileService.GetFiles(folder, "*.config");
@@ -458,9 +472,14 @@ namespace uSync8.BackOffice.SyncHandlers
                         keys.Add(key);
                 }
 
+                logger.Debug(handlerType, "Adding {count} keys to {key}", keys.Count, cacheKey);
                 return keys;
 
             }, null);
+
+            logger.Debug(handlerType, "Returning {count} keys from {folder}", result.Count, folder);
+
+            return result;
         }
 
         /// <summary>
@@ -580,7 +599,10 @@ namespace uSync8.BackOffice.SyncHandlers
         {
             var actions = new List<uSyncAction>();
 
-            runtimeCache.ClearByKey($"keycache_{this.Alias}");
+            var cacheKey = GetCacheKeyBase();
+
+            logger.Debug(handlerType, "Clearing Key Cache for {Alias} [{key}]", this.Alias, cacheKey); 
+            runtimeCache.ClearByKey(cacheKey);
 
             callback?.Invoke("Checking Actions", 1, 3);
             actions.AddRange(ReportFolder(folder, config, callback));
@@ -588,11 +610,15 @@ namespace uSync8.BackOffice.SyncHandlers
             callback?.Invoke("Validating Report", 2, 3);
             actions = ValidateReport(folder, actions);
 
-            runtimeCache.ClearByKey($"keycache_{this.Alias}");
+            logger.Debug(handlerType, "Clearing Key Cache for {Alias} [{key}]", this.Alias, cacheKey);
+            runtimeCache.ClearByKey(cacheKey);
 
             callback?.Invoke("Done", 3, 3);
             return actions;
         }
+
+        private string GetCacheKeyBase()
+            => $"keycache_{this.Alias}_{Thread.CurrentThread.ManagedThreadId}";
 
         private List<uSyncAction> ValidateReport(string folder, List<uSyncAction> actions)
         {

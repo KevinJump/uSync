@@ -71,6 +71,11 @@ namespace uSync8.BackOffice.Configuration
         /// </summary>
         public bool FailOnMissingParent { get; set; } = false;
 
+        /// <summary>
+        ///  should we cache keys look ups etc, in the runtime cache ? most of the time 
+        ///  the answer is yes - but for debugging we might want to turn this off. 
+        /// </summary>
+        public bool CacheFolderKeys { get; set; } = true;
 
         /// <summary>
         ///  Get the default handler set
