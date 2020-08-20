@@ -22,6 +22,10 @@ namespace uSync8.ContentEdition.Mapping.Mappers
     public class BlockListMapper : SyncNestedValueMapperBase, ISyncMapper
     {
         private readonly string docTypeKeyAlias = "contentTypeKey";
+        private readonly string[] contentBlocks = new string[]
+        {
+            "contentData", "settingsData"
+        };
 
         public BlockListMapper(IEntityService entityService,
             IContentTypeService contentTypeService,
@@ -43,22 +47,25 @@ namespace uSync8.ContentEdition.Mapping.Mappers
             var jsonValue = GetJsonValue(value);
             if (jsonValue == null) return value.ToString();
 
-            if (jsonValue.ContainsKey("contentData"))
+            foreach (var block in contentBlocks)
             {
-                var contentData = jsonValue.Value<JArray>("contentData");
-                if (contentData == null) return value.ToString();
-
-                foreach (var item in contentData.Cast<JObject>())
+                if (jsonValue.ContainsKey(block))
                 {
-                    var doctype = GetDocTypeByKey(item, docTypeKeyAlias);
-                    if (doctype == null) continue;
+                    var contentData = jsonValue.Value<JArray>(block);
+                    if (contentData == null) return value.ToString();
 
-                    GetExportProperties(item, doctype);
+                    foreach (var item in contentData.Cast<JObject>())
+                    {
+                        var doctype = GetDocTypeByKey(item, docTypeKeyAlias);
+                        if (doctype == null) continue;
+
+                        GetExportProperties(item, doctype);
+                    }
+
                 }
-
                 return JsonConvert.SerializeObject(jsonValue, Formatting.Indented);
             }
-
+            
             return value.ToString();
 
         }
@@ -74,19 +81,22 @@ namespace uSync8.ContentEdition.Mapping.Mappers
             // format of block data.
             // { "layout" : {}, "contentData": {}, "settingsData": {} }
 
-            // contentData is the thing we need to inspect. 
-            if (jsonValue.ContainsKey("contentData"))
+            foreach (var block in contentBlocks)
             {
-                var contentData = jsonValue.Value<JArray>("contentData");
-                if (contentData != null)
+                // contentData is the thing we need to inspect. 
+                if (jsonValue.ContainsKey(block))
                 {
-                    foreach (var contentItem in contentData.Cast<JObject>())
+                    var contentData = jsonValue.Value<JArray>(block);
+                    if (contentData != null)
                     {
-                        var contentType = GetDocTypeByKey(contentItem, "contentTypeKey");
-                        if (contentType != null)
+                        foreach (var contentItem in contentData.Cast<JObject>())
                         {
-                            dependencies.AddNotNull(CreateDocTypeDependency(contentType, flags));
-                            dependencies.AddRange(this.GetPropertyDependencies(contentItem, contentType, flags));
+                            var contentType = GetDocTypeByKey(contentItem, this.docTypeKeyAlias);
+                            if (contentType != null)
+                            {
+                                dependencies.AddNotNull(CreateDocTypeDependency(contentType, flags));
+                                dependencies.AddRange(this.GetPropertyDependencies(contentItem, contentType, flags));
+                            }
                         }
                     }
                 }
