@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -37,7 +39,7 @@ namespace uSync8.ContentEdition.Mapping
         /// </summary>
         protected JObject GetExportProperties(JObject item, IContentType docType)
         {
-            foreach(var property in docType.CompositionPropertyTypes)
+            foreach (var property in docType.CompositionPropertyTypes)
             {
                 if (item.ContainsKey(property.Alias))
                 {
@@ -108,7 +110,17 @@ namespace uSync8.ContentEdition.Mapping
             var item = contentTypeService.Get(alias);
             if (item != null)
             {
-                return new uSyncDependency()
+                return CreateDocTypeDependency(item, flags);
+            }
+
+            return null;
+        }
+
+        protected uSyncDependency CreateDocTypeDependency(IContentType item, DependencyFlags flags)
+        {
+            if (item != null)
+            {
+                new uSyncDependency
                 {
                     Name = item.Name,
                     Udi = item.GetUdi(),
@@ -120,6 +132,7 @@ namespace uSync8.ContentEdition.Mapping
 
             return null;
         }
+
 
         protected JObject GetJsonValue(object value)
         {
@@ -138,6 +151,20 @@ namespace uSync8.ContentEdition.Mapping
             {
                 var docTypeAlias = json[alias].ToString();
                 return GetDocType(docTypeAlias);
+            }
+
+            return default;
+        }
+
+        protected IContentType GetDocTypeByKey(JObject json, string keyAlias)
+        {
+            if (json.ContainsKey(keyAlias))
+            {
+                var attempt = json[keyAlias].TryConvertTo<Guid>();
+                if (attempt.Success)
+                {
+                    return contentTypeService.Get(attempt.Result);
+                }
             }
 
             return default;
