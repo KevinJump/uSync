@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -104,7 +103,7 @@ namespace uSync8.Community.Contrib.Mappers
 
                 List<uSyncDependency> dependencies = new List<uSyncDependency>();
 
-                var docTypeDependency = CreateDocTypeDependency(docTypeAlias, flags);
+                var docTypeDependency = CreateDocTypeDependency(docType, flags);
                 dependencies.AddNotNull(docTypeDependency);
 
                 dependencies.AddRange(GetPropertyDependencies(contentData, docType, flags));
