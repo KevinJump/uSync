@@ -1,18 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Microsoft.Owin.Security.DataProtection;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-using Umbraco.Core;
-using Umbraco.Core.Models;
 using Umbraco.Core.Services;
-using Umbraco.Core.Services.Implement;
 
 using uSync8.Core;
 using uSync8.Core.Dependency;
