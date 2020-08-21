@@ -2,6 +2,8 @@
 {
     public static partial class uSyncBackOfficeConstants
     {
+        public const string ReleaseSuffix = "-rc";
+
         public const string ConfigFile = "uSync8.config";
 
         public static class Priorites
