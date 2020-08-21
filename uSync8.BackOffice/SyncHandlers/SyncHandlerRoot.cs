@@ -874,7 +874,9 @@ namespace uSync8.BackOffice.SyncHandlers
                 if (serializer is ISyncOptionsSerializer<TObject> optionSerializer)
                     return optionSerializer.Serialize(item, options);
 
+#pragma warning disable CS0618 // Type or member is obsolete
                 return serializer.Serialize(item);
+#pragma warning restore CS0618 // Type or member is obsolete
 
             }
 
