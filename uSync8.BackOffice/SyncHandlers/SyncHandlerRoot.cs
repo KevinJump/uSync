@@ -830,6 +830,7 @@ namespace uSync8.BackOffice.SyncHandlers
                     if (action.Change != ChangeType.Create && (action.Details == null || action.Details.Count() == 0))
                     {
                         action.Message = "xml is diffrent - but properties may not have changed";
+                        action.Details = MakeRawChange(node, serializerOptions).AsEnumerableOfOne();
                     }
                     else
                     {
@@ -850,6 +851,35 @@ namespace uSync8.BackOffice.SyncHandlers
                     .ReportActionFail(Path.GetFileName(node.GetAlias()), $"format error {fex.Message}")
                     .AsEnumerableOfOne();
             }
+        }
+
+        private uSyncChange MakeRawChange(XElement node, SyncSerializerOptions options)
+        {
+            var item = this.GetFromService(node.GetKey());
+            var currentNode = GetCurrent(item, options);
+            if (currentNode.Success)
+            {
+                return uSyncChange.Update(node.GetAlias(), "Raw XML", currentNode.Item.ToString(), node.ToString());
+            }
+
+            return uSyncChange.NoChange(node.GetAlias(), node.GetAlias());
+
+        }
+                    
+
+        private SyncAttempt<XElement> GetCurrent(TObject item, SyncSerializerOptions options)
+        {
+            if (item != null)
+            {
+                if (serializer is ISyncOptionsSerializer<TObject> optionSerializer)
+                    return optionSerializer.Serialize(item, options);
+
+                return serializer.Serialize(item);
+
+            }
+
+            return SyncAttempt<XElement>.Fail("unknown", ChangeType.Fail);
+
         }
 
         protected IEnumerable<uSyncAction> ReportItem(string file, HandlerSettings config)

@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using uSync8.Core.Dependency;
+
 namespace uSync8.Core.DataTypes
 {
     public interface IConfigurationSerializer
