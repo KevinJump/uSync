@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Web.WebPages;
 using System.Xml.Linq;
-
-using NPoco.Expressions;
 
 using Umbraco.Core;
 using Umbraco.Core.Configuration;
@@ -383,6 +379,11 @@ namespace uSync8.ContentEdition.Serializers
             try
             {
                 var result = contentService.SaveAndPublish(item);
+                if (!result.Success)
+                {
+                    var messages = result.EventMessages.FormatMessages(",");
+                    logger.Error<ContentSerializer>("Failed to publish {result} : {messages}", result.Result, messages);
+                }
                 return result.ToAttempt();
             }
             catch (ArgumentNullException ex)

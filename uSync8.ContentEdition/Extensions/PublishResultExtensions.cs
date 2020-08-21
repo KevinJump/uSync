@@ -18,12 +18,7 @@ namespace uSync8.ContentEdition
         {
             if (result.Success) return Attempt.Succeed("Published");
 
-            var errorMessage = "";
-            if (result.EventMessages.Count > 0)
-            {
-                errorMessage = string.Join(": ", result.EventMessages.GetAll().Select(x => $"{x.Category}: {x.Message}"));
-            }
-
+            var errorMessage = result.EventMessages.FormatMessages(":");
             return Attempt.Fail($"Publish failed: {result.Result} {errorMessage}");
         }
     }
