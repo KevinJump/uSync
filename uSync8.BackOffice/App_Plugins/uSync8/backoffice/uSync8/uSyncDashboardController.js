@@ -35,29 +35,6 @@
         $timeout(function () {
             navigationService.syncTree({ tree: "uSync8", path: "-1" });
         });
-
-
-        uSync8DashboardService.getAddOns()
-            .then(function (result) {
-                vm.page.description = 'v' + result.data.Version;
-                if (result.data.AddOnString.length > 0) {
-                    vm.page.description += ' + ' + result.data.AddOnString;
-                }
-                vm.addOns = result.data.AddOns;
-
-                vm.addOns.forEach(function (value, key) {
-                    if (value.View !== '') {
-                        vm.page.navigation.splice(vm.page.navigation.length-2, 0, 
-                        {
-                            'name': value.DisplayName,
-                            'alias': value.Alias,
-                            'icon': value.Icon,
-                            'view': value.View
-                        });
-                    }
-                });
-            });
-
     }
 
     angular.module('umbraco')
