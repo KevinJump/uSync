@@ -44,7 +44,7 @@ namespace uSync8.ContentEdition.Mapping.Mappers
                 if (jsonValue.ContainsKey(block))
                 {
                     var contentData = jsonValue.Value<JArray>(block);
-                    if (contentData == null) return value.ToString();
+                    if (contentData == null) continue;
 
                     foreach (var item in contentData.Cast<JObject>())
                     {
