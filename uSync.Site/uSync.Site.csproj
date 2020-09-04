@@ -1,0 +1,68 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Content Remove="wwwroot\App_Plugins\uSync8\addons.json" />
+      <Content Remove="wwwroot\App_Plugins\uSync8\backoffice\uSync8\dashboard.html" />
+      <Content Remove="wwwroot\App_Plugins\uSync8\backoffice\uSync8\uSyncDashboardController.js" />
+      <Content Remove="wwwroot\App_Plugins\uSync8\changeDialog.html" />
+      <Content Remove="wwwroot\App_Plugins\uSync8\changeDialogController.js" />
+      <Content Remove="wwwroot\App_Plugins\uSync8\components\uSyncProgressView.html" />
+      <Content Remove="wwwroot\App_Plugins\uSync8\components\usyncProgressViewComponent.js" />
+      <Content Remove="wwwroot\App_Plugins\uSync8\components\uSyncReportView.html" />
+      <Content Remove="wwwroot\App_Plugins\uSync8\components\uSyncReportViewComponent.js" />
+      <Content Remove="wwwroot\App_Plugins\uSync8\lang\en-US.xml" />
+      <Content Remove="wwwroot\App_Plugins\uSync8\package.manifest" />
+      <Content Remove="wwwroot\App_Plugins\uSync8\settings\default.html" />
+      <Content Remove="wwwroot\App_Plugins\uSync8\settings\expansion.html" />
+      <Content Remove="wwwroot\App_Plugins\uSync8\settings\expansionController.js" />
+      <Content Remove="wwwroot\App_Plugins\uSync8\settings\settings.html" />
+      <Content Remove="wwwroot\App_Plugins\uSync8\settings\settingsController.js" />
+      <Content Remove="wwwroot\App_Plugins\uSync8\settings\uSyncController.js" />
+      <Content Remove="wwwroot\App_Plugins\uSync8\usync.css" />
+      <Content Remove="wwwroot\App_Plugins\uSync8\uSyncHub.js" />
+      <Content Remove="wwwroot\App_Plugins\uSync8\uSyncService.js" />
+      <Content Remove="wwwroot\App_Plugins\uSync8\usync_864.css" />
+      <Content Remove="wwwroot\App_Plugins\uSync8\uSync_864.js" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="wwwroot\App_Plugins\uSync8\addons.json" />
+      <None Include="wwwroot\App_Plugins\uSync8\backoffice\uSync8\dashboard.html" />
+      <None Include="wwwroot\App_Plugins\uSync8\backoffice\uSync8\uSyncDashboardController.js" />
+      <None Include="wwwroot\App_Plugins\uSync8\changeDialog.html" />
+      <None Include="wwwroot\App_Plugins\uSync8\changeDialogController.js" />
+      <None Include="wwwroot\App_Plugins\uSync8\components\uSyncProgressView.html" />
+      <None Include="wwwroot\App_Plugins\uSync8\components\usyncProgressViewComponent.js" />
+      <None Include="wwwroot\App_Plugins\uSync8\components\uSyncReportView.html" />
+      <None Include="wwwroot\App_Plugins\uSync8\components\uSyncReportViewComponent.js" />
+      <None Include="wwwroot\App_Plugins\uSync8\lang\en-US.xml" />
+      <None Include="wwwroot\App_Plugins\uSync8\package.manifest" />
+      <None Include="wwwroot\App_Plugins\uSync8\settings\default.html" />
+      <None Include="wwwroot\App_Plugins\uSync8\settings\expansion.html" />
+      <None Include="wwwroot\App_Plugins\uSync8\settings\expansionController.js" />
+      <None Include="wwwroot\App_Plugins\uSync8\settings\settings.html" />
+      <None Include="wwwroot\App_Plugins\uSync8\settings\settingsController.js" />
+      <None Include="wwwroot\App_Plugins\uSync8\settings\uSyncController.js" />
+      <None Include="wwwroot\App_Plugins\uSync8\usync.css" />
+      <None Include="wwwroot\App_Plugins\uSync8\uSyncHub.js" />
+      <None Include="wwwroot\App_Plugins\uSync8\uSyncService.js" />
+      <None Include="wwwroot\App_Plugins\uSync8\usync_864.css" />
+      <None Include="wwwroot\App_Plugins\uSync8\uSync_864.js" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Umbraco.Cms" Version="0.5.0-alpha001" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\uSync.BackOffice\uSync.BackOffice.csproj" />
+      <ProjectReference Include="..\uSync.Community.Contrib\uSync.Community.Contrib.csproj" />
+      <ProjectReference Include="..\uSync.ContentEdition\uSync.ContentEdition.csproj" />
+      <ProjectReference Include="..\uSync.Core\uSync.Core.csproj" />
+    </ItemGroup>
+
+</Project>

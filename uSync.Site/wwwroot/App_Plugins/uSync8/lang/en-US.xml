@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<language alias="en" intName="English (US)" localName="English (US)" lcid="" culture="en-US">
+  <creator>
+    <name>Jumoo</name>
+    <link>http://jumoo.uk</link>
+  </creator>
+  <area alias="treeHeaders">
+    <key alias="sync">Synchronization</key>
+    <key alias="uSync8">uSync</key>
+  </area>
+  <area alias="usync">
+    <key alias="name">uSync 8</key>
+    <key alias="intro">Database elements to and from disk</key>
+
+    <key alias="newer">There is a newer version of uSync available</key>
+		<key alias="noHandlers"><![CDATA[No Handlers have been loaded, so you can't sync anything - check your uSync8.config file it might be corrupt or missing 😢]]></key>
+    
+    <key alias="import">Import</key>
+    <key alias="importforce">Full Import</key>
+    <key alias="report">Report</key>
+    <key alias="export">Export</key>
+    <key alias="exportClean">Clean Export</key>
+    <key alias="apply">Apply</key>
+
+    <key alias="details">Details</key>
+  
+    <key alias="handlers">Item Handlers</key>
+    <key alias="savesettings">Save Settings</key>
+
+    <key alias="import-content">Import Content/Media</key>
+    <key alias="import-settings">Import Settings</key>
+    <key alias="import-members">Import Members</key>
+    <key alias="import-users">Import Users</key>
+
+    <key alias="report-content">Report Content/Media</key>
+    <key alias="report-settings">Report Settings</key>
+    <key alias="report-members">Report Members</key>
+    <key alias="report-users">Report Users</key>
+
+    <key alias="tableType">Type</key>
+    <key alias="tableName">Name</key>
+    <key alias="tableChange">Change</key>
+    <key alias="tableMessage">Message</key>
+
+    <key alias="nochange"><![CDATA[<h4>No Changes</h4>]]></key>
+    
+  </area>
+  <area alias="dashboardTabs">
+    <key alias="uSync8">uSync</key>
+  </area>
+</language>

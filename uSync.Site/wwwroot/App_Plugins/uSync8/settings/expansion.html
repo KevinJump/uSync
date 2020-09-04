@@ -1,0 +1,18 @@
+﻿<div ng-controller="uSyncExpansionController as vm" class="usync-pane-fade">
+    <umb-load-indicator ng-if="vm.loading"></umb-load-indicator>
+    <div ng-if="!vm.loading" class="usync-extras">
+        <div class="usync-banner">
+            <h2><i class="{{vm.addons.banner.icon}}"></i> {{vm.addons.banner.title}}</h2>
+            <p>{{vm.addons.banner.text}}</p>
+
+            <div class="banner-icons">
+                <div ng-repeat="icon in vm.addons.banner.icons">
+                    <i class="icon {{icon.icon}}"></i>
+                    {{icon.name}}
+                </div>
+            </div>
+
+            <a href="{{vm.addons.banner.link}}" target="_blank" class="btn btn-success btn-large">Find out more</a>
+        </div>
+    </div>
+</div>
