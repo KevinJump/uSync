@@ -130,9 +130,10 @@
                                 {{handler.Alias}}
                             </div>
                             <div class="umb-permission__description">
-                                Enabled for :
-                                <span ng-if="handler.DefaultConfig.Actions.length > 0">{{handler.DefaultConfig.Actions}}</span>
-                                <span ng-if="!handler.DefaultConfig.Actions">All</span>
+                                Enabled for : 
+                                <ul ng-if="handler.Actions.length > 0" class="usync-action-list">
+                                    <li ng-repeat="action in handler.Actions">{{action}}</li></ul>
+                                <span ng-if="!handler.Actions">All</span>
                             </div>
                         </div>
                     </div>

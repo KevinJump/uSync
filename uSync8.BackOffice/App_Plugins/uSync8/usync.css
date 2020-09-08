@@ -30,6 +30,17 @@
     margin: 0 0 20px;
 }
 
+ul.usync-action-list {
+    display: inline-block;
+    margin:0;
+    padding:0;
+}
+
+    ul.usync-action-list li {
+        display: inline;
+        margin-right: 4px;
+    }
+
 .usync-action-message-step {
     margin: 0 0 20px;
     font-weight: 700;
