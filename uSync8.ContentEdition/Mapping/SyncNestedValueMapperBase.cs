@@ -75,7 +75,7 @@ namespace uSync8.ContentEdition.Mapping
                 var dataType = dataTypeService.GetDataType(propertyType.DataTypeKey);
                 if (dataType == null) continue;
 
-                return SyncValueMapperFactory.GetDependencies(propertyValue, dataType.EditorAlias, flags);
+                dependencies.AddRange(SyncValueMapperFactory.GetDependencies(propertyValue, dataType.EditorAlias, flags));
             }
 
             return dependencies;
