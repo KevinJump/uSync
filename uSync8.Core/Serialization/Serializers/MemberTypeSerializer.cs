@@ -93,7 +93,7 @@ namespace uSync8.Core.Serialization.Serializers
                 var alias = property.Element("Alias").ValueOrDefault(string.Empty);
                 if (!string.IsNullOrWhiteSpace(alias) && buildInProperties.InvariantContains(alias))
                 {
-                    property.Element("Key").Value = Guid.Empty.ToString();
+                    property.Element("Key").Value = alias.GetHashCode().ToGuid().ToString();
                 }
             }
             return node;
