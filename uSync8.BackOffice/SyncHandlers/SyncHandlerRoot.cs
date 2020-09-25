@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -454,6 +453,21 @@ namespace uSync8.BackOffice.SyncHandlers
         protected virtual IEnumerable<uSyncAction> CleanFolder(string cleanFile, bool reportOnly, bool flat)
         {
             var folder = Path.GetDirectoryName(cleanFile);
+            if (!flat)
+            {
+                // when the folder isn't flat we don't want the parent folder, but rather the folder of the children
+                // of this item.
+                var cleanFileFolder = Path.GetFileNameWithoutExtension(cleanFile);
+                if (cleanFileFolder.IndexOf('_') >= 0)
+                {
+                    cleanFileFolder = cleanFileFolder.Substring(0, cleanFileFolder.LastIndexOf('_'));
+                    folder = Path.Combine(folder, cleanFileFolder);
+                }
+
+                logger.Debug(handlerType, "Non Flat Folder {folder}", folder);
+            }
+
+            if (!Directory.Exists(folder)) return Enumerable.Empty<uSyncAction>();
 
             var parent = GetCleanParent(cleanFile);
             if (parent == null) return Enumerable.Empty<uSyncAction>();
@@ -497,16 +511,20 @@ namespace uSync8.BackOffice.SyncHandlers
             var folderKey = folder.GetHashCode();
 
             var cacheKey = $"{GetCacheKeyBase()}_{folderKey}";
+
             return runtimeCache.GetCacheItem(cacheKey, () =>
             {
                 var keys = new List<Guid>();
-                var files = syncFileService.GetFiles(folder, "*.config");
+                var files = syncFileService.GetFiles(folder, "*.config").ToList();
+
                 foreach (var file in files)
                 {
                     var node = XElement.Load(file);
                     var key = node.GetKey();
                     if (!keys.Contains(key))
+                    {
                         keys.Add(key);
+                    }
                 }
 
                 return keys;
