@@ -802,10 +802,14 @@ namespace uSync8.BackOffice.SyncHandlers
         {
             List<uSyncAction> actions = new List<uSyncAction>();
 
+
             var files = GetImportFiles(folder);
 
             int count = 0;
             int total = files.Count();
+
+            logger.Debug(handlerType, "ReportFolder: {folder} ({count} files)", folder, total);
+
             foreach (string file in files)
             {
                 count++;
@@ -906,6 +910,8 @@ namespace uSync8.BackOffice.SyncHandlers
         {
             try
             {
+                logger.Debug(handlerType, "Report Item {file}", file);
+
                 var node = syncFileService.LoadXElement(file);
                 if (ShouldImport(node, config))
                 {

@@ -8,6 +8,7 @@ using Newtonsoft.Json.Linq;
 using Umbraco.Core;
 using Umbraco.Core.Services;
 
+using uSync8.Core;
 using uSync8.Core.Dependency;
 
 namespace uSync8.ContentEdition.Mapping.Mappers
@@ -94,14 +95,7 @@ namespace uSync8.ContentEdition.Mapping.Mappers
                                 var result = callback(mappers, alias, value);
                                 if (result != string.Empty)
                                 {
-                                    if (result.DetectIsJson())
-                                    {
-                                        control["value"] = JToken.Parse(result);
-                                    }
-                                    else
-                                    {
-                                        control["value"] = result;
-                                    }
+                                    control["value"] = result.GetJsonTokenValue();
                                 }
                             }
                         }

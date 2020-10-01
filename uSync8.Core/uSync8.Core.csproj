@@ -79,6 +79,7 @@
     <Compile Include="Dependency\SyncDependencyCollection.cs" />
     <Compile Include="Dependency\uSyncDependency.cs" />
     <Compile Include="Extensions\ChangeListExtensions.cs" />
+    <Compile Include="Extensions\JsonExtensions.cs" />
     <Compile Include="Extensions\ListExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Extensions\XElementExtensions.cs" />

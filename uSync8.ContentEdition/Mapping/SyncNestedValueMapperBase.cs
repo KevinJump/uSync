@@ -9,6 +9,7 @@ using Umbraco.Core;
 using Umbraco.Core.Models;
 using Umbraco.Core.Services;
 
+using uSync8.Core;
 using uSync8.Core.Dependency;
 
 namespace uSync8.ContentEdition.Mapping
@@ -47,14 +48,7 @@ namespace uSync8.ContentEdition.Mapping
                     if (value != null)
                     {
                         var mappedVal = SyncValueMapperFactory.GetExportValue(value, property.PropertyEditorAlias);
-                        if (mappedVal.DetectIsJson())
-                        {
-                            item[property.Alias] = JToken.Parse(mappedVal);
-                        }
-                        else
-                        {
-                            item[property.Alias] = mappedVal;
-                        }
+                        item[property.Alias] = mappedVal.GetJsonTokenValue();
                     }
                 }
             }
