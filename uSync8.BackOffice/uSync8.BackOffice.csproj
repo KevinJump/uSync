@@ -143,6 +143,7 @@
     <Content Include="App_Plugins\uSync8\components\usyncProgressViewComponent.js" />
     <Content Include="App_Plugins\uSync8\components\uSyncReportView.html" />
     <Content Include="App_Plugins\uSync8\components\uSyncReportViewComponent.js" />
+    <Content Include="App_Plugins\uSync8\lang\nl-NL.xml" />
     <Content Include="App_Plugins\uSync8\settings\default.html" />
     <Content Include="App_Plugins\uSync8\settings\expansion.html" />
     <Content Include="App_Plugins\uSync8\settings\expansionController.js" />
