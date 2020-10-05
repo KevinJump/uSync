@@ -13,6 +13,7 @@ namespace uSync8.Core.Dependency
         IncludeMedia = 32,
         IncludeLinked = 64,
         IncludeMediaFiles = 128,
-        IncludeConfig = 256
+        IncludeConfig = 256,
+        AdjacentOnly = 512
     }
 }
