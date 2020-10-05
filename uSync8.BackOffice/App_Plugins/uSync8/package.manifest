@@ -1,9 +1,10 @@
 {
   "javascript": [
+
+    "~/App_Plugins/uSync8/usync_871.js",
+
     "~/App_Plugins/uSync8/uSyncService.js",
     "~/App_Plugins/uSync8/uSyncHub.js",
-
-    "~/App_Plugins/uSync8/usync_864.js",
 
     "~/App_Plugins/uSync8/backoffice/uSync8/uSyncDashboardController.js",
     "~/App_Plugins/uSync8/settings/settingsController.js",
@@ -15,7 +16,7 @@
     "~/App_Plugins/uSync8/components/uSyncProgressViewComponent.js"
   ],
   "css": [
-    "~/App_Plugins/uSync8/usync.css",
-    "~/App_Plugins/uSync8/usync_864.css"
+    "~/App_Plugins/uSync8/usync_871.css",
+    "~/App_Plugins/uSync8/usync.css"
   ]
 }
