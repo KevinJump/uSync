@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Xml.Linq;
 
 using Umbraco.Core.Composing;
 using Umbraco.Core.Configuration;
@@ -10,6 +12,7 @@ using Umbraco.Core.Logging;
 using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
 using uSync8.BackOffice.SyncHandlers;
+using uSync8.Core;
 
 namespace uSync8.BackOffice
 {
@@ -352,9 +355,22 @@ namespace uSync8.BackOffice
             handlerOptions.Action = HandlerActions.Export;
 
             var handlers = handlerFactory.GetValidHandlers(handlerOptions);
+
+            WriteVersionFile(folder);
+
             return Export(folder, handlers, callbacks);
         }
 
+        private void WriteVersionFile(string folder)
+        {
+            var versionFile = Path.Combine(syncFileService.GetAbsPath(folder), "usync.config");
+            var versionNode = new XElement("uSync",
+                new XAttribute("version", typeof(uSync8.BackOffice.uSync8BackOffice).Assembly.GetName().Version.ToString()),
+                new XAttribute("format", uSyncConstants.FormatVersion),
+                new XElement("Date", DateTime.Now.ToString("s")));
+
+            versionNode.Save(versionFile);
+        }
         /// <summary>
         ///  Export items from umbraco into a given folder
         /// </summary>
