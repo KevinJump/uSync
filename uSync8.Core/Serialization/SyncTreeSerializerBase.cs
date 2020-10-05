@@ -23,7 +23,7 @@ namespace uSync8.Core.Serialization
         // Getters - get information we already know (either in the object or the XElement)
         protected virtual string GetItemBaseType(XElement node)
             => string.Empty;
-        
+
         #endregion
 
         #region Finders 

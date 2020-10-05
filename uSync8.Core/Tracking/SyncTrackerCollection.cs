@@ -26,7 +26,7 @@ namespace uSync8.Core.Tracking
         public IEnumerable<uSyncChange> GetChanges<TObject>(XElement node, SyncSerializerOptions options)
         {
             var changes = new List<uSyncChange>();
-            foreach(var tracker in GetTrackers<TObject>())
+            foreach (var tracker in GetTrackers<TObject>())
             {
                 if (tracker is ISyncOptionsTracker<TObject> optionTracker)
                     changes.AddRange(optionTracker.GetChanges(node, options));

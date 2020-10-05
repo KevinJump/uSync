@@ -36,7 +36,7 @@ namespace uSync8.ContentEdition.Mapping.Mappers
             var nestedJson = JsonConvert.DeserializeObject<JArray>(stringValue);
             if (nestedJson == null || !nestedJson.Any()) return value.ToString();
 
-            foreach(var item in nestedJson.Cast<JObject>())
+            foreach (var item in nestedJson.Cast<JObject>())
             {
                 var docType = GetDocType(item, this.docTypeAliasValue);
                 if (docType == null) continue;

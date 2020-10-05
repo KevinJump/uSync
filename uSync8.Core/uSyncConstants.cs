@@ -5,7 +5,7 @@
         // this is our format 'version' - 
         // it only changes when the format of the .config files change
         // we use it to prompt people to do an uptodate export.
-        public const string FormatVersion = "8.7.1"; 
+        public const string FormatVersion = "8.7.1";
 
         /// <summary>
         ///  names of the root xml elements that are seralized in/out
@@ -70,7 +70,7 @@
 
             // new properties only (so existing properties are left)
             public const string NewPropertiesOnly = "NewPropertiesOnly";
-            public const bool NewPropertiesOnly_Default = false; 
+            public const bool NewPropertiesOnly_Default = false;
         }
     }
 

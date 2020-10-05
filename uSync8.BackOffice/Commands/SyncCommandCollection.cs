@@ -9,9 +9,9 @@ namespace uSync8.BackOffice.Commands
     public class SyncCommandCollection
         : BuilderCollectionBase<ISyncCommand>
     {
-        public SyncCommandCollection(IEnumerable<ISyncCommand> items) 
+        public SyncCommandCollection(IEnumerable<ISyncCommand> items)
             : base(items)
-        {  }
+        { }
 
         public ISyncCommand GetCommand(string alias)
             => this.FirstOrDefault(x => x.Alias.Equals(alias, StringComparison.InvariantCultureIgnoreCase));

@@ -128,7 +128,7 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
                 {
                     // The language code changed, this can mean we need to do a full content export. 
                     // + we should export the languages again!
-                    uSyncTriggers.TriggerExport(rootFolder, new List<string>() { 
+                    uSyncTriggers.TriggerExport(rootFolder, new List<string>() {
                         UdiEntityType.Document, UdiEntityType.Language }, null);
                 }
 

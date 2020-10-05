@@ -53,7 +53,7 @@ namespace uSync8.Core.Extensions
                 .Attribute("Key").ValueOrDefault(Guid.Empty);
 
             return result != null && result.HasValue
-                ? result.Value 
+                ? result.Value
                 : Guid.Empty;
         }
 
@@ -156,7 +156,7 @@ namespace uSync8.Core.Extensions
                 new XAttribute(attributeName, value));
             node.Add(element);
 
-            return element;   
+            return element;
         }
 
         /// <summary>
@@ -204,7 +204,7 @@ namespace uSync8.Core.Extensions
             var stripped = new XElement(node.Name.LocalName);
             bool changed = false;
 
-            foreach(var element in node.Elements(elements))
+            foreach (var element in node.Elements(elements))
             {
                 var key = element.Attribute(keyName).ValueOrDefault(string.Empty);
                 if (keys.Contains(key))
@@ -223,7 +223,7 @@ namespace uSync8.Core.Extensions
                 node.Remove();
             }
         }
-             
+
         /// <summary>
         ///  gets a value from an element, if its is missing throws an ArgumentNullException
         /// </summary>

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.ComponentModel;
 using System.Configuration;
 using System.IO;
 using System.Linq;
@@ -11,7 +10,6 @@ using Newtonsoft.Json.Linq;
 using Umbraco.Core;
 using Umbraco.Core.IO;
 using Umbraco.Core.Logging;
-using Umbraco.Core.Models;
 using Umbraco.Core.Services;
 
 using uSync8.BackOffice.Configuration;
@@ -36,7 +34,7 @@ namespace uSync8.ContentEdition.Mapping.Mappers
         private readonly string mediaFolder;
         private readonly IProfilingLogger logger;
 
-        public ImagePathMapper(IEntityService entityService, 
+        public ImagePathMapper(IEntityService entityService,
             IProfilingLogger logger, uSyncConfig config) : base(entityService)
         {
             this.logger = logger;
@@ -169,7 +167,7 @@ namespace uSync8.ContentEdition.Mapping.Mappers
                     return $"/{containerName}";
                 }
             }
-            
+
 
             // look in the uSync8.config 
             return config.GetExtensionSetting("media", "folder", string.Empty);
@@ -210,10 +208,10 @@ namespace uSync8.ContentEdition.Mapping.Mappers
         public override IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)
         {
             var stringValue = value?.ToString();
-            if (string.IsNullOrWhiteSpace(stringValue)) 
+            if (string.IsNullOrWhiteSpace(stringValue))
                 return Enumerable.Empty<uSyncDependency>();
 
-            var stringPath = GetImagePath(stringValue).TrimStart('/').ToLower() ;
+            var stringPath = GetImagePath(stringValue).TrimStart('/').ToLower();
 
             if (!string.IsNullOrWhiteSpace(stringPath))
             {

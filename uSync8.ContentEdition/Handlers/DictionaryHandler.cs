@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
+
 using Umbraco.Core;
 using Umbraco.Core.Cache;
 using Umbraco.Core.Logging;
@@ -36,7 +37,7 @@ namespace uSync8.ContentEdition.Handlers
             ILocalizationService localizationService,
             IEntityService entityService,
             IProfilingLogger logger,
-            AppCaches appCaches,            
+            AppCaches appCaches,
             ISyncSerializer<IDictionaryItem> serializer,
             ISyncItemFactory syncItemFactory,
             SyncFileService syncFileService)
@@ -77,9 +78,9 @@ namespace uSync8.ContentEdition.Handlers
                     return SyncAttempt<IDictionaryItem>.Succeed(item.ItemKey, ChangeType.NoChange);
                 }
             }
-            
+
             return base.Import(filePath, config, flags);
-            
+
         }
 
         private IDictionaryItem GetExistingItem(string filePath)
@@ -134,7 +135,7 @@ namespace uSync8.ContentEdition.Handlers
             => GetChildItems(parent);
 
         protected override IEnumerable<IEntity> GetChildItems(int parent)
-        { 
+        {
             if (parent == -1)
             {
                 return localizationService.GetRootDictionaryItems()

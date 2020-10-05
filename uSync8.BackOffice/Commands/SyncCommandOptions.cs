@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+
 using Umbraco.Core;
 
 namespace uSync8.BackOffice.Commands
@@ -26,7 +27,7 @@ namespace uSync8.BackOffice.Commands
         public SyncCommandOptions(string folder)
         {
             this.Folder = folder;
-            
+
         }
 
         /// <summary>

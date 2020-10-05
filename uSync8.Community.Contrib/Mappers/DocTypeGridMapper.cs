@@ -1,12 +1,11 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Umbraco.Core;
+
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+
 using Umbraco.Core.Services;
+
 using uSync8.ContentEdition.Mapping;
 using uSync8.Core.Dependency;
 

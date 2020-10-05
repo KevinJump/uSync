@@ -44,12 +44,12 @@ namespace uSync8.Community.Contrib.Mappers
             var stackJson = GetValueAs<JArray>(value);
             if (stackJson == null) return value.ToString();
 
-            foreach(var stack in stackJson)
+            foreach (var stack in stackJson)
             {
                 var areas = stack.Value<JArray>("areas");
                 if (areas == null) continue;
 
-                foreach(var area in areas)
+                foreach (var area in areas)
                 {
                     var contentData = area.Value<JObject>("contentData");
                     if (contentData != null)
@@ -59,7 +59,7 @@ namespace uSync8.Community.Contrib.Mappers
                         if (docType == null) continue;
 
                         GetExportProperties(contentData, docType);
-                    }                 
+                    }
                 }
 
                 return JsonConvert.SerializeObject(stackJson, Formatting.Indented);

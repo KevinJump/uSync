@@ -1,16 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+
 using Umbraco.Core.Models;
+
 using uSync8.Core.Serialization;
 
 namespace uSync8.Core.Tracking.Impliment
 {
     public class DataTypeTracker : SyncBaseTracker<IDataType>, ISyncTracker<IDataType>
     {
-        public DataTypeTracker(ISyncSerializer<IDataType> serializer) 
+        public DataTypeTracker(ISyncSerializer<IDataType> serializer)
             : base(serializer)
         {
         }
@@ -19,7 +17,7 @@ namespace uSync8.Core.Tracking.Impliment
         {
             return new TrackedItem(serializer.ItemType, true)
             {
-                Children =  new List<TrackedItem>()
+                Children = new List<TrackedItem>()
                 {
                     new TrackedItem("Info", "/Info")
                     {

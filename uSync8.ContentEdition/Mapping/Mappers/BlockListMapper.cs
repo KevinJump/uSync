@@ -23,7 +23,7 @@ namespace uSync8.ContentEdition.Mapping.Mappers
             IContentTypeService contentTypeService,
             IDataTypeService dataTypeService)
             : base(entityService, contentTypeService, dataTypeService)
-        {}
+        { }
 
         public override string Name => "Block List Mapper";
 
@@ -57,7 +57,7 @@ namespace uSync8.ContentEdition.Mapping.Mappers
                 }
                 return JsonConvert.SerializeObject(jsonValue, Formatting.Indented);
             }
-            
+
             return value.ToString();
 
         }

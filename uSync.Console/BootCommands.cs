@@ -1,15 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+
 using Umbraco.Core;
 using Umbraco.Core.Composing;
 using Umbraco.Core.IO;
+
 using uSync.BaseCommands;
+
 using uSync8.BackOffice.Commands;
 
 namespace uSync.ConsoleApp

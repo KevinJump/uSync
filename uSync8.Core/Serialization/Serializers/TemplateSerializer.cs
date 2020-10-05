@@ -19,7 +19,7 @@ namespace uSync8.Core.Serialization.Serializers
         private readonly IFileService fileService;
 
         public TemplateSerializer(IEntityService entityService, ILogger logger,
-            IFileService fileService) 
+            IFileService fileService)
             : base(entityService, logger)
         {
             this.fileService = fileService;
@@ -35,7 +35,7 @@ namespace uSync8.Core.Serialization.Serializers
 
             var details = new List<uSyncChange>();
 
-            if (key != Guid.Empty) 
+            if (key != Guid.Empty)
                 item = fileService.GetTemplate(key);
 
             if (item == null)

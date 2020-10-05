@@ -133,7 +133,7 @@ namespace uSync8.BackOffice.SyncHandlers
                 ISyncSerializer<TObject> serializer,
                 ISyncItemFactory itemFactory,
                 SyncFileService syncFileService)
-        { 
+        {
             this.logger = logger;
             this.itemFactory = itemFactory ?? Current.Factory.GetInstance<ISyncItemFactory>();
 
@@ -333,7 +333,7 @@ namespace uSync8.BackOffice.SyncHandlers
                     }
                     else
                     {
-                        return SyncAttempt<TObject>.Succeed(Path.GetFileName(filePath), 
+                        return SyncAttempt<TObject>.Succeed(Path.GetFileName(filePath),
                             ChangeType.NoChange, "Not Imported (Based on config)");
                     }
                 }
@@ -727,9 +727,9 @@ namespace uSync8.BackOffice.SyncHandlers
 
                         details.Add(
                             uSyncChange.Update(
-                                path: dupFilename, 
-                                name: $"{dup.Change} : {dup.Name} ({dupFilename})", 
-                                oldValue: "", 
+                                path: dupFilename,
+                                name: $"{dup.Change} : {dup.Name} ({dupFilename})",
+                                oldValue: "",
                                 newValue: dupRelativePath));
                     }
 
@@ -852,7 +852,7 @@ namespace uSync8.BackOffice.SyncHandlers
                 var actions = new List<uSyncAction>();
                 var serializerOptions = new SyncSerializerOptions(config.Settings);
 
-                var change = IsItemCurrent(node,serializerOptions);
+                var change = IsItemCurrent(node, serializerOptions);
                 var action = uSyncActionHelper<TObject>
                         .ReportAction(change, node.GetAlias(), !string.IsNullOrWhiteSpace(filename) ? filename : node.GetAlias(), node.GetKey(), this.Alias);
 
@@ -864,7 +864,7 @@ namespace uSync8.BackOffice.SyncHandlers
                 }
                 else if (action.Change > ChangeType.NoChange)
                 {
-                    action.Details = GetChanges(node,serializerOptions);
+                    action.Details = GetChanges(node, serializerOptions);
                     if (action.Change != ChangeType.Create && (action.Details == null || action.Details.Count() == 0))
                     {
                         action.Message = "xml is diffrent - but properties may not have changed";
@@ -903,7 +903,7 @@ namespace uSync8.BackOffice.SyncHandlers
             return uSyncChange.NoChange(node.GetAlias(), node.GetAlias());
 
         }
-                    
+
 
         private SyncAttempt<XElement> GetCurrent(TObject item, SyncSerializerOptions options)
         {

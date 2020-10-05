@@ -1,19 +1,17 @@
 ﻿
-using Umbraco.Core;
-using Umbraco.Core.Models;
-using Umbraco.Core.Composing;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
-using uSync8.ContentEdition.Serializers;
-using uSync8.Core.Serialization;
-using uSync8.Core.Tracking;
-using uSync8.ContentEdition.Tracker;
-using uSync8.Core;
+using Umbraco.Core;
+using Umbraco.Core.Composing;
+using Umbraco.Core.Models;
+
 using uSync8.BackOffice;
 using uSync8.BackOffice.Models;
 using uSync8.ContentEdition.Mapping;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-using uSync8.Core.Dependency;
+using uSync8.ContentEdition.Serializers;
+using uSync8.Core;
+using uSync8.Core.Serialization;
 
 namespace uSync8.ContentEdition
 {
@@ -24,7 +22,7 @@ namespace uSync8.ContentEdition
         public string Version => "8.0.1";
 
         /// The following if you are an add on that displays like an app
-        
+
         // but content edition doesn't have an interface, so the view is empty. this hides it. 
         public string View => string.Empty;
         public string Icon => "icon-globe";

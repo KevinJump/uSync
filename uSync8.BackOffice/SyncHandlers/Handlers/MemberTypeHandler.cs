@@ -19,7 +19,7 @@ using static Umbraco.Core.Constants;
 
 namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
-    [SyncHandler("memberTypeHandler", "Member Types", "MemberTypes", uSyncBackOfficeConstants.Priorites.MemberTypes, 
+    [SyncHandler("memberTypeHandler", "Member Types", "MemberTypes", uSyncBackOfficeConstants.Priorites.MemberTypes,
         IsTwoPass = true, Icon = "icon-users", EntityType = UdiEntityType.MemberType)]
     public class MemberTypeHandler : SyncHandlerContainerBase<IMemberType, IMemberTypeService>, ISyncExtendedHandler
     {
@@ -53,7 +53,7 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
         {
             this.memberTypeService = memberTypeService;
 
-            this.Enabled = false; 
+            this.Enabled = false;
             // turn it off it appears to break things in current build
         }
         protected override void InitializeEvents(HandlerSettings settings)

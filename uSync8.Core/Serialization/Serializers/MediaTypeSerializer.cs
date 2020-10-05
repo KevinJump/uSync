@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Xml.Linq;
 
 using Umbraco.Core;
@@ -22,7 +21,7 @@ namespace uSync8.Core.Serialization.Serializers
         public MediaTypeSerializer(
             IEntityService entityService, ILogger logger,
             IDataTypeService dataTypeService,
-            IMediaTypeService mediaTypeService) 
+            IMediaTypeService mediaTypeService)
             : base(entityService, logger, dataTypeService, mediaTypeService, UmbracoObjectTypes.MediaTypeContainer)
         {
             this.mediaTypeService = mediaTypeService;
@@ -104,7 +103,7 @@ namespace uSync8.Core.Serialization.Serializers
             if (parent != null)
             {
                 if (parent is IMediaType mediaParent)
-                item.AddContentType(mediaParent);
+                    item.AddContentType(mediaParent);
 
                 item.SetParent(parent);
             }

@@ -4,6 +4,7 @@ using System.Linq;
 
 using Umbraco.Core;
 using Umbraco.Core.Logging;
+
 using uSync8.BackOffice.Configuration;
 
 namespace uSync8.BackOffice.SyncHandlers
@@ -16,7 +17,7 @@ namespace uSync8.BackOffice.SyncHandlers
 
         public SyncHandlerFactory(
             IProfilingLogger logger,
-            SyncHandlerCollection syncHandlers, 
+            SyncHandlerCollection syncHandlers,
             uSyncConfig config)
         {
             this.logger = logger;
@@ -162,10 +163,10 @@ namespace uSync8.BackOffice.SyncHandlers
                     });
                 }
                 else
-                { 
+                {
                     // only log if we are doing the default 'everything' group 
                     // because weh nfoing groups we choose not to load things. 
-                    if (string.IsNullOrWhiteSpace(options.Group)) 
+                    if (string.IsNullOrWhiteSpace(options.Group))
                         logger.Warn<SyncHandlerFactory>("No Handler with {alias} has been loaded", settings.Alias);
                 }
 

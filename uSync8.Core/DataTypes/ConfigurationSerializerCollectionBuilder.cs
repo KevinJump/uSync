@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 using Umbraco.Core;
 using Umbraco.Core.Composing;
 
@@ -18,7 +16,7 @@ namespace uSync8.Core.DataTypes
     public class ConfigurationSerializerCollection :
         BuilderCollectionBase<IConfigurationSerializer>
     {
-        public ConfigurationSerializerCollection(IEnumerable<IConfigurationSerializer> items) 
+        public ConfigurationSerializerCollection(IEnumerable<IConfigurationSerializer> items)
             : base(items)
         {
         }

@@ -116,7 +116,7 @@ namespace uSync8.BackOffice
         ///  The icon the user sees for this handler.
         /// </summary>
         public string Icon { get; set; }
-        
+
         /// <summary>
         ///  Name shown under the handler
         /// </summary>

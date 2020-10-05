@@ -1,9 +1,7 @@
 ﻿using System;
-using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Remoting.Metadata.W3cXsd2001;
 using System.Xml.Linq;
 
 using Umbraco.Core;
@@ -202,7 +200,8 @@ namespace uSync8.Core.Serialization.Serializers
             List<uSyncChange> changes = new List<uSyncChange>();
 
             var key = node.GetKey();
-            if (item.Key != key) {
+            if (item.Key != key)
+            {
                 changes.AddUpdate("Key", item.Key, key, "");
                 item.Key = key;
             }
@@ -216,25 +215,29 @@ namespace uSync8.Core.Serialization.Serializers
             }
 
             var name = info.Element("Name").ValueOrDefault(string.Empty);
-            if (!string.IsNullOrEmpty(name) && item.Name != name) {
+            if (!string.IsNullOrEmpty(name) && item.Name != name)
+            {
                 changes.AddUpdate("Name", item.Name, name, "");
                 item.Name = name;
             }
 
             var icon = info.Element("Icon").ValueOrDefault(string.Empty);
-            if (item.Icon != icon) {
+            if (item.Icon != icon)
+            {
                 changes.AddUpdate("Icon", item.Icon, icon, "");
                 item.Icon = icon;
             }
 
             var thumbnail = info.Element("Thumbnail").ValueOrDefault(string.Empty);
-            if (item.Thumbnail != thumbnail) {
+            if (item.Thumbnail != thumbnail)
+            {
                 changes.AddUpdate("Icon", item.Thumbnail, thumbnail, "");
                 item.Thumbnail = thumbnail;
             }
 
             var description = info.Element("Description").ValueOrDefault(null);
-            if (item.Description != description) {
+            if (item.Description != description)
+            {
                 changes.AddUpdate("Description", item.Description, description, "");
                 item.Description = description;
             }
@@ -361,7 +364,7 @@ namespace uSync8.Core.Serialization.Serializers
                 var alias = propertyNode.Element("Alias").ValueOrDefault(string.Empty);
                 if (string.IsNullOrEmpty(alias)) continue;
 
-                var key = propertyNode.Element("Key").ValueOrDefault(alias.GetHashCode().ToGuid()) ;
+                var key = propertyNode.Element("Key").ValueOrDefault(alias.GetHashCode().ToGuid());
                 var definitionKey = propertyNode.Element("Definition").ValueOrDefault(Guid.Empty);
                 var propertyEditorAlias = propertyNode.Element("Type").ValueOrDefault(string.Empty);
 
@@ -667,7 +670,7 @@ namespace uSync8.Core.Serialization.Serializers
 
             if (!Enumerable.SequenceEqual(item.ContentTypeComposition, compositions))
             {
-                var change = uSyncChange.Update("Info", "Compositions", 
+                var change = uSyncChange.Update("Info", "Compositions",
                     string.Join(",", item.ContentTypeComposition.Select(x => x.Alias)),
                     string.Join(",", compositions.Select(x => x.Alias)));
 
@@ -946,11 +949,11 @@ namespace uSync8.Core.Serialization.Serializers
         {
             if (item.IsDirty()) baseService.Save(item);
         }
-                
+
 
         public override void Save(IEnumerable<TObject> items)
             => baseService.Save(items);
-            
+
         protected override void SaveContainer(EntityContainer container)
         {
             logger.Debug(serializerType, "Saving Container: {0}", container.Key);

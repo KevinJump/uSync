@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Web;
 using System.Xml.Linq;
+
 using Umbraco.Core;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
+
 using uSync8.Core.Extensions;
 
 namespace uSync8.Core.Serialization
@@ -20,7 +20,7 @@ namespace uSync8.Core.Serialization
     {
         protected UmbracoObjectTypes containerType;
 
-        public SyncContainerSerializerBase(IEntityService entityService, ILogger logger, UmbracoObjectTypes containerType) 
+        public SyncContainerSerializerBase(IEntityService entityService, ILogger logger, UmbracoObjectTypes containerType)
             : base(entityService, logger)
         {
             this.containerType = containerType;
@@ -91,8 +91,8 @@ namespace uSync8.Core.Serialization
 
             var alias = node.GetAlias();
 
-            return CreateItem(alias, parent != null ? parent : treeItem,itemType);
-        }   
+            return CreateItem(alias, parent != null ? parent : treeItem, itemType);
+        }
 
         private EntityContainer TryCreateContainer(string name, ITreeEntity parent)
         {
@@ -130,8 +130,8 @@ namespace uSync8.Core.Serialization
             if (folders.Any())
             {
                 var path = string.Join("/", folders);
-                return new XElement("Folder", path); 
-                    // new XAttribute("Key", parentKey));
+                return new XElement("Folder", path);
+                // new XAttribute("Key", parentKey));
             }
 
             return null;

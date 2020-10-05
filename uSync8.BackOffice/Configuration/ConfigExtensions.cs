@@ -18,6 +18,6 @@ namespace uSync8.BackOffice.Configuration
                 return null;
             }
         }
-            
+
     }
 }

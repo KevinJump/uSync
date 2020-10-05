@@ -1,13 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
-using System.Web.UI;
 using System.Xml.Linq;
 
 using Umbraco.Core.Logging;
@@ -76,7 +71,7 @@ namespace uSync8.Core.Serialization
         [Obsolete("deserialize with options for better config support")]
         public SyncAttempt<TObject> Deserialize(XElement node, SerializerFlags flags)
             => Deserialize(node, new SyncSerializerOptions(flags));
-      
+
         public SyncAttempt<TObject> Deserialize(XElement node, SyncSerializerOptions options)
         {
             if (IsEmpty(node))

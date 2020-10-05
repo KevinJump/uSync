@@ -423,7 +423,7 @@ namespace uSync8.ContentEdition.Serializers
                     logger.Verbose(serializerType, "Derserialize Property {0} {1}", alias, current.PropertyType.PropertyEditorAlias);
 
                     var values = property.Elements("Value").ToList();
-                    
+
                     foreach (var value in values)
                     {
                         var culture = value.Attribute("Culture").ValueOrDefault(string.Empty);

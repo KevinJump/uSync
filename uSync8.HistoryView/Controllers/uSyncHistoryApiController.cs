@@ -2,7 +2,9 @@
 using System.IO;
 using System.Linq;
 using System.Web.Mvc;
+
 using Newtonsoft.Json;
+
 using Umbraco.Core.Configuration;
 using Umbraco.Web.Mvc;
 using Umbraco.Web.WebApi;
@@ -15,7 +17,7 @@ namespace uSync8.HistoryView.Controllers
     public class uSyncHistoryApiController : UmbracoAuthorizedApiController
     {
         private readonly SyncFileService syncFileService;
-        private readonly string historyFolder; 
+        private readonly string historyFolder;
 
         public uSyncHistoryApiController(IGlobalSettings globalSettings, SyncFileService syncFileService)
         {
@@ -37,7 +39,7 @@ namespace uSync8.HistoryView.Controllers
         {
             var histories = new List<SyncHistoryView>();
 
-            foreach(var historyFile in syncFileService.GetFiles(folder, "*.history"))
+            foreach (var historyFile in syncFileService.GetFiles(folder, "*.history"))
             {
                 var content = syncFileService.LoadContent(historyFile);
                 if (!string.IsNullOrWhiteSpace(content))
@@ -50,7 +52,7 @@ namespace uSync8.HistoryView.Controllers
                 }
             }
 
-            foreach(var subFolder in syncFileService.GetDirectories(folder))
+            foreach (var subFolder in syncFileService.GetDirectories(folder))
             {
                 histories.AddRange(GetHistory(subFolder));
             }

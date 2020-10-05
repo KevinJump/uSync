@@ -12,9 +12,10 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 
 using Umbraco.Core.Cache;
-using Umbraco.Core.Logging;
 using Umbraco.Core.Composing;
 using Umbraco.Core.IO;
+using Umbraco.Core.Logging;
+using Umbraco.Core.Services;
 using Umbraco.Web.Mvc;
 using Umbraco.Web.WebApi;
 using Umbraco.Web.WebApi.Filters;
@@ -23,10 +24,9 @@ using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Hubs;
 using uSync8.BackOffice.Models;
 using uSync8.BackOffice.SyncHandlers;
+using uSync8.Core;
 
 using Constants = Umbraco.Core.Constants;
-using uSync8.Core;
-using Umbraco.Core.Services;
 
 namespace uSync8.BackOffice.Controllers
 {

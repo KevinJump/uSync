@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Xml.Linq;
 
-using Umbraco.Core.Models.Entities;
-
 using uSync8.Core.Models;
 
 namespace uSync8.Core.Serialization
@@ -86,7 +84,7 @@ namespace uSync8.Core.Serialization
         ///  string representation of the item types used in this serializer
         /// </summary>
         string ItemType { get; }
-        
+
         /// <summary>
         ///  save all the items in umbraco.
         /// </summary>

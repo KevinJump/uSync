@@ -283,8 +283,8 @@ namespace uSync8.BackOffice
                     fireBulkComplete(ImportComplete, actions);
 
                     logger.Info<uSyncService>("uSync Import: {handlerCount} handlers, processed {itemCount} items, {changeCount} changes in {ElapsedMilliseconds}ms",
-                        handlers.Count(), 
-                        actions.Count, 
+                        handlers.Count(),
+                        actions.Count,
                         actions.CountChanges(),
                         sw.ElapsedMilliseconds);
 
@@ -413,7 +413,7 @@ namespace uSync8.BackOffice
 
                 versionNode.Save(versionFile);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 logger.Warn<uSyncService>(ex, "Issue saving the usync.conifg file in the root of {folder}", folder);
             }
@@ -461,8 +461,8 @@ namespace uSync8.BackOffice
 
                 actions.AddRange(handlerActions);
 
-                summary.UpdateHandler(handler.Name, HandlerStatus.Complete, 
-                    handlerActions.CountChanges(), 
+                summary.UpdateHandler(handler.Name, HandlerStatus.Complete,
+                    handlerActions.CountChanges(),
                     handlerActions.ContainsErrors());
             }
 
@@ -475,7 +475,7 @@ namespace uSync8.BackOffice
             sw.Stop();
 
             logger.Info<uSyncService>("uSync Export: {handlerCount} handlers, processed {itemCount} items, {changeCount} changes in {ElapsedMilliseconds}ms",
-                handlers.Count(), actions.Count, 
+                handlers.Count(), actions.Count,
                 actions.CountChanges(),
                 sw.ElapsedMilliseconds);
 

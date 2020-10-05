@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+
 using Umbraco.Core;
 using Umbraco.Core.IO;
 using Umbraco.Core.Models;
@@ -30,7 +28,7 @@ namespace uSync.TemplateTracker
         public void WatchViewFolder()
         {
             var watcher = new FileSystemWatcher();
-                watcher.Path = viewFolderPath;
+            watcher.Path = viewFolderPath;
 
             watcher.NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.LastWrite | NotifyFilters.FileName;
             watcher.Filter = "*.cshtml";

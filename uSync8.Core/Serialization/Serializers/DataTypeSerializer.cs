@@ -169,7 +169,7 @@ namespace uSync8.Core.Serialization.Serializers
                 new XElement("Name", item.Name),
                 new XElement("EditorAlias", item.EditorAlias),
                 new XElement("DatabaseType", item.DatabaseType));
-                // new XElement("SortOrder", item.SortOrder));
+            // new XElement("SortOrder", item.SortOrder));
 
             if (item.Level != 1)
             {
@@ -193,7 +193,7 @@ namespace uSync8.Core.Serialization.Serializers
             {
                 var serializer = this.configurationSerializers.GetSerializer(item.EditorAlias);
 
-                string config ;
+                string config;
                 if (serializer == null)
                 {
                     config = JsonConvert.SerializeObject(item.Configuration, Formatting.Indented);

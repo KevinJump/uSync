@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+
 using Umbraco.Core.Models;
+
 using uSync8.Core.Serialization;
 
 namespace uSync8.Core.Tracking.Impliment

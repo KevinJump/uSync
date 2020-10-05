@@ -5,7 +5,6 @@ using System.Xml.Linq;
 
 using Umbraco.Core;
 using Umbraco.Core.Logging;
-using Umbraco.Core.Migrations.Expressions.Update;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;

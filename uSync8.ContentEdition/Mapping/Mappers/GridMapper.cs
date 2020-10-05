@@ -87,7 +87,7 @@ namespace uSync8.ContentEdition.Mapping.Mappers
                         foreach (var control in controls.Cast<JObject>())
                         {
                             var editor = control.Value<JObject>("editor");
-                            var value = control.Value<Object>("value");                           
+                            var value = control.Value<Object>("value");
                             var (alias, mappers) = FindMappers(editor);
 
                             if (mappers != null && mappers.Any())

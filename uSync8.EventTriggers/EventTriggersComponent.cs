@@ -1,6 +1,6 @@
 ﻿using System.Linq;
+
 using Umbraco.Core.Composing;
-using Umbraco.Core.Logging;
 using Umbraco.Core.Services.Changes;
 using Umbraco.Web.Cache;
 using Umbraco.Web.PublishedCache;
@@ -49,12 +49,14 @@ namespace uSync8.EventTriggers
             }
         }
 
-        private void RefreshContentCache(DistributedCache dc) {
+        private void RefreshContentCache(DistributedCache dc)
+        {
             var payloads = new[] { new ContentCacheRefresher.JsonPayload(0, TreeChangeTypes.RefreshAll) };
             Umbraco.Web.Composing.Current.DistributedCache.RefreshByPayload(ContentCacheRefresher.UniqueId, payloads);
         }
 
-        private void RefreshMediaCache(DistributedCache dc) {
+        private void RefreshMediaCache(DistributedCache dc)
+        {
             var payloads = new[] { new MediaCacheRefresher.JsonPayload(0, TreeChangeTypes.RefreshAll) };
             dc.RefreshByPayload(MediaCacheRefresher.UniqueId, payloads);
         }

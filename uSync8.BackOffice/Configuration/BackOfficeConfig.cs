@@ -43,7 +43,7 @@ namespace uSync8.BackOffice.Configuration
 
         public uSyncConfig(IProfilingLogger logger)
         {
-            this.logger = logger; 
+            this.logger = logger;
             this.Settings = LoadSettings();
         }
 
@@ -141,7 +141,7 @@ namespace uSync8.BackOffice.Configuration
                 var handlerSettings = LoadHandlerConfig(handlerNode, defaultSettings);
                 if (handlerSettings != null)
                 {
-                    logger.Debug<uSyncConfig>("Loading Handler {alias} {enabled} [{actions}]", 
+                    logger.Debug<uSyncConfig>("Loading Handler {alias} {enabled} [{actions}]",
                         handlerSettings.Alias, handlerSettings.Enabled, string.Join(",", handlerSettings.Actions));
 
                     handlerSet.Handlers.Add(handlerSettings);
@@ -172,7 +172,7 @@ namespace uSync8.BackOffice.Configuration
             var settingsNode = root.Element(node);
             if (settingsNode != null)
             {
-                foreach(var element in settingsNode.Elements("Add"))
+                foreach (var element in settingsNode.Elements("Add"))
                 {
                     var key = element.Attribute("Key").ValueOrDefault(string.Empty);
                     var value = element.Attribute("Value").ValueOrDefault(string.Empty);
@@ -312,7 +312,7 @@ namespace uSync8.BackOffice.Configuration
             // These get added to a Settings dictionary for the handler, so it
             // can access them as needed (v8.7+ also passed to serializers)
             // 
-            
+
 
             var perHandlerSettings = new Dictionary<string, string>();
 

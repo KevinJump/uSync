@@ -23,7 +23,7 @@ namespace uSync8.ContentEdition.Serializers
         private readonly IContentTypeService contentTypeService;
 
         public ContentTemplateSerializer(
-            IEntityService entityService, 
+            IEntityService entityService,
             ILocalizationService localizationService,
             IRelationService relationService,
             ILogger logger,
@@ -58,7 +58,7 @@ namespace uSync8.ContentEdition.Serializers
                 details.AddUpdate("Name", item.Name, name);
                 item.Name = name;
             }
-            
+
             item.Blueprint = true;
 
             details.AddRange(DeserializeBase(item, node, options));
@@ -121,7 +121,8 @@ namespace uSync8.ContentEdition.Serializers
             {
                 item = new Content(alias, (IContent)parent, contentType);
             }
-            else {
+            else
+            {
                 item = new Content(alias, -1, contentType);
             }
 

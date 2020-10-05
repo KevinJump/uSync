@@ -88,7 +88,7 @@ namespace uSync8.ContentEdition.Serializers
                 return SyncAttempt<IMedia>.Fail(item.Name, ChangeType.Fail, "");
 
             // setting the saved flag on the attempt to true, stops base classes from saving the item.
-            return SyncAttempt<IMedia>.Succeed(item.Name, item, ChangeType.NoChange, propertyAttempt.Status, true, 
+            return SyncAttempt<IMedia>.Succeed(item.Name, item, ChangeType.NoChange, propertyAttempt.Status, true,
                 propertyAttempt.Result);
         }
 
@@ -127,7 +127,7 @@ namespace uSync8.ContentEdition.Serializers
             // used to copy media between servers (uSync.Complete)
             if (options.GetSetting("IncludeFileHash", true))
                 info.Add(SerializeFileHash(item));
-            
+
             return SyncAttempt<XElement>.Succeed(
                 item.Name,
                 node,

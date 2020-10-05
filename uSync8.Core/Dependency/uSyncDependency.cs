@@ -33,7 +33,7 @@ namespace uSync8.Core.Dependency
 
         public DependencyFlags Flags { get; set; }
 
-       
+
         public static event uSyncDependencyUpdate DependencyUpdate;
 
         public static void FireUpdate(string message)

@@ -34,9 +34,10 @@ namespace uSync.BaseCommands.Commands
                 return await List();
             }
 
-            if (args.Length > 1) {
+            if (args.Length > 1)
+            {
 
-                switch (args[0].ToLower()) 
+                switch (args[0].ToLower())
                 {
                     case "add":
                         return await AddLanguage(args[1]);
@@ -45,14 +46,14 @@ namespace uSync.BaseCommands.Commands
                     case "default":
                         return await SetDefault(args[1]);
                 }
-          
+
             }
 
             return SyncCommandResult.NoResult;
         }
 
         private async Task<SyncCommandResult> AddLanguage(string isoCode)
-        { 
+        {
             var existing = localizationService.GetLanguageByIsoCode(isoCode);
             if (existing == null || existing.IsoCode != isoCode)
             {
@@ -116,7 +117,7 @@ namespace uSync.BaseCommands.Commands
 
             await writer.WriteLineAsync("Language\tDefault");
             await writer.WriteLineAsync("----------------------------");
-            foreach(var lang in languages)
+            foreach (var lang in languages)
             {
                 await writer.WriteLineAsync(
                     string.Format("- {0}\t\t{1}", lang.IsoCode,

@@ -13,7 +13,7 @@ namespace uSync8.ContentEdition
                 return string.Join(seprerator,
                     eventMessages.GetAll()
                         .Select(x => $"{x.Category} {x.Message}"));
-            } 
+            }
 
             return string.Empty;
         }

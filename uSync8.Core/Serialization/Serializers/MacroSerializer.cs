@@ -88,7 +88,7 @@ namespace uSync8.Core.Serialization.Serializers
             }
 
             var useInEditor = node.Element("UseInEditor").ValueOrDefault(false);
-            var dontRender =  node.Element("DontRender").ValueOrDefault(false);
+            var dontRender = node.Element("DontRender").ValueOrDefault(false);
             var cacheByMember = node.Element("CachedByMember").ValueOrDefault(false);
             var cacheByPage = node.Element("CachedByPage").ValueOrDefault(false);
             var cacheDuration = node.Element("CachedDuration").ValueOrDefault(0);

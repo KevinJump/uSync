@@ -62,7 +62,7 @@ namespace uSync8.BackOffice.SyncHandlers
             AppCaches appCaches,
             ISyncDependencyChecker<TObject> dependencyChecker,
             SyncFileService syncFileService)
-            : base(logger, appCaches, 
+            : base(logger, appCaches,
                   serializer,
                   tracker.AsEnumerableOfOne(),
                   dependencyChecker.AsEnumerableOfOne(),
@@ -70,7 +70,7 @@ namespace uSync8.BackOffice.SyncHandlers
         {
             this.entityService = entityService;
         }
-      
+
         protected override IEnumerable<uSyncAction> DeleteMissingItems(TObject parent, IEnumerable<Guid> keys, bool reportOnly)
         {
             var items = GetChildItems(parent.Id).ToList();

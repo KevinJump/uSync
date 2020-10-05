@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+
 using uSync8.BackOffice.SyncHandlers;
 using uSync8.Core;
 
@@ -12,7 +10,7 @@ namespace uSync8.BackOffice.Commands.Command
     [SyncCommand("Import", "import", "Imports uSync settings into Umbraco")]
     public class ImportCommand : SyncCommandServiceBase, ISyncCommand
     {
-        public ImportCommand(TextReader reader, TextWriter writer, 
+        public ImportCommand(TextReader reader, TextWriter writer,
             uSyncService uSyncService) : base(reader, writer, uSyncService)
         { }
 
@@ -24,7 +22,7 @@ namespace uSync8.BackOffice.Commands.Command
             var force = options.GetSwitchValue<bool>("force", false);
             var handlerSet = options.GetSwitchValue<string>("set", uSync.Handlers.DefaultSet);
 
-            if (force) await writer.WriteAsync("(With Force) ");            
+            if (force) await writer.WriteAsync("(With Force) ");
 
             var result = uSyncService.Import(options.Folder, force,
                 new SyncHandlerOptions(handlerSet, HandlerActions.Import),

@@ -1,9 +1,8 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Web.UI.WebControls;
+
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace uSync8.Core.Models
 {

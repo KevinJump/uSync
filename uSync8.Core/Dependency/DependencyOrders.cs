@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static Umbraco.Core.Constants;
+﻿using static Umbraco.Core.Constants;
 
 namespace uSync8.Core.Dependency
 {
@@ -42,7 +37,7 @@ namespace uSync8.Core.Dependency
 
         public static int OrderFromEntityType(string entityType)
         {
-            switch(entityType)
+            switch (entityType)
             {
                 case UdiEntityType.Document:
                     return Content;

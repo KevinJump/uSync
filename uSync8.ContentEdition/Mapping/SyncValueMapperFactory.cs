@@ -50,7 +50,7 @@ namespace uSync8.ContentEdition.Mapping
             if (!mappers.Any()) return Enumerable.Empty<uSyncDependency>();
 
             var dependencies = new List<uSyncDependency>();
-            foreach(var mapper in mappers)
+            foreach (var mapper in mappers)
             {
                 dependencies.AddRange(mapper.GetDependencies(value, editorAlias, flags));
             }

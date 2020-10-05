@@ -1,12 +1,9 @@
 ﻿using System;
 using System.IO;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Reflection;
-using uSync8.BackOffice.Commands;
 using System.Threading;
+
+using uSync8.BackOffice.Commands;
 
 namespace uSync.ConsoleApp
 {
@@ -74,7 +71,7 @@ namespace uSync.ConsoleApp
             var domain = AppDomain.CreateDomain(uSyncAppDomain,
                 AppDomain.CurrentDomain.Evidence, setup);
 
-            foreach(var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
                 if (File.Exists(assembly.FullName))
                     domain.Load(assembly.FullName);

@@ -84,7 +84,8 @@ namespace uSync8.BackOffice.SyncHandlers
                 {
                     // get the name (from the slim)
                     var name = fdlr.Id.ToString();
-                    if (fdlr is IEntitySlim slim) {
+                    if (fdlr is IEntitySlim slim)
+                    {
                         name = slim.Name;
                     }
 

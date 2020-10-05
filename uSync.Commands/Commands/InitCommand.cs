@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Security;
 using System.Xml.Linq;
+
 using Umbraco.Core;
 using Umbraco.Core.Composing;
 using Umbraco.Core.Configuration;
@@ -13,6 +14,7 @@ using Umbraco.Core.Exceptions;
 using Umbraco.Core.IO;
 using Umbraco.Core.Migrations.Install;
 using Umbraco.Core.Services;
+
 using uSync8.BackOffice.Commands;
 
 namespace uSync.BaseCommands
@@ -76,7 +78,7 @@ namespace uSync.BaseCommands
                     await writer.WriteLineAsync(" you can use the -sqlce switch to have this value automatically populated");
                     return SyncCommandResult.Error;
                 }
-                
+
             }
 
             var result = SyncCommandResult.Success;
@@ -133,7 +135,7 @@ namespace uSync.BaseCommands
             return SyncCommandResult.Success;
         }
 
-        private SyncCommandResult CreateDatabase() 
+        private SyncCommandResult CreateDatabase()
         {
             writer.WriteLine(" Creating Database Schema");
 
@@ -179,7 +181,7 @@ namespace uSync.BaseCommands
                 var success = membershipUser.ChangePassword("default", password);
                 if (success == false)
                 {
-                  throw new FormatException(" Password must be at least " + GetCurrentProvider().MinRequiredPasswordLength + " characters long and contain at least " + GetCurrentProvider().MinRequiredNonAlphanumericCharacters + " symbols");
+                    throw new FormatException(" Password must be at least " + GetCurrentProvider().MinRequiredPasswordLength + " characters long and contain at least " + GetCurrentProvider().MinRequiredNonAlphanumericCharacters + " symbols");
                 }
             }
             catch (Exception ex)

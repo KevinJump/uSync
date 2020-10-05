@@ -14,7 +14,6 @@ using uSync8.BackOffice.Services;
 using uSync8.BackOffice.SyncHandlers;
 using uSync8.ContentEdition.Serializers;
 using uSync8.Core;
-using uSync8.Core.Dependency;
 using uSync8.Core.Tracking;
 
 using static Umbraco.Core.Constants;

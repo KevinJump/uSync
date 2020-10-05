@@ -2,6 +2,7 @@
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
+
 using Umbraco.Core.Composing;
 
 using uSync8.BackOffice.Configuration;
@@ -16,7 +17,7 @@ namespace uSync8.BackOffice.Commands
 
         public string AdvancedHelp { get; protected set; }
 
-        public bool Interactive { get;set; }
+        public bool Interactive { get; set; }
 
         protected readonly TextReader reader;
         protected readonly TextWriter writer;
@@ -66,14 +67,15 @@ namespace uSync8.BackOffice.Commands
             foreach (var argument in args)
             {
                 var cmd = argument.Trim().ToLower();
-                
+
                 if (cmd.StartsWith("-"))
                 {
                     var fragments = cmd.Split('=');
 
                     var flag = fragments[0].Substring(1);
 
-                    if (fragments.Length > 1) {
+                    if (fragments.Length > 1)
+                    {
                         options.Switches[flag] = fragments[1];
                     }
                     else

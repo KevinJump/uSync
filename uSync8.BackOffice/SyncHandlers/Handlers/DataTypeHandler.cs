@@ -41,7 +41,7 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             this.dataTypeService = dataTypeService;
         }
 
- 
+
         [Obsolete("Use constructors with collections")]
         protected DataTypeHandler(
             IEntityService entityService,

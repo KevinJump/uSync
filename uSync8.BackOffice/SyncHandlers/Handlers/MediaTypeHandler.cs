@@ -42,9 +42,9 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 
         [Obsolete("Use constructors with collections")]
         protected MediaTypeHandler(
-            IEntityService entityService, 
+            IEntityService entityService,
             IMediaTypeService mediaTypeService,
-            IProfilingLogger logger, 
+            IProfilingLogger logger,
             ISyncSerializer<IMediaType> serializer,
             ISyncTracker<IMediaType> tracker,
             AppCaches appCaches,
@@ -77,7 +77,7 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 
             return item.Name.ToSafeFileName();
         }
-          
+
 
 
         protected override IMediaType GetFromService(int id)

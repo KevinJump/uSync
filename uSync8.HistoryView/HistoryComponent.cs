@@ -93,7 +93,7 @@ namespace uSync8.HistoryView
             {
                 var username = contextReference?.UmbracoContext?.Security?.CurrentUser?.Username;
 
-                
+
 
                 if (string.IsNullOrWhiteSpace(username))
                 {

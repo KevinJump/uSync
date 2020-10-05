@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 
-using Serilog.Formatting.Compact;
-
 using Umbraco.Core;
 using Umbraco.Core.Composing;
 using Umbraco.Core.Models;
@@ -20,7 +18,7 @@ namespace uSync8.ContentEdition.Mapping
         public SyncValueMapperCollection(
             uSyncConfig uSyncConfig,
             IEnumerable<ISyncMapper> items)
-            : base(items) 
+            : base(items)
         {
             CustomMappings = uSyncConfig.Settings.CustomMappings;
         }
@@ -42,8 +40,8 @@ namespace uSync8.ContentEdition.Mapping
             if (value == null) return string.Empty;
 
             var mappers = GetSyncMappers(editorAlias);
-            if (mappers.Any()) 
-            { 
+            if (mappers.Any())
+            {
                 var mappedValue = value.ToString();
                 foreach (var mapper in mappers)
                 {
@@ -67,7 +65,7 @@ namespace uSync8.ContentEdition.Mapping
             if (mappers.Any())
             {
                 var mappedValue = value;
-                foreach(var mapper in mappers)
+                foreach (var mapper in mappers)
                 {
                     mappedValue = mapper.GetImportValue(mappedValue, editorAlias);
                 }
@@ -95,7 +93,7 @@ namespace uSync8.ContentEdition.Mapping
                 case DateTime date:
                     // use the Sortable 's' format of ISO 8601, it doesn't include milliseconds
                     // so we get less false positives, on checking and everything is to the second.
-                    return date.ToString("s"); 
+                    return date.ToString("s");
                 default:
                     return value.ToString();
             }

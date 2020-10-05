@@ -9,7 +9,7 @@ namespace uSync8.Core
     /// we are wrapping and extending Udi's 
     /// the internal functions throw if you don't know the type
     /// so here we capture and add return Unknown.
-    public static class uSyncObjectType 
+    public static class uSyncObjectType
     {
         public const string File = "physical-file";
 
@@ -19,7 +19,7 @@ namespace uSync8.Core
             {
                 return UdiEntityType.ToUmbracoObjectType(entityType);
             }
-            catch(NotSupportedException)
+            catch (NotSupportedException)
             {
                 // this gets thrown, when its not a known type, but for 
                 // use we want to carry on with Unknown
@@ -32,7 +32,7 @@ namespace uSync8.Core
         /// </summary>
         public static UmbracoObjectTypes ToContainerUmbracoObjectType(string entityType)
         {
-            switch(entityType)
+            switch (entityType)
             {
                 case UdiEntityType.DocumentType:
                     return UmbracoObjectTypes.DocumentTypeContainer;

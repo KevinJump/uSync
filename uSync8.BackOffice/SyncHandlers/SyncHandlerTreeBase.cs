@@ -59,7 +59,7 @@ namespace uSync8.BackOffice.SyncHandlers
             : base(entityService, logger, serializer, tracker, appCaches, checker, syncFileService)
         {
         }
-        
+
         protected override string GetItemName(TObject item) => item.Name;
     }
 

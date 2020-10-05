@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq;
+
 using Umbraco.Core;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
+
 using uSync8.Core.DataTypes;
+
 using static Umbraco.Core.Constants;
 
 namespace uSync8.Community.DataTypeSerializers
@@ -51,7 +50,7 @@ namespace uSync8.Community.DataTypeSerializers
         protected virtual Udi PathToUdi(string entityPath)
         {
             if (entityPath.IndexOf(':') == -1) return null;
-            
+
             var entityType = entityPath.Substring(0, entityPath.IndexOf(':'));
             var objectType = UdiEntityType.ToUmbracoObjectType(entityType);
 
@@ -60,8 +59,8 @@ namespace uSync8.Community.DataTypeSerializers
             int parentId = -1;
 
             IEntitySlim next = null;
-                       
-            foreach(var name in names)
+
+            foreach (var name in names)
             {
                 next = FindItem(parentId, name, objectType);
                 if (next == null) return null;
@@ -79,7 +78,7 @@ namespace uSync8.Community.DataTypeSerializers
         protected IEntitySlim FindItem(int parentId, string name, UmbracoObjectTypes objectType)
         {
             var children = entityService.GetChildren(parentId, objectType);
-            if (children.Any()) 
+            if (children.Any())
             {
                 return children.FirstOrDefault(x => x.Name.InvariantEquals(name));
             }

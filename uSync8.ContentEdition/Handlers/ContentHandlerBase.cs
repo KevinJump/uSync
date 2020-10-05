@@ -1,13 +1,13 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Xml.Linq;
+
 using Umbraco.Core;
 using Umbraco.Core.Cache;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Services;
+
 using uSync8.BackOffice;
 using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
@@ -113,8 +113,8 @@ namespace uSync8.ContentEdition.Handlers
             return true;
         }
 
-        private bool ImportPaths(XElement node, HandlerSettings config) 
-        { 
+        private bool ImportPaths(XElement node, HandlerSettings config)
+        {
             var include = config.GetSetting("Include", "")
                 .Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 

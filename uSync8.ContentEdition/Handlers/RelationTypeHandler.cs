@@ -2,11 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Timers;
 using System.Xml.Linq;
-
-using NPoco.Expressions;
 
 using Umbraco.Core;
 using Umbraco.Core.Cache;
@@ -20,10 +17,8 @@ using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
 using uSync8.BackOffice.SyncHandlers;
 using uSync8.Core;
-using uSync8.Core.Dependency;
 using uSync8.Core.Extensions;
 using uSync8.Core.Serialization;
-using uSync8.Core.Tracking;
 
 using static Umbraco.Core.Constants;
 
@@ -79,7 +74,7 @@ namespace uSync8.ContentEdition.Handlers
         /// </summary>
         protected override bool ShouldExport(XElement node, HandlerSettings config)
         {
-            var exclude = config.GetSetting<string>("Exclude",  defaultRelations);
+            var exclude = config.GetSetting<string>("Exclude", defaultRelations);
 
             if (!string.IsNullOrWhiteSpace(exclude) && exclude.Contains(node.GetAlias()))
                 return false;

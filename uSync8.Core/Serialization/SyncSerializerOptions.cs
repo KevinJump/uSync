@@ -1,9 +1,6 @@
 ﻿using System.Collections.Generic;
-using System.Configuration;
 using System.Xml.Linq;
 
-using NPoco.Expressions;
-using Superpower.Model;
 using Umbraco.Core;
 
 using uSync8.Core.Extensions;

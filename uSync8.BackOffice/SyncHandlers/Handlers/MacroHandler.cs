@@ -21,7 +21,7 @@ using static Umbraco.Core.Constants;
 
 namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
-    [SyncHandler("macroHandler", "Macros", "Macros", uSyncBackOfficeConstants.Priorites.Macros, 
+    [SyncHandler("macroHandler", "Macros", "Macros", uSyncBackOfficeConstants.Priorites.Macros,
         Icon = "icon-settings-alt", EntityType = UdiEntityType.Macro)]
     public class MacroHandler : SyncHandlerBase<IMacro, IMacroService>, ISyncExtendedHandler
     {
@@ -39,21 +39,21 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
         {
             this.macroService = macroService;
         }
-        
+
         [Obsolete("Use constructors with collections")]
         protected MacroHandler(IEntityService entityService,
-            IProfilingLogger logger, 
+            IProfilingLogger logger,
             IMacroService macroService,
             ISyncSerializer<IMacro> serializer,
             ISyncTracker<IMacro> tracker,
             AppCaches appCaches,
             ISyncDependencyChecker<IMacro> checker,
-            SyncFileService syncFileService) 
+            SyncFileService syncFileService)
             : base(entityService, logger, serializer, tracker, appCaches, checker, syncFileService)
         {
             this.macroService = macroService;
         }
-       
+
         /// <summary>
         ///  overrider the default export, because macros, don't exist as an object type???
         /// </summary>
@@ -66,7 +66,7 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 
             var items = macroService.GetAll().ToList();
             int count = 0;
-            foreach(var item in items)
+            foreach (var item in items)
             {
                 count++;
                 callback?.Invoke(item.Name, count, items.Count);
@@ -95,7 +95,7 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
         protected override IMacro GetFromService(Guid key)
             => macroService.GetById(key);
 
-        protected override IMacro GetFromService(string alias) 
+        protected override IMacro GetFromService(string alias)
             => macroService.GetByAlias(alias);
 
         protected override void DeleteViaService(IMacro item)

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Linq;
 using System.Linq;
-using System.Runtime.InteropServices.ComTypes;
 using System.Xml.Linq;
 
 using Umbraco.Core;
@@ -144,7 +142,7 @@ namespace uSync8.Core.Serialization.Serializers
 
             details.AddRange(DeserializeCompositions(item, node));
             details.AddRange(DeserializeStructure(item, node));
-           
+
             if (!options.Flags.HasFlag(SerializerFlags.DoNotSave) && item.IsDirty())
                 contentTypeService.Save(item);
 
@@ -161,7 +159,8 @@ namespace uSync8.Core.Serialization.Serializers
             var changes = new List<uSyncChange>();
 
             var isContainer = info.Element("IsListView").ValueOrDefault(false);
-            if (item.IsContainer != isContainer) {
+            if (item.IsContainer != isContainer)
+            {
                 changes.AddUpdate("IsListView", item.IsContainer, isContainer, "Info/IsListView");
                 item.IsContainer = isContainer;
             }

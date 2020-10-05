@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+
 using Umbraco.Core;
 using Umbraco.Core.Composing;
 using Umbraco.Core.Configuration;
+
 using uSync8.BackOffice;
 using uSync8.BackOffice.Commands;
 using uSync8.BackOffice.Models;
@@ -55,7 +56,7 @@ namespace uSync.ConsoleApp
                 }
             }
 
-            while( result < SyncCommandResult.Complete)
+            while (result < SyncCommandResult.Complete)
             {
                 await writer.WriteAsync("uSync>");
                 var command = await reader.ReadLineAsync();
@@ -76,7 +77,8 @@ namespace uSync.ConsoleApp
             {
                 var alias = args[0];
                 var commandFactory = factory.GetInstance<SyncCommandFactory>();
-                if (commandFactory == null) {
+                if (commandFactory == null)
+                {
                     writer.WriteLine("Cannot load the commands :(");
                     return SyncCommandResult.Error;
                 }

@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+
 using uSync8.BackOffice.SyncHandlers;
 
 namespace uSync8.BackOffice.Commands.Command
@@ -9,7 +10,7 @@ namespace uSync8.BackOffice.Commands.Command
     [SyncCommand("Export", "export", "Exports setting from Umbraco")]
     public class ExportCommand : SyncCommandServiceBase, ISyncCommand
     {
-        public ExportCommand(TextReader reader, TextWriter writer, 
+        public ExportCommand(TextReader reader, TextWriter writer,
             uSyncService uSyncService) : base(reader, writer, uSyncService)
         { }
 
