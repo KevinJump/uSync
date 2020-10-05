@@ -394,7 +394,7 @@ namespace uSync8.BackOffice
                 {
                     return false;
                 }
-                }
+            }
 
             return true;
         }
@@ -415,7 +415,7 @@ namespace uSync8.BackOffice
             }
             catch(Exception ex)
             {
-                logger.Warn<uSyncService>("Issue saving the usync.conifg file in the root of {folder}", folder);
+                logger.Warn<uSyncService>(ex, "Issue saving the usync.conifg file in the root of {folder}", folder);
             }
         }
         /// <summary>
