@@ -369,6 +369,8 @@ namespace uSync8.BackOffice
                 new XAttribute("format", uSyncConstants.FormatVersion),
                 new XElement("Date", DateTime.Now.ToString("s")));
 
+            Directory.CreateDirectory(Path.GetDirectoryName(versionFile));
+
             versionNode.Save(versionFile);
         }
         /// <summary>
