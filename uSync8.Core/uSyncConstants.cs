@@ -45,6 +45,30 @@
         ///  Key used in settings and in xml to indicate if partial file also includes fallback values.
         /// </summary>
         public const string DefaultsKey = "DefaultValues";
+
+
+        /// <summary>
+        ///  constant values for default settings in handlers/serializers.
+        /// </summary>
+        /// <remarks>
+        ///  these are checked within the serializers if the config is not present the default values
+        ///  are used.
+        /// </remarks>
+        public static class DefaultSettings
+        {
+            // don't remove properties or items (e.g no delete)
+            public const string NoRemove = "NoRemove";
+            public const bool NoRemove_Default = false;
+
+            // only create new items (existing items are not touched)
+            public const string CreateOnly = "CreateOnly";
+            public const string OneWay = "OneWay"; // legacy config name 
+            public const bool CreateOnly_Default = false;
+
+            // new properties only (so existing properties are left)
+            public const string NewPropertiesOnly = "NewPropertiesOnly";
+            public const bool NewPropertiesOnly_Default = false; 
+        }
     }
 
 

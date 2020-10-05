@@ -111,9 +111,9 @@ namespace uSync8.Core.Serialization.Serializers
 
             details.AddRange(DeserializeBase(item, node));
             details.AddRange(DeserializeTabs(item, node));
-            details.AddRange(DeserializeProperties(item, node));
+            details.AddRange(DeserializeProperties(item, node, options));
 
-            CleanTabs(item, node);
+            CleanTabs(item, node, options);
 
             // memberTypeService.Save(item);
 

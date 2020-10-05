@@ -105,13 +105,13 @@ namespace uSync8.Core.Serialization.Serializers
 
             details.AddRange(DeserializeBase(item, node));
             details.AddRange(DeserializeTabs(item, node));
-            details.AddRange(DeserializeProperties(item, node));
+            details.AddRange(DeserializeProperties(item, node, options));
 
             // content type only property stuff.
             details.AddRange(DeserializeContentTypeProperties(item, node));
 
             // clean tabs 
-            details.AddRange(CleanTabs(item, node));
+            details.AddRange(CleanTabs(item, node, options));
 
             // templates 
             details.AddRange(DeserializeTemplates(item, node));

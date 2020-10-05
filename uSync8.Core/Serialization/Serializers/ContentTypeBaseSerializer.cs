@@ -341,7 +341,7 @@ namespace uSync8.Core.Serialization.Serializers
             return changes;
         }
 
-        protected IEnumerable<uSyncChange> DeserializeProperties(TObject item, XElement node)
+        protected IEnumerable<uSyncChange> DeserializeProperties(TObject item, XElement node, SyncSerializerOptions options)
         {
             logger.Debug(serializerType, "Deserializing Properties");
 
@@ -462,14 +462,20 @@ namespace uSync8.Core.Serialization.Serializers
                         }
                     }
                 }
-
             }
 
             // move things between tabs. 
             changes.AddRange(MoveProperties(item, propertiesToMove));
 
-            // remove what needs to be removed
-            changes.AddRange(RemoveProperties(item, propertiesNode));
+            if (options.DeleteItems())
+            {
+                // remove what needs to be removed
+                changes.AddRange(RemoveProperties(item, propertiesNode));
+            }
+            else
+            {
+                logger.Debug(serializerType, "Property Removal disabled by config");
+            }
 
             return changes;
 
@@ -575,40 +581,43 @@ namespace uSync8.Core.Serialization.Serializers
         }
 
 
-        protected IEnumerable<uSyncChange> CleanTabs(TObject item, XElement node)
+        protected IEnumerable<uSyncChange> CleanTabs(TObject item, XElement node, SyncSerializerOptions options)
         {
-            logger.Debug(serializerType, "Cleaning Tabs Base");
-
-            var tabNode = node?.Element("Tabs");
-            if (tabNode == null) return Enumerable.Empty<uSyncChange>();
-
-            var newTabs = tabNode.Elements("Tab")
-                .Where(x => x.Element("Caption") != null)
-                .Select(x => x.Element("Caption").ValueOrDefault(string.Empty))
-                .ToList();
-
-            List<string> removals = new List<string>();
-            foreach (var tab in item.PropertyGroups)
+            if (options.DeleteItems())
             {
-                if (!newTabs.InvariantContains(tab.Name))
+                logger.Debug(serializerType, "Cleaning Tabs Base");
+
+                var tabNode = node?.Element("Tabs");
+                if (tabNode == null) return Enumerable.Empty<uSyncChange>();
+
+                var newTabs = tabNode.Elements("Tab")
+                    .Where(x => x.Element("Caption") != null)
+                    .Select(x => x.Element("Caption").ValueOrDefault(string.Empty))
+                    .ToList();
+
+                List<string> removals = new List<string>();
+                foreach (var tab in item.PropertyGroups)
                 {
-                    removals.Add(tab.Name);
-                }
-            }
-
-            if (removals.Count > 0)
-            {
-                var changes = new List<uSyncChange>();
-
-                foreach (var name in removals)
-                {
-                    logger.Debug(serializerType, "Removing {0}", name);
-                    changes.Add(uSyncChange.Delete($"Tabs/{name}", name, name));
-
-                    item.PropertyGroups.Remove(name);
+                    if (!newTabs.InvariantContains(tab.Name))
+                    {
+                        removals.Add(tab.Name);
+                    }
                 }
 
-                return changes;
+                if (removals.Count > 0)
+                {
+                    var changes = new List<uSyncChange>();
+
+                    foreach (var name in removals)
+                    {
+                        logger.Debug(serializerType, "Removing {0}", name);
+                        changes.Add(uSyncChange.Delete($"Tabs/{name}", name, name));
+
+                        item.PropertyGroups.Remove(name);
+                    }
+
+                    return changes;
+                }
             }
 
             return Enumerable.Empty<uSyncChange>();

@@ -93,11 +93,14 @@ namespace uSync8.ContentEdition.Handlers
 
         protected override bool ShouldImport(XElement node, HandlerSettings config)
         {
+            // check base first - if it says no - then no point checking this. 
+            if (!base.ShouldImport(node, config)) return false;
+
             // unless the setting is explicit we don't import trashed items. 
             var trashed = node.Element("Info")?.Element("Trashed").ValueOrDefault(false);
-            if (trashed.GetValueOrDefault(false) && !GetConfigValue(config, "ImportTrashed", true)) return false;
+            if (trashed.GetValueOrDefault(false) && !config.GetSetting("ImportTrashed", true)) return false;
 
-            var include = GetConfigValue(config, "Include", "")
+            var include = config.GetSetting("Include", "")
                 .Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
             if (include.Length > 0)
@@ -110,7 +113,7 @@ namespace uSync8.ContentEdition.Handlers
                 }
             }
 
-            var exclude = GetConfigValue(config, "Exclude", "")
+            var exclude = config.GetSetting("Exclude", "")
                 .Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
             if (exclude.Length > 0)
             {
@@ -139,9 +142,9 @@ namespace uSync8.ContentEdition.Handlers
         {
             // We export trashed items by default, (but we don't import them by default)
             var trashed = node.Element("Info")?.Element("Trashed").ValueOrDefault(false);
-            if (trashed.GetValueOrDefault(false) && !GetConfigValue(config, "ExportTrashed", true)) return false;
+            if (trashed.GetValueOrDefault(false) && config.GetSetting<bool>("ExportTrashed", true)) return false;
 
-            if (GetConfigValue(config, "RulesOnExport", false))
+            if (config.GetSetting("RulesOnExport", false))
             {
                 return ShouldImport(node, config);
             }
@@ -149,18 +152,6 @@ namespace uSync8.ContentEdition.Handlers
             return true;
         }
 
-        private bool GetConfigValue(HandlerSettings config, string setting, bool defaultValue)
-        {
-            if (!config.Settings.ContainsKey(setting)) return defaultValue;
-            return config.Settings[setting].InvariantEquals("true");
-        }
-
-        private string GetConfigValue(HandlerSettings config, string setting, string defaultValue)
-        {
-            if (!config.Settings.ContainsKey(setting)) return defaultValue;
-            if (string.IsNullOrWhiteSpace(config.Settings[setting])) return defaultValue;
-            return config.Settings[setting];
-        }
 
         // we only match duplicate actions by key. 
         protected override bool DoActionsMatch(uSyncAction a, uSyncAction b)

@@ -562,7 +562,23 @@ namespace uSync8.BackOffice.SyncHandlers
         /// <summary>
         ///  check to see if this element should be imported as part of the process.
         /// </summary>
-        virtual protected bool ShouldImport(XElement node, HandlerSettings config) => true;
+        virtual protected bool ShouldImport(XElement node, HandlerSettings config)
+        {
+            // if createOnly is on, then we only create things that are not already there. 
+            // this lookup is slow(ish) so we only do it if we have to.
+            if (config.GetSetting<bool>(uSyncConstants.DefaultSettings.CreateOnly, uSyncConstants.DefaultSettings.CreateOnly_Default)
+                || config.GetSetting<bool>(uSyncConstants.DefaultSettings.OneWay, uSyncConstants.DefaultSettings.CreateOnly_Default))
+            {
+                var item = serializer.FindItem(node);
+                if (item != null)
+                {
+                    logger.Debug(handlerType, "CreateOnly: Item {alias} already exist not importing it.", node.GetAlias());
+                    return false;
+                }
+            }
+            return true;
+        }
+
 
         /// <summary>
         ///  Check to see if this elment should be exported. 

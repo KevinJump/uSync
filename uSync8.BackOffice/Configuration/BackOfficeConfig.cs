@@ -74,6 +74,9 @@ namespace uSync8.BackOffice.Configuration
 
             settings.CacheFolderKeys = node.Element("CacheFolderKeys").ValueOrDefault(true);
 
+
+            settings.DefaultHandlerSettings = LoadKeyValueSettings(node.Element("HandlerDefaults"));
+
             // load the handlers 
             var handlerSets = node.Element("HandlerSets");
             if (handlerSets != null)
@@ -94,6 +97,7 @@ namespace uSync8.BackOffice.Configuration
             }
 
             settings.CustomMappings = LoadAppKeysFromNode(node, "Mappings", true);
+
 
             // fire the loaded event, so things can tell when they are loaded. 
             Reloaded?.Invoke(settings);
@@ -309,21 +313,47 @@ namespace uSync8.BackOffice.Configuration
             // can access them as needed (v8.7+ also passed to serializers)
             // 
             
+
             var perHandlerSettings = new Dictionary<string, string>();
-            
-            foreach (var settingItem in node.Elements("Add"))
+
+            // merge in the defaults 
+            if (defaultSettings.DefaultHandlerSettings != null)
             {
-                var key = settingItem.Attribute("Key").ValueOrDefault(string.Empty);
-                var value = settingItem.Attribute("Value").ValueOrDefault(string.Empty);
-                
-                if (string.IsNullOrWhiteSpace(key) || string.IsNullOrWhiteSpace(value))
-                    continue;
-                perHandlerSettings.Add(key, value);
+                defaultSettings.DefaultHandlerSettings.ToList()
+                    .ForEach(x => perHandlerSettings[x.Key] = x.Value);
+            }
+
+            // merge in the handler. 
+            var handlerSettings = LoadKeyValueSettings(node);
+            if (handlerSettings != null)
+            {
+                handlerSettings.ToList()
+                    .ForEach(x => perHandlerSettings[x.Key] = x.Value);
             }
 
             settings.Settings = perHandlerSettings;
 
             return settings;
+        }
+
+        private Dictionary<string, string> LoadKeyValueSettings(XElement node)
+        {
+            if (node == null) return null;
+
+            Dictionary<string, string> keyValuePairs = new Dictionary<string, string>();
+
+            foreach (var settingItem in node.Elements("Add"))
+            {
+                var key = settingItem.Attribute("Key").ValueOrDefault(string.Empty);
+                var value = settingItem.Attribute("Value").ValueOrDefault(string.Empty);
+
+                if (string.IsNullOrWhiteSpace(key) || string.IsNullOrWhiteSpace(value))
+                    continue;
+
+                keyValuePairs.Add(key, value);
+            }
+
+            return keyValuePairs;
         }
 
         /// <summary>
