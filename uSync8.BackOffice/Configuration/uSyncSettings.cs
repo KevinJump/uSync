@@ -89,6 +89,12 @@ namespace uSync8.BackOffice.Configuration
         ///  to make one property type to behave like an existing one
         /// </summary>
         public IDictionary<string, string> CustomMappings { get; set; }
+
+
+        /// <summary>
+        ///  options you can set at the top level, that are then set on all handlers.
+        /// </summary>
+        public IDictionary<string, string> DefaultHandlerSettings { get; set; }
     }
 
     public class HandlerSet

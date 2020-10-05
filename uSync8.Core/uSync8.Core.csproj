@@ -97,6 +97,7 @@
     <Compile Include="Serialization\Serializers\MemberTypeSerializer.cs" />
     <Compile Include="Serialization\Serializers\TemplateSerializer.cs" />
     <Compile Include="Serialization\SyncContainerSerializerBase.cs" />
+    <Compile Include="Serialization\SyncOptionsExtensions.cs" />
     <Compile Include="Serialization\SyncSerializerAttribute.cs" />
     <Compile Include="Serialization\SyncSerializerBase.cs" />
     <Compile Include="Serialization\SyncSerializerOptions.cs" />

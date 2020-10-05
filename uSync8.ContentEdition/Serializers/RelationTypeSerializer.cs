@@ -94,7 +94,7 @@ namespace uSync8.ContentEdition.Serializers
                 // we have to save before we can add the relations. 
                 this.SaveItem(item);
                 hasBeenSaved = true;
-                details.AddRange(DeserializeRelations(node, item));
+                details.AddRange(DeserializeRelations(node, item, options));
             }
 
             return SyncAttempt<IRelationType>.Succeed(item.Name, item, ChangeType.Import, hasBeenSaved, details);
@@ -103,7 +103,7 @@ namespace uSync8.ContentEdition.Serializers
         /// <summary>
         ///  Deserialize the relations for a relation type.
         /// </summary>
-        private IEnumerable<uSyncChange> DeserializeRelations(XElement node, IRelationType relationType)
+        private IEnumerable<uSyncChange> DeserializeRelations(XElement node, IRelationType relationType, SyncSerializerOptions options)
         {
             var changes = new List<uSyncChange>();
 
@@ -141,12 +141,16 @@ namespace uSync8.ContentEdition.Serializers
                 newRelations.Add($"{parentItem.Id}_{childItem.Id}");
             }
 
-            var obsolete = existing.Where(x => !newRelations.Contains($"{x.ParentId}_{x.ChildId}"));
 
-            foreach (var obsoleteRelation in obsolete)
+            if (options.DeleteItems())
             {
-                changes.Add(uSyncChange.Delete(relationType.Alias, obsoleteRelation.ParentId.ToString(), obsoleteRelation.ChildId.ToString()));
-                relationService.Delete(obsoleteRelation);
+                var obsolete = existing.Where(x => !newRelations.Contains($"{x.ParentId}_{x.ChildId}"));
+
+                foreach (var obsoleteRelation in obsolete)
+                {
+                    changes.Add(uSyncChange.Delete(relationType.Alias, obsoleteRelation.ParentId.ToString(), obsoleteRelation.ChildId.ToString()));
+                    relationService.Delete(obsoleteRelation);
+                }
             }
 
             return changes;

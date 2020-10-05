@@ -54,8 +54,10 @@
                     </div>
                 </div>
             </div>
+
         </umb-box-content>
     </umb-box>
+
 
     <umb-box>
         <umb-box-content ng-if="vm.working || vm.reported">
@@ -64,6 +66,12 @@
                                  hide-labels="false" />
         </umb-box-content>
     </umb-box>
+
+    <div ng-if="vm.warnings.Message.length > 0" class="alert alert-{{vm.warnings.Type}}">
+        {{vm.warnings.Message}}
+    </div>
+
+
 
     <div ng-if="vm.reported">
         <usync-report-view actions="vm.actions"

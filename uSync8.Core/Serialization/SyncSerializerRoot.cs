@@ -223,7 +223,10 @@ namespace uSync8.Core.Serialization
             switch (actionType)
             {
                 case SyncActionType.Delete:
-                    return ProcessDelete(key, alias, options.Flags);
+                    if (options.DeleteItems())
+                        return ProcessDelete(key, alias, options.Flags);
+
+                    return SyncAttempt<TObject>.Succeed(alias, ChangeType.NoChange);
                 case SyncActionType.Rename:
                     return ProcessRename(key, alias, options.Flags);
                 case SyncActionType.Clean:
@@ -233,6 +236,8 @@ namespace uSync8.Core.Serialization
                 default:
                     return SyncAttempt<TObject>.Succeed(alias, ChangeType.NoChange);
             }
+
+
         }
 
         protected virtual SyncAttempt<TObject> ProcessDelete(Guid key, string alias, SerializerFlags flags)

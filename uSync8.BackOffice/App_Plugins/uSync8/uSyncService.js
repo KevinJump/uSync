@@ -30,6 +30,8 @@
 
             getHandlerGroups: getHandlerGroups,
 
+            getSyncWarnings: getSyncWarnings,
+
             checkVersion: checkVersion
         };
 
@@ -74,6 +76,11 @@
                     clientId: clientId
                 });
         }
+
+        function getSyncWarnings(action, group) {
+            return $http.post(serviceRoot + 'GetSyncWarnings?action=' + action, { group: group });
+        }
+        
 
         function importItem(item) {
             return $http.put(serviceRoot + 'importItem', item);

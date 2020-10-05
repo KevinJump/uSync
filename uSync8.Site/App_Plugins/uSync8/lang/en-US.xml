@@ -43,6 +43,10 @@
     <key alias="tableMessage">Message</key>
 
     <key alias="nochange"><![CDATA[<h4>No Changes</h4>]]></key>
+
+		<!-- warning messages -->
+		<key alias="oldformat"><![CDATA[This sync folder is from an older version of uSync. While the sync will work, you will get quicker and cleaner results with a more recent export.]]></key>
+		<key alias="createWarning"><![CDATA[One or more handlers are set to create only. Changes within items may not be synchronized]]></key>
     
   </area>
   <area alias="dashboardTabs">

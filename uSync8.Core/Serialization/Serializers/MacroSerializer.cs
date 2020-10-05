@@ -156,7 +156,10 @@ namespace uSync8.Core.Serialization.Serializers
 
             }
 
-            RemoveOrphanProperties(item, properties);
+            if (options.DeleteItems())
+            {
+                RemoveOrphanProperties(item, properties);
+            }
 
             return SyncAttempt<IMacro>.Succeed(item.Name, item, ChangeType.Import, details);
         }

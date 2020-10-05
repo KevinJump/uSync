@@ -25,6 +25,8 @@ using uSync8.BackOffice.Models;
 using uSync8.BackOffice.SyncHandlers;
 
 using Constants = Umbraco.Core.Constants;
+using uSync8.Core;
+using Umbraco.Core.Services;
 
 namespace uSync8.BackOffice.Controllers
 {
@@ -297,6 +299,50 @@ namespace uSync8.BackOffice.Controllers
                 }
             };
         }
+
+        /// <summary>
+        ///  report any warnings about a sync
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        public uSyncWarningMessage GetSyncWarnings(string action, uSyncOptions options)
+        {
+            var handlers = handlerFactory.GetValidHandlers(new SyncHandlerOptions
+            {
+                Group = options.Group
+            });
+
+            var message = new uSyncWarningMessage();
+
+            if (!uSyncService.CheckVersionFile(this.settings.RootFolder))
+            {
+                message.Type = "info";
+                message.Message = Services.TextService.Localize("usync", "oldformat");
+                return message;
+            }
+
+            var createOnly = handlers
+                .Select(x => x.Handler)
+                .Any(h => h.DefaultConfig.GetSetting(uSyncConstants.DefaultSettings.CreateOnly, false));
+
+            if (createOnly)
+            {
+                message.Type = "warning";
+                message.Message = Services.TextService.Localize("usync", "createWarning");
+                return message;
+            }
+
+
+            return message;
+        }
+
+    }
+
+    [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
+    public class uSyncWarningMessage
+    {
+        public string Type { get; set; }
+        public string Message { get; set; }
     }
 
     [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]

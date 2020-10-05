@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Xml.Linq;
 
 using Umbraco.Core;
@@ -73,9 +74,9 @@ namespace uSync8.Core.Serialization.Serializers
 
             // mediaTypeService.Save(item);
 
-            details.AddRange(DeserializeProperties(item, node));
+            details.AddRange(DeserializeProperties(item, node, options));
 
-            CleanTabs(item, node);
+            CleanTabs(item, node, options);
 
             return SyncAttempt<IMediaType>.Succeed(item.Name, item, ChangeType.Import, details);
         }

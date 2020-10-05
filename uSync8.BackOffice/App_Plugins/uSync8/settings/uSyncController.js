@@ -125,6 +125,7 @@
         ///////////
         function report(group) {
             resetStatus(modes.REPORT);
+            getWarnings('report');
 
             uSync8DashboardService.report(group, getClientId())
                 .then(function (result) {
@@ -168,6 +169,8 @@
 
         function importItems(force, group) {
             resetStatus(modes.IMPORT);
+            getWarnings('import');
+
             vm.hideLink = false;
             vm.importButton.state = 'busy';
 
@@ -213,6 +216,14 @@
         }
 
         //////////////
+
+        function getWarnings(action) {
+            uSync8DashboardService.getSyncWarnings(action)
+                .then(function (result) {
+                    vm.warnings = result.data;
+                });
+        }
+
 
         function getHandlerGroups() {
             uSync8DashboardService.getHandlerGroups()
@@ -294,6 +305,8 @@
 
         /// resets all the flags, and messages to the start 
         function resetStatus(mode) {
+            vm.warnings = {};
+
             vm.reported = vm.showAll = false;
             vm.working = true;
             vm.runmode = mode;
