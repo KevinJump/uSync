@@ -2,6 +2,8 @@
 {
     public static partial class uSyncConstants
     {
+        public const string FormatVersion = "8.7.0";
+
         /// <summary>
         ///  names of the root xml elements that are seralized in/out
         /// </summary>

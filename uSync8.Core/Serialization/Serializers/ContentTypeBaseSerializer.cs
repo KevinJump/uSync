@@ -103,6 +103,8 @@ namespace uSync8.Core.Serialization.Serializers
                 var tab = item.PropertyGroups.FirstOrDefault(x => x.PropertyTypes.Contains(property));
                 propNode.Add(new XElement("Tab", tab != null ? tab.Name : ""));
 
+                SerializeExtraProperties(propNode, item, property);
+
                 // added in v8.6
                 // reflection is fast but a a quick check of version is faster !
                 if (UmbracoVersion.LocalVersion.Major > 8 || UmbracoVersion.LocalVersion.Minor >= 6)
@@ -110,8 +112,6 @@ namespace uSync8.Core.Serialization.Serializers
                     SerializeNewProperty<string>(propNode, property, "MandatoryMessage");
                     SerializeNewProperty<string>(propNode, property, "ValidationRegExpMessage");
                 }
-
-                SerializeExtraProperties(propNode, item, property);
 
                 node.Add(propNode);
             }
@@ -842,6 +842,59 @@ namespace uSync8.Core.Serialization.Serializers
 
         #endregion
 
+
+        public override ChangeType IsCurrent(XElement node, SyncSerializerOptions options)
+        {
+            if (node == null) return ChangeType.Update;
+
+            // checkfor and add missing 8.6 properties, means we get less false positives.
+            if (UmbracoVersion.LocalVersion.Major > 8 || UmbracoVersion.LocalVersion.Minor >= 6)
+            {
+                InsertMissingProperties(node, "MandatoryMessage");
+                InsertMissingProperties(node, "ValidationRegExpMessage");
+            }
+
+            AddStructureSort(node);
+
+            return base.IsCurrent(node, options);
+        }
+
+        private void InsertMissingProperties(XElement node, string propertyName)
+        {
+            var propertiesNode = node?.Element("GenericProperties");
+            if (propertiesNode == null) return;
+
+            foreach (var propertyNode in propertiesNode.Elements("GenericProperty"))
+            {
+                if (propertyNode.Element(propertyName) == null)
+                {
+                    propertyNode.Add(new XElement(propertyName, string.Empty));
+                }
+            }
+        }
+
+        /// <summary>
+        ///  Add missing sort value to xml before compare.
+        /// </summary>
+        /// <remarks>
+        /// Adds the sort order attribute to the xml, if its missing, this reduces the 
+        /// number of false positives between old and newer versions of the xml.
+        /// and it doesn't cost anywhere as much as the db lookups do.
+        /// </remarks>
+        private void AddStructureSort(XElement node)
+        {
+            var structure = node?.Element("Structure");
+            if (structure == null || !structure.HasElements) return;
+
+            var sortOrder = 0;
+            foreach (var baseNode in structure.Elements(ItemType))
+            {
+                if (baseNode.Attribute("SortOrder") == null)
+                {
+                    baseNode.Add(new XAttribute("SortOrder", sortOrder++));
+                }
+            }
+        }
 
         /// <summary>
         ///  does this property alias exist further down the composition tree ? 
