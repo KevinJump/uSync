@@ -5,6 +5,9 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 
+using Semver;
+
+using Umbraco.Core;
 using Umbraco.Core.Composing;
 using Umbraco.Core.Configuration;
 using Umbraco.Core.Logging;
@@ -13,6 +16,7 @@ using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
 using uSync8.BackOffice.SyncHandlers;
 using uSync8.Core;
+using uSync8.Core.Extensions;
 
 namespace uSync8.BackOffice
 {
@@ -361,17 +365,58 @@ namespace uSync8.BackOffice
             return Export(folder, handlers, callbacks);
         }
 
-        private void WriteVersionFile(string folder)
+        public bool CheckVersionFile(string folder)
         {
             var versionFile = Path.Combine(syncFileService.GetAbsPath(folder), "usync.config");
-            var versionNode = new XElement("uSync",
-                new XAttribute("version", typeof(uSync8.BackOffice.uSync8BackOffice).Assembly.GetName().Version.ToString()),
-                new XAttribute("format", uSyncConstants.FormatVersion),
-                new XElement("Date", DateTime.Now.ToString("s")));
 
-            Directory.CreateDirectory(Path.GetDirectoryName(versionFile));
+            if (!syncFileService.FileExists(versionFile))
+            {
+                return false;
+            }
+            else
+            {
+                try
+                {
+                    var node = syncFileService.LoadXElement(versionFile);
+                    var format = node.Attribute("format").ValueOrDefault("");
+                    if (!format.InvariantEquals(uSyncConstants.FormatVersion))
+                    {
+                        var expectedVersion = SemVersion.Parse(uSyncConstants.FormatVersion);
+                        if (SemVersion.TryParse(format, out SemVersion current))
+                        {
+                            if (current.CompareTo(expectedVersion) >= 0) return true;
+                        }
 
-            versionNode.Save(versionFile);
+                        return false;
+                    }
+                }
+                catch
+                {
+                    return false;
+                }
+                }
+
+            return true;
+        }
+
+        private void WriteVersionFile(string folder)
+        {
+            try
+            {
+                var versionFile = Path.Combine(syncFileService.GetAbsPath(folder), "usync.config");
+                var versionNode = new XElement("uSync",
+                    new XAttribute("version", typeof(uSync8.BackOffice.uSync8BackOffice).Assembly.GetName().Version.ToString()),
+                    new XAttribute("format", uSyncConstants.FormatVersion),
+                    new XElement("Date", DateTime.Now.ToString("s")));
+
+                Directory.CreateDirectory(Path.GetDirectoryName(versionFile));
+
+                versionNode.Save(versionFile);
+            }
+            catch(Exception ex)
+            {
+                logger.Warn<uSyncService>("Issue saving the usync.conifg file in the root of {folder}", folder);
+            }
         }
         /// <summary>
         ///  Export items from umbraco into a given folder

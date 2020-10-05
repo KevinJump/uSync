@@ -218,7 +218,6 @@
         //////////////
 
         function getWarnings(action) {
-            vm.warnings = {};
             uSync8DashboardService.getSyncWarnings(action)
                 .then(function (result) {
                     vm.warnings = result.data;
@@ -306,6 +305,8 @@
 
         /// resets all the flags, and messages to the start 
         function resetStatus(mode) {
+            vm.warnings = {};
+
             vm.reported = vm.showAll = false;
             vm.working = true;
             vm.runmode = mode;

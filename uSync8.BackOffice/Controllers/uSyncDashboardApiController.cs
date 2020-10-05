@@ -26,6 +26,7 @@ using uSync8.BackOffice.SyncHandlers;
 
 using Constants = Umbraco.Core.Constants;
 using uSync8.Core;
+using Umbraco.Core.Services;
 
 namespace uSync8.BackOffice.Controllers
 {
@@ -313,15 +314,24 @@ namespace uSync8.BackOffice.Controllers
 
             var message = new uSyncWarningMessage();
 
+            if (!uSyncService.CheckVersionFile(this.settings.RootFolder))
+            {
+                message.Type = "info";
+                message.Message = Services.TextService.Localize("usync", "oldformat");
+                return message;
+            }
+
             var createOnly = handlers
-                .Select(x => x.Handler)  
+                .Select(x => x.Handler)
                 .Any(h => h.DefaultConfig.GetSetting(uSyncConstants.DefaultSettings.CreateOnly, false));
 
             if (createOnly)
             {
                 message.Type = "warning";
-                message.Message = "One or more handlers, are set to create only. Changes within items will not be synced";
+                message.Message = Services.TextService.Localize("usync", "createWarning");
+                return message;
             }
+
 
             return message;
         }
