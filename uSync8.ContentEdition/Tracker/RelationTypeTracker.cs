@@ -8,7 +8,7 @@ using uSync8.Core.Tracking;
 namespace uSync8.ContentEdition.Tracker
 {
     public class RelationTypeTracker
-        : SyncBaseTracker<IRelationType>, ISyncTracker<IRelationType>
+        : SyncBaseTracker<IRelationType>, ISyncNodeTracker<IRelationType>
     {
         public RelationTypeTracker(ISyncSerializer<IRelationType> serializer) : base(serializer)
         { }

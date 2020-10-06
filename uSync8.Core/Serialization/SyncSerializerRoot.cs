@@ -277,12 +277,25 @@ namespace uSync8.Core.Serialization
 
         public virtual ChangeType IsCurrent(XElement node, SyncSerializerOptions options)
         {
+            XElement current = null;
+            var item = FindItem(node);
+            if (item != null)
+            {
+                var attempt = this.Serialize(item, options);
+                if (attempt.Success)
+                    current = attempt.Item;
+            }
+
+            return IsCurrent(node, current, options);
+        }
+
+        public virtual ChangeType IsCurrent(XElement node, XElement current, SyncSerializerOptions options)
+        {
             if (node == null) return ChangeType.Update;
 
             if (!IsValidOrEmpty(node)) throw new FormatException($"Invalid Xml File {node.Name.LocalName}");
 
-            var item = FindItem(node);
-            if (item == null)
+            if (current == null)
             {
                 if (IsEmpty(node))
                 {
@@ -298,23 +311,20 @@ namespace uSync8.Core.Serialization
                 }
             }
 
-            if (IsEmpty(node)) return CalculateEmptyChange(node, item);
+            if (IsEmpty(node)) return CalculateEmptyChange(node, current);
 
             var newHash = MakeHash(node);
 
-            var currentNode = Serialize(item, options);
-            if (!currentNode.Success) return ChangeType.Create;
-
-            var currentHash = MakeHash(currentNode.Item);
+            var currentHash = MakeHash(current);
             if (string.IsNullOrEmpty(currentHash)) return ChangeType.Update;
 
             return currentHash == newHash ? ChangeType.NoChange : ChangeType.Update;
         }
 
-        private ChangeType CalculateEmptyChange(XElement node, TObject item)
+        private ChangeType CalculateEmptyChange(XElement node, XElement current)
         {
             // this shouldn't happen, but check.
-            if (item == null) return ChangeType.NoChange;
+            if (current == null) return ChangeType.NoChange;
 
             // simple logic, if it's a delete we say so, 
             // renames are picked up by the check on the new file

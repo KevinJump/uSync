@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Xml.Linq;
+
+using AutoMapper.QueryableExtensions.Impl;
 
 using Umbraco.Core.Composing;
 
@@ -37,8 +40,35 @@ namespace uSync8.Core.Tracking
             }
             return changes;
         }
-    }
 #pragma warning restore CS0618 // Type or member is obsolete
+
+        public IEnumerable<uSyncChange> GetChanges<TObject>(XElement node, XElement currentNode, SyncSerializerOptions options)
+        {
+            if (currentNode == null)
+                return GetChanges<TObject>(node, options);
+
+            var changes = new List<uSyncChange>();
+            foreach (var tracker in GetTrackers<TObject>())
+            {
+                switch (tracker)
+                {
+                    case ISyncNodeTracker<TObject> nodeTracker:
+                        changes.AddRange(nodeTracker.GetChanges(node, currentNode, options));
+                        break;
+                    case ISyncOptionsTracker<TObject> optionTracker:
+                        changes.AddRange(optionTracker.GetChanges(node, options));
+                        break;
+                    default:
+                        changes.AddRange(tracker.GetChanges(node));
+                        break;
+                }
+            }
+            return changes;
+        }
+
+    }
+
+
 
     public class SyncTrackerCollectionBuilder
         : WeightedCollectionBuilderBase<SyncTrackerCollectionBuilder,

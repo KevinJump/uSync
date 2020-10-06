@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 
-using ICSharpCode.SharpZipLib.Zip.Compression;
-
 using Umbraco.Core;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;

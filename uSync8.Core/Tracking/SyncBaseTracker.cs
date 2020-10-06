@@ -33,9 +33,25 @@ namespace uSync8.Core.Tracking
 
         public virtual IEnumerable<uSyncChange> GetChanges(XElement node, SyncSerializerOptions options)
         {
+            XElement current = null;
+
+            var item = serializer.FindItem(node);
+            if (item != null)
+            {
+                var attempt = SerializeItem(item, options);
+                if (attempt.Success)
+                {
+                    current = attempt.Item;
+                }
+            }
+            return GetChanges(node, current, options);
+        }
+
+        public virtual IEnumerable<uSyncChange> GetChanges(XElement node, XElement current, SyncSerializerOptions options)
+        { 
             if (serializer.IsEmpty(node))
             {
-                return GetEmptyFileChanges(node).AsEnumerableOfOne();
+                return GetEmptyFileChanges(node, current).AsEnumerableOfOne();
             }
 
             if (!serializer.IsValid(node))
@@ -44,34 +60,40 @@ namespace uSync8.Core.Tracking
                 return uSyncChange.Error("", "Invalid File", node.Name.LocalName).AsEnumerableOfOne();
             }
 
-            if (serializer.IsCurrent(node) == ChangeType.NoChange)
+
+            if (GetFileChange(node, current, options) == ChangeType.NoChange)
             {
                 return uSyncChange.NoChange("", node.GetAlias()).AsEnumerableOfOne();
             }
 
             var changes = TrackChanges();
-
-            var item = serializer.FindItem(node);
-            if (item != null)
+            if (current != null)
             {
-                var current = SerializeItem(item, options);
-                if (current.Success)
-                {
-                    return CalculateChanges(changes, current.Item, node, "", "");
-                }
+                return CalculateChanges(changes, current, node, "", "");
             }
 
             return Enumerable.Empty<uSyncChange>();
         }
 
-        private uSyncChange GetEmptyFileChanges(XElement node)
+        private ChangeType GetFileChange(XElement node, XElement current, SyncSerializerOptions options)
+        {
+            switch (serializer)
+            {
+                case ISyncNodeSerializer<TObject> nodeSerializer:
+                    return nodeSerializer.IsCurrent(node, current, options);
+                case ISyncOptionsSerializer<TObject> optionSerializer:
+                    return optionSerializer.IsCurrent(node, options);
+                default:
+                    return serializer.IsCurrent(node);
+            }
+        }
+
+        private uSyncChange GetEmptyFileChanges(XElement node, XElement current)
         {
             if (!serializer.IsEmpty(node))
                 throw new ArgumentException("Cannot calculate empty changes on a non empty file");
 
-            var item = serializer.FindItem(node);
-
-            if (item == null) return uSyncChange.NoChange("", node.GetAlias());
+            if (current == null) return uSyncChange.NoChange("", node.GetAlias());
 
             var action = node.Attribute("Change").ValueOrDefault<SyncActionType>(SyncActionType.None);
 

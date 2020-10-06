@@ -59,14 +59,23 @@ namespace uSync8.Core.Serialization
         public override ChangeType IsCurrent(XElement node, SyncSerializerOptions options)
         {
             var change = base.IsCurrent(node, options);
-            if (change != ChangeType.NoChange)
-            {
-                // check parent matches. 
-                if (!HasParentItem(node))
-                {
-                    return ChangeType.ParentMissing;
-                }
-            }
+
+
+            // doing this check in isCurrent slows us down a lot, 
+            // we also do this check in derserizlie node, so removing it here
+            // means reports might not show a missing parent warning but a full
+            // import would show an error. 
+            //
+            // but it is much faster?
+            
+            //if (change != ChangeType.NoChange)
+            //{
+            //    // check parent matches.
+            //    if (!HasParentItem(node))
+            //    {
+            //        return ChangeType.ParentMissing;
+            //    }
+            //}
             return change;
         }
 

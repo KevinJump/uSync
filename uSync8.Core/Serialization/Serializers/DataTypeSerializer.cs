@@ -20,7 +20,7 @@ using uSync8.Core.Models;
 namespace uSync8.Core.Serialization.Serializers
 {
     [SyncSerializer("C06E92B7-7440-49B7-B4D2-AF2BF4F3D75D", "DataType Serializer", uSyncConstants.Serialization.DataType)]
-    public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncOptionsSerializer<IDataType>
+    public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncNodeSerializer<IDataType>
     {
         private readonly IDataTypeService dataTypeService;
         private readonly ConfigurationSerializerCollection configurationSerializers;

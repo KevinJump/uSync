@@ -19,7 +19,7 @@ namespace uSync8.ContentEdition.Serializers
     /// </summary>
     [SyncSerializer("19FA7E6D-3B88-44AA-AED4-94634C90A5B4", "RelationTypeSerializer", uSyncConstants.Serialization.RelationType)]
     public class RelationTypeSerializer
-        : SyncSerializerBase<IRelationType>, ISyncOptionsSerializer<IRelationType>
+        : SyncSerializerBase<IRelationType>, ISyncNodeSerializer<IRelationType>
     {
         private IRelationService relationService;
 

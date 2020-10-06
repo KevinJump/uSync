@@ -18,7 +18,7 @@ using uSync8.Core.Serialization;
 namespace uSync8.ContentEdition.Serializers
 {
     [SyncSerializer("C4E0E6F8-2742-4C7A-9244-321D5592987A", "contentTemplateSerializer", uSyncConstants.Serialization.Content)]
-    public class ContentTemplateSerializer : ContentSerializer, ISyncOptionsSerializer<IContent>
+    public class ContentTemplateSerializer : ContentSerializer, ISyncNodeSerializer<IContent>
     {
         private readonly IContentTypeService contentTypeService;
 
