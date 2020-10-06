@@ -314,7 +314,7 @@ namespace uSync8.BackOffice.Controllers
 
             var message = new uSyncWarningMessage();
 
-            if (!uSyncService.CheckVersionFile(this.settings.RootFolder))
+            if (this.settings.ShowVersionCheckWarning && !uSyncService.CheckVersionFile(this.settings.RootFolder))
             {
                 message.Type = "info";
                 message.Message = Services.TextService.Localize("usync", "oldformat");

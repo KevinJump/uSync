@@ -77,6 +77,13 @@ namespace uSync8.BackOffice.Configuration
         /// </summary>
         public bool CacheFolderKeys { get; set; } = true;
 
+
+        /// <summary>
+        ///  Show a version check warning to the user if the folder version is less
+        ///  than the version expected by uSync.
+        /// </summary>
+        public bool ShowVersionCheckWarning { get; set; } = false;
+
         /// <summary>
         ///  Get the default handler set
         /// </summary>

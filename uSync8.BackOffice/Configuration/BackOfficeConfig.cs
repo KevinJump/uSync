@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 
+using AutoMapper.QueryableExtensions.Impl;
+
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
@@ -71,6 +73,7 @@ namespace uSync8.BackOffice.Configuration
             settings.AddOnPing = node.Element("AddOnPing").ValueOrDefault(true);
             settings.RebuildCacheOnCompletion = node.Element("RebuildCacheOnCompletion").ValueOrDefault(false);
             settings.FailOnMissingParent = node.Element("FailOnMissingParent").ValueOrDefault(true);
+            settings.ShowVersionCheckWarning = node.Element("ShowVersionCheckWarning").ValueOrDefault(false);
 
             settings.CacheFolderKeys = node.Element("CacheFolderKeys").ValueOrDefault(true);
 
@@ -207,6 +210,7 @@ namespace uSync8.BackOffice.Configuration
             node.CreateOrSetElement("ReportDebug", settings.ReportDebug);
             node.CreateOrSetElement("RebuildCacheOnCompletion", settings.RebuildCacheOnCompletion);
             node.CreateOrSetElement("FailOnMissingParent", settings.FailOnMissingParent);
+            node.CreateOrSetElement("ShowVersionCheckWarning", settings.ShowVersionCheckWarning);
 
             if (settings.HandlerSets.Count > 0)
             {
