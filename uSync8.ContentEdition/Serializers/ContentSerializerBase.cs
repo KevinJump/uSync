@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 
+using ICSharpCode.SharpZipLib.Zip.Compression;
+
 using Umbraco.Core;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
@@ -714,9 +716,19 @@ namespace uSync8.ContentEdition.Serializers
             return default(TObject);
         }
 
-        protected virtual TObject FindItem(string alias, Guid parent)
+        protected virtual TObject FindItem(string alias, Guid parentKey)
         {
-            return FindItem(alias, FindItem(parent));
+            var parentItem = FindItem(parentKey);
+            if (parentItem != null)
+            {
+                return FindItem(alias, parentItem);
+            }
+            else if (parentKey == Guid.Empty)
+            {
+                FindAtRoot(alias);
+            }
+
+            return default;
         }
 
         protected virtual TObject FindItem(string alias, TObject parent)
