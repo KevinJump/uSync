@@ -32,8 +32,8 @@ namespace uSync8.ContentEdition.Serializers
         // these save us 20-40% time on checks in content and media
         // protected Dictionary<string, string> pathCache;
         // not thread safe ??
-        protected Dictionary<string, string> pathCache;
         protected Dictionary<int, Tuple<Guid, string>> nameCache;
+        protected Dictionary<string, string> pathCache;
 
         protected string relationAlias;
 
@@ -631,41 +631,53 @@ namespace uSync8.ContentEdition.Serializers
         protected override string GetItemBaseType(XElement node)
             => node.Name.LocalName;
 
-        public virtual string GetItemPath(TObject item)
-        {
-            if (pathCache.ContainsKey(item.Path)) return pathCache[item.Path];
+        public virtual string GetItemPath(TObject item) => GetFriendlyPath(item.Path);
 
-            if (item.Trashed)
+        /// <summary>
+        ///  Get the friendly path for an item, leaning on our internal cache
+        ///  as best we can.
+        /// </summary>
+        /// <remarks>
+        ///  The path is a list of ids, e.g -1,1024,1892,2094,4811
+        ///  
+        ///  for speed we cache path lookups so we don't have to do them again, 
+        ///  (e.g -1,1024,1892) - 
+        ///  
+        ///  so when we get a path from a node, we want to find the largest 
+        ///  string of ids that is cached, and then we will have to lookup 
+        ///  the remainder, 
+        ///  
+        ///  we use to do this by recursing down, but entityService.GetAll is 
+        ///  faster then individual calls to Get - so its quicker to do it
+        ///  in a batch, as long as we don't ask for the ones we already know 
+        ///  about. 
+        /// </remarks>
+        private string GetFriendlyPath(string path)
+        {
+            var ids = path.ToDelimitedList().Select(x => int.Parse(x));
+            var lookups = new List<int>();
+            var friendlyPath = "";
+
+            foreach(var id in ids)
             {
-                var parent = GetTrashedParent(item);
-                if (parent != null)
+                if (!nameCache.ContainsKey(id))
                 {
-                    return GetItemPath(parent) + "/" + item.Name.ToSafeAlias();
+                    lookups.Add(id);
+                }
+                else
+                {
+                    friendlyPath += "/" + nameCache[id].Item2.ToSafeAlias();
                 }
             }
 
-            var entity = entityService.Get(item.Id);
-            if (entity != null)
-                return GetItemPath(entity);
-
-            return "";
-        }
-
-        protected virtual string GetItemPath(IEntitySlim item)
-        {
-            // path caching, stops us looking up the same path all the time.
-            if (pathCache.ContainsKey(item.Path)) return pathCache[item.Path];
-
-            var path = "";
-            if (item.ParentId != -1)
+            var items = entityService.GetAll(this.umbracoObjectType, lookups.ToArray());
+            foreach(var item in items)
             {
-                var parent = entityService.Get(item.ParentId);
-                if (parent != null)
-                    path += GetItemPath(parent);
+                nameCache[item.Id] = new Tuple<Guid, string>(item.Key, item.Name);
+                friendlyPath += "/" + item.Name.ToSafeAlias();
             }
 
-            pathCache[item.Path] = path + "/" + item.Name.ToSafeAlias();
-            return pathCache[item.Path];
+            return friendlyPath;
         }
 
         public override SyncAttempt<XElement> SerializeEmpty(TObject item, SyncActionType change, string alias)
@@ -849,9 +861,6 @@ namespace uSync8.ContentEdition.Serializers
 
         private void CleanCaches(int id)
         {
-            // clear the path cache of anything with this id.
-            pathCache.RemoveAll(x => x.Key.Contains(id.ToString()));
-
             // clean the name cache for this id.
             nameCache.Remove(id);
         }

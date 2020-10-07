@@ -107,6 +107,9 @@ namespace uSync8.ContentEdition.Serializers
             return null;
         }
 
+        public override string GetItemPath(IContent item)
+            => base.GetItemPath(item) + "/" + item.Name.ToSafeAlias();
+
         protected override IContent FindItem(int id)
             => contentService.GetBlueprintById(id);
 
