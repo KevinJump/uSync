@@ -242,6 +242,21 @@ namespace uSync8.Core.Tracking
                     // now we need to make the XPath for the children this will be [key = ''] or [@key =''] 
                     // depending if its an attribute or element key
                     currentNodePath += MakeKeyPath(change.Repeating.Key, currentKey, change.Repeating.KeyIsAttribute);
+                    
+                    // now see if we can find that node in the target elements we have loaded 
+                    targetNode = GetTarget(targetItems, change.Repeating.Key, currentKey, change.Repeating.KeyIsAttribute);
+
+                    if (targetNode == null && !string.IsNullOrWhiteSpace(change.Repeating.Key2))
+                    {
+                        // we couldn't find it, but we have a second key to look up, so lets do that. 
+                        currentKey = GetKeyValue(currentNode, change.Repeating.Key2, change.Repeating.Key2IsAttribute);
+                        if (currentKey == string.Empty) continue;
+                        currentNodePath = path + MakeKeyPath(change.Repeating.Key2, currentKey, change.Repeating.Key2IsAttribute);
+
+                        targetNode = GetTarget(targetItems, change.Repeating.Key2, currentKey, change.Repeating.Key2IsAttribute);
+                    }
+
+                    // make the name 
                     if (!string.IsNullOrWhiteSpace(change.Repeating.Name))
                     {
                         var itemName = GetKeyValue(currentNode, change.Repeating.Name, change.Repeating.NameIsAttribute);
@@ -250,9 +265,6 @@ namespace uSync8.Core.Tracking
                             currentNodeName += $": {itemName}";
                         }
                     }
-
-                    // now see if we can find that node in the target elements we have loaded 
-                    targetNode = GetTarget(targetItems, change.Repeating.Key, currentKey, change.Repeating.KeyIsAttribute);
                 }
 
                 if (targetNode == null)
@@ -309,6 +321,12 @@ namespace uSync8.Core.Tracking
 
                         targetNodePath += MakeKeyPath(change.Repeating.Key, targetKey, change.Repeating.KeyIsAttribute);
                         var currentNode = GetTarget(currentItems, change.Repeating.Key, targetKey, change.Repeating.KeyIsAttribute);
+                        if (currentNode == null && !string.IsNullOrWhiteSpace(change.Repeating.Key2))
+                        {
+                            var targetKey2 = GetKeyValue(targetItem, change.Repeating.Key2, change.Repeating.Key2IsAttribute);
+                            currentNode = GetTarget(currentItems, change.Repeating.Key2, targetKey2, change.Repeating.Key2IsAttribute);
+                        }
+
                         if (currentNode == null)
                         {
                             missing.Add(targetItem);
@@ -565,11 +583,23 @@ namespace uSync8.Core.Tracking
             Name = name;
         }
 
+        public RepeatingInfo(string key, string key2, string value, string name) 
+            : this(key, value, name)
+        {
+            Key2 = key2;
+        }
+
         /// <summary>
         ///  Element used to match items in a collection of nodes
         ///  (e.g Key)
         /// </summary>
         public string Key { get; set; }
+
+        /// <summary>
+        ///  secondary element used to match items (e.g if key fails, we check alias)
+        /// </summary>
+        public string Key2 { get; set; }
+        
 
         /// <summary>
         ///  The repeating element name 
@@ -587,6 +617,8 @@ namespace uSync8.Core.Tracking
         /// indicates if the key is actually an attribute on the node.
         /// </summary>
         public bool KeyIsAttribute { get; set; }
+
+        public bool Key2IsAttribute { get; set; }
 
         public bool NameIsAttribute { get; set; }
 

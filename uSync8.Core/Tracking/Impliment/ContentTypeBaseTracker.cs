@@ -39,7 +39,7 @@ namespace uSync8.Core.Tracking.Impliment
                         {
                             new TrackedItem("Property", "/GenericProperty")
                             {
-                                Repeating = new RepeatingInfo("Key", "/GenericProperty", "Name"),
+                                Repeating = new RepeatingInfo("Key", "Alias", "/GenericProperty", "Name"),
                                 Children = new List<TrackedItem>()
                                 {
                                     new TrackedItem("Key", "/Key", true),
