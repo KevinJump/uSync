@@ -19,6 +19,9 @@ namespace uSync8.Core.Tracking
     public abstract class SyncBaseTracker<TObject>
         where TObject : IEntity
     {
+
+        private const string seperator = " > "; 
+
         protected readonly ISyncSerializer<TObject> serializer;
 
         public SyncBaseTracker(ISyncSerializer<TObject> serializer)
@@ -262,7 +265,7 @@ namespace uSync8.Core.Tracking
                         var itemName = GetKeyValue(currentNode, change.Repeating.Name, change.Repeating.NameIsAttribute);
                         if (!string.IsNullOrWhiteSpace(itemName))
                         {
-                            currentNodeName += $": {itemName}";
+                            currentNodeName += $"{seperator}{itemName}";
                         }
                     }
                 }
@@ -480,7 +483,7 @@ namespace uSync8.Core.Tracking
             if (string.IsNullOrWhiteSpace(name)) return parent;
 
             if (!string.IsNullOrWhiteSpace(parent))
-                return $"{parent}: " + name;
+                return $"{parent}{seperator}{name}";
 
             return name;
         }
