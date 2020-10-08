@@ -60,9 +60,8 @@ namespace uSync8.Core.Tracking.Impliment
                     {
                         new TrackedItem("ContentType", "/ContentType")
                         {
-                            Repeating = new RepeatingInfo("SortOrder", string.Empty, "Key")
+                            Repeating = new RepeatingInfo(string.Empty, string.Empty, string.Empty)
                             {
-                                KeyIsAttribute = true,
                                 NameIsAttribute = true
                             }
                         }
