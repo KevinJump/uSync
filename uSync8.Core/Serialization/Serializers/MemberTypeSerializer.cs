@@ -77,10 +77,17 @@ namespace uSync8.Core.Serialization.Serializers
         //   get removed when required. 
         // 
 
-        private static string[] buildInProperties = new string[] {
-            "umbracoMemberApproved", "umbracoMemberComments", "umbracoMemberFailedPasswordAttempts",
-            "umbracoMemberLastLockoutDate", "umbracoMemberLastLogin", "umbracoMemberLastPasswordChangeDate",
-            "umbracoMemberLockedOut", "umbracoMemberPasswordRetrievalAnswer", "umbracoMemberPasswordRetrievalQuestion"
+        private static Dictionary<string, string> buildInProperties = new Dictionary<string, string>() 
+        {
+            {  "umbracoMemberApproved", "e79dccfb-0000-0000-0000-000000000000" },
+            {  "umbracoMemberComments", "2a280588-0000-0000-0000-000000000000" },
+            {  "umbracoMemberFailedPasswordAttempts", "0f2ea539-0000-0000-0000-000000000000" },
+            {  "umbracoMemberLastLockoutDate", "3a7bc3c6-0000-0000-0000-000000000000" },
+            {  "umbracoMemberLastLogin", "b5e309ba-0000-0000-0000-000000000000" },
+            {  "umbracoMemberLastPasswordChangeDate", "ded56d3f-0000-0000-0000-000000000000" },
+            {  "umbracoMemberLockedOut", "c36093d2-0000-0000-0000-000000000000" },
+            {  "umbracoMemberPasswordRetrievalAnswer", "9700bd39-0000-0000-0000-000000000000" },
+            {  "umbracoMemberPasswordRetrievalQuestion", "e2d9286a-0000-0000-0000-000000000000" },
         };
 
         protected override XElement SerializeProperties(IMemberType item)
@@ -89,14 +96,14 @@ namespace uSync8.Core.Serialization.Serializers
             foreach (var property in node.Elements("GenericProperty"))
             {
                 var alias = property.Element("Alias").ValueOrDefault(string.Empty);
-                if (!string.IsNullOrWhiteSpace(alias) && buildInProperties.InvariantContains(alias))
+                if (!string.IsNullOrWhiteSpace(alias) && buildInProperties.ContainsKey(alias))
                 {
-                    var keyName = alias;
+                    var key = buildInProperties[alias];
                     if (!item.Alias.InvariantEquals("Member"))
                     {
-                        keyName = $"{item.Alias}{alias}";
+                        key = $"{item.Alias}{alias}".GetDeterministicHashCode().ToGuid().ToString();
                     }
-                    property.Element("Key").Value = keyName.GetHashCode().ToGuid().ToString();
+                    property.Element("Key").Value = key;
                 }
             }
             return node;
