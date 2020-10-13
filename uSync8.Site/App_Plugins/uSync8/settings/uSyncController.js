@@ -2,6 +2,7 @@
     'use strict';
 
     function uSyncController($scope,
+        eventsService,
         notificationsService,
         editorService,
         uSync8DashboardService,
@@ -157,6 +158,7 @@
                     vm.savings.show = true;
                     vm.savings.title = 'All items exported.';
                     vm.savings.message = 'Now go wash your hands 🧼!';
+                    eventsService.emit('usync-dashboard.export.complete');
                 }, function (error) {
                     notificationsService.error('Exporting', error.data.ExceptionMessage);
                     vm.exportButton.state = 'error';
@@ -180,7 +182,7 @@
                     vm.working = false;
                     vm.reported = true;
                     vm.importButton.state = 'success';
-
+                    eventsService.emit('usync-dashboard.import.complete');
                     calculateTimeSaved(vm.results);
                 }, function (error) {
                     vm.importButton.state = 'error';
