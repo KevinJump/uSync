@@ -77,6 +77,7 @@
     <None Include="App_Plugins\uSyncHistory\package.manifest" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="App_Plugins\uSyncHistory\confirmdraw.html" />
     <Content Include="App_Plugins\uSyncHistory\history.html" />
     <Content Include="App_Plugins\uSyncHistory\historyDialog.html" />
     <Content Include="App_Plugins\uSyncHistory\syncHistoryController.js" />

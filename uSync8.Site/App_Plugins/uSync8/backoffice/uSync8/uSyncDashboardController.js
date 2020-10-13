@@ -2,9 +2,13 @@
     'use strict';
 
     function dashboardController(
-        $scope, $timeout, navigationService, notificationsService, uSync8DashboardService) {
+        $scope, $timeout, navigationService, eventsService, uSync8DashboardService) {
 
         var vm = this;
+
+        vm.selectNavigationItem = function (item) {
+            eventsService.emit('usync-dashboard.tab.change', item);
+        }
 
         vm.page = {
             title: 'uSync 8',

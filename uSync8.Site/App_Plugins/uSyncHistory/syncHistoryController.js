@@ -1,12 +1,20 @@
 (function () {
     'use strict';
 
-    function historyController($scope, editorService, uSyncHistoryService) {
+    function historyController($scope, eventsService, overlayService, editorService, uSyncHistoryService) {
 
         var vm = this;
+        vm.loaded = false;
         vm.viewDetails = viewDetails;
+        vm.showPrompt = false;
+        vm.clearHistory = clearHistory;
 
-        loadHistories();
+        eventsService.on('usync-dashboard.tab.change', function (event, args) {
+            if (args.alias === 'history' && vm.loaded === false) {
+                loadHistories();
+                vm.loaded = true;
+            }
+        });
 
         function loadHistories() {
 
@@ -26,6 +34,37 @@
                     editorService.close();
                 }
             });
+        }
+
+        function clearHistory() {
+
+            var overlay = {
+                "view": "default",
+                "title": "Confirm delete",
+                "content": "Do you want to remove all histroy ?",
+                "disableBackdropClick": true,
+                "disableEscKey": true,
+                "submitButtonLabel": "Keep History",
+                "closeButtonLabel": "Remove History",
+                submit: function () {
+                    overlayService.close();
+                },
+                close: function (model) {
+
+                    model.submitButtonState = "busy";
+
+                    uSyncHistoryService.clearHistory()
+                        .then(function () {
+                            loadHistories();
+                            notificationsService.success('Removed', 'Sync history has been cleared');
+                        });
+
+                    overlayService.close();
+
+                }
+            };
+
+            overlayService.open(overlay);
 
         }
 

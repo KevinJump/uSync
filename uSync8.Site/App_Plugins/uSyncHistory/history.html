@@ -2,16 +2,18 @@
 
     <umb-box>
         <umb-box-header title="Sync History"
-                        description="History of everything that has been imported via uSync"></umb-box-header>
+                        description="History of everything that has been imported via uSync">
+            <umb-button ng-if="vm.histories.length > 0"
+                        type="button"
+                        button-style="action"
+                        action="vm.clearHistory()"
+                        label="Clear history"></umb-button>
+        </umb-box-header>
     </umb-box>
 
-    <umb-box>
+    <umb-box ng-if="vm.histories.length > 0">
         <umb-box-content>
-
-            {{vm.histories.count}}
-
             <div class="umb-table">
-
                 <div class="umb-table-head">
                     <div class="umb-table-row">
                         <div class="umb-table-cell"></div>
@@ -50,5 +52,16 @@
 
         </umb-box-content>
     </umb-box>
+
+
+    <umb-empty-state ng-if="vm.histories.length == 0"
+                     position="center">
+        <h5>History is written by the winners</h5>
+        <p>
+            There is currently no sync history on this installation.
+        </p>
+    </umb-empty-state>
+
+    
 
 </div>
