@@ -20,7 +20,7 @@ namespace uSync8.Core.Tracking
         where TObject : IEntity
     {
 
-        private const string seperator = " > "; 
+        private const string seperator = " > ";
 
         protected readonly ISyncSerializer<TObject> serializer;
 
@@ -51,7 +51,7 @@ namespace uSync8.Core.Tracking
         }
 
         public virtual IEnumerable<uSyncChange> GetChanges(XElement node, XElement current, SyncSerializerOptions options)
-        { 
+        {
             if (serializer.IsEmpty(node))
             {
                 return GetEmptyFileChanges(node, current).AsEnumerableOfOne();
@@ -245,7 +245,7 @@ namespace uSync8.Core.Tracking
                     // now we need to make the XPath for the children this will be [key = ''] or [@key =''] 
                     // depending if its an attribute or element key
                     currentNodePath += MakeKeyPath(change.Repeating.Key, currentKey, change.Repeating.KeyIsAttribute);
-                    
+
                     // now see if we can find that node in the target elements we have loaded 
                     targetNode = GetTarget(targetItems, change.Repeating.Key, currentKey, change.Repeating.KeyIsAttribute);
 
@@ -586,7 +586,7 @@ namespace uSync8.Core.Tracking
             Name = name;
         }
 
-        public RepeatingInfo(string key, string key2, string value, string name) 
+        public RepeatingInfo(string key, string key2, string value, string name)
             : this(key, value, name)
         {
             Key2 = key2;
@@ -602,7 +602,7 @@ namespace uSync8.Core.Tracking
         ///  secondary element used to match items (e.g if key fails, we check alias)
         /// </summary>
         public string Key2 { get; set; }
-        
+
 
         /// <summary>
         ///  The repeating element name 

@@ -1,9 +1,6 @@
 ﻿using System.Collections.Generic;
-using System.Dynamic;
 using System.Linq;
 using System.Xml.Linq;
-
-using AutoMapper.QueryableExtensions.Impl;
 
 using Umbraco.Core.Composing;
 

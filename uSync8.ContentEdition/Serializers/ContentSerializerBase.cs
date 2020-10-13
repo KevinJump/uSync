@@ -658,7 +658,7 @@ namespace uSync8.ContentEdition.Serializers
             var lookups = new List<int>();
             var friendlyPath = "";
 
-            foreach(var id in ids)
+            foreach (var id in ids)
             {
                 if (!nameCache.ContainsKey(id))
                 {
@@ -671,7 +671,7 @@ namespace uSync8.ContentEdition.Serializers
             }
 
             var items = entityService.GetAll(this.umbracoObjectType, lookups.ToArray());
-            foreach(var item in items)
+            foreach (var item in items)
             {
                 nameCache[item.Id] = new Tuple<Guid, string>(item.Key, item.Name);
                 friendlyPath += "/" + item.Name.ToSafeAlias();

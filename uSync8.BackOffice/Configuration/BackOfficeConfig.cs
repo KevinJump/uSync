@@ -4,8 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 
-using AutoMapper.QueryableExtensions.Impl;
-
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 

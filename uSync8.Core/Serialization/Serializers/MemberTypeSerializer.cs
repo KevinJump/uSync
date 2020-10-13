@@ -77,7 +77,7 @@ namespace uSync8.Core.Serialization.Serializers
         //   get removed when required. 
         // 
 
-        private static Dictionary<string, string> buildInProperties = new Dictionary<string, string>() 
+        private static Dictionary<string, string> buildInProperties = new Dictionary<string, string>()
         {
             {  "umbracoMemberApproved", "e79dccfb-0000-0000-0000-000000000000" },
             {  "umbracoMemberComments", "2a280588-0000-0000-0000-000000000000" },

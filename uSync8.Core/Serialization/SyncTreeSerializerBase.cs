@@ -67,7 +67,7 @@ namespace uSync8.Core.Serialization
             // import would show an error. 
             //
             // but it is much faster?
-            
+
             //if (change != ChangeType.NoChange)
             //{
             //    // check parent matches.

@@ -33,7 +33,7 @@ namespace uSync8.Core
             else
                 return syncTrackers.GetChanges<TObject>(node, currentNode, options);
         }
-            
+
 
         public IEnumerable<ISyncDependencyChecker<TObject>> GetCheckers<TObject>()
             => syncCheckers.GetCheckers<TObject>();
