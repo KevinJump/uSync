@@ -658,7 +658,7 @@ namespace uSync8.ContentEdition.Serializers
             var lookups = new List<int>();
             var friendlyPath = "";
 
-            foreach (var id in ids)
+            foreach (var id in ids.Where(x => x != -1))
             {
                 if (!nameCache.ContainsKey(id))
                 {
