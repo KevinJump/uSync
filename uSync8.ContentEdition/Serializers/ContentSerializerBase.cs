@@ -663,6 +663,7 @@ namespace uSync8.ContentEdition.Serializers
                 if (!nameCache.ContainsKey(id))
                 {
                     lookups.Add(id);
+                    friendlyPath += $"/[{id}]";
                 }
                 else
                 {
@@ -674,7 +675,7 @@ namespace uSync8.ContentEdition.Serializers
             foreach (var item in items)
             {
                 nameCache[item.Id] = new Tuple<Guid, string>(item.Key, item.Name);
-                friendlyPath += "/" + item.Name.ToSafeAlias();
+                friendlyPath = friendlyPath.Replace($"[{item.Id}]", item.Name.ToSafeAlias());
             }
 
             return friendlyPath;
