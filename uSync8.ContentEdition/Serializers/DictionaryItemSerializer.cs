@@ -71,7 +71,11 @@ namespace uSync8.ContentEdition.Serializers
                 item.Key = key;
             }
 
-            details.AddRange(DeserializeTranslations(item, node));
+            // key only translationm, would not add the translation values. 
+            if (!options.GetSetting("KeysOnly", false))
+            {
+                details.AddRange(DeserializeTranslations(item, node));
+            }
 
             return SyncAttempt<IDictionaryItem>.Succeed(item.ItemKey, item, ChangeType.Import, details);
         }
