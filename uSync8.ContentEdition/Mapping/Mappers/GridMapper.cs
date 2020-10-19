@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 using Umbraco.Core;
+using Umbraco.Core.Composing;
 using Umbraco.Core.Services;
 
 using uSync8.Core;
@@ -44,7 +46,7 @@ namespace uSync8.ContentEdition.Mapping.Mappers
             var stringValue = value.ToString();
             if (string.IsNullOrWhiteSpace(stringValue)) return Enumerable.Empty<uSyncDependency>();
 
-            return GetGridDependencies<uSyncDependency>(stringValue, ProcessControl, flags);
+            return GetGridDependencies(stringValue, ProcessControl, flags);
         }
 
         public override string GetImportValue(string value, string editorAlias)
@@ -147,12 +149,12 @@ namespace uSync8.ContentEdition.Mapping.Mappers
             return dependencies;
         }
 
-        private IEnumerable<TObject> GetGridDependencies<TObject>(string gridContent, Func<JObject, DependencyFlags, IEnumerable<TObject>> callback, DependencyFlags flags)
+        private IEnumerable<uSyncDependency> GetGridDependencies(string gridContent, Func<JObject, DependencyFlags, IEnumerable<uSyncDependency>> callback, DependencyFlags flags)
         {
             var grid = JsonConvert.DeserializeObject<JObject>(gridContent);
-            if (grid == null) return Enumerable.Empty<TObject>();
+            if (grid == null) return Enumerable.Empty<uSyncDependency>();
 
-            var items = new List<TObject>();
+            var items = new List<uSyncDependency>();
 
             var sections = GetArray(grid, "sections");
             foreach (var section in sections.Cast<JObject>())
@@ -160,9 +162,15 @@ namespace uSync8.ContentEdition.Mapping.Mappers
                 var rows = GetArray(section, "rows");
                 foreach (var row in rows.Cast<JObject>())
                 {
+                    var rowStyles = GetObject(row, "styles");
+                    if (rowStyles != null) items.AddRange(GetStyleDependencies(rowStyles));
+
                     var areas = GetArray(row, "areas");
                     foreach (var area in areas.Cast<JObject>())
                     {
+                        var areaStyles = GetObject(area, "styles");
+                        if (areaStyles != null) items.AddRange(GetStyleDependencies(areaStyles));
+
                         var controls = GetArray(area, "controls");
                         foreach (var control in controls.Cast<JObject>())
                         {
@@ -175,6 +183,49 @@ namespace uSync8.ContentEdition.Mapping.Mappers
             }
 
             return items;
+        }
+
+        /// <summary>
+        ///  Attempt to extact any media values out of the style sheet entries in the grid config.
+        /// </summary>
+        private IEnumerable<uSyncDependency> GetStyleDependencies(JObject style)
+        {
+            if (style == null) return Enumerable.Empty<uSyncDependency>();
+
+            var dependencies = new List<uSyncDependency>();
+
+            foreach (var value in style.ToObject<Dictionary<string, string>>())
+            {
+                // style property contains a url value.
+                if (value.Value.InvariantContains("url")) { 
+                    dependencies.AddRange(ProcessStyleMedia(value.Value));
+                }
+            }
+
+            return dependencies;
+        }
+
+        private Regex UrlRegEx = new Regex(@"(?:url\s*[(]*\s*)(.+)(?:[)])", RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace);
+
+        /// <summary>
+        ///  Process a URL() value and get the media dependency for the inner value (if there is one).
+        /// </summary>
+        /// <param name="urlValue"></param>
+        /// <returns></returns>
+        private IEnumerable<uSyncDependency> ProcessStyleMedia(string urlValue)
+        {
+            foreach(Match match in UrlRegEx.Matches(urlValue))
+            {
+                if (match.Groups.Count > 1)
+                {
+                    var mediaPath = match.Groups[1].Value.Trim(new char[] { '\'', '\"' });
+                    var item = Current.Services.MediaService.GetMediaByPath(mediaPath);
+                    if (item != null)
+                    {
+                        yield return CreateDependency(item.GetUdi(), DependencyFlags.IncludeMedia);
+                    }
+                }
+            }
         }
 
         #endregion
@@ -217,6 +268,18 @@ namespace uSync8.ContentEdition.Mapping.Mappers
             }
 
             return new JArray();
+        }
+
+        private JObject GetObject(JObject obj, string propertyName)
+        {
+            if (obj.TryGetValue(propertyName, out JToken token))
+            {
+                if (token is JObject value)
+                    return value;
+            }
+
+            return null;               
+
         }
     }
 }
