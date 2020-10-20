@@ -576,6 +576,22 @@ namespace uSync8.BackOffice.SyncHandlers
                     return false;
                 }
             }
+
+
+            // Ignore alias setting. 
+            // if its set the thing with this alias is ignored.
+            var ignore = config.GetSetting<string>("IgnoreAliases", string.Empty);
+            if (!string.IsNullOrWhiteSpace(ignore))
+            {
+                var ignoreList = ignore.ToDelimitedList();
+                if (ignoreList.InvariantContains(node.GetAlias()))
+                {
+                    logger.Debug(handlerType, "Ignore: Item {alias} is in the ignore list", node.GetAlias());
+                    return false;
+                }
+            }
+
+
             return true;
         }
 
