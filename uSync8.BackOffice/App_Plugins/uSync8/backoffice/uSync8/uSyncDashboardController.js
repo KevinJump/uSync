@@ -12,7 +12,7 @@
 
         vm.page = {
             title: 'uSync 8',
-            description: '8.1.x',
+            description: '...',
             navigation: [
                 {
                     'name': 'uSync',
@@ -42,6 +42,14 @@
 
         uSync8DashboardService.getAddOns()
             .then(function (result) {
+
+                vm.version = 'v' + result.data.Version;
+                if (result.data.AddOnString.length > 0) {
+                    vm.version += ' + ' + result.data.AddOnString;
+                }
+
+                vm.page.description = vm.version;
+
                 vm.addOns = result.data.AddOns;
                 vm.addOns.forEach(function (value, key) {
                     if (value.View !== '') {

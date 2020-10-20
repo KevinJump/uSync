@@ -1,8 +1,10 @@
 ﻿<div ng-controller="uSyncSettingsDashboardController as vm">
     <umb-editor-view footer="false">
         <umb-editor-header name="vm.page.title"
-                           hide-description="true"
+                           description="vm.page.description"
+                           hide-description="false"
                            name-locked="true"
+                           description-locked="true"
                            hide-alias="true"
                            hide-icon="true"
                            navigation="vm.page.navigation"
