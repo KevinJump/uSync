@@ -84,7 +84,11 @@ namespace uSync8.Core.Serialization.Serializers
             }
 
             // config 
-            details.AddRange(DeserializeConfiguration(item, node));
+            if (ShouldDeserilizeConfig(name, editorAlias, options))
+            {
+                details.AddRange(DeserializeConfiguration(item, node));
+            }
+
             details.AddNotNull(SetFolderFromElement(item, info.Element("Folder")));
 
             return SyncAttempt<IDataType>.Succeed(item.Name, item, ChangeType.Import, details);
@@ -270,5 +274,36 @@ namespace uSync8.Core.Serialization.Serializers
 
         protected override string ItemAlias(IDataType item)
             => item.Name;
+
+
+
+        /// <summary>
+        ///  Checks the config to see if we should be deserializing the config element of a data type.
+        /// </summary>
+        /// <remarks>
+        ///   a key value on the handler will allow users to add editorAliases that they don't want the 
+        ///   config importing for. 
+        ///   e.g - to not import all the colour picker values.
+        ///   <code>
+        ///      <Add Key="NoConfigEditors" Value="Umbraco.ColorPicker" />
+        ///   </code>
+        ///   
+        ///   To ignore just specific colour pickers (so still import config for other colour pickers)
+        ///   <code>
+        ///     <Add Key="NoConfigNames" Value="Approved Colour,My Colour Picker" />
+        ///   </code>
+        /// </remarks>
+        private bool ShouldDeserilizeConfig(string itemName, string editorAlias, SyncSerializerOptions options)
+        {
+            var noConfigEditors = options.GetSetting("NoConfigEditors", string.Empty);
+            if (!string.IsNullOrWhiteSpace(noConfigEditors) && noConfigEditors.InvariantContains(editorAlias))
+                return false;
+
+            var noConfigAliases = options.GetSetting("NoConfigNames", string.Empty);
+            if (!string.IsNullOrWhiteSpace(noConfigAliases) && noConfigAliases.InvariantContains(itemName))
+                return false;
+
+            return true;
+        }
     }
 }
