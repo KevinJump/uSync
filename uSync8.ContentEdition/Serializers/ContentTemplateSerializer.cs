@@ -34,6 +34,7 @@ namespace uSync8.ContentEdition.Serializers
             : base(entityService, localizationService, relationService, logger, contentService, fileService, syncMappers)
         {
             this.contentTypeService = contentTypeService;
+            this.umbracoObjectType = UmbracoObjectTypes.DocumentBlueprint;
         }
 
         protected override XElement SerializeInfo(IContent item, SyncSerializerOptions options)
@@ -107,8 +108,7 @@ namespace uSync8.ContentEdition.Serializers
             return null;
         }
 
-        public override string GetItemPath(IContent item)
-            => base.GetItemPath(item) + "/" + item.Name.ToSafeAlias();
+        // public override string GetItemPath(IContent item) => base.GetItemPath(item) + "/" + item.Name.ToSafeAlias(); 
 
         protected override IContent FindItem(int id)
             => contentService.GetBlueprintById(id);
