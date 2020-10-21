@@ -26,12 +26,6 @@
                     'alias': 'settings',
                     'icon': 'icon-settings',
                     'view': Umbraco.Sys.ServerVariables.umbracoSettings.appPluginsPath + '/uSync8/settings/settings.html'
-                },
-                {
-                    'name': 'Add ons',
-                    'alias': 'expansion',
-                    'icon': 'icon-box',
-                    'view': Umbraco.Sys.ServerVariables.umbracoSettings.appPluginsPath + '/usync8/settings/expansion.html'
                 } 
             ]
         };
@@ -49,11 +43,23 @@
                 }
 
                 vm.page.description = vm.version;
-
                 vm.addOns = result.data.AddOns;
+
+                var insertOffset = 1;
+                if (vm.version.indexOf('Complete') == -1) {
+                    insertOffset = 2;
+                    vm.page.navigation.push(
+                        {
+                            'name': 'Add ons',
+                            'alias': 'expansion',
+                            'icon': 'icon-box',
+                            'view': Umbraco.Sys.ServerVariables.umbracoSettings.appPluginsPath + '/usync8/settings/expansion.html'
+                        });
+                }
+
                 vm.addOns.forEach(function (value, key) {
                     if (value.View !== '') {
-                        vm.page.navigation.splice(vm.page.navigation.length - 2, 0,
+                        vm.page.navigation.splice(vm.page.navigation.length - insertOffset, 0,
                             {
                                 'name': value.DisplayName,
                                 'alias': value.Alias,
