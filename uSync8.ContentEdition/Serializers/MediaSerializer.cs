@@ -25,7 +25,7 @@ using uSync8.Core.Serialization;
 namespace uSync8.ContentEdition.Serializers
 {
     [SyncSerializer("B4060604-CF5A-46D6-8F00-257579A658E6", "MediaSerializer", uSyncConstants.Serialization.Media)]
-    public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncOptionsSerializer<IMedia>
+    public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncNodeSerializer<IMedia>
     {
         private readonly IMediaService mediaService;
 

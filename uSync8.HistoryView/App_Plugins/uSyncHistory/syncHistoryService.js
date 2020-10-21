@@ -6,13 +6,18 @@
         var serviceRoot = Umbraco.Sys.ServerVariables.uSync.historyService;
 
         return {
-            getHistory: getHistory
+            getHistory: getHistory,
+            clearHistory: clearHistory
         };
 
         //////////////
 
         function getHistory() {
             return $http.get(serviceRoot + 'GetHistory');
+        }
+
+        function clearHistory() {
+            return $http.post(serviceRoot + "ClearHistory");
         }
     }
 

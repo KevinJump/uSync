@@ -7,7 +7,7 @@ using uSync8.Core.Tracking;
 
 namespace uSync8.ContentEdition.Tracker
 {
-    public class DictionaryItemTracker : SyncBaseTracker<IDictionaryItem>, ISyncTracker<IDictionaryItem>
+    public class DictionaryItemTracker : SyncBaseTracker<IDictionaryItem>, ISyncNodeTracker<IDictionaryItem>
     {
         public DictionaryItemTracker(ISyncSerializer<IDictionaryItem> serializer) : base(serializer)
         {

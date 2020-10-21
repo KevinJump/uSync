@@ -17,6 +17,8 @@ namespace uSync8.Core
         IEnumerable<ISyncTracker<TObject>> GetTrackers<TObject>();
         IEnumerable<uSyncChange> GetChanges<TObject>(XElement node, SyncSerializerOptions options);
 
+        IEnumerable<uSyncChange> GetChanges<TObject>(XElement node, XElement currentNode, SyncSerializerOptions options);
+
         // dependency checker items
         IEnumerable<ISyncDependencyChecker<TObject>> GetCheckers<TObject>();
         IEnumerable<uSyncDependency> GetDependencies<TObject>(TObject item, DependencyFlags flags);

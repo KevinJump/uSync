@@ -18,7 +18,7 @@ using uSync8.Core.Serialization;
 namespace uSync8.ContentEdition.Serializers
 {
     [SyncSerializer("C4E0E6F8-2742-4C7A-9244-321D5592987A", "contentTemplateSerializer", uSyncConstants.Serialization.Content)]
-    public class ContentTemplateSerializer : ContentSerializer, ISyncOptionsSerializer<IContent>
+    public class ContentTemplateSerializer : ContentSerializer, ISyncNodeSerializer<IContent>
     {
         private readonly IContentTypeService contentTypeService;
 
@@ -34,6 +34,7 @@ namespace uSync8.ContentEdition.Serializers
             : base(entityService, localizationService, relationService, logger, contentService, fileService, syncMappers)
         {
             this.contentTypeService = contentTypeService;
+            this.umbracoObjectType = UmbracoObjectTypes.DocumentBlueprint;
         }
 
         protected override XElement SerializeInfo(IContent item, SyncSerializerOptions options)
@@ -106,6 +107,8 @@ namespace uSync8.ContentEdition.Serializers
 
             return null;
         }
+
+        // public override string GetItemPath(IContent item) => base.GetItemPath(item) + "/" + item.Name.ToSafeAlias(); 
 
         protected override IContent FindItem(int id)
             => contentService.GetBlueprintById(id);

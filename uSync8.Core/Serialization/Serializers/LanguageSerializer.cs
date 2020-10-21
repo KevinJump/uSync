@@ -15,7 +15,7 @@ namespace uSync8.Core.Serialization.Serializers
 {
     [SyncSerializer("8D2381C3-A0F8-43A2-8563-6F12F9F48023", "Language Serializer",
         uSyncConstants.Serialization.Language, IsTwoPass = true)]
-    public class LanguageSerializer : SyncSerializerBase<ILanguage>, ISyncOptionsSerializer<ILanguage>
+    public class LanguageSerializer : SyncSerializerBase<ILanguage>, ISyncNodeSerializer<ILanguage>
     {
         private readonly ILocalizationService localizationService;
 

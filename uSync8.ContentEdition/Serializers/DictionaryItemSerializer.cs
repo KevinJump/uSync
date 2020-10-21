@@ -16,7 +16,7 @@ using uSync8.Core.Serialization;
 namespace uSync8.ContentEdition.Serializers
 {
     [SyncSerializer("4D18F4C3-6EBC-4AAD-8D20-6353BDBBD484", "Dicrionary Serializer", uSyncConstants.Serialization.Dictionary)]
-    public class DictionaryItemSerializer : SyncSerializerBase<IDictionaryItem>, ISyncOptionsSerializer<IDictionaryItem>
+    public class DictionaryItemSerializer : SyncSerializerBase<IDictionaryItem>, ISyncNodeSerializer<IDictionaryItem>
     {
         private readonly ILocalizationService localizationService;
 
@@ -71,7 +71,11 @@ namespace uSync8.ContentEdition.Serializers
                 item.Key = key;
             }
 
-            details.AddRange(DeserializeTranslations(item, node));
+            // key only translationm, would not add the translation values. 
+            if (!options.GetSetting("KeysOnly", false))
+            {
+                details.AddRange(DeserializeTranslations(item, node));
+            }
 
             return SyncAttempt<IDictionaryItem>.Succeed(item.ItemKey, item, ChangeType.Import, details);
         }

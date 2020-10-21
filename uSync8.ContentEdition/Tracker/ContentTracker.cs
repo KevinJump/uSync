@@ -7,7 +7,7 @@ using uSync8.Core.Tracking;
 
 namespace uSync8.ContentEdition.Tracker
 {
-    public class ContentTracker : SyncBaseTracker<IContent>, ISyncTracker<IContent>
+    public class ContentTracker : SyncBaseTracker<IContent>, ISyncNodeTracker<IContent>
     {
         public ContentTracker(ISyncSerializer<IContent> serializer) : base(serializer)
         {
