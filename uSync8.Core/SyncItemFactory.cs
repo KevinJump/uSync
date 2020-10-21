@@ -26,6 +26,14 @@ namespace uSync8.Core
 
         public IEnumerable<uSyncChange> GetChanges<TObject>(XElement node, SyncSerializerOptions options)
             => syncTrackers.GetChanges<TObject>(node, options);
+        public IEnumerable<uSyncChange> GetChanges<TObject>(XElement node, XElement currentNode, SyncSerializerOptions options)
+        {
+            if (currentNode == null)
+                return syncTrackers.GetChanges<TObject>(node, options);
+            else
+                return syncTrackers.GetChanges<TObject>(node, currentNode, options);
+        }
+
 
         public IEnumerable<ISyncDependencyChecker<TObject>> GetCheckers<TObject>()
             => syncCheckers.GetCheckers<TObject>();

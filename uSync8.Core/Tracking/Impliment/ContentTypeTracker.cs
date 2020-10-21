@@ -6,7 +6,7 @@ using uSync8.Core.Serialization;
 
 namespace uSync8.Core.Tracking.Impliment
 {
-    public class ContentTypeTracker : ContentTypeBaseTracker<IContentType>, ISyncTracker<IContentType>
+    public class ContentTypeTracker : ContentTypeBaseTracker<IContentType>, ISyncNodeTracker<IContentType>
     {
         public ContentTypeTracker(ISyncSerializer<IContentType> serializer) : base(serializer)
         {
@@ -60,9 +60,8 @@ namespace uSync8.Core.Tracking.Impliment
                     {
                         new TrackedItem("ContentType", "/ContentType")
                         {
-                            Repeating = new RepeatingInfo("SortOrder", string.Empty, "Key")
+                            Repeating = new RepeatingInfo(string.Empty, string.Empty, string.Empty)
                             {
-                                KeyIsAttribute = true,
                                 NameIsAttribute = true
                             }
                         }

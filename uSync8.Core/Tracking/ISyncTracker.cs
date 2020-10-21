@@ -18,6 +18,10 @@ namespace uSync8.Core.Tracking
     public interface ISyncOptionsTracker<TObject> : ISyncTracker<TObject>
     {
         IEnumerable<uSyncChange> GetChanges(XElement node, SyncSerializerOptions options);
+    }
 
+    public interface ISyncNodeTracker<TObject> : ISyncTracker<TObject>
+    {
+        IEnumerable<uSyncChange> GetChanges(XElement node, XElement current, SyncSerializerOptions options);
     }
 }

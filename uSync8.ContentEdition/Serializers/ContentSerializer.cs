@@ -20,7 +20,7 @@ using uSync8.Core.Serialization;
 namespace uSync8.ContentEdition.Serializers
 {
     [SyncSerializer("5CB57139-8AF7-4813-95AD-C075D74636C2", "ContentSerializer", uSyncConstants.Serialization.Content)]
-    public class ContentSerializer : ContentSerializerBase<IContent>, ISyncOptionsSerializer<IContent>
+    public class ContentSerializer : ContentSerializerBase<IContent>, ISyncNodeSerializer<IContent>
     {
         protected readonly IContentService contentService;
         protected readonly IFileService fileService;
@@ -50,7 +50,9 @@ namespace uSync8.ContentEdition.Serializers
         protected override SyncAttempt<XElement> SerializeCore(IContent item, SyncSerializerOptions options)
         {
             var node = InitializeNode(item, item.ContentType.Alias, options);
+
             var info = SerializeInfo(item, options);
+
             var properties = SerializeProperties(item, options);
 
             node.Add(info);

@@ -6,7 +6,7 @@ using uSync8.Core.Serialization;
 
 namespace uSync8.Core.Tracking.Impliment
 {
-    public class MacroTracker : SyncBaseTracker<IMacro>, ISyncTracker<IMacro>
+    public class MacroTracker : SyncBaseTracker<IMacro>, ISyncNodeTracker<IMacro>
     {
         public MacroTracker(ISyncSerializer<IMacro> serializer) : base(serializer)
         {

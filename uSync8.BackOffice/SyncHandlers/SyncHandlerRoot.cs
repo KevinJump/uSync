@@ -576,6 +576,22 @@ namespace uSync8.BackOffice.SyncHandlers
                     return false;
                 }
             }
+
+
+            // Ignore alias setting. 
+            // if its set the thing with this alias is ignored.
+            var ignore = config.GetSetting<string>("IgnoreAliases", string.Empty);
+            if (!string.IsNullOrWhiteSpace(ignore))
+            {
+                var ignoreList = ignore.ToDelimitedList();
+                if (ignoreList.InvariantContains(node.GetAlias()))
+                {
+                    logger.Debug(handlerType, "Ignore: Item {alias} is in the ignore list", node.GetAlias());
+                    return false;
+                }
+            }
+
+
             return true;
         }
 
@@ -854,7 +870,7 @@ namespace uSync8.BackOffice.SyncHandlers
 
                 var change = IsItemCurrent(node, serializerOptions);
                 var action = uSyncActionHelper<TObject>
-                        .ReportAction(change, node.GetAlias(), !string.IsNullOrWhiteSpace(filename) ? filename : node.GetAlias(), node.GetKey(), this.Alias);
+                        .ReportAction(change.Change, node.GetAlias(), !string.IsNullOrWhiteSpace(filename) ? filename : node.GetAlias(), node.GetKey(), this.Alias);
 
                 action.Message = "";
 
@@ -864,11 +880,11 @@ namespace uSync8.BackOffice.SyncHandlers
                 }
                 else if (action.Change > ChangeType.NoChange)
                 {
-                    action.Details = GetChanges(node, serializerOptions);
+                    action.Details = GetChanges(node, change.CurrentNode, serializerOptions);
                     if (action.Change != ChangeType.Create && (action.Details == null || action.Details.Count() == 0))
                     {
                         action.Message = "xml is diffrent - but properties may not have changed";
-                        action.Details = MakeRawChange(node, serializerOptions).AsEnumerableOfOne();
+                        action.Details = MakeRawChange(node, change.CurrentNode, serializerOptions).AsEnumerableOfOne();
                     }
                     else
                     {
@@ -891,43 +907,18 @@ namespace uSync8.BackOffice.SyncHandlers
             }
         }
 
-        private uSyncChange MakeRawChange(XElement node, SyncSerializerOptions options)
+        private uSyncChange MakeRawChange(XElement node, XElement current, SyncSerializerOptions options)
         {
-            var item = this.GetFromService(node.GetKey());
-            var currentNode = GetCurrent(item, options);
-            if (currentNode.Success)
-            {
-                return uSyncChange.Update(node.GetAlias(), "Raw XML", currentNode.Item.ToString(), node.ToString());
-            }
+            if (current != null)
+                return uSyncChange.Update(node.GetAlias(), "Raw XML", current.ToString(), node.ToString());
 
             return uSyncChange.NoChange(node.GetAlias(), node.GetAlias());
-
-        }
-
-
-        private SyncAttempt<XElement> GetCurrent(TObject item, SyncSerializerOptions options)
-        {
-            if (item != null)
-            {
-                if (serializer is ISyncOptionsSerializer<TObject> optionSerializer)
-                    return optionSerializer.Serialize(item, options);
-
-#pragma warning disable CS0618 // Type or member is obsolete
-                return serializer.Serialize(item);
-#pragma warning restore CS0618 // Type or member is obsolete
-
-            }
-
-            return SyncAttempt<XElement>.Fail("unknown", ChangeType.Fail);
-
         }
 
         protected IEnumerable<uSyncAction> ReportItem(string file, HandlerSettings config)
         {
             try
             {
-                logger.Debug(handlerType, "Report Item {file}", file);
-
                 var node = syncFileService.LoadXElement(file);
                 if (ShouldImport(node, config))
                 {
@@ -949,8 +940,8 @@ namespace uSync8.BackOffice.SyncHandlers
         }
 
 
-        private IEnumerable<uSyncChange> GetChanges(XElement node, SyncSerializerOptions options)
-            => itemFactory.GetChanges<TObject>(node, options);
+        private IEnumerable<uSyncChange> GetChanges(XElement node, XElement currentNode, SyncSerializerOptions options)
+            => itemFactory.GetChanges<TObject>(node, currentNode, options);
 
         #endregion
 
@@ -1369,15 +1360,46 @@ namespace uSync8.BackOffice.SyncHandlers
             return serializer.DeserializeSecondPass(item, node, options.Flags);
         }
 
-        private ChangeType IsItemCurrent(XElement node, SyncSerializerOptions options)
+        private SyncChangeInfo IsItemCurrent(XElement node, SyncSerializerOptions options)
         {
-            if (serializer is ISyncOptionsSerializer<TObject> optionSerializer)
-                return optionSerializer.IsCurrent(node, options);
+            var change = new SyncChangeInfo();
+            change.CurrentNode = SerializeFromNode(node, options);
 
-            return serializer.IsCurrent(node);
+            switch (serializer)
+            {
+                case ISyncNodeSerializer<TObject> nodeSerializer:
+                    change.Change = nodeSerializer.IsCurrent(node, change.CurrentNode, options);
+                    break;
+                case ISyncOptionsSerializer<TObject> optionSerializer:
+                    change.Change = optionSerializer.IsCurrent(node, options);
+                    break;
+                default:
+                    change.Change = serializer.IsCurrent(node);
+                    break;
+            }
+
+            return change;
+        }
+#pragma warning restore CS0618 // Type or member is obsolete
+
+        private XElement SerializeFromNode(XElement node, SyncSerializerOptions options)
+        {
+            var item = serializer.FindItem(node);
+            if (item != null)
+            {
+                var attempt = this.SerializeItem(item, options);
+                if (attempt.Success) return attempt.Item;
+            }
+
+            return null;
         }
 
-#pragma warning restore CS0618 // Type or member is obsolete
+        private class SyncChangeInfo
+        {
+            public ChangeType Change { get; set; }
+            public XElement CurrentNode { get; set; }
+        }
+
 
         #endregion
 

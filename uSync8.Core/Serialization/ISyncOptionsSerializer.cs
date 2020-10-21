@@ -29,4 +29,10 @@ namespace uSync8.Core.Serialization
         /// </summary>
         ChangeType IsCurrent(XElement node, SyncSerializerOptions options);
     }
+
+    public interface ISyncNodeSerializer<TObject> : ISyncOptionsSerializer<TObject>
+    {
+        ChangeType IsCurrent(XElement node, XElement current, SyncSerializerOptions options);
+
+    }
 }

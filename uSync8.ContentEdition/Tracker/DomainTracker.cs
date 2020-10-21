@@ -7,7 +7,7 @@ using uSync8.Core.Tracking;
 
 namespace uSync8.ContentEdition.Tracker
 {
-    public class DomainTracker : SyncBaseTracker<IDomain>, ISyncTracker<IDomain>
+    public class DomainTracker : SyncBaseTracker<IDomain>, ISyncNodeTracker<IDomain>
     {
         public DomainTracker(ISyncSerializer<IDomain> serializer) : base(serializer)
         {

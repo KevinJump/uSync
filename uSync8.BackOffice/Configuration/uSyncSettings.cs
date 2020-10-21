@@ -11,6 +11,12 @@ namespace uSync8.BackOffice.Configuration
     [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
     public class uSyncSettings
     {
+
+        /// <summary>
+        ///  The folder as stored in the settings file. 
+        /// </summary>
+        public string SettingsFolder { get; set; } = "~/uSync/v8/";
+
         /// <summary>
         ///  Location where all uSync files are saved by default
         /// </summary>

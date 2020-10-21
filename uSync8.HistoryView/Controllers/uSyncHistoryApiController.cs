@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Web.Mvc;
 
 using Newtonsoft.Json;
 
+using Umbraco.Core.Logging;
 using Umbraco.Core.Configuration;
 using Umbraco.Web.Mvc;
 using Umbraco.Web.WebApi;
@@ -58,6 +60,37 @@ namespace uSync8.HistoryView.Controllers
             }
 
             return histories.OrderByDescending(x => x.When);
+        }
+
+        [HttpPost]
+        public int ClearHistory()
+        {
+            return ClearHistory(historyFolder);
+        }
+
+        private int ClearHistory(string folder)
+        {
+            var count = 0;
+            foreach (var historyFile in syncFileService.GetFiles(folder, "*.history"))
+            {
+                try
+                {
+                    syncFileService.DeleteFile(historyFile);
+                    count++;
+                }
+                catch (Exception ex)
+                {
+                    Logger.Warn<uSyncHistoryApiController>(ex, "Unable to delete {file}", historyFile);
+                }
+            }
+
+            foreach(var subFolder in syncFileService.GetDirectories(folder))
+            {
+                count += ClearHistory(subFolder);
+            }
+
+            return count;
+
         }
 
     }

@@ -2,15 +2,17 @@
 using System.Configuration;
 using System.IO;
 using System.Linq;
+using System.Web.Hosting;
+using System.Web.UI;
 using System.Xml.Linq;
-
-using AutoMapper.QueryableExtensions.Impl;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
 using Umbraco.Core;
 using Umbraco.Core.Logging;
+using Umbraco.Core.Models.Entities;
+using Umbraco.Web.Features;
 
 using uSync8.Core.Extensions;
 
@@ -63,7 +65,10 @@ namespace uSync8.BackOffice.Configuration
                 return SaveSettings(settings);
             }
 
-            settings.RootFolder = ValueFromWebConfigOrDefault("Folder", node.Element("Folder").ValueOrDefault(settings.RootFolder));
+            settings.SettingsFolder = ValueFromWebConfigOrDefault("Folder", node.Element("Folder").ValueOrDefault(settings.RootFolder));
+            var allowUnsafeFolder = ValueFromWebConfigOrDefault("AllowUnsafeFolder", node.Element("Folder").Attribute("AllowUnsafe").ValueOrDefault(false));
+            settings.RootFolder = GetPhysicalFolder(settings.SettingsFolder, allowUnsafeFolder);
+
             settings.UseFlatStructure = ValueFromWebConfigOrDefault("FlatFolders", node.Element("FlatFolders").ValueOrDefault(true));
             settings.ImportAtStartup = ValueFromWebConfigOrDefault("ImportAtStartup", node.Element("ImportAtStartup").ValueOrDefault(true));
             settings.ExportAtStartup = ValueFromWebConfigOrDefault("ExportAtStartup", node.Element("ExportAtStartup").ValueOrDefault(false));
@@ -201,7 +206,7 @@ namespace uSync8.BackOffice.Configuration
         {
             var node = GetSettingsFile(true);
 
-            node.CreateOrSetElement("Folder", settings.RootFolder);
+            node.CreateOrSetElement("Folder", settings.SettingsFolder);
             node.CreateOrSetElement("FlatFolders", settings.UseFlatStructure);
             node.CreateOrSetElement("ImportAtStartup", settings.ImportAtStartup);
             node.CreateOrSetElement("ExportAtStartup", settings.ExportAtStartup);
@@ -570,6 +575,37 @@ namespace uSync8.BackOffice.Configuration
             }
             return defaultValue;
         }
+
+
+        private string GetPhysicalFolder(string folder, bool acceptUnsafe)
+        {
+            var root = HostingEnvironment.IsHosted
+                ? HostingEnvironment.MapPath("~/")
+                : Directory.GetCurrentDirectory();
+           
+            if (folder.StartsWith("~/"))
+            {
+                var dir = HostingEnvironment.IsHosted
+                    ? HostingEnvironment.MapPath(folder)
+                    : Path.Combine(root, folder.TrimStart("~/"));
+
+                dir = Path.GetFullPath(dir);
+                root = Path.GetFullPath(root);
+
+                if (!acceptUnsafe && !dir.StartsWith(root))
+                    throw new ConfigurationErrorsException($"Invalid uSync folder \"{folder}\". Folders outside root require AllowUnsafe setting in config.");
+
+                return dir;
+            }
+
+            if (acceptUnsafe)
+            {
+                return Path.GetFullPath(folder);
+            }
+
+            throw new ConfigurationErrorsException($"Invalid uSync folder \"{folder}\". Folders outside root require AllowUnsafe setting in config.");
+        }
+
     }
 
 }
