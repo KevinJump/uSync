@@ -538,7 +538,7 @@ namespace uSync8.BackOffice.Configuration
             var keyNode = section.Element(key);
             if (keyNode == null)
             {
-                keyNode = new XElement(app);
+                keyNode = new XElement(key);
                 section.Add(keyNode);
             }
 
