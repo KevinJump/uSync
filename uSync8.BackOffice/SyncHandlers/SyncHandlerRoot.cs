@@ -865,6 +865,17 @@ namespace uSync8.BackOffice.SyncHandlers
         {
             try
             {
+                // pre event reporting 
+                //  this lets us intercept a report and 
+                //  shortcut the checking (sometimes).
+                var e = new uSyncItemEventArgs { Item = node };
+                if (uSyncService.FireReportingItem(e))  
+                {
+                    return uSyncActionHelper<TObject>
+                        .ReportAction(e.Change, node.GetAlias(), !string.IsNullOrWhiteSpace(filename) ? filename : node.GetAlias(), node.GetKey(), this.Alias)
+                        .AsEnumerableOfOne();
+                }
+
                 var actions = new List<uSyncAction>();
                 var serializerOptions = new SyncSerializerOptions(config.Settings);
 
@@ -897,6 +908,9 @@ namespace uSync8.BackOffice.SyncHandlers
                     actions.Add(action);
                 }
 
+                // tell other things we have reported this item.
+                uSyncService.FireReportedItem(node, action.Change);
+
                 return actions;
             }
             catch (FormatException fex)
@@ -920,6 +934,7 @@ namespace uSync8.BackOffice.SyncHandlers
             try
             {
                 var node = syncFileService.LoadXElement(file);
+
                 if (ShouldImport(node, config))
                 {
                     return ReportElement(node, file, config);

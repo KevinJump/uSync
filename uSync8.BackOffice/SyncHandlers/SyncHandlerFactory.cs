@@ -154,7 +154,7 @@ namespace uSync8.BackOffice.SyncHandlers
                     && IsValidGroup(options.Group, handler)
                     && IsValidAction(options.Action, settings.Actions))
                 {
-                    logger.Debug<SyncHandlerFactory>("Adding {handler} to ValidHandler List", handler.Alias);
+                    // logger.Debug<SyncHandlerFactory>("Adding {handler} to ValidHandler List", handler.Alias);
 
                     configs.Add(new ExtendedHandlerConfigPair()
                     {

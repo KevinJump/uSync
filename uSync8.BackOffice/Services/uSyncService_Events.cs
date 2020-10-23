@@ -1,10 +1,14 @@
 ﻿using System.Collections.Generic;
+using System.Xml.Linq;
 
 using uSync8.BackOffice.SyncHandlers;
+using uSync8.Core;
+using uSync8.Core.Models;
 
 namespace uSync8.BackOffice
 {
     public delegate void uSyncBulkEventHandler(uSyncBulkEventArgs e);
+    public delegate void uSyncItemEventHandler(uSyncItemEventArgs e);
 
     public partial class uSyncService
     {
@@ -63,10 +67,44 @@ namespace uSync8.BackOffice
         {
             EventMsg?.Invoke(summary);
         }
+
+
+        /// <summary>
+        ///  Before an item is reported. Can be cancelled
+        /// </summary>
+        public static event uSyncItemEventHandler ReportingItem;
+
+        /// <summary>
+        ///  After an item is reported 
+        /// </summary>
+        public static event uSyncItemEventHandler ReportedItem;
+
+        public static bool FireReportingItem(uSyncItemEventArgs e)
+        {
+            ReportingItem?.Invoke(e);
+            return e.Cancel;
+        }
+
+        public static void FireReportedItem(XElement node, ChangeType changeType)
+        {
+            ReportedItem?.Invoke(new uSyncItemEventArgs
+            {
+                Item = node, 
+                Change = changeType
+            });
+        }
     }
 
     public class uSyncBulkEventArgs
     {
         public IEnumerable<uSyncAction> Actions { get; set; }
+    }
+
+    public class uSyncItemEventArgs
+    {
+        public bool Cancel { get; set; }
+        public ChangeType Change { get; set; }
+
+        public XElement Item { get; set; }
     }
 }
