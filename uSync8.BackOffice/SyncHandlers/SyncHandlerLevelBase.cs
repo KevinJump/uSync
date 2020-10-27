@@ -81,54 +81,27 @@ namespace uSync8.BackOffice.SyncHandlers
         /// <returns></returns>
         protected override IEnumerable<uSyncAction> ImportFolder(string folder, HandlerSettings config, Dictionary<string, TObject> updates, bool force, SyncUpdateCallback callback)
         {
-
-            // if not using flat, then directory structure is doing
-            // this for us. 
+            // if not using flat then directory structure is sorting them for us. 
             if (config.UseFlatStructure == false)
                 return base.ImportFolder(folder, config, updates, force, callback);
 
             List<uSyncAction> actions = new List<uSyncAction>();
 
-            var files = syncFileService.GetFiles(folder, "*.config");
-
-            List<LeveledFile> nodes = new List<LeveledFile>();
-
             callback?.Invoke("Calculating import order", 0, 1);
             logger.Verbose(handlerType, "Calculating import order");
 
-            foreach (var file in files)
-            {
-                try
-                {
-                    var node = LoadNode(file);
-                    if (node != null)
-                    {
-                        nodes.Add(new LeveledFile
-                        {
-                            Level = node.GetLevel(),
-                            File = file
-                        });
-                    }
-                }
-                catch (XmlException ex)
-                {
-                    // one of the files is wrong. (do we stop or carry on)
-                    logger.Warn(handlerType, $"Error loading file: {file} [{ex.Message}]");
-                    actions.Add(uSyncActionHelper<TObject>.SetAction(
-                        SyncAttempt<TObject>.Fail(Path.GetFileName(file), ChangeType.Fail, $"Failed to Load: {ex.Message}"), file, false));
-                }
-            }
+            var orderedFiles = GetLevelOrderedFiles(folder, actions);
 
-            // loaded - now process.
+            // process.
             var flags = SerializerFlags.None;
             if (force) flags |= SerializerFlags.Force;
 
             var cleanMarkers = new List<string>();
 
-            foreach (var item in nodes.OrderBy(x => x.Level).Select((Node, Index) => new { Node, Index }))
+            foreach (var item in orderedFiles.Select((Node, Index) => new { Node, Index }))
             {
                 var filename = Path.GetFileNameWithoutExtension(item.Node.File);
-                callback?.Invoke($"{filename}", item.Index, nodes.Count);
+                callback?.Invoke($"{filename}", item.Index, orderedFiles.Count);
 
                 logger.Verbose(handlerType, "{Index} Importing: {File}, [Level {Level}]", item.Index, filename, item.Node.Level);
 
@@ -181,6 +154,40 @@ namespace uSync8.BackOffice.SyncHandlers
             callback?.Invoke("", 1, 1);
 
             return actions;
+        }
+
+        /// <summary>
+        ///  Get all the files in a folder and return them sorted by their level 
+        /// </summary>
+        private IList<LeveledFile> GetLevelOrderedFiles(string folder, IList<uSyncAction> actions)
+        {
+            List<LeveledFile> nodes = new List<LeveledFile>();
+
+            var files = syncFileService.GetFiles(folder, "*.config");
+            foreach (var file in files)
+            {
+                try
+                {
+                    var node = LoadNode(file);
+                    if (node != null)
+                    {
+                        nodes.Add(new LeveledFile
+                        {
+                            Level = node.GetLevel(),
+                            File = file
+                        });
+                    }
+                }
+                catch (XmlException ex)
+                {
+                    // one of the files is wrong. (do we stop or carry on)
+                    logger.Warn(handlerType, $"Error loading file: {file} [{ex.Message}]");
+                    actions.Add(uSyncActionHelper<TObject>.SetAction(
+                        SyncAttempt<TObject>.Fail(Path.GetFileName(file), ChangeType.Fail, $"Failed to Load: {ex.Message}"), file, false));
+                }
+            }
+
+            return nodes.OrderBy(x => x.Level).ToList();
 
         }
 

@@ -320,22 +320,11 @@ namespace uSync8.BackOffice.SyncHandlers
         {
             try
             {
-                if (config.FailOnMissingParent) flags |= SerializerFlags.FailMissingParent;
-
                 syncFileService.EnsureFileExists(filePath);
                 using (var stream = syncFileService.OpenRead(filePath))
                 {
                     var node = XElement.Load(stream);
-                    if (ShouldImport(node, config))
-                    {
-                        var attempt = DeserializeItem(node, new SyncSerializerOptions(flags, config.Settings));
-                        return attempt;
-                    }
-                    else
-                    {
-                        return SyncAttempt<TObject>.Succeed(Path.GetFileName(filePath),
-                            ChangeType.NoChange, "Not Imported (Based on config)");
-                    }
+                    return Import(node, config, flags);
                 }
             }
             catch (FileNotFoundException notFoundException)
@@ -346,6 +335,20 @@ namespace uSync8.BackOffice.SyncHandlers
             {
                 logger.Warn(handlerType, "{alias}: Import Failed : {exception}", this.Alias, ex.ToString());
                 return SyncAttempt<TObject>.Fail(Path.GetFileName(filePath), ChangeType.Fail, $"Import Fail: {ex.Message}");
+            }
+        }
+
+        public virtual SyncAttempt<TObject> Import(XElement node, HandlerSettings config, SerializerFlags flags)
+        {
+            if (config.FailOnMissingParent) flags |= SerializerFlags.FailMissingParent;
+
+            if (ShouldImport(node, config))
+            {
+                return DeserializeItem(node, new SyncSerializerOptions(flags, config.Settings));
+            }
+            else
+            {
+                return SyncAttempt<TObject>.Succeed(node.GetAlias(), ChangeType.NoChange, "Not imported (based on config)");
             }
         }
 
@@ -469,8 +472,6 @@ namespace uSync8.BackOffice.SyncHandlers
 
             if (!Directory.Exists(folder)) return Enumerable.Empty<uSyncAction>();
 
-            var parent = GetCleanParent(cleanFile);
-            if (parent == null) return Enumerable.Empty<uSyncAction>();
 
             // get the keys for every item in this folder. 
 
@@ -484,6 +485,10 @@ namespace uSync8.BackOffice.SyncHandlers
             var keys = GetFolderKeys(folder, flat);
             if (keys.Count > 0)
             {
+                // move parent to here, we only need to check it if there are files.
+                var parent = GetCleanParent(cleanFile);
+                if (parent == null) return Enumerable.Empty<uSyncAction>();
+
                 // keys should aways have at least one entry (the key from cleanFile)
                 // if it doesn't then something might have gone wrong.
                 // because we are being defensive when it comes to deletes, 
@@ -557,7 +562,7 @@ namespace uSync8.BackOffice.SyncHandlers
         ///  Get the files we are going to import from a folder. 
         /// </summary>
         protected virtual IEnumerable<string> GetImportFiles(string folder)
-            => syncFileService.GetFiles(folder, "*.config");
+            => syncFileService.GetFiles(folder, "*.config").OrderBy(x => x);
 
         /// <summary>
         ///  check to see if this element should be imported as part of the process.

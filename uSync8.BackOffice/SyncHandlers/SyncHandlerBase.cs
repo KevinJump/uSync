@@ -75,25 +75,22 @@ namespace uSync8.BackOffice.SyncHandlers
         {
             var items = GetChildItems(parent.Id).ToList();
             var actions = new List<uSyncAction>();
-            foreach (var item in items)
+            foreach (var item in items.Where(x => !keys.Contains(x.Key)))
             {
-                if (!keys.Contains(item.Key))
+                var name = String.Empty;
+                if (item is IEntitySlim slim) name = slim.Name;
+                if (string.IsNullOrEmpty(name) || !reportOnly)
                 {
-                    var name = String.Empty;
-                    if (item is IEntitySlim slim) name = slim.Name;
-                    if (string.IsNullOrEmpty(name) || !reportOnly)
-                    {
-                        var actualItem = GetFromService(item.Key);
-                        name = GetItemName(actualItem);
+                    var actualItem = GetFromService(item.Key);
+                    name = GetItemName(actualItem);
 
-                        // actually do the delete if we are really not reporting
-                        if (!reportOnly) DeleteViaService(actualItem);
-                    }
-
-                    // for reporting - we use the entity name,
-                    // this stops an extra lookup - which we may not need later
-                    actions.Add(uSyncActionHelper<TObject>.SetAction(SyncAttempt<TObject>.Succeed(name, ChangeType.Delete), string.Empty));
+                    // actually do the delete if we are really not reporting
+                    if (!reportOnly) DeleteViaService(actualItem);
                 }
+
+                // for reporting - we use the entity name,
+                // this stops an extra lookup - which we may not need later
+                actions.Add(uSyncActionHelper<TObject>.SetAction(SyncAttempt<TObject>.Succeed(name, ChangeType.Delete), string.Empty));
             }
 
             return actions;
@@ -118,7 +115,18 @@ namespace uSync8.BackOffice.SyncHandlers
         virtual protected IEnumerable<IEntity> GetChildItems(int parent)
         {
             if (this.itemObjectType != UmbracoObjectTypes.Unknown)
-                return entityService.GetChildren(parent, this.itemObjectType);
+            {
+                if (parent == -1)
+                {
+                    return entityService.GetChildren(parent, this.itemObjectType);
+                }
+                else
+                {
+                    // If you ask for the type then you get more info, and there is extra db calls to 
+                    // load it, so GetChildren without the object type is quicker. 
+                    return entityService.GetChildren(parent);
+                }
+            }
 
             return Enumerable.Empty<IEntity>();
         }
