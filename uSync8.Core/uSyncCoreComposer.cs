@@ -2,6 +2,7 @@
 using Umbraco.Core.Composing;
 using Umbraco.Core.Models;
 
+using uSync8.Core.Cache;
 using uSync8.Core.DataTypes;
 using uSync8.Core.Dependency;
 using uSync8.Core.Serialization;
@@ -14,6 +15,10 @@ namespace uSync8.Core
     {
         public void Compose(Composition composition)
         {
+
+            // cache for entity items, we use it to speed up lookups.
+            composition.RegisterUnique<SyncEntityCache>();
+
             // register *all* ConfigurationSerializers except those marked [HideFromTypeFinder]
             // has to happen before the DataTypeSerializer is loaded, because that is where
             // they are used

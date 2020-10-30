@@ -105,7 +105,8 @@ namespace uSync8.ContentEdition.Serializers
             var parents = relationService.GetByChild(item, relationAlias);
             if (parents != null && parents.Any())
             {
-                return entityService.Get(parents.FirstOrDefault().ParentId);
+                return syncMappers.EntityCache.GetEntity(parents.FirstOrDefault().ParentId);
+                // return entityService.Get(parents.FirstOrDefault().ParentId);
             }
 
             return null;
@@ -671,7 +672,8 @@ namespace uSync8.ContentEdition.Serializers
                 }
             }
 
-            var items = entityService.GetAll(this.umbracoObjectType, lookups.ToArray());
+            var items = syncMappers.EntityCache.GetAll(this.umbracoObjectType, lookups.ToArray());
+            // var items = entityService.GetAll(this.umbracoObjectType, lookups.ToArray());
             foreach (var item in items)
             {
                 nameCache[item.Id] = new Tuple<Guid, string>(item.Key, item.Name);

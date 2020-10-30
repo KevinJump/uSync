@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 
 using Umbraco.Core;
 using Umbraco.Core.Configuration;
+using Umbraco.Core.IO;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
@@ -137,27 +138,35 @@ namespace uSync8.ContentEdition.Serializers
 
         private XElement SerializeFileHash(IMedia item)
         {
-            if (item.HasProperty("umbracoFile"))
+            try
             {
-                var value = item.GetValue<string>("umbracoFile");
-                var path = GetFilePath(value);
-
-                if (!string.IsNullOrWhiteSpace(path))
+                if (item.HasProperty("umbracoFile"))
                 {
-                    using (var stream = mediaService.GetMediaFileContentStream(path))
-                    {
-                        if (stream != null)
-                        {
-                            using (MD5 md5 = MD5.Create())
-                            {
-                                stream.Seek(0, SeekOrigin.Begin);
-                                var hash = md5.ComputeHash(stream);
+                    var value = item.GetValue<string>("umbracoFile");
+                    var path = GetFilePath(value);
 
-                                return new XElement("FileHash", hash);
+                    if (!string.IsNullOrWhiteSpace(path))
+                    {
+                        using (var stream = mediaService.GetMediaFileContentStream(path))
+                        {
+                            if (stream != null)
+                            {
+                                using (MD5 md5 = MD5.Create())
+                                {
+                                    stream.Seek(0, SeekOrigin.Begin);
+                                    var hash = md5.ComputeHash(stream);
+
+                                    return new XElement("FileHash", hash);
+                                }
                             }
                         }
                     }
                 }
+            }
+            catch(FileSecurityException ex)
+            {
+                // can happen when the media locations get moved.
+                logger.Error<MediaSerializer>(ex, "Error reading media file: {item}", item.Name);
             }
 
             return new XElement("FileHash", "");

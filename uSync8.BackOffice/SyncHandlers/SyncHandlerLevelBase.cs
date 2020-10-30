@@ -237,7 +237,8 @@ namespace uSync8.BackOffice.SyncHandlers
             {
                 if (item.ParentId > 0)
                 {
-                    var parent = entityService.Get(item.ParentId);
+                    var parent = this.itemFactory.EntityCache.GetEntity(item.ParentId);
+                    // var parent = entityService.Get(item.ParentId);
                     if (parent != null)
                     {
                         path = GetEntityPath(parent, useGuid, false);

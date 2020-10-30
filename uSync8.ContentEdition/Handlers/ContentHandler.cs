@@ -72,7 +72,8 @@ namespace uSync8.ContentEdition.Handlers
             if (performDoubleLookup)
             {
                 // FIX: alpha bug - getby key is not always uptodate 
-                var entity = entityService.Get(key);
+                var entity = itemFactory.EntityCache.GetEntity(key);
+                // var entity = entityService.Get(key);
                 if (entity != null)
                     return contentService.GetById(entity.Id);
 

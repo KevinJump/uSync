@@ -12,6 +12,7 @@ using Umbraco.Core.Services;
 using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
 using uSync8.Core;
+using uSync8.Core.Cache;
 using uSync8.Core.Dependency;
 using uSync8.Core.Models;
 using uSync8.Core.Serialization;

@@ -515,7 +515,7 @@ namespace uSync8.ContentEdition.Serializers
             if (performDoubleLookup)
             {
                 // fixed v8.4+ by https://github.com/umbraco/Umbraco-CMS/issues/2997
-                var entity = entityService.Get(key);
+                var entity = syncMappers.EntityCache.GetEntity(key);
                 if (entity != null)
                     return contentService.GetById(entity.Id);
             }

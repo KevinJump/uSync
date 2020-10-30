@@ -953,7 +953,7 @@ namespace uSync8.BackOffice.SyncHandlers
             catch (Exception ex)
             {
                 return uSyncActionHelper<TObject>
-                    .ReportActionFail(Path.GetFileName(file), $"Reporing error {ex.Message}")
+                    .ReportActionFail(Path.GetFileName(file), $"Reporting error {ex.Message}")
                     .AsEnumerableOfOne();
             }
 

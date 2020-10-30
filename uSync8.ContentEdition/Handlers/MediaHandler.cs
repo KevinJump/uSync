@@ -73,7 +73,7 @@ namespace uSync8.ContentEdition.Handlers
             if (performDoubleLookup)
             {
                 // fixed v8.4+ by https://github.com/umbraco/Umbraco-CMS/issues/2997
-                var entity = entityService.Get(key);
+                var entity = itemFactory.EntityCache.GetEntity(key);
                 if (entity != null)
                     return mediaService.GetById(entity.Id);
             }

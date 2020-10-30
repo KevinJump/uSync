@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Xml.Linq;
 
+using uSync8.Core.Cache;
 using uSync8.Core.Dependency;
 using uSync8.Core.Models;
 using uSync8.Core.Serialization;
@@ -22,5 +23,7 @@ namespace uSync8.Core
         // dependency checker items
         IEnumerable<ISyncDependencyChecker<TObject>> GetCheckers<TObject>();
         IEnumerable<uSyncDependency> GetDependencies<TObject>(TObject item, DependencyFlags flags);
+        SyncEntityCache EntityCache { get; }
+
     }
 }
