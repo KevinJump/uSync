@@ -1070,7 +1070,7 @@ namespace uSync8.BackOffice.SyncHandlers
         /// <summary>
         ///  Clean up the events, when umbraco terminates.
         /// </summary>
-        protected abstract void TerminateEvents(HandlerSettings settings);
+        protected virtual void TerminateEvents(HandlerSettings settings) { }
 
 
         protected virtual void EventDeletedItem(IService sender, DeleteEventArgs<TObject> e)
