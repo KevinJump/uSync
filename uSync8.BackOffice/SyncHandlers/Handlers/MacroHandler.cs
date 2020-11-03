@@ -23,7 +23,7 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("macroHandler", "Macros", "Macros", uSyncBackOfficeConstants.Priorites.Macros,
         Icon = "icon-settings-alt", EntityType = UdiEntityType.Macro)]
-    public class MacroHandler : SyncHandlerBase<IMacro, IMacroService>, ISyncExtendedHandler
+    public class MacroHandler : SyncHandlerBase<IMacro, IMacroService>, ISyncExtendedHandler, ISyncItemHandler
     {
         private readonly IMacroService macroService;
 
@@ -90,6 +90,12 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
         {
             MacroService.Saved += EventSavedItem;
             MacroService.Deleted += EventDeletedItem;
+        }
+
+        protected override void TerminateEvents(HandlerSettings settings)
+        {
+            MacroService.Saved -= EventSavedItem;
+            MacroService.Deleted -= EventDeletedItem;
         }
 
         protected override IMacro GetFromService(Guid key)

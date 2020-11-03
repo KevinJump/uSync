@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 using Umbraco.Core.Cache;
 using Umbraco.Core.Configuration;
@@ -22,7 +23,7 @@ namespace uSync8.ContentEdition.Handlers
 {
     [SyncHandler("contentHandler", "Content", "Content", uSyncBackOfficeConstants.Priorites.Content
         , Icon = "icon-document usync-addon-icon", IsTwoPass = true, EntityType = UdiEntityType.Document)]
-    public class ContentHandler : ContentHandlerBase<IContent, IContentService>, ISyncHandler, ISyncExtendedHandler
+    public class ContentHandler : ContentHandlerBase<IContent, IContentService>, ISyncHandler, ISyncExtendedHandler, ISyncItemHandler
     {
         public override string Group => uSyncBackOfficeConstants.Groups.Content;
 
@@ -96,11 +97,16 @@ namespace uSync8.ContentEdition.Handlers
             ContentService.Trashed += EventMovedItem;
         }
 
-        public uSyncAction Import(string file)
+        protected override void TerminateEvents(HandlerSettings settings)
         {
-            var attempt = this.Import(file, DefaultConfig, SerializerFlags.OnePass);
-            return uSyncActionHelper<IContent>.SetAction(attempt, file, this.Alias, IsTwoPass);
+            ContentService.Saved -= EventSavedItem;
+            ContentService.Deleted -= EventDeletedItem;
+            ContentService.Moved -= EventMovedItem;
+            ContentService.Trashed -= EventMovedItem;
         }
+
+        public uSyncAction Import(string file)
+            => this.Import(file, DefaultConfig, SerializerFlags.OnePass).FirstOrDefault();
 
 
     }

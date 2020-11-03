@@ -22,7 +22,7 @@ namespace uSync8.ContentEdition.Handlers
 {
     [SyncHandler("mediaHandler", "Media", "Media", uSyncBackOfficeConstants.Priorites.Media,
         Icon = "icon-picture usync-addon-icon", IsTwoPass = true, EntityType = UdiEntityType.Media)]
-    public class MediaHandler : ContentHandlerBase<IMedia, IMediaService>, ISyncHandler, ISyncExtendedHandler
+    public class MediaHandler : ContentHandlerBase<IMedia, IMediaService>, ISyncHandler, ISyncExtendedHandler, ISyncItemHandler
     {
         public override string Group => uSyncBackOfficeConstants.Groups.Content;
 
@@ -95,6 +95,14 @@ namespace uSync8.ContentEdition.Handlers
             MediaService.Deleted += EventDeletedItem;
             MediaService.Moved += EventMovedItem;
             MediaService.Trashed += EventMovedItem;
+        }
+
+        protected override void TerminateEvents(HandlerSettings settings)
+        {
+            MediaService.Saved -= EventSavedItem;
+            MediaService.Deleted -= EventDeletedItem;
+            MediaService.Moved -= EventMovedItem;
+            MediaService.Trashed -= EventMovedItem;
         }
     }
 }

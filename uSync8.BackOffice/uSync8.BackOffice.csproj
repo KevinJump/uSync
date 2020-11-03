@@ -99,9 +99,12 @@
     <Compile Include="Services\SyncFileService.cs" />
     <Compile Include="Models\SyncProgressModels.cs" />
     <Compile Include="Hubs\uSyncCallbacks.cs" />
+    <Compile Include="Models\uSyncImportOptions.cs" />
     <Compile Include="Services\uSyncService.cs" />
     <Compile Include="Services\uSyncService_Events.cs" />
+    <Compile Include="Services\uSyncService_Single.cs" />
     <Compile Include="Services\uSyncTriggers.cs" />
+    <Compile Include="SyncHandlers\Interfaces\ISyncItemHandler.cs" />
     <Compile Include="SyncHandlers\Models\ExtendedHandlerConfigPair.cs" />
     <Compile Include="SyncHandlers\Models\HandlerActionNames.cs" />
     <Compile Include="SyncHandlers\Models\HandlerConfigPair.cs" />
@@ -131,6 +134,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="BackOfficeConstants.cs" />
     <Compile Include="Configuration\uSyncSettings.cs" />
+    <Compile Include="uSyncImportPause.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

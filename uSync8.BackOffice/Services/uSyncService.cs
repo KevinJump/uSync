@@ -207,9 +207,8 @@ namespace uSync8.BackOffice
             {
                 var sw = Stopwatch.StartNew();
 
-                try
+                using (var pause = new uSyncImportPause())
                 {
-                    uSync8BackOffice.eventsPaused = true;
 
                     // pre import event
                     fireBulkStarting(ImportStarting);
@@ -291,14 +290,6 @@ namespace uSync8.BackOffice
                     callbacks?.Update?.Invoke($"Processed {actions.Count} items in {sw.ElapsedMilliseconds}ms", 1, 1);
 
                     return actions;
-                }
-                catch (Exception ex)
-                {
-                    throw ex;
-                }
-                finally
-                {
-                    uSync8BackOffice.eventsPaused = false;
                 }
             }
         }

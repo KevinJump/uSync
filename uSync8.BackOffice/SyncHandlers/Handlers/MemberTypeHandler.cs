@@ -21,7 +21,7 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("memberTypeHandler", "Member Types", "MemberTypes", uSyncBackOfficeConstants.Priorites.MemberTypes,
         IsTwoPass = true, Icon = "icon-users", EntityType = UdiEntityType.MemberType)]
-    public class MemberTypeHandler : SyncHandlerContainerBase<IMemberType, IMemberTypeService>, ISyncExtendedHandler
+    public class MemberTypeHandler : SyncHandlerContainerBase<IMemberType, IMemberTypeService>, ISyncExtendedHandler, ISyncItemHandler
     {
         private readonly IMemberTypeService memberTypeService;
 
@@ -52,17 +52,21 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             : base(entityService, logger, serializer, tracker, appCaches, checker, syncFileService)
         {
             this.memberTypeService = memberTypeService;
-
-            this.Enabled = false;
-            // turn it off it appears to break things in current build
         }
         protected override void InitializeEvents(HandlerSettings settings)
         {
             MemberTypeService.Saved += EventSavedItem;
             MemberTypeService.Deleted += EventDeletedItem;
             MemberTypeService.Moved += EventMovedItem;
-
             MemberTypeService.SavedContainer += EventContainerSaved;
+        }
+
+        protected override void TerminateEvents(HandlerSettings settings)
+        {
+            MemberTypeService.Saved -= EventSavedItem;
+            MemberTypeService.Deleted -= EventDeletedItem;
+            MemberTypeService.Moved -= EventMovedItem;
+            MemberTypeService.SavedContainer -= EventContainerSaved;
         }
 
         protected override void DeleteFolder(int id)

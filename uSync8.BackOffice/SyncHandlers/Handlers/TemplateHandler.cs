@@ -23,7 +23,7 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("templateHandler", "Templates", "Templates", uSyncBackOfficeConstants.Priorites.Templates,
         Icon = "icon-layout", EntityType = UdiEntityType.Template, IsTwoPass = true)]
-    public class TemplateHandler : SyncHandlerLevelBase<ITemplate, IFileService>, ISyncExtendedHandler
+    public class TemplateHandler : SyncHandlerLevelBase<ITemplate, IFileService>, ISyncExtendedHandler, ISyncItemHandler
     {
         private readonly IFileService fileService;
 
@@ -63,6 +63,12 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
         {
             FileService.SavedTemplate += EventSavedItem;
             FileService.DeletedTemplate += EventDeletedItem;
+        }
+
+        protected override void TerminateEvents(HandlerSettings settings)
+        {
+            FileService.SavedTemplate -= EventSavedItem;
+            FileService.DeletedTemplate -= EventDeletedItem;
         }
 
         protected override string GetItemPath(ITemplate item, bool useGuid, bool isFlat)

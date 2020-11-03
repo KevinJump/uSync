@@ -21,7 +21,7 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("mediaTypeHandler", "Media Types", "MediaTypes", uSyncBackOfficeConstants.Priorites.MediaTypes,
         IsTwoPass = true, Icon = "icon-thumbnails", EntityType = UdiEntityType.MediaType)]
-    public class MediaTypeHandler : SyncHandlerContainerBase<IMediaType, IMediaTypeService>, ISyncExtendedHandler
+    public class MediaTypeHandler : SyncHandlerContainerBase<IMediaType, IMediaTypeService>, ISyncExtendedHandler, ISyncItemHandler
     {
         private readonly IMediaTypeService mediaTypeService;
 
@@ -56,14 +56,20 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
         }
 
 
-
         protected override void InitializeEvents(HandlerSettings settings)
         {
             MediaTypeService.Saved += EventSavedItem;
             MediaTypeService.Deleted += EventDeletedItem;
             MediaTypeService.Moved += EventMovedItem;
-
             MediaTypeService.SavingContainer += EventContainerSaved;
+        }
+
+        protected override void TerminateEvents(HandlerSettings settings)
+        {
+            MediaTypeService.Saved -= EventSavedItem;
+            MediaTypeService.Deleted -= EventDeletedItem;
+            MediaTypeService.Moved -= EventMovedItem;
+            MediaTypeService.SavingContainer -= EventContainerSaved;
         }
 
         protected override string GetItemFileName(IUmbracoEntity item, bool useGuid)

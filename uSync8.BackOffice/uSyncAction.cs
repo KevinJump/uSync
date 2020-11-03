@@ -30,6 +30,12 @@ namespace uSync8.BackOffice
         public bool RequiresPostProcessing { get; set; }
 
         /// <summary>
+        ///  boxed item - used on updates. 
+        /// </summary>
+        [JsonIgnore]
+        public object Item { get; set; }
+
+        /// <summary>
         ///  text that is shown on the details screen above any details. 
         /// </summary>
         public string DetailMessage { get; set; }

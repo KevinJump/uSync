@@ -23,7 +23,7 @@ namespace uSync8.ContentEdition.Handlers
 {
     [SyncHandler("domainHandler", "Domains", "Domains", uSyncBackOfficeConstants.Priorites.DomainSettings
         , Icon = "icon-home usync-addon-icon", EntityType = "domain")]
-    public class DomainHandler : SyncHandlerBase<IDomain, IDomainService>, ISyncHandler, ISyncExtendedHandler
+    public class DomainHandler : SyncHandlerBase<IDomain, IDomainService>, ISyncHandler, ISyncExtendedHandler, ISyncItemHandler
     {
         public override string Group => uSyncBackOfficeConstants.Groups.Content;
 
@@ -103,6 +103,13 @@ namespace uSync8.ContentEdition.Handlers
             DomainService.Saved += EventSavedItem;
             DomainService.Deleted += EventDeletedItem;
         }
+
+        protected override void TerminateEvents(HandlerSettings settings)
+        {
+            DomainService.Saved -= EventSavedItem;
+            DomainService.Deleted -= EventDeletedItem;
+        }
+
         protected override IEnumerable<IEntity> GetChildItems(int parent)
         {
             if (parent == -1)

@@ -27,7 +27,7 @@ namespace uSync8.ContentEdition.Handlers
 {
     [SyncHandler("dictionaryHandler", "Dictionary", "Dictionary", uSyncBackOfficeConstants.Priorites.DictionaryItems
         , Icon = "icon-book-alt usync-addon-icon", EntityType = UdiEntityType.DictionaryItem)]
-    public class DictionaryHandler : SyncHandlerLevelBase<IDictionaryItem, ILocalizationService>, ISyncHandler, ISyncExtendedHandler
+    public class DictionaryHandler : SyncHandlerLevelBase<IDictionaryItem, ILocalizationService>, ISyncHandler, ISyncExtendedHandler, ISyncItemHandler
     {
         public override string Group => uSyncBackOfficeConstants.Groups.Content;
 
@@ -60,7 +60,7 @@ namespace uSync8.ContentEdition.Handlers
             this.localizationService = localizationService;
         }
 
-        public override SyncAttempt<IDictionaryItem> Import(string filePath, HandlerSettings config, SerializerFlags flags)
+        public override IEnumerable<uSyncAction> Import(string filePath, HandlerSettings config, SerializerFlags flags)
         {
             if (IsOneWay(config))
             {
@@ -75,7 +75,7 @@ namespace uSync8.ContentEdition.Handlers
                 var item = GetExistingItem(filePath);
                 if (item != null)
                 {
-                    return SyncAttempt<IDictionaryItem>.Succeed(item.ItemKey, ChangeType.NoChange);
+                    return uSyncAction.SetAction(true, item.ItemKey, change: ChangeType.NoChange).AsEnumerableOfOne() ;
                 }
             }
 
@@ -174,6 +174,12 @@ namespace uSync8.ContentEdition.Handlers
         {
             LocalizationService.SavedDictionaryItem += EventSavedItem;
             LocalizationService.DeletedDictionaryItem += EventDeletedItem;
+        }
+
+        protected override void TerminateEvents(HandlerSettings settings)
+        {
+            LocalizationService.SavedDictionaryItem -= EventSavedItem;
+            LocalizationService.DeletedDictionaryItem -= EventDeletedItem;
         }
 
         protected override IEnumerable<uSyncAction> ReportElement(XElement node, string filename, HandlerSettings config)

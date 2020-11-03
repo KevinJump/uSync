@@ -22,7 +22,7 @@ namespace uSync8.ContentEdition.Handlers
 {
     [SyncHandler("contentTemplateHandler", "Blueprints", "Blueprints", uSyncBackOfficeConstants.Priorites.ContentTemplate
         , Icon = "icon-document-dashed-line usync-addon-icon", IsTwoPass = true, EntityType = UdiEntityType.DocumentBlueprint)]
-    public class ContentTemplateHandler : ContentHandlerBase<IContent, IContentService>, ISyncHandler, ISyncExtendedHandler
+    public class ContentTemplateHandler : ContentHandlerBase<IContent, IContentService>, ISyncHandler, ISyncExtendedHandler, ISyncItemHandler
     {
         public override string Group => uSyncBackOfficeConstants.Groups.Content;
 
@@ -72,6 +72,12 @@ namespace uSync8.ContentEdition.Handlers
         {
             ContentService.SavedBlueprint += ContentService_SavedBlueprint;
             ContentService.DeletedBlueprint += ContentService_DeletedBlueprint;
+        }
+
+        protected override void TerminateEvents(HandlerSettings settings)
+        {
+            ContentService.SavedBlueprint -= ContentService_SavedBlueprint;
+            ContentService.DeletedBlueprint -= ContentService_DeletedBlueprint;
         }
 
         private void ContentService_DeletedBlueprint(IContentService sender, Umbraco.Core.Events.DeleteEventArgs<IContent> e)
