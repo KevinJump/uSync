@@ -18,13 +18,15 @@ namespace uSync8.BackOffice
     //
     public partial class uSyncService
     {
-        public IEnumerable<uSyncAction> ImportPartial(string folder, uSyncImportOptions options)
+        public IEnumerable<uSyncAction> ImportPartial(string folder, int page, int pageSize, uSyncImportOptions options, out int total)
         {
             lock (_importLock)
             {
                 using (var pause = new uSyncImportPause())
                 {
                     var orderedNodes = LoadOrderedNodes(folder);
+
+                    total = orderedNodes.Count;
 
                     var actions = new List<uSyncAction>();
 
@@ -33,7 +35,7 @@ namespace uSync8.BackOffice
                     SyncHandlerOptions syncHandlerOptions = new SyncHandlerOptions(options.HandlerSet);
                     ExtendedHandlerConfigPair handlerPair = null;
 
-                    foreach (var item in orderedNodes.Skip(options.Page * options.PageSize).Take(options.PageSize))
+                    foreach (var item in orderedNodes.Skip(page * pageSize).Take(pageSize))
                     {
                         if (!item.Node.Name.LocalName.InvariantEquals(lastType))
                         {
@@ -58,7 +60,7 @@ namespace uSync8.BackOffice
             }
         }
 
-        public IEnumerable<uSyncAction> ImportPartialSecondPass(IEnumerable<uSyncAction> actions, uSyncImportOptions options)
+        public IEnumerable<uSyncAction> ImportPartialSecondPass(IEnumerable<uSyncAction> actions, int page, int pageSize, uSyncImportOptions options)
         {
             lock (_importLock)
             {
@@ -70,7 +72,7 @@ namespace uSync8.BackOffice
                     var lastType = string.Empty;
                     ExtendedHandlerConfigPair handlerPair = null;
 
-                    foreach (var action in actions.Skip(options.Page * options.PageSize).Take(options.PageSize))
+                    foreach (var action in actions.Skip(page*pageSize).Take(pageSize))
                     {
                         if (!action.HandlerAlias.InvariantEquals(lastType))
                         {
@@ -127,7 +129,7 @@ namespace uSync8.BackOffice
         /// <summary>
         ///  Load the xml in a folder in level order so we process the higher level items first.
         /// </summary>
-        private IEnumerable<OrderedNodeInfo> LoadOrderedNodes(string folder)
+        private IList<OrderedNodeInfo> LoadOrderedNodes(string folder)
         {
             var files = syncFileService.GetFiles(folder, "*.conifg");
 

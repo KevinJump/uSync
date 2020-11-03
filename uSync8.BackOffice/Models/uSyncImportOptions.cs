@@ -14,8 +14,5 @@ namespace uSync8.BackOffice
         public SerializerFlags Flags { get; set; }
 
         public uSyncCallbacks Callbacks { get; set; }
-
-        public int Page { get; set; }
-        public int PageSize { get; set; }
     }
 }
