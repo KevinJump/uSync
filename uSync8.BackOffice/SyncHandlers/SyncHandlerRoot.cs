@@ -952,10 +952,14 @@ namespace uSync8.BackOffice.SyncHandlers
         public IEnumerable<uSyncAction> ReportElement(XElement node)
             => ReportElement(node, string.Empty, null);
 
+        protected virtual IEnumerable<uSyncAction> ReportElement(XElement node, string filename, HandlerSettings config)
+            => ReportElement(node, filename, config, new uSyncImportOptions());
+
+
         /// <summary>
         ///  Report an Element
         /// </summary>
-        protected virtual IEnumerable<uSyncAction> ReportElement(XElement node, string filename, HandlerSettings config)
+        public IEnumerable<uSyncAction> ReportElement(XElement node, string filename, HandlerSettings settings, uSyncImportOptions options)
         {
             try
             {
@@ -970,7 +974,7 @@ namespace uSync8.BackOffice.SyncHandlers
                 }
 
                 var actions = new List<uSyncAction>();
-                var serializerOptions = new SyncSerializerOptions(config.Settings);
+                var serializerOptions = new SyncSerializerOptions(settings.Settings);
 
                 var change = IsItemCurrent(node, serializerOptions);
                 var action = uSyncActionHelper<TObject>
@@ -980,7 +984,7 @@ namespace uSync8.BackOffice.SyncHandlers
 
                 if (action.Change == ChangeType.Clean)
                 {
-                    actions.AddRange(CleanFolder(filename, true, config.UseFlatStructure));
+                    actions.AddRange(CleanFolder(filename, true, settings.UseFlatStructure));
                 }
                 else if (action.Change > ChangeType.NoChange)
                 {

@@ -3,6 +3,8 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 
+using Microsoft.Owin.Security.DataHandler.Encoder;
+
 using Umbraco.Core;
 
 using uSync8.BackOffice.SyncHandlers;
@@ -18,6 +20,40 @@ namespace uSync8.BackOffice
     //
     public partial class uSyncService
     {
+        public IEnumerable<uSyncAction> ReportPartial(string folder, int page, int pageSize, uSyncImportOptions options, out int total)
+        {
+            var orderedNodes = LoadOrderedNodes(folder);
+            total = orderedNodes.Count;
+
+            var actions = new List<uSyncAction>();
+            var lastType = string.Empty;
+
+            SyncHandlerOptions syncHandlerOptions = new SyncHandlerOptions(options.HandlerSet);
+            ExtendedHandlerConfigPair handlerPair = null;
+
+            foreach (var item in orderedNodes.Skip(page * pageSize).Take(pageSize))
+            {
+                if (!item.Node.Name.LocalName.InvariantEquals(lastType))
+                {
+                    handlerPair = handlerFactory.GetValidHandlerByTypeName(item.Node.Name.LocalName, syncHandlerOptions);
+                }
+
+                if (handlerPair != null)
+                {
+                    if (handlerPair.Handler is ISyncItemHandler itemHandler)
+                    {
+                        actions.AddRange(itemHandler.ReportElement(item.Node, item.FileName, handlerPair.Settings, options));
+                    }
+                    else
+                    {
+                        actions.AddRange(handlerPair.Handler.ReportElement(item.Node));
+                    }
+                }
+            }
+
+            return actions;
+        }
+
         public IEnumerable<uSyncAction> ImportPartial(string folder, int page, int pageSize, uSyncImportOptions options, out int total)
         {
             lock (_importLock)
@@ -29,7 +65,6 @@ namespace uSync8.BackOffice
                     total = orderedNodes.Count;
 
                     var actions = new List<uSyncAction>();
-
                     var lastType = string.Empty;
 
                     SyncHandlerOptions syncHandlerOptions = new SyncHandlerOptions(options.HandlerSet);

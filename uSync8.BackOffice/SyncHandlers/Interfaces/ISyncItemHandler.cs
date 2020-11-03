@@ -19,6 +19,9 @@ namespace uSync8.BackOffice.SyncHandlers
     /// </summary>
     public interface ISyncItemHandler 
     {
+        IEnumerable<uSyncAction> ReportElement(XElement node, string filename, HandlerSettings settings, uSyncImportOptions options);
+
+
         /// <summary>
         ///  Import from a single node. 
         /// </summary>
