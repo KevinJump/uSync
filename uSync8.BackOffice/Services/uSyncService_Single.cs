@@ -31,12 +31,17 @@ namespace uSync8.BackOffice
             SyncHandlerOptions syncHandlerOptions = new SyncHandlerOptions(options.HandlerSet);
             ExtendedHandlerConfigPair handlerPair = null;
 
+            var index = page * pageSize;
+
             foreach (var item in orderedNodes.Skip(page * pageSize).Take(pageSize))
             {
                 if (!item.Node.Name.LocalName.InvariantEquals(lastType))
                 {
+                    lastType = item.Node.Name.LocalName;
                     handlerPair = handlerFactory.GetValidHandlerByTypeName(item.Node.Name.LocalName, syncHandlerOptions);
                 }
+
+                options.Callbacks?.Update.Invoke(item.Node.GetAlias(), index, total);
 
                 if (handlerPair != null)
                 {
@@ -49,6 +54,8 @@ namespace uSync8.BackOffice
                         actions.AddRange(handlerPair.Handler.ReportElement(item.Node));
                     }
                 }
+
+                index++;
             }
 
             return actions;
@@ -74,6 +81,7 @@ namespace uSync8.BackOffice
                     {
                         if (!item.Node.Name.LocalName.InvariantEquals(lastType))
                         {
+                            lastType = item.Node.Name.LocalName;
                             handlerPair = handlerFactory.GetValidHandlerByTypeName(item.Node.Name.LocalName, syncHandlerOptions);
                         }
 
@@ -111,6 +119,7 @@ namespace uSync8.BackOffice
                     {
                         if (!action.HandlerAlias.InvariantEquals(lastType))
                         {
+                            lastType = action.HandlerAlias;    
                             handlerPair = handlerFactory.GetValidHandler(action.HandlerAlias, syncHandlerOptions);
                         }
 
@@ -143,16 +152,13 @@ namespace uSync8.BackOffice
 
                     var results = new List<uSyncAction>();
 
-                    foreach (var actionGroup in folders)
+                    foreach (var actionItem in folders.SelectMany(actionGroup => actionGroup))
                     {
-                        foreach (var actionItem in actionGroup)
+                        var handlerPair = handlerFactory.GetValidHandler(actionItem.alias, syncHandlerOptions);
+                        if (handlerPair.Handler is ISyncPostImportHandler postImportHandler)
                         {
-                            var handlerPair = handlerFactory.GetValidHandler(actionItem.alias, syncHandlerOptions);
-                            if (handlerPair.Handler is ISyncPostImportHandler postImportHandler)
-                            {
-                                var handlerActions = actions.Where(x => x.HandlerAlias.InvariantEquals(handlerPair.Handler.Alias));
-                                results.AddRange(postImportHandler.ProcessPostImport(actionItem.folder, handlerActions, handlerPair.Settings));
-                            }
+                            var handlerActions = actions.Where(x => x.HandlerAlias.InvariantEquals(handlerPair.Handler.Alias));
+                            results.AddRange(postImportHandler.ProcessPostImport(actionItem.folder, handlerActions, handlerPair.Settings));
                         }
                     }
 
@@ -166,7 +172,7 @@ namespace uSync8.BackOffice
         /// </summary>
         private IList<OrderedNodeInfo> LoadOrderedNodes(string folder)
         {
-            var files = syncFileService.GetFiles(folder, "*.conifg");
+            var files = syncFileService.GetFiles(folder, "*.config");
 
             var nodes = new List<OrderedNodeInfo>();
 

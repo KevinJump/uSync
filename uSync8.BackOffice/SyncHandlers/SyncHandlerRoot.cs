@@ -950,10 +950,10 @@ namespace uSync8.BackOffice.SyncHandlers
         }
 
         public IEnumerable<uSyncAction> ReportElement(XElement node)
-            => ReportElement(node, string.Empty, null);
+            => ReportElement(node, string.Empty, this.DefaultConfig);
 
         protected virtual IEnumerable<uSyncAction> ReportElement(XElement node, string filename, HandlerSettings config)
-            => ReportElement(node, filename, config, new uSyncImportOptions());
+            => ReportElement(node, filename, config ?? this.DefaultConfig, new uSyncImportOptions());
 
 
         /// <summary>
