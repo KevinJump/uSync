@@ -139,19 +139,10 @@ namespace uSync8.BackOffice
     public struct uSyncActionHelper<T>
     {
 
-        public static uSyncAction SetAction(SyncAttempt<T> attempt, string filename, string handlerAlias, bool requirePostProcessing = true)
+        public static uSyncAction SetAction(SyncAttempt<T> attempt, string filename, Guid key, string handlerAlias, bool requirePostProcessing = true)
         {
             var action = new uSyncAction(attempt.Success, attempt.Name, attempt.ItemType, attempt.Change, attempt.Message, attempt.Exception, filename, handlerAlias, requirePostProcessing);
-            if (attempt.Details != null && attempt.Details.Any())
-            {
-                action.Details = attempt.Details;
-            }
-            return action;
-        }
-
-        public static uSyncAction SetAction(SyncAttempt<T> attempt, string filename, bool requirePostProcessing = true)
-        {
-            var action = new uSyncAction(attempt.Success, attempt.Name, attempt.ItemType, attempt.Change, attempt.Message, attempt.Exception, filename, requirePostProcessing);
+            action.key = key;
             if (attempt.Details != null && attempt.Details.Any())
             {
                 action.Details = attempt.Details;

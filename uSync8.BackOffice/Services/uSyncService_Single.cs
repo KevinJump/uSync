@@ -77,6 +77,8 @@ namespace uSync8.BackOffice
                     SyncHandlerOptions syncHandlerOptions = new SyncHandlerOptions(options.HandlerSet);
                     ExtendedHandlerConfigPair handlerPair = null;
 
+                    var index = page * pageSize;
+
                     foreach (var item in orderedNodes.Skip(page * pageSize).Take(pageSize))
                     {
                         if (!item.Node.Name.LocalName.InvariantEquals(lastType))
@@ -84,6 +86,8 @@ namespace uSync8.BackOffice
                             lastType = item.Node.Name.LocalName;
                             handlerPair = handlerFactory.GetValidHandlerByTypeName(item.Node.Name.LocalName, syncHandlerOptions);
                         }
+
+                        options.Callbacks?.Update?.Invoke(item.Node.GetAlias(), index, total);
 
                         if (handlerPair != null)
                         {
@@ -96,6 +100,8 @@ namespace uSync8.BackOffice
                                 actions.AddRange(handlerPair.Handler.ImportElement(item.Node, options.Flags.HasFlag(SerializerFlags.Force)));
                             }
                         }
+
+                        index++;
                     }
 
                     return actions;
@@ -112,8 +118,12 @@ namespace uSync8.BackOffice
                     SyncHandlerOptions syncHandlerOptions = new SyncHandlerOptions(options.HandlerSet);
                     var secondPassActions = new List<uSyncAction>();
 
+                    var total = actions.Count();
+
                     var lastType = string.Empty;
                     ExtendedHandlerConfigPair handlerPair = null;
+
+                    var index = page * pageSize;
 
                     foreach (var action in actions.Skip(page*pageSize).Take(pageSize))
                     {
@@ -123,10 +133,14 @@ namespace uSync8.BackOffice
                             handlerPair = handlerFactory.GetValidHandler(action.HandlerAlias, syncHandlerOptions);
                         }
 
+                        options.Callbacks?.Update?.Invoke($"Second Pass: {action.Name}", index, total);
+
                         if (handlerPair != null && handlerPair.Handler is ISyncItemHandler itemHandler)
                         {
                             secondPassActions.AddRange(itemHandler.ImportSecondPass(action, handlerPair.Settings, options));
                         }
+
+                        index++;
                     }
 
                     return secondPassActions;
@@ -146,20 +160,27 @@ namespace uSync8.BackOffice
                     var aliases = actions.Select(x => x.HandlerAlias).Distinct();
 
                     var folders = actions
+                        .Where(x => x.RequiresPostProcessing)
                         .Select(x => new { alias = x.HandlerAlias, folder = Path.GetDirectoryName(x.FileName), actions = x })
                         .DistinctBy(x => x.folder)
-                        .GroupBy(x => x.alias);
+                        .GroupBy(x => x.alias)
+                        .ToList();
 
                     var results = new List<uSyncAction>();
+
+                    var index = 0;
 
                     foreach (var actionItem in folders.SelectMany(actionGroup => actionGroup))
                     {
                         var handlerPair = handlerFactory.GetValidHandler(actionItem.alias, syncHandlerOptions);
                         if (handlerPair.Handler is ISyncPostImportHandler postImportHandler)
                         {
+                            options.Callbacks?.Update?.Invoke(actionItem.alias, index, folders.Count);
+
                             var handlerActions = actions.Where(x => x.HandlerAlias.InvariantEquals(handlerPair.Handler.Alias));
                             results.AddRange(postImportHandler.ProcessPostImport(actionItem.folder, handlerActions, handlerPair.Settings));
                         }
+                        index++;
                     }
 
                     return results;

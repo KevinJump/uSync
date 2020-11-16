@@ -91,7 +91,8 @@ namespace uSync8.BackOffice.SyncHandlers
 
                 // for reporting - we use the entity name,
                 // this stops an extra lookup - which we may not need later
-                actions.Add(uSyncActionHelper<TObject>.SetAction(SyncAttempt<TObject>.Succeed(name, ChangeType.Delete), string.Empty));
+                actions.Add(
+                    uSyncActionHelper<TObject>.SetAction(SyncAttempt<TObject>.Succeed(name, ChangeType.Delete), string.Empty, item.Key, this.Alias));
             }
 
             return actions;

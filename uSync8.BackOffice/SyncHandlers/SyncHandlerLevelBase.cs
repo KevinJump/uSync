@@ -187,7 +187,7 @@ namespace uSync8.BackOffice.SyncHandlers
                     // one of the files is wrong. (do we stop or carry on)
                     logger.Warn(handlerType, $"Error loading file: {file} [{ex.Message}]");
                     actions.Add(uSyncActionHelper<TObject>.SetAction(
-                        SyncAttempt<TObject>.Fail(Path.GetFileName(file), ChangeType.Fail, $"Failed to Load: {ex.Message}"), file, false));
+                        SyncAttempt<TObject>.Fail(Path.GetFileName(file), ChangeType.Fail, $"Failed to Load: {ex.Message}"), file, Guid.Empty, this.Alias, false));
                 }
             }
 

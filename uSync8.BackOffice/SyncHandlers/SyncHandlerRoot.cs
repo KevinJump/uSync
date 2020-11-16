@@ -376,19 +376,30 @@ namespace uSync8.BackOffice.SyncHandlers
 
             }
 
-            var attempt = DeserializeItem(node, new SyncSerializerOptions(options.Flags));
-            var action = uSyncActionHelper<TObject>.SetAction(attempt, GetNameFromFileOrNode(filename, node), this.Alias, IsTwoPass);
+            try
+            {
+                var attempt = DeserializeItem(node, new SyncSerializerOptions(options.Flags));
+                var action = uSyncActionHelper<TObject>.SetAction(attempt, GetNameFromFileOrNode(filename, node), node.GetKey(), this.Alias, IsTwoPass);
 
-            // add item if we have it.
-            if (attempt.Item != null) action.Item = attempt.Item;
+                // add item if we have it.
+                if (attempt.Item != null) action.Item = attempt.Item;
 
-            // add details if we have them
-            if (attempt.Details != null && attempt.Details.Any()) action.Details = attempt.Details;
+                // add details if we have them
+                if (attempt.Details != null && attempt.Details.Any()) action.Details = attempt.Details;
 
-            // this might not be the place to do this because, two pass items are imported at another point too.
-            uSyncService.FireImportedItem(node, attempt.Change);
+                // this might not be the place to do this because, two pass items are imported at another point too.
+                uSyncService.FireImportedItem(node, attempt.Change);
 
-            return action.AsEnumerableOfOne();
+
+                return action.AsEnumerableOfOne();
+            }
+            catch (Exception ex)
+            {
+                logger.Warn(handlerType, "{alias}: Import Failed : {exception}", this.Alias, ex.ToString());
+                return uSyncAction.Fail(Path.GetFileName(filename), this.handlerType, ChangeType.Fail, $"Import Fail: {ex.Message}")
+                    .AsEnumerableOfOne();
+            }
+
         }
 
 
@@ -469,7 +480,7 @@ namespace uSync8.BackOffice.SyncHandlers
 
                 var result = DeserializeItemSecondPass(item, node, new SyncSerializerOptions(options.Flags, settings.Settings));
 
-                return uSyncActionHelper<TObject>.SetAction(result, file).AsEnumerableOfOne();
+                return uSyncActionHelper<TObject>.SetAction(result,file, node.GetKey(), this.Alias).AsEnumerableOfOne();
             }
             catch (Exception ex)
             {
@@ -760,7 +771,7 @@ namespace uSync8.BackOffice.SyncHandlers
 
             uSyncService.FireExportedItem(attempt.Item, ChangeType.Export);
 
-            return uSyncActionHelper<XElement>.SetAction(attempt, filename).AsEnumerableOfOne();
+            return uSyncActionHelper<XElement>.SetAction(attempt, filename, GetItemKey(item), this.Alias).AsEnumerableOfOne();
         }
 
         #endregion
