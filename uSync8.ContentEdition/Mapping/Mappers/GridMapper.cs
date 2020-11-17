@@ -194,12 +194,24 @@ namespace uSync8.ContentEdition.Mapping.Mappers
 
             var dependencies = new List<uSyncDependency>();
 
-            foreach (var value in style.ToObject<Dictionary<string, string>>())
+            try
             {
-                // style property contains a url value.
-                if (value.Value.InvariantContains("url")) { 
-                    dependencies.AddRange(ProcessStyleMedia(value.Value));
+                foreach (var value in style.ToObject<Dictionary<string, object>>())
+                {
+                    if (value.Value is string stringValue)
+                    {
+                        // style property contains a url value.
+                        if (stringValue.InvariantContains("url"))
+                        {
+                            dependencies.AddRange(ProcessStyleMedia(stringValue));
+                        }
+                    }
                 }
+            }
+            catch(JsonReaderException jrex)
+            {
+                // ideally we want to deal with this, but failure of a dependcy check on a url in 
+                // a grid style element shouldn't stop a full export. 
             }
 
             return dependencies;
