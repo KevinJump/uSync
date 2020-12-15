@@ -67,7 +67,8 @@
     </umb-box>
 
     <div ng-if="vm.warnings.Message.length > 0" class="alert alert-{{vm.warnings.Type}}">
-        {{vm.warnings.Message}}
+        <span ng-bind-html="vm.warnings.Message"></span>
+        
     </div>
 
 
