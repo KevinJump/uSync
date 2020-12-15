@@ -585,9 +585,24 @@ namespace uSync8.BackOffice.Configuration
            
             if (folder.StartsWith("~/"))
             {
-                var dir = HostingEnvironment.IsHosted
-                    ? HostingEnvironment.MapPath(folder)
-                    : Path.Combine(root, folder.TrimStart("~/"));
+                string dir = string.Empty;
+                if (folder.StartsWith("~/.."))
+                {
+                    if (acceptUnsafe)
+                    {
+                        dir = Path.Combine(root, folder.TrimStart("~/"));
+                    }
+                    else
+                    {
+                        throw new ConfigurationErrorsException($"Invalid uSync folder \"{folder}\". Folders outside root require AllowUnsafe setting in config.");
+                    }
+                }
+                else
+                {
+                    dir = HostingEnvironment.IsHosted
+                        ? HostingEnvironment.MapPath(folder)
+                        : Path.Combine(root, folder.TrimStart("~/"));
+                }
 
                 dir = Path.GetFullPath(dir);
                 root = Path.GetFullPath(root);

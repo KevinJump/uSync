@@ -77,7 +77,7 @@ namespace uSync8.ContentEdition.Serializers
                 details.AddRange(DeserializeTranslations(item, node));
             }
 
-            this.SaveItem(item);
+            // this.SaveItem(item);
             
 
             return SyncAttempt<IDictionaryItem>.Succeed(item.ItemKey, item, ChangeType.Import, details);
