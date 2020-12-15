@@ -62,7 +62,8 @@
         <umb-box-content ng-if="vm.working || vm.reported">
             <usync-progress-view update="vm.update"
                                  status="vm.status"
-                                 hide-labels="false" />
+                                 hide-labels="false">
+            </usync-progress-view>
         </umb-box-content>
     </umb-box>
 
@@ -77,7 +78,8 @@
         <usync-report-view actions="vm.actions"
                            results="vm.results"
                            hide-action="true"
-                           hide-link="vm.hideLink" />
+                           hide-link="vm.hideLink">
+        </usync-report-view>
     </div>
 
 </div>
