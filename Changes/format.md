@@ -6,6 +6,10 @@ Very occasionaly we will need to change how something is stored within the uSync
 
 Changes are always backwards compatible (so old files will still import fine into usync) - but the actual changes in the file cause them to be registred as diffrent and show up as a change in the uSync UI.
 
+When uSync performs a report/import it checks the version against a file in the root of the sync folder. if it is diffrent you get a warning: 
+
+![uSync format warning](warning.png)
+
 Our recommendation is to perform a new export when the format version changes
 
 ## v8.8.0
