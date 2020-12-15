@@ -381,6 +381,14 @@ namespace uSync8.BackOffice.SyncHandlers
                 var attempt = DeserializeItem(node, new SyncSerializerOptions(options.Flags));
                 var action = uSyncActionHelper<TObject>.SetAction(attempt, GetNameFromFileOrNode(filename, node), node.GetKey(), this.Alias, IsTwoPass);
 
+
+                if (action.Success && action.Change == ChangeType.Clean)
+                {
+                    // we have to do the clean (this would normally be batched).
+                    // and cleans do rely on the folder having the other files in them.
+                    return CleanFolder(filename, false, settings.UseFlatStructure);
+                }
+
                 // add item if we have it.
                 if (attempt.Item != null) action.Item = attempt.Item;
 
@@ -515,7 +523,6 @@ namespace uSync8.BackOffice.SyncHandlers
 
             return SyncAttempt<TObject>.Succeed(GetItemAlias(item), ChangeType.NoChange);
         }
-
 
         /// <summary>
         ///  given a folder we calculate what items we can remove, becuase they are 

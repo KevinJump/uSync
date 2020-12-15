@@ -20,7 +20,7 @@ namespace uSync8.BackOffice
     //
     public partial class uSyncService
     {
-        public IEnumerable<uSyncAction> ReportPartial(string folder, int page, int pageSize, uSyncImportOptions options, out int total)
+        public IEnumerable<uSyncAction> ReportPartial(string folder, uSyncPagedImportOptions options, out int total)
         {
             var orderedNodes = LoadOrderedNodes(folder);
             total = orderedNodes.Count;
@@ -31,17 +31,19 @@ namespace uSync8.BackOffice
             SyncHandlerOptions syncHandlerOptions = new SyncHandlerOptions(options.HandlerSet);
             ExtendedHandlerConfigPair handlerPair = null;
 
-            var index = page * pageSize;
+            var index = options.PageNumber * options.PageSize;
 
-            foreach (var item in orderedNodes.Skip(page * pageSize).Take(pageSize))
+            foreach (var item in orderedNodes.Skip(options.PageNumber * options.PageSize).Take(options.PageSize))
             {
-                if (!item.Node.Name.LocalName.InvariantEquals(lastType))
+                var itemType = item.Node.GetItemType();
+                if (!itemType.InvariantEquals(lastType))
                 {
-                    lastType = item.Node.Name.LocalName;
-                    handlerPair = handlerFactory.GetValidHandlerByTypeName(item.Node.Name.LocalName, syncHandlerOptions);
+                    lastType = itemType;
+                    handlerPair = handlerFactory.GetValidHandlerByTypeName(itemType, syncHandlerOptions);
                 }
 
-                options.Callbacks?.Update.Invoke(item.Node.GetAlias(), index, total);
+                options.Callbacks?.Update.Invoke(item.Node.GetAlias(),
+                    CalculateProgress(index, total, options.ProgressMin, options.ProgressMax), 100);
 
                 if (handlerPair != null)
                 {
@@ -61,7 +63,7 @@ namespace uSync8.BackOffice
             return actions;
         }
 
-        public IEnumerable<uSyncAction> ImportPartial(string folder, int page, int pageSize, uSyncImportOptions options, out int total)
+        public IEnumerable<uSyncAction> ImportPartial(string folder, uSyncPagedImportOptions options, out int total)
         {
             lock (_importLock)
             {
@@ -74,20 +76,24 @@ namespace uSync8.BackOffice
                     var actions = new List<uSyncAction>();
                     var lastType = string.Empty;
 
+                    var range = options.ProgressMax - options.ProgressMin;
+
                     SyncHandlerOptions syncHandlerOptions = new SyncHandlerOptions(options.HandlerSet);
                     ExtendedHandlerConfigPair handlerPair = null;
 
-                    var index = page * pageSize;
+                    var index = options.PageNumber * options.PageSize;
 
-                    foreach (var item in orderedNodes.Skip(page * pageSize).Take(pageSize))
+                    foreach (var item in orderedNodes.Skip(options.PageNumber * options.PageSize).Take(options.PageSize))
                     {
-                        if (!item.Node.Name.LocalName.InvariantEquals(lastType))
+                        var itemType = item.Node.GetItemType();
+                        if (!itemType.InvariantEquals(lastType))
                         {
-                            lastType = item.Node.Name.LocalName;
-                            handlerPair = handlerFactory.GetValidHandlerByTypeName(item.Node.Name.LocalName, syncHandlerOptions);
+                            lastType = itemType;
+                            handlerPair = handlerFactory.GetValidHandlerByTypeName(itemType, syncHandlerOptions);
                         }
 
-                        options.Callbacks?.Update?.Invoke(item.Node.GetAlias(), index, total);
+                        options.Callbacks?.Update?.Invoke(item.Node.GetAlias(), 
+                            CalculateProgress(index, total, options.ProgressMin, options.ProgressMax), 100) ;
 
                         if (handlerPair != null)
                         {
@@ -109,7 +115,7 @@ namespace uSync8.BackOffice
             }
         }
 
-        public IEnumerable<uSyncAction> ImportPartialSecondPass(IEnumerable<uSyncAction> actions, int page, int pageSize, uSyncImportOptions options)
+        public IEnumerable<uSyncAction> ImportPartialSecondPass(IEnumerable<uSyncAction> actions, uSyncPagedImportOptions options)
         {
             lock (_importLock)
             {
@@ -123,9 +129,9 @@ namespace uSync8.BackOffice
                     var lastType = string.Empty;
                     ExtendedHandlerConfigPair handlerPair = null;
 
-                    var index = page * pageSize;
+                    var index = options.PageNumber * options.PageSize;
 
-                    foreach (var action in actions.Skip(page*pageSize).Take(pageSize))
+                    foreach (var action in actions.Skip(options.PageNumber*options.PageSize).Take(options.PageSize))
                     {
                         if (!action.HandlerAlias.InvariantEquals(lastType))
                         {
@@ -133,7 +139,9 @@ namespace uSync8.BackOffice
                             handlerPair = handlerFactory.GetValidHandler(action.HandlerAlias, syncHandlerOptions);
                         }
 
-                        options.Callbacks?.Update?.Invoke($"Second Pass: {action.Name}", index, total);
+                        options.Callbacks?.Update?.Invoke($"Second Pass: {action.Name}",
+                            CalculateProgress(index, total, options.ProgressMin, options.ProgressMax), 100);
+
 
                         if (handlerPair != null && handlerPair.Handler is ISyncItemHandler itemHandler)
                         {
@@ -148,7 +156,7 @@ namespace uSync8.BackOffice
             }
         }
         
-        public IEnumerable<uSyncAction> ImportPartialPostImport(IEnumerable<uSyncAction> actions, uSyncImportOptions options)
+        public IEnumerable<uSyncAction> ImportPartialPostImport(IEnumerable<uSyncAction> actions, uSyncPagedImportOptions options)
         {
             lock (_importLock)
             {
@@ -218,5 +226,16 @@ namespace uSync8.BackOffice
             public XElement Node { get; set; }
             public string FileName { get; set; }
         }
+
+
+        /// <summary>
+        ///  calculate the percentage progress we are making between a range. 
+        /// </summary>
+        /// <remarks>
+        ///  for partial imports this allows the calling progress to smooth out the progress bar.
+        /// </remarks>
+        private int CalculateProgress(int value, int total, int min, int max)
+            => (int)(min + (((float)value / total) * (max-min)));
+                        
     }
 }

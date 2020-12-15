@@ -15,4 +15,14 @@ namespace uSync8.BackOffice
 
         public uSyncCallbacks Callbacks { get; set; }
     }
+
+    public class uSyncPagedImportOptions : uSyncImportOptions
+    {
+        public int PageNumber { get; set; }
+        public int PageSize { get; set; }
+
+        public int ProgressMin { get; set; }
+        public int ProgressMax { get; set; }
+    
+    }
 }
