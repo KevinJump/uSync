@@ -149,6 +149,22 @@ namespace uSync8.BackOffice
         public void Terminate()
         {
             logger.Debug<uSyncBackofficeComponent>("Terminiating Component");
+            if (globalSettings.ExportOnSave)
+            {
+                var handlers = handlerFactory
+                    .GetValidHandlers(new SyncHandlerOptions(handlerFactory.DefaultSet, HandlerActions.Save))
+                    .ToList();
+
+                logger.Info<uSyncBackofficeComponent>("uSync: Cleaning up events for {count} Handlers", handlers.Count);
+
+                foreach (var syncHandler in handlers)
+                {
+                    if (syncHandler.Handler is ISyncItemHandler itemHandler)
+                    {
+                        itemHandler.Terminate(syncHandler.Settings);
+                    }
+                }
+            }
         }
 
 

@@ -95,7 +95,7 @@ namespace uSync8.ContentEdition.Serializers
         protected override SyncAttempt<XElement> SerializeCore(IDomain item, SyncSerializerOptions options)
         {
             var node = new XElement(ItemType,
-                new XAttribute("Key", item.Id.ToGuid()),
+                new XAttribute("Key", item.DomainName.GetDeterministicHashCode().ToGuid()),
                 new XAttribute("Alias", item.DomainName));
 
             var info = new XElement("Info",

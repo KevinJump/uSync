@@ -56,7 +56,9 @@ namespace uSync8.Core.Tracking
                         changes.AddRange(optionTracker.GetChanges(node, options));
                         break;
                     default:
+#pragma warning disable CS0618 // Type or member is obsolete
                         changes.AddRange(tracker.GetChanges(node));
+#pragma warning restore CS0618 // Type or member is obsolete
                         break;
                 }
             }

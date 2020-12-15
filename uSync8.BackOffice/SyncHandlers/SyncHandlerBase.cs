@@ -12,6 +12,7 @@ using Umbraco.Core.Services;
 using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
 using uSync8.Core;
+using uSync8.Core.Cache;
 using uSync8.Core.Dependency;
 using uSync8.Core.Models;
 using uSync8.Core.Serialization;
@@ -90,7 +91,8 @@ namespace uSync8.BackOffice.SyncHandlers
 
                 // for reporting - we use the entity name,
                 // this stops an extra lookup - which we may not need later
-                actions.Add(uSyncActionHelper<TObject>.SetAction(SyncAttempt<TObject>.Succeed(name, ChangeType.Delete), string.Empty));
+                actions.Add(
+                    uSyncActionHelper<TObject>.SetAction(SyncAttempt<TObject>.Succeed(name, ChangeType.Delete), string.Empty, item.Key, this.Alias));
             }
 
             return actions;

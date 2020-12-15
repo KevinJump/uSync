@@ -23,7 +23,7 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("dataTypeHandler", "Datatypes", "DataTypes", uSyncBackOfficeConstants.Priorites.DataTypes,
         Icon = "icon-autofill", EntityType = UdiEntityType.DataType)]
-    public class DataTypeHandler : SyncHandlerContainerBase<IDataType, IDataTypeService>, ISyncExtendedHandler, ISyncPostImportHandler
+    public class DataTypeHandler : SyncHandlerContainerBase<IDataType, IDataTypeService>, ISyncExtendedHandler, ISyncPostImportHandler, ISyncItemHandler
     {
         private readonly IDataTypeService dataTypeService;
 
@@ -65,8 +65,15 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             DataTypeService.Saved += EventSavedItem;
             DataTypeService.Deleted += EventDeletedItem;
             DataTypeService.Moved += EventMovedItem;
-
             DataTypeService.SavedContainer += EventContainerSaved;
+        }
+
+        protected override void TerminateEvents(HandlerSettings settings)
+        {
+            DataTypeService.Saved -= EventSavedItem;
+            DataTypeService.Deleted -= EventDeletedItem;
+            DataTypeService.Moved -= EventMovedItem;
+            DataTypeService.SavedContainer -= EventContainerSaved;
         }
 
         protected override string GetItemFileName(IUmbracoEntity item, bool useGuid)
@@ -85,10 +92,13 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 
             foreach (var action in actions)
             {
-                var attempt = Import(action.FileName, config, SerializerFlags.None);
-                if (attempt.Success)
+                var result = Import(action.FileName, config, SerializerFlags.None);
+                foreach (var attempt in result)
                 {
-                    ImportSecondPass(action.FileName, attempt.Item, config, null);
+                    if (attempt.Success && attempt.Item is IDataType dataType)
+                    {
+                        ImportSecondPass(action.FileName, dataType, config, null);
+                    }
                 }
             }
 

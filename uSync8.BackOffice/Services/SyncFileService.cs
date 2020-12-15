@@ -158,6 +158,13 @@ namespace uSync8.BackOffice.Services
                 Directory.CreateDirectory(absPath);
         }
 
+        public void CreateFolder(string folder)
+        {
+            var absPath = GetAbsPath(folder);
+            if (!Directory.Exists(folder))
+                Directory.CreateDirectory(folder);
+        }
+
         /// <summary>
         ///  remove a folder and all its contents
         /// </summary>

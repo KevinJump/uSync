@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Security.Cryptography;
 using System.Xml.Linq;
 
 using uSync8.BackOffice.SyncHandlers;
@@ -8,7 +10,8 @@ using uSync8.Core.Models;
 namespace uSync8.BackOffice
 {
     public delegate void uSyncBulkEventHandler(uSyncBulkEventArgs e);
-    public delegate void uSyncItemEventHandler(uSyncItemEventArgs e);
+    public delegate void uSyncItemEventHandler(uSyncItemEventArgs<XElement> e);
+    public delegate void uSyncItemObjectEventHandler(uSyncItemEventArgs<object> e);
 
     public partial class uSyncService
     {
@@ -79,17 +82,74 @@ namespace uSync8.BackOffice
         /// </summary>
         public static event uSyncItemEventHandler ReportedItem;
 
-        public static bool FireReportingItem(uSyncItemEventArgs e)
-        {
-            ReportingItem?.Invoke(e);
-            return e.Cancel;
-        }
+
+        /// <summary>
+        ///  Before an item is imported can be cancelled
+        /// </summary>
+        public static event uSyncItemEventHandler ImportingItem;
+
+        /// <summary>
+        ///  After an item is imported
+        /// </summary>
+        public static event uSyncItemEventHandler ImportedItem;
+
+        /// <summary>
+        ///  before an item is exported (can be cancelled)
+        /// </summary>
+        public static event uSyncItemObjectEventHandler ExportingItem;
+
+        /// <summary>
+        ///  after an item is exported
+        /// </summary>
+        public static event uSyncItemEventHandler ExportedItem;
+
+
+        public static bool FireReportingItem(XElement node)
+            => FireItemStartingEvent(ReportingItem, node);
 
         public static void FireReportedItem(XElement node, ChangeType changeType)
+            => FireItemCompletedEvent(ReportedItem, node, changeType);
+
+
+        public static bool FireImportingItem(XElement node)
+            => FireItemStartingEvent(ImportingItem, node);
+
+        public static void FireImportedItem(XElement node, ChangeType changeType)
+            => FireItemCompletedEvent(ImportedItem, node, changeType);
+
+        public static bool FireExportingItem(object item)
         {
-            ReportedItem?.Invoke(new uSyncItemEventArgs
+            if (ExportingItem != null)
             {
-                Item = node, 
+                var e = new uSyncItemEventArgs<object> { Item = item };
+                ExportingItem?.Invoke(e);
+                return e.Cancel;
+            }
+
+            return true;
+
+        }
+
+        public static void FireExportedItem(XElement node, ChangeType changeType)
+            => FireItemCompletedEvent(ExportedItem, node, changeType);
+
+        private static bool FireItemStartingEvent(uSyncItemEventHandler eventHandler, XElement node)
+        {
+            if (eventHandler != null)
+            {
+                var e = new uSyncItemEventArgs<XElement> { Item = node };
+                eventHandler?.Invoke(e);
+                return e.Cancel;
+            }
+
+            return true;
+        }
+
+        private static void FireItemCompletedEvent(uSyncItemEventHandler eventHandler, XElement node, ChangeType changeType)
+        {
+            eventHandler?.Invoke(new uSyncItemEventArgs<XElement>
+            {
+                Item = node,
                 Change = changeType
             });
         }
@@ -100,11 +160,11 @@ namespace uSync8.BackOffice
         public IEnumerable<uSyncAction> Actions { get; set; }
     }
 
-    public class uSyncItemEventArgs
+    public class uSyncItemEventArgs<TObject>
     {
         public bool Cancel { get; set; }
         public ChangeType Change { get; set; }
 
-        public XElement Item { get; set; }
+        public TObject Item { get; set; }
     }
 }

@@ -26,7 +26,7 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("languageHandler", "Languages", "Languages", uSyncBackOfficeConstants.Priorites.Languages,
         Icon = "icon-globe", EntityType = UdiEntityType.Language, IsTwoPass = true)]
-    public class LanguageHandler : SyncHandlerBase<ILanguage, ILocalizationService>, ISyncExtendedHandler
+    public class LanguageHandler : SyncHandlerBase<ILanguage, ILocalizationService>, ISyncExtendedHandler, ISyncItemHandler
     {
         private readonly ILocalizationService localizationService;
 
@@ -74,12 +74,16 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 
         protected override void InitializeEvents(HandlerSettings settings)
         {
-            // LocalizationService.SavedLanguage += EventSavedItem;
             LocalizationService.DeletedLanguage += EventDeletedItem;
-
             LocalizationService.SavedLanguage += LocalizationService_SavedLanguage;
             LocalizationService.SavingLanguage += LocalizationService_SavingLanguage;
+        }
 
+        protected override void TerminateEvents(HandlerSettings settings)
+        {
+            LocalizationService.DeletedLanguage -= EventDeletedItem;
+            LocalizationService.SavedLanguage -= LocalizationService_SavedLanguage;
+            LocalizationService.SavingLanguage -= LocalizationService_SavingLanguage;
         }
 
         private static ConcurrentDictionary<string, string> newLanguages = new ConcurrentDictionary<string, string>();

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Xml.Linq;
 
+using uSync8.Core.Cache;
 using uSync8.Core.Dependency;
 using uSync8.Core.Models;
 using uSync8.Core.Serialization;
@@ -13,13 +14,20 @@ namespace uSync8.Core
         private readonly SyncTrackerCollection syncTrackers;
         private readonly SyncDependencyCollection syncCheckers;
 
+        private readonly SyncEntityCache entityCache;
+
+
         public SyncItemFactory(
+            SyncEntityCache entityCache,
             SyncTrackerCollection syncTrackers,
             SyncDependencyCollection syncCheckers)
         {
             this.syncTrackers = syncTrackers;
             this.syncCheckers = syncCheckers;
+            this.entityCache = entityCache;
         }
+
+        public SyncEntityCache EntityCache => entityCache;
 
         public IEnumerable<ISyncTracker<TObject>> GetTrackers<TObject>()
             => syncTrackers.GetTrackers<TObject>();

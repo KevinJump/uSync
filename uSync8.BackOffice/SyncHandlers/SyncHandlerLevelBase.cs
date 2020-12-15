@@ -105,20 +105,24 @@ namespace uSync8.BackOffice.SyncHandlers
 
                 logger.Verbose(handlerType, "{Index} Importing: {File}, [Level {Level}]", item.Index, filename, item.Node.Level);
 
-                var attempt = Import(item.Node.File, config, flags);
-                if (attempt.Success)
+                var result = Import(item.Node.File, config, flags);
+                foreach (var attempt in result)
                 {
-                    if (attempt.Change == ChangeType.Clean)
+                    if (attempt.Success)
                     {
-                        cleanMarkers.Add(item.Node.File);
+                        if (attempt.Change == ChangeType.Clean)
+                        {
+                            cleanMarkers.Add(item.Node.File);
+                        }
+                        else if (attempt.Item != null && attempt.Item is TObject attemptItem)
+                        {
+                            updates.Add(item.Node.File, attemptItem);
+                        }
                     }
-                    else if (attempt.Item != null)
-                    {
-                        updates.Add(item.Node.File, attempt.Item);
-                    }
-                }
 
-                actions.Add(uSyncActionHelper<TObject>.SetAction(attempt, item.Node.File, IsTwoPass));
+                    if (attempt.Change != ChangeType.Clean)
+                        actions.Add(attempt);
+                }
             }
 
             if (flags.HasFlag(SerializerFlags.DoNotSave) && updates.Any())
@@ -183,7 +187,7 @@ namespace uSync8.BackOffice.SyncHandlers
                     // one of the files is wrong. (do we stop or carry on)
                     logger.Warn(handlerType, $"Error loading file: {file} [{ex.Message}]");
                     actions.Add(uSyncActionHelper<TObject>.SetAction(
-                        SyncAttempt<TObject>.Fail(Path.GetFileName(file), ChangeType.Fail, $"Failed to Load: {ex.Message}"), file, false));
+                        SyncAttempt<TObject>.Fail(Path.GetFileName(file), ChangeType.Fail, $"Failed to Load: {ex.Message}"), file, Guid.Empty, this.Alias, false));
                 }
             }
 
@@ -237,7 +241,8 @@ namespace uSync8.BackOffice.SyncHandlers
             {
                 if (item.ParentId > 0)
                 {
-                    var parent = entityService.Get(item.ParentId);
+                    var parent = this.itemFactory.EntityCache.GetEntity(item.ParentId);
+                    // var parent = entityService.Get(item.ParentId);
                     if (parent != null)
                     {
                         path = GetEntityPath(parent, useGuid, false);

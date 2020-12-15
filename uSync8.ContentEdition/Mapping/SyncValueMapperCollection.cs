@@ -7,6 +7,7 @@ using Umbraco.Core.Composing;
 using Umbraco.Core.Models;
 
 using uSync8.BackOffice.Configuration;
+using uSync8.Core.Cache;
 
 namespace uSync8.ContentEdition.Mapping
 {
@@ -15,11 +16,15 @@ namespace uSync8.ContentEdition.Mapping
     {
         private readonly IDictionary<string, string> CustomMappings;
 
+        public SyncEntityCache EntityCache { get; private set; }
+
         public SyncValueMapperCollection(
             uSyncConfig uSyncConfig,
+            SyncEntityCache entityCache,
             IEnumerable<ISyncMapper> items)
             : base(items)
         {
+            EntityCache = entityCache;
             CustomMappings = uSyncConfig.Settings.CustomMappings;
         }
 

@@ -21,7 +21,7 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("contentTypeHandler", "DocTypes", "ContentTypes", uSyncBackOfficeConstants.Priorites.ContentTypes,
             IsTwoPass = true, Icon = "icon-item-arrangement", EntityType = UdiEntityType.DocumentType)]
-    public class ContentTypeHandler : SyncHandlerContainerBase<IContentType, IContentTypeService>, ISyncExtendedHandler, ISyncPostImportHandler
+    public class ContentTypeHandler : SyncHandlerContainerBase<IContentType, IContentTypeService>, ISyncExtendedHandler, ISyncPostImportHandler, ISyncItemHandler
     {
         private readonly IContentTypeService contentTypeService;
 
@@ -70,8 +70,15 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             ContentTypeService.Saved += EventSavedItem;
             ContentTypeService.Deleted += EventDeletedItem;
             ContentTypeService.Moved += EventMovedItem;
-
             ContentTypeService.SavedContainer += EventContainerSaved;
+        }
+
+        protected override void TerminateEvents(HandlerSettings settings)
+        {
+            ContentTypeService.Saved -= EventSavedItem;
+            ContentTypeService.Deleted -= EventDeletedItem;
+            ContentTypeService.Moved -= EventMovedItem;
+            ContentTypeService.SavedContainer -= EventContainerSaved;
         }
 
         protected override string GetItemFileName(IUmbracoEntity item, bool useGuid)

@@ -250,3 +250,4 @@ $RECYCLE.BIN/
 # code analysis
 .sonarqube
 
+/usync/test

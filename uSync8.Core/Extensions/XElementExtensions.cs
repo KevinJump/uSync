@@ -92,6 +92,13 @@ namespace uSync8.Core.Extensions
             return SyncActionType.None;
         }
 
+        public static string GetItemType(this XElement node)
+        {
+            if (node.IsEmptyItem()) return node.Attribute("itemType").ValueOrDefault(string.Empty);
+            return node.Name.LocalName;
+        }
+
+
         /// <summary>
         ///  Get the value of the XML Node or return a default value
         /// </summary>

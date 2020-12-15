@@ -69,6 +69,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Cache\SyncEntityCache.cs" />
     <Compile Include="ChangeType.cs" />
     <Compile Include="DataTypes\ConfigurationSerializerBase.cs" />
     <Compile Include="DataTypes\ConfigurationSerializerCollectionBuilder.cs" />

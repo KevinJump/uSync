@@ -28,7 +28,7 @@ namespace uSync8.ContentEdition.Handlers
             "RelationTypes", uSyncBackOfficeConstants.Priorites.RelationTypes,
             Icon = "icon-traffic usync-addon-icon",
             EntityType = UdiEntityType.RelationType, IsTwoPass = false)]
-    public class RelationTypeHandler : SyncHandlerBase<IRelationType, IRelationService>, ISyncExtendedHandler
+    public class RelationTypeHandler : SyncHandlerBase<IRelationType, IRelationService>, ISyncExtendedHandler, ISyncItemHandler
     {
         private readonly IRelationService relationService;
 
@@ -128,7 +128,21 @@ namespace uSync8.ContentEdition.Handlers
             }
         }
 
-        private void RelationService_SavedRelation(IRelationService sender, Umbraco.Core.Events.SaveEventArgs<IRelation> e)
+        protected override void TerminateEvents(HandlerSettings settings)
+        {
+            RelationService.SavedRelationType -= EventSavedItem;
+            RelationService.DeletedRelationType -= EventDeletedItem;
+
+            if (settings.GetSetting<bool>("IncludeRelations", false))
+            {
+                // relation saving is noisy, for example if you copy a load of 
+                // pages the save event fires a lot. 
+                RelationService.SavedRelation -= RelationService_SavedRelation;
+                RelationService.DeletedRelation -= RelationService_DeletedRelation;
+            }
+        }
+
+            private void RelationService_SavedRelation(IRelationService sender, Umbraco.Core.Events.SaveEventArgs<IRelation> e)
         {
             if (uSync8BackOffice.eventsPaused) return;
 

@@ -1,6 +1,7 @@
 ﻿using Umbraco.Core;
 using Umbraco.Core.Composing;
 
+using uSync8.BackOffice.Cache;
 using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
 using uSync8.BackOffice.SyncHandlers;
@@ -22,7 +23,6 @@ namespace uSync8.BackOffice
     {
         public void Compose(Composition composition)
         {
-
             composition.RegisterUnique<SyncFileService>();
 
             composition.WithCollectionBuilder<SyncHandlerCollectionBuilder>()
@@ -31,6 +31,8 @@ namespace uSync8.BackOffice
             composition.RegisterUnique<SyncHandlerFactory>();
 
             composition.RegisterUnique<uSyncService>();
+
+            composition.RegisterUnique<CacheLifecycleManager>();
 
             composition.Components().Append<uSyncBackofficeComponent>();
         }
