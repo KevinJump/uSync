@@ -336,7 +336,10 @@ namespace uSync8.Core.Serialization.Serializers
 
             if (!currentHash.Equals(newHash))
             {
-                changes.AddUpdate("Allowed", item.AllowedContentTypes.Select(x => x.Alias), allowed.Select(x => x.Alias), "/Structure");
+                changes.AddUpdate("Allowed", 
+                    string.Join(",", item.AllowedContentTypes.Select(x => x.Alias) ?? Enumerable.Empty<string>()),
+                    string.Join(",", allowed.Select(x => x.Alias) ?? Enumerable.Empty<string>()), "/Structure");
+
                 logger.Debug(serializerType, "Updating allowed content types");
                 item.AllowedContentTypes = allowed;
             }
