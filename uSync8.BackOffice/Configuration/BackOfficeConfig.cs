@@ -78,7 +78,7 @@ namespace uSync8.BackOffice.Configuration
             settings.AddOnPing = node.Element("AddOnPing").ValueOrDefault(true);
             settings.RebuildCacheOnCompletion = node.Element("RebuildCacheOnCompletion").ValueOrDefault(false);
             settings.FailOnMissingParent = node.Element("FailOnMissingParent").ValueOrDefault(true);
-            settings.ShowVersionCheckWarning = node.Element("ShowVersionCheckWarning").ValueOrDefault(false);
+            settings.ShowVersionCheckWarning = node.Element("ShowVersionCheckWarning").ValueOrDefault(true);
 
             settings.CacheFolderKeys = node.Element("CacheFolderKeys").ValueOrDefault(true);
 
