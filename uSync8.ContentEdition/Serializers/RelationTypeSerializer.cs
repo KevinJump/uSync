@@ -39,15 +39,16 @@ namespace uSync8.ContentEdition.Serializers
             var info = node.Element("Info");
 
             var name = info.Element("Name").ValueOrDefault(string.Empty);
-            var parentType = info.Element("ParentType").ValueOrDefault(Guid.Empty);
-            var childType = info.Element("ChildType").ValueOrDefault(Guid.Empty);
+            var parentType = info.Element("ParentType").ValueOrDefault<Guid?>(null) ;
+            var childType = info.Element("ChildType").ValueOrDefault<Guid?>(null);
             var bidirectional = info.Element("Bidirectional").ValueOrDefault(false);
 
             var item = FindItem(node);
 
             if (item == null)
             {
-                item = new RelationType(childType, parentType, alias);
+                item = CreateRelation(name, alias, bidirectional, parentType, childType);
+                // item = new RelationType(childType.Value, parentType.Value, alias);
             }
 
             var details = new List<uSyncChange>();
@@ -70,16 +71,18 @@ namespace uSync8.ContentEdition.Serializers
                 item.Alias = alias;
             }
 
-            if (item.ParentObjectType != parentType)
+            var currentParentType = GetGuidValue(item, nameof(item.ParentObjectType));
+            if (currentParentType != parentType)
             {
-                details.AddUpdate("ParentType", item.ParentObjectType, parentType);
-                item.ParentObjectType = parentType;
+                details.AddUpdate("ParentType", currentParentType, parentType);
+                SetGuidValue(item, nameof(item.ParentObjectType), parentType);
             }
 
-            if (item.ChildObjectType != childType)
+            var currentChildType = GetGuidValue(item, nameof(item.ChildObjectType));
+            if (currentChildType != childType)
             {
-                details.AddUpdate("ChildType", item.ChildObjectType, childType);
-                item.ChildObjectType = childType;
+                details.AddUpdate("ChildType", currentChildType, childType);
+                SetGuidValue(item, nameof(item.ChildObjectType), childType);
             }
 
             if (item.IsBidirectional = bidirectional)
@@ -125,7 +128,6 @@ namespace uSync8.ContentEdition.Serializers
 
                 if (parentKey == Guid.Empty || childKey == Guid.Empty) continue;
 
-
                 var parentItem = entityService.Get(parentKey);
                 var childItem = entityService.Get(childKey);
 
@@ -165,21 +167,21 @@ namespace uSync8.ContentEdition.Serializers
             return base.IsValid(node);
         }
 
-        protected override SyncAttempt<XElement> SerializeCore(IRelationType item, SyncSerializerOptions options)
+          protected override SyncAttempt<XElement> SerializeCore(IRelationType item, SyncSerializerOptions options)
         {
             var node = this.InitializeBaseNode(item, item.Alias);
 
             node.Add(new XElement("Info",
                 new XElement("Name", item.Name),
-                new XElement("ParentType", item.ParentObjectType),
-                new XElement("ChildType", item.ChildObjectType),
+                new XElement("ParentType", GetGuidValue(item, nameof(item.ParentObjectType))),
+                new XElement("ChildType", GetGuidValue(item, nameof(item.ChildObjectType))),
                 new XElement("Bidirectional", item.IsBidirectional)));
 
             if (options.GetSetting<bool>("IncludeRelations", true))
             {
                 node.Add(SerializeRelations(item));
             }
-
+              
             return SyncAttempt<XElement>.SucceedIf(
                 node != null,
                 item.Name,
@@ -187,6 +189,77 @@ namespace uSync8.ContentEdition.Serializers
                 typeof(IRelationType),
                 ChangeType.Export);
         }
+
+
+        private RelationType CreateRelation(string name, string alias, bool isBidrectional, Guid? parent, Guid? child)
+        {
+            // public RelationType(string name, string alias, bool isBidrectional, Guid? parentObjectType, Guid? childObjectType)
+
+            var t = typeof(RelationType);
+            var types = new Type[5];
+            types[0] = typeof(string);
+            types[1] = typeof(string);
+            types[2] = typeof(bool);
+            types[3] = typeof(Guid?);
+            types[4] = typeof(Guid?);
+
+            var constructorInfoObj = t.GetConstructor(types);
+            if (constructorInfoObj != null)
+            {
+                var parameters = new object[5];
+                parameters[0] = name;
+                parameters[1] = alias;
+                parameters[2] = isBidrectional;
+                parameters[3] = parent;
+                parameters[4] = child;
+
+                var obj = constructorInfoObj.Invoke(parameters);
+                return (RelationType)obj;
+            }
+            else
+            {
+                return new RelationType(child.Value, parent.Value, alias);
+            }
+
+        }
+
+        /// <summary>
+        ///  gets a value from the interface that might be Guid or Guid?
+        /// </summary>
+        /// <remarks>
+        ///  works around the interface changing v8.6 from Guid to Guid?
+        /// </remarks>
+        private Guid? GetGuidValue(IRelationType item, string propertyName)
+        {
+            var propertyInfo = item.GetType().GetProperty(propertyName);
+            if (propertyInfo == null) return null;
+
+            var value = propertyInfo.GetValue(item);
+            if (value == null) return null;
+
+            if (value is Guid guid)
+            {
+                return guid;
+            }
+
+            return null;
+        }
+
+        private void SetGuidValue(object item, string propertyName, Guid? value)
+        {
+            var propertyInfo = item.GetType().GetProperty(propertyName);
+            if (propertyInfo == null) return;
+
+            if (propertyInfo.PropertyType == typeof(Guid?))
+            {
+                propertyInfo.SetValue(item, value);
+            }
+            else if (propertyInfo.PropertyType == typeof(Guid) && value != null)
+            {
+                propertyInfo.SetValue(item, value.Value);
+            }
+        }
+
 
         private XElement SerializeRelations(IRelationType item)
         {

@@ -67,7 +67,7 @@ namespace uSync8.ContentEdition.Handlers
         ///  Relations that by default we exclude, if the exlude setting is used,then it will override these values
         ///  and they will be included if not explicity set;
         /// </summary>
-        private const string defaultRelations = "relateParentDocumentOnDelete,relateParentMediaFolderOnDelete,relateDocumentOnCopy";
+        private const string defaultRelations = "relateParentDocumentOnDelete,relateParentMediaFolderOnDelete,relateDocumentOnCopy,umbMedia,umbDocument";
 
         /// <summary>
         ///  Workout if we are excluding this relationType from export/import
