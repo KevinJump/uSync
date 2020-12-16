@@ -715,9 +715,10 @@ namespace uSync8.BackOffice.SyncHandlers
             foreach (var item in items.Select((Value, Index) => new { Value, Index }))
             {
                 var concreateType = GetFromService(item.Value);
-                callback?.Invoke(GetItemName(concreateType), item.Index, items.Count);
-
-                actions.AddRange(Export(concreateType, folder, config));
+                if (concreateType != null) {  // only export the items (not the containers).
+                    callback?.Invoke(GetItemName(concreateType), item.Index, items.Count);
+                    actions.AddRange(Export(concreateType, folder, config));
+                }
                 actions.AddRange(ExportAll(item.Value, folder, config, callback));
             }
 
