@@ -208,7 +208,7 @@ namespace uSync8.ContentEdition.Mapping.Mappers
                     }
                 }
             }
-            catch(JsonReaderException jrex)
+            catch(JsonReaderException)
             {
                 // ideally we want to deal with this, but failure of a dependcy check on a url in 
                 // a grid style element shouldn't stop a full export. 

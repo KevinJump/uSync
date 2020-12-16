@@ -17,7 +17,8 @@
 8.4 - Dependency checking updates
 8.5 - Updates for uSync Console
 8.6 - Clean Export, Missing Parent Support
-8.7 - Block support]]>
+8.7 - Block support
+8.8 - Batched commands]]>
 		</releaseNotes>
 		<dependencies>
 			<group targetFramework=".NETFramework4.7.2">
