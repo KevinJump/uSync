@@ -23,10 +23,9 @@ A clear and concise description of what you expected to happen.
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
 
-**Desktop (please complete the following information):**
+**About your Site (please complete the following information):**
  - Umbraco Version:
  - uSync Version:
- - OS: [e.g. iOS]
  - Browser [e.g. chrome, safari]
 
 **Additional context**
