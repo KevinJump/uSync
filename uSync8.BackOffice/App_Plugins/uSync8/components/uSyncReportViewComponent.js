@@ -21,6 +21,7 @@
 
         vm.showChange = showChange;
         vm.getIcon = getIcon;
+        vm.getChangeClass = getChangeClass;
         vm.getTypeName = getTypeName;
         vm.countChanges = countChanges;
         vm.openDetail = openDetail;
@@ -41,8 +42,35 @@
             return vm.showAll || (change !== 'NoChange' && change !== 'Removed');
         }
 
-        function getIcon(change) {
-            switch (change) {
+        function hasFailedDetail(details) {
+            if (details == null || details.length == 0) {
+                return false;
+            }
+
+            return details.some(function (detail) {
+                return !detail.Success;
+            })
+        }
+
+        function getChangeClass(result) {
+            if (!result.Success) {
+                return 'usync-change-row-Fail';
+            }
+            else if (hasFailedDetail(result.Details)) {
+                return 'usync-change-row-Warn';
+            }
+
+            return 'usync-change-row-' + result.Change;
+        }
+
+        function getIcon(result) {
+            if (!result.Success) {
+                return "icon-delete color-red";
+            }
+            else if (hasFailedDetail(result.Details)) {
+                return "icon-alert color-yellow";
+            }
+            switch (result.Change) {
                 case 'NoChange':
                     return 'icon-check color-grey';
                 case 'Update':

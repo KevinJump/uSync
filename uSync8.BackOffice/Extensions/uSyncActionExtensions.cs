@@ -9,7 +9,7 @@ namespace uSync8.BackOffice
         ///  does this list of actions have any that in an error state?
         /// </summary>
         public static bool ContainsErrors(this IEnumerable<uSyncAction> actions)
-            => actions.Any(x => x.Change >= Core.ChangeType.Fail);
+            => actions.Any(x => x.Change >= Core.ChangeType.Fail || !x.Success);
 
         /// <summary>
         ///  count how many actions in this list are for changes

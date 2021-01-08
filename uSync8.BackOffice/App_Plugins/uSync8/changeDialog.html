@@ -30,7 +30,7 @@
                                     </div>
                                     <div class="umb-table-body">
                                         <div ng-repeat="detail in vm.item.Details" class="umb-table-row"
-                                             ng-class="{'usync-row-delete': detail.Change == 'Delete', 'usync-row-create' : detail.Change == 'Create'}">
+                                             ng-class="{'usync-row-delete': detail.Change == 'Delete', 'usync-row-create' : detail.Change == 'Create', 'usync-row-warn' : !detail.Success }">
                                             <div class="umb-table-cell">
                                                 <i ng-if="detail.Change == 'Create'" class="icon icon-add color-green"></i>
                                                 <i ng-if="detail.Change == 'NoChange'" class="icon icon-check color-green"></i>

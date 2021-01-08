@@ -10,7 +10,9 @@
             <i class="icon {{handler.Icon}}"></i>
             <div class="usync-handler-name">{{handler.Name}}</div>
             <div ng-if="!vm.hideLabels">
-                <div class="handler-badge badge type-complete" ng-if="handler.Changes > 0" title="{{handler.Changes}} changes">{{handler.Changes}}</div>
+                <div class="handler-badge badge type-complete" 
+                     ng-class="{'badge-error' : handler.InError}"
+                     ng-if="handler.Changes > 0" title="{{handler.Changes}} changes">{{handler.Changes}}</div>
                 <div class="handler-badge type-complete" ng-if="handler.Changes == 0 && handler.Status == 2">
                     <i class="icon icon-check color-green" ng-if="!handler.InError"></i>
                     <i class="icon icon-flag-alt color-deep-orange" ng-if="handler.InError"></i>

@@ -98,6 +98,10 @@ ul.usync-action-list {
     background-color: #E8F5E9;
 }
 
+.usync-row-warn {
+    background-color: #FFFDE7 !important;
+}
+
 .usync-handler-icon {
     padding: 0.75em;
     margin-right: 14px;
@@ -122,6 +126,10 @@ ul.usync-action-list {
     .usync-handler-icon .badge.type-complete {
         background-color: #27b171;
     }
+
+        .usync-handler-icon .badge.type-complete.badge-error {
+            background-color: #ff5722;
+        }
 
     .usync-handler-icon .handler-badge i {
         font-size: 16px;
@@ -396,4 +404,8 @@ ul.usync-action-list {
 
 .usync-change-row-Fail {
     background-color: #FFEBEE;
+}
+
+.usync-change-row-Warn {
+    background-color: #FFFDE7;
 }

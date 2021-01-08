@@ -37,10 +37,10 @@
                 </div>
                 <div class="umb-table-body">
                     <div ng-repeat="result in vm.results">
-                        <div class="umb-table-row usync-change-row-{{result.Change}}"
+                        <div class="umb-table-row {{vm.getChangeClass(result)}}"
                              ng-if="vm.showChange(result.Change)">
                             <div class="umb-table-cell">
-                                <i class="icon {{vm.getIcon(result.Change)}}"></i>
+                                <i class="icon {{vm.getIcon(result)}}"></i>
                             </div>
                             <div class="umb-table-cell">
                                 {{vm.getTypeName(result.ItemType)}}

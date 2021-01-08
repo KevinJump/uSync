@@ -174,6 +174,10 @@ namespace uSync8.Core.Serialization.Serializers
                     changes.AddUpdate("DefaultTemplate", item.DefaultTemplate?.Alias ?? string.Empty, masterTemplate, "DefaultTemplate");
                     item.SetDefaultTemplate(template);
                 }
+                else
+                {
+                    changes.AddUpdate("DefaultTemplate", item.DefaultTemplate?.Alias ?? string.Empty, "Cannot find Template", "DefaultTemplate", false);
+                }
             }
 
             return changes;

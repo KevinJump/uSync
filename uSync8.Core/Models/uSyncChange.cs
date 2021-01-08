@@ -12,6 +12,8 @@ namespace uSync8.Core.Models
     [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
     public class uSyncChange
     {
+        public bool Success { get; set; } = true;
+
         /// <summary>
         ///  Name of item/property
         /// </summary>
@@ -58,9 +60,10 @@ namespace uSync8.Core.Models
                 NewValue = ""
             };
 
-        public static uSyncChange Update(string path, string name, string oldValue, string newValue)
+        public static uSyncChange Update(string path, string name, string oldValue, string newValue, bool success = true)
             => new uSyncChange
             {
+                Success = success,
                 Name = name,
                 Path = path,
                 Change = ChangeDetailType.Update,
