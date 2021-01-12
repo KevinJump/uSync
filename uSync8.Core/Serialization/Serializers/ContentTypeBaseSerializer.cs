@@ -103,12 +103,20 @@ namespace uSync8.Core.Serialization.Serializers
 
                 SerializeExtraProperties(propNode, item, property);
 
+                // hello ugly if statements. - we could 'just' reflect these everytime.
+                // but the if check is quicker (reflection is still quick) so it reduces sync time)
+
                 // added in v8.6
-                // reflection is fast but a a quick check of version is faster !
                 if (UmbracoVersion.LocalVersion.Major > 8 || UmbracoVersion.LocalVersion.Minor >= 6)
                 {
                     SerializeNewProperty<string>(propNode, property, "MandatoryMessage");
                     SerializeNewProperty<string>(propNode, property, "ValidationRegExpMessage");
+                }
+
+                // added in 8.10
+                if (UmbracoVersion.LocalVersion.Major > 8 || UmbracoVersion.LocalVersion.Minor >= 10)
+                {
+                    SerializeNewProperty<bool>(propNode, property, "labelOnTop");
                 }
 
                 node.Add(propNode);
@@ -431,6 +439,11 @@ namespace uSync8.Core.Serialization.Serializers
                 {
                     changes.AddNotNull(DeserializeNewProperty<string>(property, propertyNode, "MandatoryMessage"));
                     changes.AddNotNull(DeserializeNewProperty<string>(property, propertyNode, "ValidationRegExpMessage"));
+                }
+
+                if (UmbracoVersion.LocalVersion.Major > 8 || UmbracoVersion.LocalVersion.Minor >= 10)
+                {
+                    changes.AddNotNull(DeserializeNewProperty<bool>(property, propertyNode, "LabelOnTop"));
                 }
 
                 changes.AddRange(DeserializeExtraProperties(item, property, propertyNode));
