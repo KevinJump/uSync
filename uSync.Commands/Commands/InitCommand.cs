@@ -107,7 +107,7 @@ namespace uSync.BaseCommands
                         case SyncCommandResult.Success:
                             SaveSetting(Constants.AppSettings.ConfigurationStatus, UmbracoVersion.SemanticVersion.ToSemanticString());
                             SaveSetting("Umbraco.Core.RuntimeState.InstallUnattended", "true");
-                           return SyncCommandResult.Restart;
+                            return SyncCommandResult.Restart;
                         case SyncCommandResult.NoResult:
                             await UpdateAdminUser(args);
                             SaveSetting(Constants.AppSettings.ConfigurationStatus, UmbracoVersion.SemanticVersion.ToSemanticString());
@@ -115,14 +115,31 @@ namespace uSync.BaseCommands
                     }
                 }
             }
+            else if (SupportsUmbracoUnattended())
+            {
+                // none SQL CE installs.
+                // ensure the unattentdInstall value is set, 
+
+                var unattendedSetting = ConfigurationManager.AppSettings["Umbraco.Core.RuntimeState.InstallUnattended"];
+                if (string.IsNullOrWhiteSpace(unattendedSetting))
+                {
+                    SaveSetting("Umbraco.Core.RuntimeState.InstallUnattended", "true");
+                }
+                else if (AdminUserNeedsUpdate(args))
+                {
+                    await UpdateAdminUser(args);
+                }
+                SaveSetting(Constants.AppSettings.ConfigurationStatus, UmbracoVersion.SemanticVersion.ToSemanticString());
+                return SyncCommandResult.Restart;
+            }
 
             if (!SupportsUmbracoUnattended())
             {
                 await writer.WriteLineAsync(" creating db (pre 8.11)");
                 CreateDatabase();
                 return await UpdateAdminUser(args);
-
             }
+
 
             await writer.WriteLineAsync(" Setup complete !!! #h5yr\n");
             return result;

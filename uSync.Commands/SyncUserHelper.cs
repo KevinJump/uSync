@@ -44,7 +44,7 @@ namespace uSync.BaseCommands
 
             try
             {
-                await writer.WriteLineAsync($" Setting password {password}");
+                await writer.WriteLineAsync($" Setting password {new string('x', password.Length)}");
                 memberUser.ChangePassword("default", password);
             }
             catch(Exception ex) {
