@@ -25,18 +25,20 @@ namespace uSync.ConsoleApp
         {
             if (AppDomain.CurrentDomain.FriendlyName == uSyncAppDomain)
             {
-                Console.WriteLine($"uSync Umbraco Command Line [" +
+                Console.WriteLine($"uSync CLI [" +
                     $"{Assembly.GetExecutingAssembly().GetName().Version}] ");
 
-                Console.Write("Initialising...");
+                Console.Write("Booting Umbraco ...");
 
                 var consoleHost = new ConsoleHost(Console.In, Console.Out);
                 var task = consoleHost.Run(args);
                 task.Wait();
 
+                Console.WriteLine($"> {task.Result}");
+
                 if (task.Result == SyncCommandResult.Restart)
                 {
-                    Console.Write("Restarting...");
+                    Console.Write("Restarting Umbraco ...");
                     InitApplication(args);
                 }
             }

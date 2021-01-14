@@ -37,16 +37,19 @@ namespace uSync.BaseCommands
     {
         private readonly DatabaseBuilder databaseBuilder;
         private readonly IGlobalSettings globalSettings;
-        private readonly IUserService userService;
+
+        private readonly SyncUserHelper userHelper;
 
         public InitCommand(TextReader reader, TextWriter writer,
             DatabaseBuilder databaseBuilder,
             IGlobalSettings globalSettings,
+            SyncUserHelper userHelper,
             IUserService userService) : base(reader, writer)
         {
             this.databaseBuilder = databaseBuilder;
             this.globalSettings = globalSettings;
-            this.userService = userService;
+
+            this.userHelper = userHelper;
 
             AdvancedHelp = HelpTextResource.Init_Help;
         }
@@ -54,11 +57,19 @@ namespace uSync.BaseCommands
 
         public async Task<SyncCommandResult> Run(string[] args)
         {
-            await writer.WriteLineAsync($" Umbraco is at level {Current.RuntimeState.Level}");
+            // await writer.WriteLineAsync($" Umbraco is at level {Current.RuntimeState.Level}");
 
             if (Current.RuntimeState.Level == RuntimeLevel.Run)
             {
                 await writer.WriteLineAsync(" Umbraco is alread installed");
+
+                if (SupportsUmbracoUnattended() && AdminUserNeedsUpdate(args))
+                {
+                    await writer.WriteLineAsync(" Admin user still needs updating, flicking back to install mode.");
+                    SaveSetting(Constants.AppSettings.ConfigurationStatus, "");
+                    return SyncCommandResult.Restart;
+                }
+
                 return SyncCommandResult.NoResult;
             }
 
@@ -87,20 +98,57 @@ namespace uSync.BaseCommands
             {
                 // create the sql db file.
                 result = CreateSqlCEDb(connectionString.ConnectionString);
-                if (result != SyncCommandResult.Success)
-                    return result;
+                if (result < SyncCommandResult.Success) return result;
+
+                if (SupportsUmbracoUnattended())
+                {
+                    switch(result)
+                    {
+                        case SyncCommandResult.Success:
+                            SaveSetting(Constants.AppSettings.ConfigurationStatus, UmbracoVersion.SemanticVersion.ToSemanticString());
+                            SaveSetting("Umbraco.Core.RuntimeState.InstallUnattended", "true");
+                           return SyncCommandResult.Restart;
+                        case SyncCommandResult.NoResult:
+                            await UpdateAdminUser(args);
+                            SaveSetting(Constants.AppSettings.ConfigurationStatus, UmbracoVersion.SemanticVersion.ToSemanticString());
+                            return SyncCommandResult.Restart;
+                    }
+                }
             }
 
-            CreateDatabase();
-
-            var parameters = args.Where(x => !x.StartsWith("-")).ToArray();
-            if (parameters.Length == 2)
+            if (!SupportsUmbracoUnattended())
             {
-                result = SetupAdmin(parameters[0], parameters[1]);
+                await writer.WriteLineAsync(" creating db (pre 8.11)");
+                CreateDatabase();
+                return await UpdateAdminUser(args);
+
             }
 
             await writer.WriteLineAsync(" Setup complete !!! #h5yr\n");
             return result;
+        }
+
+        private async Task<SyncCommandResult> UpdateAdminUser(string[] args)
+        {
+            var parameters = args.Where(x => !x.StartsWith("-")).ToArray();
+            if (parameters.Length == 2)
+            {
+                return await userHelper.SetupAdminUser(parameters[0], parameters[1]);
+            }
+
+            return SyncCommandResult.NoResult;
+
+        }
+
+        public bool AdminUserNeedsUpdate(string [] args)
+        {
+            var parameters = args.Where(x => !x.StartsWith("-")).ToArray();
+            if (parameters.Length == 2)
+            {
+                return userHelper.AdminUserNeedsaUpdate(parameters[0]);
+            }
+
+            return false;
         }
 
 
@@ -130,9 +178,10 @@ namespace uSync.BaseCommands
                 var engine = new SqlCeEngine(connectionString);
                 engine.CreateDatabase();
                 writer.WriteLine(" Created SQL CE Database");
+                return SyncCommandResult.Success;
             }
 
-            return SyncCommandResult.Success;
+            return SyncCommandResult.NoResult;
         }
 
         private SyncCommandResult CreateDatabase()
@@ -159,55 +208,29 @@ namespace uSync.BaseCommands
             return result.Success ? SyncCommandResult.Restart : SyncCommandResult.Error;
         }
 
-        private SyncCommandResult SetupAdmin(string username, string password)
+        /// <summary>
+        ///  same a setting back to the web.config 
+        /// </summary>
+        /// <remarks>
+        ///  From Umbraco.Core 
+        /// </remarks>
+        private void SaveSetting(string key, string value)
         {
-            var admin = userService.GetUserById(Constants.Security.SuperUserId);
-            if (admin == null)
-            {
-                throw new InvalidOperationException(" Could not find the super user!");
-            }
+            var fileName = IOHelper.MapPath(string.Format("{0}/web.config", SystemDirectories.Root));
+            var xml = XDocument.Load(fileName, LoadOptions.PreserveWhitespace);
 
-            writer.WriteLine(" Found super user - setting password ");
+            var appSettings = xml.Root.DescendantsAndSelf("appSettings").Single();
 
-            var membershipUser = GetCurrentProvider().GetUser(Constants.Security.SuperUserId, true);
-            if (membershipUser == null)
-            {
-                throw new InvalidOperationException($" No user found in membership provider with id of {Constants.Security.SuperUserId}.");
-            }
+            // Update appSetting if it exists, or else create a new appSetting for the given key and value
+            var setting = appSettings.Descendants("add").FirstOrDefault(s => s.Attribute("key").Value == key);
+            if (setting == null)
+                appSettings.Add(new XElement("add", new XAttribute("key", key), new XAttribute("value", value)));
+            else
+                setting.Attribute("value").Value = value;
 
-            try
-            {
-                writer.WriteLine(" Setting password", password);
-                var success = membershipUser.ChangePassword("default", password);
-                if (success == false)
-                {
-                    throw new FormatException(" Password must be at least " + GetCurrentProvider().MinRequiredPasswordLength + " characters long and contain at least " + GetCurrentProvider().MinRequiredNonAlphanumericCharacters + " symbols");
-                }
-            }
-            catch (Exception ex)
-            {
-                writer.WriteLine(ex.ToString());
-                // throw new FormatException(" Password must be at least " + CurrentProvider.MinRequiredPasswordLength + " characters long and contain at least " + CurrentProvider.MinRequiredNonAlphanumericCharacters + " symbols");
-            }
-
-            writer.WriteLine(" setting super user username - email -name");
-
-            admin.Email = username;
-            admin.Name = username;
-            admin.Username = username;
-
-            writer.WriteLine(" Saving user");
-            userService.Save(admin);
-
-            return SyncCommandResult.Success;
+            xml.Save(fileName, SaveOptions.DisableFormatting);
+            ConfigurationManager.RefreshSection("appSettings");
         }
-
-        private MembershipProvider GetCurrentProvider()
-        {
-            var provider = Umbraco.Core.Security.MembershipProviderExtensions.GetUsersMembershipProvider();
-            return provider;
-        }
-
 
         private static void SaveConnectionString(string connectionString, string providerName)
         {
@@ -268,6 +291,7 @@ namespace uSync.BaseCommands
                 attribute.Value = value;
         }
 
-
+        private bool SupportsUmbracoUnattended()
+            => UmbracoVersion.SemanticVersion >= new Semver.SemVersion(8, 11, 0, prerelease: "rc");
     }
 }

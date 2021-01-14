@@ -244,12 +244,15 @@
   <ItemGroup>
     <Compile Include="Commands\InitCommand.cs" />
     <Compile Include="Commands\LangCommand.cs" />
+    <Compile Include="Commands\PrepCECommand.cs" />
+    <Compile Include="Commands\UserCommand.cs" />
     <Compile Include="Commands\QuitCommand.cs" />
     <Compile Include="HelpTextResource.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>HelpTextResource.resx</DependentUpon>
     </Compile>
+    <Compile Include="SyncUserHelper.cs" />
     <Compile Include="uSyncCommandComposer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

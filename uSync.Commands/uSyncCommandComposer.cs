@@ -16,9 +16,13 @@ namespace uSync.BaseCommands
     {
         public void Compose(Composition composition)
         {
-            Console.WriteLine("Register for pre boot");
+            // things we register when in pre-setup phase (so umbraco insn't setup).
+            composition.RegisterUnique<SyncUserHelper>();
 
+            // init - sets up db, user, installs umbraco. 
             composition.RegisterUnique<InitCommand>();
+
+            // quit. 
             composition.RegisterUnique<QuitCommand>();
         }
     }
@@ -29,6 +33,8 @@ namespace uSync.BaseCommands
     {
         public void Compose(Composition composition)
         {
+            composition.RegisterUnique<SyncUserHelper>();
+
             composition.WithCollectionBuilder<SyncCommandCollectionBuilder>()
              .Add(() => composition.TypeLoader.GetTypes<ISyncCommand>());
 

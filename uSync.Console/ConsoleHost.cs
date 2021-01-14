@@ -43,6 +43,8 @@ namespace uSync.ConsoleApp
             // clear the first line.
             await writer.WriteAsync("\r");
 
+            await WriteUmbracoVersion();
+
             if (args.Length == 0)
             {
                 await WriteInteractiveHeader();
@@ -141,14 +143,17 @@ namespace uSync.ConsoleApp
             return SyncCommandResult.NoResult;
         }
 
+        private async Task WriteUmbracoVersion()
+        {
+            var umbracoVersion = UmbracoVersion.SemanticVersion.ToSemanticString();
+            await writer.WriteLineAsync($"Umbraco : {umbracoVersion} - RuntimeState:[{Current.RuntimeState.Level}]");
+        }
+
         /// <summary>
         ///  write out the first few lines when you load interactively.
         /// </summary>
         private async Task WriteInteractiveHeader()
         {
-            var umbracoVersion = UmbracoVersion.SemanticVersion.ToSemanticString();
-            await writer.WriteLineAsync($"Umbraco : {umbracoVersion} - RuntimeState:[{Current.RuntimeState.Level}]");
-
             var uSyncVersion = typeof(uSync8BackOffice).Assembly.GetName().Version.ToString();
             var addOnNames = new List<string>();
             foreach (var addOn in TypeFinder.FindClassesOfType<ISyncAddOn>())
