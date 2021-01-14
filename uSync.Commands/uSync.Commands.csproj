@@ -244,7 +244,6 @@
   <ItemGroup>
     <Compile Include="Commands\InitCommand.cs" />
     <Compile Include="Commands\LangCommand.cs" />
-    <Compile Include="Commands\PrepCECommand.cs" />
     <Compile Include="Commands\UserCommand.cs" />
     <Compile Include="Commands\QuitCommand.cs" />
     <Compile Include="HelpTextResource.Designer.cs">
