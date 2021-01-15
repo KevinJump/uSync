@@ -60,7 +60,7 @@ namespace uSync8.Core.Models
                 NewValue = ""
             };
 
-        public static uSyncChange Update(string path, string name, string oldValue, string newValue, bool success = true)
+        public static uSyncChange Update(string path, string name, string oldValue, string newValue, bool success)
             => new uSyncChange
             {
                 Success = success,
@@ -75,7 +75,7 @@ namespace uSync8.Core.Models
             => Update(path, name, string.Join(",", oldValues), string.Join(",", newValues));
 
         public static uSyncChange Update<TObject>(string path, string name, TObject oldValue, TObject newValue)
-            => Update(path, name, oldValue.ToString(), newValue.ToString());
+            => Update(path, name, oldValue.ToString(), newValue.ToString(), true);
 
         public static uSyncChange NoChange(string path, string name)
             => new uSyncChange
