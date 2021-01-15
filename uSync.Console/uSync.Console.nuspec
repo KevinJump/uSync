@@ -11,11 +11,12 @@
 		<summary>uSync Command Line</summary>
 		<releaseNotes>
 			8.0 - Initial Release.
+			8.9 - Unattended Install support
 		</releaseNotes>
 		<tags>umbraco usync</tags>
 		<dependencies>
 			<group targetFramework=".NETFramework4.7.2">
-				<dependency id="uSync" version="$depends$"/>
+				<dependency id="uSync" version="8.8.1"/>
 			</group>
 		</dependencies>
 	</metadata>
