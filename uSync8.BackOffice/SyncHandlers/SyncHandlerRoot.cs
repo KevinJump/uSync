@@ -373,12 +373,16 @@ namespace uSync8.BackOffice.SyncHandlers
                 return uSyncActionHelper<TObject>
                     .ReportAction(ChangeType.NoChange, node.GetAlias(), GetNameFromFileOrNode(filename, node), node.GetKey(), this.Alias)
                     .AsEnumerableOfOne();
-
             }
 
             try
             {
-                var attempt = DeserializeItem(node, new SyncSerializerOptions(options.Flags));
+                // merge the options from the handler and any import options into our serializer options.
+                var serializerOptions = new SyncSerializerOptions(options.Flags, settings.Settings);
+                serializerOptions.MergeSettings(options.Settings);
+
+                // get the item.
+                var attempt = DeserializeItem(node, serializerOptions);
                 var action = uSyncActionHelper<TObject>.SetAction(attempt, GetNameFromFileOrNode(filename, node), node.GetKey(), this.Alias, IsTwoPass);
 
 
@@ -486,7 +490,12 @@ namespace uSync8.BackOffice.SyncHandlers
                 var item = GetFromService(node.GetKey());
                 if (item == null) return Enumerable.Empty<uSyncAction>();
 
-                var result = DeserializeItemSecondPass(item, node, new SyncSerializerOptions(options.Flags, settings.Settings));
+                // merge the options from the handler and any import options into our serializer options.
+                var serializerOptions = new SyncSerializerOptions(options.Flags, settings.Settings);
+                serializerOptions.MergeSettings(options.Settings);
+
+                // do the second pass on this item
+                var result = DeserializeItemSecondPass(item, node, serializerOptions);
 
                 return uSyncActionHelper<TObject>.SetAction(result,file, node.GetKey(), this.Alias).AsEnumerableOfOne();
             }
@@ -993,9 +1002,14 @@ namespace uSync8.BackOffice.SyncHandlers
                 }
 
                 var actions = new List<uSyncAction>();
-                var serializerOptions = new SyncSerializerOptions(settings.Settings);
 
+                // get the serializer options
+                var serializerOptions = new SyncSerializerOptions(options.Flags, settings.Settings);
+                serializerOptions.MergeSettings(options.Settings);
+
+                // check if this item is current (the provided xml and exported xml match)
                 var change = IsItemCurrent(node, serializerOptions);
+
                 var action = uSyncActionHelper<TObject>
                         .ReportAction(change.Change, node.GetAlias(), GetNameFromFileOrNode(filename, node), node.GetKey(), this.Alias);
 

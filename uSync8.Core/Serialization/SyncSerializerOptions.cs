@@ -21,7 +21,7 @@ namespace uSync8.Core.Serialization
 
         public SyncSerializerOptions(Dictionary<string, string> settings)
         {
-            this.Settings = settings ?? new Dictionary<string, string>();
+            this.Settings = settings != null ? new Dictionary<string, string>(settings) : new Dictionary<string, string>();
 
         }
 
@@ -109,6 +109,21 @@ namespace uSync8.Core.Serialization
                 this.Settings[key] = newValue;
 
             return oldValue;
+        }
+
+        /// <summary>
+        ///  merge any new settings into the settings collection.
+        /// </summary>
+        public void MergeSettings(Dictionary<string,string> newSettings)
+        {
+            if (Settings == null) Settings = new Dictionary<string, string>();
+            if (newSettings != null)
+            {
+                foreach (var kvp in newSettings)
+                {
+                    Settings[kvp.Key] = kvp.Value;
+                }
+            }
         }
     }
 }
