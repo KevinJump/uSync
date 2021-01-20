@@ -113,17 +113,25 @@ namespace uSync8.ContentEdition.Serializers
         {
             var node = new XElement("Schedule");
             var schedules = item.ContentSchedule.FullSchedule;
+
+            var cultures = options.GetCultures();
+
             if (schedules != null)
             {
                 foreach (var schedule in schedules
                     .OrderBy(x => x.Action.ToString())
                     .ThenBy(x => x.Culture))
                 {
-                    node.Add(new XElement("ContentSchedule",
-                        // new XAttribute("Key", schedule.Id),
-                        new XElement("Culture", schedule.Culture),
-                        new XElement("Action", schedule.Action),
-                        new XElement("Date", schedule.Date.ToString("s"))));
+
+                    // only export if its a blank culture or one of the ones we have set. 
+                    if (cultures.IsValidOrBlank(schedule.Culture))
+                    {
+                        node.Add(new XElement("ContentSchedule",
+                            // new XAttribute("Key", schedule.Id),
+                            new XElement("Culture", schedule.Culture),
+                            new XElement("Action", schedule.Action),
+                            new XElement("Date", schedule.Date.ToString("s"))));
+                    }
                 }
             }
 
@@ -194,22 +202,27 @@ namespace uSync8.ContentEdition.Serializers
                 var currentSchedules = item.ContentSchedule.FullSchedule;
                 var nodeSchedules = new List<ContentSchedule>();
 
+                var cultures = options.GetCultures();
+
                 foreach (var schedule in schedules.Elements("ContentSchedule"))
                 {
                     var importSchedule = GetContentScheduleFromNode(schedule);
                     logger.Debug<ContentSerializer>("Schedule: {action} {culture} {date}", importSchedule.Action, importSchedule.Culture, importSchedule.Date);
 
-                    if (importSchedule.Date < DateTime.Now)
-                        continue; // don't add schedules in the past
-
-                    nodeSchedules.Add(importSchedule);
-
-                    var existing = FindSchedule(currentSchedules, importSchedule);
-                    if (existing != null)
+                    if (cultures.IsValidOrBlank(importSchedule.Culture))
                     {
-                        item.ContentSchedule.Remove(existing);
+                        if (importSchedule.Date < DateTime.Now)
+                            continue; // don't add schedules in the past
+
+                        nodeSchedules.Add(importSchedule);
+
+                        var existing = FindSchedule(currentSchedules, importSchedule);
+                        if (existing != null)
+                        {
+                            item.ContentSchedule.Remove(existing);
+                        }
+                        item.ContentSchedule.Add(importSchedule);
                     }
-                    item.ContentSchedule.Add(importSchedule);
                 }
 
                 // remove things that are in the current but not the import. 

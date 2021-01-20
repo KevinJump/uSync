@@ -1505,6 +1505,15 @@ namespace uSync8.BackOffice.SyncHandlers
             var item = serializer.FindItem(node);
             if (item != null)
             {
+                var cultures = node.GetCultures();
+                if (!string.IsNullOrWhiteSpace(cultures))
+                {
+                    // the cultures we serialize should match any in the file.
+                    // this means we then only check the same values at each end.
+                    options.Settings[uSyncConstants.CultureKey] = cultures;
+                }
+
+
                 var attempt = this.SerializeItem(item, options);
                 if (attempt.Success) return attempt.Item;
             }

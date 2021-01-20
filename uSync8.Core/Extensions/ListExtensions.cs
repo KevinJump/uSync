@@ -20,5 +20,8 @@ namespace uSync8.Core
         /// </summary>
         public static bool IsValid(this IList<string> list, string value)
             => list.Count == 0 || list.InvariantContains(value) || list.InvariantContains("*");
+
+        public static bool IsValidOrBlank(this IList<string> list, string value)
+            => string.IsNullOrWhiteSpace(value) || list.IsValid(value);
     }
 }

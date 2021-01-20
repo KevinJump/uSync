@@ -67,8 +67,13 @@ namespace uSync8.ContentEdition.Tracker
                                 {
                                     new TrackedItem("", "/ContentSchedule")
                                     {
-                                        Repeating = new RepeatingInfo("Key", "/ContentSchedule", "Date"){
-                                            KeyIsAttribute = true
+                                        Repeating = new RepeatingInfo("Culture", "/ContentSchedule", "Culture"){
+                                            KeyIsAttribute = false,
+                                            MatchingKeys = new List<RepeatingKey>()
+                                            {
+                                                new RepeatingKey { Key = "Culture", IsAttribute = false},
+                                                new RepeatingKey { Key = "Action", IsAttribute = false}
+                                            },
                                         },
                                         Children = new List<TrackedItem>()
                                         {

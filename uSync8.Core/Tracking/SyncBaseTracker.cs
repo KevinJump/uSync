@@ -238,25 +238,32 @@ namespace uSync8.Core.Tracking
                 }
                 else
                 {
-                    // we need to find the current key value 
-                    var currentKey = GetKeyValue(currentNode, change.Repeating.Key, change.Repeating.KeyIsAttribute);
-                    if (currentKey == string.Empty) continue;
-
-                    // now we need to make the XPath for the children this will be [key = ''] or [@key =''] 
-                    // depending if its an attribute or element key
-                    currentNodePath += MakeKeyPath(change.Repeating.Key, currentKey, change.Repeating.KeyIsAttribute);
-
-                    // now see if we can find that node in the target elements we have loaded 
-                    targetNode = GetTarget(targetItems, change.Repeating.Key, currentKey, change.Repeating.KeyIsAttribute);
-
-                    if (targetNode == null && !string.IsNullOrWhiteSpace(change.Repeating.Key2))
+                    if (change.Repeating.MatchingKeys == null || change.Repeating.MatchingKeys.Count == 0)
                     {
-                        // we couldn't find it, but we have a second key to look up, so lets do that. 
-                        currentKey = GetKeyValue(currentNode, change.Repeating.Key2, change.Repeating.Key2IsAttribute);
+                        // we need to find the current key value 
+                        var currentKey = GetKeyValue(currentNode, change.Repeating.Key, change.Repeating.KeyIsAttribute);
                         if (currentKey == string.Empty) continue;
-                        currentNodePath = path + MakeKeyPath(change.Repeating.Key2, currentKey, change.Repeating.Key2IsAttribute);
 
-                        targetNode = GetTarget(targetItems, change.Repeating.Key2, currentKey, change.Repeating.Key2IsAttribute);
+                        // now we need to make the XPath for the children this will be [key = ''] or [@key =''] 
+                        // depending if its an attribute or element key
+                        currentNodePath += MakeKeyPath(change.Repeating.Key, currentKey, change.Repeating.KeyIsAttribute);
+
+                        // now see if we can find that node in the target elements we have loaded 
+                        targetNode = GetTarget(targetItems, change.Repeating.Key, currentKey, change.Repeating.KeyIsAttribute);
+                    }
+                    else
+                    {
+                        var matchingPath = "";
+                        foreach(var matchingKey in change.Repeating.MatchingKeys)
+                        {
+                            var currentValue = GetKeyValue(currentNode, matchingKey.Key, matchingKey.IsAttribute);
+                            if (currentValue == string.Empty) continue;
+                            matchingPath += MakeKeyPath(matchingKey.Key, currentValue, matchingKey.IsAttribute);
+                        }
+
+                        currentNodePath = path + matchingPath.Replace("][", " and ");
+
+                        targetNode = GetTarget(target, currentNodePath);
                     }
 
                     // make the name 
@@ -516,6 +523,11 @@ namespace uSync8.Core.Tracking
             return items.FirstOrDefault(x => x.Element(key).ValueOrDefault(string.Empty) == value);
         }
 
+        private XElement GetTarget(XElement parent, string xpath)
+        {
+            var element = parent.XPathSelectElement(xpath);
+            return element;
+        }
 
         private SyncAttempt<XElement> SerializeItem(TObject item, SyncSerializerOptions options)
         {
@@ -603,6 +615,11 @@ namespace uSync8.Core.Tracking
         /// </summary>
         public string Key2 { get; set; }
 
+        /// <summary>
+        ///  If set all the keys in this list are used to build up the path we want to match.
+        /// </summary>
+        public List<RepeatingKey> MatchingKeys { get; set; }
+
 
         /// <summary>
         ///  The repeating element name 
@@ -631,4 +648,12 @@ namespace uSync8.Core.Tracking
         /// </summary>
         public bool ElementsInOrder { get; set; }
     }
+
+    public class RepeatingKey
+    {
+        public string Key { get; set; }
+
+        public bool IsAttribute { get; set; }
+    }
+
 }

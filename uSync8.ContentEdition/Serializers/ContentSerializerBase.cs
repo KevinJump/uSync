@@ -146,11 +146,16 @@ namespace uSync8.ContentEdition.Serializers
             info.Add(new XElement("ContentType", item.ContentType.Alias));
             info.Add(new XElement("CreateDate", item.CreateDate.ToString("s")));
 
+            var cultures = options.GetCultures();
+
             var title = new XElement("NodeName", new XAttribute("Default", item.Name));
             foreach (var culture in item.AvailableCultures)
             {
-                title.Add(new XElement("Name", item.GetCultureName(culture),
-                    new XAttribute("Culture", culture)));
+                if (cultures.IsValidOrBlank(culture))
+                {
+                    title.Add(new XElement("Name", item.GetCultureName(culture),
+                        new XAttribute("Culture", culture)));
+                }
             }
             info.Add(title);
 
