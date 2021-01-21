@@ -7,6 +7,41 @@ using uSync8.Core.Tracking;
 
 namespace uSync8.ContentEdition.Tracker
 {
+    public class ContentXmlTracker : SyncXmlTracker<IContent>, ISyncNodeTracker<IContent>
+    {
+        public ContentXmlTracker(ISyncSerializer<IContent> serializer) : base(serializer)
+        {
+        }
+
+        public override List<TrackingItem> TrackingItems => new List<TrackingItem>()
+        {
+            TrackingItem.Single("Parent", "/Info/Parent"),
+            TrackingItem.Single("Path", "/Info/Path"),
+            TrackingItem.Single("Template", "/Info/Template"),
+            TrackingItem.Single("FileHash", "/Info/FileHash"),
+            TrackingItem.Single("CreatedDate", "/Info/CreateDate"),
+            TrackingItem.Single("SortOrder", "/Info/SortOrder"),
+            TrackingItem.Single("Trashed", "/Info/Trashed"),
+            TrackingItem.Single("ContentType", "/Info/ContentType"),
+
+            TrackingItem.Attribute("NodeName (Default)", "/Info/NodeName", "Default"),
+            TrackingItem.Many("Name", "/Info/NodeName/Name", "@Culture"),
+
+            TrackingItem.Attribute("Published (Default)", "/Info/Published", "Default"),
+            TrackingItem.Many("Published", "/Info/Published/Published", "@Culture"),
+
+            TrackingItem.Many("Schedule", "/Info/Schedule/ContentSchedule", "Culture,Action"),
+
+            //TrackingItem.Many("Property", "/Properties/*", "#" ),
+
+            TrackingItem.Many("Property - *", "/Properties/*/Value", "@Culture"),
+
+            TrackingItem.Many("GenericProperty", "/GenericProperties/GenericProperty", "Key")
+        };
+    }
+
+    /*
+
     public class ContentTracker : SyncBaseTracker<IContent>, ISyncNodeTracker<IContent>
     {
         public ContentTracker(ISyncSerializer<IContent> serializer) : base(serializer)
@@ -105,4 +140,5 @@ namespace uSync8.ContentEdition.Tracker
             };
         }
     }
+    */
 }
