@@ -202,7 +202,7 @@ namespace uSync8.ContentEdition.Serializers
                 var currentSchedules = item.ContentSchedule.FullSchedule;
                 var nodeSchedules = new List<ContentSchedule>();
 
-                var cultures = options.GetCultures();
+                var cultures = options.GetDeserializedCultures(node);
 
                 foreach (var schedule in schedules.Elements("ContentSchedule"))
                 {
@@ -222,6 +222,7 @@ namespace uSync8.ContentEdition.Serializers
                             item.ContentSchedule.Remove(existing);
                         }
                         item.ContentSchedule.Add(importSchedule);
+                        changes.Add(uSyncChange.Update("Schedule", $"{importSchedule.Culture} {importSchedule.Action}", "", importSchedule.Date.ToString()));
                     }
                 }
 
@@ -231,7 +232,14 @@ namespace uSync8.ContentEdition.Serializers
 
                 foreach (var oldItem in toRemove)
                 {
-                    item.ContentSchedule.Remove(oldItem);
+                    if (cultures.IsValidOrBlank(oldItem.Culture))
+                    {
+                        // only remove a culture if this seralization included it. 
+                        // we don't remove things we didn't serialize. 
+                        item.ContentSchedule.Remove(oldItem);
+
+                        changes.Add(uSyncChange.Delete("Schedule", $"{oldItem.Culture} - {oldItem.Action}", oldItem.Date.ToString()));
+                    }
                 }
 
                 return changes;
