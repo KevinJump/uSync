@@ -194,26 +194,26 @@ namespace uSync8.ContentEdition.Serializers
 
         private IEnumerable<uSyncChange> DeserializeSchedules(IContent item, XElement node, SyncSerializerOptions options)
         {
+            logger.Debug<ContentSerializer>("Deserialize Schedules");
+
+            var changes = new List<uSyncChange>();
+            var nodeSchedules = new List<ContentSchedule>();
+            var currentSchedules = item.ContentSchedule.FullSchedule;
+            var cultures = options.GetDeserializedCultures(node);
+
             var schedules = node.Element("Info")?.Element("Schedule");
             if (schedules != null && schedules.HasElements)
             {
-                var changes = new List<uSyncChange>();
-
-                var currentSchedules = item.ContentSchedule.FullSchedule;
-                var nodeSchedules = new List<ContentSchedule>();
-
-                var cultures = options.GetDeserializedCultures(node);
 
                 foreach (var schedule in schedules.Elements("ContentSchedule"))
                 {
                     var importSchedule = GetContentScheduleFromNode(schedule);
-                    logger.Debug<ContentSerializer>("Schedule: {action} {culture} {date}", importSchedule.Action, importSchedule.Culture, importSchedule.Date);
-
                     if (cultures.IsValidOrBlank(importSchedule.Culture))
                     {
                         if (importSchedule.Date < DateTime.Now)
                             continue; // don't add schedules in the past
 
+                        logger.Debug<ContentSerializer>("Adding {action} {culture} {date}", importSchedule.Action, importSchedule.Culture, importSchedule.Date);
                         nodeSchedules.Add(importSchedule);
 
                         var existing = FindSchedule(currentSchedules, importSchedule);
@@ -225,7 +225,10 @@ namespace uSync8.ContentEdition.Serializers
                         changes.Add(uSyncChange.Update("Schedule", $"{importSchedule.Culture} {importSchedule.Action}", "", importSchedule.Date.ToString()));
                     }
                 }
+            }
 
+            if (currentSchedules != null && currentSchedules.Count > 0)
+            {
                 // remove things that are in the current but not the import. 
 
                 var toRemove = currentSchedules.Where(x => FindSchedule(nodeSchedules, x) == null);
@@ -234,6 +237,7 @@ namespace uSync8.ContentEdition.Serializers
                 {
                     if (cultures.IsValidOrBlank(oldItem.Culture))
                     {
+                        logger.Debug<ContentSerializer>("Removing Schedule : {culture} {action} {date}", oldItem.Culture, oldItem.Action, oldItem.Date);
                         // only remove a culture if this seralization included it. 
                         // we don't remove things we didn't serialize. 
                         item.ContentSchedule.Remove(oldItem);
@@ -243,8 +247,8 @@ namespace uSync8.ContentEdition.Serializers
                 }
 
                 return changes;
-
             }
+
 
             return Enumerable.Empty<uSyncChange>();
         }
@@ -329,8 +333,9 @@ namespace uSync8.ContentEdition.Serializers
                     // culture based publishing.
                     var cultures = options.GetDeserializedCultures(node);
 
-                    // TODO: I think this is the wrong way around?
-                    var unpublishMissingCultures = cultures.Count > 0;
+                    // Only unpublish other cultures, when we are not already filtered by cultures
+                    // this stops things we don't care about this time being unpublished.
+                    var unpublishMissingCultures = cultures.Count == 0;
 
                     var cultureStatuses = new Dictionary<string, uSyncContentState>();
 
@@ -500,7 +505,7 @@ namespace uSync8.ContentEdition.Serializers
             {
                 foreach (var culture in missingCultures)
                 {
-                    logger.Debug<ContentSerializer>("Unpublishing culture not defined in config file");
+                    logger.Debug<ContentSerializer>("Unpublishing culture not defined in config file {culture}", culture);
                     contentService.Unpublish(item, culture);
                 }
             }
