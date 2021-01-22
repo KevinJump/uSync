@@ -169,10 +169,13 @@ namespace uSync8.Core.Serialization.Serializers
             if (!string.IsNullOrEmpty(masterTemplate))
             {
                 var template = fileService.GetTemplate(masterTemplate);
-                if (template != null && !Object.Equals(template, item.DefaultTemplate))
+                if (template != null)
                 {
-                    changes.AddUpdate("DefaultTemplate", item.DefaultTemplate?.Alias ?? string.Empty, masterTemplate, "DefaultTemplate");
-                    item.SetDefaultTemplate(template);
+                    if (item.DefaultTemplate == null || template.Alias != item.DefaultTemplate.Alias)
+                    {
+                        changes.AddUpdate("DefaultTemplate", item.DefaultTemplate?.Alias ?? string.Empty, masterTemplate, "DefaultTemplate");
+                        item.SetDefaultTemplate(template);
+                    }
                 }
                 else
                 {
