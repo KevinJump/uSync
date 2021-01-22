@@ -6,24 +6,18 @@ using uSync8.Core.Serialization;
 
 namespace uSync8.Core.Tracking.Impliment
 {
-    public class LanguageTracker : SyncBaseTracker<ILanguage>, ISyncNodeTracker<ILanguage>
+    public class LanguageTracker : SyncXmlTracker<ILanguage>, ISyncNodeTracker<ILanguage>
     {
         public LanguageTracker(ISyncSerializer<ILanguage> serializer) : base(serializer)
         {
         }
 
-        protected override TrackedItem TrackChanges()
+        public override List<TrackingItem> TrackingItems => new List<TrackingItem>()
         {
-            return new TrackedItem(serializer.ItemType, true)
-            {
-                Children = new List<TrackedItem>()
-                {
-                    new TrackedItem("IsoCode", "/IsoCode", true),
-                    new TrackedItem("CultureName", "/CultureName", true),
-                    new TrackedItem("Mandatory", "/IsMandatory", true),
-                    new TrackedItem("Default Lanaguage", "/IsDefault", true),
-                }
-            };
-        }
+            TrackingItem.Single("IsoCode", "/IsoCode"),
+            TrackingItem.Single("Mandatory", "IsMandatory"),
+            TrackingItem.Single("Default Language", "/IsDefault"),
+            TrackingItem.Single("CultureName", "/CultureName")
+        };
     }
 }

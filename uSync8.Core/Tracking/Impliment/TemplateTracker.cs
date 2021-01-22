@@ -6,23 +6,17 @@ using uSync8.Core.Serialization;
 
 namespace uSync8.Core.Tracking.Impliment
 {
-    public class TemplateTracker : SyncBaseTracker<ITemplate>, ISyncNodeTracker<ITemplate>
+    public class TemplateTracker : SyncXmlTracker<ITemplate>, ISyncNodeTracker<ITemplate>
     {
         public TemplateTracker(ISyncSerializer<ITemplate> serializer)
             : base(serializer)
         {
         }
 
-        protected override TrackedItem TrackChanges()
+        public override List<TrackingItem> TrackingItems => new List<TrackingItem>()
         {
-            return new TrackedItem(serializer.ItemType, true)
-            {
-                Children = new List<TrackedItem>
-                {
-                    new TrackedItem("Name", "/Name", true),
-                    new TrackedItem("Parent", "/Parent", true)
-                }
-            };
-        }
+            TrackingItem.Single("Name", "/Name"),
+            TrackingItem.Single("Parent", "/Parent")
+        };
     }
 }

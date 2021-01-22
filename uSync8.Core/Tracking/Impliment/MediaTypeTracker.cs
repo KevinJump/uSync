@@ -9,28 +9,6 @@ namespace uSync8.Core.Tracking.Impliment
     public class MediaTypeTracker : ContentTypeBaseTracker<IMediaType>, ISyncNodeTracker<IMediaType>
     {
         public MediaTypeTracker(ISyncSerializer<IMediaType> serializer) : base(serializer)
-        {
-        }
-
-        protected override TrackedItem TrackChanges()
-        {
-            var tracker = base.TrackChanges();
-            tracker.Children[0]
-                .Children.Add(new TrackedItem("Folder", "/Folder", true));
-
-            tracker.Children.Add(
-                    new TrackedItem("Structure", "/Structure")
-                    {
-                        Children = new List<TrackedItem>()
-                        {
-                            new TrackedItem("MediaType", "/MediaType")
-                            {
-                                Repeating = new RepeatingInfo(string.Empty, string.Empty, string.Empty)
-                            }
-                        }
-                    });
-
-            return tracker;
-        }
+        { }
     }
 }

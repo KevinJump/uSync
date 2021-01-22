@@ -117,18 +117,20 @@ namespace uSync8.Core.Tracking
             {
                 if (trackingItem.SingleItem)
                 {
-                    changes.AddNotNull(TrackSingleItem(trackingItem, target, source));
+                    changes.AddNotNull(TrackSingleItem(trackingItem, target, source, TrackingDirection.TargetToSource));
+                    changes.AddNotNull(TrackSingleItem(trackingItem, source, target, TrackingDirection.SourceToTarget));
                 }
                 else
                 {
-                    changes.AddRange(TrackMultipleKeyedItems(trackingItem, target, source));
+                    changes.AddRange(TrackMultipleKeyedItems(trackingItem, target, source, TrackingDirection.TargetToSource));
+                    changes.AddRange(TrackMultipleKeyedItems(trackingItem, source, target, TrackingDirection.SourceToTarget));
                 }
             }
 
             return changes;
         }
 
-        private uSyncChange TrackSingleItem(TrackingItem item, XElement target, XElement source)
+        private uSyncChange TrackSingleItem(TrackingItem item, XElement target, XElement source, TrackingDirection direction)
         {
             var sourceNode = source.XPathSelectElement(item.Path);
             var targetNode = target.XPathSelectElement(item.Path);
@@ -137,11 +139,14 @@ namespace uSync8.Core.Tracking
             {
                 if (targetNode == null)
                 {
-                    // missing it's a delete.
-                    return uSyncChange.Delete(item.Path, item.Name, sourceNode.ValueOrDefault(string.Empty));
+                    // value is missing, this is a delete or create depending on compare direction
+                    return AddMissingChange(item.Path, item.Name, sourceNode.ValueOrDefault(string.Empty), direction);
                 }
-                else
+
+                // only track updates when tracking target to source. 
+                else if (direction == TrackingDirection.TargetToSource)
                 {
+                    
                     if (item.HasAttributes())
                     {
                         return Compare(targetNode.Attribute(item.AttributeKey).ValueOrDefault(string.Empty),
@@ -158,10 +163,9 @@ namespace uSync8.Core.Tracking
             }
 
             return null;
-
         }
 
-        private IEnumerable<uSyncChange> TrackMultipleKeyedItems(TrackingItem trackingItem, XElement target, XElement source)
+        private IEnumerable<uSyncChange> TrackMultipleKeyedItems(TrackingItem trackingItem, XElement target, XElement source, TrackingDirection direction)
         {
             var changes = new List<uSyncChange>();
 
@@ -172,16 +176,23 @@ namespace uSync8.Core.Tracking
                 // make the selection path for this item.
                 var itemPath = trackingItem.Path.Replace("*", sourceNode.Parent.Name.LocalName) + MakeSelectionPath(sourceNode, trackingItem.Keys);
 
-                var itemName = trackingItem.Name.Replace("*", sourceNode.Parent.Name.LocalName) +  MakeSelectionName(sourceNode, trackingItem.Keys);
+                var itemName = trackingItem.Name.Replace("*", sourceNode.Parent.Name.LocalName) + 
+                    MakeSelectionName(sourceNode, String.IsNullOrWhiteSpace(trackingItem.ValueKey) ? trackingItem.Keys : trackingItem.ValueKey);
 
                 var targetNode = target.XPathSelectElement(itemPath);
 
                 if (targetNode == null)
                 {
-                    // missing from target - its a delete
-                    changes.Add(uSyncChange.Delete(trackingItem.Path, itemName, sourceNode.Name.LocalName));
+                    var value = sourceNode.ValueOrDefault(string.Empty);
+                    if (!string.IsNullOrEmpty(trackingItem.ValueKey))
+                        value = GetKeyValue(sourceNode, trackingItem.ValueKey);
+
+                    // missing, we add either a delete or create - depending on tracking direction
+                    changes.AddNotNull(AddMissingChange(trackingItem.Path, itemName, value, direction));
                 }
-                else
+
+                // only track updates when tracking target to source. 
+                else if (direction == TrackingDirection.TargetToSource)
                 {
                     // check the node to see if its an update. 
                     changes.AddRange(CompareNode(targetNode, sourceNode, trackingItem.Path, itemName, trackingItem.MaskValue));
@@ -213,7 +224,6 @@ namespace uSync8.Core.Tracking
 
         private string MakeSelectionName(XElement node, string keys)
         {
-            var name = "";
             var names = new List<string>();
             var keyList = keys.ToDelimitedList();
             foreach (var key in keyList)
@@ -247,12 +257,10 @@ namespace uSync8.Core.Tracking
 
                 changes.AddNotNull(
                     Compare(
-                        sourceAttribute.Value,
                         target.Attribute(sourceAttributeName).ValueOrDefault(string.Empty),
+                        sourceAttribute.Value,
                         path + $"{seperator}{sourceAttributeName}",
                         $"{name} > {sourceAttributeName}", maskValue));
-
-
             }
 
             if (source.HasElements)
@@ -313,6 +321,25 @@ namespace uSync8.Core.Tracking
             return uSyncChange.Update(path, name, maskValue ? "*****" : source, maskValue ? "*****" : target);
         }
 
+        /// <summary>
+        ///  Adds a change when a value is missing
+        /// </summary>
+        /// <remarks>
+        ///  Depending on the direction of the comapre this will add a delete (when value is mising from target)
+        ///  or a create (when value is missing from source).
+        /// </remarks>
+        private uSyncChange AddMissingChange(string path, string name, string value, TrackingDirection direction)
+        {
+            switch (direction)
+            {
+                case TrackingDirection.TargetToSource:
+                    return uSyncChange.Delete(path, name, value);
+                case TrackingDirection.SourceToTarget:
+                    return uSyncChange.Create(path, name, value);
+            }
+
+            return null;
+        }
 
         public virtual List<TrackingItem> TrackingItems { get; }
 
@@ -327,10 +354,10 @@ namespace uSync8.Core.Tracking
             => new TrackingItem(name, path, true) { AttributeKey = attributes };
 
         public static TrackingItem Many(string name, string path, string keys)
-            => new TrackingItem(name, path, false)
-            {
-                Keys = keys
-            };
+            => new TrackingItem(name, path, false, keys);
+
+        public static TrackingItem Many(string name, string path, string keys, string valueKey)
+            => new TrackingItem(name, path, false, keys, valueKey);
 
         public TrackingItem(string name, string path, bool single)
         {
@@ -339,18 +366,30 @@ namespace uSync8.Core.Tracking
             this.Path = path;
         }
 
+        public TrackingItem(string name, string path, bool single, string keys)
+            : this(name, path, single)
+        {
+            Keys = keys;
+        }
+
+        public TrackingItem(string name, string path, bool single, string keys, string valueKey)
+            : this(name, path, single, keys)
+        {
+            this.ValueKey = valueKey;
+        }
+
+
         public bool SingleItem { get; set; }
         public string Path { get; set; }
-
         public string Name { get; set; }
 
-        public string AttributeKey { get; set; }
+        public string ValueKey { get; set; }
 
+        public string AttributeKey { get; set; }
         public string Keys { get; set; }
 
         public bool MaskValue { get; set; }
 
-        public bool HasKeys() => !string.IsNullOrWhiteSpace(Keys);
         public bool HasAttributes() => !string.IsNullOrWhiteSpace(AttributeKey);
     }
 
@@ -358,5 +397,11 @@ namespace uSync8.Core.Tracking
     {
         public string Key { get; set; }
         public bool IsAttribute { get; set; }
+    }
+
+    public enum TrackingDirection
+    {
+        TargetToSource,
+        SourceToTarget
     }
 }

@@ -6,33 +6,21 @@ using uSync8.Core.Serialization;
 
 namespace uSync8.Core.Tracking.Impliment
 {
-    public class DataTypeTracker : SyncBaseTracker<IDataType>, ISyncNodeTracker<IDataType>
+    public class DataTypeTracker : SyncXmlTracker<IDataType>, ISyncNodeTracker<IDataType>
     {
         public DataTypeTracker(ISyncSerializer<IDataType> serializer)
             : base(serializer)
         {
         }
 
-        protected override TrackedItem TrackChanges()
+        public override List<TrackingItem> TrackingItems => new List<TrackingItem>()
         {
-            return new TrackedItem(serializer.ItemType, true)
-            {
-                Children = new List<TrackedItem>()
-                {
-                    new TrackedItem("Info", "/Info")
-                    {
-                        Children = new List<TrackedItem>()
-                        {
-                            new TrackedItem("Name", "/Name", true),
-                            new TrackedItem("EditorAlias", "/EditorAlias", true),
-                            new TrackedItem("DatabaseType", "/DatabaseType", true),
-                            new TrackedItem("SortOrder", "/SortOrder", true),
-                            new TrackedItem("Folder", "/Folder", true)
-                        }
-                    },
-                    new TrackedItem("Config", "/Config", true)
-                }
-            };
-        }
+            TrackingItem.Single("Name", "/Info/Name"),
+            TrackingItem.Single("EditorAlias", "/Info/EditorAlias"),
+            TrackingItem.Single("Database Type", "/Info/DatabaseType"),
+            TrackingItem.Single("Sort Order", "/Info/SortOrder"),
+            TrackingItem.Single("Folder", "/Info/Folder"),
+            TrackingItem.Single("Config", "/Config")
+        };
     }
 }

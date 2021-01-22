@@ -6,47 +6,24 @@ using uSync8.Core.Serialization;
 
 namespace uSync8.Core.Tracking.Impliment
 {
-    public class MacroTracker : SyncBaseTracker<IMacro>, ISyncNodeTracker<IMacro>
+    public class MacroTracker : SyncXmlTracker<IMacro>, ISyncNodeTracker<IMacro>
     {
         public MacroTracker(ISyncSerializer<IMacro> serializer) : base(serializer)
         {
         }
 
-        protected override TrackedItem TrackChanges()
+        public override List<TrackingItem> TrackingItems => new List<TrackingItem>()
         {
-            return new TrackedItem(serializer.ItemType, true)
-            {
-                Children = new List<TrackedItem>()
-                {
-                    new TrackedItem("Name", "/Name", true),
-                    new TrackedItem("Source", "/MacroSource", true),
-                    new TrackedItem("Type", "/MacroType", true),
-                    new TrackedItem("Use In Editor", "/UseInEditor", true),
-                    new TrackedItem("Don't Render in Editor", "/DontRender", true),
-                    new TrackedItem("Cache By Member", "/CachedByMember", true),
-                    new TrackedItem("Cache By Page", "/CachedByPage", true),
-                    new TrackedItem("Cache Duration", "/CachedDuration", true),
+            TrackingItem.Single("Name", "/Name"),
+            TrackingItem.Single("Source", "/MacroSource"),
+            TrackingItem.Single("Type", "/MacroType"),
+            TrackingItem.Single("Use In Editor", "/UseInEditor"),
+            TrackingItem.Single("Don't Render in Editor", "/DontRender"),
+            TrackingItem.Single("Cache By Member", "/CachedByMember"),
+            TrackingItem.Single("Cache By Page", "/CachedByPage"),
+            TrackingItem.Single("Cache Duration", "/CachedDuration"),
 
-                    new TrackedItem("", "/Properties", false)
-                    {
-                        Children = new List<TrackedItem>()
-                        {
-                            new TrackedItem("Property", "/Property")
-                            {
-                                Repeating = new RepeatingInfo("Alias", "/Property", "Name"),
-                                Children = new List<TrackedItem>()
-                                {
-                                    new TrackedItem("Name", "/Name", true),
-                                    new TrackedItem("Alias", "/Alias", true),
-                                    new TrackedItem("SortOrder", "/SortOrder", true),
-                                    new TrackedItem("EditorAlias", "/EditorAlias", true)
-                                }
-                            }
-                        }
-                    }
-                }
-
-            };
-        }
+            TrackingItem.Many("Property", "/Properties/Property", "Alias", "Alias")
+        };
     }
 }

@@ -7,23 +7,17 @@ using uSync8.Core.Tracking;
 
 namespace uSync8.ContentEdition.Tracker
 {
-    public class DomainTracker : SyncBaseTracker<IDomain>, ISyncNodeTracker<IDomain>
+    public class DomainTracker : SyncXmlTracker<IDomain>, ISyncNodeTracker<IDomain>
     {
         public DomainTracker(ISyncSerializer<IDomain> serializer) : base(serializer)
         {
         }
 
-        protected override TrackedItem TrackChanges()
+        public override List<TrackingItem> TrackingItems => new List<TrackingItem>()
         {
-            return new TrackedItem(serializer.ItemType, true)
-            {
-                Children = new List<TrackedItem>()
-                {
-                    new TrackedItem("Language", "/Language", true),
-                    new TrackedItem("Content Root", "/Root", true),
-                    new TrackedItem("Wildcard", "/IsWildcard", true)
-                }
-            };
-        }
+            TrackingItem.Single("Domain > Wildcard", "/Info/IsWildcard"),
+            TrackingItem.Single("Domain > Language", "/Info/Language"),
+            TrackingItem.Single("Domain > Root", "/Info/Root")
+        };
     }
 }

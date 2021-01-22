@@ -8,65 +8,35 @@ using uSync8.Core.Tracking;
 
 namespace uSync8.ContentEdition.Tracker
 {
-    public abstract class ContentBaseTracker<TObject> : SyncBaseTracker<TObject>
+    public abstract class ContentBaseTracker<TObject> : SyncXmlTracker<TObject>
         where TObject : IContentBase
     {
         public ContentBaseTracker(ISyncSerializer<TObject> serializer)
             : base(serializer)
+        { }
+
+        public override List<TrackingItem> TrackingItems => new List<TrackingItem>()
         {
-        }
-        protected override TrackedItem TrackChanges()
-        {
-            return new TrackedItem(serializer.ItemType, true)
-            {
-                Children = new List<TrackedItem>()
-                {
-                    new TrackedItem("", "/Info")
-                    {
-                        Children = new List<TrackedItem>()
-                        {
-                            new TrackedItem("Parent", "/Parent", true),
-                            new TrackedItem("Path", "/Path", true),
-                            new TrackedItem("SortOrder", "/SortOrder", true),
-                            new TrackedItem("ContentType", "/ContentType", true),
-                            new TrackedItem("CreateDate", "/CreateDate", true),
+            TrackingItem.Single("Parent", "/Info/Parent"),
+            TrackingItem.Single("Path", "/Info/Path"),
+            TrackingItem.Single("Trashed", "/Info/Trashed"),
+            TrackingItem.Single("ContentType", "/Info/ContentType"),
+            TrackingItem.Single("CreatedDate", "/Info/CreateDate"),
+            TrackingItem.Single("SortOrder", "/Info/SortOrder"),
+            TrackingItem.Single("Template", "/Info/Template"),
+            TrackingItem.Single("FileHash", "/Info/FileHash"),
 
-                            new TrackedItem("Name", "/NodeName", false)
-                            {
-                                Attributes = new List<string>() { "Default" },
-                                Children = new List<TrackedItem>()
-                                {
-                                    new TrackedItem("", "/Name")
-                                    {
-                                        Repeating = new RepeatingInfo("Culture", string.Empty, "Culture")
-                                        {
-                                            KeyIsAttribute = true,
-                                            NameIsAttribute = true
-                                        }
-                                    }
-                                }
-                            },
-                            new TrackedItem("File Contents (Hash)", "/FileHash", true)
-                        }
-                    },
+            TrackingItem.Attribute("NodeName (Default)", "/Info/NodeName", "Default"),
+            TrackingItem.Many("Name", "/Info/NodeName/Name", "@Culture"),
 
-                    new TrackedItem("Property", "/Properties")
-                    {
-                        HasChildProperties = true,
-                        Children = new List<TrackedItem>()
-                        {
-                            new TrackedItem("", "/Value")
-                            {
-                                Repeating = new RepeatingInfo(String.Empty, string.Empty, String.Empty)
-                                {
-                                    ElementsInOrder = true
-                                }
-                            }
-                        }
-                    }
-                }
-            };
+            TrackingItem.Attribute("Published (Default)", "/Info/Published", "Default"),
+            TrackingItem.Many("Published", "/Info/Published/Published", "@Culture"),
 
-        }
+            TrackingItem.Many("Schedule", "/Info/Schedule/ContentSchedule", "Culture,Action", "Date"),
+
+            TrackingItem.Many("Property - *", "/Properties/*/Value", "@Culture"),
+
+            TrackingItem.Many("GenericProperty", "/GenericProperties/GenericProperty", "Key")
+        };
     }
 }

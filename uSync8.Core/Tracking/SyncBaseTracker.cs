@@ -16,6 +16,7 @@ using uSync8.Core.Serialization;
 
 namespace uSync8.Core.Tracking
 {
+    [Obsolete("Use the SyncXmlTracker for simpler config/control")]
     public abstract class SyncBaseTracker<TObject>
         where TObject : IEntity
     {

@@ -7,40 +7,15 @@ using uSync8.Core.Tracking;
 
 namespace uSync8.ContentEdition.Tracker
 {
-    public class DictionaryItemTracker : SyncBaseTracker<IDictionaryItem>, ISyncNodeTracker<IDictionaryItem>
+    public class DictionaryItemTracker : SyncXmlTracker<IDictionaryItem>, ISyncNodeTracker<IDictionaryItem>
     {
         public DictionaryItemTracker(ISyncSerializer<IDictionaryItem> serializer) : base(serializer)
-        {
-        }
+        { }
 
-        protected override TrackedItem TrackChanges()
+        public override List<TrackingItem> TrackingItems => new List<TrackingItem>()
         {
-            return new TrackedItem(serializer.ItemType, true)
-            {
-                Children = new List<TrackedItem>()
-                {
-                    new TrackedItem("Info", "/Info")
-                    {
-                        Children = new List<TrackedItem>()
-                        {
-                            new TrackedItem("Parent", "/Parent", true)
-                        }
-                    },
-                    new TrackedItem("Translations", "/Translations")
-                    {
-                        Children = new List<TrackedItem>()
-                        {
-                            new TrackedItem("Translation", "/Translation")
-                            {
-                                Repeating = new RepeatingInfo("Language", string.Empty, string.Empty)
-                                {
-                                    KeyIsAttribute = true
-                                }
-                            }
-                        }
-                    }
-                }
-            };
-        }
+            TrackingItem.Single("Parent", "/Info/Parent"),
+            TrackingItem.Many("Translation", "/Translations/Translation", "@Language")
+        };
     }
 }
