@@ -46,7 +46,8 @@ namespace uSync8.Core.Tracking
                     return GetChanges(target, attempt.Item, options);
 
             }
-            return GetChanges(target, null, options);
+
+            return GetChanges(target, XElement.Parse("<blank/>"), options);
         }
 
         private SyncAttempt<XElement> SerializeItem(TObject item, SyncSerializerOptions options)
