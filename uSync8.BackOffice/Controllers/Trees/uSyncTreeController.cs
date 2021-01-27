@@ -19,7 +19,7 @@ namespace uSync8.BackOffice.Controllers.Trees
         {
             var root = base.CreateRootNode(queryStrings);
 
-            root.RoutePath = $"{Constants.Applications.Settings}/{uSync.Trees.uSync}/dashboard";
+            root.RoutePath = $"{this.SectionAlias}/{uSync.Trees.uSync}/dashboard";
             root.Icon = "icon-infinity";
             root.HasChildren = false;
             root.MenuUrl = null;
