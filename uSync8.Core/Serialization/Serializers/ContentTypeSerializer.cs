@@ -179,7 +179,15 @@ namespace uSync8.Core.Serialization.Serializers
                 }
                 else
                 {
-                    changes.AddUpdate("DefaultTemplate", item.DefaultTemplate?.Alias ?? string.Empty, "Cannot find Template", "DefaultTemplate", false);
+                    // elements don't have a defaultTemplate, but it can be valid to have the old defaultTemplate in the db.
+                    // (it would then re-appear if the user untoggles is element) See issue #203
+                    //
+                    // So we only log this as a problem if the default template is missing on a non-element doctype. 
+                    if (!item.IsElement)
+                    {
+                        
+                        changes.AddUpdate("DefaultTemplate", item.DefaultTemplate?.Alias ?? string.Empty, "Cannot find Template", "DefaultTemplate", false);
+                    }
                 }
             }
 
