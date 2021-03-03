@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Xml.Linq;
 
@@ -288,14 +289,22 @@ namespace uSync8.ContentEdition.Serializers
             var trashed = node.Element("Info").Element("Trashed").ValueOrDefault(false);
             changes.AddNotNull(HandleTrashedState(item, trashed));
 
+
+            var publishTimer = Stopwatch.StartNew();
             // published status
             // this does the last save and publish
             var saveAttempt = DoSaveOrPublish(item, node, options);
             if (saveAttempt.Success)
             {
+                var message = attempt.Status;
+                if (publishTimer.ElapsedMilliseconds > 10000)
+                {
+                    message += $" (Slow publish {publishTimer.ElapsedMilliseconds}ms)";
+                }
+
                 // we say no change back, this stops the core second pass function from saving 
                 // this item (which we have just done with DoSaveOrPublish)
-                return SyncAttempt<IContent>.Succeed(item.Name, item, ChangeType.NoChange, attempt.Status, true, changes);
+                return SyncAttempt<IContent>.Succeed(item.Name, item, ChangeType.NoChange, message, true, changes);
             }
 
             return SyncAttempt<IContent>.Fail(item.Name, item, ChangeType.ImportFail, $"{saveAttempt.Result} {attempt.Status}");
