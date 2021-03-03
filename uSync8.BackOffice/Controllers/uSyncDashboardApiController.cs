@@ -222,7 +222,7 @@ namespace uSync8.BackOffice.Controllers
                 + uSyncBackOfficeConstants.ReleaseSuffix;
 
             addOnInfo.AddOns = addOnInfo.AddOns.OrderBy(x => x.SortOrder).ToList();
-            addOnInfo.AddOnString = string.Join(", ", addOnInfo.AddOns.Select(x => x.Name));
+            addOnInfo.AddOnString = string.Join(", ", addOnInfo.AddOns.Select(x => $"{x.Name} (v{x.Version})"));
 
             return addOnInfo;
         }

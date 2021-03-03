@@ -19,7 +19,7 @@ namespace uSync8.ContentEdition
     public class uSyncContent : ISyncAddOn
     {
         public string Name => "Content Edition";
-        public string Version => "8.0.1";
+        public string Version => typeof(uSyncContent).Assembly.GetName().Version.ToString();
 
         /// The following if you are an add on that displays like an app
 
