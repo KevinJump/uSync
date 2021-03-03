@@ -116,7 +116,7 @@ namespace uSync8.Core.Serialization.Serializers
                 // added in 8.10
                 if (UmbracoVersion.LocalVersion.Major > 8 || UmbracoVersion.LocalVersion.Minor >= 10)
                 {
-                    SerializeNewProperty<bool>(propNode, property, "labelOnTop");
+                    SerializeNewProperty<bool>(propNode, property, "LabelOnTop");
                 }
 
                 node.Add(propNode);
