@@ -82,6 +82,10 @@ namespace uSync8.BackOffice.Configuration
 
             settings.CacheFolderKeys = node.Element("CacheFolderKeys").ValueOrDefault(true);
 
+            settings.SignalRRoot = ValueFromWebConfigOrDefault("SignalRRoot", node.Element("SignalRRoot")
+                .ValueOrDefault("backoffice/signalr/hubs"))
+                .TrimStart(new[] { '/' });
+
 
             settings.DefaultHandlerSettings = LoadKeyValueSettings(node.Element("HandlerDefaults"));
 

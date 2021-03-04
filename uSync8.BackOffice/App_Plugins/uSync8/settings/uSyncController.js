@@ -15,6 +15,7 @@
         vm.reported = false;
         vm.syncing = false;
         vm.hideLink = false;
+        vm.showSpinner = false;
 
         vm.showAdvanced = false;
 
@@ -317,6 +318,7 @@
 
             vm.reported = vm.showAll = false;
             vm.working = true;
+            vm.showSpinner = false; 
             vm.runmode = mode;
             vm.hideLink = false;
             vm.savings.show = false;
@@ -327,6 +329,11 @@
                 Message: 'Initializing',
                 Handlers: vm.handlers
             };
+
+            if (!vm.hub.active) {
+                vm.status.Message = 'Working ';
+                vm.showSpinner = true;
+            }
 
             vm.update = {
                 Message: '',

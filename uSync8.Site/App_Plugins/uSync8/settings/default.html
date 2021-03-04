@@ -58,8 +58,8 @@
     </umb-box>
 
 
-    <umb-box>
-        <umb-box-content ng-if="vm.working || vm.reported">
+    <umb-box ng-if="!vm.showSpinner && (vm.working || vm.reported)">
+        <umb-box-content>
             <usync-progress-view update="vm.update"
                                  status="vm.status"
                                  hide-labels="false">
@@ -67,9 +67,14 @@
         </umb-box-content>
     </umb-box>
 
+    <div ng-if="vm.showSpinner && vm.working">
+        <umb-load-indicator></umb-load-indicator>
+    </div>
+
+
     <div ng-if="vm.warnings.Message.length > 0" class="alert alert-{{vm.warnings.Type}}">
         <span ng-bind-html="vm.warnings.Message"></span>
-        
+
     </div>
 
 

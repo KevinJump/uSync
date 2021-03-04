@@ -108,6 +108,11 @@ namespace uSync8.BackOffice.Configuration
         ///  options you can set at the top level, that are then set on all handlers.
         /// </summary>
         public IDictionary<string, string> DefaultHandlerSettings { get; set; }
+
+        /// <summary>
+        ///  location of SignalR hub script (/
+        /// </summary>
+        public string SignalRRoot { get; set; }
     }
 
     public class HandlerSet

@@ -8,6 +8,7 @@ using System.Web.Routing;
 
 using Umbraco.Core;
 using Umbraco.Core.Composing;
+using Umbraco.Core.Configuration;
 using Umbraco.Core.Logging;
 using Umbraco.Web;
 using Umbraco.Web.JavaScript;
@@ -25,13 +26,17 @@ namespace uSync8.BackOffice
         private readonly SyncHandlerFactory handlerFactory;
 
         private readonly SyncFileService syncFileService;
-        private readonly uSyncSettings globalSettings;
+        private readonly uSyncSettings uSyncSettings;
         private readonly uSyncService uSyncService;
         private readonly IRuntimeState runtimeState;
 
         private readonly IUmbracoContextFactory umbracoContextFactory;
 
+        private readonly string UmbracoMvcArea;
+
         public uSyncBackofficeComponent(
+            IGlobalSettings globalSettings,
+            uSyncConfig uSyncConfig,
             SyncHandlerFactory handlerFactory,
             IProfilingLogger logger,
             SyncFileService fileService,
@@ -39,7 +44,9 @@ namespace uSync8.BackOffice
             IRuntimeState runtimeState,
             IUmbracoContextFactory umbracoContextFactory)
         {
-            globalSettings = Current.Configs.uSync();
+            uSyncSettings = uSyncConfig.Settings;
+
+            UmbracoMvcArea = globalSettings.GetUmbracoMvcArea();
 
             this.runtimeState = runtimeState;
             this.logger = logger;
@@ -85,7 +92,8 @@ namespace uSync8.BackOffice
 
             e.Add("uSync", new Dictionary<string, object>
             {
-                { "uSyncService", urlHelper.GetUmbracoApiServiceBaseUrl<uSyncDashboardApiController>(controller => controller.GetApi()) }
+                { "uSyncService", urlHelper.GetUmbracoApiServiceBaseUrl<uSyncDashboardApiController>(controller => controller.GetApi()) },
+                { "signalRHub", UriUtility.ToAbsolute($"~/{UmbracoMvcArea}/{uSyncSettings.SignalRRoot}") }
             });
         }
 
@@ -99,20 +107,20 @@ namespace uSync8.BackOffice
                 using (var reference = umbracoContextFactory.EnsureUmbracoContext())
                 {
 
-                    if (globalSettings.ExportAtStartup || (globalSettings.ExportOnSave && !syncFileService.RootExists(globalSettings.RootFolder)))
+                    if (uSyncSettings.ExportAtStartup || (uSyncSettings.ExportOnSave && !syncFileService.RootExists(uSyncSettings.RootFolder)))
                     {
                         logger.Info<uSyncBackofficeComponent>("uSync: Running Export at startup");
-                        uSyncService.Export(globalSettings.RootFolder, default(SyncHandlerOptions));
+                        uSyncService.Export(uSyncSettings.RootFolder, default(SyncHandlerOptions));
                     }
 
-                    if (globalSettings.ImportAtStartup)
+                    if (uSyncSettings.ImportAtStartup)
                     {
                         logger.Info<uSyncBackofficeComponent>("uSync: Running Import at startup");
 
-                        if (!HasStopFile(globalSettings.RootFolder))
+                        if (!HasStopFile(uSyncSettings.RootFolder))
                         {
-                            uSyncService.Import(globalSettings.RootFolder, false, default(SyncHandlerOptions));
-                            ProcessOnceFile(globalSettings.RootFolder);
+                            uSyncService.Import(uSyncSettings.RootFolder, false, default(SyncHandlerOptions));
+                            ProcessOnceFile(uSyncSettings.RootFolder);
                         }
                         else
                         {
@@ -120,7 +128,7 @@ namespace uSync8.BackOffice
                         }
                     }
 
-                    if (globalSettings.ExportOnSave)
+                    if (uSyncSettings.ExportOnSave)
                     {
                         var handlers = handlerFactory
                             .GetValidHandlers(new SyncHandlerOptions(handlerFactory.DefaultSet, HandlerActions.Save))
@@ -149,7 +157,7 @@ namespace uSync8.BackOffice
         public void Terminate()
         {
             logger.Debug<uSyncBackofficeComponent>("Terminiating Component");
-            if (globalSettings.ExportOnSave)
+            if (uSyncSettings.ExportOnSave)
             {
                 var handlers = handlerFactory
                     .GetValidHandlers(new SyncHandlerOptions(handlerFactory.DefaultSet, HandlerActions.Save))
