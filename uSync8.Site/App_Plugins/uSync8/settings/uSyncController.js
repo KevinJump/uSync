@@ -3,6 +3,7 @@
 
     function uSyncController($scope,
         eventsService,
+        overlayService,
         notificationsService,
         editorService,
         uSync8DashboardService,
@@ -64,7 +65,7 @@
             subButtons: [{
                 labelKey: 'usync_exportClean',
                 handler: function () {
-                    exportItems(true);
+                    cleanExport();
                 }
             }]
         }
@@ -130,15 +131,28 @@
                 });
         }
 
+        function cleanExport() {
+
+            overlayService.open({
+                title: 'Clean Export',
+                content: 'Are you sure ? A clean export will delete all the contents of the uSync folder. You will loose any stored delete or rename actions.',
+                disableBackdropClick: true,
+                disableEscKey: true,
+                submitButtonLabel: 'Yes run a clean export',
+                closeButtonLabel: 'No, close',
+                submit: function () {
+                    overlayService.close();
+                    exportItems(true);
+                },
+                close: function () {
+                    overlayService.close();
+                }
+            })
+        }
+
         function exportItems(clean) {
             resetStatus(modes.EXPORT);
             vm.exportButton.state = 'busy';
-
-            if (clean && !confirm('Are you sure? A clean export will delete the contents of the uSync folder, you will may loose any delete/rename actions.')) {
-                vm.working = false;
-                vm.exportButton.state = 'success';
-                return;
-            }
 
             vm.hideLink = true;
             uSync8DashboardService.exportItems(getClientId(), clean)
