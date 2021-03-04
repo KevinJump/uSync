@@ -315,6 +315,7 @@ namespace uSync8.BackOffice.Configuration
             settings.UseFlatStructure = GetLocalValue(node.Attribute("UseFlatStructure"), defaultSettings.UseFlatStructure);
             settings.Actions = node.Attribute("Actions").ValueOrDefault("All").ToDelimitedList().ToArray();
             settings.FailOnMissingParent = GetLocalValue(node.Attribute("FailOnMissingParent"), defaultSettings.FailOnMissingParent);
+            settings.Group = node.Attribute("Group").ValueOrDefault(string.Empty);
 
             // handlers can have their own individual settings beneath a node
             // 

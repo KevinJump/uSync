@@ -117,9 +117,17 @@ namespace uSync8.BackOffice.SyncHandlers
 
 
         public IEnumerable<string> GetValidGroups(SyncHandlerOptions options = null)
-            => GetValidHandlers(options)
+        {
+            var handlers = GetValidHandlers(options);
+            var groups = handlers
                 .Select(x => x.Handler.Group)
-                .Distinct();
+                .ToList();
+
+            groups.AddRange(handlers.Where(x => !string.IsNullOrWhiteSpace(x.Settings.Group))
+                .Select(x => x.Settings.Group));
+
+            return groups.Distinct();              
+        }
 
         public IEnumerable<ExtendedHandlerConfigPair> GetValidHandlers(string[] aliases, SyncHandlerOptions options = null)
             => GetValidHandlers(options)
@@ -151,7 +159,7 @@ namespace uSync8.BackOffice.SyncHandlers
 
                 // check its valid for the passed group and action. 
                 if (handler != null
-                    && IsValidGroup(options.Group, handler)
+                    && IsValidGroup(options.Group, handler, settings)
                     && IsValidAction(options.Action, settings.Actions))
                 {
                     // logger.Debug<SyncHandlerFactory>("Adding {handler} to ValidHandler List", handler.Alias);
@@ -180,10 +188,14 @@ namespace uSync8.BackOffice.SyncHandlers
                 actions.InvariantContains("all") ||
                 actions.InvariantContains(requestedAction.ToString());
 
-        private bool IsValidGroup(string group, ISyncHandler handler)
+        private bool IsValidGroup(string group, ISyncHandler handler, HandlerSettings settings)
         {
             // empty means all 
             if (string.IsNullOrWhiteSpace(group)) return true;
+
+            // group over written in settings.
+            if (!string.IsNullOrWhiteSpace(settings.Group))
+                return settings.Group.InvariantEquals(group);
 
             if (handler is ISyncExtendedHandler extendedHandler)
                 return extendedHandler.Group.InvariantEquals(group);

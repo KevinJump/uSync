@@ -15,6 +15,8 @@ namespace uSync8.BackOffice.Configuration
 
         public string[] Actions { get; set; } = new string[] { "All" };
 
+        public string Group { get; set; }
+
         public OverriddenValue<bool> UseFlatStructure { get; set; } = new OverriddenValue<bool>();
         public OverriddenValue<bool> GuidNames { get; set; } = new OverriddenValue<bool>();
 
