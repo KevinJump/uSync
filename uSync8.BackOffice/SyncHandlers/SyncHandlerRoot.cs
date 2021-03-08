@@ -367,6 +367,12 @@ namespace uSync8.BackOffice.SyncHandlers
         /// </remarks>
         virtual public IEnumerable<uSyncAction> ImportElement(XElement node, string filename, HandlerSettings settings, uSyncImportOptions options)
         {
+            if (!ShouldImport(node, settings))
+            {
+                return uSyncAction.SetAction(true, node.GetAlias(), message: "Change blocked (based on config)")
+                    .AsEnumerableOfOne();
+            }
+
             if (!uSyncService.FireImportingItem(node))
             {
                 // blocked
