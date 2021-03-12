@@ -71,6 +71,14 @@ namespace uSync8.BackOffice.Configuration
 
             settings.UseFlatStructure = ValueFromWebConfigOrDefault("FlatFolders", node.Element("FlatFolders").ValueOrDefault(true));
             settings.ImportAtStartup = ValueFromWebConfigOrDefault("ImportAtStartup", node.Element("ImportAtStartup").ValueOrDefault(true));
+
+            // new add a group to use on import at startup (so say only import settings)
+            var startupGroup = string.Empty;
+            var importStartupNode = node.Element("ImportAtStartup");
+            if (importStartupNode != null) startupGroup = importStartupNode.Attribute("Group").ValueOrDefault(startupGroup);
+            settings.ImportAtStartupGroup = ValueFromWebConfigOrDefault("ImportAtStartup.Group", startupGroup);
+
+
             settings.ExportAtStartup = ValueFromWebConfigOrDefault("ExportAtStartup", node.Element("ExportAtStartup").ValueOrDefault(false));
             settings.ExportOnSave = ValueFromWebConfigOrDefault("ExportOnSave", node.Element("ExportOnSave").ValueOrDefault(true));
             settings.UseGuidNames = ValueFromWebConfigOrDefault("UseGuidFilenames", node.Element("UseGuidFilenames").ValueOrDefault(false));

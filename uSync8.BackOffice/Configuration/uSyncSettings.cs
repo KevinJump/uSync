@@ -38,6 +38,11 @@ namespace uSync8.BackOffice.Configuration
         public bool ImportAtStartup { get; set; } = false;
 
         /// <summary>
+        ///  The handler 'group' to use on startup import 
+        /// </summary>
+        public string ImportAtStartupGroup { get; set; } = string.Empty;
+
+        /// <summary>
         ///  Export when Umbraco boots
         /// </summary>
         public bool ExportAtStartup { get; set; } = false;

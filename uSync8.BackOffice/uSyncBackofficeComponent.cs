@@ -119,7 +119,11 @@ namespace uSync8.BackOffice
 
                         if (!HasStopFile(uSyncSettings.RootFolder))
                         {
-                            uSyncService.Import(uSyncSettings.RootFolder, false, default(SyncHandlerOptions));
+                            uSyncService.Import(uSyncSettings.RootFolder, false, new SyncHandlerOptions
+                            {
+                                Group = uSyncSettings.ImportAtStartupGroup
+                            });
+
                             ProcessOnceFile(uSyncSettings.RootFolder);
                         }
                         else
