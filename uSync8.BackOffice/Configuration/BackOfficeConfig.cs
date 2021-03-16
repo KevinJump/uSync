@@ -289,15 +289,13 @@ namespace uSync8.BackOffice.Configuration
 
             if (handler.Settings != null && handler.Settings.Count > 0)
             {
-                var settingsNode = node.FindOrCreate("Settings");
-
                 foreach (var setting in handler.Settings)
                 {
-                    var s = settingsNode.FindOrCreate("Add", "Key", setting.Key);
+                    var s = node.FindOrCreate("Add", "Key", setting.Key);
                     s.SetAttributeValue("Value", setting.Value);
                 }
 
-                settingsNode.RemoveMissingElements("Add", "Key", handler.Settings.Keys.ToList());
+                node.RemoveMissingElements("Add", "Key", handler.Settings.Keys.ToList());
             }
         }
 
