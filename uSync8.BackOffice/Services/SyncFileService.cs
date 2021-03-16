@@ -180,14 +180,18 @@ namespace uSync8.BackOffice.Services
         ///  Get a list of files from a folder. 
         /// </summary>
         public IEnumerable<string> GetFiles(string folder, string extensions)
+            => GetFiles(folder, extensions, false);
+
+        public IEnumerable<string> GetFiles(string folder, string extensions, bool allFolders)
         {
             var localPath = GetAbsPath(folder);
             if (DirectoryExists(localPath))
             {
-                return Directory.GetFiles(localPath, extensions);
+                return Directory.GetFiles(localPath, extensions, allFolders ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
             }
 
             return Enumerable.Empty<string>();
+
         }
 
         /// <summary>

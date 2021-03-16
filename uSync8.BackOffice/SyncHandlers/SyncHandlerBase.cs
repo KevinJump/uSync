@@ -75,6 +75,9 @@ namespace uSync8.BackOffice.SyncHandlers
         protected override IEnumerable<uSyncAction> DeleteMissingItems(TObject parent, IEnumerable<Guid> keys, bool reportOnly)
         {
             var items = GetChildItems(parent.Id).ToList();
+
+            logger.Debug(handlerType, "DeleteMissingItems: {parentId} Checking {itemCount} items for {keyCount} keys", parent.Id, items.Count, keys.Count());
+
             var actions = new List<uSyncAction>();
             foreach (var item in items.Where(x => !keys.Contains(x.Key)))
             {

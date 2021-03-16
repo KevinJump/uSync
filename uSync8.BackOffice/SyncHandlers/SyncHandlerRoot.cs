@@ -548,20 +548,6 @@ namespace uSync8.BackOffice.SyncHandlers
         protected virtual IEnumerable<uSyncAction> CleanFolder(string cleanFile, bool reportOnly, bool flat)
         {
             var folder = Path.GetDirectoryName(cleanFile);
-            if (!flat)
-            {
-                // when the folder isn't flat we don't want the parent folder, but rather the folder of the children
-                // of this item.
-                var cleanFileFolder = Path.GetFileNameWithoutExtension(cleanFile);
-                if (cleanFileFolder.IndexOf('_') >= 0)
-                {
-                    cleanFileFolder = cleanFileFolder.Substring(0, cleanFileFolder.LastIndexOf('_'));
-                    folder = Path.Combine(folder, cleanFileFolder);
-                }
-
-                logger.Debug(handlerType, "Non Flat Folder {folder}", folder);
-            }
-
             if (!Directory.Exists(folder)) return Enumerable.Empty<uSyncAction>();
 
 
@@ -580,6 +566,8 @@ namespace uSync8.BackOffice.SyncHandlers
                 // move parent to here, we only need to check it if there are files.
                 var parent = GetCleanParent(cleanFile);
                 if (parent == null) return Enumerable.Empty<uSyncAction>();
+
+                logger.Debug(handlerType, "Got parent with {alias} from clean file {file}", GetItemAlias(parent), Path.GetFileName(cleanFile));
 
                 // keys should aways have at least one entry (the key from cleanFile)
                 // if it doesn't then something might have gone wrong.
@@ -609,10 +597,13 @@ namespace uSync8.BackOffice.SyncHandlers
 
             var cacheKey = $"{GetCacheKeyBase()}_{folderKey}";
 
+            logger.Debug(handlerType, "Getting Folder Keys : {cacheKey}", cacheKey);
+
             return runtimeCache.GetCacheItem(cacheKey, () =>
             {
+                // when it's not flat structure we also get the sub folders. (extra defensive get them all)
                 var keys = new List<Guid>();
-                var files = syncFileService.GetFiles(folder, "*.config").ToList();
+                var files = syncFileService.GetFiles(folder, "*.config", !flat).ToList();
 
                 foreach (var file in files)
                 {
@@ -623,6 +614,8 @@ namespace uSync8.BackOffice.SyncHandlers
                         keys.Add(key);
                     }
                 }
+
+                logger.Debug(handlerType, "Loaded {count} keys from {folder} [{cacheKey}]", keys.Count, folder, cacheKey);
 
                 return keys;
 
