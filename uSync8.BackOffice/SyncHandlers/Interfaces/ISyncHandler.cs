@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using Newtonsoft.Json.Serialization;
+using Newtonsoft.Json;
+
 using uSync8.BackOffice.Configuration;
 
 namespace uSync8.BackOffice.SyncHandlers
 {
     public delegate void SyncUpdateCallback(string message, int count, int total);
 
+    [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
     public interface ISyncHandler
     {
         /// <summary>

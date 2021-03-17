@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Xml.Linq;
 
+using Newtonsoft.Json.Serialization;
+using Newtonsoft.Json;
+
 using Umbraco.Core;
 
 using uSync8.BackOffice.Configuration;
@@ -14,6 +17,7 @@ namespace uSync8.BackOffice.SyncHandlers
     ///  A Extended Handler, lets you do things to just one item, 
     ///  like import/export it, or work out what dependencies it has. 
     /// </summary>
+    [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
     public interface ISyncExtendedHandler : ISyncHandler
     {
         /// <summary>
