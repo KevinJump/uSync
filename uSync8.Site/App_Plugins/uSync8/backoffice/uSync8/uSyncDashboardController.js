@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    function dashboardController(
+    function dashboardController($controller,
         $scope, $timeout, navigationService, eventsService, uSync8DashboardService) {
 
         var vm = this;

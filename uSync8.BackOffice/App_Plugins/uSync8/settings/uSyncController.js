@@ -19,6 +19,10 @@
 
         vm.showAdvanced = false;
 
+        vm.hasuSyncForms = false; 
+
+        vm.canHaveForms = canHaveForms();
+
         var modes = {
             NONE: 0,
             REPORT: 1,
@@ -238,18 +242,25 @@
             uSync8DashboardService.getHandlerGroups()
                 .then(function (result) {
                     angular.forEach(result.data, function (group, key) {
+
                         vm.importButton.subButtons.push({
                             handler: function () {
                                 importGroup(group);
                             },
                             labelKey: 'usync_import-' + group.toLowerCase()
                         });
+
                         vm.reportButton.subButtons.push({
                             handler: function () {
                                 report(group);
                             },
                             labelKey: 'usync_report-' + group.toLowerCase()
                         });
+
+                        if (group.toLowerCase() === "forms") {
+                            vm.hasuSyncForms = true;
+                        }
+
                     });
                     vm.loading = false;
                 }, function (error) {
@@ -378,6 +389,22 @@
             }
             return "";
         }
+
+        function canHaveForms() {
+
+            if (vm.hasuSyncForms) return false;
+
+            try {
+
+                // check to see if usync.forms is installed. 
+                $controller('formService', { $scope: {} }, true)
+                return true;
+            }
+            catch {
+                return false;
+            }
+        }
+
     }
 
     angular.module('umbraco')

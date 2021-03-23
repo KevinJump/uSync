@@ -57,6 +57,10 @@
         </umb-box-content>
     </umb-box>
 
+    <div ng-if="!vm.hasForms && !vm.reported && !vm.working" class="flex justify-center">
+        <localize key="usync_forms"></localize>
+    </div>
+
 
     <umb-box ng-if="!vm.showSpinner && (vm.working || vm.reported)">
         <umb-box-content>
