@@ -118,6 +118,11 @@ namespace uSync8.BackOffice.Configuration
         ///  location of SignalR hub script (/
         /// </summary>
         public string SignalRRoot { get; set; }
+
+        /// <summary>
+        ///  Should the history view be on of off ? 
+        /// </summary>
+        public bool EnableHistory { get; set; }
     }
 
     public class HandlerSet

@@ -67,6 +67,17 @@
                         </div>
                     </div>
 
+                    <div class="umb-permission">
+                        <umb-toggle class="umb-permission__toggle"
+                                    checked="vm.settings.EnableHistory"
+                                    on-click="vm.settings.EnableHistory = !vm.settings.EnableHistory">
+                        </umb-toggle>
+                        <div class="umb-permission__content" ng-click="vm.settings.EnableHistory = !vm.settings.EnableHistory">
+                            <div>Enable History</div>
+                            <div class="umb-permission__description">Save the result of imports/exports in the history folder</div>
+                        </div>
+                    </div>
+
                 </umb-box-content>
             </umb-box>
 

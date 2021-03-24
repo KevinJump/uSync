@@ -89,6 +89,7 @@ namespace uSync8.BackOffice.Configuration
             settings.ShowVersionCheckWarning = node.Element("ShowVersionCheckWarning").ValueOrDefault(true);
 
             settings.CacheFolderKeys = node.Element("CacheFolderKeys").ValueOrDefault(true);
+            settings.EnableHistory = node.Element("EnableHistory").ValueOrDefault(true);
 
             settings.SignalRRoot = ValueFromWebConfigOrDefault("SignalRRoot", node.Element("SignalRRoot")
                 .ValueOrDefault("backoffice/signalr/hubs"))
@@ -228,6 +229,7 @@ namespace uSync8.BackOffice.Configuration
             node.CreateOrSetElement("RebuildCacheOnCompletion", settings.RebuildCacheOnCompletion);
             node.CreateOrSetElement("FailOnMissingParent", settings.FailOnMissingParent);
             node.CreateOrSetElement("ShowVersionCheckWarning", settings.ShowVersionCheckWarning);
+            node.CreateOrSetElement("EnableHistory", settings.EnableHistory);
 
             if (settings.HandlerSets.Count > 0)
             {

@@ -15,6 +15,7 @@ using Umbraco.Web;
 using Umbraco.Web.JavaScript;
 
 using uSync8.BackOffice;
+using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
 using uSync8.Core;
 using uSync8.HistoryView.Controllers;
@@ -32,12 +33,16 @@ namespace uSync8.HistoryView
 
         private readonly SyncFileService syncFileService;
         private readonly string historyFolder;
+        private readonly uSyncSettings uSyncSettings;
+
 
         public HistoryComponent(SyncFileService syncFileService,
+            uSyncConfig syncConfig,
             IUmbracoContextFactory umbracoContextFactory,
             IGlobalSettings globalSettings)
         {
             this.umbracoContextFactory = umbracoContextFactory;
+            this.uSyncSettings = syncConfig.Settings;
 
             this.syncFileService = syncFileService;
             historyFolder = Path.Combine(globalSettings.LocalTempPath, "usync", "history");
@@ -67,6 +72,8 @@ namespace uSync8.HistoryView
 
         private void USyncService_ImportComplete(uSyncBulkEventArgs e)
         {
+            if (!uSyncSettings.EnableHistory) return;
+
             var changes = e.Actions.Where(x => x.Change > ChangeType.NoChange);
 
             if (changes.Any())
@@ -92,8 +99,6 @@ namespace uSync8.HistoryView
             using (var contextReference = umbracoContextFactory.EnsureUmbracoContext())
             {
                 var username = contextReference?.UmbracoContext?.Security?.CurrentUser?.Username;
-
-
 
                 if (string.IsNullOrWhiteSpace(username))
                 {

@@ -17,6 +17,8 @@
         vm.hideLink = false;
         vm.showSpinner = false;
 
+        vm.groups = [];
+
         vm.showAdvanced = false;
 
         vm.hasuSyncForms = false; 
@@ -242,6 +244,11 @@
             uSync8DashboardService.getHandlerGroups()
                 .then(function (result) {
                     angular.forEach(result.data, function (group, key) {
+
+                        vm.groups.push({
+                            name: group.toLowerCase(),
+                            icon: group.toLowerCase()
+                        });
 
                         vm.importButton.subButtons.push({
                             handler: function () {
