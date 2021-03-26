@@ -177,7 +177,7 @@ namespace uSync8.Core.Serialization.Serializers
 
             if (item.Level != 1)
             {
-                var folderNode = this.GetFolderNode(dataTypeService.GetContainers(item));
+                var folderNode = this.GetFolderNode(dataTypeService.GetContainers(item)); //TODO - CACHE THIS CALL. 
                 if (folderNode != null)
                     info.Add(folderNode);
             }
