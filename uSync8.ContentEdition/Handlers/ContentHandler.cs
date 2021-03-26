@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using Umbraco.Core.Cache;
 using Umbraco.Core.Configuration;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
+using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
 using Umbraco.Core.Services.Implement;
 
@@ -86,6 +88,7 @@ namespace uSync8.ContentEdition.Handlers
             }
         }
 
+
         protected override IContent GetFromService(string alias)
             => null;
 
@@ -107,6 +110,34 @@ namespace uSync8.ContentEdition.Handlers
 
         public uSyncAction Import(string file)
             => this.Import(file, DefaultConfig, SerializerFlags.OnePass).FirstOrDefault();
+
+        /// <summary>
+        ///  Get child items 
+        /// </summary>
+        /// <remarks>
+        ///  The core method works for all services, (using entities) - but if we look up
+        ///  the actual type for content and media, we save ourselves an extra lookup later on
+        ///  and this speeds up the itteration by quite a bit (onle less db trip per item).
+        /// </remarks>
+        protected override IEnumerable<IEntity> GetChildItems(IEntity parent)
+        {
+            if (parent != null)
+            {
+                var items = new List<IContent>();
+                const int pageSize = 5000;
+                var page = 0;
+                var total = long.MaxValue;
+                while (page * pageSize < total)
+                {
+                    items.AddRange(contentService.GetPagedChildren(parent.Id, page++, pageSize, out total));
+                }
+                return items;
+            }
+            else
+            {
+                return contentService.GetRootContent();
+            }
+        }
 
 
     }

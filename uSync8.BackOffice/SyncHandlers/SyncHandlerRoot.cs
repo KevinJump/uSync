@@ -722,10 +722,18 @@ namespace uSync8.BackOffice.SyncHandlers
             var items = GetChildItems(parent).ToList();
             foreach (var item in items.Select((Value, Index) => new { Value, Index }))
             {
-                var concreateType = GetFromService(item.Value);
-                if (concreateType != null) {  // only export the items (not the containers).
-                    callback?.Invoke(GetItemName(concreateType), item.Index, items.Count);
-                    actions.AddRange(Export(concreateType, folder, config));
+                TObject concreteType;
+                if (item.Value is TObject t)
+                {
+                    concreteType = t;
+                }
+                else
+                {
+                    concreteType = GetFromService(item.Value);
+                }
+                if (concreteType != null) {  // only export the items (not the containers).
+                    callback?.Invoke(GetItemName(concreteType), item.Index, items.Count);
+                    actions.AddRange(Export(concreteType, folder, config));
                 }
                 actions.AddRange(ExportAll(item.Value, folder, config, callback));
             }

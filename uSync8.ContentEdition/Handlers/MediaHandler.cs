@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 
 using Umbraco.Core.Cache;
 using Umbraco.Core.Configuration;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
+using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
 using Umbraco.Core.Services.Implement;
 
@@ -103,6 +105,26 @@ namespace uSync8.ContentEdition.Handlers
             MediaService.Deleted -= EventDeletedItem;
             MediaService.Moved -= EventMovedItem;
             MediaService.Trashed -= EventMovedItem;
+        }
+
+        protected override IEnumerable<IEntity> GetChildItems(IEntity parent)
+        {
+            if (parent != null)
+            {
+                var items = new List<IMedia>();
+                const int pageSize = 5000;
+                var page = 0;
+                var total = long.MaxValue;
+                while (page * pageSize < total)
+                {
+                    items.AddRange(mediaService.GetPagedChildren(parent.Id, page++, pageSize, out total));
+                }
+                return items;
+            }
+            else
+            {
+                return mediaService.GetRootMedia();
+            }
         }
     }
 }
