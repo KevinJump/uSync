@@ -126,7 +126,7 @@ namespace uSync8.ContentEdition.Serializers
             // serializing the file hash, will mean if the image changes, then the media item will
             // trigger as a change - this doesn't mean the image will be updated other methods are
             // used to copy media between servers (uSync.Complete)
-            if (options.GetSetting("IncludeFileHash", true))
+            if (options.GetSetting("IncludeFileHash", false))
                 info.Add(SerializeFileHash(item));
 
             return SyncAttempt<XElement>.Succeed(
