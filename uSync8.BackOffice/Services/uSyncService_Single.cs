@@ -201,7 +201,7 @@ namespace uSync8.BackOffice
         /// </summary>
         private IList<OrderedNodeInfo> LoadOrderedNodes(string folder)
         {
-            var files = syncFileService.GetFiles(folder, "*.config");
+            var files = syncFileService.GetFiles(folder, "*.config", true);
 
             var nodes = new List<OrderedNodeInfo>();
 

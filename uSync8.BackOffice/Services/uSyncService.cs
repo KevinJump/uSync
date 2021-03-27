@@ -252,27 +252,7 @@ namespace uSync8.BackOffice
 
                     callbacks?.Callback?.Invoke(summary);
 
-                    var postImportActions = actions.Where(x => x.Success
-                                                && x.Change > Core.ChangeType.NoChange
-                                                && x.RequiresPostProcessing);
-
-                    foreach (var configuredHandler in handlers)
-                    {
-                        var handler = configuredHandler.Handler;
-                        var handlerSettings = configuredHandler.Settings;
-
-                        if (handler is ISyncPostImportHandler postHandler)
-                        {
-                            var handlerActions = postImportActions.Where(x => x.ItemType == handler.ItemType);
-
-                            if (handlerActions.Any())
-                            {
-                                var postActions = postHandler.ProcessPostImport($"{folder}/{handler.DefaultFolder}", handlerActions, handlerSettings);
-                                if (postActions != null)
-                                    actions.AddRange(postActions);
-                            }
-                        }
-                    }
+                    actions.AddRange(PerformPostImport(folder, handlers, actions));
 
                     sw.Stop();
                     summary.UpdateHandler("Post Import", HandlerStatus.Complete, "Import Completed", 0);
@@ -292,6 +272,32 @@ namespace uSync8.BackOffice
                     return actions;
                 }
             }
+        }
+
+        private IEnumerable<uSyncAction> PerformPostImport(string rootFolder, IEnumerable<ExtendedHandlerConfigPair> handlers, IEnumerable<uSyncAction> actions)
+        {
+            var postImportActions = actions.Where(x => x.Success && x.Change > Core.ChangeType.NoChange && x.RequiresPostProcessing).ToList();
+            if (postImportActions.Count == 0) return Enumerable.Empty<uSyncAction>();
+
+            var results = new List<uSyncAction>();
+
+            foreach (var handlerPair in handlers)
+            {
+                if (handlerPair.Handler is ISyncPostImportHandler postImportHandler)
+                {
+                    var handlerActions = postImportActions.Where(x => x.ItemType == handlerPair.Handler.ItemType);
+
+                    if (handlerActions.Any())
+                    {
+                        var handlerFolder = GetHandlerFolder(rootFolder, handlerPair.Handler);
+                        var postActions = postImportHandler.ProcessPostImport(handlerFolder, handlerActions, handlerPair.Settings);
+                        if (postActions != null)
+                            results.AddRange(postActions);
+                    }
+                }
+            }
+
+            return results;
         }
 
 

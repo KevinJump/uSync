@@ -121,23 +121,129 @@
                 });
         }
 
-
-
-        ///////////
-        function report(group) {
-            resetStatus(modes.REPORT);
-            getWarnings('report');
-
-            uSync8DashboardService.report(group, getClientId())
+        function performAction(options, actionMethod, cb) {
+            uSync8DashboardService.getActionHandlers(options)
                 .then(function (result) {
-                    vm.results = result.data;
-                    vm.working = false;
-                    vm.reported = true;
-                }, function (error) {
-                    notificationsService.error('Reporting', error.data.Message);
+                    vm.status.Handlers = result.data;
+                    performHandlerAction(vm.status.Handlers, actionMethod, options, cb)
                 });
         }
 
+        function performHandlerAction(handlers, actionMethod, options, cb) {
+
+            var index = 0;
+
+            uSync8DashboardService.startProcess(options.action)
+                .then(function () {
+                    runHandlerAction(handlers[index])
+                });
+
+            function runHandlerAction(handler) {
+
+                vm.status.Message = handler.Name;
+
+                handler.Status = 1;
+                actionMethod(handler.Alias, options, getClientId())
+                    .then(function (result) {
+
+                        vm.results = vm.results.concat(result.data.Actions);
+
+                        handler.Status = 2;
+                        handler.Changes = countChanges(result.data.Actions);
+                        index++;
+                        if (index < handlers.length) {
+                            runHandlerAction(handlers[index]);
+                        }
+                        else {
+
+                            uSync8DashboardService.finishProcess(options.action, vm.results)
+                                .then(function () {
+                                    cb(vm.results);
+                                });
+                        }
+                    });
+            }
+        }
+
+        function report(group) {
+
+            vm.results = [];
+
+            resetStatus(modes.REPORT);
+            getWarnings('report');
+
+            var options = {
+                action: 'report',
+                group: group
+            };
+
+            performAction(options,
+                uSync8DashboardService.reportHandler,
+                function (results) {
+                    vm.working = false;
+                    vm.reported = true;
+                    vm.status.Message = 'Report complete';
+                });
+        }
+
+        function importItems(force, group) {
+            vm.results = [];
+            resetStatus(modes.IMPORT);
+            getWarnings('import');
+
+            vm.importButton.state = 'busy';
+
+            var options = {
+                action: 'import',
+                group: group,
+                force: force
+            };
+
+            performAction(options,
+                uSync8DashboardService.importHandler,
+                function (results) {
+
+                    vm.status.Message = 'Post import actions';
+
+                    uSync8DashboardService.importPost(vm.results, getClientId())
+                        .then(function (results) {
+                            console.log('post import');
+                            vm.working = false;
+                            vm.reported = true;
+                            vm.importButton.state = 'success';
+                            eventsService.emit('usync-dashboard.import.complete');
+                            calculateTimeSaved(vm.results);
+
+                            vm.status.Message = 'Complete';
+                        });
+                });
+        }
+
+        function exportItems() {
+
+            vm.results = [];
+            resetStatus(modes.EXPORT);
+            vm.exportButton.state = 'busy';
+
+            var options = {
+                action: 'export',
+                group: ''
+            };
+
+            performAction(options,
+                uSync8DashboardService.exportHandler,
+                function (result) {
+                    vm.status.Message = 'Export complete';
+                    vm.working = false;
+                    vm.reported = true;
+                    vm.exportButton.state = 'success';
+                    vm.savings.show = true;
+                    vm.savings.title = 'All items exported.';
+                    vm.savings.message = 'Now go wash your hands 🧼!';
+                    eventsService.emit('usync-dashboard.export.complete');
+                });
+        }
+     
         function cleanExport() {
 
             overlayService.open({
@@ -149,63 +255,22 @@
                 closeButtonLabel: 'No, close',
                 submit: function () {
                     overlayService.close();
-                    exportItems(true);
+
+                    uSync8DashboardService.cleanExport()
+                        .then(function () {
+                            exportItems();
+                        });
                 },
                 close: function () {
                     overlayService.close();
                 }
             })
         }
-
-        function exportItems(clean) {
-            resetStatus(modes.EXPORT);
-            vm.exportButton.state = 'busy';
-
-            vm.hideLink = true;
-            uSync8DashboardService.exportItems(getClientId(), clean)
-                .then(function (result) {
-                    vm.results = result.data;
-                    vm.working = false;
-                    vm.reported = true;
-                    vm.exportButton.state = 'success';
-                    vm.savings.show = true;
-                    vm.savings.title = 'All items exported.';
-                    vm.savings.message = 'Now go wash your hands 🧼!';
-                    eventsService.emit('usync-dashboard.export.complete');
-                }, function (error) {
-                    notificationsService.error('Exporting', error.data.ExceptionMessage);
-                    vm.exportButton.state = 'error';
-                });
-        }
+      
 
         function importForce() {
             importItems(true);
         }
-
-        function importItems(force, group) {
-            resetStatus(modes.IMPORT);
-            getWarnings('import');
-
-            vm.hideLink = false;
-            vm.importButton.state = 'busy';
-
-            uSync8DashboardService.importItems(force, group, getClientId())
-                .then(function (result) {
-                    vm.results = result.data;
-                    vm.working = false;
-                    vm.reported = true;
-                    vm.importButton.state = 'success';
-                    eventsService.emit('usync-dashboard.import.complete');
-                    calculateTimeSaved(vm.results);
-                }, function (error) {
-                    vm.importButton.state = 'error';
-                    notificationsService.error('Failed', error.data.ExceptionMessage);
-
-                    vm.working = false;
-                    vm.reported = true;
-                });
-        }
-
 
         // add a little joy to the process.
         function calculateTimeSaved(results) {
