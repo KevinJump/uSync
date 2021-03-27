@@ -133,6 +133,8 @@
 
             var index = 0;
 
+            vm.status.Message = 'Starting ' + options.action;
+
             uSync8DashboardService.startProcess(options.action)
                 .then(function () {
                     runHandlerAction(handlers[index])
@@ -156,11 +158,16 @@
                         }
                         else {
 
+                            vm.status.Message = 'Finishing ' + options.action;
+
                             uSync8DashboardService.finishProcess(options.action, vm.results)
                                 .then(function () {
                                     cb(vm.results);
                                 });
                         }
+                    }, function (error) {
+                        // error in this handler ? 
+                        // do we want to carry on with the other ones or just stop?
                     });
             }
         }
