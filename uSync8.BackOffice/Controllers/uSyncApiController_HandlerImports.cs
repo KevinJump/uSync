@@ -2,9 +2,6 @@
 using System.Linq;
 using System.Web.Http;
 
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-
 using Umbraco.Web.WebApi;
 
 using uSync8.BackOffice.Hubs;
@@ -30,12 +27,16 @@ namespace uSync8.BackOffice.Controllers
                     Action = action
                 }).Select(x => new SyncHandlerView
                 {
+                    Enabled = x.Handler.Enabled,
                     Alias = x.Handler.Alias,
                     Name = x.Handler.Name,
                     Icon = x.Handler.Icon,
                     Group = x.Handler.Group
                 });
 
+        /// <summary>
+        ///  run the report process against a given handler alias
+        /// </summary>
         [HttpPost]
         public SyncActionResult ReportHandler(SyncActionOptions options) 
         {
@@ -53,7 +54,7 @@ namespace uSync8.BackOffice.Controllers
         }
 
         /// <summary>
-        ///  Import
+        ///  Run the import against a given handelr alias
         /// </summary>
         /// <remarks>
         ///  Will use the list of passed handler aliases to only import those aliase values.
@@ -75,6 +76,9 @@ namespace uSync8.BackOffice.Controllers
             return new SyncActionResult(actions);
         }
 
+        /// <summary>
+        ///  run the post import options (called after all the handlers you are going to use)
+        /// </summary>
         [HttpPost]
         public SyncActionResult ImportPost(SyncActionOptions options)
         {
@@ -85,6 +89,10 @@ namespace uSync8.BackOffice.Controllers
             return new SyncActionResult(actions);
         }
 
+
+        /// <summary>
+        ///  clean the export folder, 
+        /// </summary>
         [HttpPost]
         public bool CleanExport()
         {
@@ -98,6 +106,9 @@ namespace uSync8.BackOffice.Controllers
             }
         }
 
+        /// <summary>
+        ///  export all the items for a given handler
+        /// </summary>
         [HttpPost]
         public SyncActionResult ExportHandler(SyncActionOptions options)
         {
@@ -113,35 +124,21 @@ namespace uSync8.BackOffice.Controllers
             return new SyncActionResult(actions);
         }
 
+        /// <summary>
+        ///  trigger the start of a bulk process (fires events)
+        /// </summary>
+        /// <param name="action"></param>
         [HttpPost]
         public void StartProcess(HandlerActions action)
             => uSyncService.StartBulkProcess(action);
 
+        /// <summary>
+        ///  trigger the end of a bulk process (fire events)
+        /// </summary>
+        /// <param name="action"></param>
+        /// <param name="actions"></param>
         [HttpPost]
         public void FinishProcess(HandlerActions action, IEnumerable<uSyncAction> actions)
             => uSyncService.FinishBulkProcess(action, actions);
-    }
-
-    [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
-    public class SyncActionOptions
-    {
-        public string ClientId { get; set; }
-        public string Handler { get; set; }
-        public bool Force { get; set; }
-
-        public IEnumerable<uSyncAction> Actions { get; set; }
-
-    }
-
-    [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
-    public class SyncActionResult {
-        
-        public SyncActionResult() { }
-        public SyncActionResult(IEnumerable<uSyncAction> actions)
-        {
-            this.Actions = actions;
-        }
-
-        public IEnumerable<uSyncAction> Actions { get; set; }
     }
 }

@@ -34,14 +34,25 @@ namespace uSync8.BackOffice
         /// </summary>
         public List<SyncHandlerSummary> Handlers { get; set; }
 
+        private SyncProgressSummary(string message, int totalSteps)
+        {
+            this.Message = message;
+            this.Total = totalSteps;
+        }
+
+        public SyncProgressSummary(IEnumerable<SyncHandlerSummary> summaries,
+            string message, int totalSteps)
+            : this(message, totalSteps)
+        {
+            this.Handlers = summaries.ToList();
+        }
+
         public SyncProgressSummary(
             IEnumerable<ISyncHandler> handlers,
             string message,
             int totalSteps)
+            : this(message, totalSteps)
         {
-            this.Total = totalSteps;
-            this.Message = message;
-
             if (handlers != null)
             {
                 this.Handlers = handlers.Select(x => new SyncHandlerSummary()
@@ -55,14 +66,6 @@ namespace uSync8.BackOffice
             {
                 this.Handlers = new List<SyncHandlerSummary>();
             }
-        }
-
-        public SyncProgressSummary(IEnumerable<SyncHandlerSummary> summaries,
-            string message, int totalSteps)
-        {
-            this.Total = totalSteps;
-            this.Message = message;
-            this.Handlers = summaries.ToList();
         }
 
         /// <summary>
@@ -104,7 +107,17 @@ namespace uSync8.BackOffice
         public void UpdateHandler(string name, HandlerStatus status, string message, int changeCount)
         {
             UpdateHandler(name, status, changeCount);
+            UpdateMessage(message);
+        }
+
+        public void UpdateMessage(string message)
+        {
             this.Message = message;
+        }
+
+        public void Increment()
+        {
+            this.Count++;
         }
 
     }

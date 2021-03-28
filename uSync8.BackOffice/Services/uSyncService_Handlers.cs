@@ -90,12 +90,15 @@ namespace uSync8.BackOffice
                         }
                     }
 
-                    foreach (var action in actions.Where(x => x.Success))
+                    var secondPasses = actions.Where(x => x.Success 
+                        && x.Change != Core.ChangeType.NoChange && x.Change != Core.ChangeType.Clean && x.ItemType != null).ToList();
+                    total = secondPasses.Count;
+                    index = 0;
+                    foreach (var action in secondPasses)
                     {
-                        if (action.Change != Core.ChangeType.Clean && action.Item != null)
-                        {
-                            itemHandler.ImportSecondPass(action, handlerPair.Settings, options);
-                        }
+                        options.Callbacks?.Update.Invoke("Second Pass: " + action.Name, index++, total);
+
+                        itemHandler.ImportSecondPass(action, handlerPair.Settings, options);
                     }
 
                     return actions;
@@ -129,6 +132,9 @@ namespace uSync8.BackOffice
             return handlerPair.Handler.ExportAll(folder, handlerPair.Settings, options.Callbacks?.Update);
         }
 
+        /// <summary>
+        ///  Start a bulk run, fires events, and for exports writes the version file.
+        /// </summary>
         public void StartBulkProcess(HandlerActions action) 
         {
             switch (action)
@@ -146,6 +152,9 @@ namespace uSync8.BackOffice
             }
         }
 
+        /// <summary>
+        ///  Complete a bulk run, fire the event so other things know we have done it.
+        /// </summary>
         public void FinishBulkProcess(HandlerActions action, IEnumerable<uSyncAction> actions) 
         {
             switch (action)
@@ -162,12 +171,15 @@ namespace uSync8.BackOffice
             }
         }
 
+        /// <summary>
+        ///  gets an ISyncItemHandler, if not returns default (null)
+        /// </summary>
         private ISyncItemHandler GetItemHandlerOrDefault(ISyncExtendedHandler handler)
-        {
-            if (handler is ISyncItemHandler) return handler as ISyncItemHandler;
-            return default;
-        }
+            => (handler is ISyncItemHandler) ? handler as ISyncItemHandler : default;
 
+        /// <summary>
+        ///  gets the phyical folder for a handler. ( root + handlerfolder)
+        /// </summary>
         private string GetHandlerFolder(string rootFolder, ISyncHandler handler)
             => Path.Combine(rootFolder, handler.DefaultFolder);
 

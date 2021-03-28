@@ -1,17 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Newtonsoft.Json.Serialization;
+﻿
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
-namespace uSync8.BackOffice.Models
+namespace uSync8.BackOffice.Controllers
 {
+    /// <summary>
+    ///  view model of a handler, sent to the UI to draw the handler boxes.
+    /// </summary>
     [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
     public class SyncHandlerView
     {
+        public bool Enabled { get; set; }
         public int Status { get; set; }
         public string Name { get; set; }
         public string Alias { get; set; }

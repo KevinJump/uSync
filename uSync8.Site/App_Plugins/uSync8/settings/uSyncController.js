@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    function uSyncController($scope,
+    function uSyncController($scope, $q,
         eventsService,
         overlayService,
         notificationsService,
@@ -122,55 +122,67 @@
         }
 
         function performAction(options, actionMethod, cb) {
-            uSync8DashboardService.getActionHandlers(options)
-                .then(function (result) {
-                    vm.status.Handlers = result.data;
-                    performHandlerAction(vm.status.Handlers, actionMethod, options, cb)
-                });
+
+            return $q(function (resolve, reject) {
+                uSync8DashboardService.getActionHandlers(options)
+                    .then(function (result) {
+                        vm.status.Handlers = result.data;
+                        performHandlerAction(vm.status.Handlers, actionMethod, options, cb)
+                            .then(function () {
+                                resolve();
+                            }, function (error) {
+                                reject(error)
+                            })
+                    });
+            });
         }
 
         function performHandlerAction(handlers, actionMethod, options, cb) {
 
-            var index = 0;
+            return $q(function (resolve, reject) {
 
-            vm.status.Message = 'Starting ' + options.action;
+                var index = 0;
+                vm.status.Message = 'Starting ' + options.action;
 
-            uSync8DashboardService.startProcess(options.action)
-                .then(function () {
-                    runHandlerAction(handlers[index])
-                });
-
-            function runHandlerAction(handler) {
-
-                vm.status.Message = handler.Name;
-
-                handler.Status = 1;
-                actionMethod(handler.Alias, options, getClientId())
-                    .then(function (result) {
-
-                        vm.results = vm.results.concat(result.data.Actions);
-
-                        handler.Status = 2;
-                        handler.Changes = countChanges(result.data.Actions);
-                        index++;
-                        if (index < handlers.length) {
-                            runHandlerAction(handlers[index]);
-                        }
-                        else {
-
-                            vm.status.Message = 'Finishing ' + options.action;
-
-                            uSync8DashboardService.finishProcess(options.action, vm.results)
-                                .then(function () {
-                                    cb(vm.results);
-                                });
-                        }
-                    }, function (error) {
-                        // error in this handler ? 
-                        // do we want to carry on with the other ones or just stop?
+                uSync8DashboardService.startProcess(options.action)
+                    .then(function () {
+                        runHandlerAction(handlers[index])
                     });
-            }
-        }
+
+                function runHandlerAction(handler) {
+
+                    vm.status.Message = handler.Name;
+
+                    handler.Status = 1;
+                    actionMethod(handler.Alias, options, getClientId())
+                        .then(function (result) {
+
+                            vm.results = vm.results.concat(result.data.Actions);
+
+                            handler.Status = 2;
+                            handler.Changes = countChanges(result.data.Actions);
+
+                            index++;
+                            if (index < handlers.length) {
+                                runHandlerAction(handlers[index]);
+                            }
+                            else {
+
+                                vm.status.Message = 'Finishing ' + options.action;
+
+                                uSync8DashboardService.finishProcess(options.action, vm.results)
+                                    .then(function () {
+                                        resolve();
+                                    });
+                            }
+                        }, function (error) {
+                            // error in this handler ? 
+                            // do we want to carry on with the other ones or just stop?
+                            reject(error);
+                        });
+                }
+            });
+        } 
 
         function report(group) {
 
@@ -178,19 +190,27 @@
 
             resetStatus(modes.REPORT);
             getWarnings('report');
+            vm.reportButton.state = 'busy';
 
             var options = {
                 action: 'report',
                 group: group
             };
 
-            performAction(options,
-                uSync8DashboardService.reportHandler,
-                function (results) {
+            performAction(options, uSync8DashboardService.reportHandler)
+                .then(function (results) {
                     vm.working = false;
                     vm.reported = true;
                     vm.status.Message = 'Report complete';
+                    vm.reportButton.state = 'success';
+                }, function (error) {
+                    vm.reportButton.state = 'error';
+                    notificationsService.error('Error', error.data.ExceptionMessage ?? error.data.exceptionMessage);
                 });
+        }
+
+        function importForce() {
+            importItems(true);
         }
 
         function importItems(force, group) {
@@ -206,23 +226,22 @@
                 force: force
             };
 
-            performAction(options,
-                uSync8DashboardService.importHandler,
-                function (results) {
+            performAction(options, uSync8DashboardService.importHandler)
+                .then(function (results) {
 
                     vm.status.Message = 'Post import actions';
 
                     uSync8DashboardService.importPost(vm.results, getClientId())
                         .then(function (results) {
-                            console.log('post import');
                             vm.working = false;
                             vm.reported = true;
                             vm.importButton.state = 'success';
                             eventsService.emit('usync-dashboard.import.complete');
                             calculateTimeSaved(vm.results);
-
                             vm.status.Message = 'Complete';
                         });
+                }, function (error) {
+                    notificationsService.error('Error', error.data.ExceptionMessage ?? error.data.exceptionMessage);
                 });
         }
 
@@ -237,9 +256,8 @@
                 group: ''
             };
 
-            performAction(options,
-                uSync8DashboardService.exportHandler,
-                function (result) {
+            performAction(options, uSync8DashboardService.exportHandler)
+                then(function (results) {
                     vm.status.Message = 'Export complete';
                     vm.working = false;
                     vm.reported = true;
@@ -248,6 +266,8 @@
                     vm.savings.title = 'All items exported.';
                     vm.savings.message = 'Now go wash your hands 🧼!';
                     eventsService.emit('usync-dashboard.export.complete');
+                }, function (error) {
+                    notificationsService.error('Error', error.data.ExceptionMessage ?? error.data.exceptionMessage);
                 });
         }
      
@@ -272,11 +292,6 @@
                     overlayService.close();
                 }
             })
-        }
-      
-
-        function importForce() {
-            importItems(true);
         }
 
         // add a little joy to the process.
