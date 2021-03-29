@@ -982,6 +982,9 @@ namespace uSync8.Core.Serialization.Serializers
         protected override string ItemAlias(TObject item)
             => item.Alias;
 
+        protected override IEnumerable<EntityContainer> GetContainers(TObject item)
+            => baseService.GetContainers(item);
+
         #endregion
 
     }

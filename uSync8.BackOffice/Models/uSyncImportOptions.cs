@@ -18,6 +18,8 @@ namespace uSync8.BackOffice
         public Dictionary<string, string> Settings { get; set; }
 
         public uSyncCallbacks Callbacks { get; set; }
+
+        public string RootFolder { get; set; }
     }
 
     public class uSyncPagedImportOptions : uSyncImportOptions

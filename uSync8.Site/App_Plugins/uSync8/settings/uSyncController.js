@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    function uSyncController($scope,
+    function uSyncController($scope, $q,
         eventsService,
         overlayService,
         notificationsService,
@@ -18,6 +18,7 @@
         vm.showSpinner = false;
 
         vm.groups = [];
+        vm.perf = 0;
 
         vm.showAdvanced = false;
 
@@ -121,23 +122,166 @@
                 });
         }
 
+        function performAction(options, actionMethod, cb) {
 
+            return $q(function (resolve, reject) {
+                uSync8DashboardService.getActionHandlers(options)
+                    .then(function (result) {
+                        vm.status.Handlers = result.data;
+                        performHandlerAction(vm.status.Handlers, actionMethod, options, cb)
+                            .then(function () {
+                                resolve();
+                            }, function (error) {
+                                reject(error)
+                            })
+                    });
+            });
+        }
 
-        ///////////
+        function performHandlerAction(handlers, actionMethod, options, cb) {
+
+            return $q(function (resolve, reject) {
+
+                var index = 0;
+                vm.status.Message = 'Starting ' + options.action;
+
+                uSync8DashboardService.startProcess(options.action)
+                    .then(function () {
+                        runHandlerAction(handlers[index])
+                    });
+
+                function runHandlerAction(handler) {
+
+                    vm.status.Message = handler.Name;
+
+                    handler.Status = 1;
+                    actionMethod(handler.Alias, options, getClientId())
+                        .then(function (result) {
+
+                            vm.results = vm.results.concat(result.data.Actions);
+
+                            handler.Status = 2;
+                            handler.Changes = countChanges(result.data.Actions);
+
+                            index++;
+                            if (index < handlers.length) {
+                                runHandlerAction(handlers[index]);
+                            }
+                            else {
+
+                                vm.status.Message = 'Finishing ' + options.action;
+
+                                uSync8DashboardService.finishProcess(options.action, vm.results)
+                                    .then(function () {
+                                        resolve();
+                                    });
+                            }
+                        }, function (error) {
+                            // error in this handler ? 
+                            // do we want to carry on with the other ones or just stop?
+                            reject(error);
+                        });
+                }
+            });
+        } 
+
         function report(group) {
+
+            vm.results = [];
+
             resetStatus(modes.REPORT);
             getWarnings('report');
+            vm.reportButton.state = 'busy';
 
-            uSync8DashboardService.report(group, getClientId())
-                .then(function (result) {
-                    vm.results = result.data;
+            var options = {
+                action: 'report',
+                group: group
+            };
+
+            var start = performance.now();
+
+            performAction(options, uSync8DashboardService.reportHandler)
+                .then(function (results) {
                     vm.working = false;
                     vm.reported = true;
+                    vm.perf = performance.now() - start;
+                    vm.status.Message = 'Report complete';
+                    vm.reportButton.state = 'success';
                 }, function (error) {
-                    notificationsService.error('Reporting', error.data.Message);
+                    vm.reportButton.state = 'error';
+                    notificationsService.error('Error', error.data.ExceptionMessage ?? error.data.exceptionMessage);
                 });
         }
 
+        function importForce() {
+            importItems(true);
+        }
+
+        function importItems(force, group) {
+            vm.results = [];
+            resetStatus(modes.IMPORT);
+            getWarnings('import');
+
+            vm.importButton.state = 'busy';
+
+            var options = {
+                action: 'import',
+                group: group,
+                force: force
+            };
+
+            var start = performance.now();
+
+            performAction(options, uSync8DashboardService.importHandler)
+                .then(function (results) {
+
+                    vm.status.Message = 'Post import actions';
+
+                    uSync8DashboardService.importPost(vm.results, getClientId())
+                        .then(function (results) {
+                            vm.working = false;
+                            vm.reported = true;
+                            vm.perf = performance.now() - start;
+                            vm.importButton.state = 'success';
+                            eventsService.emit('usync-dashboard.import.complete');
+                            calculateTimeSaved(vm.results);
+                            vm.status.Message = 'Complete';
+                        });
+                }, function (error) {
+                    notificationsService.error('Error', error.data.ExceptionMessage ?? error.data.exceptionMessage);
+                });
+        }
+
+        function exportItems() {
+
+            vm.results = [];
+            resetStatus(modes.EXPORT);
+            vm.exportButton.state = 'busy';
+
+            var options = {
+                action: 'export',
+                group: ''
+            };
+
+            var start = performance.now();
+
+            performAction(options, uSync8DashboardService.exportHandler)
+                .then(function (results) {
+                    vm.status.Message = 'Export complete';
+                    vm.working = false;
+                    vm.reported = true;
+                    vm.perf = performance.now() - start;
+
+                    vm.exportButton.state = 'success';
+                    vm.savings.show = true;
+                    vm.savings.title = 'All items exported.';
+                    vm.savings.message = 'Now go wash your hands 🧼!';
+                    eventsService.emit('usync-dashboard.export.complete');
+                }, function (error) {
+                    notificationsService.error('Error', error.data.ExceptionMessage ?? error.data.exceptionMessage);
+                });
+        }
+     
         function cleanExport() {
 
             overlayService.open({
@@ -149,63 +293,17 @@
                 closeButtonLabel: 'No, close',
                 submit: function () {
                     overlayService.close();
-                    exportItems(true);
+
+                    uSync8DashboardService.cleanExport()
+                        .then(function () {
+                            exportItems();
+                        });
                 },
                 close: function () {
                     overlayService.close();
                 }
             })
         }
-
-        function exportItems(clean) {
-            resetStatus(modes.EXPORT);
-            vm.exportButton.state = 'busy';
-
-            vm.hideLink = true;
-            uSync8DashboardService.exportItems(getClientId(), clean)
-                .then(function (result) {
-                    vm.results = result.data;
-                    vm.working = false;
-                    vm.reported = true;
-                    vm.exportButton.state = 'success';
-                    vm.savings.show = true;
-                    vm.savings.title = 'All items exported.';
-                    vm.savings.message = 'Now go wash your hands 🧼!';
-                    eventsService.emit('usync-dashboard.export.complete');
-                }, function (error) {
-                    notificationsService.error('Exporting', error.data.ExceptionMessage);
-                    vm.exportButton.state = 'error';
-                });
-        }
-
-        function importForce() {
-            importItems(true);
-        }
-
-        function importItems(force, group) {
-            resetStatus(modes.IMPORT);
-            getWarnings('import');
-
-            vm.hideLink = false;
-            vm.importButton.state = 'busy';
-
-            uSync8DashboardService.importItems(force, group, getClientId())
-                .then(function (result) {
-                    vm.results = result.data;
-                    vm.working = false;
-                    vm.reported = true;
-                    vm.importButton.state = 'success';
-                    eventsService.emit('usync-dashboard.import.complete');
-                    calculateTimeSaved(vm.results);
-                }, function (error) {
-                    vm.importButton.state = 'error';
-                    notificationsService.error('Failed', error.data.ExceptionMessage);
-
-                    vm.working = false;
-                    vm.reported = true;
-                });
-        }
-
 
         // add a little joy to the process.
         function calculateTimeSaved(results) {
@@ -358,6 +456,10 @@
                 Count: 0,
                 Total: 1
             };
+
+            // performance timer. 
+            vm.perf = 0;
+
 
             switch (mode) {
                 case modes.IMPORT:

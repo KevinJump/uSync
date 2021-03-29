@@ -213,7 +213,7 @@ namespace uSync8.BackOffice.SyncHandlers
                 var actions = new List<uSyncAction>();
                 var updates = new Dictionary<string, TObject>();
 
-                var cacheKey = GetCacheKeyBase();
+                var cacheKey = PrepCaches();
 
                 logger.Debug(handlerType, "Clearing KeyCache {key}", cacheKey);
                 runtimeCache.ClearByKey(cacheKey);
@@ -226,7 +226,9 @@ namespace uSync8.BackOffice.SyncHandlers
                 }
 
                 logger.Debug(handlerType, "Clearing KeyCache {key}", cacheKey);
-                runtimeCache.ClearByKey(cacheKey);
+
+                CleanCaches(cacheKey);
+
                 callback?.Invoke("Done", 3, 3);
 
                 return actions;
@@ -806,9 +808,7 @@ namespace uSync8.BackOffice.SyncHandlers
         {
             var actions = new List<uSyncAction>();
 
-            var cacheKey = GetCacheKeyBase();
-
-            runtimeCache.ClearByKey(cacheKey);
+            var cacheKey = PrepCaches();
 
             callback?.Invoke("Checking Actions", 1, 3);
             actions.AddRange(ReportFolder(folder, config, callback));
@@ -816,7 +816,7 @@ namespace uSync8.BackOffice.SyncHandlers
             callback?.Invoke("Validating Report", 2, 3);
             actions = ValidateReport(folder, actions);
 
-            runtimeCache.ClearByKey(cacheKey);
+            CleanCaches(cacheKey);
 
             callback?.Invoke("Done", 3, 3);
             return actions;
@@ -1538,12 +1538,34 @@ namespace uSync8.BackOffice.SyncHandlers
         #endregion
 
 
-        private string GetCacheKeyBase()
-            => $"keycache_{this.Alias}_{Thread.CurrentThread.ManagedThreadId}";
-
 
         private string GetNameFromFileOrNode(string filename, XElement node)
             => !string.IsNullOrWhiteSpace(filename) ? filename : node.GetAlias();
 
+
+        private string GetCacheKeyBase()
+            => $"keycache_{this.Alias}_{Thread.CurrentThread.ManagedThreadId}";
+
+        private string PrepCaches()
+        {
+            if (this.serializer is ISyncCachedSerializer cachedSerializer)
+                cachedSerializer.InitializeCache();
+
+            // make sure the runtime cache is clean.
+            var key = GetCacheKeyBase();
+
+            // this also cleares the folder cache - as its a starts with call.
+            runtimeCache.ClearByKey(key);
+            return key;
+        }
+
+        private void CleanCaches(string cacheKey)
+        {
+            runtimeCache.ClearByKey(cacheKey);
+
+            if (this.serializer is ISyncCachedSerializer cachedSerializer)
+                cachedSerializer.DisposeCache();
+
+        }
     }
 }

@@ -43,6 +43,7 @@
     <key alias="tableMessage">Message</key>
 
     <key alias="nochange"><![CDATA[<h4>No Changes</h4>]]></key>
+		<key alias="nochange_quote"><![CDATA[True life is lived when tiny changes occur.]]></key>
 
 		<!-- warning messages -->
 		<key alias="oldformat">

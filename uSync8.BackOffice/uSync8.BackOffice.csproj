@@ -87,6 +87,10 @@
     <Compile Include="Configuration\ConfigExtensions.cs" />
     <Compile Include="Configuration\OverriddenValue.cs" />
     <Compile Include="Configuration\uSyncHandlerSettings.cs" />
+    <Compile Include="Controllers\ViewModels\SyncActionOptions.cs" />
+    <Compile Include="Controllers\ViewModels\SyncActionResult.cs" />
+    <Compile Include="Controllers\uSyncApiController_HandlerImports.cs" />
+    <Compile Include="Controllers\uSyncApiController_StatusChecks.cs" />
     <Compile Include="Controllers\ViewModels\AddOnInfo.cs" />
     <Compile Include="Controllers\Trees\uSyncTreeController.cs" />
     <Compile Include="Controllers\uSyncDashboardApiController.cs" />
@@ -96,12 +100,14 @@
     <Compile Include="Hubs\uSyncHub.cs" />
     <Compile Include="Hubs\uSyncUpdateMessage.cs" />
     <Compile Include="Models\ISyncAddOn.cs" />
+    <Compile Include="Controllers\ViewModels\SyncHandlerView.cs" />
     <Compile Include="Services\SyncFileService.cs" />
     <Compile Include="Models\SyncProgressModels.cs" />
     <Compile Include="Hubs\uSyncCallbacks.cs" />
     <Compile Include="Models\uSyncImportOptions.cs" />
     <Compile Include="Services\uSyncService.cs" />
     <Compile Include="Services\uSyncService_Events.cs" />
+    <Compile Include="Services\uSyncService_Handlers.cs" />
     <Compile Include="Services\uSyncService_Single.cs" />
     <Compile Include="Services\uSyncTriggers.cs" />
     <Compile Include="SyncHandlers\Interfaces\ISyncItemHandler.cs" />

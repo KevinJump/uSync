@@ -86,6 +86,7 @@
     <Compile Include="Extensions\XElementExtensions.cs" />
     <Compile Include="ISyncItemFactory.cs" />
     <Compile Include="Models\uSyncChange.cs" />
+    <Compile Include="Serialization\ISyncCachedSerializer.cs" />
     <Compile Include="Serialization\ISyncOptionsSerializer.cs" />
     <Compile Include="Serialization\ISyncSerializer.cs" />
     <Compile Include="Serialization\SerializerFlags.cs" />

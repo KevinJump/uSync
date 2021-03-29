@@ -112,9 +112,10 @@ namespace uSync8.BackOffice
 
             if (GlobalSettings.DebugMode && settings.ReportDebug)
             {
-                logger.Warn<uSyncService>("Running Report Debug - this can be a slow process, don't enable unless you need it");
                 // debug - full export into a dated folder. 
-                summary.Message = "Debug: Creating Extract in Tracker folder";
+                summary.UpdateMessage("Debug: Creating Extract in Tracker folder");
+                logger.Warn<uSyncService>("Running Report Debug - this can be a slow process, don't enable unless you need it");
+
                 callbacks?.Callback?.Invoke(summary);
                 this.Export($"~/uSync/Tracker/{DateTime.Now.ToString("yyyyMMdd_HHmmss")}/", handlers, callbacks);
             }
@@ -124,7 +125,7 @@ namespace uSync8.BackOffice
                 var handler = configuredHandler.Handler;
                 var handlerSettings = configuredHandler.Settings;
 
-                summary.Count++;
+                summary.Increment();
 
                 summary.UpdateHandler(handler.Name, HandlerStatus.Processing, $"Reporting {handler.Name}", 0);
 
@@ -138,7 +139,7 @@ namespace uSync8.BackOffice
                     handlerActions.ContainsErrors());
             }
 
-            summary.Message = "Report Complete";
+            summary.UpdateMessage("Report Complete");
             callbacks?.Callback?.Invoke(summary);
 
             fireBulkComplete(ReportComplete, actions);
@@ -228,7 +229,7 @@ namespace uSync8.BackOffice
                         var handler = configuredHandler.Handler;
                         var handlerSettings = configuredHandler.Settings;
 
-                        summary.Count++;
+                        summary.Increment();
 
                         summary.UpdateHandler(
                             handler.Name, HandlerStatus.Processing, $"Importing {handler.Name}", 0);
@@ -247,32 +248,12 @@ namespace uSync8.BackOffice
 
                     // postImport things (mainly cleaning up folders)
 
-                    summary.Count++;
+                    summary.Increment();
                     summary.UpdateHandler("Post Import", HandlerStatus.Pending, "Post Import Actions", 0);
 
                     callbacks?.Callback?.Invoke(summary);
 
-                    var postImportActions = actions.Where(x => x.Success
-                                                && x.Change > Core.ChangeType.NoChange
-                                                && x.RequiresPostProcessing);
-
-                    foreach (var configuredHandler in handlers)
-                    {
-                        var handler = configuredHandler.Handler;
-                        var handlerSettings = configuredHandler.Settings;
-
-                        if (handler is ISyncPostImportHandler postHandler)
-                        {
-                            var handlerActions = postImportActions.Where(x => x.ItemType == handler.ItemType);
-
-                            if (handlerActions.Any())
-                            {
-                                var postActions = postHandler.ProcessPostImport($"{folder}/{handler.DefaultFolder}", handlerActions, handlerSettings);
-                                if (postActions != null)
-                                    actions.AddRange(postActions);
-                            }
-                        }
-                    }
+                    actions.AddRange(PerformPostImport(folder, handlers, actions));
 
                     sw.Stop();
                     summary.UpdateHandler("Post Import", HandlerStatus.Complete, "Import Completed", 0);
@@ -294,6 +275,32 @@ namespace uSync8.BackOffice
             }
         }
 
+        private IEnumerable<uSyncAction> PerformPostImport(string rootFolder, IEnumerable<ExtendedHandlerConfigPair> handlers, IEnumerable<uSyncAction> actions)
+        {
+            var postImportActions = actions.Where(x => x.Success && x.Change > Core.ChangeType.NoChange && x.RequiresPostProcessing).ToList();
+            if (postImportActions.Count == 0) return Enumerable.Empty<uSyncAction>();
+
+            var results = new List<uSyncAction>();
+
+            foreach (var handlerPair in handlers)
+            {
+                if (handlerPair.Handler is ISyncPostImportHandler postImportHandler)
+                {
+                    var handlerActions = postImportActions.Where(x => x.ItemType == handlerPair.Handler.ItemType);
+
+                    if (handlerActions.Any())
+                    {
+                        var handlerFolder = GetHandlerFolder(rootFolder, handlerPair.Handler);
+                        var postActions = postImportHandler.ProcessPostImport(handlerFolder, handlerActions, handlerPair.Settings);
+                        if (postActions != null)
+                            results.AddRange(postActions);
+                    }
+                }
+            }
+
+            return results;
+        }
+
 
         /// <summary>
         ///  Import a single item based on a uSyncAction item
@@ -309,7 +316,9 @@ namespace uSync8.BackOffice
             var handlerConfig = handlerFactory.GetValidHandler(action.HandlerAlias);
             if (handlerConfig != null && handlerConfig.Handler is ISyncExtendedHandler extendedHandler)
             {
-                extendedHandler.Import(action.FileName, handlerConfig.Settings, true);
+                return extendedHandler
+                    .Import(action.FileName, handlerConfig.Settings, true)
+                    .FirstOrDefault();
             }
 
             return new uSyncAction();
@@ -409,6 +418,7 @@ namespace uSync8.BackOffice
                 logger.Warn<uSyncService>(ex, "Issue saving the usync.conifg file in the root of {folder}", folder);
             }
         }
+
         /// <summary>
         ///  Export items from umbraco into a given folder
         /// </summary>
@@ -441,8 +451,8 @@ namespace uSync8.BackOffice
             foreach (var configuredHandler in handlers)
             {
                 var handler = configuredHandler.Handler;
-                summary.Count++;
 
+                summary.Increment();
                 summary.UpdateHandler(
                     handler.Name, HandlerStatus.Processing, $"Exporting {handler.Name}", 0);
 
@@ -458,7 +468,7 @@ namespace uSync8.BackOffice
             }
 
 
-            summary.Message = "Export Completed";
+            summary.UpdateMessage("Export Completed");
             callbacks?.Callback?.Invoke(summary);
 
             fireBulkComplete(ExportComplete, actions);

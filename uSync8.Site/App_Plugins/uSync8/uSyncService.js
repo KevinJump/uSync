@@ -24,6 +24,16 @@
             importItem: importItem,
             saveSettings: saveSettings,
 
+            getActionHandlers: getActionHandlers,
+            reportHandler: reportHandler,
+            importHandler: importHandler,
+            importPost: importPost,
+            exportHandler: exportHandler,
+            cleanExport: cleanExport,
+
+            startProcess: startProcess,
+            finishProcess: finishProcess,
+
             getLoadedHandlers: getLoadedHandlers,
             getAddOns: getAddOns,
             getAddOnSplash: getAddOnSplash,
@@ -97,6 +107,56 @@
         function checkVersion() {
             return $http.get(serviceRoot + 'CheckVersion');
         }
+
+
+        function getActionHandlers(options) {
+            return $http.post(serviceRoot + 'GetActionHandlers?action=' + options.action,
+                {
+                    group: options.group
+                });
+        }
+
+        function reportHandler(handler, options, clientId) {
+            return $http.post(serviceRoot + 'ReportHandler', {
+                handler: handler,
+                clientId: clientId
+            });
+        }
+
+        function importHandler(handler, options, clientId) {
+            return $http.post(serviceRoot + 'ImportHandler', {
+                handler: handler,
+                clientId: clientId,
+                force: options.force
+            });
+        }
+
+        function importPost(actions, options, clientId) {
+            return $http.post(serviceRoot + 'ImportPost', {
+                actions: actions,
+                clientId: clientId
+            });
+        }
+
+        function exportHandler(handler, options, clientId) {
+            return $http.post(serviceRoot + 'ExportHandler', {
+                handler: handler,
+                clientId: clientId
+            });
+        }
+
+        function startProcess(action) {
+            return $http.post(serviceRoot + 'StartProcess?action=' + action);
+        }
+
+        function finishProcess(action, actions) {
+            return $http.post(serviceRoot + 'FinishProcess?action=' + action, actions);
+        }
+
+        function cleanExport() {
+            return $http.post(serviceRoot + 'cleanExport');
+        }
+    
     }
 
     angular.module('umbraco.services')

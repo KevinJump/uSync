@@ -7,7 +7,7 @@ namespace uSync8.HistoryView
 {
     public class HistoryViewApp : ISyncAddOn
     {
-        public string Name => "History";
+        public string Name => "_History";
 
         public string Version => "1.0.0";
 
