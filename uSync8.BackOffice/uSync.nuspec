@@ -23,6 +23,7 @@
 		<dependencies>
 			<group targetFramework=".NETFramework4.7.2">
 				<dependency id="uSync.Core" version="$depends$"/>
+				<dependency id="uSync.History" version="$depends$" />
 				<dependency id="Microsoft.AspNet.SignalR.Core" version="2.4.0"/>
 			</group>
 		</dependencies>

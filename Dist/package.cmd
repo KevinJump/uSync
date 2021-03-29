@@ -16,6 +16,7 @@ nuget pack .\uSync8.ContentEdition\uSync.ContentEdition.Core.nuspec  -OutputDire
 nuget pack .\uSync8.Community.DataTypeSerializers\uSync.Community.DataTypeSerializers.nuspec  -OutputDirectory .\dist\%1 -build -version %1 -properties "depends=%1;Configuration=%config%"
 
 nuget pack .\uSync.Console\uSync.Console.nuspec  -OutputDirectory .\dist\%1 -build -version %1 -properties "depends=%1;Configuration=%config%"
+nuget pack .\uSync8.HistoryView\uSync.History.nuspec  -OutputDirectory .\dist\%1 -build -version %1 -properties "depends=%1;Configuration=%config%"
 
 call .\dist\CreatePackages %1
 
