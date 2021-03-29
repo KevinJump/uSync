@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 
-using uSync8.BackOffice.Configuration;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+
 using uSync8.Core.Serialization;
 
 namespace uSync8.BackOffice
@@ -9,6 +11,7 @@ namespace uSync8.BackOffice
     /// <summary>
     ///  options passed to an import, report or export of an item.
     /// </summary>
+    [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
     public class uSyncImportOptions
     {
         public Guid ImportId { get; set; }
@@ -22,6 +25,7 @@ namespace uSync8.BackOffice
         public string RootFolder { get; set; }
     }
 
+    [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
     public class uSyncPagedImportOptions : uSyncImportOptions
     {
         public int PageNumber { get; set; }
