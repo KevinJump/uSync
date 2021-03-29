@@ -18,6 +18,7 @@
         vm.showSpinner = false;
 
         vm.groups = [];
+        vm.perf = 0;
 
         vm.showAdvanced = false;
 
@@ -197,10 +198,13 @@
                 group: group
             };
 
+            var start = performance.now();
+
             performAction(options, uSync8DashboardService.reportHandler)
                 .then(function (results) {
                     vm.working = false;
                     vm.reported = true;
+                    vm.perf = performance.now() - start;
                     vm.status.Message = 'Report complete';
                     vm.reportButton.state = 'success';
                 }, function (error) {
@@ -226,6 +230,8 @@
                 force: force
             };
 
+            var start = performance.now();
+
             performAction(options, uSync8DashboardService.importHandler)
                 .then(function (results) {
 
@@ -235,6 +241,7 @@
                         .then(function (results) {
                             vm.working = false;
                             vm.reported = true;
+                            vm.perf = performance.now() - start;
                             vm.importButton.state = 'success';
                             eventsService.emit('usync-dashboard.import.complete');
                             calculateTimeSaved(vm.results);
@@ -256,11 +263,15 @@
                 group: ''
             };
 
+            var start = performance.now();
+
             performAction(options, uSync8DashboardService.exportHandler)
                 .then(function (results) {
                     vm.status.Message = 'Export complete';
                     vm.working = false;
                     vm.reported = true;
+                    vm.perf = performance.now() - start;
+
                     vm.exportButton.state = 'success';
                     vm.savings.show = true;
                     vm.savings.title = 'All items exported.';
@@ -445,6 +456,10 @@
                 Count: 0,
                 Total: 1
             };
+
+            // performance timer. 
+            vm.perf = 0;
+
 
             switch (mode) {
                 case modes.IMPORT:

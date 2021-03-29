@@ -67,6 +67,7 @@
                                  status="vm.status"
                                  hide-labels="false">
             </usync-progress-view>
+            <div ng-if="vm.perf > 0" class="text-center muted">{{vm.perf | number: 0 }}ms</div>
         </umb-box-content>
     </umb-box>
 
