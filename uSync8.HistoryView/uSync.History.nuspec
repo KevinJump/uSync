@@ -21,7 +21,6 @@
 		<repository type="git" url="https://github.com/KevinJump/uSync8" />
 	</metadata>
 	<files>
-		<file src="readme.txt" target="readme.txt" />
 		<file src="bin\$Configuration$\uSync8.HistoryView.dll" target="lib\net472" />
 		<file src="App_Plugins\uSyncHistory\**\*.*" target="content\App_Plugins\uSyncHistory" />
 	</files>
