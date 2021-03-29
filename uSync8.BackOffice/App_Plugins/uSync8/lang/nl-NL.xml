@@ -43,6 +43,7 @@
         <key alias="tableMessage">Bericht</key>
 
         <key alias="nochange"><![CDATA[<h4>Geen aanpassingen</h4>]]></key>
+			  <key alias="nochange_quote"></key>
 
     </area>
     <area alias="dashboardTabs">

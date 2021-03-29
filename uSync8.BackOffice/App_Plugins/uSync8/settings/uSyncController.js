@@ -257,7 +257,7 @@
             };
 
             performAction(options, uSync8DashboardService.exportHandler)
-                then(function (results) {
+                .then(function (results) {
                     vm.status.Message = 'Export complete';
                     vm.working = false;
                     vm.reported = true;

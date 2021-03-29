@@ -375,6 +375,7 @@ ul.usync-action-list {
 
 .usync-report-no-changes {
     margin: 50px 0;
+    text-align: center;
 }
 .usync-report-no-changes h4 {
     font-weight: 700;
