@@ -41,7 +41,7 @@ namespace uSync8.Core.Serialization.Serializers
             else if (item.Level != 1)
             {
                 // in a folder
-                var folderNode = GetFolderNode(memberTypeService.GetContainers(item)); //TODO: Cache this call.
+                var folderNode = GetFolderNode(item); //TODO: Cache this call.
                 if (folderNode != null)
                     info.Add(folderNode);
             }

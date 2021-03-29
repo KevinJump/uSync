@@ -177,7 +177,7 @@ namespace uSync8.Core.Serialization.Serializers
 
             if (item.Level != 1)
             {
-                var folderNode = this.GetFolderNode(dataTypeService.GetContainers(item)); //TODO - CACHE THIS CALL. 
+                var folderNode = this.GetFolderNode(item); //TODO - CACHE THIS CALL. 
                 if (folderNode != null)
                     info.Add(folderNode);
             }
@@ -190,6 +190,9 @@ namespace uSync8.Core.Serialization.Serializers
 
             return SyncAttempt<XElement>.Succeed(item.Name, node, typeof(IDataType), ChangeType.Export);
         }
+
+        protected override IEnumerable<EntityContainer> GetContainers(IDataType item)
+            => dataTypeService.GetContainers(item);
 
         private XElement SerializeConfiguration(IDataType item)
         {

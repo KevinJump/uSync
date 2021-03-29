@@ -15,7 +15,7 @@ using uSync8.Core.Extensions;
 namespace uSync8.Core.Serialization
 {
     public abstract class SyncContainerSerializerBase<TObject>
-        : SyncTreeSerializerBase<TObject>
+        : SyncTreeSerializerBase<TObject>, ISyncCachedSerializer
         where TObject : ITreeEntity
     {
         protected UmbracoObjectTypes containerType;
@@ -115,15 +115,30 @@ namespace uSync8.Core.Serialization
         #region Getters
         // Getters - get information we already know (either in the object or the XElement)
 
+        protected XElement GetFolderNode(TObject item) 
+        {
+            if (item.ParentId <= 0) return null;
+            // return GetFolderNode(GetContainers(item));
+
+            if (!folderCache.ContainsKey(item.ParentId))
+            {
+                folderCache[item.ParentId] = GetFolderNode(GetContainers(item));
+            }
+            return folderCache[item.ParentId];
+        }
+
+        protected abstract IEnumerable<EntityContainer> GetContainers(TObject item);
+
         protected XElement GetFolderNode(IEnumerable<EntityContainer> containers)
         {
             if (containers == null || !containers.Any())
                 return null;
 
-            var parentKey = containers.OrderBy(x => x.Level).LastOrDefault().Key.ToString();
+            var containerList = containers; // .ToList();
 
-            var folders = containers
-                .OrderBy(x => x.Level)
+            var parentKey = containerList.OrderBy(x => x.Level).LastOrDefault().Key.ToString();
+
+            var folders = containerList.OrderBy(x => x.Level)
                 .Select(x => HttpUtility.UrlEncode(x.Name))
                 .ToList();
 
@@ -193,6 +208,33 @@ namespace uSync8.Core.Serialization
 
         #region Container stuff
         protected abstract void SaveContainer(EntityContainer container);
+        #endregion
+
+
+        #region container folder cache 
+
+        /// <summary>
+        ///  Container folder cache, makes lookups of items in containers slightly faster.
+        /// </summary>
+        /// <remarks>
+        ///  only used on serialization, allows us to only build the folder path for a set of containers once.
+        /// </remarks>
+        private Dictionary<int, XElement> folderCache = new Dictionary<int, XElement>();
+
+        private void ClearFolderCache()
+        {
+            folderCache = new Dictionary<int, XElement>();
+        }
+
+        public void InitializeCache()
+        {
+            ClearFolderCache();
+        }
+
+        public void DisposeCache()
+        {
+            ClearFolderCache();
+        }
         #endregion
     }
 }
