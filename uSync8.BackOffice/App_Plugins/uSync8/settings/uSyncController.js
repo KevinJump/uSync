@@ -1,7 +1,7 @@
 ﻿(function () {
     'use strict';
 
-    function uSyncController($scope, $q,
+    function uSyncController($scope, $q, $controller,
         eventsService,
         overlayService,
         notificationsService,
@@ -24,7 +24,7 @@
 
         vm.hasuSyncForms = false; 
 
-        vm.canHaveForms = canHaveForms();
+        vm.canHaveForms = false;
 
         var modes = {
             NONE: 0,
@@ -367,6 +367,11 @@
                         }
 
                     });
+
+                    if (!vm.hasuSyncForms) {
+                        vm.canHaveForms = canHaveForms();
+                    }
+
                     vm.loading = false;
                 }, function (error) {
                     vm.loading = false;
@@ -505,8 +510,8 @@
 
             try {
 
-                // check to see if usync.forms is installed. 
-                $controller('formService', { $scope: {} }, true)
+                // check to see if umbraco.forms is installed. 
+                $controller('UmbracoForms.Dashboards.FormsController', { $scope: {} }, true)
                 return true;
             }
             catch {
