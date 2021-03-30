@@ -12,6 +12,14 @@ When uSync performs a report/import it checks the version against a file in the 
 
 Our recommendation is to perform a new export when the format version changes
 
+## v8.9.0 
+
+### Change of media sync default (don't include file hash)
+Change of the default for media handlers, so they no longer stamp the filehash into the config file. 
+this means media syncs don't need to read the media files - so its quicker when your media is slow to get (e.g in the cloud or something).
+
+uSync.Complete uses this feature - but forces it on by default - with normal uSync operation there is likely no need to have this set.
+
 ## v8.8.0
 
 ### Changes to Key used for Domain items (Culture and Hostname entries)
