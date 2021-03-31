@@ -1135,13 +1135,16 @@ namespace uSync8.BackOffice.SyncHandlers
                 var attempts = Export(item, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
 
                 // if we are using guid names and a flat structure then the clean doesn't need to happen
-                if (!(this.DefaultConfig.GuidNames && this.DefaultConfig.UseFlatStructure))
-                {
+                // if (!(this.DefaultConfig.GuidNames && this.DefaultConfig.UseFlatStructure))
+
+                // #216 clean up all the time, because if someone recreates a doctype, we want to find the old 
+                // version of that doctype and call it a rename
+                // {
                     foreach (var attempt in attempts.Where(x => x.Success))
                     {
                         this.CleanUp(item, attempt.FileName, Path.Combine(rootFolder, this.DefaultFolder));
                     }
-                }
+                // }
             }
         }
 
