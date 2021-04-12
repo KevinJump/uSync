@@ -98,10 +98,13 @@ namespace uSync8.ContentEdition.Serializers
                 if (language == string.Empty) continue;
 
                 var itemTranslation = item.Translations.FirstOrDefault(x => x.Language.IsoCode == language);
-                if (itemTranslation != null && itemTranslation.Value != translation.Value)
+                if (itemTranslation != null)
                 {
-                    changes.AddUpdate(language, itemTranslation.Value, translation.Value, $"{item.ItemKey}/{language}");
-                    itemTranslation.Value = translation.Value;
+                    if (itemTranslation.Value != translation.Value)
+                    {
+                        changes.AddUpdate(language, itemTranslation.Value, translation.Value, $"{item.ItemKey}/{language}");
+                        itemTranslation.Value = translation.Value;
+                    }
                 }
                 else
                 {
@@ -114,7 +117,7 @@ namespace uSync8.ContentEdition.Serializers
                 }
             }
 
-            item.Translations = currentTranslations;
+            item.Translations = currentTranslations.DistinctBy(x => x.Language.IsoCode);
 
             return changes;
         }
