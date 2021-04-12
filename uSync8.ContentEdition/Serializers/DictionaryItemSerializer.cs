@@ -70,7 +70,7 @@ namespace uSync8.ContentEdition.Serializers
                 details.AddUpdate("Key", item.Key, key);
                 item.Key = key;
             }
-            
+
             // key only translationm, would not add the translation values. 
             if (!options.GetSetting("KeysOnly", false))
             {
@@ -98,13 +98,11 @@ namespace uSync8.ContentEdition.Serializers
                 if (language == string.Empty) continue;
 
                 var itemTranslation = item.Translations.FirstOrDefault(x => x.Language.IsoCode == language);
-                if (itemTranslation != null)
-                {
-                    if (itemTranslation.Value != translation.Value)
+                if (itemTranslation != null && itemTranslation.Value != translation.Value)
                     {
                         changes.AddUpdate(language, itemTranslation.Value, translation.Value, $"{item.ItemKey}/{language}");
                         itemTranslation.Value = translation.Value;
-                    }
+                    
                 }
                 else
                 {
@@ -117,7 +115,20 @@ namespace uSync8.ContentEdition.Serializers
                 }
             }
 
-            item.Translations = currentTranslations.DistinctBy(x => x.Language.IsoCode);
+            var translations = currentTranslations.DistinctBy(x => x.Language.IsoCode).ToList();
+
+            // if the count is wrong, we delete the item (shortly before we save it again).
+            if (item.Translations.Count() > translations.Count)
+            {
+                var existing = FindItem(item.Key);
+                if (existing != null)
+                {
+                    DeleteItem(existing);
+                    item.Id = 0; // make this a new (so it will be inserted)
+                }
+            }
+
+            item.Translations = translations; //.DistinctBy(x => x.Language.IsoCode);
 
             return changes;
         }
