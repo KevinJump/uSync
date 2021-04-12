@@ -75,7 +75,7 @@ namespace uSync8.BackOffice.SyncHandlers
         public string Icon { get; private set; }
 
         /// <summary>
-        ///  does this handler require two passes at the import (e.g datatypes import once, and then again after doctypes)
+        ///  does this handler require two passes at the import.
         /// </summary>
         protected bool IsTwoPass = false;
 
@@ -116,6 +116,8 @@ namespace uSync8.BackOffice.SyncHandlers
 
         protected readonly ISyncItemFactory itemFactory;
 
+        protected bool IsPostImportHandler = false;
+
         [Obsolete("Use constructors with collections")]
         protected SyncHandlerRoot(
             IProfilingLogger logger,
@@ -142,6 +144,8 @@ namespace uSync8.BackOffice.SyncHandlers
             this.dependencyCheckers = this.itemFactory.GetCheckers<TObject>().ToList();
 
             this.syncFileService = syncFileService;
+
+            this.IsPostImportHandler = this is ISyncPostImportHandler;
 
             handlerType = GetType();
             var meta = handlerType.GetCustomAttribute<SyncHandlerAttribute>(false);
@@ -391,7 +395,7 @@ namespace uSync8.BackOffice.SyncHandlers
 
                 // get the item.
                 var attempt = DeserializeItem(node, serializerOptions);
-                var action = uSyncActionHelper<TObject>.SetAction(attempt, GetNameFromFileOrNode(filename, node), node.GetKey(), this.Alias, IsTwoPass);
+                var action = uSyncActionHelper<TObject>.SetAction(attempt, GetNameFromFileOrNode(filename, node), node.GetKey(), this.Alias, IsPostImportHandler);
 
                 // add item if we have it.
                 if (attempt.Item != null) action.Item = attempt.Item;
