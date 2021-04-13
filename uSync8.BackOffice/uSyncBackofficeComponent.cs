@@ -93,7 +93,8 @@ namespace uSync8.BackOffice
             e.Add("uSync", new Dictionary<string, object>
             {
                 { "uSyncService", urlHelper.GetUmbracoApiServiceBaseUrl<uSyncDashboardApiController>(controller => controller.GetApi()) },
-                { "signalRHub", UriUtility.ToAbsolute($"~/{UmbracoMvcArea}/{uSyncSettings.SignalRRoot}") }
+                { "signalRHub", UriUtility.ToAbsolute($"~/{UmbracoMvcArea}/{uSyncSettings.SignalRRoot}") },
+                { "isLoadBalanced", runtimeState.ServerRole == Umbraco.Core.Sync.ServerRole.Replica }
             });
         }
 

@@ -52,6 +52,8 @@
 		<key alias="createWarning"><![CDATA[One or more handlers are set to create only. Changes within items may not be synchronized]]></key>
 
 		<key alias="forms"><![CDATA[Are you using Umbraco forms? - you can now sync forms and settings with <a href="http://jumoo.co.uk/usync/forms" target="_blank">uSync.FormsEdition</a>]]></key>
+
+		<key alias="loadbalancedWarning"><![CDATA[Umbraco appears to be running in a load balanced envrionment. <a href="https://our.umbraco.com/documentation/getting-started/setup/server-setup/load-balancing/#faqs" target="_blank">You should not load balanace the umbraco back office</a>. We strongly recommend you do not run uSync from a load balanced back office.]]></key>
 		
   </area>
   <area alias="dashboardTabs">

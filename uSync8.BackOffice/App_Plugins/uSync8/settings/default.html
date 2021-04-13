@@ -10,6 +10,9 @@
         </span>
     </div>
 
+    <div ng-if="vm.isLoadbalanced == true" class="alert alert-danger usync-alert">
+        <localize key="usync_loadbalancedWarning"></localize>
+    </div>
     <umb-box ng-if="!vm.loading">
         <div ng-if="vm.versionInfo.HandlersLoaded != undefined && vm.versionInfo.HandlersLoaded != true" class="alert alert-danger usync-alert">
             <localize key="usync_noHandlers"></localize>

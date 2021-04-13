@@ -17,6 +17,8 @@
         vm.hideLink = false;
         vm.showSpinner = false;
 
+        vm.isLoadbalanced = Umbraco.Sys.ServerVariables.uSync.isLoadBalanced;
+
         vm.groups = [];
         vm.perf = 0;
 
