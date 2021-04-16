@@ -20,10 +20,10 @@
     <readme>
       <![CDATA[
       <p>
-      Push and pull all the database config and elements of your umbraco solution to and from the disk. 
+      Push and pull all the database config and elements of your Umbraco solution to and from the disk. 
       </p>
       <p>
-      Helps with Source Control, Continious Deployment and Multi Team Development.
+      Helps with Source Control, Continuous Deployment and Multi Team Development.
       </p>]]>
     </readme>
   </info>
