@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net5.0</TargetFramework>
+		<ContentTargetFolders>.</ContentTargetFolders>
+		<Product>uSync</Product>
+		<PackageId>uSync</PackageId>
+		<Title>uSync</Title>
+		<Description></Description>
+		<PackageTags>Umbraco</PackageTags>
+		<Version>9.0.0</Version>
+		<FileVersion>9.0.0</FileVersion>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="9.0.0-beta001.20210420.22" />
+		<PackageReference Include="Umbraco.Cms.Web.Website" Version="9.0.0-beta001.20210420.22" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+		<Compile Remove="Commands\**" />
+		<EmbeddedResource Remove="Commands\**" />
+		<None Remove="Commands\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Include="App_Plugins\uSync\**\*.*">
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+			<CopyToPublishDirectory>Always</CopyToPublishDirectory>
+		</Content>
+		<None Include="build\**\*.*">
+			<Pack>true</Pack>
+			<PackagePath>Build</PackagePath>
+		</None>
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\uSync.Core\uSync.Core.csproj" />
+	</ItemGroup>
+
+</Project>

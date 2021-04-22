@@ -1,7 +1,0 @@
-{
-  "javascript": [
-    "~/App_Plugins/uSyncHistory/syncHistoryService.js",
-    "~/App_Plugins/uSyncHistory/syncHistoryController.js",
-    "~/App_Plugins/uSyncHistory/syncHistoryDialogController.js"
-  ]
-}

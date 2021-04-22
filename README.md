@@ -1,5 +1,5 @@
-# uSync8
-Database syncing tool for Umbraco 8. 
+# uSync - for UniCore (Umbraco on NetCore aka Umbraco 9)
+Database syncing tool for Umbraco  
 
 ![uSync](https://github.com/KevinJump/uSync8/blob/v8/8.2/Screenshots/usyncprogress.gif "uSync Import Animation")
 

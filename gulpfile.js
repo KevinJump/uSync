@@ -2,14 +2,12 @@
 const { watch, src, dest } = require('gulp');
 
 const sourceFolders = [
-    'uSync8.BackOffice/App_Plugins/',
-    'uSync8.HistoryView/App_Plugins/'];
+    'uSync.BackOffice/App_Plugins/'
+];
 
-const destination = 'uSync8.Site/App_Plugins/';
-
+const destination = 'uSync.Site/App_Plugins/';
 
 function copy(path, baseFolder) {
-
     return src(path, { base: baseFolder })
         .pipe(dest(destination));
 }
@@ -18,8 +16,7 @@ function time() {
     return '[' + new Date().toISOString().slice(11, -5) + ']';
 }
 
-exports.default = function () {
-
+exports.default = function() {
     sourceFolders.forEach(function (sourceFolder) {
 
         let source = sourceFolder + '**/*';
@@ -34,7 +31,4 @@ exports.default = function () {
                 copy(path, sourceFolder);
             });
     });
-
 };
-
-
