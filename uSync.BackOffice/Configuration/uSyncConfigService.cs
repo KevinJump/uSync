@@ -25,5 +25,6 @@ namespace uSync.BackOffice.Configuration
 
         public uSyncHandlerSetSettings GetDefaultSetSettings()
             => GetSetSettings(Settings.DefaultSet);
+
     }
 }

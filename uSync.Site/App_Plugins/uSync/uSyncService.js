@@ -17,6 +17,7 @@
         var service = {
             getSettings: getSettings,
             getHandlers: getHandlers,
+            getHandlerSetSettings: getHandlerSetSettings,
 
             report: report,
             exportItems: exportItems,
@@ -51,6 +52,10 @@
 
         function getSettings() {
             return $http.get(serviceRoot + 'GetSettings');
+        }
+
+        function getHandlerSetSettings(set) {
+            return $http.get(serviceRoot + 'GetHandlerSetSettings/' + set);
         }
 
         function getHandlers() {

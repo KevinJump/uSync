@@ -71,6 +71,10 @@ namespace uSync.BackOffice.Controllers
             => this.uSyncConfig.Settings;
 
         [HttpGet]
+        public uSyncHandlerSetSettings GetHandlerSetSettings(string id)
+            => this.uSyncConfig.GetSetSettings(id);
+
+        [HttpGet]
         public IEnumerable<object> GetLoadedHandlers()
             => handlerFactory.GetAll();
 
