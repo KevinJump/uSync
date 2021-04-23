@@ -95,7 +95,7 @@ namespace uSync.BackOffice
                     {
                         applicationBuilder.UseEndpoints(e =>
                         {
-                            var hubRoutes = services.BuildServiceProvider().GetRequiredService<uSyncHubRoutes>();       
+                            var hubRoutes = applicationBuilder.ApplicationServices.GetRequiredService<uSyncHubRoutes>();       
                             hubRoutes.CreateRoutes(e);
                         });
                     }
