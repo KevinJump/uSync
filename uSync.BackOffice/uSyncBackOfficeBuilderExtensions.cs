@@ -49,9 +49,7 @@ namespace uSync.BackOffice
 
             // Setup uSync core.
             builder.Services.AddUnique<uSyncConfigService>();
-            builder.Services.AddUnique<uSyncHubRoutes>();
 
-            builder.Services.AddSignalR();
 
             builder.AdduSyncCore();
 
@@ -74,6 +72,8 @@ namespace uSync.BackOffice
             builder.AddNotificationHandler<UmbracoApplicationStarting, uSyncApplicationStartingHandler>();
             builder.AddHandlerNotifications();
 
+            builder.Services.AddUnique<uSyncHubRoutes>();
+            builder.Services.AddSignalR();
             builder.Services.AdduSyncSignalR();
 
             return builder;
@@ -84,7 +84,6 @@ namespace uSync.BackOffice
         /// </summary>
         public static IServiceCollection AdduSyncSignalR(this IServiceCollection services)
         {
-            var hubRoutes = services.BuildServiceProvider().GetRequiredService<uSyncHubRoutes>();
 
             services.Configure<UmbracoPipelineOptions>(options =>
             {
@@ -96,6 +95,7 @@ namespace uSync.BackOffice
                     {
                         applicationBuilder.UseEndpoints(e =>
                         {
+                            var hubRoutes = services.BuildServiceProvider().GetRequiredService<uSyncHubRoutes>();       
                             hubRoutes.CreateRoutes(e);
                         });
                     }

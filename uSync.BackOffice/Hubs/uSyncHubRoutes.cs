@@ -27,12 +27,14 @@ namespace uSync.BackOffice.Hubs
         
         public void CreateRoutes(IEndpointRouteBuilder endpoints)
         {
+            endpoints.MapHub<SyncHub>(GetuSyncHubRoute());
+
+            /*
             switch (_runtimeState.Level)
             {
                 case Umbraco.Cms.Core.RuntimeLevel.Run:
-                    endpoints.MapHub<SyncHub>(GetuSyncHubRoute());
                     break;
-            }
+            }*/
             
         }
 
