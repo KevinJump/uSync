@@ -74,8 +74,19 @@ namespace uSync.BackOffice
             builder.AddNotificationHandler<UmbracoApplicationStarting, uSyncApplicationStartingHandler>();
             builder.AddHandlerNotifications();
 
+            builder.Services.AdduSyncSignalR();
 
-            builder.Services.Configure<UmbracoPipelineOptions>(options =>
+            return builder;
+        }
+
+        /// <summary>
+        ///  Adds the signalR hub route for uSync
+        /// </summary>
+        public static IServiceCollection AdduSyncSignalR(this IServiceCollection services)
+        {
+            var hubRoutes = services.BuildServiceProvider().GetRequiredService<uSyncHubRoutes>();
+
+            services.Configure<UmbracoPipelineOptions>(options =>
             {
                 options.AddFilter(new UmbracoPipelineFilter(
                     "uSync",
@@ -85,23 +96,13 @@ namespace uSync.BackOffice
                     {
                         applicationBuilder.UseEndpoints(e =>
                         {
-                            e.UseuSyncEndpoints(applicationBuilder.ApplicationServices);
+                            hubRoutes.CreateRoutes(e);
                         });
                     }
                     ));
             });
 
-            return builder;
-        }
-
-        /// <summary>
-        ///  register the signalR hub for uSync via the pipeline filters (above)
-        /// </summary>
-        public static IEndpointRouteBuilder UseuSyncEndpoints(this IEndpointRouteBuilder app, IServiceProvider applicationServices)
-        {
-            uSyncHubRoutes uSyncHubRoutes = applicationServices.GetRequiredService<uSyncHubRoutes>();
-            uSyncHubRoutes.CreateRoutes(app);
-            return app;
+            return services;
         }
 
         internal static void AddHandlerNotifications(this IUmbracoBuilder builder)
