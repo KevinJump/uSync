@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Xml.Linq;
 
-using Newtonsoft.Json.Serialization;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+
+using Umbraco.Cms.Core;
 
 using uSync.BackOffice.Configuration;
-using Umbraco.Cms.Core;
-using uSync.Core.Models;
-using System.Xml.Linq;
 using uSync.Core.Dependency;
+using uSync.Core.Models;
 
 namespace uSync.BackOffice.SyncHandlers
 {

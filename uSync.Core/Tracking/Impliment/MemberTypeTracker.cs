@@ -1,5 +1,4 @@
-﻿using System.Linq;
-
+﻿
 using Umbraco.Cms.Core.Models;
 
 using uSync.Core.Serialization;

@@ -4,10 +4,11 @@ using System.Linq;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Extensions;
-using uSync.Core;
+
 using uSync.Core.Dependency;
 
 namespace uSync.Core.Mapping

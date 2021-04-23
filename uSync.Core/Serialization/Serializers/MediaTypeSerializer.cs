@@ -7,7 +7,6 @@ using Microsoft.Extensions.Logging;
 
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Configuration;
-using Umbraco.Cms.Core.Logging;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Models.Entities;
 using Umbraco.Cms.Core.Services;

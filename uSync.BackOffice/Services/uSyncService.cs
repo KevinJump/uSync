@@ -6,8 +6,7 @@ using System.Linq;
 using System.Xml.Linq;
 
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Umbraco.Cms.Core.Configuration.Models;
+
 using Umbraco.Cms.Core.Semver;
 using Umbraco.Extensions;
 

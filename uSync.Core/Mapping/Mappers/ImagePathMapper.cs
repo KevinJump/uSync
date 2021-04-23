@@ -1,17 +1,18 @@
 ﻿using System.Collections.Generic;
-using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+
 using Microsoft.Extensions.Logging;
+
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+
 using Umbraco.Cms.Core;
-using Umbraco.Cms.Core.Logging;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Extensions;
+
 using uSync.Core.Dependency;
-using static Umbraco.Cms.Core.Constants;
 
 namespace uSync.Core.Mapping
 {

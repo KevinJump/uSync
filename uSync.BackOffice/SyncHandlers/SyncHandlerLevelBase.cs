@@ -6,11 +6,8 @@ using System.Xml;
 using System.Xml.Linq;
 
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
-using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Cache;
-using Umbraco.Cms.Core.Logging;
 using Umbraco.Cms.Core.Models.Entities;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Strings;
@@ -19,10 +16,8 @@ using Umbraco.Extensions;
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
 using uSync.Core;
-using uSync.Core.Dependency;
 using uSync.Core.Models;
 using uSync.Core.Serialization;
-using uSync.Core.Tracking;
 
 namespace uSync.BackOffice.SyncHandlers
 {

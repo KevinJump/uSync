@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Security.Cryptography;
+﻿using System.Collections.Generic;
 using System.Xml.Linq;
 
 using uSync.BackOffice.SyncHandlers;
 using uSync.Core;
-using uSync.Core.Models;
 
 namespace uSync.BackOffice
 {

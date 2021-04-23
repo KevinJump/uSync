@@ -1,6 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+
 using uSync.Core.Dependency;
 
 namespace uSync.Core.Mapping

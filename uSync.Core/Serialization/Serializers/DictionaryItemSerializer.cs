@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
+
 using Microsoft.Extensions.Logging;
+
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Extensions;
-using uSync.Core;
+
 using uSync.Core.Models;
-using uSync.Core.Serialization;
 
 namespace uSync.Core.Serialization.Serializers
 {

@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-using Umbraco.Cms.Core;
 using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;

@@ -8,7 +8,6 @@ using Umbraco.Extensions;
 using uSync.BackOffice.SyncHandlers;
 
 using uSync.Core;
-using uSync.Core.Serialization;
 
 namespace uSync.BackOffice
 {

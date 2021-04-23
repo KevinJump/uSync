@@ -2,7 +2,6 @@
 using System.Linq;
 
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
 
 using Umbraco.Cms.Web.BackOffice.Controllers;
 

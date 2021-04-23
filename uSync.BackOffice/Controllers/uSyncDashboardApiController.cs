@@ -6,11 +6,9 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Composing;
-using Umbraco.Cms.Core.IO;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Web.BackOffice.Controllers;
 using Umbraco.Cms.Web.Common.Attributes;
@@ -19,8 +17,6 @@ using Umbraco.Cms.Web.Common.Authorization;
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Hubs;
 using uSync.BackOffice.SyncHandlers;
-
-using Constants = Umbraco.Cms.Core.Constants;
 
 namespace uSync.BackOffice.Controllers
 {

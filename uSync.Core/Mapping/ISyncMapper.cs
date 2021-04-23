@@ -1,6 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+
 using Umbraco.Cms.Core.Models;
+
 using uSync.Core.Dependency;
 
 namespace uSync.Core.Mapping

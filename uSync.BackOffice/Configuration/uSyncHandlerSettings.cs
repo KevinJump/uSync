@@ -3,7 +3,6 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
-using Umbraco.Cms.Core;
 using Umbraco.Extensions;
 
 namespace uSync.BackOffice.Configuration
