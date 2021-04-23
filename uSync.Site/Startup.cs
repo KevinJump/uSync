@@ -61,8 +61,11 @@ namespace Umbraco.Cms.Web.UI.NetCore
             }
 
             app.UseUmbraco()
-                .WithBackOffice()
-                .WithWebsite()
+                .WithMiddleware(u =>
+                {
+                    u.WithBackOffice();
+                    u.WithWebsite();
+                })
                 .WithEndpoints(u =>
                 {
                     u.UseInstallerEndpoints();

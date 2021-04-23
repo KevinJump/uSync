@@ -107,17 +107,28 @@ namespace uSync.BackOffice
 
         internal static void AddHandlerNotifications(this IUmbracoBuilder builder)
         {
-            
+
             // TODO: we need to register all the notifications in the SyncHandlers - not hard wire them here.
-            builder.AddNotificationHandler<SavedNotification<IContentType>, ContentTypeHandler>();
-            builder.AddNotificationHandler<DeletedNotification<IContentType>, ContentTypeHandler>();
-            builder.AddNotificationHandler<MovedNotification<IContentType>, ContentTypeHandler>();
+            builder.AddNotificationHandler<ContentTypeSavedNotification, ContentTypeHandler>();
+            builder.AddNotificationHandler<ContentTypeDeletedNotification, ContentTypeHandler>();
+            builder.AddNotificationHandler<ContentTypeMovedNotification, ContentTypeHandler>();
             builder.AddNotificationHandler<EntityContainerSavedNotification, ContentTypeHandler>();
 
-            builder.AddNotificationHandler<SavedNotification<IDataType>, DataTypeHandler>();
-            builder.AddNotificationHandler<DeletedNotification<IDataType>, DataTypeHandler>();
-            builder.AddNotificationHandler<MovedNotification<IDataType>, DataTypeHandler>();
+            builder.AddNotificationHandler<DataTypeSavedNotification, DataTypeHandler>();
+            builder.AddNotificationHandler<DataTypeDeletedNotification, DataTypeHandler>();
+            builder.AddNotificationHandler<DataTypeMovedNotification, DataTypeHandler>();
             builder.AddNotificationHandler<EntityContainerSavedNotification, DataTypeHandler>();
+
+            builder.AddNotificationHandler<MediaTypeSavedNotification, MediaTypeHandler>();
+            builder.AddNotificationHandler<MediaTypeDeletedNotification, MediaTypeHandler>();
+            builder.AddNotificationHandler<MediaTypeMovedNotification, MediaTypeHandler>();
+            builder.AddNotificationHandler<EntityContainerSavedNotification, ContentTypeHandler>();
+
+            builder.AddNotificationHandler<MemberTypeSavedNotification, MemberTypeHandler>();
+            builder.AddNotificationHandler<MemberTypeSavedNotification, MemberTypeHandler>();
+            builder.AddNotificationHandler<MemberTypeMovedNotification, MemberTypeHandler>();
+
+            // todo . these don't appear to be ready to fire yet.
 
             builder.AddNotificationHandler<SavingNotification<ILanguage>, LanguageHandler>();
             builder.AddNotificationHandler<SavedNotification<ILanguage>, LanguageHandler>();
@@ -125,15 +136,6 @@ namespace uSync.BackOffice
 
             builder.AddNotificationHandler<SavedNotification<IMacro>, MacroHandler>();
             builder.AddNotificationHandler<DeletedNotification<IMacro>, MacroHandler>();
-
-            builder.AddNotificationHandler<SavedNotification<IMediaType>, MediaTypeHandler>();
-            builder.AddNotificationHandler<DeletedNotification<IMediaType>, MediaTypeHandler>();
-            builder.AddNotificationHandler<MovedNotification<IMediaType>, MediaTypeHandler>();
-            builder.AddNotificationHandler<EntityContainerSavedNotification, ContentTypeHandler>();
-
-            builder.AddNotificationHandler<SavedNotification<IMemberType>, MemberTypeHandler>();
-            builder.AddNotificationHandler<DeletedNotification<IMemberType>, MemberTypeHandler>();
-            builder.AddNotificationHandler<MovedNotification<IMemberType>, MemberTypeHandler>();
 
             builder.AddNotificationHandler<SavedNotification<ITemplate>, TemplateHandler>();
             builder.AddNotificationHandler<DeletedNotification<ITemplate>, TemplateHandler>();
