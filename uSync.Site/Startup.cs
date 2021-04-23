@@ -68,7 +68,6 @@ namespace Umbraco.Cms.Web.UI.NetCore
                     u.UseInstallerEndpoints();
                     u.UseBackOfficeEndpoints();
                     u.UseWebsiteEndpoints();
-                    u.UseuSyncEndpoints();
                 });
         }
     }

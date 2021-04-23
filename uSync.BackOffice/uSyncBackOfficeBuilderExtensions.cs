@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Linq;
 
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -24,11 +26,10 @@ namespace uSync.BackOffice
 {
     public static class uSyncBackOfficeBuilderExtensions
     {
-        public static IUmbracoEndpointBuilder UseuSyncEndpoints(this IUmbracoEndpointBuilder app)
+        public static IEndpointRouteBuilder UseuSyncEndpoints(this IEndpointRouteBuilder app, IServiceProvider applicationServices)
         {
-
-            uSyncHubRoutes uSyncHubRoutes = app.ApplicationServices.GetRequiredService<uSyncHubRoutes>();
-            uSyncHubRoutes.CreateRoutes(app.EndpointRouteBuilder);
+            uSyncHubRoutes uSyncHubRoutes = applicationServices.GetRequiredService<uSyncHubRoutes>();
+            uSyncHubRoutes.CreateRoutes(app);
             return app;
         }
 
@@ -79,6 +80,23 @@ namespace uSync.BackOffice
             builder.AddNotificationHandler<ServerVariablesParsing, uSyncServerVariablesHandler>();
             builder.AddNotificationHandler<UmbracoApplicationStarting, uSyncApplicationStartingHandler>();
             builder.AddHandlerNotifications();
+
+
+            builder.Services.Configure<UmbracoPipelineOptions>(options =>
+            {
+                options.AddFilter(new UmbracoPipelineFilter(
+                    "uSync",
+                    applicationBuilder => { },
+                    applicationBuilder => { },
+                    applicationBuilder =>
+                    {
+                        applicationBuilder.UseEndpoints(e =>
+                        {
+                            e.UseuSyncEndpoints(applicationBuilder.ApplicationServices);
+                        });
+                    }
+                    ));
+            });
 
             return builder;
         }
