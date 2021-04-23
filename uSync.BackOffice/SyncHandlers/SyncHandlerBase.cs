@@ -9,6 +9,7 @@ using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Models.Entities;
 using Umbraco.Cms.Core.Services;
+using Umbraco.Cms.Core.Strings;
 
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
@@ -30,13 +31,14 @@ namespace uSync.BackOffice.SyncHandlers
 
         public SyncHandlerBase(
             ILogger<SyncHandlerBase<TObject, TService>> logger,
+            IShortStringHelper shortStringHelper,
             uSyncConfigService uSyncConfig,
             AppCaches appCaches,
             ISyncSerializer<TObject> serializer,
             ISyncItemFactory syncItemFactory,
             SyncFileService syncFileService,
             IEntityService entityService)
-            : base(logger, uSyncConfig, appCaches, serializer, syncItemFactory, syncFileService)
+            : base(logger, shortStringHelper, uSyncConfig, appCaches, serializer, syncItemFactory, syncFileService)
         {
             this.entityService = entityService;
         }
@@ -118,11 +120,6 @@ namespace uSync.BackOffice.SyncHandlers
             if (parent == null) return GetFolders(-1);
             return GetFolders(parent.Id);
         }
-
-        protected override string GetItemAlias(TObject item)
-            => GetItemName(item);
-
-        protected override Guid GetItemKey(TObject item) => item.Key;
 
         protected override TObject GetFromService(IEntity entity)
             => GetFromService(entity.Id);

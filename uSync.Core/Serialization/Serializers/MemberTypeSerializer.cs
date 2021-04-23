@@ -17,7 +17,7 @@ using uSync.Core.Models;
 namespace uSync.Core.Serialization.Serializers
 {
     [SyncSerializer("F45B5C7B-C206-4971-858B-6D349E153ACE", "MemberTypeSerializer", uSyncConstants.Serialization.MemberType)]
-    public class MemberTypeSerializer : ContentTypeBaseSerializer<IMemberType>, ISyncNodeSerializer<IMemberType>
+    public class MemberTypeSerializer : ContentTypeBaseSerializer<IMemberType>, ISyncSerializer<IMemberType>
     {
         private readonly IMemberTypeService memberTypeService;
 

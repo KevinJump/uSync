@@ -1,22 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+
 using Microsoft.Extensions.Logging;
+
 using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Models.Entities;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Strings;
+
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
 using uSync.Core;
 using uSync.Core.Serialization;
+
 using static Umbraco.Cms.Core.Constants;
 
-namespace uSync.BackOffice.SyncHandlers.Handlers{
+namespace uSync.BackOffice.SyncHandlers.Handlers
+{
     [SyncHandler("contentHandler", "Content", "Content", uSyncBackOfficeConstants.Priorites.Content
         , Icon = "icon-document usync-addon-icon", IsTwoPass = true, EntityType = UdiEntityType.Document)]
-    public class ContentHandler : ContentHandlerBase<IContent, IContentService>, ISyncHandler, ISyncExtendedHandler, ISyncItemHandler
+    public class ContentHandler : ContentHandlerBase<IContent, IContentService>, ISyncHandler
     {
         public override string Group => uSyncBackOfficeConstants.Groups.Content;
 
@@ -36,25 +40,6 @@ namespace uSync.BackOffice.SyncHandlers.Handlers{
         {
             this.contentService = contentService;
         }
-
-        protected override void DeleteViaService(IContent item)
-            => contentService.Delete(item);
-
-        protected override IContent GetFromService(int id)
-            => contentService.GetById(id);
-
-        protected override IContent GetFromService(Guid key)
-        {
-            return contentService.GetById(key);
-        }
-
-
-        protected override IContent GetFromService(string alias)
-            => null;
-
-
-        public uSyncAction Import(string file)
-            => this.Import(file, DefaultConfig, SerializerFlags.OnePass).FirstOrDefault();
 
         /// <summary>
         ///  Get child items 

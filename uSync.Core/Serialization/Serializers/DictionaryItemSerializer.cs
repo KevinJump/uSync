@@ -13,7 +13,7 @@ using uSync.Core.Serialization;
 namespace uSync.Core.Serialization.Serializers
 {
     [SyncSerializer("4D18F4C3-6EBC-4AAD-8D20-6353BDBBD484", "Dicrionary Serializer", uSyncConstants.Serialization.Dictionary)]
-    public class DictionaryItemSerializer : SyncSerializerBase<IDictionaryItem>, ISyncNodeSerializer<IDictionaryItem>
+    public class DictionaryItemSerializer : SyncSerializerBase<IDictionaryItem>, ISyncSerializer<IDictionaryItem>
     {
         private readonly ILocalizationService localizationService;
 
@@ -162,10 +162,13 @@ namespace uSync.Core.Serialization.Serializers
                 item.ItemKey, node, typeof(IDictionaryItem), ChangeType.Export);
         }
 
-        protected override IDictionaryItem FindItem(Guid key)
+        public override IDictionaryItem FindItem(int id)
+            => localizationService.GetDictionaryItemById(id);
+
+        public override IDictionaryItem FindItem(Guid key)
             => localizationService.GetDictionaryItemById(key);
 
-        protected override IDictionaryItem FindItem(string alias)
+        public override IDictionaryItem FindItem(string alias)
             => localizationService.GetDictionaryItemByKey(alias);
 
         private int GetLevel(IDictionaryItem item, int level = 0)
@@ -179,13 +182,13 @@ namespace uSync.Core.Serialization.Serializers
             return level;
         }
 
-        protected override void SaveItem(IDictionaryItem item)
+        public override void SaveItem(IDictionaryItem item)
             => localizationService.Save(item);
 
-        protected override void DeleteItem(IDictionaryItem item)
+        public override void DeleteItem(IDictionaryItem item)
             => localizationService.Delete(item);
 
-        protected override string ItemAlias(IDictionaryItem item)
+        public override string ItemAlias(IDictionaryItem item)
             => item.ItemKey;
     }
 }

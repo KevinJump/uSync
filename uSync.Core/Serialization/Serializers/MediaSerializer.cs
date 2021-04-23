@@ -20,7 +20,7 @@ using uSync.Core.Models;
 namespace uSync.Core.Serialization.Serializers
 {
     [SyncSerializer("B4060604-CF5A-46D6-8F00-257579A658E6", "MediaSerializer", uSyncConstants.Serialization.Media)]
-    public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncNodeSerializer<IMedia>
+    public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncSerializer<IMedia>
     {
         private readonly IMediaService mediaService;
 
@@ -186,7 +186,7 @@ namespace uSync.Core.Serialization.Serializers
             return Attempt.Succeed((IMedia)item);
         }
 
-        protected override IMedia FindItem(int id)
+        public override IMedia FindItem(int id)
         {
             var item = mediaService.GetById(id);
             if (item != null)
@@ -199,7 +199,7 @@ namespace uSync.Core.Serialization.Serializers
         }
 
 
-        protected override IMedia FindItem(Guid key)
+        public override IMedia FindItem(Guid key)
             => mediaService.GetById(key);
 
         protected override IMedia FindAtRoot(string alias)
@@ -216,10 +216,10 @@ namespace uSync.Core.Serialization.Serializers
         public override void Save(IEnumerable<IMedia> items)
             => mediaService.Save(items);
 
-        protected override void SaveItem(IMedia item)
+        public override void SaveItem(IMedia item)
             => mediaService.Save(item);
 
-        protected override void DeleteItem(IMedia item)
+        public override void DeleteItem(IMedia item)
             => mediaService.Delete(item);
 
     }

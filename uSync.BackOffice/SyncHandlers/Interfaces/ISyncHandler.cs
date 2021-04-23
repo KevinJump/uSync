@@ -5,6 +5,10 @@ using Newtonsoft.Json.Serialization;
 using Newtonsoft.Json;
 
 using uSync.BackOffice.Configuration;
+using Umbraco.Cms.Core;
+using uSync.Core.Models;
+using System.Xml.Linq;
+using uSync.Core.Dependency;
 
 namespace uSync.BackOffice.SyncHandlers
 {
@@ -52,6 +56,12 @@ namespace uSync.BackOffice.SyncHandlers
         ///  default config for the handler - when being used in events.
         /// </summary>
         HandlerSettings DefaultConfig { get; set; }
+        string Group { get; }
+        string EntityType { get; }
+        string TypeName { get; }
+
+        IEnumerable<uSyncAction> Export(int id, string folder, HandlerSettings settings);
+        IEnumerable<uSyncAction> Export(Udi udi, string folder, HandlerSettings settings);
 
         /// <summary>
         ///  Export all items 
@@ -61,6 +71,10 @@ namespace uSync.BackOffice.SyncHandlers
         /// <param name="callback">Callbacks to keep UI uptodate</param>
         /// <returns>List of actions detailing changes</returns>
         IEnumerable<uSyncAction> ExportAll(string folder, HandlerSettings settings, SyncUpdateCallback callback);
+        IEnumerable<uSyncDependency> GetDependencies(int id, DependencyFlags flags);
+        IEnumerable<uSyncDependency> GetDependencies(Guid key, DependencyFlags flags);
+        SyncAttempt<XElement> GetElement(Udi udi);
+        IEnumerable<uSyncAction> Import(string file, HandlerSettings settings, bool force);
 
         /// <summary>
         ///  Import All items 
@@ -73,6 +87,11 @@ namespace uSync.BackOffice.SyncHandlers
         IEnumerable<uSyncAction> ImportAll(string folder, HandlerSettings settings, bool force, SyncUpdateCallback callback);
 
         /// <summary>
+        ///  Import from a single node. 
+        /// </summary>
+        IEnumerable<uSyncAction> ImportElement(XElement node, string filename, HandlerSettings settings, uSyncImportOptions options);
+
+        /// <summary>
         ///  Report All items 
         /// </summary>
         /// <param name="folder">folder to use when reporting</param>
@@ -80,6 +99,13 @@ namespace uSync.BackOffice.SyncHandlers
         /// <param name="callback">Callbacks to keep UI uptodate</param>
         /// <returns>List of actions detailing changes</returns>
         IEnumerable<uSyncAction> Report(string folder, HandlerSettings settings, SyncUpdateCallback callback);
+        IEnumerable<uSyncAction> ReportElement(XElement node, string filename, HandlerSettings settings, uSyncImportOptions options);
+
+
+        /// <summary>
+        ///  Import the second pass of an item.
+        /// </summary>
+        IEnumerable<uSyncAction> ImportSecondPass(uSyncAction action, HandlerSettings settings, uSyncImportOptions options);
 
     }
 }

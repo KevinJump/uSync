@@ -6,7 +6,7 @@ using uSync.Core.Serialization;
 
 namespace uSync.Core.Tracking.Impliment
 {
-    public class LanguageTracker : SyncXmlTracker<ILanguage>, ISyncNodeTracker<ILanguage>
+    public class LanguageTracker : SyncXmlTracker<ILanguage>, ISyncTracker<ILanguage>
     {
         public LanguageTracker(ISyncSerializer<ILanguage> serializer) : base(serializer)
         {

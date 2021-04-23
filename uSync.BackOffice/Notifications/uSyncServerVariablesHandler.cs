@@ -8,7 +8,6 @@ using Umbraco.Cms.Core.Events;
 using Umbraco.Cms.Core.Hosting;
 using Umbraco.Cms.Core.Routing;
 using Umbraco.Cms.Infrastructure.WebAssets;
-using Umbraco.Cms.Web.BackOffice.SignalR;
 using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;

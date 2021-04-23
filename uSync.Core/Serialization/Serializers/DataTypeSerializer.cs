@@ -23,7 +23,7 @@ using uSync.Core.Models;
 namespace uSync.Core.Serialization.Serializers
 {
     [SyncSerializer("C06E92B7-7440-49B7-B4D2-AF2BF4F3D75D", "DataType Serializer", uSyncConstants.Serialization.DataType)]
-    public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncNodeSerializer<IDataType>
+    public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncSerializer<IDataType>
     {
         private readonly IDataTypeService dataTypeService;
         private readonly DataEditorCollection dataEditors;
@@ -252,10 +252,13 @@ namespace uSync.Core.Serialization.Serializers
         protected override string GetItemBaseType(XElement node)
             => node.Element("Info").Element("EditorAlias").ValueOrDefault(string.Empty);
 
-        protected override IDataType FindItem(Guid key)
+        public override IDataType FindItem(int id)
+            => dataTypeService.GetDataType(id);
+
+        public override IDataType FindItem(Guid key)
             => dataTypeService.GetDataType(key);
 
-        protected override IDataType FindItem(string alias)
+        public override IDataType FindItem(string alias)
             => dataTypeService.GetDataType(alias);
 
         protected override EntityContainer FindContainer(Guid key)
@@ -267,7 +270,7 @@ namespace uSync.Core.Serialization.Serializers
         protected override Attempt<OperationResult<OperationResultType, EntityContainer>> FindContainers(int parentId, string name)
             => dataTypeService.CreateContainer(parentId, name);
 
-        protected override void SaveItem(IDataType item)
+        public override void SaveItem(IDataType item)
         {
             if (item.IsDirty())
                 dataTypeService.Save(item);
@@ -282,11 +285,11 @@ namespace uSync.Core.Serialization.Serializers
         protected override void SaveContainer(EntityContainer container)
             => dataTypeService.SaveContainer(container);
 
-        protected override void DeleteItem(IDataType item)
+        public override void DeleteItem(IDataType item)
             => dataTypeService.Delete(item);
 
 
-        protected override string ItemAlias(IDataType item)
+        public override string ItemAlias(IDataType item)
             => item.Name;
 
 

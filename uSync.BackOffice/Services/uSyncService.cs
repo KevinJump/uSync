@@ -28,30 +28,25 @@ namespace uSync.BackOffice
     public partial class uSyncService
     {
         public delegate void SyncEventCallback(SyncProgressSummary summary);
-
-        private GlobalSettings globalSettings;
+      
+        private readonly uSyncConfigService _uSyncConfig;
+        private readonly SyncHandlerFactory _handlerFactory;
+        private readonly ILogger<uSyncService> _logger;
         
-        private readonly uSyncConfigService uSyncConfig;
-        private readonly SyncHandlerFactory handlerFactory;
-        private readonly ILogger<uSyncService> logger;
-        
-        private SyncFileService syncFileService;
+        private SyncFileService _syncFileService;
 
         public uSyncService(
             ILogger<uSyncService> logger,
             uSyncConfigService uSyncConfigService,
             SyncHandlerFactory handlerFactory,
-            SyncFileService syncFileService,
-            IOptions<GlobalSettings> globalOptions)
+            SyncFileService syncFileService)
         {
-            this.handlerFactory = handlerFactory;
+            this._handlerFactory = handlerFactory;
 
-            this.syncFileService = syncFileService;
+            this._syncFileService = syncFileService;
 
-            this.uSyncConfig = uSyncConfigService;
-            this.logger = logger;
-
-            this.globalSettings = globalOptions.Value;
+            this._uSyncConfig = uSyncConfigService;
+            this._logger = logger;
 
             uSyncTriggers.DoExport += USyncTriggers_DoExport;
             uSyncTriggers.DoImport += USyncTriggers_DoImport;
@@ -71,7 +66,7 @@ namespace uSync.BackOffice
             if (handlerOptions == null) handlerOptions = new SyncHandlerOptions();
             handlerOptions.Action = HandlerActions.Report;
 
-            var handlers = handlerFactory.GetValidHandlers(handlerOptions);
+            var handlers = _handlerFactory.GetValidHandlers(handlerOptions);
             return Report(folder, handlers, callbacks);
         }
 
@@ -84,7 +79,7 @@ namespace uSync.BackOffice
         /// <returns>List of actions detailing what would and wouldn't change</returns>
         public IEnumerable<uSyncAction> Report(string folder, IEnumerable<string> handlerAliases, uSyncCallbacks callbacks)
         {
-            var handlers = handlerFactory.GetDefaultHandlers(handlerAliases);
+            var handlers = _handlerFactory.GetDefaultHandlers(handlerAliases);
             return Report(folder, handlers, callbacks);
         }
 
@@ -95,14 +90,14 @@ namespace uSync.BackOffice
         /// <param name="handlers">List of SyncHandlers to use for the report</param>
         /// <param name="callbacks">Callback functions to keep UI uptodate</param>
         /// <returns>List of actions detailing what would and wouldn't change</returns>
-        public IEnumerable<uSyncAction> Report(string folder, IEnumerable<ExtendedHandlerConfigPair> handlers, uSyncCallbacks callbacks)
+        public IEnumerable<uSyncAction> Report(string folder, IEnumerable<HandlerConfigPair> handlers, uSyncCallbacks callbacks)
         {
 
             var sw = Stopwatch.StartNew();
 
             fireBulkStarting(ReportStarting);
 
-            logger.LogDebug("Reporting For [{0}]", string.Join(",", handlers.Select(x => x.Handler.Name)));
+            _logger.LogDebug("Reporting For [{0}]", string.Join(",", handlers.Select(x => x.Handler.Name)));
 
             var actions = new List<uSyncAction>();
 
@@ -133,7 +128,7 @@ namespace uSync.BackOffice
             fireBulkComplete(ReportComplete, actions);
             sw.Stop();
 
-            logger.LogInformation("uSync Report: {handlerCount} handlers, processed {itemCount} items, {changeCount} changes in {ElapsedMilliseconds}ms",
+            _logger.LogInformation("uSync Report: {handlerCount} handlers, processed {itemCount} items, {changeCount} changes in {ElapsedMilliseconds}ms",
                 handlers.Count(), actions.Count,
                 actions.CountChanges(),
                 sw.ElapsedMilliseconds);
@@ -161,7 +156,7 @@ namespace uSync.BackOffice
             if (handlerOptions == null) handlerOptions = new SyncHandlerOptions();
             handlerOptions.Action = HandlerActions.Import;
 
-            var handlers = handlerFactory.GetValidHandlers(handlerOptions);
+            var handlers = _handlerFactory.GetValidHandlers(handlerOptions);
             return Import(folder, force, handlers, callbacks);
         }
 
@@ -175,7 +170,7 @@ namespace uSync.BackOffice
         /// <returns>List of actions detailing what did and didn't change</returns>
         public IEnumerable<uSyncAction> Import(string folder, bool force, IEnumerable<string> handlerAliases, uSyncCallbacks callbacks)
         {
-            var handlers = handlerFactory.GetDefaultHandlers(handlerAliases);
+            var handlers = _handlerFactory.GetDefaultHandlers(handlerAliases);
             return Import(folder, force, handlers, callbacks);
         }
 
@@ -187,7 +182,7 @@ namespace uSync.BackOffice
         /// <param name="handlers">List of Handlers & config to use for import</param>
         /// <param name="callbacks">Callbacks to keep UI informed</param>
         /// <returns>List of actions detailing what did and didn't change</returns>
-        public IEnumerable<uSyncAction> Import(string folder, bool force, IEnumerable<ExtendedHandlerConfigPair> handlers, uSyncCallbacks callbacks)
+        public IEnumerable<uSyncAction> Import(string folder, bool force, IEnumerable<HandlerConfigPair> handlers, uSyncCallbacks callbacks)
         {
             // if its blank, we just throw it back empty. 
             if (handlers == null || !handlers.Any()) return Enumerable.Empty<uSyncAction>();
@@ -250,7 +245,7 @@ namespace uSync.BackOffice
                     // fire complete
                     fireBulkComplete(ImportComplete, actions);
 
-                    logger.LogInformation("uSync Import: {handlerCount} handlers, processed {itemCount} items, {changeCount} changes in {ElapsedMilliseconds}ms",
+                    _logger.LogInformation("uSync Import: {handlerCount} handlers, processed {itemCount} items, {changeCount} changes in {ElapsedMilliseconds}ms",
                         handlers.Count(),
                         actions.Count,
                         actions.CountChanges(),
@@ -263,7 +258,7 @@ namespace uSync.BackOffice
             }
         }
 
-        private IEnumerable<uSyncAction> PerformPostImport(string rootFolder, IEnumerable<ExtendedHandlerConfigPair> handlers, IEnumerable<uSyncAction> actions)
+        private IEnumerable<uSyncAction> PerformPostImport(string rootFolder, IEnumerable<HandlerConfigPair> handlers, IEnumerable<uSyncAction> actions)
         {
             var postImportActions = actions.Where(x => x.Success && x.Change > Core.ChangeType.NoChange && x.RequiresPostProcessing).ToList();
             if (postImportActions.Count == 0) return Enumerable.Empty<uSyncAction>();
@@ -301,10 +296,11 @@ namespace uSync.BackOffice
         /// <returns>Action detailing change or not</returns>
         public uSyncAction ImportSingleAction(uSyncAction action)
         {
-            var handlerConfig = handlerFactory.GetValidHandler(action.HandlerAlias);
-            if (handlerConfig != null && handlerConfig.Handler is ISyncExtendedHandler extendedHandler)
+            var handlerConfig = _handlerFactory.GetValidHandler(action.HandlerAlias);
+
+            if (handlerConfig != null)
             {
-                return extendedHandler
+                return handlerConfig.Handler
                     .Import(action.FileName, handlerConfig.Settings, true)
                     .FirstOrDefault();
             }
@@ -322,8 +318,8 @@ namespace uSync.BackOffice
         {
             try
             {
-                if (syncFileService.DirectoryExists(folder))
-                    syncFileService.CleanFolder(folder);
+                if (_syncFileService.DirectoryExists(folder))
+                    _syncFileService.CleanFolder(folder);
             }
             catch (Exception ex)
             {
@@ -346,7 +342,7 @@ namespace uSync.BackOffice
             if (handlerOptions == null) handlerOptions = new SyncHandlerOptions();
             handlerOptions.Action = HandlerActions.Export;
 
-            var handlers = handlerFactory.GetValidHandlers(handlerOptions);
+            var handlers = _handlerFactory.GetValidHandlers(handlerOptions);
 
             WriteVersionFile(folder);
 
@@ -355,9 +351,9 @@ namespace uSync.BackOffice
 
         public bool CheckVersionFile(string folder)
         {
-            var versionFile = Path.Combine(syncFileService.GetAbsPath(folder), "usync.config");
+            var versionFile = Path.Combine(_syncFileService.GetAbsPath(folder), "usync.config");
 
-            if (!syncFileService.FileExists(versionFile))
+            if (!_syncFileService.FileExists(versionFile))
             {
                 return false;
             }
@@ -365,7 +361,7 @@ namespace uSync.BackOffice
             {
                 try
                 {
-                    var node = syncFileService.LoadXElement(versionFile);
+                    var node = _syncFileService.LoadXElement(versionFile);
                     var format = node.Attribute("format").ValueOrDefault("");
                     if (!format.InvariantEquals(uSyncConstants.FormatVersion))
                     {
@@ -391,7 +387,7 @@ namespace uSync.BackOffice
         {
             try
             {
-                var versionFile = Path.Combine(syncFileService.GetAbsPath(folder), "usync.config");
+                var versionFile = Path.Combine(_syncFileService.GetAbsPath(folder), "usync.config");
                 var versionNode = new XElement("uSync",
                     new XAttribute("version", typeof(uSyncBackOffice).Assembly.GetName().Version.ToString()),
                     new XAttribute("format", uSyncConstants.FormatVersion),
@@ -403,7 +399,7 @@ namespace uSync.BackOffice
             }
             catch (Exception ex)
             {
-                logger.LogWarning(ex, "Issue saving the usync.conifg file in the root of {folder}", folder);
+                _logger.LogWarning(ex, "Issue saving the usync.conifg file in the root of {folder}", folder);
             }
         }
 
@@ -416,7 +412,7 @@ namespace uSync.BackOffice
         /// <returns>List of actions detailing what was exported</returns>
         public IEnumerable<uSyncAction> Export(string folder, IEnumerable<string> handlerAliases, uSyncCallbacks callbacks)
         {
-            var handlers = handlerFactory.GetDefaultHandlers(handlerAliases);
+            var handlers = _handlerFactory.GetDefaultHandlers(handlerAliases);
             return Export(folder, handlers, callbacks);
         }
 
@@ -427,7 +423,7 @@ namespace uSync.BackOffice
         /// <param name="handlerAliases">List of handlers to use for export</param>
         /// <param name="callbacks">callback functions to update the UI</param>
         /// <returns>List of actions detailing what was exported</returns>
-        public IEnumerable<uSyncAction> Export(string folder, IEnumerable<ExtendedHandlerConfigPair> handlers, uSyncCallbacks callbacks)
+        public IEnumerable<uSyncAction> Export(string folder, IEnumerable<HandlerConfigPair> handlers, uSyncCallbacks callbacks)
         {
             var sw = Stopwatch.StartNew();
 
@@ -463,7 +459,7 @@ namespace uSync.BackOffice
 
             sw.Stop();
 
-            logger.LogInformation("uSync Export: {handlerCount} handlers, processed {itemCount} items, {changeCount} changes in {ElapsedMilliseconds}ms",
+            _logger.LogInformation("uSync Export: {handlerCount} handlers, processed {itemCount} items, {changeCount} changes in {ElapsedMilliseconds}ms",
                 handlers.Count(), actions.Count,
                 actions.CountChanges(),
                 sw.ElapsedMilliseconds);
@@ -475,24 +471,6 @@ namespace uSync.BackOffice
 
         #endregion
 
-        #region Obsolete calls (callback, update)
-
-        // v8.1 calls
-
-        [Obsolete("Use the new uSyncCallbacks group when calling")]
-        public IEnumerable<uSyncAction> Import(string folder, bool force, SyncEventCallback callback = null, SyncUpdateCallback update = null)
-            => Import(folder, force, default(SyncHandlerOptions), new uSyncCallbacks(callback, update));
-
-        [Obsolete("Use the new uSyncCallbacks group when calling")]
-        public IEnumerable<uSyncAction> Report(string folder, SyncEventCallback callback = null, SyncUpdateCallback update = null)
-            => Report(folder, default(SyncHandlerOptions), new uSyncCallbacks(callback, update));
-
-        [Obsolete("Use the new uSyncCallbacks group when calling")]
-        public IEnumerable<uSyncAction> Export(string folder, SyncEventCallback callback = null, SyncUpdateCallback update = null)
-            => Export(folder, default(SyncHandlerOptions), new uSyncCallbacks(callback, update));
-
-        #endregion
-
         /// <summary>
         ///  Do an import triggered by an event.
         /// </summary>
@@ -501,9 +479,9 @@ namespace uSync.BackOffice
         {
             if (e.EntityTypes != null && !string.IsNullOrWhiteSpace(e.Folder))
             {
-                logger.LogInformation("Import Triggered by downlevel change {0}", e.Folder);
+                _logger.LogInformation("Import Triggered by downlevel change {0}", e.Folder);
 
-                var handlers = handlerFactory
+                var handlers = _handlerFactory
                     .GetValidHandlersByEntityType(e.EntityTypes, e.HandlerOptions);
 
                 if (handlers.Any()) this.Import(e.Folder, false, handlers, null);
@@ -518,9 +496,9 @@ namespace uSync.BackOffice
         {
             if (e.EntityTypes != null && !string.IsNullOrWhiteSpace(e.Folder))
             {
-                logger.LogInformation("Export Triggered by downlevel change {0}", e.Folder);
+                _logger.LogInformation("Export Triggered by downlevel change {0}", e.Folder);
 
-                var handlers = handlerFactory
+                var handlers = _handlerFactory
                     .GetValidHandlersByEntityType(e.EntityTypes, e.HandlerOptions);
 
                 if (handlers.Any()) this.Export(e.Folder, handlers, null);

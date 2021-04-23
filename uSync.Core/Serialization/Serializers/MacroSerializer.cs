@@ -14,7 +14,7 @@ using uSync.Core.Models;
 namespace uSync.Core.Serialization.Serializers
 {
     [SyncSerializer("CBB3FDA1-F7B3-470E-B78F-EB316576C8C6", "Macro Serializer", uSyncConstants.Serialization.Macro)]
-    public class MacroSerializer : SyncSerializerBase<IMacro>, ISyncNodeSerializer<IMacro>
+    public class MacroSerializer : SyncSerializerBase<IMacro>, ISyncSerializer<IMacro>
     {
         private readonly IMacroService macroService;
         private readonly IShortStringHelper shortStringHelper;
@@ -231,19 +231,22 @@ namespace uSync.Core.Serialization.Serializers
                 ChangeType.Export);
         }
 
-        protected override IMacro FindItem(Guid key)
+        public override IMacro FindItem(int id)
+            => macroService.GetById(id);
+
+        public override IMacro FindItem(Guid key)
             => macroService.GetById(key);
 
-        protected override IMacro FindItem(string alias)
+        public override IMacro FindItem(string alias)
             => macroService.GetByAlias(alias);
 
-        protected override void SaveItem(IMacro item)
+        public override void SaveItem(IMacro item)
             => macroService.Save(item);
 
-        protected override void DeleteItem(IMacro item)
+        public override void DeleteItem(IMacro item)
             => macroService.Delete(item);
 
-        protected override string ItemAlias(IMacro item)
+        public override string ItemAlias(IMacro item)
             => item.Alias;
     }
 }

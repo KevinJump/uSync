@@ -47,15 +47,7 @@ namespace uSync.Core.Tracking
         }
 
         private SyncAttempt<XElement> SerializeItem(TObject item, SyncSerializerOptions options)
-        {
-            if (serializer is ISyncOptionsSerializer<TObject> optionSerializer)
-                return optionSerializer.Serialize(item, options);
-
-#pragma warning disable CS0618 // Type or member is obsolete
-            return serializer.Serialize(item);
-#pragma warning restore CS0618 // Type or member is obsolete
-        }
-
+            => serializer.Serialize(item, options);
 
         public IEnumerable<uSyncChange> GetChanges(XElement target, XElement source, SyncSerializerOptions options)
         {
@@ -89,18 +81,7 @@ namespace uSync.Core.Tracking
         }
 
         private ChangeType GetChangeType(XElement target, XElement source, SyncSerializerOptions options)
-        {
-            switch (serializer)
-            {
-                case ISyncNodeSerializer<TObject> nodeSerializer:
-                    return nodeSerializer.IsCurrent(target, source, options);
-                case ISyncOptionsSerializer<TObject> optionSerializer:
-                    return optionSerializer.IsCurrent(target, options);
-                default:
-                    return serializer.IsCurrent(target);
-            }
-        }
-
+           => serializer.IsCurrent(target, source, options);
 
         /// <summary>
         ///  actually kicks off here, if you have two xml files that are diffrent. 

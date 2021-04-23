@@ -11,6 +11,7 @@ using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Models.Entities;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Strings;
+using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
@@ -74,6 +75,7 @@ namespace uSync.BackOffice.SyncHandlers
 
             return actions;
         }
+
 
         abstract protected void DeleteFolder(int id);
 

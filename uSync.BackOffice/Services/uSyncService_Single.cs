@@ -27,7 +27,7 @@ namespace uSync.BackOffice
             var lastType = string.Empty;
 
             SyncHandlerOptions syncHandlerOptions = new SyncHandlerOptions(options.HandlerSet);
-            ExtendedHandlerConfigPair handlerPair = null;
+            HandlerConfigPair handlerPair = null;
 
             var index = options.PageNumber * options.PageSize;
 
@@ -37,7 +37,7 @@ namespace uSync.BackOffice
                 if (!itemType.InvariantEquals(lastType))
                 {
                     lastType = itemType;
-                    handlerPair = handlerFactory.GetValidHandlerByTypeName(itemType, syncHandlerOptions);
+                    handlerPair = _handlerFactory.GetValidHandlerByTypeName(itemType, syncHandlerOptions);
                 }
 
                 options.Callbacks?.Update.Invoke(item.Node.GetAlias(),
@@ -45,14 +45,7 @@ namespace uSync.BackOffice
 
                 if (handlerPair != null)
                 {
-                    if (handlerPair.Handler is ISyncItemHandler itemHandler)
-                    {
-                        actions.AddRange(itemHandler.ReportElement(item.Node, item.FileName, handlerPair.Settings, options));
-                    }
-                    else
-                    {
-                        actions.AddRange(handlerPair.Handler.ReportElement(item.Node));
-                    }
+                    actions.AddRange(handlerPair.Handler.ReportElement(item.Node, item.FileName, handlerPair.Settings, options));
                 }
 
                 index++;
@@ -77,7 +70,7 @@ namespace uSync.BackOffice
                     var range = options.ProgressMax - options.ProgressMin;
 
                     SyncHandlerOptions syncHandlerOptions = new SyncHandlerOptions(options.HandlerSet);
-                    ExtendedHandlerConfigPair handlerPair = null;
+                    HandlerConfigPair handlerPair = null;
 
                     var index = options.PageNumber * options.PageSize;
 
@@ -87,7 +80,7 @@ namespace uSync.BackOffice
                         if (!itemType.InvariantEquals(lastType))
                         {
                             lastType = itemType;
-                            handlerPair = handlerFactory.GetValidHandlerByTypeName(itemType, syncHandlerOptions);
+                            handlerPair = _handlerFactory.GetValidHandlerByTypeName(itemType, syncHandlerOptions);
                         }
 
                         options.Callbacks?.Update?.Invoke(item.Node.GetAlias(), 
@@ -95,14 +88,7 @@ namespace uSync.BackOffice
 
                         if (handlerPair != null)
                         {
-                            if (handlerPair.Handler is ISyncItemHandler itemHandler)
-                            {
-                                actions.AddRange(itemHandler.ImportElement(item.Node, item.FileName, handlerPair.Settings, options));
-                            }
-                            else
-                            {
-                                actions.AddRange(handlerPair.Handler.ImportElement(item.Node, options.Flags.HasFlag(SerializerFlags.Force)));
-                            }
+                            actions.AddRange(handlerPair.Handler.ImportElement(item.Node, item.FileName, handlerPair.Settings, options));
                         }
 
                         index++;
@@ -125,7 +111,7 @@ namespace uSync.BackOffice
                     var total = actions.Count();
 
                     var lastType = string.Empty;
-                    ExtendedHandlerConfigPair handlerPair = null;
+                    HandlerConfigPair handlerPair = null;
 
                     var index = options.PageNumber * options.PageSize;
 
@@ -134,17 +120,13 @@ namespace uSync.BackOffice
                         if (!action.HandlerAlias.InvariantEquals(lastType))
                         {
                             lastType = action.HandlerAlias;    
-                            handlerPair = handlerFactory.GetValidHandler(action.HandlerAlias, syncHandlerOptions);
+                            handlerPair = _handlerFactory.GetValidHandler(action.HandlerAlias, syncHandlerOptions);
                         }
 
                         options.Callbacks?.Update?.Invoke($"Second Pass: {action.Name}",
                             CalculateProgress(index, total, options.ProgressMin, options.ProgressMax), 100);
 
-
-                        if (handlerPair != null && handlerPair.Handler is ISyncItemHandler itemHandler)
-                        {
-                            secondPassActions.AddRange(itemHandler.ImportSecondPass(action, handlerPair.Settings, options));
-                        }
+                        secondPassActions.AddRange(handlerPair.Handler.ImportSecondPass(action, handlerPair.Settings, options));
 
                         index++;
                     }
@@ -178,7 +160,7 @@ namespace uSync.BackOffice
 
                     foreach (var actionItem in folders.SelectMany(actionGroup => actionGroup))
                     {
-                        var handlerPair = handlerFactory.GetValidHandler(actionItem.alias, syncHandlerOptions);
+                        var handlerPair = _handlerFactory.GetValidHandler(actionItem.alias, syncHandlerOptions);
                         if (handlerPair.Handler is ISyncPostImportHandler postImportHandler)
                         {
                             options.Callbacks?.Update?.Invoke(actionItem.alias, index, folders.Count);
@@ -199,13 +181,13 @@ namespace uSync.BackOffice
         /// </summary>
         private IList<OrderedNodeInfo> LoadOrderedNodes(string folder)
         {
-            var files = syncFileService.GetFiles(folder, "*.config", true);
+            var files = _syncFileService.GetFiles(folder, "*.config", true);
 
             var nodes = new List<OrderedNodeInfo>();
 
             foreach(var file in files)
             {
-                nodes.Add(new OrderedNodeInfo(file, syncFileService.LoadXElement(file)));
+                nodes.Add(new OrderedNodeInfo(file, _syncFileService.LoadXElement(file)));
             }
 
             return nodes

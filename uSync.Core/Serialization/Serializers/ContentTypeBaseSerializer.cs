@@ -951,13 +951,13 @@ namespace uSync.Core.Serialization.Serializers
 
         #region Finders
 
-        protected virtual TObject FindItem(int id)
+        public override TObject FindItem(int id)
             => baseService.Get(id);
 
-        override protected TObject FindItem(Guid key)
+        public override TObject FindItem(Guid key)
             => baseService.Get(key);
 
-        override protected TObject FindItem(string alias)
+        public override TObject FindItem(string alias)
             => baseService.Get(alias);
 
 
@@ -970,7 +970,7 @@ namespace uSync.Core.Serialization.Serializers
         override protected Attempt<OperationResult<OperationResultType, EntityContainer>> FindContainers(int parentId, string name)
             => baseService.CreateContainer(parentId, name);
 
-        protected override void SaveItem(TObject item)
+        public override void SaveItem(TObject item)
         {
             if (item.IsDirty()) baseService.Save(item);
         }
@@ -985,10 +985,10 @@ namespace uSync.Core.Serialization.Serializers
             baseService.SaveContainer(container);
         }
 
-        protected override void DeleteItem(TObject item)
+        public override void DeleteItem(TObject item)
             => baseService.Delete(item);
 
-        protected override string ItemAlias(TObject item)
+        public override string ItemAlias(TObject item)
             => item.Alias;
 
         protected override IEnumerable<EntityContainer> GetContainers(TObject item)

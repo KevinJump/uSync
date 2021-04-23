@@ -43,22 +43,10 @@ namespace uSync.Core.Serialization
 
         public bool IsTwoPass { get; private set; }
 
-
-        [Obsolete("Serialize with options for better config support")]
-        public SyncAttempt<XElement> Serialize(TObject item)
-            => Serialize(item, new SyncSerializerOptions());
-
         public SyncAttempt<XElement> Serialize(TObject item, SyncSerializerOptions options)
         {
             return this.SerializeCore(item, options);
         }
-
-        /// <remarks>
-        ///  used primarliy for checking parentage, but also can be used for checking things like create only.
-        /// </remarks>
-        [Obsolete("deserialize with options for better config support")]
-        protected virtual SyncAttempt<TObject> CanDeserialize(XElement node, SerializerFlags flags)
-            => CanDeserialize(node, new SyncSerializerOptions(flags));
 
         /// <summary>
         ///  CanDeserialize based on the flags, used to check the model is good, for this import 
@@ -66,10 +54,6 @@ namespace uSync.Core.Serialization
         protected virtual SyncAttempt<TObject> CanDeserialize(XElement node, SyncSerializerOptions options)
             => SyncAttempt<TObject>.Succeed("No Check", ChangeType.NoChange);
 
-
-        [Obsolete("deserialize with options for better config support")]
-        public SyncAttempt<TObject> Deserialize(XElement node, SerializerFlags flags)
-            => Deserialize(node, new SyncSerializerOptions(flags));
 
         public SyncAttempt<TObject> Deserialize(XElement node, SyncSerializerOptions options)
         {
@@ -122,33 +106,13 @@ namespace uSync.Core.Serialization
             return SyncAttempt<TObject>.Succeed(node.GetAlias(), ChangeType.NoChange);
         }
 
-        [Obsolete("Deserialize with options for better config support")]
-        public virtual SyncAttempt<TObject> DeserializeSecondPass(TObject item, XElement node, SerializerFlags flags)
-            => DeserializeSecondPass(item, node, new SyncSerializerOptions(flags));
-
         public virtual SyncAttempt<TObject> DeserializeSecondPass(TObject item, XElement node, SyncSerializerOptions options)
         {
             return SyncAttempt<TObject>.Succeed(nameof(item), item, typeof(TObject), ChangeType.NoChange);
         }
 
-
-        [Obsolete("Pass SyncSerializerOptions for more config control")]
-        protected virtual SyncAttempt<XElement> SerializeCore(TObject item)
-            => SerializeCore(item, new SyncSerializerOptions());
-
-        [Obsolete("Pass SyncSerializerOptions for more config control")]
-        protected virtual SyncAttempt<TObject> DeserializeCore(XElement node)
-            => DeserializeCore(node, new SyncSerializerOptions());
-
-#pragma warning disable CS0618 // Type or member is obsolete
-
-        protected virtual SyncAttempt<XElement> SerializeCore(TObject item, SyncSerializerOptions options)
-            => SerializeCore(item);
-
-        protected virtual SyncAttempt<TObject> DeserializeCore(XElement node, SyncSerializerOptions options)
-            => DeserializeCore(node);
-
-#pragma warning restore CS0618 // Type or member is obsolete
+        protected abstract SyncAttempt<XElement> SerializeCore(TObject item, SyncSerializerOptions options);
+        protected abstract SyncAttempt<TObject> DeserializeCore(XElement node, SyncSerializerOptions options);
 
         /// <summary>
         ///  all xml items now have the same top line, this makes 
@@ -192,11 +156,7 @@ namespace uSync.Core.Serialization
         public bool IsValidOrEmpty(XElement node)
             => IsEmpty(node) || IsValid(node);
 
-        [Obsolete]
-        protected SyncAttempt<TObject> ProcessAction(XElement node, SerializerFlags flags)
-            => ProcessAction(node, new SyncSerializerOptions(flags));
-
-        /// <summary>
+           /// <summary>
         ///  Process the action in teh 'empty' XML node
         /// </summary>
         /// <param name="node">XML to process</param>
@@ -269,11 +229,7 @@ namespace uSync.Core.Serialization
             logger.LogDebug("Process Rename (no action)");
             return SyncAttempt<TObject>.Succeed(alias, ChangeType.NoChange);
         }
-
-        [Obsolete]
-        public virtual ChangeType IsCurrent(XElement node)
-            => IsCurrent(node, new SyncSerializerOptions());
-
+        
         public virtual ChangeType IsCurrent(XElement node, SyncSerializerOptions options)
         {
             XElement current = null;
@@ -392,16 +348,18 @@ namespace uSync.Core.Serialization
             return (key: Guid.Empty, alias: string.Empty);
         }
 
-        protected abstract TObject FindItem(Guid key);
-        protected abstract TObject FindItem(string alias);
+        public abstract TObject FindItem(int id); 
 
-        protected abstract void SaveItem(TObject item);
+        public abstract TObject FindItem(Guid key);
+        public abstract TObject FindItem(string alias);
 
-        protected abstract void DeleteItem(TObject item);
+        public abstract void SaveItem(TObject item);
 
-        protected abstract string ItemAlias(TObject item);
+        public abstract void DeleteItem(TObject item);
 
-        protected abstract Guid ItemKey(TObject item);
+        public abstract string ItemAlias(TObject item);
+
+        public abstract Guid ItemKey(TObject item);
 
 
         /// <summary>

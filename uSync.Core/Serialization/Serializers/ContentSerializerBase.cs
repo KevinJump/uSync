@@ -724,9 +724,7 @@ namespace uSync.Core.Serialization.Serializers
             return default(TObject);
         }
 
-        protected abstract TObject FindItem(int id);
-
-        protected override TObject FindItem(string alias)
+        public override TObject FindItem(string alias)
         {
             // we can't relaibly do this - because names can be the same
             // across the content treee. but we should have overridden all classes that call this 
@@ -768,7 +766,7 @@ namespace uSync.Core.Serialization.Serializers
 
         protected abstract TObject FindAtRoot(string alias);
 
-        protected override string ItemAlias(TObject item)
+        public override string ItemAlias(TObject item)
             => item.Name;
 
         protected TObject FindParent(XElement node, bool searchByAlias = false)

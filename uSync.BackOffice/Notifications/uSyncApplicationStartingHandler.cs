@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Events;
@@ -20,20 +15,22 @@ using uSync.BackOffice.SyncHandlers;
 
 namespace uSync.BackOffice.Notifications
 {
+    /// <summary>
+    ///  Run uSync tasks when the site has started up. 
+    /// </summary>
     public class uSyncApplicationStartingHandler : INotificationHandler<UmbracoApplicationStarting>
     {
-        private ILogger<uSyncApplicationStartingHandler> logger;
+        private ILogger<uSyncApplicationStartingHandler> _logger;
 
-        private IRuntimeState runtimeState;
-        private IServerRoleAccessor serverRegistrar;
+        private IRuntimeState _runtimeState;
+        private IServerRoleAccessor _serverRegistrar;
 
-        private IUmbracoContextFactory umbracoContextFactory;
+        private IUmbracoContextFactory _umbracoContextFactory;
 
-        private readonly uSyncConfigService uSyncConfig;
+        private readonly uSyncConfigService _uSyncConfig;
 
-        private SyncFileService syncFileService;
-        private uSyncService uSyncService;
-        private SyncHandlerFactory handlerFactory;
+        private SyncFileService _syncFileService;
+        private uSyncService _uSyncService;
 
         public uSyncApplicationStartingHandler(
             ILogger<uSyncApplicationStartingHandler> logger,
@@ -42,74 +39,80 @@ namespace uSync.BackOffice.Notifications
             IUmbracoContextFactory umbracoContextFactory,
             uSyncConfigService uSyncConfigService,
             SyncFileService syncFileService,
-            uSyncService uSyncService,
-            SyncHandlerFactory handlerFactory)
+            uSyncService uSyncService)
         {
-            this.runtimeState = runtimeState;
-            this.serverRegistrar = serverRegistrar;
+            this._runtimeState = runtimeState;
+            this._serverRegistrar = serverRegistrar;
 
-            this.umbracoContextFactory = umbracoContextFactory;
+            this._umbracoContextFactory = umbracoContextFactory;
 
-            this.logger = logger;
+            this._logger = logger;
 
-            this.uSyncConfig = uSyncConfigService;
+            this._uSyncConfig = uSyncConfigService;
 
-            this.syncFileService = syncFileService;
-            this.uSyncService = uSyncService;
-            this.handlerFactory = handlerFactory;
+            this._syncFileService = syncFileService;
+            this._uSyncService = uSyncService;
         }
 
+        /// <summary>
+        ///  Handle the appliction starting notification event.
+        /// </summary>
         public void Handle(UmbracoApplicationStarting notification)
         {
-            if (runtimeState.Level < RuntimeLevel.Run)
+            /// we only run uSync when the site is running, and we 
+            /// are not running on a replica.
+            if (_runtimeState.Level < RuntimeLevel.Run)
             {
-                logger.LogInformation("Umbaco is not in Run mode, so uSync will not run");
+                _logger.LogInformation("Umbaco is not in Run mode, so uSync will not run");
                 return;
             }
 
-            if (serverRegistrar.CurrentServerRole == ServerRole.Replica)
+            if (_serverRegistrar.CurrentServerRole == ServerRole.Replica)
             {
-                logger.LogInformation("This is a replicate server in a load balanced setup - uSync will not run");
+                _logger.LogInformation("This is a replicate server in a load balanced setup - uSync will not run");
                 return;
             }
 
             InituSync();
         }
 
+        /// <summary>
+        ///  Initialize uSync elements (run start up import etc).
+        /// </summary>
         private void InituSync()
         {
             var sw = Stopwatch.StartNew();
 
             try
             {
-                using (var reference = umbracoContextFactory.EnsureUmbracoContext())
+                using (var reference = _umbracoContextFactory.EnsureUmbracoContext())
                 {
-                    if (uSyncConfig.Settings.ExportAtStartup || (uSyncConfig.Settings.ExportOnSave && !syncFileService.RootExists(uSyncConfig.Settings.RootFolder)))
+                    if (_uSyncConfig.Settings.ExportAtStartup || (_uSyncConfig.Settings.ExportOnSave && !_syncFileService.RootExists(_uSyncConfig.Settings.RootFolder)))
                     {
-                        logger.LogInformation("uSync: Running export at startup");
-                        uSyncService.Export(uSyncConfig.Settings.RootFolder, default(SyncHandlerOptions));
+                        _logger.LogInformation("uSync: Running export at startup");
+                        _uSyncService.Export(_uSyncConfig.Settings.RootFolder, default(SyncHandlerOptions));
                     }
 
-                    if (uSyncConfig.Settings.ImportAtStartup)
+                    if (_uSyncConfig.Settings.ImportAtStartup)
                     {
-                        logger.LogInformation("uSync: Running Import at startup");
+                        _logger.LogInformation("uSync: Running Import at startup");
 
-                        if (!HasStopFile(uSyncConfig.Settings.RootFolder))
+                        if (!HasStopFile(_uSyncConfig.Settings.RootFolder))
                         {
-                            uSyncService.Import(uSyncConfig.Settings.RootFolder, false, new SyncHandlerOptions
+                            _uSyncService.Import(_uSyncConfig.Settings.RootFolder, false, new SyncHandlerOptions
                             {
-                                Group = uSyncConfig.Settings.ImportAtStartupGroup
+                                Group = _uSyncConfig.Settings.ImportAtStartupGroup
                             });
 
-                            ProcessOnceFile(uSyncConfig.Settings.RootFolder);
+                            ProcessOnceFile(_uSyncConfig.Settings.RootFolder);
                         }
                         else
                         {
-                            logger.LogInformation("Startup Import blocked by usync.stop file");
+                            _logger.LogInformation("Startup Import blocked by usync.stop file");
                         }
                     }
 
-                    if (uSyncConfig.Settings.ExportOnSave)
+                    if (_uSyncConfig.Settings.ExportOnSave)
                     {
                         // This is not done here any more - notification handlers are always setup, and 
                         // when they fire we check to see if ExportOnSave is set then.
@@ -118,26 +121,32 @@ namespace uSync.BackOffice.Notifications
             }
             catch(Exception ex)
             {
-                logger.LogWarning(ex, "uSyc: Error duting startup {message}", ex.Message);
+                _logger.LogWarning(ex, "uSync: Error duting startup {message}", ex.Message);
             }
             finally
             {
                 sw.Stop();
-                logger.LogInformation("uSync: Startup Complete {elapsed}ms", sw.ElapsedMilliseconds);
+                _logger.LogInformation("uSync: Startup Complete {elapsed}ms", sw.ElapsedMilliseconds);
             }
 
         }
 
+        /// <summary>
+        ///  does the uSync folder contain a uSync.stop file (which would mean we would not process anything at startup)
+        /// </summary>
         private bool HasStopFile(string folder)
-            => syncFileService.FileExists($"{folder}/usync.stop");
+            => _syncFileService.FileExists($"{folder}/usync.stop");
 
+        /// <summary>
+        ///  Process the once file (if it exsits we rename it to usync.stop).
+        /// </summary>
         private void ProcessOnceFile(string folder)
         {
-            if (syncFileService.FileExists($"{folder}/usync.once"))
+            if (_syncFileService.FileExists($"{folder}/usync.once"))
             {
-                syncFileService.DeleteFile($"{folder}/usync.once");
-                syncFileService.SaveFile($"{folder}/usync.stop", "uSync Stop file, prevents startup import");
-                logger.LogInformation("usync.once file replaced by usync.stop file");
+                _syncFileService.DeleteFile($"{folder}/usync.once");
+                _syncFileService.SaveFile($"{folder}/usync.stop", "uSync Stop file, prevents startup import");
+                _logger.LogInformation("usync.once file replaced by usync.stop file");
             }
         }
 

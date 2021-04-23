@@ -17,7 +17,7 @@ namespace uSync.Core.Serialization.Serializers
 {
     [SyncSerializer("8D2381C3-A0F8-43A2-8563-6F12F9F48023", "Language Serializer",
         uSyncConstants.Serialization.Language, IsTwoPass = true)]
-    public class LanguageSerializer : SyncSerializerBase<ILanguage>, ISyncNodeSerializer<ILanguage>
+    public class LanguageSerializer : SyncSerializerBase<ILanguage>, ISyncSerializer<ILanguage>
     {
         private readonly ILocalizationService localizationService;
         private readonly GlobalSettings globalSettings;
@@ -197,7 +197,7 @@ namespace uSync.Core.Serialization.Serializers
                 && node.GetAlias() != string.Empty
                 && node.Element("IsoCode") != null;
 
-        protected override ILanguage FindItem(string alias)
+        public override ILanguage FindItem(string alias)
         {
             // GetLanguageByIsoCode - doesn't only return the language of the code you specify
             // it will fallback to the primary one (e.g en-US might return en), 
@@ -209,13 +209,15 @@ namespace uSync.Core.Serialization.Serializers
             return item;
         }
 
+        public override ILanguage FindItem(int id)
+            => localizationService.GetLanguageById(id);
 
-        protected override ILanguage FindItem(Guid key) => default(ILanguage);
+        public override ILanguage FindItem(Guid key) => default(ILanguage);
 
-        protected override void SaveItem(ILanguage item)
+        public override void SaveItem(ILanguage item)
             => localizationService.Save(item);
 
-        protected override void DeleteItem(ILanguage item)
+        public override void DeleteItem(ILanguage item)
             => localizationService.Delete(item);
 
 
@@ -225,7 +227,7 @@ namespace uSync.Core.Serialization.Serializers
             return node;
         }
 
-        protected override string ItemAlias(ILanguage item)
+        public override string ItemAlias(ILanguage item)
             => item.IsoCode;
 
     }

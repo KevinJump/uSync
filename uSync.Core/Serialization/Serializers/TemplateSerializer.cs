@@ -16,7 +16,7 @@ using static Umbraco.Cms.Core.Constants;
 namespace uSync.Core.Serialization.Serializers
 {
     [SyncSerializer("D0E0769D-CCAE-47B4-AD34-4182C587B08A", "Template Serializer", uSyncConstants.Serialization.Template)]
-    public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncNodeSerializer<ITemplate>
+    public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer<ITemplate>
     {
         private readonly IFileService fileService;
         private readonly IShortStringHelper shortStringHelper;
@@ -161,23 +161,25 @@ namespace uSync.Core.Serialization.Serializers
             return level;
         }
 
+        public override ITemplate FindItem(int id)
+            => fileService.GetTemplate(id);
 
-        protected override ITemplate FindItem(string alias)
+        public override ITemplate FindItem(string alias)
             => fileService.GetTemplate(alias);
 
-        protected override ITemplate FindItem(Guid key)
+        public override ITemplate FindItem(Guid key)
             => fileService.GetTemplate(key);
 
-        protected override void SaveItem(ITemplate item)
+        public override void SaveItem(ITemplate item)
             => fileService.SaveTemplate(item);
 
         public override void Save(IEnumerable<ITemplate> items)
             => fileService.SaveTemplate(items);
 
-        protected override void DeleteItem(ITemplate item)
+        public override void DeleteItem(ITemplate item)
             => fileService.DeleteTemplate(item.Alias);
 
-        protected override string ItemAlias(ITemplate item)
+        public override string ItemAlias(ITemplate item)
             => item.Alias;
 
         /// <summary>

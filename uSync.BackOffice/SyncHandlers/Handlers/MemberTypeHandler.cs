@@ -22,7 +22,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("memberTypeHandler", "Member Types", "MemberTypes", uSyncBackOfficeConstants.Priorites.MemberTypes,
         IsTwoPass = true, Icon = "icon-users", EntityType = UdiEntityType.MemberType)]
-    public class MemberTypeHandler : SyncHandlerContainerBase<IMemberType, IMemberTypeService>, ISyncExtendedHandler, ISyncItemHandler,
+    public class MemberTypeHandler : SyncHandlerContainerBase<IMemberType, IMemberTypeService>, ISyncHandler,
         INotificationHandler<SavedNotification<IMemberType>>,
         INotificationHandler<MovedNotification<IMemberType>>,
         INotificationHandler<DeletedNotification<IMemberType>>
@@ -46,19 +46,6 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         protected override void DeleteFolder(int id)
             => memberTypeService.DeleteContainer(id);
 
-        protected override void DeleteViaService(IMemberType item)
-            => memberTypeService.Delete(item);
-
-        protected override IMemberType GetFromService(int id)
-            => memberTypeService.Get(id);
-
-        protected override IMemberType GetFromService(Guid key)
-            => memberTypeService.Get(key);
-
-        protected override IMemberType GetFromService(string alias)
-            => memberTypeService.Get(alias);
-
-
         protected override IEntity GetContainer(int id)
             => memberTypeService.GetContainer(id);
 
@@ -76,9 +63,6 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
 
             return item.Name.ToSafeFileName(shortStringHelper);
         }
-
-        protected override string GetItemAlias(IMemberType item)
-            => item.Alias;
     }
 
 }

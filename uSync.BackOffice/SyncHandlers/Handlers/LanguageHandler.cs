@@ -26,13 +26,12 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("languageHandler", "Languages", "Languages", uSyncBackOfficeConstants.Priorites.Languages,
         Icon = "icon-globe", EntityType = UdiEntityType.Language, IsTwoPass = true)]
-    public class LanguageHandler : SyncHandlerBase<ILanguage, ILocalizationService>, ISyncExtendedHandler, ISyncItemHandler,
+    public class LanguageHandler : SyncHandlerBase<ILanguage, ILocalizationService>, ISyncHandler,
         INotificationHandler<SavingNotification<ILanguage>>,
         INotificationHandler<SavedNotification<ILanguage>>,
         INotificationHandler<DeletedNotification<ILanguage>>
     {
         private readonly ILocalizationService localizationService;
-        private readonly IShortStringHelper shortStringHelper;
 
         public LanguageHandler(
             IShortStringHelper shortStringHelper,
@@ -44,16 +43,11 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             ISyncSerializer<ILanguage> serializer,
             ISyncItemFactory syncItemFactory,
             SyncFileService syncFileService)
-            : base(logger, uSyncConfig, appCaches, serializer, syncItemFactory, syncFileService, entityService)
+            : base(logger, shortStringHelper, uSyncConfig, appCaches, serializer, syncItemFactory, syncFileService, entityService)
         {
-            this.shortStringHelper = shortStringHelper;
             this.localizationService = localizationService;
         }
       
-        protected override ILanguage GetFromService(int id)
-            => localizationService.GetLanguageById(id);
-
-
         // language guids are not consistant (at least in alpha)
         // so we don't save by Guid we save by ISO name everytime.           
         protected override string GetPath(string folder, ILanguage item, bool GuidNames, bool isFlat)
@@ -72,17 +66,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             return Enumerable.Empty<IEntity>();
         }
 
-        protected override ILanguage GetFromService(Guid key)
-            => null;
-
-        protected override ILanguage GetFromService(string alias)
-            => localizationService.GetLanguageByIsoCode(alias);
-
-        protected override void DeleteViaService(ILanguage item)
-            => localizationService.Delete(item);
-
-        protected override string GetItemName(ILanguage item)
-            => item.IsoCode;
+        protected override string GetItemName(ILanguage item) => item.IsoCode;
 
         protected override void CleanUp(ILanguage item, string newFile, string folder)
         {

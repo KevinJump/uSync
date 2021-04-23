@@ -14,7 +14,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("contentTemplateHandler", "Blueprints", "Blueprints", uSyncBackOfficeConstants.Priorites.ContentTemplate
         , Icon = "icon-document-dashed-line usync-addon-icon", IsTwoPass = true, EntityType = UdiEntityType.DocumentBlueprint)]
-    public class ContentTemplateHandler : ContentHandlerBase<IContent, IContentService>, ISyncHandler, ISyncExtendedHandler, ISyncItemHandler
+    public class ContentTemplateHandler : ContentHandlerBase<IContent, IContentService>, ISyncHandler
     {
         public override string Group => uSyncBackOfficeConstants.Groups.Content;
 
@@ -46,24 +46,5 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
 
         protected override IContent GetFromService(string alias)
             => null;
-
-        /*
-        private void ContentService_DeletedBlueprint(IContentService sender, Umbraco.Core.Events.DeleteEventArgs<IContent> e)
-        {
-            if (e.DeletedEntities.Any(x => !x.Name.InvariantStartsWith("dtge temp")))
-            {
-                EventDeletedItem(sender, e);
-            }
-        }
-
-        private void ContentService_SavedBlueprint(IContentService sender, Umbraco.Core.Events.SaveEventArgs<IContent> e)
-        {
-            // was is a dtge temp file ?
-            if (e.SavedEntities.Any(x => !x.Name.InvariantStartsWith("dtge temp")))
-            {
-                EventSavedItem(sender, e);
-            }
-        }
-        */
     }
 }

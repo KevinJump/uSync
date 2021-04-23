@@ -6,7 +6,7 @@ using uSync.Core.Serialization;
 
 namespace uSync.Core.Tracking.Impliment
 {
-    public class MemberTypeTracker : ContentTypeBaseTracker<IMemberType>, ISyncNodeTracker<IMemberType>
+    public class MemberTypeTracker : ContentTypeBaseTracker<IMemberType>, ISyncTracker<IMemberType>
     {
         public MemberTypeTracker(ISyncSerializer<IMemberType> serializer) : base(serializer)
         { }

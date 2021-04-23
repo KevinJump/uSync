@@ -22,22 +22,15 @@ namespace uSync.Core.Tracking
                 .Select(x => x as ISyncTracker<TObject>);
         }
 
-#pragma warning disable CS0618 // Type or member is obsolete
         public IEnumerable<uSyncChange> GetChanges<TObject>(XElement node, SyncSerializerOptions options)
         {
             var changes = new List<uSyncChange>();
             foreach (var tracker in GetTrackers<TObject>())
             {
-                if (tracker is ISyncOptionsTracker<TObject> optionTracker)
-                    changes.AddRange(optionTracker.GetChanges(node, options));
-                else
-                {
-                    changes.AddRange(tracker.GetChanges(node));
-                }
+                changes.AddRange(tracker.GetChanges(node, options));
             }
             return changes;
         }
-#pragma warning restore CS0618 // Type or member is obsolete
 
         public IEnumerable<uSyncChange> GetChanges<TObject>(XElement node, XElement currentNode, SyncSerializerOptions options)
         {
@@ -47,20 +40,7 @@ namespace uSync.Core.Tracking
             var changes = new List<uSyncChange>();
             foreach (var tracker in GetTrackers<TObject>())
             {
-                switch (tracker)
-                {
-                    case ISyncNodeTracker<TObject> nodeTracker:
-                        changes.AddRange(nodeTracker.GetChanges(node, currentNode, options));
-                        break;
-                    case ISyncOptionsTracker<TObject> optionTracker:
-                        changes.AddRange(optionTracker.GetChanges(node, options));
-                        break;
-                    default:
-#pragma warning disable CS0618 // Type or member is obsolete
-                        changes.AddRange(tracker.GetChanges(node));
-#pragma warning restore CS0618 // Type or member is obsolete
-                        break;
-                }
+                changes.AddRange(tracker.GetChanges(node, currentNode, options));
             }
             return changes;
         }

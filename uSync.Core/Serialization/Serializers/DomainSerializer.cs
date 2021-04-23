@@ -14,7 +14,7 @@ using uSync.Core.Serialization;
 namespace uSync.Core.Serialization.Serializers
 {
     [SyncSerializer("9A5C253C-71FA-4FC0-9B7C-9D0522AAE880", "Domain Serializer", uSyncConstants.Serialization.Domain)]
-    public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncNodeSerializer<IDomain>
+    public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncSerializer<IDomain>
     {
         private readonly IDomainService domainService;
         private readonly IContentService contentService;
@@ -117,10 +117,13 @@ namespace uSync.Core.Serialization.Serializers
                 node != null, item.DomainName, node, typeof(IDomain), ChangeType.Export);
         }
 
-        protected override IDomain FindItem(Guid key)
+        public override IDomain FindItem(int id)
+            => domainService.GetById(id);
+
+        public override IDomain FindItem(Guid key)
             => null;
 
-        protected override IDomain FindItem(string alias)
+        public override IDomain FindItem(string alias)
             => domainService.GetByName(alias);
 
 
@@ -178,13 +181,13 @@ namespace uSync.Core.Serialization.Serializers
         }
 
 
-        protected override void SaveItem(IDomain item)
+        public override void SaveItem(IDomain item)
             => domainService.Save(item);
 
-        protected override void DeleteItem(IDomain item)
+        public override void DeleteItem(IDomain item)
             => domainService.Delete(item);
 
-        protected override string ItemAlias(IDomain item)
+        public override string ItemAlias(IDomain item)
             => item.DomainName;
     }
 }

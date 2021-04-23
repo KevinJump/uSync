@@ -22,7 +22,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("contentTypeHandler", "DocTypes", "ContentTypes", uSyncBackOfficeConstants.Priorites.ContentTypes,
             IsTwoPass = true, Icon = "icon-item-arrangement", EntityType = UdiEntityType.DocumentType)]
-    public class ContentTypeHandler : SyncHandlerContainerBase<IContentType, IContentTypeService>, ISyncExtendedHandler, ISyncPostImportHandler, ISyncItemHandler,
+    public class ContentTypeHandler : SyncHandlerContainerBase<IContentType, IContentTypeService>, ISyncHandler, ISyncPostImportHandler,
         INotificationHandler<SavedNotification<IContentType>>,
         INotificationHandler<DeletedNotification<IContentType>>,
         INotificationHandler<MovedNotification<IContentType>>,
@@ -49,22 +49,14 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         {
             if (useGuid) return item.Key.ToString();
 
-            if (item is IContentType contentItem)
+            if (item is IContentTypeBase baseItem)
             {
-                return contentItem.Alias.ToSafeFileName(shortStringHelper);
+                return baseItem.Alias.ToSafeFileName(shortStringHelper);
             }
 
             return item.Name.ToSafeFileName(shortStringHelper);
         }
 
-        protected override IContentType GetFromService(int id)
-            => contentTypeService.Get(id);
-
-        protected override IContentType GetFromService(Guid key)
-            => contentTypeService.Get(key);
-
-        protected override IContentType GetFromService(string alias)
-            => contentTypeService.Get(alias);
 
         protected override IEntity GetContainer(int id)
             => contentTypeService.GetContainer(id);
@@ -74,11 +66,5 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
 
         protected override void DeleteFolder(int id)
             => contentTypeService.DeleteContainer(id);
-
-        protected override void DeleteViaService(IContentType item)
-            => contentTypeService.Delete(item);
-
-        protected override string GetItemAlias(IContentType item)
-            => item.Alias;
     }
 }

@@ -4,7 +4,7 @@ using uSync.Core.Serialization;
 
 namespace uSync.Core.Tracking.Impliment
 {
-    public class DomainTracker : SyncXmlTracker<IDomain>, ISyncNodeTracker<IDomain>
+    public class DomainTracker : SyncXmlTracker<IDomain>, ISyncTracker<IDomain>
     {
         public DomainTracker(ISyncSerializer<IDomain> serializer) : base(serializer)
         {

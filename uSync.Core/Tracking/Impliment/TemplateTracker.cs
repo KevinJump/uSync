@@ -6,7 +6,7 @@ using uSync.Core.Serialization;
 
 namespace uSync.Core.Tracking.Impliment
 {
-    public class TemplateTracker : SyncXmlTracker<ITemplate>, ISyncNodeTracker<ITemplate>
+    public class TemplateTracker : SyncXmlTracker<ITemplate>, ISyncTracker<ITemplate>
     {
         public TemplateTracker(ISyncSerializer<ITemplate> serializer)
             : base(serializer)

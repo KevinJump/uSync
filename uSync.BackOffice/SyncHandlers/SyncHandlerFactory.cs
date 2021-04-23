@@ -37,35 +37,18 @@ namespace uSync.BackOffice.SyncHandlers
         public IEnumerable<ISyncHandler> GetAll()
             => syncHandlers.Handlers;
 
-        public IEnumerable<ISyncExtendedHandler> GetExtended()
-            => syncHandlers.ExtendedHandlers;
-
-        public ISyncExtendedHandler GetHandler(string alias)
-            => syncHandlers.ExtendedHandlers
+        public ISyncHandler GetHandler(string alias)
+            => syncHandlers.Handlers
                 .FirstOrDefault(x => x.Alias.InvariantEquals(alias));
-
-        [Obsolete("You should avoid asking for a handler just by type, ask for valid based on set too")]
-        public ISyncExtendedHandler GetHandler(Udi udi)
-            => GetHandlerByEntityType(udi.EntityType);
 
         public IEnumerable<ISyncHandler> GetHandlers(params string[] aliases)
             => syncHandlers.Where(x => aliases.InvariantContains(x.Alias));
-
-        [Obsolete("You should avoid asking for a handler just by type, ask for valid based on set too")]
-        public ISyncExtendedHandler GetHandlerByEntityType(string entityType)
-            => syncHandlers.ExtendedHandlers
-                .FirstOrDefault(x => x.EntityType == entityType);
-
-        [Obsolete("You should avoid asking for a handler just by type, ask for valid based on set too")]
-        public ISyncExtendedHandler GetHandlerByTypeName(string typeName)
-            => syncHandlers.ExtendedHandlers
-                .FirstOrDefault(x => x.TypeName == typeName);
 
         /// <summary>
         ///  returns the handler groups (settings, content, users, etc) that stuff can be grouped into
         /// </summary>
         public IEnumerable<string> GetGroups()
-            => syncHandlers.ExtendedHandlers
+            => syncHandlers.Handlers
                 .Select(x => x.Group)
                 .Distinct();
 
@@ -78,10 +61,10 @@ namespace uSync.BackOffice.SyncHandlers
         /// </summary>
         /// <param name="aliases">aliases of handlers you want </param>
         /// <returns>Handler/Config Pair with default config loaded</returns>
-        public IEnumerable<ExtendedHandlerConfigPair> GetDefaultHandlers(IEnumerable<string> aliases)
-            => GetExtended()
+        public IEnumerable<HandlerConfigPair> GetDefaultHandlers(IEnumerable<string> aliases)
+            => GetAll()
                     .Where(x => aliases.InvariantContains(x.Alias))
-                    .Select(x => new ExtendedHandlerConfigPair()
+                    .Select(x => new HandlerConfigPair()
                     {
                         Handler = x,
                         Settings = x.DefaultConfig
@@ -92,22 +75,22 @@ namespace uSync.BackOffice.SyncHandlers
 
         #region Valid Loaders (need set, group, action)
 
-        public ExtendedHandlerConfigPair GetValidHandler(string alias, SyncHandlerOptions options = null)
+        public HandlerConfigPair GetValidHandler(string alias, SyncHandlerOptions options = null)
              => GetValidHandlers(options)
                  .FirstOrDefault(x => x.Handler.Alias.InvariantEquals(alias));
 
-        public ExtendedHandlerConfigPair GetValidHandlerByTypeName(string typeName, SyncHandlerOptions options = null)
+        public HandlerConfigPair GetValidHandlerByTypeName(string typeName, SyncHandlerOptions options = null)
             => GetValidHandlers(options)
                 .Where(x => typeName.InvariantEquals(x.Handler.TypeName))
                 .FirstOrDefault();
 
-        public ExtendedHandlerConfigPair GetValidHandlerByEntityType(string entityType, SyncHandlerOptions options = null)
+        public HandlerConfigPair GetValidHandlerByEntityType(string entityType, SyncHandlerOptions options = null)
             => GetValidHandlers(options)
                 .Where(x => x.Handler.EntityType.InvariantEquals(entityType))
                 .FirstOrDefault();
 
 
-        public IEnumerable<ExtendedHandlerConfigPair> GetValidHandlersByEntityType(IEnumerable<string> entityTypes, SyncHandlerOptions options = null)
+        public IEnumerable<HandlerConfigPair> GetValidHandlersByEntityType(IEnumerable<string> entityTypes, SyncHandlerOptions options = null)
             => GetValidHandlers(options)
                 .Where(x => entityTypes.InvariantContains(x.Handler.EntityType));
 
@@ -125,7 +108,7 @@ namespace uSync.BackOffice.SyncHandlers
             return groups.Distinct();              
         }
 
-        public IEnumerable<ExtendedHandlerConfigPair> GetValidHandlers(string[] aliases, SyncHandlerOptions options = null)
+        public IEnumerable<HandlerConfigPair> GetValidHandlers(string[] aliases, SyncHandlerOptions options = null)
             => GetValidHandlers(options)
                 .Where(x => aliases.InvariantContains(x.Handler.Alias));
 
@@ -136,24 +119,24 @@ namespace uSync.BackOffice.SyncHandlers
         }
 
 
-        private ExtendedHandlerConfigPair LoadHandlerConfig(ISyncExtendedHandler handler, uSyncHandlerSetSettings setSettings)
+        private HandlerConfigPair LoadHandlerConfig(ISyncHandler handler, uSyncHandlerSetSettings setSettings)
         {
-            return new ExtendedHandlerConfigPair
+            return new HandlerConfigPair
             {
                 Handler = handler,
                 Settings = setSettings.GetHandlerSettings(handler.Alias)
             };
         }
 
-        public IEnumerable<ExtendedHandlerConfigPair> GetValidHandlers(SyncHandlerOptions options = null)
+        public IEnumerable<HandlerConfigPair> GetValidHandlers(SyncHandlerOptions options = null)
         {
             if (options == null) options = new SyncHandlerOptions();
 
-            var configs = new List<ExtendedHandlerConfigPair>();
+            var configs = new List<HandlerConfigPair>();
 
             var handlerSetSettings = GetSetSettings(options.Set);
 
-            foreach (var handler in syncHandlers.ExtendedHandlers.Where(x => x.Enabled))
+            foreach (var handler in syncHandlers.Handlers.Where(x => x.Enabled))
             {
                 if (handlerSetSettings.DisabledHandlers.InvariantContains(handler.Alias)) continue;
 
@@ -186,7 +169,7 @@ namespace uSync.BackOffice.SyncHandlers
             if (string.IsNullOrWhiteSpace(group)) return true;
 
             // only handlers in the specified group
-            if (handler is ISyncExtendedHandler extendedHandler)
+            if (handler is ISyncHandler extendedHandler)
                 return extendedHandler.Group.InvariantEquals(group);
 
             return false;

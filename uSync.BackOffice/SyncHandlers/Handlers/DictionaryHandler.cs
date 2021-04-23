@@ -19,7 +19,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("dictionaryHandler", "Dictionary", "Dictionary", uSyncBackOfficeConstants.Priorites.DictionaryItems
         , Icon = "icon-book-alt usync-addon-icon", EntityType = UdiEntityType.DictionaryItem)]
-    public class DictionaryHandler : SyncHandlerLevelBase<IDictionaryItem, ILocalizationService>, ISyncHandler, ISyncExtendedHandler, ISyncItemHandler
+    public class DictionaryHandler : SyncHandlerLevelBase<IDictionaryItem, ILocalizationService>, ISyncHandler
     {
         public override string Group => uSyncBackOfficeConstants.Groups.Content;
 
@@ -131,19 +131,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
 
             return Enumerable.Empty<IEntity>();
         }
-
-        protected override void DeleteViaService(IDictionaryItem item)
-            => localizationService.Delete(item);
-
-        protected override IDictionaryItem GetFromService(int id)
-            => localizationService.GetDictionaryItemById(id);
-
-        protected override IDictionaryItem GetFromService(Guid key)
-            => localizationService.GetDictionaryItemById(key);
-
-        protected override IDictionaryItem GetFromService(string alias)
-            => localizationService.GetDictionaryItemByKey(alias);
-
+        
         protected override string GetItemName(IDictionaryItem item)
             => item.ItemKey;
 

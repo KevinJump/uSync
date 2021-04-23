@@ -19,7 +19,7 @@ namespace uSync.Core.Serialization
             this.entityService = entityService;
         }
 
-        protected override Guid ItemKey(TObject item)
+        public override Guid ItemKey(TObject item)
             => item.Key;
     }
 }

@@ -16,7 +16,7 @@ namespace uSync.BackOffice
 
         public IEnumerable<uSyncAction> ReportHandler(string handler, uSyncImportOptions options)
         {
-            var handlerPair = handlerFactory.GetValidHandler(handler, new SyncHandlerOptions
+            var handlerPair = _handlerFactory.GetValidHandler(handler, new SyncHandlerOptions
             {
                 Set = options.HandlerSet,
                 Action = HandlerActions.Report
@@ -35,7 +35,7 @@ namespace uSync.BackOffice
             {
                 using (var pause = new uSyncImportPause())
                 {
-                    var handlerPair = handlerFactory.GetValidHandler(handlerAlias, new SyncHandlerOptions
+                    var handlerPair = _handlerFactory.GetValidHandler(handlerAlias, new SyncHandlerOptions
                     {
                         Set = options.HandlerSet,
                         Action = HandlerActions.Import
@@ -57,7 +57,7 @@ namespace uSync.BackOffice
             {
                 using (var pause = new uSyncImportPause())
                 {
-                    var handlers = handlerFactory.GetValidHandlers(new SyncHandlerOptions { Set = handlerSet, Action = HandlerActions.Import });
+                    var handlers = _handlerFactory.GetValidHandlers(new SyncHandlerOptions { Set = handlerSet, Action = HandlerActions.Import });
                     return PerformPostImport(rootFolder, handlers, actions);
                 }
             }
@@ -65,7 +65,7 @@ namespace uSync.BackOffice
 
         public IEnumerable<uSyncAction> ExportHandler(string handler, uSyncImportOptions options)
         {
-            var handlerPair = handlerFactory.GetValidHandler(handler, new SyncHandlerOptions
+            var handlerPair = _handlerFactory.GetValidHandler(handler, new SyncHandlerOptions
             {
                 Set = options.HandlerSet,
                 Action = HandlerActions.Export
@@ -85,7 +85,7 @@ namespace uSync.BackOffice
             switch (action)
             {
                 case HandlerActions.Export:
-                    WriteVersionFile(uSyncConfig.Settings.RootFolder);
+                    WriteVersionFile(_uSyncConfig.Settings.RootFolder);
                     fireBulkStarting(ExportStarting);
                     break;
                 case HandlerActions.Import:

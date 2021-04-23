@@ -25,16 +25,15 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             "RelationTypes", uSyncBackOfficeConstants.Priorites.RelationTypes,
             Icon = "icon-traffic usync-addon-icon",
             EntityType = UdiEntityType.RelationType, IsTwoPass = false)]
-    public class RelationTypeHandler : SyncHandlerBase<IRelationType, IRelationService>, ISyncExtendedHandler, ISyncItemHandler
+    public class RelationTypeHandler : SyncHandlerBase<IRelationType, IRelationService>, ISyncHandler
     {
         private readonly IRelationService relationService;
-        private readonly IShortStringHelper shortStringHelper;
 
         public override string Group => uSyncBackOfficeConstants.Groups.Content;
 
         public RelationTypeHandler(
-            IShortStringHelper shortStringHelper,
             ILogger<RelationTypeHandler> logger,
+            IShortStringHelper shortStringHelper,
             uSyncConfigService uSyncConfigService,
             AppCaches appCaches,
             ISyncSerializer<IRelationType> serializer,
@@ -42,9 +41,8 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             SyncFileService syncFileService,
             IRelationService relationService,
             IEntityService entityService)
-            : base(logger, uSyncConfigService, appCaches, serializer, syncItemFactory, syncFileService, entityService)
+            : base(logger, shortStringHelper, uSyncConfigService, appCaches, serializer, syncItemFactory, syncFileService, entityService)
         {
-            this.shortStringHelper = shortStringHelper;
             this.relationService = relationService;
         }
 
@@ -87,26 +85,8 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             => ShouldExport(node, config);
 
 
-
-        protected override void DeleteViaService(IRelationType item)
-            => relationService.Delete(item);
-
-        protected override IRelationType GetFromService(int id)
-            => relationService.GetRelationTypeById(id);
-
-        protected override IRelationType GetFromService(Guid key)
-            => relationService.GetRelationTypeById(key);
-
-        protected override IRelationType GetFromService(string alias)
-            => relationService.GetRelationTypeByAlias(alias);
-
         protected override string GetItemName(IRelationType item)
             => item.Name;
-
-        protected override string GetItemPath(IRelationType item, bool useGuid, bool isFlat)
-            => useGuid ? item.Key.ToString() : item.Alias.ToSafeAlias(shortStringHelper);
-
-        
         
     //     private void RelationService_SavedRelation(IRelationService sender, Umbraco.Core.Events.SaveEventArgs<IRelation> e)
     //     {

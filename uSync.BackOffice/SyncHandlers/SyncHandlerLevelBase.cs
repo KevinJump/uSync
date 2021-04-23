@@ -37,9 +37,6 @@ namespace uSync.BackOffice.SyncHandlers
         where TObject : IEntity
         where TService : IService
     {
-
-        protected IShortStringHelper shortStringHelper;
-
         protected SyncHandlerLevelBase(
             IShortStringHelper shortStringHelper,
             ILogger<SyncHandlerLevelBase<TObject, TService>> logger,
@@ -49,10 +46,8 @@ namespace uSync.BackOffice.SyncHandlers
            ISyncItemFactory syncItemFactory,
             SyncFileService syncFileService,
             IEntityService entityService)
-            : base(logger, uSyncConfig, appCaches, serializer, syncItemFactory, syncFileService, entityService)
-        {
-            this.shortStringHelper = shortStringHelper;
-        }
+            : base(logger, shortStringHelper, uSyncConfig, appCaches, serializer, syncItemFactory, syncFileService, entityService)
+        { }
 
         /// <summary>
         ///  this is the simple interface, based purely on level, 
@@ -203,9 +198,7 @@ namespace uSync.BackOffice.SyncHandlers
         {
             if (item != null)
             {
-                if (useGuid)
-                    return item.Key.ToString();
-
+                if (useGuid) return item.Key.ToString();
                 return item.Name.ToSafeFileName(shortStringHelper);
             }
 
@@ -214,9 +207,7 @@ namespace uSync.BackOffice.SyncHandlers
 
         override protected string GetItemPath(TObject item, bool useGuid, bool isFlat)
         {
-            if (isFlat)
-                return GetItemFileName((IUmbracoEntity)item, useGuid);
-
+            if (isFlat) return base.GetItemPath(item, useGuid, isFlat);
             return GetEntityPath((IUmbracoEntity)item, useGuid, true);
         }
 

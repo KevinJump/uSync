@@ -22,7 +22,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("mediaTypeHandler", "Media Types", "MediaTypes", uSyncBackOfficeConstants.Priorites.MediaTypes,
         IsTwoPass = true, Icon = "icon-thumbnails", EntityType = UdiEntityType.MediaType)]
-    public class MediaTypeHandler : SyncHandlerContainerBase<IMediaType, IMediaTypeService>, ISyncExtendedHandler, ISyncItemHandler,
+    public class MediaTypeHandler : SyncHandlerContainerBase<IMediaType, IMediaTypeService>, ISyncHandler,
         INotificationHandler<SavedNotification<IMediaType>>,
         INotificationHandler<DeletedNotification<IMediaType>>,
         INotificationHandler<MovedNotification<IMediaType>>,
@@ -59,25 +59,8 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             return item.Name.ToSafeFileName(shortStringHelper);
         }
 
-
-
-        protected override IMediaType GetFromService(int id)
-            => mediaTypeService.Get(id);
-
-        protected override IMediaType GetFromService(Guid key)
-            => mediaTypeService.Get(key);
-
-        protected override IMediaType GetFromService(string alias)
-            => mediaTypeService.Get(alias);
-
-        protected override void DeleteViaService(IMediaType item)
-            => mediaTypeService.Delete(item);
-
         protected override void DeleteFolder(int id)
             => mediaTypeService.DeleteContainer(id);
-
-        protected override string GetItemAlias(IMediaType item)
-            => item.Alias;
 
         protected override IEntity GetContainer(int id)
             => mediaTypeService.GetContainer(id);

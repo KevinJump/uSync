@@ -16,7 +16,7 @@ using uSync.Core.Models;
 namespace uSync.Core.Serialization.Serializers
 {
     [SyncSerializer("5CB57139-8AF7-4813-95AD-C075D74636C2", "ContentSerializer", uSyncConstants.Serialization.Content)]
-    public class ContentSerializer : ContentSerializerBase<IContent>, ISyncNodeSerializer<IContent>
+    public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerializer<IContent>
     {
         protected readonly IContentService contentService;
         protected readonly IFileService fileService;
@@ -527,7 +527,7 @@ namespace uSync.Core.Serialization.Serializers
         }
 
         #region Finders
-        protected override IContent FindItem(int id)
+        public override IContent FindItem(int id)
         {
             var item = contentService.GetById(id);
             if (item != null)
@@ -539,7 +539,7 @@ namespace uSync.Core.Serialization.Serializers
             return null;
         }
 
-        protected override IContent FindItem(Guid key)
+        public override IContent FindItem(Guid key)
         {
             if (performDoubleLookup)
             {
@@ -572,7 +572,7 @@ namespace uSync.Core.Serialization.Serializers
         public override void Save(IEnumerable<IContent> items)
             => contentService.Save(items);
 
-        protected override void SaveItem(IContent item)
+        public override void SaveItem(IContent item)
         {
             try
             {
@@ -586,7 +586,7 @@ namespace uSync.Core.Serialization.Serializers
             }
         }
 
-        protected override void DeleteItem(IContent item)
+        public override void DeleteItem(IContent item)
         {
             try
             {

@@ -14,7 +14,7 @@ using uSync.Core.Models;
 namespace uSync.Core.Serialization.Serializers
 {
     [SyncSerializer("C4E0E6F8-2742-4C7A-9244-321D5592987A", "contentTemplateSerializer", uSyncConstants.Serialization.Content)]
-    public class ContentTemplateSerializer : ContentSerializer, ISyncNodeSerializer<IContent>
+    public class ContentTemplateSerializer : ContentSerializer, ISyncSerializer<IContent>
     {
         private readonly IContentTypeService contentTypeService;
 
@@ -95,7 +95,7 @@ namespace uSync.Core.Serialization.Serializers
 
         }
 
-        protected override IContent FindItem(Guid key)
+        public override IContent FindItem(Guid key)
         {
             // TODO: Umbraco 8 bug, the key isn sometimes an old version
             var entity = entityService.Get(key);
@@ -107,7 +107,7 @@ namespace uSync.Core.Serialization.Serializers
 
         // public override string GetItemPath(IContent item) => base.GetItemPath(item) + "/" + item.Name.ToSafeAlias(); 
 
-        protected override IContent FindItem(int id)
+        public override IContent FindItem(int id)
             => contentService.GetBlueprintById(id);
 
         protected override Attempt<IContent> CreateItem(string alias, ITreeEntity parent, string itemType)
@@ -135,10 +135,10 @@ namespace uSync.Core.Serialization.Serializers
             return Attempt.Succeed<string>("blueprint saved");
         }
 
-        protected override void SaveItem(IContent item)
+        public override void SaveItem(IContent item)
             => contentService.SaveBlueprint(item);
 
-        protected override void DeleteItem(IContent item)
+        public override void DeleteItem(IContent item)
             => contentService.DeleteBlueprint(item);
     }
 

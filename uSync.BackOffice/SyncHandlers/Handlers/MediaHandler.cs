@@ -16,7 +16,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("mediaHandler", "Media", "Media", uSyncBackOfficeConstants.Priorites.Media,
         Icon = "icon-picture usync-addon-icon", IsTwoPass = true, EntityType = UdiEntityType.Media)]
-    public class MediaHandler : ContentHandlerBase<IMedia, IMediaService>, ISyncHandler, ISyncExtendedHandler, ISyncItemHandler
+    public class MediaHandler : ContentHandlerBase<IMedia, IMediaService>, ISyncHandler
     {
         public override string Group => uSyncBackOfficeConstants.Groups.Content;
 
@@ -36,22 +36,6 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         {
             this.mediaService = mediaService;
         }
-
-        protected override void DeleteViaService(IMedia item)
-            => mediaService.Delete(item);
-
-        protected override IMedia GetFromService(int id)
-            => mediaService.GetById(id);
-
-        protected override IMedia GetFromService(Guid key)
-        {    
-            return mediaService.GetById(key);
-        }
-
-
-        protected override IMedia GetFromService(string alias)
-            => null;
-
 
         protected override IEnumerable<IEntity> GetChildItems(IEntity parent)
         {

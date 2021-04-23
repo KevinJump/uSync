@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Linq;
 using System.Xml.Linq;
+
 using Microsoft.Extensions.Logging;
+
 using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Strings;
 using Umbraco.Extensions;
+
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
 using uSync.Core;
@@ -144,18 +147,6 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         // we only match duplicate actions by key. 
         protected override bool DoActionsMatch(uSyncAction a, uSyncAction b)
             => a.key == b.key;
-
-        /// <summary>
-        /// </summary>
-        /// <remarks>
-        ///  content items sit in a tree, so we don't want to give them
-        ///  an alias based on their name (because of false matches)
-        ///  so we give the key as an alias.
-        /// </remarks>
-        /// <param name="item"></param>
-        /// <returns></returns>
-        protected override string GetItemAlias(TObject item)
-            => item.Key.ToString();
     }
 
 }

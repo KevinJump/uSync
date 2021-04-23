@@ -24,12 +24,11 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("macroHandler", "Macros", "Macros", uSyncBackOfficeConstants.Priorites.Macros,
         Icon = "icon-settings-alt", EntityType = UdiEntityType.Macro)]
-    public class MacroHandler : SyncHandlerBase<IMacro, IMacroService>, ISyncExtendedHandler, ISyncItemHandler,
+    public class MacroHandler : SyncHandlerBase<IMacro, IMacroService>, ISyncHandler,
         INotificationHandler<SavedNotification<IMacro>>,
         INotificationHandler<DeletedNotification<IMacro>>
     {
         private readonly IMacroService macroService;
-        private readonly IShortStringHelper shortStringHelper;
 
         public MacroHandler(
             IShortStringHelper shortStringHelper,
@@ -41,9 +40,8 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             ISyncSerializer<IMacro> serializer,
             ISyncItemFactory syncItemFactory,
             SyncFileService syncFileService)
-            : base(logger, uSyncConfig, appCaches, serializer, syncItemFactory, syncFileService, entityService)
+            : base(logger, shortStringHelper, uSyncConfig, appCaches, serializer, syncItemFactory, syncFileService, entityService)
         {
-            this.shortStringHelper = shortStringHelper;
             this.macroService = macroService;
         }
 
@@ -69,29 +67,8 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             return actions;
         }
 
-        protected override IMacro GetFromService(int id)
-            => macroService.GetById(id);
-
-        // not sure we can trust macro guids in the path just yet.
-        protected override string GetItemPath(IMacro item, bool useGuid, bool isFlat)
-        {
-            if (useGuid) return item.Key.ToString();
-            return item.Alias.ToSafeAlias(shortStringHelper);
-        }
-
-        protected override IMacro GetFromService(Guid key)
-            => macroService.GetById(key);
-
-        protected override IMacro GetFromService(string alias)
-            => macroService.GetByAlias(alias);
-
-        protected override void DeleteViaService(IMacro item)
-            => macroService.Delete(item);
-
         protected override string GetItemName(IMacro item)
             => item.Name;
-        protected override string GetItemAlias(IMacro item)
-            => item.Alias;
 
         protected override IEnumerable<IEntity> GetChildItems(int parent)
         {

@@ -112,18 +112,6 @@ namespace uSync.Core.Mapping
 
             return alias;
         }
-
-
-        // Obsolete calls. 
-
-        [Obsolete("Request all mappers and you can chain multiple mappers")]
-        public ISyncMapper GetSyncMapper(PropertyType propertyType)
-            => this.FirstOrDefault(x => x.IsMapper(propertyType));
-
-        [Obsolete("Request all mappers and you can chain multiple mappers")]
-        public ISyncMapper GetSyncMapper(string alias)
-            => this.FirstOrDefault(x => x.Editors.InvariantContains(GetMapperAlias(alias)));
-
     }
 
     public class SyncValueMapperCollectionBuilder

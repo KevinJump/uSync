@@ -152,12 +152,6 @@ namespace uSync.BackOffice
             return new uSyncAction(true, name, typeof(T).ToString(), changeType, string.Empty, null, string.Empty);
         }
 
-        [Obsolete("You should report the key back so it can be found")]
-        public static uSyncAction ReportAction(ChangeType changeType, string name, string file, string handlerAlias)
-        {
-            return new uSyncAction(true, name, typeof(T).ToString(), changeType, string.Empty, null, file, handlerAlias);
-        }
-
         public static uSyncAction ReportAction(ChangeType changeType, string name, string file, Guid key, string handlerAlias)
         {
             return new uSyncAction(true, name, typeof(T).ToString(), changeType, string.Empty, null, file, handlerAlias)

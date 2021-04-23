@@ -6,7 +6,7 @@ using uSync.Core.Serialization;
 
 namespace uSync.Core.Tracking.Impliment
 {
-    public class DataTypeTracker : SyncXmlTracker<IDataType>, ISyncNodeTracker<IDataType>
+    public class DataTypeTracker : SyncXmlTracker<IDataType>, ISyncTracker<IDataType>
     {
         public DataTypeTracker(ISyncSerializer<IDataType> serializer)
             : base(serializer)

@@ -14,7 +14,7 @@ namespace uSync.Core.Serialization.Serializers
     /// </summary>
     [SyncSerializer("19FA7E6D-3B88-44AA-AED4-94634C90A5B4", "RelationTypeSerializer", uSyncConstants.Serialization.RelationType)]
     public class RelationTypeSerializer
-        : SyncSerializerBase<IRelationType>, ISyncNodeSerializer<IRelationType>
+        : SyncSerializerBase<IRelationType>, ISyncSerializer<IRelationType>
     {
         private IRelationService relationService;
 
@@ -257,19 +257,22 @@ namespace uSync.Core.Serialization.Serializers
 
         // control methods.
 
-        protected override void DeleteItem(IRelationType item)
+        public override void DeleteItem(IRelationType item)
             => relationService.Delete(item);
 
-        protected override IRelationType FindItem(Guid key)
+        public override IRelationType FindItem(int id)
+            => relationService.GetRelationTypeById(id);
+
+        public override IRelationType FindItem(Guid key)
             => relationService.GetRelationTypeById(key); // ??
 
-        protected override IRelationType FindItem(string alias)
+        public override IRelationType FindItem(string alias)
             => relationService.GetRelationTypeByAlias(alias);
 
-        protected override string ItemAlias(IRelationType item)
+        public override string ItemAlias(IRelationType item)
             => item.Alias;
 
-        protected override void SaveItem(IRelationType item)
+        public override void SaveItem(IRelationType item)
             => relationService.Save(item);
     }
 }

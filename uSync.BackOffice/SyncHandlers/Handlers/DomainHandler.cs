@@ -17,16 +17,15 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("domainHandler", "Domains", "Domains", uSyncBackOfficeConstants.Priorites.DomainSettings
         , Icon = "icon-home usync-addon-icon", EntityType = "domain")]
-    public class DomainHandler : SyncHandlerBase<IDomain, IDomainService>, ISyncHandler, ISyncExtendedHandler, ISyncItemHandler
+    public class DomainHandler : SyncHandlerBase<IDomain, IDomainService>, ISyncHandler
     {
         public override string Group => uSyncBackOfficeConstants.Groups.Content;
 
         private readonly IDomainService domainService;
-        private readonly IShortStringHelper shortStringHelper;
 
         public DomainHandler(
-            IShortStringHelper shortStringHelper,
             ILogger<DomainHandler> logger,
+            IShortStringHelper shortStringHelper,
             uSyncConfigService configService,
             AppCaches appCaches,
             ISyncSerializer<IDomain> serializer,
@@ -34,9 +33,8 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             SyncFileService syncFileService,
             IEntityService entityService,
             IDomainService domainService)
-            : base (logger, configService, appCaches, serializer,syncItemFactory, syncFileService, entityService)
+            : base (logger, shortStringHelper, configService, appCaches, serializer,syncItemFactory, syncFileService, entityService)
         {
-            this.shortStringHelper = shortStringHelper;
             this.domainService = domainService;
         }
 
@@ -59,21 +57,6 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             callback?.Invoke("done", 1, 1);
             return actions;
         }
-
-        protected override void DeleteViaService(IDomain item)
-            => domainService.Delete(item);
-
-        protected override IDomain GetFromService(int id)
-            => domainService.GetById(id);
-
-        protected override IDomain GetFromService(Guid key)
-            => domainService.GetAll(true).FirstOrDefault(x => x.Key == key);
-
-        protected override Guid GetItemKey(IDomain item)
-            => item.Id.ToGuid();
-
-        protected override IDomain GetFromService(string alias)
-            => domainService.GetByName(alias);
 
         protected override string GetItemName(IDomain item)
             => item.DomainName;

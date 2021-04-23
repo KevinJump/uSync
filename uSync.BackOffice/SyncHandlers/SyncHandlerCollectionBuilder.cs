@@ -17,24 +17,12 @@ namespace uSync.BackOffice.SyncHandlers
 
     public class SyncHandlerCollection : BuilderCollectionBase<ISyncHandler>
     {
-        /// <summary>
-        ///  handlers that impliment the Extended Handler interface, can be used for other things.
-        /// </summary>
-        private List<ISyncExtendedHandler> extendedHandlers;
-
         public SyncHandlerCollection(IEnumerable<ISyncHandler> items)
             : base(items)
-        {
-            extendedHandlers = items
-                .Where(x => x is ISyncExtendedHandler)
-                .Select(x => x as ISyncExtendedHandler)
-                .ToList();
-        }
+        { }
 
         public IEnumerable<ISyncHandler> Handlers => this;
 
-        public IEnumerable<ISyncExtendedHandler> ExtendedHandlers
-            => extendedHandlers;
    
     }
 }

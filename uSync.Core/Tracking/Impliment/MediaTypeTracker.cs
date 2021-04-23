@@ -6,7 +6,7 @@ using uSync.Core.Serialization;
 
 namespace uSync.Core.Tracking.Impliment
 {
-    public class MediaTypeTracker : ContentTypeBaseTracker<IMediaType>, ISyncNodeTracker<IMediaType>
+    public class MediaTypeTracker : ContentTypeBaseTracker<IMediaType>, ISyncTracker<IMediaType>
     {
         public MediaTypeTracker(ISyncSerializer<IMediaType> serializer) : base(serializer)
         { }

@@ -4,7 +4,7 @@ using uSync.Core.Serialization;
 
 namespace uSync.Core.Tracking.Impliment
 {
-    public class DictionaryItemTracker : SyncXmlTracker<IDictionaryItem>, ISyncNodeTracker<IDictionaryItem>
+    public class DictionaryItemTracker : SyncXmlTracker<IDictionaryItem>, ISyncTracker<IDictionaryItem>
     {
         public DictionaryItemTracker(ISyncSerializer<IDictionaryItem> serializer) : base(serializer)
         { }

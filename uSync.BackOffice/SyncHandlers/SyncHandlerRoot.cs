@@ -12,6 +12,7 @@ using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Events;
 using Umbraco.Cms.Core.Models;
+using Umbraco.Cms.Core.Strings;
 using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;
@@ -33,14 +34,7 @@ namespace uSync.BackOffice.SyncHandlers
         protected readonly IList<ISyncDependencyChecker<TObject>> dependencyCheckers;
         protected readonly IList<ISyncTracker<TObject>> trackers;
 
-        // [Obsolete]
-        // protected ISyncDependencyChecker<TObject> dependencyChecker => dependencyCheckers.FirstOrDefault();
-
         protected readonly ISyncSerializer<TObject> serializer;
-
-
-        // [Obsolete]
-        // protected ISyncTracker<TObject> tracker => trackers.FirstOrDefault();
 
         protected readonly IAppPolicyCache runtimeCache;
 
@@ -117,8 +111,11 @@ namespace uSync.BackOffice.SyncHandlers
 
         protected readonly uSyncConfigService uSyncConfig;
 
+        protected readonly IShortStringHelper shortStringHelper;
+
         public SyncHandlerRoot(
                 ILogger<SyncHandlerRoot<TObject, TContainer>> logger,
+                IShortStringHelper shortStringHelper,
                 uSyncConfigService uSyncConfig,
                 AppCaches appCaches,
                 ISyncSerializer<TObject> serializer,
@@ -128,6 +125,7 @@ namespace uSync.BackOffice.SyncHandlers
             this.uSyncConfig = uSyncConfig;
 
             this.logger = logger;
+            this.shortStringHelper = shortStringHelper;
             this.itemFactory = itemFactory;
 
             this.serializer = serializer;
@@ -325,15 +323,6 @@ namespace uSync.BackOffice.SyncHandlers
             if (force) flags |= SerializerFlags.Force;
 
             return Import(file, config, flags);
-        }
-
-
-        virtual public IEnumerable<uSyncAction> ImportElement(XElement node, bool force)
-        {
-            var flags = SerializerFlags.OnePass;
-            if (force) flags |= SerializerFlags.Force;
-
-            return ImportElement(node, string.Empty, this.DefaultConfig, new uSyncImportOptions { Flags = flags });
         }
 
         /// <summary>
@@ -952,9 +941,6 @@ namespace uSync.BackOffice.SyncHandlers
             return actions;
         }
 
-        public IEnumerable<uSyncAction> ReportElement(XElement node)
-            => ReportElement(node, string.Empty, this.DefaultConfig);
-
         protected virtual IEnumerable<uSyncAction> ReportElement(XElement node, string filename, HandlerSettings config)
             => ReportElement(node, filename, config ?? this.DefaultConfig, new uSyncImportOptions());
 
@@ -1179,20 +1165,28 @@ namespace uSync.BackOffice.SyncHandlers
 
         #endregion
 
-        abstract protected TObject GetFromService(int id);
-        abstract protected TObject GetFromService(Guid key);
-        abstract protected TObject GetFromService(string alias);
-        abstract protected TObject GetFromService(TContainer item);
-        abstract protected void DeleteViaService(TObject item);
+        // 98% of the time the serializer can do all these calls for us, 
+        // but for blueprints, we want to get diffrent items, (but still use the 
+        // content serializer) so we override them.
 
+
+        protected virtual TObject GetFromService(int id) => serializer.FindItem(id);
+        protected virtual TObject GetFromService(Guid key) => serializer.FindItem(key);
+        protected virtual TObject GetFromService(string alias) => serializer.FindItem(alias);
+        protected virtual void DeleteViaService(TObject item) => serializer.DeleteItem(item);
+        protected string GetItemAlias(TObject item) => serializer.ItemAlias(item);
+        protected Guid GetItemKey(TObject item) => serializer.ItemKey(item);
+
+        // container ones, only matter when theire is a container?
+        // should we bump these up to container 
+        abstract protected TObject GetFromService(TContainer item);
         virtual protected TContainer GetContainer(Guid key) => default;
         virtual protected TContainer GetContainer(int id) => default;
 
-        abstract protected string GetItemPath(TObject item, bool useGuid, bool isFlat);
-        abstract protected string GetItemName(TObject item);
+        virtual protected string GetItemPath(TObject item, bool useGuid, bool isFlat)
+            => useGuid ? GetItemKey(item).ToString() : GetItemAlias(item).ToSafeFileName(shortStringHelper);
 
-        virtual protected string GetItemAlias(TObject item)
-            => GetItemName(item);
+        abstract protected string GetItemName(TObject item);
 
         virtual protected string GetPath(string folder, TObject item, bool GuidNames, bool isFlat)
         {
@@ -1204,7 +1198,6 @@ namespace uSync.BackOffice.SyncHandlers
             return path;
         }
 
-        abstract protected Guid GetItemKey(TObject item);
 
         /// <summary>
         ///  Get a clean filename that doesn't clash with any existing items.
@@ -1263,12 +1256,7 @@ namespace uSync.BackOffice.SyncHandlers
         virtual public uSyncAction Rename(TObject item) => new uSyncAction();
 
 
-        #region ISyncHandler2 Methods 
-
         public virtual string Group { get; protected set; } = uSyncBackOfficeConstants.Groups.Settings;
-
-        public IEnumerable<uSyncAction> Report(string file, HandlerSettings config)
-            => ReportItem(file, config);
 
         public SyncAttempt<XElement> GetElement(Udi udi)
         {
@@ -1385,59 +1373,24 @@ namespace uSync.BackOffice.SyncHandlers
             return dependencies.DistinctBy(x => x.Udi.ToString()).OrderByDescending(x => x.Order);
         }
 
-        #endregion
-
-
         #region Serializer Calls 
 
-#pragma warning disable CS0618 // Type or member is obsolete
-
         private SyncAttempt<XElement> SerializeItem(TObject item, SyncSerializerOptions options)
-        {
-            if (serializer is ISyncOptionsSerializer<TObject> optionSerializer)
-                return optionSerializer.Serialize(item, options);
-
-            return serializer.Serialize(item);
-        }
+            =>serializer.Serialize(item, options);
 
         private SyncAttempt<TObject> DeserializeItem(XElement node, SyncSerializerOptions options)
-        {
-            if (serializer is ISyncOptionsSerializer<TObject> optionSerializer)
-                return optionSerializer.Deserialize(node, options);
-
-            return serializer.Deserialize(node, options.Flags);
-        }
+            => serializer.Deserialize(node, options);
 
         private SyncAttempt<TObject> DeserializeItemSecondPass(TObject item, XElement node, SyncSerializerOptions options)
-        {
-            if (serializer is ISyncOptionsSerializer<TObject> optionSerializer)
-                return optionSerializer.DeserializeSecondPass(item, node, options);
-
-            return serializer.DeserializeSecondPass(item, node, options.Flags);
-        }
+            => serializer.DeserializeSecondPass(item, node, options);
 
         private SyncChangeInfo IsItemCurrent(XElement node, SyncSerializerOptions options)
         {
             var change = new SyncChangeInfo();
             change.CurrentNode = SerializeFromNode(node, options);
-
-            switch (serializer)
-            {
-                case ISyncNodeSerializer<TObject> nodeSerializer:
-                    change.Change = nodeSerializer.IsCurrent(node, change.CurrentNode, options);
-                    break;
-                case ISyncOptionsSerializer<TObject> optionSerializer:
-                    change.Change = optionSerializer.IsCurrent(node, options);
-                    break;
-                default:
-                    change.Change = serializer.IsCurrent(node);
-                    break;
-            }
-
+            change.Change = serializer.IsCurrent(node, change.CurrentNode, options);
             return change;
         }
-#pragma warning restore CS0618 // Type or member is obsolete
-
         private XElement SerializeFromNode(XElement node, SyncSerializerOptions options)
         {
             var item = serializer.FindItem(node);
@@ -1450,7 +1403,6 @@ namespace uSync.BackOffice.SyncHandlers
                     // this means we then only check the same values at each end.
                     options.Settings[uSyncConstants.CultureKey] = cultures;
                 }
-
 
                 var attempt = this.SerializeItem(item, options);
                 if (attempt.Success) return attempt.Item;
