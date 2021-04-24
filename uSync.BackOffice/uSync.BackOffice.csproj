@@ -25,6 +25,7 @@
 		<PackageReleaseNotes>
 			9.0 - Dotnet core version
 		</PackageReleaseNotes>
+	
 	</PropertyGroup>
 
 	<ItemGroup>
