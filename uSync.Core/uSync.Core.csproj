@@ -20,10 +20,15 @@
 		<PackageReleaseNotes>
 			9.0 - Dotnet core version
 		</PackageReleaseNotes>
+
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Umbraco.Cms.Web.Website" Version="9.0.0-beta001.20210423.3" />
-  </ItemGroup>
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
+	</ItemGroup>
 
 </Project>
