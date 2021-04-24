@@ -24,8 +24,6 @@ namespace uSync.Core.Serialization.Serializers
         protected readonly IContentService contentService;
         protected readonly IFileService fileService;
 
-        private bool performDoubleLookup;
-
         public ContentSerializer(
             IEntityService entityService,
             ILocalizationService localizationService,
@@ -543,21 +541,7 @@ namespace uSync.Core.Serialization.Serializers
         }
 
         public override IContent FindItem(Guid key)
-        {
-            if (performDoubleLookup)
-            {
-                // fixed v8.4+ by https://github.com/umbraco/Umbraco-CMS/issues/2997
-                var entity = syncMappers.EntityCache.GetEntity(key);
-                if (entity != null)
-                    return contentService.GetById(entity.Id);
-            }
-            else
-            {
-                return contentService.GetById(key);
-            }
-
-            return null;
-        }
+            => contentService.GetById(key);
 
         protected override IContent FindAtRoot(string alias)
         {

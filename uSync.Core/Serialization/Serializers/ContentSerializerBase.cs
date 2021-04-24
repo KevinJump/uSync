@@ -601,7 +601,6 @@ namespace uSync.Core.Serialization.Serializers
         /// </summary>
         public override bool IsValid(XElement node)
              => node != null
-                && node.GetKey() != null
                 && node.GetAlias() != null
                 && node.Element("Info") != null;
 
