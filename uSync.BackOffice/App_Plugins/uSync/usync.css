@@ -413,12 +413,11 @@ ul.usync-action-list {
 
 .usync-group-actions {
     display: grid;
-    grid-template-columns: repeat(3, 33%);
-
+    grid-template-columns: 1fr 1fr 1fr;
+    column-gap: 15px;
 }
 
 .usync-group-box {
-    margin-right: 10px;
     text-align: center;
 }
 
