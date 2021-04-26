@@ -23,9 +23,15 @@ namespace uSync.Core.Serialization
             => this.Where(x => x is ISyncSerializer<TObject> tracker)
                 .Select(x => x as ISyncSerializer<TObject>);
 
+        public ISyncSerializer<TObject> GetSerializer<TObject>()
+            => this.Where(x => x is ISyncSerializer<TObject> tracker)
+                .Select(x => x as ISyncSerializer<TObject>)
+                .FirstOrDefault();
+
         public ISyncSerializer<TObject> GetSerializer<TObject>(string name)
             => this.Where(x => x is ISyncSerializer<TObject> tracker && x.Name.InvariantEquals(name))
                 .Select(x => x as ISyncSerializer<TObject>)
                 .FirstOrDefault();
+
     }
 }

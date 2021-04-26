@@ -8,10 +8,9 @@ namespace uSync.Core.Tracking.Impliment
 {
     public class TemplateTracker : SyncXmlTracker<ITemplate>, ISyncTracker<ITemplate>
     {
-        public TemplateTracker(ISyncSerializer<ITemplate> serializer)
-            : base(serializer)
-        {
-        }
+        public TemplateTracker(SyncSerializerCollection serializers)
+            : base(serializers)
+        { }
 
         public override List<TrackingItem> TrackingItems => new List<TrackingItem>()
         {

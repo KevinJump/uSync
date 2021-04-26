@@ -9,7 +9,8 @@ namespace uSync.Core.Tracking.Impliment
     public class RelationTypeTracker
         : SyncXmlTracker<IRelationType>, ISyncTracker<IRelationType>
     {
-        public RelationTypeTracker(ISyncSerializer<IRelationType> serializer) : base(serializer)
+        public RelationTypeTracker(SyncSerializerCollection serializers)
+            : base(serializers)
         { }
 
         public override List<TrackingItem> TrackingItems => new List<TrackingItem>()

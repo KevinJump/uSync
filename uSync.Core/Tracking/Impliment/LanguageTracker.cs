@@ -8,7 +8,8 @@ namespace uSync.Core.Tracking.Impliment
 {
     public class LanguageTracker : SyncXmlTracker<ILanguage>, ISyncTracker<ILanguage>
     {
-        public LanguageTracker(ISyncSerializer<ILanguage> serializer) : base(serializer)
+        public LanguageTracker(SyncSerializerCollection serializers)
+            : base(serializers)
         {
         }
 

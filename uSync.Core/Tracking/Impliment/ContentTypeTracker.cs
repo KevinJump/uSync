@@ -7,7 +7,8 @@ namespace uSync.Core.Tracking.Impliment
 {
     public class ContentTypeTracker : ContentTypeBaseTracker<IContentType>, ISyncTracker<IContentType>
     {
-        public ContentTypeTracker(ISyncSerializer<IContentType> serializer) : base(serializer)
+        public ContentTypeTracker(SyncSerializerCollection serializers)
+            : base(serializers)
         {
         }
     }

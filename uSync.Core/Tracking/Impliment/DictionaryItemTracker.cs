@@ -8,7 +8,8 @@ namespace uSync.Core.Tracking.Impliment
 {
     public class DictionaryItemTracker : SyncXmlTracker<IDictionaryItem>, ISyncTracker<IDictionaryItem>
     {
-        public DictionaryItemTracker(ISyncSerializer<IDictionaryItem> serializer) : base(serializer)
+        public DictionaryItemTracker(SyncSerializerCollection serializers)
+            : base(serializers)
         { }
 
         public override List<TrackingItem> TrackingItems => new List<TrackingItem>()

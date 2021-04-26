@@ -8,7 +8,8 @@ namespace uSync.Core.Tracking.Impliment
 {
     public class DomainTracker : SyncXmlTracker<IDomain>, ISyncTracker<IDomain>
     {
-        public DomainTracker(ISyncSerializer<IDomain> serializer) : base(serializer)
+        public DomainTracker(SyncSerializerCollection serializers)
+            : base(serializers)
         {
         }
 

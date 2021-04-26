@@ -8,7 +8,8 @@ namespace uSync.Core.Tracking.Impliment
 {
     public class MacroTracker : SyncXmlTracker<IMacro>, ISyncTracker<IMacro>
     {
-        public MacroTracker(ISyncSerializer<IMacro> serializer) : base(serializer)
+        public MacroTracker(SyncSerializerCollection serializers)
+            : base(serializers)
         {
         }
 

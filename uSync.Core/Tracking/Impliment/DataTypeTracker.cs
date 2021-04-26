@@ -8,8 +8,8 @@ namespace uSync.Core.Tracking.Impliment
 {
     public class DataTypeTracker : SyncXmlTracker<IDataType>, ISyncTracker<IDataType>
     {
-        public DataTypeTracker(ISyncSerializer<IDataType> serializer)
-            : base(serializer)
+        public DataTypeTracker(SyncSerializerCollection serializers)
+            : base(serializers)
         {
         }
 

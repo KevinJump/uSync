@@ -18,13 +18,13 @@ namespace uSync.Core.Tracking
     /// </summary>
     public class SyncXmlTracker<TObject>
     {
-        protected readonly ISyncSerializer<TObject> serializer;
+        protected ISyncSerializer<TObject> serializer;
 
         private const string seperator = "/";
 
-        public SyncXmlTracker(ISyncSerializer<TObject> serializer)
+        public SyncXmlTracker(SyncSerializerCollection serializers)
         {
-            this.serializer = serializer;
+            serializer = serializers.GetSerializer<TObject>();
         }
 
         public IList<TrackingItem> Items { get; set; }

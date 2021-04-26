@@ -9,7 +9,8 @@ namespace uSync.Core.Tracking.Impliment
     public class ContentTypeBaseTracker<TObject> : SyncXmlTracker<TObject>
         where TObject : IContentTypeBase
     {
-        public ContentTypeBaseTracker(ISyncSerializer<TObject> serializer) : base(serializer)
+        public ContentTypeBaseTracker(SyncSerializerCollection serializers)
+            : base(serializers)
         { }
 
         public override List<TrackingItem> TrackingItems => new List<TrackingItem>()

@@ -6,8 +6,8 @@ namespace uSync.Core.Tracking.Impliment
 {
     public class MediaTracker : ContentBaseTracker<IMedia>, ISyncTracker<IMedia>
     {
-        public MediaTracker(ISyncSerializer<IMedia> serializer)
-            : base(serializer)
+        public MediaTracker(SyncSerializerCollection serializers)
+            : base(serializers)
         {
         }
     }
