@@ -1,4 +1,4 @@
-name: Build & Test uSync .NetCore Version
+name: core-build
 
 on:
   push:
