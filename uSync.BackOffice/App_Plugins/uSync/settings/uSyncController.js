@@ -153,8 +153,6 @@
 
                 function runHandlerAction(handler) {
 
-                    console.log(handler);
-
                     vm.status.message = handler.name;
 
                     handler.status = 1;

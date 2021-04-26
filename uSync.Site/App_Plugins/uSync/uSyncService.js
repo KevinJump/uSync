@@ -122,9 +122,6 @@
         }
 
         function reportHandler(handler, options, clientId) {
-
-            console.log("Report", handler, options, clientId);
-
             return $http.post(serviceRoot + 'ReportHandler', {
                 handler: handler,
                 clientId: clientId

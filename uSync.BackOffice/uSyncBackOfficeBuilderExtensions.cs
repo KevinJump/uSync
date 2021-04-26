@@ -58,6 +58,7 @@ namespace uSync.BackOffice
 
             // Setup the back office.
             builder.Services.AddUnique<uSyncMutexService>();
+            
             builder.Services.AddUnique<uSyncConfigService>();
             builder.Services.AddUnique<SyncFileService>();
 

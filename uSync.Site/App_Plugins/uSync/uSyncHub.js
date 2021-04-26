@@ -19,8 +19,6 @@
 
         function initHub(callback) {
 
-            console.log('initHub');
-
             callbacks.push(callback);
 
             if (!starting) {
@@ -35,7 +33,6 @@
                     $q.all(promises)
                         .then(function () {
                             while (callbacks.length) {
-                                console.log('a', callbacks.length);
                                 var cb = callbacks.pop();
                                 hubSetup(cb);
                             }
@@ -44,7 +41,6 @@
                 }
                 else {
                     while (callbacks.length) {
-                        console.log('x', callbacks.length);
                         var cb = callbacks.pop();
                         hubSetup(cb);
                     }
@@ -55,11 +51,10 @@
 
         function hubSetup(callback) {
 
-            console.log('setting up hub');
             $.connection = new signalR.HubConnectionBuilder()
                 .withUrl(Umbraco.Sys.ServerVariables.uSync.signalRHub)
                 .withAutomaticReconnect()
-                .configureLogging(signalR.LogLevel.Debug)
+                .configureLogging(signalR.LogLevel.Warning)
                 .build();
 
             var hub = {};
@@ -71,12 +66,12 @@
 
                         try {
                             $.connection.start().then(function () {
-                                console.log('Hub started', $.connection.connectionId);
+                                // console.info('Hub started', $.connection.connectionId);
                             }).catch(function () {
-                                console.log('Failed to start hub');
+                                console.warn('Failed to start hub');
                             });
                         } catch (e) {
-                            console.log('Could not setup signalR connection', e);
+                            console.warn('Could not setup signalR connection', e);
                         }
 
                     },
@@ -105,7 +100,7 @@
                 hub = {
                     on: function () { },
                     invoke: function () { },
-                    start: function () { console.log('no hub to start - missing signalR library ?'); }
+                    start: function () { console.warn('no hub to start - missing signalR library ?'); }
                 };
             }
 

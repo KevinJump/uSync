@@ -11,7 +11,7 @@
         }
 
         vm.page = {
-            title: 'uSync 🦄 beta',
+            title: 'uSync 🦄-core beta',
             description: '...',
             navigation: [
                 {

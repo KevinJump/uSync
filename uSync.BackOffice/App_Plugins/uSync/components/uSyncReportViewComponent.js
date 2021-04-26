@@ -123,10 +123,9 @@
             item.applyState = 'busy';
             uSync8DashboardService.importItem(item)
                 .then(function (result) {
-                    console.log(result.data);
                     item.applyState = 'success';
                 }, function (error) {
-                    console.log(error);
+                    console.error(error);
                     item.applyState = 'error';
                 });
         }

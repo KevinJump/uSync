@@ -13,6 +13,7 @@ namespace uSync.BackOffice
 
         public uSyncImportPause(uSyncMutexService mutexService)
         {
+            _mutexService = mutexService;
             _mutexService.Pause();
         }
 

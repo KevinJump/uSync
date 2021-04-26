@@ -28,10 +28,7 @@
                 .then(function (result) {
                     vm.settings = result.data;
                     vm.loading = false;
-
-                    console.log('getHandlerSetSettings', vm.settings.defaultSet);
                     getHandlerSetSettings(vm.settings.defaultSet);
-
                 });
         }
 
