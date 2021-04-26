@@ -55,7 +55,7 @@
 		</Content>
 		<None Include="build\**\*.*">
 			<Pack>true</Pack>
-			<PackagePath>Build</PackagePath>
+			<PackagePath>build</PackagePath>
 		</None>
 	</ItemGroup>
 	

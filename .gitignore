@@ -22,6 +22,7 @@ Bin/
 Archive/
 uSync8.Site/Media/*
 !uSync8.Site/Media/web.config
+[Dd]ist/
 
 
 # Build results
