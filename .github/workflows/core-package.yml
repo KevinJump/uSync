@@ -35,8 +35,6 @@ jobs:
       with:
         dotnet-version: 5.0.x
         source-url: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
-        env:
-          NUGET_AUTH_TOKEN: '%NUGET_AUTH_TOKEN%'
 
     - name: Restore dependencies
       run: dotnet restore --noLogo
