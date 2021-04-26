@@ -1,8 +1,6 @@
 name: core-build
 
 on:
-  push:
-    branches: [ core/main ]
   pull_request:
     branches: [ core/main ]
 
