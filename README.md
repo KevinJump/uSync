@@ -4,7 +4,7 @@ Database syncing tool for Umbraco
 
 **This is the .net core branch of uSync, and is still in alpha/beta development.**
 
-![uSync](https://github.com/KevinJump/uSync8/blob/v8/8.2/Screenshots/usyncprogress.gif "uSync Import Animation")
+![uSync](https://github.com/KevinJump/uSync8/blob/core/main/screenshots/importing.gif "uSync Import Animation")
 
 
 ## What is uSync 
