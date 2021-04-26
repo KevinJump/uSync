@@ -1,14 +1,13 @@
-name: core-package
+name: core-nightly-package
 
 env:
   OUTPUT: ./output
   CONFIG: Release
   RELEASE: 'beta001'
 
-on:
-  workflow_dispatch:
-  schedule:
-  - cron: "0 0 * * *"
+on: [workflow_dispatch]
+# schedule:
+# - cron: "0 0 * * *"
 
 jobs:
   build:
@@ -22,11 +21,14 @@ jobs:
 
     - name: Get Date
       id: date
-      run: echo "::set-output name=date::$(date + '%Y-%m-%d')"
+      run: echo "::set-output name=date::$(date +'%Y%m%d')"
+      shell: bash
+
     - name: Set Release Suffix
       run: echo "SUFFIX=$SUFFIX" >> $GITHUB_ENV
+      shell: bash
       env:
-        SUFFIX: ${{env.RELEASE}}-${{steps.date.outputs.date}}
+        SUFFIX: ${{env.RELEASE}}-${{steps.date.outputs.date}}.${{github.run_number}}
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
@@ -34,7 +36,7 @@ jobs:
         dotnet-version: 5.0.x
 
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore --noLogo
     
     - name: Build
       run: dotnet build --no-restore
@@ -43,7 +45,7 @@ jobs:
       run: dotnet test --no-build --verbosity normal
 
     - name: Package Core
-      run: dotnet pack \uSync.Core\*.csproj -c ${{env.CONFIG}} -o ${{env.OUTDIR}} --version-suffix ${{env.SUFFIX}} /p:ContinuousIntegrationBuild=true 
+      run: dotnet pack \uSync.Core\uSync.Core.csproj -c ${{env.CONFIG}} -o ${{env.OUTDIR}} --version-suffix ${{env.SUFFIX}} /p:ContinuousIntegrationBuild=true 
 
     - name: Package BackOffice
-      run: dotnet pack \uSync.BackOffice\*.csproj -c ${{env.CONFIG}} -o ${{env.OUTDIR}} --version-suffix ${{env.SUFFIX}} /p:ContinuousIntegrationBuild=true       
+      run: dotnet pack \uSync.BackOffice\uSync.BackOffice.csproj -c ${{env.CONFIG}} -o ${{env.OUTDIR}} --version-suffix ${{env.SUFFIX}} /p:ContinuousIntegrationBuild=true       
