@@ -33,6 +33,6 @@ namespace uSync.BackOffice
 
         public int ProgressMin { get; set; }
         public int ProgressMax { get; set; }
-    
+
     }
 }

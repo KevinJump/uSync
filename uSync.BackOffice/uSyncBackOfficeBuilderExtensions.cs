@@ -2,7 +2,6 @@
 using System.Linq;
 
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -36,7 +35,8 @@ namespace uSync.BackOffice
             var options = builder.Services.AddOptions<uSyncSettings>()
                 .Bind(builder.Config.GetSection(uSync.Configuration.ConfigSettings));
 
-            if (defaultOptions != default) {
+            if (defaultOptions != default)
+            {
                 options.Configure(defaultOptions);
             }
             options.ValidateDataAnnotations();
@@ -96,7 +96,7 @@ namespace uSync.BackOffice
                     {
                         applicationBuilder.UseEndpoints(e =>
                         {
-                            var hubRoutes = applicationBuilder.ApplicationServices.GetRequiredService<uSyncHubRoutes>();       
+                            var hubRoutes = applicationBuilder.ApplicationServices.GetRequiredService<uSyncHubRoutes>();
                             hubRoutes.CreateRoutes(e);
                         });
                     }

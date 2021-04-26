@@ -9,7 +9,6 @@ using Umbraco.Cms.Core.Strings;
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
 using uSync.Core;
-using uSync.Core.Serialization;
 
 namespace uSync.BackOffice.SyncHandlers
 {

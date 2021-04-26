@@ -22,23 +22,23 @@ namespace uSync.BackOffice.Controllers
         [HttpPost]
         public IEnumerable<SyncHandlerView> GetActionHandlers(HandlerActions action, uSyncOptions options)
             => handlerFactory.GetValidHandlers(new SyncHandlerOptions
-                {
-                    Group = options.Group,
-                    Action = action
-                }).Select(x => new SyncHandlerView
-                {
-                    Enabled = x.Handler.Enabled,
-                    Alias = x.Handler.Alias,
-                    Name = x.Handler.Name,
-                    Icon = x.Handler.Icon,
-                    Group = x.Handler.Group
-                });
+            {
+                Group = options.Group,
+                Action = action
+            }).Select(x => new SyncHandlerView
+            {
+                Enabled = x.Handler.Enabled,
+                Alias = x.Handler.Alias,
+                Name = x.Handler.Name,
+                Icon = x.Handler.Icon,
+                Group = x.Handler.Group
+            });
 
         /// <summary>
         ///  run the report process against a given handler alias
         /// </summary>
         [HttpPost]
-        public SyncActionResult ReportHandler(SyncActionOptions options) 
+        public SyncActionResult ReportHandler(SyncActionOptions options)
         {
             var hubClient = new HubClientService(hubContext, options.ClientId);
 
@@ -102,7 +102,7 @@ namespace uSync.BackOffice.Controllers
             }
             catch
             {
-                return false; 
+                return false;
             }
         }
 

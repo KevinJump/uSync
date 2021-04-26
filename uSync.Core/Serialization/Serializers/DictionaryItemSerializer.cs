@@ -76,7 +76,7 @@ namespace uSync.Core.Serialization.Serializers
             }
 
             // this.SaveItem(item);
-            
+
 
             return SyncAttempt<IDictionaryItem>.Succeed(item.ItemKey, item, ChangeType.Import, details);
         }
@@ -97,10 +97,10 @@ namespace uSync.Core.Serialization.Serializers
 
                 var itemTranslation = item.Translations.FirstOrDefault(x => x.Language.IsoCode == language);
                 if (itemTranslation != null && itemTranslation.Value != translation.Value)
-                    {
-                        changes.AddUpdate(language, itemTranslation.Value, translation.Value, $"{item.ItemKey}/{language}");
-                        itemTranslation.Value = translation.Value;
-                    
+                {
+                    changes.AddUpdate(language, itemTranslation.Value, translation.Value, $"{item.ItemKey}/{language}");
+                    itemTranslation.Value = translation.Value;
+
                 }
                 else
                 {

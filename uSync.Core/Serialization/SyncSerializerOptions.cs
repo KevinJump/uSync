@@ -112,7 +112,7 @@ namespace uSync.Core.Serialization
         /// <summary>
         ///  merge any new settings into the settings collection.
         /// </summary>
-        public void MergeSettings(Dictionary<string,string> newSettings)
+        public void MergeSettings(Dictionary<string, string> newSettings)
         {
             if (Settings == null) Settings = new Dictionary<string, string>();
             if (newSettings != null)

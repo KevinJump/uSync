@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+
 using Umbraco.Cms.Core.Composing;
 using Umbraco.Extensions;
 
@@ -19,7 +20,7 @@ namespace uSync.Core.Serialization
         { }
 
         public IEnumerable<ISyncSerializer<TObject>> GetSerializers<TObject>()
-            =>this.Where(x => x is ISyncSerializer<TObject> tracker)
+            => this.Where(x => x is ISyncSerializer<TObject> tracker)
                 .Select(x => x as ISyncSerializer<TObject>);
 
         public ISyncSerializer<TObject> GetSerializer<TObject>(string name)

@@ -813,7 +813,7 @@ namespace uSync.Core.Serialization.Serializers
                 if (next == null)
                 {
                     // if we get lost 1/2 way we are returning that as the path? which would put us in an odd place?
-                    logger.LogTrace( "Didn't find {folder} returning last found Parent", folder);
+                    logger.LogTrace("Didn't find {folder} returning last found Parent", folder);
 
                     // if we don't fail on exact this is ok, 
                     // else its not - so we haven't 'found' the right place.

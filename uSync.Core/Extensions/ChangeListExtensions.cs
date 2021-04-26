@@ -10,7 +10,7 @@ namespace uSync.Core
     {
         public static void AddNew(this List<uSyncChange> changes, string name, string value, string path)
             => AddNew(changes, name, value, path, true);
-        
+
         public static void AddNew(this List<uSyncChange> changes, string name, string value, string path, bool success)
         {
             changes.Add(uSyncChange.Create(path, name, value));

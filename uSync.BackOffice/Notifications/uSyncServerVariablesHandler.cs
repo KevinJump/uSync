@@ -27,7 +27,7 @@ namespace uSync.BackOffice.Notifications
 
         private string umbracoMvcArea;
 
-        public uSyncServerVariablesHandler(LinkGenerator linkGenerator, UriUtility uriUtility, 
+        public uSyncServerVariablesHandler(LinkGenerator linkGenerator, UriUtility uriUtility,
             IOptions<GlobalSettings> globalSettings,
             uSyncConfigService uSyncConfigService,
             IHostingEnvironment hostingEnvironment,

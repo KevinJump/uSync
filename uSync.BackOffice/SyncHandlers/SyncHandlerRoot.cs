@@ -1389,7 +1389,7 @@ namespace uSync.BackOffice.SyncHandlers
         #region Serializer Calls 
 
         private SyncAttempt<XElement> SerializeItem(TObject item, SyncSerializerOptions options)
-            =>serializer.Serialize(item, options);
+            => serializer.Serialize(item, options);
 
         private SyncAttempt<TObject> DeserializeItem(XElement node, SyncSerializerOptions options)
             => serializer.Deserialize(node, options);

@@ -115,7 +115,7 @@ namespace uSync.Core.Serialization
         #region Getters
         // Getters - get information we already know (either in the object or the XElement)
 
-        protected XElement GetFolderNode(TObject item) 
+        protected XElement GetFolderNode(TObject item)
         {
             if (item.ParentId <= 0) return null;
             // return GetFolderNode(GetContainers(item));

@@ -39,8 +39,8 @@ namespace uSync.BackOffice.Controllers
         private readonly ITypeFinder typeFinder;
 
         public uSyncDashboardApiController(
-            AppCaches appCaches, 
-            IWebHostEnvironment hostEnvironment, 
+            AppCaches appCaches,
+            IWebHostEnvironment hostEnvironment,
             ILocalizedTextService textService,
             ILogger<uSyncDashboardApiController> logger,
             ITypeFinder typeFinder,

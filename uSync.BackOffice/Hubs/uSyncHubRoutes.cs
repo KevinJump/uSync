@@ -24,7 +24,7 @@ namespace uSync.BackOffice.Hubs
             _runtimeState = runtimeState;
             _umbracoPathSegment = globalSettings.Value.GetUmbracoMvcArea(hostingEnvironment);
         }
-        
+
         public void CreateRoutes(IEndpointRouteBuilder endpoints)
         {
             switch (_runtimeState.Level)
@@ -33,7 +33,7 @@ namespace uSync.BackOffice.Hubs
                     endpoints.MapHub<SyncHub>(GetuSyncHubRoute());
                     break;
             }
-           
+
         }
 
         public string GetuSyncHubRoute()

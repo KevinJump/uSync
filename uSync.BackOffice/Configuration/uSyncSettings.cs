@@ -18,7 +18,7 @@ namespace uSync.BackOffice.Configuration
         /// <summary>
         ///  Import when Umbraco boots (can be group name or 'All' so everything is done, blank or 'none' == off)
         /// </summary>
-        public string ImportAtStartup { get; set; } = ""; 
+        public string ImportAtStartup { get; set; } = "";
 
         /// <summary>
         ///  Export when Umbraco boots
@@ -78,6 +78,6 @@ namespace uSync.BackOffice.Configuration
         ///  Should the history view be on of off ? 
         /// </summary>
         public bool EnableHistory { get; set; } = true;
-   }
+    }
 
 }

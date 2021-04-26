@@ -156,7 +156,7 @@ namespace uSync.Core.Serialization
         public bool IsValidOrEmpty(XElement node)
             => IsEmpty(node) || IsValid(node);
 
-           /// <summary>
+        /// <summary>
         ///  Process the action in teh 'empty' XML node
         /// </summary>
         /// <param name="node">XML to process</param>
@@ -229,7 +229,7 @@ namespace uSync.Core.Serialization
             logger.LogDebug("Process Rename (no action)");
             return SyncAttempt<TObject>.Succeed(alias, ChangeType.NoChange);
         }
-        
+
         public virtual ChangeType IsCurrent(XElement node, SyncSerializerOptions options)
         {
             XElement current = null;
@@ -348,7 +348,7 @@ namespace uSync.Core.Serialization
             return (key: Guid.Empty, alias: string.Empty);
         }
 
-        public abstract TObject FindItem(int id); 
+        public abstract TObject FindItem(int id);
 
         public abstract TObject FindItem(Guid key);
         public abstract TObject FindItem(string alias);

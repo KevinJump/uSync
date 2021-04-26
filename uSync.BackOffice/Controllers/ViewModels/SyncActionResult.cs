@@ -6,8 +6,9 @@ using Newtonsoft.Json.Serialization;
 namespace uSync.BackOffice.Controllers
 {
     [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
-    public class SyncActionResult {
-        
+    public class SyncActionResult
+    {
+
         public SyncActionResult() { }
         public SyncActionResult(IEnumerable<uSyncAction> actions)
         {

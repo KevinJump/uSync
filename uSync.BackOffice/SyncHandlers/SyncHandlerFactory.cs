@@ -103,7 +103,7 @@ namespace uSync.BackOffice.SyncHandlers
             groups.AddRange(handlers.Where(x => !string.IsNullOrWhiteSpace(x.Settings.Group))
                 .Select(x => x.Settings.Group));
 
-            return groups.Distinct();              
+            return groups.Distinct();
         }
 
         public IEnumerable<HandlerConfigPair> GetValidHandlers(string[] aliases, SyncHandlerOptions options = null)

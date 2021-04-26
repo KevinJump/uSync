@@ -126,7 +126,7 @@ namespace uSync.Core.Cache
 
             var items = new List<IEntitySlim>();
             var uncachedIds = new List<int>();
-            foreach(var id in ids)
+            foreach (var id in ids)
             {
                 var cachedItem = cache.GetCacheItem<IEntitySlim>(id.ToString());
                 if (cachedItem != null)

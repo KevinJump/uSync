@@ -124,7 +124,7 @@ namespace uSync.Core.Tracking
                 // only track updates when tracking target to source. 
                 else if (direction == TrackingDirection.TargetToSource)
                 {
-                    
+
                     if (item.HasAttributes())
                     {
                         return Compare(targetNode.Attribute(item.AttributeKey).ValueOrDefault(string.Empty),
@@ -154,7 +154,7 @@ namespace uSync.Core.Tracking
                 // make the selection path for this item.
                 var itemPath = trackingItem.Path.Replace("*", sourceNode.Parent.Name.LocalName) + MakeSelectionPath(sourceNode, trackingItem.Keys);
 
-                var itemName = trackingItem.Name.Replace("*", sourceNode.Parent.Name.LocalName) + 
+                var itemName = trackingItem.Name.Replace("*", sourceNode.Parent.Name.LocalName) +
                     MakeSelectionName(sourceNode, String.IsNullOrWhiteSpace(trackingItem.ValueKey) ? trackingItem.Keys : trackingItem.ValueKey);
 
                 var targetNode = target.XPathSelectElement(itemPath);

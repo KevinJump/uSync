@@ -17,7 +17,7 @@ namespace uSync.BackOffice.Configuration
         ///  settings for named handlers 
         /// </summary>
         public IDictionary<string, HandlerSettings> Handlers { get; set; } = new Dictionary<string, HandlerSettings>();
-    
+
     }
 
     public static class HandlerSetSettingsExtensions

@@ -22,9 +22,9 @@ namespace uSync.Core.Mapping
             : base(items)
         {
             EntityCache = entityCache;
-            
+
             // todo, load these from config. 
-            CustomMappings = new Dictionary<string, string>(); 
+            CustomMappings = new Dictionary<string, string>();
         }
 
         /// <summary>

@@ -10,7 +10,6 @@ using Umbraco.Cms.Core.Strings;
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
 using uSync.Core;
-using uSync.Core.Serialization;
 
 using static Umbraco.Cms.Core.Constants;
 
@@ -37,7 +36,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfigService, syncItemFactory)
         {
 
-           this.contentService = contentService;
+            this.contentService = contentService;
 
             // make sure we load up the template serializer - because we need that one, not the normal content one.
             this.serializer = syncItemFactory.GetSerializer<IContent>("contentTemplateSerializer");

@@ -15,7 +15,6 @@ using Umbraco.Extensions;
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
 using uSync.Core;
-using uSync.Core.Serialization;
 
 namespace uSync.BackOffice.SyncHandlers
 {
@@ -128,10 +127,10 @@ namespace uSync.BackOffice.SyncHandlers
         }
 
         public virtual void Handle(EntityContainerSavedNotification notification)
-        { 
+        {
             if (_mutexService.IsPaused) return;
 
-            foreach(var folder in notification.SavedEntities)
+            foreach (var folder in notification.SavedEntities)
             {
                 if (folder.ContainedObjectType == this.itemObjectType.GetGuid())
                 {

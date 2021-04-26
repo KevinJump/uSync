@@ -44,7 +44,7 @@ namespace uSync.BackOffice
                     if (handlerPair == null) return Enumerable.Empty<uSyncAction>();
                     var folder = GetHandlerFolder(options.RootFolder, handlerPair.Handler);
 
-                    return handlerPair.Handler.ImportAll(folder, handlerPair.Settings, 
+                    return handlerPair.Handler.ImportAll(folder, handlerPair.Settings,
                         options.Flags.HasFlag(SerializerFlags.Force),
                         options.Callbacks?.Update);
                 }
@@ -80,7 +80,7 @@ namespace uSync.BackOffice
         /// <summary>
         ///  Start a bulk run, fires events, and for exports writes the version file.
         /// </summary>
-        public void StartBulkProcess(HandlerActions action) 
+        public void StartBulkProcess(HandlerActions action)
         {
             switch (action)
             {
@@ -100,7 +100,7 @@ namespace uSync.BackOffice
         /// <summary>
         ///  Complete a bulk run, fire the event so other things know we have done it.
         /// </summary>
-        public void FinishBulkProcess(HandlerActions action, IEnumerable<uSyncAction> actions) 
+        public void FinishBulkProcess(HandlerActions action, IEnumerable<uSyncAction> actions)
         {
             switch (action)
             {

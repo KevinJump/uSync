@@ -17,7 +17,6 @@ using Umbraco.Extensions;
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
 using uSync.Core;
-using uSync.Core.Serialization;
 
 using static Umbraco.Cms.Core.Constants;
 
@@ -46,7 +45,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         {
             this.localizationService = localizationService;
         }
-      
+
         // language guids are not consistant (at least in alpha)
         // so we don't save by Guid we save by ISO name everytime.           
         protected override string GetPath(string folder, ILanguage item, bool GuidNames, bool isFlat)

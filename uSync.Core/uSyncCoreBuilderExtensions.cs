@@ -2,7 +2,6 @@
 using System.Linq;
 
 using Umbraco.Cms.Core.DependencyInjection;
-using Umbraco.Cms.Core.Models;
 using Umbraco.Extensions;
 
 using uSync.Core.Cache;
@@ -10,7 +9,6 @@ using uSync.Core.DataTypes;
 using uSync.Core.Dependency;
 using uSync.Core.Mapping;
 using uSync.Core.Serialization;
-using uSync.Core.Serialization.Serializers;
 using uSync.Core.Tracking;
 
 namespace uSync.Core
@@ -50,7 +48,7 @@ namespace uSync.Core
 
             // the item factory lets us get to these collections from one place. 
             builder.Services.AddUnique<ISyncItemFactory, SyncItemFactory>();
-            
+
             return builder;
         }
     }

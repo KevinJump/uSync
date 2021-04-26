@@ -156,7 +156,7 @@ namespace uSync.Core.Serialization.Serializers
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 // can happen when the media locations get moved.
                 logger.LogError(ex, "Error reading media file: {item}", item.Name);

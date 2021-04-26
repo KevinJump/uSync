@@ -22,7 +22,7 @@ namespace uSync.Core.Mapping
     {
         private readonly Lazy<SyncValueMapperCollection> mapperCollection;
 
-        public RTEMapper(IEntityService entityService, Lazy<SyncValueMapperCollection> mappers) 
+        public RTEMapper(IEntityService entityService, Lazy<SyncValueMapperCollection> mappers)
             : base(entityService)
         {
             this.mapperCollection = mappers;

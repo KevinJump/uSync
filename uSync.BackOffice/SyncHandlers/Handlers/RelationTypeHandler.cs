@@ -13,7 +13,6 @@ using Umbraco.Extensions;
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
 using uSync.Core;
-using uSync.Core.Serialization;
 
 using static Umbraco.Cms.Core.Constants;
 
@@ -85,69 +84,69 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
 
         protected override string GetItemName(IRelationType item)
             => item.Name;
-        
-    //     private void RelationService_SavedRelation(IRelationService sender, Umbraco.Core.Events.SaveEventArgs<IRelation> e)
-    //     {
-    //         if (uSync8BackOffice.eventsPaused) return;
 
-    //         lock (saveLock)
-    //         {
-    //             saveTimer.Stop();
-    //             saveTimer.Start();
+        //     private void RelationService_SavedRelation(IRelationService sender, Umbraco.Core.Events.SaveEventArgs<IRelation> e)
+        //     {
+        //         if (uSync8BackOffice.eventsPaused) return;
 
-    //             // add each item to the save list (if we haven't already)
-    //             foreach (var item in e.SavedEntities)
-    //             {
-    //                 if (!pendingSaveIds.Contains(item.RelationTypeId))
-    //                     pendingSaveIds.Add(item.RelationTypeId);
-    //             }
-    //         }
-    //     }
+        //         lock (saveLock)
+        //         {
+        //             saveTimer.Stop();
+        //             saveTimer.Start();
 
-    //     private void SaveTimer_Elapsed(object sender, ElapsedEventArgs e)
-    //     {
-    //         lock (saveLock)
-    //         {
-    //             UpdateRelationTypes(pendingSaveIds);
-    //             pendingSaveIds.Clear();
-    //         }
-    //     }
+        //             // add each item to the save list (if we haven't already)
+        //             foreach (var item in e.SavedEntities)
+        //             {
+        //                 if (!pendingSaveIds.Contains(item.RelationTypeId))
+        //                     pendingSaveIds.Add(item.RelationTypeId);
+        //             }
+        //         }
+        //     }
 
-    //     private static Timer saveTimer;
-    //     private static List<int> pendingSaveIds;
-    //     private static object saveLock;
+        //     private void SaveTimer_Elapsed(object sender, ElapsedEventArgs e)
+        //     {
+        //         lock (saveLock)
+        //         {
+        //             UpdateRelationTypes(pendingSaveIds);
+        //             pendingSaveIds.Clear();
+        //         }
+        //     }
 
-    //     private void RelationService_DeletedRelation(IRelationService sender, Umbraco.Core.Events.DeleteEventArgs<IRelation> e)
-    //     {
-    //         if (uSync8BackOffice.eventsPaused) return;
+        //     private static Timer saveTimer;
+        //     private static List<int> pendingSaveIds;
+        //     private static object saveLock;
 
-    //         var types = new List<int>();
+        //     private void RelationService_DeletedRelation(IRelationService sender, Umbraco.Core.Events.DeleteEventArgs<IRelation> e)
+        //     {
+        //         if (uSync8BackOffice.eventsPaused) return;
 
-    //         foreach (var item in e.DeletedEntities)
-    //         {
-    //             if (!types.Contains(item.RelationTypeId))
-    //                 types.Add(item.RelationTypeId);
-    //         }
+        //         var types = new List<int>();
 
-    //         UpdateRelationTypes(types);
-    //     }
+        //         foreach (var item in e.DeletedEntities)
+        //         {
+        //             if (!types.Contains(item.RelationTypeId))
+        //                 types.Add(item.RelationTypeId);
+        //         }
 
-    //     private void UpdateRelationTypes(IEnumerable<int> types)
-    //     {
-    //         foreach (var type in types)
-    //         {
-    //             var relationType = relationService.GetRelationTypeById(type);
+        //         UpdateRelationTypes(types);
+        //     }
 
-    //             var attempts = Export(relationType, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
+        //     private void UpdateRelationTypes(IEnumerable<int> types)
+        //     {
+        //         foreach (var type in types)
+        //         {
+        //             var relationType = relationService.GetRelationTypeById(type);
 
-    //             if (!(this.DefaultConfig.GuidNames && this.DefaultConfig.UseFlatStructure))
-    //             {
-    //                 foreach (var attempt in attempts.Where(x => x.Success))
-    //                 {
-    //                     this.CleanUp(relationType, attempt.FileName, Path.Combine(rootFolder, this.DefaultFolder));
-    //                 }
-    //             }
-    //         }
-    //     }
+        //             var attempts = Export(relationType, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
+
+        //             if (!(this.DefaultConfig.GuidNames && this.DefaultConfig.UseFlatStructure))
+        //             {
+        //                 foreach (var attempt in attempts.Where(x => x.Success))
+        //                 {
+        //                     this.CleanUp(relationType, attempt.FileName, Path.Combine(rootFolder, this.DefaultFolder));
+        //                 }
+        //             }
+        //         }
+        //     }
     }
 }

@@ -234,8 +234,8 @@ namespace uSync.Core.Serialization.Serializers
             if (editorType == null)
                 return Attempt.Fail<IDataType>(null, new ArgumentException($"(Missing Package?) DataEditor {itemType} is not installed"));
 
-            var item = new DataType(editorType, jsonSerializer, -1); 
-            
+            var item = new DataType(editorType, jsonSerializer, -1);
+
             item.Name = alias;
 
             if (parent != null)

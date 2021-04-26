@@ -31,7 +31,7 @@ namespace uSync.Core.Mapping
     {
         protected readonly IMediaService mediaService;
         protected readonly Lazy<SyncValueMapperCollection> mapperCollection;
-        public GridMapper(IEntityService entityService, 
+        public GridMapper(IEntityService entityService,
             Lazy<SyncValueMapperCollection> mappers,
             IMediaService mediaService) : base(entityService)
         {
@@ -214,7 +214,7 @@ namespace uSync.Core.Mapping
                     }
                 }
             }
-            catch(JsonReaderException)
+            catch (JsonReaderException)
             {
                 // ideally we want to deal with this, but failure of a dependcy check on a url in 
                 // a grid style element shouldn't stop a full export. 
@@ -232,7 +232,7 @@ namespace uSync.Core.Mapping
         /// <returns></returns>
         private IEnumerable<uSyncDependency> ProcessStyleMedia(string urlValue)
         {
-            foreach(Match match in UrlRegEx.Matches(urlValue))
+            foreach (Match match in UrlRegEx.Matches(urlValue))
             {
                 if (match.Groups.Count > 1)
                 {
@@ -296,7 +296,7 @@ namespace uSync.Core.Mapping
                     return value;
             }
 
-            return null;               
+            return null;
 
         }
     }

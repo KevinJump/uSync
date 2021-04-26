@@ -17,7 +17,6 @@ using Umbraco.Extensions;
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Models;
 using uSync.BackOffice.SyncHandlers;
-using uSync.Core;
 
 namespace uSync.BackOffice.Controllers
 {
@@ -91,7 +90,7 @@ namespace uSync.BackOffice.Controllers
         {
             var addOnInfo = new AddOnInfo();
 
-            
+
             var addOns = typeFinder.FindClassesOfType<ISyncAddOn>();
             foreach (var addOn in addOns)
             {
@@ -101,12 +100,12 @@ namespace uSync.BackOffice.Controllers
                     addOnInfo.AddOns.Add(instance);
                 }
             }
-            
+
             addOnInfo.Version = typeof(global::uSync.BackOffice.uSync).Assembly.GetName().Version.ToString()
                 + uSyncConstants.ReleaseSuffix;
 
             addOnInfo.AddOns = addOnInfo.AddOns.OrderBy(x => x.SortOrder).ToList();
-            addOnInfo.AddOnString = string.Join(", ", 
+            addOnInfo.AddOnString = string.Join(", ",
                     addOnInfo.AddOns
                         .Where(x => !string.IsNullOrWhiteSpace(x.Name) && x.Name[0] != '_')
                         .Select(x => $"{x.Name} (v{x.Version})"));

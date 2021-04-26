@@ -13,5 +13,5 @@ namespace uSync.Core.Tracking
         IEnumerable<uSyncChange> GetChanges(XElement node, XElement current, SyncSerializerOptions options);
         IEnumerable<uSyncChange> GetChanges(XElement node, SyncSerializerOptions options);
     }
-  
+
 }

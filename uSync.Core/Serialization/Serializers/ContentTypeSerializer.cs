@@ -190,7 +190,7 @@ namespace uSync.Core.Serialization.Serializers
                     // So we only log this as a problem if the default template is missing on a non-element doctype. 
                     if (!item.IsElement)
                     {
-                        
+
                         changes.AddUpdate("DefaultTemplate", item.DefaultTemplate?.Alias ?? string.Empty, "Cannot find Template", "DefaultTemplate", false);
                     }
                 }

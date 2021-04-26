@@ -82,8 +82,8 @@ namespace uSync.BackOffice
                             handlerPair = _handlerFactory.GetValidHandlerByTypeName(itemType, syncHandlerOptions);
                         }
 
-                        options.Callbacks?.Update?.Invoke(item.Node.GetAlias(), 
-                            CalculateProgress(index, total, options.ProgressMin, options.ProgressMax), 100) ;
+                        options.Callbacks?.Update?.Invoke(item.Node.GetAlias(),
+                            CalculateProgress(index, total, options.ProgressMin, options.ProgressMax), 100);
 
                         if (handlerPair != null)
                         {
@@ -114,11 +114,11 @@ namespace uSync.BackOffice
 
                     var index = options.PageNumber * options.PageSize;
 
-                    foreach (var action in actions.Skip(options.PageNumber*options.PageSize).Take(options.PageSize))
+                    foreach (var action in actions.Skip(options.PageNumber * options.PageSize).Take(options.PageSize))
                     {
                         if (!action.HandlerAlias.InvariantEquals(lastType))
                         {
-                            lastType = action.HandlerAlias;    
+                            lastType = action.HandlerAlias;
                             handlerPair = _handlerFactory.GetValidHandler(action.HandlerAlias, syncHandlerOptions);
                         }
 
@@ -134,7 +134,7 @@ namespace uSync.BackOffice
                 }
             }
         }
-        
+
         public IEnumerable<uSyncAction> ImportPartialPostImport(IEnumerable<uSyncAction> actions, uSyncPagedImportOptions options)
         {
             lock (_importLock)
@@ -184,7 +184,7 @@ namespace uSync.BackOffice
 
             var nodes = new List<OrderedNodeInfo>();
 
-            foreach(var file in files)
+            foreach (var file in files)
             {
                 nodes.Add(new OrderedNodeInfo(file, _syncFileService.LoadXElement(file)));
             }
@@ -214,7 +214,7 @@ namespace uSync.BackOffice
         ///  for partial imports this allows the calling progress to smooth out the progress bar.
         /// </remarks>
         private int CalculateProgress(int value, int total, int min, int max)
-            => (int)(min + (((float)value / total) * (max-min)));
-                        
+            => (int)(min + (((float)value / total) * (max - min)));
+
     }
 }

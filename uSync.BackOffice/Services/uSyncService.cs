@@ -27,11 +27,11 @@ namespace uSync.BackOffice
     public partial class uSyncService
     {
         public delegate void SyncEventCallback(SyncProgressSummary summary);
-      
+
         private readonly uSyncConfigService _uSyncConfig;
         private readonly SyncHandlerFactory _handlerFactory;
         private readonly ILogger<uSyncService> _logger;
-        
+
         private SyncFileService _syncFileService;
 
         private readonly uSyncMutexService _mutexService;

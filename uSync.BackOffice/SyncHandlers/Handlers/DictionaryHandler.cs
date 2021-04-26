@@ -59,7 +59,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
                 var item = GetExistingItem(filePath);
                 if (item != null)
                 {
-                    return uSyncAction.SetAction(true, item.ItemKey, change: ChangeType.NoChange).AsEnumerableOfOne() ;
+                    return uSyncAction.SetAction(true, item.ItemKey, change: ChangeType.NoChange).AsEnumerableOfOne();
                 }
             }
 
@@ -135,7 +135,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
 
             return Enumerable.Empty<IEntity>();
         }
-        
+
         protected override string GetItemName(IDictionaryItem item)
             => item.ItemKey;
 

@@ -13,7 +13,6 @@ using Umbraco.Extensions;
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
 using uSync.Core;
-using uSync.Core.Serialization;
 
 using static Umbraco.Cms.Core.Constants;
 
@@ -26,7 +25,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         INotificationHandler<DeletedNotification<IMediaType>>,
         INotificationHandler<MovedNotification<IMediaType>>,
         INotificationHandler<EntityContainerSavedNotification>
-        // INotificationHandler<MediaTypeSavedNotification>
+    // INotificationHandler<MediaTypeSavedNotification>
     {
         private readonly IMediaTypeService mediaTypeService;
 
@@ -44,7 +43,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
 
         {
             this.mediaTypeService = mediaTypeService;
-        }       
+        }
 
         protected override string GetItemFileName(IUmbracoEntity item, bool useGuid)
         {

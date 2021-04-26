@@ -37,7 +37,7 @@ namespace uSync.Core.Serialization.Serializers
             var info = node.Element("Info");
 
             var name = info.Element("Name").ValueOrDefault(string.Empty);
-            var parentType = info.Element("ParentType").ValueOrDefault<Guid?>(null) ;
+            var parentType = info.Element("ParentType").ValueOrDefault<Guid?>(null);
             var childType = info.Element("ChildType").ValueOrDefault<Guid?>(null);
             var bidirectional = info.Element("Bidirectional").ValueOrDefault(false);
 
@@ -165,7 +165,7 @@ namespace uSync.Core.Serialization.Serializers
             return base.IsValid(node);
         }
 
-          protected override SyncAttempt<XElement> SerializeCore(IRelationType item, SyncSerializerOptions options)
+        protected override SyncAttempt<XElement> SerializeCore(IRelationType item, SyncSerializerOptions options)
         {
             var node = this.InitializeBaseNode(item, item.Alias);
 
@@ -179,7 +179,7 @@ namespace uSync.Core.Serialization.Serializers
             {
                 node.Add(SerializeRelations(item));
             }
-              
+
             return SyncAttempt<XElement>.SucceedIf(
                 node != null,
                 item.Name,

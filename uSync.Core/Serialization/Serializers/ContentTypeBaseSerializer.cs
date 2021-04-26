@@ -23,7 +23,7 @@ namespace uSync.Core.Serialization.Serializers
         private readonly IDataTypeService dataTypeService;
         private readonly IContentTypeBaseService<TObject> baseService;
         private readonly IUmbracoVersion umbracoVersion;
-        
+
         protected readonly IShortStringHelper shortStringHelper;
 
         protected ContentTypeBaseSerializer(
@@ -114,7 +114,7 @@ namespace uSync.Core.Serialization.Serializers
                 // hello ugly if statements. - we could 'just' reflect these everytime.
                 // but the if check is quicker (reflection is still quick) so it reduces sync time)
 
-                
+
                 // added in v8.6
                 if (umbracoVersion.Version.Major > 8 || umbracoVersion.Version.Minor >= 6)
                 {
@@ -353,7 +353,7 @@ namespace uSync.Core.Serialization.Serializers
 
             if (!currentHash.Equals(newHash))
             {
-                changes.AddUpdate("Allowed", 
+                changes.AddUpdate("Allowed",
                     string.Join(",", item.AllowedContentTypes.Select(x => x.Alias) ?? Enumerable.Empty<string>()),
                     string.Join(",", allowed.Select(x => x.Alias) ?? Enumerable.Empty<string>()), "/Structure");
 

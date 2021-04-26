@@ -18,6 +18,6 @@ namespace uSync.BackOffice.SyncHandlers
 
         public IEnumerable<ISyncHandler> Handlers => this;
 
-   
+
     }
 }
