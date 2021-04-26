@@ -53,8 +53,5 @@ jobs:
     - name: Package BackOffice
       run: dotnet pack .\uSync.BackOffice\uSync.BackOffice.csproj -c ${{env.CONFIG}} -o ${{env.OUTDIR}} --version-suffix ${{env.SUFFIX}} /p:ContinuousIntegrationBuild=true --no-restore
 
-    - name: publish core to git
-      run: dotnet nuget push ${{env.OUTDIR}}/uSync.Core.nupkg --skip-duplicate
-
-    - name: publish backoffice to git
-      run: dotnet nuget push ${{env.OUTDIR}}/uSync.nupkg --skip-duplicate
+    - name: publish packages to git
+      run: dotnet nuget push "${{env.OUTDIR}}/*.nupkg" --skip-duplicate
