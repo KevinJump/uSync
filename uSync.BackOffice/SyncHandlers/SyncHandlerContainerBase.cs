@@ -43,7 +43,7 @@ namespace uSync.BackOffice.SyncHandlers
             AppCaches appCaches,
             IShortStringHelper shortStringHelper,
             SyncFileService syncFileService,
-            uSyncMutexService mutexService,
+            uSyncEventService mutexService,
             uSyncConfigService uSyncConfig,
             ISyncItemFactory syncItemFactory)
             : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfig, syncItemFactory)

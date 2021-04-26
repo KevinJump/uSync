@@ -30,7 +30,7 @@ namespace uSync.BackOffice.SyncHandlers
         protected readonly ILogger<SyncHandlerRoot<TObject, TContainer>> logger;
 
         protected readonly SyncFileService syncFileService;
-        protected readonly uSyncMutexService _mutexService;
+        protected readonly uSyncEventService _mutexService;
 
         protected readonly IList<ISyncDependencyChecker<TObject>> dependencyCheckers;
         protected readonly IList<ISyncTracker<TObject>> trackers;
@@ -119,7 +119,7 @@ namespace uSync.BackOffice.SyncHandlers
                 AppCaches appCaches,
                 IShortStringHelper shortStringHelper,
                 SyncFileService syncFileService,
-                uSyncMutexService mutexService,
+                uSyncEventService mutexService,
                 uSyncConfigService uSyncConfig,
                 ISyncItemFactory itemFactory)
         {
@@ -340,7 +340,7 @@ namespace uSync.BackOffice.SyncHandlers
                     .AsEnumerableOfOne();
             }
 
-            if (!uSyncService.FireImportingItem(node))
+            if (_mutexService.FireItemStartingEvent(new uSyncImportingItemNotification(node)))
             {
                 // blocked
                 return uSyncActionHelper<TObject>
@@ -365,7 +365,7 @@ namespace uSync.BackOffice.SyncHandlers
                 if (attempt.Details != null && attempt.Details.Any()) action.Details = attempt.Details;
 
                 // this might not be the place to do this because, two pass items are imported at another point too.
-                uSyncService.FireImportedItem(node, attempt.Change);
+                _mutexService.FireItemCompletedEvent(new uSyncImportedItemNotification(node, attempt.Change));
 
 
                 return action.AsEnumerableOfOne();
@@ -730,7 +730,7 @@ namespace uSync.BackOffice.SyncHandlers
             if (item == null)
                 return uSyncAction.Fail(nameof(item), typeof(TObject).ToString(), ChangeType.Fail, "Item not set").AsEnumerableOfOne();
 
-            if (!uSyncService.FireExportingItem(item))
+            if (_mutexService.FireItemStartingEvent(new uSyncExportingItemNotification<TObject>(item))) 
             {
                 return uSyncActionHelper<TObject>
                     .ReportAction(ChangeType.NoChange, GetItemName(item), string.Empty, GetItemKey(item), this.Alias)
@@ -753,7 +753,7 @@ namespace uSync.BackOffice.SyncHandlers
                 }
             }
 
-            uSyncService.FireExportedItem(attempt.Item, ChangeType.Export);
+            _mutexService.FireItemCompletedEvent(new uSyncExportedItemNotification(attempt.Item, ChangeType.Export));
 
             return uSyncActionHelper<XElement>.SetAction(attempt, filename, GetItemKey(item), this.Alias).AsEnumerableOfOne();
         }
@@ -956,7 +956,7 @@ namespace uSync.BackOffice.SyncHandlers
                 // pre event reporting 
                 //  this lets us intercept a report and 
                 //  shortcut the checking (sometimes).
-                if (!uSyncService.FireReportingItem(node))
+                if (_mutexService.FireItemStartingEvent(new uSyncReportingItemNotification(node)))
                 {
                     return uSyncActionHelper<TObject>
                         .ReportAction(ChangeType.NoChange, node.GetAlias(), GetNameFromFileOrNode(filename, node), node.GetKey(), this.Alias)
@@ -1001,7 +1001,7 @@ namespace uSync.BackOffice.SyncHandlers
                 }
 
                 // tell other things we have reported this item.
-                uSyncService.FireReportedItem(node, action.Change);
+                _mutexService.FireItemCompletedEvent(new uSyncReportedItemNotification(node, action.Change));
 
                 return actions;
             }

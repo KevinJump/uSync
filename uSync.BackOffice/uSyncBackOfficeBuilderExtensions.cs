@@ -57,7 +57,7 @@ namespace uSync.BackOffice
             // a pain because they are generic. and then how do we let people unload them ?
 
             // Setup the back office.
-            builder.Services.AddUnique<uSyncMutexService>();
+            builder.Services.AddUnique<uSyncEventService>();
             
             builder.Services.AddUnique<uSyncConfigService>();
             builder.Services.AddUnique<SyncFileService>();

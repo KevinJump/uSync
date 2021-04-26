@@ -7,6 +7,7 @@ using System.Xml.Linq;
 
 using Microsoft.Extensions.Logging;
 
+using Umbraco.Cms.Core.Events;
 using Umbraco.Cms.Core.Semver;
 using Umbraco.Extensions;
 
@@ -28,28 +29,31 @@ namespace uSync.BackOffice
     {
         public delegate void SyncEventCallback(SyncProgressSummary summary);
 
-        private readonly uSyncConfigService _uSyncConfig;
-        private readonly SyncHandlerFactory _handlerFactory;
         private readonly ILogger<uSyncService> _logger;
 
-        private SyncFileService _syncFileService;
+        private readonly IEventAggregator _eventAggregator;
 
-        private readonly uSyncMutexService _mutexService;
+        private readonly uSyncConfigService _uSyncConfig;
+        private readonly SyncHandlerFactory _handlerFactory;
+        private SyncFileService _syncFileService;
+        private readonly uSyncEventService _mutexService;
 
         public uSyncService(
             ILogger<uSyncService> logger,
+            IEventAggregator eventAggregator,
             uSyncConfigService uSyncConfigService,
             SyncHandlerFactory handlerFactory,
             SyncFileService syncFileService,
-            uSyncMutexService mutexService)
+            uSyncEventService mutexService)
         {
-            this._handlerFactory = handlerFactory;
-
-            this._syncFileService = syncFileService;
-
-            this._uSyncConfig = uSyncConfigService;
             this._logger = logger;
 
+            this._eventAggregator = eventAggregator;
+
+
+            this._uSyncConfig = uSyncConfigService;
+            this._handlerFactory = handlerFactory;
+            this._syncFileService = syncFileService;
             this._mutexService = mutexService;
 
             uSyncTriggers.DoExport += USyncTriggers_DoExport;
@@ -99,7 +103,7 @@ namespace uSync.BackOffice
 
             var sw = Stopwatch.StartNew();
 
-            fireBulkStarting(ReportStarting);
+            _mutexService.FireBulkStarting(new uSyncReportStartingNotification());
 
             _logger.LogDebug("Reporting For [{0}]", string.Join(",", handlers.Select(x => x.Handler.Name)));
 
@@ -129,7 +133,8 @@ namespace uSync.BackOffice
             summary.UpdateMessage("Report Complete");
             callbacks?.Callback?.Invoke(summary);
 
-            fireBulkComplete(ReportComplete, actions);
+
+            _mutexService.FireBulkComplete(new uSyncReportCompletedNotification(actions));
             sw.Stop();
 
             _logger.LogInformation("uSync Report: {handlerCount} handlers, processed {itemCount} items, {changeCount} changes in {ElapsedMilliseconds}ms",
@@ -199,7 +204,7 @@ namespace uSync.BackOffice
                 {
 
                     // pre import event
-                    fireBulkStarting(ImportStarting);
+                    _mutexService.FireBulkStarting(new uSyncImportStartingNotification()); 
 
                     var actions = new List<uSyncAction>();
 
@@ -247,7 +252,7 @@ namespace uSync.BackOffice
                     callbacks?.Callback?.Invoke(summary);
 
                     // fire complete
-                    fireBulkComplete(ImportComplete, actions);
+                    _mutexService.FireBulkComplete(new uSyncImportCompletedNotification(actions));
 
                     _logger.LogInformation("uSync Import: {handlerCount} handlers, processed {itemCount} items, {changeCount} changes in {ElapsedMilliseconds}ms",
                         handlers.Count(),
@@ -431,7 +436,7 @@ namespace uSync.BackOffice
         {
             var sw = Stopwatch.StartNew();
 
-            fireBulkStarting(ExportStarting);
+            _mutexService.FireBulkStarting(new uSyncExportStartingNotification());
 
             var actions = new List<uSyncAction>();
             var summary = new SyncProgressSummary(handlers.Select(x => x.Handler), "Exporting", handlers.Count());
@@ -459,7 +464,7 @@ namespace uSync.BackOffice
             summary.UpdateMessage("Export Completed");
             callbacks?.Callback?.Invoke(summary);
 
-            fireBulkComplete(ExportComplete, actions);
+            _mutexService.FireBulkComplete(new uSyncExportCompletedNotification(actions));
 
             sw.Stop();
 

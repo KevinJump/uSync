@@ -86,13 +86,13 @@ namespace uSync.BackOffice
             {
                 case HandlerActions.Export:
                     WriteVersionFile(_uSyncConfig.Settings.RootFolder);
-                    fireBulkStarting(ExportStarting);
+                    _mutexService.FireBulkStarting(new uSyncExportStartingNotification());
                     break;
                 case HandlerActions.Import:
-                    fireBulkStarting(ImportStarting);
+                    _mutexService.FireBulkStarting(new uSyncImportStartingNotification());
                     break;
                 case HandlerActions.Report:
-                    fireBulkStarting(ReportStarting);
+                    _mutexService.FireBulkStarting(new uSyncReportStartingNotification());
                     break;
             }
         }
@@ -105,13 +105,13 @@ namespace uSync.BackOffice
             switch (action)
             {
                 case HandlerActions.Export:
-                    fireBulkComplete(ExportComplete, actions);
+                    _mutexService.FireBulkComplete(new uSyncExportCompletedNotification(actions));
                     break;
                 case HandlerActions.Import:
-                    fireBulkComplete(ImportComplete, actions);
+                    _mutexService.FireBulkComplete(new uSyncImportCompletedNotification(actions));
                     break;
                 case HandlerActions.Report:
-                    fireBulkComplete(ReportComplete, actions);
+                    _mutexService.FireBulkComplete(new uSyncReportCompletedNotification(actions));
                     break;
             }
         }

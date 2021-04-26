@@ -122,7 +122,7 @@ namespace uSync.BackOffice.Notifications
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "uSync: Error duting startup {message}", ex.Message);
+                _logger.LogWarning(ex, "uSync: Error during startup {message}", ex.Message);
             }
             finally
             {

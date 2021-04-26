@@ -9,9 +9,9 @@ namespace uSync.BackOffice
     /// </summary>
     public class uSyncImportPause : IDisposable
     {
-        private readonly uSyncMutexService _mutexService;
+        private readonly uSyncEventService _mutexService;
 
-        public uSyncImportPause(uSyncMutexService mutexService)
+        public uSyncImportPause(uSyncEventService mutexService)
         {
             _mutexService = mutexService;
             _mutexService.Pause();
