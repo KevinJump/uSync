@@ -6,6 +6,7 @@ env:
   RELEASE: 'beta001'
 
 on:
+  workflow_dispatch:
   schedule:
   - cron: "0 0 * * *"
 
