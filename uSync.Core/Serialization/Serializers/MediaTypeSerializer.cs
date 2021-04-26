@@ -22,12 +22,11 @@ namespace uSync.Core.Serialization.Serializers
         private readonly IMediaTypeService mediaTypeService;
 
         public MediaTypeSerializer(
-            IUmbracoVersion umbracoVersion,
             IEntityService entityService, ILogger<MediaTypeSerializer> logger,
             IDataTypeService dataTypeService,
             IMediaTypeService mediaTypeService,
             IShortStringHelper shortStringHelper)
-            : base(umbracoVersion, entityService, logger, dataTypeService, mediaTypeService, UmbracoObjectTypes.MediaTypeContainer, shortStringHelper)
+            : base(entityService, logger, dataTypeService, mediaTypeService, UmbracoObjectTypes.MediaTypeContainer, shortStringHelper)
         {
             this.mediaTypeService = mediaTypeService;
         }

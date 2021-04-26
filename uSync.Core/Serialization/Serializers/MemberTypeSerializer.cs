@@ -22,12 +22,11 @@ namespace uSync.Core.Serialization.Serializers
         private readonly IMemberTypeService memberTypeService;
 
         public MemberTypeSerializer(
-            IUmbracoVersion umbracoVersion,
             IEntityService entityService, ILogger<MemberTypeSerializer> logger,
             IDataTypeService dataTypeService,
             IMemberTypeService memberTypeService,
             IShortStringHelper shortStringHelper)
-            : base(umbracoVersion, entityService, logger, dataTypeService, memberTypeService, UmbracoObjectTypes.Unknown, shortStringHelper)
+            : base(entityService, logger, dataTypeService, memberTypeService, UmbracoObjectTypes.Unknown, shortStringHelper)
         {
             this.memberTypeService = memberTypeService;
         }

@@ -22,20 +22,17 @@ namespace uSync.Core.Serialization.Serializers
     {
         private readonly IDataTypeService dataTypeService;
         private readonly IContentTypeBaseService<TObject> baseService;
-        private readonly IUmbracoVersion umbracoVersion;
-
         protected readonly IShortStringHelper shortStringHelper;
 
         protected ContentTypeBaseSerializer(
-            IUmbracoVersion umbracoVersion,
-            IEntityService entityService, ILogger<ContentTypeBaseSerializer<TObject>> logger,
+            IEntityService entityService, 
+            ILogger<ContentTypeBaseSerializer<TObject>> logger,
             IDataTypeService dataTypeService,
             IContentTypeBaseService<TObject> baseService,
             UmbracoObjectTypes containerType,
             IShortStringHelper shortStringHelper)
             : base(entityService, logger, containerType)
         {
-            this.umbracoVersion = umbracoVersion;
             this.dataTypeService = dataTypeService;
             this.baseService = baseService;
             this.shortStringHelper = shortStringHelper;
@@ -109,24 +106,12 @@ namespace uSync.Core.Serialization.Serializers
                 var tab = item.PropertyGroups.FirstOrDefault(x => x.PropertyTypes.Contains(property));
                 propNode.Add(new XElement("Tab", tab != null ? tab.Name : ""));
 
+
                 SerializeExtraProperties(propNode, item, property);
 
-                // hello ugly if statements. - we could 'just' reflect these everytime.
-                // but the if check is quicker (reflection is still quick) so it reduces sync time)
-
-
-                // added in v8.6
-                if (umbracoVersion.Version.Major > 8 || umbracoVersion.Version.Minor >= 6)
-                {
-                    SerializeNewProperty<string>(propNode, property, "MandatoryMessage");
-                    SerializeNewProperty<string>(propNode, property, "ValidationRegExpMessage");
-                }
-
-                // added in 8.10
-                if (umbracoVersion.Version.Major > 8 || umbracoVersion.Version.Minor >= 10)
-                {
-                    SerializeNewProperty<bool>(propNode, property, "LabelOnTop");
-                }
+                propNode.Add(new XElement("MandatoryMessage", property.MandatoryMessage));
+                propNode.Add(new XElement("ValidationExpMessage", property.ValidationRegExpMessage));
+                propNode.Add(new XElement("LabelOnTop", property.LabelOnTop));
 
                 node.Add(propNode);
             }
@@ -442,17 +427,25 @@ namespace uSync.Core.Serialization.Serializers
                     property.SortOrder = sortOrder;
                 }
 
-                // added in v8.6
-                // reflection is fast but a a quick check of version is faster !
-                if (umbracoVersion.Version.Major > 8 || umbracoVersion.Version.Minor >= 6)
+                var mandatoryMessage = propertyNode.Element("MandatoryMessage").ValueOrDefault(string.Empty);
+                if (property.MandatoryMessage != mandatoryMessage)
                 {
-                    changes.AddNotNull(DeserializeNewProperty<string>(property, propertyNode, "MandatoryMessage"));
-                    changes.AddNotNull(DeserializeNewProperty<string>(property, propertyNode, "ValidationRegExpMessage"));
+                    changes.AddUpdate("MandatoryMessage", property.MandatoryMessage, mandatoryMessage, $"{alias}/MandatoryMessage");
+                    property.MandatoryMessage = mandatoryMessage;
                 }
 
-                if (umbracoVersion.Version.Major > 8 || umbracoVersion.Version.Minor >= 10)
+                var validationRegExMessage = propertyNode.Element("ValidationRegExpMessage").ValueOrDefault(string.Empty);
+                if (property.ValidationRegExpMessage != validationRegExMessage)
                 {
-                    changes.AddNotNull(DeserializeNewProperty<bool>(property, propertyNode, "LabelOnTop"));
+                    changes.AddUpdate("ValidationRegExpMessage", property.ValidationRegExpMessage, validationRegExMessage, $"{alias}/ValidationRegExpMessage");
+                    property.ValidationRegExpMessage = validationRegExMessage;
+                }
+
+                var labelOnTop = propertyNode.Element("LabelOnTop").ValueOrDefault(false);
+                if (property.LabelOnTop != labelOnTop)
+                {
+                    changes.AddUpdate("LabelOnTop", property.LabelOnTop, labelOnTop, $"{alias}/LabelOnTop");
+                    property.LabelOnTop = labelOnTop;
                 }
 
                 changes.AddRange(DeserializeExtraProperties(item, property, propertyNode));
@@ -883,13 +876,6 @@ namespace uSync.Core.Serialization.Serializers
         public override ChangeType IsCurrent(XElement node, SyncSerializerOptions options)
         {
             if (node == null) return ChangeType.Update;
-
-            // checkfor and add missing 8.6 properties, means we get less false positives.
-            if (umbracoVersion.Version.Major > 8 || umbracoVersion.Version.Minor >= 6)
-            {
-                InsertMissingProperties(node, "MandatoryMessage");
-                InsertMissingProperties(node, "ValidationRegExpMessage");
-            }
 
             AddStructureSort(node);
 

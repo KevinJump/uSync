@@ -82,8 +82,9 @@ namespace uSync.BackOffice.Controllers
         ///  return handler groups for all enabled handlers
         /// </summary>
         [HttpGet]
-        public IEnumerable<string> GetHandlerGroups()
-            => handlerFactory.GetValidGroups(new SyncHandlerOptions(uSyncConfig.Settings.DefaultSet));
+        public IDictionary<string,string> GetHandlerGroups()
+            => handlerFactory.GetValidGroups(new SyncHandlerOptions(uSyncConfig.Settings.DefaultSet))
+                       .ToDictionary(k => k, v => uSyncConstants.Groups.Icons[v]);
 
         /// <summary>
         ///  returns the handler groups, even if the handlers

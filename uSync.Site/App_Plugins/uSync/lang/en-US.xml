@@ -32,6 +32,14 @@
     <key alias="import-members">Import Members</key>
     <key alias="import-users">Import Users</key>
 
+    <key alias="everything">Everything</key>
+    <key alias="everything-description">All Settings, Content, and other things</key>
+
+    <key alias="settings-description">DataTypes, Doctypes and all setttings</key>
+    <key alias="content-description">Content, Media and related items</key>
+    <key alias="members-description">Members and Member groups</key>
+    <key alias="users-description">Users and User groups</key>
+
     <key alias="report-content">Report Content/Media</key>
     <key alias="report-settings">Report Settings</key>
     <key alias="report-members">Report Members</key>

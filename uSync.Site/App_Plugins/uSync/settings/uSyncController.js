@@ -10,6 +10,7 @@
         uSyncHub) {
 
         var vm = this;
+        vm.fresh = true;
         vm.loading = true;
         vm.working = false;
         vm.reported = false;
@@ -47,7 +48,9 @@
             },
             subButtons: [{
                 labelKey: 'usync_importforce',
-                handler: importForce
+                handler: function () {
+                    importForce('');
+                }
             }]
         };
 
@@ -86,6 +89,8 @@
         vm.exportItems = exportItems;
         vm.importForce = importForce;
         vm.importItems = importItems;
+        vm.importGroup = importGroup;
+        vm.exportGroup = exportGroup;
 
         vm.getTypeName = getTypeName;
 
@@ -214,8 +219,8 @@
                 });
         }
 
-        function importForce() {
-            importItems(true);
+        function importForce(group) {
+            importItems(true, group);
         }
 
         function importItems(force, group) {
@@ -254,6 +259,11 @@
         }
 
         function exportItems() {
+            exportGroup('');
+        }
+
+        function exportGroup(group) {
+
 
             vm.results = [];
             resetStatus(modes.EXPORT);
@@ -261,7 +271,7 @@
 
             var options = {
                 action: 'export',
-                group: ''
+                group: group
             };
 
             var start = performance.now();
@@ -338,30 +348,33 @@
                 });
         }
 
+        vm.importGroup = {};
 
         function getHandlerGroups() {
             uSync8DashboardService.getHandlerGroups()
                 .then(function (result) {
-                    angular.forEach(result.data, function (group, key) {
+                    angular.forEach(result.data, function (icon, group) {
 
                         vm.groups.push({
-                            name: group.toLowerCase(),
-                            icon: group.toLowerCase()
+                            name: group,
+                            icon: icon,
+                            key: group.toLowerCase()
                         });
 
-                        vm.importButton.subButtons.push({
-                            handler: function () {
-                                importGroup(group);
-                            },
-                            labelKey: 'usync_import-' + group.toLowerCase()
-                        });
 
-                        vm.reportButton.subButtons.push({
-                            handler: function () {
-                                report(group);
+                        vm.importGroup[group] = {
+                            state: 'init',
+                            defaultButton: {
+                                labelKey: 'usync_import',
+                                handler: function () { importGroup(group) }
                             },
-                            labelKey: 'usync_report-' + group.toLowerCase()
-                        });
+                            subButtons: [{
+                                labelKey: 'usync_importforce',
+                                handler: function () { importForce(group) }
+                            }]
+                        }
+
+                        console.log(vm.importGroup);
 
                         if (group.toLowerCase() === "forms") {
                             vm.hasuSyncForms = true;
@@ -436,6 +449,8 @@
 
         /// resets all the flags, and messages to the start 
         function resetStatus(mode) {
+
+            vm.fresh = false;
             vm.warnings = {};
 
             vm.reported = vm.showAll = false;

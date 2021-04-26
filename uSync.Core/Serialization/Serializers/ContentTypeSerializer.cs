@@ -24,13 +24,12 @@ namespace uSync.Core.Serialization.Serializers
         private readonly IFileService fileService;
 
         public ContentTypeSerializer(
-            IUmbracoVersion umbracoVersion,
             IEntityService entityService, ILogger<ContentTypeSerializer> logger,
             IDataTypeService dataTypeService,
             IContentTypeService contentTypeService,
             IFileService fileService,
             IShortStringHelper shortStringHelper)
-            : base(umbracoVersion, entityService, logger, dataTypeService, contentTypeService, UmbracoObjectTypes.DocumentTypeContainer, shortStringHelper)
+            : base(entityService, logger, dataTypeService, contentTypeService, UmbracoObjectTypes.DocumentTypeContainer, shortStringHelper)
         {
             this.contentTypeService = contentTypeService;
             this.fileService = fileService;

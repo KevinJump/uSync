@@ -46,16 +46,16 @@
                 vm.addOns = result.data.addOns;
 
                 var insertOffset = 1;
-                if (vm.version.indexOf('Complete') == -1) {
-                    insertOffset = 2;
-                    vm.page.navigation.push(
-                        {
-                            'name': 'Add ons',
-                            'alias': 'expansion',
-                            'icon': 'icon-box',
-                            'view': Umbraco.Sys.ServerVariables.umbracoSettings.appPluginsPath + '/usync/settings/expansion.html'
-                        });
-                }
+                // if (vm.version.indexOf('Complete') == -1) {
+                //     insertOffset = 2;
+                //     vm.page.navigation.push(
+                //         {
+                //             'name': 'Add ons',
+                //             'alias': 'expansion',
+                //             'icon': 'icon-box',
+                //             'view': Umbraco.Sys.ServerVariables.umbracoSettings.appPluginsPath + '/usync/settings/expansion.html'
+                //         });
+                // }
 
                 vm.addOns.forEach(function (value, key) {
                     if (value.View !== '') {
