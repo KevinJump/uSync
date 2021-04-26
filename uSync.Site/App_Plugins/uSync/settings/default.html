@@ -47,12 +47,10 @@
                     <umb-button button-style="action" action="vm.report('')" label="Report"></umb-button>
                     <umb-button-group default-button="vm.importButton.defaultButton"
                         sub-buttons="vm.importButton.subButtons" direction="down" float="left" button-style="success"
-                        state="vm.importButton.state">
-                    </umb-button-group>
+                        state="vm.importButton.state"></umb-button-group>
                     <umb-button-group default-button="vm.exportButton.defaultButton"
                         sub-buttons="vm.exportButton.subButtons" direction="down" float="left" button-style="info"
-                        state="vm.exportButton.state">
-                    </umb-button-group>
+                        state="vm.exportButton.state"></umb-button-group>
                 </div>
             </umb-box-content>
         </umb-box>
@@ -78,14 +76,10 @@
 
     <div ng-if="vm.warnings.Message.length > 0" class="alert alert-{{vm.warnings.Type}}">
         <span ng-bind-html="vm.warnings.Message"></span>
-
     </div>
 
-
-
     <div ng-if="vm.reported">
-        <usync-report-view actions="vm.actions" results="vm.results" hide-action="true" hide-link="vm.hideLink">
-        </usync-report-view>
+        <usync-report-view actions="vm.actions" results="vm.results" hide-action="true" hide-link="vm.hideLink"></usync-report-view>
     </div>
 
     <div class="usync-fresh-view" ng-if="vm.fresh">
@@ -93,7 +87,7 @@
             
             <div class="usync-group-box-title">
                 <i class="icon icon-infinity"></i>
-                <h2>uSync all the things</h4>
+                <h2>uSync all the things</h2>
             </div>
             
         </umb-empty-state>
