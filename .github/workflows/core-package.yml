@@ -6,6 +6,7 @@ env:
   RELEASE: 'beta001'
 
 on:
+  workflow_dispatch:
   schedule:
   - cron: "0 0 * * *"
 
@@ -33,7 +34,7 @@ jobs:
         dotnet-version: 5.0.x
 
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore --noLogo
     
     - name: Build
       run: dotnet build --no-restore
