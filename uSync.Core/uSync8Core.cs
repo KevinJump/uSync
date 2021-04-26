@@ -3,7 +3,7 @@
     /// <summary>
     ///  Placeholder.
     /// </summary>
-    public class uSync8Core
+    public class uSyncCore
     {
     }
 }

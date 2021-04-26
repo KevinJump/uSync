@@ -9,6 +9,8 @@ namespace uSync.Core.Serialization
 
     public interface ISyncSerializerBase
     {
+        string Name { get; }
+        
         Type objectType { get; }
     }
 

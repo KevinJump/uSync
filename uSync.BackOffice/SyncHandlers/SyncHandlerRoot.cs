@@ -35,7 +35,7 @@ namespace uSync.BackOffice.SyncHandlers
         protected readonly IList<ISyncDependencyChecker<TObject>> dependencyCheckers;
         protected readonly IList<ISyncTracker<TObject>> trackers;
 
-        protected readonly ISyncSerializer<TObject> serializer;
+        protected ISyncSerializer<TObject> serializer;
 
         protected readonly IAppPolicyCache runtimeCache;
 
@@ -121,7 +121,6 @@ namespace uSync.BackOffice.SyncHandlers
                 SyncFileService syncFileService,
                 uSyncMutexService mutexService,
                 uSyncConfigService uSyncConfig,
-                ISyncSerializer<TObject> serializer,
                 ISyncItemFactory itemFactory)
         {
             this.uSyncConfig = uSyncConfig;
@@ -130,13 +129,12 @@ namespace uSync.BackOffice.SyncHandlers
             this.shortStringHelper = shortStringHelper;
             this.itemFactory = itemFactory;
 
-            this.serializer = serializer;
+            this.serializer = this.itemFactory.GetSerializers<TObject>().FirstOrDefault();
             this.trackers = this.itemFactory.GetTrackers<TObject>().ToList();
             this.dependencyCheckers = this.itemFactory.GetCheckers<TObject>().ToList();
 
             this.syncFileService = syncFileService;
             this._mutexService = mutexService;
-
 
             var currentHandlerType = GetType();
             var meta = currentHandlerType.GetCustomAttribute<SyncHandlerAttribute>(false);

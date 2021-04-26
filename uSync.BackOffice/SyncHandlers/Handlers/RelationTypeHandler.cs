@@ -38,9 +38,8 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             SyncFileService syncFileService,
             uSyncMutexService mutexService,
             uSyncConfigService uSyncConfigService,
-            ISyncSerializer<IRelationType> serializer,
             ISyncItemFactory syncItemFactory)
-            : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfigService, serializer, syncItemFactory)
+            : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfigService, syncItemFactory)
         {
             this.relationService = relationService;
         }

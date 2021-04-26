@@ -34,11 +34,13 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             SyncFileService syncFileService,
             uSyncMutexService mutexService,
             uSyncConfigService uSyncConfigService,
-            ISyncSerializer<IContent> serializer,
             ISyncItemFactory syncItemFactory)
-            : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfigService, serializer, syncItemFactory)
+            : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfigService, syncItemFactory)
         {
             this.contentService = contentService;
+
+            // make sure we get the default content serializer (not just the first one that loads)
+            this.serializer = syncItemFactory.GetSerializer<IContent>("ContentSerializer");
         }
 
         /// <summary>

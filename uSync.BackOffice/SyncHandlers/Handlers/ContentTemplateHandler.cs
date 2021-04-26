@@ -33,11 +33,14 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             SyncFileService syncFileService,
             uSyncMutexService mutexService,
             uSyncConfigService uSyncConfigService,
-            ISyncSerializer<IContent> serializer,
             ISyncItemFactory syncItemFactory)
-            : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfigService, serializer, syncItemFactory)
+            : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfigService, syncItemFactory)
         {
-            this.contentService = contentService;
+
+           this.contentService = contentService;
+
+            // make sure we load up the template serializer - because we need that one, not the normal content one.
+            this.serializer = syncItemFactory.GetSerializer<IContent>("contentTemplateSerializer");
         }
 
         protected override void DeleteViaService(IContent item)

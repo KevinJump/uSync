@@ -36,9 +36,8 @@ namespace uSync.BackOffice.SyncHandlers
             SyncFileService syncFileService,
             uSyncMutexService mutexService,
             uSyncConfigService uSyncConfig,
-            ISyncSerializer<TObject> serializer,
             ISyncItemFactory syncItemFactory)
-            : base(logger, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfig, serializer, syncItemFactory)
+            : base(logger, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfig, syncItemFactory)
         {
             this.entityService = entityService;
         }

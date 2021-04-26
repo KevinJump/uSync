@@ -16,18 +16,29 @@ namespace uSync.Core
 
         private readonly SyncEntityCache entityCache;
 
+        private readonly SyncSerializerCollection syncSerializers;
+
 
         public SyncItemFactory(
             SyncEntityCache entityCache,
+            SyncSerializerCollection syncSerializers,
             SyncTrackerCollection syncTrackers,
             SyncDependencyCollection syncCheckers)
         {
+            this.syncSerializers = syncSerializers;
             this.syncTrackers = syncTrackers;
             this.syncCheckers = syncCheckers;
             this.entityCache = entityCache;
         }
 
         public SyncEntityCache EntityCache => entityCache;
+
+        public IEnumerable<ISyncSerializer<TObject>> GetSerializers<TObject>()
+            => syncSerializers.GetSerializers<TObject>();
+
+        public ISyncSerializer<TObject> GetSerializer<TObject>(string name)
+            => syncSerializers.GetSerializer<TObject>(name);
+
 
         public IEnumerable<ISyncTracker<TObject>> GetTrackers<TObject>()
             => syncTrackers.GetTrackers<TObject>();
@@ -55,5 +66,6 @@ namespace uSync.Core
             }
             return dependencies;
         }
+
     }
 }

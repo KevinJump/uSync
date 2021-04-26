@@ -34,9 +34,8 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             SyncFileService syncFileService,
             uSyncMutexService mutexService,
             uSyncConfigService configService,
-            ISyncSerializer<IDomain> serializer,
             ISyncItemFactory syncItemFactory)
-            : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, configService, serializer, syncItemFactory)
+            : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, configService, syncItemFactory)
         {
             this.domainService = domainService;
         }

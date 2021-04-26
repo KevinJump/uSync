@@ -14,6 +14,11 @@ namespace uSync.Core
     /// </summary>
     public interface ISyncItemFactory
     {
+        // serializers
+        IEnumerable<ISyncSerializer<TObject>> GetSerializers<TObject>();
+
+        ISyncSerializer<TObject> GetSerializer<TObject>(string name);
+        
         // tracking items
         IEnumerable<ISyncTracker<TObject>> GetTrackers<TObject>();
         IEnumerable<uSyncChange> GetChanges<TObject>(XElement node, SyncSerializerOptions options);
