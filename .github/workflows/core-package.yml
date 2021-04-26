@@ -1,0 +1,48 @@
+name: core-package
+
+env:
+  OUTPUT: ./output
+  CONFIG: Release
+  RELEASE: 'beta001'
+
+on:
+  schedule:
+  - cron: "0 0 * * *"
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        ref: core/main
+
+    - name: Get Date
+      id: date
+      run: echo "::set-output name=date::$(date + '%Y-%m-%d')"
+    - name: Set Release Suffix
+      run: echo "SUFFIX=$SUFFIX" >> $GITHUB_ENV
+      env:
+        SUFFIX: ${{env.RELEASE}}-${{steps.date.outputs.date}}
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+
+    - name: Restore dependencies
+      run: dotnet restore
+    
+    - name: Build
+      run: dotnet build --no-restore
+    
+    - name: Test
+      run: dotnet test --no-build --verbosity normal
+
+    - name: Package Core
+      run: dotnet pack \uSync.Core\*.csproj -c ${{env.CONFIG}} -o ${{env.OUTDIR}} --version-suffix ${{env.SUFFIX}} /p:ContinuousIntegrationBuild=true 
+
+    - name: Package BackOffice
+      run: dotnet pack \uSync.BackOffice\*.csproj -c ${{env.CONFIG}} -o ${{env.OUTDIR}} --version-suffix ${{env.SUFFIX}} /p:ContinuousIntegrationBuild=true       
