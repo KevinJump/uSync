@@ -48,16 +48,17 @@ namespace uSync.BackOffice
 
 
             // Setup uSync core.
-            builder.Services.AddUnique<uSyncConfigService>();
-
-
             builder.AdduSyncCore();
+
 
             // TODO: we need something here. that lets people add serializers before we then load 
             // the handlers - events/composers won't do, if we are letting people add this as 
             // part of the pipeline. we might need to dynamically load serializers - which is 
             // a pain because they are generic. and then how do we let people unload them ?
 
+            // Setup the back office.
+            builder.Services.AddUnique<uSyncMutexService>();
+            builder.Services.AddUnique<uSyncConfigService>();
             builder.Services.AddUnique<SyncFileService>();
 
             builder.WithCollectionBuilder<SyncHandlerCollectionBuilder>()
