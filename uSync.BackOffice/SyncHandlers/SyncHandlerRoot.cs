@@ -617,8 +617,8 @@ namespace uSync.BackOffice.SyncHandlers
         {
             // if createOnly is on, then we only create things that are not already there. 
             // this lookup is slow(ish) so we only do it if we have to.
-            if (config.GetSetting<bool>(uSyncConstants.DefaultSettings.CreateOnly, uSyncConstants.DefaultSettings.CreateOnly_Default)
-                || config.GetSetting<bool>(uSyncConstants.DefaultSettings.OneWay, uSyncConstants.DefaultSettings.CreateOnly_Default))
+            if (config.GetSetting(Core.uSyncConstants.DefaultSettings.CreateOnly, Core.uSyncConstants.DefaultSettings.CreateOnly_Default)
+                || config.GetSetting(Core.uSyncConstants.DefaultSettings.OneWay, Core.uSyncConstants.DefaultSettings.CreateOnly_Default))
             {
                 var item = serializer.FindItem(node);
                 if (item != null)
@@ -1271,7 +1271,7 @@ namespace uSync.BackOffice.SyncHandlers
         virtual public uSyncAction Rename(TObject item) => new uSyncAction();
 
 
-        public virtual string Group { get; protected set; } = uSyncBackOfficeConstants.Groups.Settings;
+        public virtual string Group { get; protected set; } = uSyncConstants.Groups.Settings;
 
         public SyncAttempt<XElement> GetElement(Udi udi)
         {
@@ -1416,7 +1416,7 @@ namespace uSync.BackOffice.SyncHandlers
                 {
                     // the cultures we serialize should match any in the file.
                     // this means we then only check the same values at each end.
-                    options.Settings[uSyncConstants.CultureKey] = cultures;
+                    options.Settings[Core.uSyncConstants.CultureKey] = cultures;
                 }
 
                 var attempt = this.SerializeItem(item, options);

@@ -17,11 +17,11 @@ using uSync.Core.Serialization;
 
 namespace uSync.BackOffice.SyncHandlers.Handlers
 {
-    [SyncHandler("domainHandler", "Domains", "Domains", uSyncBackOfficeConstants.Priorites.DomainSettings
+    [SyncHandler("domainHandler", "Domains", "Domains", uSyncConstants.Priorites.DomainSettings
         , Icon = "icon-home usync-addon-icon", EntityType = "domain")]
     public class DomainHandler : SyncHandlerBase<IDomain, IDomainService>, ISyncHandler
     {
-        public override string Group => uSyncBackOfficeConstants.Groups.Content;
+        public override string Group => uSyncConstants.Groups.Content;
 
         private readonly IDomainService domainService;
 

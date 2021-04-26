@@ -17,11 +17,11 @@ using static Umbraco.Cms.Core.Constants;
 
 namespace uSync.BackOffice.SyncHandlers.Handlers
 {
-    [SyncHandler("contentHandler", "Content", "Content", uSyncBackOfficeConstants.Priorites.Content
+    [SyncHandler("contentHandler", "Content", "Content", uSyncConstants.Priorites.Content
         , Icon = "icon-document usync-addon-icon", IsTwoPass = true, EntityType = UdiEntityType.Document)]
     public class ContentHandler : ContentHandlerBase<IContent, IContentService>, ISyncHandler
     {
-        public override string Group => uSyncBackOfficeConstants.Groups.Content;
+        public override string Group => uSyncConstants.Groups.Content;
 
         private readonly IContentService contentService;
 

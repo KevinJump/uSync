@@ -17,11 +17,11 @@ using static Umbraco.Cms.Core.Constants;
 
 namespace uSync.BackOffice.SyncHandlers.Handlers
 {
-    [SyncHandler("mediaHandler", "Media", "Media", uSyncBackOfficeConstants.Priorites.Media,
+    [SyncHandler("mediaHandler", "Media", "Media", uSyncConstants.Priorites.Media,
         Icon = "icon-picture usync-addon-icon", IsTwoPass = true, EntityType = UdiEntityType.Media)]
     public class MediaHandler : ContentHandlerBase<IMedia, IMediaService>, ISyncHandler
     {
-        public override string Group => uSyncBackOfficeConstants.Groups.Content;
+        public override string Group => uSyncConstants.Groups.Content;
 
         private readonly IMediaService mediaService;
 

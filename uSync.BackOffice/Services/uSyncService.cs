@@ -367,9 +367,9 @@ namespace uSync.BackOffice
                 {
                     var node = _syncFileService.LoadXElement(versionFile);
                     var format = node.Attribute("format").ValueOrDefault("");
-                    if (!format.InvariantEquals(uSyncConstants.FormatVersion))
+                    if (!format.InvariantEquals(Core.uSyncConstants.FormatVersion))
                     {
-                        var expectedVersion = SemVersion.Parse(uSyncConstants.FormatVersion);
+                        var expectedVersion = SemVersion.Parse(Core.uSyncConstants.FormatVersion);
                         if (SemVersion.TryParse(format, out SemVersion current))
                         {
                             if (current.CompareTo(expectedVersion) >= 0) return true;
@@ -394,7 +394,7 @@ namespace uSync.BackOffice
                 var versionFile = Path.Combine(_syncFileService.GetAbsPath(folder), "usync.config");
                 var versionNode = new XElement("uSync",
                     new XAttribute("version", typeof(uSync).Assembly.GetName().Version.ToString()),
-                    new XAttribute("format", uSyncConstants.FormatVersion),
+                    new XAttribute("format", Core.uSyncConstants.FormatVersion),
                     new XElement("Date", DateTime.Now.ToString("s")));
 
                 Directory.CreateDirectory(Path.GetDirectoryName(versionFile));

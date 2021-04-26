@@ -21,11 +21,11 @@ using static Umbraco.Cms.Core.Constants;
 
 namespace uSync.BackOffice.SyncHandlers.Handlers
 {
-    [SyncHandler("dictionaryHandler", "Dictionary", "Dictionary", uSyncBackOfficeConstants.Priorites.DictionaryItems
+    [SyncHandler("dictionaryHandler", "Dictionary", "Dictionary", uSyncConstants.Priorites.DictionaryItems
         , Icon = "icon-book-alt usync-addon-icon", EntityType = UdiEntityType.DictionaryItem)]
     public class DictionaryHandler : SyncHandlerLevelBase<IDictionaryItem, ILocalizationService>, ISyncHandler
     {
-        public override string Group => uSyncBackOfficeConstants.Groups.Content;
+        public override string Group => uSyncConstants.Groups.Content;
 
         private readonly ILocalizationService localizationService;
 

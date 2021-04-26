@@ -103,7 +103,7 @@ namespace uSync.BackOffice.Controllers
             }
             
             addOnInfo.Version = typeof(global::uSync.BackOffice.uSync).Assembly.GetName().Version.ToString()
-                + uSyncBackOfficeConstants.ReleaseSuffix;
+                + uSyncConstants.ReleaseSuffix;
 
             addOnInfo.AddOns = addOnInfo.AddOns.OrderBy(x => x.SortOrder).ToList();
             addOnInfo.AddOnString = string.Join(", ", 
@@ -210,7 +210,7 @@ namespace uSync.BackOffice.Controllers
 
             var createOnly = handlers
                 .Select(x => x.Handler)
-                .Any(h => h.DefaultConfig.GetSetting(uSyncConstants.DefaultSettings.CreateOnly, false));
+                .Any(h => h.DefaultConfig.GetSetting(Core.uSyncConstants.DefaultSettings.CreateOnly, false));
 
             if (createOnly)
             {

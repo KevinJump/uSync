@@ -45,6 +45,11 @@ namespace Umbraco.Cms.Web.UI.NetCore
                 .AddBackOffice()             
                 .AddWebsite()
                 .AddComposers()
+                // add uSync (example - you can just leave this out, and the default settings from appsettings.json are used).
+                .AdduSync(o => {
+                    o.ImportAtStartup = uSyncConstants.Groups.Settings; // import settings at startup.
+                    o.RootFolder = "/uSync/v8/"; // use a v8 folder (so you can just copy from v8
+                    })
                 .Build();
 #pragma warning restore IDE0022 // Use expression body for methods
 

@@ -1,6 +1,6 @@
 ﻿namespace uSync.BackOffice
 {
-    public static partial class uSyncBackOfficeConstants
+    public static partial class uSyncConstants
     {
         public const string ReleaseSuffix = "";
 
