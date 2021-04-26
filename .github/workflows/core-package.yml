@@ -22,9 +22,12 @@ jobs:
 
     - name: Get Date
       id: date
-      run: echo "::set-output name=date::$(date + '%Y-%m-%d')"
+      run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+      shell: bash
+
     - name: Set Release Suffix
       run: echo "SUFFIX=$SUFFIX" >> $GITHUB_ENV
+      shell: bash
       env:
         SUFFIX: ${{env.RELEASE}}-${{steps.date.outputs.date}}
 
