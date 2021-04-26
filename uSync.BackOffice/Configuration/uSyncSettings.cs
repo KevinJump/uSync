@@ -16,14 +16,9 @@ namespace uSync.BackOffice.Configuration
         public string DefaultSet { get; set; } = uSync.Sets.DefaultSet;
 
         /// <summary>
-        ///  Import when Umbraco boots
+        ///  Import when Umbraco boots (can be group name or 'All' so everything is done, blank or 'none' == off)
         /// </summary>
-        public bool ImportAtStartup { get; set; } = false;
-
-        /// <summary>
-        ///  The handler 'group' to use on startup import 
-        /// </summary>
-        public string ImportAtStartupGroup { get; set; } = string.Empty;
+        public string ImportAtStartup { get; set; } = ""; 
 
         /// <summary>
         ///  Export when Umbraco boots

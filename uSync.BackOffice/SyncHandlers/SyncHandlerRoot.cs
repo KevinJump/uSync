@@ -30,6 +30,7 @@ namespace uSync.BackOffice.SyncHandlers
         protected readonly ILogger<SyncHandlerRoot<TObject, TContainer>> logger;
 
         protected readonly SyncFileService syncFileService;
+        protected readonly uSyncMutexService _mutexService;
 
         protected readonly IList<ISyncDependencyChecker<TObject>> dependencyCheckers;
         protected readonly IList<ISyncTracker<TObject>> trackers;
@@ -115,12 +116,13 @@ namespace uSync.BackOffice.SyncHandlers
 
         public SyncHandlerRoot(
                 ILogger<SyncHandlerRoot<TObject, TContainer>> logger,
-                IShortStringHelper shortStringHelper,
-                uSyncConfigService uSyncConfig,
                 AppCaches appCaches,
+                IShortStringHelper shortStringHelper,
+                SyncFileService syncFileService,
+                uSyncMutexService mutexService,
+                uSyncConfigService uSyncConfig,
                 ISyncSerializer<TObject> serializer,
-                ISyncItemFactory itemFactory,
-                SyncFileService syncFileService)
+                ISyncItemFactory itemFactory)
         {
             this.uSyncConfig = uSyncConfig;
 
@@ -133,6 +135,7 @@ namespace uSync.BackOffice.SyncHandlers
             this.dependencyCheckers = this.itemFactory.GetCheckers<TObject>().ToList();
 
             this.syncFileService = syncFileService;
+            this._mutexService = mutexService;
 
 
             var currentHandlerType = GetType();
@@ -1053,9 +1056,21 @@ namespace uSync.BackOffice.SyncHandlers
 
         #region Notification Events 
 
+        /// <summary>
+        /// calculate if this handler should process the events.  
+        /// </summary>
+        /// <remarks>
+        /// will check if uSync is paused, the handler is enabled or the action is set.
+        /// </remarks>
+        private bool ShouldProcessEvent()
+        {
+            if (_mutexService.IsPaused) return false;
+            return HandlerActions.Save.IsValidAction(DefaultConfig.Actions);
+        }
+
         public virtual void Handle(DeletedNotification<TObject> notification)
         {
-            if (uSyncBackOffice.eventsPaused) return;
+            if (!ShouldProcessEvent()) return;
 
             foreach (var item in notification.DeletedEntities)
             {
@@ -1065,7 +1080,7 @@ namespace uSync.BackOffice.SyncHandlers
 
         public virtual void Handle(SavedNotification<TObject> notification)
         {
-            if (uSyncBackOffice.eventsPaused) return;
+            if (!ShouldProcessEvent()) return;
 
             foreach (var item in notification.SavedEntities)
             {
@@ -1080,7 +1095,7 @@ namespace uSync.BackOffice.SyncHandlers
 
         public virtual void Handle(MovedNotification<TObject> notification)
         {
-            if (uSyncBackOffice.eventsPaused) return;
+            if (!ShouldProcessEvent()) return;
 
             foreach (var item in notification.MoveInfoCollection)
             {

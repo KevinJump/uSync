@@ -26,16 +26,17 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         private readonly IMediaService mediaService;
 
         public MediaHandler(
-            IShortStringHelper shortStringHelper,
             ILogger<MediaHandler> logger,
-            uSyncConfigService uSyncConfigService,
-            AppCaches appCaches,
-            ISyncSerializer<IMedia> serializer,
-            ISyncItemFactory syncItemFactory,
-            SyncFileService syncFileService,            
             IEntityService entityService,
-            IMediaService mediaService)
-            : base(shortStringHelper, logger, uSyncConfigService, appCaches, serializer, syncItemFactory, syncFileService, entityService)
+            IMediaService mediaService,
+            AppCaches appCaches,
+            IShortStringHelper shortStringHelper,
+            SyncFileService syncFileService,
+            uSyncMutexService mutexService,
+            uSyncConfigService uSyncConfigService,
+            ISyncSerializer<IMedia> serializer,
+            ISyncItemFactory syncItemFactory)
+            : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfigService, serializer, syncItemFactory)
         {
             this.mediaService = mediaService;
         }

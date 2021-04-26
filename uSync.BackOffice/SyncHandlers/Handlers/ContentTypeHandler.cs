@@ -30,16 +30,17 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         private readonly IContentTypeService contentTypeService;
 
         public ContentTypeHandler(
-            IShortStringHelper shortStringHelper,
             ILogger<ContentTypeHandler> logger,
-            uSyncConfigService uSyncConfig,
-            IContentTypeService contentTypeService,
             IEntityService entityService,
+            IContentTypeService contentTypeService,
             AppCaches appCaches,
+            IShortStringHelper shortStringHelper,
+            SyncFileService syncFileService,
+            uSyncMutexService mutexService,
+            uSyncConfigService uSyncConfig,
             ISyncSerializer<IContentType> serializer,
-            ISyncItemFactory syncItemFactory,
-            SyncFileService syncFileService)
-            : base(shortStringHelper, logger, uSyncConfig, appCaches, serializer, syncItemFactory, syncFileService, entityService)
+            ISyncItemFactory syncItemFactory)
+            : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfig, serializer, syncItemFactory)
         {
             this.contentTypeService = contentTypeService;
         }

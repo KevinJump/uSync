@@ -1,15 +1,19 @@
 ﻿using System;
 
+using uSync.BackOffice.Services;
+
 namespace uSync.BackOffice
 {
     /// <summary>
-    ///  causes a section of code to be ran while the uSync events are paused. 
+    ///  wraps code running that might trigger events, pausing uSyncs capture of those events.
     /// </summary>
     public class uSyncImportPause : IDisposable
     {
-        public uSyncImportPause()
+        private readonly uSyncMutexService _mutexService;
+
+        public uSyncImportPause(uSyncMutexService mutexService)
         {
-            uSyncBackOffice.eventsPaused = true;
+            _mutexService.Pause();
         }
 
         public void Dispose()
@@ -20,7 +24,7 @@ namespace uSync.BackOffice
 
         protected virtual void Dispose(bool disposing)
         {
-            uSyncBackOffice.eventsPaused = false;
+            _mutexService.UnPause();
         }
     }
 }

@@ -31,15 +31,16 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
     {
 
         protected ContentHandlerBase(
-            IShortStringHelper shortStringHelper,
             ILogger<ContentHandlerBase<TObject, TService>> logger,
-            uSyncConfigService uSyncConfigService, 
+            IEntityService entityService,
             AppCaches appCaches,
-            ISyncSerializer<TObject> serializer,
-            ISyncItemFactory syncItemFactory,
+            IShortStringHelper shortStringHelper,
             SyncFileService syncFileService,
-            IEntityService entityService)
-            : base (shortStringHelper, logger, uSyncConfigService, appCaches, serializer,syncItemFactory, syncFileService, entityService)
+            uSyncMutexService mutexService,
+            uSyncConfigService uSyncConfigService,
+            ISyncSerializer<TObject> serializer,
+            ISyncItemFactory syncItemFactory)
+            : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfigService, serializer, syncItemFactory)
         { }
 
         protected override string GetItemMatchString(TObject item)

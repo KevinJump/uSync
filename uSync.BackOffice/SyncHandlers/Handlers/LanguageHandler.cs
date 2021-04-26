@@ -33,16 +33,17 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         private readonly ILocalizationService localizationService;
 
         public LanguageHandler(
-            IShortStringHelper shortStringHelper,
             ILogger<LanguageHandler> logger,
-            uSyncConfigService uSyncConfig,
-            ILocalizationService localizationService,
             IEntityService entityService,
+            ILocalizationService localizationService,
             AppCaches appCaches,
+            IShortStringHelper shortStringHelper,
+            SyncFileService syncFileService,
+            uSyncMutexService mutexService,
+            uSyncConfigService uSyncConfig,
             ISyncSerializer<ILanguage> serializer,
-            ISyncItemFactory syncItemFactory,
-            SyncFileService syncFileService)
-            : base(logger, shortStringHelper, uSyncConfig, appCaches, serializer, syncItemFactory, syncFileService, entityService)
+            ISyncItemFactory syncItemFactory)
+            : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfig, serializer, syncItemFactory)
         {
             this.localizationService = localizationService;
         }
@@ -118,7 +119,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
 
         public void Handle(SavingNotification<ILanguage> notification)
         {
-            if (uSyncBackOffice.eventsPaused) return;
+            if (_mutexService.IsPaused) return;
 
             foreach (var item in notification.SavedEntities)
             {
@@ -134,7 +135,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
 
         public override void Handle(SavedNotification<ILanguage> notification)
         {
-            if (uSyncBackOffice.eventsPaused) return;
+            if (_mutexService.IsPaused) return;
 
             foreach (var item in notification.SavedEntities)
             {

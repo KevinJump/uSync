@@ -156,15 +156,10 @@ namespace uSync.BackOffice.SyncHandlers
             return configs.OrderBy(x => x.Handler.Priority);
         }
 
-        private bool IsValidAction(HandlerActions requestedAction, string[] actions)
-            => requestedAction == HandlerActions.None ||
-                actions.InvariantContains("all") ||
-                actions.InvariantContains(requestedAction.ToString());
-
         private bool IsValidGroup(string group, ISyncHandler handler)
         {
-            // empty means all 
-            if (string.IsNullOrWhiteSpace(group)) return true;
+            // empty means all as does 'all'
+            if (string.IsNullOrWhiteSpace(group) || group.InvariantEquals("all")) return true;
 
             // only handlers in the specified group
             if (handler is ISyncHandler extendedHandler)

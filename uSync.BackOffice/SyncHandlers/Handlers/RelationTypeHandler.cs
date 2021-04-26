@@ -31,15 +31,16 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
 
         public RelationTypeHandler(
             ILogger<RelationTypeHandler> logger,
-            IShortStringHelper shortStringHelper,
-            uSyncConfigService uSyncConfigService,
-            AppCaches appCaches,
-            ISyncSerializer<IRelationType> serializer,
-            ISyncItemFactory syncItemFactory,
-            SyncFileService syncFileService,
+            IEntityService entityService,
             IRelationService relationService,
-            IEntityService entityService)
-            : base(logger, shortStringHelper, uSyncConfigService, appCaches, serializer, syncItemFactory, syncFileService, entityService)
+            AppCaches appCaches,
+            IShortStringHelper shortStringHelper,
+            SyncFileService syncFileService,
+            uSyncMutexService mutexService,
+            uSyncConfigService uSyncConfigService,
+            ISyncSerializer<IRelationType> serializer,
+            ISyncItemFactory syncItemFactory)
+            : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfigService, serializer, syncItemFactory)
         {
             this.relationService = relationService;
         }

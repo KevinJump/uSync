@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
+using Umbraco.Extensions;
+using uSync.BackOffice.SyncHandlers;
+
 namespace uSync.BackOffice
 {
     public static class uSyncActionExtensions
@@ -16,5 +19,14 @@ namespace uSync.BackOffice
         /// </summary>
         public static int CountChanges(this IEnumerable<uSyncAction> actions)
             => actions.Count(x => x.Change > Core.ChangeType.NoChange);
+
+        /// <summary>
+        ///  checks to see if the reuqested action is valid for the configured list of actions.
+        /// </summary>
+        public static bool IsValidAction(this HandlerActions requestedAction, IEnumerable<string> actions)
+            => requestedAction == HandlerActions.None ||
+                actions.InvariantContains("all") ||
+                actions.InvariantContains(requestedAction.ToString());
+
     }
 }

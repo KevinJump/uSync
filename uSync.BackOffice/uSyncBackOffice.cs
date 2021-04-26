@@ -1,10 +1,5 @@
 ﻿namespace uSync.BackOffice
 {
-    public class uSyncBackOffice
-    {
-        public static bool eventsPaused { get; set; }
-    }
-
     public class uSync
     {
         internal const string Name = "uSync";

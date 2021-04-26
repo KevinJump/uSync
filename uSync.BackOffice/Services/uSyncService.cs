@@ -34,11 +34,14 @@ namespace uSync.BackOffice
         
         private SyncFileService _syncFileService;
 
+        private readonly uSyncMutexService _mutexService;
+
         public uSyncService(
             ILogger<uSyncService> logger,
             uSyncConfigService uSyncConfigService,
             SyncHandlerFactory handlerFactory,
-            SyncFileService syncFileService)
+            SyncFileService syncFileService,
+            uSyncMutexService mutexService)
         {
             this._handlerFactory = handlerFactory;
 
@@ -46,6 +49,8 @@ namespace uSync.BackOffice
 
             this._uSyncConfig = uSyncConfigService;
             this._logger = logger;
+
+            this._mutexService = mutexService;
 
             uSyncTriggers.DoExport += USyncTriggers_DoExport;
             uSyncTriggers.DoImport += USyncTriggers_DoImport;
@@ -190,7 +195,7 @@ namespace uSync.BackOffice
             {
                 var sw = Stopwatch.StartNew();
 
-                using (var pause = new uSyncImportPause())
+                using (var pause = _mutexService.ImportPause())
                 {
 
                     // pre import event
@@ -388,7 +393,7 @@ namespace uSync.BackOffice
             {
                 var versionFile = Path.Combine(_syncFileService.GetAbsPath(folder), "usync.config");
                 var versionNode = new XElement("uSync",
-                    new XAttribute("version", typeof(uSyncBackOffice).Assembly.GetName().Version.ToString()),
+                    new XAttribute("version", typeof(uSync).Assembly.GetName().Version.ToString()),
                     new XAttribute("format", uSyncConstants.FormatVersion),
                     new XElement("Date", DateTime.Now.ToString("s")));
 

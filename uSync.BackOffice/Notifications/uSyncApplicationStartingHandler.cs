@@ -8,6 +8,7 @@ using Umbraco.Cms.Core.Events;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Sync;
 using Umbraco.Cms.Core.Web;
+using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
@@ -93,15 +94,15 @@ namespace uSync.BackOffice.Notifications
                         _uSyncService.Export(_uSyncConfig.Settings.RootFolder, default(SyncHandlerOptions));
                     }
 
-                    if (_uSyncConfig.Settings.ImportAtStartup)
+                    if (IsImportAtStatupEnabled())
                     {
-                        _logger.LogInformation("uSync: Running Import at startup");
+                        _logger.LogInformation("uSync: Running Import at startup {group}", _uSyncConfig.Settings.ImportAtStartup);
 
                         if (!HasStopFile(_uSyncConfig.Settings.RootFolder))
                         {
                             _uSyncService.Import(_uSyncConfig.Settings.RootFolder, false, new SyncHandlerOptions
                             {
-                                Group = _uSyncConfig.Settings.ImportAtStartupGroup
+                                Group = _uSyncConfig.Settings.ImportAtStartup
                             });
 
                             ProcessOnceFile(_uSyncConfig.Settings.RootFolder);
@@ -149,6 +150,10 @@ namespace uSync.BackOffice.Notifications
                 _logger.LogInformation("usync.once file replaced by usync.stop file");
             }
         }
+
+        private bool IsImportAtStatupEnabled()
+            => !string.IsNullOrWhiteSpace(_uSyncConfig.Settings.ImportAtStartup)
+                && !_uSyncConfig.Settings.ImportAtStartup.InvariantEquals("none");
 
     }
 }

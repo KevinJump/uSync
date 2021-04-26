@@ -27,15 +27,16 @@ namespace uSync.BackOffice.SyncHandlers
         where TService : IService
     {
         protected SyncHandlerTreeBase(
-            IShortStringHelper shortStringHelper,
             ILogger<SyncHandlerTreeBase<TObject, TService>> logger,
-            uSyncConfigService uSyncConfig,
+            IEntityService entityService,
             AppCaches appCaches,
-            ISyncSerializer<TObject> serializer,
-            ISyncItemFactory syncItemFactory,
+            IShortStringHelper shortStringHelper,
             SyncFileService syncFileService,
-            IEntityService entityService)
-            : base(shortStringHelper, logger, uSyncConfig, appCaches, serializer, syncItemFactory, syncFileService, entityService)
+            uSyncMutexService mutexService,
+            uSyncConfigService uSyncConfig,
+            ISyncSerializer<TObject> serializer,
+            ISyncItemFactory syncItemFactory)
+            : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfig, serializer, syncItemFactory)
         { }
 
         protected override string GetItemName(TObject item) => item.Name;

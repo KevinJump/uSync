@@ -39,15 +39,16 @@ namespace uSync.BackOffice.SyncHandlers
     {
 
         protected SyncHandlerContainerBase(
-            IShortStringHelper shortStringHelper,
             ILogger<SyncHandlerContainerBase<TObject, TService>> logger,
-            uSyncConfigService uSyncConfig,
+            IEntityService entityService,
             AppCaches appCaches,
-            ISyncSerializer<TObject> serializer,
-            ISyncItemFactory syncItemFactory,
+            IShortStringHelper shortStringHelper,
             SyncFileService syncFileService,
-            IEntityService entityService)
-            : base(shortStringHelper, logger, uSyncConfig, appCaches, serializer, syncItemFactory, syncFileService, entityService)
+            uSyncMutexService mutexService,
+            uSyncConfigService uSyncConfig,
+            ISyncSerializer<TObject> serializer,
+            ISyncItemFactory syncItemFactory)
+            : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfig, serializer, syncItemFactory)
         { }
 
         protected IEnumerable<uSyncAction> CleanFolders(string folder, int parent)
@@ -129,7 +130,7 @@ namespace uSync.BackOffice.SyncHandlers
 
         public virtual void Handle(EntityContainerSavedNotification notification)
         { 
-            if (uSyncBackOffice.eventsPaused) return;
+            if (_mutexService.IsPaused) return;
 
             foreach(var folder in notification.SavedEntities)
             {

@@ -29,16 +29,17 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         private readonly IMemberTypeService memberTypeService;
 
         public MemberTypeHandler(
-            IShortStringHelper shortStringHelper,
             ILogger<MemberTypeHandler> logger,
-            uSyncConfigService uSyncConfig,
-            IMemberTypeService memberTypeService,
             IEntityService entityService,
+            IMemberTypeService memberTypeService,
             AppCaches appCaches,
+            IShortStringHelper shortStringHelper,
+            SyncFileService syncFileService,
+            uSyncMutexService mutexService,
+            uSyncConfigService uSyncConfig,
             ISyncSerializer<IMemberType> serializer,
-            ISyncItemFactory syncItemFactory,
-            SyncFileService syncFileService)
-            : base(shortStringHelper, logger, uSyncConfig, appCaches, serializer, syncItemFactory, syncFileService, entityService)
+            ISyncItemFactory syncItemFactory)
+            : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfig, serializer, syncItemFactory)
         {
             this.memberTypeService = memberTypeService;
         }

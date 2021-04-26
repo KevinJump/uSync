@@ -30,14 +30,15 @@ namespace uSync.BackOffice.SyncHandlers
 
         public SyncHandlerBase(
             ILogger<SyncHandlerBase<TObject, TService>> logger,
-            IShortStringHelper shortStringHelper,
-            uSyncConfigService uSyncConfig,
+            IEntityService entityService,
             AppCaches appCaches,
-            ISyncSerializer<TObject> serializer,
-            ISyncItemFactory syncItemFactory,
+            IShortStringHelper shortStringHelper,
             SyncFileService syncFileService,
-            IEntityService entityService)
-            : base(logger, shortStringHelper, uSyncConfig, appCaches, serializer, syncItemFactory, syncFileService)
+            uSyncMutexService mutexService,
+            uSyncConfigService uSyncConfig,
+            ISyncSerializer<TObject> serializer,
+            ISyncItemFactory syncItemFactory)
+            : base(logger, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfig, serializer, syncItemFactory)
         {
             this.entityService = entityService;
         }

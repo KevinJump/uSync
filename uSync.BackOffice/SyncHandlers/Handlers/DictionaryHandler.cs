@@ -30,16 +30,17 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         private readonly ILocalizationService localizationService;
 
         public DictionaryHandler(
-            IShortStringHelper shortStringHelper,
             ILogger<DictionaryHandler> logger,
-            uSyncConfigService uSyncConfigService,
-            AppCaches appCaches,
-            ISyncSerializer<IDictionaryItem> serializer,
-            ISyncItemFactory syncItemFactory,
-            SyncFileService syncFileService,
             IEntityService entityService,
-            ILocalizationService localizationService)
-            : base(shortStringHelper, logger, uSyncConfigService, appCaches, serializer, syncItemFactory, syncFileService, entityService)
+            ILocalizationService localizationService,
+            AppCaches appCaches,
+            IShortStringHelper shortStringHelper,
+            SyncFileService syncFileService,
+            uSyncMutexService mutexService,
+            uSyncConfigService uSyncConfigService,
+            ISyncSerializer<IDictionaryItem> serializer,
+            ISyncItemFactory syncItemFactory)
+            : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfigService, serializer, syncItemFactory)
         {
             this.localizationService = localizationService;
         }

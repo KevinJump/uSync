@@ -30,16 +30,17 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         private readonly IFileService fileService;
 
         public TemplateHandler(
-            IShortStringHelper shortStringHelper,
             ILogger<TemplateHandler> logger,
-            uSyncConfigService uSyncConfig,
-            IFileService fileService,
             IEntityService entityService,
+            IFileService fileService,
             AppCaches appCaches,
+            IShortStringHelper shortStringHelper,
+            SyncFileService syncFileService,
+            uSyncMutexService mutexService,
+            uSyncConfigService uSyncConfig,
             ISyncSerializer<ITemplate> serializer,
-            ISyncItemFactory syncItemFactory,
-            SyncFileService syncFileService)
-            : base(shortStringHelper, logger, uSyncConfig, appCaches, serializer, syncItemFactory, syncFileService, entityService)
+            ISyncItemFactory syncItemFactory)
+            : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfig, serializer, syncItemFactory)
         {
             this.fileService = fileService;
         }

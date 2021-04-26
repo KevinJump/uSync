@@ -25,16 +25,17 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         private readonly IContentService contentService;
 
         public ContentTemplateHandler(
-            IContentService contentService,
-            IShortStringHelper shortStringHelper,
             ILogger<ContentTemplateHandler> logger,
-            uSyncConfigService uSyncConfigService, 
+            IEntityService entityService,
+            IContentService contentService,
             AppCaches appCaches,
-            ISyncSerializer<IContent> serializer,
-            ISyncItemFactory syncItemFactory,
+            IShortStringHelper shortStringHelper,
             SyncFileService syncFileService,
-            IEntityService entityService)
-            : base(shortStringHelper, logger, uSyncConfigService, appCaches, serializer, syncItemFactory, syncFileService, entityService)
+            uSyncMutexService mutexService,
+            uSyncConfigService uSyncConfigService,
+            ISyncSerializer<IContent> serializer,
+            ISyncItemFactory syncItemFactory)
+            : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfigService, serializer, syncItemFactory)
         {
             this.contentService = contentService;
         }

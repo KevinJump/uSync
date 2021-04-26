@@ -32,16 +32,17 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
 
 
         public DataTypeHandler(
-            IShortStringHelper shortStringHelper,
             ILogger<DataTypeHandler> logger,
-            uSyncConfigService uSyncConfig,
-            IDataTypeService dataTypeService,
             IEntityService entityService,
+            IDataTypeService dataTypeService,
             AppCaches appCaches,
+            IShortStringHelper shortStringHelper,
+            SyncFileService syncFileService,
+            uSyncMutexService mutexService,
+            uSyncConfigService uSyncConfig,
             ISyncSerializer<IDataType> serializer,
-            ISyncItemFactory syncItemFactory,
-            SyncFileService syncFileService)
-            : base(shortStringHelper, logger, uSyncConfig, appCaches, serializer, syncItemFactory, syncFileService, entityService)
+            ISyncItemFactory syncItemFactory)
+            : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfig, serializer, syncItemFactory)
         {
             this.dataTypeService = dataTypeService;
         }

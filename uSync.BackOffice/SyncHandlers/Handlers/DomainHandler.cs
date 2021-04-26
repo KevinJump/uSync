@@ -27,15 +27,16 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
 
         public DomainHandler(
             ILogger<DomainHandler> logger,
-            IShortStringHelper shortStringHelper,
-            uSyncConfigService configService,
-            AppCaches appCaches,
-            ISyncSerializer<IDomain> serializer,
-            ISyncItemFactory syncItemFactory,
-            SyncFileService syncFileService,
             IEntityService entityService,
-            IDomainService domainService)
-            : base (logger, shortStringHelper, configService, appCaches, serializer,syncItemFactory, syncFileService, entityService)
+            IDomainService domainService,
+            AppCaches appCaches,
+            IShortStringHelper shortStringHelper,
+            SyncFileService syncFileService,
+            uSyncMutexService mutexService,
+            uSyncConfigService configService,
+            ISyncSerializer<IDomain> serializer,
+            ISyncItemFactory syncItemFactory)
+            : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, configService, serializer, syncItemFactory)
         {
             this.domainService = domainService;
         }

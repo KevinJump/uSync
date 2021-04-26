@@ -29,16 +29,17 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         private readonly IMacroService macroService;
 
         public MacroHandler(
-            IShortStringHelper shortStringHelper,
             ILogger<MacroHandler> logger,
-            uSyncConfigService uSyncConfig,
-            IMacroService macroService,
             IEntityService entityService,
+            IMacroService macroService,
             AppCaches appCaches,
+            IShortStringHelper shortStringHelper,
+            SyncFileService syncFileService,
+            uSyncMutexService mutexService,
+            uSyncConfigService uSyncConfig,
             ISyncSerializer<IMacro> serializer,
-            ISyncItemFactory syncItemFactory,
-            SyncFileService syncFileService)
-            : base(logger, shortStringHelper, uSyncConfig, appCaches, serializer, syncItemFactory, syncFileService, entityService)
+            ISyncItemFactory syncItemFactory)
+            : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfig, serializer, syncItemFactory)
         {
             this.macroService = macroService;
         }
