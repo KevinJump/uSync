@@ -9,6 +9,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.BackOffice", "uSync.B
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.Site", "uSync.Site\uSync.Site.csproj", "{2A471D92-DBDF-4B40-9F8E-4153E46B8558}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "uSync.Community.Contrib", "uSync.Community.Contrib\uSync.Community.Contrib.csproj", "{B78A0BB0-E95A-4F38-B75C-A4645AFA49D7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{AC8D82BC-EAC5-4EB5-8281-92FFA58A786F}"
+	ProjectSection(SolutionItems) = preProject
+		dist\build-package.ps1 = dist\build-package.ps1
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +34,10 @@ Global
 		{2A471D92-DBDF-4B40-9F8E-4153E46B8558}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2A471D92-DBDF-4B40-9F8E-4153E46B8558}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2A471D92-DBDF-4B40-9F8E-4153E46B8558}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B78A0BB0-E95A-4F38-B75C-A4645AFA49D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B78A0BB0-E95A-4F38-B75C-A4645AFA49D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B78A0BB0-E95A-4F38-B75C-A4645AFA49D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B78A0BB0-E95A-4F38-B75C-A4645AFA49D7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

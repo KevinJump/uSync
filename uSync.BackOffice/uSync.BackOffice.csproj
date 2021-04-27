@@ -28,7 +28,7 @@
 		<EmbedUntrackedSources>true</EmbedUntrackedSources>
 		<IncludeSymbols>true</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
-		
+
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -38,6 +38,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\uSync.Community.Contrib\uSync.Community.Contrib.csproj" />
 		<ProjectReference Include="..\uSync.Core\uSync.Core.csproj" />
 	</ItemGroup>
 
