@@ -17,11 +17,10 @@
 		<PackageProjectUrl>https://jumoo.co.uk/uSync</PackageProjectUrl>
 		<PackageTags>Umbraco</PackageTags>
 
-		<RepositoryUrl>https://github.com/KevinJump/uSync8</RepositoryUrl>
+		<RepositoryUrl>https://github.com/KevinJump/uSync8/tree/core/main</RepositoryUrl>
 
-		<Description>
-			Core serializers for uSync to read / write information to / from Umbraco CMS.
-		</Description>
+		<Copyright>Jumoo @ 2013-2021</Copyright>
+		<Description>Core serializers for uSync to read / write information to / from Umbraco CMS.</Description>
 		<PackageReleaseNotes>
 			9.0 - Dotnet core version
 		</PackageReleaseNotes>
@@ -56,6 +55,10 @@
 		<None Include="build\**\*.*">
 			<Pack>true</Pack>
 			<PackagePath>build</PackagePath>
+		</None>
+		<None Include="readme.txt">
+			<Pack>true</Pack>
+			<PackagePath></PackagePath>
 		</None>
 	</ItemGroup>
 	

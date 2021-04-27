@@ -7,8 +7,6 @@ namespace uSync.BackOffice
     {
         public const string ReleaseSuffix = "";
 
-        public const string ConfigFile = "uSync8.config";
-
         public static class Priorites
         {
             public const int USYNC_RESERVED_LOWER = 1000;
