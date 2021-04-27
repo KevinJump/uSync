@@ -7,7 +7,8 @@
 
         var vm = this;
         vm.working = false; 
-        vm.loading = true; 
+        vm.loading = true;
+        vm.readonly = true;
 
         vm.umbracoVersion = Umbraco.Sys.ServerVariables.application.version;
 
