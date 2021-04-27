@@ -1,7 +1,7 @@
 <div ng-controller="uSync8Controller as vm">
 
 
-    <div ng-if="vm.versionInfo.isCurrent != true" class="alert alert-info usync-alert">
+    <div ng-if="!vm.loading && vm.versionInfo.isCurrent != true" class="alert alert-info usync-alert">
         <localize key="usync_newer"></localize> [v{{vm.versionInfo.versionInfo.Core}}]
         <span ng-if="vm.versionInfo.versionInfo.message">
             <a href="{{vm.versionInfo.versionInfo.link}}" target="_blank">
