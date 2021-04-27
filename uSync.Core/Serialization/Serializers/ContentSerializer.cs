@@ -422,7 +422,7 @@ namespace uSync.Core.Serialization.Serializers
             {
                 // we can get thrown a null argument exception by the notifer, 
                 // which is non critical! but we are ignoring this error. ! <= 8.1.5
-                if (!ex.Message.Contains("siteUri")) throw ex;
+                if (!ex.Message.Contains("siteUri")) throw;
                 return Attempt.Succeed($"Published");
             }
         }
@@ -488,7 +488,7 @@ namespace uSync.Core.Serialization.Serializers
             {
                 // we can get thrown a null argument exception by the notifer, 
                 // which is non critical! but we are ignoring this error. ! <= 8.1.5
-                if (!ex.Message.Contains("siteUri")) throw ex;
+                if (!ex.Message.Contains("siteUri")) throw;
                 return Attempt.Succeed($"Published");
             }
         }
@@ -569,7 +569,7 @@ namespace uSync.Core.Serialization.Serializers
             {
                 // we can get thrown a null argument exception by the notifer, 
                 // which is non critical! but we are ignoring this error. ! <= 8.1.5
-                if (!ex.Message.Contains("siteUri")) throw ex;
+                if (!ex.Message.Contains("siteUri")) throw;
             }
         }
 
@@ -583,7 +583,7 @@ namespace uSync.Core.Serialization.Serializers
             {
                 // we can get thrown a null argument exception by the notifer, 
                 // which is non critical! but we are ignoring this error. ! <= 8.1.5
-                if (!ex.Message.Contains("siteUri")) throw ex;
+                if (!ex.Message.Contains("siteUri")) throw;
             }
         }
     }
