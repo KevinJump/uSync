@@ -3,6 +3,7 @@
 using Microsoft.Extensions.Logging;
 
 using Umbraco.Cms.Core.Cache;
+using Umbraco.Cms.Core.Events;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Models.Entities;
 using Umbraco.Cms.Core.Services;
@@ -18,7 +19,10 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("contentHandler", "Content", "Content", uSyncConstants.Priorites.Content
         , Icon = "icon-document usync-addon-icon", IsTwoPass = true, EntityType = UdiEntityType.Document)]
-    public class ContentHandler : ContentHandlerBase<IContent, IContentService>, ISyncHandler
+    public class ContentHandler : ContentHandlerBase<IContent, IContentService>, ISyncHandler,
+        INotificationHandler<SavedNotification<IContent>>,
+        INotificationHandler<DeletedNotification<IContent>>,
+        INotificationHandler<MovedNotification<IContent>>
     {
         public override string Group => uSyncConstants.Groups.Content;
 

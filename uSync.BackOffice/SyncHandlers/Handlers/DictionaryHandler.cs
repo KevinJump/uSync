@@ -6,9 +6,11 @@ using System.Xml.Linq;
 using Microsoft.Extensions.Logging;
 
 using Umbraco.Cms.Core.Cache;
+using Umbraco.Cms.Core.Events;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Models.Entities;
 using Umbraco.Cms.Core.Services;
+using Umbraco.Cms.Core.Services.Notifications;
 using Umbraco.Cms.Core.Strings;
 using Umbraco.Extensions;
 
@@ -23,7 +25,9 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("dictionaryHandler", "Dictionary", "Dictionary", uSyncConstants.Priorites.DictionaryItems
         , Icon = "icon-book-alt usync-addon-icon", EntityType = UdiEntityType.DictionaryItem)]
-    public class DictionaryHandler : SyncHandlerLevelBase<IDictionaryItem, ILocalizationService>, ISyncHandler
+    public class DictionaryHandler : SyncHandlerLevelBase<IDictionaryItem, ILocalizationService>, ISyncHandler,
+        INotificationHandler<SavedNotification<IDictionaryItem>>,
+        INotificationHandler<DeletedNotification<IDictionaryItem>>
     {
         public override string Group => uSyncConstants.Groups.Content;
 

@@ -3,6 +3,7 @@
 using Microsoft.Extensions.Logging;
 
 using Umbraco.Cms.Core.Cache;
+using Umbraco.Cms.Core.Events;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Models.Entities;
 using Umbraco.Cms.Core.Services;
@@ -18,7 +19,11 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("mediaHandler", "Media", "Media", uSyncConstants.Priorites.Media,
         Icon = "icon-picture usync-addon-icon", IsTwoPass = true, EntityType = UdiEntityType.Media)]
-    public class MediaHandler : ContentHandlerBase<IMedia, IMediaService>, ISyncHandler
+    public class MediaHandler : ContentHandlerBase<IMedia, IMediaService>, ISyncHandler,
+        INotificationHandler<SavedNotification<IMedia>>,
+        INotificationHandler<DeletedNotification<IMedia>>,
+        INotificationHandler<MovedNotification<IMedia>>
+
     {
         public override string Group => uSyncConstants.Groups.Content;
 

@@ -5,6 +5,7 @@ using System.Xml.Linq;
 using Microsoft.Extensions.Logging;
 
 using Umbraco.Cms.Core.Cache;
+using Umbraco.Cms.Core.Events;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Strings;
@@ -22,7 +23,9 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             "RelationTypes", uSyncConstants.Priorites.RelationTypes,
             Icon = "icon-traffic usync-addon-icon",
             EntityType = UdiEntityType.RelationType, IsTwoPass = false)]
-    public class RelationTypeHandler : SyncHandlerBase<IRelationType, IRelationService>, ISyncHandler
+    public class RelationTypeHandler : SyncHandlerBase<IRelationType, IRelationService>, ISyncHandler,
+        INotificationHandler<SavedNotification<IRelationType>>,
+        INotificationHandler<DeletedNotification<IRelationType>>        
     {
         private readonly IRelationService relationService;
 

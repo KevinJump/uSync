@@ -4,6 +4,7 @@ using System.Linq;
 using Microsoft.Extensions.Logging;
 
 using Umbraco.Cms.Core.Cache;
+using Umbraco.Cms.Core.Events;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Models.Entities;
 using Umbraco.Cms.Core.Services;
@@ -18,7 +19,9 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("domainHandler", "Domains", "Domains", uSyncConstants.Priorites.DomainSettings
         , Icon = "icon-home usync-addon-icon", EntityType = "domain")]
-    public class DomainHandler : SyncHandlerBase<IDomain, IDomainService>, ISyncHandler
+    public class DomainHandler : SyncHandlerBase<IDomain, IDomainService>, ISyncHandler,
+        INotificationHandler<SavedNotification<IDomain>>,
+        INotificationHandler<DeletedNotification<IDomain>>
     {
         public override string Group => uSyncConstants.Groups.Content;
 

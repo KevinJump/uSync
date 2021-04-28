@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Umbraco.Cms.Core.DependencyInjection;
 using Umbraco.Cms.Core.Events;
 using Umbraco.Cms.Core.Models;
+using Umbraco.Cms.Core.Services.Notifications;
 using Umbraco.Cms.Infrastructure.WebAssets;
 using Umbraco.Cms.Web.Common.ApplicationBuilder;
 using Umbraco.Extensions;
@@ -110,38 +111,58 @@ namespace uSync.BackOffice
         internal static void AddHandlerNotifications(this IUmbracoBuilder builder)
         {
 
-            // TODO: we need to register all the notifications in the SyncHandlers - not hard wire them here.
-            builder.AddNotificationHandler<ContentTypeSavedNotification, ContentTypeHandler>();
-            builder.AddNotificationHandler<ContentTypeDeletedNotification, ContentTypeHandler>();
-            builder.AddNotificationHandler<ContentTypeMovedNotification, ContentTypeHandler>();
-            builder.AddNotificationHandler<EntityContainerSavedNotification, ContentTypeHandler>();
+            // TODO: Would be nice if we could just register all the notifications in the handlers
 
             builder.AddNotificationHandler<DataTypeSavedNotification, DataTypeHandler>();
             builder.AddNotificationHandler<DataTypeDeletedNotification, DataTypeHandler>();
             builder.AddNotificationHandler<DataTypeMovedNotification, DataTypeHandler>();
             builder.AddNotificationHandler<EntityContainerSavedNotification, DataTypeHandler>();
 
+            builder.AddNotificationHandler<ContentTypeSavedNotification, ContentTypeHandler>();
+            builder.AddNotificationHandler<ContentTypeDeletedNotification, ContentTypeHandler>();
+            builder.AddNotificationHandler<ContentTypeMovedNotification, ContentTypeHandler>();
+            builder.AddNotificationHandler<EntityContainerSavedNotification, ContentTypeHandler>();
+
             builder.AddNotificationHandler<MediaTypeSavedNotification, MediaTypeHandler>();
             builder.AddNotificationHandler<MediaTypeDeletedNotification, MediaTypeHandler>();
             builder.AddNotificationHandler<MediaTypeMovedNotification, MediaTypeHandler>();
-            builder.AddNotificationHandler<EntityContainerSavedNotification, ContentTypeHandler>();
+            builder.AddNotificationHandler<EntityContainerSavedNotification, MediaTypeHandler>();
 
             builder.AddNotificationHandler<MemberTypeSavedNotification, MemberTypeHandler>();
             builder.AddNotificationHandler<MemberTypeSavedNotification, MemberTypeHandler>();
             builder.AddNotificationHandler<MemberTypeMovedNotification, MemberTypeHandler>();
 
-            // todo . these don't appear to be ready to fire yet.
+            builder.AddNotificationHandler<LanguageSavingNotification, LanguageHandler>();
+            builder.AddNotificationHandler<LanguageSavedNotification, LanguageHandler>();
+            builder.AddNotificationHandler<LanguageDeletedNotification, LanguageHandler>();
 
-            builder.AddNotificationHandler<SavingNotification<ILanguage>, LanguageHandler>();
-            builder.AddNotificationHandler<SavedNotification<ILanguage>, LanguageHandler>();
-            builder.AddNotificationHandler<DeletedNotification<ILanguage>, LanguageHandler>();
+            builder.AddNotificationHandler<MacroSavedNotification, MacroHandler>();
+            builder.AddNotificationHandler<MacroDeletedNotification, MacroHandler>();
 
-            builder.AddNotificationHandler<SavedNotification<IMacro>, MacroHandler>();
-            builder.AddNotificationHandler<DeletedNotification<IMacro>, MacroHandler>();
+            builder.AddNotificationHandler<TemplateSavedNotification, TemplateHandler>();
+            builder.AddNotificationHandler<TemplateDeletedNotification, TemplateHandler>();
 
-            builder.AddNotificationHandler<SavedNotification<ITemplate>, TemplateHandler>();
-            builder.AddNotificationHandler<DeletedNotification<ITemplate>, TemplateHandler>();
-            builder.AddNotificationHandler<MovedNotification<ITemplate>, TemplateHandler>();
+            // content ones
+            builder.AddNotificationHandler<ContentSavedNotification, ContentHandler>();
+            builder.AddNotificationHandler<ContentDeletedNotification, ContentHandler>();
+            builder.AddNotificationHandler<ContentMovedNotification, ContentHandler>();
+
+            builder.AddNotificationHandler<MediaSavedNotification, MediaHandler>();
+            builder.AddNotificationHandler<MediaDeletedNotification, MediaHandler>();
+            builder.AddNotificationHandler<MediaMovedNotification, MediaHandler>();
+
+            builder.AddNotificationHandler<DomainSavedNotification, DomainHandler>();
+            builder.AddNotificationHandler<DomainDeletedNotification, DomainHandler>();
+
+            builder.AddNotificationHandler<DictionaryItemSavedNotification, DictionaryHandler>();
+            builder.AddNotificationHandler<DictionaryItemDeletedNotification, DictionaryHandler>();
+
+            builder.AddNotificationHandler<RelationTypeSavedNotification, RelationTypeHandler>();
+            builder.AddNotificationHandler<RelationTypeDeletedNotification, RelationTypeHandler>();
+
+            // builder.AddNotificationHandler<ContentSavedBlueprintNotification, ContentHandler>();
+            // builder.AddNotificationHandler<ContentDeletedBlueprintNotification, ContentHandler>();
+
         }
     }
 }
