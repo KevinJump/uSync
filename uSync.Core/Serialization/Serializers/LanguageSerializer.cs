@@ -223,7 +223,7 @@ namespace uSync.Core.Serialization.Serializers
 
         protected override XElement CleanseNode(XElement node)
         {
-            node.Attribute("Key").Value = "";
+            node.SetAttributeValue("Key", "");
             return node;
         }
 
