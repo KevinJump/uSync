@@ -1,7 +1,7 @@
 name: core-nightly-package
 
 env:
-  OUTDIR: ./output
+  OUTDIR: .\output
   CONFIG: Release
   RELEASE: 'beta002'
 
@@ -19,16 +19,11 @@ jobs:
       with:
         ref: core/main
 
-    - name: Get Date
-      id: date
-      run: echo "::set-output name=date::$(date +'%Y%m%d')"
-      shell: bash
-
     - name: Set Release Suffix
       run: echo "SUFFIX=$SUFFIX" >> $GITHUB_ENV
       shell: bash
       env:
-        SUFFIX: ${{env.RELEASE}}.${{steps.date.outputs.date}}.${{github.run_number}}
+        SUFFIX: ${{env.RELEASE}}.${{github.run_number}}
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
@@ -54,4 +49,4 @@ jobs:
       run: dotnet pack .\uSync.BackOffice\uSync.BackOffice.csproj -c ${{env.CONFIG}} -o ${{env.OUTDIR}} --version-suffix ${{env.SUFFIX}} /p:ContinuousIntegrationBuild=true --no-restore
 
     - name: publish packages to git
-      run: dotnet nuget push ${{env.OUTDIR}}/*.nupkg --skip-duplicate
+      run: dotnet nuget push ${{env.OUTDIR}}\*.nupkg --skip-duplicate
