@@ -39,8 +39,9 @@ namespace uSync.BackOffice.Services
 
         public string GetAbsPath(string path)
         {
-            if (Path.IsPathFullyQualified(path)) return CleanLocalPath(path);
-            return CleanLocalPath(hostEnvironment.MapPathContentRoot(path.TrimStart('/')));
+            var trimmedPath = path.TrimStart('/');
+            if (Path.IsPathFullyQualified(trimmedPath)) return CleanLocalPath(trimmedPath);
+            return CleanLocalPath(hostEnvironment.MapPathContentRoot(trimmedPath));
         }
 
         /// <summary>
