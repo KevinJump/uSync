@@ -4,6 +4,7 @@ env:
   OUTDIR: .\output
   CONFIG: Release
   RELEASE: 'beta002'
+  DOTNET_NOLOGO: true
 
 on: [workflow_dispatch]
 # schedule:
@@ -24,9 +25,6 @@ jobs:
       shell: bash
       env:
         SUFFIX: ${{env.RELEASE}}.${{github.run_number}}
-
-    - name: Setup NuGet.exe 
-      uses: NuGet/setup-nuget@v1.0.5
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
@@ -51,5 +49,5 @@ jobs:
     - name: Package BackOffice
       run: dotnet pack .\uSync.BackOffice\uSync.BackOffice.csproj -c ${{env.CONFIG}} -o ${{env.OUTDIR}} --version-suffix ${{env.SUFFIX}} /p:ContinuousIntegrationBuild=true --no-restore
 
-    - name: publish packages to git
-      run: dotnet nuget push ${{env.OUTDIR}}\*.nupkg -k ${{secrets.NUGET_KEY}} --skip-duplicate
+    - name: publish packages to nightly feed
+      run: dotnet nuget push ${{env.OUTDIR}}\*.nupkg --skip-duplicate
