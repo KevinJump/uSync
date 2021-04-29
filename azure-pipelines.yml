@@ -1,49 +1,24 @@
-# uSync Package Build
-# creates the uSync nuget packages, pushes them to a public devops feed
-
 trigger:
-- v8/8.7-main
-
-pool:
-  name: Default
-  demands:
-  - msbuild
-  - visualstudio
-
-variables:
-  solution: '**/*.sln'
-  buildPlatform: 'Any CPU'
-  buildConfiguration: 'PackageOnlyBuild'
-  packageVersion: '8.9.0-alpha-$(Build.BuildId)0'
+ branches:
+   include:
+     - main/core
 
 steps:
-- task: NuGetToolInstaller@1
-
-- task: NuGetCommand@2
+- task: DotNetCoreCLI@2
   inputs:
-    restoreSolution: '$(solution)'
+    command: 'restore'
 
-- task: VSBuild@1
+- task: DotNetCoreCLI@2
   inputs:
-    solution: '$(solution)'
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
-
-- task: NuGetCommand@2
-  displayName: 'Creating NuGet Packages $(packageVersion)'
+    command: 'build'
+- task: DotNetCoreCLI@2
   inputs:
-    command: 'pack'
-    packagesToPack: '**/*.nuspec'
-    versioningScheme: 'byEnvVar'
-    versionEnvVar: 'packageVersion'
-    buildProperties: 'depends=$(packageVersion)'
-
+    command: 'test'
+  
 - task: NuGetCommand@2
-  displayName: 'Pushing to the public nightly feed'
   inputs:
     command: 'push'
-    packagesToPush: '$(Build.ArtifactStagingDirectory)/**/uSync*.nupkg'
+    packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
     nuGetFeedType: 'internal'
-    publishVstsFeed: 'b5f11e6f-5f5f-4e7f-858d-ec234c2e8e65/9e2b6c0a-55ae-49ff-8c70-ec6e80934adc'
+    publishVstsFeed: 'b5f11e6f-5f5f-4e7f-858d-ec234c2e8e65/f2b5a7a4-ac8f-4f88-a080-41ad3831c4ee'
     allowPackageConflicts: true
-    verbosityPush: Normal
