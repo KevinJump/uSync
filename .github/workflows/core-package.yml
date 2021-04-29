@@ -25,13 +25,16 @@ jobs:
       env:
         SUFFIX: ${{env.RELEASE}}.${{github.run_number}}
 
+    - name: Setup NuGet.exe 
+      uses: NuGet/setup-nuget@v1.0.5
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 5.0.x
-        source-url: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
+        source-url: https://pkgs.dev.azure.com/jumoo/Public/_packaging/nightly/nuget/v3/index.json
       env:
-        NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        NUGET_AUTH_TOKEN: ${{secrets.NUGET_KEY}}
 
     - name: Restore dependencies
       run: dotnet restore --noLogo
@@ -49,4 +52,4 @@ jobs:
       run: dotnet pack .\uSync.BackOffice\uSync.BackOffice.csproj -c ${{env.CONFIG}} -o ${{env.OUTDIR}} --version-suffix ${{env.SUFFIX}} /p:ContinuousIntegrationBuild=true --no-restore
 
     - name: publish packages to git
-      run: dotnet nuget push ${{env.OUTDIR}}\*.nupkg -k ${{secrets.GITHUB_TOKEN}} --skip-duplicate
+      run: dotnet nuget push ${{env.OUTDIR}}\*.nupkg -k ${{secrets.NUGET_KEY}} --skip-duplicate
