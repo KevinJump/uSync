@@ -11,7 +11,7 @@
     "~/app_plugins/usync/settings/expansion.controller.js",
     "~/app_plugins/usync/settings/usync.controller.js",
 
-    "~/app_plugins/usync/changeDialog.controller.js",
+    "~/app_plugins/usync/changedialog.controller.js",
     "~/app_plugins/usync/components/usync.reportview.component.js",
     "~/app_plugins/usync/components/usync.progressview.component.js"
   ],
