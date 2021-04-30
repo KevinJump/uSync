@@ -85,7 +85,7 @@ namespace uSync.BackOffice
             switch (action)
             {
                 case HandlerActions.Export:
-                    WriteVersionFile(_uSyncConfig.Settings.RootFolder);
+                    WriteVersionFile(_uSyncConfig.GetRootFolder());
                     _mutexService.FireBulkStarting(new uSyncExportStartingNotification());
                     break;
                 case HandlerActions.Import:

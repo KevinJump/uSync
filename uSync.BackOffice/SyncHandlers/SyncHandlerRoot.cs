@@ -172,7 +172,7 @@ namespace uSync.BackOffice.SyncHandlers
         {
             var defaultSet = uSyncConfig.GetDefaultSetSettings();
             this.DefaultConfig = defaultSet.GetHandlerSettings(this.Alias);
-            rootFolder = uSyncConfig.Settings.RootFolder;
+            rootFolder = uSyncConfig.GetRootFolder();
         }
 
         #region Importing 

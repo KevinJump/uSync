@@ -47,7 +47,7 @@ namespace uSync.BackOffice.Controllers
                 {
                     Callbacks = hubClient.Callbacks(),
                     HandlerSet = uSyncConfig.Settings.DefaultSet,
-                    RootFolder = uSyncConfig.Settings.RootFolder
+                    RootFolder = uSyncConfig.GetRootFolder()
                 });
 
             return new SyncActionResult(actions);
@@ -69,7 +69,7 @@ namespace uSync.BackOffice.Controllers
             {
                 Callbacks = hubClient.Callbacks(),
                 HandlerSet = uSyncConfig.Settings.DefaultSet,
-                RootFolder = uSyncConfig.Settings.RootFolder,
+                RootFolder = uSyncConfig.GetRootFolder(),
                 Flags = options.Force ? Core.Serialization.SerializerFlags.Force : Core.Serialization.SerializerFlags.None
             });
 
@@ -84,7 +84,7 @@ namespace uSync.BackOffice.Controllers
         {
             var hubClient = new HubClientService(hubContext, options.ClientId);
             var actions = uSyncService.PerformPostImport(
-                uSyncConfig.Settings.RootFolder, uSyncConfig.Settings.DefaultSet, options.Actions);
+                uSyncConfig.GetRootFolder(), uSyncConfig.Settings.DefaultSet, options.Actions);
 
             return new SyncActionResult(actions);
         }
@@ -98,7 +98,7 @@ namespace uSync.BackOffice.Controllers
         {
             try
             {
-                return uSyncService.CleanExportFolder(uSyncConfig.Settings.RootFolder);
+                return uSyncService.CleanExportFolder(uSyncConfig.GetRootFolder());
             }
             catch
             {
@@ -118,7 +118,7 @@ namespace uSync.BackOffice.Controllers
             {
                 Callbacks = hubClient.Callbacks(),
                 HandlerSet = uSyncConfig.Settings.DefaultSet,
-                RootFolder = uSyncConfig.Settings.RootFolder
+                RootFolder = uSyncConfig.GetRootFolder()
             });
 
             return new SyncActionResult(actions);

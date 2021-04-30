@@ -88,24 +88,24 @@ namespace uSync.BackOffice.Notifications
             {
                 using (var reference = _umbracoContextFactory.EnsureUmbracoContext())
                 {
-                    if (_uSyncConfig.Settings.ExportAtStartup || (_uSyncConfig.Settings.ExportOnSave && !_syncFileService.RootExists(_uSyncConfig.Settings.RootFolder)))
+                    if (_uSyncConfig.Settings.ExportAtStartup || (_uSyncConfig.Settings.ExportOnSave && !_syncFileService.RootExists(_uSyncConfig.GetRootFolder())))
                     {
                         _logger.LogInformation("uSync: Running export at startup");
-                        _uSyncService.Export(_uSyncConfig.Settings.RootFolder, default(SyncHandlerOptions));
+                        _uSyncService.Export(_uSyncConfig.GetRootFolder(), default(SyncHandlerOptions));
                     }
 
                     if (IsImportAtStatupEnabled())
                     {
                         _logger.LogInformation("uSync: Running Import at startup {group}", _uSyncConfig.Settings.ImportAtStartup);
 
-                        if (!HasStopFile(_uSyncConfig.Settings.RootFolder))
+                        if (!HasStopFile(_uSyncConfig.GetRootFolder()))
                         {
-                            _uSyncService.Import(_uSyncConfig.Settings.RootFolder, false, new SyncHandlerOptions
+                            _uSyncService.Import(_uSyncConfig.GetRootFolder(), false, new SyncHandlerOptions
                             {
                                 Group = _uSyncConfig.Settings.ImportAtStartup
                             });
 
-                            ProcessOnceFile(_uSyncConfig.Settings.RootFolder);
+                            ProcessOnceFile(_uSyncConfig.GetRootFolder());
                         }
                         else
                         {

@@ -10,6 +10,9 @@ namespace uSync.BackOffice.Configuration
     {
         public uSyncSettings Settings { get; private set; }
 
+        public string GetRootFolder()
+            => Settings.RootFolder.TrimStart('/');
+
         private IOptionsMonitor<uSyncHandlerSetSettings> setOptionsMonitor;
 
         public uSyncConfigService(

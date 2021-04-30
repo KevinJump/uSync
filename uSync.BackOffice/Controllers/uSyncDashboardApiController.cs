@@ -108,7 +108,10 @@ namespace uSync.BackOffice.Controllers
         public IEnumerable<uSyncAction> Report(uSyncOptions options)
         {
             var hubClient = new HubClientService(hubContext, options.ClientId);
-            return uSyncService.Report(uSyncConfig.Settings.RootFolder, new SyncHandlerOptions()
+
+
+
+            return uSyncService.Report(uSyncConfig.GetRootFolder(), new SyncHandlerOptions()
             {
                 Group = options.Group
             },
@@ -122,10 +125,10 @@ namespace uSync.BackOffice.Controllers
 
             if (options.Clean)
             {
-                uSyncService.CleanExportFolder(uSyncConfig.Settings.RootFolder);
+                uSyncService.CleanExportFolder(uSyncConfig.GetRootFolder());
             }
 
-            return uSyncService.Export(uSyncConfig.Settings.RootFolder, new SyncHandlerOptions()
+            return uSyncService.Export(uSyncConfig.GetRootFolder(), new SyncHandlerOptions()
             {
                 Group = options.Group
             },
@@ -136,7 +139,7 @@ namespace uSync.BackOffice.Controllers
         public IEnumerable<uSyncAction> Import(uSyncOptions options)
         {
             var hubClient = new HubClientService(hubContext, options.ClientId);
-            return uSyncService.Import(uSyncConfig.Settings.RootFolder, options.Force, new SyncHandlerOptions()
+            return uSyncService.Import(uSyncConfig.GetRootFolder(), options.Force, new SyncHandlerOptions()
             {
                 Group = options.Group
             },

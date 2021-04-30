@@ -34,7 +34,7 @@ namespace uSync.BackOffice.Services
             this.uSyncConfig = uSyncConfigService;
             this.hostEnvironment = hostEnvironment;
 
-            this.mappedRoot = GetAbsPath(uSyncConfig.Settings.RootFolder.TrimStart('/'));
+            this.mappedRoot = GetAbsPath(uSyncConfig.GetRootFolder());
         }
 
         public string GetAbsPath(string path)
