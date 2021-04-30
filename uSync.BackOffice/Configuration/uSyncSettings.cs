@@ -11,7 +11,7 @@ namespace uSync.BackOffice.Configuration
         /// <summary>
         ///  Location where all uSync files are saved by default
         /// </summary>
-        public string RootFolder { get; set; } = "/uSync/v9/";
+        public string RootFolder { get; set; } = "uSync/v9/";
 
         public string DefaultSet { get; set; } = uSync.Sets.DefaultSet;
 

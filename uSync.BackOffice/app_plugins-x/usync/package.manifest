@@ -1,0 +1,22 @@
+{
+  "javascript": [
+
+    "~/app_plugins/usync/usync_900.js",
+
+    "~/app_plugins/usync/usync.service.js",
+    "~/app_plugins/usync/usync.hub.js",
+
+    "~/app_plugins/usync/backoffice/usync/usync.dashboard.controller.js",
+    "~/app_plugins/usync/settings/settings.controller.js",
+    "~/app_plugins/usync/settings/expansion.controller.js",
+    "~/app_plugins/usync/settings/usync.controller.js",
+
+    "~/app_plugins/usync/changeDialog.controller.js",
+    "~/app_plugins/usync/components/usync.reportview.component.js",
+    "~/app_plugins/usync/components/usync.progressview.component.js"
+  ],
+  "css": [
+    "~/app_plugins/usync/usync_900.css",
+    "~/app_plugins/usync/usync.css"
+  ]
+}

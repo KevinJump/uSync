@@ -34,14 +34,13 @@ namespace uSync.BackOffice.Services
             this.uSyncConfig = uSyncConfigService;
             this.hostEnvironment = hostEnvironment;
 
-            this.mappedRoot = GetAbsPath(uSyncConfig.Settings.RootFolder);
+            this.mappedRoot = GetAbsPath(uSyncConfig.Settings.RootFolder.TrimStart('/'));
         }
 
         public string GetAbsPath(string path)
         {
-            var trimmedPath = path.TrimStart('/');
-            if (Path.IsPathFullyQualified(trimmedPath)) return CleanLocalPath(trimmedPath);
-            return CleanLocalPath(hostEnvironment.MapPathContentRoot(trimmedPath));
+            if (Path.IsPathFullyQualified(path)) return CleanLocalPath(path);
+            return CleanLocalPath(hostEnvironment.MapPathContentRoot(path.TrimStart('/')));
         }
 
         /// <summary>
