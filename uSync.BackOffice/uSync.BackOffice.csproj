@@ -49,7 +49,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Content Include="app_plugins\usync\**\*.*">
+		<Content Include="App_Plugins\usync\**\*.*">
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 			<CopyToPublishDirectory>Always</CopyToPublishDirectory>
 		</Content>

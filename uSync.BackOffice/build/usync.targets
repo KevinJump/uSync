@@ -1,7 +1,7 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
     <PropertyGroup>
-        <uSyncPackageContentFilesPath>$(MSBuildThisFileDirectory)..\app_plugins\usync\**\*.*</uSyncPackageContentFilesPath>
+        <uSyncPackageContentFilesPath>$(MSBuildThisFileDirectory)..\App_Plugins\usync\**\*.*</uSyncPackageContentFilesPath>
     </PropertyGroup>
 
     <Target Name="CopyuSyncPackageAssets" BeforeTargets="Build">
@@ -11,14 +11,14 @@
         <Message Text="Copying uSync Package files: $(uSyncPackageContentFilesPath) - #@(uSyncPackageContentFiles->Count()) files"  Importance="high" />
         <Copy
             SourceFiles="@(uSyncPackageContentFiles)"
-            DestinationFiles="@(uSyncPackageContentFiles->'$(MSBuildProjectDirectory)\app_plugins\usync\%(RecursiveDir)%(Filename)%(Extension)')"
+            DestinationFiles="@(uSyncPackageContentFiles->'$(MSBuildProjectDirectory)\App_Plugins\usync\%(RecursiveDir)%(Filename)%(Extension)')"
             SkipUnchangedFiles="true" />
 
     </Target>
 
     <Target Name="ClearuSyncPackageAssets" BeforeTargets="Clean">
         <ItemGroup>
-            <uSyncPackageDir Include="$(MSBuildProjectDirectory)\app_plugins\usync\" />
+            <uSyncPackageDir Include="$(MSBuildProjectDirectory)\App_Plugins\usync\" />
         </ItemGroup>
         <Message Text="Clear old uSync Package data"  Importance="high" />
         <RemoveDir Directories="@(uSyncPackageDir)"  />
