@@ -55,7 +55,7 @@
         }
 
         function getHandlerSetSettings(set) {
-            return $http.get(serviceRoot + 'GetHandlerSetSettings/' + set);
+            return $http.get(serviceRoot + 'GetHandlerSetSettings?id=' + set);
         }
 
         function getHandlers() {

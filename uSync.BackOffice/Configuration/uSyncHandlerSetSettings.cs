@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace uSync.BackOffice.Configuration
 {
@@ -6,8 +7,8 @@ namespace uSync.BackOffice.Configuration
     {
         public bool Enabled { get; set; } = true;
 
-        public IEnumerable<string> DisabledHandlers { get; set; } = new List<string>();
-
+        
+        public string[] DisabledHandlers { get; set; } = Array.Empty<string>();
         /// <summary>
         ///  default settings for all handlers
         /// </summary>
