@@ -2,7 +2,7 @@
 const { watch, src, dest } = require('gulp');
 
 const sourceFolders = [
-    'uSync.BackOffice/App_Plugins/'
+    'uSync.BackOffice.Assets/App_Plugins/'
 ];
 
 const destination = 'uSync.Site/App_Plugins/';

@@ -1,12 +1,12 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
+  <PropertyGroup>
 		<TargetFramework>net5.0</TargetFramework>
 		<ContentTargetFolders>.</ContentTargetFolders>
 
-		<Product>uSync.BackOffice</Product>
-		<PackageId>uSync.BackOffice</PackageId>
-		<Title>uSync.BackOffice</Title>
+		<Product>uSync</Product>
+		<PackageId>uSync</PackageId>
+		<Title>uSync</Title>
 
 		<VersionPrefix>9.0.0</VersionPrefix>
 		<Authors>Kevin Jump</Authors>
@@ -29,24 +29,20 @@
 		<IncludeSymbols>true</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 
+		<IncludeBuildOutput>false</IncludeBuildOutput>
+
 	</PropertyGroup>
 
-	<ItemGroup>
-		<PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="9.0.0-beta001" />
-		<PackageReference Include="Umbraco.Cms.Web.Website" Version="9.0.0-beta001" />
-		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+  <ItemGroup>
+    <ProjectReference Include="..\uSync.Backoffice.Assets\uSync.Backoffice.Assets.csproj" />
+    <ProjectReference Include="..\uSync.BackOffice\uSync.BackOffice.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\uSync.Community.Contrib\uSync.Community.Contrib.csproj" />
-		<ProjectReference Include="..\uSync.Core\uSync.Core.csproj" />
+		<None Include="readme.txt">
+			<Pack>true</Pack>
+			<PackagePath></PackagePath>
+		</None>
 	</ItemGroup>
-
-	<ItemGroup>
-		<Compile Remove="Commands\**" />
-		<EmbeddedResource Remove="Commands\**" />
-		<None Remove="Commands\**" />
-	</ItemGroup>
-
 
 </Project>
