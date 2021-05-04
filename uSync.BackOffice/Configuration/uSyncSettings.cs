@@ -28,7 +28,7 @@ namespace uSync.BackOffice.Configuration
         /// <summary>
         ///  Export when an item is saved in Umbraco
         /// </summary>
-        public bool ExportOnSave { get; set; } = true;
+        public string ExportOnSave { get; set; } = "All";
 
         /// <summary>
         ///  Debug reports (creates an export into a temp folder for comparison)

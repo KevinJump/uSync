@@ -172,6 +172,10 @@ namespace uSync.BackOffice.SyncHandlers
         {
             var defaultSet = uSyncConfig.GetDefaultSetSettings();
             this.DefaultConfig = defaultSet.GetHandlerSettings(this.Alias);
+
+            if (defaultSet.DisabledHandlers.InvariantContains(this.Alias))
+                this.DefaultConfig.Enabled = false; 
+
             rootFolder = uSyncConfig.GetRootFolder();
         }
 
@@ -1063,7 +1067,15 @@ namespace uSync.BackOffice.SyncHandlers
         private bool ShouldProcessEvent()
         {
             if (_mutexService.IsPaused) return false;
-            return HandlerActions.Save.IsValidAction(DefaultConfig.Actions);
+            if (!DefaultConfig.Enabled) return false;
+
+            if (uSyncConfig.Settings.ExportOnSave.InvariantContains("All")|| 
+                uSyncConfig.Settings.ExportOnSave.InvariantContains(this.Group)) 
+            {
+                return HandlerActions.Save.IsValidAction(DefaultConfig.Actions);
+            }
+
+            return false;
         }
 
         public virtual void Handle(DeletedNotification<TObject> notification)

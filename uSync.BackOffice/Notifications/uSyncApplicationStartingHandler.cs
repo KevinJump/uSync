@@ -88,10 +88,16 @@ namespace uSync.BackOffice.Notifications
             {
                 using (var reference = _umbracoContextFactory.EnsureUmbracoContext())
                 {
-                    if (_uSyncConfig.Settings.ExportAtStartup || (_uSyncConfig.Settings.ExportOnSave && !_syncFileService.RootExists(_uSyncConfig.GetRootFolder())))
+                    if (_uSyncConfig.Settings.ExportAtStartup || (ExportOnSaveOn() && !_syncFileService.RootExists(_uSyncConfig.GetRootFolder())))
                     {
+
+                        var options = new SyncHandlerOptions();
+                        if (ExportOnSaveOn()){
+                            options.Group = _uSyncConfig.Settings.ExportOnSave;
+                        }
+                        
                         _logger.LogInformation("uSync: Running export at startup");
-                        _uSyncService.Export(_uSyncConfig.GetRootFolder(), default(SyncHandlerOptions));
+                        _uSyncService.Export(_uSyncConfig.GetRootFolder(), options);
                     }
 
                     if (IsImportAtStatupEnabled())
@@ -112,12 +118,6 @@ namespace uSync.BackOffice.Notifications
                             _logger.LogInformation("Startup Import blocked by usync.stop file");
                         }
                     }
-
-                    if (_uSyncConfig.Settings.ExportOnSave)
-                    {
-                        // This is not done here any more - notification handlers are always setup, and 
-                        // when they fire we check to see if ExportOnSave is set then.
-                    }
                 }
             }
             catch (Exception ex)
@@ -130,6 +130,13 @@ namespace uSync.BackOffice.Notifications
                 _logger.LogInformation("uSync: Startup Complete {elapsed}ms", sw.ElapsedMilliseconds);
             }
 
+        }
+
+        /// <summary>
+        ///  is the export on save feature on (not blank or none)
+        /// </summary>
+        private bool ExportOnSaveOn(){
+            return (!string.IsNullOrWhiteSpace(_uSyncConfig.Settings.ExportOnSave) && !_uSyncConfig.Settings.ExportOnSave.InvariantEquals("none"));
         }
 
         /// <summary>
