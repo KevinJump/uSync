@@ -30,6 +30,8 @@ namespace uSync.BackOffice.SyncHandlers
             this.settings = options.CurrentValue;
         }
 
+        public string DefaultSet => this.settings.DefaultSet;
+
         #region All getters (regardless of set or config)
 
         public IEnumerable<ISyncHandler> GetAll()

@@ -1,18 +1,23 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
+using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.DependencyInjection;
 using Umbraco.Cms.Core.Events;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Services.Notifications;
 using Umbraco.Cms.Infrastructure.WebAssets;
+using Umbraco.Cms.Web.BackOffice.Authorization;
 using Umbraco.Cms.Web.Common.ApplicationBuilder;
 using Umbraco.Extensions;
 
+using uSync.BackOffice.Authorization;
 using uSync.BackOffice.Cache;
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Hubs;
@@ -52,14 +57,8 @@ namespace uSync.BackOffice
             builder.AdduSyncCore();
 
 
-            // TODO: we need something here. that lets people add serializers before we then load 
-            // the handlers - events/composers won't do, if we are letting people add this as 
-            // part of the pipeline. we might need to dynamically load serializers - which is 
-            // a pain because they are generic. and then how do we let people unload them ?
-
             // Setup the back office.
             builder.Services.AddUnique<uSyncEventService>();
-            
             builder.Services.AddUnique<uSyncConfigService>();
             builder.Services.AddUnique<SyncFileService>();
 
@@ -78,6 +77,8 @@ namespace uSync.BackOffice
             builder.Services.AddUnique<uSyncHubRoutes>();
             builder.Services.AddSignalR();
             builder.Services.AdduSyncSignalR();
+
+            builder.Services.AddAuthorization(o => CreatePolicies(o));
 
             return builder;
         }
@@ -162,7 +163,17 @@ namespace uSync.BackOffice
 
             // builder.AddNotificationHandler<ContentSavedBlueprintNotification, ContentHandler>();
             // builder.AddNotificationHandler<ContentDeletedBlueprintNotification, ContentHandler>();
+        }
 
+
+        private static void CreatePolicies(AuthorizationOptions options, 
+            string backofficeAuthenticationScheme = Constants.Security.BackOfficeAuthenticationType)
+        {
+            options.AddPolicy(SyncAuthorizationPolicies.TreeAccessuSync, policy =>
+            {
+                policy.AuthenticationSchemes.Add(backofficeAuthenticationScheme);
+                policy.Requirements.Add(new TreeRequirement(uSync.Trees.uSync));
+            });
         }
     }
 }

@@ -72,6 +72,8 @@
             public const string NewPropertiesOnly = "NewPropertiesOnly";
             public const bool NewPropertiesOnly_Default = false;
         }
+
+        public const int DependencyCountMax = 204800;
     }
 
 
