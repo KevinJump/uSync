@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 
-using Umbraco.Cms.Core.Events;
+using Umbraco.Cms.Core.Notifications;
 
 namespace uSync.BackOffice
 {

@@ -7,7 +7,7 @@ using Umbraco.Cms.Core.Configuration.Models;
 using Umbraco.Cms.Core.Events;
 using Umbraco.Cms.Core.Hosting;
 using Umbraco.Cms.Core.Routing;
-using Umbraco.Cms.Infrastructure.WebAssets;
+using Umbraco.Cms.Core.Notifications;
 using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;
@@ -16,7 +16,7 @@ using uSync.BackOffice.Hubs;
 
 namespace uSync.BackOffice.Notifications
 {
-    public class uSyncServerVariablesHandler : INotificationHandler<ServerVariablesParsing>
+    public class uSyncServerVariablesHandler : INotificationHandler<ServerVariablesParsingNotification>
     {
         private uSyncConfigService uSyncConfig;
 
@@ -42,7 +42,7 @@ namespace uSync.BackOffice.Notifications
 
         }
 
-        public void Handle(ServerVariablesParsing notification)
+        public void Handle(ServerVariablesParsingNotification notification)
         {
             notification.ServerVariables.Add("uSync", new Dictionary<string, object>
             {

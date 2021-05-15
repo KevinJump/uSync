@@ -1,18 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
+using System;
+using System.Linq;
+
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.DependencyInjection;
-using Umbraco.Cms.Core.Events;
-using Umbraco.Cms.Core.Models;
-using Umbraco.Cms.Core.Services.Notifications;
-using Umbraco.Cms.Infrastructure.WebAssets;
+using Umbraco.Cms.Core.Notifications;
 using Umbraco.Cms.Web.BackOffice.Authorization;
 using Umbraco.Cms.Web.Common.ApplicationBuilder;
 using Umbraco.Extensions;
@@ -70,8 +66,8 @@ namespace uSync.BackOffice
             builder.Services.AddUnique<CacheLifecycleManager>();
 
             // register for the notifications 
-            builder.AddNotificationHandler<ServerVariablesParsing, uSyncServerVariablesHandler>();
-            builder.AddNotificationHandler<UmbracoApplicationStarting, uSyncApplicationStartingHandler>();
+            builder.AddNotificationHandler<ServerVariablesParsingNotification, uSyncServerVariablesHandler>();
+            builder.AddNotificationHandler<UmbracoApplicationStartingNotification, uSyncApplicationStartingHandler>();
             builder.AddHandlerNotifications();
 
             builder.Services.AddUnique<uSyncHubRoutes>();
