@@ -16,9 +16,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		dist\build-package.ps1 = dist\build-package.ps1
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.Backoffice.Assets", "uSync.Backoffice.Assets\uSync.Backoffice.Assets.csproj", "{F112D331-4820-4F24-BDED-991C9A229292}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.Backoffice.StaticAssets", "uSync.Backoffice.Assets\uSync.Backoffice.StaticAssets.csproj", "{F112D331-4820-4F24-BDED-991C9A229292}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "uSync", "uSync\uSync.csproj", "{F499A436-FA33-4B49-8900-2EDBCA6432D4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync", "uSync\uSync.csproj", "{F499A436-FA33-4B49-8900-2EDBCA6432D4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

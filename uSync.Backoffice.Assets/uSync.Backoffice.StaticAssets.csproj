@@ -4,9 +4,9 @@
     <TargetFramework>net5.0</TargetFramework>
 		<ContentTargetFolders>.</ContentTargetFolders>
 
-		<Product>uSync.BackOffice.Assets</Product>
-		<PackageId>uSync.BackOffice.Assets</PackageId>
-		<Title>uSync.BackOffice.Assets</Title>
+		<Product>uSync.BackOffice.StaticAssets</Product>
+		<PackageId>uSync.BackOffice.StaticAssets</PackageId>
+		<Title>uSync.BackOffice.StaticAssets</Title>
 
 		<VersionPrefix>9.0.0</VersionPrefix>
 		<Authors>Kevin Jump</Authors>
@@ -20,14 +20,13 @@
 		<RepositoryUrl>https://github.com/KevinJump/uSync8/tree/core/main</RepositoryUrl>
 
 		<Copyright>Jumoo @ 2013-2021</Copyright>
-		<Description>Core serializers for uSync to read / write information to / from Umbraco CMS.</Description>
+		<Description>uSync backoffice asset files</Description>
 		<PackageReleaseNotes>
 			9.0 - Dotnet core version
 		</PackageReleaseNotes>
 
 		<IncludeBuildOutput>false</IncludeBuildOutput>
-
-	</PropertyGroup>
+  </PropertyGroup>
 
 	<ItemGroup>
 		<Content Include="App_Plugins\usync\**\*.*">
