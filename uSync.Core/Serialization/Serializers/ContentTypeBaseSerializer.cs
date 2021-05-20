@@ -110,7 +110,7 @@ namespace uSync.Core.Serialization.Serializers
                 SerializeExtraProperties(propNode, item, property);
 
                 propNode.Add(new XElement("MandatoryMessage", property.MandatoryMessage));
-                propNode.Add(new XElement("ValidationExpMessage", property.ValidationRegExpMessage));
+                propNode.Add(new XElement("ValidationRegExpMessage", property.ValidationRegExpMessage));
                 propNode.Add(new XElement("LabelOnTop", property.LabelOnTop));
 
                 node.Add(propNode);
