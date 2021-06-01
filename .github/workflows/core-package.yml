@@ -1,9 +1,10 @@
 name: core-nightly-package
 
 env:
-  OUTPUT: ./output
+  OUTDIR: .\output
   CONFIG: Release
-  RELEASE: 'beta001'
+  RELEASE: 'beta002'
+  DOTNET_NOLOGO: true
 
 on: [workflow_dispatch]
 # schedule:
@@ -19,21 +20,19 @@ jobs:
       with:
         ref: core/main
 
-    - name: Get Date
-      id: date
-      run: echo "::set-output name=date::$(date +'%Y%m%d')"
-      shell: bash
-
     - name: Set Release Suffix
       run: echo "SUFFIX=$SUFFIX" >> $GITHUB_ENV
       shell: bash
       env:
-        SUFFIX: ${{env.RELEASE}}-${{steps.date.outputs.date}}.${{github.run_number}}
+        SUFFIX: ${{env.RELEASE}}.${{github.run_number}}
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 5.0.x
+        source-url: https://pkgs.dev.azure.com/jumoo/Public/_packaging/nightly/nuget/v3/index.json
+      env:
+        NUGET_AUTH_TOKEN: ${{secrets.NUGET_KEY}}
 
     - name: Restore dependencies
       run: dotnet restore --noLogo
@@ -45,7 +44,10 @@ jobs:
       run: dotnet test --no-build --verbosity normal
 
     - name: Package Core
-      run: dotnet pack \uSync.Core\uSync.Core.csproj -c ${{env.CONFIG}} -o ${{env.OUTDIR}} --version-suffix ${{env.SUFFIX}} /p:ContinuousIntegrationBuild=true 
+      run: dotnet pack .\uSync.Core\uSync.Core.csproj -c ${{env.CONFIG}} -o ${{env.OUTDIR}} --version-suffix ${{env.SUFFIX}} /p:ContinuousIntegrationBuild=true --no-restore
 
     - name: Package BackOffice
-      run: dotnet pack \uSync.BackOffice\uSync.BackOffice.csproj -c ${{env.CONFIG}} -o ${{env.OUTDIR}} --version-suffix ${{env.SUFFIX}} /p:ContinuousIntegrationBuild=true       
+      run: dotnet pack .\uSync.BackOffice\uSync.BackOffice.csproj -c ${{env.CONFIG}} -o ${{env.OUTDIR}} --version-suffix ${{env.SUFFIX}} /p:ContinuousIntegrationBuild=true --no-restore
+
+    - name: publish packages to nightly feed
+      run: dotnet nuget push ${{env.OUTDIR}}\*.nupkg --skip-duplicate
