@@ -234,7 +234,8 @@ namespace uSync8.ContentEdition.Serializers
 
                     if (validNode)
                     {
-                        valueNode.Add(new XCData(GetExportValue(GetPropertyValue(value), property.PropertyType, value.Culture, value.Segment)));
+                        var exportValueAttempt = GetExportValue(GetPropertyValue(value), property.PropertyType, value.Culture, value.Segment);
+                        valueNode.Add(new XCData(exportValueAttempt.Result));
                         propertyNode.Add(valueNode);
                     }
                 }
@@ -490,8 +491,10 @@ namespace uSync8.ContentEdition.Serializers
                             }
 
                             // get here ... set the value
-                            var itemValue = GetImportValue(propValue, current.PropertyType, culture, segment);
+                            var itemValueAttempt = GetImportValue(propValue, current.PropertyType, culture, segment);
                             var currentValue = item.GetValue(alias, culture, segment);
+
+                            var itemValue = itemValueAttempt.Result;
 
                             if (IsUpdatedValue(currentValue, itemValue))
                             {
@@ -503,6 +506,11 @@ namespace uSync8.ContentEdition.Serializers
 
                                 logger.Debug(serializerType, "Property {item} set {alias} value", item.Name, alias);
                                 logger.Verbose(serializerType, "{Id} Property [{alias}] : {itemValue}", item.Id, alias, itemValue);
+                            }
+
+                            if (!itemValueAttempt)
+                            {
+                                errors += $"Failed to Get Import value for {item.Id} Property [{alias}]<br/>";
                             }
                         }
                         catch (Exception ex)
@@ -569,28 +577,46 @@ namespace uSync8.ContentEdition.Serializers
 
         protected abstract uSyncChange HandleTrashedState(TObject item, bool trashed);
 
-        protected string GetExportValue(object value, PropertyType propertyType, string culture, string segment)
+        protected Attempt<string> GetExportValue(object value, PropertyType propertyType, string culture, string segment)
         {
             // this is where the mapping magic will happen. 
             // at the moment there are no value mappers, but if we need
             // them they plug in as ISyncMapper things
             logger.Verbose(serializerType, "Getting ExportValue [{PropertyEditorAlias}]", propertyType.PropertyEditorAlias);
 
-            var exportValue = syncMappers.GetExportValue(value, propertyType.PropertyEditorAlias);
-            logger.Verbose(serializerType, "Export Value {PropertyEditorAlias} {exportValue}", propertyType.PropertyEditorAlias, exportValue);
-            return exportValue;
+            try
+            {
+                var exportValue = syncMappers.GetExportValue(value, propertyType.PropertyEditorAlias);
+                logger.Verbose(serializerType, "Export Value {PropertyEditorAlias} {exportValue}", propertyType.PropertyEditorAlias, exportValue);
+                return Attempt.Succeed(exportValue);
+            }
+            catch(Exception ex)
+            {
+                // things can go wrong (e.g if the data is corrupt)
+                logger.Error(serializerType, ex, "Error Getting Export value {PropertyEditorAlias} {Value} - mapping may have not occured", propertyType.PropertyEditorAlias, value);
+                return Attempt.Fail(value.ToString());
+            }
         }
 
-        protected object GetImportValue(string value, PropertyType propertyType, string culture, string segment)
+        protected Attempt<object> GetImportValue(string value, PropertyType propertyType, string culture, string segment)
         {
             // this is where the mapping magic will happen. 
             // at the moment there are no value mappers, but if we need
             // them they plug in as ISyncMapper things
             logger.Verbose(serializerType, "Getting ImportValue [{PropertyEditorAlias}]", propertyType.PropertyEditorAlias);
 
-            var importValue = syncMappers.GetImportValue(value, propertyType.PropertyEditorAlias);
-            logger.Verbose(serializerType, "Import Value {PropertyEditorAlias} {importValue}", propertyType.PropertyEditorAlias, importValue);
-            return importValue;
+            try
+            {
+                var importValue = syncMappers.GetImportValue(value, propertyType.PropertyEditorAlias);
+                logger.Verbose(serializerType, "Import Value {PropertyEditorAlias} {importValue}", propertyType.PropertyEditorAlias, importValue);
+                return Attempt.Succeed(importValue);
+            }
+            catch(Exception ex)
+            {
+                // things can go wrong (e.g if the data is corrupt)
+                logger.Error(serializerType, ex, "Error Getting Import value {PropertyEditorAlias} {Value} - mapping may have not occured", propertyType.PropertyEditorAlias, value);
+                return Attempt.Fail<Object>(value);
+            }
         }
 
         /// <summary>
