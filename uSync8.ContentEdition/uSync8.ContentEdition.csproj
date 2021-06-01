@@ -81,6 +81,7 @@
     <Compile Include="Mapping\Mappers\GridMapper.cs" />
     <Compile Include="Mapping\Mappers\ImagePathMapper.cs" />
     <Compile Include="Mapping\Mappers\MacroMapper.cs" />
+    <Compile Include="Mapping\Mappers\MediaPicker3Mapper.cs" />
     <Compile Include="Mapping\Mappers\MultiUrlMapper.cs" />
     <Compile Include="Mapping\Mappers\NestedContentMapper.cs" />
     <Compile Include="Mapping\Mappers\RepeatableValueMapper.cs" />
