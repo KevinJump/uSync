@@ -60,6 +60,35 @@ namespace uSync8.ContentEdition.Mapping
         }
 
         /// <summary>
+        ///  Get the mapped export value
+        /// </summary>
+        public string GetExportValue(object value, SyncPropertyMapInfo propertyMapInfo)
+        {
+            if (value == null) return string.Empty;
+
+            var mappers = GetSyncMappers(propertyMapInfo.PropertyType.PropertyEditorAlias);
+            if (mappers.Any())
+            {
+                var mappedValue = value.ToString();
+                foreach (var mapper in mappers)
+                {
+                    if (mapper is ISyncMapperExtended extendedMapper)
+                    {
+                        mappedValue = extendedMapper.GetExportValue(mappedValue, propertyMapInfo);
+                    }
+                    else
+                    {
+                        mappedValue = mapper.GetExportValue(mappedValue, propertyMapInfo.PropertyType.PropertyEditorAlias);
+                    }
+                }
+
+                return mappedValue;
+            }
+
+            return GetSafeValue(value);
+        }
+
+        /// <summary>
         ///  Get the mapped import value
         /// </summary>
         public object GetImportValue(string value, string editorAlias)
@@ -73,6 +102,35 @@ namespace uSync8.ContentEdition.Mapping
                 foreach (var mapper in mappers)
                 {
                     mappedValue = mapper.GetImportValue(mappedValue, editorAlias);
+                }
+                return mappedValue;
+            }
+
+            return value;
+        }
+
+
+        /// <summary>
+        ///  Get the mapped import value
+        /// </summary>
+        public object GetImportValue(string value, SyncPropertyMapInfo propertyMapInfo)
+        {
+            if (string.IsNullOrWhiteSpace(value)) return null;
+
+            var mappers = GetSyncMappers(propertyMapInfo.PropertyType.PropertyEditorAlias);
+            if (mappers.Any())
+            {
+                var mappedValue = value;
+                foreach (var mapper in mappers)
+                {
+                    if (mapper is ISyncMapperExtended mapperExtended)
+                    {
+                        mappedValue = mapperExtended.GetImportValue(mappedValue, propertyMapInfo);
+                    }
+                    else
+                    {
+                        mappedValue = mapper.GetImportValue(mappedValue, propertyMapInfo.PropertyType.PropertyEditorAlias);
+                    }
                 }
                 return mappedValue;
             }

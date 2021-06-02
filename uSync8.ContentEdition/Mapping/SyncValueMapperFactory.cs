@@ -36,12 +36,28 @@ namespace uSync8.ContentEdition.Mapping
                     .GetExportValue(value, editorAlias);
         }
 
+        public static string GetExportValue(object value, SyncPropertyMapInfo propertyMapInfo)
+        {
+            return Current
+                    .Factory
+                    .GetInstance<SyncValueMapperCollection>()
+                    .GetExportValue(value, propertyMapInfo);
+        }
+
         public static object GetImportValue(string value, string editorAlias)
         {
             return Current
                     .Factory
                     .GetInstance<SyncValueMapperCollection>()
                     .GetImportValue(value, editorAlias);
+        }
+
+        public static object GetImportValue(string value, SyncPropertyMapInfo propertyMapInfo)
+        {
+            return Current
+                    .Factory
+                    .GetInstance<SyncValueMapperCollection>()
+                    .GetImportValue(value, propertyMapInfo);
         }
 
         public static IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)

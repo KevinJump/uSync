@@ -198,6 +198,8 @@ namespace uSync8.ContentEdition.Serializers
 
             var node = new XElement("Properties");
 
+            var contentTypeAlias = item.ContentType?.Alias;
+
             foreach (var property in item.Properties
                 .Where(x => !dontSerialize.InvariantContains(x.Alias))
                 .OrderBy(x => x.Alias))
@@ -234,7 +236,7 @@ namespace uSync8.ContentEdition.Serializers
 
                     if (validNode)
                     {
-                        var exportValueAttempt = GetExportValue(GetPropertyValue(value), property.PropertyType, value.Culture, value.Segment);
+                        var exportValueAttempt = GetExportValue(GetPropertyValue(value), contentTypeAlias, property.PropertyType, value.Culture, value.Segment);
                         valueNode.Add(new XCData(exportValueAttempt.Result));
                         propertyNode.Add(valueNode);
                     }
@@ -420,6 +422,8 @@ namespace uSync8.ContentEdition.Serializers
             if (properties == null || !properties.HasElements)
                 return Attempt.SucceedWithStatus(errors, changes); // new Exception("No Properties in the content node"));
 
+            var contentTypeAlias = item.ContentType?.Alias;
+
             foreach (var property in properties.Elements())
             {
                 var alias = property.Name.LocalName;
@@ -491,7 +495,7 @@ namespace uSync8.ContentEdition.Serializers
                             }
 
                             // get here ... set the value
-                            var itemValueAttempt = GetImportValue(propValue, current.PropertyType, culture, segment);
+                            var itemValueAttempt = GetImportValue(propValue, contentTypeAlias,  current.PropertyType, culture, segment);
                             var currentValue = item.GetValue(alias, culture, segment);
 
                             var itemValue = itemValueAttempt.Result;
@@ -577,7 +581,7 @@ namespace uSync8.ContentEdition.Serializers
 
         protected abstract uSyncChange HandleTrashedState(TObject item, bool trashed);
 
-        protected Attempt<string> GetExportValue(object value, PropertyType propertyType, string culture, string segment)
+        protected Attempt<string> GetExportValue(object value, string contentTypeAlias, PropertyType propertyType, string culture, string segment)
         {
             // this is where the mapping magic will happen. 
             // at the moment there are no value mappers, but if we need
@@ -586,7 +590,14 @@ namespace uSync8.ContentEdition.Serializers
 
             try
             {
-                var exportValue = syncMappers.GetExportValue(value, propertyType.PropertyEditorAlias);
+                var exportValue = syncMappers.GetExportValue(value, new SyncPropertyMapInfo
+                {
+                    PropertyType = propertyType,
+                    ContentTypeAlias = contentTypeAlias,
+                    Culture = culture,
+                    Segment = segment
+                });
+
                 logger.Verbose(serializerType, "Export Value {PropertyEditorAlias} {exportValue}", propertyType.PropertyEditorAlias, exportValue);
                 return Attempt.Succeed(exportValue);
             }
@@ -598,7 +609,7 @@ namespace uSync8.ContentEdition.Serializers
             }
         }
 
-        protected Attempt<object> GetImportValue(string value, PropertyType propertyType, string culture, string segment)
+        protected Attempt<object> GetImportValue(string value, string contentTypeAlias, PropertyType propertyType, string culture, string segment)
         {
             // this is where the mapping magic will happen. 
             // at the moment there are no value mappers, but if we need
@@ -607,7 +618,13 @@ namespace uSync8.ContentEdition.Serializers
 
             try
             {
-                var importValue = syncMappers.GetImportValue(value, propertyType.PropertyEditorAlias);
+                var importValue = syncMappers.GetImportValue(value, new SyncPropertyMapInfo
+                {
+                    PropertyType = propertyType,
+                    ContentTypeAlias = contentTypeAlias,
+                    Culture = culture,
+                    Segment = segment
+                });
                 logger.Verbose(serializerType, "Import Value {PropertyEditorAlias} {importValue}", propertyType.PropertyEditorAlias, importValue);
                 return Attempt.Succeed(importValue);
             }
