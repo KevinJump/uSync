@@ -137,10 +137,14 @@ namespace uSync8.ContentEdition.Mapping
             var stringValue = GetValueAs<string>(value);
             if (string.IsNullOrWhiteSpace(stringValue)) return null;
 
-            var jsonValue = JsonConvert.DeserializeObject<JObject>(stringValue);
-            if (jsonValue == null) return null;
+            var token = JToken.Parse(stringValue);
 
-            return jsonValue;
+            switch(token)
+            {
+                case JObject obj: return obj;
+                case JArray array: return array.FirstOrDefault().ToObject<JObject>();
+                default: return null;
+            }
         }
 
         protected IContentType GetDocType(JObject json, string alias)

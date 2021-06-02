@@ -30,10 +30,7 @@ namespace uSync8.ContentEdition.Mapping.Mappers
 
         public override string GetExportValue(object value, string editorAlias)
         {
-            var stringValue = GetValueAs<string>(value);
-            if (string.IsNullOrWhiteSpace(stringValue) || !stringValue.DetectIsJson()) return value.ToString();
-
-            var nestedJson = JsonConvert.DeserializeObject<JArray>(stringValue);
+            var nestedJson = GetItemArray(value);
             if (nestedJson == null || !nestedJson.Any()) return value.ToString();
 
             foreach (var item in nestedJson.Cast<JObject>())
@@ -49,11 +46,7 @@ namespace uSync8.ContentEdition.Mapping.Mappers
 
         public override IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)
         {
-            var stringValue = GetValueAs<string>(value);
-            if (string.IsNullOrWhiteSpace(stringValue) || !stringValue.DetectIsJson())
-                return Enumerable.Empty<uSyncDependency>();
-
-            var nestedJson = JsonConvert.DeserializeObject<JArray>(stringValue);
+            var nestedJson = GetItemArray(value);
             if (nestedJson == null || !nestedJson.Any())
                 return Enumerable.Empty<uSyncDependency>();
 
@@ -76,6 +69,21 @@ namespace uSync8.ContentEdition.Mapping.Mappers
             }
 
             return dependencies;
+        }
+
+        private JArray GetItemArray(object value)
+        {
+            var stringValue = GetValueAs<string>(value);
+            if (string.IsNullOrWhiteSpace(stringValue) || !stringValue.DetectIsJson())
+                return null;
+
+            var token = JToken.Parse(stringValue);
+            switch (token)
+            {
+                case JArray array: return array;
+                case JObject obj: return new JArray(obj);
+                default: return null;
+            }
         }
     }
 }
