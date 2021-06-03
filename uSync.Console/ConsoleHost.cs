@@ -154,7 +154,7 @@ namespace uSync.ConsoleApp
         /// </summary>
         private async Task WriteInteractiveHeader()
         {
-            var uSyncVersion = typeof(uSync8BackOffice).Assembly.GetName().Version.ToString();
+            var uSyncVersion = typeof(uSync8BackOffice).Assembly.GetName().Version.ToString(3);
             var addOnNames = new List<string>();
             foreach (var addOn in TypeFinder.FindClassesOfType<ISyncAddOn>())
             {
