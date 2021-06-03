@@ -510,10 +510,21 @@ namespace uSync8.Core.Tracking
         {
             if (isAttribute)
             {
-                return $"[@{key} = '{keyValue}']";
+                return $"[@{key} = {EscapeXPathString(keyValue)}]";
             }
 
-            return $"[{key} = '{keyValue}']";
+            return $"[{key} = {EscapeXPathString(keyValue)}]";
+        }
+
+        private string EscapeXPathString(string value)
+        {
+            if (!value.Contains("'"))
+                return '\'' + value + '\'';
+
+            if (!value.Contains("\""))
+                return '"' + value + '"';
+
+            return "concat('" + value.Replace("'", "',\"'\",'") + "')";
         }
 
         private XElement GetTarget(IEnumerable<XElement> items, string key, string value, bool isAttribute)

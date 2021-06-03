@@ -215,13 +215,25 @@ namespace uSync8.Core.Tracking
                 var value = GetKeyValue(node, key);
                 if (!string.IsNullOrWhiteSpace(value))
                 {
-                    selectionPath += $"[{key} = '{value}']";
+                    selectionPath += $"[{key} = {EscapeXPathString(value)}]";
                 }
 
             }
 
             return selectionPath.Replace("][", " and ");
         }
+
+        private string EscapeXPathString(string value)
+        {
+            if (!value.Contains("'"))
+                return '\'' + value + '\'';
+
+            if (!value.Contains("\""))
+                return '"' + value + '"';
+
+            return "concat('" + value.Replace("'", "',\"'\",'") + "')";
+        }
+
 
         private string MakeSelectionName(XElement node, string keys)
         {
