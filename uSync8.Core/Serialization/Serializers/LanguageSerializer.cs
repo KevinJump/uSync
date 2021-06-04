@@ -217,7 +217,8 @@ namespace uSync8.Core.Serialization.Serializers
 
         protected override XElement CleanseNode(XElement node)
         {
-            node.Attribute("Key").Value = "";
+            if (node?.Attribute("Key") != null)
+                node.Attribute("Key").Value = "";
             return node;
         }
 
