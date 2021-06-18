@@ -14,7 +14,7 @@
             internal const string DefaultSet = "default";
         }
 
-        internal class Configuration
+        public class Configuration
         {
             private const string uSyncConfigPrefix = "uSync:";
 
