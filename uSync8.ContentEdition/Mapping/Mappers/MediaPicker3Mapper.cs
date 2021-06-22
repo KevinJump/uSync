@@ -29,6 +29,9 @@ namespace uSync8.ContentEdition.Mapping.Mappers
             "Umbraco.MediaPicker3"
         };
 
+        public override string GetExportValue(object value, string editorAlias)
+            => string.IsNullOrEmpty(value.ToString()) ? null : value.ToString();
+
         public override IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)
         {
             // validate string 
