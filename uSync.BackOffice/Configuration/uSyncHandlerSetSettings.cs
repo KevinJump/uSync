@@ -7,7 +7,8 @@ namespace uSync.BackOffice.Configuration
     {
         public bool Enabled { get; set; } = true;
 
-        
+        public string[] HandlerGroups { get; set; } = Array.Empty<string>();
+
         public string[] DisabledHandlers { get; set; } = Array.Empty<string>();
         /// <summary>
         ///  default settings for all handlers

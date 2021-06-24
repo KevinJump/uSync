@@ -25,6 +25,11 @@ namespace uSync.BackOffice.SyncHandlers
         /// </summary>
         public string Set { get; set; } = uSync.Sets.DefaultSet;
 
+        /// <summary>
+        ///  include handlers that are by default disabled 
+        /// </summary>
+        public bool IncludeDisabled { get; set; } = false; 
+
         public SyncHandlerOptions() { }
 
         public SyncHandlerOptions(string setName)

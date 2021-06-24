@@ -12,11 +12,11 @@ namespace uSync.BackOffice.SyncHandlers
 {
     public class SyncHandlerFactory
     {
-        private SyncHandlerCollection syncHandlers;
-        private uSyncSettings settings;
-        private ILogger<SyncHandlerFactory> logger;
+        private SyncHandlerCollection _syncHandlers;
+        private uSyncSettings _settings;
+        private ILogger<SyncHandlerFactory> _logger;
 
-        private IOptionsMonitor<uSyncHandlerSetSettings> handlerSetSettingsAccessor;
+        private IOptionsMonitor<uSyncHandlerSetSettings> _handlerSetSettingsAccessor;
 
         public SyncHandlerFactory(
             ILogger<SyncHandlerFactory> logger,
@@ -24,31 +24,31 @@ namespace uSync.BackOffice.SyncHandlers
             IOptionsMonitor<uSyncHandlerSetSettings> handlerSetSettingsAccessor,
             IOptionsMonitor<uSyncSettings> options)
         {
-            this.handlerSetSettingsAccessor = handlerSetSettingsAccessor;
-            this.logger = logger;
-            this.syncHandlers = syncHandlers;
-            this.settings = options.CurrentValue;
+            _handlerSetSettingsAccessor = handlerSetSettingsAccessor;
+            _logger = logger;
+            _syncHandlers = syncHandlers;
+            _settings = options.CurrentValue;
         }
 
-        public string DefaultSet => this.settings.DefaultSet;
+        public string DefaultSet => this._settings.DefaultSet;
 
         #region All getters (regardless of set or config)
 
         public IEnumerable<ISyncHandler> GetAll()
-            => syncHandlers.Handlers;
+            => _syncHandlers.Handlers;
 
         public ISyncHandler GetHandler(string alias)
-            => syncHandlers.Handlers
+            => _syncHandlers.Handlers
                 .FirstOrDefault(x => x.Alias.InvariantEquals(alias));
 
         public IEnumerable<ISyncHandler> GetHandlers(params string[] aliases)
-            => syncHandlers.Where(x => aliases.InvariantContains(x.Alias));
+            => _syncHandlers.Where(x => aliases.InvariantContains(x.Alias));
 
         /// <summary>
         ///  returns the handler groups (settings, content, users, etc) that stuff can be grouped into
         /// </summary>
         public IEnumerable<string> GetGroups()
-            => syncHandlers.Handlers
+            => _syncHandlers.Handlers
                 .Select(x => x.Group)
                 .Distinct();
 
@@ -115,7 +115,7 @@ namespace uSync.BackOffice.SyncHandlers
 
         private uSyncHandlerSetSettings GetSetSettings(string name)
         {
-            return handlerSetSettingsAccessor.Get(name);
+            return _handlerSetSettingsAccessor.Get(name);
         }
 
 
@@ -136,7 +136,7 @@ namespace uSync.BackOffice.SyncHandlers
 
             var handlerSetSettings = GetSetSettings(options.Set);
 
-            foreach (var handler in syncHandlers.Handlers.Where(x => x.Enabled))
+            foreach (var handler in _syncHandlers.Handlers.Where(x => options.IncludeDisabled || x.Enabled))
             {
                 if (handlerSetSettings.DisabledHandlers.InvariantContains(handler.Alias)) continue;
 
@@ -150,12 +150,22 @@ namespace uSync.BackOffice.SyncHandlers
                     // only log if we are doing the default 'everything' group 
                     // because weh nfoing groups we choose not to load things. 
                     if (string.IsNullOrWhiteSpace(options.Group))
-                        logger.LogWarning("No Handler with {alias} has been loaded", handler.Alias);
+                        _logger.LogWarning("No Handler with {alias} has been loaded", handler.Alias);
                 }
 
             }
 
-            return configs.OrderBy(x => x.Handler.Priority);
+            // if the handlergroups is set, only return handlers in those groups.
+            if (handlerSetSettings.HandlerGroups.Any())
+            {
+                return configs
+                    .Where(x => handlerSetSettings.HandlerGroups.InvariantContains(x.Handler.Group))
+                    .OrderBy(x => x.Handler.Priority);
+            }
+            else
+            {
+                return configs.OrderBy(x => x.Handler.Priority);
+            }
         }
 
         private bool IsValidGroup(string group, ISyncHandler handler)
@@ -163,11 +173,7 @@ namespace uSync.BackOffice.SyncHandlers
             // empty means all as does 'all'
             if (string.IsNullOrWhiteSpace(group) || group.InvariantEquals("all")) return true;
 
-            // only handlers in the specified group
-            if (handler is ISyncHandler extendedHandler)
-                return extendedHandler.Group.InvariantEquals(group);
-
-            return false;
+            return handler.Group.InvariantEquals(group);
         }
         #endregion
     }
