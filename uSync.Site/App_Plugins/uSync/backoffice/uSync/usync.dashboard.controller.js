@@ -58,7 +58,7 @@
                 // }
 
                 vm.addOns.forEach(function (value, key) {
-                    if (value.View !== '') {
+                    if (value.view !== '') {
                         vm.page.navigation.splice(vm.page.navigation.length - insertOffset, 0,
                             {
                                 'name': value.displayName,
