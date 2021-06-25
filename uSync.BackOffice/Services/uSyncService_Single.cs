@@ -3,6 +3,8 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 
+using Microsoft.Extensions.Logging;
+
 using Umbraco.Extensions;
 
 using uSync.BackOffice.SyncHandlers;
@@ -25,7 +27,8 @@ namespace uSync.BackOffice
             var actions = new List<uSyncAction>();
             var lastType = string.Empty;
 
-            SyncHandlerOptions syncHandlerOptions = new SyncHandlerOptions(options.HandlerSet);
+            SyncHandlerOptions syncHandlerOptions = HandlerOptionsFromPaged(options);
+
             HandlerConfigPair handlerPair = null;
 
             var index = options.PageNumber * options.PageSize;
@@ -37,6 +40,12 @@ namespace uSync.BackOffice
                 {
                     lastType = itemType;
                     handlerPair = _handlerFactory.GetValidHandlerByTypeName(itemType, syncHandlerOptions);
+                }
+
+                if (handlerPair == null)
+                {
+                    _logger.LogWarning("No handler was found for {alias} item might not process correctly", actionItem.alias);
+                    continue;
                 }
 
                 options.Callbacks?.Update.Invoke(item.Node.GetAlias(),
@@ -68,7 +77,8 @@ namespace uSync.BackOffice
 
                     var range = options.ProgressMax - options.ProgressMin;
 
-                    SyncHandlerOptions syncHandlerOptions = new SyncHandlerOptions(options.HandlerSet);
+                    SyncHandlerOptions syncHandlerOptions = HandlerOptionsFromPaged(options);
+
                     HandlerConfigPair handlerPair = null;
 
                     var index = options.PageNumber * options.PageSize;
@@ -80,6 +90,12 @@ namespace uSync.BackOffice
                         {
                             lastType = itemType;
                             handlerPair = _handlerFactory.GetValidHandlerByTypeName(itemType, syncHandlerOptions);
+                        }
+
+                        if (handlerPair == null)
+                        {
+                            _logger.LogWarning("No handler was found for {alias} item might not process correctly", actionItem.alias);
+                            continue;
                         }
 
                         options.Callbacks?.Update?.Invoke(item.Node.GetAlias(),
@@ -104,7 +120,8 @@ namespace uSync.BackOffice
             {
                 using (var pause = _mutexService.ImportPause())
                 {
-                    SyncHandlerOptions syncHandlerOptions = new SyncHandlerOptions(options.HandlerSet);
+                    SyncHandlerOptions syncHandlerOptions = HandlerOptionsFromPaged(options);
+
                     var secondPassActions = new List<uSyncAction>();
 
                     var total = actions.Count();
@@ -122,6 +139,12 @@ namespace uSync.BackOffice
                             handlerPair = _handlerFactory.GetValidHandler(action.HandlerAlias, syncHandlerOptions);
                         }
 
+                        if (handlerPair == null) 
+                        {
+                            _logger.LogWarning("No handler was found for {alias} item might not process correctly", actionItem.alias);
+                            continue;
+                        }
+
                         options.Callbacks?.Update?.Invoke($"Second Pass: {action.Name}",
                             CalculateProgress(index, total, options.ProgressMin, options.ProgressMax), 100);
 
@@ -137,12 +160,14 @@ namespace uSync.BackOffice
 
         public IEnumerable<uSyncAction> ImportPartialPostImport(IEnumerable<uSyncAction> actions, uSyncPagedImportOptions options)
         {
+            if (actions == null || !actions.Any()) return Enumerable.Empty<uSyncAction>();
+
             lock (_importLock)
             {
                 using (var pause = _mutexService.ImportPause())
                 {
 
-                    SyncHandlerOptions syncHandlerOptions = new SyncHandlerOptions(options.HandlerSet);
+                    SyncHandlerOptions syncHandlerOptions = HandlerOptionsFromPaged(options);
 
                     var aliases = actions.Select(x => x.HandlerAlias).Distinct();
 
@@ -160,13 +185,22 @@ namespace uSync.BackOffice
                     foreach (var actionItem in folders.SelectMany(actionGroup => actionGroup))
                     {
                         var handlerPair = _handlerFactory.GetValidHandler(actionItem.alias, syncHandlerOptions);
-                        if (handlerPair.Handler is ISyncPostImportHandler postImportHandler)
-                        {
-                            options.Callbacks?.Update?.Invoke(actionItem.alias, index, folders.Count);
 
-                            var handlerActions = actions.Where(x => x.HandlerAlias.InvariantEquals(handlerPair.Handler.Alias));
-                            results.AddRange(postImportHandler.ProcessPostImport(actionItem.folder, handlerActions, handlerPair.Settings));
+                        if (handlerPair == null)
+                        {
+                            _logger.LogWarning("No handler was found for {alias} item might not process correctly", actionItem.alias);
                         }
+                        else
+                        {
+                            if (handlerPair.Handler is ISyncPostImportHandler postImportHandler)
+                            {
+                                options.Callbacks?.Update?.Invoke(actionItem.alias, index, folders.Count);
+
+                                var handlerActions = actions.Where(x => x.HandlerAlias.InvariantEquals(handlerPair.Handler.Alias));
+                                results.AddRange(postImportHandler.ProcessPostImport(actionItem.folder, handlerActions, handlerPair.Settings));
+                            }
+                        }
+
                         index++;
                     }
 
@@ -174,6 +208,12 @@ namespace uSync.BackOffice
                 }
             }
         }
+
+        private SyncHandlerOptions HandlerOptionsFromPaged(uSyncPagedImportOptions options)
+            => new SyncHandlerOptions(options.HandlerSet)
+            {
+                IncludeDisabled = options.IncludeDisabledHandlers
+            };
 
         /// <summary>
         ///  Load the xml in a folder in level order so we process the higher level items first.

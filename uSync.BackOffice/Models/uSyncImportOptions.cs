@@ -34,5 +34,11 @@ namespace uSync.BackOffice
         public int ProgressMin { get; set; }
         public int ProgressMax { get; set; }
 
+        /// <summary>
+        ///  should include what is a normally disabled handler when looking for 
+        ///  something to process the folder.
+        /// </summary>
+        public bool IncludeDisabledHandlers { get; set; }
+
     }
 }
