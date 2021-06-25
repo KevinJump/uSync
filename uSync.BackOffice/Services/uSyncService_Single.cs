@@ -44,7 +44,7 @@ namespace uSync.BackOffice
 
                 if (handlerPair == null)
                 {
-                    _logger.LogWarning("No handler was found for {alias} item might not process correctly", actionItem.alias);
+                    _logger.LogWarning("No handler was found for {alias} item might not process correctly", itemType);
                     continue;
                 }
 
@@ -94,7 +94,7 @@ namespace uSync.BackOffice
 
                         if (handlerPair == null)
                         {
-                            _logger.LogWarning("No handler was found for {alias} item might not process correctly", actionItem.alias);
+                            _logger.LogWarning("No handler was found for {alias} item might not process correctly", itemType);
                             continue;
                         }
 
@@ -141,7 +141,7 @@ namespace uSync.BackOffice
 
                         if (handlerPair == null) 
                         {
-                            _logger.LogWarning("No handler was found for {alias} item might not process correctly", actionItem.alias);
+                            _logger.LogWarning("No handler was found for {alias} item might not process correctly",  action.HandlerAlias);
                             continue;
                         }
 
