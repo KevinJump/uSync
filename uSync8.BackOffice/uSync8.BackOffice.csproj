@@ -110,6 +110,7 @@
     <Compile Include="Services\uSyncService_Handlers.cs" />
     <Compile Include="Services\uSyncService_Single.cs" />
     <Compile Include="Services\uSyncTriggers.cs" />
+    <Compile Include="SyncHandlers\Interfaces\ISyncCleanEntryHandler.cs" />
     <Compile Include="SyncHandlers\Interfaces\ISyncItemHandler.cs" />
     <Compile Include="SyncHandlers\Models\ExtendedHandlerConfigPair.cs" />
     <Compile Include="SyncHandlers\Models\HandlerActionNames.cs" />

@@ -8,7 +8,7 @@ using Microsoft.Owin.Security.DataHandler.Encoder;
 using Umbraco.Core;
 
 using uSync8.BackOffice.SyncHandlers;
-
+using uSync8.Core;
 using uSync8.Core.Extensions;
 using uSync8.Core.Serialization;
 
@@ -109,7 +109,7 @@ namespace uSync8.BackOffice
 
                         index++;
                     }
-
+                
                     return actions;
                 }
             }
@@ -155,7 +155,8 @@ namespace uSync8.BackOffice
                 }
             }
         }
-        
+
+       
         public IEnumerable<uSyncAction> ImportPartialPostImport(IEnumerable<uSyncAction> actions, uSyncPagedImportOptions options)
         {
             lock (_importLock)
@@ -187,6 +188,46 @@ namespace uSync8.BackOffice
 
                             var handlerActions = actions.Where(x => x.HandlerAlias.InvariantEquals(handlerPair.Handler.Alias));
                             results.AddRange(postImportHandler.ProcessPostImport(actionItem.folder, handlerActions, handlerPair.Settings));
+                        }
+                        index++;
+                    }
+
+                    return results;
+                }
+            }
+        }
+
+        public IEnumerable<uSyncAction> ImportPostCleanFiles(IEnumerable<uSyncAction> actions, uSyncPagedImportOptions options)
+        {
+            lock (_importLock)
+            {
+                using (var pause = new uSyncImportPause())
+                {
+
+                    SyncHandlerOptions syncHandlerOptions = new SyncHandlerOptions(options.HandlerSet);
+
+                    var aliases = actions.Select(x => x.HandlerAlias).Distinct();
+
+                    var cleans = actions
+                        .Where(x => x.Change == ChangeType.Clean)
+                        .Select(x => new { alias = x.HandlerAlias, folder = Path.GetDirectoryName(x.FileName), actions = x })
+                        .DistinctBy(x => x.folder)
+                        .GroupBy(x => x.alias)
+                        .ToList();
+
+                    var results = new List<uSyncAction>();
+
+                    var index = 0;
+
+                    foreach (var actionItem in cleans.SelectMany(actionGroup => actionGroup))
+                    {
+                        var handlerPair = handlerFactory.GetValidHandler(actionItem.alias, syncHandlerOptions);
+                        if (handlerPair.Handler is ISyncCleanEntryHandler cleanEntryHandler)
+                        {
+                            options.Callbacks?.Update?.Invoke(actionItem.alias, index, cleans.Count);
+
+                            var handlerActions = actions.Where(x => x.HandlerAlias.InvariantEquals(handlerPair.Handler.Alias));
+                            results.AddRange(cleanEntryHandler.ProcessCleanActions(actionItem.folder, handlerActions, handlerPair.Settings));
                         }
                         index++;
                     }

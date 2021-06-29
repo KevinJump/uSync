@@ -25,7 +25,7 @@ namespace uSync8.ContentEdition.Handlers
 {
     [SyncHandler("contentHandler", "Content", "Content", uSyncBackOfficeConstants.Priorites.Content
         , Icon = "icon-document usync-addon-icon", IsTwoPass = true, EntityType = UdiEntityType.Document)]
-    public class ContentHandler : ContentHandlerBase<IContent, IContentService>, ISyncHandler, ISyncExtendedHandler, ISyncItemHandler
+    public class ContentHandler : ContentHandlerBase<IContent, IContentService>, ISyncHandler, ISyncExtendedHandler, ISyncItemHandler, ISyncCleanEntryHandler
     {
         public override string Group => uSyncBackOfficeConstants.Groups.Content;
 
