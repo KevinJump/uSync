@@ -333,8 +333,10 @@ namespace uSync8.ContentEdition.Serializers
             else if (trashed && !item.Trashed)
             {
                 // move to the recycle bin
-
                 logger.Debug<ContentSerializer>("Moving content into Recycle bin {id}", item.Id);
+
+                // clean any relations that may be there (stops an error)
+                CleanRelations(item, "relateParentDocumentOnDelete");
 
                 contentService.MoveToRecycleBin(item);
                 return uSyncChange.Update("Moved to Bin", item.Name, "", "Recycle Bin");

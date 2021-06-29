@@ -110,6 +110,10 @@ namespace uSync8.ContentEdition.Serializers
             }
             else if (trashed && !item.Trashed)
             {
+
+                // clean any rouge relations 
+                CleanRelations(item, "relateParentMediaFolderOnDelete");
+
                 // move to the recycle bin
                 mediaService.MoveToRecycleBin(item);
                 return uSyncChange.Update("Moved to Bin", item.Name, "", "Recycle Bin");
