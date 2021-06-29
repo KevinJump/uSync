@@ -155,6 +155,11 @@ namespace uSync8.ContentEdition.Serializers
             details.AddRange(DeserializeBase(item, node, options));
             details.AddNotNull(DeserializeTemplate(item, node));
             details.AddRange(DeserializeSchedules(item, node, options));
+            
+            // handle the trashed state here. (before we do any saves)
+            // we need to do this as a move, or the relations db doesn't get cleaned up.
+            var trashed = node.Element("Info").Element("Trashed").ValueOrDefault(false);
+            details.AddNotNull(HandleTrashedState(item, trashed));
 
             return SyncAttempt<IContent>.Succeed(item.Name, item, ChangeType.Import, details);
         }
@@ -285,10 +290,6 @@ namespace uSync8.ContentEdition.Serializers
             // sort order
             var sortOrder = node.Element("Info").Element("SortOrder").ValueOrDefault(-1);
             changes.AddNotNull(HandleSortOrder(item, sortOrder));
-
-            var trashed = node.Element("Info").Element("Trashed").ValueOrDefault(false);
-            changes.AddNotNull(HandleTrashedState(item, trashed));
-
 
             var publishTimer = Stopwatch.StartNew();
             // published status
