@@ -67,6 +67,9 @@ namespace uSync8.ContentEdition.Serializers
 
             var details = DeserializeBase(item, node, options);
 
+            var trashed = info.Element("Trashed").ValueOrDefault(false);
+            HandleTrashedState(item, trashed);
+
             return SyncAttempt<IMedia>.Succeed(item.Name, item, ChangeType.Import, details.ToList());
         }
 
@@ -80,9 +83,6 @@ namespace uSync8.ContentEdition.Serializers
 
             var sortOrder = info.Element("SortOrder").ValueOrDefault(-1);
             HandleSortOrder(item, sortOrder);
-
-            var trashed = info.Element("Trashed").ValueOrDefault(false);
-            HandleTrashedState(item, trashed);
 
             var attempt = mediaService.Save(item);
             if (!attempt.Success)
