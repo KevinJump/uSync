@@ -67,8 +67,11 @@ namespace uSync8.ContentEdition.Serializers
 
             var details = DeserializeBase(item, node, options);
 
-            var trashed = info.Element("Trashed").ValueOrDefault(false);
-            HandleTrashedState(item, trashed);
+            if (node.Element("Info") != null)
+            {
+                var trashed = node.Element("Info").Element("Trashed").ValueOrDefault(false);
+                HandleTrashedState(item, trashed);
+            }
 
             return SyncAttempt<IMedia>.Succeed(item.Name, item, ChangeType.Import, details.ToList());
         }
