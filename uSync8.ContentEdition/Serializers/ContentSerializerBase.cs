@@ -938,7 +938,7 @@ namespace uSync8.ContentEdition.Serializers
             }
             catch(Exception exception)
             {
-                logger.Warn<ContentSerializer>(exception, "Error cleaning up relations: {id}", item.Id)
+                logger.Warn<ContentSerializer>(exception, "Error cleaning up relations: {id}", item.Id);
             }
 
         }
