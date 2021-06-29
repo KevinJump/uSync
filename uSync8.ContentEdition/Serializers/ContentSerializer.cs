@@ -153,13 +153,15 @@ namespace uSync8.ContentEdition.Serializers
             var details = new List<uSyncChange>();
 
             details.AddRange(DeserializeBase(item, node, options));
-            details.AddNotNull(DeserializeTemplate(item, node));
-            details.AddRange(DeserializeSchedules(item, node, options));
-            
+
             // handle the trashed state here. (before we do any saves)
             // we need to do this as a move, or the relations db doesn't get cleaned up.
             var trashed = node.Element("Info").Element("Trashed").ValueOrDefault(false);
             details.AddNotNull(HandleTrashedState(item, trashed));
+
+            details.AddNotNull(DeserializeTemplate(item, node));
+            details.AddRange(DeserializeSchedules(item, node, options));
+            
 
             return SyncAttempt<IContent>.Succeed(item.Name, item, ChangeType.Import, details);
         }
@@ -317,13 +319,23 @@ namespace uSync8.ContentEdition.Serializers
             {
                 // if the item is trashed, then the change of it's parent 
                 // should restore it (as long as we do a move!)
+
+                logger.Debug<ContentSerializer>("Moving content back into content tree via move {id}", item.Id);
+
                 contentService.Move(item, item.ParentId);
+
+                // clean out any relations for this item (some versions of Umbraco don't do this on a Move)
+                CleanRelations(item, "relateParentDocumentOnDelete");
+
                 return uSyncChange.Update("Restored", item.Name, "Recycle Bin", item.ParentId.ToString());
 
             }
             else if (trashed && !item.Trashed)
             {
                 // move to the recycle bin
+
+                logger.Debug<ContentSerializer>("Moving content into Recycle bin {id}", item.Id);
+
                 contentService.MoveToRecycleBin(item);
                 return uSyncChange.Update("Moved to Bin", item.Name, "", "Recycle Bin");
             }

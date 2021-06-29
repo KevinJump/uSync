@@ -103,6 +103,9 @@ namespace uSync8.ContentEdition.Serializers
                 // if the item is trashed, then moving it back to the parent value 
                 // restores it.
                 mediaService.Move(item, item.ParentId);
+
+                CleanRelations(item, "relateParentMediaFolderOnDelete");
+
                 return uSyncChange.Update("Restored", item.Name, "Recycle Bin", item.ParentId.ToString());
             }
             else if (trashed && !item.Trashed)
