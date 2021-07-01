@@ -286,7 +286,7 @@ namespace uSync8.BackOffice
             {
                 if (handlerPair.Handler is ISyncPostImportHandler postImportHandler)
                 {
-                    var handlerActions = postImportActions.Where(x => x.ItemType == handlerPair.Handler.ItemType);
+                    var handlerActions = postImportActions.Where(x => x.ItemType == handlerPair.Handler.ItemType.Name);
 
                     if (handlerActions.Any())
                     {

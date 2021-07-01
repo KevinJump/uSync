@@ -87,8 +87,11 @@
         }
 
         function getTypeName(typeName) {
-            var umbType = typeName.substring(0, typeName.indexOf(','));
-            return umbType.substring(umbType.lastIndexOf('.') + 1);
+            if (typeName.indexOf(',') != -1) {
+                var umbType = typeName.substring(0, typeName.indexOf(','));
+                return umbType.substring(umbType.lastIndexOf('.') + 1);
+            }
+            return typeName;
         }
 
         function countChanges(changes) {

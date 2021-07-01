@@ -27,7 +27,7 @@ namespace uSync8.Core.Models
         /// <summary>
         ///  object type for the item
         /// </summary>
-        public Type ItemType { get; private set; }
+        public string ItemType { get; private set; }
 
         /// <summary>
         ///  type of change that was performed
@@ -61,7 +61,7 @@ namespace uSync8.Core.Models
             Success = success;
             Name = name;
             Item = item;
-            ItemType = itemType;
+            ItemType = itemType.Name;
             Change = change;
             Message = message;
             Exception = ex;

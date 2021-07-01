@@ -506,7 +506,7 @@ namespace uSync8.BackOffice.SyncHandlers
             catch (Exception ex)
             {
                 logger.Warn(handlerType, $"Second Import Failed: {ex}");
-                return uSyncAction.Fail(action.Name, action.ItemType, ex).AsEnumerableOfOne();
+                return uSyncAction.Fail(action.Name, action.ItemType, ex: ex).AsEnumerableOfOne();
             }
         }
 

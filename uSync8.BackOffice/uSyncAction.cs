@@ -18,7 +18,7 @@ namespace uSync8.BackOffice
         public string HandlerAlias { get; set; }
 
         public bool Success { get; set; }
-        public Type ItemType { get; set; }
+        public string ItemType { get; set; }
         public string Message { get; set; }
         public Exception Exception { get; set; }
 
@@ -47,11 +47,15 @@ namespace uSync8.BackOffice
 
         public Guid key { get; set; }
 
-        internal uSyncAction(bool success, string name, Type type, ChangeType change, string message, Exception ex, string filename, string handlerAlias, bool postProcess = false) : this()
+        internal uSyncAction(bool success, string name, Type type, ChangeType change, string message, Exception ex, string filename, string handlerAlias, bool postProcess = false) 
+            : this(success, name, type.Name, change, message, ex, filename, handlerAlias, postProcess)
+        { }
+
+        internal uSyncAction(bool success, string name, string typeName, ChangeType change, string message, Exception ex, string filename, string handlerAlias, bool postProcess = false) : this()
         {
             Success = success;
             Name = name;
-            ItemType = type;
+            ItemType = typeName;
             Message = message;
             Change = change;
             Exception = ex;
@@ -60,7 +64,6 @@ namespace uSync8.BackOffice
 
             HandlerAlias = handlerAlias;
             key = Guid.Empty;
-
         }
 
         internal uSyncAction(bool success, string name, Type type, ChangeType change, string message, Exception ex, string filename, bool postProcess = false)
@@ -99,8 +102,16 @@ namespace uSync8.BackOffice
             string message = null,
             Exception ex = null,
             string filename = null)
+            => Fail(name, type.Name, change, message, ex, filename);
+
+        public static uSyncAction Fail(string name,
+            string typeName,
+            ChangeType change = ChangeType.Fail,
+            string message = null,
+            Exception ex = null,
+            string filename = null)
         {
-            return new uSyncAction(false, name, type, change, message, null, string.Empty);
+            return new uSyncAction(false, name, typeName, change, message, null, string.Empty, string.Empty);
         }
 
 
