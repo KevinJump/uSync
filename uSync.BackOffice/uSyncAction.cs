@@ -149,12 +149,12 @@ namespace uSync.BackOffice
 
         public static uSyncAction ReportAction(ChangeType changeType, string name)
         {
-            return new uSyncAction(true, name, typeof(T).ToString(), changeType, string.Empty, null, string.Empty);
+            return new uSyncAction(true, name, typeof(T).Name, changeType, string.Empty, null, string.Empty);
         }
 
         public static uSyncAction ReportAction(ChangeType changeType, string name, string file, Guid key, string handlerAlias)
         {
-            return new uSyncAction(true, name, typeof(T).ToString(), changeType, string.Empty, null, file, handlerAlias)
+            return new uSyncAction(true, name, typeof(T).Name, changeType, string.Empty, null, file, handlerAlias)
             {
                 key = key
             };
@@ -162,14 +162,14 @@ namespace uSync.BackOffice
 
         public static uSyncAction ReportAction(bool willUpdate, string name, string message)
         {
-            return new uSyncAction(true, name, typeof(T).ToString(),
+            return new uSyncAction(true, name, typeof(T).Name,
                 willUpdate ? ChangeType.Update : ChangeType.NoChange,
                 message, null, string.Empty);
         }
 
         public static uSyncAction ReportAction(bool willUpdate, string name, string message, string handlerAlias)
         {
-            return new uSyncAction(true, name, typeof(T).ToString(),
+            return new uSyncAction(true, name, typeof(T).Name,
                 willUpdate ? ChangeType.Update : ChangeType.NoChange,
                 message, null, string.Empty, handlerAlias);
 
@@ -177,7 +177,7 @@ namespace uSync.BackOffice
 
         public static uSyncAction ReportActionFail(string name, string message)
         {
-            return new uSyncAction(false, name, typeof(T).ToString(), ChangeType.Fail, message, null, string.Empty);
+            return new uSyncAction(false, name, typeof(T).Name, ChangeType.Fail, message, null, string.Empty);
         }
     }
 }

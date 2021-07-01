@@ -77,7 +77,7 @@ namespace uSync.BackOffice.SyncHandlers
         /// <summary>
         ///  the object type of the item being processed.
         /// </summary>
-        public string ItemType { get; protected set; } = typeof(TObject).ToString();
+        public string ItemType { get; protected set; } = typeof(TObject).Name;
 
         /// <summary>
         ///  Is the handler enabled 
