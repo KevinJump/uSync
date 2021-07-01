@@ -12,6 +12,7 @@ using Umbraco.Cms.Core.Strings;
 
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
+using uSync.BackOffice.SyncHandlers.Interfaces;
 using uSync.Core;
 
 using static Umbraco.Cms.Core.Constants;
@@ -20,7 +21,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("mediaHandler", "Media", "Media", uSyncConstants.Priorites.Media,
         Icon = "icon-picture usync-addon-icon", IsTwoPass = true, EntityType = UdiEntityType.Media)]
-    public class MediaHandler : ContentHandlerBase<IMedia, IMediaService>, ISyncHandler,
+    public class MediaHandler : ContentHandlerBase<IMedia, IMediaService>, ISyncHandler, ISyncCleanEntryHandler,
         INotificationHandler<SavedNotification<IMedia>>,
         INotificationHandler<DeletedNotification<IMedia>>,
         INotificationHandler<MovedNotification<IMedia>>

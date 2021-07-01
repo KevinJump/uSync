@@ -12,6 +12,7 @@ using Umbraco.Cms.Core.Strings;
 
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
+using uSync.BackOffice.SyncHandlers.Interfaces;
 using uSync.Core;
 
 using static Umbraco.Cms.Core.Constants;
@@ -20,7 +21,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("contentHandler", "Content", "Content", uSyncConstants.Priorites.Content
         , Icon = "icon-document usync-addon-icon", IsTwoPass = true, EntityType = UdiEntityType.Document)]
-    public class ContentHandler : ContentHandlerBase<IContent, IContentService>, ISyncHandler,
+    public class ContentHandler : ContentHandlerBase<IContent, IContentService>, ISyncHandler, ISyncCleanEntryHandler,
         INotificationHandler<SavedNotification<IContent>>,
         INotificationHandler<DeletedNotification<IContent>>,
         INotificationHandler<MovedNotification<IContent>>

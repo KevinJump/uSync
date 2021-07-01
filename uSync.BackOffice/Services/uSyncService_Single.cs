@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 using Umbraco.Extensions;
 
 using uSync.BackOffice.SyncHandlers;
-
+using uSync.BackOffice.SyncHandlers.Interfaces;
 using uSync.Core;
 
 namespace uSync.BackOffice
@@ -201,6 +201,45 @@ namespace uSync.BackOffice
                             }
                         }
 
+                        index++;
+                    }
+
+                    return results;
+                }
+            }
+        }
+
+        public IEnumerable<uSyncAction> ImportPostCleanFiles(IEnumerable<uSyncAction> actions, uSyncPagedImportOptions options)
+        {
+            lock (_importLock)
+            {
+                using (var pause = _mutexService.ImportPause())
+                {
+                    SyncHandlerOptions syncHandlerOptions = new SyncHandlerOptions(options.HandlerSet);
+
+                    var aliases = actions.Select(x => x.HandlerAlias).Distinct();
+
+                    var cleans = actions
+                        .Where(x => x.Change == ChangeType.Clean)
+                        .Select(x => new { alias = x.HandlerAlias, folder = Path.GetDirectoryName(x.FileName), actions = x })
+                        .DistinctBy(x => x.folder)
+                        .GroupBy(x => x.alias)
+                        .ToList();
+
+                    var results = new List<uSyncAction>();
+
+                    var index = 0;
+
+                    foreach (var actionItem in cleans.SelectMany(actionGroup => actionGroup))
+                    {
+                        var handlerPair = _handlerFactory.GetValidHandler(actionItem.alias, syncHandlerOptions);
+                        if (handlerPair.Handler is ISyncCleanEntryHandler cleanEntryHandler)
+                        {
+                            options.Callbacks?.Update?.Invoke(actionItem.alias, index, cleans.Count);
+
+                            var handlerActions = actions.Where(x => x.HandlerAlias.InvariantEquals(handlerPair.Handler.Alias));
+                            results.AddRange(cleanEntryHandler.ProcessCleanActions(actionItem.folder, handlerActions, handlerPair.Settings));
+                        }
                         index++;
                     }
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 
@@ -147,6 +148,24 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         // we only match duplicate actions by key. 
         protected override bool DoActionsMatch(uSyncAction a, uSyncAction b)
             => a.key == b.key;
+
+
+        public virtual IEnumerable<uSyncAction> ProcessCleanActions(string folder, IEnumerable<uSyncAction> actions, HandlerSettings config)
+        {
+            var cleans = actions.Where(x => x.Change == ChangeType.Clean && !string.IsNullOrWhiteSpace(x.FileName)).ToList();
+            if (cleans.Count == 0) return Enumerable.Empty<uSyncAction>();
+
+            var results = new List<uSyncAction>();
+
+            foreach (var clean in cleans)
+            {
+                if (!string.IsNullOrWhiteSpace(clean.FileName))
+                    results.AddRange(CleanFolder(clean.FileName, false, config.UseFlatStructure));
+            }
+
+            return results;
+        }
+
     }
 
 }
