@@ -872,5 +872,35 @@ namespace uSync.Core.Serialization.Serializers
             // clean the name cache for this id.
             nameCache.Remove(id);
         }
+
+
+        /// <summary>
+        ///  Remove relations from the 'OnDelete' relation tables. 
+        /// </summary>
+        /// <remarks>
+        ///  While we do move the content/media back, it doesn't always clean the relations table.
+        /// </remarks>
+        protected void CleanRelations(TObject item, string relationType)
+        {
+            try
+            {
+                // clean them up here.
+                var deleteRelations = relationService.GetByChild(item, relationType);
+                if (deleteRelations.Any())
+                {
+                    foreach (var deleteRelation in deleteRelations)
+                    {
+                        relationService.Delete(deleteRelation);
+                    }
+                }
+            }
+            catch (Exception exception)
+            {
+                logger.LogWarning(exception, "Error cleaning up relations: {id}", item.Id);
+            }
+
+        }
+
+
     }
 }

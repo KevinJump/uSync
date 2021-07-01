@@ -148,6 +148,13 @@ namespace uSync.Core.Serialization.Serializers
             var details = new List<uSyncChange>();
 
             details.AddRange(DeserializeBase(item, node, options));
+
+            if (node.Element("Info") != null)
+            {
+                var trashed = node.Element("Info").Element("Trashed").ValueOrDefault(false);
+                details.AddNotNull(HandleTrashedState(item, trashed));
+            }
+
             details.AddNotNull(DeserializeTemplate(item, node));
             details.AddRange(DeserializeSchedules(item, node, options));
 
@@ -281,10 +288,6 @@ namespace uSync.Core.Serialization.Serializers
             var sortOrder = node.Element("Info").Element("SortOrder").ValueOrDefault(-1);
             changes.AddNotNull(HandleSortOrder(item, sortOrder));
 
-            var trashed = node.Element("Info").Element("Trashed").ValueOrDefault(false);
-            changes.AddNotNull(HandleTrashedState(item, trashed));
-
-
             var publishTimer = Stopwatch.StartNew();
             // published status
             // this does the last save and publish
@@ -311,12 +314,21 @@ namespace uSync.Core.Serialization.Serializers
             {
                 // if the item is trashed, then the change of it's parent 
                 // should restore it (as long as we do a move!)
+
                 contentService.Move(item, item.ParentId);
+
+                // clean out any relations for this item (some versions of Umbraco don't do this on a Move)
+                CleanRelations(item, "relateParentDocumentOnDelete");
+
                 return uSyncChange.Update("Restored", item.Name, "Recycle Bin", item.ParentId.ToString());
 
             }
             else if (trashed && !item.Trashed)
             {
+
+                // clean any relations that may be there (stops an error)
+                CleanRelations(item, "relateParentDocumentOnDelete");
+
                 // move to the recycle bin
                 contentService.MoveToRecycleBin(item);
                 return uSyncChange.Update("Moved to Bin", item.Name, "", "Recycle Bin");

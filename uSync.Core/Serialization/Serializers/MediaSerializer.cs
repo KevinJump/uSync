@@ -58,7 +58,16 @@ namespace uSync.Core.Serialization.Serializers
 
             var item = attempt.Result;
 
-            var details = DeserializeBase(item, node, options);
+            var details = new List<uSyncChange>();
+
+            details.AddRange(DeserializeBase(item, node, options));
+
+            if (node.Element("Info") != null)
+            {
+                var trashed = node.Element("Info").Element("Trashed").ValueOrDefault(false);
+                details.AddNotNull( HandleTrashedState(item, trashed));
+            }
+
 
             return SyncAttempt<IMedia>.Succeed(item.Name, item, ChangeType.Import, details.ToList());
         }
@@ -73,9 +82,6 @@ namespace uSync.Core.Serialization.Serializers
 
             var sortOrder = info.Element("SortOrder").ValueOrDefault(-1);
             HandleSortOrder(item, sortOrder);
-
-            var trashed = info.Element("Trashed").ValueOrDefault(false);
-            HandleTrashedState(item, trashed);
 
             var attempt = mediaService.Save(item);
             if (!attempt.Success)
@@ -93,10 +99,16 @@ namespace uSync.Core.Serialization.Serializers
                 // if the item is trashed, then moving it back to the parent value 
                 // restores it.
                 mediaService.Move(item, item.ParentId);
+
+                CleanRelations(item, "relateParentMediaFolderOnDelete");
+
                 return uSyncChange.Update("Restored", item.Name, "Recycle Bin", item.ParentId.ToString());
             }
             else if (trashed && !item.Trashed)
             {
+                // clean any rouge relations 
+                CleanRelations(item, "relateParentMediaFolderOnDelete");
+
                 // move to the recycle bin
                 mediaService.MoveToRecycleBin(item);
                 return uSyncChange.Update("Moved to Bin", item.Name, "", "Recycle Bin");
