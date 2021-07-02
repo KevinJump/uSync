@@ -16,8 +16,8 @@
     <repository url="https://github.com/KevinJump/uSync8/tree/core/main" />
     <dependencies>
       <group targetFramework="net5.0">
-        <dependency id="uSync.BackOffice.StaticAssets" version="[$version$]" />
-        <dependency id="uSync.BackOffice" version="[$version$]"/>
+        <dependency id="uSync.BackOffice.StaticAssets" version="$version$" />
+        <dependency id="uSync.BackOffice" version="$version$"/>
       </group>
     </dependencies>
 	<contentFiles />
