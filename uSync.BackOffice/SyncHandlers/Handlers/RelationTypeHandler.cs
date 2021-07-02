@@ -89,6 +89,9 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         protected override string GetItemName(IRelationType item)
             => item.Name;
 
+        protected override string GetItemFileName(IRelationType item)
+            => GetItemAlias(item).ToSafeAlias(shortStringHelper);
+
         //     private void RelationService_SavedRelation(IRelationService sender, Umbraco.Core.Events.SaveEventArgs<IRelation> e)
         //     {
         //         if (uSync8BackOffice.eventsPaused) return;

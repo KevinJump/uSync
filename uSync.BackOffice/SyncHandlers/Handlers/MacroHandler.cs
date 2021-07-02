@@ -68,6 +68,9 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         protected override string GetItemName(IMacro item)
             => item.Name;
 
+        protected override string GetItemFileName(IMacro item)
+            => GetItemAlias(item).ToSafeAlias(shortStringHelper);
+
         protected override IEnumerable<IEntity> GetChildItems(int parent)
         {
             if (parent == -1)

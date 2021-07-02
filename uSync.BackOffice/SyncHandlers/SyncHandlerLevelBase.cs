@@ -187,26 +187,20 @@ namespace uSync.BackOffice.SyncHandlers
             }
         }
 
-
-        // path helpers
-        virtual protected string GetItemFileName(IUmbracoEntity item, bool useGuid)
-        {
-            if (item != null)
-            {
-                if (useGuid) return item.Key.ToString();
-                return item.Name.ToSafeFileName(shortStringHelper);
-            }
-
-            return Guid.NewGuid().ToString();
-        }
-
         override protected string GetItemPath(TObject item, bool useGuid, bool isFlat)
         {
             if (isFlat) return base.GetItemPath(item, useGuid, isFlat);
-            return GetEntityPath((IUmbracoEntity)item, useGuid, true);
+            return GetEntityTreePath((IUmbracoEntity)item, useGuid, true);
         }
 
-        protected string GetEntityPath(IUmbracoEntity item, bool useGuid, bool isTop)
+        /// <summary>
+        ///  get the tree path for an item (eg. /homepage/about-us/something )
+        /// </summary>
+        /// <param name="item"></param>
+        /// <param name="useGuid"></param>
+        /// <param name="isTop"></param>
+        /// <returns></returns>
+        protected string GetEntityTreePath(IUmbracoEntity item, bool useGuid, bool isTop)
         {
             var path = string.Empty;
             if (item != null)
@@ -217,15 +211,30 @@ namespace uSync.BackOffice.SyncHandlers
                     // var parent = entityService.Get(item.ParentId);
                     if (parent != null)
                     {
-                        path = GetEntityPath(parent, useGuid, false);
+                        path = GetEntityTreePath(parent, useGuid, false);
                     }
                 }
 
                 // we only want the guid file name at the top of the tree 
-                path = Path.Combine(path, GetItemFileName(item, useGuid && isTop));
+                path = Path.Combine(path, GetEntityTreeName(item, useGuid && isTop));
             }
 
             return path;
         }
+
+        /// <summary>
+        ///  the name of an item in an entity tree 
+        /// </summary>
+        virtual protected string GetEntityTreeName(IUmbracoEntity item, bool useGuid)
+        {
+            if (item != null)
+            {
+                if (useGuid) return item.Key.ToString();
+                return item.Name.ToSafeFileName(shortStringHelper);
+            }
+
+            return Guid.NewGuid().ToString();
+        }
+
     }
 }

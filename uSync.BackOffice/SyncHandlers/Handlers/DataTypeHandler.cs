@@ -11,6 +11,7 @@ using Umbraco.Cms.Core.Models.Entities;
 using Umbraco.Cms.Core.Notifications;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Strings;
+using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
@@ -75,5 +76,8 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
 
         protected override void DeleteFolder(int id)
             => dataTypeService.DeleteContainer(id);
+
+        protected override string GetItemFileName(IDataType item)
+            => GetItemAlias(item).ToSafeAlias(shortStringHelper);
     }
 }

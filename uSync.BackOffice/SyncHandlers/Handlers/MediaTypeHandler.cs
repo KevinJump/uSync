@@ -46,7 +46,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             this.mediaTypeService = mediaTypeService;
         }
 
-        protected override string GetItemFileName(IUmbracoEntity item, bool useGuid)
+        protected override string GetEntityTreeName(IUmbracoEntity item, bool useGuid)
         {
             if (useGuid) return item.Key.ToString();
 

@@ -51,7 +51,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         protected override IEntity GetContainer(Guid key)
             => memberTypeService.GetContainer(key);
 
-        protected override string GetItemFileName(IUmbracoEntity item, bool useGuid)
+        protected override string GetEntityTreeName(IUmbracoEntity item, bool useGuid)
         {
             if (useGuid) return item.Key.ToString();
 

@@ -1210,9 +1210,13 @@ namespace uSync.BackOffice.SyncHandlers
         virtual protected TContainer GetContainer(int id) => default;
 
         virtual protected string GetItemPath(TObject item, bool useGuid, bool isFlat)
-            => useGuid ? GetItemKey(item).ToString() : GetItemAlias(item).ToSafeFileName(shortStringHelper);
+            => useGuid ? GetItemKey(item).ToString() : GetItemFileName(item);
+
+        virtual protected string GetItemFileName(TObject item)
+            => GetItemAlias(item).ToSafeFileName(shortStringHelper);
 
         abstract protected string GetItemName(TObject item);
+
 
         virtual protected string GetPath(string folder, TObject item, bool GuidNames, bool isFlat)
         {
