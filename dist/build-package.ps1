@@ -3,11 +3,11 @@ param ($version = '9.0.0', $suffix, $env='release', [switch]$push=$false)
 $fullVersion = -join($version, '-', $suffix)
 $outFolder = ".\$fullVersion"
 
-dotnet pack ..\uSync.Core\uSync.Core.csproj -c $env -o $outFolder --version-suffix $suffix /p:ContinuousIntegrationBuild=true,version=$version 
-dotnet pack ..\uSync.Community.Contrib\uSync.Community.Contrib.csproj -c $env -o $outFolder --version-suffix $suffix /p:ContinuousIntegrationBuild=true,version=$version  
-dotnet pack ..\uSync.BackOffice\uSync.BackOffice.csproj -c $env -o $outFolder --version-suffix $suffix /p:ContinuousIntegrationBuild=true,version=$version 
+dotnet pack ..\uSync.Core\uSync.Core.csproj -c $env -o $outFolder /p:ContinuousIntegrationBuild=true,version=$fullVersion 
+dotnet pack ..\uSync.Community.Contrib\uSync.Community.Contrib.csproj -c $env -o $outFolder /p:ContinuousIntegrationBuild=true,version=$fullversion  
+dotnet pack ..\uSync.BackOffice\uSync.BackOffice.csproj -c $env -o $outFolder /p:ContinuousIntegrationBuild=true,version=$fullVersion 
 
-.\nuget pack "..\uSync\uSync.nuspec" -version 9.0.0-$suffix -OutputDirectory $outFolder
+.\nuget pack "..\uSync\uSync.nuspec" -version $fullVersion -OutputDirectory $outFolder
 .\nuget pack "..\uSync.BackOffice.Assets\uSync.BackOffice.StaticAssets.nuspec" -version $fullVersion -OutputDirectory $outFolder
 
 if ($push) {
