@@ -61,7 +61,7 @@ namespace uSync8.Core.Models
             Success = success;
             Name = name;
             Item = item;
-            ItemType = itemType.Name;
+            ItemType = itemType.AssemblyQualifiedName;
             Change = change;
             Message = message;
             Exception = ex;
