@@ -101,7 +101,7 @@ namespace uSync.BackOffice.Controllers
                 }
             }
 
-            addOnInfo.Version = typeof(global::uSync.BackOffice.uSync).Assembly.GetName().Version.ToString()
+            addOnInfo.Version = typeof(global::uSync.BackOffice.uSync).Assembly.GetName().Version.ToString(3)
                 + uSyncConstants.ReleaseSuffix;
 
             addOnInfo.AddOns = addOnInfo.AddOns.OrderBy(x => x.SortOrder).ToList();
