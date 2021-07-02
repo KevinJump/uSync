@@ -5,7 +5,7 @@
         internal const string Name = "uSync";
         internal class Trees
         {
-            internal const string uSync = "uSync";
+            internal const string uSync = "usync";
             internal const string Group = "sync";
         }
 

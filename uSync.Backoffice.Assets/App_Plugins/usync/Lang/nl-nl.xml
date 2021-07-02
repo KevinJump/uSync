@@ -6,7 +6,7 @@
     </creator>
     <area alias="treeHeaders">
         <key alias="sync">Synchronisatie</key>
-        <key alias="uSync8">uSync</key>
+        <key alias="usync">uSync</key>
     </area>
     <area alias="usync">
         <key alias="name">uSync 8</key>
@@ -47,6 +47,6 @@
 
     </area>
     <area alias="dashboardTabs">
-        <key alias="uSync8">uSync</key>
+        <key alias="usync">uSync</key>
     </area>
 </language>
