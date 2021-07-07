@@ -3,7 +3,7 @@
                / / / /\__ \/ / / / __ \/ ___/
               / /_/ /___/ / /_/ / / / / /__  
               \__,_//____/\__, /_/ /_/\___/  
-                         /____/     v9.x - beta
+                         /____/     v9.x - Release Candidate
 
              Welcome to uSync 9 for Umbraco 9
 
@@ -21,4 +21,4 @@
    uSync is FREE ✔ You can use them on any of your projects 
    as many times as your like. 
 
-- 🦄 -
+- 🦄 🎈 -
