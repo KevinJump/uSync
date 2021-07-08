@@ -1,11 +1,11 @@
-﻿                       _____                 
-                __  __/ ___/__  ______  _____
-               / / / /\__ \/ / / / __ \/ ___/
-              / /_/ /___/ / /_/ / / / / /__  
-              \__,_//____/\__, /_/ /_/\___/  
-                         /____/     v9.x - Release Candidate
+﻿                     ,---.                         
+            ,--.,--.'   .-',--. ,--.,--,--,  ,---. 
+            |  ||  |`.  `-. \  '  / |      \| .--' 
+            '  ''  '.-'    | \   '  |  ||  |\ `--. 
+             `----' `-----'.-'  /   `--''--' `---' 
+                           `---'  v9.x - release candidate                                        
 
-             Welcome to uSync 9 for Umbraco 9
+               Welcome to uSync 9 for Umbraco 9
 
 !! This is the .NetCore version of uSync for the .NetCore version of Umbraco !! 
 
@@ -22,3 +22,5 @@
    as many times as your like. 
 
 - 🦄 🎈 -
+
+
