@@ -8,7 +8,9 @@ namespace uSync.BackOffice.Configuration
     /// </summary>
     public class uSyncConfigService
     {
-        public uSyncSettings Settings { get; private set; }
+        public uSyncSettings Settings => _settingsMonitor.CurrentValue;
+
+        private IOptionsMonitor<uSyncSettings> _settingsMonitor; 
 
         public string GetRootFolder()
             => Settings.RootFolder.TrimStart('/');
@@ -16,10 +18,10 @@ namespace uSync.BackOffice.Configuration
         private IOptionsMonitor<uSyncHandlerSetSettings> setOptionsMonitor;
 
         public uSyncConfigService(
-            IOptions<uSyncSettings> options,
+            IOptionsMonitor<uSyncSettings> options,
             IOptionsMonitor<uSyncHandlerSetSettings> setOptionsMonitor)
         {
-            Settings = options.Value;
+            _settingsMonitor = options;
             this.setOptionsMonitor = setOptionsMonitor;
         }
 
