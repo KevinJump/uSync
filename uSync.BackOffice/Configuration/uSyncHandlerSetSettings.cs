@@ -24,6 +24,9 @@ namespace uSync.BackOffice.Configuration
 
     public static class HandlerSetSettingsExtensions
     {
+        /// <summary>
+        ///  Get the handler settings for the named handler - (will load defaults if no speicifc handler settings are found)
+        /// </summary>
         public static HandlerSettings GetHandlerSettings(this uSyncHandlerSetSettings handlerSet, string alias)
         {
             if (handlerSet.Handlers.ContainsKey(alias))
