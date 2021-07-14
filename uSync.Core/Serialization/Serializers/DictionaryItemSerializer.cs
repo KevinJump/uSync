@@ -72,7 +72,7 @@ namespace uSync.Core.Serialization.Serializers
             // key only translationm, would not add the translation values. 
             if (!options.GetSetting("KeysOnly", false))
             {
-                details.AddRange(DeserializeTranslations(item, node));
+                details.AddRange(DeserializeTranslations(item, node, options));
             }
 
             // this.SaveItem(item);
@@ -81,12 +81,14 @@ namespace uSync.Core.Serialization.Serializers
             return SyncAttempt<IDictionaryItem>.Succeed(item.ItemKey, item, ChangeType.Import, details);
         }
 
-        private IEnumerable<uSyncChange> DeserializeTranslations(IDictionaryItem item, XElement node)
+        private IEnumerable<uSyncChange> DeserializeTranslations(IDictionaryItem item, XElement node, SyncSerializerOptions options)
         {
             var translationNode = node?.Element("Translations");
             if (translationNode == null) return Enumerable.Empty<uSyncChange>();
 
             var currentTranslations = item.Translations.ToList();
+
+            var activeCultures = options.GetDeserializedCultures(node);
 
             var changes = new List<uSyncChange>();
 
@@ -94,6 +96,9 @@ namespace uSync.Core.Serialization.Serializers
             {
                 var language = translation.Attribute("Language").ValueOrDefault(string.Empty);
                 if (language == string.Empty) continue;
+
+                // only deserialize the active cultures passed to us (blank = all) 
+                if (!activeCultures.IsValid(language)) continue;
 
                 var itemTranslation = item.Translations.FirstOrDefault(x => x.Language.IsoCode == language);
                 if (itemTranslation != null && itemTranslation.Value != translation.Value)
@@ -115,15 +120,21 @@ namespace uSync.Core.Serialization.Serializers
 
             var translations = currentTranslations.DistinctBy(x => x.Language.IsoCode).ToList();
 
-            // if the count is wrong, we delete the item (shortly before we save it again).
-            if (item.Translations.Count() > translations.Count)
+            // if we are syncing all cultures we do a delete, but when only syncing some, we 
+            // don't remove missing cultures from the list.
+            if (activeCultures.Count == 0)
             {
-                var existing = FindItem(item.Key);
-                if (existing != null)
+                // if the count is wrong, we delete the item (shortly before we save it again).
+                if (item.Translations.Count() > translations.Count)
                 {
-                    DeleteItem(existing);
-                    item.Id = 0; // make this a new (so it will be inserted)
+                    var existing = FindItem(item.Key);
+                    if (existing != null)
+                    {
+                        DeleteItem(existing);
+                        item.Id = 0; // make this a new (so it will be inserted)
+                    }
                 }
+
             }
 
             item.Translations = translations; //.DistinctBy(x => x.Language.IsoCode);
@@ -134,6 +145,11 @@ namespace uSync.Core.Serialization.Serializers
         protected override SyncAttempt<XElement> SerializeCore(IDictionaryItem item, SyncSerializerOptions options)
         {
             var node = InitializeBaseNode(item, item.ItemKey, GetLevel(item));
+
+            // if we are serializing by culture, then add the culture attribute here. 
+            var cultures = options.GetSetting(uSyncConstants.CultureKey, string.Empty);
+            if (!string.IsNullOrWhiteSpace(cultures))
+                node.Add(new XAttribute(uSyncConstants.CultureKey, cultures));
 
             var info = new XElement("Info");
 
@@ -146,14 +162,19 @@ namespace uSync.Core.Serialization.Serializers
                 }
             }
 
+            var activeCultures = options.GetCultures();
+
             var translationsNode = new XElement("Translations");
 
             foreach (var translation in item.Translations
                 .DistinctBy(x => x.Language.IsoCode)
                 .OrderBy(x => x.Language.IsoCode))
             {
-                translationsNode.Add(new XElement("Translation", translation.Value,
-                    new XAttribute("Language", translation.Language.IsoCode)));
+                if (activeCultures.IsValid(translation.Language.IsoCode))
+                {
+                    translationsNode.Add(new XElement("Translation", translation.Value,
+                        new XAttribute("Language", translation.Language.IsoCode)));
+                }
             }
 
             node.Add(info);
