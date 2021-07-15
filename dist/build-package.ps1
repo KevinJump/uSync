@@ -5,7 +5,7 @@ $outFolder = ".\$fullVersion"
 
 dotnet pack ..\uSync.Core\uSync.Core.csproj -c $env -o $outFolder /p:ContinuousIntegrationBuild=true,version=$fullVersion 
 dotnet pack ..\uSync.Community.Contrib\uSync.Community.Contrib.csproj -c $env -o $outFolder /p:ContinuousIntegrationBuild=true,version=$fullversion  
-dotnet pack ..\uSync.Community.Contrib\uSync.Community.DataTypeSerializers.csproj -c $env -o $outFolder /p:ContinuousIntegrationBuild=true,version=$fullversion  
+dotnet pack ..\uSync.Community.DataTypeSerializers\uSync.Community.DataTypeSerializers.csproj -c $env -o $outFolder /p:ContinuousIntegrationBuild=true,version=$fullversion  
 dotnet pack ..\uSync.BackOffice\uSync.BackOffice.csproj -c $env -o $outFolder /p:ContinuousIntegrationBuild=true,version=$fullVersion 
 
 .\nuget pack "..\uSync\uSync.nuspec" -version $fullVersion -OutputDirectory $outFolder
