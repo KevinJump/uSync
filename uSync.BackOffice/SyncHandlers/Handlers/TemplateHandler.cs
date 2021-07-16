@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 using Umbraco.Cms.Core.Cache;
@@ -53,5 +54,8 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         protected override IEnumerable<IEntity> GetFolders(int parent)
             => GetChildItems(parent);
 
+
+        protected override string GetItemPath(ITemplate item, bool useGuid, bool isFlat)
+            => useGuid ? item.Key.ToString() : item.Alias.ToSafeFileName(shortStringHelper);
     }
 }
