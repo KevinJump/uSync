@@ -3,12 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
 
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
 
 using uSync.Core;
 using uSync.Core.Models;
 
 namespace uSync.BackOffice
 {
+    [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public struct uSyncAction
     {
         public string HandlerAlias { get; set; }
@@ -19,7 +23,8 @@ namespace uSync.BackOffice
         public string Message { get; set; }
         public Exception Exception { get; set; }
 
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [Newtonsoft.Json.JsonConverter(typeof(StringEnumConverter))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(JsonStringEnumConverter))]
         public ChangeType Change { get; set; }
 
         public string FileName { get; set; }
@@ -29,7 +34,8 @@ namespace uSync.BackOffice
         /// <summary>
         ///  boxed item - used on updates. 
         /// </summary>
-        [JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         public object Item { get; set; }
 
         /// <summary>

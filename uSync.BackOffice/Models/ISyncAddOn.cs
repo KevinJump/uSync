@@ -7,7 +7,7 @@ namespace uSync.BackOffice.Models
     ///  An add on to usync, which allows you to inject a view onto the usync page
     ///  just like a content app. 
     /// </summary>
-    [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
+    [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public interface ISyncAddOn
     {
         /// <summary>

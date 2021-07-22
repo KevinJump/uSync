@@ -7,7 +7,7 @@ namespace uSync.BackOffice.Controllers
     /// <summary>
     ///  view model of a handler, sent to the UI to draw the handler boxes.
     /// </summary>
-    [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
+    [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public class SyncHandlerView
     {
         public bool Enabled { get; set; }

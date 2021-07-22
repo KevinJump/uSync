@@ -11,7 +11,7 @@ namespace uSync.BackOffice
     /// <summary>
     ///  options passed to an import, report or export of an item.
     /// </summary>
-    [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
+    [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public class uSyncImportOptions
     {
         public Guid ImportId { get; set; }
@@ -25,7 +25,7 @@ namespace uSync.BackOffice
         public string RootFolder { get; set; }
     }
 
-    [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
+    [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public class uSyncPagedImportOptions : uSyncImportOptions
     {
         public int PageNumber { get; set; }

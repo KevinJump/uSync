@@ -3,7 +3,7 @@ using Newtonsoft.Json.Serialization;
 
 namespace uSync.BackOffice.Hubs
 {
-    [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
+    [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public class uSyncUpdateMessage
     {
         public string Message { get; set; }

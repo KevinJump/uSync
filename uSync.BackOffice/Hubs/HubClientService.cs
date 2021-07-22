@@ -40,7 +40,7 @@ namespace uSync.BackOffice.Hubs
                     client.SendAsync("Update", message).Wait();
                     return;
                 }
-                hubContext.Clients.All.SendAsync("Update", message);
+                hubContext.Clients.All.SendAsync("Update", message).Wait();
             }
         }
 

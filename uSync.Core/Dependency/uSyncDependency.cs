@@ -15,7 +15,7 @@ namespace uSync.Core.Dependency
     }
 
 
-    [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
+    [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public class uSyncDependency
     {
 

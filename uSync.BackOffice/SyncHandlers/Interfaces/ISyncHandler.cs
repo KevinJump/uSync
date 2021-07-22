@@ -15,7 +15,7 @@ namespace uSync.BackOffice.SyncHandlers
 {
     public delegate void SyncUpdateCallback(string message, int count, int total);
 
-    [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
+    [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public interface ISyncHandler
     {
         /// <summary>

@@ -7,7 +7,7 @@ using uSync.BackOffice.Models;
 
 namespace uSync.BackOffice.Controllers
 {
-    [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
+    [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public class AddOnInfo
     {
         public string Version { get; set; }

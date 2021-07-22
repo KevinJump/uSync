@@ -4,7 +4,7 @@ using Newtonsoft.Json.Serialization;
 
 namespace uSync.BackOffice.SyncHandlers
 {
-    [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
+    [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     /// <summary>
     ///  options that define how we define a handler 
     /// </summary>

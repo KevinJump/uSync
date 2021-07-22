@@ -11,7 +11,7 @@ namespace uSync.BackOffice
     /// <summary>
     ///  Progress summary - object that tells the UI to draw the handler icons while uSync works.
     /// </summary>
-    [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
+    [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public class SyncProgressSummary
     {
         /// <summary>
@@ -122,7 +122,7 @@ namespace uSync.BackOffice
 
     }
 
-    [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
+    [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public class SyncHandlerSummary
     {
         /// <summary>

@@ -6,7 +6,7 @@ using Newtonsoft.Json.Serialization;
 
 namespace uSync.Core.Models
 {
-    [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
+    [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public struct SyncAttempt<TObject>
     {
         /// <summary>

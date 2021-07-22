@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -9,7 +10,7 @@ namespace uSync.Core.Models
     /// <summary>
     ///  tracks the details of a change to an individual item
     /// </summary>
-    [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
+    [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public class uSyncChange
     {
         public bool Success { get; set; } = true;
@@ -37,7 +38,8 @@ namespace uSync.Core.Models
         /// <summary>
         ///  Change type
         /// </summary>
-        [JsonConverter(typeof(StringEnumConverter))]
+        [Newtonsoft.Json.JsonConverter(typeof(StringEnumConverter))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(JsonStringEnumConverter))]
         public ChangeDetailType Change { get; set; }
 
         public static uSyncChange Create(string path, string name, string newValue, bool useNew = true)

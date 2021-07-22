@@ -41,6 +41,10 @@ namespace Umbraco.Cms.Web.UI.NetCore
         public void ConfigureServices(IServiceCollection services)
         {
 #pragma warning disable IDE0022 // Use expression body for methods
+
+            // Use NewtonSoft as json serializer - the new evil. 
+            // services.AddControllers().AddNewtonsoftJson();
+
             services.AddUmbraco(_env, _config)
                 .AddBackOffice()             
                 .AddWebsite()

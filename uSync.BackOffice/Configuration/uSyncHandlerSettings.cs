@@ -7,7 +7,7 @@ using Umbraco.Extensions;
 
 namespace uSync.BackOffice.Configuration
 {
-    [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
+    [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public class HandlerSettings
     {
         public bool Enabled { get; set; } = true;

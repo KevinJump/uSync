@@ -223,14 +223,14 @@ namespace uSync.BackOffice.Controllers
         }
     }
 
-    [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
+    [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public class uSyncWarningMessage
     {
         public string Type { get; set; }
         public string Message { get; set; }
     }
 
-    [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
+    [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public class uSyncVersionInfo
     {
         public string Core { get; set; }
@@ -239,7 +239,7 @@ namespace uSync.BackOffice.Controllers
         public string Message { get; set; }
     }
 
-    [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
+    [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public class uSyncVersionCheck
     {
         public uSyncVersionInfo VersionInfo { get; set; }

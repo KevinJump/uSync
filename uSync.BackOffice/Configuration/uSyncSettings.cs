@@ -5,7 +5,7 @@ using Newtonsoft.Json.Serialization;
 
 namespace uSync.BackOffice.Configuration
 {
-    [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
+    [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public class uSyncSettings
     {
         /// <summary>
