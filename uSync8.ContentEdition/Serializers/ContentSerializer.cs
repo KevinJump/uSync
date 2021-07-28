@@ -103,7 +103,10 @@ namespace uSync8.ContentEdition.Serializers
             {
                 if (activeCultures.IsValid(culture))
                 {
-                    published.Add(new XElement("Published", item.IsCulturePublished(culture),
+                    // Umbraco issue - if all cultures are unpublished at once, 
+                    // IsCulturePublblished can still return true 
+                    // so we need to check item.Published things 'something' is published
+                    published.Add(new XElement("Published", item.Published && item.IsCulturePublished(culture),
                         new XAttribute("Culture", culture)));
                 }
             }
