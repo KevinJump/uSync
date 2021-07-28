@@ -123,7 +123,7 @@ namespace uSync8.BackOffice
             {
                 var e = new uSyncItemEventArgs<object> { Item = item };
                 ExportingItem?.Invoke(e);
-                return e.Cancel;
+                return !e.Cancel;
             }
 
             return true;
@@ -139,7 +139,7 @@ namespace uSync8.BackOffice
             {
                 var e = new uSyncItemEventArgs<XElement> { Item = node };
                 eventHandler?.Invoke(e);
-                return e.Cancel;
+                return !e.Cancel;
             }
 
             return true;
