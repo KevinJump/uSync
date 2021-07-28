@@ -203,6 +203,20 @@ namespace uSync8.ContentEdition.Handlers
             return results;
         }
 
+
+        protected override bool DoItemsMatch(XElement node, TObject item)
+        {
+            if (node.GetKey() == GetItemKey(item)) return true;
+
+            if (this.serializer is ContentSerializerBase<TObject> baseSerializer)
+            {
+                var itemPath = baseSerializer.GetItemPath(item);
+                var nodePath = node.Element("Info")?.Element("Path").ValueOrDefault(string.Empty);
+                if (itemPath == nodePath) return true;
+            }
+
+            return false;
+        }
     }
 
 }

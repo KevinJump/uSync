@@ -348,6 +348,7 @@ namespace uSync8.Core.Serialization
                 alias = ItemAlias(item);
 
             var node = XElementExtensions.MakeEmpty(ItemKey(item), change, alias);
+            node.Add(new XAttribute("Level", change == SyncActionType.Delete ? 9999 : 9998));
 
             return SyncAttempt<XElement>.Succeed("Empty", node, ChangeType.Removed);
         }

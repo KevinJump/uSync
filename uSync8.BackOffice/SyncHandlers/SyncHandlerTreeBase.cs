@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Xml.Linq;
 
 using Umbraco.Core.Cache;
 using Umbraco.Core.Logging;
@@ -8,6 +9,7 @@ using Umbraco.Core.Services;
 using uSync8.BackOffice.Services;
 using uSync8.Core;
 using uSync8.Core.Dependency;
+using uSync8.Core.Extensions;
 using uSync8.Core.Serialization;
 using uSync8.Core.Tracking;
 
@@ -61,6 +63,7 @@ namespace uSync8.BackOffice.SyncHandlers
         }
 
         protected override string GetItemName(TObject item) => item.Name;
+   
     }
 
 }

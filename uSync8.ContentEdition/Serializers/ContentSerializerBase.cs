@@ -720,25 +720,17 @@ namespace uSync8.ContentEdition.Serializers
                 }
             }
 
-            var items = syncMappers.EntityCache.GetAll(this.umbracoObjectType, lookups.ToArray());
-            // var items = entityService.GetAll(this.umbracoObjectType, lookups.ToArray());
-            foreach (var item in items)
+            if (lookups.Count > 0)
             {
-                nameCache[item.Id] = new Tuple<Guid, string>(item.Key, item.Name);
-                friendlyPath = friendlyPath.Replace($"[{item.Id}]", item.Name.ToSafeAlias());
+                var items = syncMappers.EntityCache.GetAll(this.umbracoObjectType, lookups.ToArray());
+                foreach (var item in items)
+                {
+                    nameCache[item.Id] = new Tuple<Guid, string>(item.Key, item.Name);
+                    friendlyPath = friendlyPath.Replace($"[{item.Id}]", item.Name.ToSafeAlias());
+                }
             }
 
             return friendlyPath;
-        }
-
-        public override SyncAttempt<XElement> SerializeEmpty(TObject item, SyncActionType change, string alias)
-        {
-            var attempt = base.SerializeEmpty(item, change, alias);
-            if (attempt.Success)
-            {
-                attempt.Item.Add(new XAttribute("Level", GetLevel(item)));
-            }
-            return attempt;
         }
 
         #region Finders 
