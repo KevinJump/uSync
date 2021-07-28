@@ -65,7 +65,7 @@ namespace uSync.BackOffice.Notifications
             /// are not running on a replica.
             if (_runtimeState.Level < RuntimeLevel.Run)
             {
-                _logger.LogInformation("Umbaco is not in Run mode, so uSync will not run");
+                _logger.LogInformation("Umbraco is not in Run mode, so uSync will not run");
                 return;
             }
 
