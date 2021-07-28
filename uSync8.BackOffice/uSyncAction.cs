@@ -48,7 +48,7 @@ namespace uSync8.BackOffice
         public Guid key { get; set; }
 
         internal uSyncAction(bool success, string name, Type type, ChangeType change, string message, Exception ex, string filename, string handlerAlias, bool postProcess = false) 
-            : this(success, name, type.AssemblyQualifiedName, change, message, ex, filename, handlerAlias, postProcess)
+            : this(success, name, type?.AssemblyQualifiedName, change, message, ex, filename, handlerAlias, postProcess)
         { }
 
         internal uSyncAction(bool success, string name, string typeName, ChangeType change, string message, Exception ex, string filename, string handlerAlias, bool postProcess = false) : this()
