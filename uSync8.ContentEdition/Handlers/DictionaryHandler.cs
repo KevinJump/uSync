@@ -180,7 +180,7 @@ namespace uSync8.ContentEdition.Handlers
             {
                 var parent = localizationService.GetDictionaryItemById(item.ParentId.Value);
                 if (parent != null)
-                    return item.ItemKey.ToSafeFileName() + Path.DirectorySeparatorChar + GetDictionaryPath(parent);
+                    return GetDictionaryPath(parent) + Path.DirectorySeparatorChar + item.ItemKey.ToSafeFileName();
             }
 
             return item.ItemKey.ToSafeFileName();
