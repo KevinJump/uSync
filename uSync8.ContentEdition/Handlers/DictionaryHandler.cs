@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 
@@ -168,7 +169,22 @@ namespace uSync8.ContentEdition.Handlers
             => item.ItemKey;
 
         protected override string GetItemPath(IDictionaryItem item, bool useGuid, bool isFlat)
-            => item.ItemKey.ToSafeFileName();
+        {
+            if (isFlat) return item.ItemKey.ToSafeFileName();
+            return GetDictionaryPath(item);
+        }
+
+        private string GetDictionaryPath(IDictionaryItem item)
+        {
+            if (item.ParentId.HasValue)
+            {
+                var parent = localizationService.GetDictionaryItemById(item.ParentId.Value);
+                if (parent != null)
+                    return item.ItemKey.ToSafeFileName() + Path.DirectorySeparatorChar + GetDictionaryPath(parent);
+            }
+
+            return item.ItemKey.ToSafeFileName();
+        }
 
         protected override void InitializeEvents(HandlerSettings settings)
         {
