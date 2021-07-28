@@ -49,16 +49,14 @@ namespace uSync8.ContentEdition.Serializers
             var info = node.Element("Info");
 
             var parentItemKey = info.Element("Parent").ValueOrDefault(string.Empty);
-            if (parentItemKey != string.Empty)
+            if (!string.IsNullOrWhiteSpace(parentItemKey))
             {
                 var parent = localizationService.GetDictionaryItemByKey(parentItemKey);
-                if (parent != null)
-                {
-                    return true;
-                }
+                return parent != null;
             }
 
-            return false;
+            // if the parent is empty, then there is no parent, and that is ok.
+            return true;
         }
 
         protected override SyncAttempt<IDictionaryItem> DeserializeCore(XElement node, SyncSerializerOptions options)
