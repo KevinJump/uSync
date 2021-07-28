@@ -27,6 +27,40 @@ namespace uSync8.ContentEdition.Serializers
             this.localizationService = localizationService;
         }
 
+        protected override SyncAttempt<IDictionaryItem> CanDeserialize(XElement node, SyncSerializerOptions options)
+        {
+            if (options.FailOnMissingParent)
+            {
+                // check the parent exists. 
+                if (!this.HasParentItem(node))
+                {
+                    return SyncAttempt<IDictionaryItem>.Fail(node.GetAlias(), ChangeType.ParentMissing, $"The parent node for this item is missing, and config is set to not import when a parent is missing");
+
+                }
+            }
+            return SyncAttempt<IDictionaryItem>.Succeed("No check", ChangeType.NoChange);
+        }
+
+        /// <summary>
+        ///  will check the xml to see if the specified parent exists in umbraco dictionary
+        /// </summary>
+        protected bool HasParentItem(XElement node)
+        {
+            var info = node.Element("Info");
+
+            var parentItemKey = info.Element("Parent").ValueOrDefault(string.Empty);
+            if (parentItemKey != string.Empty)
+            {
+                var parent = localizationService.GetDictionaryItemByKey(parentItemKey);
+                if (parent != null)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         protected override SyncAttempt<IDictionaryItem> DeserializeCore(XElement node, SyncSerializerOptions options)
         {
             var item = FindItem(node);

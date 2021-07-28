@@ -375,7 +375,7 @@ namespace uSync8.BackOffice.SyncHandlers
         {
             if (!ShouldImport(node, settings))
             {
-                return uSyncAction.SetAction(true, node.GetAlias(), message: "Change blocked (based on config)")
+                return uSyncAction.SetAction(true, node.GetAlias(), type: typeof(TObject), message: "Change blocked (based on config)")
                     .AsEnumerableOfOne();
             }
 
