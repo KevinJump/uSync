@@ -3,11 +3,15 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Linq;
+
 using System.Web.Http;
 
 using Umbraco.Core;
 using Umbraco.Web.Mvc;
 using Umbraco.Web.WebApi;
+using Umbraco.Web.WebApi.Filters;
+
+using uSync.Triggers.Auth;
 
 using uSync8.BackOffice;
 using uSync8.BackOffice.Configuration;
@@ -47,6 +51,8 @@ namespace uSync.Triggers.Controllers
     ///  
     /// </remarks>
     [PluginController("uSync")]
+    [uSyncTriggerAuth]
+    [UmbracoApplicationAuthorize(Constants.Applications.Settings)]
     public class TriggerController : UmbracoApiController
     {
         private readonly uSyncService _uSyncService;

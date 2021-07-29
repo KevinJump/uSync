@@ -15,4 +15,8 @@
 		<ProjectReference Include="..\uSync8.BackOffice\uSync8.BackOffice.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Reference Include="System.Web.ApplicationServices" />
+	</ItemGroup>
+
 </Project>
