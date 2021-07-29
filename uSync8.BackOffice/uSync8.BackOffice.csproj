@@ -87,7 +87,6 @@
     <Compile Include="Configuration\ConfigExtensions.cs" />
     <Compile Include="Configuration\OverriddenValue.cs" />
     <Compile Include="Configuration\uSyncHandlerSettings.cs" />
-    <Compile Include="Controllers\uSyncTriggerApiController.cs" />
     <Compile Include="Controllers\ViewModels\SyncActionOptions.cs" />
     <Compile Include="Controllers\ViewModels\SyncActionResult.cs" />
     <Compile Include="Controllers\uSyncApiController_HandlerImports.cs" />

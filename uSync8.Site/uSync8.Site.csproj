@@ -502,6 +502,10 @@
       <Project>{6d7486dc-0b84-4914-9c01-297467a6b706}</Project>
       <Name>uSync.TemplateTracker</Name>
     </ProjectReference>
+    <ProjectReference Include="..\uSync.Triggers\uSync.Triggers.csproj">
+      <Project>{367a32d4-88cb-49ba-b22a-4c9a6ce2a13d}</Project>
+      <Name>uSync.Triggers</Name>
+    </ProjectReference>
     <ProjectReference Include="..\uSync8.BackOffice\uSync8.BackOffice.csproj">
       <Project>{f2dfcb19-c9ee-471e-b8e2-e0b4dd31761d}</Project>
       <Name>uSync8.BackOffice</Name>
