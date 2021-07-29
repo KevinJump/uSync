@@ -48,20 +48,24 @@ namespace uSync.Triggers.Auth
 
             var user = ValidateUmbracoUser(username, password);
 
-            var umbracoIdentity = new UmbracoBackOfficeIdentity(
-                user.Id,
-                user.Username,
-                user.Name,
-                user.StartContentIds,
-                user.StartMediaIds,
-                "en-us",
-                Guid.NewGuid().ToString(),
-                user.SecurityStamp,
-                user.AllowedSections,
-                user.Groups.Select(x => x.Alias)
-                );
+            if (user != null)
+            {
 
-            context.Principal = new ClaimsPrincipal(umbracoIdentity);
+                var umbracoIdentity = new UmbracoBackOfficeIdentity(
+                    user.Id,
+                    user.Username,
+                    user.Name,
+                    user.StartContentIds,
+                    user.StartMediaIds,
+                    "en-us",
+                    Guid.NewGuid().ToString(),
+                    user.SecurityStamp,
+                    user.AllowedSections,
+                    user.Groups.Select(x => x.Alias)
+                    );
+
+                context.Principal = new ClaimsPrincipal(umbracoIdentity);
+            }
         }
 
         private (string username, string password) ExtractUserNameAndPassword(string authorizationParameter)
