@@ -13,6 +13,8 @@ nuget pack .\uSync8.Community.Contrib\uSync.Community.Contrib.nuspec  -OutputDir
 nuget pack .\uSync8.ContentEdition\uSync.ContentEdition.nuspec  -OutputDirectory .\dist\%1 -build -version %1 -properties "depends=%1;Configuration=%config%"
 nuget pack .\uSync8.ContentEdition\uSync.ContentEdition.Core.nuspec  -OutputDirectory .\dist\%1 -build -version %1 -properties "depends=%1;Configuration=%config%"
 
+nuget pack .\uSync.Triggers\uSync.Triggers.nuspec  -OutputDirectory .\dist\%1 -build -version %1 -properties "depends=%1;Configuration=%config%"
+
 REM nuget pack .\uSync8.Community.DataTypeSerializers\uSync.Community.DataTypeSerializers.nuspec  -OutputDirectory .\dist\%1 -build -version %1 -properties "depends=%1;Configuration=%config%"
 REM nuget pack .\uSync.Console\uSync.Console.nuspec  -OutputDirectory .\dist\%1 -build -version %1 -properties "depends=%1;Configuration=%config%"
 

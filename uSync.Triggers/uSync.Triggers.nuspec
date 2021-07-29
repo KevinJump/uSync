@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+	<metadata>
+		<id>uSync.Triggers</id>
+		<version>8.0.0-alpha58</version>
+		<title>uSync Api triggers for Umbraco 8</title>
+		<authors>Kevin Jump</authors>
+		<owners>Jumoo</owners>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<description>Set of API trigger end points so you can get uSync to do stuff for you from a url.</description>
+		<summary></summary>
+		<releaseNotes>
+			8.0 - Initial Release for uSync 8
+		</releaseNotes>
+		<dependencies>
+			<group targetFramework=".NETFramework4.7.2">
+				<dependency id="uSync.BackOffice.Core" version="8.9.0"/>
+			</group>
+		</dependencies>
+		<tags>umbraco usync</tags>
+		<repository type="git" url="https://github.com/KevinJump/uSync8" />
+	</metadata>
+	<files>
+		<file src="bin\$Configuration$\net472\uSync.triggers.dll" target="lib\net472" />
+		<file src="readme.txt" target="readme.txt" />
+	</files>
+</package>

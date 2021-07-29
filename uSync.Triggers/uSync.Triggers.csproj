@@ -1,15 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net472</TargetFramework>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net472</TargetFramework>
+		<ProductVersion>8.9.7</ProductVersion>
+		<FileVersion>8.9.7</FileVersion>
+		<AssemblyVersion>8.9.7</AssemblyVersion>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="UmbracoCms.Web" Version="8.1.1" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="UmbracoCms.Web" Version="8.1.1" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\uSync8.BackOffice\uSync8.BackOffice.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\uSync8.BackOffice\uSync8.BackOffice.csproj" />
+	</ItemGroup>
 
 </Project>
