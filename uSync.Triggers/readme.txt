@@ -15,17 +15,21 @@
 
   -----
 
-  n.b : this will not work until you have a uSync.TriggerKey value
+  n.b : this will not work until you have a uSync.Triggers value
   in your web.config 
   
-  <add key="uSync.TriggerKey" value="[YOUR-GUID-VALUE]"/>
-  (Also it has to be a GUID value) 
-
+  <add key="uSync.Triggers" value="True"/>
+  
   -----
 
-  with this set you can call import or export, 
+  With this set you can call import or export, via post or get
 
-  {siteUrl}/umbraco/usync/trigger/import?key=[YOUR-GUID-VALUE]
+  You need to supply a valid umbraco username/password 
+  the umbraco user must have access to the settings section 
+  (so can see the uSync tree)
+
+
+  {siteUrl}/umbraco/usync/trigger/import
 
   Valid Actions: 
       import: /umbraco/usync/trigger/import
@@ -44,6 +48,17 @@
              you add 
              <add key="uSync.TriggerFolderLimits" value="false"/>
              to your web.config. 
+
+
+  CURL Examples: 
+
+    // import default options 
+
+    curl -u user:password http://my.site/umbraco/usync/triggers/import
+
+    // import only settings 
+
+    curl -X POST -d 'group=settings' -u user:password http://my.site/umbraco/usync/triggers/import
 
     -----
  
