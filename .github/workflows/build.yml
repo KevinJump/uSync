@@ -29,7 +29,7 @@ jobs:
     
     # get nuget
     - name: Setup NuGet.exe for use with actions
-      uses: NuGet/setup-nuget@v1.0.2        
+      uses: NuGet/setup-nuget@v1.0.5        
     
     # setup msbuild 
     - name: setup-msbuild
