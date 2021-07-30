@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Configuration;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Web.Http;
@@ -84,15 +85,20 @@ namespace uSync.Triggers.Controllers
 
             EnsureOptions(options);
 
+            var sw = Stopwatch.StartNew();
+
             var handlerOptions = new SyncHandlerOptions 
             { 
                 Group = options.Group,
                 Set = options.Set,
             };
 
+
             var results = _uSyncService.Import(options.Folder, options.Force, handlerOptions);
 
-            return $"{results.CountChanges()} changes in {results.Count()} items";
+            sw.Stop(); 
+
+            return $"{results.CountChanges()} changes in {results.Count()} items in {sw.ElapsedMilliseconds}ms";
         }
 
         [HttpGet]
@@ -109,15 +115,20 @@ namespace uSync.Triggers.Controllers
 
             EnsureOptions(options);
 
+            var sw = Stopwatch.StartNew();
+
             var handlerOptions = new SyncHandlerOptions
             {
                 Group = options.Group,
                 Set = options.Set,
             };
 
+
             var result = _uSyncService.Export(options.Folder, handlerOptions);
 
-            return $"{result.CountChanges()} Exported items";
+            sw.Stop();
+
+            return $"{result.Count()} Exported items in {sw.ElapsedMilliseconds}ms";
         }
 
         
