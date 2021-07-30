@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
 using System.IO;
@@ -71,14 +72,14 @@ namespace uSync.Triggers.Controllers
         }
 
         [HttpGet]
-        public string Import(string group = "", string set = "", string folder = "", bool force = false)
+        public object Import(string group = "", string set = "", string folder = "", bool force = false, bool verbose = false)
         {
-            var options = GetOptions(group, set, folder, force);
+            var options = GetOptions(group, set, folder, force, verbose);
             return Import(options);
         }
 
         [HttpPost]
-        public string Import(TriggerOptions options)
+        public object Import(TriggerOptions options)
         {
 
             EnsureEnabled();
@@ -96,15 +97,22 @@ namespace uSync.Triggers.Controllers
 
             var results = _uSyncService.Import(options.Folder, options.Force, handlerOptions);
 
-            sw.Stop(); 
+            sw.Stop();
 
-            return $"{results.CountChanges()} changes in {results.Count()} items in {sw.ElapsedMilliseconds}ms";
+            if (options.Verbose)
+            {
+                return results.Where(x => x.Change != uSync8.Core.ChangeType.NoChange);
+            }
+            else
+            {
+                return $"{results.CountChanges()} changes in {results.Count()} items in {sw.ElapsedMilliseconds}ms".AsEnumerableOfOne();
+            }
         }
 
         [HttpGet]
-        public string Export(string group = "", string set = "", string folder = "", bool force = false)
+        public string Export(string group = "", string set = "", string folder = "", bool force = false, bool verbose = false)
         {
-            var options = GetOptions(group, set, folder, force);
+            var options = GetOptions(group, set, folder, force, verbose);
             return Export(options);
         }
 
@@ -172,14 +180,15 @@ namespace uSync.Triggers.Controllers
           
         }
 
-        private TriggerOptions GetOptions(string group, string set, string folder, bool force = false)
+        private TriggerOptions GetOptions(string group, string set, string folder, bool force = false, bool verbose = false)
         {
             var options = new TriggerOptions
             {
                 Group = string.IsNullOrWhiteSpace(group) ? _uSyncSettings.ImportAtStartupGroup : group,
                 Set = string.IsNullOrWhiteSpace(set) ? _uSyncSettings.DefaultSet : set,
                 Folder = string.IsNullOrWhiteSpace(folder) ? _uSyncSettings.RootFolder : folder,
-                Force = force
+                Force = force,
+                Verbose = verbose
             };
 
             EnsureOptions(options);
@@ -195,6 +204,8 @@ namespace uSync.Triggers.Controllers
         public string Set { get; set; }
         public string Folder { get; set; }
         public bool Force { get; set; }
+
+        public bool Verbose { get; set; }
     }
 
 }
