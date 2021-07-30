@@ -119,20 +119,27 @@ namespace uSync.Triggers.Auth
 
         private IUser ValidateUmbracoUser(string username, string password)
         {
-            // this is the Models builder way. 
-            // but i am not sure it increments failed attempts,
-            // so it would be suseptible to brute force ? 
-           
-            var provider = Membership.Providers[Constants.Security.UserMembershipProviderName];
-            if (provider == null || !provider.ValidateUser(username, password))
-                return null;
-           
+            try
+            {
+                // this is the Models builder way. 
+                // but i am not sure it increments failed attempts,
+                // so it would be suseptible to brute force ? 
 
-            var user = Current.Services.UserService.GetByUsername(username);
-            if (!user.IsApproved || user.IsLockedOut)
-                return null;
+                var provider = Membership.Providers[Constants.Security.UserMembershipProviderName];
+                if (provider == null || !provider.ValidateUser(username, password))
+                    return null;
 
-            return user;
+
+                var user = Current.Services.UserService.GetByUsername(username);
+                if (!user.IsApproved || user.IsLockedOut)
+                    return null;
+
+                return user;
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         public Task ChallengeAsync(HttpAuthenticationChallengeContext context, CancellationToken cancellationToken)

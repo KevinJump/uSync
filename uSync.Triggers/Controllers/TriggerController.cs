@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Linq;
-
+using System.Net.Http.Formatting;
 using System.Web.Http;
 
 using Umbraco.Core;
@@ -70,11 +70,19 @@ namespace uSync.Triggers.Controllers
         }
 
         [HttpGet]
-        public string Import(Guid key, string group = "", string set = "", string folder = "", bool force = false)
+        public string Import(string group = "", string set = "", string folder = "", bool force = false)
         {
-            EnsureValidKey(key);
-
             var options = GetOptions(group, set, folder, force);
+            return Import(options);
+        }
+
+        [HttpPost]
+        public string Import(TriggerOptions options)
+        {
+
+            EnsureEnabled();
+
+            EnsureOptions(options);
 
             var handlerOptions = new SyncHandlerOptions 
             { 
@@ -88,11 +96,18 @@ namespace uSync.Triggers.Controllers
         }
 
         [HttpGet]
-        public string Export(Guid key, string group = "", string set = "", string folder = "")
+        public string Export(string group = "", string set = "", string folder = "", bool force = false)
         {
-            EnsureValidKey(key);
+            var options = GetOptions(group, set, folder, force);
+            return Export(options);
+        }
 
-            var options = GetOptions(group, set, folder);
+        [HttpPost]
+        public string Export(TriggerOptions options)
+        {
+            EnsureEnabled();
+
+            EnsureOptions(options);
 
             var handlerOptions = new SyncHandlerOptions
             {
@@ -106,33 +121,40 @@ namespace uSync.Triggers.Controllers
         }
 
         
-        private void EnsureValidKey(Guid key)
+        private void EnsureEnabled()
         {
-            var triggerKey = ConfigurationManager.AppSettings["uSync.TriggerKey"];
+            var triggersEnabled = ConfigurationManager.AppSettings["uSync.Triggers"];
 
-            if (string.IsNullOrWhiteSpace(triggerKey))
-                throw new KeyNotFoundException("Missing/Inavlid Key");
-
-            if (!Guid.TryParse(triggerKey, out Guid triggerGuid))
-                throw new KeyNotFoundException("Missing/Inavlid Key");
-
-            if (triggerGuid != key)
-                throw new KeyNotFoundException("Missing/Inavlid Key");
+            if (string.IsNullOrWhiteSpace(triggersEnabled) || !bool.Parse(triggersEnabled))
+                throw new HttpResponseException(System.Net.HttpStatusCode.ServiceUnavailable);
         }
 
-        private void EnsureFolder(string folder)
+        private void EnsureOptions(TriggerOptions options)
         {
+            if (string.IsNullOrWhiteSpace(options.Group))
+                options.Group = _uSyncSettings.ImportAtStartupGroup;
+
+            if (string.IsNullOrWhiteSpace(options.Set))
+                options.Set = _uSyncSettings.DefaultSet;
+
+            if (string.IsNullOrWhiteSpace(options.Folder))
+                options.Folder = _uSyncSettings.RootFolder;
+
+            if (options.Group.InvariantEquals("all"))
+                options.Group = "";
+
+
             var folderLimits = ConfigurationManager.AppSettings["uSync.TriggerFolderLimits"];
 
             var limits = string.IsNullOrWhiteSpace(folderLimits) || bool.Parse(folderLimits);
 
             if (limits)
             {
-                var absPath = _fileService.GetAbsPath(folder);
+                var absPath = _fileService.GetAbsPath(options.Folder);
                 var rootPath = Path.GetFullPath(Path.GetDirectoryName(_uSyncSettings.RootFolder.TrimEnd(Path.DirectorySeparatorChar)));
 
                 if (!absPath.InvariantStartsWith(rootPath))
-                    throw new AccessViolationException($"Cannot access {folder} out of uSync folder limits");
+                    throw new AccessViolationException($"Cannot access {options.Folder} out of uSync folder limits");
             }
 
             // no folder limits (you can import/export to anywhere on disk!)
@@ -149,14 +171,14 @@ namespace uSync.Triggers.Controllers
                 Force = force
             };
 
-            EnsureFolder(options.Folder);
+            EnsureOptions(options);
 
             return options;
         }
 
     }
 
-    internal class TriggerOptions
+    public class TriggerOptions
     {
         public string Group { get; set; }
         public string Set { get; set; }
