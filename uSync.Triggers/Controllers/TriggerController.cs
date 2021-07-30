@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Linq;
-using System.Net.Http.Formatting;
 using System.Web.Http;
 
 using Umbraco.Core;
@@ -24,14 +22,16 @@ namespace uSync.Triggers.Controllers
     ///  Api Trigger for uSync commands - good for batch jobs and CD/CI commands. 
     /// </summary>
     /// <remarks>
-    ///  will not work unless you have a TriggerKey setting in web.config 
+    ///  will not work unless you have a uSync.Triggers setting in web.config 
     ///  
     ///  e.g
-    ///   <add key="uSync.TriggerKey" value="FF57D4D6-ABF5-406B-8531-21C51ECC2DD7"/>
+    ///   <add key="uSync.Triggers" value="True"/>
     /// 
     ///  url to trigger an import : 
     ///  
-    ///  {siteUrl}/umbraco/usync/trigger/import?key=FF57D4D6-ABF5-406B-8531-21C51ECC2DD7
+    ///  {siteUrl}/umbraco/usync/trigger/import
+    ///  
+    ///  uses basic auth: so needs username/password sent in header (64 bit encoded)
     ///  
     ///  valid actions: 
     ///  
