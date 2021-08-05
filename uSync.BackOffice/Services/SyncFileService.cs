@@ -20,21 +20,14 @@ namespace uSync.BackOffice.Services
     /// </summary>
     public class SyncFileService
     {
-        private string mappedRoot;
         private readonly ILogger<SyncFileService> logger;
         private readonly IHostingEnvironment hostEnvironment;
 
-        private readonly uSyncConfigService uSyncConfig;
-
-        public SyncFileService(uSyncConfigService uSyncConfigService,
-                               ILogger<SyncFileService> logger,
+        public SyncFileService(ILogger<SyncFileService> logger,
                                IHostingEnvironment hostEnvironment)
         {
             this.logger = logger;
-            this.uSyncConfig = uSyncConfigService;
             this.hostEnvironment = hostEnvironment;
-
-            this.mappedRoot = GetAbsPath(uSyncConfig.GetRootFolder());
         }
 
         public string GetAbsPath(string path)
