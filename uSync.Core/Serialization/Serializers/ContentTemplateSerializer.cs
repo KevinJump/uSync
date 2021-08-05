@@ -79,7 +79,7 @@ namespace uSync.Core.Serialization.Serializers
             }
 
             var contentTypeAlias = node.Name.LocalName;
-            if (this.IsEmpty(node))
+            if (node.IsEmptyItem())
             {
                 contentTypeAlias = node.GetAlias();
             }

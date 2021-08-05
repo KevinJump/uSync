@@ -57,7 +57,7 @@ namespace uSync.Core.Serialization
 
         public SyncAttempt<TObject> Deserialize(XElement node, SyncSerializerOptions options)
         {
-            if (IsEmpty(node))
+            if (node.IsEmptyItem())
             {
                 // new behavior when a node is 'empty' that is a marker for a delete or rename
                 // so we process that action here, no more action file/folders
@@ -140,21 +140,14 @@ namespace uSync.Core.Serialization
                 && node.GetKey() != Guid.Empty
                 && node.GetAlias() != string.Empty;
 
-        /// <summary>
-        ///  Does the XML represent an Empty uSync Action?
-        /// </summary>
-        /// <param name="node">XML to examine</param>
-        /// <returns>true if the file is an 'empty' file</returns>
-        public bool IsEmpty(XElement node)
-            => node.Name.LocalName == uSyncConstants.Serialization.Empty;
-
+ 
         /// <summary>
         ///  Is the XML either valid or 'Empty' 
         /// </summary>
         /// <param name="node">XML to examine</param>
         /// <returns>true if file is valid or empty</returns>
         public bool IsValidOrEmpty(XElement node)
-            => IsEmpty(node) || IsValid(node);
+            => node.IsEmptyItem() || IsValid(node);
 
         /// <summary>
         ///  Process the action in teh 'empty' XML node
@@ -165,7 +158,7 @@ namespace uSync.Core.Serialization
         protected SyncAttempt<TObject> ProcessAction(XElement node, SyncSerializerOptions options)
 
         {
-            if (!IsEmpty(node))
+            if (!node.IsEmptyItem())
                 throw new ArgumentException("Cannot process actions on a non-empty node");
 
             var actionType = node.Attribute("Change").ValueOrDefault<SyncActionType>(SyncActionType.None);
@@ -252,7 +245,7 @@ namespace uSync.Core.Serialization
 
             if (current == null)
             {
-                if (IsEmpty(node))
+                if (node.IsEmptyItem())
                 {
                     // we tell people it's a clean.
                     if (node.GetEmptyAction() == SyncActionType.Clean) return ChangeType.Clean;
@@ -266,7 +259,7 @@ namespace uSync.Core.Serialization
                 }
             }
 
-            if (IsEmpty(node)) return CalculateEmptyChange(node, current);
+            if (node.IsEmptyItem()) return CalculateEmptyChange(node, current);
 
             var newHash = MakeHash(node);
 

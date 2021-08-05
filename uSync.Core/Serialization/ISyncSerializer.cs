@@ -27,11 +27,6 @@ namespace uSync.Core.Serialization
         bool IsValid(XElement node);
 
         /// <summary>
-        ///  tells us if this is an empty node (so result of a rename or delete)
-        /// </summary>
-        bool IsEmpty(XElement node);
-
-        /// <summary>
         ///  this serializer has two passes
         /// </summary>
         bool IsTwoPass { get; }

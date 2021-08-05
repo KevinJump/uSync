@@ -51,7 +51,7 @@ namespace uSync.Core.Tracking
 
         public IEnumerable<uSyncChange> GetChanges(XElement target, XElement source, SyncSerializerOptions options)
         {
-            if (serializer.IsEmpty(target))
+            if (target.IsEmptyItem())
                 return GetEmptyFileChange(target, source).AsEnumerableOfOne();
 
             if (!serializer.IsValid(target))
