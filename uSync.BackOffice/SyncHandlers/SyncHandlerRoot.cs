@@ -306,13 +306,13 @@ namespace uSync.BackOffice.SyncHandlers
             }
             catch (FileNotFoundException notFoundException)
             {
-                return uSyncAction.Fail(Path.GetFileName(filePath), this.handlerType, ChangeType.Fail, $"File not found {notFoundException.Message}")
+                return uSyncAction.Fail(Path.GetFileName(filePath), this.handlerType, ChangeType.Fail, $"File not found {notFoundException.Message}", notFoundException)
                     .AsEnumerableOfOne();
             }
             catch (Exception ex)
             {
                 logger.LogWarning("{alias}: Import Failed : {exception}", this.Alias, ex.ToString());
-                return uSyncAction.Fail(Path.GetFileName(filePath), this.handlerType, ChangeType.Fail, $"Import Fail: {ex.Message}")
+                return uSyncAction.Fail(Path.GetFileName(filePath), this.handlerType, ChangeType.Fail, $"Import Fail: {ex.Message}", ex)
                     .AsEnumerableOfOne();
             }
         }
@@ -349,7 +349,7 @@ namespace uSync.BackOffice.SyncHandlers
             {
                 // blocked
                 return uSyncActionHelper<TObject>
-                    .ReportAction(ChangeType.NoChange, node.GetAlias(), GetNameFromFileOrNode(filename, node), node.GetKey(), this.Alias)
+                    .ReportAction(ChangeType.NoChange, node.GetAlias(), GetNameFromFileOrNode(filename, node), node.GetKey(), this.Alias, "Change stopped by delegate event")
                     .AsEnumerableOfOne();
             }
 
@@ -378,7 +378,7 @@ namespace uSync.BackOffice.SyncHandlers
             catch (Exception ex)
             {
                 logger.LogWarning("{alias}: Import Failed : {exception}", this.Alias, ex.ToString());
-                return uSyncAction.Fail(Path.GetFileName(filename), this.handlerType, ChangeType.Fail, $"Import Fail: {ex.Message}")
+                return uSyncAction.Fail(Path.GetFileName(filename), this.handlerType, ChangeType.Fail, $"{this.Alias} Import Fail", ex)
                     .AsEnumerableOfOne();
             }
 
@@ -472,7 +472,7 @@ namespace uSync.BackOffice.SyncHandlers
             catch (Exception ex)
             {
                 logger.LogWarning($"Second Import Failed: {ex}");
-                return uSyncAction.Fail(action.Name, action.ItemType, ex).AsEnumerableOfOne();
+                return uSyncAction.Fail(action.Name, action.ItemType, ChangeType.ImportFail, "Second import failed", ex).AsEnumerableOfOne();
             }
         }
 
@@ -725,7 +725,8 @@ namespace uSync.BackOffice.SyncHandlers
             if (item != null)
                 return Export(item, folder, settings);
 
-            return uSyncAction.Fail(nameof(udi), typeof(TObject).ToString(), ChangeType.Fail, "Item not found")
+            return uSyncAction.Fail(nameof(udi), typeof(TObject).ToString(), ChangeType.Fail, $"Item not found {udi}",
+                 new KeyNotFoundException(nameof(udi)))
                 .AsEnumerableOfOne();
         }
 
@@ -733,12 +734,14 @@ namespace uSync.BackOffice.SyncHandlers
         virtual public IEnumerable<uSyncAction> Export(TObject item, string folder, HandlerSettings config)
         {
             if (item == null)
-                return uSyncAction.Fail(nameof(item), typeof(TObject).ToString(), ChangeType.Fail, "Item not set").AsEnumerableOfOne();
+                return uSyncAction.Fail(nameof(item), typeof(TObject).ToString(), ChangeType.Fail, "Item not set", 
+                    new ArgumentNullException(nameof(item))).AsEnumerableOfOne();
 
             if (_mutexService.FireItemStartingEvent(new uSyncExportingItemNotification<TObject>(item))) 
             {
                 return uSyncActionHelper<TObject>
-                    .ReportAction(ChangeType.NoChange, GetItemName(item), string.Empty, GetItemKey(item), this.Alias)
+                    .ReportAction(ChangeType.NoChange, GetItemName(item), string.Empty, GetItemKey(item), this.Alias, 
+                                    "Change stopped by delegate event")
                     .AsEnumerableOfOne();
             }
 
@@ -964,7 +967,8 @@ namespace uSync.BackOffice.SyncHandlers
                 if (_mutexService.FireItemStartingEvent(new uSyncReportingItemNotification(node)))
                 {
                     return uSyncActionHelper<TObject>
-                        .ReportAction(ChangeType.NoChange, node.GetAlias(), GetNameFromFileOrNode(filename, node), node.GetKey(), this.Alias)
+                        .ReportAction(ChangeType.NoChange, node.GetAlias(), GetNameFromFileOrNode(filename, node), node.GetKey(), this.Alias,
+                            "Change stopped by delegate event")
                         .AsEnumerableOfOne();
                 }
 
@@ -978,7 +982,7 @@ namespace uSync.BackOffice.SyncHandlers
                 var change = IsItemCurrent(node, serializerOptions);
 
                 var action = uSyncActionHelper<TObject>
-                        .ReportAction(change.Change, node.GetAlias(), GetNameFromFileOrNode(filename, node), node.GetKey(), this.Alias);
+                        .ReportAction(change.Change, node.GetAlias(), GetNameFromFileOrNode(filename, node), node.GetKey(), this.Alias, "");
 
                 action.Message = "";
 
@@ -1038,7 +1042,8 @@ namespace uSync.BackOffice.SyncHandlers
                 }
                 else
                 {
-                    return uSyncActionHelper<TObject>.ReportAction(false, node.GetAlias(), "Will not be imported (Based on config)")
+                    return uSyncActionHelper<TObject>.ReportAction(ChangeType.NoChange, node.GetAlias(), file, node.GetKey(),
+                        this.Alias, "Will not be imported (Based on config)")
                         .AsEnumerableOfOne<uSyncAction>();
                 }
             }

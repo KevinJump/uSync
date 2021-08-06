@@ -155,7 +155,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
                 if (item != null)
                 {
                     return uSyncActionHelper<IDictionaryItem>
-                        .ReportAction(false, item.ItemKey, "Existing Item will not be overwritten")
+                        .ReportAction(ChangeType.NoChange, item.ItemKey, filename, item.Key, this.Alias, "Existing Item will not be overwritten")
                         .AsEnumerableOfOne<uSyncAction>();
                 }
             }

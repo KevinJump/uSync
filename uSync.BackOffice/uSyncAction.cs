@@ -70,20 +70,6 @@ namespace uSync.BackOffice
             : this(success, name, type, change, message, ex, filename, null, postProcess)
         { }
 
-
-        public static uSyncAction SetAction(
-            bool success,
-            string name,
-            string handlerAlias,
-            string type = "",
-            ChangeType change = ChangeType.NoChange,
-            string message = null,
-            Exception ex = null,
-            string filename = null)
-        {
-            return new uSyncAction(success, name, type, change, message, ex, filename, handlerAlias);
-        }
-
         public static uSyncAction SetAction(
             bool success,
             string name,
@@ -96,52 +82,12 @@ namespace uSync.BackOffice
             return new uSyncAction(success, name, type, change, message, ex, filename);
         }
 
-        public static uSyncAction Fail(string name,
-            string type = "",
-            ChangeType change = ChangeType.Fail,
-            string message = null,
-            Exception ex = null,
-            string filename = null)
-        {
-            return new uSyncAction(false, name, type, change, message, null, string.Empty);
-        }
-
-
-        public static uSyncAction Fail(string name, string type, string message)
-        {
-            return new uSyncAction(false, name, type, ChangeType.Fail, message, null, string.Empty);
-        }
-
-
-        public static uSyncAction Fail(string name, string type, ChangeType change, string message)
-        {
-            return new uSyncAction(false, name, type, change, message, null, string.Empty);
-        }
-
-        public static uSyncAction Fail(string name, string type, string message, string file)
-        {
-            return new uSyncAction(false, name, type, ChangeType.Fail, message, null, file);
-        }
-
-        public static uSyncAction Fail(string name, string type, Exception ex)
-        {
-            return new uSyncAction(false, name, type, ChangeType.Fail, string.Empty, ex, string.Empty);
-        }
-
-        public static uSyncAction Fail(string name, string type, ChangeType change, Exception ex)
-        {
-            return new uSyncAction(false, name, type, change, string.Empty, ex, string.Empty);
-        }
-
-        public static uSyncAction Fail(string name, string type, Exception ex, string file)
-        {
-            return new uSyncAction(false, name, type, ChangeType.Fail, string.Empty, ex, file);
-        }
+        public static uSyncAction Fail(string name, string type, ChangeType change, string message, Exception ex)
+            => new uSyncAction(false, name, type, change, message, ex, string.Empty);
     }
 
     public struct uSyncActionHelper<T>
     {
-
         public static uSyncAction SetAction(SyncAttempt<T> attempt, string filename, Guid key, string handlerAlias, bool requirePostProcessing = true)
         {
             var action = new uSyncAction(attempt.Success, attempt.Name, attempt.ItemType, attempt.Change, attempt.Message, attempt.Exception, filename, handlerAlias, requirePostProcessing);
@@ -153,37 +99,15 @@ namespace uSync.BackOffice
             return action;
         }
 
-        public static uSyncAction ReportAction(ChangeType changeType, string name)
+        public static uSyncAction ReportAction(ChangeType changeType, string name, string file, Guid key, string handlerAlias, string message)
         {
-            return new uSyncAction(true, name, typeof(T).Name, changeType, string.Empty, null, string.Empty);
-        }
-
-        public static uSyncAction ReportAction(ChangeType changeType, string name, string file, Guid key, string handlerAlias)
-        {
-            return new uSyncAction(true, name, typeof(T).Name, changeType, string.Empty, null, file, handlerAlias)
+            return new uSyncAction(true, name, typeof(T).Name, changeType, message, null, file, handlerAlias)
             {
                 key = key
             };
         }
 
-        public static uSyncAction ReportAction(bool willUpdate, string name, string message)
-        {
-            return new uSyncAction(true, name, typeof(T).Name,
-                willUpdate ? ChangeType.Update : ChangeType.NoChange,
-                message, null, string.Empty);
-        }
-
-        public static uSyncAction ReportAction(bool willUpdate, string name, string message, string handlerAlias)
-        {
-            return new uSyncAction(true, name, typeof(T).Name,
-                willUpdate ? ChangeType.Update : ChangeType.NoChange,
-                message, null, string.Empty, handlerAlias);
-
-        }
-
         public static uSyncAction ReportActionFail(string name, string message)
-        {
-            return new uSyncAction(false, name, typeof(T).Name, ChangeType.Fail, message, null, string.Empty);
-        }
+            => new uSyncAction(false, name, typeof(T).Name, ChangeType.Fail, message, null, string.Empty);
     }
 }
