@@ -15,6 +15,16 @@ namespace uSync.Core
 {
     public static class uSyncCoreBuilderExtensions
     {
+        /// <summary>
+        ///  Adds uSyncCore to project. 
+        /// </summary>
+        /// <remarks>
+        ///  uSyncCore does not usally need to be registerd seperatly from 
+        ///  uSync. unless you are using core features but not backoffice (files, handler) features
+        /// </remarks>
+        /// <param name="builder"></param>
+        /// <returns></returns>
+
         public static IUmbracoBuilder AdduSyncCore(this IUmbracoBuilder builder)
         {
             // TODO: Check this - in theory, if SyncEnityCache is already registered we don't run again.
