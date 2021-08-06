@@ -5,7 +5,7 @@ namespace uSync.BackOffice
 {
     public static partial class uSyncConstants
     {
-        public const string ReleaseSuffix = "";
+        public const string ReleaseSuffix = "-rc002";
 
         public static class Priorites
         {

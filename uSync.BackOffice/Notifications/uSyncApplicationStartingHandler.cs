@@ -89,13 +89,13 @@ namespace uSync.BackOffice.Notifications
             {
                 using (var reference = _umbracoContextFactory.EnsureUmbracoContext())
                 {
-                    if (_uSyncConfig.Settings.ExportAtStartup || (ExportOnSaveOn() && !_syncFileService.RootExists(_uSyncConfig.GetRootFolder())))
+                    if (IsExportAtStatupEnabled() || (IsExportOnSaveOn() && !_syncFileService.RootExists(_uSyncConfig.GetRootFolder())))
                     {
 
-                        var options = new SyncHandlerOptions();
-                        if (ExportOnSaveOn()){
-                            options.Group = _uSyncConfig.Settings.ExportOnSave;
-                        }
+                        var options = new SyncHandlerOptions
+                        {
+                            Group = _uSyncConfig.Settings.ExportOnSave
+                        };
                         
                         _logger.LogInformation("uSync: Running export at startup");
                         _uSyncService.Export(_uSyncConfig.GetRootFolder(), options);
@@ -133,12 +133,6 @@ namespace uSync.BackOffice.Notifications
 
         }
 
-        /// <summary>
-        ///  is the export on save feature on (not blank or none)
-        /// </summary>
-        private bool ExportOnSaveOn(){
-            return (!string.IsNullOrWhiteSpace(_uSyncConfig.Settings.ExportOnSave) && !_uSyncConfig.Settings.ExportOnSave.InvariantEquals("none"));
-        }
 
         /// <summary>
         ///  does the uSync folder contain a uSync.stop file (which would mean we would not process anything at startup)
@@ -159,9 +153,24 @@ namespace uSync.BackOffice.Notifications
             }
         }
 
+        /// <summary>
+        ///  is the export on save feature on (not blank or none)
+        /// </summary>
+        private bool IsExportOnSaveOn()
+            => IsGroupSettingEnabled(_uSyncConfig.Settings.ExportOnSave);
+
         private bool IsImportAtStatupEnabled()
-            => !string.IsNullOrWhiteSpace(_uSyncConfig.Settings.ImportAtStartup)
-                && !_uSyncConfig.Settings.ImportAtStartup.InvariantEquals("none");
+            => IsGroupSettingEnabled(_uSyncConfig.Settings.ImportAtStartup);
+
+        private bool IsExportAtStatupEnabled()
+            => IsGroupSettingEnabled(_uSyncConfig.Settings.ExportAtStartup);
+
+
+        private bool IsGroupSettingEnabled(string value)
+            => !string.IsNullOrWhiteSpace(value)
+                && !value.InvariantEquals("none")
+                && !value.InvariantEquals("off")
+                && !value.InvariantEquals("false");
 
     }
 }

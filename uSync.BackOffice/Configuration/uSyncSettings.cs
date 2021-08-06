@@ -18,17 +18,23 @@ namespace uSync.BackOffice.Configuration
         /// <summary>
         ///  Import when Umbraco boots (can be group name or 'All' so everything is done, blank or 'none' == off)
         /// </summary>
-        public string ImportAtStartup { get; set; } = "";
+        public string ImportAtStartup { get; set; } = "None";
 
         /// <summary>
         ///  Export when Umbraco boots
         /// </summary>
-        public bool ExportAtStartup { get; set; } = false;
+        public string ExportAtStartup { get; set; } = "None";
 
         /// <summary>
         ///  Export when an item is saved in Umbraco
         /// </summary>
         public string ExportOnSave { get; set; } = "All";
+
+
+        /// <summary>
+        ///  The handler groups that are enabled in the UI.
+        /// </summary>
+        public string UIEnabledGroups { get; set; } = "All";
 
         /// <summary>
         ///  Debug reports (creates an export into a temp folder for comparison)

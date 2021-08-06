@@ -21,9 +21,14 @@ namespace uSync.BackOffice.Controllers
         /// </summary>
         [HttpPost]
         public IEnumerable<SyncHandlerView> GetActionHandlers(HandlerActions action, uSyncOptions options)
-            => handlerFactory.GetValidHandlers(new SyncHandlerOptions
+        {
+            var handlerGroup = string.IsNullOrWhiteSpace(options.Group)
+                ? uSyncConfig.Settings.UIEnabledGroups
+                : options.Group;
+
+            return handlerFactory.GetValidHandlers(new SyncHandlerOptions
             {
-                Group = options.Group,
+                Group = handlerGroup,
                 Action = action
             }).Select(x => new SyncHandlerView
             {
@@ -33,6 +38,7 @@ namespace uSync.BackOffice.Controllers
                 Icon = x.Handler.Icon,
                 Group = x.Handler.Group
             });
+        }
 
         /// <summary>
         ///  run the report process against a given handler alias

@@ -82,9 +82,16 @@ namespace uSync.BackOffice.Controllers
         ///  return handler groups for all enabled handlers
         /// </summary>
         [HttpGet]
-        public IDictionary<string,string> GetHandlerGroups()
-            => handlerFactory.GetValidGroups(new SyncHandlerOptions(uSyncConfig.Settings.DefaultSet))
+        public IDictionary<string, string> GetHandlerGroups()
+        {
+            var options = new SyncHandlerOptions(uSyncConfig.Settings.DefaultSet)
+            {
+                Group = uSyncConfig.Settings.UIEnabledGroups
+            };
+
+            return handlerFactory.GetValidGroups(options)
                        .ToDictionary(k => k, v => uSyncConstants.Groups.Icons[v]);
+        }
 
         /// <summary>
         ///  returns the handler groups, even if the handlers
@@ -95,14 +102,21 @@ namespace uSync.BackOffice.Controllers
             => handlerFactory.GetGroups();
 
         [HttpGet]
-        public IEnumerable<object> GetHandlers()
-            => handlerFactory.GetAll()
+        public IEnumerable<SyncHandlerSummary> GetHandlers()
+        {
+            var options = new SyncHandlerOptions
+            {
+                Group = uSyncConfig.Settings.UIEnabledGroups
+            };
+
+            return handlerFactory.GetValidHandlers(options)
                 .Select(x => new SyncHandlerSummary()
                 {
-                    Icon = x.Icon,
-                    Name = x.Name,
+                    Icon = x.Handler.Icon,
+                    Name = x.Handler.Name,
                     Status = HandlerStatus.Pending
                 });
+        }
 
         [HttpPost]
         public IEnumerable<uSyncAction> Report(uSyncOptions options)

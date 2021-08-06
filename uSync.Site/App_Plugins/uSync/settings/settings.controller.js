@@ -3,6 +3,7 @@
 
     function settingsController($scope,
         uSync8DashboardService,
+        overlayService,
         notificationsService) {
 
         var vm = this;
@@ -10,9 +11,12 @@
         vm.loading = true;
         vm.readonly = true;
 
+        vm.docslink = "https://docs.jumoo.co.uk/uSync/v9/settings/";
+
         vm.umbracoVersion = Umbraco.Sys.ServerVariables.application.version;
 
         vm.saveSettings = saveSettings;
+        vm.openAppSettingsOverlay = openAppSettingsOverlay;
 
         init();
 
@@ -53,6 +57,37 @@
                     notificationsService.error('Saving', error.data.Message);
                 });
         }
+
+
+
+        function openAppSettingsOverlay() {
+
+            var appSetting = {
+                "uSync": {
+                    "Settings": vm.settings,
+                    "Sets": {
+                        "Default": vm.handlerSet
+                    }
+                }
+            };
+
+            var options = {
+                view: Umbraco.Sys.ServerVariables.umbracoSettings.appPluginsPath + '/usync/settings/settings.overlay.html',
+                title: 'appsettings.json snipped',
+                content: JSON.stringify(appSetting, null, 4),
+                docslink: vm.docslink,
+                disableBackdropClick: true,
+                disableEscKey: true,
+                hideSubmitButton: true,
+                submit: function () {
+                    overlayService.close();
+                }
+            };
+
+            overlayService.confirm(options);
+
+        }
+
 
     }
 

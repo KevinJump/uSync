@@ -451,3 +451,22 @@ ul.usync-action-list {
 .usync-fresh-view .umb-empty-state {
     color: #ddd;
 }
+
+
+.usync-setting-value {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5em;
+    border-bottom: 1px solid #e9e9eb;
+    padding-bottom: 0.5em;
+}
+
+    .usync-setting-value .umb-permission__value {
+        flex-basis: 20%;
+        text-align: right;
+        font-weight: 700;
+    }
+
+.usync-setting-value:last-child {
+    border-bottom: none;
+}

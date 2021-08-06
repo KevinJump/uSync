@@ -18,10 +18,10 @@ namespace uSync.BackOffice.Configuration
         private IOptionsMonitor<uSyncHandlerSetSettings> setOptionsMonitor;
 
         public uSyncConfigService(
-            IOptionsMonitor<uSyncSettings> options,
+            IOptionsMonitor<uSyncSettings> settingsOptionsMonitor,
             IOptionsMonitor<uSyncHandlerSetSettings> setOptionsMonitor)
         {
-            _settingsMonitor = options;
+            _settingsMonitor = settingsOptionsMonitor;
             this.setOptionsMonitor = setOptionsMonitor;
         }
 

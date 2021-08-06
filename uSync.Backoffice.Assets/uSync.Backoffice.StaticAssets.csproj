@@ -39,5 +39,9 @@
 		</None>
 	</ItemGroup>
 
+	<ItemGroup>
+	  <None Remove="App_Plugins\usync\settings\settings.overlay.html" />
+	</ItemGroup>
+
 
 </Project>
