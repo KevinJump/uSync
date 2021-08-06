@@ -90,15 +90,17 @@ namespace uSync.Core.Serialization.Serializers
             }
 
             var hasBeenSaved = false;
+            var message = "";
             if (options.GetSetting<bool>("IncludeRelations", true))
             {
                 // we have to save before we can add the relations. 
                 this.SaveItem(item);
                 hasBeenSaved = true;
+                message = "Relation items included";
                 details.AddRange(DeserializeRelations(node, item, options));
             }
 
-            return SyncAttempt<IRelationType>.Succeed(item.Name, item, ChangeType.Import, hasBeenSaved, details);
+            return SyncAttempt<IRelationType>.Succeed(item.Name, item, ChangeType.Import, message, hasBeenSaved, details);
         }
 
         /// <summary>

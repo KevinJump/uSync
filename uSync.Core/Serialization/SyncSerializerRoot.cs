@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Xml.Linq;
@@ -297,7 +298,7 @@ namespace uSync.Core.Serialization
 
             var node = XElementExtensions.MakeEmpty(ItemKey(item), change, alias);
 
-            return SyncAttempt<XElement>.Succeed("Empty", node, ChangeType.Removed);
+            return SyncAttempt<XElement>.Succeed("Empty", node, ChangeType.Removed, null);
         }
 
 

@@ -73,14 +73,6 @@ namespace uSync.Core.Models
         public static SyncAttempt<TObject> Succeed(string name, ChangeType change)
             => new SyncAttempt<TObject>(true, name, default(TObject), typeof(TObject).Name, change, string.Empty, null, false);
 
-        //public static SyncAttempt<TObject> Succeed(string name, ChangeType change, string message)
-        //    => new SyncAttempt<TObject>(true, name, default(TObject), typeof(TObject).Name, change, message, null, false);
-
-
-        // item passed back versions 
-        public static SyncAttempt<TObject> Succeed(string name, TObject item, ChangeType change)
-            => new SyncAttempt<TObject>(true, name, item, typeof(TObject).Name, change, string.Empty, null, false);
-
         public static SyncAttempt<TObject> Succeed(string name, TObject item, ChangeType change, IList<uSyncChange> details)
         {
             var attempt = new SyncAttempt<TObject>(true, name, item, typeof(TObject).Name, change, string.Empty, null, false);
@@ -88,22 +80,7 @@ namespace uSync.Core.Models
             return attempt;
         }
 
-        //public static SyncAttempt<TObject> Succeed(string name, TObject item, ChangeType change, bool saved)
-        //    => Succeed(name, item, change, saved, null);
-
-        public static SyncAttempt<TObject> Succeed(string name, TObject item, ChangeType change, bool saved, IList<uSyncChange> details)
-        {
-            var attempt = new SyncAttempt<TObject>(true, name, item, typeof(TObject).Name, change, string.Empty, null, saved);
-            if (details != null) attempt.Details = details;
-            return attempt;
-        }
-
-        //public static SyncAttempt<TObject> Succeed(string name, TObject item, ChangeType change, string message)
-        //    => new SyncAttempt<TObject>(true, name, item, typeof(TObject).Name, change, message, null, false);
-
-        //public static SyncAttempt<TObject> Succeed(string name, TObject item, ChangeType change, string message, bool saved)
-        //    => Succeed(name, item, change, message, saved, null);
-
+     
         public static SyncAttempt<TObject> Succeed(string name, TObject item, ChangeType change, string message, bool saved, IList<uSyncChange> details)
         {
             var attempt = new SyncAttempt<TObject>(true, name, item, typeof(TObject).Name, change, message, null, saved);
@@ -111,42 +88,15 @@ namespace uSync.Core.Models
             return attempt;
         }
 
-        //public static SyncAttempt<TObject> Fail(string name, TObject item, ChangeType change)
-        //    => new SyncAttempt<TObject>(false, name, item, typeof(TObject).Name, change, string.Empty, null, false);
-
-        public static SyncAttempt<TObject> Fail(string name, TObject item, ChangeType change, string message)
-            => new SyncAttempt<TObject>(false, name, item, typeof(TObject).Name, change, message, null, false);
-
-        //public static SyncAttempt<TObject> Fail(string name, TObject item, ChangeType change, string message, Exception ex)
-        //    => new SyncAttempt<TObject>(false, name, item, typeof(TObject).Name, change, message, ex, false);
-
-        //public static SyncAttempt<TObject> Fail(string name, TObject item, ChangeType change, Exception ex)
-        //    => new SyncAttempt<TObject>(false, name, item, typeof(TObject).Name, change, string.Empty, ex, false);
+        public static SyncAttempt<TObject> Fail(string name, TObject item, ChangeType change, string message, Exception ex)
+            => new SyncAttempt<TObject>(false, name, item, typeof(TObject).Name, change, message, ex, false);
 
         public static SyncAttempt<TObject> Fail(string name, ChangeType change, string message)
             => new SyncAttempt<TObject>(false, name, default(TObject), typeof(TObject).Name, change, message, null, false);
 
-        public static SyncAttempt<TObject> Fail(string name, ChangeType change, string message, Exception ex)
-            => new SyncAttempt<TObject>(false, name, default(TObject), typeof(TObject).Name, change, message, ex, false);
-
-        public static SyncAttempt<TObject> Fail(string name, ChangeType change, Exception ex)
-            => new SyncAttempt<TObject>(false, name, default(TObject), typeof(TObject).Name, change, string.Empty, ex, false);
-
-        //public static SyncAttempt<TObject> Fail(string name, ChangeType change)
-        //    => new SyncAttempt<TObject>(false, name, default(TObject), typeof(TObject).Name, change, string.Empty, null, false);
-
-        //public static SyncAttempt<TObject> SucceedIf(bool condition, string name, TObject item, ChangeType change)
-        //    => new SyncAttempt<TObject>(condition, name, item, typeof(TObject).Name, change, string.Empty, null, false);
-
         // xelement ones, pass type
         public static SyncAttempt<TObject> Succeed(string name, TObject item, Type itemType, ChangeType change)
             => new SyncAttempt<TObject>(true, name, item, itemType.Name, change, string.Empty, null, false);
-
-        //public static SyncAttempt<TObject> Fail(string name, Type itemType, ChangeType change, string message)
-        //    => new SyncAttempt<TObject>(false, name, default(TObject), itemType.Name, change, message, null, false);
-
-        //public static SyncAttempt<TObject> Fail(string name, Type itemType, ChangeType change, string message, Exception ex)
-        //    => new SyncAttempt<TObject>(false, name, default(TObject), itemType.Name, change, message, ex, false);
 
         public static SyncAttempt<TObject> SucceedIf(bool condition, string name, TObject item, Type itemType, ChangeType change)
             => new SyncAttempt<TObject>(condition, name, item, itemType.Name, change, string.Empty, null, false);

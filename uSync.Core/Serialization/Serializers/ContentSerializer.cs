@@ -279,7 +279,7 @@ namespace uSync.Core.Serialization.Serializers
             var attempt = DeserializeProperties(item, node, options);
             if (!attempt.Success)
             {
-                return SyncAttempt<IContent>.Fail(item.Name, ChangeType.ImportFail, attempt.Exception);
+                return SyncAttempt<IContent>.Fail(item.Name, item, ChangeType.ImportFail, "Failed to deserialize properties", attempt.Exception);
             }
 
             var changes = attempt.Result;
@@ -305,7 +305,7 @@ namespace uSync.Core.Serialization.Serializers
                 return SyncAttempt<IContent>.Succeed(item.Name, item, ChangeType.NoChange, message, true, changes);
             }
 
-            return SyncAttempt<IContent>.Fail(item.Name, item, ChangeType.ImportFail, $"{saveAttempt.Result} {attempt.Status}");
+            return SyncAttempt<IContent>.Fail(item.Name, item, ChangeType.ImportFail, $"{saveAttempt.Result} {attempt.Status}", saveAttempt.Exception);
         }
 
         protected override uSyncChange HandleTrashedState(IContent item, bool trashed)

@@ -38,7 +38,9 @@ namespace uSync.Core.Serialization.Serializers
 
             var info = node?.Element("Info");
             if (info == null)
-                return SyncAttempt<IDomain>.Fail(node.GetAlias(), ChangeType.Fail, new ArgumentNullException("Info", "Missing Info Section in XML"));
+            {
+                return SyncAttempt<IDomain>.Fail(node.GetAlias(), default(IDomain), ChangeType.Fail, "Missing info section in xml", new ArgumentNullException("Info", "Missing Info Section in XML"));
+            }
 
             var isoCode = info.Element("Language").ValueOrDefault(string.Empty) ?? string.Empty;
 

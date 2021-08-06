@@ -76,7 +76,7 @@ namespace uSync.Core.Serialization.Serializers
         {
             var propertyAttempt = DeserializeProperties(item, node, options);
             if (!propertyAttempt.Success)
-                return SyncAttempt<IMedia>.Fail(item.Name, ChangeType.Fail, "Failed to save properties", propertyAttempt.Exception);
+                return SyncAttempt<IMedia>.Fail(item.Name, item, ChangeType.Fail, "Failed to save properties", propertyAttempt.Exception);
 
             var info = node.Element("Info");
 
