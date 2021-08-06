@@ -3,12 +3,16 @@ using Umbraco.Cms.Core.DependencyInjection;
 
 namespace uSync.Core
 {
-    public class uSyncCoreComposer : IComposer
-    {
-        public void Compose(IUmbracoBuilder builder)
-        {
-            builder.AdduSyncCore();
-        }
+    //
+    // uSync.Core should never need to be composed on its own.
+    //
 
-    }
+    //public class uSyncCoreComposer : IComposer
+    //{
+    //    public void Compose(IUmbracoBuilder builder)
+    //    {
+    //        builder.AdduSyncCore();
+    //    }
+
+    //}
 }
