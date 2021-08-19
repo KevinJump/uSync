@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using Umbraco.Cms.Core.Composing;
@@ -15,7 +16,7 @@ namespace uSync.Core.Serialization
 
     public class SyncSerializerCollection : BuilderCollectionBase<ISyncSerializerBase>
     {
-        public SyncSerializerCollection(IEnumerable<ISyncSerializerBase> items)
+        public SyncSerializerCollection(Func<IEnumerable<ISyncSerializerBase>> items)
             : base(items)
         { }
 

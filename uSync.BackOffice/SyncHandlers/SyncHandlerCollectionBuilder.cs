@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 using Umbraco.Cms.Core.Composing;
 
@@ -12,7 +13,7 @@ namespace uSync.BackOffice.SyncHandlers
 
     public class SyncHandlerCollection : BuilderCollectionBase<ISyncHandler>
     {
-        public SyncHandlerCollection(IEnumerable<ISyncHandler> items)
+        public SyncHandlerCollection(Func<IEnumerable<ISyncHandler>> items)
             : base(items)
         { }
 
