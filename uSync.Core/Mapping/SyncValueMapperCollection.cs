@@ -18,7 +18,7 @@ namespace uSync.Core.Mapping
 
         public SyncValueMapperCollection(
             SyncEntityCache entityCache,
-            IEnumerable<ISyncMapper> items)
+            Func<IEnumerable<ISyncMapper>> items)
             : base(items)
         {
             EntityCache = entityCache;

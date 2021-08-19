@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using Umbraco.Cms.Core.Composing;
@@ -8,7 +9,7 @@ namespace uSync.Core.Dependency
     public class SyncDependencyCollection
         : BuilderCollectionBase<ISyncDependencyItem>
     {
-        public SyncDependencyCollection(IEnumerable<ISyncDependencyItem> items)
+        public SyncDependencyCollection(Func<IEnumerable<ISyncDependencyItem>> items)
             : base(items) { }
 
         public IEnumerable<ISyncDependencyChecker<TObject>> GetCheckers<TObject>()

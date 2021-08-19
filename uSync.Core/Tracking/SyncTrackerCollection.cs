@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 
@@ -12,7 +13,7 @@ namespace uSync.Core.Tracking
     public class SyncTrackerCollection
            : BuilderCollectionBase<ISyncTrackerBase>
     {
-        public SyncTrackerCollection(IEnumerable<ISyncTrackerBase> items)
+        public SyncTrackerCollection(Func<IEnumerable<ISyncTrackerBase>> items)
             : base(items)
         { }
 

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using Umbraco.Cms.Core.Composing;
@@ -16,7 +17,7 @@ namespace uSync.Core.DataTypes
     public class ConfigurationSerializerCollection :
         BuilderCollectionBase<IConfigurationSerializer>
     {
-        public ConfigurationSerializerCollection(IEnumerable<IConfigurationSerializer> items)
+        public ConfigurationSerializerCollection(Func<IEnumerable<IConfigurationSerializer>> items)
             : base(items)
         {
         }
