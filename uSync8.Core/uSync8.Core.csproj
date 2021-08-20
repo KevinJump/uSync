@@ -85,6 +85,7 @@
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Extensions\XElementExtensions.cs" />
     <Compile Include="ISyncItemFactory.cs" />
+    <Compile Include="Sync\ISyncItemManager.cs" />
     <Compile Include="Models\uSyncChange.cs" />
     <Compile Include="Serialization\ISyncCachedSerializer.cs" />
     <Compile Include="Serialization\ISyncOptionsSerializer.cs" />
@@ -109,6 +110,10 @@
     <Compile Include="Serialization\SyncSerializerCollectionBuilder.cs" />
     <Compile Include="SyncActionType.cs" />
     <Compile Include="SyncItemFactory.cs" />
+    <Compile Include="Sync\SyncItem.cs" />
+    <Compile Include="Sync\SyncLocalItem.cs" />
+    <Compile Include="Sync\SyncTreeItem.cs" />
+    <Compile Include="Sync\SyncTreeType.cs" />
     <Compile Include="Tracking\Impliment\ContentTypeBaseTracker.cs" />
     <Compile Include="Tracking\Impliment\ContentTypeTracker.cs" />
     <Compile Include="Tracking\Impliment\DataTypeTracker.cs" />
