@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 
 using uSync8.Core.Dependency;
+using Umbraco.Core;
 
 namespace uSync8.Core.Sync
 {
@@ -19,7 +20,7 @@ namespace uSync8.Core.Sync
         /// <summary>
         ///  Umbraco UDI value to identify the item.
         /// </summary>
-        public string Udi { get; set; }
+        public Udi Udi { get; set; }
 
         /// <summary>
         ///  Flags controlling what is to be included when this item is exported

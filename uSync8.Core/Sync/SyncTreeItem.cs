@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json.Serialization;
 using Newtonsoft.Json;
+using Umbraco.Core;
 
 namespace uSync8.Core.Sync
 {
@@ -28,6 +29,12 @@ namespace uSync8.Core.Sync
         ///  the section the item is in.
         /// </summary>
         public string SectionAlias { get; set; }
+    }
+
+    public static class SyncTreeItemExtensions
+    {
+        public static bool IsRoot(this SyncTreeItem item)
+            => item.Id == Constants.System.RootString;
     }
 
 }

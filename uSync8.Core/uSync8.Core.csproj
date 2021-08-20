@@ -111,6 +111,8 @@
     <Compile Include="SyncActionType.cs" />
     <Compile Include="SyncItemFactory.cs" />
     <Compile Include="Sync\SyncItem.cs" />
+    <Compile Include="Sync\SyncItemManagerAttribute.cs" />
+    <Compile Include="Sync\SyncItemManagerBase.cs" />
     <Compile Include="Sync\SyncLocalItem.cs" />
     <Compile Include="Sync\SyncTreeItem.cs" />
     <Compile Include="Sync\SyncTreeType.cs" />
