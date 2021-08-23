@@ -21,8 +21,6 @@ namespace uSync8.Core.Sync
 
                 if (!string.IsNullOrEmpty(meta.TreeAlias))
                     Trees = new[] { meta.TreeAlias };
-
-                CanExport = meta.CanExport;
             }
         }
 
@@ -40,7 +38,6 @@ namespace uSync8.Core.Sync
         }
 
         public virtual string[] Trees { get; }
-        public virtual bool CanExport { get; }
 
         public virtual bool ShowTreeOptions { get; } = true; ///  show in the tree.
 
@@ -58,6 +55,34 @@ namespace uSync8.Core.Sync
                 Name = EntityType,
                 Udi = Udi.Create(EntityType)
             };
+
+        protected abstract IEnumerable<SyncItem> GetDecendants(SyncItem item);
+
+        /// <summary>
+        ///  standard use case, if IncludeChildren flag is set, return this item and all its children.
+        ///  if not just return this item. 
+        /// </summary>
+        public virtual IEnumerable<SyncItem> GetItems(SyncItem item)
+        {
+            if (item.Flags.HasFlag(Dependency.DependencyFlags.IncludeChildren))
+            {
+                var items = new List<SyncItem> { item };
+                items.AddRange(GetDecendants(item));
+                return items;
+            }
+            else
+            {
+                return item.AsEnumerableOfOne();
+            }
+        }
+
+        /// <summary>
+        ///  get the sync infomation needed for an item to appear in uSync.Exporter.
+        /// </summary>
+        /// <remarks>
+        ///  override this if you have a picker that can be used to pick items for exporter.
+        /// </remarks>
+        public virtual SyncEntityInfo GetSyncInfo(string entityType) => null;
     }
 
 

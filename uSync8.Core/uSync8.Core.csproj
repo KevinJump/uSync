@@ -85,6 +85,7 @@
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Extensions\XElementExtensions.cs" />
     <Compile Include="ISyncItemFactory.cs" />
+    <Compile Include="Sync\SyncEntityInfo.cs" />
     <Compile Include="Sync\ISyncItemManager.cs" />
     <Compile Include="Models\uSyncChange.cs" />
     <Compile Include="Serialization\ISyncCachedSerializer.cs" />

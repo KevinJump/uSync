@@ -31,10 +31,5 @@ namespace uSync8.Core.Sync
             EntityType = entityType;
             TreeAlias = treeAlias;
         }
-
-        /// <summary>
-        ///  Can this item be seen in uSync Exporter UI
-        /// </summary>
-        public bool CanExport { get; set; } = true;
     }
 }

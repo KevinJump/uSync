@@ -13,14 +13,14 @@ namespace uSync8.Core.Sync
     /// </summary>
     public interface ISyncItemManager
     {
-        /// <summary>yc
-        ///  Can these items be exported in uSync Exporter
+        /// <summary>
+        ///  Return information to let people pick this for export.
         /// </summary>
         /// <remarks>
         ///  Unless the item has some form of shared picker tree with the
         ///  core umbraco UI then answer is likely no (for now)
         /// </remarks>
-        bool CanExport { get; }
+        SyncEntityInfo GetSyncInfo(string entityType);
 
         /// <summary>
         ///   Which type of tree menu should be used. 
@@ -50,13 +50,16 @@ namespace uSync8.Core.Sync
         string[] Trees { get; }
 
         /// <summary>
-        ///  Get all the decendents of the provided item (based on flags)
+        ///  Get all items that we want to sync. 
         /// </summary>
         /// <remarks>
         ///  These items form the basis of a sync - from these core items 
         ///  everything else will be calculated. 
+        ///  
+        ///  the process should as a bare minimum return the item it is passed, 
+        ///  when the Include children flag is set - it should also return children. 
         /// </remarks>
-        IEnumerable<SyncItem> GetDecendants(SyncItem item);
+        IEnumerable<SyncItem> GetItems(SyncItem item);
 
         /// <summary>
         ///  Get the underling Local item for something that was picked from the tree.
