@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Umbraco.Core;
+
+using uSync8.Core.Dependency;
 
 namespace uSync8.Core.Sync
 {
@@ -56,7 +55,7 @@ namespace uSync8.Core.Sync
                 Udi = Udi.Create(EntityType)
             };
 
-        protected abstract IEnumerable<SyncItem> GetDecendants(SyncItem item);
+        protected abstract IEnumerable<SyncItem> GetDecendants(SyncItem item, DependencyFlags flags);
 
         /// <summary>
         ///  standard use case, if IncludeChildren flag is set, return this item and all its children.
@@ -64,10 +63,10 @@ namespace uSync8.Core.Sync
         /// </summary>
         public virtual IEnumerable<SyncItem> GetItems(SyncItem item)
         {
-            if (item.Flags.HasFlag(Dependency.DependencyFlags.IncludeChildren))
+            if (item.Flags.HasFlag(DependencyFlags.IncludeChildren))
             {
                 var items = new List<SyncItem> { item };
-                items.AddRange(GetDecendants(item));
+                items.AddRange(GetDecendants(item, item.Flags & ~DependencyFlags.IncludeChildren));
                 return items;
             }
             else

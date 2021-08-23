@@ -42,6 +42,16 @@ namespace uSync8.Core.Sync
         /// </remarks>
         public Dictionary<string, string> Variants { get; set; }
 
+        /// <summary>
+        ///  Syncing of this item requires that the files be synced. 
+        ///  e.g if this is a template, we sync the files. because templates
+        ///  need files, and they might need the partial views/css/etc.
+        /// </summary>
+        /// <remarks>
+        ///  this value is not yet supported - reserved for future use.
+        /// </remarks>
+        public bool RequiresFiles { get; set; }
+
         public SyncLocalItem() {}
 
         public SyncLocalItem(string id) : this()
