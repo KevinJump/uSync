@@ -65,13 +65,13 @@ namespace uSync.BackOffice.Notifications
             /// are not running on a replica.
             if (_runtimeState.Level < RuntimeLevel.Run)
             {
-                _logger.LogInformation("Umbraco is not in Run mode, so uSync will not run");
+                _logger.LogInformation("Umbraco is not in Run mode, {mode} so uSync will not run", _runtimeState.Level); 
                 return;
             }
 
             if (_serverRegistrar.CurrentServerRole == ServerRole.Replica)
             {
-                _logger.LogInformation("This is a replicate server in a load balanced setup - uSync will not run");
+                _logger.LogInformation("This is a replicate server in a load balanced setup - uSync will not run {serverRole}", _serverRegistrar.CurrentServerRole);
                 return;
             }
 
