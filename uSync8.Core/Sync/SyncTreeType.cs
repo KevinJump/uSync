@@ -21,9 +21,26 @@
         ///  This item doesn't have options on its tree menu
         /// </summary>
         None, 
+
+        /// <summary>
+        ///  Sending settings (e.g doctypes, datatypes, non-content things)
+        /// </summary>
         Settings,
+
+        /// <summary>
+        ///  sending content 
+        /// </summary>
         Content,
-        Media,
+
+        /// <summary>
+        ///  sending media 
+        /// </summary>
+        Media, 
+
+        /// <summary>
+        ///  sending files
+        /// </summary>
+        File, 
     }
 
 }

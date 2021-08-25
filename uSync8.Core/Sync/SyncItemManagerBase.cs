@@ -51,6 +51,7 @@ namespace uSync8.Core.Sync
         protected virtual SyncLocalItem GetRootItem(SyncTreeItem treeItem)
             => new SyncLocalItem(Constants.System.RootString)
             {
+                EntityType = EntityType,
                 Name = EntityType,
                 Udi = Udi.Create(EntityType)
             };
