@@ -14,9 +14,6 @@ name: "CodeQL"
 on:
   push:
     branches: [ v8/8.7-main, core/main ]
-  pull_request:
-    # The branches below must be a subset of the branches above
-    branches: [ v8/8.7-main ]
   schedule:
     - cron: '36 18 * * 1'
 
