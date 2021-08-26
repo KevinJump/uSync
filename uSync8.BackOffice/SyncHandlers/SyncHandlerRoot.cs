@@ -994,13 +994,16 @@ namespace uSync8.BackOffice.SyncHandlers
         {
             try
             {
+                // there are cases when we blank key, while checking, so we should save a reference here. 
+                var nodeKey = node.GetKey();
+
                 // pre event reporting 
                 //  this lets us intercept a report and 
                 //  shortcut the checking (sometimes).
                 if (!uSyncService.FireReportingItem(node))
                 {
                     return uSyncActionHelper<TObject>
-                        .ReportAction(ChangeType.NoChange, node.GetAlias(), GetNameFromFileOrNode(filename, node), node.GetKey(), this.Alias)
+                        .ReportAction(ChangeType.NoChange, node.GetAlias(), GetNameFromFileOrNode(filename, node), nodeKey, this.Alias)
                         .AsEnumerableOfOne();
                 }
 
@@ -1014,7 +1017,7 @@ namespace uSync8.BackOffice.SyncHandlers
                 var change = IsItemCurrent(node, serializerOptions);
 
                 var action = uSyncActionHelper<TObject>
-                        .ReportAction(change.Change, node.GetAlias(), GetNameFromFileOrNode(filename, node), node.GetKey(), this.Alias);
+                        .ReportAction(change.Change, node.GetAlias(), GetNameFromFileOrNode(filename, node), nodeKey, this.Alias);
 
                 action.Message = "";
 

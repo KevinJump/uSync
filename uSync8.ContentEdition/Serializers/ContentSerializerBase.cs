@@ -385,14 +385,15 @@ namespace uSync8.ContentEdition.Serializers
             {
                 var activeCultures = options.GetDeserializedCultures(node);
 
+                var allCultures = this.GetInstalledLanguges();
+
                 foreach (var cultureNode in nameNode.Elements("Name"))
                 {
                     var culture = cultureNode.Attribute("Culture").ValueOrDefault(string.Empty);
                     if (culture == string.Empty) continue;
 
-                    if (activeCultures.IsValid(culture))
+                    if (activeCultures.IsValid(culture) && allCultures.Contains(culture))
                     {
-
                         var cultureName = cultureNode.ValueOrDefault(string.Empty);
                         var currentCultureName = item.GetCultureName(culture);
                         if (cultureName != string.Empty && cultureName != currentCultureName)
@@ -417,6 +418,7 @@ namespace uSync8.ContentEdition.Serializers
             List<uSyncChange> changes = new List<uSyncChange>();
 
             var activeCultures = options.GetDeserializedCultures(node);
+            var availibleCultures = item.AvailableCultures.ToList();
 
             var properties = node.Element("Properties");
             if (properties == null || !properties.HasElements)
@@ -445,7 +447,7 @@ namespace uSync8.ContentEdition.Serializers
 
                         try
                         {
-                            if (!string.IsNullOrEmpty(culture) && activeCultures.IsValid(culture))
+                            if (!string.IsNullOrEmpty(culture) && activeCultures.IsValid(culture) && availibleCultures.Contains(culture))
                             {
                                 //
                                 // check the culture is something we should and can be setting.
@@ -933,6 +935,27 @@ namespace uSync8.ContentEdition.Serializers
                 logger.Warn<ContentSerializer>(exception, "Error cleaning up relations: {id}", item.Id);
             }
 
+        }
+
+        /// <summary>
+        ///  get the installed languages, we want to cache this as we don't want to call the localization
+        ///  service for every content item. 
+        /// </summary>
+        /// <remarks>
+        ///  thew language service caches this call, so its no slower to call it, then it is to cache it
+        ///  and then call it. 
+        ///  
+        ///  perf tests 
+        ///  cached mean : 25.12s
+        ///  non-cached  : 24.88s
+        ///  
+        ///  we will leave it in this method - if it turns out it is slower we can add the caching here.
+        /// </remarks>
+        private List<string> GetInstalledLanguges()
+        {
+            // cached mean     : 25.12s
+            // non-cached mean : 24.8  
+            return localizationService.GetAllLanguages().Select(x => x.IsoCode).ToList();
         }
 
     }

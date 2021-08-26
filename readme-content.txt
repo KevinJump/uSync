@@ -3,7 +3,7 @@
                / / / /\__ \/ / / / __ \/ ___/
               / /_/ /___/ / /_/ / / / / /__  
               \__,_//____/\__, /_/ /_/\___/  
-                         /____/  ContentEdition v8.9.x
+                         /____/  ContentEdition v8.10.x
  
          Thanks for Installing uSync.ContentEdtion!
  

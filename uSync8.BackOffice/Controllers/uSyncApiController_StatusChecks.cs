@@ -20,6 +20,8 @@ using uSync8.BackOffice.Models;
 using uSync8.BackOffice.SyncHandlers;
 using uSync8.Core;
 
+using Semver;
+
 namespace uSync8.BackOffice.Controllers
 {
     /// <summary>
@@ -157,7 +159,7 @@ namespace uSync8.BackOffice.Controllers
                             Remote = true,
                         };
 
-                        if (check.VersionInfo.Core.CompareTo(addOnInfo.Version) <= 0)
+                        if (CompareVersions(check.VersionInfo.Core, addOnInfo.Version) <= 0)
                         {
                             check.IsCurrent = true;
                         }
@@ -184,6 +186,21 @@ namespace uSync8.BackOffice.Controllers
                     Core = addOnInfo.Version
                 }
             };
+        }
+
+
+        private int CompareVersions(string avalible, string current)
+        {
+            try
+            {
+                var currentSemVer = Version.Parse(current);
+                var avalibleSemVer = Version.Parse(avalible);
+                return avalibleSemVer.CompareTo(currentSemVer);
+            }
+            catch
+            {
+                return 0;
+            }
         }
 
         /// <summary>
