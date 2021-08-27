@@ -33,6 +33,12 @@ namespace uSync8.Core.Sync
 
     public static class SyncTreeItemExtensions
     {
+        /// <summary>
+        ///  Is this the root item for the entity 
+        /// </summary>
+        /// <remarks>
+        ///  this method assums the item is following Umbraco conventions for root (i.e "-1")
+        /// </remarks>
         public static bool IsRoot(this SyncTreeItem item)
             => item.Id == Constants.System.RootString;
     }

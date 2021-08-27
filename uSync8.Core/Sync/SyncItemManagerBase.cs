@@ -7,6 +7,14 @@ using uSync8.Core.Dependency;
 
 namespace uSync8.Core.Sync
 {
+    /// <summary>
+    ///  base class for ISyncItemManager implimentations
+    /// </summary>
+    /// <remarks>
+    ///  the base class leys you use the SyncItemManager attribute
+    ///  to define a SyncItemManager that handles a single entity/tree 
+    ///  combination.
+    /// </remarks>
     public abstract class SyncItemManagerBase
     {
         public SyncItemManagerBase()
@@ -85,7 +93,13 @@ namespace uSync8.Core.Sync
         public virtual SyncEntityInfo GetSyncInfo(string entityType) => null;
     }
 
-
+    /// <summary>
+    ///  Base class for ISyncItemManager items where the ID for the entity is of Type TIndexType
+    /// </summary>
+    /// <remarks>
+    ///  saves you having to write the convertion code in your methods to conver the ID from
+    ///  a string to whatever type the enity uses. 
+    /// </remarks>
     public abstract class SyncItemManagerIndexBase<TIndexType> : SyncItemManagerBase
     {
         protected abstract SyncLocalItem GetLocalEntity(TIndexType id);
