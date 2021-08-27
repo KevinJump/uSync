@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json.Serialization;
 using Newtonsoft.Json;
 using Umbraco.Core;
+using System.Net.Http.Formatting;
 
 namespace uSync8.Core.Sync
 {
@@ -29,6 +30,12 @@ namespace uSync8.Core.Sync
         ///  the section the item is in.
         /// </summary>
         public string SectionAlias { get; set; }
+
+        /// <summary>
+        ///  any query strings that might be set on the menu item.
+        /// </summary>
+        public FormDataCollection QueryStrings { get; set;  }
+
     }
 
     public static class SyncTreeItemExtensions
