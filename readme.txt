@@ -7,9 +7,9 @@
 
              Welcome to uSync 8 for Umbraco 8
 
- Thanks for Installing uSync 8, All the bits of your 
- umbraco settings will now be saved to disk - if you want 
- to also sync content and media install uSync.ContentEdition.
+ Thanks for installing uSync 8. All the bits of your 
+ Umbraco settings will now be saved to disk. If you want 
+ to also sync content and media, install uSync.ContentEdition.
 
  Repo   : https://github.com/KevinJump/uSync  
  Docs   : https://docs.jumoo.co.uk/uSync/v8/
@@ -17,7 +17,7 @@
 
  uSync and uSync.ContentEdition are FREE ✔ You can use them
  on any of your projects as many times as your like. 
-
+ 
  
  --- 
  uSync.Complete is our awesome add on package that lets you and
@@ -30,4 +30,4 @@
  a play around show it the 👨‍💼👩‍💼 with the 💳 and they will ❤ it.   
 
 
- - 🛴🛒🎄💻🧼😷🦕🚲 👋😷🛰 💉 ⏳ 🌊 - 
+ - 🛴🛒🎄💻🧼😷🦕🚲 👋😷🛰 💉 ⏳ 🌊 🍂 - 

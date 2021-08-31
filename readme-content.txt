@@ -5,9 +5,9 @@
               \__,_//____/\__, /_/ /_/\___/  
                          /____/  ContentEdition v8.10.x
  
-         Thanks for Installing uSync.ContentEdtion!
+         Thanks for installing uSync.ContentEdtion!
  
- uSync.ContentEdition adds syncing of the "contenty" bits of Umbraco:
+ uSync.ContentEdition adds syncing of the "contenty" bits of Umbraco to uSync:
 
   - Content
   - Media
@@ -33,4 +33,4 @@
  Its not free 💰, but the 60 day trial is - so you can have 
  a play around show it the 👨‍💼👩‍💼 with the 💳 and they will ❤ it.   
  
-  - 🛴🛒🎄💻🧼😷🦕🚲 👋😷🛰 💉 ⏳ 🌊 - 
+ - 🛴🛒🎄💻🧼😷🦕🚲 👋😷🛰 💉 ⏳ 🌊 🍂 - 
