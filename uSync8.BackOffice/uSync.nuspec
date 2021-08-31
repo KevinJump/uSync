@@ -28,7 +28,7 @@
 			</group>
 		</dependencies>
 		<tags>umbraco usync</tags>
-		<repository type="git" url="https://github.com/KevinJump/uSync8" />
+		<repository type="git" url="https://github.com/KevinJump/uSync" />
 	</metadata>
 	<files>
 		<file src="..\readme.txt" target="readme.txt" />

@@ -11,7 +11,7 @@
  umbraco settings will now be saved to disk - if you want 
  to also sync content and media install uSync.ContentEdition.
 
- Repo   : https://github.com/KevinJump/uSync8  
+ Repo   : https://github.com/KevinJump/uSync  
  Docs   : https://docs.jumoo.co.uk/uSync/v8/
  Forums : https://our.umbraco.com/packages/developer-tools/usync/usync/
 

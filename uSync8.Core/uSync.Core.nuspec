@@ -20,7 +20,7 @@
 8.7 - Block editor support]]>
 		</releaseNotes>
 		<tags>umbraco usync</tags>
-		<repository type="git" url="https://github.com/KevinJump/uSync8" />
+		<repository type="git" url="https://github.com/KevinJump/uSync" />
 		<dependencies>
 			<group targetFramework=".NETFramework4.7.2" />
 		</dependencies>

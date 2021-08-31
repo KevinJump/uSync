@@ -23,7 +23,7 @@
 			</group>
 		</dependencies>
 		<tags>umbraco usync</tags>
-		<repository type="git" url="https://github.com/KevinJump/uSync8" />
+		<repository type="git" url="https://github.com/KevinJump/uSync" />
 	</metadata>
 	<files>
 		<file src="bin\$Configuration$\uSync8.BackOffice.dll" target="lib\net472" />
