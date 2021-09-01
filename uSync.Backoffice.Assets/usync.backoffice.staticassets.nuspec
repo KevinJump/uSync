@@ -18,6 +18,6 @@
 	<files>
 		<file src="readme.txt" target="." />
 		<file src="build\**\*.*" target="build" />
-		<file src="App_Plugins\usync\**\*.*" target="content\App_Plugins\usync" />
+		<file src="App_Plugins\usync\**\*.*" target="content\wwwroot\App_Plugins\usync" />
 	</files>
 </package>
