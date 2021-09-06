@@ -392,7 +392,7 @@ namespace uSync8.ContentEdition.Serializers
                     var culture = cultureNode.Attribute("Culture").ValueOrDefault(string.Empty);
                     if (culture == string.Empty) continue;
 
-                    if (activeCultures.IsValid(culture) && allCultures.Contains(culture))
+                    if (activeCultures.IsValid(culture) && allCultures.InvariantContains(culture))
                     {
                         var cultureName = cultureNode.ValueOrDefault(string.Empty);
                         var currentCultureName = item.GetCultureName(culture);
@@ -447,7 +447,7 @@ namespace uSync8.ContentEdition.Serializers
 
                         try
                         {
-                            if (!string.IsNullOrEmpty(culture) && activeCultures.IsValid(culture) && availibleCultures.Contains(culture))
+                            if (!string.IsNullOrEmpty(culture) && activeCultures.IsValid(culture) && availibleCultures.InvariantContains(culture))
                             {
                                 //
                                 // check the culture is something we should and can be setting.
