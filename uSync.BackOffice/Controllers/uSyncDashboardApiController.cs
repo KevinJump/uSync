@@ -22,7 +22,7 @@ namespace uSync.BackOffice.Controllers
 {
     [PluginController("uSync")]
     [Authorize(Policy = AuthorizationPolicies.SectionAccessSettings)]
-    public partial class uSyncDashboardApiController : UmbracoAuthorizedApiController
+    public partial class uSyncDashboardApiController : UmbracoAuthorizedJsonController
     {
 
         private readonly AppCaches appCaches;

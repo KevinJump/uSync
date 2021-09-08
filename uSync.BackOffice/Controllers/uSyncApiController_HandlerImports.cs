@@ -13,7 +13,7 @@ namespace uSync.BackOffice.Controllers
     /// <summary>
     ///  Actions by handler, allows for things to be split.
     /// </summary>
-    public partial class uSyncDashboardApiController : UmbracoAuthorizedApiController
+    public partial class uSyncDashboardApiController : UmbracoAuthorizedJsonController
     {
 
         /// <summary>

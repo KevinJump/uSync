@@ -72,7 +72,7 @@ namespace uSync.BackOffice.Controllers
         {
             try
             {
-                var localFile = Path.Combine(hostEnvironment.ContentRootPath, "App_Plugins\\uSync\\addons.txt");
+                var localFile = Path.Combine(hostEnvironment.ContentRootPath, "App_Plugins", "usync", "addons.txt");
                 if (System.IO.File.Exists(localFile))
                 {
                     return System.IO.File.ReadAllText(localFile);
