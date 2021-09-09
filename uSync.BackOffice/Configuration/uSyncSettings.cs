@@ -67,7 +67,7 @@ namespace uSync.BackOffice.Configuration
         ///  Show a version check warning to the user if the folder version is less
         ///  than the version expected by uSync.
         /// </summary>
-        public bool ShowVersionCheckWarning { get; set; } = false;
+        public bool ShowVersionCheckWarning { get; set; } = true;
 
         /// <summary>
         ///  Custom mapping keys, allows users to add a simple config mapping

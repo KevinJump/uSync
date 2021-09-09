@@ -5,7 +5,7 @@
         // this is our format 'version' - 
         // it only changes when the format of the .config files change
         // we use it to prompt people to do an uptodate export.
-        public const string FormatVersion = "8.9.0";
+        public const string FormatVersion = "8.17.0";
 
         /// <summary>
         ///  names of the root xml elements that are seralized in/out
