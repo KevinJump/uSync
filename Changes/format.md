@@ -12,6 +12,13 @@ When uSync performs a report/import it checks the version against a file in the 
 
 Our recommendation is to perform a new export when the format version changes
 
+## v8.17.0 / #9.0
+
+### Change to support tabs in Document types
+Tab support in document types requires we now also store the alias, and tab type against a tab. for v8 these changes fail back to the name if they cannot find the alias, while in v9 the alias is always used. 
+
+this change means that when using uSync to update from v8 to v9 - you will need to be running the latest uSync v8.10.2+ to get the tab values in the format that uSync 9 is expecting (if you are using tabs)
+
 ## v8.9.0 
 
 ### Change of media sync default (don't include file hash)
