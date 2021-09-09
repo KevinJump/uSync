@@ -626,11 +626,19 @@ namespace uSync.Core.Serialization.Serializers
                 logger.LogDebug("> Tab {0} {1} {2}", name, alias, sortOrder);
 
                 var existing = FindTab(item, alias, name);
-                if (existing != null && existing.SortOrder != sortOrder)
+                if (existing != null)
                 {
-                    changes.AddUpdate("SortOrder", existing.SortOrder, sortOrder, $"Tabs/{name}/SortOrder");
-                    existing.SortOrder = sortOrder;
-                    existing.Type = tabType;
+                    if (existing.SortOrder != sortOrder)
+                    {
+                        changes.AddUpdate("SortOrder", existing.SortOrder, sortOrder, $"Tabs/{name}/SortOrder");
+                        existing.SortOrder = sortOrder;
+                    }
+
+                    if (existing.Type != tabType)
+                    {
+                        changes.AddUpdate("Tab type", existing.Type, tabType, $"Tabs/{name}/Type");
+                        existing.Type = tabType;
+                    }
                 }
                 else
                 {
