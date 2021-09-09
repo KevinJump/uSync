@@ -66,7 +66,10 @@ namespace uSync.Core.Serialization.Serializers
             {
                 tabs.Add(new XElement("Tab",
                             new XElement("Caption", tab.Name),
+                            new XElement("Alias", tab.Alias),
+                            new XElement("Type", tab.Type),
                             new XElement("SortOrder", tab.SortOrder)));
+                
             }
 
             return tabs;
@@ -472,7 +475,7 @@ namespace uSync.Core.Serialization.Serializers
                     // we need to see if this one has moved. 
                     if (!string.IsNullOrWhiteSpace(tab))
                     {
-                        var tabGroup = item.PropertyGroups.FirstOrDefault(x => x.Name.InvariantEquals(tab));
+                        var tabGroup = item.PropertyGroups.FirstOrDefault(x => x.Alias.InvariantEquals(tab));
                         if (tabGroup != null)
                         {
                             if (!tabGroup.PropertyTypes.Contains(property.Alias))
@@ -571,29 +574,33 @@ namespace uSync.Core.Serialization.Serializers
             foreach (var tab in tabNode.Elements("Tab"))
             {
                 var name = tab.Element("Caption").ValueOrDefault(string.Empty);
+                var alias = tab.Element("Alias").ValueOrDefault(string.Empty);
                 var sortOrder = tab.Element("SortOrder").ValueOrDefault(defaultSort);
+                var tabType = tab.Element("Type").ValueOrDefault(PropertyGroupType.Group);
 
                 logger.LogDebug("> Tab {0} {1}", name, sortOrder);
 
-                var existing = item.PropertyGroups.FirstOrDefault(x => x.Name.InvariantEquals(name));
+                var existing = item.PropertyGroups.FirstOrDefault(x => x.Alias.InvariantEquals(alias));
                 if (existing != null && existing.SortOrder != sortOrder)
                 {
                     changes.AddUpdate("SortOrder", existing.SortOrder, sortOrder, $"Tabs/{name}/SortOrder");
                     existing.SortOrder = sortOrder;
+                    existing.Type = tabType;
                 }
                 else
                 {
                     // create the tab
-                    if (item.AddPropertyGroup(name))
+                    item.AddPropertyGroup(alias, name);
+                    var propertyGroup = item.PropertyGroups[alias];
+
+                    changes.AddNew(name, name, $"Tabs/{name}");
+                    var newTab = item.PropertyGroups.FirstOrDefault(x => x.Alias.InvariantEquals(name));
+                    if (newTab != null)
                     {
-                        changes.AddNew(name, name, $"Tabs/{name}");
-                        var newTab = item.PropertyGroups.FirstOrDefault(x => x.Name.InvariantEquals(name));
-                        if (newTab != null)
-                        {
-                            newTab.SortOrder = sortOrder;
-                        }
+                        newTab.SortOrder = sortOrder;
+                        newTab.Type = tabType;
                     }
-                }
+                } 
 
                 defaultSort = sortOrder + 1;
             }
@@ -612,16 +619,16 @@ namespace uSync.Core.Serialization.Serializers
                 if (tabNode == null) return Enumerable.Empty<uSyncChange>();
 
                 var newTabs = tabNode.Elements("Tab")
-                    .Where(x => x.Element("Caption") != null)
-                    .Select(x => x.Element("Caption").ValueOrDefault(string.Empty))
+                    .Where(x => x.Element("Alias") != null)
+                    .Select(x => x.Element("Alias").ValueOrDefault(string.Empty))
                     .ToList();
 
                 List<string> removals = new List<string>();
                 foreach (var tab in item.PropertyGroups)
                 {
-                    if (!newTabs.InvariantContains(tab.Name))
+                    if (!newTabs.InvariantContains(tab.Alias))
                     {
-                        removals.Add(tab.Name);
+                        removals.Add(tab.Alias);
                     }
                 }
 
@@ -629,12 +636,12 @@ namespace uSync.Core.Serialization.Serializers
                 {
                     var changes = new List<uSyncChange>();
 
-                    foreach (var name in removals)
+                    foreach (var alias in removals)
                     {
-                        logger.LogDebug("Removing {0}", name);
-                        changes.Add(uSyncChange.Delete($"Tabs/{name}", name, name));
+                        logger.LogDebug("Removing {0}", alias);
+                        changes.Add(uSyncChange.Delete($"Tabs/{alias}", alias, alias));
 
-                        item.PropertyGroups.Remove(name);
+                        item.PropertyGroups.Remove(alias);
                     }
 
                     return changes;
