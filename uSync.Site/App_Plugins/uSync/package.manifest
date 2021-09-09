@@ -1,22 +1,22 @@
 {
   "javascript": [
 
-    "~/App_Plugins/usync/usync_900.js",
+    "~/App_Plugins/uSync/usync_900.js",
 
-    "~/App_Plugins/usync/usync.service.js",
-    "~/App_Plugins/usync/usync.hub.js",
+    "~/App_Plugins/uSync/usync.service.js",
+    "~/App_Plugins/uSync/usync.hub.js",
 
-    "~/App_Plugins/usync/backoffice/usync/usync.dashboard.controller.js",
-    "~/App_Plugins/usync/settings/settings.controller.js",
-    "~/App_Plugins/usync/settings/expansion.controller.js",
-    "~/App_Plugins/usync/settings/usync.controller.js",
+    "~/App_Plugins/uSync/backoffice/usync/usync.dashboard.controller.js",
+    "~/App_Plugins/uSync/settings/settings.controller.js",
+    "~/App_Plugins/uSync/settings/expansion.controller.js",
+    "~/App_Plugins/uSync/settings/usync.controller.js",
 
-    "~/App_Plugins/usync/changedialog.controller.js",
-    "~/App_Plugins/usync/components/usync.reportview.component.js",
-    "~/App_Plugins/usync/components/usync.progressview.component.js"
+    "~/App_Plugins/uSync/changedialog.controller.js",
+    "~/App_Plugins/uSync/components/usync.reportview.component.js",
+    "~/App_Plugins/uSync/components/usync.progressview.component.js"
   ],
   "css": [
-    "~/App_Plugins/usync/usync_900.css",
-    "~/App_Plugins/usync/usync.css"
+    "~/App_Plugins/uSync/usync_900.css",
+    "~/App_Plugins/uSync/usync.css"
   ]
 }

@@ -18,14 +18,14 @@
                     'name': 'uSync',
                     'alias': 'uSync',
                     'icon': 'icon-infinity',
-                    'view': Umbraco.Sys.ServerVariables.umbracoSettings.appPluginsPath + '/usync/settings/default.html',
+                    'view': Umbraco.Sys.ServerVariables.umbracoSettings.appPluginsPath + '/uSync/settings/default.html',
                     'active': true
                 },
                 {
                     'name': 'Settings',
                     'alias': 'settings',
                     'icon': 'icon-settings',
-                    'view': Umbraco.Sys.ServerVariables.umbracoSettings.appPluginsPath + '/usync/settings/settings.html'
+                    'view': Umbraco.Sys.ServerVariables.umbracoSettings.appPluginsPath + '/uSync/settings/settings.html'
                 } 
             ]
         };

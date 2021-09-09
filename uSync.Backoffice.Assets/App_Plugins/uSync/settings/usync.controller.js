@@ -403,7 +403,7 @@
             var options = {
                 item: item,
                 title: 'uSync Change',
-                view: "/App_Plugins/uSync8/changeDialog.html",
+                view: "/App_Plugins/uSync/changeDialog.html",
                 close: function () {
                     editorService.close();
                 }

@@ -2,7 +2,7 @@
     'use strict';
 
     var uSyncReportViewComponent = {
-        templateUrl: Umbraco.Sys.ServerVariables.application.applicationPath + 'App_Plugins/usync/components/usync.reportview.html',
+        templateUrl: Umbraco.Sys.ServerVariables.application.applicationPath + 'App_Plugins/uSync/components/usync.reportview.html',
         bindings: {
             action: '<',
             results: '<',
@@ -109,7 +109,7 @@
             var options = {
                 item: item,
                 title: 'uSync Change',
-                view: Umbraco.Sys.ServerVariables.application.applicationPath + "App_Plugins/usync/changedialog.html",
+                view: Umbraco.Sys.ServerVariables.application.applicationPath + "App_Plugins/uSync/changedialog.html",
                 close: function () {
                     editorService.close();
                 }

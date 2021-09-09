@@ -29,7 +29,7 @@
   </PropertyGroup>
 
 	<ItemGroup>
-		<Content Include="App_Plugins\usync\**\*.*">
+		<Content Include="App_Plugins\uSync\**\*.*">
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 			<CopyToPublishDirectory>Always</CopyToPublishDirectory>
 		</Content>
@@ -40,7 +40,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Remove="App_Plugins\usync\settings\settings.overlay.html" />
+	  <None Remove="App_Plugins\uSync\settings\settings.overlay.html" />
 	</ItemGroup>
 
 
