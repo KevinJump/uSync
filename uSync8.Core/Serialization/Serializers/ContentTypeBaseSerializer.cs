@@ -9,6 +9,7 @@ using Umbraco.Core.Configuration;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Services;
+using Umbraco.Core.Strings;
 
 using uSync8.Core.Extensions;
 using uSync8.Core.Models;
@@ -63,29 +64,14 @@ namespace uSync8.Core.Serialization.Serializers
                             new XElement("Caption", tab.Name),
                             new XElement("SortOrder", tab.SortOrder));
 
-                tabNode.Add(new XElement("Alias", GetNewTabProperty(tab, "Alias")));
-                tabNode.Add(new XElement("Type", GetNewTabProperty(tab, "Type")));
+                tabNode.Add(new XElement("Alias", tab.GetTabPropertyAsString("Alias")));
+                tabNode.Add(new XElement("Type", tab.GetTabPropertyAsString("Type")));
 
                 tabs.Add(tabNode);
 
             }
 
             return tabs;
-        }
-
-        private string GetNewTabProperty(PropertyGroup tab, string propertyName)
-        {
-            // reflection, this doesn't exist pre Umbraco 8.17
-            var propertyInstance = typeof(PropertyGroup).GetProperty(propertyName);
-            if (propertyInstance != null)
-            {
-                var propertyValue = propertyInstance.GetValue(tab);
-                var attempt = propertyValue.TryConvertTo<string>();
-                if (attempt.Success) return attempt.Result;
-            }
-
-            return string.Empty;
-
         }
 
         protected virtual XElement SerializeProperties(TObject item)
@@ -469,35 +455,30 @@ namespace uSync8.Core.Serialization.Serializers
 
                 changes.AddRange(DeserializeExtraProperties(item, property, propertyNode));
 
-                var tab = propertyNode.Element("Tab").ValueOrDefault(string.Empty);
+                var tabAliasOrName = item.PropertyGroups.GetTabAliasOrName(propertyNode.Element("Tab"));
 
                 if (IsNew)
                 {
                     changes.AddNew(alias, name, alias);
                     logger.Debug(serializerType, "Property Is new adding to tab.");
-
-                    if (string.IsNullOrWhiteSpace(tab))
-                    {
-                        item.AddPropertyType(property);
-                    }
-                    else
-                    {
-                        item.AddPropertyType(property, tab);
-                    }
+                    item.SafeAddPropertyType(property, tabAliasOrName, name);
                 }
                 else
                 {
                     logger.Debug(serializerType, "Property exists, checking tab location");
                     // we need to see if this one has moved. 
-                    if (!string.IsNullOrWhiteSpace(tab))
+                    if (!string.IsNullOrWhiteSpace(tabAliasOrName))
                     {
-                        var tabGroup = item.PropertyGroups.FirstOrDefault(x => x.Name.InvariantEquals(tab));
+                        // index of key - will fail back from alias to name,
+                        // so it simplifies this call for v8
+                        var tabGroup = item.PropertyGroups.FindTab(tabAliasOrName);
                         if (tabGroup != null)
                         {
+                            // this tab doesn't currently contain this property. 
                             if (!tabGroup.PropertyTypes.Contains(property.Alias))
                             {
                                 // add to our move list.
-                                propertiesToMove[property.Alias] = tab;
+                                propertiesToMove[property.Alias] = tabAliasOrName;
                             }
                         }
                     }
@@ -521,6 +502,8 @@ namespace uSync8.Core.Serialization.Serializers
 
         }
 
+
+     
         /// <summary>
         ///  Deserialize properties added in later versions of Umbraco.
         /// </summary>
@@ -584,7 +567,7 @@ namespace uSync8.Core.Serialization.Serializers
             if (tabNode == null) return Enumerable.Empty<uSyncChange>();
 
             var defaultSort = 0;
-            var defaultTabType = GetDefaultTabType(tabNode);
+            var defaultTabType = tabNode.GetDefaultTabType();
 
             var changes = new List<uSyncChange>();
 
@@ -592,34 +575,30 @@ namespace uSync8.Core.Serialization.Serializers
             {
                 var name = tab.Element("Caption").ValueOrDefault(string.Empty);
                 var sortOrder = tab.Element("SortOrder").ValueOrDefault(defaultSort);
-                var alias = tab.Element("Alias").ValueOrDefault(string.Empty);
+                var alias = tab.Element("Alias").ValueOrDefault(name);
                 var type = tab.Element("Group").ValueOrDefault(defaultTabType);
 
-                logger.Debug(serializerType, "> Tab {0} {1}", name, sortOrder);
+                logger.Debug(serializerType, "> Tab {0} {1} {2}", name, alias, sortOrder);
 
-                var existing = item.PropertyGroups.FirstOrDefault(x => x.Name.InvariantEquals(name));
-                if (existing != null && existing.SortOrder != sortOrder)
+                var existing = item.PropertyGroups.FindTab(alias);
+                if (existing != null)
                 {
-                    changes.AddUpdate("SortOrder", existing.SortOrder, sortOrder, $"Tabs/{name}/SortOrder");
-                    existing.SortOrder = sortOrder;
+                    if (existing.SortOrder != sortOrder)
+                    {
+                        changes.AddUpdate("SortOrder", existing.SortOrder, sortOrder, $"Tabs/{name}/SortOrder");
+                        existing.SortOrder = sortOrder;
+                    }
+
+                    var existingType = existing.GetTabPropertyAsString("Type");
+                    if (!string.IsNullOrWhiteSpace(existingType) && existingType != type)
+                    {
+                        changes.AddUpdate("Type", existingType, type, $"Tabs/{name}/Type");
+                        existing.SetGroupType(type);
+                    }
                 }
                 else
                 {
-                    if (!string.IsNullOrEmpty(alias))
-                    {
-                        // only avalible in 8.17+
-                        // item.AddPropertyGroup(alias, name); 
-                        var addAliasMethod = typeof(IContentBase).GetMethod("AddPropertyGroup", new Type[] { typeof(string), typeof(string) });
-                        if (addAliasMethod != null)
-                        {
-                            addAliasMethod.Invoke(item, new[] { alias, name });
-                        }
-                    }
-                    else
-                    {
-                        // create the tab (pre v8.17 or when we don't have alias)
-                        item.AddPropertyGroup(name);
-                    }
+                    item.SafeAddPropertyGroup(alias, name);
 
                     changes.AddNew(name, name, $"Tabs/{name}");
                     var newTab = item.PropertyGroups.FirstOrDefault(x => x.Name.InvariantEquals(name));
@@ -627,20 +606,8 @@ namespace uSync8.Core.Serialization.Serializers
                     {
                         newTab.SortOrder = sortOrder;
 
-                        // get the tab type through reflection.
-                        var tabType = typeof(PropertyGroup).GetProperty("Type");
-                        if (tabType != null)
-                        {
-                            var tabTypeEnum = tabType.PropertyType.GetField(type);
-                            if (tabTypeEnum != null)
-                            {
-                                var x = tabTypeEnum.GetValue(tabType);
-                                tabType.SetValue(newTab, tabTypeEnum.GetValue(tabType));
-                            }
-                        }
-
-
-                        
+                        // set the tab type through relection
+                        newTab.SetGroupType(type);
                     }
                 }
 
@@ -649,17 +616,6 @@ namespace uSync8.Core.Serialization.Serializers
 
             return changes;
         }
-
-        private string GetDefaultTabType(XElement node)
-        {
-            // if we have tabs then when we don't know the type of a group, its a tab.
-            if (node.Elements("Tab").Any(x => x.Element("Type").ValueOrDefault("Group") == "Tab"))
-                return "Tab";
-
-            // if we don't have tabs then all unknown types are groups.
-            return "Group";
-        }
-
 
 
         protected IEnumerable<uSyncChange> CleanTabs(TObject item, XElement node, SyncSerializerOptions options)
