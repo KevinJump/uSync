@@ -11,7 +11,7 @@
         <Message Text="Copying uSync Package files: $(uSyncPackageContentFilesPath) - #@(uSyncPackageContentFiles->Count()) files"  Importance="high" />
         <Copy
             SourceFiles="@(uSyncPackageContentFiles)"
-            DestinationFiles="@(uSyncPackageContentFiles->'$(MSBuildProjectDirectory)\App_Plugins\usync\%(RecursiveDir)%(Filename)%(Extension)')"
+            DestinationFiles="@(uSyncPackageContentFiles->'$(MSBuildProjectDirectory)\App_Plugins\uSync\%(RecursiveDir)%(Filename)%(Extension)')"
             SkipUnchangedFiles="true" />
 
     </Target>

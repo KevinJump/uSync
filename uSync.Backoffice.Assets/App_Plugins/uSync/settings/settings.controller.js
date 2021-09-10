@@ -72,7 +72,7 @@
             };
 
             var options = {
-                view: Umbraco.Sys.ServerVariables.umbracoSettings.appPluginsPath + '/usync/settings/settings.overlay.html',
+                view: Umbraco.Sys.ServerVariables.umbracoSettings.appPluginsPath + '/uSync/settings/settings.overlay.html',
                 title: 'appsettings.json snipped',
                 content: JSON.stringify(appSetting, null, 4),
                 docslink: vm.docslink,
