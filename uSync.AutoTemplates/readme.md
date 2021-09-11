@@ -8,11 +8,11 @@
 
 ---
 
-> ## Current Version : 9.0.0-rc003.20210911.3
+> ## Current Version : 9.0.0-rc003.20210911.8
 >  You can add the package to your project with `dotnet add`
 > 
 > ```
-> dotnet add package uSync.AutoTemplates -v 9.0.0-rc003.20210911.3
+> dotnet add package uSync.AutoTemplates -v 9.0.0-rc003.20210911.8
 > ```
 
 

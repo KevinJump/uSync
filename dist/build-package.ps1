@@ -13,6 +13,9 @@ dotnet pack ..\uSync.AutoTemplates\uSync.AutoTemplates.csproj -c $env -o $outFol
 .\nuget pack "..\uSync\uSync.nuspec" -version $fullVersion -OutputDirectory $outFolder
 .\nuget pack "..\uSync.BackOffice.Assets\uSync.BackOffice.StaticAssets.nuspec" -version $fullVersion -OutputDirectory $outFolder
 
+
+XCOPY "$outFolder\*.nupkg" "C:\Source\localgit" /Q /Y 
+
 if ($push) {
     .\nuget.exe push "$outFolder\*.nupkg" -ApiKey AzureDevOps -src https://pkgs.dev.azure.com/jumoo/Public/_packaging/nightly/nuget/v3/index.json
 }
