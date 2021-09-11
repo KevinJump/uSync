@@ -6,6 +6,18 @@
 > 
 > You need to get uSync from our [nightly feed](../nightly.md) to get the nuget package.
 
+---
+
+> ## Current Version : 9.0.0-rc003.20210911.3
+>  You can add the package to your project with `dotnet add`
+> 
+> ```
+> dotnet add package uSync.AutoTemplates -v 9.0.0-rc003.20210911.3
+> ```
+
+
+
+
 Template folder watcher, that keeps your template folder in Sync with Umbraco's Templates view. 
 
 If you create or edit .cshtml files in the view folder outside of Umbraco AutoTemplates will attempt to workout how the file should fit into the templates. 
