@@ -14,6 +14,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{AC8D82BC-EAC5-4EB5-8281-92FFA58A786F}"
 	ProjectSection(SolutionItems) = preProject
 		dist\build-package.ps1 = dist\build-package.ps1
+		Directory.Build.props = Directory.Build.props
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.BackOffice.StaticAssets", "uSync.Backoffice.Assets\uSync.BackOffice.StaticAssets.csproj", "{F112D331-4820-4F24-BDED-991C9A229292}"
@@ -21,6 +22,10 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync", "uSync\uSync.csproj", "{F499A436-FA33-4B49-8900-2EDBCA6432D4}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.Community.DataTypeSerializers", "uSync.Community.DataTypeSerializers\uSync.Community.DataTypeSerializers.csproj", "{32B98DAA-2061-41B9-97C8-1788F31A05B8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{35F7A5CF-8120-4F63-AC8C-776A08F6C617}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "uSync.AutoTemplates", "uSync.AutoTemplates\uSync.AutoTemplates.csproj", "{4B177C9F-9AD1-43E5-B3C9-705425244DF9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -56,9 +61,16 @@ Global
 		{32B98DAA-2061-41B9-97C8-1788F31A05B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{32B98DAA-2061-41B9-97C8-1788F31A05B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{32B98DAA-2061-41B9-97C8-1788F31A05B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4B177C9F-9AD1-43E5-B3C9-705425244DF9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4B177C9F-9AD1-43E5-B3C9-705425244DF9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4B177C9F-9AD1-43E5-B3C9-705425244DF9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4B177C9F-9AD1-43E5-B3C9-705425244DF9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{4B177C9F-9AD1-43E5-B3C9-705425244DF9} = {35F7A5CF-8120-4F63-AC8C-776A08F6C617}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {AC5EE6B2-05D3-4D8C-94BF-E008B2D6952C}

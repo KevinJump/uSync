@@ -4,23 +4,10 @@
 		<TargetFramework>net5.0</TargetFramework>
 
 		<PackageId>uSync.Community.DataTypeSerializers</PackageId>
-		<VersionPrefix>9.0.0</VersionPrefix>
-		<Authors>Kevin Jump</Authors>
-		<Company>Jumoo</Company>
-
-		<PackageIconUrl></PackageIconUrl>
-		<PackageLicenseExpression>MPL-2.0</PackageLicenseExpression>
-		<PackageProjectUrl>https://jumoo.co.uk/uSync</PackageProjectUrl>
-		<PackageTags>Umbraco</PackageTags>
-		<RepositoryUrl>https://github.com/KevinJump/uSync8</RepositoryUrl>
 
 		<Description>
 			DataTypeSerializers  - For mapping content/media paths when you don't also sync content/media
 		</Description>
-
-		<PackageReleaseNotes>
-			9.0 - Dotnet core version
-		</PackageReleaseNotes>
 
 		<EmbedUntrackedSources>true</EmbedUntrackedSources>
 		<IncludeSymbols>true</IncludeSymbols>
