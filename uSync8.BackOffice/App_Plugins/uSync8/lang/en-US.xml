@@ -13,7 +13,7 @@
     <key alias="intro">Database elements to and from disk</key>
 
     <key alias="newer">There is a newer version of uSync available</key>
-		<key alias="noHandlers"><![CDATA[No Handlers have been loaded, so you can't sync anything - check your uSync8.config file it might be corrupt or missing 😢]]></key>
+		<key alias="noHandlers"><![CDATA[No Handlers have been loaded, so you can't sync anything. Check your uSync8.config file, it might be corrupt or missing 😢.]]></key>
     
     <key alias="import">Import</key>
     <key alias="importforce">Full Import</key>
@@ -51,7 +51,7 @@
 		  <a href="https://github.com/KevinJump/uSync8/blob/v8/8.7-main/Changes/format.md" target="_blank"><i class="icon icon-info"></i>info</a>]]></key>
 		<key alias="createWarning"><![CDATA[One or more handlers are set to create only. Changes within items may not be synchronized]]></key>
 
-		<key alias="forms"><![CDATA[Are you using Umbraco forms? - you can now sync forms and settings with <a href="http://jumoo.co.uk/usync/forms" target="_blank">uSync.FormsEdition</a>]]></key>
+		<key alias="forms"><![CDATA[Are you using Umbraco forms? You can now sync forms and settings with <a href="http://jumoo.co.uk/usync/forms" target="_blank">uSync.FormsEdition</a>]]></key>
 
 		<key alias="loadbalancedWarning"><![CDATA[Umbraco appears to be running in a load balanced environment. <a href="https://our.umbraco.com/documentation/getting-started/setup/server-setup/load-balancing/#faqs" target="_blank">You should not load balance the Umbraco back office</a>. We strongly recommend you do not run uSync from a load balanced back office.]]></key>
 		
