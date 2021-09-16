@@ -3,7 +3,7 @@
             |  ||  |`.  `-. \  '  / |      \| .--' 
             '  ''  '.-'    | \   '  |  ||  |\ `--. 
              `----' `-----'.-'  /   `--''--' `---' 
-                           `---'  v9.x - release candidate                                        
+                           `---'  v9.x                                        
 
                Welcome to uSync 9 for Umbraco 9
 
