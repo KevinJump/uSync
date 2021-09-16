@@ -1,8 +1,11 @@
-﻿using Newtonsoft.Json.Serialization;
+﻿
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+
 using System.Collections.Generic;
 
 using Umbraco.Cms.Core;
+using Umbraco.Cms.Infrastructure.Serialization;
 
 namespace uSync.Core.Sync
 {
@@ -26,6 +29,7 @@ namespace uSync.Core.Sync
         /// <summary>
         ///  Umbraco UDI value that identifies the item.
         /// </summary>
+        [JsonConverter(typeof(UdiJsonConverter))]
         public Udi Udi { get; set; } 
 
         /// <summary>
