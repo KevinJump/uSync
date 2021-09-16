@@ -1,8 +1,9 @@
-﻿using uSync.Core.Dependency;
-using Umbraco.Cms.Core;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using Umbraco.Cms.Infrastructure.Serialization;
+
+using Umbraco.Cms.Core;
+
+using uSync.Core.Dependency;
 
 namespace uSync.Core.Sync
 {
@@ -20,7 +21,7 @@ namespace uSync.Core.Sync
         /// <summary>
         ///  Umbraco UDI value to identify the item.
         /// </summary>
-        [JsonConverter(typeof(UdiJsonConverter))]
+        // [JsonConverter(typeof(UdiJsonConverter))]
         public Udi Udi { get; set; }
 
         /// <summary>
