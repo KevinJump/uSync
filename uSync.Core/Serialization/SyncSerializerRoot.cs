@@ -311,10 +311,10 @@ namespace uSync.Core.Serialization
             {
                 node.Save(s);
                 s.Position = 0;
-                using (var md5 = MD5.Create())
+                using (var hashAlgorithm = HashAlgorithm.Create(CryptoConfig.AllowOnlyFipsAlgorithms ? "SHA1" : "MD5"))
                 {
                     return BitConverter.ToString(
-                        md5.ComputeHash(s)).Replace("-", "").ToLower();
+                        hashAlgorithm.ComputeHash(s)).Replace("-", "").ToLower();
                 }
             }
         }
