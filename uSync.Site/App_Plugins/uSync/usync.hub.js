@@ -62,13 +62,19 @@
             if ($.connection !== undefined) {
                 hub = {
                     active: true,
-                    start: function () {
+                    start: function (cb) {
 
                         try {
                             $.connection.start().then(function () {
                                 // console.info('Hub started', $.connection.connectionId);
+                                if (cb) {
+                                    cb(true);
+                                }
                             }).catch(function () {
                                 console.warn('Failed to start hub');
+                                if (cb) {
+                                    cb(false);
+                                }
                             });
                         } catch (e) {
                             console.warn('Could not setup signalR connection', e);
