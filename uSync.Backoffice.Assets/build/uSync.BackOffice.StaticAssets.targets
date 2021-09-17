@@ -1,14 +1,16 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
     <PropertyGroup>
-        <uSyncPackageContentFilesPath>$(MSBuildThisFileDirectory)..\content\App_Plugins\uSync\**\*.*</uSyncPackageContentFilesPath>
+		<uSyncPluginFolder>App_Plugins\uSync</uSyncPluginFolder>
+        <uSyncPackageContentFilesPath>$(MSBuildThisFileDirectory)..\content\$(uSyncPluginFolder)\**\*.*</uSyncPackageContentFilesPath>
     </PropertyGroup>
 
     <Target Name="CopyuSyncPackageAssets" BeforeTargets="Build">
         <ItemGroup>
             <uSyncPackageContentFiles Include="$(uSyncPackageContentFilesPath)" />
         </ItemGroup>
-        <Message Text="Copying uSync Package files: $(uSyncPackageContentFilesPath) - #@(uSyncPackageContentFiles->Count()) files"  Importance="high" />
+        <Message Text="Copying uSync files from package -> $(uSyncPluginFolder) - #@(uSyncPackageContentFiles->Count()) files"  Importance="high" />
+		<Warning Text="No uSync Package files found in $(uSyncPackageContentFiles)" Condition="@(uSyncPackageContentFiles->Count()) == 0" />
         <Copy
             SourceFiles="@(uSyncPackageContentFiles)"
             DestinationFiles="@(uSyncPackageContentFiles->'$(MSBuildProjectDirectory)\App_Plugins\uSync\%(RecursiveDir)%(Filename)%(Extension)')"
