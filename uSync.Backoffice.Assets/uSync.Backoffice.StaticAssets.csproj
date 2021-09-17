@@ -25,10 +25,4 @@
 			<PackagePath>build</PackagePath>
 		</None>
 	</ItemGroup>
-
-	<ItemGroup>
-		<None Remove="App_Plugins\uSync\settings\settings.overlay.html" />
-	</ItemGroup>
-
-
 </Project>
