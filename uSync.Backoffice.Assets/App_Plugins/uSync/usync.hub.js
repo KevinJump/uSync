@@ -78,6 +78,9 @@
                             });
                         } catch (e) {
                             console.warn('Could not setup signalR connection', e);
+                            if (cd) {
+                                cb(false);
+                            }
                         }
 
                     },
