@@ -67,6 +67,7 @@
   <ItemGroup>
     <Compile Include="Extensions\ContentScheduleExtensions.cs" />
     <Compile Include="Extensions\EventMessageExtensions.cs" />
+    <Compile Include="Extensions\MediaFolderExtensions.cs" />
     <Compile Include="Extensions\PublishResultExtensions.cs" />
     <Compile Include="Handlers\ContentHandler.cs" />
     <Compile Include="Handlers\ContentHandlerBase.cs" />

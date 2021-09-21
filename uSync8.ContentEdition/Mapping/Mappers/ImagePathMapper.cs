@@ -13,6 +13,7 @@ using Umbraco.Core.Logging;
 using Umbraco.Core.Services;
 
 using uSync8.BackOffice.Configuration;
+using uSync8.ContentEdition.Extensions;
 using uSync8.Core.Dependency;
 
 namespace uSync8.ContentEdition.Mapping.Mappers
@@ -147,31 +148,7 @@ namespace uSync8.ContentEdition.Mapping.Mappers
         ///  </backoffice>
         /// </remarks>
         private string GetMediaFolderSetting(uSyncConfig config)
-        {
-            // look in the web.config 
-            var folder = ConfigurationManager.AppSettings["uSync.mediaFolder"];
-            if (!string.IsNullOrWhiteSpace(folder))
-                return folder;
-
-            // azure guessing - so for most people seeing this issue, 
-            // they won't have to do any config, as we will detect it ???
-            var useDefault = ConfigurationManager.AppSettings["AzureBlobFileSystem.UseDefaultRoute:media"];
-            if (useDefault != null && bool.TryParse(useDefault, out bool usingDefaultRoute) && !usingDefaultRoute)
-            {
-                // means azure is configured to not use the default root, so the media 
-                // will be prepended with /container-name. 
-                var containerName = ConfigurationManager.AppSettings["AzureBlobFileSystem.ContainerName:media"];
-                if (!string.IsNullOrWhiteSpace(containerName))
-                {
-                    logger.Debug<ImagePathMapper>("Calculating media folder path from AzureBlobFileSystem settings");
-                    return $"/{containerName}";
-                }
-            }
-
-
-            // look in the uSync8.config 
-            return config.GetExtensionSetting("media", "folder", string.Empty);
-        }
+            => config.GetMediaFolderRoot();
 
 
         public override string GetImportValue(string value, string editorAlias)
