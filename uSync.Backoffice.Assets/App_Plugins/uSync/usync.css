@@ -305,13 +305,15 @@ ul.usync-action-list {
     .usync-banner h2 {
         display: flex;
         justify-content: center;
+        flex-direction: column;
         font-weight: 700;
         padding: 10px 0;
     }
 
         .usync-banner h2 > i {
             padding-right: 15px;
-            font-size: 60px;
+            font-size: 60pt;
+            color: #1b264f;
         }
 
     .usync-banner p {
@@ -340,7 +342,7 @@ ul.usync-action-list {
         .banner-icons > div > i {
             display: block;
             padding: 20px;
-            font-size: 160%;
+            font-size: 35pt;
             color: rgba(0,0,0,0.5);
         }
 
@@ -413,18 +415,20 @@ ul.usync-action-list {
 
 .usync-group-actions {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: repeat(auto-fill, minmax(342px, 32.5%));
     column-gap: 15px;
 }
 
 .usync-group-box {
     text-align: center;
+    z-index: 1001;
 }
 
 .usync-group-box-title {
     display: flex;
     align-items: center;
     justify-content: center;
+    z-index: 1000;
 }
 
 .usync-group-buttons {

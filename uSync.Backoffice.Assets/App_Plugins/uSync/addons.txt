@@ -26,10 +26,6 @@
       {
         "icon": "icon-user",
         "name": "people"
-      },
-      {
-        "icon": "icon-lock",
-        "name": "audit"
       }
     ]
   },

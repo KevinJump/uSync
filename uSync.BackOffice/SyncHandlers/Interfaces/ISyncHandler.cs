@@ -51,7 +51,7 @@ namespace uSync.BackOffice.SyncHandlers
         /// <summary>
         ///  is the handler enabled.
         /// </summary>
-        bool Enabled { get; set; }
+        bool Enabled { get; }
 
         /// <summary>
         ///  default config for the handler - when being used in events.

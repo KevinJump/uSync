@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -12,7 +13,7 @@ namespace uSync.BackOffice.Configuration
     {
         public bool Enabled { get; set; } = true;
 
-        public IEnumerable<string> Actions { get; set; } = new List<string>();
+        public string[] Actions { get; set; } = Array.Empty<string>();
 
         public bool UseFlatStructure { get; set; } = true;
         public bool GuidNames { get; set; } = false;

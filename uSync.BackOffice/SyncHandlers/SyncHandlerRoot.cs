@@ -82,7 +82,8 @@ namespace uSync.BackOffice.SyncHandlers
         /// <summary>
         ///  Is the handler enabled 
         /// </summary>
-        public bool Enabled { get; set; } = true;
+        public bool Enabled => DefaultConfig?.Enabled ?? true;
+
 
         /// <summary>
         ///  the default configuration for this handler 
@@ -1075,8 +1076,11 @@ namespace uSync.BackOffice.SyncHandlers
             if (_mutexService.IsPaused) return false;
             if (!DefaultConfig.Enabled) return false;
 
+
+            var group = !string.IsNullOrWhiteSpace(DefaultConfig.Group) ? DefaultConfig.Group : this.Group;
+
             if (uSyncConfig.Settings.ExportOnSave.InvariantContains("All")|| 
-                uSyncConfig.Settings.ExportOnSave.InvariantContains(this.Group)) 
+                uSyncConfig.Settings.ExportOnSave.InvariantContains(group)) 
             {
                 return HandlerActions.Save.IsValidAction(DefaultConfig.Actions);
             }

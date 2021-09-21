@@ -99,7 +99,7 @@ namespace uSync.BackOffice.SyncHandlers
         {
             var handlers = GetValidHandlers(options);
             var groups = handlers
-                .Select(x => x.Handler.Group)
+                .Select(x => x.GetConfigGroup())
                 .ToList();
 
             groups.AddRange(handlers.Where(x => !string.IsNullOrWhiteSpace(x.Settings.Group))
@@ -140,10 +140,12 @@ namespace uSync.BackOffice.SyncHandlers
             {
                 if (handlerSetSettings.DisabledHandlers.InvariantContains(handler.Alias)) continue;
 
+                var config = LoadHandlerConfig(handler, handlerSetSettings);
+
                 // check its valid for the passed group and action. 
-                if (handler != null && IsValidGroup(options.Group, handler))
+                if (handler != null && IsValidHandler(config, options.Action, options.Group))
                 {
-                    configs.Add(LoadHandlerConfig(handler, handlerSetSettings));
+                    configs.Add(config);
                 }
                 else
                 {
@@ -154,29 +156,19 @@ namespace uSync.BackOffice.SyncHandlers
                 }
 
             }
-
-            // if the handlergroups is set, only return handlers in those groups.
-            if (handlerSetSettings.HandlerGroups.Any())
-            {
-                return configs
-                    .Where(x => handlerSetSettings.HandlerGroups.InvariantContains(x.Handler.Group))
-                    .OrderBy(x => x.Handler.Priority);
-            }
-            else
-            {
-                return configs.OrderBy(x => x.Handler.Priority);
-            }
-        }
-
-        private bool IsValidGroup(string group, ISyncHandler handler)
-        {
-            // empty means all as does 'all'
-            if (string.IsNullOrWhiteSpace(group) || group.InvariantEquals("all")) return true;
-
-            return handler.Group.InvariantEquals(group);
+            
+            return configs.OrderBy(x => x.Handler.Priority);
         }
         #endregion
+
+        /// <summary>
+        ///  is this config pair valid for the settings we have for it. 
+        /// </summary>
+        /// <param name="handlerConfigPair"></param>
+        /// <param name="actions"></param>
+        /// <param name="group"></param>
+        /// <returns></returns>
+        private bool IsValidHandler(HandlerConfigPair handlerConfigPair, HandlerActions actions, string group)
+            => handlerConfigPair.IsEnabled() && handlerConfigPair.IsValidAction(actions) && handlerConfigPair.IsValidGroup(group);
     }
-
-
 }

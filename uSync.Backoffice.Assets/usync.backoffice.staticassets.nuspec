@@ -17,7 +17,7 @@
 	</metadata>
 	<files>
 		<file src="readme.txt" target="." />
-		<file src="build\**\*.*" target="build" />
+		<file src="build\**\*.*" target="buildTransitive" />
 		<file src="App_Plugins\uSync\**\*.*" target="content\App_Plugins\uSync" />
 	</files>
 </package>
