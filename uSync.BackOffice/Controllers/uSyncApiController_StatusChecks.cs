@@ -191,11 +191,12 @@ namespace uSync.BackOffice.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost]
-        public uSyncWarningMessage GetSyncWarnings(string action, uSyncOptions options)
+        public uSyncWarningMessage GetSyncWarnings(HandlerActions action, uSyncOptions options)
         {
             var handlers = handlerFactory.GetValidHandlers(new SyncHandlerOptions
             {
-                Group = options.Group
+                Group = options.Group,
+                Action = action
             });
 
             var message = new uSyncWarningMessage();
@@ -208,13 +209,14 @@ namespace uSync.BackOffice.Controllers
             }
 
             var createOnly = handlers
-                .Select(x => x.Handler)
-                .Any(h => h.DefaultConfig.GetSetting(Core.uSyncConstants.DefaultSettings.CreateOnly, false));
+                .Where(h => h.Settings.GetSetting(Core.uSyncConstants.DefaultSettings.CreateOnly, false))
+                .Select(x => x.Handler.Alias)
+                .ToList();
 
-            if (createOnly)
+            if (createOnly.Count > 0)
             {
                 message.Type = "warning";
-                message.Message = textService.Localize("usync", "createWarning");
+                message.Message = textService.Localize("usync", "createWarning", new [] { string.Join(",", createOnly) });
                 return message;
             }
 

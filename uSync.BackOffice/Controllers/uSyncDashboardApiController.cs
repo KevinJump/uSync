@@ -99,7 +99,9 @@ namespace uSync.BackOffice.Controllers
         /// </summary>
         [HttpGet]
         public IEnumerable<string> GetAllHandlerGroups()
-            => handlerFactory.GetGroups();
+        {
+            return handlerFactory.GetGroups();
+        }
 
         [HttpGet]
         public IEnumerable<SyncHandlerSummary> GetHandlers()

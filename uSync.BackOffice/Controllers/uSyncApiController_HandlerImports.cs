@@ -72,7 +72,7 @@ namespace uSync.BackOffice.Controllers
             var hubClient = new HubClientService(hubContext, options.ClientId);
 
             var actions = uSyncService.ImportHandler(options.Handler, new uSyncImportOptions
-            {
+            { 
                 Callbacks = hubClient.Callbacks(),
                 HandlerSet = uSyncConfig.Settings.DefaultSet,
                 RootFolder = uSyncConfig.GetRootFolder(),
