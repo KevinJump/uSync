@@ -21,6 +21,11 @@ param (
     $push=$false #push to devops nightly feed
 )
 
+if ($version.IndexOf('-') -ne -1) {
+    Write-Host "Version shouldn't contain a - (remember version and suffix are seperate)"
+    exit
+}
+
 $fullVersion = $version;
 
 if (![string]::IsNullOrWhiteSpace($suffix)) {
@@ -38,6 +43,7 @@ if (![string]::IsNullOrWhiteSpace($suffix)) {
 "----------------------------------"
 Write-Host "Version  :" $fullVersion
 Write-Host "Config   :" $env
+Write-Host "Folder   :" $outFolder
 "----------------------------------"; ""
 
 dotnet restore ..
@@ -62,4 +68,4 @@ if ($push) {
     .\nuget.exe push "$outFolder\*.nupkg" -ApiKey AzureDevOps -src https://pkgs.dev.azure.com/jumoo/Public/_packaging/nightly/nuget/v3/index.json
 }
 
-Write-Host "uSync Packaged : $versionString"
+Write-Host "uSync Packaged : $fullVersion"
