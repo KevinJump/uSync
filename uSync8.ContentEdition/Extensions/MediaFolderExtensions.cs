@@ -1,14 +1,10 @@
-﻿using Serilog.Core;
+﻿using System.Configuration;
+using System.Text.RegularExpressions;
 
-using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Umbraco.Core;
+using Umbraco.Core.IO;
 
 using uSync8.BackOffice.Configuration;
-using uSync8.ContentEdition.Mapping.Mappers;
 
 namespace uSync8.ContentEdition.Extensions
 {
@@ -32,20 +28,6 @@ namespace uSync8.ContentEdition.Extensions
             if (!string.IsNullOrWhiteSpace(folder))
                 return folder;
 
-            // azure guessing - so for most people seeing this issue, 
-            // they won't have to do any config, as we will detect it ???
-            var useDefault = ConfigurationManager.AppSettings["AzureBlobFileSystem.UseDefaultRoute:media"];
-            if (useDefault != null && bool.TryParse(useDefault, out bool usingDefaultRoute) && !usingDefaultRoute)
-            {
-                // means azure is configured to not use the default root, so the media 
-                // will be prepended with /container-name. 
-                var containerName = ConfigurationManager.AppSettings["AzureBlobFileSystem.ContainerName:media"];
-                if (!string.IsNullOrWhiteSpace(containerName))
-                {
-                    return $"/{containerName}";
-                }
-            }
-
             // more azure guessing - if the virtual path provider is disabled, 
             // then the URLs are stored in the media store, and we need to 
             // strip them from the names when we save things. 
@@ -63,8 +45,71 @@ namespace uSync8.ContentEdition.Extensions
                 }
             }
 
+            // azure guessing - so for most people seeing this issue, 
+            // they won't have to do any config, as we will detect it ???
+            var useDefault = ConfigurationManager.AppSettings["AzureBlobFileSystem.UseDefaultRoute:media"];
+            if (useDefault != null && bool.TryParse(useDefault, out bool usingDefaultRoute) && !usingDefaultRoute)
+            {
+                // means azure is configured to not use the default root, so the media 
+                // will be prepended with /container-name. 
+                var containerName = ConfigurationManager.AppSettings["AzureBlobFileSystem.ContainerName:media"];
+                if (!string.IsNullOrWhiteSpace(containerName))
+                {
+                    return $"/{containerName}";
+                }
+            }
+
             return config.GetExtensionSetting("media", "folder", string.Empty);
 
         }
+
+      
+
+        public static string StripSitePath(string filepath, string mediaFolder)
+        {
+            var path = filepath;
+            if (SystemDirectories.Root.Length > 0 && !string.IsNullOrWhiteSpace(filepath) && filepath.InvariantStartsWith(SystemDirectories.Root))
+                path = filepath.Substring(SystemDirectories.Root.Length);
+
+            return ReplacePath(path, mediaFolder, "/media");
+        }
+
+
+        public static string PrePendSitePath(string filepath, string mediaFolder)
+        {
+            var path = filepath;
+            if (SystemDirectories.Root.Length > 0 && !string.IsNullOrEmpty(filepath))
+                path = $"{SystemDirectories.Root}{filepath}";
+
+            return ReplacePath(path, "/media", mediaFolder);
+        }
+
+        /// <summary>
+        ///  makes a specific media path generic. 
+        /// </summary>
+        /// <remarks>
+        ///  sometimes paths may be defined by umbraco settings, (especially blob settings)
+        ///  that mean they are not stored as /media 
+        ///  
+        ///  for the sake of generic importing we want the folder stored to be /media. 
+        ///  so we re-write the setting on import and export 
+        ///  
+        ///  assumes you have a app setting in the web.config 
+        ///  
+        ///     <add key="uSync.mediaFolder">/somefolder</add>
+        ///
+        /// </remarks>
+        /// <returns></returns>
+        private static string ReplacePath(string filepath, string currentPath, string targetPath)
+        {
+            if (!string.IsNullOrWhiteSpace(targetPath)
+                && !string.IsNullOrWhiteSpace(currentPath))
+            {
+                return Regex.Replace(filepath, $"^{currentPath}", targetPath, RegexOptions.IgnoreCase);
+            }
+
+            return filepath;
+        }
+
     }
 }
