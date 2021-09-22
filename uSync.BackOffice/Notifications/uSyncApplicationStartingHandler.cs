@@ -69,7 +69,7 @@ namespace uSync.BackOffice.Notifications
                 return;
             }
 
-            if (_serverRegistrar.CurrentServerRole == ServerRole.Replica)
+            if (_serverRegistrar.CurrentServerRole == ServerRole.Subscriber)
             {
                 _logger.LogInformation("This is a replicate server in a load balanced setup - uSync will not run {serverRole}", _serverRegistrar.CurrentServerRole);
                 return;
