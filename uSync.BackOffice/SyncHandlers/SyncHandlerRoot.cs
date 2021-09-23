@@ -82,7 +82,7 @@ namespace uSync.BackOffice.SyncHandlers
         /// <summary>
         ///  Is the handler enabled 
         /// </summary>
-        public bool Enabled => DefaultConfig?.Enabled ?? true;
+        public bool Enabled { get; set; } = true; 
 
 
         /// <summary>

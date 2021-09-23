@@ -135,10 +135,14 @@ namespace uSync.BackOffice.SyncHandlers
             var configs = new List<HandlerConfigPair>();
 
             var handlerSetSettings = GetSetSettings(options.Set);
-
+    
             foreach (var handler in _syncHandlers.Handlers.Where(x => options.IncludeDisabled || x.Enabled))
             {
-                if (handlerSetSettings.DisabledHandlers.InvariantContains(handler.Alias)) continue;
+                if (!options.IncludeDisabled && handlerSetSettings.DisabledHandlers.InvariantContains(handler.Alias))
+                {
+                    _logger.LogDebug("Handler {hadler} is in the disabled handler list", handler.Alias);
+                    continue;
+                }
 
                 var config = LoadHandlerConfig(handler, handlerSetSettings);
 
@@ -149,6 +153,7 @@ namespace uSync.BackOffice.SyncHandlers
                 }
                 else
                 {
+                    _logger.LogDebug("No Handler with {alias} has been loaded", handler.Alias);
                     // only log if we are doing the default 'everything' group 
                     // because weh nfoing groups we choose not to load things. 
                     if (string.IsNullOrWhiteSpace(options.Group))
