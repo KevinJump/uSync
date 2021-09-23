@@ -36,7 +36,10 @@ $majorFolder = $version.Substring(0, $version.LastIndexOf('.'))
 
 $outFolder = ".\$majorFolder\$version\$fullVersion"
 if (![string]::IsNullOrWhiteSpace($suffix)) {
-    $suffixFolder = $suffix.substring(0, $suffix.indexOf('.'))
+    $suffixFolder = $suffix;
+    if ($suffix.IndexOf('.') -ne -1) {
+        $suffixFolder = $suffix.substring(0, $suffix.indexOf('.'))
+    }
     $outFolder = ".\$majorFolder\$version\$version-$suffixFolder\$fullVersion"
 }
 
@@ -45,6 +48,7 @@ Write-Host "Version  :" $fullVersion
 Write-Host "Config   :" $env
 Write-Host "Folder   :" $outFolder
 "----------------------------------"; ""
+
 
 dotnet restore ..
 
