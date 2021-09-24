@@ -104,7 +104,7 @@ namespace uSync.Core.Serialization
             }
 
             // else create 
-            var attempt = FindContainers(parent.Id, name);
+            var attempt = CreateContainer(parent.Id, name);
             if (attempt)
                 return attempt.Result.Entity;
 
@@ -159,7 +159,7 @@ namespace uSync.Core.Serialization
 
         protected abstract EntityContainer FindContainer(Guid key);
         protected abstract IEnumerable<EntityContainer> FindContainers(string folder, int level);
-        protected abstract Attempt<OperationResult<OperationResultType, EntityContainer>> FindContainers(int parentId, string name);
+        protected abstract Attempt<OperationResult<OperationResultType, EntityContainer>> CreateContainer(int parentId, string name);
 
         protected virtual EntityContainer FindFolder(Guid key, string path)
         {
@@ -175,7 +175,7 @@ namespace uSync.Core.Serialization
                 .FirstOrDefault();
             if (root == null)
             {
-                var attempt = FindContainers(-1, rootFolder);
+                var attempt = CreateContainer(-1, rootFolder);
                 if (!attempt)
                 {
                     return null;

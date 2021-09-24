@@ -265,8 +265,8 @@ namespace uSync.Core.Serialization.Serializers
         protected override IEnumerable<EntityContainer> FindContainers(string folder, int level)
             => dataTypeService.GetContainers(folder, level);
 
-        protected override Attempt<OperationResult<OperationResultType, EntityContainer>> FindContainers(int parentId, string name)
-            => dataTypeService.CreateContainer(parentId, name);
+        protected override Attempt<OperationResult<OperationResultType, EntityContainer>> CreateContainer(int parentId, string name)
+            => dataTypeService.CreateContainer(parentId, Guid.NewGuid(), name);
 
         public override void SaveItem(IDataType item)
         {
