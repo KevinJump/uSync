@@ -11,7 +11,7 @@
 
         internal class Sets
         {
-            internal const string DefaultSet = "default";
+            internal const string DefaultSet = "Default";
         }
 
         public class Configuration

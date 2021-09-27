@@ -21,7 +21,7 @@ using static Umbraco.Cms.Core.Constants;
 
 namespace uSync.BackOffice.SyncHandlers.Handlers
 {
-    [SyncHandler("templateHandler", "Templates", "Templates", uSyncConstants.Priorites.Templates,
+    [SyncHandler("TemplateHandler", "Templates", "Templates", uSyncConstants.Priorites.Templates,
         Icon = "icon-layout", EntityType = UdiEntityType.Template, IsTwoPass = true)]
     public class TemplateHandler : SyncHandlerLevelBase<ITemplate, IFileService>, ISyncHandler,
         INotificationHandler<SavedNotification<ITemplate>>,

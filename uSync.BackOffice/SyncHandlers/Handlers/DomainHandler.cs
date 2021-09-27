@@ -18,7 +18,7 @@ using uSync.Core;
 
 namespace uSync.BackOffice.SyncHandlers.Handlers
 {
-    [SyncHandler("domainHandler", "Domains", "Domains", uSyncConstants.Priorites.DomainSettings
+    [SyncHandler("DomainHandler", "Domains", "Domains", uSyncConstants.Priorites.DomainSettings
         , Icon = "icon-home usync-addon-icon", EntityType = "domain")]
     public class DomainHandler : SyncHandlerBase<IDomain, IDomainService>, ISyncHandler,
         INotificationHandler<SavedNotification<IDomain>>,
