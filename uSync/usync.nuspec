@@ -14,7 +14,7 @@
 		<copyright>Jumoo @ 2013-2021</copyright>
 		<tags>Umbraco</tags>
 		<repository url="https://github.com/KevinJump/uSync8/tree/core/main" />
-		<readme>doc\README.md</readme>
+		<readme>docs\README.md</readme>
 		<dependencies>
 			<group targetFramework="net5.0">
 				<dependency id="uSync.BackOffice.StaticAssets" version="$version$" />
@@ -22,9 +22,8 @@
 			</group>
 		</dependencies>
 		<contentFiles />
-		<files>
-			<file src="..\readme.md" target="docs\" />
-		</files>
 	</metadata>
-	<files />
+	<files>
+		<file src="..\readme.md" target="docs\" />
+	</files>
 </package>
