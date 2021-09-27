@@ -20,7 +20,7 @@ using static Umbraco.Cms.Core.Constants;
 
 namespace uSync.BackOffice.SyncHandlers.Handlers
 {
-    [SyncHandler("MacroHandler", "Macros", "Macros", uSyncConstants.Priorites.Macros,
+    [SyncHandler(uSyncConstants.Handlers.MacroHandler, "Macros", "Macros", uSyncConstants.Priorites.Macros,
         Icon = "icon-settings-alt", EntityType = UdiEntityType.Macro)]
     public class MacroHandler : SyncHandlerBase<IMacro, IMacroService>, ISyncHandler,
         INotificationHandler<SavedNotification<IMacro>>,

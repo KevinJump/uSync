@@ -20,7 +20,7 @@ using static Umbraco.Cms.Core.Constants;
 
 namespace uSync.BackOffice.SyncHandlers.Handlers
 {
-    [SyncHandler("RelationTypeHandler", "Relations",
+    [SyncHandler(uSyncConstants.Handlers.RelationTypeHandler, "Relations",
             "RelationTypes", uSyncConstants.Priorites.RelationTypes,
             Icon = "icon-traffic usync-addon-icon",
             EntityType = UdiEntityType.RelationType, IsTwoPass = false)]

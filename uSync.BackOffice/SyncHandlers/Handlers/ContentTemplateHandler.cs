@@ -15,7 +15,7 @@ using static Umbraco.Cms.Core.Constants;
 
 namespace uSync.BackOffice.SyncHandlers.Handlers
 {
-    [SyncHandler("ContentTemplateHandler", "Blueprints", "Blueprints", uSyncConstants.Priorites.ContentTemplate
+    [SyncHandler(uSyncConstants.Handlers.ContentTemplateHandler, "Blueprints", "Blueprints", uSyncConstants.Priorites.ContentTemplate
         , Icon = "icon-document-dashed-line usync-addon-icon", IsTwoPass = true, EntityType = UdiEntityType.DocumentBlueprint)]
     public class ContentTemplateHandler : ContentHandlerBase<IContent, IContentService>, ISyncHandler
     {

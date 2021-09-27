@@ -49,5 +49,24 @@ namespace uSync.BackOffice
                 { Users, "icon-users color-green"}
             };
         }
+
+        public static class Handlers
+        {
+            public const string ContentHandler = "ContentHandler";
+            public const string ContentTemplateHandler = "ContentTemplateHandler";
+            public const string ContentTypeHandler = "ContentTypeHandler";
+            public const string DataTypeHandler = "DataTypeHandler";
+            public const string DictionaryHandler = "DictionaryHandler";
+            public const string DomainHandler = "DomainHandler";
+            public const string LanguageHandler = "LanguageHandler";
+            public const string MacroHandler = "MacroHandler";
+            public const string MediaHandler = "MediaHandler";
+            public const string MediaTypeHandler = "MediaTypeHandler";
+            public const string MemberTypeHandler = "MemberTypeHandler";
+            public const string RelationTypeHandler = "RelationTypeHandler";
+            public const string TemplateHandler = "TemplateHandler";
+
+
+        }
     }
 }
