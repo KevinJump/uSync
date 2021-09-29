@@ -24,6 +24,6 @@
 		<contentFiles />
 	</metadata>
 	<files>
-		<file src="..\readme.md" target="docs\" />
+		<file src=".\readme.md" target="docs\" />
 	</files>
 </package>

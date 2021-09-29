@@ -39,7 +39,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Include="readme.txt">
+		<None Include="readme.md">
 			<Pack>true</Pack>
 			<PackagePath></PackagePath>
 		</None>
