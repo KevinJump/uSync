@@ -53,7 +53,7 @@
                              'name': 'Add ons',
                              'alias': 'expansion',
                              'icon': 'icon-box',
-                             'view': Umbraco.Sys.ServerVariables.umbracoSettings.appPluginsPath + '/usync/settings/expansion.html'
+                             'view': Umbraco.Sys.ServerVariables.umbracoSettings.appPluginsPath + '/uSync/settings/expansion.html'
                          });
                 }
 
