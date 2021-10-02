@@ -29,7 +29,7 @@
 		<IncludeSymbols>true</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 
-		<IncludeBuildOutput>false</IncludeBuildOutput>
+		<IncludeBuildOutput>true</IncludeBuildOutput>
 
 	</PropertyGroup>
 
@@ -40,6 +40,10 @@
 
 	<ItemGroup>
 		<None Include="readme.md">
+			<Pack>true</Pack>
+			<PackagePath>/docs</PackagePath>
+		</None>
+		<None Include="readme.txt">
 			<Pack>true</Pack>
 			<PackagePath></PackagePath>
 		</None>

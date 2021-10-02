@@ -25,5 +25,6 @@
 	</metadata>
 	<files>
 		<file src=".\readme.md" target="docs\" />
+		<file src=".\readme.txt" target="readme.txt" />
 	</files>
 </package>
