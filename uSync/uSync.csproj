@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
+	<PropertyGroup>
 		<TargetFramework>net5.0</TargetFramework>
 		<ContentTargetFolders>.</ContentTargetFolders>
 
@@ -12,7 +12,9 @@
 		<Authors>Kevin Jump</Authors>
 		<Company>Jumoo</Company>
 
-		<PackageIconUrl></PackageIconUrl>
+		<PackageIcon>usync-logo.png</PackageIcon>
+		<PackageReadmeFile>readme.md</PackageReadmeFile>
+
 		<PackageLicenseExpression>MPL-2.0</PackageLicenseExpression>
 		<PackageProjectUrl>https://jumoo.co.uk/uSync</PackageProjectUrl>
 		<PackageTags>Umbraco</PackageTags>
@@ -26,27 +28,22 @@
 		</PackageReleaseNotes>
 
 		<EmbedUntrackedSources>true</EmbedUntrackedSources>
-		<IncludeSymbols>true</IncludeSymbols>
+		<IncludeSymbols>false</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 
 		<IncludeBuildOutput>true</IncludeBuildOutput>
 
 	</PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\uSync.Backoffice.Assets\uSync.BackOffice.StaticAssets.csproj" />
-    <ProjectReference Include="..\uSync.BackOffice\uSync.BackOffice.csproj" />
+	<ItemGroup>
+		<ProjectReference Include="..\uSync.Backoffice.Assets\uSync.BackOffice.StaticAssets.csproj" />
+		<ProjectReference Include="..\uSync.BackOffice\uSync.BackOffice.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Include="readme.md">
-			<Pack>true</Pack>
-			<PackagePath>/docs</PackagePath>
-		</None>
-		<None Include="readme.txt">
-			<Pack>true</Pack>
-			<PackagePath></PackagePath>
-		</None>
+		<None Include="readme.md" Pack="true" PackagePath="\" />
+		<None Include="readme.txt" Pack="true" PackagePath="\" />
+		<None Include="usync-logo.png" Pack="true" PackagePath="\" />
 	</ItemGroup>
 
 </Project>

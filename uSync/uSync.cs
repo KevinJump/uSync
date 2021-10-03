@@ -9,6 +9,6 @@
     /// </summary>
     public static class uSync
     {
-        private static string Welcome = "uSync all the things";
+        // private static string Welcome = "uSync all the things";
     }
 }
