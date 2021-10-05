@@ -200,10 +200,12 @@ namespace uSync.Core.Serialization.Serializers
             var includeDefaults = (cultures.Count == 0 && segments.Count == 0)
                 || options.GetSetting(uSyncConstants.DefaultsKey, false);
 
+            var excludedProperties = GetExcludedProperties(options);
+
             var node = new XElement("Properties");
 
             foreach (var property in item.Properties
-                .Where(x => !dontSerialize.InvariantContains(x.Alias))
+                .Where(x => !excludedProperties.InvariantContains(x.Alias))
                 .OrderBy(x => x.Alias))
             {
                 var propertyNode = new XElement(property.Alias);
@@ -898,6 +900,18 @@ namespace uSync.Core.Serialization.Serializers
             {
                 logger.LogWarning(exception, "Error cleaning up relations: {id}", item.Id);
             }
+
+        }
+
+
+        private List<string> GetExcludedProperties(SyncSerializerOptions options)
+        {
+            List<string> exclude = new List<string>(dontSerialize);
+            var excludeOptions = options.GetSetting<string>("DoNotSerialize", "");
+            if (!string.IsNullOrWhiteSpace(excludeOptions))
+                exclude.AddRange(excludeOptions.ToDelimitedList());
+
+            return exclude;
 
         }
 
