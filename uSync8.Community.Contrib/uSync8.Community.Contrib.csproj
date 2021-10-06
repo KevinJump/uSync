@@ -66,6 +66,7 @@
   <ItemGroup>
     <Compile Include="Mappers\BentoStackMapper.cs" />
     <Compile Include="Mappers\BentoItemMapper.cs" />
+    <Compile Include="Mappers\ContentmentContentBlocks.cs" />
     <Compile Include="Mappers\DocTypeGridMapper.cs" />
     <Compile Include="uSyncContrib.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
