@@ -579,9 +579,9 @@ namespace uSync8.Core.Serialization.Serializers
                 var name = tab.Element("Caption").ValueOrDefault(string.Empty);
                 var sortOrder = tab.Element("SortOrder").ValueOrDefault(defaultSort);
                 var alias = tab.Element("Alias").ValueOrDefault(name);
-                var type = tab.Element("Group").ValueOrDefault(defaultTabType);
+                var type = tab.Element("Type").ValueOrDefault(defaultTabType);
 
-                logger.Debug(serializerType, "> Tab {0} {1} {2}", name, alias, sortOrder);
+                logger.Debug(serializerType, "> Tab {0} {1} {2} [{3}]", name, alias, sortOrder, type);
 
                 var existing = item.PropertyGroups.FindTab(alias);
                 if (existing != null)
@@ -593,8 +593,11 @@ namespace uSync8.Core.Serialization.Serializers
                     }
 
                     var existingType = existing.GetTabPropertyAsString("Type");
+                    logger.Debug(serializerType, "Exiting tab type: {type}", existingType);
+
                     if (!string.IsNullOrWhiteSpace(existingType) && existingType != type)
                     {
+                        logger.Debug(serializerType, "Setting tab type: {exiting} > {type}", existingType, type);
                         changes.AddUpdate("Type", existingType, type, $"Tabs/{name}/Type");
                         existing.SetGroupType(type);
                     }
