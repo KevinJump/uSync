@@ -1,0 +1,13 @@
+<div class="contentment number-input" ng-class="vm.uniqueId" ng-controller="Umbraco.Community.Contentment.DataEditors.NumberInput.Controller as vm">
+    <input type="number"
+           class="umb-number"
+           fix-number
+           id="{{model.alias}}"
+           max="{{vm.maximum}}"
+           min="{{vm.minimum}}"
+           ng-class="vm.sizeClass"
+           ng-model="model.value"
+           pattern="{{vm.pattern}}"
+           placeholder="{{vm.placeholderText}}"
+           step="{{vm.step}}" />
+</div>

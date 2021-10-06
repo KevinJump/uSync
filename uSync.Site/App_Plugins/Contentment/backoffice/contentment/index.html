@@ -1,0 +1,173 @@
+﻿<!-- Copyright © 2019 Lee Kelleher.
+   - This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at https://mozilla.org/MPL/2.0/. -->
+
+<div class="contentment" ng-controller="Umbraco.Community.Contentment.Tree.Controller as vm">
+
+    <umb-editor-view footer="false">
+
+        <div class="umb-editor-header">
+            <div class="flex items-center" style="height: 100%;">
+                <div class="flex items-center" style="flex: 1;">
+                    <img style="height:50px;margin-right:15px;" alt="Contentment logo" src="data:image/png;base64,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" />
+                    <div class="umb-editor-header__name-and-description" style="flex: 1 1 auto;">
+                        <div class="umb-panel-header-name" ng-bind="vm.title"></div>
+                        <div class="umb-panel-header-locked-description" ng-bind="vm.version"></div>
+                    </div>
+                    <div style="padding: 0 20px"><lee-was-here></lee-was-here></div>
+                </div>
+            </div>
+        </div>
+
+        <umb-editor-container>
+
+            <div class="umb-package-details">
+
+                <div class="umb-package-details__main-content">
+
+                    <umb-box>
+                        <umb-box-header title="Vote for the package"
+                                        description="If you enjoy using this package, please do vote up on the project page, thank you.">
+                            <div class="umb-button">
+                                <a href="https://our.umbraco.com/packages/backoffice-extensions/contentment/" target="_blank" rel="noopener" class="btn umb-button__button btn-success umb-button--m" ng-click="vm.vote(true)">
+                                    <span class="umb-button__content">
+                                        <umb-icon icon="icon-fa fa-lg fa-thumbs-up" class="umb-button__icon mr0"></umb-icon>
+                                        <span class="sr-only">Vote up</span>
+                                    </span>
+                                </a>
+                            </div>
+                            <div class="umb-button">
+                                <a href="#" class="btn umb-button__button btn-danger umb-button--m" ng-click="vm.vote(false)" prevent-default>
+                                    <span class="umb-button__content">
+                                        <umb-icon icon="icon-fa fa-lg fa-thumbs-down fa-flip-horizontal" class="umb-button__icon mr0"></umb-icon>
+                                        <span class="sr-only">Vote down</span>
+                                    </span>
+                                </a>
+                            </div>
+                            <img ng-if="vm.nggyu" ng-src="https://leekelleher.com/umbraco/contentment/assets/rickroll.gif" style="position:absolute;bottom:0;right:0;z-index:1;">
+                        </umb-box-header>
+                    </umb-box>
+
+                    <umb-box>
+                        <umb-box-header title="Do you want to stay up to date with Contentment?"
+                                        description="Sign up for my newsletter about latest Contentment package releases and community news.">
+                            <umb-button action="vm.subscribe()"
+                                        button-style="action"
+                                        icon="icon-fa fa-envelope mr2"
+                                        label="Sign up"
+                                        size="m"
+                                        type="button">
+                            </umb-button>
+                        </umb-box-header>
+                    </umb-box>
+
+                    <umb-box>
+                        <umb-box-header title="Feature options"></umb-box-header>
+                        <umb-box-content>
+
+                            <div ng-if="vm.telemetryEnabled === true">
+                                <h5 class="mt0">Telemetry</h5>
+                                <p>By default, the package sends telemetry data about which property-editors are being used (from Contentment only). For more details about the data being captured and transparency on the analysis, please visit <a href="https://leekelleher.com/umbraco/contentment/telemetry/" target="_blank" rel="noopener"><strong>leekelleher.com/umbraco/contentment/telemetry</strong></a>.</p>
+                                <p>If you would prefer to opt-out and disable the telemetry feature, you can set an option to do so.</p>
+                                <div class="umb-readonlyvalue">
+                                    <details class="well well-small">
+                                        <summary><strong>Configuration to disable Contentment telemetry</strong></summary>
+                                        <p>In your <code>appsettings.json</code> file, add this option inside the <code>"Umbraco"</code> section, add the following.</p>
+                                        <umb-code-snippet language="vm.codeSnippetLanguage">{{vm.disableTelemetryCode | json}}</umb-code-snippet>
+                                        <p>If you prefer to use a strongly-typed configuration in C# code, you can do this with the <code>.AddContentment(opts => { opts.DisableTelemetry = true; })</code> extension method in your <code>Startup.cs</code> file <code>ConfigureServices()</code> method.</p>
+                                    </details>
+                                </div>
+                            </div>
+                            <div ng-if="vm.telemetryEnabled === false">
+                                <h5 class="mt0">Telemetry</h5>
+                                <p><em>The telemetry feature has been disabled.</em> 🤐</p>
+                            </div>
+
+                            <hr />
+
+                            <div>
+                                <h5 class="mt0">Tree dashboard</h5>
+                                <p>If you would like to remove this page and tree item from the Settings section, you can set an option to do so.</p>
+                                <div class="umb-readonlyvalue">
+                                    <details class="well well-small">
+                                        <summary><strong>Configuration to disable Contentment tree dashboard</strong></summary>
+                                        <p>In your <code>appsettings.json</code> file, add this option inside the <code>"Umbraco"</code> section, add the following.</p>
+                                        <umb-code-snippet language="vm.codeSnippetLanguage">{{vm.disableTreeCode | json}}</umb-code-snippet>
+                                        <p>If you prefer to use a strongly-typed configuration in C# code, you can do this with the <code>.AddContentment(opts => { opts.DisableTree = true; })</code> extension method in your <code>Startup.cs</code> file <code>ConfigureServices()</code> method.</p>
+                                    </details>
+                                </div>
+                            </div>
+
+                        </umb-box-content>
+                    </umb-box>
+
+                    <div class="umb-box">
+                        <div class="umb-box-header">
+                            <div class="umb-box-header-title">
+                                <a href="https://www.youtube.com/playlist?list=PL8grlRt7-8oVULPYJpqido5QItRsJBt3M" target="_blank" rel="noopener">
+                                    Video demonstrations, guides and tutorials about Contentment on YouTube
+                                </a>
+                            </div>
+                            <a href="https://www.youtube.com/playlist?list=PL8grlRt7-8oVULPYJpqido5QItRsJBt3M" target="_blank" rel="noopener">
+                                <umb-icon icon="medium icon-fa fa-youtube" class="icon medium mr0"></umb-icon>
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="umb-package-details__sidebar">
+
+                    <umb-box>
+                        <umb-box-content>
+                            <div class="umb-package-details__owner-profile">
+                                <div>
+                                    <div class="umb-package-details__owner-profile-name" style="font-weight: normal;">
+                                        <a href="https://github.com/sponsors/leekelleher?o=esb" target="_blank" rel="noopener">Thank you to all my friendly <strong>GitHub sponsors</strong>, I appreciate your support.</a><br />
+                                    </div>
+                                </div>
+                                <div class="umb-package-details__owner-profile-avatar">
+                                    <img class="umb-avatar--m" src="data:image/png;base64,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" />
+                                </div>
+                            </div>
+                        </umb-box-content>
+                    </umb-box>
+
+                    <umb-box>
+                        <umb-box-header title="Useful links"></umb-box-header>
+                        <umb-box-content>
+                            <div class="umb-node-preview" ng-repeat="item in vm.links">
+                                <div class="flex">
+                                    <umb-icon icon="{{item.icon}}" class="umb-node-preview__icon" ng-class="item.icon"></umb-icon>
+                                    <div class="umb-node-preview__content">
+                                        <div class="umb-node-preview__name">
+                                            <a ng-href="{{item.url}}" ng-attr-target="_blank" ng-attr-rel="noopener" ng-bind="item.name"></a>
+                                        </div>
+                                        <div class="umb-node-preview__description" ng-bind="item.description"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </umb-box-content>
+                    </umb-box>
+
+                    <umb-box>
+                        <umb-box-content>
+                            <div class="text-center">
+                                <a href="https://umbrellainc.co.uk/" target="_blank" rel="noopener">
+                                    <img alt="Umbrella logo" src="data:image/png;base64,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" />
+                                </a>
+                                <small><a href="https://umbrellainc.co.uk/" target="_blank" rel="noopener">Development supported by <strong>Umbrella</strong>.</a></small>
+                            </div>
+                        </umb-box-content>
+                    </umb-box>
+
+                </div>
+
+            </div>
+
+        </umb-editor-container>
+
+    </umb-editor-view>
+
+</div>

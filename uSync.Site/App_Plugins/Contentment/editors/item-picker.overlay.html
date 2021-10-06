@@ -1,0 +1,90 @@
+<div class="contentment lk-overlay" ng-controller="Umbraco.Community.Contentment.Overlays.ItemPicker.Controller as vm">
+    <umb-editor-view>
+
+        <umb-editor-header name="vm.title"
+                           name-locked="true"
+                           hide-alias="true"
+                           hide-icon="true"
+                           hide-description="true">
+        </umb-editor-header>
+
+        <umb-editor-container>
+
+            <umb-box ng-if="vm.items.length > 0">
+                <umb-box-content>
+
+                    <div class="umb-search-filter w-100 mb3" ng-if="vm.enableFilter">
+                        <label for="icon-search" class="sr-only">Type to filter...</label>
+                        <umb-icon icon="icon-search"></umb-icon>
+                        <input id="icon-search"
+                               type="text"
+                               ng-model="vm.searchTerm"
+                               class="umb-search-filter__input"
+                               localize="placeholder"
+                               placeholder="@placeholders_filter"
+                               umb-auto-focus
+                               no-dirty-check />
+                    </div>
+
+                    <div ng-if="vm.enableMultiple === true && vm.itemCount > 0 && vm.maxItems > 0 && vm.itemCount > vm.maxItems" class="alert alert-danger">
+                        <span>Too many items selected, please unselect <strong>{{vm.itemCount - vm.maxItems}}</strong> {{vm.itemCount - vm.maxItems === 1 ? 'item' : 'items'}}.</span>
+                    </div>
+
+                    <ul class="umb-card-grid" ng-class="{'-three-in-row': vm.items.length < 7, '-four-in-row': vm.items.length >= 7}" ng-if="vm.listType === 'grid'">
+                        <li ng-class="{ '-disabled': item.disabled }" ng-repeat="item in vm.items | orderBy:vm.orderBy | filter:vm.searchTerm as results">
+                            <button type="button" class="btn-reset umb-card-grid-item" title="{{ item.name }}" ng-click="vm.select(item)">
+                                <i class="icon" ng-class="item.selected ? 'icon-check color-green' : item.icon || vm.defaultIcon" aria-hidden="true"></i>
+                                {{item.name}}
+                            </button>
+                        </li>
+                        <li class="alert alert-danger" ng-if="results.length == 0">
+                            <span>No items found for '<em ng-bind="vm.searchTerm"></em>'.</span>
+                        </li>
+                    </ul>
+
+                    <ul class="umb-actions umb-actions-child" ng-if="vm.listType === 'list'">
+                        <li class="umb-action" ng-class="{ '-disabled': item.disabled }" ng-repeat="item in vm.items | orderBy:vm.orderBy | filter:vm.searchTerm as results">
+                            <button type="button" class="umb-action-link umb-outline btn-reset" ng-click="vm.select(item)">
+                                <umb-checkmark ng-if="vm.enableMultiple" checked="item.selected" size="m"></umb-checkmark>
+                                <umb-icon icon="{{item.icon || vm.defaultIcon}}" class="large icon"></umb-icon>
+                                <span class="menu-label">
+                                    <span ng-bind="item.name"></span>
+                                    <small ng-bind="item.description"></small>
+                                </span>
+                            </button>
+                        </li>
+                        <li class="alert alert-danger" ng-if="results.length == 0">
+                            <span>No items found for '<em ng-bind="vm.searchTerm"></em>'.</span>
+                        </li>
+                    </ul>
+
+                </umb-box-content>
+            </umb-box>
+
+            <umb-empty-state ng-if="vm.items.length == 0" position="center">
+                <p>There are no items available to add.</p>
+            </umb-empty-state>
+
+        </umb-editor-container>
+
+        <umb-editor-footer>
+            <umb-editor-footer-content-right>
+                <umb-button type="button"
+                            button-style="link"
+                            label-key="general_close"
+                            shortcut="esc"
+                            action="vm.close()">
+                </umb-button>
+                <umb-button ng-if="vm.enableMultiple"
+                            type="button"
+                            button-style="primary"
+                            label-key="buttons_select"
+                            shortcut="ctrl+s"
+                            disabled="vm.allowSubmit === false"
+                            action="vm.submit()">
+                </umb-button>
+            </umb-editor-footer-content-right>
+        </umb-editor-footer>
+
+    </umb-editor-view>
+</div>
