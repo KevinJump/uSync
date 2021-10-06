@@ -20,7 +20,7 @@ namespace uSync8.Core.Extensions
         ///  reflection is fast, but a version check is faster, so we wrap things where we
         ///  don't have to do the reflection, 
         /// </remarks>
-        private static bool SupportsTabs
+        public static bool SupportsTabs
             => UmbracoVersion.LocalVersion.Major > 8 || UmbracoVersion.LocalVersion.Minor >= 17;
 
         public static PropertyGroup FindTab(this PropertyGroupCollection groups, string nameOrAlias)

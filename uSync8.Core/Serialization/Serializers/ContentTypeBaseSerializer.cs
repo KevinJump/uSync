@@ -64,8 +64,11 @@ namespace uSync8.Core.Serialization.Serializers
                             new XElement("Caption", tab.Name),
                             new XElement("SortOrder", tab.SortOrder));
 
-                tabNode.Add(new XElement("Alias", tab.GetTabPropertyAsString("Alias")));
-                tabNode.Add(new XElement("Type", tab.GetTabPropertyAsString("Type")));
+                if (PropertyGroupExtensions.SupportsTabs)
+                {
+                    tabNode.Add(new XElement("Alias", tab.GetTabPropertyAsString("Alias")));
+                    tabNode.Add(new XElement("Type", tab.GetTabPropertyAsString("Type")));
+                }
 
                 tabs.Add(tabNode);
 
