@@ -462,8 +462,8 @@ namespace uSync.BackOffice.SyncHandlers
                 if (item == null) return Enumerable.Empty<uSyncAction>();
 
                 // merge the options from the handler and any import options into our serializer options.
-                var serializerOptions = new SyncSerializerOptions(options.Flags, settings.Settings);
-                serializerOptions.MergeSettings(options.Settings);
+                var serializerOptions = new SyncSerializerOptions(options?.Flags ?? SerializerFlags.None, settings.Settings);
+                serializerOptions.MergeSettings(options?.Settings);
 
                 // do the second pass on this item
                 var result = DeserializeItemSecondPass(item, node, serializerOptions);
