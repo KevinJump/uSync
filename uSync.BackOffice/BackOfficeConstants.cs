@@ -42,11 +42,14 @@ namespace uSync.BackOffice
             public const string Members = "Members";
             public const string Users = "Users";
 
+            public const string Default = "__default__";
+
             public static Dictionary<string, string> Icons = new Dictionary<string, string> {
                 { Settings, "icon-settings-alt color-blue" },
                 { Content, "icon-documents color-purple" },
                 { Members, "icon-users" },
-                { Users, "icon-users color-green"}
+                { Users, "icon-users color-green"},
+                { Default, "icon-settings" }
             };
         }
 

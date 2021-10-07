@@ -90,7 +90,15 @@ namespace uSync.BackOffice.Controllers
             };
 
             return handlerFactory.GetValidGroups(options)
-                       .ToDictionary(k => k, v => uSyncConstants.Groups.Icons[v]);
+                       .ToDictionary(k => k, v => GetIcon(v));
+        }
+
+        private string GetIcon(string key)
+        {
+            if (uSyncConstants.Groups.Icons.ContainsKey(key))
+                return uSyncConstants.Groups.Icons[key];
+
+            return uSyncConstants.Groups.Icons[uSyncConstants.Groups.Default];
         }
 
         /// <summary>
