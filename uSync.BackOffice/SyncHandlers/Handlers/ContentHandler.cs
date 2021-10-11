@@ -24,7 +24,8 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
     public class ContentHandler : ContentHandlerBase<IContent, IContentService>, ISyncHandler, ISyncCleanEntryHandler,
         INotificationHandler<SavedNotification<IContent>>,
         INotificationHandler<DeletedNotification<IContent>>,
-        INotificationHandler<MovedNotification<IContent>>
+        INotificationHandler<MovedNotification<IContent>>,
+        INotificationHandler<MovedToRecycleBinNotification<IContent>>
     {
         public override string Group => uSyncConstants.Groups.Content;
 
@@ -75,7 +76,5 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
                 return contentService.GetRootContent();
             }
         }
-
-
     }
 }

@@ -143,10 +143,12 @@ namespace uSync.BackOffice
             builder.AddNotificationHandler<ContentSavedNotification, ContentHandler>();
             builder.AddNotificationHandler<ContentDeletedNotification, ContentHandler>();
             builder.AddNotificationHandler<ContentMovedNotification, ContentHandler>();
+            builder.AddNotificationHandler<ContentMovedToRecycleBinNotification, ContentHandler>();
 
             builder.AddNotificationHandler<MediaSavedNotification, MediaHandler>();
             builder.AddNotificationHandler<MediaDeletedNotification, MediaHandler>();
             builder.AddNotificationHandler<MediaMovedNotification, MediaHandler>();
+            builder.AddNotificationHandler<MediaMovedToRecycleBinNotification, MediaHandler>();
 
             builder.AddNotificationHandler<DomainSavedNotification, DomainHandler>();
             builder.AddNotificationHandler<DomainDeletedNotification, DomainHandler>();

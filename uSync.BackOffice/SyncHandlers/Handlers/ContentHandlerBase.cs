@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 
 using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Models;
+using Umbraco.Cms.Core.Notifications;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Strings;
 using Umbraco.Extensions;
@@ -165,6 +166,13 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
 
             return results;
         }
+
+        public void Handle(MovedToRecycleBinNotification<TObject> notification)
+        {
+            if (!ShouldProcessEvent()) return;
+            HandleMove(notification.MoveInfoCollection);
+        }
+
 
     }
 

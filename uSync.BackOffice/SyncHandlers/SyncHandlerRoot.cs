@@ -1071,7 +1071,7 @@ namespace uSync.BackOffice.SyncHandlers
         /// <remarks>
         /// will check if uSync is paused, the handler is enabled or the action is set.
         /// </remarks>
-        private bool ShouldProcessEvent()
+        protected bool ShouldProcessEvent()
         {
             if (_mutexService.IsPaused) return false;
             if (!DefaultConfig.Enabled) return false;
@@ -1116,8 +1116,12 @@ namespace uSync.BackOffice.SyncHandlers
         public virtual void Handle(MovedNotification<TObject> notification)
         {
             if (!ShouldProcessEvent()) return;
+            HandleMove(notification.MoveInfoCollection);
+        }
 
-            foreach (var item in notification.MoveInfoCollection)
+        protected void HandleMove(IEnumerable<MoveEventInfo<TObject>> moveInfoCollection)
+        {
+            foreach (var item in moveInfoCollection)
             {
                 var attempts = Export(item.Entity, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
 

@@ -24,8 +24,8 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
     public class MediaHandler : ContentHandlerBase<IMedia, IMediaService>, ISyncHandler, ISyncCleanEntryHandler,
         INotificationHandler<SavedNotification<IMedia>>,
         INotificationHandler<DeletedNotification<IMedia>>,
-        INotificationHandler<MovedNotification<IMedia>>
-
+        INotificationHandler<MovedNotification<IMedia>>,
+        INotificationHandler<MovedToRecycleBinNotification<IMedia>>
     {
         public override string Group => uSyncConstants.Groups.Content;
 
