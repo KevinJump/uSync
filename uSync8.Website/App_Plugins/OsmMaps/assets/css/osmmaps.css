@@ -1,0 +1,11 @@
+.osmmaps .map{
+	height: 400px;
+}
+
+.osmmaps .btn{
+	margin-top:10px;
+}
+
+.osmmaps .hide{
+	display: none;
+}

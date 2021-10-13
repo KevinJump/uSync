@@ -1,0 +1,55 @@
+﻿@inherits UmbracoViewPage<Contact>
+@using ContentModels = Umbraco.Web.PublishedModels;
+@{
+    Layout = "master.cshtml";
+
+
+    var coordinates = Model.MapCoordinates.ToString().Split(',');
+
+    var latitude = coordinates[0];
+    var longitude = coordinates[1];
+    var zoomLevel = coordinates[2];
+
+    // Build the coordinates string
+    var coordinatesString = longitude + "," + latitude + "," + longitude + "," + latitude;
+}
+@Html.Partial("~/Views/Partials/SectionHeader.cshtml")
+<section class="section">
+    <div class="container">
+
+        <div class="row">
+            <div class="col-md-6">
+                <h2>@Model.MapHeader</h2>
+                <iframe width="550"
+                        height="400"
+                        frameborder="0"
+                        scrolling="no"
+                        marginheight="0"
+                        marginwidth="0"
+                        src="https://www.openstreetmap.org/export/embed.html?bbox=@coordinatesString&amp;layer=mapnik&amp;marker=@Model.MapCoordinates"
+                        style="border: 1px solid black">
+                </iframe>
+
+                <br />
+
+                <small>
+                    <a href="https://www.openstreetmap.org/?mlat=@latitude&amp;mlon=@longitude#map=@zoomLevel/@latitude/@longitude&amp;layers=N">View Larger Map</a>
+                </small>
+            </div>
+
+            <div class="col-md-6">
+                <h2>@Model.ContactFormHeader</h2>
+                @Model.ContactIntro
+                <p class="compat-msg">
+        <em>Umbraco Forms</em> is required to render this form.It's a breeze to install, all you have to do is
+        go to the<em> Umbraco Forms</em> section in the back office and click Install, that's it! :) 
+        <br /><br />
+        <a href="/umbraco/#/forms" class="button button--border--solid">Go to Back Office and install Forms</a>
+        <!-- When Umbraco Forms is installed, uncomment this line -->
+        @* @Umbraco.RenderMacro("renderUmbracoForm", new {FormGuid=Model.ContactForm.ToString()}) *@
+        </p>
+            </div>
+
+        </div>
+    </div>
+</section>

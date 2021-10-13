@@ -1,0 +1,80 @@
+﻿@using Umbraco.Core.PropertyEditors
+@inherits UmbracoViewPage
+@{
+    Layout = null;
+    // Get basic design settings from the homepage
+    var home = (Home)Model.Root();
+    var font = home.Font;
+    var colorTheme = home.ColorTheme;
+}
+
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>@Model.Name - @home.Sitename</title>
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <link rel="stylesheet" href="@Url.Content("~/css/umbraco-starterkit-style.css")" />
+    @RenderSection("Header", required: false)
+</head>
+
+<body class="frontpage theme-font-@font theme-color-@colorTheme">
+    <div class="mobile-nav">
+        <nav class="nav-bar">
+            @Html.Partial("~/views/partials/navigation/topNavigation.cshtml")
+        </nav>
+    </div>
+
+    <header class="header">
+
+        <div class="logo">
+            @if (home.SiteLogo != null && !string.IsNullOrEmpty(home.SiteLogo.Url))
+            {
+                <div class="nav-link--home">
+                    <img class="logo-image" src="@home.SiteLogo.Url" alt="@home.Sitename">
+                </div>
+            }
+            else
+            {
+                <a class="nav-link nav-link--home nav-link--home__text logo-text" href="/">@home.Sitename</a>
+            }
+        </div>
+
+        <nav class="nav-bar top-nav">
+            @Html.Partial("~/Views/Partials/Navigation/TopNavigation.cshtml")
+        </nav>
+
+        <div class="mobile-nav-handler">
+            <div class="hamburger lines" id="toggle-nav">
+                <span></span>
+            </div>
+        </div>
+
+    </header>
+
+    <main>
+        @RenderBody()
+    </main>
+
+    <footer class="section--themed">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12 ta-center">
+                    @home.FooterAddress
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s=" crossorigin="anonymous"></script>
+    <script src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.13.1/jquery.validate.min.js"></script>
+    <script src="https://ajax.aspnetcdn.com/ajax/mvc/5.2.3/jquery.validate.unobtrusive.min.js"></script>
+    <script src="@Url.Content("~/scripts/umbraco-starterkit-app.js")"></script>
+
+</body>
+
+</html>

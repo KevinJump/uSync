@@ -5,7 +5,7 @@ const sourceFolders = [
     'uSync8.BackOffice/App_Plugins/',
     'uSync8.HistoryView/App_Plugins/'];
 
-const destination = 'uSync8.Site/App_Plugins/';
+const destination = 'uSync8.Website/App_Plugins/';
 
 
 function copy(path, baseFolder) {

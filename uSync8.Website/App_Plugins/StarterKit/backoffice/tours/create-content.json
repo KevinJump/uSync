@@ -1,0 +1,319 @@
+[
+    {
+        "name": "The Content section",
+        "alias": "theStarterKitTheContentSection",
+        "group": "Create content",
+        "groupOrder": 110,
+        "requiredSections": [
+            "content"
+        ],
+        "steps": [
+            {
+                "title": "The Content section",
+                "content": "<p>In this tour you will get a short introduction to the <b>Content section</b> in Umbraco.</p><p>The <b>Content section</b> is where all the pages and content for the website lives.</p><p>You will learn how to navigate the content, update some content, and preview the website.</p>",
+                "type": "intro"
+            },
+            {
+                "element": "#applications [data-element='section-content']",
+                "title": "Navigate to the Content section",
+                "content": "<p>In the <b>Content section</b> you can create and manage the content of the website.</p><p>The <b>Content section</b> contains the content of your website. Content is displayed as <b>nodes</b> in the content tree.</p>",
+                "event": "click",
+                "backdropOpacity": 0.6
+            },
+            {
+                "element": "#tree [data-element='tree-item-Home']",
+                "title": "The Home page",
+                "event": "click",
+                "content": "<p>The first node you will see in the content tree is the <b>Home</b> page.</p><p><b>Click</b> on the <b>arrow</b> on the left of the Home page to see the pages underneath the Home page.</p>",
+                "eventElement": "#tree [data-element='tree-item-Home'] [data-element='tree-item-expand']"
+            },
+            {
+                "element": "#tree [data-element='tree-item-Home']",
+                "elementPreventClick": true,
+                "title": "The site structure",
+                "content": "<p>In the content tree you will see the site structure. You can expand trees by clicking the arrow to the left of the node.</p>"
+            },
+            {
+                "element": "#tree [data-element='tree-item-Home'] a.umb-tree-item__label",
+                "title": "Open the Home page",
+                "content": "<p>Let's have a look at what the content of a page could look like.</p><p><b>Click</b> on the <b>Home page name</b> to open the node.</p>",
+                "event": "click",
+                "eventElement": "#tree [data-element='tree-item-Home'] a.umb-tree-item__label"
+            },
+            {
+                "element": "[data-element='editor-name-field']",
+                "elementPreventClick": true,
+                "title": "The page name",
+                "content": "<p>At the top of the page you will find the name of the content you are editing.</p>"
+            },
+            {
+                "element": "[data-element='property-heroHeader']",
+                "elementPreventClick": true,
+                "title": "Properties",
+                "content": "<p>In the center of the page you will find the content <b>Properties</b>.</p><p>These are all the pieces of information the content consist of. Properties can vary depending on which <b>Document type</b> the current item is based on.</p>"
+            },
+            {
+                "element": "[data-element='group-Hero']",
+                "elementPreventClick": true,
+                "title": "Organise with groups",
+                "content": "<p>The properties of a page are organised in <b>groups</b> making it easy to find the right place to update the content.</p>"
+            },
+            {
+                "element": "[data-element='button-preview']",
+                "title": "Preview content",
+                "content": "<p>Before a page is published to your website you can preview any changes you have made to the page.</p><p><b>Click</b> the Preview button to see how the page looks now.</p>",
+                "event": "click"
+            },
+            {
+                "element": "[data-element='property-heroHeader']",
+                "title": "Update the header",
+                "content": "<p>Let's make an update to the content in the <b>Header</b> property.</p><p>Try changing it to: <code>Welcome to my website</code></p>"
+            },
+            {
+                "element": "[data-element='button-preview']",
+                "title": "Preview update",
+                "content": "<p><b>Click</b> the Preview button to see the changes you've just made.</p>",
+                "event": "click"
+            },
+            {
+                "element": "[data-element='button-saveAndPublish']",
+                "title": "Save and Publish",
+                "content": "<p><b>Click</b> on the <b>Publish</b> button to publish the changes and make them visible to the public.</p>",
+                "event": "click"
+            }
+        ]
+    },
+    {
+        "name": "Creating Content",
+        "alias": "theStarterKitCreatingContent",
+        "group": "Create content",
+        "groupOrder": 110,
+        "requiredSections": [
+            "content"
+        ],
+        "steps": [
+            {
+                "title": "Creating your first content page",
+                "content": "<p>In this tour you will learn how to create new content for your website.</p>",
+                "type": "intro"
+            },
+            {
+                "element": "#applications [data-element='section-content']",
+                "title": "Navigate to the Content section",
+                "content": "<p>In the <b>Content section</b> you can create and manage the content of the website.</p><p>The <b>Content section</b> contains the content of your website. Content is displayed as <b>nodes</b> in the content tree.</p>",
+                "event": "click",
+                "backdropOpacity": 0.6
+            },
+            {
+                "element": "#tree [data-element='tree-item-Home']",
+                "title": "Open the context menu",
+                "content": "<p>Open the context menu by hovering the Home node.</p><p>Now click the <b>three small dots</b> to the right.</p>",
+                "event": "click",
+                "eventElement": "[data-element='tree-item-Home'] [data-element='tree-item-options']"
+            },
+            {
+                "element": "#dialog [data-element='action-create-contentPage']",
+                "title": "Create new Content Page",
+                "content": "<p>Now you can see all the options you have for creating content in this part of the site.</p><p>Select the <b>Content Page</b> option to create a new page of that type.</p>",
+                "event": "click"
+            },
+            {
+                "element": "[data-element='editor-content'] [data-element='editor-name-field']",
+                "title": "Give your new page a name",
+                "content": "<p>Our new page needs a name. Enter <code>My Page</code> in the field and click <b>Next</b>.</p>",
+                "view": "/App_Plugins/StarterKit/tours/views/validateText.html",
+                "customProperties": {
+                    "validateText": "My Page"
+                }
+            },
+            {
+                "element": "[data-element='editor-content'] [data-element='property-pageTitle'] input",
+                "title": "Add a page title",
+                "content": "<p>On this page we are also required to fill out the <b>Page Title</b> property.</p><p><b>Enter</b> <code>Welcome to My Page</code> in the field and click <b>Next</b>.</p>",
+                "view": "/App_Plugins/StarterKit/tours/views/validateText.html",
+                "customProperties": {
+                    "validateText": "Welcome to My Page"
+                }
+            },
+            {
+                "element": "[data-element='editor-footer'] [data-element='button-save']",
+                "title": "Save as draft",
+                "content": "<p>Before we can preview the page we need to save it as a draft.</p><p><b>Click</b> the <b>Save</b> option to save your changes without making them public.</p>",
+                "event": "click"
+            },
+            {
+                "element": "[data-element='editor-footer'] [data-element='button-preview']",
+                "title": "Preview",
+                "content": "<p><b>Click</b> the <b>Preview</b> button to preview the new page before publishing it.</p>",
+                "event": "click"
+            },
+            {
+                "element": "[data-element='editor-container']",
+                "elementPreventClick": true,
+                "title": "Go explore",
+                "content": "<p>The page still looks a bit empty. You can now try and fill out some of the other properties on the page.</p>"
+            }
+        ]
+    },
+    {
+        "name": "The Media Library",
+        "alias": "theStarterKitTheMediaLibrary",
+        "group": "Create content",
+        "groupOrder": 110,
+        "requiredSections": [
+            "media"
+        ],
+        "steps": [
+            {
+                "title": "How to use the media library",
+                "content": "<p>A website would be boring without media content. In Umbraco you can manage all your images, documents, videos etc. in the <b>Media section</b>. Here you can upload and organise your media items and see details about each item.</p><p>In this tour you will learn how to upload and organise your Media library in Umbraco. It will also show you how to view details about a specific media item.</p>",
+                "type": "intro"
+            },
+            {
+                "element": "#applications [data-element='section-media']",
+                "title": "Navigate to the Media section",
+                "content": "The <b>Media</b> section is where you manage all your media items.",
+                "event": "click",
+                "backdropOpacity": 0.6
+            },
+            {
+                "element": "#tree",
+                "elementPreventClick": true,
+                "title": "The media tree",
+                "content": "<p>Like the Content section the Media section also has a tree.</p>"
+            },
+            {
+                "element": "#tree [data-element='tree-item-Design']",
+                "title": "Folders",
+                "content": "<p>In this Starter kit we have added a couple of folders. One of them is called <b>Design</b>.</p><p>This folder is meant to hold all the design related media items like background images etc.</p><p><b>Click</b> the folder name to open the folder.</p>",
+                "event": "click",
+                "eventElement": "#tree [data-element='tree-item-Design'] a.umb-tree-item__label"
+            },
+            {
+                "element": "[data-element='editor-media'] [data-element='dropzone']",
+                "elementPreventClick": true,
+                "title": "Upload area",
+                "content": "<p>Inside a folder you will find an area to upload your media files...</p>"
+            },
+            {
+                "element": "[data-element='editor-media'] [data-element='media-grid']",
+                "elementPreventClick": true,
+                "title": "Uploaded media",
+                "content": "<p>...and an area with all your uploaded files.</p>"
+            },
+            {
+                "element": "[data-element='editor-media'] [data-element='dropzone']",
+                "title": "Upload a background image",
+                "content": "<p>Let's upload a new image we can use as background image on the Home page in the next tour.</p><p>Click the <b>or click here to choose files</b>-button and select an image on your computer to upload.</p>",
+                "view": "/App_Plugins/StarterKit/Tours/views/medialibrary/uploadimages.html"
+            },
+            {
+                "element": "[data-element='editor-media'] [data-element='media-grid-item-0']",
+                "title": "View media item details",
+                "content": "Hover the media item and <b>Click the white bar</b> to view details about the media item.",
+                "event": "click",
+                "eventElement": "[data-element='editor-media'] [data-element='media-grid-item-0'] [data-element='media-grid-item-edit']"
+            },
+            {
+                "element": "[data-element='editor-media'] [data-element='property-umbracoFile']",
+                "elementPreventClick": true,
+                "title": "The uploaded image",
+                "content": "<p>Here you can see the image you have uploaded.</p>"
+            },
+            {
+                "element": "[data-element='editor-media'] [data-element='property-umbracoBytes']",
+                "elementPreventClick": true,
+                "title": "Image size",
+                "content": "<p>You will also find other details about the image, like the size.</p><p>Media items work in much the same way as content. Properties can vary depending on which <b>Media type</b> the current item belongs to.</p>"
+            },
+            {
+                "element": "[data-element='editor-media'] [data-element='sub-view-umbInfo']",
+                "title": "Info",
+                "content": "Under the Info-app you will find default information about the media item.",
+                "event": "click"
+            },
+            {
+                "element": "[data-element='editor-media'] [data-element='node-info-urls']",
+                "elementPreventClick": true,
+                "title": "Link to media",
+                "content": "The path to the media item..."
+            },
+            {
+                "element": "[data-element='editor-media'] [data-element='node-info-general']",
+                "elementPreventClick": true,
+                "title": "General information",
+                "content": "...and information about when the media item has been created and edited."
+            }
+        ]
+    },
+    {
+        "name": "Adding media to content",
+        "alias": "theStarterKitAddingMediaToContent",
+        "group": "Create content",
+        "groupOrder": 110,
+        "requiredSections": [
+            "content"
+        ],
+        "steps": [
+            {
+                "title": "Adding media to content",
+                "content": "<p>In this tour you will learn how to add media to a content page using a <b>Media picker</b>.</p><p>Your will use the image you uploaded to the Design folder as a new background image for the <b>Home page</b>.</p>",
+                "type": "intro"
+            },
+            {
+                "element": "#applications [data-element='section-content']",
+                "title": "Navigate to the Content section",
+                "content": "<p><b>Click</b> the Content section icon to open the content section.</p>",
+                "event": "click",
+                "backdropOpacity": 0.6
+            },
+            {
+                "element": "#tree [data-element='tree-item-Home']",
+                "title": "Home",
+                "content": "<p><b>Click</b> the Home node to open it.</p>",
+                "event": "click",
+                "eventElement": "#tree [data-element='tree-item-Home'] a.umb-tree-item__label"
+            },
+            {
+                "element": "[data-element='group-Design']",
+                "elementPreventClick": true,
+                "title": "Design",
+                "content": "<p>Under the <b>Design group</b> you will find the property to change the background image.</p>"
+            },
+            {
+                "element": "[data-element='editor-content'] [data-element='property-HeroBackgroundImage'] [data-element='sortable-thumbnails'] [data-element='sortable-thumbnail-0']",
+                "title": "Remove the current image",
+                "content": "<p>First we need to remove the current image so we can add our new image.</p><p><b>Hover</b> the image and <b>Click</b> on the red X i the bottom right corner of the image.</p>",
+                "event": "click",
+                "eventElement": "[data-element='editor-content'] [data-element='property-HeroBackgroundImage'] [data-element='sortable-thumbnails'] [data-element='sortable-thumbnail-0'] [data-element='action-remove']"
+            },
+            {
+                "element": "[data-element='editor-content'] [data-element='property-HeroBackgroundImage'] [data-element='sortable-thumbnails'] [data-element='sortable-thumbnails-add']",
+                "title": "Open the Media picker",
+                "content": "<p>Click the <b>Add icon</b> to open the <b>Media Picker</b>.</p>",
+                "event": "click"
+            },
+            {
+                "element": "[ng-controller*='Umbraco.Editors.MediaPickerController'] [data-element='editor-container']",
+                "title": "Select image",
+                "content": "<p>This Media picker is configured to only show images from the Design folder.</p><p><b>Click</b> on the image you just uploaded to select it.</p>"
+            },
+            {
+                "element": "[ng-controller*='Umbraco.Editors.MediaPickerController'] [button-style='success'] [data-element]",
+                "title": "Submit dialog",
+                "content": "Click <b>Select image</b> to add the selected image.",
+                "event": "click"
+            },
+            {
+                "element": "[data-element='button-preview']",
+                "title": "Preview",
+                "content": "<p><b>Click</b> Preview to see the changed background image.</p>",
+                "event": "click"
+            },
+            {
+                "title": "Remember to Save or Publish",
+                "content": "<p>If you want to keep the changes you've made, remember to Save or Publish the content item.</p>"
+            }
+        ]
+    }
+]

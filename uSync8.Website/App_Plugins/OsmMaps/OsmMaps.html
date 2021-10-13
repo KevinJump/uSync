@@ -1,0 +1,25 @@
+﻿<div class="osmmaps" ng-controller="OsmMaps.PropertyEditorController">
+    <!-- This is a bit dirty but currently the only way I know how to translate the text values in the controller -->
+    <span id="geoCodeError" class="hide">
+        <osmmaps-localize key="geoCodeError">Oops! Having trouble geocoding specified address! Please try again.</osmmaps-localize>
+    </span>
+
+    <span id="locationSet" class="hide">
+        <osmmaps-localize key="locationSet">Location set to</osmmaps-localize>
+    </span>
+
+    <!--<div>
+        <input type="text" id="{{model.alias}}_{{model.uid}}_lookup" class="umb-editor umb-textstring textstring"/>
+    </div>-->
+    <div>
+        <div class="map" id="{{model.alias}}_{{model.uid}}_map"></div>
+    </div>
+    <div>
+        <span>{{formattedAddress}}</span>
+    </div>
+    <!--<div>
+        <button type="submit" id="umb-osmmaps-reset-{{model.uid}}" class="btn">
+            <osmmaps-localize key="resetTxt">Reset position</osmmaps-localize>
+        </button>
+    </div>-->
+</div>

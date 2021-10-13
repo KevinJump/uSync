@@ -1,0 +1,36 @@
+﻿<div ng-controller="Umbraco.Starterkit.HelpController as vm">
+
+    <div ng-hide="vm.currentLesson">
+        <ul class="umb-help-list">
+            <li class="umb-help-list-item" ng-repeat="lesson in vm.lessons">
+                <a href="" title="{{lesson.name}}" ng-click="vm.loadLesson(lesson)">
+                    <i class="umb-help-list-item__icon icon-help-alt"></i>
+                    <span class="umb-help-list-item__title">{{lesson.name}}</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="umb-help-article" ng-if="vm.currentLesson">
+
+        <a href="" ng-click="vm.exitLesson()"><small>&larr; Back to overview</small></a>
+
+        <div ng-bind-html="vm.currentStep.content"></div>
+
+        <div class="umb-help-article-navigation">
+
+            <div>
+                <a ng-if="vm.currentStepIndex < vm.steps.length-1" href="" ng-click="vm.exitLesson()"><small>&larr; Back to overview</small></a>
+            </div>
+
+            <div>
+                <umb-button type="button" ng-if="vm.currentStepIndex > 0" action="vm.loadStep(vm.currentStepIndex-1)" label="Previous"></umb-button>
+                <umb-button type="button" button-style="success" ng-if="vm.currentStepIndex < vm.steps.length-1" action="vm.loadStep(vm.currentStepIndex+1)" label="Next"></umb-button>
+                <umb-button type="button" button-style="success" ng-if="vm.currentStepIndex === vm.steps.length-1" action="vm.exitLesson()" label="Complete"></umb-button>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>

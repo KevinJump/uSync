@@ -1,0 +1,45 @@
+{
+  propertyEditors:
+  [ 
+    {
+      alias: "Our.Umbraco.OsmMaps",
+      name: "Open street maps",
+      editor:  
+      {
+        view: "~/App_Plugins/OsmMaps/OsmMaps.html"
+        
+      },
+      prevalues: {
+        fields:[          
+          {
+            label: "Latitude",
+            description: "Enter your default starting latitude",
+            key: "lat",
+            view: "textstring"
+          },
+          {
+            label: "Longitude",
+            description: "Enter your default starting longitude",
+            key: "lng",
+            view: "textstring"
+          },
+          {
+            label: "Zoom level",
+            description: "Enter your default zoom level",
+            key: "zoomlevel",
+            view: "textstring"
+          }
+        ]
+      },
+      defaultConfig:{
+        lat: 55.40626,
+        lng: 10.38840,
+        zoomlevel: 15
+      }
+    } 
+  ],
+  javascript:  
+  [
+    "~/App_Plugins/OsmMaps/OsmMaps.controller.js"
+  ]
+}

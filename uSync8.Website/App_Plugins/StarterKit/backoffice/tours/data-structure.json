@@ -1,0 +1,237 @@
+[
+    {
+        "name": "Document types",
+        "alias": "theStarterKitDocumentTypes",
+        "group": "Data structure",
+        "groupOrder": 120,
+        "requiredSections": [
+            "content",
+            "settings"
+        ],
+        "steps": [
+            {
+                "title": "Document types = content structure",
+                "content": "<p>The first thing you do with a new Umbraco installation is to create a <strong>Document Type</strong>. A Document Type is a template for content. For each <em>type</em> of content you want to create, you'll create a Document Type.</p><p>The document type defines where content can be created, how many properties it holds and what the input method should be for these properties.</p><p>When you have at least one Document type in place you can start creating content</p><p>In this tour you will get an introduction to the Starter kits data structure and learn how to add a new property to a Document type.</p>",
+                "type": "intro"
+            },
+            {
+                "element": "#applications [data-element='section-settings']",
+                "title": "Navigate to the Settings sections",
+                "content": "In the <b>Settings section</b> you will find the document types.",
+                "event": "click",
+                "backdropOpacity": 0.6
+            },
+            {
+                "element": "#tree [data-element='tree-item-documentTypes']",
+                "title": "Document types tree",
+                "content": "<p>To see all the document types click the <b>arrow</b> to the left of the <b>Document Types</b> node.</p>",
+                "event": "click",
+                "eventElement": "#tree [data-element='tree-item-documentTypes'] [data-element='tree-item-expand']"
+            },
+            {
+                "element": "#tree [data-element='tree-item-documentTypes']",
+                "elementPreventClick": true,
+                "title": "Document types",
+                "content": "<p>In the tree you will find all the document types for the different types of content we can create for our website.</p><p>You can see a document type for a <b>Blog</b> and one for a <b>Blog post</b>. There is also a document type for a standard <b>Content Page</b> and one for a special <b>Contact</b> page.</p>"
+            },
+            {
+                "element": "#tree [data-element='tree-item-documentTypes'] [data-element='tree-item-Home']",
+                "title": "Home document type",
+                "content": "<p>We want to add a new piece of text on our <b>Home </b>page.</p><p>Let's have a look at how a Document type is set up. <b>Click</b> on the <b>Home</b> document type to open the document type editor.</p>",
+                "event": "click",
+                "eventElement": "#tree [data-element='tree-item-documentTypes'] [data-element='tree-item-Home'] a.umb-tree-item__label"
+            },
+            {
+                "element": "[data-element='editor-document-types'] .umb-editor-wrapper",
+                "elementPreventClick": true,
+                "title": "The Document Type Editor",
+                "content": "In the document type editor you can manage all the settings for a document type."
+            },
+            {
+                "element": "[data-element='editor-icon']",
+                "elementPreventClick": true,
+                "title": "The icon",
+                "content": "<p>In the top of the screen you will find the <b>Document type icon</b>.</p><p>Use the icon to help choose the right Document type when creating content.</p>"
+            },
+            {
+                "element": "[data-element='editor-name-field']",
+                "elementPreventClick": true,
+                "title": "The name",
+                "content": "<p>The name of the Document type.</p>"
+            },
+            {
+                "element": "[data-element='editor-sub-views']",
+                "elementPreventClick": true,
+                "title": "Navigation",
+                "content": "<p>The document type settings are split up into multiple views to keep them organized.</p><p>Right now we are on the <b>Design view</b> where we structure the <b>Properties</b>.</p>"
+            },
+            {
+                "element": "[data-element='group-Hero']",
+                "elementPreventClick": true,
+                "title": "Tabs to structure properties",
+                "content": "<p>Properties are organised in groups.</p><p>Use them to group your properties so it is easy to find the right place to update a piece of content.</p>"
+            },
+            {
+                "element": "[data-element='group-Hero'] [data-element='property-heroHeader']",
+                "elementPreventClick": true,
+                "title": "Property",
+                "content": "<p>Every document type has properties. These are the fields that the content editor is allowed to edit for the node.</p>"
+            },
+            {
+                "element": "[data-element='group-Content'] [data-element='property-add']",
+                "title": "Add new property",
+                "content": "<p>Let's add a new property to the <b>Content</b> group where we can add an About text to our Home page.</p>",
+                "event": "click"
+            },
+            {
+                "element": "[ng-controller*='Umbraco.Editors.PropertySettingsController'] [data-element='property-name']",
+                "title": "Enter a name",
+                "content": "Enter <code>Welcome Text</code> as name for the property.",
+                "view": "/App_Plugins/StarterKit/tours/views/validateText.html",
+                "customProperties": {
+                  "validateText": "Welcome Text"
+                }
+            },
+            {
+                "element": "[ng-controller*='Umbraco.Editors.PropertySettingsController'] [data-element='property-description']",
+                "title": "Enter a description",
+                "content": "<p>A description will help to fill in the right content.</p><p>Enter a description for the property. It could be:<br/> <pre>Write a nice introduction so the visitors feel welcome</pre></p>"
+            },
+            {
+                "element": "[ng-controller*='Umbraco.Editors.PropertySettingsController'] [data-element='editor-add']",
+                "title": "Add editor",
+                "content": "The editor defines what data type the property is based on. Click <b>Add editor</b> to open the editor picker dialog.",
+                "event": "click"
+            },
+            {
+                "element": "[ng-controller*='Umbraco.Editors.DataTypePickerController'] [data-element='editor-data-type-picker']",
+                "elementPreventClick": true,
+                "title": "Editor picker",
+                "content": "<p>In the editor picker dialog we can pick one of the many built-in editors.</p>"
+            },
+            {
+                "element": "[data-element~='editor-data-type-picker'] [data-element='editor-Textarea']",
+                "title": "Select editor",
+                "content": "Select the <b>Textarea</b> editor which allows us to enter long texts.",
+                "event": "click"
+            },
+            {
+                "element": "[ng-controller~='Umbraco.Editors.DataTypeSettingsController'] [data-element='editor-data-type-settings']",
+                "elementPreventClick": true,
+                "title": "Editor settings",
+                "content": "Each property editor can have individual settings. We don't want to change any of these now."
+            },
+            {
+                "element": "[data-element~='editor-data-type-settings'] [data-element='button-submit']",
+                "title": "Save editor",
+                "content": "Click <b>Submit</b> to save the editor.",
+                "event": "click"
+            },
+            {
+                "element": "[data-element~='editor-property-settings'] [data-element='button-submit']",
+                "title": "Add property to document type",
+                "content": "Click <b>Submit</b> to add the property to the document type.",
+                "event": "click"
+            },
+            {
+                "element": "[data-element='button-save']",
+                "title": "Save the document type",
+                "content": "All we need now is to save the document type. Click <b>Save</b> to save the document type.",
+                "event": "click"
+            },
+            {
+                "element": "#applications [data-element='section-content']",
+                "title": "Navigate to the Content section",
+                "content": "To see the property we just added, let's head back to the <b>Content</b> section.",
+                "event": "click",
+                "backdropOpacity": 0.6
+            },
+            {
+                "element": "#tree [data-element='tree-item-Home']",
+                "title": "The Home page",
+                "event": "click",
+                "content": "<p>Click the <b>Home</b> node.</p>",
+                "eventElement": "#tree [data-element='tree-item-Home'] a.umb-tree-item__label"
+            },
+            {
+                "element": "[data-element='editor-content'] [data-element='group-Content']",
+                "elementPreventClick": true,
+                "title": "The Content group",
+                "content": "<p>Under the Content group you will find the new property.</p>"
+            },
+            {
+                "element": "[data-element='property-welcomeText']",
+                "title": "Add an About text",
+                "content": "<p>Here you can see the text area you added. Try entering some text. This could be</p><p><pre>This is the Home page!</pre></p>"
+            },
+            {
+                "element": "[data-element='button-saveAndPublish']",
+                "title": "Save and Publish",
+                "content": "<p><b>Click</b> on the <b>Publish</b> button to publish the changes and make them visible to the public.</p><p>In the next tour you will learn how to update the template to render content from the new <b>Welcome Text</b> property.</p>",
+                "event": "click"
+            }
+        ]
+    },
+    {
+        "name": "Templating",
+        "alias": "theStarterKitTemplates",
+        "group": "Data structure",
+        "groupOrder": 120,
+        "requiredSections": [
+            "content",
+            "settings"
+        ],
+        "steps": [
+            {
+                "title": "Render your content in a template",
+                "content": "<p>Templating in Umbraco builds on the concept of <b>Razor Views</b> from asp.net MVC. - This tour is a sneak peek on how to write templates in Umbraco.</p><p>In this tour you will learn how to render content from the new <b>Welcome Text</b> property we added to the <b>Home</b> document type, so you can see the content added to our <b>Home</b> content page.</p>",
+                "type": "intro"
+            },
+            {
+                "element": "#applications [data-element='section-settings']",
+                "title": "Navigate to the Settings section",
+                "content": "<p>In the <b>Settings</b> section you will find all the templates.</p><p>It is of course also possible to edit all your code files in your favorite code editor.</p>",
+                "event": "click",
+                "backdropOpacity": 0.6
+            },
+            {
+                "element": "#tree [data-element='tree-item-templates']",
+                "title": "Expand the Templates node",
+                "content": "<p>To see all our templates click the <b>arrow</b> to the left of the Templates node.</p>",
+                "event": "click",
+                "eventElement": "#tree [data-element='tree-item-templates'] [data-element='tree-item-expand']"
+            },
+            {
+                "element": "#tree [data-element='tree-item-templates'] [data-element='tree-item-Master']",
+                "title": "Master templates",
+                "content": "<p>The first template you will see is the <b>Master template</b>.</p><p>When creating new templates we don't want to duplicate header, footer etc. across all our templates so they get inherited from the Master.</p><p><b>Click</b> the <b>arrow</b> to the left of the Master template node to see the child templates.</p>",
+                "event": "click",
+                "eventElement": "#tree [data-element='tree-item-templates'] [data-element='tree-item-Master'] [data-element='tree-item-expand']"
+            },
+            {
+                "element": "#tree [data-element='tree-item-templates'] [data-element='tree-item-Home']",
+                "title": "Open Home template",
+                "content": "<p>When a document type is created you can choose to get a matching template created.</p><p>Click the <b>Home</b> template to open it.</p>",
+                "eventElement": "#tree [data-element='tree-item-templates'] [data-element='tree-item-Home'] a.umb-tree-item__label",
+                "event": "click"
+            },
+            {
+                "element": "[data-element='editor-templates'] [data-element='editor-container']",
+                "title": "Edit template",
+                "content": "<p>To render the field <b>Welcome Text</b> from the Home document type copy/paste the following code on <b>line 20</b> underneath the first <b>section</b>:<br/> <pre>&#60;section class=\"section section--themed section--content-center\"&#62;&#60;h1&#62;@Model.WelcomeText&#60;/h1&#62;&#60;/section&#62;</pre></p>"
+            },
+            {
+                "element": "[data-element='editor-templates'] [data-element='button-save']",
+                "title": "Save the template",
+                "content": "Click the <b>Save button</b> and your template will be saved.",
+                "event": "click"
+            },
+            {
+                "element": "[data-element='editor-container']",
+                "elementPreventClick": true,
+                "title": "Preview Home page",
+                "content": "<p>The Document type, template and content is now ready to preview.</p><p>You can now go back to you <b>Home page</b> and preview your new content.</p>"
+            }
+        ]
+    }
+]
