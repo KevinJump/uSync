@@ -74,6 +74,9 @@ namespace uSync8.Core.Sync
         {
             if (item.Flags.HasFlag(DependencyFlags.IncludeChildren))
             {
+                // take include children off the item, because we are doing that now
+                item.Flags = item.Flags & ~DependencyFlags.IncludeChildren;
+
                 var items = new List<SyncItem> { item };
                 items.AddRange(GetDecendants(item, item.Flags & ~DependencyFlags.IncludeChildren));
                 return items;
