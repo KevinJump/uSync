@@ -34,9 +34,9 @@ namespace uSync8.Community.DataTypeSerializers.CoreTypes
                     ShowOpen = pickerConfig.ShowOpen,
                     TreeSource = new MultiNodePickerConfigurationTreeSource()
                     {
-                        ObjectType = pickerConfig.TreeSource.ObjectType,
-                        StartNodeId = pickerConfig.TreeSource.StartNodeId,
-                        StartNodeQuery = pickerConfig.TreeSource.StartNodeQuery
+                        ObjectType = pickerConfig.TreeSource?.ObjectType,
+                        StartNodeId = pickerConfig.TreeSource?.StartNodeId,
+                        StartNodeQuery = pickerConfig.TreeSource?.StartNodeQuery
                     }
 
                 };
