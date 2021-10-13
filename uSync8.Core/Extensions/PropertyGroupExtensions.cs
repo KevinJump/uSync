@@ -6,8 +6,11 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 
 using Umbraco.Core;
+using Umbraco.Core.Composing;
 using Umbraco.Core.Configuration;
 using Umbraco.Core.Models;
+using Umbraco.Core.Logging;
+
 
 namespace uSync8.Core.Extensions
 {
@@ -49,6 +52,8 @@ namespace uSync8.Core.Extensions
                     var attempt = propertyValue.TryConvertTo<string>();
                     if (attempt.Success) return attempt.Result;
                 }
+
+                return "Unknown";
             }
 
             return string.Empty;
@@ -84,13 +89,18 @@ namespace uSync8.Core.Extensions
         {
             if (SupportsTabs)
             {
-                var addPropertyGroupMethod = typeof(IContentTypeComposition).GetMethod("AddPropertyGroup",
+                var addPropertyGroupMethod = typeof(IContentTypeBase).GetMethod("AddPropertyGroup",
                     new Type[] { typeof(string), typeof(string) });
 
                 if (addPropertyGroupMethod != null)
                 {
+                    Current.Logger.Info<uSync8Core>("Adding new propery group {alias} {name} ", alias, name);
                     addPropertyGroupMethod.Invoke(item, new[] { alias, name });
                     return;
+                }
+                else
+                {
+                    Current.Logger.Warn<uSync8Core>("Umbraco is 8.17 but we can't find the add property group method");
                 }
             }
 
@@ -114,13 +124,19 @@ namespace uSync8.Core.Extensions
             {
                 if (SupportsTabs)
                 {
-                    var addPropertyTypeMethod = typeof(IContentTypeComposition).GetMethod("AddPropertyType",
+
+                    var addPropertyTypeMethod = typeof(IContentTypeBase).GetMethod("AddPropertyType",
                         new Type[] { typeof(PropertyType), typeof(string), typeof(string) });
 
                     if (addPropertyTypeMethod != null)
                     {
+                        Current.Logger.Info<uSync8Core>("Adding Property to group using reflection {alias} {name}", alias, name);
                         addPropertyTypeMethod.Invoke(item, new object[] { property, alias, name });
                         return;
+                    }
+                    else
+                    {
+                        Current.Logger.Warn<uSync8Core>("Version is 8.17+ but we can't find the tab property method");
                     }
                 }
 
@@ -138,7 +154,6 @@ namespace uSync8.Core.Extensions
 
             return tab.Name;
         }
-
 
         /// <summary>
         ///  Get the tab alias or name for an item we are importing. 

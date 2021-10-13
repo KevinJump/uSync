@@ -109,7 +109,8 @@ namespace uSync8.Core.Serialization.Serializers
                 propNode.Add(new XElement("SortOrder", property.SortOrder));
 
                 var tab = item.PropertyGroups.FirstOrDefault(x => x.PropertyTypes.Contains(property));
-                propNode.Add(new XElement("Tab", tab != null ? tab.Name : ""));
+
+                propNode.Add(SerializeTab(item, property));
 
                 SerializeExtraProperties(propNode, item, property);
 
@@ -133,6 +134,23 @@ namespace uSync8.Core.Serialization.Serializers
             }
 
             return node;
+        }
+
+        protected XElement SerializeTab(TObject item, PropertyType property)
+        {
+            var tab = item.PropertyGroups.FirstOrDefault(x => x.PropertyTypes.Contains(property));
+            var tabNode = new XElement("Tab", tab != null ? tab.Name : "");
+
+            if (tab != null)
+            {
+                var alias = tab.GetTabPropertyAsString("Alias");
+                if (!string.IsNullOrWhiteSpace(alias))
+                {
+                    tabNode.Add(new XAttribute("Alias", alias));
+                }
+            }
+
+            return tabNode;
         }
 
         /// <summary>
@@ -578,18 +596,24 @@ namespace uSync8.Core.Serialization.Serializers
             {
                 var name = tab.Element("Caption").ValueOrDefault(string.Empty);
                 var sortOrder = tab.Element("SortOrder").ValueOrDefault(defaultSort);
-                var alias = tab.Element("Alias").ValueOrDefault(name);
+                var aliasOrName = tab.Element("Alias").ValueOrDefault(name);
                 var type = tab.Element("Type").ValueOrDefault(defaultTabType);
 
-                logger.Debug(serializerType, "> Tab {0} {1} {2} [{3}]", name, alias, sortOrder, type);
+                logger.Debug(serializerType, "> Tab {0} {1} {2} [{3}]", name, aliasOrName, sortOrder, type);
 
-                var existing = item.PropertyGroups.FindTab(alias);
+                var existing = item.PropertyGroups.FindTab(aliasOrName);
                 if (existing != null)
                 {
                     if (existing.SortOrder != sortOrder)
                     {
                         changes.AddUpdate("SortOrder", existing.SortOrder, sortOrder, $"Tabs/{name}/SortOrder");
                         existing.SortOrder = sortOrder;
+                    }
+
+                    if (existing.Name != name)
+                    {
+                        changes.AddUpdate("Name", existing.Name, name, $"Tabs/{name}/Name");
+                        existing.Name = name;
                     }
 
                     var existingType = existing.GetTabPropertyAsString("Type");
@@ -604,10 +628,10 @@ namespace uSync8.Core.Serialization.Serializers
                 }
                 else
                 {
-                    item.SafeAddPropertyGroup(alias, name);
+                    item.SafeAddPropertyGroup(aliasOrName, name);
 
                     changes.AddNew(name, name, $"Tabs/{name}");
-                    var newTab = item.PropertyGroups.FirstOrDefault(x => x.Name.InvariantEquals(name));
+                    var newTab = item.PropertyGroups.FindTab(aliasOrName);
                     if (newTab != null)
                     {
                         newTab.SortOrder = sortOrder;
@@ -623,7 +647,6 @@ namespace uSync8.Core.Serialization.Serializers
             return changes;
         }
 
-
         protected IEnumerable<uSyncChange> CleanTabs(TObject item, XElement node, SyncSerializerOptions options)
         {
             if (options.DeleteItems())
@@ -633,17 +656,18 @@ namespace uSync8.Core.Serialization.Serializers
                 var tabNode = node?.Element("Tabs");
                 if (tabNode == null) return Enumerable.Empty<uSyncChange>();
 
-                var newTabs = tabNode.Elements("Tab")
-                    .Where(x => x.Element("Caption") != null)
-                    .Select(x => x.Element("Caption").ValueOrDefault(string.Empty))
+                var newTabAliasOrNames = tabNode.Elements("Tab")
+                    .Where(x => x.Element("Alias") != null || x.Element("Caption") != null)
+                    .Select(x => x.Element("Alias").ValueOrDefault(x.Element("Caption").ValueOrDefault(string.Empty)))
                     .ToList();
 
                 List<string> removals = new List<string>();
                 foreach (var tab in item.PropertyGroups)
                 {
-                    if (!newTabs.InvariantContains(tab.Name))
+                    var tabNameOrAlias = tab.GetTabAliasOrName();
+                    if (!newTabAliasOrNames.InvariantContains(tabNameOrAlias))
                     {
-                        removals.Add(tab.Name);
+                        removals.Add(tabNameOrAlias);
                     }
                 }
 
@@ -651,12 +675,14 @@ namespace uSync8.Core.Serialization.Serializers
                 {
                     var changes = new List<uSyncChange>();
 
-                    foreach (var name in removals)
+                    foreach (var aliasOrName in removals)
                     {
-                        logger.Debug(serializerType, "Removing {0}", name);
-                        changes.Add(uSyncChange.Delete($"Tabs/{name}", name, name));
+                        logger.Debug(serializerType, "Removing {0}", aliasOrName);
+                        changes.Add(uSyncChange.Delete($"Tabs/{aliasOrName}", aliasOrName, aliasOrName));
 
-                        item.PropertyGroups.Remove(name);
+                        // remove in core has some fallbakc if we pass in alias, it will remove by that
+                        // if we pass in name it does it by name. 
+                        item.PropertyGroups.Remove(aliasOrName);
                     }
 
                     return changes;
