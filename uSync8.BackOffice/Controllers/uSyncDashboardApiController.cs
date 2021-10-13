@@ -108,6 +108,7 @@ namespace uSync8.BackOffice.Controllers
         }
 
         [HttpPut]
+        [HttpPost]
         public IEnumerable<uSyncAction> Import(uSyncOptions options)
         {
             var hubClient = new HubClientService(options.ClientId);
@@ -119,6 +120,7 @@ namespace uSync8.BackOffice.Controllers
         }
 
         [HttpPut]
+        [HttpPost]
         public uSyncAction ImportItem(uSyncAction item)
             => uSyncService.ImportSingleAction(item);
 

@@ -79,7 +79,7 @@
         }
 
         function importItems(force, group, clientId) {
-            return $http.put(serviceRoot + 'import',
+            return $http.post(serviceRoot + 'import',
                 {
                     force: force,
                     group: group,
@@ -93,7 +93,7 @@
         
 
         function importItem(item) {
-            return $http.put(serviceRoot + 'importItem', item);
+            return $http.post(serviceRoot + 'importItem', item);
         }
 
         function saveSettings(settings) {
