@@ -161,10 +161,10 @@ namespace uSync8.ContentEdition.Serializers
                         {
                             if (stream != null)
                             {
-                                using (MD5 md5 = MD5.Create())
+                                using (var hashAlgorithm = HashAlgorithm.Create(CryptoConfig.AllowOnlyFipsAlgorithms ? "SHA1" : "MD5"))
                                 {
                                     stream.Seek(0, SeekOrigin.Begin);
-                                    var hash = md5.ComputeHash(stream);
+                                    var hash = hashAlgorithm.ComputeHash(stream);
 
                                     return new XElement("FileHash", hash);
                                 }
