@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<language alias="da" intName="Danish" localName="Dansk" lcid="" culture="da-DK">
+  <creator>
+    <name>Jumoo</name>
+    <link>http://jumoo.uk</link>
+  </creator>
+  <area alias="treeHeaders">
+    <key alias="sync">Synkronisering</key>
+    <key alias="uSync8">uSync</key>
+  </area>
+  <area alias="usync">
+    <key alias="name">uSync 8</key>
+    <key alias="intro">Database-elementer til og fra disk</key>
+
+    <key alias="newer">Der findes en nyere version af uSync</key>
+		<key alias="noHandlers"><![CDATA[Ingen handlers blev indlæst, så du kan ikke synkronisere noget - check din uSync8.config-fil, da den kan være beskadiget, ugyldig eller mangle helt 😢]]></key>
+    
+    <key alias="import">Import</key>
+    <key alias="importforce">Fuld Import</key>
+    <key alias="report">Rapportér</key>
+    <key alias="export">Eksportér</key>
+    <key alias="exportClean">Ren Eksport</key>
+    <key alias="apply">Anvend</key>
+
+    <key alias="details">Detaljer</key>
+  
+    <key alias="handlers">Item Handlers</key>
+    <key alias="savesettings">Gem Indstillinger</key>
+
+    <key alias="import-content">Importér Indhold/Media</key>
+    <key alias="import-settings">Importér Indstillinger</key>
+    <key alias="import-members">Importér Medlemmer</key>
+    <key alias="import-users">Import Brugere</key>
+
+    <key alias="report-content">Rapportér Content/Media</key>
+    <key alias="report-settings">Rapportér Indstillinger</key>
+    <key alias="report-members">Rapportér Medlemmer</key>
+    <key alias="report-users">Rapportér Brugere</key>
+
+    <key alias="tableType">Type</key>
+    <key alias="tableName">Navn</key>
+    <key alias="tableChange">Ændring</key>
+    <key alias="tableMessage">Besked</key>
+
+    <key alias="nochange"><![CDATA[<h4>Ingen ændringer</h4>]]></key>
+		<key alias="nochange_quote"><![CDATA[Be the change you wish to see in the world.]]></key>
+
+		<!-- warning messages -->
+		<key alias="oldformat">
+			<![CDATA[Denne synkroniseringsmappe er fra en ældre version af uSync. Synkroniseringen vil stadig fungere, men du vil få hurtigere og bedre resultater med en nyere eksport. 
+		  <a href="https://github.com/KevinJump/uSync8/blob/v8/8.7-main/Changes/format.md" target="_blank"><i class="icon icon-info"></i>info</a>]]></key>
+		<key alias="createWarning"><![CDATA[En eller flere handlers are sat til kun at oprette. Ændringer i elementer bliver muligvis ikke synkroniseret]]></key>
+
+		<key alias="forms"><![CDATA[Bruger du Umbraco Forms? Du kan nu synkronisere formularer og indstillinger med <a href="http://jumoo.co.uk/usync/forms" target="_blank">uSync.FormsEdition</a>]]></key>
+
+		<key alias="loadbalancedWarning"><![CDATA[Umbraco lader til at køre i et load balanced miljø. <a href="https://our.umbraco.com/documentation/getting-started/setup/server-setup/load-balancing/#faqs" target="_blank">Du bør ikke bruge load balancing på Umbraco backoffice</a>. Vi anbefaler at du ikke kører uSync fra et load balanced backoffice.]]></key>
+		
+  </area>
+  <area alias="dashboardTabs">
+    <key alias="uSync8">uSync</key>
+  </area>
+</language>
