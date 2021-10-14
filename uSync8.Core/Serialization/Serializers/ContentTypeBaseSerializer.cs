@@ -633,10 +633,11 @@ namespace uSync8.Core.Serialization.Serializers
                 }
                 else
                 {
-                    item.SafeAddPropertyGroup(aliasOrName, name);
+                    var safeAliasName = aliasOrName.ToSafeAlias(true);
+                    item.SafeAddPropertyGroup(safeAliasName, name);
 
                     changes.AddNew(name, name, $"Tabs/{name}");
-                    var newTab = item.PropertyGroups.FindTab(aliasOrName);
+                    var newTab = item.PropertyGroups.FindTab(safeAliasName);
                     if (newTab != null)
                     {
                         newTab.SortOrder = sortOrder;
