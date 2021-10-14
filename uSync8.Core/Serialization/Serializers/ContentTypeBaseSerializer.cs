@@ -477,16 +477,17 @@ namespace uSync8.Core.Serialization.Serializers
                 changes.AddRange(DeserializeExtraProperties(item, property, propertyNode));
 
                 var tabAliasOrName = item.PropertyGroups.GetTabAliasOrName(propertyNode.Element("Tab"));
+                var tabName = propertyNode.Element("Tab").ValueOrDefault(tabAliasOrName);
 
                 if (IsNew)
                 {
                     changes.AddNew(alias, name, alias);
-                    logger.Debug(serializerType, "Property Is new adding to tab.");
-                    item.SafeAddPropertyType(property, tabAliasOrName, name);
+                    logger.Debug(serializerType, "Property Is new adding to tab. {property} [{tabNameOrAlias}] [{name}]", property.Name, tabAliasOrName, tabName);
+                    item.SafeAddPropertyType(property, tabAliasOrName, tabName);
                 }
                 else
                 {
-                    logger.Debug(serializerType, "Property exists, checking tab location");
+                    logger.Debug(serializerType, "Property exists, checking tab location {tabAliasOrName}", tabAliasOrName);
                     // we need to see if this one has moved. 
                     if (!string.IsNullOrWhiteSpace(tabAliasOrName))
                     {
@@ -501,6 +502,10 @@ namespace uSync8.Core.Serialization.Serializers
                                 // add to our move list.
                                 propertiesToMove[property.Alias] = tabAliasOrName;
                             }
+                        }
+                        else
+                        {
+                            logger.Warn(serializerType, "Cannot find tab {tabAliasOrName} to add {property} to", tabAliasOrName, property.Alias);
                         }
                     }
                 }
