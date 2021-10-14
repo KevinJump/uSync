@@ -415,7 +415,7 @@ ul.usync-action-list {
 
 .usync-group-actions {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(342px, 32.5%));
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
     column-gap: 15px;
 }
 
