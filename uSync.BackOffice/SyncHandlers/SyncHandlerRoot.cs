@@ -1460,6 +1460,15 @@ namespace uSync.BackOffice.SyncHandlers
             public XElement CurrentNode { get; set; }
         }
 
+        public Udi FindFromNode(XElement node)
+        {
+            var item = serializer.FindItem(node);
+            if (item != null)
+                return Udi.Create(this.EntityType, serializer.ItemKey(item));
+
+            return null;
+        }
+
 
         #endregion
 

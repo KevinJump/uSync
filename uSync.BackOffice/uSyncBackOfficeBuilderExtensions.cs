@@ -57,6 +57,7 @@ namespace uSync.BackOffice
             builder.Services.AddUnique<uSyncEventService>();
             builder.Services.AddUnique<uSyncConfigService>();
             builder.Services.AddUnique<SyncFileService>();
+            builder.Services.AddUnique<uSyncRollbackService>();
 
             builder.WithCollectionBuilder<SyncHandlerCollectionBuilder>()
                 .Add(() => builder.TypeLoader.GetTypes<ISyncHandler>());

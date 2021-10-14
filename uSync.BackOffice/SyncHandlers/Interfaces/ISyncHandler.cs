@@ -108,5 +108,10 @@ namespace uSync.BackOffice.SyncHandlers
         /// </summary>
         IEnumerable<uSyncAction> ImportSecondPass(uSyncAction action, HandlerSettings settings, uSyncImportOptions options);
 
+        /// <summary>
+        ///  default impimentation, roothandler does do this. 
+        /// </summary>
+        Udi FindFromNode(XElement node) => null;
+
     }
 }

@@ -38,23 +38,27 @@ namespace uSync.BackOffice
         private SyncFileService _syncFileService;
         private readonly uSyncEventService _mutexService;
 
+        private readonly uSyncRollbackService _rollbackService;
+
         public uSyncService(
             ILogger<uSyncService> logger,
             IEventAggregator eventAggregator,
             uSyncConfigService uSyncConfigService,
             SyncHandlerFactory handlerFactory,
             SyncFileService syncFileService,
-            uSyncEventService mutexService)
+            uSyncEventService mutexService,
+            uSyncRollbackService rollbackService)
         {
             this._logger = logger;
 
             this._eventAggregator = eventAggregator;
 
-
             this._uSyncConfig = uSyncConfigService;
             this._handlerFactory = handlerFactory;
             this._syncFileService = syncFileService;
             this._mutexService = mutexService;
+
+            _rollbackService = rollbackService;
 
             uSyncTriggers.DoExport += USyncTriggers_DoExport;
             uSyncTriggers.DoImport += USyncTriggers_DoImport;
