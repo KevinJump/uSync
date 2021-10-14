@@ -130,7 +130,7 @@
             resetStatus(modes.EXPORT);
             vm.exportButton.state = 'busy';
 
-            if (clean && !confirm('Are you sure? A clean export will delete the contents of the uSync folder, you will may loose any delete/rename actions.')) {
+            if (clean && !confirm('Are you sure? A clean export will delete the contents of the uSync folder, you will lose any delete/rename actions.')) {
                 vm.working = false;
                 vm.exportButton.state = 'success';
                 return;
