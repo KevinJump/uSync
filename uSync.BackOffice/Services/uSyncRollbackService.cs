@@ -25,11 +25,16 @@ namespace uSync.BackOffice.Services
 
         public uSyncRollbackService(IHostingEnvironment hostingEnvironment)
         {
-            _rollbackFolder = Path.GetFullPath(Path.Combine(hostingEnvironment.LocalTempPath, "uSync", "Rollback"));
+            _rollbackFolder = Path.GetFullPath(Path.Combine(hostingEnvironment.LocalTempPath, "uSync", "rollback"));
         }
 
-        private string GetRollbackFolder(Guid id)
-            => Path.Combine(_rollbackFolder, id.ToString());
+        /// <summary>
+        ///  returns the location of the rollback folder,
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public string GetRollbackFolder(Guid id, string folder = "")
+            => Path.Combine(_rollbackFolder, id.ToString(), folder);
 
         /// <summary>
         ///  create a rollback file. 
@@ -42,7 +47,7 @@ namespace uSync.BackOffice.Services
             var udi = handlerConfigPair.Handler.FindFromNode(node);
             if (udi != null)
             {
-                var folder = Path.Combine(GetRollbackFolder(rollbackId), handlerConfigPair.Handler.DefaultFolder);
+                var folder = Path.Combine(GetRollbackFolder(rollbackId, "uSync"), handlerConfigPair.Handler.DefaultFolder);
                 handlerConfigPair.Handler.Export(udi, folder, handlerConfigPair.Settings);
             }
         }
@@ -58,6 +63,10 @@ namespace uSync.BackOffice.Services
                 RollbackTime = DateTime.Now
             };
 
+            var folder = GetRollbackFolder(rollbackId);
+            if (!Directory.Exists(folder)) return; // nothing to rollback.
+
+            // stamp the rollback with a date/time.
             var rollbackfile = Path.Combine(GetRollbackFolder(rollbackId), "_info.json");
             File.WriteAllText(rollbackfile, JsonConvert.SerializeObject(rollbackInfo));
         }
