@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 
+using Newtonsoft.Json.Linq;
+
 using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Composing;
 using Umbraco.Cms.Core.Services;
@@ -180,5 +182,20 @@ namespace uSync.BackOffice.Controllers
         {
             // uSyncConfig.SaveSettings(settings);
         }
+
+        [HttpGet]
+        public JObject GetChangedSettings()
+        {
+            var changes = new JObject();
+            changes.Add("Settings", uSyncConfig.Settings.GetNonDefaultValues(new uSyncSettings()));
+
+            var setChanges = new JObject();
+            setChanges.Add("Default", this.uSyncConfig.GetSetSettings(uSync.Sets.DefaultSet).GetNonDefaultValues(new uSyncHandlerSetSettings()));
+            changes.Add("Sets", setChanges);
+
+            return changes;
+        }
     }
+
+    
 }
