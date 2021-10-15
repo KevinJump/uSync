@@ -373,6 +373,8 @@ namespace uSync.Core.Serialization.Serializers
 
             List<uSyncChange> changes = new List<uSyncChange>();
 
+            List<string> compositeProperties = default;
+
             foreach (var propertyNode in propertiesNode.Elements("GenericProperty"))
             {
                 var alias = propertyNode.Element("Alias").ValueOrDefault(string.Empty);
@@ -386,7 +388,7 @@ namespace uSync.Core.Serialization.Serializers
 
                 bool IsNew = false;
 
-                var property = GetOrCreateProperty(item, key, alias, definitionKey, propertyEditorAlias, out IsNew);
+                var property = GetOrCreateProperty(item, key, alias, definitionKey, propertyEditorAlias, compositeProperties,  out IsNew);
                 if (property == null) continue;
 
                 if (key != Guid.Empty && property.Key != key)
@@ -464,7 +466,7 @@ namespace uSync.Core.Serialization.Serializers
                 if (IsNew)
                 {
                     changes.AddNew(alias, name, alias);
-                    logger.LogDebug("Property Is new adding to tab.");
+                    logger.LogDebug("Property is new adding to tab.");
 
                     if (string.IsNullOrWhiteSpace(tabAlias))
                     {
@@ -841,6 +843,7 @@ namespace uSync.Core.Serialization.Serializers
             string alias,
             Guid definitionKey,
             string propertyEditorAlias,
+            List<string> compositeProperties,
             out bool IsNew)
         {
             logger.LogDebug("GetOrCreateProperty {0} [{1}]", key, alias);
@@ -876,7 +879,11 @@ namespace uSync.Core.Serialization.Serializers
                 dataType = dataTypeService.GetDataType(propertyEditorAlias);
             }
 
-            if (dataType == null) return null;
+            if (dataType == null)
+            {
+                logger.LogWarning("Cannot find underling datatype {key} {alias} for {property} it is likely you are missing a package?", definitionKey, propertyEditorAlias, alias);
+                return null;
+            }
 
             // we set it here, this means if the file is in conflict (because its changed in the datatype), 
             // we shouldn't reset it later on should we set the editor alias value. 
@@ -885,7 +892,8 @@ namespace uSync.Core.Serialization.Serializers
             // if it's null then it doesn't exist (so it's new)
             if (property == null)
             {
-                if (PropertyExistsOnComposite(item, alias))
+
+                if (PropertyExistsOnComposite(item, alias, compositeProperties))
                 {
                     logger.LogDebug("Cannot create property here {0} as it exist on Composition", item.Name);
                     // can't create here, its on a composite
@@ -1024,16 +1032,19 @@ namespace uSync.Core.Serialization.Serializers
         /// <summary>
         ///  does this property alias exist further down the composition tree ? 
         /// </summary>
-        protected virtual bool PropertyExistsOnComposite(TObject item, string alias)
+        protected virtual bool PropertyExistsOnComposite(TObject item, string alias, List<string> compositeProperties)
         {
-            var allTypes = baseService.GetAll().ToList();
+            if (compositeProperties == default)
+            {
+                // passing the compositeProperties list around means we only
+                // make this call once per item (and only if we are looking for new properties)
+                // should improve the speed of first time syncs.
 
-            var allProperties = allTypes
-                    .Where(x => x.ContentTypeComposition.Any(y => y.Id == item.Id))
-                    .Select(x => x.PropertyTypes)
-                    .ToList();
+                // properties that are on the compoistions this item is using. 
+                compositeProperties = item.ContentTypeComposition?.SelectMany(x => x.PropertyTypes.Select(y => y.Alias)).ToList() ?? new List<string>();
+            }
 
-            return allProperties.Any(x => x.Any(y => y.Alias == alias));
+            return compositeProperties.Any(existing => existing == alias);
         }
 
 
