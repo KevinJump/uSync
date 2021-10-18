@@ -55,6 +55,12 @@ namespace uSync.Core.Sync
         /// </remarks>
         public bool RequiresFiles { get; set; }
 
+
+        /// <summary>
+        ///  indicates that this item has children
+        /// </summary>
+        public bool HasChildren { get; set; } = true;
+
         public SyncLocalItem() {}
 
         public SyncLocalItem(string id) : this()
