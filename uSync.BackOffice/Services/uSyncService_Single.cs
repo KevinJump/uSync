@@ -103,9 +103,6 @@ namespace uSync.BackOffice
 
                         if (handlerPair != null)
                         {
-                            // create a rollback file before we do the import ? 
-                            if (options.EnableRollback) _rollbackService.Rollback(options.ImportId, handlerPair, item.Node);
-
                             actions.AddRange(handlerPair.Handler.ImportElement(item.Node, item.FileName, handlerPair.Settings, options));
                         }
 
