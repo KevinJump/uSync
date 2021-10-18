@@ -1,72 +1,69 @@
 ﻿using System.Linq;
+using System.Xml.Linq;
 
+using Umbraco.Core;
 using Umbraco.Core.Composing;
-using Umbraco.Core.Services.Changes;
-using Umbraco.Web.Cache;
-using Umbraco.Web.PublishedCache;
+using Umbraco.Core.Models;
+using Umbraco.Core.Services;
 
 using uSync8.BackOffice;
 
-namespace uSync8.EventTriggers
+namespace ExampleuSyncEvents
 {
-    /// <summary>
-    ///  Composer to register the events. 
-    /// </summary>
-    public class EventTriggersComposer : ComponentComposer<EventTriggersComponent> { }
+    [RuntimeLevel(MinLevel = RuntimeLevel.Run)]
+    public class EventTriggerComposer : ComponentComposer<EventTriggersComponent> { }
 
     /// <summary>
     ///  Component, will trigger a cache rebuild when an import is completed. (and there are changes)
     /// </summary>
     public class EventTriggersComponent : IComponent
     {
-        private readonly IPublishedSnapshotService snapshotService;
+        private readonly IEntityService entityService;
 
-        public EventTriggersComponent(IPublishedSnapshotService snapshotService)
+        private static string blockedContainer = "Compositions";
+        private int componentsFolderId = -1;
+
+
+        public EventTriggersComponent(IEntityService entityService)
         {
-            this.snapshotService = snapshotService;
+            this.entityService = entityService;
         }
 
         public void Initialize()
         {
-            uSyncService.ImportComplete += BulkEventComplete;
+            var rootContainers = entityService.GetChildren(-1, UmbracoObjectTypes.DocumentTypeContainer);
+            componentsFolderId = rootContainers.FirstOrDefault(x => x.Name.InvariantEquals(blockedContainer))?.Id ?? -1;
+
+            uSyncService.ImportingItem += USyncService_ImportingItem;
+            uSyncService.ExportingItem += USyncService_ExportingItem;
         }
 
-        private void BulkEventComplete(uSyncBulkEventArgs e)
+        /// <summary>
+        ///  stop an item from being exported if its in the folder
+        /// </summary>
+        private void USyncService_ExportingItem(uSyncItemEventArgs<object> e)
         {
-            if (e.Actions.Any(x => x.Change > uSync8.Core.ChangeType.NoChange))
+            if (componentsFolderId != -1 && e.Item is IContentType contentType)
             {
-                // change happened. - rebuild
-                snapshotService.Rebuild();
-
-                // then refresh the cache : 
-
-                // there is a function for this but it is internal, so we have extracted bits.
-                // mimics => DistributedCache.RefreshAllPublishedSnapshot
-
-                RefreshContentCache(Umbraco.Web.Composing.Current.DistributedCache);
-                RefreshMediaCache(Umbraco.Web.Composing.Current.DistributedCache);
-                RefreshAllDomainCache(Umbraco.Web.Composing.Current.DistributedCache);
+                if (contentType.ParentId == componentsFolderId)
+                    e.Cancel = true;
             }
         }
 
-        private void RefreshContentCache(DistributedCache dc)
+        /// <summary>
+        ///  stop an item being imported if its in a folder. 
+        /// </summary>
+        private void USyncService_ImportingItem(uSyncItemEventArgs<XElement> e)
         {
-            var payloads = new[] { new ContentCacheRefresher.JsonPayload(0, TreeChangeTypes.RefreshAll) };
-            Umbraco.Web.Composing.Current.DistributedCache.RefreshByPayload(ContentCacheRefresher.UniqueId, payloads);
+            if (e.Item.Name.LocalName == "ContentType")
+            {
+                var folder = e.Item.Element("Info")?.Element("Folder").Value;
+                if (!string.IsNullOrWhiteSpace(folder) && folder.InvariantEquals(blockedContainer))
+                {
+                    e.Cancel = true;
+                }
+            }
         }
-
-        private void RefreshMediaCache(DistributedCache dc)
-        {
-            var payloads = new[] { new MediaCacheRefresher.JsonPayload(0, TreeChangeTypes.RefreshAll) };
-            dc.RefreshByPayload(MediaCacheRefresher.UniqueId, payloads);
-        }
-
-        public void RefreshAllDomainCache(DistributedCache dc)
-        {
-            var payloads = new[] { new DomainCacheRefresher.JsonPayload(0, DomainChangeTypes.RefreshAll) };
-            dc.RefreshByPayload(DomainCacheRefresher.UniqueId, payloads);
-        }
-
 
         public void Terminate()
         {
