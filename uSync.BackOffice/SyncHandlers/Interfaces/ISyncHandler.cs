@@ -8,6 +8,7 @@ using Newtonsoft.Json.Serialization;
 using Umbraco.Cms.Core;
 
 using uSync.BackOffice.Configuration;
+using uSync.Core;
 using uSync.Core.Dependency;
 using uSync.Core.Models;
 
@@ -112,6 +113,11 @@ namespace uSync.BackOffice.SyncHandlers
         ///  default impimentation, roothandler does do this. 
         /// </summary>
         Udi FindFromNode(XElement node) => null;
+
+        /// <summary>
+        ///  is this a current node (roothandler can do this too)
+        /// </summary>
+        ChangeType GetItemStatus(XElement node) => ChangeType.NoChange;
 
     }
 }

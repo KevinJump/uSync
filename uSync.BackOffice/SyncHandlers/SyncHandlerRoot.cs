@@ -346,7 +346,7 @@ namespace uSync.BackOffice.SyncHandlers
                     .AsEnumerableOfOne();
             }
 
-            if (_mutexService.FireItemStartingEvent(new uSyncImportingItemNotification(node)))
+            if (_mutexService.FireItemStartingEvent(new uSyncImportingItemNotification(node, (ISyncHandler)this )))
             {
                 // blocked
                 return uSyncActionHelper<TObject>
@@ -738,7 +738,7 @@ namespace uSync.BackOffice.SyncHandlers
                 return uSyncAction.Fail(nameof(item), typeof(TObject).ToString(), ChangeType.Fail, "Item not set", 
                     new ArgumentNullException(nameof(item))).AsEnumerableOfOne();
 
-            if (_mutexService.FireItemStartingEvent(new uSyncExportingItemNotification<TObject>(item))) 
+            if (_mutexService.FireItemStartingEvent(new uSyncExportingItemNotification<TObject>(item, (ISyncHandler)this))) 
             {
                 return uSyncActionHelper<TObject>
                     .ReportAction(ChangeType.NoChange, GetItemName(item), string.Empty, GetItemKey(item), this.Alias, 
@@ -1469,6 +1469,11 @@ namespace uSync.BackOffice.SyncHandlers
             return null;
         }
 
+        public ChangeType GetItemStatus(XElement node)
+        {
+            var serializerOptions = new SyncSerializerOptions(SerializerFlags.None, this.DefaultConfig.Settings);
+            return this.IsItemCurrent(node, serializerOptions).Change;
+        }
 
         #endregion
 

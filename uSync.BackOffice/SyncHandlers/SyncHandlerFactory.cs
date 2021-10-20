@@ -89,7 +89,12 @@ namespace uSync.BackOffice.SyncHandlers
                 .Where(x => x.Handler.EntityType.InvariantEquals(entityType))
                 .FirstOrDefault();
 
-
+        public HandlerConfigPair GetValidHander<TObject>(SyncHandlerOptions options = null)
+            => GetValidHandlers(options)
+                .Where(x => x.Handler.ItemType == typeof(TObject).Name)
+                .FirstOrDefault();
+            
+                
         public IEnumerable<HandlerConfigPair> GetValidHandlersByEntityType(IEnumerable<string> entityTypes, SyncHandlerOptions options = null)
             => GetValidHandlers(options)
                 .Where(x => entityTypes.InvariantContains(x.Handler.EntityType));

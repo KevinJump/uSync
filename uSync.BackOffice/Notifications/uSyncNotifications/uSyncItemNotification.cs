@@ -1,5 +1,6 @@
 ﻿using Umbraco.Cms.Core.Notifications;
 
+using uSync.BackOffice.SyncHandlers;
 using uSync.Core;
 
 namespace uSync.BackOffice
@@ -16,10 +17,16 @@ namespace uSync.BackOffice
             this.Change = change;
         }
 
+        public uSyncItemNotification(TObject item, ISyncHandler handler)
+            : this(item)
+        {
+            this.Handler = handler;
+        }
+
         public ChangeType Change { get; set; }
 
         public TObject Item { get; set; }
+
+        public ISyncHandler Handler { get; set; }
     }
-
-
 }
