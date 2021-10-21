@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<language alias="en" intName="English (US)" localName="English (US)" lcid="" culture="en-US">
+<language alias="sv" intName="Swedish" localName="Svenska" lcid="" culture="sv-SE">
   <creator>
     <name>Jumoo</name>
     <link>http://jumoo.uk</link>
@@ -10,7 +10,7 @@
   </area>
   <area alias="usync">
     <key alias="name">uSync 8</key>
-    <key alias="intro">Databas element till och från disk</key>
+    <key alias="intro">Databaselement till och från disk</key>
 
     <key alias="newer">Det finns en ny version av uSync tillgänglig</key>
 		<key alias="noHandlers"><![CDATA[Inga hanterare (Handlers) blev inlästa, så du kan inte synka något. Kontrollera filen uSync8.config, den kan vara korrupt eller saknas 😢.]]></key>
@@ -47,7 +47,7 @@
 
 		<!-- warning messages -->
 		<key alias="oldformat">
-			<![CDATA[Denna mapp är från en äldre version av uSync. Synken kommer fungera, men du kommer få ett snabbare och enklare resultat om du använder export från senare version. 
+			<![CDATA[Denna synkroniseringsmapp är från en äldre version av uSync. Synken kommer fungera, men du kommer få ett snabbare och enklare resultat om du använder export från senare version. 
 		  <a href="https://github.com/KevinJump/uSync8/blob/v8/8.7-main/Changes/format.md" target="_blank"><i class="icon icon-info"></i>info</a>]]></key>
 		<key alias="createWarning"><![CDATA[En eller flera hanterare (handlers) är inställda att bara skapas. Ändringar i andra objekt kanske inte kommer synkas]]></key>
 
