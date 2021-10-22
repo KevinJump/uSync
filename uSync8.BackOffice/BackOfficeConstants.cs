@@ -2,7 +2,7 @@
 {
     public static partial class uSyncBackOfficeConstants
     {
-        public const string ReleaseSuffix = "";
+        public const string ReleaseSuffix = "-beta";
 
         public const string ConfigFile = "uSync8.config";
 
