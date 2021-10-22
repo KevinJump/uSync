@@ -363,7 +363,7 @@ namespace uSync8.Core.Serialization
             {
                 node.Save(s);
                 s.Position = 0;
-                using (var hashAlgorithm = HashAlgorithm.Create(CryptoConfig.AllowOnlyFipsAlgorithms ? "SHA1" : "MD5"))
+                using (var hashAlgorithm = uSyncHashAlgorithm.Create())
                 {
                     return BitConverter.ToString(
                         hashAlgorithm.ComputeHash(s)).Replace("-", "").ToLower();

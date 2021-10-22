@@ -84,6 +84,7 @@
     <Compile Include="Extensions\ListExtensions.cs" />
     <Compile Include="Extensions\PropertyGroupExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
+    <Compile Include="Extensions\uSyncHashAlgorithmExtensions.cs" />
     <Compile Include="Extensions\XElementExtensions.cs" />
     <Compile Include="ISyncItemFactory.cs" />
     <Compile Include="Sync\SyncEntityInfo.cs" />

@@ -161,7 +161,7 @@ namespace uSync8.ContentEdition.Serializers
                         {
                             if (stream != null)
                             {
-                                using (var hashAlgorithm = HashAlgorithm.Create(CryptoConfig.AllowOnlyFipsAlgorithms ? "SHA1" : "MD5"))
+                                using (var hashAlgorithm = uSyncHashAlgorithm.Create())
                                 {
                                     stream.Seek(0, SeekOrigin.Begin);
                                     var hash = hashAlgorithm.ComputeHash(stream);
