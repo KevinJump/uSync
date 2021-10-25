@@ -1,0 +1,13 @@
+<div ng-controller="Umbraco.Community.Contentment.DataEditors.DictionaryPicker.Controller as vm">
+    <contentment-list-editor ng-model="model.value"
+                             add-button-label-key="'general_add'"
+                             allow-add="vm.allowAdd"
+                             allow-edit="false"
+                             allow-remove="true"
+                             allow-sort="vm.allowSort"
+                             default-icon="'icon-book-alt'"
+                             on-add="vm.add"
+                             on-remove="vm.remove"
+                             on-sort="vm.sort">
+    </contentment-list-editor>
+</div>

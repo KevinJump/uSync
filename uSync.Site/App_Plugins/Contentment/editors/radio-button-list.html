@@ -1,0 +1,21 @@
+<div class="contentment umb-radiobuttons" ng-class="vm.uniqueId" ng-controller="Umbraco.Community.Contentment.DataEditors.RadioButtonList.Controller as vm">
+    <ul class="unstyled">
+        <li ng-repeat="item in vm.items">
+            <label class="radio umb-form-check umb-form-check--radiobutton" ng-class="{ 'umb-form-check--disabled': item.disabled }">
+                <span class="umb-form-check__symbol">
+                    <input type="radio" class="umb-form-check__input" value="{{item.value}}" ng-model="model.value" ng-disabled="item.disabled" />
+                    <span class="umb-form-check__state" aria-hidden="true">
+                        <span class="umb-form-check__check"></span>
+                    </span>
+                </span>
+                <span class="umb-form-check__info">
+                    <span class="umb-form-check__text">
+                        <i ng-if="vm.showIcons && item.icon" class="icon" ng-class="item.icon"></i>
+                        <span ng-bind-html="item.name | safe_html"></span>
+                        <small ng-if="vm.showDescriptions && item.description" ng-bind-html="item.description | safe_html"></small>
+                    </span>
+                </span>
+            </label>
+        </li>
+    </ul>
+</div>
