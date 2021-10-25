@@ -52,7 +52,7 @@ namespace uSync.Core.Serialization.Serializers
 
             if (item == null)
             {
-                var templatePath = hostEnvrionment.MapPathContentRoot(SystemDirectories.MvcViews + "/" + alias.ToSafeFileName(shortStringHelper) + ".cshtml");
+                var templatePath = hostEnvrionment.MapPathContentRoot(SystemDirectories.MvcViews + "/" + alias + ".cshtml");
                 if (System.IO.File.Exists(templatePath))
                 {
                     logger.LogDebug("Reading {0} contents", templatePath);
@@ -67,7 +67,7 @@ namespace uSync.Core.Serialization.Serializers
                 {
                     // template is missing
                     // we can't create 
-                    return SyncAttempt<ITemplate>.Fail(name, ChangeType.Import, "The template '.cshtml' file is missing.");
+                    return SyncAttempt<ITemplate>.Fail(name, ChangeType.Import, $"The template {templatePath} file is missing.");
                 }
             }
 
