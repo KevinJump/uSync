@@ -52,7 +52,7 @@ namespace uSync.Core.Mapping
                     if (value != null)
                     {
                         var mappedVal = mapperCollection.Value.GetExportValue(value, property.PropertyEditorAlias);
-                        item[property.Alias] = mappedVal.GetJsonTokenValue();
+                        item[property.Alias] = mappedVal; // .GetJsonTokenValue();
                     }
                 }
             }
