@@ -2,7 +2,7 @@
   "$schema": "./App_Plugins/uSync/config/appsettings-usync-schema.json",
   "uSync": {
     "Settings": {
-      "ExportOnSave":  "Settings",
+      "ExportOnSave":  "Settings"
     },
     "Sets": {
       "Default": {

@@ -45,7 +45,6 @@
         <Content Remove="umbraco\models\**" />
     </ItemGroup>
     <ItemGroup>
-      <ProjectReference Include="..\uSync.AutoTemplates\uSync.AutoTemplates.csproj" />
       <ProjectReference Include="..\uSync.BackOffice\uSync.BackOffice.csproj" />
       <ProjectReference Include="..\uSync.Community.DataTypeSerializers\uSync.Community.DataTypeSerializers.csproj" />
       <ProjectReference Include="..\uSync.Core\uSync.Core.csproj" />
