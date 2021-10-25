@@ -52,7 +52,7 @@ namespace uSync8.ContentEdition.Mapping
                             ContentTypeAlias = docType.Alias
                         });
 
-                        item[property.Alias] = mappedVal.GetJsonTokenValue();
+                        item[property.Alias] = mappedVal; // .GetJsonTokenValue();
                     }
                 }
             }

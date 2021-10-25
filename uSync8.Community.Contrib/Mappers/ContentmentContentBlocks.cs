@@ -58,7 +58,7 @@ namespace uSync8.Community.Contrib.Mappers
                 var doctype = GetDocTypeByKey(item, "elementType");
                 if (doctype == null) continue;
 
-                item["value"] = GetExportProperties(itemValue, doctype);
+                GetExportProperties(itemValue, doctype);
             }
 
             return JsonConvert.SerializeObject(elements, Formatting.Indented);
