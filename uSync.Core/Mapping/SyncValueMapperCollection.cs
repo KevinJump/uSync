@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -73,10 +76,25 @@ namespace uSync.Core.Mapping
                 {
                     mappedValue = mapper.GetImportValue(mappedValue, editorAlias);
                 }
-                return mappedValue;
+
+                return GetCleanFlatJson(mappedValue);
             }
 
             return value;
+        }
+
+        private string GetCleanFlatJson(string stringValue)
+        {
+            if (string.IsNullOrWhiteSpace(stringValue) || !stringValue.DetectIsJson()) return stringValue;
+
+            try
+            {
+                return JsonConvert.SerializeObject(JsonConvert.DeserializeObject<JToken>(stringValue));
+            }
+            catch
+            {
+                return stringValue;
+            }
         }
 
         /// <summary>

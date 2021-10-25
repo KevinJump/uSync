@@ -47,7 +47,7 @@ namespace uSync.Core.Mapping
                 GetExportProperties(item, docType);
             }
 
-            return JsonConvert.SerializeObject(nestedJson, Formatting.Indented);
+            return JsonConvert.SerializeObject(nestedJson);
         }
 
         public override IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)
