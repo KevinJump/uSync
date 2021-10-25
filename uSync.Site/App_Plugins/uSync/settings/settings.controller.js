@@ -7,7 +7,7 @@
         notificationsService) {
 
         var vm = this;
-        vm.working = false; 
+        vm.working = false;
         vm.loading = true;
         vm.readonly = true;
 
@@ -43,9 +43,9 @@
                 .then(function (result) {
                     vm.handlerSet = result.data;
                 });
-            
+
         }
-        
+
 
         function saveSettings() {
             vm.working = false;
@@ -62,29 +62,27 @@
 
         function openAppSettingsOverlay() {
 
-            var appSetting = {
-                "uSync": {
-                    "Settings": toPascal(vm.settings),
-                    "Sets": {
-                        "Default": toPascal(vm.handlerSet)
+            uSync8DashboardService.getChangedSettings()
+                .then(function (result) {
+                    var appSetting = {
+                        "uSync:": toPascal(result.data)
                     }
-                }
-            };
 
-            var options = {
-                view: Umbraco.Sys.ServerVariables.umbracoSettings.appPluginsPath + '/uSync/settings/settings.overlay.html',
-                title: 'appsettings.json snipped',
-                content: JSON.stringify(appSetting, null, 4),
-                docslink: vm.docslink,
-                disableBackdropClick: true,
-                disableEscKey: true,
-                hideSubmitButton: true,
-                submit: function () {
-                    overlayService.close();
-                }
-            };
+                    var options = {
+                        view: Umbraco.Sys.ServerVariables.umbracoSettings.appPluginsPath + '/uSync/settings/settings.overlay.html',
+                        title: 'appsettings.json snipped',
+                        content: JSON.stringify(appSetting, null, 4),
+                        docslink: vm.docslink,
+                        disableBackdropClick: true,
+                        disableEscKey: true,
+                        hideSubmitButton: true,
+                        submit: function () {
+                            overlayService.close();
+                        }
+                    };
 
-            overlayService.confirm(options);
+                    overlayService.confirm(options);
+                });
 
         }
 

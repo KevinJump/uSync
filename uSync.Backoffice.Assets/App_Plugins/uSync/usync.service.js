@@ -16,6 +16,7 @@
 
         var service = {
             getSettings: getSettings,
+            getChangedSettings: getChangedSettings,
             getHandlers: getHandlers,
             getHandlerSetSettings: getHandlerSetSettings,
 
@@ -44,6 +45,7 @@
             getSyncWarnings: getSyncWarnings,
 
             checkVersion: checkVersion
+
         };
 
         return service;
@@ -52,6 +54,10 @@
 
         function getSettings() {
             return $http.get(serviceRoot + 'GetSettings');
+        }
+
+        function getChangedSettings() {
+            return $http.get(serviceRoot + 'GetChangedSettings');
         }
 
         function getHandlerSetSettings(set) {

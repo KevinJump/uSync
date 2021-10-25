@@ -23,6 +23,8 @@ namespace uSync.BackOffice
         public uSyncCallbacks Callbacks { get; set; }
 
         public string RootFolder { get; set; }
+
+        public bool EnableRollback { get; set; }
     }
 
     [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]

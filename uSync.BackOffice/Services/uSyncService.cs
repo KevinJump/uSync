@@ -50,7 +50,6 @@ namespace uSync.BackOffice
 
             this._eventAggregator = eventAggregator;
 
-
             this._uSyncConfig = uSyncConfigService;
             this._handlerFactory = handlerFactory;
             this._syncFileService = syncFileService;

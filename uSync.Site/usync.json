@@ -1,0 +1,25 @@
+{
+  "$schema": "./App_Plugins/uSync/config/appsettings-usync-schema.json",
+  "uSync": {
+    "Settings": {
+      "ExportOnSave":  "Settings"
+    },
+    "Sets": {
+      "Default": {
+        "DisabledHandlers": [ "" ],
+        "Handlers": {
+          "DictionaryHandler": {
+            "Group": "Settings",
+            "Settings": {
+              "CreateOnly": true
+            }
+          }
+        }
+      }
+    },
+    "AutoTemplates": {
+      "Enabled": true,
+      "Delete": true
+    }
+  }
+}
