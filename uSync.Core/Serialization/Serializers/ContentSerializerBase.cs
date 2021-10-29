@@ -72,26 +72,36 @@ namespace uSync.Core.Serialization.Serializers
 
             // are we only serizling some cultures ? 
             var cultures = options.GetSetting(uSyncConstants.CultureKey, string.Empty);
-            if (!string.IsNullOrWhiteSpace(cultures) && item.ContentType.VariesByCulture())
+            if (IsPartialCultureElement(item, cultures))
             {
                 node.Add(new XAttribute(uSyncConstants.CultureKey, cultures));
             }
 
             // are we only serizling some segments ? 
             var segments = options.GetSetting(uSyncConstants.SegmentKey, string.Empty);
-            if (!string.IsNullOrWhiteSpace(segments) && item.ContentType.Variations.VariesBySegment())
+            if (IsPartialSegmentElement(item, segments)) ;
             {
                 node.Add(new XAttribute(uSyncConstants.SegmentKey, segments));
             }
 
             // are we including the default (not variant) values in the serialized result? 
-            if (options.GetSetting(uSyncConstants.DefaultsKey, false) && !item.ContentType.VariesByNothing())
-            {
+            // we only worry about this when we are passing partial cultures or segments 
+            // to the file, when we sync complte content items, this is reduntant. 
+            if (options.GetSetting(uSyncConstants.DefaultsKey, false) && !IsPartialElement(item, cultures ,segments)) {
                 node.Add(new XAttribute(uSyncConstants.DefaultsKey, true));
             }
 
             return node;
         }
+
+        private bool IsPartialCultureElement(TObject item, string cultures)
+            => !string.IsNullOrWhiteSpace(cultures) && item.ContentType.VariesByCulture();
+
+        private bool IsPartialSegmentElement(TObject item, string segments)
+            => !string.IsNullOrWhiteSpace(segments) && item.ContentType.VariesBySegment();
+
+        private bool IsPartialElement(TObject item, string cultures, string segments)
+            => IsPartialCultureElement(item, cultures) || IsPartialSegmentElement(item, segments);
 
         /// <summary>
         ///  Calculate the level for this item
