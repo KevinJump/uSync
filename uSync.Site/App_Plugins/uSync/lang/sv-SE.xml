@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <language alias="sv" intName="Swedish" localName="Svenska" lcid="" culture="sv-SE">
   <creator>
     <name>Jumoo</name>
@@ -51,7 +51,7 @@
     <key alias="tableMessage">Meddelande</key>
 
     <key alias="nochange"><![CDATA[<h4>Inga ändringar</h4>]]></key>
-	<key alias="nochange_quote"><![CDATA[Verkligt liv finns där små ändringar sker]]></key>
+	<key alias="nochange_quote"><![CDATA[Be the change you wish to see in the world.]]></key>
 
 	<!-- warning messages -->
 	<key alias="oldformat">
@@ -61,7 +61,7 @@
 	<key alias="createWarning"><![CDATA[En eller flera hanterare (handlers) är inställda att bara skapas. Ändringar i andra objekt kanske inte kommer synkas]]></key>
 
 	<key alias="forms"><![CDATA[Använder du Umbraco forms? Du kan även synka formulär med dess inställningar med <a href="http://jumoo.co.uk/usync/forms" target="_blank">uSync.FormsEdition</a>]]></key>
-	
+
   </area>
   <area alias="dashboardTabs">
     <key alias="uSync8">uSync</key>
