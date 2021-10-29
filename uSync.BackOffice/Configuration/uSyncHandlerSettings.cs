@@ -28,6 +28,14 @@ namespace uSync.BackOffice.Configuration
 
     public static class HandlerSettingsExtensions
     {
+        /// <summary>
+        ///  get a setting from the settings dictionary.
+        /// </summary>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="settings"></param>
+        /// <param name="key"></param>
+        /// <param name="defaultValue"></param>
+        /// <returns></returns>
         public static TResult GetSetting<TResult>(this HandlerSettings settings, string key, TResult defaultValue)
         {
             if (settings.Settings != null && settings.Settings.ContainsKey(key))
@@ -37,6 +45,20 @@ namespace uSync.BackOffice.Configuration
             }
 
             return defaultValue;
+        }
+
+        /// <summary>
+        ///  Add a setting to the settings Dictionary (creating the dictionary if its missing)
+        /// </summary>
+        /// <param name="settings"></param>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        public static void AddSetting<TObject>(this HandlerSettings settings, string key, TObject value)
+        {
+            if (settings.Settings == null)
+                settings.Settings = new Dictionary<string, string>();
+
+            settings.Settings[key] = value.ToString();
         }
 
         public static HandlerSettings Clone(this HandlerSettings settings)

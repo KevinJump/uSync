@@ -52,28 +52,39 @@ namespace uSync.Core.Serialization.Serializers
 
             if (item == null)
             {
-                var templatePath = hostEnvrionment.MapPathContentRoot(SystemDirectories.MvcViews + "/" + alias + ".cshtml");
-                if (System.IO.File.Exists(templatePath))
-                {
-                    logger.LogDebug("Reading {0} contents", templatePath);
-                    var content = System.IO.File.ReadAllText(templatePath);
-                    item = new Template(shortStringHelper, name, alias);
-                    item.Path = templatePath;
-                    item.Content = content;
+                item = new Template(shortStringHelper, name, alias);
+                details.AddNew(alias, alias, "Template");
 
-                    details.AddNew(alias, alias, "Template");
+                if (ShouldGetContentFromNode(node, options))
+                {
+                    logger.LogDebug("Getting content for Template from XML");
+                    item.Content = GetContentFromConfig(node);
                 }
                 else
                 {
-                    // template is missing
-                    // we can't create 
-                    return SyncAttempt<ITemplate>.Fail(name, ChangeType.Import, $"The template {templatePath} file is missing.");
+                    logger.LogDebug("Loading template content from disk");
+                    var templatePath = hostEnvrionment.MapPathContentRoot(SystemDirectories.MvcViews + "/" + alias + ".cshtml");
+                    if (System.IO.File.Exists(templatePath))
+                    {
+                        logger.LogDebug("Reading {0} contents", templatePath);
+                        var content = System.IO.File.ReadAllText(templatePath);
+                        item.Path = templatePath;
+                        item.Content = content;
+                    }
+                    else
+                    {
+                        // template is missing
+                        // we can't create 
+                        logger.LogWarning("Failed to create template {path} the local file is missing", templatePath);
+                        return SyncAttempt<ITemplate>.Fail(name, ChangeType.Import, $"The template {templatePath} file is missing.");
+                    }
                 }
             }
 
             if (item == null)
             {
                 // creating went wrong
+                logger.LogWarning("Failed to create template");
                 return SyncAttempt<ITemplate>.Fail(name, ChangeType.Import, "Failed to create template");
             }
 
@@ -95,6 +106,16 @@ namespace uSync.Core.Serialization.Serializers
                 item.Alias = alias;
             }
 
+            if (ShouldGetContentFromNode(node, options))
+            {
+                var content = GetContentFromConfig(node);
+                if (content != item.Content)
+                {
+                    details.AddUpdate("Content", item.Content, content);
+                    item.Content = content;
+                }
+            }
+
             //var master = node.Element("Parent").ValueOrDefault(string.Empty);
             //if (master != string.Empty)
             //{
@@ -108,6 +129,19 @@ namespace uSync.Core.Serialization.Serializers
 
             return SyncAttempt<ITemplate>.Succeed(item.Name, item, ChangeType.Import, details);
         }
+
+        /// <summary>
+        ///  As a default if the file contains the content node, then we are going to use it 
+        ///  for the content. if it doesn't then we are not.
+        /// </summary>
+        /// <param name="node"></param>
+        /// <param name="options"></param>
+        /// <returns></returns>
+        private bool ShouldGetContentFromNode(XElement node, SyncSerializerOptions options)
+            => node.Element("Contents") != null; // && options.GetSetting(uSyncConstants.Conventions.IncludeContent, false);
+
+        public string GetContentFromConfig(XElement node)
+            => node.Element("Contents").ValueOrDefault(string.Empty);
 
         public override SyncAttempt<ITemplate> DeserializeSecondPass(ITemplate item, XElement node, SyncSerializerOptions options)
         {
@@ -141,7 +175,17 @@ namespace uSync.Core.Serialization.Serializers
             node.Add(new XElement("Name", item.Name));
             node.Add(new XElement("Parent", item.MasterTemplateAlias));
 
+            if (options.GetSetting(uSyncConstants.Conventions.IncludeContent, false))
+            {
+                node.Add(SerializeContent(item));
+            }
+
             return SyncAttempt<XElement>.Succeed(item.Name, node, typeof(ITemplate), ChangeType.Export);
+        }
+
+        private XElement SerializeContent(ITemplate item)
+        {
+            return new XElement("Contents", new XCData(item.Content));
         }
 
         private int CalculateLevel(ITemplate item)

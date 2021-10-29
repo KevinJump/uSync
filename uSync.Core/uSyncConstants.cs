@@ -74,6 +74,15 @@
         }
 
         public const int DependencyCountMax = 204800;
+
+
+        public static class Conventions
+        {
+            /// <summary>
+            ///  setting to tell a serializer to include the file content in anything it is sending over. 
+            /// </summary>
+            public const string IncludeContent = "IncludeContent"; 
+        }
     }
 
 

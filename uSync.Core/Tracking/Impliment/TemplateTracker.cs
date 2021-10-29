@@ -15,7 +15,8 @@ namespace uSync.Core.Tracking.Impliment
         public override List<TrackingItem> TrackingItems => new List<TrackingItem>()
         {
             TrackingItem.Single("Name", "/Name"),
-            TrackingItem.Single("Parent", "/Parent")
+            TrackingItem.Single("Parent", "/Parent"),
+            TrackingItem.Single("Contents", "/Contents")
         };
     }
 }
