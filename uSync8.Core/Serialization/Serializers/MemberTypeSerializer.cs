@@ -7,6 +7,7 @@ using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.Entities;
 using Umbraco.Core.Services;
+using Umbraco.Core.Services.Implement;
 
 using uSync8.Core.Extensions;
 using uSync8.Core.Models;
@@ -123,11 +124,22 @@ namespace uSync8.Core.Serialization.Serializers
             details.AddRange(DeserializeTabs(item, node));
             details.AddRange(DeserializeProperties(item, node, options));
 
-            CleanTabs(item, node, options);
 
             // memberTypeService.Save(item);
 
             return SyncAttempt<IMemberType>.Succeed(item.Name, item, ChangeType.Import, details);
+        }
+
+        public override SyncAttempt<IMemberType> DeserializeSecondPass(IMemberType item, XElement node, SyncSerializerOptions options)
+        {
+            CleanTabAliases(item);
+            CleanTabs(item, node, options);
+
+            bool saveInSerializer = !options.Flags.HasFlag(SerializerFlags.DoNotSave);
+            if (saveInSerializer && item.IsDirty())
+                memberTypeService.Save(item);
+
+            return SyncAttempt<IMemberType>.Succeed(item.Name, item, ChangeType.Import, saveInSerializer);
         }
 
         protected override IEnumerable<uSyncChange> DeserializeExtraProperties(IMemberType item, PropertyType property, XElement node)

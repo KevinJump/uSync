@@ -26,11 +26,64 @@ namespace uSync8.Core.Extensions
         public static bool SupportsTabs
             => UmbracoVersion.LocalVersion.Major > 8 || UmbracoVersion.LocalVersion.Minor >= 17;
 
+        /// <summary>
+        ///  prefix we put on tabs when we are appending something to them.
+        /// </summary>
+        public static string uSyncTmpTabAliasPrefix = "zzzusync";
+
+        /// <summary>
+        ///  get the temp alias for the tab - that will help with clashes on renames/changes of type
+        /// </summary>
+        public static string GetTempTabAlias(string alias)
+            => $"{uSyncTmpTabAliasPrefix}{alias}";
+
+        /// <summary>
+        ///  is the current tab alias a temp alias (one we have appended zzz... to)
+        /// </summary>
+        public static bool IsTempTabAlias(string alias)
+            => !string.IsNullOrWhiteSpace(alias) && alias.StartsWith(uSyncTmpTabAliasPrefix);
+
+        /// <summary>
+        ///  strip of any temp tab alias string from the tab name.
+        /// </summary>
+        public static string StripTempTabAlias(string alias)
+        {
+            if (IsTempTabAlias(alias))
+                return alias.Substring(uSyncTmpTabAliasPrefix.Length);
+
+            return alias;
+        }
+
+        /// <summary>
+        ///  find a tab among the existing tabs.
+        /// </summary>
+        /// <remarks>
+        ///  in v8 this is a bit painful because tabs use to only have a name, and now they 
+        ///  have a name and alias, and it might be one or the other, and the case can change
+        ///  so it can get complicated.
+        /// </remarks>
         public static PropertyGroup FindTab(this PropertyGroupCollection groups, string nameOrAlias)
         {
+            // tabs - check case and don't care about case (or should we?)
+            if (SupportsTabs) {
+                var tab = groups.FirstOrDefault(x => x.GetTabPropertyAsString("Alias").InvariantEquals(nameOrAlias));
+                if (tab != null) return tab;
+            }
+                    
+            // 2 - check name or alias is in index
             var index = groups.IndexOfKey(nameOrAlias);
             if (index != -1)
                 return groups[index];
+
+            // 3 - tabs we might have given it a zzzname 
+            if (SupportsTabs)
+            {
+                // check the temp alias to, because we might be in move things.
+                var tempTabAlias = GetTempTabAlias(nameOrAlias);
+                var tab = groups.FirstOrDefault(x => x.GetTabPropertyAsString("Alias").InvariantEquals(tempTabAlias));
+                if (tab != null) 
+                    return tab;
+            }
 
             return null;
         }
@@ -75,6 +128,23 @@ namespace uSync8.Core.Extensions
                     {
                         tabType.SetValue(group, tabTypeEnum.GetValue(tabType));
                     }
+                }
+            }
+        }
+
+        /// <summary>
+        ///  set the alias value of a tab (if we support it).
+        /// </summary>
+        /// <param name="group"></param>
+        /// <param name="alias"></param>
+        public  static void SetGroupAlias(this PropertyGroup group, string alias)
+        {
+            if (SupportsTabs)
+            {
+                var aliasType = typeof(PropertyGroup).GetProperty("Alias");
+                if (aliasType != null)
+                {
+                    aliasType.SetValue(group, alias);
                 }
             }
         }

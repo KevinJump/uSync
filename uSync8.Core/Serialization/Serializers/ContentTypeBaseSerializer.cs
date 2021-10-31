@@ -483,7 +483,15 @@ namespace uSync8.Core.Serialization.Serializers
                 {
                     changes.AddNew(alias, name, alias);
                     logger.Debug(serializerType, "Property Is new adding to tab. {property} [{tabNameOrAlias}] [{name}]", property.Name, tabAliasOrName, tabName);
-                    item.SafeAddPropertyType(property, tabAliasOrName, tabName);
+                    var tabGroup = item.PropertyGroups.FindTab(tabAliasOrName);
+                    if (tabGroup != null)
+                    {
+                        item.SafeAddPropertyType(property, tabGroup.GetTabAliasOrName(), tabGroup.Name);
+                    }
+                    else
+                    {
+                        logger.Warn(serializerType, "Cannot find tab {tabAliasOrName} to add {property} to", tabAliasOrName, property.Alias);
+                    }
                 }
                 else
                 {
@@ -500,7 +508,8 @@ namespace uSync8.Core.Serialization.Serializers
                             if (!tabGroup.PropertyTypes.Contains(property.Alias))
                             {
                                 // add to our move list.
-                                propertiesToMove[property.Alias] = tabAliasOrName;
+                                // we have to get the alias again, it might be a temp one.
+                                propertiesToMove[property.Alias] = tabGroup.GetTabAliasOrName();
                             }
                         }
                         else
@@ -599,58 +608,104 @@ namespace uSync8.Core.Serialization.Serializers
 
             foreach (var tab in tabNode.Elements("Tab"))
             {
-                var name = tab.Element("Caption").ValueOrDefault(string.Empty);
-                var sortOrder = tab.Element("SortOrder").ValueOrDefault(defaultSort);
-                var aliasOrName = tab.Element("Alias").ValueOrDefault(name);
-                var type = tab.Element("Type").ValueOrDefault(defaultTabType);
-
-                logger.Debug(serializerType, "> Tab {0} {1} {2} [{3}]", name, aliasOrName, sortOrder, type);
-
-                var existing = item.PropertyGroups.FindTab(aliasOrName);
-                if (existing != null)
+                try
                 {
-                    if (existing.SortOrder != sortOrder)
+                    var name = tab.Element("Caption").ValueOrDefault(string.Empty);
+                    var sortOrder = tab.Element("SortOrder").ValueOrDefault(defaultSort);
+                    var aliasOrName = tab.Element("Alias").ValueOrDefault(name);
+                    var type = tab.Element("Type").ValueOrDefault(defaultTabType);
+
+                    logger.Debug(serializerType, "> Tab {0} {1} {2} [{3}]", name, aliasOrName, sortOrder, type);
+
+                    var existing = item.PropertyGroups.FindTab(aliasOrName);
+                    if (existing != null)
                     {
-                        changes.AddUpdate("SortOrder", existing.SortOrder, sortOrder, $"Tabs/{name}/SortOrder");
-                        existing.SortOrder = sortOrder;
+                        if (PropertyGroupExtensions.SupportsTabs)
+                        {
+                            // because we search case insensitive for alias name it might not 
+                            // match exactly when we find it.
+                            if (existing.GetTabAliasOrName() != aliasOrName)
+                                existing.SetGroupAlias(aliasOrName);
+                        }
+
+                        if (existing.SortOrder != sortOrder)
+                        {
+                            changes.AddUpdate("SortOrder", existing.SortOrder, sortOrder, $"Tabs/{name}/SortOrder");
+                            existing.SortOrder = sortOrder;
+                        }
+
+                        if (existing.Name != name)
+                        {
+                            changes.AddUpdate("Name", existing.Name, name, $"Tabs/{name}/Name");
+                            existing.Name = name;
+                        }
+
+                        var existingType = existing.GetTabPropertyAsString("Type");
+                        if (!string.IsNullOrWhiteSpace(existingType) && existingType != type)
+                        {
+                            logger.Debug(serializerType, "{alias} tab type changed {from} > {to}", aliasOrName, type, existing);
+                            if (TabClashesWithExisting(item, aliasOrName, type))
+                            {
+                                // v8.17 - you can't just swap from group to tab
+                                //   if the tab is used in other places this can cause a clash
+                                //   so we prefix the alias, and in the second step we clean it
+                                existing.SetGroupAlias(PropertyGroupExtensions.GetTempTabAlias(aliasOrName));
+                            }
+
+                            changes.AddUpdate("Type", existingType, type, $"Tabs/{name}/Type");
+                            existing.SetGroupType(type);
+                        }
+                    }
+                    else
+                    {
+                        var safeAliasName = aliasOrName.ToSafeAlias(true);
+
+                        if (TabClashesWithExisting(item, safeAliasName, type))
+                            safeAliasName = PropertyGroupExtensions.GetTempTabAlias(safeAliasName);
+
+                        item.SafeAddPropertyGroup(safeAliasName, name);
+
+                        changes.AddNew(name, name, $"Tabs/{name}");
+                        var newTab = item.PropertyGroups.FindTab(safeAliasName);
+                        if (newTab != null)
+                        {
+                            newTab.SortOrder = sortOrder;
+
+                            // set the tab type through relection
+                            newTab.SetGroupType(type);
+                        }
                     }
 
-                    if (existing.Name != name)
-                    {
-                        changes.AddUpdate("Name", existing.Name, name, $"Tabs/{name}/Name");
-                        existing.Name = name;
-                    }
-
-                    var existingType = existing.GetTabPropertyAsString("Type");
-                    logger.Debug(serializerType, "Exiting tab type: {type}", existingType);
-
-                    if (!string.IsNullOrWhiteSpace(existingType) && existingType != type)
-                    {
-                        logger.Debug(serializerType, "Setting tab type: {exiting} > {type}", existingType, type);
-                        changes.AddUpdate("Type", existingType, type, $"Tabs/{name}/Type");
-                        existing.SetGroupType(type);
-                    }
+                    defaultSort = sortOrder + 1;
                 }
-                else
+                catch(Exception ex)
                 {
-                    var safeAliasName = aliasOrName.ToSafeAlias(true);
-                    item.SafeAddPropertyGroup(safeAliasName, name);
-
-                    changes.AddNew(name, name, $"Tabs/{name}");
-                    var newTab = item.PropertyGroups.FindTab(safeAliasName);
-                    if (newTab != null)
-                    {
-                        newTab.SortOrder = sortOrder;
-
-                        // set the tab type through relection
-                        newTab.SetGroupType(type);
-                    }
+                    logger.Warn(serializerType, ex, "Error attempting to deserialize tabs for {item}", item.Alias);
                 }
-
-                defaultSort = sortOrder + 1;
             }
 
+            ClearAllTabsCache();
+
             return changes;
+        }
+
+        /// <summary>
+        ///  remove any prefixes we may have added to a tab alias
+        /// </summary>
+        /// <param name="item"></param>
+        protected void CleanTabAliases(TObject item)
+        {
+            if (PropertyGroupExtensions.SupportsTabs)
+            {
+                foreach (var tab in item.PropertyGroups)
+                {
+                    var alias = tab.GetTabAliasOrName();
+                    if (PropertyGroupExtensions.IsTempTabAlias(alias))
+                    {
+                        tab.SetGroupAlias(PropertyGroupExtensions.StripTempTabAlias(alias));
+                    }
+                }
+            }
         }
 
         protected IEnumerable<uSyncChange> CleanTabs(TObject item, XElement node, SyncSerializerOptions options)
@@ -740,7 +795,11 @@ namespace uSync8.Core.Serialization.Serializers
                     compositions.Add(type);
             }
 
-            if (!Enumerable.SequenceEqual(item.ContentTypeComposition, compositions))
+            // compare hashes, because enumerable compare fails with the lazy properties in the collections
+            var currentHash = string.Join(":", item.ContentTypeComposition.Select(x => $"{x.Alias}-{x.SortOrder}").OrderBy(x => x));
+            var newHash = string.Join(":", compositions.Select(x => $"{x.Alias}-{x.SortOrder}").OrderBy(x => x));
+
+            if (currentHash != newHash)
             {
                 var change = uSyncChange.Update("Info", "Compositions",
                     string.Join(",", item.ContentTypeComposition.Select(x => x.Alias)),
@@ -870,10 +929,9 @@ namespace uSync8.Core.Serialization.Serializers
 
         private IEnumerable<uSyncChange> MoveProperties(IContentTypeBase item, IDictionary<string, string> moves)
         {
-            logger.Debug(serializerType, "MoveProperties");
-
             foreach (var move in moves)
             {
+                logger.Debug(serializerType, "Moving property {property} to tab/group {tab}", move.Key, move.Value);
                 item.MovePropertyType(move.Key, move.Value);
 
                 yield return uSyncChange.Update($"{move.Key}/Tab/{move.Value}", move.Key, "", move.Value);
@@ -882,8 +940,6 @@ namespace uSync8.Core.Serialization.Serializers
 
         private IEnumerable<uSyncChange> RemoveProperties(IContentTypeBase item, XElement properties)
         {
-            logger.Debug(serializerType, "RemoveProperties");
-
             List<string> removals = new List<string>();
 
             var nodes = properties.Elements("GenericProperty")
@@ -1043,5 +1099,62 @@ namespace uSync8.Core.Serialization.Serializers
 
         #endregion
 
+        #region Tab checks
+
+        //
+        // When we create or change a tab type, we need to confirm it won't clash with 
+        // an existing tab somewhere else in the tab tree for this item. 
+        //
+        // This isn't ideal as it involves a full load of all content types 
+        // so we try to limit this call so we only do it once if needed per 
+        // import, 
+        //
+        // so the load will only be called if we need to check for a clash 
+        // and once we have called it once, we won't call it again for this doctype
+        // import.
+        //
+        // we could go full cache, and keep a history all all tab aliases across umbraco
+        // but it might not give us enough performance gain for how hard it would be 
+        // to ensure it doesn't become out of sync.
+        // 
+
+        private Dictionary<string, string> _allTabs;
+
+        public bool TabClashesWithExisting(TObject item, string alias, string tabType)
+        {
+            if (PropertyGroupExtensions.SupportsTabs)
+            {
+                EnsureAllTabsCacheLoaded(item);
+                return _allTabs.ContainsKey(alias) && _allTabs[alias] != tabType;
+            }
+            return false;
+        }
+
+        public void EnsureAllTabsCacheLoaded(TObject item)
+        {
+            if (_allTabs == null)
+            {
+                var compositions = item.CompositionPropertyGroups
+                    .DistinctBy(x => x.GetTabAliasOrName())
+                    .ToDictionary(k => k.GetTabAliasOrName(), v => v.GetTabPropertyAsString("Type"));
+
+                var dependents = baseService.GetAll()
+                    .Where(x => x.CompositionIds().Contains(item.Id))
+                    .SelectMany(x => x.PropertyGroups)
+                    .DistinctBy(x => x.GetTabAliasOrName())
+                    .ToDictionary(k => k.GetTabAliasOrName(), v => v.GetTabPropertyAsString("Type"));
+
+                _allTabs = compositions
+                    .Union(dependents.Where(x => !compositions.ContainsKey(x.Key)))
+                    .ToDictionary(k => k.Key, v=>v.Value);
+            }
+        }
+
+        public void ClearAllTabsCache()
+        {
+            if (_allTabs != null) _allTabs = null;
+        }
+
+        #endregion
     }
 }

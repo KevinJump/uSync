@@ -75,7 +75,6 @@ namespace uSync8.Core.Serialization.Serializers
 
             details.AddRange(DeserializeProperties(item, node, options));
 
-            CleanTabs(item, node, options);
 
             return SyncAttempt<IMediaType>.Succeed(item.Name, item, ChangeType.Import, details);
         }
@@ -87,10 +86,14 @@ namespace uSync8.Core.Serialization.Serializers
             details.AddRange(DeserializeCompositions(item, node));
             details.AddRange(DeserializeStructure(item, node));
 
-            if (!options.Flags.HasFlag(SerializerFlags.DoNotSave) && item.IsDirty())
+            CleanTabAliases(item);
+            CleanTabs(item, node, options);
+
+            bool saveInSerializer = !options.Flags.HasFlag(SerializerFlags.DoNotSave);
+            if (saveInSerializer && item.IsDirty())
                 mediaTypeService.Save(item);
 
-            return SyncAttempt<IMediaType>.Succeed(item.Name, item, ChangeType.Import, details);
+            return SyncAttempt<IMediaType>.Succeed(item.Name, item, ChangeType.Import, saveInSerializer, details);
         }
 
         protected override Attempt<IMediaType> CreateItem(string alias, ITreeEntity parent, string itemType)
