@@ -27,6 +27,12 @@ namespace uSync.Core.Tracking
             serializer = serializers.GetSerializer<TObject>();
         }
 
+        protected virtual ISyncSerializer<TObject> GetSerializer(XElement target)
+            => serializer;
+
+        protected virtual ISyncSerializer<TObject> GetSerializer(TObject item)
+            => serializer;
+
         public IList<TrackingItem> Items { get; set; }
 
         public IEnumerable<uSyncChange> GetChanges(XElement target)
@@ -34,7 +40,7 @@ namespace uSync.Core.Tracking
 
         public IEnumerable<uSyncChange> GetChanges(XElement target, SyncSerializerOptions options)
         {
-            var item = serializer.FindItem(target);
+            var item = GetSerializer(target).FindItem(target);
             if (item != null)
             {
                 var attempt = SerializeItem(item, options);
@@ -47,14 +53,14 @@ namespace uSync.Core.Tracking
         }
 
         private SyncAttempt<XElement> SerializeItem(TObject item, SyncSerializerOptions options)
-            => serializer.Serialize(item, options);
+            => GetSerializer(item).Serialize(item, options);
 
         public IEnumerable<uSyncChange> GetChanges(XElement target, XElement source, SyncSerializerOptions options)
         {
             if (target.IsEmptyItem())
                 return GetEmptyFileChange(target, source).AsEnumerableOfOne();
 
-            if (!serializer.IsValid(target))
+            if (!GetSerializer(target).IsValid(target))
                 return uSyncChange.Error("", "Invalid File", target.Name.LocalName).AsEnumerableOfOne();
 
             var changeType = GetChangeType(target, source, options);
@@ -81,7 +87,7 @@ namespace uSync.Core.Tracking
         }
 
         private ChangeType GetChangeType(XElement target, XElement source, SyncSerializerOptions options)
-           => serializer.IsCurrent(target, source, options);
+           => GetSerializer(target).IsCurrent(target, source, options);
 
         /// <summary>
         ///  actually kicks off here, if you have two xml files that are diffrent. 

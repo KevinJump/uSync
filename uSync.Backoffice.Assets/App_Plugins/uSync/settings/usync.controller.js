@@ -18,6 +18,7 @@
         vm.syncing = false;
         vm.hideLink = false;
         vm.showSpinner = false;
+        vm.showEverything = true;
 
         vm.groups = [];
         vm.perf = 0;
@@ -353,31 +354,37 @@
         vm.importGroup = {};
 
         function getHandlerGroups() {
+            vm.showEverything = false; 
+
             uSync8DashboardService.getHandlerGroups()
                 .then(function (result) {
-                    angular.forEach(result.data, function (icon, group) {
-
-                        vm.groups.push({
-                            name: group,
-                            icon: icon,
-                            key: group.toLowerCase()
-                        });
-
-
-                        vm.importGroup[group] = {
-                            state: 'init',
-                            defaultButton: {
-                                labelKey: 'usync_import',
-                                handler: function () { importGroup(group) }
-                            },
-                            subButtons: [{
-                                labelKey: 'usync_importforce',
-                                handler: function () { importForce(group) }
-                            }]
+                    _.forEach(result.data, function (icon, group) {
+                        if (group == '_everything') {
+                            vm.showEverything = true;
                         }
+                        else {
+                            vm.groups.push({
+                                name: group,
+                                icon: icon,
+                                key: group.toLowerCase()
+                            });
 
-                        if (group.toLowerCase() === "forms") {
-                            vm.hasuSyncForms = true;
+
+                            vm.importGroup[group] = {
+                                state: 'init',
+                                defaultButton: {
+                                    labelKey: 'usync_import',
+                                    handler: function () { importGroup(group) }
+                                },
+                                subButtons: [{
+                                    labelKey: 'usync_importforce',
+                                    handler: function () { importForce(group) }
+                                }]
+                            }
+
+                            if (group.toLowerCase() === "forms") {
+                                vm.hasuSyncForms = true;
+                            }
                         }
 
                     });

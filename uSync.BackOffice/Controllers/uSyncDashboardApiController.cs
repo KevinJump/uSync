@@ -15,6 +15,7 @@ using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Web.BackOffice.Controllers;
 using Umbraco.Cms.Web.Common.Attributes;
 using Umbraco.Cms.Web.Common.Authorization;
+using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Hubs;
@@ -91,7 +92,16 @@ namespace uSync.BackOffice.Controllers
                 Group = uSyncConfig.Settings.UIEnabledGroups
             };
 
-            return handlerFactory.GetValidHandlerGroupsAndIcons(options);
+            var groups = handlerFactory.GetValidHandlerGroupsAndIcons(options);
+
+            // if nothing is set, we add everything marker.
+            if (string.IsNullOrWhiteSpace(uSyncConfig.Settings.UIEnabledGroups) || 
+                uSyncConfig.Settings.UIEnabledGroups.InvariantContains("all"))
+            {
+                groups.Add("_everything", "");
+            }
+
+            return groups;
         }
 
         /// <summary>

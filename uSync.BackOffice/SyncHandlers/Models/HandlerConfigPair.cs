@@ -30,7 +30,7 @@ namespace uSync.BackOffice.SyncHandlers
                 handlerGroup = handlerAndConfig.Settings.Group;
             }
 
-            return handlerGroup.InvariantEquals(group);
+            return group.InvariantContains(handlerGroup);
         }
 
         public static bool IsValidAction(this HandlerConfigPair handlerAndConfig, HandlerActions action)
