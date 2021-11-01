@@ -65,6 +65,7 @@ namespace uSync.Core.Serialization.Serializers
             foreach (var tab in item.PropertyGroups.OrderBy(x => x.SortOrder))
             {
                 tabs.Add(new XElement("Tab",
+                            new XElement("Key", tab.Key),
                             new XElement("Caption", tab.Name),
                             new XElement("Alias", tab.Alias),
                             new XElement("Type", tab.Type),
@@ -474,7 +475,8 @@ namespace uSync.Core.Serialization.Serializers
                     }
                     else
                     {
-                        item.AddPropertyType(property, tabAlias);
+                        var tabGroup = item.PropertyGroups.FindTab(tabAlias);
+                        item.AddPropertyType(property, tabGroup?.Alias ?? tabAlias);
                     }
                 }
                 else
@@ -483,14 +485,19 @@ namespace uSync.Core.Serialization.Serializers
                     // we need to see if this one has moved. 
                     if (!string.IsNullOrWhiteSpace(tabAlias))
                     {
-                        var tabGroup = item.PropertyGroups.FirstOrDefault(x => x.Alias.InvariantEquals(tabAlias));
+                        var tabGroup = item.PropertyGroups.FindTab(tabAlias);
                         if (tabGroup != null)
                         {
                             if (!tabGroup.PropertyTypes.Contains(property.Alias))
                             {
+                                // this property is not currently in this tab.
                                 // add to our move list.
                                 propertiesToMove[property.Alias] = tabAlias;
                             }
+                        }
+                        else
+                        {
+                            logger.LogWarning("Cannot find tab {alias} to add {property} to", tabAlias, property.Alias);
                         }
                     }
                 }
@@ -614,6 +621,7 @@ namespace uSync.Core.Serialization.Serializers
                 var alias = tab.Element("Alias").ValueOrDefault(string.Empty);
                 var sortOrder = tab.Element("SortOrder").ValueOrDefault(defaultSort);
                 var tabType = tab.Element("Type").ValueOrDefault(defaultType);
+                var tabKey = tab.Element("Key").ValueOrDefault(Guid.Empty);
 
                 // do we block nested tabs ? the file would be corrupt,
                 // but if its introduced later on, we would just work?
@@ -627,9 +635,27 @@ namespace uSync.Core.Serialization.Serializers
 
                 logger.LogDebug("> Tab {0} {1} {2}", name, alias, sortOrder);
 
-                var existing = FindTab(item, alias, name);
+                var existing = FindTab(item, alias, name, tabKey);
                 if (existing != null)
                 {
+                    if (existing.Alias != alias)
+                    {
+                        changes.AddUpdate("Alias", existing.Alias, alias, $"Tabs/{name}/Alias");
+                        existing.Alias = alias;
+                    }
+
+                    if (existing.Name != name)
+                    {
+                        changes.AddUpdate("Alias", existing.Name, name, $"Tabs/{name}/Name");
+                        existing.Name = name;
+                    }
+
+                    if (tabKey != Guid.Empty && existing.Key != tabKey)
+                    {
+                        changes.AddUpdate("Key", existing.Key.ToString(), tabKey.ToString(), $"Tabs/{name}/Key");
+                        existing.Key = tabKey;
+                    }
+
                     if (existing.SortOrder != sortOrder)
                     {
                         changes.AddUpdate("SortOrder", existing.SortOrder, sortOrder, $"Tabs/{name}/SortOrder");
@@ -638,6 +664,12 @@ namespace uSync.Core.Serialization.Serializers
 
                     if (existing.Type != tabType)
                     {
+                        // check for clash. 
+                        if (TabClashesWithExisting(item, alias, tabType))
+                        {
+                            existing.Alias = SyncPropertyGroupHelpers.GetTempTabAlias(alias);
+                        }
+
                         changes.AddUpdate("Tab type", existing.Type, tabType, $"Tabs/{name}/Type");
                         existing.Type = tabType;
                     }
@@ -645,7 +677,14 @@ namespace uSync.Core.Serialization.Serializers
                 else
                 {
                     // if the alias is blank, we make it up.
-                    if (string.IsNullOrWhiteSpace(alias)) alias = name.ToSafeAlias(shortStringHelper, true);
+                    if (string.IsNullOrWhiteSpace(alias)) 
+                        alias = name.ToSafeAlias(shortStringHelper, true);
+
+                    // if the alias & type would clash with something already in the tree
+                    // *e.g this is a group with `name` when tab with `name` already being used
+                    // by ancestor or decendant.
+                    if (TabClashesWithExisting(item, alias, tabType))
+                        alias = SyncPropertyGroupHelpers.GetTempTabAlias(alias);
 
                     // create the tab
                     item.AddPropertyGroup(alias, name);
@@ -657,17 +696,26 @@ namespace uSync.Core.Serialization.Serializers
                     {
                         newTab.SortOrder = sortOrder;
                         newTab.Type = tabType;
+                        if (tabKey != Guid.Empty) newTab.Key = tabKey;
                     }
                 } 
 
                 defaultSort = sortOrder + 1;
             }
 
+            ClearAllTabsCache();
+
             return changes;
         }
 
-        private PropertyGroup FindTab(TObject item, string alias, string name)
+        private PropertyGroup FindTab(TObject item, string alias, string name, Guid key)
         {
+            if (key != Guid.Empty)
+            {
+                var tab = item.PropertyGroups.FirstOrDefault(x => x.Key == key);
+                if (tab != null) return tab;
+            }
+
             if (string.IsNullOrWhiteSpace(alias))
                 return item.PropertyGroups.FirstOrDefault(x => x.Name.InvariantEquals(name));
 
@@ -705,6 +753,21 @@ namespace uSync.Core.Serialization.Serializers
             if (string.IsNullOrWhiteSpace(name)) return string.Empty;
 
             return name.ToSafeAlias(shortStringHelper, true);
+        }
+
+        /// <summary>
+        ///  remove any prefixes we may have added to a tab alias
+        /// </summary>
+        /// <param name="item"></param>
+        protected void CleanTabAliases(TObject item)
+        {
+            foreach (var tab in item.PropertyGroups)
+            {
+                if (SyncPropertyGroupHelpers.IsTempTabAlias(tab.Alias))
+                {
+                    tab.Alias = SyncPropertyGroupHelpers.StripTempTabAlias(tab.Alias);
+                }
+            }
         }
 
         protected IEnumerable<uSyncChange> CleanTabs(TObject item, XElement node, SyncSerializerOptions options)
@@ -1095,5 +1158,58 @@ namespace uSync.Core.Serialization.Serializers
 
         #endregion
 
+        #region Tab checks
+
+        //
+        // When we create or change a tab type, we need to confirm it won't clash with 
+        // an existing tab somewhere else in the tab tree for this item. 
+        //
+        // This isn't ideal as it involves a full load of all content types 
+        // so we try to limit this call so we only do it once if needed per 
+        // import, 
+        //
+        // so the load will only be called if we need to check for a clash 
+        // and once we have called it once, we won't call it again for this doctype
+        // import.
+        //
+        // we could go full cache, and keep a history all all tab aliases across umbraco
+        // but it might not give us enough performance gain for how hard it would be 
+        // to ensure it doesn't become out of sync.
+        // 
+
+        private Dictionary<string, PropertyGroupType> _allTabs;
+
+        public bool TabClashesWithExisting(TObject item, string alias, PropertyGroupType tabType)
+        {
+            EnsureAllTabsCacheLoaded(item);
+            return _allTabs.ContainsKey(alias) && _allTabs[alias] != tabType;
+        }
+
+        public void EnsureAllTabsCacheLoaded(TObject item)
+        {
+            if (_allTabs == null)
+            {
+                var compositions = item.CompositionPropertyGroups
+                    .DistinctBy(x => x.Alias)
+                    .ToDictionary(k => k.Alias, v => v.Type);
+
+                var dependents = baseService.GetAll()
+                    .Where(x => x.CompositionIds().Contains(item.Id))
+                    .SelectMany(x => x.PropertyGroups)
+                    .DistinctBy(x => x.Alias)
+                    .ToDictionary(k => k.Alias, v => v.Type);
+
+                _allTabs = compositions
+                    .Union(dependents.Where(x => !compositions.ContainsKey(x.Key)))
+                    .ToDictionary(k => k.Key, v => v.Value);
+            }
+        }
+
+        public void ClearAllTabsCache()
+        {
+            if (_allTabs != null) _allTabs = null;
+        }
+
+        #endregion
     }
 }

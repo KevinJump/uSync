@@ -112,9 +112,6 @@ namespace uSync.Core.Serialization.Serializers
             // content type only property stuff.
             details.AddRange(DeserializeContentTypeProperties(item, node));
 
-            // clean tabs 
-            details.AddRange(CleanTabs(item, node, options));
-
             // templates 
             details.AddRange(DeserializeTemplates(item, node));
 
@@ -147,12 +144,25 @@ namespace uSync.Core.Serialization.Serializers
             details.AddRange(DeserializeCompositions(item, node));
             details.AddRange(DeserializeStructure(item, node));
 
-            if (!options.Flags.HasFlag(SerializerFlags.DoNotSave) && item.IsDirty())
+            CleanTabAliases(item);
+
+            // clean tabs 
+            details.AddRange(CleanTabs(item, node, options));
+
+            bool saveInSerializer = !options.Flags.HasFlag(SerializerFlags.DoNotSave);
+            if (saveInSerializer && item.IsDirty())
+            {
+                var dirty = string.Join(", ", item.GetDirtyProperties());
+                dirty += string.Join(", ", item.PropertyGroups.Where(x => x.IsDirty()).Select(x => $"Group:{x.Name}"));
+                dirty += string.Join(", ", item.PropertyTypes.Where(x => x.IsDirty()).Select(x => $"Property:{x.Name}"));
+                logger.LogDebug("Saving in Serializer because item is dirty [{properties}]", dirty);
+
                 contentTypeService.Save(item);
+            }
 
             CleanFolder(item, node);
 
-            return SyncAttempt<IContentType>.Succeed(item.Name, item, ChangeType.Import, details);
+            return SyncAttempt<IContentType>.Succeed(item.Name, item, ChangeType.Import, "", saveInSerializer, details);
         }
 
         private IEnumerable<uSyncChange> DeserializeContentTypeProperties(IContentType item, XElement node)

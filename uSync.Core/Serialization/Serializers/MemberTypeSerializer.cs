@@ -133,6 +133,17 @@ namespace uSync.Core.Serialization.Serializers
 
             return SyncAttempt<IMemberType>.Succeed(item.Name, item, ChangeType.Import, details);
         }
+        public override SyncAttempt<IMemberType> DeserializeSecondPass(IMemberType item, XElement node, SyncSerializerOptions options)
+        {
+            CleanTabAliases(item);
+            var details = CleanTabs(item, node, options).ToList();
+
+            bool saveInSerializer = !options.Flags.HasFlag(SerializerFlags.DoNotSave);
+            if (saveInSerializer && item.IsDirty())
+                memberTypeService.Save(item);
+
+            return SyncAttempt<IMemberType>.Succeed(item.Name, item, ChangeType.Import, string.Empty, saveInSerializer, details);
+        }
 
         protected override IEnumerable<uSyncChange> DeserializeExtraProperties(IMemberType item, IPropertyType property, XElement node)
         {
