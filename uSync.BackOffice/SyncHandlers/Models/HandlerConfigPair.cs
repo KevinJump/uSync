@@ -1,4 +1,6 @@
 ﻿
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
+
 using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;
@@ -43,6 +45,16 @@ namespace uSync.BackOffice.SyncHandlers
                 return handlerConfigPair.Settings.Group;
 
             return handlerConfigPair.Handler.Group;
+        }
+
+        public static string GetGroupIcon(this HandlerConfigPair handlerConfigPair)
+        {
+            var group = GetConfigGroup(handlerConfigPair);
+
+            if (uSyncConstants.Groups.Icons.ContainsKey(group))
+                return uSyncConstants.Groups.Icons[group];
+
+            return handlerConfigPair.Handler.Icon;
         }
     }
 }

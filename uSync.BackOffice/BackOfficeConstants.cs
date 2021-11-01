@@ -42,6 +42,9 @@ namespace uSync.BackOffice
             public const string Members = "Members";
             public const string Users = "Users";
 
+            public const string Forms = "Forms";
+            public const string Files = "Files";
+
             public const string Default = "__default__";
 
             public static Dictionary<string, string> Icons = new Dictionary<string, string> {
@@ -49,7 +52,9 @@ namespace uSync.BackOffice
                 { Content, "icon-documents color-purple" },
                 { Members, "icon-users" },
                 { Users, "icon-users color-green"},
-                { Default, "icon-settings" }
+                { Default, "icon-settings" },
+                { Forms, "icon-umb-contour" },
+                { Files, "icon-script-alt" }
             };
         }
 

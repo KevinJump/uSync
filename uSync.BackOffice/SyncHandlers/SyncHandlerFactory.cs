@@ -113,6 +113,22 @@ namespace uSync.BackOffice.SyncHandlers
             return groups.Distinct();
         }
 
+        /// <summary>
+        ///  get the handler groups and their icons
+        /// </summary>
+        /// <remarks>
+        ///  if we don't have a defined icon for a group, the icon from the first handler in the group
+        ///  will be used. 
+        /// </remarks>
+        public IDictionary<string, string> GetValidHandlerGroupsAndIcons(SyncHandlerOptions options = null)
+        {
+            var handlers = GetValidHandlers(options);
+
+            return handlers.Select(x => new { group = x.GetConfigGroup(), icon = x.GetGroupIcon() })
+                .DistinctBy(x => x.group)
+                .ToDictionary(k => k.group, v => v.icon);
+        }
+
         public IEnumerable<HandlerConfigPair> GetValidHandlers(string[] aliases, SyncHandlerOptions options = null)
             => GetValidHandlers(options)
                 .Where(x => aliases.InvariantContains(x.Handler.Alias));

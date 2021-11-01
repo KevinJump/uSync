@@ -91,16 +91,7 @@ namespace uSync.BackOffice.Controllers
                 Group = uSyncConfig.Settings.UIEnabledGroups
             };
 
-            return handlerFactory.GetValidGroups(options)
-                       .ToDictionary(k => k, v => GetIcon(v));
-        }
-
-        private string GetIcon(string key)
-        {
-            if (uSyncConstants.Groups.Icons.ContainsKey(key))
-                return uSyncConstants.Groups.Icons[key];
-
-            return uSyncConstants.Groups.Icons[uSyncConstants.Groups.Default];
+            return handlerFactory.GetValidHandlerGroupsAndIcons(options);
         }
 
         /// <summary>
