@@ -79,9 +79,9 @@ namespace uSync.BackOffice.SyncHandlers
              => GetValidHandlers(options)
                  .FirstOrDefault(x => x.Handler.Alias.InvariantEquals(alias));
 
-        public HandlerConfigPair GetValidHandlerByTypeName(string typeName, SyncHandlerOptions options = null)
+        public HandlerConfigPair GetValidHandlerByTypeName(string itemType, SyncHandlerOptions options = null)
             => GetValidHandlers(options)
-                .Where(x => typeName.InvariantEquals(x.Handler.TypeName))
+                .Where(x => itemType.InvariantEquals(x.Handler.TypeName))
                 .FirstOrDefault();
 
         public HandlerConfigPair GetValidHandlerByEntityType(string entityType, SyncHandlerOptions options = null)
