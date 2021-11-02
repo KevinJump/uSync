@@ -474,3 +474,15 @@ ul.usync-action-list {
 .usync-setting-value:last-child {
     border-bottom: none;
 }
+
+.usync-warning {
+    text-align: center;
+}
+
+.usync-warning-info {
+    color: #3544b1;
+}
+
+.usync-warning-warning {
+    color: #f0ac00;
+}

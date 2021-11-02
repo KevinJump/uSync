@@ -67,6 +67,11 @@
             </usync-progress-view>
             <div ng-if="vm.perf > 0" class="text-center muted">{{vm.perf | number: 0 }}ms</div>
         </umb-box-content>
+        <umb-box-content>
+            <div ng-if="vm.warnings.message.length > 0" class="usync-warning usync-warning-{{vm.warnings.type}}">
+                <span ng-bind-html="vm.warnings.message"></span>
+            </div>
+        </umb-box-content>
     </umb-box>
 
     <div ng-if="vm.showSpinner && vm.working">
@@ -74,9 +79,6 @@
     </div>
 
 
-    <div ng-if="vm.warnings.message.length > 0" class="alert alert-{{vm.warnings.type}}">
-        <span ng-bind-html="vm.warnings.message"></span>
-    </div>
 
     <div ng-if="vm.reported">
         <usync-report-view actions="vm.actions" results="vm.results" hide-action="true" hide-link="vm.hideLink"></usync-report-view>
