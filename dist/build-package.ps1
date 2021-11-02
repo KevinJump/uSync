@@ -72,8 +72,11 @@ if ($push) {
     ""; "##### Pushing to our nighly package feed"; "----------------------------------" ; ""
     .\nuget.exe push "$outFolder\*.nupkg" -ApiKey AzureDevOps -src https://pkgs.dev.azure.com/jumoo/Public/_packaging/nightly/nuget/v3/index.json
     
+    Remove-Item ".\last-push-*" 
     Out-File -FilePath ".\last-push-$fullVersion.txt" -InputObject $fullVersion
 }
 
 Write-Host "uSync Packaged : $fullVersion"
+
+Remove-Item ".\last-build-*" 
 Out-File -FilePath ".\last-build-$fullVersion.txt" -InputObject $fullVersion
