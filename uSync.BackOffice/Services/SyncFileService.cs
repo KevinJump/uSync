@@ -30,6 +30,9 @@ namespace uSync.BackOffice.Services
             this.hostEnvironment = hostEnvironment;
         }
 
+        /// <summary>
+        ///  return the absolute path for any given path. 
+        /// </summary>
         public string GetAbsPath(string path)
         {
             if (Path.IsPathFullyQualified(path)) return CleanLocalPath(path);
@@ -42,6 +45,9 @@ namespace uSync.BackOffice.Services
         private string CleanLocalPath(string path)
             => Path.GetFullPath(path.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar));
 
+        /// <summary>
+        ///  does a file exist 
+        /// </summary>
         public bool FileExists(string path)
             => File.Exists(GetAbsPath(path));
 
@@ -52,12 +58,26 @@ namespace uSync.BackOffice.Services
         public bool PathMatches(string a, string b)
             => GetAbsPath(a).Equals(GetAbsPath(b), StringComparison.InvariantCultureIgnoreCase);
 
+        /// <summary>
+        ///  does a directory exist
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
         public bool DirectoryExists(string path)
             => Directory.Exists(GetAbsPath(path));
 
+        /// <summary>
+        ///  dies the root path exist. 
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
         public bool RootExists(string path)
             => DirectoryExists(path);
 
+        /// <summary>
+        ///  remove a file from disk.
+        /// </summary>
+        /// <param name="path"></param>
         public void DeleteFile(string path)
         {
             var localPath = GetAbsPath(path);
@@ -121,6 +141,10 @@ namespace uSync.BackOffice.Services
                 Directory.CreateDirectory(absPath);
         }
 
+        /// <summary>
+        ///  Create a directory.
+        /// </summary>
+        /// <param name="folder"></param>
         public void CreateFolder(string folder)
         {
             var absPath = GetAbsPath(folder);
@@ -145,6 +169,13 @@ namespace uSync.BackOffice.Services
         public IEnumerable<string> GetFiles(string folder, string extensions)
             => GetFiles(folder, extensions, false);
 
+        /// <summary>
+        ///  get all the files in a folder, 
+        /// </summary>
+        /// <param name="folder">path to the folder</param>
+        /// <param name="extensions">list of extensions (filter)</param>
+        /// <param name="allFolders">get all files in all decentant folders</param>
+        /// <returns></returns>
         public IEnumerable<string> GetFiles(string folder, string extensions, bool allFolders)
         {
             var localPath = GetAbsPath(folder);

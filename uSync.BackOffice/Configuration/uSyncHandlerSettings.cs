@@ -11,16 +11,39 @@ namespace uSync.BackOffice.Configuration
     [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public class HandlerSettings
     {
+        /// <summary>
+        ///  is handler enabled or disabled
+        /// </summary>
         public bool Enabled { get; set; } = true;
 
+        /// <summary>
+        ///  list of actions the handler is configured for. 
+        /// </summary>
         public string[] Actions { get; set; } = Array.Empty<string>();
 
+        /// <summary>
+        ///  should use a flat folder structure when exporting items
+        /// </summary>
         public bool UseFlatStructure { get; set; } = true;
+
+        /// <summary>
+        ///  items should be saved with their guid/key value as the filename
+        /// </summary>
         public bool GuidNames { get; set; } = false;
+
+        /// <summary>
+        ///  imports should fail if the parent item is missing (if false, item be importated go a close as possible to location)
+        /// </summary>
         public bool FailOnMissingParent { get; set; } = false;
 
+        /// <summary>
+        ///  override the group the handler belongs too.
+        /// </summary>
         public string Group { get; set; } = string.Empty;
 
+        /// <summary>
+        ///  additional settings for the handler
+        /// </summary>
         public Dictionary<string, string> Settings { get; set; } = new Dictionary<string, string>();
 
         public HandlerSettings() { }
@@ -61,6 +84,11 @@ namespace uSync.BackOffice.Configuration
             settings.Settings[key] = value.ToString();
         }
 
+        /// <summary>
+        ///  create a copy of this handlers settings
+        /// </summary>
+        /// <param name="settings"></param>
+        /// <returns></returns>
         public static HandlerSettings Clone(this HandlerSettings settings)
         {
             return new HandlerSettings

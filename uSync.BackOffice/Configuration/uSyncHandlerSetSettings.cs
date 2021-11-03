@@ -5,11 +5,21 @@ namespace uSync.BackOffice.Configuration
 {
     public class uSyncHandlerSetSettings
     {
+        /// <summary>
+        ///  is this handler set enabled
+        /// </summary>
         public bool Enabled { get; set; } = true;
 
+        /// <summary>
+        ///  list of groups handlers can belong to.
+        /// </summary>
         public string[] HandlerGroups { get; set; } = Array.Empty<string>();
 
+        /// <summary>
+        ///  list of disabled handlers
+        /// </summary>
         public string[] DisabledHandlers { get; set; } = Array.Empty<string>();
+        
         /// <summary>
         ///  default settings for all handlers
         /// </summary>

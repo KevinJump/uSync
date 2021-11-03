@@ -25,6 +25,15 @@ namespace uSync
             configurationBuilder.AddJsonFile($"{fileRootName}.{Environment.MachineName}.json", optional: true, reloadOnChange: true);
         }
 
+        /// <summary>
+        ///  add usync.json files sources to the applications configuration
+        /// </summary>
+        /// <remarks>
+        ///  allows you to move the uSync config out of the main appsettings.config file, by default will add 
+        ///  usync.json, usync.[environment].json and usync.[machinename].json to the list of configuration
+        ///  locations
+        /// </remarks>
+        /// <param name="filename">name of json file to add (default usync.json)</param>
         public static IHostBuilder ConfigureuSyncConfig(this IHostBuilder hostBuilder, string filename = "usync.json")
         {
             return hostBuilder.ConfigureAppConfiguration((hostingContext, config) =>
@@ -33,6 +42,15 @@ namespace uSync
             });
         }
 
+        /// <summary>
+        ///  returns values from a object that are not set to the default values from another object.
+        /// </summary>
+        /// <remarks>
+        ///  this extension method gives us a way to see which values have been changed from the 
+        ///  default values by comparing to objects. and retrunign a JToken value that only
+        ///  contains the changed values - we use this to show users what has changed in their 
+        ///  configuration.
+        /// </remarks>
         public static JToken GetNonDefaultValues<T>(this T source, T defaults)
         {
             try

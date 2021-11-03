@@ -13,6 +13,9 @@ namespace uSync.BackOffice.Configuration
         /// </summary>
         public string RootFolder { get; set; } = "uSync/v9/";
 
+        /// <summary>
+        ///  the default handler set to use on all notification triggered events
+        /// </summary>
         public string DefaultSet { get; set; } = uSync.Sets.DefaultSet;
 
         /// <summary>

@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 namespace uSync.BackOffice.Configuration
 {
     /// <summary>
-    ///  manipulation of the settings, so saving values back. 
+    ///  manages the configuration settings for uSync, 
     /// </summary>
     public class uSyncConfigService
     {
@@ -12,6 +12,9 @@ namespace uSync.BackOffice.Configuration
 
         private IOptionsMonitor<uSyncSettings> _settingsMonitor; 
 
+        /// <summary>
+        ///  The unmapped root folder for uSync.
+        /// </summary>
         public string GetRootFolder()
             => Settings.RootFolder.TrimStart('/');
 
@@ -25,9 +28,15 @@ namespace uSync.BackOffice.Configuration
             this.setOptionsMonitor = setOptionsMonitor;
         }
 
+        /// <summary>
+        ///  get the settings for a named handler set.
+        /// </summary>
         public uSyncHandlerSetSettings GetSetSettings(string setname)
             => setOptionsMonitor.Get(setname);
 
+        /// <summary>
+        ///  get the default handler settings for handlers
+        /// </summary>
         public uSyncHandlerSetSettings GetDefaultSetSettings()
             => GetSetSettings(Settings.DefaultSet);
 
