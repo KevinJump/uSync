@@ -1,5 +1,6 @@
 /// <binding ProjectOpened='default' />
 const { watch, src, dest } = require('gulp');
+const del = require('del');
 var concat = require('gulp-concat');
 var uglify = require('gulp-uglify');
 var sourcemaps = require('gulp-sourcemaps');
@@ -111,7 +112,7 @@ exports.default = function() {
 exports.minify = function (cb) {
     
     var version = arg.release;
-
+   
     sourceFolders.forEach(function (sourceFolder) {
         let source = sourceFolder + '**/*';
         let jsfiles = sourceFolder + '**/*.js';
