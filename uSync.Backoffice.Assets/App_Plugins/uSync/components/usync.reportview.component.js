@@ -48,7 +48,7 @@
             }
 
             return details.some(function (detail) {
-                return !detail.Success;
+                return !detail.success;
             })
         }
 
