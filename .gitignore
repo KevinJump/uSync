@@ -24,6 +24,7 @@ uSync8.Site/Media/*
 !uSync8.Site/Media/web.config
 [Dd]ist/
 
+[Bb]uild-[Ff]iles/
 
 # Build results
 [Dd]ebug/
