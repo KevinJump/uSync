@@ -38,7 +38,8 @@
                 <div class="umb-table-body">
                     <div ng-repeat="result in vm.results">
                         <div class="umb-table-row {{vm.getChangeClass(result)}}"
-                             ng-if="vm.showChange(result.change)">
+                             ng-if="vm.showChange(result.change)"
+                             ng-click="vm.select(result)">
                             <div class="umb-table-cell">
                                 <i class="icon {{vm.getIcon(result)}}"></i>
                             </div>

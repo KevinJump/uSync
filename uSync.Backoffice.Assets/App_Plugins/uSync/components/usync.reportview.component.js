@@ -9,7 +9,9 @@
             hideAction: '<',
             hideLink: '<',
             showAll: '<',
-            hideToggle: '<'
+            hideToggle: '<',
+            allowSelect: '<',
+            selection: '='
         },
         controllerAs: 'vm',
         controller: uSyncReportViewController
@@ -53,14 +55,24 @@
         }
 
         function getChangeClass(result) {
-            if (!result.success) {
-                return 'usync-change-row-Fail';
-            }
-            else if (hasFailedDetail(result.details)) {
-                return 'usync-change-row-Warn';
+
+            var classString = '';
+            if (vm.allowSelect) {
+                classString = '-usync-can-select ';
             }
 
-            return 'usync-change-row-' + result.change;
+            if (result.__selected) {
+                classString += '-selected '
+            }
+
+            if (!result.success) {
+                return classString + 'usync-change-row-Fail';
+            }
+            else if (hasFailedDetail(result.details)) {
+                return classString + ' usync-change-row-Warn';
+            }
+
+            return classString + ' usync-change-row-' + result.change;
         }
 
         function getIcon(result) {
@@ -128,6 +140,24 @@
                     console.error(error);
                     item.applyState = 'error';
                 });
+        }
+
+        vm.select = select;
+
+        function select(item) {
+            if (vm.allowSelect && vm.selection !== undefined) {
+                var index = _.findIndex(vm.selection,
+                    (x) => (x.key == item.key && x.name == item.name)
+                );
+                if (index === -1) {
+                    vm.selection.push(item);
+                    item.__selected = true;
+                }
+                else {
+                    vm.selection.splice(index, 1);
+                    item.__selected = false; 
+                }
+            }
         }
 
         function status(item) {

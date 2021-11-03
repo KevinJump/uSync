@@ -486,3 +486,7 @@ ul.usync-action-list {
 .usync-warning-warning {
     color: #f0ac00;
 }
+
+.-usync-can-select {
+    cursor: pointer;
+}

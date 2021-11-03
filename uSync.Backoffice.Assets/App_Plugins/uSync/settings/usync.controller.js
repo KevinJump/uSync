@@ -20,6 +20,8 @@
         vm.showSpinner = false;
         vm.showEverything = true;
 
+        vm.selection = [];
+
         vm.groups = [];
         vm.perf = 0;
 

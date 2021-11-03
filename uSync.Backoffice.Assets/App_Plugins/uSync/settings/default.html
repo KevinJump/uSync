@@ -81,7 +81,10 @@
 
 
     <div ng-if="vm.reported">
-        <usync-report-view actions="vm.actions" results="vm.results" hide-action="true" hide-link="vm.hideLink"></usync-report-view>
+        <usync-report-view actions="vm.actions" 
+                           results="vm.results" 
+                           hide-action="true" 
+                           hide-link="vm.hideLink"></usync-report-view>
     </div>
 
     <div class="usync-fresh-view" ng-if="vm.fresh">
