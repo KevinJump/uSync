@@ -79,7 +79,7 @@ namespace uSync.Core.Serialization.Serializers
 
             // are we only serizling some segments ? 
             var segments = options.GetSetting(uSyncConstants.SegmentKey, string.Empty);
-            if (IsPartialSegmentElement(item, segments)) ;
+            if (IsPartialSegmentElement(item, segments))
             {
                 node.Add(new XAttribute(uSyncConstants.SegmentKey, segments));
             }
@@ -87,7 +87,7 @@ namespace uSync.Core.Serialization.Serializers
             // are we including the default (not variant) values in the serialized result? 
             // we only worry about this when we are passing partial cultures or segments 
             // to the file, when we sync complte content items, this is reduntant. 
-            if (options.GetSetting(uSyncConstants.DefaultsKey, false) && !IsPartialElement(item, cultures ,segments)) {
+            if (options.GetSetting(uSyncConstants.DefaultsKey, true) && IsPartialElement(item, cultures ,segments)) {
                 node.Add(new XAttribute(uSyncConstants.DefaultsKey, true));
             }
 
