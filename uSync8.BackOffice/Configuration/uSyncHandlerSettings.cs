@@ -44,7 +44,42 @@ namespace uSync8.BackOffice.Configuration
 
             return defaultValue;
         }
+    }
 
+    public static class HandlerSettingsExtensions
+    {
+        /// <summary>
+        ///  Add a setting to the settings Dictionary (creating the dictionary if its missing)
+        /// </summary>
+        /// <param name="settings"></param>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        public static void AddSetting<TObject>(this HandlerSettings settings, string key, TObject value)
+        {
+            if (settings.Settings == null)
+                settings.Settings = new Dictionary<string, string>();
+
+            settings.Settings[key] = value.ToString();
+        }
+
+
+        /// <summary>
+        ///  create a copy of this handlers settings
+        /// </summary>
+        /// <param name="settings"></param>
+        /// <returns></returns>
+        public static HandlerSettings Clone(this HandlerSettings settings)
+        {
+            return new HandlerSettings(settings.Alias, settings.Enabled)
+            {
+                Actions = settings.Actions,
+                FailOnMissingParent = settings.FailOnMissingParent,
+                UseFlatStructure = settings.UseFlatStructure,
+                Group = settings.Group,
+                GuidNames = settings.GuidNames,
+                Settings = new Dictionary<string, string>(settings.Settings)
+            };
+        }
     }
 
 }

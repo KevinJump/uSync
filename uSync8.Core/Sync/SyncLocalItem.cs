@@ -52,6 +52,13 @@ namespace uSync8.Core.Sync
         /// </remarks>
         public bool RequiresFiles { get; set; }
 
+
+        /// <summary>
+        /// does this item have children ? will be used to show user the option to 
+        /// include child items in the sync.
+        /// </summary>
+        public bool HasChildren { get; set; }
+
         public SyncLocalItem() {}
 
         public SyncLocalItem(string id) : this()

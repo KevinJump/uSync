@@ -210,6 +210,28 @@ namespace uSync8.BackOffice.SyncHandlers
         }
 
         #endregion
+
+        #region Adders (add a handler at runtime to a config set)
+
+        public bool AddHandlerToSet(string alias, string setname)
+        {
+
+            var handler = syncHandlers.Handlers.FirstOrDefault(x => x.Alias.InvariantEquals(alias));
+            if (handler == null) return false;
+
+            var setConfig = config.Settings.HandlerSets.FirstOrDefault(x => x.Name.InvariantEquals(setname));
+            if (setConfig == null) return false;
+
+            // already in the set ? 
+            if (setConfig.Handlers.Any(x => x.Alias.InvariantEquals(handler.Alias)))
+                return true;
+
+            setConfig.Handlers.Add(new HandlerSettings(handler.Alias, true));
+            return true;
+
+        }
+
+        #endregion
     }
 
 

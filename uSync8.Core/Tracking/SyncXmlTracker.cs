@@ -31,6 +31,13 @@ namespace uSync8.Core.Tracking
             this.serializer = serializer;
         }
 
+        protected virtual ISyncSerializer<TObject> GetSerializer(XElement target)
+            => serializer;
+
+        protected virtual ISyncSerializer<TObject> GetSerializer(TObject item)
+            => serializer;
+
+
         public IList<TrackingItem> Items { get; set; }
 
         public IEnumerable<uSyncChange> GetChanges(XElement target)
@@ -38,7 +45,7 @@ namespace uSync8.Core.Tracking
 
         public IEnumerable<uSyncChange> GetChanges(XElement target, SyncSerializerOptions options)
         {
-            var item = serializer.FindItem(target);
+            var item = GetSerializer(target).FindItem(target);
             if (item != null)
             {
                 var attempt = SerializeItem(item, options);
@@ -52,21 +59,21 @@ namespace uSync8.Core.Tracking
 
         private SyncAttempt<XElement> SerializeItem(TObject item, SyncSerializerOptions options)
         {
-            if (serializer is ISyncOptionsSerializer<TObject> optionSerializer)
+            if (GetSerializer(item) is ISyncOptionsSerializer<TObject> optionSerializer)
                 return optionSerializer.Serialize(item, options);
 
 #pragma warning disable CS0618 // Type or member is obsolete
-            return serializer.Serialize(item);
+            return GetSerializer(item).Serialize(item);
 #pragma warning restore CS0618 // Type or member is obsolete
         }
 
 
         public IEnumerable<uSyncChange> GetChanges(XElement target, XElement source, SyncSerializerOptions options)
         {
-            if (serializer.IsEmpty(target))
+            if (GetSerializer(target).IsEmpty(target))
                 return GetEmptyFileChange(target, source).AsEnumerableOfOne();
 
-            if (!serializer.IsValid(target))
+            if (!GetSerializer(target).IsValid(target))
                 return uSyncChange.Error("", "Invalid File", target.Name.LocalName).AsEnumerableOfOne();
 
             var changeType = GetChangeType(target, source, options);
@@ -94,14 +101,14 @@ namespace uSync8.Core.Tracking
 
         private ChangeType GetChangeType(XElement target, XElement source, SyncSerializerOptions options)
         {
-            switch (serializer)
+            switch (GetSerializer(target))
             {
                 case ISyncNodeSerializer<TObject> nodeSerializer:
                     return nodeSerializer.IsCurrent(target, source, options);
                 case ISyncOptionsSerializer<TObject> optionSerializer:
                     return optionSerializer.IsCurrent(target, options);
                 default:
-                    return serializer.IsCurrent(target);
+                    return GetSerializer(target).IsCurrent(target);
             }
         }
 
