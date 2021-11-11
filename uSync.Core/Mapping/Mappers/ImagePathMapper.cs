@@ -75,6 +75,11 @@ namespace uSync.Core.Mapping
                         return JsonConvert.SerializeObject(json);
                     }
                 }
+
+                // we always reserialize if we can, because you can get inconsitancies, 
+                // and spaces in the json (especially from the starterkit)
+                // this just ensures it looks the same across sites (where possible).
+                return JsonConvert.SerializeObject(json, Formatting.Indented);
             }
             else
             {
