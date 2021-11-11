@@ -778,8 +778,6 @@ namespace uSync.Core.Serialization.Serializers
         {
             if (options.DeleteItems())
             {
-                logger.LogDebug("Cleaning Tabs Base");
-
                 var tabNode = node?.Element("Tabs");
                 if (tabNode == null) return Enumerable.Empty<uSyncChange>();
 
@@ -827,8 +825,6 @@ namespace uSync.Core.Serialization.Serializers
             var folderNode = node.Element("Info").Element("Folder");
             if (folderNode != null)
             {
-                logger.LogDebug("Cleaing Folder");
-
                 var key = folderNode.Attribute("Key").ValueOrDefault(Guid.Empty);
                 if (key != Guid.Empty)
                 {
@@ -836,7 +832,7 @@ namespace uSync.Core.Serialization.Serializers
                     var folder = FindContainer(key);
                     if (folder == null)
                     {
-                        logger.LogDebug("Folder Key doesn't not match");
+                        logger.LogDebug("Clean folder - Key doesn't not match");
                         FindFolder(key, folderNode.Value);
                     }
                 }
