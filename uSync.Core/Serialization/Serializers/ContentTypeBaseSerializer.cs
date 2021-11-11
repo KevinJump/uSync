@@ -741,7 +741,11 @@ namespace uSync.Core.Serialization.Serializers
             // if we don't have tabs then all unknown types are groups.
             return PropertyGroupType.Group;
         }
+        
 
+        /// <summary>
+        ///  Returns either the alias or an alias made from the name of the tab. 
+        /// </summary>
         private string GetTabAliasFromTabGroup(XElement tabNode)
         {
             if (tabNode == null) return string.Empty;
@@ -783,12 +787,12 @@ namespace uSync.Core.Serialization.Serializers
                     .Select(x => GetTabAliasFromTabGroup(x))
                     .ToList();
 
-                List<string> removals = new List<string>();
+                List<PropertyGroup> removals = new List<PropertyGroup>();
                 foreach (var tab in item.PropertyGroups)
                 {
                     if (!newTabs.InvariantContains(tab.Alias))
                     {
-                        removals.Add(tab.Alias);
+                        removals.Add(tab);
                     }
                 }
 
@@ -796,12 +800,19 @@ namespace uSync.Core.Serialization.Serializers
                 {
                     var changes = new List<uSyncChange>();
 
-                    foreach (var alias in removals)
+                    foreach (var tab in removals)
                     {
-                        logger.LogDebug("Removing {0}", alias);
-                        changes.Add(uSyncChange.Delete($"Tabs/{alias}", alias, alias));
-
-                        item.PropertyGroups.Remove(alias);
+                        if (tab.PropertyTypes.Count > 0)
+                        {
+                            logger.LogWarning("Not removing {tab} as it still has properties {properties}", tab.Alias,
+                                String.Join(",", tab.PropertyTypes.Select(x => x.Name)));
+                        }
+                        else
+                        {
+                            logger.LogDebug("Removing {0}", tab.Alias);
+                            changes.Add(uSyncChange.Delete($"Tabs/{tab.Alias}", tab.Alias, tab.Alias));
+                            item.PropertyGroups.Remove(tab);
+                        }
                     }
 
                     return changes;
