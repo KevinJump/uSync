@@ -18,6 +18,7 @@
 	<files>
 		<file src="readme.txt" target="." />
 		<file src="build\**\*.*" target="buildTransitive" />
-		<file src="App_Plugins\uSync\**\*.*" target="content\App_Plugins\uSync" />
-	</files>
+		<!-- <file src="App_Plugins\uSync\**\*.*" target="content\App_Plugins\uSync" /> -->
+		<file src="..\build-files\App_Plugins\uSync\**\*.*" target="content\App_Plugins\uSync" />
+	</files>	
 </package>
