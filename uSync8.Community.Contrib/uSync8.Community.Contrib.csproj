@@ -68,6 +68,7 @@
     <Compile Include="Mappers\BentoItemMapper.cs" />
     <Compile Include="Mappers\ContentmentContentBlocks.cs" />
     <Compile Include="Mappers\DocTypeGridMapper.cs" />
+    <Compile Include="Mappers\SEOCheckerSocialMapper.cs" />
     <Compile Include="uSyncContrib.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
