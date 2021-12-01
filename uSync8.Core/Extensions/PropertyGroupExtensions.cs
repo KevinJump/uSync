@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 
@@ -274,6 +275,53 @@ namespace uSync8.Core.Extensions
             return "Group";
         }
 
+        internal static IEnumerable<TabInfo> GetTabs(this XElement tabNode)
+        {
+            var defaultSort = 0;
+            var defaultTabType = tabNode.GetDefaultTabType();
+
+            var tabs = new List<TabInfo>();
+
+            var highestSort = 0;
+
+            foreach (var tab in tabNode.Elements("Tab"))
+            {
+                var tabInfo = new TabInfo
+                {
+                    Name = tab.Element("Caption").ValueOrDefault(string.Empty),
+                    SortOrder = tab.Element("SortOrder").ValueOrDefault(defaultSort),
+                    Type = tab.Element("Type").ValueOrDefault(defaultTabType)
+                };
+
+                if (tabInfo.SortOrder > highestSort) highestSort = tabInfo.SortOrder;
+
+                tabInfo.InternalSortOrder = tabInfo.SortOrder;
+
+                tabInfo.Alias = tab.Element("Alias").ValueOrDefault(tabInfo.Name);
+                tabs.Add(tabInfo);
+
+                defaultSort = tabInfo.SortOrder + 1;
+
+            }
+
+            // ensure that any groups within tabs are sorted later than tabs.
+            foreach (var tab in tabs.Where(x => x.Alias.Contains("/")))
+            {
+                tab.InternalSortOrder = highestSort + tab.SortOrder;
+            }
+
+            return tabs.OrderBy(x => x.InternalSortOrder);
+        }
+
+        internal class TabInfo
+        {
+            public string Name { get; set; }
+            public int SortOrder { get; set; }
+            public string Alias { get; set; }
+            public string Type { get; set; }
+
+            public Int64 InternalSortOrder { get; set; }
+        }
 
     }
 }

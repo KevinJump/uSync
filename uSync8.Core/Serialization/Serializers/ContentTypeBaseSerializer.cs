@@ -601,86 +601,80 @@ namespace uSync8.Core.Serialization.Serializers
             var tabNode = node.Element("Tabs");
             if (tabNode == null) return Enumerable.Empty<uSyncChange>();
 
-            var defaultSort = 0;
-            var defaultTabType = tabNode.GetDefaultTabType();
+            var tabs = tabNode.GetTabs();
 
             var changes = new List<uSyncChange>();
 
-            foreach (var tab in tabNode.Elements("Tab"))
+            foreach (var tab in tabs)
             {
                 try
                 {
-                    var tabName = tab.Element("Caption").ValueOrDefault(string.Empty);
-                    var sortOrder = tab.Element("SortOrder").ValueOrDefault(defaultSort);
-                    var aliasOrName = tab.Element("Alias").ValueOrDefault(tabName);
-                    var type = tab.Element("Type").ValueOrDefault(defaultTabType);
-
-                    logger.Debug(serializerType, "> Tab Name: {0} Alias: {1} Sort: {2} Type : [{3}]", tabName, aliasOrName, sortOrder, type);
-
-                    var existing = item.PropertyGroups.FindTab(aliasOrName, tabName);
+                    var existing = item.PropertyGroups.FindTab(tab.Alias, tab.Name);
                     if (existing != null)
                     {
+                        logger.Debug(serializerType, "> Existing Tab : Name: {0} Alias: {1} Sort: {2} Type : [{3}]", tab.Name, tab.Alias, tab.SortOrder, tab.Type);
+
                         if (PropertyGroupExtensions.SupportsTabs)
                         {
                             // because we search case insensitive for alias name it might not 
                             // match exactly when we find it.
-                            if (existing.GetTabAliasOrName() != aliasOrName)
-                                existing.SetGroupAlias(aliasOrName);
+                            if (existing.GetTabAliasOrName() != tab.Alias)
+                                existing.SetGroupAlias(tab.Alias);
                         }
 
-                        if (existing.SortOrder != sortOrder)
+                        if (existing.SortOrder != tab.SortOrder)
                         {
-                            changes.AddUpdate("SortOrder", existing.SortOrder, sortOrder, $"Tabs/{tabName}/SortOrder");
-                            existing.SortOrder = sortOrder;
+                            changes.AddUpdate("SortOrder", existing.SortOrder, tab.SortOrder, $"Tabs/{tab.Name}/SortOrder");
+                            existing.SortOrder = tab.SortOrder;
                         }
 
-                        if (existing.Name != tabName)
+                        if (existing.Name != tab.Name)
                         {
-                            changes.AddUpdate("Name", existing.Name, tabName, $"Tabs/{tabName}/Name");
-                            existing.Name = tabName;
+                            changes.AddUpdate("Name", existing.Name, tab.Name, $"Tabs/{tab.Name}/Name");
+                            existing.Name = tab.Name;
                         }
 
                         var existingType = existing.GetTabPropertyAsString("Type");
-                        if (!string.IsNullOrWhiteSpace(existingType) && existingType != type)
+                        if (!string.IsNullOrWhiteSpace(existingType) && existingType != tab.Type)
                         {
-                            logger.Debug(serializerType, "{alias} tab type changed {from} > {to}", aliasOrName, type, existing);
-                            if (TabClashesWithExisting(item, aliasOrName, type))
+                            logger.Debug(serializerType, "{alias} tab type changed {from} > {to}", tab.Alias, tab.Type, existing);
+                            if (TabClashesWithExisting(item, tab.Alias, tab.Type))
                             {
                                 // v8.17 - you can't just swap from group to tab
                                 //   if the tab is used in other places this can cause a clash
                                 //   so we prefix the alias, and in the second step we clean it
-                                existing.SetGroupAlias(PropertyGroupExtensions.GetTempTabAlias(aliasOrName));
+                                existing.SetGroupAlias(PropertyGroupExtensions.GetTempTabAlias(tab.Alias));
                             }
 
-                            changes.AddUpdate("Type", existingType, type, $"Tabs/{tabName}/Type");
-                            existing.SetGroupType(type);
+                            changes.AddUpdate("Type", existingType, tab.Type, $"Tabs/{tab.Alias}/Type");
+                            existing.SetGroupType(tab.Type);
                         }
                     }
                     else
                     {
-                        var safeAliasName = aliasOrName;
+                        logger.Debug(serializerType, "> New Tab : Name: {0} Alias: {1} Sort: {2} Type : [{3}]", tab.Name, tab.Alias, tab.SortOrder, tab.Type);
+
+                        var safeAliasName = tab.Alias;
 
                         // only do the safe alias thing if we don't support tabs. 
                         if (!PropertyGroupExtensions.SupportsTabs)
-                            safeAliasName = aliasOrName.ToSafeAlias(true);
+                            safeAliasName = tab.Alias.ToSafeAlias(true);
 
-                        if (TabClashesWithExisting(item, safeAliasName, type))
+                        if (TabClashesWithExisting(item, safeAliasName, tab.Type))
                             safeAliasName = PropertyGroupExtensions.GetTempTabAlias(safeAliasName);
 
-                        item.SafeAddPropertyGroup(safeAliasName, tabName);
+                        item.SafeAddPropertyGroup(safeAliasName, tab.Name);
 
-                        changes.AddNew(tabName, tabName, $"Tabs/{tabName}");
-                        var newTab = item.PropertyGroups.FindTab(safeAliasName, tabName);
+                        changes.AddNew(tab.Name, tab.Name, $"Tabs/{tab.Name}");
+                        var newTab = item.PropertyGroups.FindTab(safeAliasName, tab.Name);
                         if (newTab != null)
                         {
-                            newTab.SortOrder = sortOrder;
+                            newTab.SortOrder = tab.SortOrder;
 
                             // set the tab type through relection
-                            newTab.SetGroupType(type);
+                            newTab.SetGroupType(tab.Type);
                         }
                     }
-
-                    defaultSort = sortOrder + 1;
                 }
                 catch(Exception ex)
                 {
