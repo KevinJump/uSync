@@ -658,7 +658,11 @@ namespace uSync8.Core.Serialization.Serializers
                     }
                     else
                     {
-                        var safeAliasName = aliasOrName.ToSafeAlias(true);
+                        var safeAliasName = aliasOrName;
+
+                        // only do the safe alias thing if we don't support tabs. 
+                        if (!PropertyGroupExtensions.SupportsTabs)
+                            safeAliasName = aliasOrName.ToSafeAlias(true);
 
                         if (TabClashesWithExisting(item, safeAliasName, type))
                             safeAliasName = PropertyGroupExtensions.GetTempTabAlias(safeAliasName);
