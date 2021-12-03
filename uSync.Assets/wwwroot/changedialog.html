@@ -1,0 +1,85 @@
+﻿<div ng-controller="uSyncChangeDialogController as vm">
+    <umb-editor-panel>
+        <umb-editor-header name="vm.pageTitle()"
+                           name-locked="true"
+                           hide-alias="true"
+                           hide-icon="true"
+                           hide-description="true">
+        </umb-editor-header>
+        <umb-editor-container>
+            <umb-box>
+                <umb-box-header title="{{vm.item.name}}"
+                                description="{{vm.getTypeName(vm.item.itemType)}} {{vm.item.message}}">
+                </umb-box-header>
+                <umb-box-container>
+                    <umb-box-content>
+                        <div ng-if="vm.item.detailMessage.length > 0" class="usync-item-detail-message">
+                            <div ng-bind-html="vm.item.detailMessage"></div>
+                        </div>
+
+                        <div ng-if="vm.item.change == 'Create'" class="alert alert-success">
+                            <h4>Create</h4>
+                            <p>
+                                This item doesn't currently exist, and will be created on import.
+                            </p>
+                        </div>
+
+                        <div ng-if="vm.item.details.length > 0">
+                            <h5>Detected changes</h5>
+                            <div class="usync-item-details">
+                                <div class="umb-table">
+                                    <div class="umb-table-head">
+                                        <div class="umb-table-row">
+                                            <div class="umb-table-cell"></div>
+                                            <div class="umb-table-cell usync-detail-action-cell">Action</div>
+                                            <div class="umb-table-cell umb-table__name">Item</div>
+                                            <div class="umb-table-cell">Difference</div>
+                                        </div>
+                                    </div>
+                                    <div class="umb-table-body">
+                                        <div ng-repeat="detail in vm.item.details" class="umb-table-row"
+                                             ng-class="{'usync-row-delete': detail.change == 'Delete', 'usync-row-create' : detail.change == 'Create', 'usync-row-warn' : !detail.success }">
+                                            <div class="umb-table-cell">
+                                                <i ng-if="detail.change == 'Create'" class="icon icon-add color-green"></i>
+                                                <i ng-if="detail.change == 'NoChange'" class="icon icon-check color-green"></i>
+                                                <i ng-if="detail.change == 'Update'" class="icon icon-sync color-orange"></i>
+                                                <i ng-if="detail.change == 'Delete'" class="icon icon-wrong color-red"></i>
+                                            </div>
+                                            <div class="umb-table-cell usync-detail-action-cell">
+                                                {{detail.change}}
+                                            </div>
+                                            <div class="umb-table-cell umb-table__name">
+                                                {{detail.name}}
+                                            </div>
+                                            <div class="umb-table-cell usync-diff-value">
+                                                <pre><span ng-repeat="part in detail.diff"><ins ng-if="part.added">{{part.value}}</ins><del ng-if="part.removed">{{part.value}}</del><span ng-if="!part.added && !part.removed">{{part.value}}</span></span></pre>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div ng-if="vm.item.Details.length == 0 && vm.item.Change == 'Update'" class="alert alert-info">
+                            <h4>No Changes detected</h4>
+                            <p>
+                                It is possible that the .config file is different, because it contains extra information
+                                (such as xml comments) but no properties or values on this item will change when the file
+                                is processed.
+                            </p>
+                        </div>
+                    </umb-box-content>
+                </umb-box-container>
+            </umb-box>
+        </umb-editor-container>
+        <umb-editor-footer>
+            <umb-editor-footer-content-right>
+                <umb-button type="button"
+                            button-style="link"
+                            label-key="general_close"
+                            action="vm.close()">
+                </umb-button>
+            </umb-editor-footer-content-right>
+        </umb-editor-footer>
+    </umb-editor-panel>
+</div>

@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<language alias="nl" intName="Dutch" localName="Nederlands" lcid="" culture="nl-NL">
+    <creator>
+        <name>Jumoo</name>
+        <link>http://jumoo.uk</link>
+    </creator>
+    <area alias="treeHeaders">
+        <key alias="sync">Synchronisatie</key>
+        <key alias="usync">uSync</key>
+    </area>
+    <area alias="usync">
+        <key alias="name">uSync 8</key>
+        <key alias="intro">Database elementen van en naar disk</key>
+
+        <key alias="newer">Er is een nieuwere versie van uSync beschikbaar</key>
+        <key alias="noHandlers"><![CDATA[Er zijn geen handlers geladen, daarom kan er niet worden gesynchroniseerd - controleer het uSync8.config bestand. Het kan corrupt of verwijderd zijn 😢]]></key>
+
+        <key alias="import">Importeren</key>
+        <key alias="importforce">Volledige Importeren</key>
+        <key alias="report">Rapporteren</key>
+        <key alias="export">Exporteren</key>
+        <key alias="exportClean">Schoon Exporteren</key>
+        <key alias="apply">Toepassen</key>
+
+        <key alias="details">Details</key>
+
+        <key alias="handlers">Item Handlers</key>
+        <key alias="savesettings">Instellingen opslaan</key>
+
+        <key alias="import-content">Content/Media Importeren</key>
+        <key alias="import-settings">Instellingen Importeren</key>
+        <key alias="import-members">Leden Importeren</key>
+        <key alias="import-users">Gebruikers Importeren</key>
+
+        <key alias="report-content">Content/Media Rapporteren</key>
+        <key alias="report-settings">Instellingen Rapporteren</key>
+        <key alias="report-members">Leden Rapporteren</key>
+        <key alias="report-users">Gebruikers Rapporteren</key>
+
+        <key alias="tableType">Type</key>
+        <key alias="tableName">Naam</key>
+        <key alias="tableChange">Aanpassing</key>
+        <key alias="tableMessage">Bericht</key>
+
+        <key alias="nochange"><![CDATA[<h4>Geen aanpassingen</h4>]]></key>
+			  <key alias="nochange_quote"></key>
+
+    </area>
+    <area alias="dashboardTabs">
+        <key alias="usync">uSync</key>
+    </area>
+</language>

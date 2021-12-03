@@ -1,0 +1,69 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<language alias="en" intName="English (US)" localName="English (US)" lcid="" culture="en-US">
+	<creator>
+		<name>Jumoo</name>
+		<link>http://jumoo.uk</link>
+	</creator>
+	<area alias="treeHeaders">
+		<key alias="sync">Synchronization</key>
+		<key alias="usync">uSync</key>
+	</area>
+	<area alias="usync">
+		<key alias="name">uSync 8</key>
+		<key alias="intro">Database elements to and from disk</key>
+
+		<key alias="newer">There is a newer version of uSync available</key>
+		<key alias="noHandlers"><![CDATA[No Handlers have been loaded, so you can't sync anything - check your uSync8.config file it might be corrupt or missing 😢]]></key>
+
+		<key alias="import">Import</key>
+		<key alias="importforce">Full Import</key>
+		<key alias="report">Report</key>
+		<key alias="export">Export</key>
+		<key alias="exportClean">Clean Export</key>
+		<key alias="apply">Apply</key>
+
+		<key alias="details">Details</key>
+
+		<key alias="handlers">Item Handlers</key>
+		<key alias="savesettings">Save Settings</key>
+
+		<key alias="import-content">Import Content/Media</key>
+		<key alias="import-settings">Import Settings</key>
+		<key alias="import-members">Import Members</key>
+		<key alias="import-users">Import Users</key>
+
+		<key alias="everything">Everything</key>
+		<key alias="everything-description">All Settings, Content, and other things</key>
+
+		<key alias="settings-description">DataTypes, Doctypes and all setttings</key>
+		<key alias="content-description">Content, Media and related items</key>
+		<key alias="members-description">Members and Member groups</key>
+		<key alias="users-description">Users and User groups</key>
+
+		<key alias="report-content">Report Content/Media</key>
+		<key alias="report-settings">Report Settings</key>
+		<key alias="report-members">Report Members</key>
+		<key alias="report-users">Report Users</key>
+
+		<key alias="tableType">Type</key>
+		<key alias="tableName">Name</key>
+		<key alias="tableChange">Change</key>
+		<key alias="tableMessage">Message</key>
+
+		<key alias="nochange"><![CDATA[<h4>No Changes</h4>]]></key>
+		<key alias="nochange_quote"><![CDATA[True life is lived when tiny changes occur.]]></key>
+
+		<!-- warning messages -->
+		<key alias="oldformat">
+			<![CDATA[This sync folder is from an older version of uSync. While the sync will work, you will get quicker and cleaner results with a more recent export. 
+		  <a href="https://github.com/KevinJump/uSync8/blob/v8/8.7-main/Changes/format.md" target="_blank"><i class="icon icon-info"></i>info</a>]]>
+		</key>
+		<key alias="createWarning"><![CDATA[One or more handlers are set to create only. [%0%]. Changes within items may not be synchronized]]></key>
+
+		<key alias="forms"><![CDATA[Are you using Umbraco forms? - you can now sync forms and settings with <a href="http://jumoo.co.uk/usync/forms" target="_blank">uSync.FormsEdition</a>]]></key>
+
+	</area>
+	<area alias="dashboardTabs">
+		<key alias="usync">uSync</key>
+	</area>
+</language>

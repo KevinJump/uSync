@@ -27,7 +27,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{35F7A5CF
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.AutoTemplates", "uSync.AutoTemplates\uSync.AutoTemplates.csproj", "{4B177C9F-9AD1-43E5-B3C9-705425244DF9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "uSync.Tests", "uSync.Tests\uSync.Tests.csproj", "{9D169F84-1CB8-461E-B5F4-3C0291D90B3D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.Tests", "uSync.Tests\uSync.Tests.csproj", "{9D169F84-1CB8-461E-B5F4-3C0291D90B3D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "uSync.Assets", "uSync.Assets\uSync.Assets.csproj", "{317B3164-587A-48BC-8867-F08FFEB686F3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -71,6 +73,10 @@ Global
 		{9D169F84-1CB8-461E-B5F4-3C0291D90B3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9D169F84-1CB8-461E-B5F4-3C0291D90B3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9D169F84-1CB8-461E-B5F4-3C0291D90B3D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{317B3164-587A-48BC-8867-F08FFEB686F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{317B3164-587A-48BC-8867-F08FFEB686F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{317B3164-587A-48BC-8867-F08FFEB686F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{317B3164-587A-48BC-8867-F08FFEB686F3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

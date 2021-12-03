@@ -1,0 +1,43 @@
+﻿<div>
+    <div class="flex items-center flex-column">
+        <h3 class="usync-action-message">{{vm.status.message}}</h3>
+    </div>
+    <div class="flex flex-wrap justify-center items-center">
+        <div ng-repeat="handler in vm.status.handlers"
+             class="text-center usync-handler-icon"
+             ng-class="{'usync-pending' : handler.status == 0, 'usync-progress' : handler.status == 1, 'usync-complete' : handler.status == 2}"
+             ng-click="vm.setFilter(handler.itemType)">
+            <i class="icon {{handler.icon}}"></i>
+            <div class="usync-handler-name">{{handler.name}}</div>
+            <div ng-if="!vm.hideLabels">
+                <div class="handler-badge badge type-complete"
+                     ng-class="{'badge-error' : handler.inError}"
+                     ng-if="handler.changes > 0" title="{{handler.changes}} changes">{{handler.changes}}</div>
+                <div class="handler-badge type-complete" ng-if="handler.changes == 0 && handler.status == 2">
+                    <i class="icon icon-check color-green" ng-if="!handler.inError"></i>
+                    <i class="icon icon-flag-alt color-deep-orange" ng-if="handler.inError"></i>
+                </div>
+            </div>
+            <div class="progress usync-not-animated" ng-if="handler.status == 0">
+                <div class="bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <div class="progress usync-not-animated" ng-if="handler.status == 1">
+                <div class="bar" role="progressbar" style="width: {{vm.calcPercentage(vm.update)}}%;" aria-valuenow="{{vm.calcPercentage(vm.update)}}" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <div class="progress usync-not-animated" ng-if="handler.status == 2" ng-class="{'usync-handler-errors' : handler.inError, 'usync-complete-changes' : handler.changes > 0}">
+                <div class="bar" role="progressbar" style="width: 100%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+
+        </div>
+    </div>
+    <div class="flex items-center flex-column">
+        <!--
+        <div class="progress usync-not-animated" style="height: 3px; width: 160px">
+            <div class="bar" role="progressbar" style="width: {{vm.calcPercentage(vm.update)}}%;" aria-valuenow="{{vm.calcPercentage(vm.update)}}" aria-valuemin="0" aria-valuemax="100"></div>
+        </div> -->
+        <div class="usync-action-message-step">{{vm.update.message}}</div>
+    </div>
+    <div class="progress usync-main-progress" style="height: 1px;">
+        <div class="bar" role="progressbar" style="width: {{vm.calcPercentage(vm.status)}}%;" aria-valuenow="{{vm.calcPercentage(vm.status)}}" aria-valuemin="0" aria-valuemax="100"></div>
+    </div>
+</div>

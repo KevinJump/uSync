@@ -29,6 +29,7 @@ namespace uSync.BackOffice.Controllers.Trees
         {
             var result = base.CreateRootNode(queryStrings);
 
+            // result.Value.RoutePath = $"/_content/uSync.Assets/backoffice/usync/dashboard.html";
             result.Value.RoutePath = $"{this.SectionAlias}/{uSync.Trees.uSync}/dashboard";
             result.Value.Icon = "icon-infinity";
             result.Value.HasChildren = false;
