@@ -12,7 +12,14 @@ namespace uSync.Assets
     {
         public static IUmbracoBuilder AdduSyncFiles(this IUmbracoBuilder builder)
         {
-            builder.ManifestFilters().Append<uSyncManifestFilter>();
+
+            // todo - we might need to confirm we haven't already added this 
+            // (e.g if some uses the AdduSyncFiles() then the composer fires)
+            // 
+            // given this is just assets maybe we don't offer the Add Method??
+            //
+
+            // builder.ManifestFilters().Append<uSyncManifestFilter>();
             return builder;
         }
     }
@@ -21,7 +28,9 @@ namespace uSync.Assets
     {
         public void Compose(IUmbracoBuilder builder)
         {
-            builder.AdduSyncFiles();
+            builder.ManifestFilters().Append<uSyncManifestFilter>();
+
+            // builder.AdduSyncFiles();
         }
     }
 }
