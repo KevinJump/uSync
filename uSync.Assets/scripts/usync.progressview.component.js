@@ -2,7 +2,7 @@
     'use strict';
 
     var uSyncProgressViewComponent = {
-        templateUrl: '/_content/uSync.Assets/components/usync.progressview.html',
+        templateUrl: Umbraco.Sys.ServerVariables.application.applicationPath + 'App_Plugins/uSync/components/usync.progressview.html',
         bindings: {
             status: '<',
             update: '<',

@@ -10,7 +10,7 @@
             <uSyncPackageContentFiles Include="$(uSyncPackageContentFilesPath)" />
         </ItemGroup>
         <Message Text="Copying uSync files from package -> $(uSyncPluginFolder) - #@(uSyncPackageContentFiles->Count()) files"  Importance="high" />
-		<Warning Text="No uSync Package files found in $(uSyncPackageContentFiles)" Condition="@(uSyncPackageContentFiles->Count()) == 0" />
+		<Warning Text="No uSync Package files found in $(uSyncPackageContentFilesPath)" Condition="@(uSyncPackageContentFiles->Count()) == 0" />
         <Copy
             SourceFiles="@(uSyncPackageContentFiles)"
             DestinationFiles="@(uSyncPackageContentFiles->'$(MSBuildProjectDirectory)\App_Plugins\uSync\%(RecursiveDir)%(Filename)%(Extension)')"

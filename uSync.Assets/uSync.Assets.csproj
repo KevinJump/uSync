@@ -1,9 +1,12 @@
-<Project Sdk="Microsoft.NET.Sdk.Razor">
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
 	<PropertyGroup>
 		<TargetFramework>net5.0</TargetFramework>
-
-		<ContentTargetFolders>.</ContentTargetFolders>
+		
+		<Title>uSync.Assets</Title>
+		<Description>uSync backoffice asset files</Description>
+		
+		<StaticWebAssetBasePath>App_Plugins/uSync</StaticWebAssetBasePath>
 
 	</PropertyGroup>
 
@@ -22,11 +25,12 @@
 		</Content>
 		<None Include="build\**\*.*">
 			<Pack>true</Pack>
-			<PackagePath>build</PackagePath>
+			<PackagePath>buildTransitive</PackagePath>
 		</None>
 	</ItemGroup>
 
-
-
+	<ItemGroup>
+	  <None Include="wwwroot\backoffice\usync\dashboard.html" />
+	</ItemGroup>
 
 </Project>

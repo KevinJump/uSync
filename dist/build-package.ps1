@@ -54,6 +54,7 @@ dotnet restore ..
 
 ""; "##### Packaging"; "----------------------------------" ; ""
 
+
 dotnet pack ..\uSync.Core\uSync.Core.csproj --no-restore -c $env -o $outFolder /p:ContinuousIntegrationBuild=true,version=$fullVersion 
 dotnet pack ..\uSync.Community.Contrib\uSync.Community.Contrib.csproj --no-restore -c $env -o $outFolder /p:ContinuousIntegrationBuild=true,version=$fullversion  
 dotnet pack ..\uSync.Community.DataTypeSerializers\uSync.Community.DataTypeSerializers.csproj --no-restore -c $env -o $outFolder /p:ContinuousIntegrationBuild=true,version=$fullversion  
@@ -65,10 +66,11 @@ dotnet pack ..\uSync\uSync.csproj --no-restore -c $env -o $outFolder /p:Continuo
 # .\nuget pack "..\uSync\uSync.nuspec" -version $fullVersion -OutputDirectory $outFolder
 
 
-rm ..\build-files\App_Plugins\ -Recurse
+# rm ..\build-files\App_Plugins\ -Recurse
 &gulp minify --release $fullVersion
 
-.\nuget pack "..\uSync.BackOffice.Assets\uSync.BackOffice.StaticAssets.nuspec" -version $fullVersion -OutputDirectory $outFolder
+dotnet pack ..\uSync.Assets\uSync.Assets.csproj --no-restore -c $env -o $outFolder /p:ContinuousIntegrationBuild=true,version=$fullVersion 
+# .\nuget pack "..\uSync.BackOffice.Assets\uSync.BackOffice.StaticAssets.nuspec" -version $fullVersion -OutputDirectory $outFolder
 
 ""; "##### Copying to LocalGit folder"; "----------------------------------" ; ""
 XCOPY "$outFolder\*.nupkg" "C:\Source\localgit" /Q /Y 

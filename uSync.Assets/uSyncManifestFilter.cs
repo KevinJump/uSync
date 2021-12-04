@@ -14,11 +14,11 @@ namespace uSync.Assets
                 BundleOptions = BundleOptions.Independent,
                 Scripts = new string[]
                 {
-                    "/_content/uSync.Assets/usync.9.2.0.min.js"
+                    "/App_Plugins/uSync/usync.9.2.0.min.js"
                 },
                 Stylesheets = new string[]
                 {
-                    "/_content/uSync.Assets/usync.9.2.0.min.css"
+                    "/App_Plugins/uSync/usync.9.2.0.min.css"
                 }
             };
 

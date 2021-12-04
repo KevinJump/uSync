@@ -1,9 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net5.0</TargetFramework>
-		
-		<ContentTargetFolders>.</ContentTargetFolders>
+		<TargetFramework>net5.0</TargetFramework>	
 
 		<Product>uSync.BackOffice.StaticAssets</Product>
 		<PackageId>uSync.BackOffice.StaticAssets</PackageId>

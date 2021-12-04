@@ -412,7 +412,7 @@
             var options = {
                 item: item,
                 title: 'uSync Change',
-                view: "'/_content/uSync.Assets/changeDialog.html",
+                view: Umbraco.Sys.ServerVariables.umbracoSettings.appPluginsPath + '/uSync/changeDialog.html',
                 close: function () {
                     editorService.close();
                 }

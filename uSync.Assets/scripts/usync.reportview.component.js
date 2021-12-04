@@ -2,7 +2,7 @@
     'use strict';
 
     var uSyncReportViewComponent = {
-        templateUrl: '/_content/uSync.Assets/components/usync.reportview.html',
+        templateUrl: Umbraco.Sys.ServerVariables.application.applicationPath + 'App_Plugins/uSync/components/usync.reportview.html',
         bindings: {
             action: '<',
             results: '<',

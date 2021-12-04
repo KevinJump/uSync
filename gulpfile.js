@@ -7,8 +7,6 @@ var sourcemaps = require('gulp-sourcemaps');
 const cleanCSS = require('gulp-clean-css');
 const transformManifest = require('./gulp-transformManifest');
 
-const version = "9.2.0";
-
 const scriptSource = 'uSync.Assets/scripts';
 const styleSource = 'uSync.Assets/css';
 
@@ -18,12 +16,48 @@ const pluginSource = 'uSync.Assets/App_Plugins/';
 const destination = 'uSync.Site/App_Plugins/';
 const minDest = 'uSync.Assets/wwwroot';
 
+// fetch command line arguments
+const arg = (argList => {
+
+    let arg = {}, a, opt, thisOpt, curOpt;
+    for (a = 0; a < argList.length; a++) {
+
+        thisOpt = argList[a].trim();
+        opt = thisOpt.replace(/^\-+/, '');
+
+        if (opt === thisOpt) {
+
+            // argument value
+            if (curOpt) arg[curOpt] = opt;
+            curOpt = null;
+
+        }
+        else {
+
+            // argument name
+            curOpt = opt;
+            arg[curOpt] = true;
+
+        }
+
+    }
+
+    return arg;
+
+})(process.argv);
+
 function copy(path, baseFolder) {
     return src(path, { base: baseFolder })
         .pipe(dest(destination));
 }
 
-function minifyJs(path) {
+
+function copy(path, baseFolder) {
+    return src(path, { base: baseFolder })
+        .pipe(dest(destination));
+}
+
+function minifyJs(path, version) {
 
     return src(path, { base: path })
         .pipe(sourcemaps.init())
@@ -34,7 +68,7 @@ function minifyJs(path) {
 }
 
 
-function minifyCss(path) {
+function minifyCss(path, version) {
     return src(path, { base: path })
         .pipe(cleanCSS({ compatibility: 'ie8'}))
         .pipe(concat('usync.' + version + '.min.css'))
@@ -64,19 +98,20 @@ function updateManifest(manifest) {
 }
 */
 
-function doMinify(cb)
+function doMinify(version, cb)
 {
     let jsfiles = scriptSource + '**/*.js';
     let cssFiles = styleSource + '**/*.css';
 
-    minifyJs(jsfiles);
-    minifyCss(cssFiles);
+    minifyJs(jsfiles, version);
+    minifyCss(cssFiles, version);
 }
 
 ////////////
 exports.default = function() 
 {
-        let source = pluginSource + '**/*';
+    let source = pluginSource + '**/*';
+    let version = "9.2.0";
 
         // let jsfiles = scriptSource + '**/*.js';
         // let cssFiles = styleSource + '**/*.css';
@@ -85,16 +120,20 @@ exports.default = function()
             .on('change', function (path, stats) {
                 console.log(time(), path, 'changed');
                 copy(path, pluginSource);
-                doMinify();
+                doMinify(version);
             })
             .on('add', function (path, stats) {
                 console.log(time(), path, 'processed');
                 copy(path, pluginSource);
-                doMinify();
+                doMinify(version);
             });
 }
 
 exports.minify = function (cb) {
-    doMinify();
+
+    // var version = arg.release;
+    var version = "9.2.0"; 
+
+    doMinify(version);
     cb();
 };
