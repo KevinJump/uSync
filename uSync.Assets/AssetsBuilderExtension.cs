@@ -29,8 +29,6 @@ namespace uSync.Assets
         public void Compose(IUmbracoBuilder builder)
         {
             builder.ManifestFilters().Append<uSyncManifestFilter>();
-
-            // builder.AdduSyncFiles();
         }
     }
 }
