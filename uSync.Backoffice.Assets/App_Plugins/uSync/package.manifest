@@ -1,4 +1,6 @@
 {
+  "name": "uSync",
+  "version": "9.0.5",
   "javascript": [
 
     "~/App_Plugins/uSync/usync_903.js",
