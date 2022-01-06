@@ -4,9 +4,11 @@ using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
+using Umbraco.Core.Models;
 using Umbraco.Core.Services;
 
 using uSync8.ContentEdition.Mapping;
+using uSync8.Core;
 using uSync8.Core.Dependency;
 
 namespace uSync8.Community.Contrib.Mappers
@@ -87,7 +89,7 @@ namespace uSync8.Community.Contrib.Mappers
                     var value = item[property.Alias];
                     if (value != null)
                     {
-                        var mappedVal = mapperCollection.Value.GetExportValue(value, property.PropertyEditorAlias).ToString();
+                        var mappedVal = SyncValueMapperFactory.GetExportValue(value, property.PropertyEditorAlias).ToString();
                         item[property.Alias] = mappedVal.GetJsonTokenValue().ExpandAllJsonInToken();
                     }
                 }
