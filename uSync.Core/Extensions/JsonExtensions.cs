@@ -35,5 +35,46 @@ namespace uSync.Core
 
             return value;
         }
+
+        /// <summary>
+        ///  Will recurse through a JToken value, and expand and child values that may contain escaped 
+        ///  JSON (in the GRID all the json is true).
+        /// </summary>
+        public static JToken ExpandAllJsonInToken(this JToken token)
+        {
+            if (token == null) return null;
+
+            switch (token)
+            {
+                case JArray jArray:
+                    for(int i = 0; i < jArray.Count; i++)
+                    {
+                        jArray[i] = jArray[i].ExpandAllJsonInToken();
+                    }
+                    break;
+                case JObject jObject:
+                    foreach(var property in jObject.Properties())
+                    {
+                        jObject[property.Name] = jObject[property.Name].ExpandAllJsonInToken();
+                    }
+                    break;
+                default:
+                    var stringValue = token.ToString();
+                    if (stringValue.DetectIsJson())
+                    {
+                        try
+                        {
+                            return JToken.Parse(stringValue).ExpandAllJsonInToken();
+                        }
+                        catch
+                        {
+                            return stringValue;
+                        }
+                    }
+                    break;
+            }
+
+            return token.ToString().GetJsonTokenValue();
+        }
     }
 }

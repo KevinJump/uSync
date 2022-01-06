@@ -5,8 +5,10 @@ using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
+using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Services;
 
+using uSync.Core;
 using uSync.Core.Dependency;
 using uSync.Core.Mapping;
 
@@ -71,11 +73,33 @@ namespace uSync8.Community.Contrib.Mappers
             var docValue = jsonValue.Value<JObject>("value");
             if (docValue == null) return value.ToString();
 
-            GetExportProperties(docValue, docType);
+            // the doctypegrid editor wants the values in "real" json
+            // as opposed to quite a few of these properties that 
+            // have it in 'escaped' json. so slightly diffrent 
+            // then a nested content, but not by much.
+            GetExportJsonValues(docValue, docType);
 
             return JsonConvert.SerializeObject(jsonValue, Formatting.Indented);
         }
 
+        private JObject GetExportJsonValues(JObject item, IContentType docType)
+        {
+            foreach (var property in docType.CompositionPropertyTypes)
+            {
+                if (item.ContainsKey(property.Alias))
+                {
+                    var value = item[property.Alias];
+                    if (value != null)
+                    {
+                        var mappedVal = mapperCollection.Value.GetExportValue(value, property.PropertyEditorAlias).ToString();
+                        item[property.Alias] = mappedVal.GetJsonTokenValue().ExpandAllJsonInToken();
+                    }
+                }
+            }
+
+            return item;
+        }
+          
         public override IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)
         {
             var jsonValue = GetJsonValue(value);
