@@ -1,0 +1,47 @@
+﻿@using Umbraco.Cms.Web.Common.PublishedModels
+@using Umbraco.Extensions
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<Product>
+@{
+    Layout = "master.cshtml";
+    var defaultCurrency = Model.Parent<Products>().DefaultCurrency;
+}
+<!-- for the section we want to show the shop header -->
+@Html.Partial("~/Views/Partials/SectionHeader.cshtml", Model.Parent)
+
+<section class="section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="product-image-container">
+                    <img class="product-image" src="@Model.Photos?.Url()" alt="@Model.ProductName image" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h1>@Model.ProductName</h1>
+                <div class="product-price">@defaultCurrency @Model.Price.ToString("F")</div>
+                <div class="product-teaser">@Model.Description</div>
+                <div class="product-button">
+                    <button class="button button--border--solid">Buy</button>
+                </div>
+                <div class="product-advantages">
+                    @if (Model.Features != null)
+                    {
+                        foreach (var feature in Model.Features)
+                        {
+                            <div class="product-advantage">
+                                <h4>@feature.FeatureName</h4>
+                                <h5>@feature.FeatureDetails</h5>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="section section--sand">
+    <div class="container">
+        <!-- todo: Check if grid is empty via a property value converter -->
+        @Html.GetGridHtml(Model, "bodyText", "bootstrap3-fluid")
+    </div>
+</section>

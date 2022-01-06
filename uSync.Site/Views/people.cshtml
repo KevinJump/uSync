@@ -1,0 +1,57 @@
+﻿@using Umbraco.Cms.Web.Common.PublishedModels;
+@using Umbraco.Extensions
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<People>
+@{
+    Layout = "master.cshtml";
+}
+@{
+    void SocialLink(string content, string service)
+    {
+        if (!string.IsNullOrEmpty(content))
+        {
+            ; //semicolon needed otherwise <a> cannot be resolved
+            <a class="employee-grid__item__contact-item" href="http://@(service).com/@content">@service</a>
+        }
+    }
+}
+
+@Html.Partial("~/Views/Partials/SectionHeader.cshtml")
+
+<section class="section">
+
+    <div class="container">
+        <!-- todo: implement department filter -->
+        <!--
+        <nav class="nav-bar nav-bar--center nav-bar--air-bottom">
+            <a class="nav-link nav-link--black nav-link--active" href="">All</a>
+            <a class="nav-link nav-link--black" href="">Marketing</a>
+            <a class="nav-link nav-link--black" href="">Package People</a>
+            <a class="nav-link nav-link--black" href="">Designers</a>
+            <a class="nav-link nav-link--black" href="">Other</a>
+        </nav>
+        -->
+        <div class="employee-grid">
+            @foreach (Person person in Model.Children<Person>())
+            {
+
+                <div class="employee-grid__item">
+                    <div class="employee-grid__item__image" style="background-image: url('@person.Photo?.Url()')"></div>
+                    <div class="employee-grid__item__details">
+                        <h3 class="employee-grid__item__name">@person.Name</h3>
+                        @if (!string.IsNullOrEmpty(person.Email))
+                        {
+                            <a href="mailto:@person.Email" class="employee-grid__item__email">@person.Email</a>
+                        }
+                        <div class="employee-grid__item__contact">
+                            @{ SocialLink(person.FacebookUsername, "Facebook"); }
+                            @{ SocialLink(person.TwitterUsername, "Twitter"); }
+                            @{ SocialLink(person.LinkedInUsername, "LinkedIn"); }
+                            @{ SocialLink(person.InstagramUsername, "Instagram"); }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+</section>

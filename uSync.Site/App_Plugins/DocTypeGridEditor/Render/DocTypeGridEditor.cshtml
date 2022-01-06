@@ -1,0 +1,4 @@
+﻿@using Our.Umbraco.DocTypeGridEditor.Helpers
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<dynamic>
+@inject DocTypeGridEditorHelper DocTypeGridEditorHelper
+@DocTypeGridEditorHelper.RenderDocTypeGridEditorItem(Component, Html, Model)

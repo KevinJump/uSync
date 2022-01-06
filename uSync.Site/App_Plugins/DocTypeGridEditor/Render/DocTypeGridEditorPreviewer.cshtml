@@ -1,0 +1,4 @@
+﻿@using Our.Umbraco.DocTypeGridEditor.Helpers
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<Our.Umbraco.DocTypeGridEditor.Models.PreviewModel>
+@inject DocTypeGridEditorHelper DocTypeGridEditorHelper
+@DocTypeGridEditorHelper.RenderDocTypeGridEditorItem(Component, Html, Model.Item, Model.EditorAlias, Model.ViewPath, Model.PreviewViewPath, true)

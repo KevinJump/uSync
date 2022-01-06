@@ -1,0 +1,29 @@
+﻿{
+  "gridEditors": [
+    {
+      "name": "Doc Type",
+      "alias": "docType",
+      "view": "/App_Plugins/DocTypeGridEditor/Views/DocTypeGridEditor.html",
+      "render": "/App_Plugins/DocTypeGridEditor/Render/DocTypeGridEditor.cshtml",
+      "icon": "icon-science",
+      "config": {
+        "allowedDocTypes": [],
+        "nameTemplate": "",
+        "enablePreview": true,
+        "viewPath": "/Views/Partials/grid/editors/DocTypeGridEditor/",
+        "previewViewPath": "/Views/Partials/grid/editors/DocTypeGridEditor/Previews/",
+        "previewCssFilePath": "",
+        "previewJsFilePath": ""
+      }
+    }
+  ],
+  "javascript": [
+    "~/App_Plugins/DocTypeGridEditor/Js/doctypegrideditor.resources.js",
+    "~/App_Plugins/DocTypeGridEditor/Js/doctypegrideditor.services.js",
+    "~/App_Plugins/DocTypeGridEditor/Js/doctypegrideditor.controllers.js",
+    "~/App_Plugins/DocTypeGridEditor/Js/doctypegrideditor.directives.js"
+  ],
+  "css": [
+    "~/App_Plugins/DocTypeGridEditor/Css/doctypegrideditor.css"
+  ]
+}

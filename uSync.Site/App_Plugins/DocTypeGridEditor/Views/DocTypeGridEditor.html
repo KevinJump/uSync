@@ -1,0 +1,19 @@
+<div ng-controller="Our.Umbraco.DocTypeGridEditor.GridEditors.DocTypeGridEditor">
+    <div ng-click="setDocType()">
+        <div ng-if="!preview"
+             class="umb-editor-placeholder dtge-editor-placeholder">
+            <i class="icon {{icon}}"></i>
+            <div class="help-text">
+                {{title}}
+            </div>
+            <div class="description-text" ng-if="description">
+                <small>{{description}}</small>
+            </div>
+        </div>
+        <div ng-if="preview"
+             class="dtge-editor-preview-container"
+             dtge-bind-html-compile="preview"
+             prevent-default>
+        </div>
+    </div>
+</div>
