@@ -26,11 +26,11 @@ namespace uSync8.Community.DataTypeSerializers
             if (udi != null && udi is GuidUdi guidUdi)
             {
                 var item = entityService.Get(guidUdi.Guid);
-                var type = Umbraco.Cms.Core.Models.ObjectTypes.GetUdiType(item.NodeObjectType);
-
                 if (item != null)
+                {
+                    var type = Umbraco.Cms.Core.Models.ObjectTypes.GetUdiType(item.NodeObjectType);
                     return type + ":" + GetItemPath(item);
-
+                }
             }
             return string.Empty;
         }
