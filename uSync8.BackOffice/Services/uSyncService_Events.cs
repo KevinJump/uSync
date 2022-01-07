@@ -141,7 +141,8 @@ namespace uSync8.BackOffice
                 eventHandler?.Invoke(e);
 
                 // set node back to whatever was set in the event ? 
-                node = e.Item;
+                if (e.Item != null)
+                    node = e.Item;
 
                 return !e.Cancel;
             }
