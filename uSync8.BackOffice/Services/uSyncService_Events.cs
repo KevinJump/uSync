@@ -139,6 +139,10 @@ namespace uSync8.BackOffice
             {
                 var e = new uSyncItemEventArgs<XElement> { Item = node };
                 eventHandler?.Invoke(e);
+
+                // set node back to whatever was set in the event ? 
+                node = e.Item;
+
                 return !e.Cancel;
             }
 
