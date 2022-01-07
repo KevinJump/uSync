@@ -1,4 +1,6 @@
 {
+  "name": "uSync",
+  "version":  "8",
   "javascript": [
 
     "~/App_Plugins/uSync8/usync_8_10.js",
