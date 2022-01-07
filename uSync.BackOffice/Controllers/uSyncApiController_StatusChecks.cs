@@ -191,7 +191,7 @@ namespace uSync.BackOffice.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost]
-        public uSyncWarningMessage GetSyncWarnings(HandlerActions action, uSyncOptions options)
+        public uSyncWarningMessage GetSyncWarnings([FromQuery]HandlerActions action, uSyncOptions options)
         {
             var handlers = handlerFactory.GetValidHandlers(new SyncHandlerOptions
             {

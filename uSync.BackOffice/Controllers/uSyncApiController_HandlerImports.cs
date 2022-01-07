@@ -20,7 +20,7 @@ namespace uSync.BackOffice.Controllers
         ///  Get the list of handler aliases to use for any give action
         /// </summary>
         [HttpPost]
-        public IEnumerable<SyncHandlerView> GetActionHandlers(HandlerActions action, uSyncOptions options)
+        public IEnumerable<SyncHandlerView> GetActionHandlers([FromQuery]HandlerActions action, uSyncOptions options)
         {
             var handlerGroup = string.IsNullOrWhiteSpace(options.Group)
                 ? uSyncConfig.Settings.UIEnabledGroups
@@ -135,7 +135,7 @@ namespace uSync.BackOffice.Controllers
         /// </summary>
         /// <param name="action"></param>
         [HttpPost]
-        public void StartProcess(HandlerActions action)
+        public void StartProcess([FromQuery]HandlerActions action)
             => uSyncService.StartBulkProcess(action);
 
         /// <summary>
@@ -144,7 +144,7 @@ namespace uSync.BackOffice.Controllers
         /// <param name="action"></param>
         /// <param name="actions"></param>
         [HttpPost]
-        public void FinishProcess(HandlerActions action, IEnumerable<uSyncAction> actions)
+        public void FinishProcess([FromQuery]HandlerActions action, IEnumerable<uSyncAction> actions)
             => uSyncService.FinishBulkProcess(action, actions);
     }
 }
