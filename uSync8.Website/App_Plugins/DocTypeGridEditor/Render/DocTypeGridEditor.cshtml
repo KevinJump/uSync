@@ -1,0 +1,30 @@
+﻿@using System.Web.Mvc
+@using System.Web.Mvc.Html
+@using Microsoft.CSharp.RuntimeBinder
+@using Our.Umbraco.DocTypeGridEditor.Helpers
+@using Our.Umbraco.DocTypeGridEditor.Web.Extensions
+@inherits Umbraco.Web.Mvc.UmbracoViewPage<dynamic>
+@if (Model.value != null)
+{
+    string id = Model.value.id.ToString();
+    string editorAlias = Model.editor.alias.ToString();
+    string contentTypeAlias = "";
+    string value = Model.value.value.ToString();
+    string viewPath = Model.editor.config.viewPath.ToString();
+
+    try
+    {
+        contentTypeAlias = Model.value.dtgeContentTypeAlias.ToString();
+    }
+    catch (RuntimeBinderException)
+    {
+        contentTypeAlias = Model.value.docType.ToString();
+    }
+
+    if (contentTypeAlias != "")
+    {
+        var content = DocTypeGridEditorHelper.ConvertValueToContent(id, contentTypeAlias, value);
+
+        @Html.RenderDocTypeGridEditorItem(content, editorAlias, viewPath)
+    }
+}

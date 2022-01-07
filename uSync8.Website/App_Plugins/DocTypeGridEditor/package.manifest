@@ -1,0 +1,29 @@
+﻿{
+  "gridEditors": [
+    {
+      "name": "Doc Type",
+      "alias": "docType",
+      "view": "/App_Plugins/DocTypeGridEditor/Views/doctypegrideditor.html",
+      "render": "/App_Plugins/DocTypeGridEditor/Render/DocTypeGridEditor.cshtml",
+      "icon": "icon-item-arrangement",
+      "config": {
+        "allowedDocTypes": [],
+        "nameTemplate": "",
+        "enablePreview": false,
+        "viewPath": "/Views/Partials/Grid/Editors/DocTypeGridEditor/",
+        "previewViewPath": "/Views/Partials/Grid/Editors/DocTypeGridEditor/Previews/",
+        "previewCssFilePath": "",
+        "previewJsFilePath": ""
+      }
+    }
+  ],
+  "javascript": [
+    "~/App_Plugins/DocTypeGridEditor/Js/doctypegrideditor.resources.js",
+    "~/App_Plugins/DocTypeGridEditor/Js/doctypegrideditor.services.js",
+    "~/App_Plugins/DocTypeGridEditor/Js/doctypegrideditor.controllers.js",
+    "~/App_Plugins/DocTypeGridEditor/Js/doctypegrideditor.directives.js"
+  ],
+  "css": [
+    "~/App_Plugins/DocTypeGridEditor/Css/doctypegrideditor.css"
+  ]
+}

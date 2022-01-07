@@ -1,0 +1,120 @@
+<div class="dtge-dialog" ng-controller="Our.Umbraco.DocTypeGridEditor.Dialogs.DocTypeGridEditorDialog as vm">
+
+    <form name="dtgeForm" val-form-manager>
+    <umb-editor-view>
+        <umb-editor-header name="dialogMode == 'selectDocType' ? model.titles.selectContentType : dialogMode == 'selectBlueprint' ? model.titles.selectBlueprint : dialogMode == 'edit' ? model.titles.editItem : model.titles.insertItem"
+                           name-locked="true"
+                           hide-alias="true"
+                           hide-icon="true"
+                           hide-description="true">
+        </umb-editor-header>
+
+        <umb-editor-container>
+            <umb-load-indicator ng-if="vm.loading">
+            </umb-load-indicator>
+            <div ng-if="!vm.loading" ng-switch="dialogMode">
+                <div ng-switch-when="selectDocType">
+                    <umb-box>
+                        <umb-box-content>
+                            <p class="abstract" ng-if="docTypes && docTypes.length === 0">
+                                <localize key="create_noDocumentTypes" />
+                            </p>
+
+                            <div class="form-search" ng-hide="docTypes.length < 0 && model.filter === false" style="margin-bottom: 15px;">
+                                <i class="icon-search"></i>
+                                <input type="text"
+                                       ng-model="searchTerm"
+                                       class="umb-search-field search-query input-block-level -full-width-input"
+                                       localize="placeholder"
+                                       placeholder="@placeholders_filter"
+                                       umb-auto-focus
+                                       no-dirty-check />
+                            </div>
+
+                            <ul class="umb-actions umb-actions-child" ng-if="docTypes.length > 0 && !model.showDocTypeSelectAsGrid">
+
+                                <li class="umb-action" ng-repeat="docType in docTypes | orderBy:'name' | filter:searchTerm">
+                                    <a class="umb-action-link" ng-click="createOrSelectBlueprintIfAny(docType)">
+                                        <i class="large icon {{docType.icon}}"></i>
+                                        <span class="menu-label">
+                                            {{docType.name}}
+                                            <small>
+                                                {{docType.description}}
+                                            </small>
+                                        </span>
+                                    </a>
+                                </li>
+
+                            </ul>
+
+                            <ul class="umb-card-grid -three-in-row" ng-if="docTypes.length > 0 && model.showDocTypeSelectAsGrid">
+                                <li ng-repeat="docType in docTypes | orderBy:'name' | filter:searchTerm"
+                                    ng-click="createOrSelectBlueprintIfAny(docType)">
+                                    <a class="umb-card-grid-item" href="" title="{{ docType.name }}">
+                                        <span>
+                                            <i class="{{ docType.icon }}"></i>
+                                            {{ docType.name }}
+                                        </span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </umb-box-content>
+                    </umb-box>
+                </div>
+
+
+                <div ng-switch-when="selectBlueprint">
+                    <umb-box>
+                        <umb-box-content>
+                            <ul class="umb-actions umb-actions-child">
+
+                                <li class="umb-action" ng-repeat="blueprint in selectedDocType.blueprints | orderBy:'name':false">
+                                    <a class="umb-action-link" ng-click="createFromBlueprint(blueprint.id)">
+                                        <i class="large icon {{selectedDocType.icon}}"></i>
+                                        <span class="menu-label">
+                                            {{blueprint.name}}
+                                        </span>
+                                    </a>
+                                </li>
+
+                                <li class="umb-action sep" ng-show="vm.blueprintConfig.allowBlank">
+                                    <a class="umb-action-link" ng-click="createBlank()">
+                                        <i class="large icon {{selectedDocType.icon}}"></i>
+                                        <span class="menu-label">
+                                            <localize key="blueprints_blankBlueprint">Blank</localize>
+                                        </span>
+                                    </a>
+                                </li>
+
+                            </ul>
+                        </umb-box-content>
+                    </umb-box>
+                </div>
+                <ng-form val-form-manager ng-switch-when="edit">
+                    <umb-tabbed-content content="vm.content"></umb-tabbed-content>
+                </ng-form>
+            </div>
+
+        </umb-editor-container>
+
+        <umb-editor-footer>
+            <umb-editor-footer-content-right>
+                <umb-button type="button"
+                            button-style="link"
+                            label-key="general_close"
+                            shortcut="esc"
+                            action="vm.close()">
+                </umb-button>
+                <umb-button type="button"
+                            button-style="action"
+                            state="vm.saveButtonState"
+                            label-key="general_submit"
+                            shortcut="ctrl+s"
+                            ng-if="dialogMode == 'edit'"
+                            action="vm.submit(model)">
+                </umb-button>
+            </umb-editor-footer-content-right>
+        </umb-editor-footer>
+    </umb-editor-view>
+    </form>
+</div>
