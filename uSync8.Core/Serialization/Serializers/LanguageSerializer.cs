@@ -59,7 +59,7 @@ namespace uSync8.Core.Serialization.Serializers
             }
             catch
             {
-                logger.Warn<LanguageSerializer>("Can't set culture name based on IsoCode");
+                logger.Warn<LanguageSerializer>("Can't set culture name based on {IsoCode}", isoCode);
             }
 
             var mandatory = node.Element("IsMandatory").ValueOrDefault(false);

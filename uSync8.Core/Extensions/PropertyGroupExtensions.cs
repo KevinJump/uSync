@@ -175,7 +175,7 @@ namespace uSync8.Core.Extensions
 
                 if (addPropertyGroupMethod != null)
                 {
-                    Current.Logger.Info<uSync8Core>("Adding new propery group {alias} {name} ", alias, name);
+                    Current.Logger.Debug<uSync8Core>("Adding new propery group {alias} {name} ", alias, name);
                     addPropertyGroupMethod.Invoke(item, new[] { alias, name });
                     return;
                 }
@@ -211,7 +211,7 @@ namespace uSync8.Core.Extensions
 
                     if (addPropertyTypeMethod != null)
                     {
-                        Current.Logger.Info<uSync8Core>("Adding Property to group using reflection {alias} {name}", alias, name);
+                        Current.Logger.Debug<uSync8Core>("Adding Property to group using reflection {alias} {name}", alias, name);
                         addPropertyTypeMethod.Invoke(item, new object[] { property, alias, name });
                         return;
                     }

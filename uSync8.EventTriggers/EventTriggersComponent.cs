@@ -57,11 +57,16 @@ namespace ExampleuSyncEvents
         {
             if (e.Item.Name.LocalName == "ContentType")
             {
-                var folder = e.Item.Element("Info")?.Element("Folder").Value;
-                if (!string.IsNullOrWhiteSpace(folder) && folder.InvariantEquals(blockedContainer))
-                {
-                    e.Cancel = true;
-                }
+
+                // var newXml = XElement.Parse(e.Item.ToString());
+                // e.Item.Element("Info").Element("Description").Value = "Changed";
+                // e.Item = newXml;
+
+                //var folder = e.Item.Element("Info")?.Element("Folder").Value;
+                //if (!string.IsNullOrWhiteSpace(folder) && folder.InvariantEquals(blockedContainer))
+                //{
+                //    e.Cancel = true;
+                //}
             }
         }
 

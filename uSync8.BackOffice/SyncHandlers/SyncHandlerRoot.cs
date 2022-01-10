@@ -175,7 +175,7 @@ namespace uSync8.BackOffice.SyncHandlers
             }
             else
             {
-                logger.Info(handlerType, "No caching of handler key lookups (CacheFolderKeys = false)");
+                logger.Debug(handlerType, "No caching of handler key lookups (CacheFolderKeys = false)");
                 this.runtimeCache = NoAppCache.Instance;
             }
         }

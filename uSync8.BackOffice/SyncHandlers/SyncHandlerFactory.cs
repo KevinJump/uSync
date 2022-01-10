@@ -175,7 +175,7 @@ namespace uSync8.BackOffice.SyncHandlers
                     // only log if we are doing the default 'everything' group 
                     // because weh nfoing groups we choose not to load things. 
                     if (string.IsNullOrWhiteSpace(options.Group))
-                        logger.Warn<SyncHandlerFactory>("No Handler with {alias} has been loaded", settings.Alias);
+                        logger.Debug<SyncHandlerFactory>("No Handler with {alias} has been loaded", settings.Alias);
                 }
 
             }
