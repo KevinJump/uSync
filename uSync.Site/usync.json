@@ -2,17 +2,12 @@
   "$schema": "./App_Plugins/uSync/config/appsettings-usync-schema.json",
   "uSync": {
     "ForceFips": true,
+    "Settings": {
+      "ExportOnSave": "None"
+    },
     "Sets": {
       "Default": {
-        "DisabledHandlers": [ "" ],
-        "Handlers": {
-          "DictionaryHandler": {
-            "Group": "Settings",
-            "Settings": {
-              "CreateOnly": true
-            }
-          }
-        }
+        "DisabledHandlers": [ "" ]
       }
     },
     "AutoTemplates": {
