@@ -1,4 +1,6 @@
 ﻿
+using Microsoft.Extensions.DependencyInjection;
+
 using System.Linq;
 
 using Umbraco.Cms.Core.DependencyInjection;
@@ -32,7 +34,7 @@ namespace uSync.Core
                 return builder;
 
             // cache for entity items, we use it to speed up lookups.
-            builder.Services.AddUnique<SyncEntityCache>();
+            builder.Services.AddSingleton<SyncEntityCache>();
 
             // register *all* ConfigurationSerializers except those marked [HideFromTypeFinder]
             // has to happen before the DataTypeSerializer is loaded, because that is where
@@ -57,7 +59,7 @@ namespace uSync.Core
                 .Add(builder.TypeLoader.GetTypes<ISyncDependencyItem>());
 
             // the item factory lets us get to these collections from one place. 
-            builder.Services.AddUnique<ISyncItemFactory, SyncItemFactory>();
+            builder.Services.AddSingleton<ISyncItemFactory, SyncItemFactory>();
 
             return builder;
         }

@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 using System;
 using System.Linq;
+using System.Reflection.PortableExecutable;
 
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.DependencyInjection;
@@ -54,23 +55,23 @@ namespace uSync.BackOffice
 
 
             // Setup the back office.
-            builder.Services.AddUnique<uSyncEventService>();
-            builder.Services.AddUnique<uSyncConfigService>();
-            builder.Services.AddUnique<SyncFileService>();
+            builder.Services.AddSingleton<uSyncEventService>();
+            builder.Services.AddSingleton<uSyncConfigService>();
+            builder.Services.AddSingleton<SyncFileService>();
 
             builder.WithCollectionBuilder<SyncHandlerCollectionBuilder>()
                 .Add(() => builder.TypeLoader.GetTypes<ISyncHandler>());
 
-            builder.Services.AddUnique<SyncHandlerFactory>();
-            builder.Services.AddUnique<uSyncService>();
-            builder.Services.AddUnique<CacheLifecycleManager>();
+            builder.Services.AddSingleton<SyncHandlerFactory>();
+            builder.Services.AddSingleton<uSyncService>();
+            builder.Services.AddSingleton<CacheLifecycleManager>();
 
             // register for the notifications 
             builder.AddNotificationHandler<ServerVariablesParsingNotification, uSyncServerVariablesHandler>();
             builder.AddNotificationHandler<UmbracoApplicationStartingNotification, uSyncApplicationStartingHandler>();
             builder.AddHandlerNotifications();
 
-            builder.Services.AddUnique<uSyncHubRoutes>();
+            builder.Services.AddSingleton<uSyncHubRoutes>();
             builder.Services.AddSignalR();
             builder.Services.AdduSyncSignalR();
 
