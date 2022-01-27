@@ -996,7 +996,7 @@ namespace uSync.BackOffice.SyncHandlers
                     action.Details = GetChanges(node, change.CurrentNode, serializerOptions);
                     if (action.Change != ChangeType.Create && (action.Details == null || action.Details.Count() == 0))
                     {
-                        action.Message = "xml is diffrent - but properties may not have changed";
+                        action.Message = "xml is different - but properties may not have changed";
                         action.Details = MakeRawChange(node, change.CurrentNode, serializerOptions).AsEnumerableOfOne();
                     }
                     else
