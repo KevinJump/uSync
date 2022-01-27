@@ -463,7 +463,7 @@ namespace uSync.Core.Serialization.Serializers
                                 //
                                 if (!current.PropertyType.VariesByCulture())
                                 {
-                                    logger.LogTrace("Item does not vary by culture - but .config file contains culture");
+                                    logger.LogTrace("Item does not vary by culture - but uSync item file contains culture");
                                     // if we get here, then things are wrong, so we will try to fix them.
                                     //
                                     // if the content config thinks it should vary by culture, but the document type doesn't

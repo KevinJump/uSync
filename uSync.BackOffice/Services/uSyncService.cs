@@ -359,7 +359,7 @@ namespace uSync.BackOffice
 
         public bool CheckVersionFile(string folder)
         {
-            var versionFile = Path.Combine(_syncFileService.GetAbsPath(folder), "usync.config");
+            var versionFile = Path.Combine(_syncFileService.GetAbsPath(folder), $"usync.{_uSyncConfig.Settings.DefaultExtension}");
 
             if (!_syncFileService.FileExists(versionFile))
             {
@@ -395,11 +395,11 @@ namespace uSync.BackOffice
         {
             try
             {
-                var versionFile = Path.Combine(_syncFileService.GetAbsPath(folder), "usync.config");
+                var versionFile = Path.Combine(_syncFileService.GetAbsPath(folder), $"usync.{_uSyncConfig.Settings.DefaultExtension}");
                 var versionNode = new XElement("uSync",
                     new XAttribute("version", typeof(uSync).Assembly.GetName().Version.ToString()),
-                    new XAttribute("format", Core.uSyncConstants.FormatVersion),
-                    new XElement("Date", DateTime.Now.ToString("s")));
+                    new XAttribute("format", Core.uSyncConstants.FormatVersion));
+                // remove date, we don't really care, and it causes uncessery git changes.
 
                 Directory.CreateDirectory(Path.GetDirectoryName(versionFile));
 

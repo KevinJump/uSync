@@ -568,7 +568,7 @@ namespace uSync.BackOffice.SyncHandlers
             {
                 // when it's not flat structure we also get the sub folders. (extra defensive get them all)
                 var keys = new List<Guid>();
-                var files = syncFileService.GetFiles(folder, "*.config", !flat).ToList();
+                var files = syncFileService.GetFiles(folder, $"*.{this.uSyncConfig.Settings.DefaultExtension}", !flat).ToList();
 
                 foreach (var file in files)
                 {
@@ -612,7 +612,7 @@ namespace uSync.BackOffice.SyncHandlers
         ///  Get the files we are going to import from a folder. 
         /// </summary>
         protected virtual IEnumerable<string> GetImportFiles(string folder)
-            => syncFileService.GetFiles(folder, "*.config").OrderBy(x => x);
+            => syncFileService.GetFiles(folder, $"*.{this.uSyncConfig.Settings.DefaultExtension}").OrderBy(x => x);
 
         /// <summary>
         ///  check to see if this element should be imported as part of the process.
@@ -1158,7 +1158,7 @@ namespace uSync.BackOffice.SyncHandlers
         {
             var physicalFile = syncFileService.GetAbsPath(newFile);
 
-            var files = syncFileService.GetFiles(folder, "*.config");
+            var files = syncFileService.GetFiles(folder, $"*.{this.uSyncConfig.Settings.DefaultExtension}");
 
             foreach (string file in files)
             {
@@ -1233,8 +1233,8 @@ namespace uSync.BackOffice.SyncHandlers
 
         virtual protected string GetPath(string folder, TObject item, bool GuidNames, bool isFlat)
         {
-            if (isFlat && GuidNames) return Path.Combine(folder, $"{GetItemKey(item)}.config");
-            var path = Path.Combine(folder, $"{this.GetItemPath(item, GuidNames, isFlat)}.config");
+            if (isFlat && GuidNames) return Path.Combine(folder, $"{GetItemKey(item)}.{this.uSyncConfig.Settings.DefaultExtension}");
+            var path = Path.Combine(folder, $"{this.GetItemPath(item, GuidNames, isFlat)}.{this.uSyncConfig.Settings.DefaultExtension}");
 
             // if this is flat but not using guid filenames, then we check for clashes.
             if (isFlat && !GuidNames) return CheckAndFixFileClash(path, item);
