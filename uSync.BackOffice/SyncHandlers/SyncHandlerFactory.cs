@@ -4,9 +4,11 @@ using System.Linq;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
+
 using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;
+using uSync.Core;
 
 namespace uSync.BackOffice.SyncHandlers
 {
@@ -125,7 +127,7 @@ namespace uSync.BackOffice.SyncHandlers
             var handlers = GetValidHandlers(options);
 
             return handlers.Select(x => new { group = x.GetConfigGroup(), icon = x.GetGroupIcon() })
-                .DistinctBy(x => x.group)
+                .SafeDistinctBy(x => x.group)
                 .ToDictionary(k => k.group, v => v.icon);
         }
 

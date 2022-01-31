@@ -1197,13 +1197,13 @@ namespace uSync.Core.Serialization.Serializers
             if (_allTabs == null)
             {
                 var compositions = item.CompositionPropertyGroups
-                    .DistinctBy(x => x.Alias)
+                    .SafeDistinctBy(x => x.Alias)
                     .ToDictionary(k => k.Alias, v => v.Type);
 
                 var dependents = baseService.GetAll()
                     .Where(x => x.CompositionIds().Contains(item.Id))
                     .SelectMany(x => x.PropertyGroups)
-                    .DistinctBy(x => x.Alias)
+                    .SafeDistinctBy(x => x.Alias)
                     .ToDictionary(k => k.Alias, v => v.Type);
 
                 _allTabs = compositions

@@ -118,7 +118,7 @@ namespace uSync.Core.Serialization.Serializers
                 }
             }
 
-            var translations = currentTranslations.DistinctBy(x => x.Language.IsoCode).ToList();
+            var translations = currentTranslations.SafeDistinctBy(x => x.Language.IsoCode).ToList();
 
             // if we are syncing all cultures we do a delete, but when only syncing some, we 
             // don't remove missing cultures from the list.
@@ -137,7 +137,7 @@ namespace uSync.Core.Serialization.Serializers
 
             }
 
-            item.Translations = translations; //.DistinctBy(x => x.Language.IsoCode);
+            item.Translations = translations; //.SafeDistinctBy(x => x.Language.IsoCode);
 
             return changes;
         }
@@ -167,7 +167,7 @@ namespace uSync.Core.Serialization.Serializers
             var translationsNode = new XElement("Translations");
 
             foreach (var translation in item.Translations
-                .DistinctBy(x => x.Language.IsoCode)
+                .SafeDistinctBy(x => x.Language.IsoCode)
                 .OrderBy(x => x.Language.IsoCode))
             {
                 if (activeCultures.IsValid(translation.Language.IsoCode))

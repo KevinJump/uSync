@@ -174,7 +174,7 @@ namespace uSync.BackOffice
                     var folders = actions
                         .Where(x => x.RequiresPostProcessing)
                         .Select(x => new { alias = x.HandlerAlias, folder = Path.GetDirectoryName(x.FileName), actions = x })
-                        .DistinctBy(x => x.folder)
+                        .SafeDistinctBy(x => x.folder)
                         .GroupBy(x => x.alias)
                         .ToList();
 
@@ -222,7 +222,7 @@ namespace uSync.BackOffice
                     var cleans = actions
                         .Where(x => x.Change == ChangeType.Clean)
                         .Select(x => new { alias = x.HandlerAlias, folder = Path.GetDirectoryName(x.FileName), actions = x })
-                        .DistinctBy(x => x.folder)
+                        .SafeDistinctBy(x => x.folder)
                         .GroupBy(x => x.alias)
                         .ToList();
 
