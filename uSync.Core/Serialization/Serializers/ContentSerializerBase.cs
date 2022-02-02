@@ -675,32 +675,40 @@ namespace uSync.Core.Serialization.Serializers
         /// </remarks>
         private string GetFriendlyPath(string path)
         {
-            var ids = path.ToDelimitedList().Select(x => int.Parse(x, CultureInfo.InvariantCulture));
-            var lookups = new List<int>();
-            var friendlyPath = "";
-
-            foreach (var id in ids.Where(x => x != -1))
+            try
             {
-                if (!nameCache.ContainsKey(id))
-                {
-                    lookups.Add(id);
-                    friendlyPath += $"/[{id}]";
-                }
-                else
-                {
-                    friendlyPath += "/" + nameCache[id].Item2.ToSafeAlias(shortStringHelper);
-                }
-            }
+                var ids = path.ToDelimitedList().Select(x => int.Parse(x, CultureInfo.InvariantCulture));
+                var lookups = new List<int>();
+                var friendlyPath = "";
 
-            var items = syncMappers.EntityCache.GetAll(this.umbracoObjectType, lookups.ToArray());
-            // var items = entityService.GetAll(this.umbracoObjectType, lookups.ToArray());
-            foreach (var item in items)
+                foreach (var id in ids.Where(x => x != -1))
+                {
+                    if (!nameCache.ContainsKey(id))
+                    {
+                        lookups.Add(id);
+                        friendlyPath += $"/[{id}]";
+                    }
+                    else
+                    {
+                        friendlyPath += "/" + nameCache[id].Item2.ToSafeAlias(shortStringHelper);
+                    }
+                }
+
+                var items = syncMappers.EntityCache.GetAll(this.umbracoObjectType, lookups.ToArray());
+                // var items = entityService.GetAll(this.umbracoObjectType, lookups.ToArray());
+                foreach (var item in items)
+                {
+                    nameCache[item.Id] = new Tuple<Guid, string>(item.Key, item.Name);
+                    friendlyPath = friendlyPath.Replace($"[{item.Id}]", item.Name.ToSafeAlias(shortStringHelper));
+                }
+
+                return friendlyPath;
+            }
+            catch(Exception ex)
             {
-                nameCache[item.Id] = new Tuple<Guid, string>(item.Key, item.Name);
-                friendlyPath = friendlyPath.Replace($"[{item.Id}]", item.Name.ToSafeAlias(shortStringHelper));
+                logger.LogWarning(ex, "Unable to parse path {path}", path);
+                return path;
             }
-
-            return friendlyPath;
         }
 
         public override SyncAttempt<XElement> SerializeEmpty(TObject item, SyncActionType change, string alias)
