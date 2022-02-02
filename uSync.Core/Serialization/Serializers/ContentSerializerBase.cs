@@ -366,7 +366,7 @@ namespace uSync.Core.Serialization.Serializers
             if (item.CreateDate != createDate)
             {
                 changes.AddUpdate("CreateDate", item.CreateDate, createDate);
-                logger.LogDebug("{id} Setting CreateDate", item.Id, createDate);
+                logger.LogDebug("{id} Setting CreateDate: {createDate}", item.Id, createDate);
                 item.CreateDate = createDate;
             }
 
