@@ -81,12 +81,10 @@ namespace uSync.Core.Mapping
                 // this just ensures it looks the same across sites (where possible).
                 return JsonConvert.SerializeObject(json, Formatting.Indented);
             }
-            else
-            {
-                return StripSitePath(stringValue);
-            }
 
-            return stringValue;
+
+            // else .
+            return StripSitePath(stringValue);
         }
 
         private string StripSitePath(string filepath)
