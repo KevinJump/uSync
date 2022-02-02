@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Xml.Linq;
 
@@ -674,7 +675,7 @@ namespace uSync.Core.Serialization.Serializers
         /// </remarks>
         private string GetFriendlyPath(string path)
         {
-            var ids = path.ToDelimitedList().Select(x => int.Parse(x));
+            var ids = path.ToDelimitedList().Select(x => int.Parse(x, CultureInfo.InvariantCulture));
             var lookups = new List<int>();
             var friendlyPath = "";
 
