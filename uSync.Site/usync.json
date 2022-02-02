@@ -3,7 +3,7 @@
   "uSync": {
     "ForceFips": true,
     "Settings": {
-      "ExportOnSave": "None"
+      "ExportOnSave": "All"
     },
     "Sets": {
       "Default": {
