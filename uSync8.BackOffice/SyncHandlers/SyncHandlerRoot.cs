@@ -775,7 +775,7 @@ namespace uSync8.BackOffice.SyncHandlers
                     .AsEnumerableOfOne();
             }
 
-            var filename = GetPath(folder, item, config.GuidNames, config.UseFlatStructure);
+            var filename = Path.Combine(folder, $"{this.GetItemPath(item, config.GuidNames, config.UseFlatStructure)}.config");
 
             var attempt = SerializeItem(item, new SyncSerializerOptions(config.Settings));
             if (attempt.Success)
@@ -783,6 +783,8 @@ namespace uSync8.BackOffice.SyncHandlers
                 if (ShouldExport(attempt.Item, config))
                 {
                     // only write the file to disk if it should be exported.
+                    // get path does some actual disk checks, so we don't do it unless we have to (e.g long path fails)
+                    filename = GetPath(folder, item, config.GuidNames, config.UseFlatStructure);
                     syncFileService.SaveXElement(attempt.Item, filename);
                 }
                 else
@@ -1139,7 +1141,7 @@ namespace uSync8.BackOffice.SyncHandlers
                 // #216 clean up all the time, because if someone recreates a doctype, we want to find the old 
                 // version of that doctype and call it a rename
                 // {
-                    foreach (var attempt in attempts.Where(x => x.Success))
+                    foreach (var attempt in attempts.Where(x => x.Success && x.Change > ChangeType.NoChange))
                     {
                         this.CleanUp(item, attempt.FileName, Path.Combine(rootFolder, this.DefaultFolder));
                     }
