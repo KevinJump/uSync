@@ -11,10 +11,11 @@
 
 		<RepositoryUrl>https://github.com/KevinJump/uSync8/tree/core/main</RepositoryUrl>
 
-		<Copyright>Jumoo @ 2013-2021</Copyright>
+		<Copyright>Jumoo @ 2013-2022</Copyright>
 
 		<PackageReleaseNotes>
 			9.0 - Dotnet core version
+			9.1 - Net 5/6 targets
 		</PackageReleaseNotes>
 
 		<EmbedUntrackedSources>true</EmbedUntrackedSources>

@@ -143,7 +143,7 @@ namespace uSync.BackOffice.SyncHandlers
         {
             List<LeveledFile> nodes = new List<LeveledFile>();
 
-            var files = syncFileService.GetFiles(folder, "*.config");
+            var files = syncFileService.GetFiles(folder, $"*.{this.uSyncConfig.Settings.DefaultExtension}");
             foreach (var file in files)
             {
                 try

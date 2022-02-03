@@ -87,6 +87,12 @@ namespace uSync.BackOffice.Configuration
         ///  Should the history view be on of off ? 
         /// </summary>
         public bool EnableHistory { get; set; } = true;
+
+
+        /// <summary>
+        ///  default file extension for the uSync files. 
+        /// </summary>
+        public string DefaultExtension { get; set; } = "config";
     }
 
 }

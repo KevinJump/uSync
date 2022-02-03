@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Xml.Linq;
 
@@ -365,7 +366,7 @@ namespace uSync.Core.Serialization.Serializers
             if (item.CreateDate != createDate)
             {
                 changes.AddUpdate("CreateDate", item.CreateDate, createDate);
-                logger.LogDebug("{id} Setting CreateDate", item.Id, createDate);
+                logger.LogDebug("{id} Setting CreateDate: {createDate}", item.Id, createDate);
                 item.CreateDate = createDate;
             }
 
@@ -463,7 +464,7 @@ namespace uSync.Core.Serialization.Serializers
                                 //
                                 if (!current.PropertyType.VariesByCulture())
                                 {
-                                    logger.LogTrace("Item does not vary by culture - but .config file contains culture");
+                                    logger.LogTrace("Item does not vary by culture - but uSync item file contains culture");
                                     // if we get here, then things are wrong, so we will try to fix them.
                                     //
                                     // if the content config thinks it should vary by culture, but the document type doesn't
@@ -674,32 +675,40 @@ namespace uSync.Core.Serialization.Serializers
         /// </remarks>
         private string GetFriendlyPath(string path)
         {
-            var ids = path.ToDelimitedList().Select(x => int.Parse(x));
-            var lookups = new List<int>();
-            var friendlyPath = "";
-
-            foreach (var id in ids.Where(x => x != -1))
+            try
             {
-                if (!nameCache.ContainsKey(id))
-                {
-                    lookups.Add(id);
-                    friendlyPath += $"/[{id}]";
-                }
-                else
-                {
-                    friendlyPath += "/" + nameCache[id].Item2.ToSafeAlias(shortStringHelper);
-                }
-            }
+                var ids = path.ToDelimitedList().Select(x => int.Parse(x, CultureInfo.InvariantCulture));
+                var lookups = new List<int>();
+                var friendlyPath = "";
 
-            var items = syncMappers.EntityCache.GetAll(this.umbracoObjectType, lookups.ToArray());
-            // var items = entityService.GetAll(this.umbracoObjectType, lookups.ToArray());
-            foreach (var item in items)
+                foreach (var id in ids.Where(x => x != -1))
+                {
+                    if (!nameCache.ContainsKey(id))
+                    {
+                        lookups.Add(id);
+                        friendlyPath += $"/[{id}]";
+                    }
+                    else
+                    {
+                        friendlyPath += "/" + nameCache[id].Item2.ToSafeAlias(shortStringHelper);
+                    }
+                }
+
+                var items = syncMappers.EntityCache.GetAll(this.umbracoObjectType, lookups.ToArray());
+                // var items = entityService.GetAll(this.umbracoObjectType, lookups.ToArray());
+                foreach (var item in items)
+                {
+                    nameCache[item.Id] = new Tuple<Guid, string>(item.Key, item.Name);
+                    friendlyPath = friendlyPath.Replace($"[{item.Id}]", item.Name.ToSafeAlias(shortStringHelper));
+                }
+
+                return friendlyPath;
+            }
+            catch(Exception ex)
             {
-                nameCache[item.Id] = new Tuple<Guid, string>(item.Key, item.Name);
-                friendlyPath = friendlyPath.Replace($"[{item.Id}]", item.Name.ToSafeAlias(shortStringHelper));
+                logger.LogWarning(ex, "Unable to parse path {path}", path);
+                return path;
             }
-
-            return friendlyPath;
         }
 
         public override SyncAttempt<XElement> SerializeEmpty(TObject item, SyncActionType change, string alias)

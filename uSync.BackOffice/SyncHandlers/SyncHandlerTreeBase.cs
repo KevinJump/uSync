@@ -1,6 +1,8 @@
 ﻿
 using Microsoft.Extensions.Logging;
 
+using System.Xml.Linq;
+
 using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Models.Entities;
 using Umbraco.Cms.Core.Services;
@@ -38,6 +40,17 @@ namespace uSync.BackOffice.SyncHandlers
         { }
 
         protected override string GetItemName(TObject item) => item.Name;
+
+        protected override bool DoItemsMatch(XElement node, TObject item)
+        {
+            if (item.Key == node.GetKey()) return true;
+
+            // in a tree items can have the same alias in diffrent places.
+            // so we only do this match on key.
+            return false;            
+
+
+        }
     }
 
 }

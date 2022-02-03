@@ -51,7 +51,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         // so we don't save by Guid we save by ISO name everytime.           
         protected override string GetPath(string folder, ILanguage item, bool GuidNames, bool isFlat)
         {
-            return Path.Combine(folder, $"{this.GetItemPath(item, GuidNames, isFlat)}.config");
+            return Path.Combine(folder, $"{this.GetItemPath(item, GuidNames, isFlat)}.{this.uSyncConfig.Settings.DefaultExtension}");
         }
 
         protected override string GetItemPath(ILanguage item, bool useGuid, bool isFlat)
@@ -77,7 +77,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             var installedLanguages = localizationService.GetAllLanguages()
                 .Select(x => x.IsoCode).ToList();
 
-            var files = syncFileService.GetFiles(folder, "*.config");
+            var files = syncFileService.GetFiles(folder, $"*.{this.uSyncConfig.Settings.DefaultExtension}");
 
             foreach (string file in files)
             {

@@ -127,7 +127,7 @@ namespace uSync.Core.Serialization.Serializers
             var fallbackIso = node.Element("Fallback").ValueOrDefault(string.Empty);
             if (!string.IsNullOrWhiteSpace(fallbackIso))
             {
-                if (int.TryParse(fallbackIso, out int fallbackId))
+                if (int.TryParse(fallbackIso, NumberStyles.Integer, CultureInfo.InvariantCulture, out int fallbackId))
                 {
                     // legacy, the fallback value is an int :( 
                     return fallbackId;

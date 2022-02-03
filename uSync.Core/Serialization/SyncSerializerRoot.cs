@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
+using System.Xml;
 using System.Xml.Linq;
 
 using Microsoft.Extensions.Logging;
@@ -309,12 +310,16 @@ namespace uSync.Core.Serialization
 
             using (MemoryStream s = new MemoryStream())
             {
-                node.Save(s);
-                s.Position = 0;
-                using (var hashAlgorithm = HashAlgorithm.Create(CryptoConfig.AllowOnlyFipsAlgorithms ? "SHA1" : "MD5"))
+                // for consistancy across platforms we need to harmonize line endings.
+                using (var writer = XmlWriter.Create(s, new XmlWriterSettings { NewLineChars = "\r\n" }))
                 {
-                    return BitConverter.ToString(
-                        hashAlgorithm.ComputeHash(s)).Replace("-", "").ToLower();
+                    node.Save(writer);
+                    writer.Flush();
+                    s.Position = 0;
+                    using (var hashAlgorithm = HashAlgorithm.Create(CryptoConfig.AllowOnlyFipsAlgorithms ? "SHA1" : "MD5"))
+                    {
+                        return BitConverter.ToString(hashAlgorithm.ComputeHash(s)).Replace("-", "").ToLower();
+                    }
                 }
             }
         }
