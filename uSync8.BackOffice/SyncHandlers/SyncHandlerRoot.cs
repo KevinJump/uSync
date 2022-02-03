@@ -1159,7 +1159,7 @@ namespace uSync8.BackOffice.SyncHandlers
 
                 if (!(this.DefaultConfig.GuidNames && this.DefaultConfig.UseFlatStructure))
                 {
-                    foreach (var attempt in attempts.Where(x => x.Success))
+                    foreach (var attempt in attempts.Where(x => x.Success && x.Change > ChangeType.NoChange))
                     {
                         this.CleanUp(item.Entity, attempt.FileName, Path.Combine(rootFolder, this.DefaultFolder));
                     }
@@ -1174,10 +1174,13 @@ namespace uSync8.BackOffice.SyncHandlers
             var filename = GetPath(folder, item, config.GuidNames, config.UseFlatStructure);
 
             var attempt = serializer.SerializeEmpty(item, SyncActionType.Delete, string.Empty);
-            if (attempt.Success)
+            if (ShouldExport(attempt.Item, config))
             {
-                syncFileService.SaveXElement(attempt.Item, filename);
-                this.CleanUp(item, filename, Path.Combine(rootFolder, this.DefaultFolder));
+                if (attempt.Success && attempt.Change > ChangeType.NoChange)
+                {
+                    syncFileService.SaveXElement(attempt.Item, filename);
+                    this.CleanUp(item, filename, Path.Combine(rootFolder, this.DefaultFolder));
+                }
             }
         }
 
@@ -1191,49 +1194,56 @@ namespace uSync8.BackOffice.SyncHandlers
         /// </summary>
         protected virtual void CleanUp(TObject item, string newFile, string folder)
         {
-            var physicalFile = syncFileService.GetAbsPath(newFile);
-
-            var files = syncFileService.GetFiles(folder, "*.config");
-
-            foreach (string file in files)
+            try
             {
-                // compare the file paths. 
-                if (!syncFileService.PathMatches(physicalFile, file)) // This is not the same file, as we are saving.
+                var physicalFile = syncFileService.GetAbsPath(newFile);
+
+                var files = syncFileService.GetFiles(folder, "*.config");
+
+                foreach (string file in files)
                 {
-                    try
+                    // compare the file paths. 
+                    if (!syncFileService.PathMatches(physicalFile, file)) // This is not the same file, as we are saving.
                     {
-                        var node = syncFileService.LoadXElement(file);
-
-                        // if this xml file matches the item we have just saved. 
-
-                        if (!node.IsEmptyItem() || node.GetEmptyAction() != SyncActionType.Rename)
+                        try
                         {
-                            // the node isn't empty, or its not a rename (because all clashes become renames)
+                            var node = syncFileService.LoadXElement(file);
 
-                            if (DoItemsMatch(node, item))
+                            // if this xml file matches the item we have just saved. 
+
+                            if (!node.IsEmptyItem() || node.GetEmptyAction() != SyncActionType.Rename)
                             {
-                                logger.Debug(handlerType, "Duplicate {file} of {alias}, saving as rename", Path.GetFileName(file), this.GetItemAlias(item));
+                                // the node isn't empty, or its not a rename (because all clashes become renames)
 
-                                var attempt = serializer.SerializeEmpty(item, SyncActionType.Rename, node.GetAlias());
-                                if (attempt.Success)
+                                if (DoItemsMatch(node, item))
                                 {
-                                    syncFileService.SaveXElement(attempt.Item, file);
+                                    logger.Debug(handlerType, "Duplicate {file} of {alias}, saving as rename", Path.GetFileName(file), this.GetItemAlias(item));
+
+                                    var attempt = serializer.SerializeEmpty(item, SyncActionType.Rename, node.GetAlias());
+                                    if (attempt.Success)
+                                    {
+                                        syncFileService.SaveXElement(attempt.Item, file);
+                                    }
                                 }
                             }
                         }
-                    }
-                    catch (Exception ex)
-                    {
-                        logger.Warn(handlerType, "Error during cleanup of existing files {message}", ex.Message);
-                        // cleanup should fail silently ? - because it can impact on normal Umbraco operations?
+                        catch (Exception ex)
+                        {
+                            logger.Warn(handlerType, "Error during cleanup of existing files {message}", ex.Message);
+                            // cleanup should fail silently ? - because it can impact on normal Umbraco operations?
+                        }
                     }
                 }
+                var folders = syncFileService.GetDirectories(folder);
+                foreach (var children in folders)
+                {
+                    CleanUp(item, newFile, children);
+                }
             }
-
-            var folders = syncFileService.GetDirectories(folder);
-            foreach (var children in folders)
+            catch (Exception ex)
             {
-                CleanUp(item, newFile, children);
+                logger.Warn(handlerType, "Error during cleanup of existing files {message}", ex.Message);
+
             }
         }
 
