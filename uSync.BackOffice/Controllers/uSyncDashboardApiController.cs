@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 using Umbraco.Cms.Core.Cache;
@@ -187,14 +188,13 @@ namespace uSync.BackOffice.Controllers
         [HttpGet]
         public JObject GetChangedSettings()
         {
-            var changes = new JObject();
-            changes.Add("Settings", uSyncConfig.Settings.GetNonDefaultValues(new uSyncSettings()));
 
-            var setChanges = new JObject();
-            setChanges.Add("Default", this.uSyncConfig.GetSetSettings(uSync.Sets.DefaultSet).GetNonDefaultValues(new uSyncHandlerSetSettings()));
-            changes.Add("Sets", setChanges);
+            var settings = JsonConvert.SerializeObject(uSyncConfig.Settings);
+            var sets = JsonConvert.SerializeObject(uSyncConfig.GetSetSettings(uSync.Sets.DefaultSet));
 
-            return changes;
+            var result = "{\"Settings\": " + settings + ", Sets : " + sets + " }";
+
+            return JObject.Parse(result);
         }
     }
 
