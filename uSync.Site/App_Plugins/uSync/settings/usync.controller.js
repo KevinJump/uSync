@@ -354,13 +354,18 @@
         }
 
         vm.importGroup = {};
+        vm.exportButtons = {};
 
         function getHandlerGroups() {
             vm.showEverything = false; 
 
             uSync8DashboardService.getHandlerGroups()
                 .then(function (result) {
-                    _.forEach(result.data, function (icon, group) {
+
+                    var groups = result.data;
+                    var isSingle = Object.keys(groups).length === 1;
+
+                    _.forEach(groups, function (icon, group) {
                         if (group == '_everything') {
                             vm.showEverything = true;
                         }
@@ -382,6 +387,24 @@
                                     labelKey: 'usync_importforce',
                                     handler: function () { importForce(group) }
                                 }]
+                            };
+
+                            vm.exportButtons[group] = {
+                                state: init,
+                                defaultButton: {
+                                    labelKey: 'usync_export',
+                                    handler: function () { exportGroup(group) }
+                                },
+                                subButtons: []
+                            };
+
+                            if (isSingle) {
+                                vm.exportButtons[group].subButtons.push({
+                                    labelKey: 'usync_exportClean',
+                                    handler: function () {
+                                        cleanExport();
+                                    }
+                                });
                             }
 
                             if (group.toLowerCase() === "forms") {

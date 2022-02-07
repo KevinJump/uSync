@@ -29,7 +29,13 @@
                                       float="left"
                                       button-style="success"
                                       state="vm.importButton.state"></umb-button-group>
-                    <umb-button button-style="info" action="vm.exportGroup(group.name)" label="Export"></umb-button>
+
+                    <umb-button-group default-button="vm.exportButtons[group.name].defaultButton"
+                                      sub-buttons="vm.exportButtons[group.name].subButtons"
+                                      direction="down"
+                                      float="left"
+                                      button-style="info"
+                                      state="vm.importButton.state"></umb-button-group>
                 </div>
             </umb-box-content>
         </umb-box>
