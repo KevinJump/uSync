@@ -29,6 +29,11 @@ namespace uSync.BackOffice
 
         public string FileName { get; set; }
         public string Name { get; set; }
+
+        /// <summary>
+        ///  9.2 a nice path for the thing (displayed).
+        /// </summary>
+        public string Path { get; set; }
         public bool RequiresPostProcessing { get; set; }
 
         /// <summary>
@@ -99,11 +104,21 @@ namespace uSync.BackOffice
             return action;
         }
 
+        [Obsolete("Reporting with the Path gives better feedback to the user.")]
         public static uSyncAction ReportAction(ChangeType changeType, string name, string file, Guid key, string handlerAlias, string message)
         {
             return new uSyncAction(true, name, typeof(T).Name, changeType, message, null, file, handlerAlias)
             {
                 key = key
+            };
+        }
+
+        public static uSyncAction ReportAction(ChangeType changeType, string name, string path, string file, Guid key, string handlerAlias, string message)
+        {
+            return new uSyncAction(true, name, typeof(T).Name, changeType, message, null, file, handlerAlias)
+            {
+                key = key,
+                Path = path
             };
         }
 

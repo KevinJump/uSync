@@ -350,7 +350,7 @@ namespace uSync.BackOffice.SyncHandlers
             {
                 // blocked
                 return uSyncActionHelper<TObject>
-                    .ReportAction(ChangeType.NoChange, node.GetAlias(), GetNameFromFileOrNode(filename, node), node.GetKey(), this.Alias, "Change stopped by delegate event")
+                    .ReportAction(ChangeType.NoChange, node.GetAlias(), node.GetPath(), GetNameFromFileOrNode(filename, node), node.GetKey(), this.Alias, "Change stopped by delegate event")
                     .AsEnumerableOfOne();
             }
 
@@ -741,7 +741,7 @@ namespace uSync.BackOffice.SyncHandlers
             if (_mutexService.FireItemStartingEvent(new uSyncExportingItemNotification<TObject>(item, (ISyncHandler)this))) 
             {
                 return uSyncActionHelper<TObject>
-                    .ReportAction(ChangeType.NoChange, GetItemName(item), string.Empty, GetItemKey(item), this.Alias, 
+                    .ReportAction(ChangeType.NoChange, GetItemName(item), string.Empty, string.Empty, GetItemKey(item), this.Alias, 
                                     "Change stopped by delegate event")
                     .AsEnumerableOfOne();
             }
@@ -968,7 +968,7 @@ namespace uSync.BackOffice.SyncHandlers
                 if (_mutexService.FireItemStartingEvent(new uSyncReportingItemNotification(node)))
                 {
                     return uSyncActionHelper<TObject>
-                        .ReportAction(ChangeType.NoChange, node.GetAlias(), GetNameFromFileOrNode(filename, node), node.GetKey(), this.Alias,
+                        .ReportAction(ChangeType.NoChange, node.GetAlias(), node.GetPath(), GetNameFromFileOrNode(filename, node), node.GetKey(), this.Alias,
                             "Change stopped by delegate event")
                         .AsEnumerableOfOne();
                 }
@@ -983,7 +983,9 @@ namespace uSync.BackOffice.SyncHandlers
                 var change = IsItemCurrent(node, serializerOptions);
 
                 var action = uSyncActionHelper<TObject>
-                        .ReportAction(change.Change, node.GetAlias(), GetNameFromFileOrNode(filename, node), node.GetKey(), this.Alias, "");
+                        .ReportAction(change.Change, node.GetAlias(), node.GetPath(), GetNameFromFileOrNode(filename, node), node.GetKey(), this.Alias, "");
+
+                
 
                 action.Message = "";
 
@@ -1043,7 +1045,7 @@ namespace uSync.BackOffice.SyncHandlers
                 }
                 else
                 {
-                    return uSyncActionHelper<TObject>.ReportAction(ChangeType.NoChange, node.GetAlias(), file, node.GetKey(),
+                    return uSyncActionHelper<TObject>.ReportAction(ChangeType.NoChange, node.GetAlias(), node.GetPath(), file, node.GetKey(),
                         this.Alias, "Will not be imported (Based on config)")
                         .AsEnumerableOfOne<uSyncAction>();
                 }

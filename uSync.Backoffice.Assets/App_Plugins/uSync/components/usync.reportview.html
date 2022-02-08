@@ -47,7 +47,10 @@
                                 {{vm.getTypeName(result.itemType)}}
                             </div>
                             <div class="umb-table-cell umb-table__name">
-                                {{result.name}}
+                                <div>
+                                    {{result.name}}
+                                    <div class="muted" ng-if="result.path.length > 0"> > {{result.itemType.substring(1)}}{{result.path}}</div>
+                                </div>
                             </div>
                             <div class="umb-table-cell">
                                 {{result.change}}

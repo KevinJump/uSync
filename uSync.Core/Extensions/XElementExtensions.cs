@@ -58,6 +58,18 @@ namespace uSync.Core
         }
 
         /// <summary>
+        ///  get the nice path name that is stored in the xml, gives us somethign to show
+        ///  the user in terms of location.
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
+        public static string GetPath(this XElement node)
+        {
+            return node.Element("Info")?
+                .Element("Path").ValueOrDefault(string.Empty) ?? string.Empty;
+        }
+
+        /// <summary>
         ///  does the xml represent an 'Empty' item (deleted/renamed/etc)
         /// </summary>
         public static bool IsEmptyItem(this XElement node)
