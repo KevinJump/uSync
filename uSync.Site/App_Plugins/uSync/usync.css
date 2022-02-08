@@ -396,11 +396,13 @@ ul.usync-action-list {
 }
 
     .umb-table-cell.usync-diff-value pre del {
-        color: red;
+        background-color: #c2185b;
+        color: #fff;
     }
 
     .umb-table-cell.usync-diff-value pre ins {
-        color: green;
+        background-color: #689f38;
+        color: #fff;
     }
 
 
