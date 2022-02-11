@@ -594,8 +594,7 @@ namespace uSync.Core.Serialization.Serializers
 
             if (aliasCache.Contains(alias))
             {
-                logger.LogInformation("Alias clash {alias} already exists", alias);
-                logger.LogInformation("Aliases {cache}", string.Join(",", aliasCache));
+                logger.LogDebug("Alias clash {alias} already exists", alias);
                 return $"{alias}_{Guid.NewGuid().ToShortKeyString(8)}";
             }
 
@@ -610,7 +609,7 @@ namespace uSync.Core.Serialization.Serializers
                     var sw = Stopwatch.StartNew();
                     var aliases = contentTypeService.GetAllContentTypeAliases().ToList();
                     sw.Stop();
-                    this.logger.LogInformation("Cache hit, 'usync_{id}' fetching all aliases {time}ms", this.Id, sw.ElapsedMilliseconds);
+                    this.logger.LogDebug("Cache hit, 'usync_{id}' fetching all aliases {time}ms", this.Id, sw.ElapsedMilliseconds);
                     return aliases;
                 });
 
@@ -629,7 +628,7 @@ namespace uSync.Core.Serialization.Serializers
 
             RefreshAliasCache();
 
-            logger.LogInformation("remove [{alias}] - {cache}", alias,
+            logger.LogDebug("remove [{alias}] - {cache}", alias,
                 aliasCache != null ? string.Join(",", aliasCache) : "Empty");
         }
 
@@ -647,7 +646,7 @@ namespace uSync.Core.Serialization.Serializers
                 aliasCache.Add(alias);
 
             RefreshAliasCache();
-            logger.LogInformation("Add [{aliaS}] - {cache}", alias, string.Join(",", aliasCache));
+            logger.LogDebug("Add [{aliaS}] - {cache}", alias, string.Join(",", aliasCache));
         }
 
 
