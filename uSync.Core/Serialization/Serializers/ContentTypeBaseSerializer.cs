@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Xml.Linq;
@@ -7,6 +8,7 @@ using System.Xml.Linq;
 using Microsoft.Extensions.Logging;
 
 using Umbraco.Cms.Core;
+using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Configuration;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Services;
@@ -24,18 +26,28 @@ namespace uSync.Core.Serialization.Serializers
         private readonly IContentTypeBaseService<TObject> baseService;
         protected readonly IShortStringHelper shortStringHelper;
 
+        private readonly IAppCache appCache;
+        private readonly IContentTypeService contentTypeService;
+
+        private List<string> aliasCache { get; set; }
+
         protected ContentTypeBaseSerializer(
-            IEntityService entityService, 
+            IEntityService entityService,
             ILogger<ContentTypeBaseSerializer<TObject>> logger,
             IDataTypeService dataTypeService,
             IContentTypeBaseService<TObject> baseService,
             UmbracoObjectTypes containerType,
-            IShortStringHelper shortStringHelper)
+            IShortStringHelper shortStringHelper,
+            AppCaches appCaches,
+            IContentTypeService contentTypeService)
             : base(entityService, logger, containerType)
         {
             this.dataTypeService = dataTypeService;
             this.baseService = baseService;
             this.shortStringHelper = shortStringHelper;
+
+            appCache = appCaches.RuntimeCache;
+            this.contentTypeService = contentTypeService; 
         }
 
         #region Serialization 
@@ -70,7 +82,7 @@ namespace uSync.Core.Serialization.Serializers
                             new XElement("Alias", tab.Alias),
                             new XElement("Type", tab.Type),
                             new XElement("SortOrder", tab.SortOrder)));
-                
+
             }
 
             return tabs;
@@ -118,9 +130,9 @@ namespace uSync.Core.Serialization.Serializers
                 propNode.Add(new XElement("MandatoryMessage",
                     string.IsNullOrEmpty(property.MandatoryMessage) ? "" : property.MandatoryMessage));
 
-                propNode.Add(new XElement("ValidationRegExpMessage", 
+                propNode.Add(new XElement("ValidationRegExpMessage",
                     string.IsNullOrEmpty(property.ValidationRegExpMessage) ? "" : property.ValidationRegExpMessage));
-                
+
                 propNode.Add(new XElement("LabelOnTop", property.LabelOnTop));
 
                 node.Add(propNode);
@@ -219,12 +231,7 @@ namespace uSync.Core.Serialization.Serializers
             }
 
 
-            var alias = node.GetAlias();
-            if (item.Alias != alias)
-            {
-                changes.AddUpdate("Alias", item.Alias, alias, "");
-                item.Alias = alias;
-            }
+            var alias = SetSafeAliasValue(item, node, true);
 
             var name = info.Element("Name").ValueOrDefault(string.Empty);
             if (!string.IsNullOrEmpty(name) && item.Name != name)
@@ -389,7 +396,7 @@ namespace uSync.Core.Serialization.Serializers
 
                 bool IsNew = false;
 
-                var property = GetOrCreateProperty(item, key, alias, definitionKey, propertyEditorAlias, compositeProperties,  out IsNew);
+                var property = GetOrCreateProperty(item, key, alias, definitionKey, propertyEditorAlias, compositeProperties, out IsNew);
                 if (property == null) continue;
 
                 if (key != Guid.Empty && property.Key != key)
@@ -546,6 +553,104 @@ namespace uSync.Core.Serialization.Serializers
         }
 
 
+        /// <summary>
+        ///  sets teh alias to a 'safe' value so it there is a clash 
+        ///  (because of a rename) it will still work
+        /// </summary>
+        /// <param name="item"></param>
+        /// <param name="node"></param>
+        protected string SetSafeAliasValue(TObject item, XElement node, bool ensureSafeValue)
+        {
+            var nodeAlias = node.GetAlias();
+            if (item.Alias != nodeAlias)
+            {
+                var oldAlias = item.Alias;
+
+                var safeAlias = ensureSafeValue ? GetSafeItemAlias(nodeAlias) : nodeAlias;
+                item.Alias = safeAlias;
+
+                // add the alias to the cache
+                AddAlias(safeAlias);
+
+                // remove the previous alias from our cache. 
+                RemoveAlias(oldAlias);
+
+                return safeAlias;
+            }
+
+            return nodeAlias;
+        }
+
+
+        /// <summary>
+        ///  method checks that the alias we want to set something too doesn't already exist. 
+        /// </summary>
+        /// <param name="alias"></param>
+        /// <returns></returns>
+        protected string GetSafeItemAlias(string alias)
+        {
+            // if its null we get a new list
+            EnsureAliasCache();
+
+            if (aliasCache.Contains(alias))
+            {
+                logger.LogInformation("Alias clash {alias} already exists", alias);
+                logger.LogInformation("Aliases {cache}", string.Join(",", aliasCache));
+                return $"{alias}_{Guid.NewGuid().ToShortKeyString(8)}";
+            }
+
+            return alias;
+        }
+
+        private void EnsureAliasCache()
+        {
+            aliasCache = appCache.GetCacheItem<List<string>>(
+                $"usync_{this.Id}", () =>
+                {
+                    var sw = Stopwatch.StartNew();
+                    var aliases = contentTypeService.GetAllContentTypeAliases().ToList();
+                    sw.Stop();
+                    this.logger.LogInformation("Cache hit, 'usync_{id}' fetching all aliases {time}ms", this.Id, sw.ElapsedMilliseconds);
+                    return aliases;
+                });
+
+        }
+
+        protected void ClearAliases()
+        {
+            aliasCache = null;
+            appCache.ClearByKey($"usync_{this.Id}");
+        }
+
+        protected void RemoveAlias(string alias)
+        {
+            if (aliasCache != null && aliasCache.Contains(alias))
+                aliasCache.Remove(alias);
+
+            RefreshAliasCache();
+
+            logger.LogInformation("remove [{alias}] - {cache}", alias,
+                aliasCache != null ? string.Join(",", aliasCache) : "Empty");
+        }
+
+        private void RefreshAliasCache()
+        {
+            appCache.ClearByKey($"usync_{this.Id}");
+            appCache.GetCacheItem($"usync_{this.Id}", () => { return aliasCache; });
+        }
+
+        protected void AddAlias(string alias)
+        {
+            EnsureAliasCache();
+
+            if (!aliasCache.Contains(alias))
+                aliasCache.Add(alias);
+
+            RefreshAliasCache();
+            logger.LogInformation("Add [{aliaS}] - {cache}", alias, string.Join(",", aliasCache));
+        }
+
+
 
         /// <summary>
         ///  Deserialize properties added in later versions of Umbraco.
@@ -677,7 +782,7 @@ namespace uSync.Core.Serialization.Serializers
                 else
                 {
                     // if the alias is blank, we make it up.
-                    if (string.IsNullOrWhiteSpace(alias)) 
+                    if (string.IsNullOrWhiteSpace(alias))
                         alias = name.ToSafeAlias(shortStringHelper, true);
 
                     // if the alias & type would clash with something already in the tree
@@ -698,7 +803,7 @@ namespace uSync.Core.Serialization.Serializers
                         newTab.Type = tabType;
                         if (tabKey != Guid.Empty) newTab.Key = tabKey;
                     }
-                } 
+                }
 
                 defaultSort = sortOrder + 1;
             }
@@ -741,7 +846,7 @@ namespace uSync.Core.Serialization.Serializers
             // if we don't have tabs then all unknown types are groups.
             return PropertyGroupType.Group;
         }
-        
+
 
         /// <summary>
         ///  Returns either the alias or an alias made from the name of the tab. 
@@ -1137,7 +1242,7 @@ namespace uSync.Core.Serialization.Serializers
             => baseService.GetContainers(folder, level);
 
         override protected Attempt<OperationResult<OperationResultType, EntityContainer>> CreateContainer(int parentId, string name)
-            => baseService.CreateContainer(parentId, Guid.NewGuid(),  name);
+            => baseService.CreateContainer(parentId, Guid.NewGuid(), name);
 
         public override void SaveItem(TObject item)
         {

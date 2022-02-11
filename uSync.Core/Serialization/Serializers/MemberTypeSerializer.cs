@@ -5,6 +5,7 @@ using System.Xml.Linq;
 using Microsoft.Extensions.Logging;
 
 using Umbraco.Cms.Core;
+using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Configuration;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Models.Entities;
@@ -25,8 +26,10 @@ namespace uSync.Core.Serialization.Serializers
             IEntityService entityService, ILogger<MemberTypeSerializer> logger,
             IDataTypeService dataTypeService,
             IMemberTypeService memberTypeService,
-            IShortStringHelper shortStringHelper)
-            : base(entityService, logger, dataTypeService, memberTypeService, UmbracoObjectTypes.Unknown, shortStringHelper)
+            IShortStringHelper shortStringHelper,
+            AppCaches appCaches,
+            IContentTypeService contentTypeService)
+            : base(entityService, logger, dataTypeService, memberTypeService, UmbracoObjectTypes.Unknown, shortStringHelper, appCaches, contentTypeService)
         {
             this.memberTypeService = memberTypeService;
         }
@@ -138,6 +141,8 @@ namespace uSync.Core.Serialization.Serializers
             CleanTabAliases(item);
             var details = CleanTabs(item, node, options).ToList();
 
+            SetSafeAliasValue(item, node, false);
+
             bool saveInSerializer = !options.Flags.HasFlag(SerializerFlags.DoNotSave);
             if (saveInSerializer && item.IsDirty())
                 memberTypeService.Save(item);
@@ -175,9 +180,11 @@ namespace uSync.Core.Serialization.Serializers
 
         protected override Attempt<IMemberType> CreateItem(string alias, ITreeEntity parent, string extra)
         {
+            var safeAlias = GetSafeItemAlias(alias);
+
             var item = new MemberType(shortStringHelper, -1)
             {
-                Alias = alias
+                Alias = safeAlias
             };
 
             if (parent != null)
@@ -187,6 +194,8 @@ namespace uSync.Core.Serialization.Serializers
 
                 item.SetParent(parent);
             }
+
+            AddAlias(safeAlias);
 
 
             return Attempt.Succeed((IMemberType)item);

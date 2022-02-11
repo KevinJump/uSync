@@ -7,6 +7,7 @@ using System.Xml.Linq;
 
 using Microsoft.Extensions.Logging;
 
+using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Events;
 using Umbraco.Cms.Core.Semver;
 using Umbraco.Extensions;
@@ -38,13 +39,17 @@ namespace uSync.BackOffice
         private SyncFileService _syncFileService;
         private readonly uSyncEventService _mutexService;
 
+
+        private readonly IAppCache _appCache;
+
         public uSyncService(
             ILogger<uSyncService> logger,
             IEventAggregator eventAggregator,
             uSyncConfigService uSyncConfigService,
             SyncHandlerFactory handlerFactory,
             SyncFileService syncFileService,
-            uSyncEventService mutexService)
+            uSyncEventService mutexService,
+            AppCaches appCaches)
         {
             this._logger = logger;
 
@@ -54,6 +59,8 @@ namespace uSync.BackOffice
             this._handlerFactory = handlerFactory;
             this._syncFileService = syncFileService;
             this._mutexService = mutexService;
+
+            this._appCache = appCaches.RuntimeCache;
 
             uSyncTriggers.DoExport += USyncTriggers_DoExport;
             uSyncTriggers.DoImport += USyncTriggers_DoImport;

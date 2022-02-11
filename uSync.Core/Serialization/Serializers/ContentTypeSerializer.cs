@@ -6,6 +6,7 @@ using System.Xml.Linq;
 using Microsoft.Extensions.Logging;
 
 using Umbraco.Cms.Core;
+using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Configuration;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Models.Entities;
@@ -28,8 +29,9 @@ namespace uSync.Core.Serialization.Serializers
             IDataTypeService dataTypeService,
             IContentTypeService contentTypeService,
             IFileService fileService,
-            IShortStringHelper shortStringHelper)
-            : base(entityService, logger, dataTypeService, contentTypeService, UmbracoObjectTypes.DocumentTypeContainer, shortStringHelper)
+            IShortStringHelper shortStringHelper,
+            AppCaches appCaches)
+            : base(entityService, logger, dataTypeService, contentTypeService, UmbracoObjectTypes.DocumentTypeContainer, shortStringHelper, appCaches, contentTypeService)
         {
             this.contentTypeService = contentTypeService;
             this.fileService = fileService;
@@ -140,6 +142,8 @@ namespace uSync.Core.Serialization.Serializers
             logger.LogDebug("Deserialize Second Pass {0}", item.Alias);
 
             var details = new List<uSyncChange>();
+
+            SetSafeAliasValue(item, node, false);
 
             details.AddRange(DeserializeCompositions(item, node));
             details.AddRange(DeserializeStructure(item, node));
@@ -254,6 +258,8 @@ namespace uSync.Core.Serialization.Serializers
 
         protected override Attempt<IContentType> CreateItem(string alias, ITreeEntity parent, string itemType)
         {
+            var safeAlias = GetSafeItemAlias(alias);
+
             var item = new ContentType(shortStringHelper, -1)
             {
                 Alias = alias
@@ -268,6 +274,9 @@ namespace uSync.Core.Serialization.Serializers
 
                 item.SetParent(parent);
             }
+
+            // adds this alias to the alias cache. 
+            AddAlias(safeAlias);
 
             return Attempt.Succeed((IContentType)item);
         }

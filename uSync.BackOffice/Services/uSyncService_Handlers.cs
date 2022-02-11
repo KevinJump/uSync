@@ -88,6 +88,9 @@ namespace uSync.BackOffice
                     _mutexService.FireBulkStarting(new uSyncExportStartingNotification());
                     break;
                 case HandlerActions.Import:
+                    // cleans any caches we might have set.
+                    _appCache.ClearByKey("usync_");
+
                     _mutexService.FireBulkStarting(new uSyncImportStartingNotification());
                     break;
                 case HandlerActions.Report:
