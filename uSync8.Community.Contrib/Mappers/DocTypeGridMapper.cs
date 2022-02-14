@@ -1,9 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
+using Umbraco.Core.Composing;
+using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Services;
 
@@ -39,9 +42,12 @@ namespace uSync8.Community.Contrib.Mappers
     {
         private readonly string docTypeAliasValue = "dtgeContentTypeAlias";
 
+        private readonly ILogger logger;
+
         public DocTypeGridMapper(IEntityService entityService,
             IContentTypeService contentTypeService,
-            IDataTypeService dataTypeService)
+            IDataTypeService dataTypeService,
+            ILogger logger)
             : base(entityService, contentTypeService, dataTypeService)
         { }
 
@@ -97,7 +103,59 @@ namespace uSync8.Community.Contrib.Mappers
 
             return item;
         }
-          
+
+        public override string GetImportValue(string value, string editorAlias)
+        {
+            try
+            {
+                if (value == null) return string.Empty;
+
+                var jsonValue = GetJsonValue(value);
+                if (jsonValue == null) return value.ToString();
+
+                var docType = GetDocType(jsonValue, this.docTypeAliasValue);
+                if (docType == null) return value.ToString();
+
+                // jarray of values 
+                var docValue = jsonValue.Value<JObject>("value");
+                if (docValue == null) return value.ToString();
+
+                // the doctypegrid editor wants the values in "real" json
+                // as opposed to quite a few of these properties that 
+                // have it in 'escaped' json. so slightly diffrent 
+                // then a nested content, but not by much.
+                GetExportJsonValues(docValue, docType);
+
+                return JsonConvert.SerializeObject(jsonValue, Formatting.Indented);
+            }
+            catch(Exception ex)
+            {
+                // we want to be quite non-destructive on an import, 
+                logger.Warn<DocTypeGridMapper>(ex, "Failed to sanitize the import value for property (turn on debugging for full property value)");
+                logger.Debug<DocTypeGridMapper>("Failed DocTypeValue: {value}", value ?? String.Empty);
+               
+                return value;
+            }
+        }
+
+        private JObject GetImportJsonValue(JObject item, IContentType docType)
+        {
+            foreach (var property in docType.CompositionPropertyTypes)
+            {
+                if (item.ContainsKey(property.Alias))
+                {
+                    var value = item[property.Alias];
+                    if (value != null)
+                    {
+                        var mappedVal = SyncValueMapperFactory.GetImportValue(value.ToString(), property.PropertyEditorAlias).ToString();
+                        item[property.Alias] = mappedVal.GetJsonTokenValue().ExpandAllJsonInToken();
+                    }
+                }
+            }
+
+            return item;
+        }
+
         public override IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)
         {
             var jsonValue = GetJsonValue(value);
