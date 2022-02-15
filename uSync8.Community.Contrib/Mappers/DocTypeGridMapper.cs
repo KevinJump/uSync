@@ -49,7 +49,9 @@ namespace uSync8.Community.Contrib.Mappers
             IDataTypeService dataTypeService,
             ILogger logger)
             : base(entityService, contentTypeService, dataTypeService)
-        { }
+        {
+            this.logger = logger;
+        }
 
         public override string Name => "DocType Grid Mapper";
 
