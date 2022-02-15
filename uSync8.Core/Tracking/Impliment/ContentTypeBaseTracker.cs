@@ -25,13 +25,16 @@ namespace uSync8.Core.Tracking.Impliment
             TrackingItem.Single("Folder", "/Info/Folder"),
             TrackingItem.Single("Default Template", "/Info/DefaultTemplate"),
 
+            TrackingItem.Single("HistoryCleanup:PreventCleanup", "/Info/HistoryCleanup/PreventCleanup"),
+            TrackingItem.Single("HistoryCleanup:KeepAllVersionsNewerThanDays", "/Info/HistoryCleanup/KeepAllVersionsNewerThanDays"),
+            TrackingItem.Single("HistoryCleanup:KeepLatestVersionPerDayForDays", "/Info/HistoryCleanup/KeepLatestVersionPerDayForDays"),
+
             TrackingItem.Many("Compositions", "/Info/Compositions/Composition", "@Key"),
             TrackingItem.Many("AllowedTemplates", "/Info/AllowedTemplates/Template", "@Key"),
 
             TrackingItem.Many("Allowed child node types", "/Structure/ContentType", "@Key"),
             TrackingItem.Many("Allowed child node types", "/Structure/MediaType", "@Key"),
             TrackingItem.Many("Allowed child node types", "/Structure/MemberType", "@Key"),
-
 
             TrackingItem.Many("Property", "/GenericProperties/GenericProperty", "Key", "Name"),
             TrackingItem.Many("Groups", "/Tabs/Tab", "Caption", "Caption")

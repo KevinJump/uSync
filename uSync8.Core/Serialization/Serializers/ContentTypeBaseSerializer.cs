@@ -572,7 +572,7 @@ namespace uSync8.Core.Serialization.Serializers
             return null;
         }
 
-        private TValue GetPropertyAs<TValue>(PropertyInfo info, PropertyType property)
+        protected TValue GetPropertyAs<TValue>(PropertyInfo info, object property)
         {
             if (info == null) return default;
 
