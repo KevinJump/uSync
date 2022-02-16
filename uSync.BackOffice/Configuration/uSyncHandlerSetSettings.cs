@@ -1,8 +1,12 @@
-﻿using System;
+﻿using Newtonsoft.Json.Serialization;
+using Newtonsoft.Json;
+
+using System;
 using System.Collections.Generic;
 
 namespace uSync.BackOffice.Configuration
 {
+    [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public class uSyncHandlerSetSettings
     {
         /// <summary>
