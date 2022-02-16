@@ -3,7 +3,7 @@
   "version":  "8",
   "javascript": [
 
-    "~/App_Plugins/uSync8/usync_8_10.js",
+    "~/App_Plugins/uSync8/usync_8_11.js",
 
     "~/App_Plugins/uSync8/uSyncService.js",
     "~/App_Plugins/uSync8/uSyncHub.js",
@@ -18,7 +18,7 @@
     "~/App_Plugins/uSync8/components/uSyncProgressViewComponent.js"
   ],
   "css": [
-    "~/App_Plugins/uSync8/usync_8_10.css",
+    "~/App_Plugins/uSync8/usync_8_11.css",
     "~/App_Plugins/uSync8/usync.css"
   ]
 }
