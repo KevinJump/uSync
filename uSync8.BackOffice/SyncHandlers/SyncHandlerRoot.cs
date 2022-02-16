@@ -786,6 +786,7 @@ namespace uSync8.BackOffice.SyncHandlers
                     // get path does some actual disk checks, so we don't do it unless we have to (e.g long path fails)
                     filename = GetPath(folder, item, config.GuidNames, config.UseFlatStructure);
                     syncFileService.SaveXElement(attempt.Item, filename);
+                    logger.Debug(handlerType, "Saving Export {file}", filename);
                 }
                 else
                 {
@@ -1121,9 +1122,13 @@ namespace uSync8.BackOffice.SyncHandlers
         protected virtual void EventDeletedItem(IService sender, DeleteEventArgs<TObject> e)
         {
             if (uSync8BackOffice.eventsPaused) return;
-            foreach (var item in e.DeletedEntities)
+
+            using (logger.DebugDuration(handlerType, "EventDeleteItem", "EventDeleteItem: Complete"))
             {
-                ExportDeletedItem(item, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
+                foreach (var item in e.DeletedEntities)
+                {
+                    ExportDeletedItem(item, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
+                }
             }
         }
 
@@ -1131,21 +1136,24 @@ namespace uSync8.BackOffice.SyncHandlers
         {
             if (uSync8BackOffice.eventsPaused) return;
 
-            foreach (var item in e.SavedEntities)
+            using (logger.DebugDuration(handlerType, "EventSavedItem", "EventSavedItem: Complete"))
             {
-                var attempts = Export(item, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
+                foreach (var item in e.SavedEntities)
+                {
+                    var attempts = Export(item, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
 
-                // if we are using guid names and a flat structure then the clean doesn't need to happen
-                // if (!(this.DefaultConfig.GuidNames && this.DefaultConfig.UseFlatStructure))
+                    // if we are using guid names and a flat structure then the clean doesn't need to happen
+                    // if (!(this.DefaultConfig.GuidNames && this.DefaultConfig.UseFlatStructure))
 
-                // #216 clean up all the time, because if someone recreates a doctype, we want to find the old 
-                // version of that doctype and call it a rename
-                // {
+                    // #216 clean up all the time, because if someone recreates a doctype, we want to find the old 
+                    // version of that doctype and call it a rename
+                    // {
                     foreach (var attempt in attempts.Where(x => x.Success && x.Change > ChangeType.NoChange))
                     {
                         this.CleanUp(item, attempt.FileName, Path.Combine(rootFolder, this.DefaultFolder));
                     }
-                // }
+                    // }
+                }
             }
         }
 
@@ -1153,15 +1161,18 @@ namespace uSync8.BackOffice.SyncHandlers
         {
             if (uSync8BackOffice.eventsPaused) return;
 
-            foreach (var item in e.MoveInfoCollection)
+            using (logger.DebugDuration(handlerType, "EventMovedItem", "EventMovedItem: Complete"))
             {
-                var attempts = Export(item.Entity, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
-
-                if (!(this.DefaultConfig.GuidNames && this.DefaultConfig.UseFlatStructure))
+                foreach (var item in e.MoveInfoCollection)
                 {
-                    foreach (var attempt in attempts.Where(x => x.Success && x.Change > ChangeType.NoChange))
+                    var attempts = Export(item.Entity, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
+
+                    if (!(this.DefaultConfig.GuidNames && this.DefaultConfig.UseFlatStructure))
                     {
-                        this.CleanUp(item.Entity, attempt.FileName, Path.Combine(rootFolder, this.DefaultFolder));
+                        foreach (var attempt in attempts.Where(x => x.Success && x.Change > ChangeType.NoChange))
+                        {
+                            this.CleanUp(item.Entity, attempt.FileName, Path.Combine(rootFolder, this.DefaultFolder));
+                        }
                     }
                 }
             }
@@ -1180,6 +1191,7 @@ namespace uSync8.BackOffice.SyncHandlers
                 {
                     syncFileService.SaveXElement(attempt.Item, filename);
                     this.CleanUp(item, filename, Path.Combine(rootFolder, this.DefaultFolder));
+                    logger.Debug(handlerType, "Saved Deleted file {file}", filename);
                 }
             }
         }

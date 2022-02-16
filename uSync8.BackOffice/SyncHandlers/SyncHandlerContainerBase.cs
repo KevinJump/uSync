@@ -152,9 +152,12 @@ namespace uSync8.BackOffice.SyncHandlers
         {
             if (uSync8BackOffice.eventsPaused) return;
 
-            foreach (var folder in e.SavedEntities)
+            using (logger.DebugDuration(handlerType, "EventContainerSaved", "EventContainerSaved: Complete"))
             {
-                UpdateFolder(folder.Id, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
+                foreach (var folder in e.SavedEntities)
+                {
+                    UpdateFolder(folder.Id, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
+                }
             }
         }
     }

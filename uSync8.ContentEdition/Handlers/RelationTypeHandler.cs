@@ -142,20 +142,23 @@ namespace uSync8.ContentEdition.Handlers
             }
         }
 
-            private void RelationService_SavedRelation(IRelationService sender, Umbraco.Core.Events.SaveEventArgs<IRelation> e)
+        private void RelationService_SavedRelation(IRelationService sender, Umbraco.Core.Events.SaveEventArgs<IRelation> e)
         {
             if (uSync8BackOffice.eventsPaused) return;
 
-            lock (saveLock)
+            using (logger.DebugDuration(handlerType, "SavedRelation", "SavedRelation: Complete"))
             {
-                saveTimer.Stop();
-                saveTimer.Start();
-
-                // add each item to the save list (if we haven't already)
-                foreach (var item in e.SavedEntities)
+                lock (saveLock)
                 {
-                    if (!pendingSaveIds.Contains(item.RelationTypeId))
-                        pendingSaveIds.Add(item.RelationTypeId);
+                    saveTimer.Stop();
+                    saveTimer.Start();
+
+                    // add each item to the save list (if we haven't already)
+                    foreach (var item in e.SavedEntities)
+                    {
+                        if (!pendingSaveIds.Contains(item.RelationTypeId))
+                            pendingSaveIds.Add(item.RelationTypeId);
+                    }
                 }
             }
         }
@@ -177,30 +180,36 @@ namespace uSync8.ContentEdition.Handlers
         {
             if (uSync8BackOffice.eventsPaused) return;
 
-            var types = new List<int>();
-
-            foreach (var item in e.DeletedEntities)
+            using (logger.DebugDuration(handlerType, "DeletedRelations", "DeletedRelations: Complete"))
             {
-                if (!types.Contains(item.RelationTypeId))
-                    types.Add(item.RelationTypeId);
-            }
+                var types = new List<int>();
 
-            UpdateRelationTypes(types);
+                foreach (var item in e.DeletedEntities)
+                {
+                    if (!types.Contains(item.RelationTypeId))
+                        types.Add(item.RelationTypeId);
+                }
+
+                UpdateRelationTypes(types);
+            }
         }
 
         private void UpdateRelationTypes(IEnumerable<int> types)
         {
-            foreach (var type in types)
+            using (logger.DebugDuration(handlerType, "UpdateRelationTypes", "UpdateRelationTypes: Complete"))
             {
-                var relationType = relationService.GetRelationTypeById(type);
-
-                var attempts = Export(relationType, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
-
-                if (!(this.DefaultConfig.GuidNames && this.DefaultConfig.UseFlatStructure))
+                foreach (var type in types)
                 {
-                    foreach (var attempt in attempts.Where(x => x.Success))
+                    var relationType = relationService.GetRelationTypeById(type);
+
+                    var attempts = Export(relationType, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
+
+                    if (!(this.DefaultConfig.GuidNames && this.DefaultConfig.UseFlatStructure))
                     {
-                        this.CleanUp(relationType, attempt.FileName, Path.Combine(rootFolder, this.DefaultFolder));
+                        foreach (var attempt in attempts.Where(x => x.Success))
+                        {
+                            this.CleanUp(relationType, attempt.FileName, Path.Combine(rootFolder, this.DefaultFolder));
+                        }
                     }
                 }
             }

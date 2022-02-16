@@ -93,14 +93,17 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
         {
             if (uSync8BackOffice.eventsPaused) return;
 
-            foreach (var item in e.SavedEntities)
+            using (logger.DebugDuration(handlerType, "SavingLanguage", "SavingLanguage: Complete"))
             {
-                // 
-                if (item.Id == 0)
+                foreach (var item in e.SavedEntities)
                 {
-                    newLanguages[item.IsoCode] = item.CultureName;
-                    // is new, we want to set this as a flag, so we don't do the full content save.n
-                    // newLanguages.Add(item.IsoCode);
+                    // 
+                    if (item.Id == 0)
+                    {
+                        newLanguages[item.IsoCode] = item.CultureName;
+                        // is new, we want to set this as a flag, so we don't do the full content save.n
+                        // newLanguages.Add(item.IsoCode);
+                    }
                 }
             }
         }
@@ -109,39 +112,42 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
         {
             if (uSync8BackOffice.eventsPaused) return;
 
-            foreach (var item in e.SavedEntities)
+            using (logger.DebugDuration(handlerType, "SavedLanguage", "SavedLanguage: Complete"))
             {
-                bool newItem = false;
-                if (newLanguages.Count > 0 && newLanguages.ContainsKey(item.IsoCode))
+                foreach (var item in e.SavedEntities)
                 {
-                    newItem = true;
-                    newLanguages.TryRemove(item.IsoCode, out string name);
-                }
+                    bool newItem = false;
+                    if (newLanguages.Count > 0 && newLanguages.ContainsKey(item.IsoCode))
+                    {
+                        newItem = true;
+                        newLanguages.TryRemove(item.IsoCode, out string name);
+                    }
 
-                if (item.WasPropertyDirty("IsDefault"))
-                {
-                    // changeing, this change doesn't trigger a save of the other languages.
-                    // so we need to save all language files. 
-                    this.ExportAll(Path.Combine(rootFolder, DefaultFolder), DefaultConfig, null);
-                }
+                    if (item.WasPropertyDirty("IsDefault"))
+                    {
+                        // changeing, this change doesn't trigger a save of the other languages.
+                        // so we need to save all language files. 
+                        this.ExportAll(Path.Combine(rootFolder, DefaultFolder), DefaultConfig, null);
+                    }
 
 
-                var attempts = Export(item, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
+                    var attempts = Export(item, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
 
-                if (!newItem && item.WasPropertyDirty(nameof(ILanguage.IsoCode)))
-                {
-                    // The language code changed, this can mean we need to do a full content export. 
-                    // + we should export the languages again!
-                    uSyncTriggers.TriggerExport(rootFolder, new List<string>() {
+                    if (!newItem && item.WasPropertyDirty(nameof(ILanguage.IsoCode)))
+                    {
+                        // The language code changed, this can mean we need to do a full content export. 
+                        // + we should export the languages again!
+                        uSyncTriggers.TriggerExport(rootFolder, new List<string>() {
                         UdiEntityType.Document, UdiEntityType.Language }, null);
-                }
+                    }
 
-                // we always clean up languages, because of the way they are stored. 
-                foreach (var attempt in attempts.Where(x => x.Success))
-                {
-                    this.CleanUp(item, attempt.FileName, Path.Combine(rootFolder, this.DefaultFolder));
-                }
+                    // we always clean up languages, because of the way they are stored. 
+                    foreach (var attempt in attempts.Where(x => x.Success))
+                    {
+                        this.CleanUp(item, attempt.FileName, Path.Combine(rootFolder, this.DefaultFolder));
+                    }
 
+                }
             }
         }
 

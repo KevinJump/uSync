@@ -11,6 +11,7 @@ using Newtonsoft.Json;
 using Umbraco.Core;
 using Umbraco.Core.Composing;
 using Umbraco.Core.Configuration;
+using Umbraco.Core.Logging;
 using Umbraco.Web;
 using Umbraco.Web.JavaScript;
 
@@ -34,13 +35,17 @@ namespace uSync8.HistoryView
         private readonly SyncFileService syncFileService;
         private readonly string historyFolder;
         private readonly uSyncSettings uSyncSettings;
+        private readonly IProfilingLogger logger;
 
 
         public HistoryComponent(SyncFileService syncFileService,
             uSyncConfig syncConfig,
+            IProfilingLogger logger,
             IUmbracoContextFactory umbracoContextFactory,
             IGlobalSettings globalSettings)
         {
+            this.logger = logger;
+
             this.umbracoContextFactory = umbracoContextFactory;
             this.uSyncSettings = syncConfig.Settings;
 
@@ -74,23 +79,26 @@ namespace uSync8.HistoryView
         {
             if (!uSyncSettings.EnableHistory) return;
 
-            var changes = e.Actions.Where(x => x.Change > ChangeType.NoChange);
-
-            if (changes.Any())
+            using (logger.DebugDuration<HistoryComponent>("History - ImportComplete", "History - ImportComplete Finished"))
             {
-                var changeDetail = new SyncHistoryView
-                {
-                    Server = HttpContext.Current?.Server?.MachineName ?? "Unknown",
-                    Action = "Import",
-                    Username = GetUsername(),
-                    When = DateTime.Now,
-                    Changes = changes.ToList()
-                };
+                var changes = e.Actions.Where(x => x.Change > ChangeType.NoChange);
 
-                var actionString = JsonConvert.SerializeObject(changeDetail, Formatting.Indented);
-                var filename = $"History_{DateTime.Now:yyyyMMdd_HHmmss}.history";
-                var path = Path.Combine(historyFolder, DateTime.Now.ToString("yyyy"), DateTime.Now.ToString("MM"), filename);
-                syncFileService.SaveFile(path, actionString);
+                if (changes.Any())
+                {
+                    var changeDetail = new SyncHistoryView
+                    {
+                        Server = HttpContext.Current?.Server?.MachineName ?? "Unknown",
+                        Action = "Import",
+                        Username = GetUsername(),
+                        When = DateTime.Now,
+                        Changes = changes.ToList()
+                    };
+
+                    var actionString = JsonConvert.SerializeObject(changeDetail, Formatting.Indented);
+                    var filename = $"History_{DateTime.Now:yyyyMMdd_HHmmss}.history";
+                    var path = Path.Combine(historyFolder, DateTime.Now.ToString("yyyy"), DateTime.Now.ToString("MM"), filename);
+                    syncFileService.SaveFile(path, actionString);
+                }
             }
         }
 
