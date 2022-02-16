@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Xml.Linq;
 
 using Microsoft.Extensions.Logging;
@@ -24,23 +25,30 @@ namespace uSync.Core.Serialization.Serializers
         private readonly IContentTypeService contentTypeService;
         private readonly IFileService fileService;
 
+        private readonly uSyncCapabilityChecker _capabilities;
+
         public ContentTypeSerializer(
             IEntityService entityService, ILogger<ContentTypeSerializer> logger,
             IDataTypeService dataTypeService,
             IContentTypeService contentTypeService,
             IFileService fileService,
             IShortStringHelper shortStringHelper,
-            AppCaches appCaches)
+            AppCaches appCaches,
+            uSyncCapabilityChecker uSyncCapabilityChecker)
             : base(entityService, logger, dataTypeService, contentTypeService, UmbracoObjectTypes.DocumentTypeContainer, shortStringHelper, appCaches, contentTypeService)
         {
             this.contentTypeService = contentTypeService;
             this.fileService = fileService;
+            _capabilities = uSyncCapabilityChecker;
         }
 
         protected override SyncAttempt<XElement> SerializeCore(IContentType item, SyncSerializerOptions options)
         {
             var node = SerializeBase(item);
             var info = SerializeInfo(item);
+
+            var history = SerializeCleanupHistory(item);
+            if (history != null) info.Add(history);
 
             var parent = item.ContentTypeComposition.FirstOrDefault(x => x.Id == item.ParentId);
             if (parent != null)
@@ -148,17 +156,24 @@ namespace uSync.Core.Serialization.Serializers
             details.AddRange(DeserializeCompositions(item, node));
             details.AddRange(DeserializeStructure(item, node));
 
+            // When doing this reflectiony - it doesn't set is dirty. 
+            var historyChanges = DeserializeCleanupHistory(item, node);
+            var historyUpdated = historyChanges.Any(x => x.Change > ChangeDetailType.NoChange);
+            details.AddRange(historyChanges);
+
+
             CleanTabAliases(item);
 
             // clean tabs 
             details.AddRange(CleanTabs(item, node, options));
 
             bool saveInSerializer = !options.Flags.HasFlag(SerializerFlags.DoNotSave);
-            if (saveInSerializer && item.IsDirty())
+            if (saveInSerializer && (item.IsDirty() || historyUpdated))
             {
                 var dirty = string.Join(", ", item.GetDirtyProperties());
                 dirty += string.Join(", ", item.PropertyGroups.Where(x => x.IsDirty()).Select(x => $"Group:{x.Name}"));
                 dirty += string.Join(", ", item.PropertyTypes.Where(x => x.IsDirty()).Select(x => $"Property:{x.Name}"));
+                dirty += historyUpdated ? " CleanupHistory" : "";
                 logger.LogDebug("Saving in Serializer because item is dirty [{properties}]", dirty);
 
                 contentTypeService.Save(item);
@@ -285,6 +300,127 @@ namespace uSync.Core.Serialization.Serializers
         {
             logger.LogDebug("Saving Container (In main class) {0}", container.Key.ToString());
             contentTypeService.SaveContainer(container);
+        }
+
+        /// History Cleanup (added in v9.1) 
+         
+
+        private string _historyCleanupName = "HistoryCleanup";
+        private string[] _historyCleanupProperties = new string[]
+        {
+            "PreventCleanup", "KeepAllVersionsNewerThanDays", "KeepLatestVersionPerDayForDays"
+        };
+
+        private XElement SerializeCleanupHistory(IContentType item)
+        {
+            if (_capabilities.HasHistoryCleanup)
+            {
+                try
+                {
+                    var historyCleanupInfo = item.GetType().GetProperty(_historyCleanupName);
+                    if (historyCleanupInfo != null)
+                    {
+                        var historyCleanup = historyCleanupInfo.GetValue(item);
+                        if (historyCleanup != null)
+                        {
+                            var history = new XElement(_historyCleanupName);
+                            foreach (var propertyName in _historyCleanupProperties)
+                            {
+                                var property = historyCleanup.GetType().GetProperty(propertyName);
+                                if (property != null)
+                                {
+                                    history.Add(new XElement(property.Name, GetPropertyAs<string>(property, historyCleanup) ?? ""));
+                                }
+                            }
+                            return history;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // we are very defensive. with the 'new' - if for some reason we can't read this, log it, but carry on.
+                    logger.LogWarning(ex, "Error tryng to get the HistoryCleanup settings for this node.");
+                }
+            }
+
+            return null;
+        }
+
+
+        private IEnumerable<uSyncChange> DeserializeCleanupHistory(IContentType item, XElement node)
+        {
+            var emtpy = Enumerable.Empty<uSyncChange>();
+            if (!_capabilities.HasHistoryCleanup || node == null) return emtpy;
+
+            var cleanupNode = node.Element("Info")?.Element(_historyCleanupName);
+            if (cleanupNode == null) return emtpy;
+
+            try
+            {
+                // get the history cleanup property
+                var historyCleanupInfo = item.GetType().GetProperty(_historyCleanupName);
+                if (historyCleanupInfo == null) return emtpy;
+
+                // get the history cleanup value
+                var historyCleanup = historyCleanupInfo.GetValue(item);
+                if (historyCleanup == null) return emtpy;
+
+                var changes = new List<uSyncChange>();
+
+                // go through the values in the XML 
+                foreach (var element in cleanupNode.Elements())
+                {
+                    var property = historyCleanup.GetType().GetProperty(element.Name.LocalName);
+                    if (property == null) continue;
+
+                    var current = GetPropertyAs<string>(property, historyCleanup);
+                    if (element.Value != current)
+                    {
+                        // now set it. 
+                        var updatedValue = element.Value.TryConvertTo(property.PropertyType);
+                        if (updatedValue.Success)
+                        {
+                            logger.LogDebug("Saving HistoryCleanup Value: {name} {value}", element.Name.LocalName, updatedValue.Result);
+                            changes.AddUpdate($"{_historyCleanupName}:{element.Name.LocalName}", current, updatedValue.Result, $"{_historyCleanupName}/{element.Name.LocalName}");
+                            property.SetValue(historyCleanup, updatedValue.Result);
+                        }
+                    }
+                }
+
+                return changes;
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Error tryng to get the HistoryCleanup settings for this node.");
+            }
+
+            return emtpy;
+        }
+
+        protected override XElement CleanseNode(XElement node)
+        {
+            if (!_capabilities.HasHistoryCleanup && node.Element("Info")?.Element(_historyCleanupName) != null)
+            {
+                node.Element("Info").Element(_historyCleanupName).Remove();
+            }
+
+            return base.CleanseNode(node);
+        }
+
+
+        protected TValue GetPropertyAs<TValue>(PropertyInfo info, object property)
+        {
+            if (info == null) return default;
+
+            var value = info.GetValue(property);
+            if (value == null) return default;
+
+            var result = value.TryConvertTo<TValue>();
+            if (result.Success)
+                return result.Result;
+
+            return default;
+
         }
     }
 }
