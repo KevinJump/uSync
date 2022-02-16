@@ -765,11 +765,13 @@ namespace uSync8.BackOffice.SyncHandlers
 
         virtual public IEnumerable<uSyncAction> Export(TObject item, string folder, HandlerSettings config)
         {
-            if (item == null)
+            if (item == null) 
                 return uSyncAction.Fail(nameof(item), typeof(TObject), ChangeType.Fail, "Item not set").AsEnumerableOfOne();
+            
 
             if (!uSyncService.FireExportingItem(item))
             {
+                logger.Debug(handlerType, "Exporting of item stopped by delegate event");
                 return uSyncActionHelper<TObject>
                     .ReportAction(ChangeType.NoChange, GetItemName(item), string.Empty, GetItemKey(item), this.Alias)
                     .AsEnumerableOfOne();
@@ -792,6 +794,10 @@ namespace uSync8.BackOffice.SyncHandlers
                 {
                     return uSyncAction.SetAction(true, filename, type: typeof(TObject), change: ChangeType.NoChange, message: "Not Exported (Based on config)", filename: filename).AsEnumerableOfOne();
                 }
+            }
+            else
+            {
+                logger.Debug(handlerType, "Serialization failed {reason} {message}", attempt.Exception?.Message ?? "", attempt.Message ?? "");
             }
 
             uSyncService.FireExportedItem(attempt.Item, ChangeType.Export);
@@ -845,7 +851,7 @@ namespace uSync8.BackOffice.SyncHandlers
             {
                 // todo: this is only matching by key, but non-tree based serializers also delete by alias.
                 // so this check actually has to be booted back down to the serializer.
-                if (actions.Any(x => x.Change != ChangeType.Delete && DoActionsMatch(x, deleteAction)))
+                if (actions.Any(x => x.Change != ChangeType.NoChange && x.Change != ChangeType.Delete && DoActionsMatch(x, deleteAction)))
                 {
                     var duplicateAction = uSyncActionHelper<TObject>.ReportActionFail(deleteAction.Name,
                         $"Duplicate! {deleteAction.Name} exists both as delete and import action");
@@ -1189,7 +1195,7 @@ namespace uSync8.BackOffice.SyncHandlers
             var attempt = serializer.SerializeEmpty(item, SyncActionType.Delete, string.Empty);
             if (ShouldExport(attempt.Item, config))
             {
-                if (attempt.Success && attempt.Change > ChangeType.NoChange)
+                if (attempt.Success && attempt.Change != ChangeType.NoChange)
                 {
                     syncFileService.SaveXElement(attempt.Item, filename);
 
