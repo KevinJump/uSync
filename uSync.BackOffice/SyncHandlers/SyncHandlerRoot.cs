@@ -1127,9 +1127,15 @@ namespace uSync.BackOffice.SyncHandlers
             {
                 var attempts = Export(item.Entity, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
 
-                foreach (var attempt in attempts.Where(x => x.Success))
+                if (!this.DefaultConfig.UseFlatStructure)
                 {
-                    this.CleanUp(item.Entity, attempt.FileName, Path.Combine(rootFolder, this.DefaultFolder));
+                    // moves only need cleaning up if we are not using flat, because 
+                    // with flat the file will always be in the same folder.
+
+                    foreach (var attempt in attempts.Where(x => x.Success))
+                    {
+                        this.CleanUp(item.Entity, attempt.FileName, Path.Combine(rootFolder, this.DefaultFolder));
+                    }
                 }
             }
         }
@@ -1144,7 +1150,14 @@ namespace uSync.BackOffice.SyncHandlers
             if (attempt.Success)
             {
                 syncFileService.SaveXElement(attempt.Item, filename);
-                this.CleanUp(item, filename, Path.Combine(rootFolder, this.DefaultFolder));
+
+                // so check - it shouldn't (under normal operation) 
+                // be possible for a clash to exist at delete, because nothing else 
+                // will have changed (like name or location) 
+
+                // we only then do this if we are not using flat structure. 
+                if (!DefaultConfig.UseFlatStructure)
+                    this.CleanUp(item, filename, Path.Combine(rootFolder, this.DefaultFolder));
             }
         }
 
