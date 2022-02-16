@@ -111,8 +111,6 @@ namespace uSync8.Core.Serialization.Serializers
             details.AddRange(DeserializeTabs(item, node));
             details.AddRange(DeserializeProperties(item, node, options));
 
-            details.AddRange(DeserializeCleanupHistory(item, node));
-
             // content type only property stuff.
             details.AddRange(DeserializeContentTypeProperties(item, node));
 
@@ -146,17 +144,23 @@ namespace uSync8.Core.Serialization.Serializers
             details.AddRange(DeserializeCompositions(item, node));
             details.AddRange(DeserializeStructure(item, node));
 
+            // When doing this reflectiony - it doesn't set is dirty. 
+            var historyChanges = DeserializeCleanupHistory(item, node);
+            var historyUpdated = historyChanges.Any(x => x.Change > ChangeDetailType.NoChange);
+            details.AddRange(historyChanges);
+
             CleanTabAliases(item);
 
             // clean tabs 
             details.AddRange(CleanTabs(item, node, options));
 
             bool saveInSerializer = !options.Flags.HasFlag(SerializerFlags.DoNotSave);
-            if (saveInSerializer && item.IsDirty())
+            if (saveInSerializer && (item.IsDirty() || historyUpdated))
             {
                 var dirty = string.Join(", ", item.GetDirtyProperties());
                 dirty += string.Join(", ", item.PropertyGroups.Where(x => x.IsDirty()).Select(x => $"Group:{x.Name}"));
                 dirty += string.Join(", ", item.PropertyTypes.Where(x => x.IsDirty()).Select(x => $"Property:{x.Name}"));
+                dirty += historyUpdated ? " CleanupHistory" : "";
                 logger.Debug<ContentTypeSerializer>("Saving in Serializer because item is dirty [{properties}]", dirty); 
 
                 contentTypeService.Save(item);
@@ -360,6 +364,7 @@ namespace uSync8.Core.Serialization.Serializers
                         var updatedValue = element.Value.TryConvertTo(property.PropertyType);
                         if (updatedValue.Success)
                         {
+                            logger.Debug<ContentTypeSerializer>("Saving HistoryCleanup Value: {name} {value}", element.Name.LocalName, updatedValue.Result);
                             changes.AddUpdate($"{_historyCleanupName}:{element.Name.LocalName}", current, updatedValue.Result, $"{_historyCleanupName}/{element.Name.LocalName}");
                             property.SetValue(historyCleanup, updatedValue.Result);
                         }
