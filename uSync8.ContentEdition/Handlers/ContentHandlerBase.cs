@@ -5,6 +5,7 @@ using System.Xml.Linq;
 
 using Umbraco.Core;
 using Umbraco.Core.Cache;
+using Umbraco.Core.Events;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Services;
@@ -219,8 +220,22 @@ namespace uSync8.ContentEdition.Handlers
         }
 
         /// <summary>
-        ///  for content, we could have 100,000s of files and reading them all would be slow. 
+        ///  Lean cleanup for content/media
         /// </summary>
+        /// <remarks>
+        ///  For content/media, we could have 100,000s of files and reading them all would be slow. 
+        ///  
+        ///  but the current cleanup lets us get away with all sorts of strange user behaviors 
+        ///  (like bad merges, copying trees over each other etc). because cleanup does something
+        ///  about it. 
+        ///  
+        ///  this new clean up (only for content/media) doesn't do as much checking if it can
+        ///  get away with it, which means we should only see low performance for content moving
+        ///  on non-flat file structures. and renames when not using guid filenames. 
+        ///  
+        ///  for large site performance we might start recommending flat & guid as this removes
+        ///  the need for this check completly, so making it quicker all round. 
+        /// </remarks>
         protected override void CleanUp(TObject item, string newFile, string folder)
         {
             // for content this clean up check only catches when an item is moved from
@@ -236,8 +251,12 @@ namespace uSync8.ContentEdition.Handlers
 
             // so we can skip this step and get a much quicker save process.
             if (this.DefaultConfig.GuidNames && this.DefaultConfig.UseFlatStructure) return;
-            base.CleanUp(item, newFile, folder);
+
+            // check to see if we think this was a rename (so only do the clean up if we really have to)
+            if (item.WasPropertyDirty(nameof(item.Name)) || item.WasPropertyDirty(nameof(item.ParentId)))
+            {
+                base.CleanUp(item, newFile, folder);
+            }
         }
     }
-
 }
