@@ -174,6 +174,29 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         }
 
 
+        protected override void CleanUp(TObject item, string newFile, string folder)
+        {
+            // for content this clean up check only catches when an item is moved from
+            // one location to another, if the site is setup to useGuidNames and a flat 
+            // structure that rename won't actually leave any old files on disk. 
+
+            bool quickCleanup = this.DefaultConfig.GetSetting("QuickCleanup", false);
+            if (quickCleanup)
+            {
+                logger.LogDebug("Quick cleanup is on, so not looking in all config files");
+                return;
+            }
+
+            // so we can skip this step and get a much quicker save process.
+            if (this.DefaultConfig.GuidNames && this.DefaultConfig.UseFlatStructure) return;
+
+            // check to see if we think this was a rename (so only do the clean up if we really have to)
+            if (item.WasPropertyDirty(nameof(item.Name)) || item.WasPropertyDirty(nameof(item.ParentId)))
+            {
+                base.CleanUp(item, newFile, folder);
+            }
+        }
+
     }
 
 }
