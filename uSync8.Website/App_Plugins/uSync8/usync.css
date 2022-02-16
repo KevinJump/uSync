@@ -410,3 +410,32 @@ ul.usync-action-list {
 .usync-change-row-Warn {
     background-color: #FFFDE7;
 }
+
+
+.usync-group-box-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+    .usync-group-box-title i {
+        font-size: 26pt;
+        padding-right: 10px;
+    }
+
+
+.usync-fresh-view {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    pointer-events: none;
+}
+.usync-fresh-view .umb-empty-state {
+    color: #ddd;
+}

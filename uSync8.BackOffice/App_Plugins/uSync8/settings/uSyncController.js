@@ -16,6 +16,7 @@
         vm.syncing = false;
         vm.hideLink = false;
         vm.showSpinner = false;
+        vm.fresh = true;
 
         vm.isLoadbalanced = Umbraco.Sys.ServerVariables.uSync.isLoadBalanced;
 
@@ -98,11 +99,14 @@
 
         vm.savings = { show: false, title: "", message: "" };
         vm.godo = [
-            { time: 0, message: "Worth checking" },
+            { time: 0, message: "but its always worth checking." },
+            { time: 0, message: "maybe add a cool new feature to your site. 🌟" },
+            { time: 0, message: "if that is what you were expecting ... then yeah 🎉" },
+            { time: 0, message: "not everything has to change. 🤷‍♂️" },
             { time: 180, message: "Go make a cup of tea" },
             { time: 300, message: "Go have a quick chat" },
             { time: 900, message: "Go for a nice walk outside 🚶‍♀️" },
-            { time: 3600, message: "You deserve a break" }
+            { time: 3600, message: "You deserve a break, go be with the trees 🌲🌳🌴" }
         ];
 
         init();
@@ -320,13 +324,19 @@
                 vm.savings.message = '';
 
                 for (let x = 0; x < vm.godo.length; x++) {
-                    if (vm.godo[x].time < time) {
+                    if (vm.godo[x].time <= time) {
                         vm.savings.message = vm.godo[x].message;
                     }
                     else {
                         break;
                     }
                 }
+            }
+            else if (time == 0) {
+                var r = Math.floor(Math.random() * 4);
+                vm.savings.show = true;
+                vm.savings.title = 'No changes this time, ';
+                vm.savings.message = vm.godo[r].message;
             }
         }
 
@@ -439,6 +449,7 @@
         function resetStatus(mode) {
             vm.warnings = {};
 
+            vm.fresh = false;
             vm.reported = vm.showAll = false;
             vm.working = true;
             vm.showSpinner = false; 
