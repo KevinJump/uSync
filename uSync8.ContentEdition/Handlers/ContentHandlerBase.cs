@@ -188,7 +188,7 @@ namespace uSync8.ContentEdition.Handlers
 
 
         public virtual IEnumerable<uSyncAction> ProcessCleanActions(string folder, IEnumerable<uSyncAction> actions, HandlerSettings config)
-        { 
+        {
             var cleans = actions.Where(x => x.Change == ChangeType.Clean && !string.IsNullOrWhiteSpace(x.FileName)).ToList();
             if (cleans.Count == 0) return Enumerable.Empty<uSyncAction>();
 
@@ -216,6 +216,27 @@ namespace uSync8.ContentEdition.Handlers
             }
 
             return false;
+        }
+
+        /// <summary>
+        ///  for content, we could have 100,000s of files and reading them all would be slow. 
+        /// </summary>
+        protected override void CleanUp(TObject item, string newFile, string folder)
+        {
+            // for content this clean up check only catches when an item is moved from
+            // one location to another, if the site is setup to useGuidNames and a flat 
+            // structure that rename won't actually leave any old files on disk. 
+
+            bool quickCleanup = this.DefaultConfig.GetSetting("QuickCleanup", false);
+            if (quickCleanup)
+            {
+                logger.Debug(handlerType, "Quick cleanup is on, so not looking in all config files");
+                return;
+            }
+
+            // so we can skip this step and get a much quicker save process.
+            if (this.DefaultConfig.GuidNames && this.DefaultConfig.UseFlatStructure) return;
+            base.CleanUp(item, newFile, folder);
         }
     }
 
