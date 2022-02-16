@@ -1167,8 +1167,10 @@ namespace uSync8.BackOffice.SyncHandlers
                 {
                     var attempts = Export(item.Entity, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
 
-                    if (!(this.DefaultConfig.GuidNames && this.DefaultConfig.UseFlatStructure))
+                    if (!this.DefaultConfig.UseFlatStructure)
                     {
+                        // moves only need cleaning up if we are not using flat, because 
+                        // with flat the file will always be in the same folder.
                         foreach (var attempt in attempts.Where(x => x.Success && x.Change > ChangeType.NoChange))
                         {
                             this.CleanUp(item.Entity, attempt.FileName, Path.Combine(rootFolder, this.DefaultFolder));
