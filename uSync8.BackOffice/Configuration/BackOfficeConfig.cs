@@ -444,8 +444,6 @@ namespace uSync8.BackOffice.Configuration
             var filePath = Umbraco.Core.IO.IOHelper.MapPath(settingsFile);
             if (File.Exists(filePath))
             {
-                logger.Debug<uSyncConfig>("Loading Settings from {filePath}", filePath);
-
                 var node = XElement.Load(filePath);
                 var settingsNode = node.Element("BackOffice");
                 if (settingsNode != null)
