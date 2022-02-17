@@ -5,7 +5,7 @@
         <uSyncPackageContentFilesPath>$(MSBuildThisFileDirectory)..\content\$(uSyncPluginFolder)\**\*.*</uSyncPackageContentFilesPath>
     </PropertyGroup>
 
-    <Target Name="CopyuSyncPackageAssets" BeforeTargets="Build">
+    <Target Name="CopyuSyncPackageAssets" BeforeTargets="BeforeBuild">
         <ItemGroup>
             <uSyncPackageContentFiles Include="$(uSyncPackageContentFilesPath)" />
         </ItemGroup>
