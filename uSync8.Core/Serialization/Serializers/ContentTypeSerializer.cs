@@ -365,7 +365,7 @@ namespace uSync8.Core.Serialization.Serializers
                         if (updatedValue.Success)
                         {
                             logger.Debug<ContentTypeSerializer>("Saving HistoryCleanup Value: {name} {value}", element.Name.LocalName, updatedValue.Result);
-                            changes.AddUpdate($"{_historyCleanupName}:{element.Name.LocalName}", current, updatedValue.Result, $"{_historyCleanupName}/{element.Name.LocalName}");
+                            changes.AddUpdate($"{_historyCleanupName}:{element.Name.LocalName}", current ?? "(Not set)", updatedValue.Result, $"{_historyCleanupName}/{element.Name.LocalName}");
                             property.SetValue(historyCleanup, updatedValue.Result);
                         }
                     }
@@ -375,7 +375,7 @@ namespace uSync8.Core.Serialization.Serializers
             }
             catch(Exception ex)
             {
-                logger.Warn<ContentTypeSerializer>(ex, "Error tryng to get the HistoryCleanup settings for this node.");
+                logger.Warn<ContentTypeSerializer>(ex, "Error tryng to get the HistoryCleanup settings for this node. {ex}", ex.ToString());
             }
 
             return emtpy;
