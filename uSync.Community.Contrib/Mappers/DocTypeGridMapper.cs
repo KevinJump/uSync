@@ -128,7 +128,7 @@ namespace uSync8.Community.Contrib.Mappers
                 // as opposed to quite a few of these properties that 
                 // have it in 'escaped' json. so slightly diffrent 
                 // then a nested content, but not by much.
-                GetExportJsonValues(docValue, docType);
+                GetImportJsonValue(docValue, docType);
 
                 return JsonConvert.SerializeObject(jsonValue, Formatting.Indented);
             }
