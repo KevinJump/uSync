@@ -351,7 +351,7 @@ namespace uSync8.ContentEdition.Serializers
         protected virtual Attempt<string> DoSaveOrPublish(IContent item, XElement node, SyncSerializerOptions options)
         {
             var publishedNode = node.Element("Info")?.Element("Published");
-            if (publishedNode != null)
+            if(!item.Trashed && publishedNode != null)
             {
                 var schedules = GetSchedules(node.Element("Info")?.Element("Schedule"));
 

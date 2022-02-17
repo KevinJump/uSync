@@ -290,53 +290,61 @@ namespace uSync8.ContentEdition.Serializers
             var nodeLevel = CalculateNodeLevel(item, default(TObject));
             var nodePath = CalculateNodePath(item, default(TObject));
 
-            var parentNode = info.Element("Parent");
-            if (parentNode != null)
+            var trashed = info.Element("Trashed").ValueOrDefault(false);
+
+            if (!trashed)
             {
-                var parent = FindParent(parentNode, false);
-                if (parent == null)
+                // we only handle path and parent, if we don't think this item is about to be trashed.
+                logger.Debug(serializerType, "Item is not trashed setting parent, path and level");
+
+                var parentNode = info.Element("Parent");
+                if (parentNode != null)
                 {
-                    var friendlyPath = info.Element("Path").ValueOrDefault(string.Empty);
-                    if (!string.IsNullOrWhiteSpace(friendlyPath))
+                    var parent = FindParent(parentNode, false);
+                    if (parent == null)
                     {
-                        logger.Debug(serializerType, "Find Parent failed, will search by path {FriendlyPath}", friendlyPath);
-                        parent = FindParentByPath(friendlyPath);
+                        var friendlyPath = info.Element("Path").ValueOrDefault(string.Empty);
+                        if (!string.IsNullOrWhiteSpace(friendlyPath))
+                        {
+                            logger.Debug(serializerType, "Find Parent failed, will search by path {FriendlyPath}", friendlyPath);
+                            parent = FindParentByPath(friendlyPath);
+                        }
+                    }
+
+                    if (parent != null)
+                    {
+                        parentId = parent.Id;
+                        nodePath = CalculateNodePath(item, parent);
+                        nodeLevel = CalculateNodeLevel(item, parent);
+                    }
+                    else
+                    {
+                        logger.Debug(serializerType, "Unable to find parent but parent node is set in config");
                     }
                 }
 
-                if (parent != null)
+                if (item.ParentId != parentId)
                 {
-                    parentId = parent.Id;
-                    nodePath = CalculateNodePath(item, parent);
-                    nodeLevel = CalculateNodeLevel(item, parent);
+                    changes.AddUpdate("Parent", item.ParentId, parentId);
+                    logger.Verbose(serializerType, "{Id} Setting Parent {ParentId}", item.Id, parentId);
+                    item.ParentId = parentId;
                 }
-                else
+
+                // the following are calculated (not in the file
+                // because they might change without this node being saved).
+                if (item.Path != nodePath)
                 {
-                    logger.Debug(serializerType, "Unable to find parent but parent node is set in config");
+                    changes.AddUpdate("Path", item.Path, nodePath);
+                    logger.Debug(serializerType, "{Id} Setting Path {idPath} was {oldPath}", item.Id, nodePath, item.Path);
+                    item.Path = nodePath;
                 }
-            }
 
-            if (item.ParentId != parentId)
-            {
-                changes.AddUpdate("Parent", item.ParentId, parentId);
-                logger.Verbose(serializerType, "{Id} Setting Parent {ParentId}", item.Id, parentId);
-                item.ParentId = parentId;
-            }
-
-            // the following are calculated (not in the file
-            // because they might change without this node being saved).
-            if (item.Path != nodePath)
-            {
-                changes.AddUpdate("Path", item.Path, nodePath);
-                logger.Debug(serializerType, "{Id} Setting Path {idPath} was {oldPath}", item.Id, nodePath, item.Path);
-                item.Path = nodePath;
-            }
-
-            if (item.Level != nodeLevel)
-            {
-                changes.AddUpdate("Level", item.Level, nodeLevel);
-                logger.Debug(serializerType, "{Id} Setting Level to {Level} was {OldLevel}", item.Id, nodeLevel, item.Level);
-                item.Level = nodeLevel;
+                if (item.Level != nodeLevel)
+                {
+                    changes.AddUpdate("Level", item.Level, nodeLevel);
+                    logger.Debug(serializerType, "{Id} Setting Level to {Level} was {OldLevel}", item.Id, nodeLevel, item.Level);
+                    item.Level = nodeLevel;
+                }
             }
 
 
