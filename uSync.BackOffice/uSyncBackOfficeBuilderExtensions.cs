@@ -9,6 +9,7 @@ using System.Reflection.PortableExecutable;
 
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.DependencyInjection;
+using Umbraco.Cms.Core.Events;
 using Umbraco.Cms.Core.Notifications;
 using Umbraco.Cms.Web.BackOffice.Authorization;
 using Umbraco.Cms.Web.Common.ApplicationBuilder;
@@ -162,10 +163,25 @@ namespace uSync.BackOffice
 
             // builder.AddNotificationHandler<ContentSavedBlueprintNotification, ContentHandler>();
             // builder.AddNotificationHandler<ContentDeletedBlueprintNotification, ContentHandler>();
+
+            // cache lifecylce manager
+            builder.
+                AddNotificationHandler<uSyncImportStartingNotification, CacheLifecycleManager>().
+                AddNotificationHandler<uSyncReportStartingNotification, CacheLifecycleManager>().
+                AddNotificationHandler<uSyncExportStartingNotification, CacheLifecycleManager>().
+                AddNotificationHandler<uSyncImportCompletedNotification, CacheLifecycleManager>().
+                AddNotificationHandler<uSyncReportCompletedNotification, CacheLifecycleManager>().
+                AddNotificationHandler<uSyncExportCompletedNotification, CacheLifecycleManager>().
+                AddNotificationHandler<ContentSavingNotification, CacheLifecycleManager>().
+                AddNotificationHandler<ContentDeletingNotification, CacheLifecycleManager>().
+                AddNotificationHandler<ContentMovingNotification, CacheLifecycleManager>().
+                AddNotificationHandler<MediaSavingNotification, CacheLifecycleManager>().
+                AddNotificationHandler<MediaSavedNotification, CacheLifecycleManager>().
+                AddNotificationHandler<MediaDeletedNotification, CacheLifecycleManager>();
         }
 
 
-        private static void CreatePolicies(AuthorizationOptions options, 
+        private static void CreatePolicies(AuthorizationOptions options,
             string backofficeAuthenticationScheme = Constants.Security.BackOfficeAuthenticationType)
         {
             options.AddPolicy(SyncAuthorizationPolicies.TreeAccessuSync, policy =>
