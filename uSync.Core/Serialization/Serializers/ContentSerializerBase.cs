@@ -13,6 +13,7 @@ using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Strings;
 using Umbraco.Extensions;
 
+using uSync.Core.Cache;
 using uSync.Core.Mapping;
 using uSync.Core.Models;
 
@@ -29,13 +30,6 @@ namespace uSync.Core.Serialization.Serializers
 
         protected ILocalizationService localizationService;
         protected IRelationService relationService;
-
-        // cheap lookup caches, for the db heavy parts of serialization
-        // these save us 20-40% time on checks in content and media
-        // protected Dictionary<string, string> pathCache;
-        // not thread safe ??
-        protected Dictionary<int, Tuple<Guid, string>> nameCache;
-        protected Dictionary<string, string> pathCache;
 
         protected string relationAlias;
 
@@ -56,9 +50,6 @@ namespace uSync.Core.Serialization.Serializers
 
             this.localizationService = localizationService;
             this.relationService = relationService;
-
-            this.pathCache = new Dictionary<string, string>();
-            this.nameCache = new Dictionary<int, Tuple<Guid, string>>();
         }
 
         /// <summary>
@@ -139,10 +130,11 @@ namespace uSync.Core.Serialization.Serializers
             var parentName = "";
             if (item.ParentId != -1)
             {
-                if (this.nameCache.ContainsKey(item.ParentId))
+                var cachedItem = GetCachedName(item.ParentId);
+                if (cachedItem != null)
                 {
-                    parentKey = this.nameCache[item.ParentId].Item1;
-                    parentName = this.nameCache[item.ParentId].Item2;
+                    parentKey = cachedItem.Key;
+                    parentName = cachedItem.Name;
                 }
                 else
                 {
@@ -683,14 +675,15 @@ namespace uSync.Core.Serialization.Serializers
 
                 foreach (var id in ids.Where(x => x != -1))
                 {
-                    if (!nameCache.ContainsKey(id))
+                    var cachedItem = GetCachedName(id);
+                    if (cachedItem == null)
                     {
                         lookups.Add(id);
                         friendlyPath += $"/[{id}]";
                     }
                     else
                     {
-                        friendlyPath += "/" + nameCache[id].Item2.ToSafeAlias(shortStringHelper);
+                        friendlyPath += "/" +  cachedItem.Name.ToSafeAlias(shortStringHelper);
                     }
                 }
 
@@ -698,7 +691,7 @@ namespace uSync.Core.Serialization.Serializers
                 // var items = entityService.GetAll(this.umbracoObjectType, lookups.ToArray());
                 foreach (var item in items)
                 {
-                    nameCache[item.Id] = new Tuple<Guid, string>(item.Key, item.Name);
+                    AddToNameCache(item.Id, item.Key, item.Name);
                     friendlyPath = friendlyPath.Replace($"[{item.Id}]", item.Name.ToSafeAlias(shortStringHelper));
                 }
 
@@ -891,8 +884,15 @@ namespace uSync.Core.Serialization.Serializers
         private void CleanCaches(int id)
         {
             // clean the name cache for this id.
-            nameCache.Remove(id);
+            // nameCache.Remove(id);
         }
+
+        protected CachedName GetCachedName(int id)
+                  => syncMappers.EntityCache.GetName(id);
+
+        protected void AddToNameCache(int id, Guid key, string name)
+            => syncMappers.EntityCache.AddName(id, key, name);
+
 
 
         /// <summary>

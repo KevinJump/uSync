@@ -545,8 +545,7 @@ namespace uSync.Core.Serialization.Serializers
             var item = contentService.GetById(id);
             if (item != null)
             {
-                if (!this.nameCache.ContainsKey(id))
-                    this.nameCache[id] = new Tuple<Guid, string>(item.Key, item.Name);
+                AddToNameCache(id, item.Key, item.Name);
                 return item;
             }
             return null;
