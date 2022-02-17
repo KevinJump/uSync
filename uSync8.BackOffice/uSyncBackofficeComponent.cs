@@ -13,6 +13,7 @@ using Umbraco.Core.Logging;
 using Umbraco.Web;
 using Umbraco.Web.JavaScript;
 
+using uSync8.BackOffice.Cache;
 using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Controllers;
 using uSync8.BackOffice.Services;
@@ -28,6 +29,7 @@ namespace uSync8.BackOffice
         private readonly SyncFileService syncFileService;
         private readonly uSyncSettings uSyncSettings;
         private readonly uSyncService uSyncService;
+        private readonly CacheLifecycleManager cacheLifecycleManager;
         private readonly IRuntimeState runtimeState;
 
         private readonly IUmbracoContextFactory umbracoContextFactory;
@@ -41,6 +43,7 @@ namespace uSync8.BackOffice
             IProfilingLogger logger,
             SyncFileService fileService,
             uSyncService uSyncService,
+            CacheLifecycleManager cacheLifecycleManager,
             IRuntimeState runtimeState,
             IUmbracoContextFactory umbracoContextFactory)
         {
@@ -55,6 +58,7 @@ namespace uSync8.BackOffice
 
             this.syncFileService = fileService;
             this.uSyncService = uSyncService;
+            this.cacheLifecycleManager = cacheLifecycleManager;
 
             this.umbracoContextFactory = umbracoContextFactory;
 
@@ -107,6 +111,7 @@ namespace uSync8.BackOffice
 
                 using (var reference = umbracoContextFactory.EnsureUmbracoContext())
                 {
+                    cacheLifecycleManager.Intialize();
 
                     if (uSyncSettings.ExportAtStartup || (uSyncSettings.ExportOnSave && !syncFileService.RootExists(uSyncSettings.RootFolder)))
                     {

@@ -28,6 +28,9 @@ namespace uSync8.BackOffice.Cache
         {
             this.entityCache = entityCache;
             this.logger = logger;
+        }
+
+        public void Intialize() { 
 
             uSyncService.ImportStarting += OnBulkActionComplete;
             uSyncService.ImportComplete += OnBulkActionComplete;
@@ -51,6 +54,8 @@ namespace uSync8.BackOffice.Cache
         {
             try
             {
+                if (uSync8BackOffice.eventsPaused) return;
+                
                 entityCache.Clear();
             }
             catch (Exception ex)
@@ -62,7 +67,7 @@ namespace uSync8.BackOffice.Cache
 
         private void OnBulkActionComplete(uSyncBulkEventArgs e)
         {
-            ClearOnEvent();
+            entityCache.Clear();
         }
     }
 }

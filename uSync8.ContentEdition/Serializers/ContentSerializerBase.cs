@@ -11,6 +11,7 @@ using Umbraco.Core.Services;
 
 using uSync8.ContentEdition.Mapping;
 using uSync8.Core;
+using uSync8.Core.Cache;
 using uSync8.Core.Extensions;
 using uSync8.Core.Models;
 using uSync8.Core.Serialization;
@@ -28,13 +29,6 @@ namespace uSync8.ContentEdition.Serializers
         protected ILocalizationService localizationService;
         protected IRelationService relationService;
 
-        // cheap lookup caches, for the db heavy parts of serialization
-        // these save us 20-40% time on checks in content and media
-        // protected Dictionary<string, string> pathCache;
-        // not thread safe ??
-        protected Dictionary<int, Tuple<Guid, string>> nameCache;
-        protected Dictionary<string, string> pathCache;
-
         protected string relationAlias;
 
         public ContentSerializerBase(
@@ -51,9 +45,6 @@ namespace uSync8.ContentEdition.Serializers
 
             this.localizationService = localizationService;
             this.relationService = relationService;
-
-            this.pathCache = new Dictionary<string, string>();
-            this.nameCache = new Dictionary<int, Tuple<Guid, string>>();
         }
 
         /// <summary>
@@ -124,10 +115,11 @@ namespace uSync8.ContentEdition.Serializers
             var parentName = "";
             if (item.ParentId != -1)
             {
-                if (this.nameCache.ContainsKey(item.ParentId))
+                var cachedItem = GetCachedName(item.ParentId);
+                if (cachedItem != null)
                 {
-                    parentKey = this.nameCache[item.ParentId].Item1;
-                    parentName = this.nameCache[item.ParentId].Item2;
+                    parentKey = cachedItem.Key;
+                    parentName = cachedItem.Name;
                 }
                 else
                 {
@@ -719,14 +711,14 @@ namespace uSync8.ContentEdition.Serializers
 
             foreach (var id in ids.Where(x => x != -1))
             {
-                if (!nameCache.ContainsKey(id))
-                {
+                var cachedItem = GetCachedName(id);
+                if (cachedItem == null) {
                     lookups.Add(id);
                     friendlyPath += $"/[{id}]";
                 }
                 else
                 {
-                    friendlyPath += "/" + nameCache[id].Item2.ToSafeAlias();
+                    friendlyPath += "/" + cachedItem.Name.ToSafeAlias();
                 }
             }
 
@@ -735,7 +727,7 @@ namespace uSync8.ContentEdition.Serializers
                 var items = syncMappers.EntityCache.GetAll(this.umbracoObjectType, lookups.ToArray());
                 foreach (var item in items)
                 {
-                    nameCache[item.Id] = new Tuple<Guid, string>(item.Key, item.Name);
+                    AddToNameCache(item.Id, item.Key, item.Name);
                     friendlyPath = friendlyPath.Replace($"[{item.Id}]", item.Name.ToSafeAlias());
                 }
             }
@@ -915,8 +907,15 @@ namespace uSync8.ContentEdition.Serializers
         private void CleanCaches(int id)
         {
             // clean the name cache for this id.
-            nameCache.Remove(id);
+            // nameCache.Remove(id);
+            // not needed as we now use the entity cache and that is cleaned on bulk complete, saves and moves
         }
+
+        protected CachedName GetCachedName(int id)
+            => syncMappers.EntityCache.GetName(id);
+
+        protected void AddToNameCache(int id, Guid key, string name)
+            => syncMappers.EntityCache.AddName(id, key, name);
 
         /// <summary>
         ///  Remove relations from the 'OnDelete' relation tables. 
