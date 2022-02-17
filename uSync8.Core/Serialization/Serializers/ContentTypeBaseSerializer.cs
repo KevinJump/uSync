@@ -854,10 +854,12 @@ namespace uSync8.Core.Serialization.Serializers
         private void SetFolderFromElement(IContentTypeBase item, XElement folderNode)
         {
             var folder = folderNode.ValueOrDefault(string.Empty);
-            // if (string.IsNullOrWhiteSpace(folder)) return;
-            if (item.ParentId != Constants.System.Root)
+            if (string.IsNullOrEmpty(folder))
             {
-                item.ParentId = Constants.System.Root;
+                if (item.ParentId != Constants.System.Root)
+                {
+                    item.ParentId = Constants.System.Root;
+                }
             }
             else
             {
