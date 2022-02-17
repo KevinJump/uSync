@@ -809,7 +809,7 @@ namespace uSync.BackOffice.SyncHandlers
             var duplicates = new List<uSyncAction>();
 
             // delete checks. 
-            foreach (var deleteAction in actions.Where(x => x.Change == ChangeType.Delete))
+            foreach (var deleteAction in actions.Where(x => x.Change != ChangeType.NoChange && x.Change == ChangeType.Delete))
             {
                 // todo: this is only matching by key, but non-tree based serializers also delete by alias.
                 // so this check actually has to be booted back down to the serializer.
@@ -1149,7 +1149,7 @@ namespace uSync.BackOffice.SyncHandlers
             var attempt = serializer.SerializeEmpty(item, SyncActionType.Delete, string.Empty);
             if (ShouldExport(attempt.Item, config))
             {
-                if (attempt.Success && attempt.Change > ChangeType.NoChange)
+                if (attempt.Success && attempt.Change != ChangeType.NoChange)
                 {
                     syncFileService.SaveXElement(attempt.Item, filename);
 
