@@ -6,6 +6,7 @@ using System.Xml.Linq;
 using Microsoft.Extensions.Logging;
 
 using Umbraco.Cms.Core;
+using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Configuration;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Models.Entities;
@@ -25,8 +26,10 @@ namespace uSync.Core.Serialization.Serializers
             IEntityService entityService, ILogger<MediaTypeSerializer> logger,
             IDataTypeService dataTypeService,
             IMediaTypeService mediaTypeService,
-            IShortStringHelper shortStringHelper)
-            : base(entityService, logger, dataTypeService, mediaTypeService, UmbracoObjectTypes.MediaTypeContainer, shortStringHelper)
+            IShortStringHelper shortStringHelper,
+            AppCaches appCaches,
+            IContentTypeService contentTypeService)
+            : base(entityService, logger, dataTypeService, mediaTypeService, UmbracoObjectTypes.MediaTypeContainer, shortStringHelper, appCaches, contentTypeService)
         {
             this.mediaTypeService = mediaTypeService;
         }
@@ -91,6 +94,8 @@ namespace uSync.Core.Serialization.Serializers
             details.AddRange(DeserializeCompositions(item, node));
             details.AddRange(DeserializeStructure(item, node));
 
+            SetSafeAliasValue(item, node, false);
+
             CleanTabAliases(item);
             CleanTabs(item, node, options);
 
@@ -103,9 +108,11 @@ namespace uSync.Core.Serialization.Serializers
 
         protected override Attempt<IMediaType> CreateItem(string alias, ITreeEntity parent, string itemType)
         {
+            var safeAlias = GetSafeItemAlias(alias);
+
             var item = new MediaType(shortStringHelper, -1)
             {
-                Alias = alias
+                Alias = safeAlias
             };
 
             if (parent != null)
@@ -115,6 +122,8 @@ namespace uSync.Core.Serialization.Serializers
 
                 item.SetParent(parent);
             }
+
+            AddAlias(safeAlias);
 
             return Attempt.Succeed((IMediaType)item);
         }

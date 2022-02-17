@@ -33,6 +33,8 @@ namespace uSync.Core
             if (builder.Services.FirstOrDefault(x => x.ServiceType == typeof(SyncEntityCache)) != null)
                 return builder;
 
+            builder.Services.AddSingleton<uSyncCapabilityChecker>();
+
             // cache for entity items, we use it to speed up lookups.
             builder.Services.AddSingleton<SyncEntityCache>();
 

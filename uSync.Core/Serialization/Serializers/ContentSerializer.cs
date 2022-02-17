@@ -340,7 +340,7 @@ namespace uSync.Core.Serialization.Serializers
         protected virtual Attempt<string> DoSaveOrPublish(IContent item, XElement node, SyncSerializerOptions options)
         {
             var publishedNode = node.Element("Info")?.Element("Published");
-            if (publishedNode != null)
+            if (!item.Trashed && publishedNode != null)
             {
                 var schedules = GetSchedules(node.Element("Info")?.Element("Schedule"));
 
@@ -545,8 +545,7 @@ namespace uSync.Core.Serialization.Serializers
             var item = contentService.GetById(id);
             if (item != null)
             {
-                if (!this.nameCache.ContainsKey(id))
-                    this.nameCache[id] = new Tuple<Guid, string>(item.Key, item.Name);
+                AddToNameCache(id, item.Key, item.Name);
                 return item;
             }
             return null;

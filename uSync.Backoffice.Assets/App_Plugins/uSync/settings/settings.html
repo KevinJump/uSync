@@ -46,18 +46,6 @@
                         </div>
                     </div>
 
-
-                    <div class="umb-permission usync-setting-value">
-                        <div class="umb-permission__content">
-                            <div>Fail on Missing Parent</div>
-                            <div class="umb-permission__description">Import of an item will fail if it's parent is not already in Umbraco or the current Import</div>
-                        </div>
-                        <div class="umb-permission__value">
-                            <div ng-if="vm.settings.failOnMissingParent"><i class="icon icon-check color-green"></i></div>
-                            <div ng-if="!vm.settings.failOnMissingParent"><i class="icon icon-wrong color-red"></i></div>
-                        </div>
-                    </div>
-
                     <!--
     <div class="umb-permission usync-setting-value">
         <div class="umb-permission__content">
@@ -106,7 +94,7 @@
                     </div>
                     <div class="umb-permission usync-setting-value">
                         <div class="umb-permission__content">
-                            <div>use guids for filenames</div>
+                            <div>Use guids for filenames</div>
                             <div class="umb-permission__description">Use the guid of an item as the filename</div>
                         </div>
                         <div class="umb-permission__value">
@@ -139,6 +127,18 @@
                             </div>
                             <div ng-if="vm.handlerSet.disabledHandlers.length == 0">
                                 None
+                            </div>
+                        </div>
+                    </div>
+                    <div class="umb-permission usync-setting-value">
+                        <div class="umb-permission__content">
+                            <div>Fail on missing parent</div>
+                            <div class="umb-permission__description">If uSync can't find a item's parent don't import it (when off best fit is used)</div>
+                        </div>
+                        <div class="umb-permission__value">
+                            <div class="umb-permission__value">
+                                <div ng-if="vm.handlerSet.handlerDefaults.failOnMissingParent"><i class="icon icon-check color-green"></i></div>
+                                <div ng-if="!vm.handlerSet.handlerDefaults.failOnMissingParent"><i class="icon icon-wrong color-red"></i></div>
                             </div>
                         </div>
                     </div>

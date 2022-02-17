@@ -23,6 +23,7 @@ namespace uSync.Core.Cache
     {
         private readonly DictionaryAppCache cache = new DictionaryAppCache();
         private readonly DictionaryAppCache keyCache = new DictionaryAppCache();
+        private readonly DictionaryAppCache nameCache = new DictionaryAppCache();
 
         private readonly IEntityService entityService;
 
@@ -32,6 +33,20 @@ namespace uSync.Core.Cache
         {
             this.entityService = entityService;
             this._cacheEnabled = true;
+        }
+        public CachedName GetName(int id)
+        {
+            if (!_cacheEnabled) return default;
+            return cache.GetCacheItem<CachedName>(id.ToString());
+        }
+
+        public void AddName(int id, Guid guid, string name)
+        {
+            nameCache.ClearByKey(id.ToString());
+            nameCache.GetCacheItem(id.ToString(), () =>
+            {
+                return new CachedName(guid, name);
+            });
         }
 
         public IEntitySlim GetEntity(int id)
@@ -156,6 +171,7 @@ namespace uSync.Core.Cache
         {
             cache.Clear();
             keyCache.Clear();
+            nameCache.Clear();
         }
     }
 }
