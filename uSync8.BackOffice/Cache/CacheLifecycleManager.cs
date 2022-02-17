@@ -4,6 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Umbraco.Core.Events;
+using Umbraco.Core.Logging;
+using Umbraco.Core.Models;
+using Umbraco.Core.Services;
+using Umbraco.Core.Services.Implement;
+
 using uSync8.Core.Cache;
 
 namespace uSync8.BackOffice.Cache
@@ -14,10 +20,14 @@ namespace uSync8.BackOffice.Cache
     public class CacheLifecycleManager
     {
         private readonly SyncEntityCache entityCache;
+        private readonly ILogger logger;
 
-        public CacheLifecycleManager(SyncEntityCache entityCache)
+        public CacheLifecycleManager(
+            ILogger logger,
+            SyncEntityCache entityCache)
         {
             this.entityCache = entityCache;
+            this.logger = logger;
 
             uSyncService.ImportStarting += OnBulkActionComplete;
             uSyncService.ImportComplete += OnBulkActionComplete;
@@ -27,11 +37,32 @@ namespace uSync8.BackOffice.Cache
 
             uSyncService.ExportStarting += OnBulkActionComplete;
             uSyncService.ExportComplete += OnBulkActionComplete;
+
+            ContentService.Saving += (s, e) => ClearOnEvent();
+            ContentService.Deleting += (s, e) => ClearOnEvent();
+            ContentService.Moving += (s, e) => ClearOnEvent();
+
+            MediaService.Saving += (s, e) => ClearOnEvent();
+            MediaService.Deleting += (s, e) => ClearOnEvent();
+            MediaService.Moving += (s, e) => ClearOnEvent();
+        }
+
+        private void ClearOnEvent()
+        {
+            try
+            {
+                entityCache.Clear();
+            }
+            catch (Exception ex)
+            {
+                logger.Warn<CacheLifecycleManager>(ex, "Failed to clean the entity name caches");
+                // it really should never fail, but we don't want to block a save event just because our cache is not there.
+            }
         }
 
         private void OnBulkActionComplete(uSyncBulkEventArgs e)
         {
-            entityCache.Clear();
+            ClearOnEvent();
         }
     }
 }
