@@ -1147,17 +1147,20 @@ namespace uSync.BackOffice.SyncHandlers
             var filename = GetPath(folder, item, config.GuidNames, config.UseFlatStructure);
 
             var attempt = serializer.SerializeEmpty(item, SyncActionType.Delete, string.Empty);
-            if (attempt.Success)
+            if (ShouldExport(attempt.Item, config))
             {
-                syncFileService.SaveXElement(attempt.Item, filename);
+                if (attempt.Success && attempt.Change > ChangeType.NoChange)
+                {
+                    syncFileService.SaveXElement(attempt.Item, filename);
 
-                // so check - it shouldn't (under normal operation) 
-                // be possible for a clash to exist at delete, because nothing else 
-                // will have changed (like name or location) 
+                    // so check - it shouldn't (under normal operation) 
+                    // be possible for a clash to exist at delete, because nothing else 
+                    // will have changed (like name or location) 
 
-                // we only then do this if we are not using flat structure. 
-                if (!DefaultConfig.UseFlatStructure)
-                    this.CleanUp(item, filename, Path.Combine(rootFolder, this.DefaultFolder));
+                    // we only then do this if we are not using flat structure. 
+                    if (!DefaultConfig.UseFlatStructure)
+                        this.CleanUp(item, filename, Path.Combine(rootFolder, this.DefaultFolder));
+                }
             }
         }
 
