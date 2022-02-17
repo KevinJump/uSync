@@ -982,7 +982,7 @@ namespace uSync.Core.Serialization.Serializers
         private void SetFolderFromElement(IContentTypeBase item, XElement folderNode)
         {
             var folder = folderNode.ValueOrDefault(string.Empty);
-            if (folder == null)
+            if (string.IsNullOrWhiteSpace(folder))
             {
                 if (item.ParentId != Constants.System.Root)
                 {
