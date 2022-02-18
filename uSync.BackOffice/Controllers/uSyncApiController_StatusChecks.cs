@@ -27,11 +27,11 @@ namespace uSync.BackOffice.Controllers
     {
 
         [HttpGet]
-        public JObject GetAddOnSplash()
+        public async Task<JObject> GetAddOnSplash()
         {
             try
             {
-                return JsonConvert.DeserializeObject<JObject>(GetContent());
+                return JsonConvert.DeserializeObject<JObject>(await GetContent());
             }
             catch
             {
@@ -41,7 +41,7 @@ namespace uSync.BackOffice.Controllers
             return new JObject();
         }
 
-        private string GetContent()
+        private async Task<string> GetContent()
         {
             if (!uSyncConfig.Settings.AddOnPing) return GetLocal();
 
@@ -49,17 +49,22 @@ namespace uSync.BackOffice.Controllers
             if (!string.IsNullOrEmpty(cachedContent)) return cachedContent;
 
             var remote = "https://jumoo.co.uk/usync/addon/82/";
-            try
-            {
-                using (var client = new WebClient())
+            try {
+                using (var client = new HttpClient())
                 {
-                    var content = client.DownloadString(remote);
-                    if (!string.IsNullOrWhiteSpace(content))
+                    using(HttpResponseMessage response = await client.GetAsync(remote))
                     {
-                        appCaches.RuntimeCache.InsertCacheItem<string>("usync_addon", () => content);
-                    }
+                        response.EnsureSuccessStatusCode();
 
-                    return content;
+                        var json = await response.Content.ReadAsStringAsync();
+                        if (!string.IsNullOrWhiteSpace(json))
+                        {
+                            appCaches.RuntimeCache.InsertCacheItem<string>("usync_json",
+                                () => json);
+                        }
+
+                        return json;
+                    }
                 }
             }
             catch
