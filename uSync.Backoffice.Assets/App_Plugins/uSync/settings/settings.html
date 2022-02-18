@@ -123,7 +123,7 @@
                         </div>
                         <div class="umb-permission__value">
                             <div ng-if="vm.handlerSet.disabledHandlers.length > 0">
-                                <span ng-repeat="handler in vm.handlerSet.disabledHandlers">{{handler}}</span>
+                                <div ng-repeat="handler in vm.handlerSet.disabledHandlers">{{handler}}</div>
                             </div>
                             <div ng-if="vm.handlerSet.disabledHandlers.length == 0">
                                 None
