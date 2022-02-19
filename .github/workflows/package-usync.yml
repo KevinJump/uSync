@@ -76,10 +76,10 @@ jobs:
         run: dotnet pack .\uSync\uSync.csproj --no-restore -c ${{ env.BUILD_CONFIG }} -o ${{ env.OUT_FOLDER }}  /p:ContinuousIntegrationBuild=true,version=${{ env.GitVersion_NuGetVersionV2 }}
 
       - name: uSync.BackOffice.StaticAssets 
-        run: \nuget pack "..\uSync.BackOffice.Assets\uSync.BackOffice.StaticAssets.nuspec" -version ${{ env.GitVersion_NuGetVersionV2 }} -OutputDirectory ${{ env.OUT_FOLDER }}
+        run: nuget pack "..\uSync.BackOffice.Assets\uSync.BackOffice.StaticAssets.nuspec" -version ${{ env.GitVersion_NuGetVersionV2 }} -OutputDirectory ${{ env.OUT_FOLDER }}
 
       - name: upload artifact 
         uses: actions/upload-artifact@v2
         with:
           name: usync-${{ env.GitVersion_NuGetVersionV2 }}
-          path: ./out/*.nupkg
+          path: ./out/*.*nupkg
