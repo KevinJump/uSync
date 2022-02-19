@@ -1,0 +1,9 @@
+mode: ContinuousDelivery
+branches: 
+  main:
+    regex: ^v9/main$
+    mode: ContinuousDelivery
+    is-mainline: true
+ignore:
+  sha: 
+merge-message-formats: 
