@@ -1,6 +1,13 @@
 name: package usync
 
-on: [push]
+on: [ push ]
+
+#on:
+#  pull_request:
+#    types:
+#      - opened
+#    branches:    
+#      - 'v9/main'
 
 jobs:
   build:
@@ -21,6 +28,14 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+          cache: 'npm'
+      
+      - run: npm install 
+
       - name: Setup .NET Core SDK ${{matrix.dotnet-versions}}
         uses: actions/setup-dotnet@v1.9.0
         with:
@@ -35,14 +50,28 @@ jobs:
         id: gitversion # step id used as reference for output values
         uses: gittools/actions/gitversion/execute@v0.9.11
 
+      - run: gulp minify --release ${{ GitVersion_NuGetVersionV2 }}
+
       - name: Install dependencies
         run: dotnet restore 
 
-      - name: pack 
-        run: dotnet pack .\uSync.Core\uSync.Core.csproj --no-restore -c ${{ env.BUILD_CONFIG }} -o ${{ env.OUT_FOLDER }}  /p:ContinuousIntegrationBuild=true,version=${{ env.GitVersion_SemVer }}
-        
+      - name: uSync.Core
+        run: dotnet pack .\uSync.Core\uSync.Core.csproj --no-restore -c ${{ env.BUILD_CONFIG }} -o ${{ env.OUT_FOLDER }}  /p:ContinuousIntegrationBuild=true,version=${{ GitVersion_NuGetVersionV2 }}
+
+      - name: uSync.Community.Contrib
+        run: dotnet pack .\uSync.Community.Contrib\uSync.Community.Contrib.csproj --no-restore -c ${{ env.BUILD_CONFIG }} -o ${{ env.OUT_FOLDER }}  /p:ContinuousIntegrationBuild=true,version=${{ GitVersion_NuGetVersionV2 }}
+
+      - name: uSync.Community.DataTypeSerializers
+        run: dotnet pack .\uSync.Community.DataTypeSerializers\uSync.Community.DataTypeSerializers.csproj --no-restore -c ${{ env.BUILD_CONFIG }} -o ${{ env.OUT_FOLDER }}  /p:ContinuousIntegrationBuild=true,version=${{ GitVersion_NuGetVersionV2 }}
+
+      - name: uSync.BackOffice
+        run: dotnet pack .\uSync.BackOffice\uSync.BackOffice.csproj --no-restore -c ${{ env.BUILD_CONFIG }} -o ${{ env.OUT_FOLDER }}  /p:ContinuousIntegrationBuild=true,version=${{ GitVersion_NuGetVersionV2 }}
+
+      - name: uSync (root)
+        run: dotnet pack .\uSync\uSync.csproj --no-restore -c ${{ env.BUILD_CONFIG }} -o ${{ env.OUT_FOLDER }}  /p:ContinuousIntegrationBuild=true,version=${{ GitVersion_NuGetVersionV2 }}
+
       - name: upload artifact 
         uses: actions/upload-artifact@v2
         with:
-          name: nupkg
+          name: usync-${{ env.GitVersion_NuGetVersionV2 }}
           path: ./out/*.nupkg
