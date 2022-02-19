@@ -56,19 +56,19 @@ jobs:
         run: dotnet restore 
 
       - name: uSync.Core
-        run: dotnet pack .\uSync.Core\uSync.Core.csproj --no-restore -c ${{ env.BUILD_CONFIG }} -o ${{ env.OUT_FOLDER }}  /p:ContinuousIntegrationBuild=true,version=${{ GitVersion_NuGetVersionV2 }}
+        run: dotnet pack .\uSync.Core\uSync.Core.csproj --no-restore -c ${{ env.BUILD_CONFIG }} -o ${{ env.OUT_FOLDER }}  /p:ContinuousIntegrationBuild=true,version=${{ env.GitVersion_NuGetVersionV2 }}
 
       - name: uSync.Community.Contrib
-        run: dotnet pack .\uSync.Community.Contrib\uSync.Community.Contrib.csproj --no-restore -c ${{ env.BUILD_CONFIG }} -o ${{ env.OUT_FOLDER }}  /p:ContinuousIntegrationBuild=true,version=${{ GitVersion_NuGetVersionV2 }}
+        run: dotnet pack .\uSync.Community.Contrib\uSync.Community.Contrib.csproj --no-restore -c ${{ env.BUILD_CONFIG }} -o ${{ env.OUT_FOLDER }}  /p:ContinuousIntegrationBuild=true,version=${{ env.GitVersion_NuGetVersionV2 }}
 
       - name: uSync.Community.DataTypeSerializers
-        run: dotnet pack .\uSync.Community.DataTypeSerializers\uSync.Community.DataTypeSerializers.csproj --no-restore -c ${{ env.BUILD_CONFIG }} -o ${{ env.OUT_FOLDER }}  /p:ContinuousIntegrationBuild=true,version=${{ GitVersion_NuGetVersionV2 }}
+        run: dotnet pack .\uSync.Community.DataTypeSerializers\uSync.Community.DataTypeSerializers.csproj --no-restore -c ${{ env.BUILD_CONFIG }} -o ${{ env.OUT_FOLDER }}  /p:ContinuousIntegrationBuild=true,version=${{ env.GitVersion_NuGetVersionV2 }}
 
       - name: uSync.BackOffice
-        run: dotnet pack .\uSync.BackOffice\uSync.BackOffice.csproj --no-restore -c ${{ env.BUILD_CONFIG }} -o ${{ env.OUT_FOLDER }}  /p:ContinuousIntegrationBuild=true,version=${{ GitVersion_NuGetVersionV2 }}
+        run: dotnet pack .\uSync.BackOffice\uSync.BackOffice.csproj --no-restore -c ${{ env.BUILD_CONFIG }} -o ${{ env.OUT_FOLDER }}  /p:ContinuousIntegrationBuild=true,version=${{ env.GitVersion_NuGetVersionV2 }}
 
       - name: uSync (root)
-        run: dotnet pack .\uSync\uSync.csproj --no-restore -c ${{ env.BUILD_CONFIG }} -o ${{ env.OUT_FOLDER }}  /p:ContinuousIntegrationBuild=true,version=${{ GitVersion_NuGetVersionV2 }}
+        run: dotnet pack .\uSync\uSync.csproj --no-restore -c ${{ env.BUILD_CONFIG }} -o ${{ env.OUT_FOLDER }}  /p:ContinuousIntegrationBuild=true,version=${{ env.GitVersion_NuGetVersionV2 }}
 
       - name: upload artifact 
         uses: actions/upload-artifact@v2
