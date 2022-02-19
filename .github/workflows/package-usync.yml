@@ -50,7 +50,7 @@ jobs:
         id: gitversion # step id used as reference for output values
         uses: gittools/actions/gitversion/execute@v0.9.11
 
-      - run: gulp minify --release ${{ GitVersion_NuGetVersionV2 }}
+      - run: gulp minify --release ${{ env.GitVersion_NuGetVersionV2 }}
 
       - name: Install dependencies
         run: dotnet restore 
