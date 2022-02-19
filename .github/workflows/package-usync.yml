@@ -1,13 +1,11 @@
 name: package usync
 
-on: [ push ]
-
-#on:
-#  pull_request:
-#    types:
-#      - opened
-#    branches:    
-#      - 'v9/main'
+on:
+  pull_request:
+    types:
+      - opened
+    branches:    
+      - 'v9/main'
 
 jobs:
   build:
