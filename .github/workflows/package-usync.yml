@@ -31,7 +31,7 @@ jobs:
       - name: node
         uses: actions/setup-node@v2
         with:
-          node-version: '14'
+          node-version: '16'
           cache: 'npm'
       
       - run: npm install 
@@ -40,6 +40,11 @@ jobs:
         uses: actions/setup-dotnet@v1.9.0
         with:
           dotnet-version: ${{matrix.dotnet-versions}}
+
+      - name: Setup NuGet.exe
+        uses: nuget/setup-nuget@v1        
+        with:
+          nuget-version: latest  
 
       - name: Install gitversion
         uses: gittools/actions/gitversion/setup@v0.9.7
@@ -69,6 +74,9 @@ jobs:
 
       - name: uSync (root)
         run: dotnet pack .\uSync\uSync.csproj --no-restore -c ${{ env.BUILD_CONFIG }} -o ${{ env.OUT_FOLDER }}  /p:ContinuousIntegrationBuild=true,version=${{ env.GitVersion_NuGetVersionV2 }}
+
+      - name: uSync.BackOffice.StaticAssets 
+        run: \nuget pack "..\uSync.BackOffice.Assets\uSync.BackOffice.StaticAssets.nuspec" -version ${{ env.GitVersion_NuGetVersionV2 }} -OutputDirectory ${{ env.OUT_FOLDER }}
 
       - name: upload artifact 
         uses: actions/upload-artifact@v2
