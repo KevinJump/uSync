@@ -1,0 +1,9 @@
+assembly-versioning-scheme: MajorMinorPatch
+mode: ContinuousDelivery
+branches: 
+  main:
+    mode: ContinuousDelivery
+    regex: ^v9\/main$
+ignore:
+  sha: []
+
