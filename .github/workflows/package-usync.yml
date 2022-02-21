@@ -6,6 +6,7 @@ on:
       - opened
     branches:    
       - 'v9/main'
+      - 'v10/main'
 
 jobs:
   build:
