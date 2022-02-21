@@ -211,16 +211,16 @@ namespace uSync.BackOffice
 
         public IEnumerable<uSyncAction> ImportPostCleanFiles(IEnumerable<uSyncAction> actions, uSyncPagedImportOptions options)
         {
+            if (actions == null) return Enumerable.Empty<uSyncAction>();
+
             lock (_importLock)
             {
                 using (var pause = _mutexService.ImportPause())
                 {
                     SyncHandlerOptions syncHandlerOptions = new SyncHandlerOptions(options.HandlerSet);
 
-                    var aliases = actions.Select(x => x.HandlerAlias).Distinct();
-
                     var cleans = actions
-                        .Where(x => x.Change == ChangeType.Clean)
+                        .Where(x => x.Change == ChangeType.Clean && !string.IsNullOrWhiteSpace(x.FileName))
                         .Select(x => new { alias = x.HandlerAlias, folder = Path.GetDirectoryName(x.FileName), actions = x })
                         .SafeDistinctBy(x => x.folder)
                         .GroupBy(x => x.alias)
