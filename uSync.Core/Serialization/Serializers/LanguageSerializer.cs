@@ -158,7 +158,7 @@ namespace uSync.Core.Serialization.Serializers
                 new XAttribute("Level", level));
         }
 
-        private Guid Int2Guid(int value)
+        private static Guid Int2Guid(int value)
         {
             byte[] bytes = new byte[16];
             BitConverter.GetBytes(value).CopyTo(bytes, 0);

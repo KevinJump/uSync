@@ -68,7 +68,7 @@ namespace uSync.BackOffice.Controllers
 
         }
 
-        public bool GetApi() => true;
+        public static bool GetApi() => true;
 
         [HttpGet]
         public uSyncSettings GetSettings()
@@ -180,7 +180,7 @@ namespace uSync.BackOffice.Controllers
 
 
         [HttpPost]
-        public void SaveSettings(uSyncSettings settings)
+        public static void SaveSettings(uSyncSettings settings)
         {
             // uSyncConfig.SaveSettings(settings);
         }

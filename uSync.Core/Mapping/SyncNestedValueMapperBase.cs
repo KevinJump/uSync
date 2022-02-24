@@ -114,7 +114,7 @@ namespace uSync.Core.Mapping
             return null;
         }
 
-        protected uSyncDependency CreateDocTypeDependency(IContentType item, DependencyFlags flags)
+        protected static uSyncDependency CreateDocTypeDependency(IContentType item, DependencyFlags flags)
         {
             if (item != null)
             {

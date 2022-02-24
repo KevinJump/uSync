@@ -164,7 +164,7 @@ namespace uSync.Core.Serialization.Serializers
         ///  tells us if the json for an object is equal, helps when the config objects don't have their
         ///  own Equals functions
         /// </summary>
-        private bool IsJsonEqual(object currentObject, object newObject)
+        private static bool IsJsonEqual(object currentObject, object newObject)
         {
             var currentString = JsonConvert.SerializeObject(currentObject, Formatting.None);
             var newString = JsonConvert.SerializeObject(newObject, Formatting.None);
@@ -308,7 +308,7 @@ namespace uSync.Core.Serialization.Serializers
         ///     <Add Key="NoConfigNames" Value="Approved Colour,My Colour Picker" />
         ///   </code>
         /// </remarks>
-        private bool ShouldDeserilizeConfig(string itemName, string editorAlias, SyncSerializerOptions options)
+        private static bool ShouldDeserilizeConfig(string itemName, string editorAlias, SyncSerializerOptions options)
         {
             var noConfigEditors = options.GetSetting("NoConfigEditors", string.Empty);
             if (!string.IsNullOrWhiteSpace(noConfigEditors) && noConfigEditors.InvariantContains(editorAlias))

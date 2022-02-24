@@ -163,7 +163,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             return base.ReportElement(node, filename, config);
         }
 
-        private bool IsOneWay(HandlerSettings config)
+        private static bool IsOneWay(HandlerSettings config)
         {
             return (config.Settings.ContainsKey("OneWay") && config.Settings["OneWay"].InvariantEquals("true"));
         }

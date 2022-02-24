@@ -86,10 +86,10 @@ namespace uSync.Core.Serialization.Serializers
             return node;
         }
 
-        private bool IsPartialCultureElement(TObject item, string cultures)
+        private static bool IsPartialCultureElement(TObject item, string cultures)
             => !string.IsNullOrWhiteSpace(cultures) && item.ContentType.VariesByCulture();
 
-        private bool IsPartialSegmentElement(TObject item, string segments)
+        private static bool IsPartialSegmentElement(TObject item, string segments)
             => !string.IsNullOrWhiteSpace(segments) && item.ContentType.VariesBySegment();
 
         private bool IsPartialElement(TObject item, string cultures, string segments)
@@ -551,7 +551,7 @@ namespace uSync.Core.Serialization.Serializers
         ///   So we attempt to convert to the type stored in the current
         ///   value, and then compare that. which gets us a better check.
         /// </remarks>
-        private bool IsUpdatedValue(object current, object newValue)
+        private static bool IsUpdatedValue(object current, object newValue)
         {
             if (Object.Equals(current, newValue)) return false;
 
@@ -889,7 +889,7 @@ namespace uSync.Core.Serialization.Serializers
             return parent != null;
         }
 
-        private void CleanCaches(int id)
+        private static void CleanCaches(int id)
         {
             // clean the name cache for this id.
             // nameCache.Remove(id);

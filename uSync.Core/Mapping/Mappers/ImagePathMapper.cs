@@ -128,7 +128,7 @@ namespace uSync.Core.Mapping
         ///
         /// </remarks>
         /// <returns></returns>
-        private string ReplacePath(string filepath, string currentPath, string targetPath)
+        private static string ReplacePath(string filepath, string currentPath, string targetPath)
         {
             if (!string.IsNullOrWhiteSpace(targetPath)
                 && !string.IsNullOrWhiteSpace(currentPath))

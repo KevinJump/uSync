@@ -83,7 +83,7 @@ namespace uSync.Core.Mapping
             return value;
         }
 
-        private string GetCleanFlatJson(string stringValue)
+        private static string GetCleanFlatJson(string stringValue)
         {
             if (string.IsNullOrWhiteSpace(stringValue) || !stringValue.DetectIsJson()) return stringValue;
 
@@ -108,7 +108,7 @@ namespace uSync.Core.Mapping
         ///   using the same format. 
         ///  </para>
         /// </remarks>
-        private string GetSafeValue(object value)
+        private static string GetSafeValue(object value)
         {
             switch (value)
             {

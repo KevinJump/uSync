@@ -178,7 +178,7 @@ namespace uSync.Core.Serialization.Serializers
 
         }
 
-        private string GetFilePath(string value)
+        private static string GetFilePath(string value)
         {
             if (value.DetectIsJson())
             {

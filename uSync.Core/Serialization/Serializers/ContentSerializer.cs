@@ -83,7 +83,7 @@ namespace uSync.Core.Serialization.Serializers
             return new XElement("Template");
         }
 
-        private XElement SerailizePublishedStatus(IContent item, SyncSerializerOptions options)
+        private static XElement SerailizePublishedStatus(IContent item, SyncSerializerOptions options)
         {
             // get the list of cultures we are serializing from the config
             var activeCultures = options.GetCultures();
@@ -261,7 +261,7 @@ namespace uSync.Core.Serialization.Serializers
             return Enumerable.Empty<uSyncChange>();
         }
 
-        private ContentSchedule GetContentScheduleFromNode(XElement scheduleNode)
+        private static ContentSchedule GetContentScheduleFromNode(XElement scheduleNode)
         {
             var key = Guid.Empty;
             var culture = scheduleNode.Element("Culture").ValueOrDefault(string.Empty);
@@ -271,7 +271,7 @@ namespace uSync.Core.Serialization.Serializers
             return new ContentSchedule(key, culture, date, action);
         }
 
-        private ContentSchedule FindSchedule(ContentScheduleCollection currentSchedules, ContentSchedule newSchedule)
+        private static ContentSchedule FindSchedule(ContentScheduleCollection currentSchedules, ContentSchedule newSchedule)
         {
             var schedule = currentSchedules.GetSchedule(newSchedule.Culture, newSchedule.Action);
             if (schedule != null && schedule.Any()) return schedule.FirstOrDefault();

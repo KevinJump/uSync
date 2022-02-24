@@ -142,7 +142,7 @@ namespace uSync.BackOffice.SyncHandlers
         }
 
 
-        private HandlerConfigPair LoadHandlerConfig(ISyncHandler handler, uSyncHandlerSetSettings setSettings)
+        private static HandlerConfigPair LoadHandlerConfig(ISyncHandler handler, uSyncHandlerSetSettings setSettings)
         {
             return new HandlerConfigPair
             {
@@ -196,7 +196,7 @@ namespace uSync.BackOffice.SyncHandlers
         /// <param name="actions"></param>
         /// <param name="group"></param>
         /// <returns></returns>
-        private bool IsValidHandler(HandlerConfigPair handlerConfigPair, HandlerActions actions, string group)
+        private static bool IsValidHandler(HandlerConfigPair handlerConfigPair, HandlerActions actions, string group)
             => handlerConfigPair.IsEnabled() && handlerConfigPair.IsValidAction(actions) && handlerConfigPair.IsValidGroup(group);
     }
 }

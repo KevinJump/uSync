@@ -57,14 +57,14 @@ namespace uSync.Core.Mapping
 
         public override string GetImportValue(string value, string editorAlias)
         {
-            var gridContent = this.GetValueAs<string>(value);
+            var gridContent = GetValueAs<string>(value);
             if (string.IsNullOrWhiteSpace(gridContent)) return value;
             return ProcessGridValues(gridContent, ProcessImport);
         }
 
         public override string GetExportValue(object value, string editorAlias)
         {
-            var gridContent = this.GetValueAs<string>(value);
+            var gridContent = GetValueAs<string>(value);
             if (string.IsNullOrWhiteSpace(gridContent)) return gridContent;
             return ProcessGridValues(gridContent, ProcessExport);
         }
@@ -277,7 +277,7 @@ namespace uSync.Core.Mapping
             return (alias, mapperCollection.Value.GetSyncMappers(alias));
         }
 
-        private JArray GetArray(JObject obj, string propertyName)
+        private static JArray GetArray(JObject obj, string propertyName)
         {
             if (obj.TryGetValue(propertyName, out JToken token))
             {
@@ -288,7 +288,7 @@ namespace uSync.Core.Mapping
             return new JArray();
         }
 
-        private JObject GetObject(JObject obj, string propertyName)
+        private static JObject GetObject(JObject obj, string propertyName)
         {
             if (obj.TryGetValue(propertyName, out JToken token))
             {

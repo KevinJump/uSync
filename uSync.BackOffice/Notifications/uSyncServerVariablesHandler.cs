@@ -46,7 +46,7 @@ namespace uSync.BackOffice.Notifications
         {
             notification.ServerVariables.Add("uSync", new Dictionary<string, object>
             {
-                { "uSyncService", linkGenerator.GetUmbracoApiServiceBaseUrl<uSyncDashboardApiController>(controller => controller.GetApi()) },
+                { "uSyncService", linkGenerator.GetUmbracoApiServiceBaseUrl<uSyncDashboardApiController>(controller => uSyncDashboardApiController.GetApi()) },
                 { "signalRHub",  uSyncHubRoutes.GetuSyncHubRoute() }
             });
         }

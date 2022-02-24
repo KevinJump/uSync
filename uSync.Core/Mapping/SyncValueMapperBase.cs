@@ -86,7 +86,7 @@ namespace uSync.Core.Mapping
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        protected TObject GetValueAs<TObject>(object value)
+        protected static TObject GetValueAs<TObject>(object value)
         {
             if (value == null) return default;
             var attempt = value.TryConvertTo<TObject>();

@@ -91,7 +91,7 @@ namespace uSync.Core.Serialization.Serializers
             node.Add(new XElement("Variations", property.Variations));
         }
 
-        private XElement SerailizeTemplates(IContentType item)
+        private static XElement SerailizeTemplates(IContentType item)
         {
             var node = new XElement("AllowedTemplates");
             if (item.AllowedTemplates.Any())
@@ -408,7 +408,7 @@ namespace uSync.Core.Serialization.Serializers
         }
 
 
-        protected TValue GetPropertyAs<TValue>(PropertyInfo info, object property)
+        protected static TValue GetPropertyAs<TValue>(PropertyInfo info, object property)
         {
             if (info == null) return default;
 

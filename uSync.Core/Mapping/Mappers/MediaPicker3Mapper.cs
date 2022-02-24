@@ -87,7 +87,7 @@ namespace uSync.Core.Mapping.Mappers
             return dependencies;
         }
 
-        private Guid GetGuidValue(JObject obj, string key)
+        private static Guid GetGuidValue(JObject obj, string key)
         {
             if (obj != null && obj.ContainsKey(key))
             {

@@ -167,7 +167,7 @@ namespace uSync.Core.Serialization.Serializers
             return SyncAttempt<IMacro>.Succeed(item.Name, item, ChangeType.Import, details);
         }
 
-        private void RemoveOrphanProperties(IMacro item, XElement properties)
+        private static void RemoveOrphanProperties(IMacro item, XElement properties)
         {
             var removalKeys = new List<string>();
             if (properties == null)

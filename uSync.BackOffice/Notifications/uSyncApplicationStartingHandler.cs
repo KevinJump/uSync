@@ -166,7 +166,7 @@ namespace uSync.BackOffice.Notifications
             => IsGroupSettingEnabled(_uSyncConfig.Settings.ExportAtStartup);
 
 
-        private bool IsGroupSettingEnabled(string value)
+        private static bool IsGroupSettingEnabled(string value)
             => !string.IsNullOrWhiteSpace(value)
                 && !value.InvariantEquals("none")
                 && !value.InvariantEquals("off")

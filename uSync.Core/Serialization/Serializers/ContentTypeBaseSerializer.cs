@@ -684,7 +684,7 @@ namespace uSync.Core.Serialization.Serializers
             return null;
         }
 
-        private TValue GetPropertyAs<TValue>(PropertyInfo info, IPropertyType property)
+        private static TValue GetPropertyAs<TValue>(PropertyInfo info, IPropertyType property)
         {
             if (info == null) return default;
 
@@ -812,7 +812,7 @@ namespace uSync.Core.Serialization.Serializers
             return changes;
         }
 
-        private PropertyGroup FindTab(TObject item, string alias, string name, Guid key)
+        private static PropertyGroup FindTab(TObject item, string alias, string name, Guid key)
         {
             if (key != Guid.Empty)
             {
@@ -836,7 +836,7 @@ namespace uSync.Core.Serialization.Serializers
         ///  by default they are probibly groups, but if the doctype already has tabs they need
         ///  to be treated as new tabs or they don't appear.
         /// </remarks>
-        private PropertyGroupType GetDefaultTabType(XElement node)
+        private static PropertyGroupType GetDefaultTabType(XElement node)
         {
             // if we have tabs then when we don't know the type of a group, its a tab.
             if (node.Elements("Tab").Any(x => x.Element("Type").ValueOrDefault(PropertyGroupType.Group) == PropertyGroupType.Tab))
@@ -1174,7 +1174,7 @@ namespace uSync.Core.Serialization.Serializers
             return base.IsCurrent(node, options);
         }
 
-        private void InsertMissingProperties(XElement node, string propertyName)
+        private static void InsertMissingProperties(XElement node, string propertyName)
         {
             var propertiesNode = node?.Element("GenericProperties");
             if (propertiesNode == null) return;

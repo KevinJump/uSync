@@ -7,7 +7,7 @@ namespace uSync.BackOffice.Hubs
 {
     public class SyncHub : Hub<ISyncHub>
     {
-        public string GetTime()
+        public static string GetTime()
             => DateTime.Now.ToString();
     }
 

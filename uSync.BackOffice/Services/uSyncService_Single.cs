@@ -248,7 +248,7 @@ namespace uSync.BackOffice
             }
         }
 
-        private SyncHandlerOptions HandlerOptionsFromPaged(uSyncPagedImportOptions options)
+        private static SyncHandlerOptions HandlerOptionsFromPaged(uSyncPagedImportOptions options)
             => new SyncHandlerOptions(options.HandlerSet)
             {
                 IncludeDisabled = options.IncludeDisabledHandlers
@@ -292,7 +292,7 @@ namespace uSync.BackOffice
         /// <remarks>
         ///  for partial imports this allows the calling progress to smooth out the progress bar.
         /// </remarks>
-        private int CalculateProgress(int value, int total, int min, int max)
+        private static int CalculateProgress(int value, int total, int min, int max)
             => (int)(min + (((float)value / total) * (max - min)));
 
     }

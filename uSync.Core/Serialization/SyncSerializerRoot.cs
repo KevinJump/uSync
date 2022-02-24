@@ -271,7 +271,7 @@ namespace uSync.Core.Serialization
             return currentHash == newHash ? ChangeType.NoChange : ChangeType.Update;
         }
 
-        private ChangeType CalculateEmptyChange(XElement node, XElement current)
+        private static ChangeType CalculateEmptyChange(XElement node, XElement current)
         {
             // this shouldn't happen, but check.
             if (current == null) return ChangeType.NoChange;

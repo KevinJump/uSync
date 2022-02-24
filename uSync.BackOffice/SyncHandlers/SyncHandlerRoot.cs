@@ -1025,7 +1025,7 @@ namespace uSync.BackOffice.SyncHandlers
             }
         }
 
-        private uSyncChange MakeRawChange(XElement node, XElement current, SyncSerializerOptions options)
+        private static uSyncChange MakeRawChange(XElement node, XElement current, SyncSerializerOptions options)
         {
             if (current != null)
                 return uSyncChange.Update(node.GetAlias(), "Raw XML", current.ToString(), node.ToString());
@@ -1497,7 +1497,7 @@ namespace uSync.BackOffice.SyncHandlers
 
 
 
-        private string GetNameFromFileOrNode(string filename, XElement node)
+        private static string GetNameFromFileOrNode(string filename, XElement node)
             => !string.IsNullOrWhiteSpace(filename) ? filename : node.GetAlias();
 
 

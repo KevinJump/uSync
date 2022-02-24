@@ -191,7 +191,7 @@ namespace uSync.Core.Serialization.Serializers
         }
 
 
-        private RelationType CreateRelation(string name, string alias, bool isBidrectional, Guid? parent, Guid? child)
+        private static RelationType CreateRelation(string name, string alias, bool isBidrectional, Guid? parent, Guid? child)
         {
             return new RelationType(name, alias, isBidrectional, parent.Value, child.Value);
         }
@@ -202,7 +202,7 @@ namespace uSync.Core.Serialization.Serializers
         /// <remarks>
         ///  works around the interface changing v8.6 from Guid to Guid?
         /// </remarks>
-        private Guid? GetGuidValue(IRelationType item, string propertyName)
+        private static Guid? GetGuidValue(IRelationType item, string propertyName)
         {
             var propertyInfo = item.GetType().GetProperty(propertyName);
             if (propertyInfo == null) return null;
@@ -218,7 +218,7 @@ namespace uSync.Core.Serialization.Serializers
             return null;
         }
 
-        private void SetGuidValue(object item, string propertyName, Guid? value)
+        private static void SetGuidValue(object item, string propertyName, Guid? value)
         {
             var propertyInfo = item.GetType().GetProperty(propertyName);
             if (propertyInfo == null) return;

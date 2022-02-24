@@ -122,7 +122,7 @@ namespace uSync.BackOffice
         /// <summary>
         ///  gets the phyical folder for a handler. ( root + handlerfolder)
         /// </summary>
-        private string GetHandlerFolder(string rootFolder, ISyncHandler handler)
+        private static string GetHandlerFolder(string rootFolder, ISyncHandler handler)
             => Path.Combine(rootFolder, handler.DefaultFolder);
 
     }

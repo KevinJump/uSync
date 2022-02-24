@@ -81,7 +81,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             return true;
         }
 
-        private bool ImportTrashedItem(XElement node, HandlerSettings config)
+        private static bool ImportTrashedItem(XElement node, HandlerSettings config)
         {
             // unless the setting is explicit we don't import trashed items. 
             var trashed = node.Element("Info")?.Element("Trashed").ValueOrDefault(false);

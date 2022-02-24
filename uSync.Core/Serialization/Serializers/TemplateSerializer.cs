@@ -137,10 +137,10 @@ namespace uSync.Core.Serialization.Serializers
         /// <param name="node"></param>
         /// <param name="options"></param>
         /// <returns></returns>
-        private bool ShouldGetContentFromNode(XElement node, SyncSerializerOptions options)
+        private static bool ShouldGetContentFromNode(XElement node, SyncSerializerOptions options)
             => node.Element("Contents") != null; // && options.GetSetting(uSyncConstants.Conventions.IncludeContent, false);
 
-        public string GetContentFromConfig(XElement node)
+        public static string GetContentFromConfig(XElement node)
             => node.Element("Contents").ValueOrDefault(string.Empty);
 
         public override SyncAttempt<ITemplate> DeserializeSecondPass(ITemplate item, XElement node, SyncSerializerOptions options)
@@ -183,7 +183,7 @@ namespace uSync.Core.Serialization.Serializers
             return SyncAttempt<XElement>.Succeed(item.Name, node, typeof(ITemplate), ChangeType.Export);
         }
 
-        private XElement SerializeContent(ITemplate item)
+        private static XElement SerializeContent(ITemplate item)
         {
             return new XElement("Contents", new XCData(item.Content));
         }

@@ -70,7 +70,7 @@ namespace uSync.Core.Tracking
             return CalculateDiffrences(target, source);
         }
 
-        private uSyncChange GetEmptyFileChange(XElement target, XElement source)
+        private static uSyncChange GetEmptyFileChange(XElement target, XElement source)
         {
             if (source == null) return uSyncChange.NoChange("", target.GetAlias());
 
@@ -206,7 +206,7 @@ namespace uSync.Core.Tracking
             return selectionPath.Replace("][", " and ");
         }
 
-        private string EscapeXPathString(string value)
+        private static string EscapeXPathString(string value)
         {
             if (!value.Contains("'"))
                 return '\'' + value + '\'';
@@ -235,7 +235,7 @@ namespace uSync.Core.Tracking
             return "";
         }
 
-        private string GetKeyValue(XElement node, string key)
+        private static string GetKeyValue(XElement node, string key)
         {
             if (key == "#") return node.Name.LocalName;
             if (key.StartsWith("@")) return node.Attribute(key.Substring(1)).ValueOrDefault(string.Empty);
@@ -311,7 +311,7 @@ namespace uSync.Core.Tracking
                 return StringChange(target, source, path, name, maskValue);
             }
         }
-        private uSyncChange StringChange(string target, string source, string path, string name, bool maskValue)
+        private static uSyncChange StringChange(string target, string source, string path, string name, bool maskValue)
         {
             if (source.Equals(target)) return null;
             return uSyncChange.Update(path, name, maskValue ? "*****" : source, maskValue ? "*****" : target);
@@ -324,7 +324,7 @@ namespace uSync.Core.Tracking
         ///  Depending on the direction of the comapre this will add a delete (when value is mising from target)
         ///  or a create (when value is missing from source).
         /// </remarks>
-        private uSyncChange AddMissingChange(string path, string name, string value, TrackingDirection direction)
+        private static uSyncChange AddMissingChange(string path, string name, string value, TrackingDirection direction)
         {
             switch (direction)
             {

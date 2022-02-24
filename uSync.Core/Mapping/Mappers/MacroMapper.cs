@@ -94,7 +94,7 @@ namespace uSync.Core.Mapping
         /// <summary>
         ///  gets all the attributes from an html macro tag 
         /// </summary>
-        private Dictionary<string, string> GetMacroAttributes(string html)
+        private static Dictionary<string, string> GetMacroAttributes(string html)
         {
             var doc = new HtmlDocument();
             doc.OptionOutputOriginalCase = true;

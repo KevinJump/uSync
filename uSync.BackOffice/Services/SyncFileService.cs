@@ -42,7 +42,7 @@ namespace uSync.BackOffice.Services
         /// <summary>
         ///  clean up the local path, and full expand any short file names
         /// </summary>
-        private string CleanLocalPath(string path)
+        private static string CleanLocalPath(string path)
             => Path.GetFullPath(path.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar));
 
         /// <summary>
