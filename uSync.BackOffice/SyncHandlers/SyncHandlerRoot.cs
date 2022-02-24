@@ -1502,7 +1502,7 @@ namespace uSync.BackOffice.SyncHandlers
 
 
         private string GetCacheKeyBase()
-            => $"keycache_{this.Alias}_{Thread.CurrentThread.ManagedThreadId}";
+            => $"keycache_{this.Alias}_{Environment.CurrentManagedThreadId}";
 
         private string PrepCaches()
         {
