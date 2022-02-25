@@ -158,7 +158,41 @@ namespace uSync.Core.Serialization.Serializers
             details.AddNotNull(DeserializeTemplate(item, node));
             details.AddRange(DeserializeSchedules(item, node, options));
 
-            return SyncAttempt<IContent>.Succeed(item.Name, item, ChangeType.Import, details);
+            var propertiesAttempt = DeserializeProperties(item, node, options);
+            if (!propertiesAttempt.Success)
+            {
+                return SyncAttempt<IContent>.Fail(item.Name, item, ChangeType.ImportFail, "Failed to deserialize properties", attempt.Exception);
+            }
+
+            details.AddRange(propertiesAttempt.Result);
+
+            // sort order
+            var sortOrder = node.Element("Info").Element("SortOrder").ValueOrDefault(-1);
+            details.AddNotNull(HandleSortOrder(item, sortOrder));
+
+            details.AddRange(DeserializeSchedules(item, node, options));
+
+
+            var publishTimer = Stopwatch.StartNew();
+            // published status
+            // this does the last save and publish
+            var saveAttempt = DoSaveOrPublish(item, node, options);
+            if (saveAttempt.Success)
+            {
+                var message = saveAttempt.Result;
+                if (publishTimer.ElapsedMilliseconds > 10000)
+                {
+                    message += $" (Slow publish {publishTimer.ElapsedMilliseconds}ms)";
+                }
+
+                // we say no change back, this stops the core second pass function from saving 
+                // this item (which we have just done with DoSaveOrPublish)
+                return SyncAttempt<IContent>.Succeed(item.Name, item, ChangeType.Import, message, true, details);
+            }
+            else
+            {
+                return SyncAttempt<IContent>.Fail(item.Name, item, ChangeType.ImportFail, saveAttempt.Result, saveAttempt.Exception);
+            }
         }
 
         protected virtual uSyncChange DeserializeTemplate(IContent item, XElement node)
@@ -274,40 +308,7 @@ namespace uSync.Core.Serialization.Serializers
             return null;
         }
 
-        public override SyncAttempt<IContent> DeserializeSecondPass(IContent item, XElement node, SyncSerializerOptions options)
-        {
-            var attempt = DeserializeProperties(item, node, options);
-            if (!attempt.Success)
-            {
-                return SyncAttempt<IContent>.Fail(item.Name, item, ChangeType.ImportFail, "Failed to deserialize properties", attempt.Exception);
-            }
-
-            var changes = attempt.Result;
-
-            // sort order
-            var sortOrder = node.Element("Info").Element("SortOrder").ValueOrDefault(-1);
-            changes.AddNotNull(HandleSortOrder(item, sortOrder));
-
-            var publishTimer = Stopwatch.StartNew();
-            // published status
-            // this does the last save and publish
-            var saveAttempt = DoSaveOrPublish(item, node, options);
-            if (saveAttempt.Success)
-            {
-                var message = attempt.Status;
-                if (publishTimer.ElapsedMilliseconds > 10000)
-                {
-                    message += $" (Slow publish {publishTimer.ElapsedMilliseconds}ms)";
-                }
-
-                // we say no change back, this stops the core second pass function from saving 
-                // this item (which we have just done with DoSaveOrPublish)
-                return SyncAttempt<IContent>.Succeed(item.Name, item, ChangeType.NoChange, message, true, changes);
-            }
-
-            return SyncAttempt<IContent>.Fail(item.Name, item, ChangeType.ImportFail, $"{saveAttempt.Result} {attempt.Status}", saveAttempt.Exception);
-        }
-
+  
         protected override uSyncChange HandleTrashedState(IContent item, bool trashed)
         {
             if (!trashed && item.Trashed)
