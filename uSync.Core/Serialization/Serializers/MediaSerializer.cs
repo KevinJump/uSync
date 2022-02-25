@@ -68,12 +68,6 @@ namespace uSync.Core.Serialization.Serializers
                 details.AddNotNull( HandleTrashedState(item, trashed));
             }
 
-
-            return SyncAttempt<IMedia>.Succeed(item.Name, item, ChangeType.Import, details.ToList());
-        }
-
-        public override SyncAttempt<IMedia> DeserializeSecondPass(IMedia item, XElement node, SyncSerializerOptions options)
-        {
             var propertyAttempt = DeserializeProperties(item, node, options);
             if (!propertyAttempt.Success)
                 return SyncAttempt<IMedia>.Fail(item.Name, item, ChangeType.Fail, "Failed to save properties", propertyAttempt.Exception);
@@ -83,13 +77,12 @@ namespace uSync.Core.Serialization.Serializers
             var sortOrder = info.Element("SortOrder").ValueOrDefault(-1);
             HandleSortOrder(item, sortOrder);
 
-            var attempt = mediaService.Save(item);
-            if (!attempt.Success)
-                return SyncAttempt<IMedia>.Fail(item.Name, ChangeType.Fail, "");
+            var saveAttempt = mediaService.Save(item);
+            if (!saveAttempt.Success)
+                return SyncAttempt<IMedia>.Fail(item.Name, item, ChangeType.Fail, "", saveAttempt.Exception);
 
             // setting the saved flag on the attempt to true, stops base classes from saving the item.
-            return SyncAttempt<IMedia>.Succeed(item.Name, item, ChangeType.NoChange, propertyAttempt.Status, true,
-                propertyAttempt.Result);
+            return SyncAttempt<IMedia>.Succeed(item.Name, item, ChangeType.NoChange, "", true, propertyAttempt.Result);
         }
 
         protected override uSyncChange HandleTrashedState(IMedia item, bool trashed)
