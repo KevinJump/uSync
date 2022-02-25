@@ -20,8 +20,11 @@ Umbraco_Client/
 Bin/
 # Config/
 Archive/
-uSync8.Site/Media/*
-!uSync8.Site/Media/web.config
+uSync.Site/Media/*
+**/uSync.Site/Views/
+**/uSync.Site/App_Plugins/
+!uSync.Site/Media/web.config
+
 [Dd]ist/
 
 [Bb]uild-[Ff]iles/
