@@ -65,7 +65,7 @@
             uSync8DashboardService.getChangedSettings()
                 .then(function (result) {
                     var appSetting = {
-                        "uSync:": toPascal(result.data)
+                        "uSync": toPascal(result.data)
                     }
 
                     var options = {
