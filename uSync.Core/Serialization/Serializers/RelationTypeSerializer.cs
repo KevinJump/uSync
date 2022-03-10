@@ -91,7 +91,7 @@ namespace uSync.Core.Serialization.Serializers
 
             var hasBeenSaved = false;
             var message = "";
-            if (options.GetSetting<bool>("IncludeRelations", true))
+            if (options.GetSetting<bool>("IncludeRelations", false))
             {
                 // we have to save before we can add the relations. 
                 this.SaveItem(item);
@@ -177,7 +177,7 @@ namespace uSync.Core.Serialization.Serializers
                 new XElement("ChildType", GetGuidValue(item, nameof(item.ChildObjectType))),
                 new XElement("Bidirectional", item.IsBidirectional)));
 
-            if (options.GetSetting<bool>("IncludeRelations", true))
+            if (options.GetSetting<bool>("IncludeRelations", false))
             {
                 node.Add(SerializeRelations(item));
             }
