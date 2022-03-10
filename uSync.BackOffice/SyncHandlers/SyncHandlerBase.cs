@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Xml.Linq;
 
 using Microsoft.Extensions.Logging;
 
+using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Models.Entities;
@@ -14,6 +17,8 @@ using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
 using uSync.Core;
 using uSync.Core.Models;
+
+using static System.Net.WebRequestMethods;
 
 namespace uSync.BackOffice.SyncHandlers
 {
@@ -41,11 +46,69 @@ namespace uSync.BackOffice.SyncHandlers
             this.entityService = entityService;
         }
 
-        protected override IEnumerable<uSyncAction> DeleteMissingItems(TObject parent, IEnumerable<Guid> keys, bool reportOnly)
+        /// <summary>
+        ///  given a folder we calculate what items we can remove, becuase they are 
+        ///  not in one the the files in the folder.
+        /// </summary>
+        /// <param name="cleanFile"></param>
+        /// <returns></returns>
+        protected override IEnumerable<uSyncAction> CleanFolder(string cleanFile, bool reportOnly, bool flat)
         {
-            var items = GetChildItems(parent.Id).ToList();
+            var folder = Path.GetDirectoryName(cleanFile);
+            if (!Directory.Exists(folder)) return Enumerable.Empty<uSyncAction>();
 
-            logger.LogDebug("DeleteMissingItems: {parentId} Checking {itemCount} items for {keyCount} keys", parent.Id, items.Count, keys.Count());
+
+            // get the keys for every item in this folder. 
+
+            // this would works on the flat folder stucture too, 
+            // there we are being super defensive, so if an item
+            // is anywhere in the folder it won't get removed
+            // even if the folder is wrong
+            // be a little slower (not much though)
+
+            // we cache this, (it is cleared on an ImportAll)
+            var keys = GetFolderKeys(folder, flat);
+            if (keys.Count > 0)
+            {
+                // move parent to here, we only need to check it if there are files.
+                var parentId = GetCleanParentId(cleanFile);
+                if (parentId == 0) return Enumerable.Empty<uSyncAction>();
+
+                logger.LogDebug("Got parent with {Id} from clean file {file}", parentId, Path.GetFileName(cleanFile));
+
+                // keys should aways have at least one entry (the key from cleanFile)
+                // if it doesn't then something might have gone wrong.
+                // because we are being defensive when it comes to deletes, 
+                // we only then do deletes when we know we have loaded some keys!
+                return DeleteMissingItems(parentId, keys, reportOnly);
+            }
+            else
+            {
+                logger.LogWarning("Failed to get the keys for items in the folder, there might be a disk issue {folder}", folder);
+                return Enumerable.Empty<uSyncAction>();
+            }
+        }
+
+        private int GetCleanParentId(string cleanFile)
+        {
+            var parent = GetCleanParent(cleanFile);
+            if (parent == null)
+            {
+                var node = XElement.Load(cleanFile);
+                var id = node.Attribute("Id").ValueOrDefault(0);
+                if (id == Constants.System.Root) return Constants.System.Root;
+            }
+            return parent?.Id ?? 0;
+        }
+
+        protected override IEnumerable<uSyncAction> DeleteMissingItems(TObject parent, IEnumerable<Guid> keys, bool reportOnly)
+            => DeleteMissingItems(parent?.Id ?? 0, keys, reportOnly);
+
+        protected override IEnumerable<uSyncAction> DeleteMissingItems(int parentId, IEnumerable<Guid> keys, bool reportOnly)
+        {
+            var items = GetChildItems(parentId).ToList();
+
+            logger.LogDebug("DeleteMissingItems: {parentId} Checking {itemCount} items for {keyCount} keys", parentId, items.Count, keys.Count());
 
             var actions = new List<uSyncAction>();
             foreach (var item in items.Where(x => !keys.Contains(x.Key)))
