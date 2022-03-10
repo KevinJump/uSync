@@ -746,7 +746,8 @@ namespace uSync.BackOffice.SyncHandlers
                     .AsEnumerableOfOne();
             }
 
-            var filename = GetPath(folder, item, config.GuidNames, config.UseFlatStructure);
+            var filename = GetPath(folder, item, config.GuidNames, config.UseFlatStructure)
+                .ToAppSafeFileName();
 
             var attempt = SerializeItem(item, new SyncSerializerOptions(config.Settings));
             if (attempt.Success)
@@ -1144,7 +1145,8 @@ namespace uSync.BackOffice.SyncHandlers
         protected virtual void ExportDeletedItem(TObject item, string folder, HandlerSettings config)
         {
             if (item == null) return;
-            var filename = GetPath(folder, item, config.GuidNames, config.UseFlatStructure);
+            var filename = GetPath(folder, item, config.GuidNames, config.UseFlatStructure)
+                .ToAppSafeFileName();
 
             var attempt = serializer.SerializeEmpty(item, SyncActionType.Delete, string.Empty);
             if (ShouldExport(attempt.Item, config))
