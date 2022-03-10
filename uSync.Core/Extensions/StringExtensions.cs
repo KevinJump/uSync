@@ -1,11 +1,36 @@
 ﻿using System;
+using System.IO;
+
+using Umbraco.Extensions;
 
 namespace uSync.Core
 {
     public static class StringExtensions
     {
+
+        /// <summary>
+        ///  things can't be called web.config or app.config it causes issues on build and publish 
+        /// </summary>
+        private static readonly string[] BadNames = new[]
+        {
+            "app.config", "web.config"
+        };
+
+        public static string ToAppSafeFileName(this string value)
+        {
+            var filename = Path.GetFileName(value);
+            if (BadNames.InvariantContains(filename))
+            {
+                return Path.Combine(
+                    Path.GetDirectoryName(value),
+                    $"__{Path.GetFileNameWithoutExtension(value)}__{Path.GetExtension(value)}");
+            }
+            return value;
+        }
+
+
         private static readonly char[] Base32Table =
-      {
+        {
             'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p',
             'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5'
         };
