@@ -4,7 +4,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Umbraco.Cms" Version="10.0.0-preview20220214.83562" />
+        <PackageReference Include="Umbraco.Cms" Version="10.0.0-preview20220311.86365" />
 		<!--
 		<PackageReference Include="Our.Umbraco.Community.Contentment" Version="3.0.0" />
 		<PackageReference Include="Our.Umbraco.DocTypeGridEditor" Version="9.0.2" />

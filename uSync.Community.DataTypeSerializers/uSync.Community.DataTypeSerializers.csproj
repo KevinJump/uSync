@@ -15,9 +15,9 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="10.0.0-preview20220214.83562" />
+		<PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="10.0.0-preview20220311.86365" />
 		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
-		<PackageReference Include="Umbraco.Cms.Web.Website" Version="10.0.0-preview20220214.83562" />
+		<PackageReference Include="Umbraco.Cms.Web.Website" Version="10.0.0-preview20220311.86365" />
 	</ItemGroup>
 
 	<ItemGroup>
