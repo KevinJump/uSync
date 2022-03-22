@@ -605,7 +605,6 @@ namespace uSync.BackOffice.SyncHandlers
         /// <param name="keysToKeep">list of guids of items we don't want to delete</param>
         /// <param name="reportOnly">will just report what would happen (doesn't do the delete)</param>
         /// <returns>list of delete actions</returns>
-        [Obsolete("Only required to pass in parent id (support root deletions)")]
         protected abstract IEnumerable<uSyncAction> DeleteMissingItems(TObject parent, IEnumerable<Guid> keysToKeep, bool reportOnly);
 
         protected abstract IEnumerable<uSyncAction> DeleteMissingItems(int parentId, IEnumerable<Guid> keysToKeep, bool reportOnly);
