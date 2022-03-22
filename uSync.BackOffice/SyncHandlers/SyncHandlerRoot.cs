@@ -555,7 +555,7 @@ namespace uSync.BackOffice.SyncHandlers
         ///  so we cache it, and if we are using the flat folder stucture, then
         ///  we only do it once, so its quicker. 
         /// </remarks>
-        private IList<Guid> GetFolderKeys(string folder, bool flat)
+        protected IList<Guid> GetFolderKeys(string folder, bool flat)
         {
             // We only need to load all the keys once per handler (if all items are in a folder that key will be used).
             var folderKey = folder.GetHashCode();
@@ -595,7 +595,6 @@ namespace uSync.BackOffice.SyncHandlers
             var node = XElement.Load(file);
             var key = node.GetKey();
             if (key == Guid.Empty) return default;
-
             return GetFromService(key);
         }
 
@@ -607,6 +606,8 @@ namespace uSync.BackOffice.SyncHandlers
         /// <param name="reportOnly">will just report what would happen (doesn't do the delete)</param>
         /// <returns>list of delete actions</returns>
         protected abstract IEnumerable<uSyncAction> DeleteMissingItems(TObject parent, IEnumerable<Guid> keysToKeep, bool reportOnly);
+
+        protected abstract IEnumerable<uSyncAction> DeleteMissingItems(int parentId, IEnumerable<Guid> keysToKeep, bool reportOnly);
 
         /// <summary>
         ///  Get the files we are going to import from a folder. 
