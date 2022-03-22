@@ -1010,10 +1010,13 @@ namespace uSync.Core.Serialization.Serializers
             if (key != Guid.Empty)
             {
                 var entity = entityService.Get(key);
-                if (entity != null && entity.Id != item.ParentId)
+                if (entity != null)
                 {
-                    item.SetParent(entity);
-                    return true;
+                    if (entity.Id != item.ParentId)
+                    {
+                        item.SetParent(entity);
+                    }
+                    return true; 
                 }
             }
 
