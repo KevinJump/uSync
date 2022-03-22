@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Xml.Linq;
 
+using Microsoft.AspNetCore.Routing.Template;
 using Microsoft.Extensions.Logging;
 
-using Umbraco.Cms.Core.Hosting;
+using Umbraco.Cms.Core.IO;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Strings;
@@ -13,6 +15,7 @@ using Umbraco.Extensions;
 using uSync.Core.Models;
 
 using static Umbraco.Cms.Core.Constants;
+using static Umbraco.Cms.Core.Constants.Conventions;
 
 namespace uSync.Core.Serialization.Serializers
 {
@@ -21,17 +24,18 @@ namespace uSync.Core.Serialization.Serializers
     {
         private readonly IFileService fileService;
         private readonly IShortStringHelper shortStringHelper;
-        private readonly IHostingEnvironment hostEnvrionment;
+        private readonly IFileSystem _viewFileSystem;
 
         public TemplateSerializer(IEntityService entityService, ILogger<TemplateSerializer> logger,
             IShortStringHelper shortStringHelper,
             IFileService fileService,
-            IHostingEnvironment hostEnvironment)
+            FileSystems fileSystems)
             : base(entityService, logger)
         {
             this.fileService = fileService;
             this.shortStringHelper = shortStringHelper;
-            this.hostEnvrionment = hostEnvironment;
+
+            _viewFileSystem = fileSystems.MvcViewsFileSystem;
         }
 
         protected override SyncAttempt<ITemplate> DeserializeCore(XElement node, SyncSerializerOptions options)
@@ -63,13 +67,13 @@ namespace uSync.Core.Serialization.Serializers
                 else
                 {
                     logger.LogDebug("Loading template content from disk");
-                    var templatePath = hostEnvrionment.MapPathContentRoot(SystemDirectories.MvcViews + "/" + alias + ".cshtml");
-                    if (System.IO.File.Exists(templatePath))
+
+                    var templatePath = ViewPath(alias);
+                    if (_viewFileSystem.FileExists(templatePath))
                     {
                         logger.LogDebug("Reading {0} contents", templatePath);
-                        var content = System.IO.File.ReadAllText(templatePath);
+                        item.Content = GetContentFromFile(templatePath);
                         item.Path = templatePath;
-                        item.Content = content;
                     }
                     else
                     {
@@ -142,6 +146,18 @@ namespace uSync.Core.Serialization.Serializers
 
         public string GetContentFromConfig(XElement node)
             => node.Element("Contents").ValueOrDefault(string.Empty);
+
+        public string GetContentFromFile(string templatePath)
+        {
+            var content = "";
+            using (var sr = new StreamReader(_viewFileSystem.OpenFile(templatePath)))
+            {
+                content = sr.ReadToEnd();
+                sr.Close();
+            }
+
+            return content;
+        }
 
         public override SyncAttempt<ITemplate> DeserializeSecondPass(ITemplate item, XElement node, SyncSerializerOptions options)
         {
@@ -238,5 +254,9 @@ namespace uSync.Core.Serialization.Serializers
 
             return base.CleanseNode(node);
         }
+
+
+        private string ViewPath(string alias)
+            => _viewFileSystem.GetRelativePath(alias.Replace(" ", "") + ".cshtml");
     }
 }
