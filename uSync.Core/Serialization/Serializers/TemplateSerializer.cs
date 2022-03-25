@@ -79,7 +79,6 @@ namespace uSync.Core.Serialization.Serializers
                     {
                         if (!options.GetSetting<bool>("UsingRazorViews", false))
                         {
-
                             // template is missing
                             // we can't create 
                             logger.LogWarning("Failed to create template {path} the local file is missing", templatePath);
@@ -87,8 +86,11 @@ namespace uSync.Core.Serialization.Serializers
                         }
                         else
                         {
+                            // template is not on disk, we could use the viewEngine to find the view 
+                            // if this finds the view it tells us that the view is somewhere else ? 
+
                             logger.LogDebug("Failed to find content, but UsingRazorViews so will create anyway, then delete the file");
-                            item.Content = "<-- template content - will be removed -->";
+                            item.Content = $"<!-- [uSyncMarker:{this.Id}]  template content - will be removed -->";
                         }
                     }
                 }
@@ -159,10 +161,17 @@ namespace uSync.Core.Serialization.Serializers
         public string GetContentFromFile(string templatePath)
         {
             var content = "";
-            using (var sr = new StreamReader(_viewFileSystem.OpenFile(templatePath)))
+            using (var stream = _viewFileSystem.OpenFile(templatePath))
             {
-                content = sr.ReadToEnd();
-                sr.Close();
+                using (var sr = new StreamReader(stream))
+                {
+                    content = sr.ReadToEnd();
+                    sr.Close();
+                    sr.Dispose();
+                }
+
+                stream.Close();
+                stream.Dispose();
             }
 
             return content;
@@ -195,11 +204,21 @@ namespace uSync.Core.Serialization.Serializers
                 var templatePath = ViewPath(item.Alias);
                 if (_viewFileSystem.FileExists(templatePath))
                 {
-                    logger.LogDebug($"Removing the file from disk, because it exists in a razor view {templatePath}");
-                    _viewFileSystem.DeleteFile(templatePath);
 
-                    // we have to tell the handlers we saved it - or they will and write the file back 
-                    return SyncAttempt<ITemplate>.Succeed(item.Name, item, ChangeType.Import, "Razor view removed", true, details);
+                    var fullPath = _viewFileSystem.GetFullPath(templatePath);
+
+                    if (System.IO.File.Exists(fullPath))
+                    {
+                        var content = System.IO.File.ReadAllText(fullPath);
+                        if (content.Contains($"[uSyncMarker:{this.Id}]"))
+                        {
+                            logger.LogDebug($"Removing the file from disk, because it exists in a razor view {templatePath}");
+                            _viewFileSystem.DeleteFile(templatePath);
+
+                            // we have to tell the handlers we saved it - or they will and write the file back 
+                            return SyncAttempt<ITemplate>.Succeed(item.Name, item, ChangeType.Import, "Razor view removed", true, details);
+                        }
+                    }
                 }
             }
 
