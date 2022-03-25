@@ -77,10 +77,19 @@ namespace uSync.Core.Serialization.Serializers
                     }
                     else
                     {
-                        // template is missing
-                        // we can't create 
-                        logger.LogWarning("Failed to create template {path} the local file is missing", templatePath);
-                        return SyncAttempt<ITemplate>.Fail(name, ChangeType.Import, $"The template {templatePath} file is missing.");
+                        if (!options.GetSetting<bool>("UsingRazorViews", false))
+                        {
+
+                            // template is missing
+                            // we can't create 
+                            logger.LogWarning("Failed to create template {path} the local file is missing", templatePath);
+                            return SyncAttempt<ITemplate>.Fail(name, ChangeType.Import, $"The template {templatePath} file is missing.");
+                        }
+                        else
+                        {
+                            logger.LogDebug("Failed to find content, but UsingRazorViews so will create anyway, then delete the file");
+                            item.Content = "<-- template content - will be removed -->";
+                        }
                     }
                 }
             }
@@ -177,6 +186,20 @@ namespace uSync.Core.Serialization.Serializers
 
                     if (!options.Flags.HasFlag(SerializerFlags.DoNotSave))
                         SaveItem(item);
+                }
+            }
+
+            if (options.GetSetting("UsingRazorViews", false))
+            {
+                // using razor views - we delete the template file at the end (because its in a razor view). 
+                var templatePath = ViewPath(item.Alias);
+                if (_viewFileSystem.FileExists(templatePath))
+                {
+                    logger.LogDebug($"Removing the file from disk, because it exists in a razor view {templatePath}");
+                    _viewFileSystem.DeleteFile(templatePath);
+
+                    // we have to tell the handlers we saved it - or they will and write the file back 
+                    return SyncAttempt<ITemplate>.Succeed(item.Name, item, ChangeType.Import, "Razor view removed", true, details);
                 }
             }
 
