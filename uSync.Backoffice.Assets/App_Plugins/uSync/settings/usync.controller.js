@@ -5,6 +5,7 @@
         eventsService,
         overlayService,
         notificationsService,
+        localizationService,
         editorService,
         uSync8DashboardService,
         uSyncHub) {
@@ -12,7 +13,7 @@
         var vm = this;
         vm.fresh = true;
         vm.loading = true;
-        vm.versionLoaded = false; 
+        vm.versionLoaded = false;
         vm.working = false;
         vm.reported = false;
         vm.syncing = false;
@@ -27,7 +28,7 @@
 
         vm.showAdvanced = false;
 
-        vm.hasuSyncForms = false; 
+        vm.hasuSyncForms = false;
 
         vm.canHaveForms = false;
 
@@ -44,44 +45,35 @@
         vm.status = {};
         vm.reportAction = '';
 
-        vm.importButton = {
+        vm.everything = {
+            icon: 'icon-paper-plane-alt color-deep-orange',
+            name: 'Everything',
+            group: '',
+            state: 'init',
+            key: 'everything'
+        }
+
+        vm.everything.import = {
             state: 'init',
             defaultButton: {
                 labelKey: 'usync_import',
-                handler: importItems
+                handler: function () { importItems(false, vm.everything); }
             },
             subButtons: [{
                 labelKey: 'usync_importforce',
-                handler: function () {
-                    importForce('');
-                }
+                handler: function () { importForce(vm.everything); }
             }]
         };
 
-        vm.reportButton = {
-            state: 'init',
-            defaultButton: {
-                labelKey: 'usync_report',
-                handler: function () {
-                    report('');
-                }
-            },
-            subButtons: []
-        };
-
-        vm.exportButton = {
+        vm.everything.export = {
             state: 'init',
             defaultButton: {
                 labelKey: 'usync_export',
-                handler: function () {
-                    exportItems(false);
-                }
+                handler: function () { exportGroup(vm.everything); }
             },
             subButtons: [{
                 labelKey: 'usync_exportClean',
-                handler: function () {
-                    cleanExport();
-                }
+                handler: function () { cleanExport(); }
             }]
         }
 
@@ -90,7 +82,6 @@
             IsCurrent: true
         };
 
-        vm.exportItems = exportItems;
         vm.importForce = importForce;
         vm.importItems = importItems;
         vm.importGroup = importGroup;
@@ -103,20 +94,13 @@
         vm.calcPercentage = calcPercentage;
         vm.openDetail = openDetail;
 
-        vm.savings = { show: false, title: "", message: "" };
-        vm.godo = [
-            { time: 0, message: "Worth checking" },
-            { time: 180, message: "Go make a cup of tea" },
-            { time: 300, message: "Go have a quick chat" },
-            { time: 900, message: "Go for a nice walk outside 🚶‍♀️" },
-            { time: 3600, message: "You deserve a break" }
-        ];
 
         init();
 
         function init() {
             InitHub();
             getHandlerGroups();
+            loadSavingsMessages();
 
             // just so there is something there when you start 
             uSync8DashboardService.getHandlers()
@@ -150,11 +134,12 @@
 
         function performHandlerAction(handlers, actionMethod, options, cb) {
 
-   
+
             return $q(function (resolve, reject) {
 
                 var index = 0;
                 vm.status.message = 'Starting ' + options.action;
+                vm.status.total = handlers.length - 1;
 
                 uSync8DashboardService.startProcess(options.action)
                     .then(function () {
@@ -175,6 +160,8 @@
                             handler.changes = countChanges(result.data.actions);
 
                             index++;
+                            vm.status.count = index;
+
                             if (index < handlers.length) {
                                 runHandlerAction(handlers[index]);
                             }
@@ -194,19 +181,21 @@
                         });
                 }
             });
-        } 
+        }
 
         function report(group) {
+
+            if (vm.working === true) return;
 
             vm.results = [];
 
             resetStatus(modes.REPORT);
             getWarnings('report');
-            vm.reportButton.state = 'busy';
+            group.state = 'busy';
 
             var options = {
                 action: 'report',
-                group: group
+                group: group.group
             };
 
             var start = performance.now();
@@ -217,9 +206,10 @@
                     vm.reported = true;
                     vm.perf = performance.now() - start;
                     vm.status.message = 'Report complete';
-                    vm.reportButton.state = 'success';
+                    group.state = 'success';
                 }, function (error) {
-                    vm.reportButton.state = 'error';
+                    vm.working = false;
+                    group.state = 'error';
                     notificationsService.error('Error', error.data.ExceptionMessage ?? error.data.exceptionMessage);
                 });
         }
@@ -229,15 +219,18 @@
         }
 
         function importItems(force, group) {
+
+            if (vm.working === true) return;
+
             vm.results = [];
             resetStatus(modes.IMPORT);
             getWarnings('import');
 
-            vm.importButton.state = 'busy';
+            group.state = 'busy';
 
             var options = {
                 action: 'import',
-                group: group,
+                group: group.group,
                 force: force
             };
 
@@ -253,30 +246,29 @@
                             vm.working = false;
                             vm.reported = true;
                             vm.perf = performance.now() - start;
-                            vm.importButton.state = 'success';
+                            group.state = 'success';
                             eventsService.emit('usync-dashboard.import.complete');
                             calculateTimeSaved(vm.results);
                             vm.status.message = 'Complete';
                         });
                 }, function (error) {
+                    vm.working = false;
+                    vm.group.state = 'error';
                     notificationsService.error('Error', error.data.ExceptionMessage ?? error.data.exceptionMessage);
                 });
         }
 
-        function exportItems() {
-            exportGroup('');
-        }
-
         function exportGroup(group) {
 
+            if (vm.working === true) return;
 
             vm.results = [];
             resetStatus(modes.EXPORT);
-            vm.exportButton.state = 'busy';
+            group.state = 'busy';
 
             var options = {
                 action: 'export',
-                group: group
+                group: group.group
             };
 
             var start = performance.now();
@@ -288,37 +280,45 @@
                     vm.reported = true;
                     vm.perf = performance.now() - start;
 
-                    vm.exportButton.state = 'success';
+                    group.state = 'success';
                     vm.savings.show = true;
                     vm.savings.title = 'All items exported.';
                     vm.savings.message = 'Now go wash your hands 🧼!';
                     eventsService.emit('usync-dashboard.export.complete');
                 }, function (error) {
+                    vm.working = false;
+                    group.state = 'error';
                     notificationsService.error('Error', error.data.ExceptionMessage ?? error.data.exceptionMessage);
                 });
         }
-     
+
         function cleanExport() {
 
-            overlayService.open({
-                title: 'Clean Export',
-                content: 'Are you sure ? A clean export will delete all the contents of the uSync folder. You will loose any stored delete or rename actions.',
-                disableBackdropClick: true,
-                disableEscKey: true,
-                submitButtonLabel: 'Yes run a clean export',
-                closeButtonLabel: 'No, close',
-                submit: function () {
-                    overlayService.close();
+            localizationService.localizeMany(["usync_cleanTitle",
+                "usync_cleanMsg", "usync_cleanSubmit", "usync_cleanClose"])
+                .then(function (values) {
 
-                    uSync8DashboardService.cleanExport()
-                        .then(function () {
-                            exportItems();
-                        });
-                },
-                close: function () {
-                    overlayService.close();
-                }
-            })
+
+                    overlayService.open({
+                        title: values[0],
+                        content: values[1],
+                        disableBackdropClick: true,
+                        disableEscKey: true,
+                        submitButtonLabel: values[2],
+                        closeButtonLabel: values[3],
+                        submit: function () {
+                            overlayService.close();
+
+                            uSync8DashboardService.cleanExport()
+                                .then(function () {
+                                    exportGroup(vm.everything);
+                                });
+                        },
+                        close: function () {
+                            overlayService.close();
+                        }
+                    });
+                });
         }
 
         // add a little joy to the process.
@@ -330,7 +330,8 @@
 
             if (time >= 180) {
                 vm.savings.show = true;
-                vm.savings.title = 'You just saved ' + duration.humanize() + "!";
+
+                vm.savings.title = 'You just saved about ' + duration.humanize() + "!";
                 vm.savings.message = '';
 
                 for (let x = 0; x < vm.godo.length; x++) {
@@ -357,7 +358,7 @@
         vm.exportButtons = {};
 
         function getHandlerGroups() {
-            vm.showEverything = false; 
+            vm.showEverything = false;
 
             uSync8DashboardService.getHandlerGroups()
                 .then(function (result) {
@@ -370,36 +371,36 @@
                             vm.showEverything = true;
                         }
                         else {
-                            vm.groups.push({
+
+                            var groupInfo = {
                                 name: group,
+                                group: group,
                                 icon: icon,
-                                key: group.toLowerCase()
-                            });
+                                key: group.toLowerCase(),
+                                state: 'init'
+                            }
 
-
-                            vm.importGroup[group] = {
-                                state: 'init',
+                            groupInfo.import = {
                                 defaultButton: {
                                     labelKey: 'usync_import',
-                                    handler: function () { importGroup(group) }
+                                    handler: function () { importGroup(groupInfo) }
                                 },
                                 subButtons: [{
                                     labelKey: 'usync_importforce',
-                                    handler: function () { importForce(group) }
+                                    handler: function () { importForce(groupInfo) }
                                 }]
                             };
 
-                            vm.exportButtons[group] = {
-                                state: init,
+                            groupInfo.export = {
                                 defaultButton: {
                                     labelKey: 'usync_export',
-                                    handler: function () { exportGroup(group) }
+                                    handler: function () { exportGroup(groupInfo) }
                                 },
-                                subButtons: []
                             };
 
+
                             if (isSingle) {
-                                vm.exportButtons[group].subButtons.push({
+                                groupInfo.export.subButtons.push({
                                     labelKey: 'usync_exportClean',
                                     handler: function () {
                                         cleanExport();
@@ -407,12 +408,18 @@
                                 });
                             }
 
+                            vm.groups.push(groupInfo);
+
                             if (group.toLowerCase() === "forms") {
                                 vm.hasuSyncForms = true;
                             }
                         }
 
                     });
+
+                    if (vm.showEverything) {
+                        vm.groups.push(vm.everything);
+                    }
 
                     if (!vm.hasuSyncForms) {
                         vm.canHaveForms = canHaveForms();
@@ -487,16 +494,16 @@
 
             vm.reported = vm.showAll = false;
             vm.working = true;
-            vm.showSpinner = false; 
+            vm.showSpinner = false;
             vm.runmode = mode;
             vm.hideLink = false;
             vm.savings.show = false;
 
             vm.status = {
-                Count: 0,
-                Total: 1,
-                Message: 'Initializing',
-                Handlers: vm.handlers
+                count: 0,
+                total: 1,
+                message: 'Initializing',
+                handlers: vm.handlers
             };
 
             if (!vm.hub.active) {
@@ -505,9 +512,9 @@
             }
 
             vm.update = {
-                Message: '',
-                Count: 0,
-                Total: 1
+                message: '',
+                count: 0,
+                total: 1
             };
 
             // performance timer. 
@@ -553,20 +560,32 @@
         }
 
         function canHaveForms() {
-
             if (vm.hasuSyncForms) return false;
-            /*
-
-            try {
-
-                // check to see if umbraco.forms is installed. 
-                $controller('UmbracoForms.Dashboards.FormsController', { $scope: {} }, true)
-                return true;
-            }
-            catch {
-                return false;
-            }*/
         }
+
+        function loadSavingsMessages() {
+            vm.savings = { show: false, title: "", message: "" };
+            vm.godo = [
+                { time: 0, message: "Worth checking" },
+                { time: 180, message: "Go make a cup of tea" },
+                { time: 300, message: "Go have a quick chat" },
+                { time: 900, message: "Go for a nice walk outside 🚶‍♀️" },
+                { time: 3600, message: "You deserve a break" }
+            ];
+
+            var keys = [];
+            for (let n = 0; n < 5; n++) {
+                keys.push('usync_godo' + n);
+            }
+            localizationService.localizeMany(keys)
+                .then(function (values) {
+                    for (let n = 0; n < values.length; n++) {
+                        vm.godo[n].message = values[n];
+                    }
+                    console.log(vm.godo);
+                });
+        }
+
 
     }
 

@@ -18,7 +18,7 @@
         vm.calcPercentage = calcPercentage;
 
         function calcPercentage(status) {
-            if (status !== undefined) {
+            if (status !== undefined && status.count !== undefined) {
                 return (100 * status.count) / status.total;
             }
             return 1;
