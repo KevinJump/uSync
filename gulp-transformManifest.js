@@ -9,7 +9,7 @@ function transformManifest(opts, file) {
     let version = opts.version
     
     manifest.version = version;
-    manifest.bundleOptions = "Independent";
+    manifest.bundleOptions = "None";
     manifest.javascript = ["~/App_Plugins/" + folder  + "/" + name + "." + version + ".min.js"];
     manifest.css = ["~/App_Plugins/" + folder  + "/" + name + "." + version + ".min.css"]
 
