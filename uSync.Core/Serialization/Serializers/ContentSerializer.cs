@@ -185,9 +185,12 @@ namespace uSync.Core.Serialization.Serializers
                     message += $" (Slow publish {publishTimer.ElapsedMilliseconds}ms)";
                 }
 
+                var changeType = options.GetSetting(uSyncConstants.DefaultSettings.OnlyPublishDirty, uSyncConstants.DefaultSettings.OnlyPublishDirty_Default) && !item.IsDirty() 
+                    ? ChangeType.NoChange : ChangeType.Import;
+
                 // we say no change back, this stops the core second pass function from saving 
                 // this item (which we have just done with DoSaveOrPublish)
-                return SyncAttempt<IContent>.Succeed(item.Name, item, ChangeType.Import, message, true, details);
+                return SyncAttempt<IContent>.Succeed(item.Name, item, changeType, message, true, details);
             }
             else
             {
@@ -195,8 +198,8 @@ namespace uSync.Core.Serialization.Serializers
             }
         }
 
-        protected virtual uSyncChange DeserializeTemplate(IContent item, XElement node)
-        {
+        protected virtual uSyncChange DeserializeTemplate(IContent item, XElement node) 
+        { 
             var templateNode = node.Element("Info")?.Element("Template");
 
             if (templateNode != null)
@@ -340,6 +343,12 @@ namespace uSync.Core.Serialization.Serializers
 
         protected virtual Attempt<string> DoSaveOrPublish(IContent item, XElement node, SyncSerializerOptions options)
         {
+            if (options.GetSetting(uSyncConstants.DefaultSettings.OnlyPublishDirty, uSyncConstants.DefaultSettings.OnlyPublishDirty_Default) && !item.IsDirty())
+            {
+                logger.LogDebug("{name} not publishing because nothing is dirty [{dirty} {userDirty}]", item.Name, item.IsDirty(), item.IsAnyUserPropertyDirty());
+                return Attempt.Succeed("No Changes");
+            }
+
             var publishedNode = node.Element("Info")?.Element("Published");
             if (!item.Trashed && publishedNode != null)
             {
