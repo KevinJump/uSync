@@ -526,3 +526,8 @@ ul.usync-action-list {
         opacity: 0;
     }
 }
+
+
+.umb-overlay.umb-overlay-center.umb-overlay--usync-error {
+    width: 720px
+}
