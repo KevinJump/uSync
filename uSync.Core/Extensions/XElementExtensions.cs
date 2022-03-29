@@ -27,6 +27,9 @@ namespace uSync.Core
         public static string GetAlias(this XElement node)
             => node.Attribute("Alias").ValueOrDefault(string.Empty);
 
+        public static int GetItemSortOrder(this XElement node)
+            => node.Element("Info")?.Element("SortOrder").ValueOrDefault(0) ?? 0;
+
         /// <summary>
         ///  cultures contained within the xml
         /// </summary>

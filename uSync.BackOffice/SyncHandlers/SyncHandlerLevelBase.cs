@@ -153,9 +153,12 @@ namespace uSync.BackOffice.SyncHandlers
                     {
                         nodes.Add(new LeveledFile
                         {
-                            Level = node.GetLevel(),
+                            Level = (node.GetLevel() * 1000) + node.GetItemSortOrder(), // will hopefully let us put things in sort order in one go. 
                             File = file
                         });
+
+                        // debug.
+                        logger.LogDebug("{file} {level}", file, (node.GetLevel() * 1000) + node.GetItemSortOrder());
                     }
                 }
                 catch (XmlException ex)

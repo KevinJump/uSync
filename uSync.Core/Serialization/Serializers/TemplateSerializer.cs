@@ -180,6 +180,8 @@ namespace uSync.Core.Serialization.Serializers
         public override SyncAttempt<ITemplate> DeserializeSecondPass(ITemplate item, XElement node, SyncSerializerOptions options)
         {
             var details = new List<uSyncChange>();
+            var saved = false;
+            var msg = "";
 
             var master = node.Element("Parent").ValueOrDefault(string.Empty);
             if (master != string.Empty && item.MasterTemplateAlias != master)
@@ -193,8 +195,8 @@ namespace uSync.Core.Serialization.Serializers
                     logger.LogDebug("Setting Master {0}", masterItem.Alias);
                     item.SetMasterTemplate(masterItem);
 
-                    if (!options.Flags.HasFlag(SerializerFlags.DoNotSave))
-                        SaveItem(item);
+                    SaveItem(item);
+                    saved = true;
                 }
             }
 
@@ -204,7 +206,6 @@ namespace uSync.Core.Serialization.Serializers
                 var templatePath = ViewPath(item.Alias);
                 if (_viewFileSystem.FileExists(templatePath))
                 {
-
                     var fullPath = _viewFileSystem.GetFullPath(templatePath);
 
                     if (System.IO.File.Exists(fullPath))
@@ -213,6 +214,7 @@ namespace uSync.Core.Serialization.Serializers
                         if (content.Contains($"[uSyncMarker:{this.Id}]"))
                         {
                             logger.LogDebug($"Removing the file from disk, because it exists in a razor view {templatePath}");
+                            msg = "Using Razor views";
                             _viewFileSystem.DeleteFile(templatePath);
 
                             // we have to tell the handlers we saved it - or they will and write the file back 
@@ -222,7 +224,7 @@ namespace uSync.Core.Serialization.Serializers
                 }
             }
 
-            return SyncAttempt<ITemplate>.Succeed(item.Name, item, ChangeType.Import, details);
+            return SyncAttempt<ITemplate>.Succeed(item.Name, item, ChangeType.Import, msg, saved, details);
         }
 
 
