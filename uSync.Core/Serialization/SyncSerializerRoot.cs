@@ -82,7 +82,7 @@ namespace uSync.Core.Serialization
                 {
                     logger.LogDebug("Base: Deserialize Core Success {0}", ItemType);
 
-                    if (!options.Flags.HasFlag(SerializerFlags.DoNotSave))
+                    if (!result.Saved && !options.Flags.HasFlag(SerializerFlags.DoNotSave))
                     {
                         logger.LogDebug("Base: Serializer Saving (No DoNotSaveFlag) {0}", ItemAlias(result.Item));
                         // save 
