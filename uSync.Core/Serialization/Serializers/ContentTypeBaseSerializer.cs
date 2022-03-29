@@ -348,10 +348,10 @@ namespace uSync.Core.Serialization.Serializers
 
             // compare the two lists (the equality compare fails because the id value is lazy)
             var currentHash =
-                string.Join(":", item.AllowedContentTypes.Select(x => $"{x.Id.Value}-{x.SortOrder}"));
+                string.Join(":", item.AllowedContentTypes.Select(x => $"{x.Id.Value}-{x.SortOrder}").OrderBy(x => x));
 
             var newHash =
-                string.Join(":", allowed.Select(x => $"{x.Id.Value}-{x.SortOrder}"));
+                string.Join(":", allowed.Select(x => $"{x.Id.Value}-{x.SortOrder}").OrderBy(x => x));
 
             if (!currentHash.Equals(newHash))
             {
@@ -359,7 +359,7 @@ namespace uSync.Core.Serialization.Serializers
                     string.Join(",", item.AllowedContentTypes.Select(x => x.Alias) ?? Enumerable.Empty<string>()),
                     string.Join(",", allowed.Select(x => x.Alias) ?? Enumerable.Empty<string>()), "/Structure");
 
-                logger.LogDebug("Updating allowed content types");
+                logger.LogDebug("Updating allowed content types {old}, {new}", currentHash, newHash);
                 item.AllowedContentTypes = allowed;
             }
 
@@ -945,7 +945,7 @@ namespace uSync.Core.Serialization.Serializers
 
         protected IEnumerable<uSyncChange> DeserializeCompositions(TObject item, XElement node)
         {
-            logger.LogDebug("Deserializing Compositions");
+            logger.LogDebug("{alias} Deserializing Compositions", item.Alias);
 
             var comps = node?.Element("Info")?.Element("Compositions");
             if (comps == null) return Enumerable.Empty<uSyncChange>();
@@ -957,14 +957,15 @@ namespace uSync.Core.Serialization.Serializers
                 var alias = compositionNode.Value;
                 var key = compositionNode.Attribute("Key").ValueOrDefault(Guid.Empty);
 
-                logger.LogDebug(" > Comp {0} {1}", alias, key);
+                logger.LogDebug("{alias} > Comp {0} {1}", item.Alias, alias, key);
 
                 var type = FindItem(key, alias);
                 if (type != null)
                     compositions.Add(type);
             }
 
-            if (!Enumerable.SequenceEqual(item.ContentTypeComposition, compositions))
+            // compare (but sorted by key) only make the change if it is diffrent.
+            if (!Enumerable.SequenceEqual(item.ContentTypeComposition.OrderBy(x => x.Key), compositions.OrderBy(x => x.Key)))
             {
                 var change = uSyncChange.Update("Info", "Compositions",
                     string.Join(",", item.ContentTypeComposition.Select(x => x.Alias)),
