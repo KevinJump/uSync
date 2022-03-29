@@ -96,7 +96,7 @@ namespace uSync.BackOffice.Controllers
             var groups = handlerFactory.GetValidHandlerGroupsAndIcons(options);
 
             // if nothing is set, we add everything marker.
-            if (string.IsNullOrWhiteSpace(uSyncConfig.Settings.UIEnabledGroups) || 
+            if (string.IsNullOrWhiteSpace(uSyncConfig.Settings.UIEnabledGroups) ||
                 uSyncConfig.Settings.UIEnabledGroups.InvariantContains("all"))
             {
                 groups.Add("_everything", "");
@@ -192,9 +192,14 @@ namespace uSync.BackOffice.Controllers
             var settings = JsonConvert.SerializeObject(uSyncConfig.Settings);
             var sets = JsonConvert.SerializeObject(uSyncConfig.GetSetSettings(uSync.Sets.DefaultSet));
 
-            var result = "{\"Settings\": " + settings + ", Sets : " + sets + " }";
+            var result = "{ " +
+                "\"Settings\" : " + settings + "," + 
+                "\"Sets\" : { " +
+                    "\"Default\" : " + sets +
+                "}" +
+            "}";
 
-            return JObject.Parse(result);
+            return JsonConvert.DeserializeObject<JObject>(result);
         }
     }
 
