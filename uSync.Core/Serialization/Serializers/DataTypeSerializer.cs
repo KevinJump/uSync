@@ -310,11 +310,17 @@ namespace uSync.Core.Serialization.Serializers
         /// </remarks>
         private bool ShouldDeserilizeConfig(string itemName, string editorAlias, SyncSerializerOptions options)
         {
-            var noConfigEditors = options.GetSetting("NoConfigEditors", string.Empty);
+            var noConfigEditors = options.GetSetting(
+                uSyncConstants.DefaultSettings.NoConfigEditors, 
+                uSyncConstants.DefaultSettings.NoConfigEditors_Default);
+
             if (!string.IsNullOrWhiteSpace(noConfigEditors) && noConfigEditors.InvariantContains(editorAlias))
                 return false;
 
-            var noConfigAliases = options.GetSetting("NoConfigNames", string.Empty);
+            var noConfigAliases = options.GetSetting(
+                uSyncConstants.DefaultSettings.NoConfigNames,
+                uSyncConstants.DefaultSettings.NoConfigNames_Default);
+
             if (!string.IsNullOrWhiteSpace(noConfigAliases) && noConfigAliases.InvariantContains(itemName))
                 return false;
 

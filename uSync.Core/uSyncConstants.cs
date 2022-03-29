@@ -71,6 +71,19 @@
             // new properties only (so existing properties are left)
             public const string NewPropertiesOnly = "NewPropertiesOnly";
             public const bool NewPropertiesOnly_Default = false;
+
+            // only publish content when we thing it is dirty 
+            public const string OnlyPublishDirty = "OnlyPublishDirty";
+            public const bool OnlyPublishDirty_Default = false;
+
+            // editors we don't want the config importing for.
+            public const string NoConfigEditors = "NoConfigEditors";
+            public const string NoConfigEditors_Default = "";
+
+            // item names we don't want the config importing for. 
+            public const string NoConfigNames = "NoConfigNames";
+            public const string NoConfigNames_Default = "";
+
         }
 
         public const int DependencyCountMax = 204800;
