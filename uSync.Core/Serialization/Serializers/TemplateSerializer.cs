@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Xml.Linq;
 
+using Microsoft.AspNetCore.Routing.Template;
 using Microsoft.Extensions.Logging;
 
-using Umbraco.Cms.Core.Hosting;
+using Umbraco.Cms.Core.IO;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Strings;
@@ -13,6 +15,7 @@ using Umbraco.Extensions;
 using uSync.Core.Models;
 
 using static Umbraco.Cms.Core.Constants;
+using static Umbraco.Cms.Core.Constants.Conventions;
 
 namespace uSync.Core.Serialization.Serializers
 {
@@ -21,17 +24,18 @@ namespace uSync.Core.Serialization.Serializers
     {
         private readonly IFileService fileService;
         private readonly IShortStringHelper shortStringHelper;
-        private readonly IHostingEnvironment hostEnvrionment;
+        private readonly IFileSystem _viewFileSystem;
 
         public TemplateSerializer(IEntityService entityService, ILogger<TemplateSerializer> logger,
             IShortStringHelper shortStringHelper,
             IFileService fileService,
-            IHostingEnvironment hostEnvironment)
+            FileSystems fileSystems)
             : base(entityService, logger)
         {
             this.fileService = fileService;
             this.shortStringHelper = shortStringHelper;
-            this.hostEnvrionment = hostEnvironment;
+
+            _viewFileSystem = fileSystems.MvcViewsFileSystem;
         }
 
         protected override SyncAttempt<ITemplate> DeserializeCore(XElement node, SyncSerializerOptions options)
@@ -63,20 +67,31 @@ namespace uSync.Core.Serialization.Serializers
                 else
                 {
                     logger.LogDebug("Loading template content from disk");
-                    var templatePath = hostEnvrionment.MapPathContentRoot(SystemDirectories.MvcViews + "/" + alias + ".cshtml");
-                    if (System.IO.File.Exists(templatePath))
+
+                    var templatePath = ViewPath(alias);
+                    if (_viewFileSystem.FileExists(templatePath))
                     {
                         logger.LogDebug("Reading {0} contents", templatePath);
-                        var content = System.IO.File.ReadAllText(templatePath);
+                        item.Content = GetContentFromFile(templatePath);
                         item.Path = templatePath;
-                        item.Content = content;
                     }
                     else
                     {
-                        // template is missing
-                        // we can't create 
-                        logger.LogWarning("Failed to create template {path} the local file is missing", templatePath);
-                        return SyncAttempt<ITemplate>.Fail(name, ChangeType.Import, $"The template {templatePath} file is missing.");
+                        if (!options.GetSetting<bool>("UsingRazorViews", false))
+                        {
+                            // template is missing
+                            // we can't create 
+                            logger.LogWarning("Failed to create template {path} the local file is missing", templatePath);
+                            return SyncAttempt<ITemplate>.Fail(name, ChangeType.Import, $"The template {templatePath} file is missing.");
+                        }
+                        else
+                        {
+                            // template is not on disk, we could use the viewEngine to find the view 
+                            // if this finds the view it tells us that the view is somewhere else ? 
+
+                            logger.LogDebug("Failed to find content, but UsingRazorViews so will create anyway, then delete the file");
+                            item.Content = $"<!-- [uSyncMarker:{this.Id}]  template content - will be removed -->";
+                        }
                     }
                 }
             }
@@ -143,6 +158,25 @@ namespace uSync.Core.Serialization.Serializers
         public string GetContentFromConfig(XElement node)
             => node.Element("Contents").ValueOrDefault(string.Empty);
 
+        public string GetContentFromFile(string templatePath)
+        {
+            var content = "";
+            using (var stream = _viewFileSystem.OpenFile(templatePath))
+            {
+                using (var sr = new StreamReader(stream))
+                {
+                    content = sr.ReadToEnd();
+                    sr.Close();
+                    sr.Dispose();
+                }
+
+                stream.Close();
+                stream.Dispose();
+            }
+
+            return content;
+        }
+
         public override SyncAttempt<ITemplate> DeserializeSecondPass(ITemplate item, XElement node, SyncSerializerOptions options)
         {
             var details = new List<uSyncChange>();
@@ -161,6 +195,30 @@ namespace uSync.Core.Serialization.Serializers
 
                     if (!options.Flags.HasFlag(SerializerFlags.DoNotSave))
                         SaveItem(item);
+                }
+            }
+
+            if (options.GetSetting("UsingRazorViews", false))
+            {
+                // using razor views - we delete the template file at the end (because its in a razor view). 
+                var templatePath = ViewPath(item.Alias);
+                if (_viewFileSystem.FileExists(templatePath))
+                {
+
+                    var fullPath = _viewFileSystem.GetFullPath(templatePath);
+
+                    if (System.IO.File.Exists(fullPath))
+                    {
+                        var content = System.IO.File.ReadAllText(fullPath);
+                        if (content.Contains($"[uSyncMarker:{this.Id}]"))
+                        {
+                            logger.LogDebug($"Removing the file from disk, because it exists in a razor view {templatePath}");
+                            _viewFileSystem.DeleteFile(templatePath);
+
+                            // we have to tell the handlers we saved it - or they will and write the file back 
+                            return SyncAttempt<ITemplate>.Succeed(item.Name, item, ChangeType.Import, "Razor view removed", true, details);
+                        }
+                    }
                 }
             }
 
@@ -238,5 +296,9 @@ namespace uSync.Core.Serialization.Serializers
 
             return base.CleanseNode(node);
         }
+
+
+        private string ViewPath(string alias)
+            => _viewFileSystem.GetRelativePath(alias.Replace(" ", "") + ".cshtml");
     }
 }

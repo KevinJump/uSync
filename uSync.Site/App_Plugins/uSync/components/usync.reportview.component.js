@@ -17,7 +17,8 @@
         controller: uSyncReportViewController
     };
 
-    function uSyncReportViewController($scope, editorService, uSync8DashboardService) {
+    function uSyncReportViewController($scope, editorService,
+        overlayService, uSync8DashboardService) {
 
         var vm = this;
 
@@ -57,7 +58,7 @@
         function getChangeClass(result) {
 
             var classString = '';
-            if (vm.allowSelect) {
+            if (vm.allowSelect || result.exception != null) {
                 classString = '-usync-can-select ';
             }
 
@@ -157,6 +158,24 @@
                     vm.selection.splice(index, 1);
                     item.__selected = false; 
                 }
+            }
+
+            if (item.exception != null) {
+
+                overlayService.open({
+                    view: Umbraco.Sys.ServerVariables.umbracoSettings.appPluginsPath + '/uSync/itemdialog.html',
+                    title: item.name,
+                    item: item,
+                    exception: item.exception,
+                    size: 'usync-error',
+                    disableBackdropClick: true,
+                    disableEscKey: true,
+                    disableSubmitButton: true,
+                    closeButtonLabelKey: 'general_close',
+                    close: function () {
+                        overlayService.close();
+                    }
+                });
             }
         }
 

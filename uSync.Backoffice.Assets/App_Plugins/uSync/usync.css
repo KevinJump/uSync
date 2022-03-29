@@ -219,14 +219,6 @@ ul.usync-action-list {
     transition: none;
 }
 
-.usync-boxes {
-    display: grid;
-    grid-gap: 0;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    margin-left: -10px;
-    margin-right: -10px;
-}
-
 .usync-box {
     max-width: 100%;
     padding: 10px;
@@ -491,4 +483,51 @@ ul.usync-action-list {
 
 .-usync-can-select {
     cursor: pointer;
+}
+
+
+.usync-group-box {
+    position: relative;
+}
+
+.usync-working .usync-group-box.umb-box::before {
+    position: absolute;
+    content: ' ';
+    display: block;
+    height: 100%;
+    width: 100%;
+    z-index: 9999;
+    background-color: rgba(255,255,255,0.6);
+}
+
+.usync-progress-box {
+    position: relative;
+}
+
+.usync-perf {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: small;
+    animation: usyncFadeOut 5s;
+    opacity: 0;
+}
+
+@keyframes usyncFadeOut {
+    0% {
+        opacity: 1;
+    }
+
+    90% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
+
+
+.umb-overlay.umb-overlay-center.umb-overlay--usync-error {
+    width: 720px
 }

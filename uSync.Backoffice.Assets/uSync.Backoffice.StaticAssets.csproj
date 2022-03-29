@@ -25,4 +25,8 @@
 			<PackagePath>build</PackagePath>
 		</None>
 	</ItemGroup>
+
+	<ItemGroup>
+	  <None Remove="App_Plugins\uSync\itemdialog.html" />
+	</ItemGroup>
 </Project>

@@ -379,7 +379,8 @@ namespace uSync.BackOffice.SyncHandlers
             catch (Exception ex)
             {
                 logger.LogWarning("{alias}: Import Failed : {exception}", this.Alias, ex.ToString());
-                return uSyncAction.Fail(Path.GetFileName(filename), this.handlerType, ChangeType.Fail, $"{this.Alias} Import Fail", ex)
+                return uSyncAction.Fail(Path.GetFileName(filename), this.handlerType, ChangeType.Fail, 
+                    $"{this.Alias} Import Fail: {ex.Message}", ex)
                     .AsEnumerableOfOne();
             }
 
