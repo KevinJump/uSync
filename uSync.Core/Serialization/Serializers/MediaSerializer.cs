@@ -82,7 +82,7 @@ namespace uSync.Core.Serialization.Serializers
                 return SyncAttempt<IMedia>.Fail(item.Name, item, ChangeType.Fail, "", saveAttempt.Exception);
 
             // setting the saved flag on the attempt to true, stops base classes from saving the item.
-            return SyncAttempt<IMedia>.Succeed(item.Name, item, ChangeType.NoChange, "", true, propertyAttempt.Result);
+            return SyncAttempt<IMedia>.Succeed(item.Name, item, ChangeType.Import, "", true, propertyAttempt.Result);
         }
 
         protected override uSyncChange HandleTrashedState(IMedia item, bool trashed)
