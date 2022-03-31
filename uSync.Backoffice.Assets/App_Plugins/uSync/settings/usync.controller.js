@@ -395,17 +395,17 @@
                                 defaultButton: {
                                     labelKey: 'usync_export',
                                     handler: function () { exportGroup(groupInfo) }
-                                },
+                                }                                
                             };
 
 
                             if (isSingle) {
-                                groupInfo.export.subButtons.push({
+                                groupInfo.export.subButtons = [{
                                     labelKey: 'usync_exportClean',
                                     handler: function () {
                                         cleanExport();
                                     }
-                                });
+                                }];
                             }
 
                             vm.groups.push(groupInfo);

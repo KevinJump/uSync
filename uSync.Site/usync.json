@@ -3,7 +3,8 @@
   "uSync": {
     "ForceFips": true,
     "Settings": {
-      "ExportOnSave": "All"
+      "ExportOnSave": "All",
+      "UIEnabledGroups":  "Settings"
     },
     "Sets": {
       "Default": {
