@@ -567,7 +567,10 @@ namespace uSync.Core.Serialization.Serializers
                 var oldAlias = item.Alias;
 
                 var safeAlias = ensureSafeValue ? GetSafeItemAlias(nodeAlias) : nodeAlias;
-                item.Alias = safeAlias;
+
+                // only set the item if its not already the value
+                if (item.Alias != safeAlias)
+                    item.Alias = safeAlias;
 
                 // add the alias to the cache
                 AddAlias(safeAlias);

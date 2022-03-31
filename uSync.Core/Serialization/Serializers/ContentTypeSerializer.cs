@@ -263,9 +263,8 @@ namespace uSync.Core.Serialization.Serializers
             if (currentTemplates != newTemplates)
             {
                 changes.AddUpdate("AllowedTemplates", currentTemplates, newTemplates, "AllowedTemplates");
+                item.AllowedTemplates = allowedTemplates;
             }
-
-            item.AllowedTemplates = allowedTemplates;
 
             return changes;
         }
