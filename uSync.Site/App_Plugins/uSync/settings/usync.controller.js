@@ -582,7 +582,6 @@
                     for (let n = 0; n < values.length; n++) {
                         vm.godo[n].message = values[n];
                     }
-                    console.log(vm.godo);
                 });
         }
 
