@@ -608,7 +608,8 @@ namespace uSync.BackOffice.SyncHandlers
         /// <returns>list of delete actions</returns>
         protected abstract IEnumerable<uSyncAction> DeleteMissingItems(TObject parent, IEnumerable<Guid> keysToKeep, bool reportOnly);
 
-        protected abstract IEnumerable<uSyncAction> DeleteMissingItems(int parentId, IEnumerable<Guid> keysToKeep, bool reportOnly);
+        protected virtual IEnumerable<uSyncAction> DeleteMissingItems(int parentId, IEnumerable<Guid> keysToKeep, bool reportOnly)
+            => Enumerable.Empty<uSyncAction>();
 
         /// <summary>
         ///  Get the files we are going to import from a folder. 
