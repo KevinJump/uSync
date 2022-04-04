@@ -66,6 +66,12 @@ namespace uSync.BackOffice
             uSyncTriggers.DoImport += USyncTriggers_DoImport;
         }
 
+        public bool HasContentFiles(string rootFolder)
+        {
+            return _syncFileService.DirectoryExists(rootFolder + "Content");
+        }
+
+
         #region Reporting 
 
         /// <summary>

@@ -1,0 +1,70 @@
+﻿@using Microsoft.Extensions.Options
+@using Umbraco.Cms.Core.Configuration.Models
+@using Umbraco.Cms.Core.Hosting
+@using Umbraco.Cms.Core.Routing
+@using Umbraco.Extensions
+@using uSync.BackOffice
+@using uSync.BackOffice.Configuration
+
+@model Umbraco.Cms.Web.Website.Models.NoNodesViewModel
+
+@inject IHostingEnvironment hostingEnvironment
+@inject IOptions<GlobalSettings> globalSettings
+@inject uSyncConfigService uSyncConfig;
+@inject uSyncService uSyncService;
+@{
+    var uSyncPath = Model.UmbracoPath + "#/settings/usync/dashboard";
+
+    var root = uSyncConfig.GetRootFolder();
+    var hasuSyncContent = uSyncService.HasContentFiles(root);
+}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Umbraco: No published content</title>
+
+    <link rel="stylesheet" href="@WebPath.Combine(Model.UmbracoPath, "assets/css/nonodes.style.min.css")">
+    <link rel="stylesheet" href="@WebPath.Combine("/App_Plugins/uSync/boot/nonodes.css")" />
+</head>
+<body>
+
+    <section>
+        <article>
+            <div>
+                <div class="logo"></div>
+                <!-- <h1>Welcome to your Umbraco installation</h1> -->
+                <h1>uSync all the things</h1>
+                <h3>
+                    You are seeing this page because your site doesn't contain any published content
+                </h3>
+                
+                <div class="cta">
+                    <a href="@Model.UmbracoPath" class="button">Open Umbraco</a>
+                </div>            
+
+                <div class="row">
+                    <div class="col">
+                        <h2>Your site has uSync Content Files</h2>
+                        <p>
+                            There are usync files located on the disk for this site, you can import
+                            them now and get the site setup and ready to roll.
+                        </p>
+                        <div class="flex-center">
+                            <a href="@uSyncPath" class="button usync-button">Import uSync files</a>
+                        </div>
+                    </div>
+
+                    <div class="col">
+                        <h2>Configure uSync to do this Automagically</h2>
+                        <p>You can configure uSync to automatically import settings and content on the first boot</p>
+
+                        <a href="http://usync.jumoo.co.uk/docs/uSync/key_topics/firstboot" target="_blank" rel="noopener">uSync FirstBoot docs →</a>
+                    </div>
+                </div>
+                
+            </div>
+        </article>
+    </section>
+</body>
+</html>

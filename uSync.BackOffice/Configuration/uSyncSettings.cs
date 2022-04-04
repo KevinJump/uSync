@@ -93,6 +93,16 @@ namespace uSync.BackOffice.Configuration
         ///  default file extension for the uSync files. 
         /// </summary>
         public string DefaultExtension { get; set; } = "config";
+
+        /// <summary>
+        ///  import the uSync folder on the first boot. 
+        /// </summary>
+        public bool ImportOnFirstBoot { get; set; } = false ;
+
+        /// <summary>
+        ///  Handler group(s) to run on first boot, default is All (so full import)
+        /// </summary>
+        public string FirstBootGroup { get; set; } = "All";
     }
 
 }
