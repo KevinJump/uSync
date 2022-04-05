@@ -94,19 +94,23 @@
         vm.calcPercentage = calcPercentage;
         vm.openDetail = openDetail;
 
-
+        vm.changeSet = changeSet; 
+        
         init();
 
         function init() {
             InitHub();
-            getHandlerGroups();
             loadSavingsMessages();
 
-            // just so there is something there when you start 
-            uSync8DashboardService.getHandlers()
+            uSync8DashboardService.getDefaultSet()
                 .then(function (result) {
-                    vm.handlers = result.data;
-                    vm.status.handlers = vm.handlers;
+                    vm.currentSet = result.data;
+                    initSet(vm.currentSet);
+                });
+
+            uSync8DashboardService.getSelectableSets()
+                .then(function (result) {
+                    vm.sets = result.data;
                 });
 
             uSync8DashboardService.checkVersion()
@@ -114,7 +118,24 @@
                     vm.versionLoaded = true;
                     vm.versionInfo = result.data;
                 });
+
         }
+
+        function initSet(setname) {
+
+            vm.loading = true;
+
+            getHandlerGroups();
+
+            // just so there is something there when you start
+            uSync8DashboardService.getHandlers(setname)
+                .then(function (result) {
+                    vm.handlers = result.data;
+                    vm.status.handlers = vm.handlers;
+                    vm.loading = false; 
+                });
+        }
+
 
         function performAction(options, actionMethod, cb) {
 
@@ -195,7 +216,8 @@
 
             var options = {
                 action: 'report',
-                group: group.group
+                group: group.group,
+                set: vm.currentSet
             };
 
             var start = performance.now();
@@ -231,7 +253,8 @@
             var options = {
                 action: 'import',
                 group: group.group,
-                force: force
+                force: force,
+                set: vm.currentSet
             };
 
             var start = performance.now();
@@ -268,7 +291,8 @@
 
             var options = {
                 action: 'export',
-                group: group.group
+                group: group.group,
+                set: vm.currentSet
             };
 
             var start = performance.now();
@@ -359,8 +383,9 @@
 
         function getHandlerGroups() {
             vm.showEverything = false;
+            vm.groups = [];
 
-            uSync8DashboardService.getHandlerGroups()
+            uSync8DashboardService.getHandlerGroups(vm.currentSet)
                 .then(function (result) {
 
                     var groups = result.data;
@@ -432,7 +457,7 @@
         }
 
         function importGroup(group) {
-            importItems(false, group);
+            importItems(false, vm.currentSet, group);
         }
 
         //////////////
@@ -532,6 +557,12 @@
                     vm.action = 'Export';
                     break;
             }
+        }
+
+        // change the handler set
+        function changeSet() {
+            vm.reported = false;
+            initSet(vm.currentSet);
         }
 
         ////// SignalR things 

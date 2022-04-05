@@ -34,6 +34,12 @@ namespace uSync.BackOffice.Configuration
         /// </summary>
         public IDictionary<string, HandlerSettings> Handlers { get; set; } = new Dictionary<string, HandlerSettings>();
 
+        /// <summary>
+        ///  for handlers to appear in the drop down on the dashboard they have to be selectable
+        /// </summary>
+        public bool IsSelectable { get; set; } = false;
+
+
     }
 
     public static class HandlerSetSettingsExtensions

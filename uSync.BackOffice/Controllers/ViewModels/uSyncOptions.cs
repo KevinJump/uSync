@@ -19,5 +19,8 @@ namespace uSync.BackOffice.Controllers
 
         [DataMember(Name = "group")]
         public string Group { get; set; }
+
+        [DataMember(Name = "set")]
+        public string Set { get; set; }
     }
 }

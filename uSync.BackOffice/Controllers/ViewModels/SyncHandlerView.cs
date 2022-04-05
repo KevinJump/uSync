@@ -16,5 +16,6 @@ namespace uSync.BackOffice.Controllers
         public string Alias { get; set; }
         public string Icon { get; set; }
         public string Group { get; set; }
+        public string Set { get; set; }
     }
 }

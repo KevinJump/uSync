@@ -12,6 +12,8 @@ namespace uSync.BackOffice.Controllers
         public string Handler { get; set; }
         public bool Force { get; set; }
 
+        public string Set { get; set; }
+
         public IEnumerable<uSyncAction> Actions { get; set; }
 
     }

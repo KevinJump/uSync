@@ -1,6 +1,16 @@
 <div ng-controller="uSync8Controller as vm">
 
 
+    <div ng-if="vm.sets.length > 1" class="flex justify-end items-center mb2">
+
+        <div>
+            <strong> Current Set : </strong>
+        </div>
+        <select ng-options="s as s for s in vm.sets" ng-model="vm.currentSet"
+                ng-change="vm.changeSet()"
+                class="ml2"></select>
+    </div>
+
     <div ng-if="vm.versionLoaded && vm.versionInfo.isCurrent != true" class="alert alert-info usync-alert">
         <localize key="usync_newer"></localize> [v{{vm.versionInfo.versionInfo.core}}]
         <span ng-if="vm.versionInfo.versionInfo.message">
