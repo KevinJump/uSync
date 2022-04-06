@@ -38,31 +38,44 @@
                 <h3>
                     You are seeing this page because your site doesn't contain any published content
                 </h3>
-                
+
                 <div class="cta">
                     <a href="@Model.UmbracoPath" class="button">Open Umbraco</a>
-                </div>            
+                </div>
 
                 <div class="row">
-                    <div class="col">
-                        <h2>Your site has uSync Content Files</h2>
-                        <p>
-                            There are usync files located on the disk for this site, you can import
-                            them now and get the site setup and ready to roll.
-                        </p>
-                        <div class="flex-center">
-                            <a href="@uSyncPath" class="button usync-button">Import uSync files</a>
+                    @if (hasuSyncContent)
+                    {
+                        <div class="col">
+                            <h2>Your site has uSync Content Files</h2>
+                            <p>
+                                There are usync files located on the disk for this site, you can import
+                                them now and get the site setup and ready to roll.
+                            </p>
+                            <div class="flex-center">
+                                <a href="@uSyncPath" class="button usync-button">Import uSync files</a>
+                            </div>
                         </div>
-                    </div>
-
+                    }
+                    else
+                    {
+                        <div class="col">
+                            <h2>There are no uSync Content files on disk</h2>
+                            <p>
+                                If there where files in the uSync Content folder, then you could quickly
+                                getup to speed by importing them into your site, But the folder is 
+                                currently empty, so there is nothing to see here.
+                            </p>
+                        </div>
+                    }
                     <div class="col">
-                        <h2>Configure uSync to do this Automagically</h2>
+                        <h2>Configure uSync to sync Automagically</h2>
                         <p>You can configure uSync to automatically import settings and content on the first boot</p>
 
                         <a href="http://usync.jumoo.co.uk/docs/uSync/key_topics/firstboot" target="_blank" rel="noopener">uSync FirstBoot docs →</a>
                     </div>
                 </div>
-                
+
             </div>
         </article>
     </section>
