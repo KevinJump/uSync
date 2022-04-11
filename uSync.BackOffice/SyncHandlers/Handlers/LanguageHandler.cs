@@ -23,6 +23,9 @@ using static Umbraco.Cms.Core.Constants;
 
 namespace uSync.BackOffice.SyncHandlers.Handlers
 {
+    /// <summary>
+    ///  Handler to mange language settings in uSync
+    /// </summary>
     [SyncHandler(uSyncConstants.Handlers.LanguageHandler, "Languages", "Languages", uSyncConstants.Priorites.Languages,
         Icon = "icon-globe", EntityType = UdiEntityType.Language, IsTwoPass = true)]
     public class LanguageHandler : SyncHandlerBase<ILanguage, ILocalizationService>, ISyncHandler,
@@ -32,6 +35,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
     {
         private readonly ILocalizationService localizationService;
 
+        /// <inheritdoc/>
         public LanguageHandler(
             ILogger<LanguageHandler> logger,
             IEntityService entityService,
@@ -47,6 +51,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             this.localizationService = localizationService;
         }
 
+        /// <inheritdoc/>
         // language guids are not consistant (at least in alpha)
         // so we don't save by Guid we save by ISO name everytime.           
         protected override string GetPath(string folder, ILanguage item, bool GuidNames, bool isFlat)
@@ -54,9 +59,11 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             return Path.Combine(folder, $"{this.GetItemPath(item, GuidNames, isFlat)}.{this.uSyncConfig.Settings.DefaultExtension}");
         }
 
+        /// <inheritdoc/>
         protected override string GetItemPath(ILanguage item, bool useGuid, bool isFlat)
             => item.IsoCode.ToSafeFileName(shortStringHelper);
 
+        /// <inheritdoc/>
         protected override IEnumerable<IEntity> GetChildItems(int parent)
         {
             if (parent == -1)
@@ -65,8 +72,10 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             return Enumerable.Empty<IEntity>();
         }
 
+        /// <inheritdoc/>
         protected override string GetItemName(ILanguage item) => item.IsoCode;
 
+        /// <inheritdoc/>
         protected override void CleanUp(ILanguage item, string newFile, string folder)
         {
             base.CleanUp(item, newFile, folder);
@@ -116,6 +125,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
 
         private static ConcurrentDictionary<string, string> newLanguages = new ConcurrentDictionary<string, string>();
 
+        /// <inheritdoc/>
         public void Handle(SavingNotification<ILanguage> notification)
         {
             if (_mutexService.IsPaused) return;
@@ -132,6 +142,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             }
         }
 
+        /// <inheritdoc/>
         public override void Handle(SavedNotification<ILanguage> notification)
         {
             if (_mutexService.IsPaused) return;

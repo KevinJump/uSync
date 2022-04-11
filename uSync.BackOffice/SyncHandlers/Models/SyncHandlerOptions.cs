@@ -4,10 +4,10 @@ using Newtonsoft.Json.Serialization;
 
 namespace uSync.BackOffice.SyncHandlers
 {
-    [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     /// <summary>
     ///  options that define how we define a handler 
     /// </summary>
+    [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public class SyncHandlerOptions
     {
         /// <summary>
@@ -30,14 +30,23 @@ namespace uSync.BackOffice.SyncHandlers
         /// </summary>
         public bool IncludeDisabled { get; set; } = false; 
 
+        /// <summary>
+        /// Default constructor
+        /// </summary>
         public SyncHandlerOptions() { }
 
+        /// <summary>
+        /// Construct Options for a given set
+        /// </summary>
         public SyncHandlerOptions(string setName)
             : this()
         {
             this.Set = setName;
         }
 
+        /// <summary>
+        /// Construct options with set and handler action set.
+        /// </summary>
         public SyncHandlerOptions(string setName, HandlerActions action)
             : this()
         {

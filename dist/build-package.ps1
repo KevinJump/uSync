@@ -49,19 +49,25 @@ Write-Host "Config   :" $env
 Write-Host "Folder   :" $outFolder
 "----------------------------------"; ""
 
-
+""; "##### Restoring project"; "--------------------------------"; ""
 dotnet restore ..
+
+""; "##### Building project"; "--------------------------------"; ""
+dotnet build ..\uSync.sln -c $env
+
+""; "##### Generating the json schema"; "----------------------------------" ; ""
+dotnet run -c $env --project ..\uSync.SchemaGenerator\uSync.SchemaGenerator.csproj --no-build
 
 ""; "##### Packaging"; "----------------------------------" ; ""
 
-dotnet pack ..\uSync.Core\uSync.Core.csproj --no-restore -c $env -o $outFolder /p:ContinuousIntegrationBuild=true,version=$fullVersion 
-dotnet pack ..\uSync.Community.Contrib\uSync.Community.Contrib.csproj --no-restore -c $env -o $outFolder /p:ContinuousIntegrationBuild=true,version=$fullversion  
-dotnet pack ..\uSync.Community.DataTypeSerializers\uSync.Community.DataTypeSerializers.csproj --no-restore -c $env -o $outFolder /p:ContinuousIntegrationBuild=true,version=$fullversion  
-dotnet pack ..\uSync.BackOffice\uSync.BackOffice.csproj --no-restore -c $env -o $outFolder /p:ContinuousIntegrationBuild=true,version=$fullVersion 
+dotnet pack ..\uSync.Core\uSync.Core.csproj --no-restore --no-build -c $env -o $outFolder /p:ContinuousIntegrationBuild=true,version=$fullVersion 
+dotnet pack ..\uSync.Community.Contrib\uSync.Community.Contrib.csproj  --no-build  --no-restore -c $env -o $outFolder /p:ContinuousIntegrationBuild=true,version=$fullversion  
+dotnet pack ..\uSync.Community.DataTypeSerializers\uSync.Community.DataTypeSerializers.csproj  --no-build  --no-restore -c $env -o $outFolder /p:ContinuousIntegrationBuild=true,version=$fullversion  
+dotnet pack ..\uSync.BackOffice\uSync.BackOffice.csproj  --no-build  --no-restore -c $env -o $outFolder /p:ContinuousIntegrationBuild=true,version=$fullVersion 
 
-dotnet pack ..\uSync.AutoTemplates\uSync.AutoTemplates.csproj --no-restore -c $env -o $outFolder /p:ContinuousIntegrationBuild=true,version=$fullVersion 
+dotnet pack ..\uSync.AutoTemplates\uSync.AutoTemplates.csproj --no-build  --no-restore -c $env -o $outFolder /p:ContinuousIntegrationBuild=true,version=$fullVersion 
 
-dotnet pack ..\uSync\uSync.csproj --no-restore -c $env -o $outFolder /p:ContinuousIntegrationBuild=true,version=$fullVersion 
+dotnet pack ..\uSync\uSync.csproj  --no-build  --no-restore -c $env -o $outFolder /p:ContinuousIntegrationBuild=true,version=$fullVersion 
 # .\nuget pack "..\uSync\uSync.nuspec" -version $fullVersion -OutputDirectory $outFolder
 
 

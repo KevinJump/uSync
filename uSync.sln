@@ -31,6 +31,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.AutoTemplates", "uSyn
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.Tests", "uSync.Tests\uSync.Tests.csproj", "{9D169F84-1CB8-461E-B5F4-3C0291D90B3D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "uSync.SchemaGenerator", "uSync.SchemaGenerator\uSync.SchemaGenerator.csproj", "{1E5B64E5-E8A6-42F2-9079-FB71D6D237D6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -73,12 +75,17 @@ Global
 		{9D169F84-1CB8-461E-B5F4-3C0291D90B3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9D169F84-1CB8-461E-B5F4-3C0291D90B3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9D169F84-1CB8-461E-B5F4-3C0291D90B3D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1E5B64E5-E8A6-42F2-9079-FB71D6D237D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E5B64E5-E8A6-42F2-9079-FB71D6D237D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E5B64E5-E8A6-42F2-9079-FB71D6D237D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E5B64E5-E8A6-42F2-9079-FB71D6D237D6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{4B177C9F-9AD1-43E5-B3C9-705425244DF9} = {35F7A5CF-8120-4F63-AC8C-776A08F6C617}
+		{1E5B64E5-E8A6-42F2-9079-FB71D6D237D6} = {35F7A5CF-8120-4F63-AC8C-776A08F6C617}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {AC5EE6B2-05D3-4D8C-94BF-E008B2D6952C}

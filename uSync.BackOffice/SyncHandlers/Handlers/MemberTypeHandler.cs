@@ -19,6 +19,9 @@ using static Umbraco.Cms.Core.Constants;
 
 namespace uSync.BackOffice.SyncHandlers.Handlers
 {
+    /// <summary>
+    ///  Handler to mange Member types in uSync
+    /// </summary>
     [SyncHandler(uSyncConstants.Handlers.MemberTypeHandler, "Member Types", "MemberTypes", uSyncConstants.Priorites.MemberTypes,
         IsTwoPass = true, Icon = "icon-users", EntityType = UdiEntityType.MemberType)]
     public class MemberTypeHandler : SyncHandlerContainerBase<IMemberType, IMemberTypeService>, ISyncHandler,
@@ -28,6 +31,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
     {
         private readonly IMemberTypeService memberTypeService;
 
+        /// <inheritdoc/>
         public MemberTypeHandler(
             ILogger<MemberTypeHandler> logger,
             IEntityService entityService,
@@ -42,15 +46,20 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         {
             this.memberTypeService = memberTypeService;
         }
+        
+        /// <inheritdoc/>
         protected override void DeleteFolder(int id)
             => memberTypeService.DeleteContainer(id);
 
+        /// <inheritdoc/>
         protected override IEntity GetContainer(int id)
             => memberTypeService.GetContainer(id);
 
+        /// <inheritdoc/>
         protected override IEntity GetContainer(Guid key)
             => memberTypeService.GetContainer(key);
 
+        /// <inheritdoc/>
         protected override string GetEntityTreeName(IUmbracoEntity item, bool useGuid)
         {
             if (useGuid) return item.Key.ToString();

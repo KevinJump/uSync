@@ -61,8 +61,8 @@ namespace uSync.BackOffice.Notifications
         /// </summary>
         public void Handle(UmbracoApplicationStartingNotification notification)
         {
-            /// we only run uSync when the site is running, and we 
-            /// are not running on a replica.
+            // we only run uSync when the site is running, and we 
+            // are not running on a replica.
             if (_runtimeState.Level < RuntimeLevel.Run)
             {
                 _logger.LogInformation("Umbraco is not in Run mode, {mode} so uSync will not run", _runtimeState.Level); 

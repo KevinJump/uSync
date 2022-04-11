@@ -35,6 +35,9 @@ namespace uSync.BackOffice.Cache
         private readonly ILogger<CacheLifecycleManager> logger;
         private readonly uSyncEventService eventService;
 
+        /// <summary>
+        ///  Constructor
+        /// </summary>
         public CacheLifecycleManager(
             ILogger<CacheLifecycleManager> logger,
             SyncEntityCache entityCache,
@@ -46,23 +49,64 @@ namespace uSync.BackOffice.Cache
         }
 
 
+        /// <summary>
+        ///  Handle the uSync import starting notification 
+        /// </summary>
         public void Handle(uSyncImportStartingNotification notification) => OnBulkActionComplete();
 
+        /// <summary>
+        ///  Handle the uSync uSync Export Completed Notification 
+        /// </summary>
         public void Handle(uSyncExportCompletedNotification notification) => OnBulkActionComplete();
 
+        /// <summary>
+        ///  Handle the uSync uSync Import Completed Notification 
+        /// </summary>
         public void Handle(uSyncImportCompletedNotification notification) => OnBulkActionComplete();
 
+        /// <summary>
+        ///  Handle the uSync uSync Export Starting Notification 
+        /// </summary>
         public void Handle(uSyncExportStartingNotification notification) => OnBulkActionComplete();
 
+        /// <summary>
+        ///  Handle the uSync uSync Report Completed Notification 
+        /// </summary>
         public void Handle(uSyncReportStartingNotification notification) => OnBulkActionComplete();
 
+        /// <summary>
+        ///  Handle the uSync uSync Report Completed Notification 
+        /// </summary>
         public void Handle(uSyncReportCompletedNotification notification) => OnBulkActionComplete();
 
+        /// <summary>
+        ///  Clear the cache on the Umbraco Content Saving notification 
+        /// </summary>
         public void Handle(ContentSavingNotification notification) => ClearOnEvents();
+
+        /// <summary>
+        ///  Clear the cache on the Umbraco Content Deleting notification 
+        /// </summary>
         public void Handle(ContentDeletingNotification notification) => ClearOnEvents();
+
+        /// <summary>
+        ///  Clear the cache on the Umbraco Content Moving notification 
+        /// </summary>
         public void Handle(ContentMovingNotification notification) => ClearOnEvents();
+
+        /// <summary>
+        ///  Clear the cache on the Umbraco Media Saving notification 
+        /// </summary>
         public void Handle(MediaSavingNotification notification) => ClearOnEvents();
+
+        /// <summary>
+        ///  Clear the cache on the Umbraco Media Saved notification 
+        /// </summary>
         public void Handle(MediaSavedNotification notification) => ClearOnEvents();
+
+        /// <summary>
+        ///  Clear the cache on the Umbraco Media deleted notification 
+        /// </summary>
         public void Handle(MediaDeletedNotification notification) => ClearOnEvents();
 
         private void OnBulkActionComplete()

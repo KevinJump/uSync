@@ -8,6 +8,9 @@ namespace uSync.BackOffice.Configuration
     /// </summary>
     public class uSyncConfigService
     {
+        /// <summary>
+        ///  uSync settings loaded from configuration
+        /// </summary>
         public uSyncSettings Settings => _settingsMonitor.CurrentValue;
 
         private IOptionsMonitor<uSyncSettings> _settingsMonitor; 
@@ -20,6 +23,9 @@ namespace uSync.BackOffice.Configuration
 
         private IOptionsMonitor<uSyncHandlerSetSettings> setOptionsMonitor;
 
+        /// <summary>
+        /// Constructor for config service
+        /// </summary>
         public uSyncConfigService(
             IOptionsMonitor<uSyncSettings> settingsOptionsMonitor,
             IOptionsMonitor<uSyncHandlerSetSettings> setOptionsMonitor)

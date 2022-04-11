@@ -10,9 +10,10 @@
         font-size: 35pt;
     }
 
-.usync-button {
+.button.usync-button {
     margin-top: 25px;
     display: inline-block;
+    background-color: #2196f3 !important;
 }
 
 .flex-center {

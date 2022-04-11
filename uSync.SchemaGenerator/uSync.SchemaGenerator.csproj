@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net5.0</TargetFramework>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="NJsonSchema" Version="10.6.10" />
+		<PackageReference Include="CommandLineParser" Version="2.8.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\uSync.BackOffice\uSync.BackOffice.csproj" />
+	</ItemGroup>
+
+	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+		<DocumentationFile>bin\Release\$(TargetFramework)\uSync.SchemaGenerator.xml</DocumentationFile>
+	</PropertyGroup>
+
+	<Target Name="CopyPackagesXml" BeforeTargets="Build">
+		<ItemGroup>
+			<PackageReferenceFiles Include="$(NugetPackageRoot)%(PackageReference.Identity)\%(PackageReference.Version)%(PackageReference.CopyToOutputDirectory)\lib\**\*.xml" />
+		</ItemGroup>
+		<Copy SourceFiles="@(PackageReferenceFiles)" DestinationFolder="$(OutDir)" />
+	</Target>
+</Project>

@@ -19,6 +19,9 @@ using static Umbraco.Cms.Core.Constants;
 
 namespace uSync.BackOffice.SyncHandlers.Handlers
 {
+    /// <summary>
+    ///  Handler to mange Media Types in uSync
+    /// </summary>
     [SyncHandler(uSyncConstants.Handlers.MediaTypeHandler, "Media Types", "MediaTypes", uSyncConstants.Priorites.MediaTypes,
         IsTwoPass = true, Icon = "icon-thumbnails", EntityType = UdiEntityType.MediaType)]
     public class MediaTypeHandler : SyncHandlerContainerBase<IMediaType, IMediaTypeService>, ISyncHandler,
@@ -30,6 +33,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
     {
         private readonly IMediaTypeService mediaTypeService;
 
+        /// <inheritdoc/>
         public MediaTypeHandler(
             ILogger<MediaTypeHandler> logger,
             IEntityService entityService,
@@ -46,6 +50,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             this.mediaTypeService = mediaTypeService;
         }
 
+        /// <inheritdoc/>
         protected override string GetEntityTreeName(IUmbracoEntity item, bool useGuid)
         {
             if (useGuid) return item.Key.ToString();
@@ -58,12 +63,15 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             return item.Name.ToSafeFileName(shortStringHelper);
         }
 
+        /// <inheritdoc/>
         protected override void DeleteFolder(int id)
             => mediaTypeService.DeleteContainer(id);
 
+        /// <inheritdoc/>
         protected override IEntity GetContainer(int id)
             => mediaTypeService.GetContainer(id);
 
+        /// <inheritdoc/>
         protected override IEntity GetContainer(Guid key)
             => mediaTypeService.GetContainer(key);
 

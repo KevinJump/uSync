@@ -21,12 +21,11 @@ namespace uSync.BackOffice.SyncHandlers
     ///  they go in, but that is ok because all treeSerializers store the level in the 
     ///  top attribute. 
     /// </summary>
-    /// <typeparam name="TObject"></typeparam>
-    /// <typeparam name="TService"></typeparam>
     public abstract class SyncHandlerTreeBase<TObject, TService> : SyncHandlerLevelBase<TObject, TService>
         where TObject : ITreeEntity
         where TService : IService
     {
+        /// <inheritdoc/>
         protected SyncHandlerTreeBase(
             ILogger<SyncHandlerTreeBase<TObject, TService>> logger,
             IEntityService entityService,
@@ -39,8 +38,10 @@ namespace uSync.BackOffice.SyncHandlers
             : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfig, syncItemFactory)
         { }
 
+        /// <inheritdoc/>
         protected override string GetItemName(TObject item) => item.Name;
 
+        /// <inheritdoc/>
         protected override bool DoItemsMatch(XElement node, TObject item)
         {
             if (item.Key == node.GetKey()) return true;

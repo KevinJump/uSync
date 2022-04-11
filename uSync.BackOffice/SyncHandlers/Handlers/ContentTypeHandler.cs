@@ -19,6 +19,9 @@ using static Umbraco.Cms.Core.Constants;
 
 namespace uSync.BackOffice.SyncHandlers.Handlers
 {
+    /// <summary>
+    ///  Handler to mange content types in uSync
+    /// </summary>
     [SyncHandler(uSyncConstants.Handlers.ContentTypeHandler, "DocTypes", "ContentTypes", uSyncConstants.Priorites.ContentTypes,
             IsTwoPass = true, Icon = "icon-item-arrangement", EntityType = UdiEntityType.DocumentType)]
     public class ContentTypeHandler : SyncHandlerContainerBase<IContentType, IContentTypeService>, ISyncHandler, ISyncPostImportHandler,
@@ -29,6 +32,9 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
     {
         private readonly IContentTypeService contentTypeService;
 
+        /// <summary>
+        ///  Constructor - loaded via DI
+        /// </summary>
         public ContentTypeHandler(
             ILogger<ContentTypeHandler> logger,
             IEntityService entityService,
@@ -44,6 +50,9 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             this.contentTypeService = contentTypeService;
         }
 
+        /// <summary>
+        ///  Get the entity name we are going to use when constructing a generic path for an item
+        /// </summary>
         protected override string GetEntityTreeName(IUmbracoEntity item, bool useGuid)
         {
             if (useGuid) return item.Key.ToString();
@@ -57,12 +66,21 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         }
 
 
+        /// <summary>
+        ///  Fetch a ContentType container via the ContentTypeService
+        /// </summary>
         protected override IEntity GetContainer(int id)
             => contentTypeService.GetContainer(id);
 
+        /// <summary>
+        ///  Fetch a ContentType container via the ContentTypeService
+        /// </summary>
         protected override IEntity GetContainer(Guid key)
             => contentTypeService.GetContainer(key);
 
+        /// <summary>
+        ///  Delete a ContentType container via the ContentTypeService
+        /// </summary>
         protected override void DeleteFolder(int id)
             => contentTypeService.DeleteContainer(id);
     }
