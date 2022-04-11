@@ -28,8 +28,14 @@ using uSync.Core;
 
 namespace uSync.BackOffice
 {
+    /// <summary>
+    ///  extensions to the IUmbracoBuilder object to add uSync to a site.
+    /// </summary>
     public static class uSyncBackOfficeBuilderExtensions
     {
+        /// <summary>
+        ///  Add uSync to the site. 
+        /// </summary>
         public static IUmbracoBuilder AdduSync(this IUmbracoBuilder builder, Action<uSyncSettings> defaultOptions = default)
         {
             // if the uSyncConfig Service is registred then we assume this has been added before so we don't do it again. 

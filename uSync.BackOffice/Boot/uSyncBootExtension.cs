@@ -40,6 +40,9 @@ namespace uSync.BackOffice.Boot
         }
     }
 
+    /// <summary>
+    ///  Handler to mange app starting for first boot migrations 
+    /// </summary>
     public class FirstBootAppStartingHandler
         : INotificationHandler<UmbracoApplicationStartingNotification>
     {
@@ -48,6 +51,7 @@ namespace uSync.BackOffice.Boot
         private readonly IKeyValueService _keyValueService;
         private readonly IMigrationPlanExecutor _migrationPlanExecutor;
 
+        /// <inheritdoc/>
         public FirstBootAppStartingHandler(
             IScopeProvider scopeProvider,
             IKeyValueService keyValueService,
@@ -58,6 +62,8 @@ namespace uSync.BackOffice.Boot
             _migrationPlanExecutor = migrationPlanExecutor;
         }
 
+
+        /// <inheritdoc/>
         public void Handle(UmbracoApplicationStartingNotification notification)
         {
             if (notification.RuntimeLevel == Umbraco.Cms.Core.RuntimeLevel.Run)

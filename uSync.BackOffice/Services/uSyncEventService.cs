@@ -14,6 +14,10 @@ namespace uSync.BackOffice.Services
     {
         private readonly IEventAggregator _eventAggregator;
 
+        /// <summary>
+        ///  generate a new uSyncEventService object
+        /// </summary>
+        /// <param name="eventAggregator"></param>
         public uSyncEventService(IEventAggregator eventAggregator) 
         {
             _eventAggregator = eventAggregator;

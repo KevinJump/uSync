@@ -42,6 +42,9 @@ namespace uSync.BackOffice.Controllers
 
         private readonly ITypeFinder typeFinder;
 
+        /// <summary>
+        /// Create a new uSyncDashboardApi Controller (via DI)
+        /// </summary>
         public uSyncDashboardApiController(
             AppCaches appCaches,
             IWebHostEnvironment hostEnvironment,
@@ -68,16 +71,34 @@ namespace uSync.BackOffice.Controllers
 
         }
 
+        /// <summary>
+        ///  Stub - get api used to locate api in umbraco
+        /// </summary>
+        /// <returns></returns>
         public bool GetApi() => true;
 
+        /// <summary>
+        ///  Return the uSyncSettings
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public uSyncSettings GetSettings()
             => this.uSyncConfig.Settings;
 
+
+        /// <summary>
+        ///  Return the Handler settings
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet]
         public uSyncHandlerSetSettings GetHandlerSetSettings(string id)
             => this.uSyncConfig.GetSetSettings(id);
 
+        /// <summary>
+        ///  get a list of loaded handlers 
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public IEnumerable<object> GetLoadedHandlers()
             => handlerFactory.GetAll();
@@ -115,6 +136,9 @@ namespace uSync.BackOffice.Controllers
             return handlerFactory.GetGroups();
         }
 
+        /// <summary>
+        ///  get a list of enabled handlers for the UI
+        /// </summary>
         [HttpGet]
         public IEnumerable<SyncHandlerSummary> GetHandlers()
         {
@@ -132,6 +156,9 @@ namespace uSync.BackOffice.Controllers
                 });
         }
 
+        /// <summary>
+        ///  run a report on the uSync files
+        /// </summary>
         [HttpPost]
         public IEnumerable<uSyncAction> Report(uSyncOptions options)
         {
@@ -146,6 +173,9 @@ namespace uSync.BackOffice.Controllers
             hubClient.Callbacks());
         }
 
+        /// <summary>
+        ///  run an export on the default uSync files
+        /// </summary>
         [HttpPost]
         public IEnumerable<uSyncAction> Export(uSyncOptions options)
         {
@@ -163,6 +193,10 @@ namespace uSync.BackOffice.Controllers
             hubClient.Callbacks());
         }
 
+        /// <summary>
+        ///  Run an import on the default uSync files
+        /// </summary>
+
         [HttpPut]
         public IEnumerable<uSyncAction> Import(uSyncOptions options)
         {
@@ -174,17 +208,28 @@ namespace uSync.BackOffice.Controllers
             callbacks: hubClient.Callbacks());
         }
 
+        /// <summary>
+        ///  Import a single item based on an uSyncAction object
+        /// </summary>
         [HttpPut]
         public uSyncAction ImportItem(uSyncAction item)
             => uSyncService.ImportSingleAction(item);
 
-
+        /// <summary>
+        ///  Save the settings to disk 
+        /// </summary>
+        /// <remarks>
+        /// In Umbraco 9 this does not save the settings!
+        /// </remarks>
         [HttpPost]
         public void SaveSettings(uSyncSettings settings)
         {
             // uSyncConfig.SaveSettings(settings);
         }
 
+        /// <summary>
+        ///  get a JSON representation of the settings as they should appear in appsettings.json file
+        /// </summary>
         [HttpGet]
         public JObject GetChangedSettings()
         {

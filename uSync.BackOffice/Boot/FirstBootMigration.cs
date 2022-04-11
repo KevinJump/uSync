@@ -11,8 +11,12 @@ using uSync.BackOffice.SyncHandlers;
 
 namespace uSync.BackOffice.Boot
 {
+    /// <summary>
+    /// Migration plan to add FirstBoot feature
+    /// </summary>
     public class FirstBootMigrationPlan : MigrationPlan
     {
+        /// <inheritdoc/>
         public FirstBootMigrationPlan()
             : base("uSync_FirstBoot")
         {
@@ -21,6 +25,9 @@ namespace uSync.BackOffice.Boot
         }
     }
 
+    /// <summary>
+    /// First boot Feature migration
+    /// </summary>
     public class FirstBootMigration : MigrationBase
     {
         private readonly IUmbracoContextFactory _umbracoContextFactory;
@@ -28,6 +35,7 @@ namespace uSync.BackOffice.Boot
         private readonly uSyncService _uSyncService;
         private readonly ILogger<FirstBootMigration> _logger;
 
+        /// <inheritdoc/>
         public FirstBootMigration(
             IMigrationContext context,
             IUmbracoContextFactory umbracoContextFactory,
@@ -41,6 +49,7 @@ namespace uSync.BackOffice.Boot
             _logger = logger;
         }
 
+        /// <inheritdoc/>
         protected override void Migrate()
         {
             // first boot migration. 

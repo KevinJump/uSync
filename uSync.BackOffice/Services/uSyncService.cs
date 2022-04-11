@@ -28,6 +28,9 @@ namespace uSync.BackOffice
     /// </summary>
     public partial class uSyncService
     {
+        /// <summary>
+        ///  Callback event for SignalR hub
+        /// </summary>
         public delegate void SyncEventCallback(SyncProgressSummary summary);
 
         private readonly ILogger<uSyncService> _logger;
@@ -42,6 +45,9 @@ namespace uSync.BackOffice
 
         private readonly IAppCache _appCache;
 
+        /// <summary>
+        ///  Create a new uSyncService (done via DI)
+        /// </summary>
         public uSyncService(
             ILogger<uSyncService> logger,
             IEventAggregator eventAggregator,
@@ -66,6 +72,9 @@ namespace uSync.BackOffice
             uSyncTriggers.DoImport += USyncTriggers_DoImport;
         }
 
+        /// <summary>
+        ///  Does the given folder contain and uSync files for Content
+        /// </summary>
         public bool HasContentFiles(string rootFolder)
         {
             return _syncFileService.DirectoryExists(rootFolder + "Content");
@@ -200,7 +209,7 @@ namespace uSync.BackOffice
         /// </summary>
         /// <param name="folder">Folder to use for the import</param>
         /// <param name="force">Push changes in even if there is no difference between the file and the item in umbraco</param>
-        /// <param name="handlers">List of Handlers & config to use for import</param>
+        /// <param name="handlers">List of Handlers &amp; config to use for import</param>
         /// <param name="callbacks">Callbacks to keep UI informed</param>
         /// <returns>List of actions detailing what did and didn't change</returns>
         public IEnumerable<uSyncAction> Import(string folder, bool force, IEnumerable<HandlerConfigPair> handlers, uSyncCallbacks callbacks)
@@ -334,7 +343,9 @@ namespace uSync.BackOffice
 
         #region Exporting 
 
-
+        /// <summary>
+        ///  Remove all the files from an export folder 
+        /// </summary>
         public bool CleanExportFolder(string folder)
         {
             try
@@ -370,6 +381,9 @@ namespace uSync.BackOffice
             return Export(folder, handlers, callbacks);
         }
 
+        /// <summary>
+        ///  Check the uSync version file (in the root) to see if we are importing upto date files
+        /// </summary>
         public bool CheckVersionFile(string folder)
         {
             var versionFile = Path.Combine(_syncFileService.GetAbsPath(folder), $"usync.{_uSyncConfig.Settings.DefaultExtension}");
@@ -441,7 +455,7 @@ namespace uSync.BackOffice
         ///  Export items from umbraco into a given folder
         /// </summary>
         /// <param name="folder">folder to place items</param>
-        /// <param name="handlerAliases">List of handlers to use for export</param>
+        /// <param name="handlers">Handler config pairs</param>
         /// <param name="callbacks">callback functions to update the UI</param>
         /// <returns>List of actions detailing what was exported</returns>
         public IEnumerable<uSyncAction> Export(string folder, IEnumerable<HandlerConfigPair> handlers, uSyncCallbacks callbacks)

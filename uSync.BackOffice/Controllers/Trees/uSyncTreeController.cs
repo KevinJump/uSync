@@ -12,12 +12,16 @@ using Umbraco.Cms.Web.Common.ModelBinders;
 
 namespace uSync.BackOffice.Controllers.Trees
 {
+    /// <summary>
+    ///  Tree controller for the 'uSync' tree
+    /// </summary>
     [Tree(Constants.Applications.Settings, uSync.Trees.uSync,
         TreeGroup = uSync.Trees.Group,
         TreeTitle = uSync.Name, SortOrder = 35)]
     [PluginController(uSync.Name)]
     public class uSyncTreeController : TreeController
     {
+        /// <inheritdoc/>
         public uSyncTreeController(
             ILocalizedTextService localizedTextService,
             UmbracoApiControllerTypeCollection umbracoApiControllerTypeCollection,
@@ -25,6 +29,7 @@ namespace uSync.BackOffice.Controllers.Trees
             : base(localizedTextService, umbracoApiControllerTypeCollection, eventAggregator)
         { }
 
+        /// <inheritdoc/>
         protected override ActionResult<TreeNode> CreateRootNode(FormCollection queryStrings)
         {
             var result = base.CreateRootNode(queryStrings);
@@ -37,11 +42,13 @@ namespace uSync.BackOffice.Controllers.Trees
             return result.Value;
         }
 
+        /// <inheritdoc/>
         protected override ActionResult<MenuItemCollection> GetMenuForNode(string id, [ModelBinder(typeof(HttpQueryStringModelBinder))] FormCollection queryStrings)
         {
             return null;
         }
 
+        /// <inheritdoc/>
         protected override ActionResult<TreeNodeCollection> GetTreeNodes(string id, [ModelBinder(typeof(HttpQueryStringModelBinder))] FormCollection queryStrings)
         {
             return new TreeNodeCollection();

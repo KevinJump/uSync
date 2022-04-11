@@ -33,7 +33,10 @@ namespace uSync.BackOffice.Notifications
 
         private SyncFileService _syncFileService;
         private uSyncService _uSyncService;
-
+        
+        /// <summary>
+        /// Generate a new uSyncApplicationStartingHandler object
+        /// </summary>
         public uSyncApplicationStartingHandler(
             ILogger<uSyncApplicationStartingHandler> logger,
             IRuntimeState runtimeState,
