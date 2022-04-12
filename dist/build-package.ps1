@@ -74,7 +74,9 @@ dotnet pack ..\uSync\uSync.csproj  --no-build  --no-restore -c $env -o $outFolde
 rm ..\build-files\App_Plugins\ -Recurse
 &gulp minify --release $fullVersion
 
-.\nuget pack "..\uSync.BackOffice.Assets\uSync.BackOffice.StaticAssets.nuspec" -version $fullVersion -OutputDirectory $outFolder
+dotnet pack ..\uSync.BackOffice.Assets\uSync.BackOffice.StaticAssets.csproj --no-build  --no-restore -c $env -o $outFolder /p:ContinuousIntegrationBuild=true,version=$fullVersion 
+
+# .\nuget pack "..\uSync.BackOffice.Assets\uSync.BackOffice.StaticAssets.nuspec" -version $fullVersion -OutputDirectory $outFolder
 
 ""; "##### Copying to LocalGit folder"; "----------------------------------" ; ""
 XCOPY "$outFolder\*.nupkg" "C:\Source\localgit" /Q /Y 

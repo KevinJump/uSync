@@ -31,7 +31,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.AutoTemplates", "uSyn
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.Tests", "uSync.Tests\uSync.Tests.csproj", "{9D169F84-1CB8-461E-B5F4-3C0291D90B3D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "uSync.SchemaGenerator", "uSync.SchemaGenerator\uSync.SchemaGenerator.csproj", "{1E5B64E5-E8A6-42F2-9079-FB71D6D237D6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.SchemaGenerator", "uSync.SchemaGenerator\uSync.SchemaGenerator.csproj", "{1E5B64E5-E8A6-42F2-9079-FB71D6D237D6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

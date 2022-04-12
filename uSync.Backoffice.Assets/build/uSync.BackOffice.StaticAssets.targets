@@ -2,7 +2,8 @@
 
     <PropertyGroup>
 		<uSyncPluginFolder>App_Plugins\uSync</uSyncPluginFolder>
-        <uSyncPackageContentFilesPath>$(MSBuildThisFileDirectory)..\content\$(uSyncPluginFolder)\**\*.*</uSyncPackageContentFilesPath>
+		<uSyncPluginFolderPath>$(MSBuildThisFileDirectory)..\content\$(uSyncPluginFolder)</uSyncPluginFolderPath>
+        <uSyncPackageContentFilesPath>$(uSyncPluginFolderPath)\**\*.*</uSyncPackageContentFilesPath>
     </PropertyGroup>
 
     <Target Name="CopyuSyncPackageAssets" BeforeTargets="BeforeBuild">
@@ -17,6 +18,14 @@
             SkipUnchangedFiles="true" />
 
     </Target>
+
+	<Target Name="InjectuSyncSchema" AfterTargets="BeforeBuild">
+		<uSyncInjectSchemaTask
+			RootFolder="$(MSBuildProjectDirectory)"
+			SourceSchema="$(MSBuildProjectDirectory)/App_Plugins/uSync/config/appsettings-usync-schema.json"
+			SchemaName="uSync"
+			SchemaDefinition="#/definitions/USyncSchemaGeneratoruSyncDefinition"></uSyncInjectSchemaTask>
+	</Target> 
 
     <Target Name="ClearuSyncPackageAssets" BeforeTargets="Clean">
         <ItemGroup>

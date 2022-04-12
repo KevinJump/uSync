@@ -4,4 +4,18 @@
 		<DefaultItemExcludes>$(DefaultItemExcludes);wwwroot\is-cache\**;wwwroot\ms-cache\**</DefaultItemExcludes>
 	</PropertyGroup>
 
+	<PropertyGroup>
+		<uSyncInjectFramework>net5.0</uSyncInjectFramework>
+		<uSyncInjectTasksFolder>$(MSBuildThisFileDirectory)..\lib\$(uSyncInjectFramework)</uSyncInjectTasksFolder>
+		<uSyncInjectSchemaTasksAssembly>$(uSyncInjectTasksFolder)\$(MSBuildThisFileName).dll</uSyncInjectSchemaTasksAssembly>
+	</PropertyGroup>
+
+	<UsingTask TaskName="uSyncInjectSchemaTask"
+			   AssemblyFile="$(uSyncInjectSchemaTasksAssembly)"/>
+
+	<!--Task parameters default values, this can be overridden-->
+	<PropertyGroup>
+		<RootFolder Condition="'$(RootFolder)' == ''">$(MSBuildProjectDirectory)</RootFolder>
+	</PropertyGroup>
+
 </Project>
