@@ -16,16 +16,17 @@
             SourceFiles="@(uSyncPackageContentFiles)"
             DestinationFiles="@(uSyncPackageContentFiles->'$(MSBuildProjectDirectory)\App_Plugins\uSync\%(RecursiveDir)%(Filename)%(Extension)')"
             SkipUnchangedFiles="true" />
-
     </Target>
-
+	
+	<!-- Injects the uSync schema into the Umbraco one -->
+	<!--
 	<Target Name="InjectuSyncSchema" AfterTargets="BeforeBuild">
 		<uSyncInjectSchemaTask
 			RootFolder="$(MSBuildProjectDirectory)"
 			SourceSchema="$(MSBuildProjectDirectory)/App_Plugins/uSync/config/appsettings-usync-schema.json"
 			SchemaName="uSync"
 			SchemaDefinition="#/definitions/USyncSchemaGeneratoruSyncDefinition"></uSyncInjectSchemaTask>
-	</Target> 
+	</Target> -->
 
     <Target Name="ClearuSyncPackageAssets" BeforeTargets="Clean">
         <ItemGroup>
