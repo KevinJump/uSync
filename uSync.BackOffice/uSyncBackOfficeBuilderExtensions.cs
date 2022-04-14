@@ -16,6 +16,7 @@ using Umbraco.Cms.Web.Common.ApplicationBuilder;
 using Umbraco.Extensions;
 
 using uSync.BackOffice.Authorization;
+using uSync.BackOffice.Boot;
 using uSync.BackOffice.Cache;
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Hubs;
@@ -27,8 +28,14 @@ using uSync.Core;
 
 namespace uSync.BackOffice
 {
+    /// <summary>
+    ///  extensions to the IUmbracoBuilder object to add uSync to a site.
+    /// </summary>
     public static class uSyncBackOfficeBuilderExtensions
     {
+        /// <summary>
+        ///  Add uSync to the site. 
+        /// </summary>
         public static IUmbracoBuilder AdduSync(this IUmbracoBuilder builder, Action<uSyncSettings> defaultOptions = default)
         {
             // if the uSyncConfig Service is registred then we assume this has been added before so we don't do it again. 
@@ -67,6 +74,9 @@ namespace uSync.BackOffice
             builder.Services.AddSingleton<uSyncService>();
             builder.Services.AddSingleton<CacheLifecycleManager>();
 
+            // first boot should happen before any other bits of uSync export on a blank site. 
+            builder.AdduSyncFirstBoot();
+
             // register for the notifications 
             builder.AddNotificationHandler<ServerVariablesParsingNotification, uSyncServerVariablesHandler>();
             builder.AddNotificationHandler<UmbracoApplicationStartingNotification, uSyncApplicationStartingHandler>();
@@ -77,6 +87,7 @@ namespace uSync.BackOffice
             builder.Services.AdduSyncSignalR();
 
             builder.Services.AddAuthorization(o => CreatePolicies(o));
+
 
             return builder;
         }

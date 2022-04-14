@@ -7,6 +7,9 @@ using uSync.BackOffice.SyncHandlers;
 
 namespace uSync.BackOffice
 {
+    /// <summary>
+    /// Extensions for working with uSyncActions
+    /// </summary>
     public static class uSyncActionExtensions
     {
         /// <summary>

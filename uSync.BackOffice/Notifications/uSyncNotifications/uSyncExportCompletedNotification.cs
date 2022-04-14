@@ -2,7 +2,12 @@
 
 namespace uSync.BackOffice
 {
-    public class uSyncExportCompletedNotification : uSyncBulkNotification { 
+    /// <summary>
+    ///  Notification object used when an bulk export has been completed
+    /// </summary>
+    public class uSyncExportCompletedNotification : uSyncBulkNotification {
+
+        /// <inheritdoc/>
         public uSyncExportCompletedNotification(IEnumerable<uSyncAction> actions)
             : base(actions) { }
     }

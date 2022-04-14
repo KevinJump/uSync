@@ -12,7 +12,6 @@
 		<Authors>Kevin Jump</Authors>
 		<Company>Jumoo</Company>
 
-		<PackageIcon>usync-logo.png</PackageIcon>
 		<PackageReadmeFile>readme.md</PackageReadmeFile>
 
 		<PackageLicenseExpression>MPL-2.0</PackageLicenseExpression>
@@ -23,9 +22,6 @@
 
 		<Copyright>Jumoo @ 2013-2021</Copyright>
 		<Description>Core serializers for uSync to read / write information to / from Umbraco CMS.</Description>
-		<PackageReleaseNotes>
-			9.0 - Dotnet core version
-		</PackageReleaseNotes>
 
 		<EmbedUntrackedSources>true</EmbedUntrackedSources>
 		<IncludeSymbols>false</IncludeSymbols>
@@ -43,7 +39,6 @@
 	<ItemGroup>
 		<None Include="readme.md" Pack="true" PackagePath="\" />
 		<None Include="readme.txt" Pack="true" PackagePath="\" />
-		<None Include="usync-logo.png" Pack="true" PackagePath="\" />
 	</ItemGroup>
 
 </Project>

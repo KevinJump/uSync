@@ -13,6 +13,11 @@
 
 	</PropertyGroup>
 
+	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+		<DocumentationFile>bin\Release\$(TargetFramework)\uSync.BackOffice.xml</DocumentationFile>
+	</PropertyGroup>
+
+
 	<ItemGroup>
 		<PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="9.0.0" />
 		<PackageReference Include="Umbraco.Cms.Web.Website" Version="9.0.0" />

@@ -1,7 +1,19 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
+	<!-- inject schema task -->
+	<!-- 
 	<PropertyGroup>
-		<DefaultItemExcludes>$(DefaultItemExcludes);wwwroot\is-cache\**;wwwroot\ms-cache\**</DefaultItemExcludes>
+		<uSyncInjectFramework>net5.0</uSyncInjectFramework>
+		<uSyncInjectTasksFolder>$(MSBuildThisFileDirectory)..\lib\$(uSyncInjectFramework)</uSyncInjectTasksFolder>
+		<uSyncInjectSchemaTasksAssembly>$(uSyncInjectTasksFolder)\$(MSBuildThisFileName).dll</uSyncInjectSchemaTasksAssembly>
 	</PropertyGroup>
+
+	<UsingTask TaskName="uSyncInjectSchemaTask"
+			   AssemblyFile="$(uSyncInjectSchemaTasksAssembly)"/>
+
+	<PropertyGroup>
+		<RootFolder Condition="'$(RootFolder)' == ''">$(MSBuildProjectDirectory)</RootFolder>
+	</PropertyGroup>
+	-->
 
 </Project>

@@ -19,6 +19,9 @@ using static Umbraco.Cms.Core.Constants;
 
 namespace uSync.BackOffice.SyncHandlers.Handlers
 {
+    /// <summary>
+    ///  Handler to manage content items in uSync
+    /// </summary>
     [SyncHandler(uSyncConstants.Handlers.ContentHandler, "Content", "Content", uSyncConstants.Priorites.Content
         , Icon = "icon-document usync-addon-icon", IsTwoPass = true, EntityType = UdiEntityType.Document)]
     public class ContentHandler : ContentHandlerBase<IContent, IContentService>, ISyncHandler, ISyncCleanEntryHandler,
@@ -27,10 +30,16 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         INotificationHandler<MovedNotification<IContent>>,
         INotificationHandler<MovedToRecycleBinNotification<IContent>>
     {
+        /// <summary>
+        ///  the default group for which events matter (content group)
+        /// </summary>
         public override string Group => uSyncConstants.Groups.Content;
 
         private readonly IContentService contentService;
 
+        /// <summary>
+        /// Constructor, called via DI
+        /// </summary>
         public ContentHandler(
             ILogger<ContentHandler> logger,
             IEntityService entityService,

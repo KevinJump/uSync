@@ -22,6 +22,9 @@ using static Umbraco.Cms.Core.Constants;
 
 namespace uSync.BackOffice.SyncHandlers.Handlers
 {
+    /// <summary>
+    ///  Handler to manage DataTypes via uSync
+    /// </summary>
     [SyncHandler(uSyncConstants.Handlers.DataTypeHandler, "Datatypes", "DataTypes", uSyncConstants.Priorites.DataTypes,
         Icon = "icon-autofill", EntityType = UdiEntityType.DataType)]
     public class DataTypeHandler : SyncHandlerContainerBase<IDataType, IDataTypeService>, ISyncHandler, ISyncPostImportHandler,
@@ -32,7 +35,9 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
     {
         private readonly IDataTypeService dataTypeService;
 
-
+        /// <summary>
+        /// Constructor called via DI
+        /// </summary>
         public DataTypeHandler(
             ILogger<DataTypeHandler> logger,
             IEntityService entityService,
@@ -48,6 +53,14 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             this.dataTypeService = dataTypeService;
         }
 
+        /// <summary>
+        /// Process all DataType actions at the end of the import process
+        /// </summary>
+        /// <remarks>
+        /// Datatypes have to exist early on so DocumentTypes can reference them, but
+        /// some doctypes reference content or document types, so we re-process them
+        /// at the end of the import process to ensure those settings can be made too.
+        /// </remarks>
         public override IEnumerable<uSyncAction> ProcessPostImport(string folder, IEnumerable<uSyncAction> actions, HandlerSettings config)
         {
             if (actions == null || !actions.Any())
@@ -68,15 +81,27 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             return CleanFolders(folder, -1);
         }
 
+        /// <summary>
+        ///  Fetch a DataType Container from the DataTypeService
+        /// </summary>
         protected override IEntity GetContainer(int id)
             => dataTypeService.GetContainer(id);
 
+        /// <summary>
+        ///  Fetch a DataType Container from the DataTypeService
+        /// </summary>
         protected override IEntity GetContainer(Guid key)
             => dataTypeService.GetContainer(key);
 
+        /// <summary>
+        ///  Delete a DataType Container from the DataTypeService
+        /// </summary>
         protected override void DeleteFolder(int id)
             => dataTypeService.DeleteContainer(id);
 
+        /// <summary>
+        ///  Get the filename to use for a DataType when we save it
+        /// </summary>
         protected override string GetItemFileName(IDataType item)
             => GetItemAlias(item).ToSafeAlias(shortStringHelper);
     }

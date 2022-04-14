@@ -11,22 +11,32 @@
 
 		<Description>uSync backoffice asset files</Description>
 
-		<IncludeBuildOutput>false</IncludeBuildOutput>
-		<IncludeSymbols>false</IncludeSymbols>
+		<!--
+		<IncludeBuildOutput>true</IncludeBuildOutput>
+		<IncludeSymbols>false</IncludeSymbols> -->
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Content Include="App_Plugins\uSync\**\*.*">
-			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-			<CopyToPublishDirectory>Always</CopyToPublishDirectory>
-		</Content>
 		<None Include="build\**\*.*">
 			<Pack>true</Pack>
-			<PackagePath>build</PackagePath>
+			<PackagePath>buildTransitive</PackagePath>
 		</None>
+
+		<Content Include="..\build-files\App_Plugins\**\*.*">
+			<Pack>true</Pack>
+			<PackagePath>content\App_Plugins</PackagePath>
+			<Visible>false</Visible>
+		</Content>
+
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Remove="App_Plugins\uSync\itemdialog.html" />
+	  <Content Remove="App_Plugins\uSync\**\*.*" />
 	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.1.0" />
+	  <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+	</ItemGroup>
+
 </Project>

@@ -20,6 +20,9 @@ using static Umbraco.Cms.Core.Constants;
 
 namespace uSync.BackOffice.SyncHandlers.Handlers
 {
+    /// <summary>
+    ///  Handler for Template items in Umbraco
+    /// </summary>
     [SyncHandler(uSyncConstants.Handlers.TemplateHandler, "Templates", "Templates", uSyncConstants.Priorites.Templates,
         Icon = "icon-layout", EntityType = UdiEntityType.Template, IsTwoPass = true)]
     public class TemplateHandler : SyncHandlerLevelBase<ITemplate, IFileService>, ISyncHandler,
@@ -29,6 +32,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
     {
         private readonly IFileService fileService;
 
+        /// <inheritdoc/>
         public TemplateHandler(
             ILogger<TemplateHandler> logger,
             IEntityService entityService,
@@ -44,16 +48,19 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             this.fileService = fileService;
         }
 
+        /// <inheritdoc/>
         protected override string GetItemName(ITemplate item) => item.Name;
 
+        /// <inheritdoc/>
         protected override IEnumerable<IEntity> GetChildItems(int parent)
             => fileService.GetTemplates(parent).Where(x => x is IEntity)
             .Select(x => x as IEntity);
 
+        /// <inheritdoc/>
         protected override IEnumerable<IEntity> GetFolders(int parent)
             => GetChildItems(parent);
 
-
+        /// <inheritdoc/>
         protected override string GetItemPath(ITemplate item, bool useGuid, bool isFlat)
             => useGuid ? item.Key.ToString() : item.Alias.ToSafeFileName(shortStringHelper);
     }

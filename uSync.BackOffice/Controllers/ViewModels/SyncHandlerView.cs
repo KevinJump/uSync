@@ -10,11 +10,34 @@ namespace uSync.BackOffice.Controllers
     [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public class SyncHandlerView
     {
+        /// <summary>
+        ///  Is Handler enabled
+        /// </summary>
         public bool Enabled { get; set; }
+
+        /// <summary>
+        ///  current status of this handler 
+        /// </summary>
         public int Status { get; set; }
+
+        /// <summary>
+        /// Display name of the handler 
+        /// </summary>
         public string Name { get; set; }
+        
+        /// <summary>
+        /// Alias for the handler 
+        /// </summary>
         public string Alias { get; set; }
+
+        /// <summary>
+        /// Icon to show for handler 
+        /// </summary>
         public string Icon { get; set; }
+
+        /// <summary>
+        /// Group handler belongs too
+        /// </summary>
         public string Group { get; set; }
         public string Set { get; set; }
     }

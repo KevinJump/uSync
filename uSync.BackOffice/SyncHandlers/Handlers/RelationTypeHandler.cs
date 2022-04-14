@@ -20,6 +20,9 @@ using static Umbraco.Cms.Core.Constants;
 
 namespace uSync.BackOffice.SyncHandlers.Handlers
 {
+    /// <summary>
+    ///  Handler to mange Relation types in uSync
+    /// </summary>
     [SyncHandler(uSyncConstants.Handlers.RelationTypeHandler, "Relations",
             "RelationTypes", uSyncConstants.Priorites.RelationTypes,
             Icon = "icon-traffic usync-addon-icon",
@@ -30,8 +33,10 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
     {
         private readonly IRelationService relationService;
 
+        /// <inheritdoc/>
         public override string Group => uSyncConstants.Groups.Content;
 
+        /// <inheritdoc/>
         public RelationTypeHandler(
             ILogger<RelationTypeHandler> logger,
             IEntityService entityService,
@@ -47,6 +52,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             this.relationService = relationService;
         }
 
+        /// <inheritdoc/>
         public override IEnumerable<uSyncAction> ExportAll(string folder, HandlerSettings config, SyncUpdateCallback callback)
         {
             var actions = new List<uSyncAction>();
@@ -82,13 +88,16 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             return true;
         }
 
+        /// <inheritdoc/>
         protected override bool ShouldImport(XElement node, HandlerSettings config)
             => ShouldExport(node, config);
 
 
+        /// <inheritdoc/>
         protected override string GetItemName(IRelationType item)
             => item.Name;
 
+        /// <inheritdoc/>
         protected override string GetItemFileName(IRelationType item)
             => GetItemAlias(item).ToSafeAlias(shortStringHelper);
 

@@ -25,7 +25,10 @@ namespace uSync.BackOffice.Controllers
     /// </summary>
     public partial class uSyncDashboardApiController
     {
-
+        /// <summary>
+        ///  Get the Addon's splash JSON to display in the addOn tab.
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public async Task<JObject> GetAddOnSplash()
         {
@@ -90,6 +93,9 @@ namespace uSync.BackOffice.Controllers
             return "{}";
         }
 
+        /// <summary>
+        ///  get the info about installed uSync Addons
+        /// </summary>
         [HttpGet]
         public AddOnInfo GetAddOns()
         {
@@ -118,6 +124,9 @@ namespace uSync.BackOffice.Controllers
             return addOnInfo;
         }
 
+        /// <summary>
+        ///  check the uSync version remotely to see if there is a newer recommended version
+        /// </summary>
         [HttpGet]
         public async Task<uSyncVersionCheck> CheckVersion()
         {
@@ -230,30 +239,74 @@ namespace uSync.BackOffice.Controllers
         }
     }
 
+    /// <summary>
+    ///  uSyncWarning message object 
+    /// </summary>
     [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public class uSyncWarningMessage
     {
+        /// <summary>
+        ///  type of warning (style)
+        /// </summary>
         public string Type { get; set; }
+
+        /// <summary>
+        ///  message to display 
+        /// </summary>
         public string Message { get; set; }
     }
 
+    /// <summary>
+    ///  uSync version information
+    /// </summary>
     [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public class uSyncVersionInfo
     {
+        /// <summary>
+        ///  core version of uSync
+        /// </summary>
         public string Core { get; set; }
+
+        /// <summary>
+        ///  version of uSync complete
+        /// </summary>
         public string Complete { get; set; }
+
+        /// <summary>
+        ///  link to updated version
+        /// </summary>
         public string Link { get; set; }
+
+        /// <summary>
+        ///  message to show 
+        /// </summary>
         public string Message { get; set; }
     }
 
+    /// <summary>
+    ///  uSync version check information
+    /// </summary>
     [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public class uSyncVersionCheck
     {
+        /// <summary>
+        ///  version info of current uSync
+        /// </summary>
         public uSyncVersionInfo VersionInfo { get; set; }
+
+        /// <summary>
+        ///  did we get the version info from a remote source
+        /// </summary>
         public bool Remote { get; set; } = false;
 
+        /// <summary>
+        ///  is this the 'current' lastest version
+        /// </summary>
         public bool IsCurrent { get; set; }
 
+        /// <summary>
+        ///  have the handlers been loaded (Reserved - always true)
+        /// </summary>
         public bool HandlersLoaded { get; set; }
     }
 }

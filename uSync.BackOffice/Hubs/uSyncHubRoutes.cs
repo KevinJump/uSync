@@ -11,11 +11,17 @@ using Umbraco.Extensions;
 
 namespace uSync.BackOffice.Hubs
 {
+    /// <summary>
+    /// Handles SignlarR routes for uSync
+    /// </summary>
     public class uSyncHubRoutes : IAreaRoutes
     {
         private readonly IRuntimeState _runtimeState;
         private readonly string _umbracoPathSegment;
 
+        /// <summary>
+        ///  Constructor (called via DI)
+        /// </summary>
         public uSyncHubRoutes(
             IOptions<GlobalSettings> globalSettings,
             IHostingEnvironment hostingEnvironment,
@@ -25,6 +31,9 @@ namespace uSync.BackOffice.Hubs
             _umbracoPathSegment = globalSettings.Value.GetUmbracoMvcArea(hostingEnvironment);
         }
 
+        /// <summary>
+        /// Create the signalR routes for uSync
+        /// </summary>
         public void CreateRoutes(IEndpointRouteBuilder endpoints)
         {
             switch (_runtimeState.Level)
@@ -36,6 +45,9 @@ namespace uSync.BackOffice.Hubs
 
         }
 
+        /// <summary>
+        /// Get the path to the uSync SignalR route
+        /// </summary>
         public string GetuSyncHubRoute()
         {
             return $"/{_umbracoPathSegment}/{nameof(SyncHub)}";

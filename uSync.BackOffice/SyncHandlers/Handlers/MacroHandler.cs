@@ -20,6 +20,9 @@ using static Umbraco.Cms.Core.Constants;
 
 namespace uSync.BackOffice.SyncHandlers.Handlers
 {
+    /// <summary>
+    ///  Handler to mange Macros in uSync
+    /// </summary>
     [SyncHandler(uSyncConstants.Handlers.MacroHandler, "Macros", "Macros", uSyncConstants.Priorites.Macros,
         Icon = "icon-settings-alt", EntityType = UdiEntityType.Macro)]
     public class MacroHandler : SyncHandlerBase<IMacro, IMacroService>, ISyncHandler,
@@ -28,6 +31,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
     {
         private readonly IMacroService macroService;
 
+        /// <inheritdoc/>
         public MacroHandler(
             ILogger<MacroHandler> logger,
             IEntityService entityService,
@@ -65,12 +69,15 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             return actions;
         }
 
+        /// <inheritdoc/>
         protected override string GetItemName(IMacro item)
             => item.Name;
 
+        /// <inheritdoc/>
         protected override string GetItemFileName(IMacro item)
             => GetItemAlias(item).ToSafeAlias(shortStringHelper);
 
+        /// <inheritdoc/>
         protected override IEnumerable<IEntity> GetChildItems(int parent)
         {
             if (parent == -1)

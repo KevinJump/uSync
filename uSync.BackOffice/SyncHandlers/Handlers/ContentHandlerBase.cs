@@ -31,7 +31,9 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         where TObject : IContentBase
         where TService : IService
     {
-
+        /// <summary>
+        /// Base constructor, should never be called directly
+        /// </summary>
         protected ContentHandlerBase(
             ILogger<ContentHandlerBase<TObject, TService>> logger,
             IEntityService entityService,
@@ -44,6 +46,9 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfigService, syncItemFactory)
         { }
 
+        /// <summary>
+        /// Generate a unique string based on the item name and path, used for matching to existing items
+        /// </summary>
         protected override string GetItemMatchString(TObject item)
         {
             var itemPath = item.Level.ToString();
@@ -54,6 +59,9 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             return $"{item.Name}_{itemPath}".ToLower();
         }
 
+        /// <summary>
+        ///  Generate a unique string based on the item name and path from a uSync xml file
+        /// </summary>
         protected override string GetXmlMatchString(XElement node)
         {
             var path = node.Element("Info")?.Element("Path").ValueOrDefault(node.GetLevel().ToString());
@@ -69,6 +77,9 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
          *    RulesOnExport = bool (do we apply the rules on export as well as import?)
          */
 
+        /// <summary>
+        /// Should this item be imported (will check rules)
+        /// </summary>
         protected override bool ShouldImport(XElement node, HandlerSettings config)
         {
             // check base first - if it says no - then no point checking this. 
@@ -81,6 +92,12 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             return true;
         }
 
+        /// <summary>
+        /// Import an item that is inthe trached state in the XML file.
+        /// </summary>
+        /// <remarks>
+        /// Trashed items are only imported when the "ImportTrashed" setting is true on the handler
+        /// </remarks>
         private bool ImportTrashedItem(XElement node, HandlerSettings config)
         {
             // unless the setting is explicit we don't import trashed items. 
@@ -147,10 +164,16 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
 
 
         // we only match duplicate actions by key. 
+
+        /// <summary>
+        /// Do the uSyncActions match by key (e.g are they the same item)
+        /// </summary>
         protected override bool DoActionsMatch(uSyncAction a, uSyncAction b)
             => a.key == b.key;
 
-
+        /// <summary>
+        ///  Process any cleanup actions that may have been loaded up
+        /// </summary>
         public virtual IEnumerable<uSyncAction> ProcessCleanActions(string folder, IEnumerable<uSyncAction> actions, HandlerSettings config)
         {
             var cleans = actions.Where(x => x.Change == ChangeType.Clean && !string.IsNullOrWhiteSpace(x.FileName)).ToList();
@@ -167,6 +190,10 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             return results;
         }
 
+        /// <summary>
+        ///  Handle the Umbraco Moved to recycle bin notification, (treated like a move)
+        /// </summary>
+        /// <param name="notification"></param>
         public void Handle(MovedToRecycleBinNotification<TObject> notification)
         {
             if (!ShouldProcessEvent()) return;
@@ -174,6 +201,9 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         }
 
 
+        /// <summary>
+        ///  Clean up any files on disk, that might be left over when an item moves
+        /// </summary>
         protected override void CleanUp(TObject item, string newFile, string folder)
         {
             // for content this clean up check only catches when an item is moved from

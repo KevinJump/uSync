@@ -18,16 +18,21 @@ using uSync.Core;
 
 namespace uSync.BackOffice.SyncHandlers.Handlers
 {
+    /// <summary>
+    ///  Handler to mange Domain settings for uSync
+    /// </summary>
     [SyncHandler(uSyncConstants.Handlers.DomainHandler, "Domains", "Domains", uSyncConstants.Priorites.DomainSettings
         , Icon = "icon-home usync-addon-icon", EntityType = "domain")]
     public class DomainHandler : SyncHandlerBase<IDomain, IDomainService>, ISyncHandler,
         INotificationHandler<SavedNotification<IDomain>>,
         INotificationHandler<DeletedNotification<IDomain>>
     {
+        /// <inheritdoc/>
         public override string Group => uSyncConstants.Groups.Content;
 
         private readonly IDomainService domainService;
 
+        /// <inheritdoc/>
         public DomainHandler(
             ILogger<DomainHandler> logger,
             IEntityService entityService,
@@ -43,6 +48,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             this.domainService = domainService;
         }
 
+        /// <inheritdoc/>
         public override IEnumerable<uSyncAction> ExportAll(string folder, HandlerSettings config, SyncUpdateCallback callback)
         {
             var actions = new List<uSyncAction>();
@@ -63,13 +69,16 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             return actions;
         }
 
+        /// <inheritdoc/>
         protected override string GetItemName(IDomain item)
             => item.DomainName;
 
+        /// <inheritdoc/>
         protected override string GetItemPath(IDomain item, bool useGuid, bool isFlat)
             => $"{item.DomainName.ToSafeFileName(shortStringHelper)}_{item.LanguageIsoCode.ToSafeFileName(shortStringHelper)}";
 
 
+        /// <inheritdoc/>
         protected override IEnumerable<IEntity> GetChildItems(int parent)
         {
             if (parent == -1)

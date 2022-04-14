@@ -14,11 +14,14 @@ using uSync.Core;
 namespace uSync.BackOffice
 {
 
-    // 
-    // Implimentation of paged import methods.
-    //
+    /// <summary>
+    /// Implimentation of paged import methods.
+    /// </summary>
     public partial class uSyncService
     {
+        /// <summary>
+        ///  Peform a paged report against a given folder 
+        /// </summary>
         public IEnumerable<uSyncAction> ReportPartial(string folder, uSyncPagedImportOptions options, out int total)
         {
             var orderedNodes = LoadOrderedNodes(folder);
@@ -62,6 +65,9 @@ namespace uSync.BackOffice
             return actions;
         }
 
+        /// <summary>
+        ///  Peform a paged Import against a given folder 
+        /// </summary>
         public IEnumerable<uSyncAction> ImportPartial(string folder, uSyncPagedImportOptions options, out int total)
         {
             lock (_importLock)
@@ -114,6 +120,9 @@ namespace uSync.BackOffice
             }
         }
 
+        /// <summary>
+        ///  Peform a paged Import second pass against a given folder 
+        /// </summary>
         public IEnumerable<uSyncAction> ImportPartialSecondPass(IEnumerable<uSyncAction> actions, uSyncPagedImportOptions options)
         {
             lock (_importLock)
@@ -158,6 +167,9 @@ namespace uSync.BackOffice
             }
         }
 
+        /// <summary>
+        ///  Peform a paged Import post import against a given folder 
+        /// </summary>
         public IEnumerable<uSyncAction> ImportPartialPostImport(IEnumerable<uSyncAction> actions, uSyncPagedImportOptions options)
         {
             if (actions == null || !actions.Any()) return Enumerable.Empty<uSyncAction>();
@@ -209,6 +221,9 @@ namespace uSync.BackOffice
             }
         }
 
+        /// <summary>
+        ///  Peform a paged Clean after import for a given folder 
+        /// </summary>
         public IEnumerable<uSyncAction> ImportPostCleanFiles(IEnumerable<uSyncAction> actions, uSyncPagedImportOptions options)
         {
             if (actions == null) return Enumerable.Empty<uSyncAction>();

@@ -3,34 +3,39 @@ using Newtonsoft.Json;
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace uSync.BackOffice.Configuration
 {
+    /// <summary>
+    /// Settings for a handler set (group of handlers)
+    /// </summary>
     [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public class uSyncHandlerSetSettings
     {
         /// <summary>
-        ///  is this handler set enabled
+        /// Is this handler set enabled
         /// </summary>
+        [DefaultValue(true)]
         public bool Enabled { get; set; } = true;
 
         /// <summary>
-        ///  list of groups handlers can belong to.
+        /// List of groups handlers can belong to.
         /// </summary>
         public string[] HandlerGroups { get; set; } = Array.Empty<string>();
 
         /// <summary>
-        ///  list of disabled handlers
+        /// List of disabled handlers
         /// </summary>
         public string[] DisabledHandlers { get; set; } = Array.Empty<string>();
         
         /// <summary>
-        ///  default settings for all handlers
+        /// Default settings for all handlers
         /// </summary>
         public HandlerSettings HandlerDefaults { get; set; } = new HandlerSettings();
 
         /// <summary>
-        ///  settings for named handlers 
+        /// Settings for named handlers 
         /// </summary>
         public IDictionary<string, HandlerSettings> Handlers { get; set; } = new Dictionary<string, HandlerSettings>();
 
@@ -42,6 +47,9 @@ namespace uSync.BackOffice.Configuration
 
     }
 
+    /// <summary>
+    /// Extensions to make handling the settings easier. 
+    /// </summary>
     public static class HandlerSetSettingsExtensions
     {
         /// <summary>

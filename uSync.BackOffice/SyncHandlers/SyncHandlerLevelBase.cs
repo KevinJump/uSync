@@ -32,6 +32,7 @@ namespace uSync.BackOffice.SyncHandlers
         where TObject : IEntity
         where TService : IService
     {
+        /// <inheritdoc/>
         protected SyncHandlerLevelBase(
             ILogger<SyncHandlerLevelBase<TObject, TService>> logger,
             IEntityService entityService,
@@ -44,17 +45,7 @@ namespace uSync.BackOffice.SyncHandlers
             : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfig, syncItemFactory)
         { }
 
-        /// <summary>
-        ///  this is the simple interface, based purely on level, 
-        ///  we could get clever (like dependency trees for content types)
-        ///  
-        ///  but that would have to be implimented lower down (and it doesn't 
-        ///  really matter for things in containers only things that parent others).
-        /// </summary>
-        /// <param name="folder"></param>
-        /// <param name="force"></param>
-        /// <param name="updates"></param>
-        /// <returns></returns>
+        /// <inheritdoc/>
         protected override IEnumerable<uSyncAction> ImportFolder(string folder, HandlerSettings config, Dictionary<string, TObject> updates, bool force, SyncUpdateCallback callback)
         {
             // if not using flat then directory structure is sorting them for us. 
@@ -190,6 +181,7 @@ namespace uSync.BackOffice.SyncHandlers
             }
         }
 
+        /// <inheritdoc/>
         override protected string GetItemPath(TObject item, bool useGuid, bool isFlat)
         {
             if (isFlat) return base.GetItemPath(item, useGuid, isFlat);

@@ -16,6 +16,9 @@ using uSync.BackOffice.Hubs;
 
 namespace uSync.BackOffice.Notifications
 {
+    /// <summary>
+    ///  Handles ServerVariablesParsing to inject the uSync variables into the Umbraco.Sys namespace in Javascript
+    /// </summary>
     public class uSyncServerVariablesHandler : INotificationHandler<ServerVariablesParsingNotification>
     {
         private uSyncConfigService uSyncConfig;
@@ -27,6 +30,8 @@ namespace uSync.BackOffice.Notifications
 
         private string umbracoMvcArea;
 
+
+        /// <inheritdoc/>
         public uSyncServerVariablesHandler(LinkGenerator linkGenerator, UriUtility uriUtility,
             IOptions<GlobalSettings> globalSettings,
             uSyncConfigService uSyncConfigService,
@@ -42,6 +47,8 @@ namespace uSync.BackOffice.Notifications
 
         }
 
+
+        /// <inheritdoc/>
         public void Handle(ServerVariablesParsingNotification notification)
         {
             notification.ServerVariables.Add("uSync", new Dictionary<string, object>

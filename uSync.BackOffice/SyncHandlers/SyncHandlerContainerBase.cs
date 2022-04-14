@@ -37,6 +37,7 @@ namespace uSync.BackOffice.SyncHandlers
         where TService : IService
     {
 
+        /// <inheritdoc/>
         protected SyncHandlerContainerBase(
             ILogger<SyncHandlerContainerBase<TObject, TService>> logger,
             IEntityService entityService,
@@ -49,6 +50,9 @@ namespace uSync.BackOffice.SyncHandlers
             : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfig, syncItemFactory)
         { }
 
+        /// <summary>
+        ///  Removes any empty 'containers' after import 
+        /// </summary>
         protected IEnumerable<uSyncAction> CleanFolders(string folder, int parent)
         {
             var actions = new List<uSyncAction>();
@@ -75,8 +79,14 @@ namespace uSync.BackOffice.SyncHandlers
         }
 
 
+        /// <summary>
+        /// delete a container
+        /// </summary>
         abstract protected void DeleteFolder(int id);
 
+        /// <summary>
+        /// Handle events at the end of any import 
+        /// </summary>
         public virtual IEnumerable<uSyncAction> ProcessPostImport(string folder, IEnumerable<uSyncAction> actions, HandlerSettings config)
         {
             if (actions == null || !actions.Any())
@@ -126,6 +136,10 @@ namespace uSync.BackOffice.SyncHandlers
 
         }
 
+        /// <summary>
+        ///  Handle container saving events
+        /// </summary>
+        /// <param name="notification"></param>
         public virtual void Handle(EntityContainerSavedNotification notification)
         {
             if (_mutexService.IsPaused) return;

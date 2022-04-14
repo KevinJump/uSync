@@ -23,6 +23,11 @@ namespace uSync.BackOffice.Services
         private readonly ILogger<SyncFileService> logger;
         private readonly IHostingEnvironment hostEnvironment;
 
+        /// <summary>
+        /// Constructor for File service (via DI)
+        /// </summary>
+        /// <param name="logger"></param>
+        /// <param name="hostEnvironment"></param>
         public SyncFileService(ILogger<SyncFileService> logger,
                                IHostingEnvironment hostEnvironment)
         {
@@ -300,6 +305,11 @@ namespace uSync.BackOffice.Services
             return string.Empty;
         }
 
+        // TODO: this doesn't need to be public? 
+
+        /// <summary>
+        ///  Locking item for saves. 
+        /// </summary>
         public static object _saveLock = new object();
 
         /// <summary>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -8,47 +9,56 @@ using Umbraco.Extensions;
 
 namespace uSync.BackOffice.Configuration
 {
+    /// <summary>
+    /// Settings to control who a handler works
+    /// </summary>
     [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public class HandlerSettings
     {
         /// <summary>
-        ///  is handler enabled or disabled
+        /// Is handler enabled or disabled
         /// </summary>
+        [DefaultValue(true)]
         public bool Enabled { get; set; } = true;
 
         /// <summary>
-        ///  list of actions the handler is configured for. 
+        /// List of actions the handler is configured for. 
         /// </summary>
         public string[] Actions { get; set; } = Array.Empty<string>();
 
         /// <summary>
-        ///  should use a flat folder structure when exporting items
+        /// Should use a flat folder structure when exporting items
         /// </summary>
+        [DefaultValue(true)]
         public bool UseFlatStructure { get; set; } = true;
 
         /// <summary>
-        ///  items should be saved with their guid/key value as the filename
+        /// Items should be saved with their guid/key value as the filename
         /// </summary>
+        [DefaultValue(false)]
         public bool GuidNames { get; set; } = false;
 
         /// <summary>
-        ///  imports should fail if the parent item is missing (if false, item be importated go a close as possible to location)
+        /// Imports should fail if the parent item is missing (if false, item be importated go a close as possible to location)
         /// </summary>
+        [DefaultValue(false)]
         public bool FailOnMissingParent { get; set; } = false;
 
         /// <summary>
-        ///  override the group the handler belongs too.
+        /// Override the group the handler belongs too.
         /// </summary>
+        [DefaultValue("")]
         public string Group { get; set; } = string.Empty;
 
         /// <summary>
-        ///  additional settings for the handler
+        /// Additional settings for the handler
         /// </summary>
         public Dictionary<string, string> Settings { get; set; } = new Dictionary<string, string>();
-
-        public HandlerSettings() { }
     }
 
+    /// <summary>
+    ///  Extensions to the handler settings
+    /// </summary>
     public static class HandlerSettingsExtensions
     {
         /// <summary>

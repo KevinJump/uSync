@@ -13,7 +13,9 @@ namespace uSync.BackOffice
 
     public partial class uSyncService
     {
-
+        /// <summary>
+        ///  Run a report for a given handler 
+        /// </summary>
         public IEnumerable<uSyncAction> ReportHandler(string handler, uSyncImportOptions options)
         {
             var handlerPair = _handlerFactory.GetValidHandler(handler, new SyncHandlerOptions
@@ -28,6 +30,9 @@ namespace uSync.BackOffice
             return handlerPair.Handler.Report(folder, handlerPair.Settings, options.Callbacks?.Update);
         }
 
+        /// <summary>
+        ///  run an import for a given handler 
+        /// </summary>
         public IEnumerable<uSyncAction> ImportHandler(string handlerAlias, uSyncImportOptions options)
         {
 
@@ -51,6 +56,9 @@ namespace uSync.BackOffice
             }
         }
 
+        /// <summary>
+        ///  perform the post import actions for a handler 
+        /// </summary>
         public IEnumerable<uSyncAction> PerformPostImport(string rootFolder, string handlerSet, IEnumerable<uSyncAction> actions)
         {
             lock (_importLock)
@@ -63,6 +71,9 @@ namespace uSync.BackOffice
             }
         }
 
+        /// <summary>
+        ///  run an export for a given handler 
+        /// </summary>
         public IEnumerable<uSyncAction> ExportHandler(string handler, uSyncImportOptions options)
         {
             var handlerPair = _handlerFactory.GetValidHandler(handler, new SyncHandlerOptions

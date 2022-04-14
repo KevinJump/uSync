@@ -4,8 +4,12 @@ using Umbraco.Cms.Core.DependencyInjection;
 
 namespace uSync.BackOffice
 {
+    /// <summary>
+    ///  default composer to startup uSync
+    /// </summary>
     public class uSyncBackOfficeComposer : IComposer
     {
+        /// <inheritdoc/>
         public void Compose(IUmbracoBuilder builder)
         {
             // the composers add uSync, but the extension methods
