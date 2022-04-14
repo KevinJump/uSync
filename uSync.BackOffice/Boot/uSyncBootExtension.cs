@@ -68,8 +68,15 @@ namespace uSync.BackOffice.Boot
         {
             if (notification.RuntimeLevel == Umbraco.Cms.Core.RuntimeLevel.Run)
             {
-                var upgrader = new Upgrader(new FirstBootMigrationPlan());
-                upgrader.Execute(_migrationPlanExecutor, _scopeProvider, _keyValueService);
+                var firstBootMigration = new FirstBootMigrationPlan();
+                var upgrader = new Upgrader(firstBootMigration);
+
+                // this bit is done inside the upgrader.Execute method too, 
+                // but we don't want the extra three log messages during startup,
+                // so we also check before we start
+                var currentState = _keyValueService.GetValue(upgrader.StateValueKey);
+                if (currentState == null || currentState != firstBootMigration.FinalState)
+                    upgrader.Execute(_migrationPlanExecutor, _scopeProvider, _keyValueService);
             }
         }
     }
