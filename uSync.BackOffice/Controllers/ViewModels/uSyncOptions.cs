@@ -35,6 +35,9 @@ namespace uSync.BackOffice.Controllers
         [DataMember(Name = "group")]
         public string Group { get; set; }
 
+        /// <summary>
+        /// The set in which the handler lives
+        /// </summary>
         [DataMember(Name = "set")]
         public string Set { get; set; }
     }

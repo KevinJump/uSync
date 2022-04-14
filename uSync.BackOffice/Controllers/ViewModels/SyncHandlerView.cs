@@ -39,6 +39,10 @@ namespace uSync.BackOffice.Controllers
         /// Group handler belongs too
         /// </summary>
         public string Group { get; set; }
+
+        /// <summary>
+        /// Set handler is currently in
+        /// </summary>
         public string Set { get; set; }
     }
 }

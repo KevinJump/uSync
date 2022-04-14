@@ -26,7 +26,9 @@ namespace uSync.BackOffice.Controllers
         /// </summary>
         public bool Force { get; set; }
 
-
+        /// <summary>
+        /// Set to use when processing the action
+        /// </summary>
         public string Set { get; set; }
 
         /// <summary>

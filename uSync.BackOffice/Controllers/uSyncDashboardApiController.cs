@@ -86,16 +86,20 @@ namespace uSync.BackOffice.Controllers
         /// <summary>
         ///  Return the uSyncSettings
         /// </summary>
-        /// <returns></returns>
         [HttpGet]
         public uSyncSettings GetSettings()
             => this.uSyncConfig.Settings;
 
-
+        /// <summary>
+        /// Return the default set name based on config
+        /// </summary>
         [HttpGet]
         public string GetDefaultSet()
             => this.uSyncConfig.Settings.DefaultSet;
 
+        /// <summary>
+        /// Get all the defined sets from the configuration
+        /// </summary>
         [HttpGet]
         public IDictionary<string, uSyncHandlerSetSettings> GetSets()
         {
@@ -113,7 +117,6 @@ namespace uSync.BackOffice.Controllers
         /// <summary>
         ///  gets the sets that can be picked in the dashboard UI. 
         /// </summary>
-        /// <returns></returns>
         public IEnumerable<string> GetSelectableSets()
             => GetSets().Where(x => x.Value.IsSelectable || x.Key.InvariantEquals(uSync.Sets.DefaultSet))
                 .Select(x => x.Key);
@@ -121,8 +124,6 @@ namespace uSync.BackOffice.Controllers
         /// <summary>
         ///  Return the Handler settings
         /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
         [HttpGet]
         public uSyncHandlerSetSettings GetHandlerSetSettings(string id)
             => this.uSyncConfig.GetSetSettings(id);

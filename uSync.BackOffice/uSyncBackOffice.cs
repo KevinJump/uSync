@@ -33,6 +33,9 @@
             /// </summary>
             public static string ConfigSettings = uSyncConfigPrefix + "Settings";
 
+            /// <summary>
+            /// path to the root of the default configuration sets 
+            /// </summary>
             public static string uSyncSetsConfig = uSyncConfigPrefix + "Sets";
 
             /// <summary>

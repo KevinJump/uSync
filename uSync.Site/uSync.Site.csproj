@@ -9,6 +9,7 @@
 		<PackageReference Include="Our.Umbraco.Community.Contentment" Version="3.0.0" />
 		<PackageReference Include="Our.Umbraco.DocTypeGridEditor" Version="9.0.2" />
 		<PackageReference Include="Umbraco.TheStarterKit" Version="9.0.0" />
+		<PackageReference Include="Bergmania.OpenStreetMap" Version="2.0.1" />
 	</ItemGroup>
 
 
