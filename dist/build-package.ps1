@@ -53,7 +53,7 @@ Write-Host "Folder   :" $outFolder
 dotnet restore ..
 
 ""; "##### Building project"; "--------------------------------"; ""
-dotnet build ..\uSync.sln -c $env
+dotnet build ..\uSync.sln -c $env /p:ContinuousIntegrationBuild=true,version=$fullVersion 
 
 ""; "##### Generating the json schema"; "----------------------------------" ; ""
 dotnet run -c $env --project ..\uSync.SchemaGenerator\uSync.SchemaGenerator.csproj --no-build
