@@ -26,17 +26,23 @@ namespace uSync.BackOffice.Controllers
                 ? uSyncConfig.Settings.UIEnabledGroups
                 : options.Group;
 
+            var handlerSet = string.IsNullOrWhiteSpace(options.Set) 
+                ? uSyncConfig.Settings.DefaultSet
+                : options.Set;
+
             return handlerFactory.GetValidHandlers(new SyncHandlerOptions
             {
                 Group = handlerGroup,
-                Action = action
+                Action = action,
+                Set = handlerSet
             }).Select(x => new SyncHandlerView
             {
                 Enabled = x.Handler.Enabled,
                 Alias = x.Handler.Alias,
                 Name = x.Handler.Name,
                 Icon = x.Handler.Icon,
-                Group = x.Handler.Group
+                Group = x.Handler.Group,
+                Set = handlerSet
             });
         }
 
@@ -48,12 +54,15 @@ namespace uSync.BackOffice.Controllers
         {
             var hubClient = new HubClientService(hubContext, options.ClientId);
 
+            var handlerSet = !string.IsNullOrWhiteSpace(options.Set)
+                ? options.Set : uSyncConfig.Settings.DefaultSet;
+
             var actions = uSyncService.ReportHandler(options.Handler,
                 new uSyncImportOptions
                 {
                     Callbacks = hubClient.Callbacks(),
-                    HandlerSet = uSyncConfig.Settings.DefaultSet,
-                    RootFolder = uSyncConfig.GetRootFolder()
+                    HandlerSet = handlerSet,
+                    RootFolder = uSyncConfig.GetRootFolder(),                    
                 });
 
             return new SyncActionResult(actions);
@@ -71,10 +80,13 @@ namespace uSync.BackOffice.Controllers
         {
             var hubClient = new HubClientService(hubContext, options.ClientId);
 
+            var handlerSet = !string.IsNullOrWhiteSpace(options.Set)
+                ? options.Set : uSyncConfig.Settings.DefaultSet;
+
             var actions = uSyncService.ImportHandler(options.Handler, new uSyncImportOptions
             { 
                 Callbacks = hubClient.Callbacks(),
-                HandlerSet = uSyncConfig.Settings.DefaultSet,
+                HandlerSet = handlerSet,
                 RootFolder = uSyncConfig.GetRootFolder(),
                 Flags = options.Force ? Core.Serialization.SerializerFlags.Force : Core.Serialization.SerializerFlags.None
             });
@@ -89,8 +101,14 @@ namespace uSync.BackOffice.Controllers
         public SyncActionResult ImportPost(SyncActionOptions options)
         {
             var hubClient = new HubClientService(hubContext, options.ClientId);
+
+            var handlerSet = !string.IsNullOrWhiteSpace(options.Set)
+                ? options.Set : uSyncConfig.Settings.DefaultSet;
+
             var actions = uSyncService.PerformPostImport(
-                uSyncConfig.GetRootFolder(), uSyncConfig.Settings.DefaultSet, options.Actions);
+                uSyncConfig.GetRootFolder(), 
+                handlerSet, 
+                options.Actions);
 
             return new SyncActionResult(actions);
         }
@@ -120,10 +138,14 @@ namespace uSync.BackOffice.Controllers
         {
             var hubClient = new HubClientService(hubContext, options.ClientId);
 
+            var handlerSet = !string.IsNullOrWhiteSpace(options.Set)
+                ? options.Set : uSyncConfig.Settings.DefaultSet;
+
+
             var actions = uSyncService.ExportHandler(options.Handler, new uSyncImportOptions
             {
                 Callbacks = hubClient.Callbacks(),
-                HandlerSet = uSyncConfig.Settings.DefaultSet,
+                HandlerSet = handlerSet,
                 RootFolder = uSyncConfig.GetRootFolder()
             });
 

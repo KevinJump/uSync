@@ -29,14 +29,16 @@
             private const string uSyncConfigPrefix = "uSync:";
 
             /// <summary>
-            ///  prefix used for sets in the config 
-            /// </summary>
-            public static string uSyncSetsConfigPrefix = uSyncConfigPrefix + "Sets:";
-
-            /// <summary>
             ///  where the configuration settings live
             /// </summary>
             public static string ConfigSettings = uSyncConfigPrefix + "Settings";
+
+            public static string uSyncSetsConfig = uSyncConfigPrefix + "Sets";
+
+            /// <summary>
+            ///  prefix used for sets in the config 
+            /// </summary>
+            public static string uSyncSetsConfigPrefix = uSyncSetsConfig + ":";
 
             /// <summary>
             /// names option for the default set. 

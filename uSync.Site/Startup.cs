@@ -7,6 +7,7 @@ using Umbraco.Cms.Core.DependencyInjection;
 using Umbraco.Extensions;
 using Microsoft.Extensions.Hosting;
 using uSync.BackOffice;
+using uSync.BackOffice.Configuration;
 
 namespace Umbraco.Cms.Web.UI.NetCore
 {
@@ -46,7 +47,7 @@ namespace Umbraco.Cms.Web.UI.NetCore
             // services.AddControllers().AddNewtonsoftJson();
 
             services.AddUmbraco(_env, _config)
-                .AddBackOffice()             
+                .AddBackOffice()
                 .AddWebsite()
                 // // uSync example - you can just leave this out, and the default settings from appsettings.json are used.
                 // .AdduSync(o => {
@@ -54,6 +55,7 @@ namespace Umbraco.Cms.Web.UI.NetCore
                 //     o.RootFolder = "/uSync/v8/"; // use a v8 folder (so you can just copy from v8
                 //     }) 
                 .AddComposers()
+                .AddCustomHandlers()
                 .Build();
 #pragma warning restore IDE0022 // Use expression body for methods
 
@@ -81,6 +83,23 @@ namespace Umbraco.Cms.Web.UI.NetCore
                     u.UseBackOfficeEndpoints();
                     u.UseWebsiteEndpoints();
                 });
+        }
+    }
+
+
+    internal static class uSyncCustomHandlerExtensions
+    {
+        public static IUmbracoBuilder AddCustomHandlers(this IUmbracoBuilder builder)
+        {
+            var customSet = "uSync:Sets:Custom";
+
+            // default handler options, other people can load their own names handler options and 
+            // they can be used throughout uSync (so complete will do this). 
+            builder.Services.Configure<uSyncHandlerSetSettings>("Custom",
+                builder.Config.GetSection(customSet));
+
+            return builder;
+
         }
     }
 }

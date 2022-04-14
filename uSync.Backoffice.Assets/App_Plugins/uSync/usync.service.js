@@ -20,6 +20,10 @@
             getHandlers: getHandlers,
             getHandlerSetSettings: getHandlerSetSettings,
 
+            getDefaultSet: getDefaultSet,
+            getSets: getSets,
+            getSelectableSets: getSelectableSets,
+
             report: report,
             exportItems: exportItems,
             importItems: importItems,
@@ -56,6 +60,18 @@
             return $http.get(serviceRoot + 'GetSettings');
         }
 
+        function getDefaultSet() {
+            return $http.get(serviceRoot + 'GetDefaultSet');
+        }
+
+        function getSets() {
+            return $http.get(serviceRoot + 'GetSets');
+        }
+
+        function getSelectableSets() {
+            return $http.get(serviceRoot + 'GetSelectableSets');
+        }
+
         function getChangedSettings() {
             return $http.get(serviceRoot + 'GetChangedSettings');
         }
@@ -64,8 +80,8 @@
             return $http.get(serviceRoot + 'GetHandlerSetSettings?id=' + set);
         }
 
-        function getHandlers() {
-            return $http.get(serviceRoot + 'GetHandlers');
+        function getHandlers(set) {
+            return $http.get(serviceRoot + 'GetHandlers?set=' + set);
         }
 
         function getLoadedHandlers() {
@@ -89,17 +105,20 @@
             return $http.post(serviceRoot + 'export', { clientId: clientId, clean: clean });
         }
 
-        function importItems(force, group, clientId) {
+        function importItems(force, set, group, clientId) {
             return $http.put(serviceRoot + 'import',
                 {
                     force: force,
+                    set: set,
                     group: group,
-                    clientId: clientId
+                    clientId: clientId,
                 });
         }
 
         function getSyncWarnings(action, group) {
-            return $http.post(serviceRoot + 'GetSyncWarnings?action=' + action, { group: group });
+            return $http.post(serviceRoot + 'GetSyncWarnings?action=' + action, {
+                group: group
+            });
         }
         
 
@@ -111,8 +130,8 @@
             return $http.post(serviceRoot + 'savesettings', settings);
         }
 
-        function getHandlerGroups() {
-            return $http.get(serviceRoot + 'GetHandlerGroups');
+        function getHandlerGroups(set) {
+            return $http.get(serviceRoot + 'GetHandlerGroups?set=' + set);
         }
 
         function checkVersion() {
@@ -123,7 +142,8 @@
         function getActionHandlers(options) {
             return $http.post(serviceRoot + 'GetActionHandlers?action=' + options.action,
                 {
-                    group: options.group
+                    group: options.group,
+                    set: options.set
                 });
         }
 
@@ -138,21 +158,24 @@
             return $http.post(serviceRoot + 'ImportHandler', {
                 handler: handler,
                 clientId: clientId,
-                force: options.force
+                force: options.force,
+                set: options.set
             });
         }
 
         function importPost(actions, options, clientId) {
             return $http.post(serviceRoot + 'ImportPost', {
                 actions: actions,
-                clientId: clientId
+                clientId: clientId,
+                set: options.set
             });
         }
 
         function exportHandler(handler, options, clientId) {
             return $http.post(serviceRoot + 'ExportHandler', {
                 handler: handler,
-                clientId: clientId
+                clientId: clientId,
+                set: options.set
             });
         }
 

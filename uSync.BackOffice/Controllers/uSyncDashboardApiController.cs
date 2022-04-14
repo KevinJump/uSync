@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 using Newtonsoft.Json;
@@ -42,10 +43,13 @@ namespace uSync.BackOffice.Controllers
 
         private readonly ITypeFinder typeFinder;
 
+        private readonly IConfiguration _configuration;
+
         /// <summary>
         /// Create a new uSyncDashboardApi Controller (via DI)
         /// </summary>
         public uSyncDashboardApiController(
+            IConfiguration configuration,
             AppCaches appCaches,
             IWebHostEnvironment hostEnvironment,
             ILocalizedTextService textService,
@@ -69,6 +73,8 @@ namespace uSync.BackOffice.Controllers
 
             this.uSyncConfig = uSyncConfig;
 
+            _configuration = configuration;
+
         }
 
         /// <summary>
@@ -85,6 +91,32 @@ namespace uSync.BackOffice.Controllers
         public uSyncSettings GetSettings()
             => this.uSyncConfig.Settings;
 
+
+        [HttpGet]
+        public string GetDefaultSet()
+            => this.uSyncConfig.Settings.DefaultSet;
+
+        [HttpGet]
+        public IDictionary<string, uSyncHandlerSetSettings> GetSets()
+        {
+            var section = _configuration.GetSection(uSync.Configuration.uSyncSetsConfig);
+            var sets = new Dictionary<string, uSyncHandlerSetSettings>();
+
+            foreach(var item in section.GetChildren())
+            {
+                sets.Add(item.Key, uSyncConfig.GetSetSettings(item.Key));
+            }
+
+            return sets; 
+        }
+
+        /// <summary>
+        ///  gets the sets that can be picked in the dashboard UI. 
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<string> GetSelectableSets()
+            => GetSets().Where(x => x.Value.IsSelectable || x.Key.InvariantEquals(uSync.Sets.DefaultSet))
+                .Select(x => x.Key);
 
         /// <summary>
         ///  Return the Handler settings
@@ -107,9 +139,11 @@ namespace uSync.BackOffice.Controllers
         ///  return handler groups for all enabled handlers
         /// </summary>
         [HttpGet]
-        public IDictionary<string, string> GetHandlerGroups()
+        public IDictionary<string, string> GetHandlerGroups(string set)
         {
-            var options = new SyncHandlerOptions(uSyncConfig.Settings.DefaultSet)
+            var handlerSet = !string.IsNullOrWhiteSpace(set) ? set : uSyncConfig.Settings.DefaultSet;
+
+            var options = new SyncHandlerOptions(handlerSet)
             {
                 Group = uSyncConfig.Settings.UIEnabledGroups
             };
@@ -140,11 +174,13 @@ namespace uSync.BackOffice.Controllers
         ///  get a list of enabled handlers for the UI
         /// </summary>
         [HttpGet]
-        public IEnumerable<SyncHandlerSummary> GetHandlers()
+        public IEnumerable<SyncHandlerSummary> GetHandlers(string set)
         {
-            var options = new SyncHandlerOptions
+            var handlerSet = !string.IsNullOrWhiteSpace(set) ? set : uSyncConfig.Settings.DefaultSet;
+
+            var options = new SyncHandlerOptions(handlerSet)
             {
-                Group = uSyncConfig.Settings.UIEnabledGroups
+                Group = uSyncConfig.Settings.UIEnabledGroups,
             };
 
             return handlerFactory.GetValidHandlers(options)

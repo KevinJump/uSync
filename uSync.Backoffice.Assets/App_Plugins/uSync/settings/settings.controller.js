@@ -24,6 +24,7 @@
 
         function init() {
             getSettings();
+            getSets();
         }
 
         ///////////
@@ -46,6 +47,13 @@
 
         }
 
+        function getSets() {
+            uSync8DashboardService.getSets()
+                .then(function (result) {
+                    vm.sets = result.data;
+                    // console.log(result.data);
+                })
+        }
 
         function saveSettings() {
             vm.working = false;

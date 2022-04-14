@@ -10,6 +10,21 @@
     "Sets": {
       "Default": {
         "DisabledHandlers": [ "" ]
+      },
+      "Custom": {
+        "IsSelectable": true,
+        "DisabledHandlers": [
+          "MediaHandler",
+          "ContentHandler",
+          "DictionaryHandler",
+          "ContentTemplateHandler",
+          "DomainHandler",
+          "RelationTypeHandler"
+        ]
+      },
+      "Fred": {
+        "IsSelectable": true,
+        "DisabledHandlers": [ "" ]
       }
     },
     "AutoTemplates": {
