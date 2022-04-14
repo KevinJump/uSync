@@ -26,18 +26,47 @@ using uSync.Core.Tracking;
 
 namespace uSync.BackOffice.SyncHandlers
 {
+    /// <summary>
+    /// Root base class for all handlers 
+    /// </summary>
+    /// <remarks>
+    /// If the Handler manages something that Impliments IEntity use SyncBaseHandler
+    /// </remarks>
     public abstract class SyncHandlerRoot<TObject, TContainer>
     {
+        /// <summary>
+        /// Reference to the Logger
+        /// </summary>
         protected readonly ILogger<SyncHandlerRoot<TObject, TContainer>> logger;
 
+        /// <summary>
+        /// Reference to the uSyncFileService
+        /// </summary>
         protected readonly SyncFileService syncFileService;
+
+        /// <summary>
+        /// Reference to the Event service used to handle locking
+        /// </summary>
         protected readonly uSyncEventService _mutexService;
 
+        /// <summary>
+        /// List of dependency checkers for this Handler 
+        /// </summary>
         protected readonly IList<ISyncDependencyChecker<TObject>> dependencyCheckers;
+
+        /// <summary>
+        /// List of change trackers for this handler 
+        /// </summary>
         protected readonly IList<ISyncTracker<TObject>> trackers;
 
+        /// <summary>
+        /// The serializer to use for importing/exporting items
+        /// </summary>
         protected ISyncSerializer<TObject> serializer;
 
+        /// <summary>
+        /// Runtime cache for caching lookups
+        /// </summary>
         protected readonly IAppPolicyCache runtimeCache;
 
         /// <summary>
@@ -104,18 +133,40 @@ namespace uSync.BackOffice.SyncHandlers
         ///  Name of the type (object)
         /// </summary>
         public string TypeName { get; protected set; }  // we calculate these now based on the entityType ? 
+
+        /// <summary>
+        ///  UmbracoObjectType of items handled by this handler
+        /// </summary>
         protected UmbracoObjectTypes itemObjectType { get; set; } = UmbracoObjectTypes.Unknown;
 
+        /// <summary>
+        /// UmbracoObjectType of containers manged by this handler
+        /// </summary>
         protected UmbracoObjectTypes itemContainerType = UmbracoObjectTypes.Unknown;
 
+        /// <summary>
+        ///  The type of the handler 
+        /// </summary>
         protected string handlerType;
 
+        /// <summary>
+        ///  SyncItem factory reference
+        /// </summary>
         protected readonly ISyncItemFactory itemFactory;
 
+        /// <summary>
+        /// Reference to the uSyncConfigService
+        /// </summary>
         protected readonly uSyncConfigService uSyncConfig;
 
+        /// <summary>
+        /// Umbraco's shortStringHelper
+        /// </summary>
         protected readonly IShortStringHelper shortStringHelper;
 
+        /// <summary>
+        ///  Constructor, base for all handlers
+        /// </summary>
         public SyncHandlerRoot(
                 ILogger<SyncHandlerRoot<TObject, TContainer>> logger,
                 AppCaches appCaches,
@@ -318,12 +369,18 @@ namespace uSync.BackOffice.SyncHandlers
             }
         }
 
+        /// <summary>
+        /// Import a single item based on already loaded XML
+        /// </summary>
         public virtual IEnumerable<uSyncAction> Import(XElement node, string filename, HandlerSettings config, SerializerFlags flags)
         {
             if (config.FailOnMissingParent) flags |= SerializerFlags.FailMissingParent;
             return ImportElement(node, filename, config, new uSyncImportOptions { Flags = flags });
         }
 
+        /// <summary>
+        ///  Import a single item from a usync xml file
+        /// </summary>
         virtual public IEnumerable<uSyncAction> Import(string file, HandlerSettings config, bool force)
         {
             var flags = SerializerFlags.OnePass;
@@ -450,7 +507,9 @@ namespace uSync.BackOffice.SyncHandlers
             }
         }
 
-
+        /// <summary>
+        /// Perform a second pass import on an item
+        /// </summary>
         virtual public IEnumerable<uSyncAction> ImportSecondPass(uSyncAction action, HandlerSettings settings, uSyncImportOptions options)
         {
             if (!IsTwoPass) return Enumerable.Empty<uSyncAction>();
@@ -509,8 +568,6 @@ namespace uSync.BackOffice.SyncHandlers
         ///  given a folder we calculate what items we can remove, becuase they are 
         ///  not in one the the files in the folder.
         /// </summary>
-        /// <param name="cleanFile"></param>
-        /// <returns></returns>
         protected virtual IEnumerable<uSyncAction> CleanFolder(string cleanFile, bool reportOnly, bool flat)
         {
             var folder = Path.GetDirectoryName(cleanFile);
@@ -608,6 +665,13 @@ namespace uSync.BackOffice.SyncHandlers
         /// <returns>list of delete actions</returns>
         protected abstract IEnumerable<uSyncAction> DeleteMissingItems(TObject parent, IEnumerable<Guid> keysToKeep, bool reportOnly);
 
+        /// <summary>
+        /// Remove an items that are not listed in the guids to keep.
+        /// </summary>
+        /// <param name="parentId">parent item that all keys will be under</param>
+        /// <param name="keysToKeep">list of guids of items we don't want to delete</param>
+        /// <param name="reportOnly">will just report what would happen (doesn't do the delete)</param>
+        /// <returns>list of delete actions</returns>
         protected virtual IEnumerable<uSyncAction> DeleteMissingItems(int parentId, IEnumerable<Guid> keysToKeep, bool reportOnly)
             => Enumerable.Empty<uSyncAction>();
 
@@ -662,18 +726,24 @@ namespace uSync.BackOffice.SyncHandlers
         #endregion
 
         #region Exporting
+
+        /// <summary>
+        /// Export all items to a give folder on the disk
+        /// </summary>
         virtual public IEnumerable<uSyncAction> ExportAll(string folder, HandlerSettings config, SyncUpdateCallback callback)
         {
             // we dont clean the folder out on an export all. 
             // because the actions (renames/deletes) live in the folder
             //
             // there will have to be a different clean option
-            ///
             // syncFileService.CleanFolder(folder);
 
             return ExportAll(default, folder, config, callback);
         }
 
+        /// <summary>
+        ///  export all items underneath a given container 
+        /// </summary>
         virtual public IEnumerable<uSyncAction> ExportAll(TContainer parent, string folder, HandlerSettings config, SyncUpdateCallback callback)
         {
             var actions = new List<uSyncAction>();
@@ -710,19 +780,37 @@ namespace uSync.BackOffice.SyncHandlers
             return actions;
         }
 
+        /// <summary>
+        /// Fetch all child items beneath a given container 
+        /// </summary>
         abstract protected IEnumerable<TContainer> GetChildItems(TContainer parent);
+
+        /// <summary>
+        /// Fetch all child items beneath a given folder
+        /// </summary>
+        /// <param name="parent"></param>
+        /// <returns></returns>
         abstract protected IEnumerable<TContainer> GetFolders(TContainer parent);
 
+        /// <summary>
+        /// Does this container have any children 
+        /// </summary>
         public bool HasChildren(TContainer item)
             => GetFolders(item).Any() || GetChildItems(item).Any();
 
 
+        /// <summary>
+        /// Export a single item based on it's ID
+        /// </summary>
         public IEnumerable<uSyncAction> Export(int id, string folder, HandlerSettings settings)
         {
             var item = this.GetFromService(id);
             return this.Export(item, folder, settings);
         }
 
+        /// <summary>
+        /// Export an single item from a given UDI value
+        /// </summary>
         public IEnumerable<uSyncAction> Export(Udi udi, string folder, HandlerSettings settings)
         {
             var item = FindByUdi(udi);
@@ -734,7 +822,9 @@ namespace uSync.BackOffice.SyncHandlers
                 .AsEnumerableOfOne();
         }
 
-
+        /// <summary>
+        /// Export a given item to disk
+        /// </summary>
         virtual public IEnumerable<uSyncAction> Export(TObject item, string folder, HandlerSettings config)
         {
             if (item == null)
@@ -775,6 +865,9 @@ namespace uSync.BackOffice.SyncHandlers
 
         #region Reporting 
 
+        /// <summary>
+        /// Run a report based on a given folder
+        /// </summary>
         public IEnumerable<uSyncAction> Report(string folder, HandlerSettings config, SyncUpdateCallback callback)
         {
             var actions = new List<uSyncAction>();
@@ -792,7 +885,7 @@ namespace uSync.BackOffice.SyncHandlers
             callback?.Invoke("Done", 3, 3);
             return actions;
         }
-
+        
         private List<uSyncAction> ValidateReport(string folder, List<uSyncAction> actions)
         {
             // Alters the existing list, by chaning the type as needed.
@@ -927,6 +1020,9 @@ namespace uSync.BackOffice.SyncHandlers
             return actions.ToList();
         }
 
+        /// <summary>
+        ///  Run a report on a given folder
+        /// </summary>
         public virtual IEnumerable<uSyncAction> ReportFolder(string folder, HandlerSettings config, SyncUpdateCallback callback)
         {
             List<uSyncAction> actions = new List<uSyncAction>();
@@ -955,6 +1051,9 @@ namespace uSync.BackOffice.SyncHandlers
             return actions;
         }
 
+        /// <summary>
+        /// Report on any changes for a single xml node.
+        /// </summary>
         protected virtual IEnumerable<uSyncAction> ReportElement(XElement node, string filename, HandlerSettings config)
             => ReportElement(node, filename, config ?? this.DefaultConfig, new uSyncImportOptions());
 
@@ -1037,6 +1136,9 @@ namespace uSync.BackOffice.SyncHandlers
             return uSyncChange.NoChange(node.GetAlias(), node.GetAlias());
         }
 
+        /// <summary>
+        /// Run a report on a single file.
+        /// </summary>
         protected IEnumerable<uSyncAction> ReportItem(string file, HandlerSettings config)
         {
             try
@@ -1094,6 +1196,9 @@ namespace uSync.BackOffice.SyncHandlers
             return false;
         }
 
+        /// <summary>
+        /// Handle an Umbraco Delete notification
+        /// </summary>
         public virtual void Handle(DeletedNotification<TObject> notification)
         {
             if (!ShouldProcessEvent()) return;
@@ -1104,6 +1209,10 @@ namespace uSync.BackOffice.SyncHandlers
             }
         }
 
+        /// <summary>
+        /// Handle the Umbraco Saved notification for items. 
+        /// </summary>
+        /// <param name="notification"></param>
         public virtual void Handle(SavedNotification<TObject> notification)
         {
             if (!ShouldProcessEvent()) return;
@@ -1119,12 +1228,23 @@ namespace uSync.BackOffice.SyncHandlers
             }
         }
 
+        /// <summary>
+        /// Handle the Umbraco moved notification for items.
+        /// </summary>
+        /// <param name="notification"></param>
         public virtual void Handle(MovedNotification<TObject> notification)
         {
             if (!ShouldProcessEvent()) return;
             HandleMove(notification.MoveInfoCollection);
         }
 
+        /// <summary>
+        /// Process a collection of move events 
+        /// </summary>
+        /// <remarks>
+        /// This has been seperated out, because we also call this code when a handler supports
+        /// recycle bin events 
+        /// </remarks>
         protected void HandleMove(IEnumerable<MoveEventInfo<TObject>> moveInfoCollection)
         {
             foreach (var item in moveInfoCollection)
@@ -1144,7 +1264,12 @@ namespace uSync.BackOffice.SyncHandlers
             }
         }
 
-
+        /// <summary>
+        /// Export any deletes items to disk 
+        /// </summary>
+        /// <remarks>
+        /// Deleted items get 'emtpy' files on disk so we know they where deleted
+        /// </remarks>
         protected virtual void ExportDeletedItem(TObject item, string folder, HandlerSettings config)
         {
             if (item == null) return;
@@ -1176,7 +1301,6 @@ namespace uSync.BackOffice.SyncHandlers
         ///   e.g if someone renames a thing (and we are using the name in the file) 
         ///   this will clean anything else in the folder that has that key / alias
         ///  </remarks>
-        /// </summary>
         protected virtual void CleanUp(TObject item, string newFile, string folder)
         {
             var physicalFile = syncFileService.GetAbsPath(newFile);
@@ -1232,28 +1356,78 @@ namespace uSync.BackOffice.SyncHandlers
         // content serializer) so we override them.
 
 
+        /// <summary>
+        /// Fetch an item via the Serializer
+        /// </summary>
         protected virtual TObject GetFromService(int id) => serializer.FindItem(id);
+
+        /// <summary>
+        /// Fetch an item via the Serializer
+        /// </summary>
         protected virtual TObject GetFromService(Guid key) => serializer.FindItem(key);
+
+        /// <summary>
+        /// Fetch an item via the Serializer
+        /// </summary>
         protected virtual TObject GetFromService(string alias) => serializer.FindItem(alias);
+
+        /// <summary>
+        /// Delete an item via the Serializer
+        /// </summary>
         protected virtual void DeleteViaService(TObject item) => serializer.DeleteItem(item);
+
+        /// <summary>
+        /// Get the alias of an item from the Serializer
+        /// </summary>
         protected string GetItemAlias(TObject item) => serializer.ItemAlias(item);
+
+        /// <summary>
+        /// Get the Key of an item from the Serializer
+        /// </summary>
         protected Guid GetItemKey(TObject item) => serializer.ItemKey(item);
 
-        // container ones, only matter when theire is a container?
-        // should we bump these up to container 
+        /// <summary>
+        /// Get a container item from the Umbraco service.
+        /// </summary>
         abstract protected TObject GetFromService(TContainer item);
+
+        /// <summary>
+        /// Get a container item from the Umbraco service.
+        /// </summary>
         virtual protected TContainer GetContainer(Guid key) => default;
+
+        /// <summary>
+        /// Get a container item from the Umbraco service.
+        /// </summary>
         virtual protected TContainer GetContainer(int id) => default;
 
+        /// <summary>
+        /// Get the file path to use for an item
+        /// </summary>
+        /// <param name="item">Item to derive path for</param>
+        /// <param name="useGuid">should we use the key value in the path</param>
+        /// <param name="isFlat">should the file be flat and ignore any sub folders?</param>
+        /// <returns>relative filepath to use for an item</returns>
         virtual protected string GetItemPath(TObject item, bool useGuid, bool isFlat)
             => useGuid ? GetItemKey(item).ToString() : GetItemFileName(item);
 
+        /// <summary>
+        /// Get the file name to use for an item
+        /// </summary>
         virtual protected string GetItemFileName(TObject item)
             => GetItemAlias(item).ToSafeFileName(shortStringHelper);
 
+        /// <summary>
+        /// Get the name of a supplied item
+        /// </summary>
         abstract protected string GetItemName(TObject item);
 
-
+        /// <summary>
+        /// Calculate the relative Physical path value for any item 
+        /// </summary>
+        /// <remarks>
+        /// this is where a item is saved on disk in relation to the uSync folder 
+        /// </remarks>
         virtual protected string GetPath(string folder, TObject item, bool GuidNames, bool isFlat)
         {
             if (isFlat && GuidNames) return Path.Combine(folder, $"{GetItemKey(item)}.{this.uSyncConfig.Settings.DefaultExtension}");
@@ -1311,6 +1485,9 @@ namespace uSync.BackOffice.SyncHandlers
         /// </remarks>
         protected virtual string GetItemMatchString(TObject item) => GetItemAlias(item);
 
+        /// <summary>
+        ///  Calculate the matching item string frol the loaded uSync xml element 
+        /// </summary>
         protected virtual string GetXmlMatchString(XElement node) => node.GetAlias();
 
         /// <summary>
@@ -1322,8 +1499,14 @@ namespace uSync.BackOffice.SyncHandlers
         virtual public uSyncAction Rename(TObject item) => new uSyncAction();
 
 
+        /// <summary>
+        ///  Group a handler belongs too (default will be settings)
+        /// </summary>
         public virtual string Group { get; protected set; } = uSyncConstants.Groups.Settings;
 
+        /// <summary>
+        /// Serialize an item to XML based on a given UDI value
+        /// </summary>
         public SyncAttempt<XElement> GetElement(Udi udi)
         {
             var element = FindByUdi(udi);
@@ -1346,6 +1529,14 @@ namespace uSync.BackOffice.SyncHandlers
 
             return default;
         }
+
+        /// <summary>
+        /// Calculate any dependencies for any given item based on loaded dependency checkers 
+        /// </summary>
+        /// <remarks>
+        /// uSync contains no dependency checkers by default - uSync.Complete will load checkers
+        /// when installed. 
+        /// </remarks>
         public IEnumerable<uSyncDependency> GetDependencies(Guid key, DependencyFlags flags)
         {
             if (key == Guid.Empty)
@@ -1369,6 +1560,13 @@ namespace uSync.BackOffice.SyncHandlers
             }
         }
 
+        /// <summary>
+        /// Calculate any dependencies for any given item based on loaded dependency checkers 
+        /// </summary>
+        /// <remarks>
+        /// uSync contains no dependency checkers by default - uSync.Complete will load checkers
+        /// when installed. 
+        /// </remarks>
         public IEnumerable<uSyncDependency> GetDependencies(int id, DependencyFlags flags)
         {
             // get them from the root. 
@@ -1392,6 +1590,13 @@ namespace uSync.BackOffice.SyncHandlers
             => dependencyCheckers != null && dependencyCheckers.Count > 0;
 
 
+        /// <summary>
+        /// Calculate any dependencies for any given item based on loaded dependency checkers 
+        /// </summary>
+        /// <remarks>
+        /// uSync contains no dependency checkers by default - uSync.Complete will load checkers
+        /// when installed. 
+        /// </remarks>
         protected IEnumerable<uSyncDependency> GetDependencies(TObject item, DependencyFlags flags)
         {
             if (item == null || !HasDependencyCheckers()) return Enumerable.Empty<uSyncDependency>();
@@ -1404,6 +1609,13 @@ namespace uSync.BackOffice.SyncHandlers
             return dependencies;
         }
 
+        /// <summary>
+        /// Calculate any dependencies for any given item based on loaded dependency checkers 
+        /// </summary>
+        /// <remarks>
+        /// uSync contains no dependency checkers by default - uSync.Complete will load checkers
+        /// when installed. 
+        /// </remarks>
         private IEnumerable<uSyncDependency> GetContainerDependencies(TContainer parent, DependencyFlags flags)
         {
             if (!HasDependencyCheckers()) return Enumerable.Empty<uSyncDependency>();
@@ -1483,6 +1695,9 @@ namespace uSync.BackOffice.SyncHandlers
             public XElement CurrentNode { get; set; }
         }
 
+        /// <summary>
+        /// Find an items UDI value based on the values in the uSync XML node
+        /// </summary>
         public Udi FindFromNode(XElement node)
         {
             var item = serializer.FindItem(node);
@@ -1492,6 +1707,9 @@ namespace uSync.BackOffice.SyncHandlers
             return null;
         }
 
+        /// <summary>
+        /// Calculate the current status of an item compared to the XML in a potental import
+        /// </summary>
         public ChangeType GetItemStatus(XElement node)
         {
             var serializerOptions = new SyncSerializerOptions(SerializerFlags.None, this.DefaultConfig.Settings);
@@ -1499,8 +1717,6 @@ namespace uSync.BackOffice.SyncHandlers
         }
 
         #endregion
-
-
 
         private string GetNameFromFileOrNode(string filename, XElement node)
             => !string.IsNullOrWhiteSpace(filename) ? filename : node.GetAlias();

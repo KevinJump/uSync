@@ -19,6 +19,9 @@ using static Umbraco.Cms.Core.Constants;
 
 namespace uSync.BackOffice.SyncHandlers.Handlers
 {
+    /// <summary>
+    ///  Handler to mange Media items in uSync
+    /// </summary>
     [SyncHandler(uSyncConstants.Handlers.MediaHandler, "Media", "Media", uSyncConstants.Priorites.Media,
         Icon = "icon-picture usync-addon-icon", IsTwoPass = true, EntityType = UdiEntityType.Media)]
     public class MediaHandler : ContentHandlerBase<IMedia, IMediaService>, ISyncHandler, ISyncCleanEntryHandler,
@@ -27,10 +30,12 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         INotificationHandler<MovedNotification<IMedia>>,
         INotificationHandler<MovedToRecycleBinNotification<IMedia>>
     {
+        /// <inheritdoc/>
         public override string Group => uSyncConstants.Groups.Content;
 
         private readonly IMediaService mediaService;
 
+        /// <inheritdoc/>
         public MediaHandler(
             ILogger<MediaHandler> logger,
             IEntityService entityService,
@@ -46,6 +51,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             this.mediaService = mediaService;
         }
 
+        /// <inheritdoc/>
         protected override IEnumerable<IEntity> GetChildItems(IEntity parent)
         {
             if (parent != null)

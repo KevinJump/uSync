@@ -15,14 +15,23 @@ using static Umbraco.Cms.Core.Constants;
 
 namespace uSync.BackOffice.SyncHandlers.Handlers
 {
+    /// <summary>
+    ///  Handler to manage content templates in uSync
+    /// </summary>
     [SyncHandler(uSyncConstants.Handlers.ContentTemplateHandler, "Blueprints", "Blueprints", uSyncConstants.Priorites.ContentTemplate
         , Icon = "icon-document-dashed-line usync-addon-icon", IsTwoPass = true, EntityType = UdiEntityType.DocumentBlueprint)]
     public class ContentTemplateHandler : ContentHandlerBase<IContent, IContentService>, ISyncHandler
     {
+        /// <summary>
+        /// ContentTypeHandler belongs to the Content group by default
+        /// </summary>
         public override string Group => uSyncConstants.Groups.Content;
 
         private readonly IContentService contentService;
 
+        /// <summary>
+        ///  Handler constrcutor Loaded via DI
+        /// </summary>
         public ContentTemplateHandler(
             ILogger<ContentTemplateHandler> logger,
             IEntityService entityService,
@@ -42,15 +51,27 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             this.serializer = syncItemFactory.GetSerializer<IContent>("contentTemplateSerializer");
         }
 
+        /// <summary>
+        ///  Delete a content template via the ContentService
+        /// </summary>
         protected override void DeleteViaService(IContent item)
             => contentService.DeleteBlueprint(item);
 
+        /// <summary>
+        ///  Fetch a content template via the ContentService
+        /// </summary>
         protected override IContent GetFromService(int id)
             => contentService.GetBlueprintById(id);
 
+        /// <summary>
+        ///  Fetch a content template via the ContentService
+        /// </summary>
         protected override IContent GetFromService(Guid key)
             => contentService.GetBlueprintById(key);
 
+        /// <summary>
+        ///  Fetch a content template via the ContentService
+        /// </summary>
         protected override IContent GetFromService(string alias)
             => null;
     }

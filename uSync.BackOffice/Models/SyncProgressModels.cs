@@ -40,6 +40,9 @@ namespace uSync.BackOffice
             this.Total = totalSteps;
         }
 
+        /// <summary>
+        ///  Create a new SyncProcessSummary object 
+        /// </summary>
         public SyncProgressSummary(IEnumerable<SyncHandlerSummary> summaries,
             string message, int totalSteps)
             : this(message, totalSteps)
@@ -47,6 +50,9 @@ namespace uSync.BackOffice
             this.Handlers = summaries.ToList();
         }
 
+        /// <summary>
+        ///  Create a new SyncProcessSummary object 
+        /// </summary>
         public SyncProgressSummary(
             IEnumerable<ISyncHandler> handlers,
             string message,
@@ -110,11 +116,18 @@ namespace uSync.BackOffice
             UpdateMessage(message);
         }
 
+        /// <summary>
+        ///  update the progress message in the object
+        /// </summary>
+        /// <param name="message"></param>
         public void UpdateMessage(string message)
         {
             this.Message = message;
         }
 
+        /// <summary>
+        ///  increment the item count in the progress message 
+        /// </summary>
         public void Increment()
         {
             this.Count++;
@@ -122,6 +135,9 @@ namespace uSync.BackOffice
 
     }
 
+    /// <summary>
+    ///  Summary object used to display a summary of progress via the UI
+    /// </summary>
     [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public class SyncHandlerSummary
     {
@@ -156,9 +172,24 @@ namespace uSync.BackOffice
     /// </summary>
     public enum HandlerStatus
     {
+        /// <summary>
+        ///  Pending - handler has yet to start work 
+        /// </summary>
         Pending,
+
+        /// <summary>
+        ///  Processing - handler is doing stuff now 
+        /// </summary>
         Processing,
+
+        /// <summary>
+        ///  Complete - handler has completed its work 
+        /// </summary>
         Complete,
+
+        /// <summary>
+        ///  error - the handler encounted one or more errors
+        /// </summary>
         Error
     }
 }

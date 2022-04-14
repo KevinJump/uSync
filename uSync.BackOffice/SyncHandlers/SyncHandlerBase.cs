@@ -22,6 +22,9 @@ using static System.Net.WebRequestMethods;
 
 namespace uSync.BackOffice.SyncHandlers
 {
+    /// <summary>
+    ///  Base class for any Handlers that manage IEntity type objects
+    /// </summary>
     public abstract class SyncHandlerBase<TObject, TService>
         : SyncHandlerRoot<TObject, IEntity>
 
@@ -29,9 +32,13 @@ namespace uSync.BackOffice.SyncHandlers
         where TService : IService
     {
 
+        /// <summary>
+        /// reference to Umbraco Entity service
+        /// </summary>
         protected readonly IEntityService entityService;
 
 
+        /// <inheritdoc/>
         public SyncHandlerBase(
             ILogger<SyncHandlerBase<TObject, TService>> logger,
             IEntityService entityService,
@@ -50,8 +57,6 @@ namespace uSync.BackOffice.SyncHandlers
         ///  given a folder we calculate what items we can remove, becuase they are 
         ///  not in one the the files in the folder.
         /// </summary>
-        /// <param name="cleanFile"></param>
-        /// <returns></returns>
         protected override IEnumerable<uSyncAction> CleanFolder(string cleanFile, bool reportOnly, bool flat)
         {
             var folder = Path.GetDirectoryName(cleanFile);
@@ -101,9 +106,11 @@ namespace uSync.BackOffice.SyncHandlers
             return parent?.Id ?? 0;
         }
 
+        /// <inheritdoc/>
         protected override IEnumerable<uSyncAction> DeleteMissingItems(TObject parent, IEnumerable<Guid> keys, bool reportOnly)
             => DeleteMissingItems(parent?.Id ?? 0, keys, reportOnly);
 
+        /// <inheritdoc/>
         protected override IEnumerable<uSyncAction> DeleteMissingItems(int parentId, IEnumerable<Guid> keys, bool reportOnly)
         {
             var items = GetChildItems(parentId).ToList();
@@ -133,14 +140,16 @@ namespace uSync.BackOffice.SyncHandlers
             return actions;
         }
 
-
+        /// <summary>
+        /// Export all items under a suppled parent id
+        /// </summary>
         virtual public IEnumerable<uSyncAction> ExportAll(int parentId, string folder, HandlerSettings config, SyncUpdateCallback callback)
         {
             var parent = GetFromService(parentId);
             return ExportAll(parent, folder, config, callback);
         }
 
-
+        /// <inheritdoc/>
         protected override IEnumerable<IEntity> GetChildItems(IEntity parent)
         {
             if (parent == null) return GetChildItems(-1);
@@ -149,6 +158,10 @@ namespace uSync.BackOffice.SyncHandlers
 
         // almost everything does this - but languages can't so we need to 
         // let the language Handler override this. 
+
+        /// <summary>
+        ///  Get all child items beneath a given item
+        /// </summary>
         virtual protected IEnumerable<IEntity> GetChildItems(int parent)
         {
             if (this.itemObjectType != UmbracoObjectTypes.Unknown)
@@ -168,6 +181,9 @@ namespace uSync.BackOffice.SyncHandlers
             return Enumerable.Empty<IEntity>();
         }
 
+        /// <summary>
+        /// Get all 'folders' beneath a given item (usally these are Container items)
+        /// </summary>
         virtual protected IEnumerable<IEntity> GetFolders(int parent)
         {
             if (this.itemContainerType != UmbracoObjectTypes.Unknown)
@@ -176,12 +192,14 @@ namespace uSync.BackOffice.SyncHandlers
             return Enumerable.Empty<IEntity>();
         }
 
+        /// <inheritdoc/>
         protected override IEnumerable<IEntity> GetFolders(IEntity parent)
         {
             if (parent == null) return GetFolders(-1);
             return GetFolders(parent.Id);
         }
 
+        /// <inheritdoc/>
         protected override TObject GetFromService(IEntity entity)
             => GetFromService(entity.Id);
 

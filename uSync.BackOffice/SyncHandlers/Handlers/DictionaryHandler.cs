@@ -23,16 +23,23 @@ using static Umbraco.Cms.Core.Constants;
 
 namespace uSync.BackOffice.SyncHandlers.Handlers
 {
+    /// <summary>
+    ///  Handler to manage Dictionary items via uSync 
+    /// </summary>
     [SyncHandler(uSyncConstants.Handlers.DictionaryHandler, "Dictionary", "Dictionary", uSyncConstants.Priorites.DictionaryItems
         , Icon = "icon-book-alt usync-addon-icon", EntityType = UdiEntityType.DictionaryItem)]
     public class DictionaryHandler : SyncHandlerLevelBase<IDictionaryItem, ILocalizationService>, ISyncHandler,
         INotificationHandler<SavedNotification<IDictionaryItem>>,
         INotificationHandler<DeletedNotification<IDictionaryItem>>
     {
+        /// <summary>
+        ///  Dictionary items belong to the content group by default
+        /// </summary>
         public override string Group => uSyncConstants.Groups.Content;
 
         private readonly ILocalizationService localizationService;
 
+        /// <inheritdoc/>
         public DictionaryHandler(
             ILogger<DictionaryHandler> logger,
             IEntityService entityService,
@@ -48,6 +55,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             this.localizationService = localizationService;
         }
 
+        /// <inheritdoc/>
         public override IEnumerable<uSyncAction> Import(string filePath, HandlerSettings config, SerializerFlags flags)
         {
             if (IsOneWay(config))
@@ -82,6 +90,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             }
         }
 
+        /// <inheritdoc/>
         public override IEnumerable<uSyncAction> ExportAll(string folder, HandlerSettings config, SyncUpdateCallback callback)
         {
             syncFileService.CleanFolder(folder);
@@ -89,8 +98,12 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         }
 
         /// <summary>
-        ///  don't think you can get dictionary items via the entity service :( 
+        ///  Export all Dictionary items based on a parent GUID value
         /// </summary>
+        /// <remarks>
+        ///  You can't fetch dictionary items via the entity service so they require their own 
+        ///  export method. 
+        /// </remarks>
         public IEnumerable<uSyncAction> ExportAll(Guid parent, string folder, HandlerSettings config, SyncUpdateCallback callback)
         {
             var actions = new List<uSyncAction>();
@@ -119,9 +132,11 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             return actions;
         }
 
+        /// <inheritdoc/>
         protected override IEnumerable<IEntity> GetFolders(int parent)
             => GetChildItems(parent);
 
+        /// <inheritdoc/>
         protected override IEnumerable<IEntity> GetChildItems(int parent)
         {
             if (parent == -1)
@@ -140,12 +155,15 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             return Enumerable.Empty<IEntity>();
         }
 
+        /// <inheritdoc/>
         protected override string GetItemName(IDictionaryItem item)
             => item.ItemKey;
 
+        /// <inheritdoc/>
         protected override string GetItemPath(IDictionaryItem item, bool useGuid, bool isFlat)
             => item.ItemKey.ToSafeFileName(shortStringHelper);
 
+        /// <inheritdoc/>
         protected override IEnumerable<uSyncAction> ReportElement(XElement node, string filename, HandlerSettings config)
         {
             if (config != null && IsOneWay(config))

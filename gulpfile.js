@@ -73,6 +73,11 @@ function copyRequired(path, baseFolder, destFolder) {
         .pipe(dest(destFolder));
 }
 
+function copySpecific(file, baseFolder, destfolder) {
+    return src(file, { base: baseFolder })
+        .pipe(dest(destfolder));
+}
+
 function time() {
     return '[' + new Date().toISOString().slice(11, -5) + ']';
 }
@@ -122,6 +127,7 @@ exports.minify = function (cb) {
         minifyCss(cssFiles, version);
         updateManifest(sourceFolder + pluginName + "/package.manifest", version);
         copyRequired(source, sourceFolder, minDest);
+        copySpecific(sourceFolder + '**/nonodes.css', sourceFolder, minDest);
     });
 
     cb();

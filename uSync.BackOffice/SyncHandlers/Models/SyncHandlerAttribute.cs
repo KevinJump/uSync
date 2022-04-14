@@ -7,6 +7,9 @@ namespace uSync.BackOffice.SyncHandlers
     /// </summary>
     public class SyncHandlerAttribute : Attribute
     {
+        /// <summary>
+        /// Construct a new SyncHandlerAttribute
+        /// </summary>
         public SyncHandlerAttribute(string alias, string name, string folder, int priority)
         {
             Alias = alias;

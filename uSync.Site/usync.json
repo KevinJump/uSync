@@ -4,7 +4,8 @@
     "ForceFips": true,
     "Settings": {
       "ExportOnSave": "All",
-      "UIEnabledGroups":  "Settings"
+      "UIEnabledGroups": "Settings",
+      "ImportOnFirstBoot": true
     },
     "Sets": {
       "Default": {

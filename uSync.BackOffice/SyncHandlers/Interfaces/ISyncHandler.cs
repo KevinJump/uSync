@@ -14,8 +14,14 @@ using uSync.Core.Models;
 
 namespace uSync.BackOffice.SyncHandlers
 {
+    /// <summary>
+    ///  callback delegate for SignalR messaging 
+    /// </summary>
     public delegate void SyncUpdateCallback(string message, int count, int total);
 
+    /// <summary>
+    ///  Handler interface for anything that wants to process elements via uSync
+    /// </summary>
     [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public interface ISyncHandler
     {
@@ -58,11 +64,30 @@ namespace uSync.BackOffice.SyncHandlers
         ///  default config for the handler - when being used in events.
         /// </summary>
         HandlerSettings DefaultConfig { get; set; }
+
+        /// <summary>
+        /// Group handler belongs too
+        /// </summary>
         string Group { get; }
+
+        /// <summary>
+        /// Umbraco entity type manged by the handler 
+        /// </summary>
         string EntityType { get; }
+
+        /// <summary>
+        /// The type name of the items hanled (Item.getType().ToString())
+        /// </summary>
         string TypeName { get; }
 
+        /// <summary>
+        /// Export an item based on the int id value in umbraco
+        /// </summary>
         IEnumerable<uSyncAction> Export(int id, string folder, HandlerSettings settings);
+
+        /// <summary>
+        /// Export an item based on the Udi value of the item
+        /// </summary>
         IEnumerable<uSyncAction> Export(Udi udi, string folder, HandlerSettings settings);
 
         /// <summary>
@@ -73,9 +98,24 @@ namespace uSync.BackOffice.SyncHandlers
         /// <param name="callback">Callbacks to keep UI uptodate</param>
         /// <returns>List of actions detailing changes</returns>
         IEnumerable<uSyncAction> ExportAll(string folder, HandlerSettings settings, SyncUpdateCallback callback);
+
+        /// <summary>
+        /// Get any dependencies required to full import this item
+        /// </summary>
         IEnumerable<uSyncDependency> GetDependencies(int id, DependencyFlags flags);
+        /// <summary>
+        /// Get any dependencies required to full import this item
+        /// </summary>
         IEnumerable<uSyncDependency> GetDependencies(Guid key, DependencyFlags flags);
+
+        /// <summary>
+        /// Get an XML representation of an item based on its UDI value 
+        /// </summary>
         SyncAttempt<XElement> GetElement(Udi udi);
+
+        /// <summary>
+        /// Import an item from disk defined by the file name 
+        /// </summary>
         IEnumerable<uSyncAction> Import(string file, HandlerSettings settings, bool force);
 
         /// <summary>
@@ -101,6 +141,10 @@ namespace uSync.BackOffice.SyncHandlers
         /// <param name="callback">Callbacks to keep UI uptodate</param>
         /// <returns>List of actions detailing changes</returns>
         IEnumerable<uSyncAction> Report(string folder, HandlerSettings settings, SyncUpdateCallback callback);
+
+        /// <summary>
+        /// Report a single item based on loaded uSync xml
+        /// </summary>
         IEnumerable<uSyncAction> ReportElement(XElement node, string filename, HandlerSettings settings, uSyncImportOptions options);
 
 
