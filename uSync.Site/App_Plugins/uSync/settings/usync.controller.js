@@ -457,7 +457,7 @@
         }
 
         function importGroup(group) {
-            importItems(false, vm.currentSet, group);
+            importItems(false, group);
         }
 
         //////////////
