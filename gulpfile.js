@@ -62,7 +62,7 @@ function minifyJs(path, version) {
 
 
 function minifyCss(path, version) {
-    return src(path, { base: path })
+    return src([path, '!**/nonodes.css'], { base: path })
         .pipe(cleanCSS({ compatibility: 'ie8'}))
         .pipe(concat('usync.' + version + '.min.css'))
         .pipe(dest(minDest + pluginName));
