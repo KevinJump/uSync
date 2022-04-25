@@ -35,7 +35,7 @@
 		<key alias="everything">Everything</key>
 		<key alias="everything-description">All Settings, Content, and other things</key>
 
-		<key alias="settings-description">DataTypes, Doctypes and all setttings</key>
+		<key alias="settings-description">DataTypes, Doctypes and all settings</key>
 		<key alias="content-description">Content, Media and related items</key>
 		<key alias="members-description">Members and Member groups</key>
 		<key alias="users-description">Users and User groups</key>
