@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -12,6 +13,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 
+using Umbraco.Cms.Core.Semver;
 using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;
@@ -112,8 +114,10 @@ namespace uSync.BackOffice.Controllers
                 }
             }
 
-            addOnInfo.Version = typeof(global::uSync.BackOffice.uSync).Assembly.GetName().Version.ToString(3)
-                + uSyncConstants.ReleaseSuffix;
+
+            addOnInfo.Version = GetuSyncVersion();
+            //addOnInfo.Version = typeof(global::uSync.BackOffice.uSync).Assembly.GetName().Version.ToString(3)
+            //    + uSyncConstants.ReleaseSuffix;
 
             addOnInfo.AddOns = addOnInfo.AddOns.OrderBy(x => x.SortOrder).ToList();
             addOnInfo.AddOnString = string.Join(", ",
@@ -122,6 +126,21 @@ namespace uSync.BackOffice.Controllers
                         .Select(x => $"{x.Name} (v{x.Version})"));
 
             return addOnInfo;
+        }
+
+        private string GetuSyncVersion()
+        {
+            var assembly = typeof(global::uSync.BackOffice.uSync).Assembly;
+            try
+            {
+                var fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.GetAssemblyFile().FullName);
+                var productVersion = SemVersion.Parse(fileVersionInfo.ProductVersion);
+                return productVersion.ToSemanticStringWithoutBuild();
+            }
+            catch
+            {
+                return assembly.GetName().Version.ToString(3);
+            }
         }
 
         /// <summary>
