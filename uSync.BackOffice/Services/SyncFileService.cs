@@ -6,11 +6,10 @@ using System.Text;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-using Umbraco.Cms.Core.Hosting;
-
-using uSync.BackOffice.Configuration;
+using Umbraco.Cms.Core.Extensions;
 
 namespace uSync.BackOffice.Services
 {
@@ -21,7 +20,7 @@ namespace uSync.BackOffice.Services
     public class SyncFileService
     {
         private readonly ILogger<SyncFileService> logger;
-        private readonly IHostingEnvironment hostEnvironment;
+        private readonly IHostEnvironment _hostEnvironment;
 
         /// <summary>
         /// Constructor for File service (via DI)
@@ -29,10 +28,10 @@ namespace uSync.BackOffice.Services
         /// <param name="logger"></param>
         /// <param name="hostEnvironment"></param>
         public SyncFileService(ILogger<SyncFileService> logger,
-                               IHostingEnvironment hostEnvironment)
+                               IHostEnvironment hostEnvironment)
         {
             this.logger = logger;
-            this.hostEnvironment = hostEnvironment;
+            _hostEnvironment = hostEnvironment;
         }
 
         /// <summary>
@@ -41,7 +40,7 @@ namespace uSync.BackOffice.Services
         public string GetAbsPath(string path)
         {
             if (Path.IsPathFullyQualified(path)) return CleanLocalPath(path);
-            return CleanLocalPath(hostEnvironment.MapPathContentRoot(path.TrimStart('/')));
+            return CleanLocalPath(_hostEnvironment.MapPathContentRoot(path.TrimStart('/')));
         }
 
         /// <summary>
