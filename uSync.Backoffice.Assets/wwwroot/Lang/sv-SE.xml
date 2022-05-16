@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<language alias="sv" intName="Swedish" localName="Svenska" lcid="" culture="sv-SE">
+  <creator>
+    <name>Jumoo</name>
+    <link>http://jumoo.uk</link>
+  </creator>
+  <area alias="treeHeaders">
+    <key alias="sync">Synkronisera</key>
+    <key alias="uSync8">uSync</key>
+  </area>
+  <area alias="usync">
+    <key alias="name">uSync 8</key>
+    <key alias="intro">Databaselement till och från disk</key>
+
+    <key alias="newer">Det finns en ny version av uSync tillgänglig</key>
+	<key alias="noHandlers"><![CDATA[Inga hanterare (Handlers) blev inlästa, så du kan inte synka något. Kontrollera filen uSync8.config, den kan vara korrupt eller saknas 😢.]]></key>
+    
+    <key alias="import">Importera</key>
+    <key alias="importforce">Full Import</key>
+    <key alias="report">Rapportera</key>
+    <key alias="export">Export</key>
+    <key alias="exportClean">Ren Export</key>
+    <key alias="apply">Bekräfta</key>
+
+    <key alias="details">Detaljer</key>
+  
+    <key alias="handlers">Objekthanterare (item handlers)</key>
+    <key alias="savesettings">Spara inställningar</key>
+
+    <key alias="import-content">Importera Innehåll/Media</key>
+    <key alias="import-settings">Importera Inställningar</key>
+    <key alias="import-members">Importera Medlemmar</key>
+    <key alias="import-users">Importera Användare</key>
+	
+	<key alias="everything">Allt</key>
+	<key alias="everything-description">Alla inställningar, innehåll och andra objekt</key>
+
+	<key alias="settings-description">Datatyper, dokumenttyper och alla inställningar</key>
+	<key alias="content-description">Innehåll, media och realaterade objekt</key>
+	<key alias="members-description">Medlemmar och medlemsgrupper</key>
+	<key alias="users-description">Användare och användargrupper</key>
+
+    <key alias="report-content">Rapport - Innehåll/Media</key>
+    <key alias="report-settings">Rapport - Inställningar</key>
+    <key alias="report-members">Rapport - Medlemmar</key>
+    <key alias="report-users">Rapport - Användare</key>
+
+    <key alias="tableType">Typ</key>
+    <key alias="tableName">Namn</key>
+    <key alias="tableChange">Ändring</key>
+    <key alias="tableMessage">Meddelande</key>
+
+    <key alias="nochange"><![CDATA[<h4>Inga ändringar</h4>]]></key>
+	<key alias="nochange_quote"><![CDATA[Be the change you wish to see in the world.]]></key>
+
+	<!-- warning messages -->
+	<key alias="oldformat">
+		<![CDATA[Denna synkroniseringsmapp är från en äldre version av uSync. Synken kommer fungera, men du kommer få ett snabbare och enklare resultat om du använder export från senare version. 
+	  <a href="https://github.com/KevinJump/uSync8/blob/v8/8.7-main/Changes/format.md" target="_blank"><i class="icon icon-info"></i>info</a>]]>
+	</key>
+	<key alias="createWarning"><![CDATA[En eller flera hanterare (handlers) är inställda att bara skapas. Ändringar i andra objekt kanske inte kommer synkas]]></key>
+
+	<key alias="forms"><![CDATA[Använder du Umbraco forms? Du kan även synka formulär med dess inställningar med <a href="http://jumoo.co.uk/usync/forms" target="_blank">uSync.FormsEdition</a>]]></key>
+
+  </area>
+  <area alias="dashboardTabs">
+    <key alias="uSync8">uSync</key>
+  </area>
+</language>

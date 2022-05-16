@@ -1,0 +1,104 @@
+<div ng-controller="uSync8Controller as vm">
+
+
+    <div ng-if="vm.sets.length > 1" class="flex justify-end items-center mb2">
+
+        <div>
+            <strong> Current Set : </strong>
+        </div>
+        <select ng-options="s as s for s in vm.sets" ng-model="vm.currentSet"
+                ng-change="vm.changeSet()"
+                class="ml2"></select>
+    </div>
+
+    <div ng-if="vm.versionLoaded && vm.versionInfo.isCurrent != true" class="alert alert-info usync-alert">
+        <localize key="usync_newer"></localize> [v{{vm.versionInfo.versionInfo.core}}]
+        <span ng-if="vm.versionInfo.versionInfo.message">
+            <a href="{{vm.versionInfo.versionInfo.link}}" target="_blank">
+                {{vm.versionInfo.versionInfo.message}}
+            </a>
+        </span>
+    </div>
+
+    <div class="usync-group-actions" ng-if="!vm.loading"
+         ng-class="{'usync-working' : vm.working === true}">
+        <umb-box class="usync-group-box" ng-repeat="group in vm.groups">
+            <umb-box-content>
+
+                <div class="usync-group-box-title">
+                    <i class="icon {{group.icon}}"></i>
+                    <h2>{{group.name}}</h2>
+                </div>
+                <small><localize key="usync_{{group.key}}-description"></small>
+
+                <div class="usync-group-buttons">
+                    <umb-button button-style="action" action="vm.report(group)" label="Report"
+                                disabled="vm.working === true"
+                                state="group.state"></umb-button>
+
+                    <umb-button-group default-button="group.import.defaultButton"
+                                      sub-buttons="group.import.subButtons"
+                                      direction="down"
+                                      float="left"
+                                      button-style="success"
+                                      disabled="vm.working === true"
+                                      state="group.state"></umb-button-group>
+
+                    <umb-button-group default-button="group.export.defaultButton"
+                                      sub-buttons="group.export.subButtons"
+                                      direction="down"
+                                      float="left"
+                                      button-style="info"
+                                      disabled="vm.working === true"
+                                      state="group.state"></umb-button-group>
+                </div>
+            </umb-box-content>
+        </umb-box>
+    </div>
+
+    <div ng-if="vm.canHaveForms && !vm.reported && !vm.working" class="flex justify-center">
+        <localize key="usync_forms"></localize>
+    </div>
+
+    <umb-box ng-if="!vm.showSpinner && (vm.working || vm.reported)">
+        <umb-box-content class="usync-progress-box">
+            <div ng-if="vm.savings.show || vm.perf > 0"
+                  class="text-right muted usync-perf">
+                <span ng-if="vm.savings.show">{{vm.savings.title}} {{vm.savings.message}} <br/></span>
+                <i ng-if="vm.perf > 0">(in {{vm.perf | number : 0}}ms)</i>
+            </div>
+            <usync-progress-view update="vm.update" status="vm.status" hide-labels="false">
+            </usync-progress-view>
+        </umb-box-content>
+        <umb-box-content ng-if="vm.warnings.message.length > 0">
+            {{vm.warnings.message.length}}
+            <div class="usync-warning usync-warning-{{vm.warnings.type}}">
+                <span ng-bind-html="vm.warnings.message"></span>
+            </div>
+        </umb-box-content>
+    </umb-box>
+
+    <div ng-if="vm.showSpinner && vm.working">
+        <umb-load-indicator></umb-load-indicator>
+    </div>
+
+    <div ng-if="vm.reported">
+        <usync-report-view actions="vm.actions"
+                           results="vm.results"
+                           hide-action="true"
+                           hide-link="vm.hideLink"></usync-report-view>
+    </div>
+
+    <div class="usync-fresh-view" ng-if="vm.fresh">
+        <umb-empty-state>
+
+            <div class="usync-group-box-title">
+                <i class="icon icon-infinity"></i>
+                <h2>uSync all the things</h2>
+            </div>
+
+        </umb-empty-state>
+    </div>
+
+
+</div>

@@ -1,0 +1,92 @@
+<div>
+    <umb-box>
+        <div class="umb-box-header flex justify-between items-center">
+            <div>
+                <div class="umb-box-header-title">{{vm.action}}</div>
+                <div class="umb-box-header-description">{{vm.countChanges(vm.results)}} changes across {{vm.results.length}} items</div>
+            </div>
+            <umb-toggle checked="vm.showAll"
+                        on-click="vm.showAll = !vm.showAll"
+                        show-labels="true"
+                        label-on="Show all"
+                        label-off="Changes only"
+                        label-position="left"
+                        ng-if="!vm.hideToggle"></umb-toggle>
+            
+        </div>
+            <div class="umb-table" ng-show="vm.countChanges(vm.results) > 0 || vm.showAll">
+                <div class="umb-table-head">
+                    <div class="umb-table-row">
+                        <div class="umb-table-cell">
+                        </div>
+                        <div class="umb-table-cell">
+                            <localize key="usync_tableType"></localize>
+                        </div>
+                        <div class="umb-table-cell umb-table__name">
+                            <localize key="usync_tableName"></localize>
+                        </div>
+                        <div class="umb-table-cell">
+                            <localize key="usync_tableChange"></localize>
+                        </div>
+                        <div class="umb-table-cell usync-table-message-cell">
+                            <localize key="usync_tableMessage"></localize>
+                        </div>
+                        <div class="umb-table-cell usync-detail-link-cell" ng-if="vm.hideLink == false"></div>
+                        <div class="umb-table-cell" ng-if="vm.hideAction == false"></div>
+                    </div>
+                </div>
+                <div class="umb-table-body">
+                    <div ng-repeat="result in vm.results">
+                        <div class="umb-table-row {{vm.getChangeClass(result)}}"
+                             ng-if="vm.showChange(result.change)"
+                             ng-click="vm.select(result)">
+                            <div class="umb-table-cell">
+                                <i class="icon {{vm.getIcon(result)}}"></i>
+                            </div>
+                            <div class="umb-table-cell">
+                                {{vm.getTypeName(result.itemType)}}
+                            </div>
+                            <div class="umb-table-cell umb-table__name">
+                                <div>
+                                    {{result.name}}
+                                    <div class="muted" ng-if="result.path.length > 0"> > {{result.itemType.substring(1)}}{{result.path}}</div>
+                                </div>
+                            </div>
+                            <div class="umb-table-cell">
+                                {{result.change}}
+                            </div>
+                            <div class="umb-table-cell usync-table-message-cell">
+                                <span ng-bind-html="result.message" title="{{result.message}}"></span>
+                            </div>
+                            <div class="umb-table-cell usync-detail-link-cell" ng-if="vm.hideLink == false">
+                                <umb-button type="button"
+                                            button-style="link"
+                                            label-key="usync_details"
+                                            action="vm.openDetail(result)"
+                                            ng-if="result.details != null"></umb-button>
+                                <div ng-if="result.details != null" class="usync-detail-count">
+                                    ({{result.details.length}} items)
+                                </div>
+                            </div>
+                            <div class="umb-table-cell" ng-if="vm.hideAction == false">
+                                <div class="text-right">
+                                    <umb-button type="button"
+                                                button-style="action btn-sm"
+                                                label-key="usync_apply"
+                                                action="vm.apply(result)"
+                                                state="vm.status(result)"
+                                                ng-if="result.details != null"></umb-button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-center items-center padded" ng-if="vm.countChanges(vm.results) == 0 && !vm.showAll">
+                <div class="usync-report-no-changes">
+                    <localize key="usync_nochange"></localize>
+                    <small><localize key="usync_nochange_quote"></localize></small>
+                </div>
+            </div>
+    </umb-box>
+</div>

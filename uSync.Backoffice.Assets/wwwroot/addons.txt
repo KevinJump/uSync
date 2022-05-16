@@ -1,0 +1,88 @@
+{
+  "intro": "Get more out of uSync",
+  "banner": {
+    "icon": "icon icon-infinity",
+    "title":  "uSync Complete",
+    "headline": "Get everything with uSync.Complete",
+    "text": "uSync Complete brings together all the best bits of uSync into one place.",
+    "link": "https://jumoo.co.uk/uSync/complete/",
+    "icons": [
+      {
+        "icon": "icon-arrow-up",
+        "name": "publish"
+      },
+      {
+        "icon": "icon-notepad",
+        "name": "content"
+      },
+      {
+        "icon": "icon-split",
+        "name": "export"
+      },
+      {
+        "icon": "icon-flash",
+        "name": "snapshot"
+      },
+      {
+        "icon": "icon-user",
+        "name": "people"
+      }
+    ]
+  },
+  "expansions": [
+    {
+      "name": "uSync Content Edition",
+      "summary": "Add content to your sync",
+      "icon": "icon-document",
+      "description": "Add Content, Media, Dictionary Items and Domain Settings to your uSync syncs",
+      "url": "https://jumoo.co.uk/usync/content/",
+      "package": "uSync.ContentEdition",
+      "state": "released"
+    },
+    {
+      "name": "uSync Snapshots",
+      "summary": "Moment in time snapshots of your umbraco state",
+      "icon": "icon-flash",
+      "description": "Take moment in time snapshots of your umbraco site, and combine and apply them to target sites",
+      "url": "https://jumoo.co.uk/usync/snapshots/",
+      "package": "uSync.Snapshots",
+      "state": "preview"
+    },
+    {
+      "name": "uSync People Edition",
+      "summary": "Users and Members",
+      "icon": "icon-user",
+      "description": "Sync user and membership accounts",
+      "url": "https://jumoo.co.uk/usync/people",
+      "package": "uSync.PeopleEdition",
+      "state": "preview"
+    },
+    {
+      "name": "uSync Publisher",
+      "summary": "Send content and media between servers",
+      "icon": "icon-arrow-up",
+      "description": "publisher gives you and your editors and ability to push or pull content between umbraco installations",
+      "url": "https://jumoo.co.uk/usync/publisher",
+      "package": "uSync.Publisher",
+      "state": "preview"
+    },
+    {
+      "name": "uSync Exporter",
+      "summary": "Export and Import settings and content in packs",
+      "icon": "icon-split",
+      "description": "Exporter lets you build collections of settings, content and media and export them as a sync-pack to be imported on another umbraco installation",
+      "url": "https://jumoo.co.uk/usync/exporter",
+      "package": "uSync.Exporter",
+      "state": "preview"
+    },
+    {
+      "name": "uSync Audit",
+      "summary": "Keep track of things",
+      "icon": "icon-ordered-list",
+      "description": "Log and audit the changes to your doctypes, datatypes and more, with links to slack",
+      "url": "https://jumoo.co.uk/usync/audit",
+      "package": "uSync.Audit",
+      "state": "working"
+    }
+  ]
+}

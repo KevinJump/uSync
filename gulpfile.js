@@ -8,12 +8,12 @@ const cleanCSS = require('gulp-clean-css');
 const transformManifest = require('./gulp-transformManifest');
 
 const sourceFolders = [
-    'uSync.BackOffice.Assets/App_Plugins/'
+    'uSync.BackOffice.Assets/App_Plugins/uSync/'
 ];
 
 const pluginName = 'uSync';
-const destination = 'uSync.Site/App_Plugins/';
-const minDest = 'build-files/App_Plugins/';
+const destination = 'uSync.Site/App_Plugins/uSync';
+const minDest = 'uSync.BackOffice.Assets/wwwroot/';
 
 // fetch command line arguments
 const arg = (argList => {
@@ -57,7 +57,7 @@ function minifyJs(path, version) {
             .pipe(concat('usync.' + version + '.min.js'))
             .pipe(uglify({ mangle: false }))
         .pipe(sourcemaps.write('.'))
-        .pipe(dest(minDest + pluginName));
+        .pipe(dest(minDest));
 }
 
 
@@ -65,7 +65,7 @@ function minifyCss(path, version) {
     return src([path, '!**/nonodes.css'], { base: path })
         .pipe(cleanCSS({ compatibility: 'ie8'}))
         .pipe(concat('usync.' + version + '.min.css'))
-        .pipe(dest(minDest + pluginName));
+        .pipe(dest(minDest));
 }
 
 function copyRequired(path, baseFolder, destFolder) {
@@ -90,7 +90,7 @@ function updateManifest(manifest, version) {
             name: pluginName.toLowerCase(),
             version: version
         }))
-        .pipe(dest(minDest + pluginName));
+        .pipe(dest(minDest));
 
 }
 
@@ -125,7 +125,7 @@ exports.minify = function (cb) {
 
         minifyJs(jsfiles, version);
         minifyCss(cssFiles, version);
-        updateManifest(sourceFolder + pluginName + "/package.manifest", version);
+        updateManifest(sourceFolder + "/package.manifest", version);
         copyRequired(source, sourceFolder, minDest);
         copySpecific(sourceFolder + '**/nonodes.css', sourceFolder, minDest);
     });

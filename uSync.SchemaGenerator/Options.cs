@@ -12,7 +12,7 @@ namespace uSync.SchemaGenerator
     {
         [Option('o', "outputFile", Required = false,
             HelpText = "",
-            Default = "..\\uSync.Backoffice.Assets\\App_Plugins\\uSync\\config\\appsettings-usync-schema.json")]
+            Default = "..\\uSync.Backoffice.Assets\\wwwroot\\config\\appsettings-usync-schema.json")]
         public string OutputFile { get; set; }
     }
 }

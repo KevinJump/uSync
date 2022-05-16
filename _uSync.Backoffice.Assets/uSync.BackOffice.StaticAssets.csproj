@@ -1,8 +1,9 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
 	<PropertyGroup>
 		<TargetFrameworks>net6.0</TargetFrameworks>
-		
+		<StaticWebAssetBasePath>App_Plugins/uSync</StaticWebAssetBasePath>
+
 		<ContentTargetFolders>.</ContentTargetFolders>
 
 		<Product>uSync.BackOffice.StaticAssets</Product>
@@ -10,28 +11,16 @@
 		<Title>uSync.BackOffice.StaticAssets</Title>
 
 		<Description>uSync backoffice asset files</Description>
-
-		<!--
-		<IncludeBuildOutput>true</IncludeBuildOutput>
-		<IncludeSymbols>false</IncludeSymbols> -->
 	</PropertyGroup>
 
+
 	<ItemGroup>
-		<None Include="build\**\*.*">
-			<Pack>true</Pack>
-			<PackagePath>buildTransitive</PackagePath>
-		</None>
-
-		<Content Include="..\build-files\App_Plugins\**\*.*">
-			<Pack>true</Pack>
-			<PackagePath>content\App_Plugins</PackagePath>
-			<Visible>false</Visible>
-		</Content>
-
+		<SupportedPlatform Include="browser" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Content Remove="App_Plugins\uSync\**\*.*" />
+		<PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="10.0.0-rc1" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>

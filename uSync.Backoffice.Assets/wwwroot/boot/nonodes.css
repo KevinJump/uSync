@@ -1,0 +1,22 @@
+section {
+    background-image: url('/App_Plugins/uSync/boot/TurbineBlades.jpg') !important;
+}
+
+    section .logo {
+        background-image: url('/App_Plugins/uSync/boot/usynclogo.png');
+    }
+
+    h1 {
+        font-size: 35pt;
+    }
+
+.button.usync-button {
+    margin-top: 25px;
+    display: inline-block;
+    background-color: #2196f3 !important;
+}
+
+.flex-center {
+    display:flex;
+    justify-content: center;
+}

@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<StaticWebAssetBasePath>App_Plugins/uSync</StaticWebAssetBasePath>
+		<AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<SupportedPlatform Include="browser" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.4" />
+		<PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="10.0.0-rc1" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\uSync.BackOffice\uSync.BackOffice.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Remove="App_Plugins\uSync\" />
+		<Content Remove="App_Plugins\uSync\config\appsettings-usync-schema.json" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="App_Plugins\uSync\config\" />
+	</ItemGroup>	
+
+</Project>

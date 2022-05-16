@@ -9,6 +9,22 @@ namespace uSync.BackOffice
     public static partial class uSyncConstants
     {
         /// <summary>
+        /// Information about the package name/files
+        /// </summary>
+        public static class Package
+        {
+            /// <summary>
+            ///  Name of the Package
+            /// </summary>
+            public const string Name = "uSync";
+
+            /// <summary>
+            ///  Virtual path to the plugin files
+            /// </summary>
+            public const string PluginPath = "/App_Plugins/uSync";
+        }
+
+        /// <summary>
         /// Suffix to place on any release strings 
         /// </summary>
         public const string ReleaseSuffix = "";
