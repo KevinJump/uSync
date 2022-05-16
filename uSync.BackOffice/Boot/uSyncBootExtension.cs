@@ -47,13 +47,13 @@ namespace uSync.BackOffice.Boot
         : INotificationHandler<UmbracoApplicationStartingNotification>
     {
 
-        private readonly IScopeProvider _scopeProvider;
+        private readonly ICoreScopeProvider _scopeProvider;
         private readonly IKeyValueService _keyValueService;
         private readonly IMigrationPlanExecutor _migrationPlanExecutor;
 
         /// <inheritdoc/>
         public FirstBootAppStartingHandler(
-            IScopeProvider scopeProvider,
+            ICoreScopeProvider scopeProvider,
             IKeyValueService keyValueService,
             IMigrationPlanExecutor migrationPlanExecutor)
         {
