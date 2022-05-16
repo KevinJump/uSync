@@ -108,13 +108,13 @@ namespace uSync.Core.Serialization.Serializers
         protected virtual XElement SerializeSchedule(IContent item, SyncSerializerOptions options)
         {
             var node = new XElement("Schedule");
-            var schedules = item.ContentSchedule.FullSchedule;
+            var schedules = contentService.GetContentScheduleByContentId(item.Id);
 
             var cultures = options.GetCultures();
 
             if (schedules != null)
             {
-                foreach (var schedule in schedules
+                foreach (var schedule in schedules.FullSchedule
                     .OrderBy(x => x.Action.ToString())
                     .ThenBy(x => x.Culture))
                 {
@@ -156,7 +156,6 @@ namespace uSync.Core.Serialization.Serializers
             }
 
             details.AddNotNull(DeserializeTemplate(item, node));
-            details.AddRange(DeserializeSchedules(item, node, options));
 
             var propertiesAttempt = DeserializeProperties(item, node, options);
             if (!propertiesAttempt.Success)
@@ -169,9 +168,6 @@ namespace uSync.Core.Serialization.Serializers
             // sort order
             var sortOrder = node.Element("Info").Element("SortOrder").ValueOrDefault(-1);
             details.AddNotNull(HandleSortOrder(item, sortOrder));
-
-            details.AddRange(DeserializeSchedules(item, node, options));
-
 
             var publishTimer = Stopwatch.StartNew();
             // published status
@@ -232,13 +228,30 @@ namespace uSync.Core.Serialization.Serializers
             return null;
         }
 
+        /// <summary>
+        ///  Second pass. 
+        /// </summary>
+        /// <remarks>
+        ///  in v9.4 we eliminated this - but because schedules now require the content to 
+        ///  exist, we need to second pass schedules, only. 99% of the time this shouldn't
+        ///  have any impact. 
+        /// </remarks>
+        public override SyncAttempt<IContent> DeserializeSecondPass(IContent item, XElement node, SyncSerializerOptions options)
+        {
+            var changes = DeserializeSchedules(item, node, options);  
+            if (changes.Any())
+                return SyncAttempt<IContent>.Succeed(item.Name, item, ChangeType.Import, "", true, changes.ToList());
+
+            return SyncAttempt<IContent>.Succeed(item.Name, item, ChangeType.NoChange, null);
+        }
+
         private IEnumerable<uSyncChange> DeserializeSchedules(IContent item, XElement node, SyncSerializerOptions options)
         {
             logger.LogDebug("Deserialize Schedules");
 
             var changes = new List<uSyncChange>();
-            var nodeSchedules = new List<ContentSchedule>();
-            var currentSchedules = item.ContentSchedule.FullSchedule;
+            var nodeSchedules = new ContentScheduleCollection();
+            var currentSchedules = contentService.GetContentScheduleByContentId(item.Id);
             var cultures = options.GetDeserializedCultures(node);
 
             var schedules = node.Element("Info")?.Element("Schedule");
@@ -259,19 +272,19 @@ namespace uSync.Core.Serialization.Serializers
                         var existing = FindSchedule(currentSchedules, importSchedule);
                         if (existing != null)
                         {
-                            item.ContentSchedule.Remove(existing);
+                            currentSchedules.Remove(existing);
                         }
-                        item.ContentSchedule.Add(importSchedule);
+                        currentSchedules.Add(importSchedule);
                         changes.Add(uSyncChange.Update("Schedule", $"{importSchedule.Culture} {importSchedule.Action}", "", importSchedule.Date.ToString()));
                     }
                 }
             }
 
-            if (currentSchedules != null && currentSchedules.Count > 0)
+            if (currentSchedules != null)
             {
                 // remove things that are in the current but not the import. 
 
-                var toRemove = currentSchedules.Where(x => FindSchedule(nodeSchedules, x) == null);
+                var toRemove = currentSchedules.FullSchedule.Where(x => FindSchedule(nodeSchedules, x) == null);
 
                 foreach (var oldItem in toRemove)
                 {
@@ -280,13 +293,19 @@ namespace uSync.Core.Serialization.Serializers
                         logger.LogDebug("Removing Schedule : {culture} {action} {date}", oldItem.Culture, oldItem.Action, oldItem.Date);
                         // only remove a culture if this seralization included it. 
                         // we don't remove things we didn't serialize. 
-                        item.ContentSchedule.Remove(oldItem);
+                        currentSchedules.Remove(oldItem);
 
                         changes.Add(uSyncChange.Delete("Schedule", $"{oldItem.Culture} - {oldItem.Action}", oldItem.Date.ToString()));
                     }
                 }
 
-                return changes;
+                if (changes.Any())
+                {
+                    contentService.PersistContentSchedule(item, currentSchedules);
+                    return changes;
+                }
+
+                return Enumerable.Empty<uSyncChange>();
             }
 
 
@@ -303,10 +322,10 @@ namespace uSync.Core.Serialization.Serializers
             return new ContentSchedule(key, culture, date, action);
         }
 
-        private ContentSchedule FindSchedule(IEnumerable<ContentSchedule> currentSchedules, ContentSchedule newSchedule)
+        private ContentSchedule FindSchedule(ContentScheduleCollection currentSchedules, ContentSchedule newSchedule)
         {
-            var schedule = currentSchedules.FirstOrDefault(x => x.Culture == newSchedule.Culture && x.Action == newSchedule.Action);
-            if (schedule != null) return schedule;
+            var schedule = currentSchedules.GetSchedule(newSchedule.Culture, newSchedule.Action);
+            if (schedule != null && schedule.Any()) return schedule.FirstOrDefault();
 
             return null;
         }
