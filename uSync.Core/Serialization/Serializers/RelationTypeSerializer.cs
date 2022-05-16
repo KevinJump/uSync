@@ -40,13 +40,13 @@ namespace uSync.Core.Serialization.Serializers
             var parentType = info.Element("ParentType").ValueOrDefault<Guid?>(null);
             var childType = info.Element("ChildType").ValueOrDefault<Guid?>(null);
             var bidirectional = info.Element("Bidirectional").ValueOrDefault(false);
+            var isDependency = info.Element("IsDependency").ValueOrDefault(true);
 
             var item = FindItem(node);
 
             if (item == null)
             {
-                item = CreateRelation(name, alias, bidirectional, parentType, childType);
-                // item = new RelationType(childType.Value, parentType.Value, alias);
+                item = CreateRelation(name, alias, bidirectional, parentType, childType, isDependency);
             }
 
             var details = new List<uSyncChange>();
@@ -171,11 +171,17 @@ namespace uSync.Core.Serialization.Serializers
         {
             var node = this.InitializeBaseNode(item, item.Alias);
 
+            var isDependency = false;
+            if (item is IRelationTypeWithIsDependency dependencyItem)
+                isDependency = dependencyItem.IsDependency;
+
             node.Add(new XElement("Info",
                 new XElement("Name", item.Name),
                 new XElement("ParentType", GetGuidValue(item, nameof(item.ParentObjectType))),
                 new XElement("ChildType", GetGuidValue(item, nameof(item.ChildObjectType))),
-                new XElement("Bidirectional", item.IsBidirectional)));
+                new XElement("Bidirectional", item.IsBidirectional),
+                new XElement("IsDependency", isDependency)));
+               
 
             if (options.GetSetting<bool>("IncludeRelations", false))
             {
@@ -191,9 +197,9 @@ namespace uSync.Core.Serialization.Serializers
         }
 
 
-        private RelationType CreateRelation(string name, string alias, bool isBidrectional, Guid? parent, Guid? child)
+        private RelationType CreateRelation(string name, string alias, bool isBidrectional, Guid? parent, Guid? child, bool isDependency)
         {
-            return new RelationType(name, alias, isBidrectional, parent.Value, child.Value);
+            return new RelationType(name, alias, isBidrectional, parent.Value, child.Value, isDependency);
         }
 
         /// <summary>

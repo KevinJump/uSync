@@ -30,19 +30,23 @@ namespace uSync.Core.Serialization.Serializers
             this.globalSettings = globalSettings.Value;
         }
 
+        private CultureInfo GetCulture(string isoCode)
+            => CultureInfo.GetCultureInfo(isoCode);
+
         protected override SyncAttempt<ILanguage> DeserializeCore(XElement node, SyncSerializerOptions options)
         {
             var isoCode = node.Element("IsoCode").ValueOrDefault(string.Empty);
             logger.LogDebug("Derserializing {0}", isoCode);
 
             var item = localizationService.GetLanguageByIsoCode(isoCode);
+            var culture = GetCulture(isoCode);
 
             var details = new List<uSyncChange>();
 
             if (item == null)
             {
                 logger.LogDebug("Creating New Language: {0}", isoCode);
-                item = new Language(globalSettings, isoCode);
+                item = new Language(isoCode, culture.DisplayName);
                 details.AddNew(isoCode, isoCode, "Language");
             }
 
@@ -54,7 +58,6 @@ namespace uSync.Core.Serialization.Serializers
 
             try
             {
-                var culture = CultureInfo.GetCultureInfo(isoCode);
                 if (item.CultureName != culture.DisplayName)
                 {
                     details.AddUpdate("CultureName", item.CultureName, culture.DisplayName);

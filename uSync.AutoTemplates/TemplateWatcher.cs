@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 using System;
@@ -10,6 +11,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 
 using Umbraco.Cms.Core;
+using Umbraco.Cms.Core.Extensions;
 using Umbraco.Cms.Core.Hosting;
 using Umbraco.Cms.Core.IO;
 using Umbraco.Cms.Core.Models;
@@ -27,7 +29,7 @@ namespace uSync.AutoTemplates
 
         private readonly IFileService _fileService;
         private readonly IShortStringHelper _shortStringHelper;
-        private readonly IHostingEnvironment _hostingEnvironment;
+        private readonly IHostEnvironment _hostEnvironment;
 
         private readonly IFileSystem _templateFileSystem;
 
@@ -44,18 +46,18 @@ namespace uSync.AutoTemplates
             IFileService fileService,
             FileSystems fileSystems,
             IShortStringHelper shortStringHelper,
-            IHostingEnvironment hostingEnvironment)
+            IHostEnvironment hostEnvironment)
         {
             _fileService = fileService;
             _shortStringHelper = shortStringHelper;
-            _hostingEnvironment = hostingEnvironment;
+            _hostEnvironment = hostEnvironment;
             _hostingLifetime = hostingLifetime;
 
             _logger = logger;
 
             _templateFileSystem = fileSystems.MvcViewsFileSystem;
 
-            _viewsFolder = _hostingEnvironment.MapPathContentRoot(Constants.SystemDirectories.MvcViews);
+            _viewsFolder = _hostEnvironment.MapPathContentRoot(Constants.SystemDirectories.MvcViews);
 
 
             // 
