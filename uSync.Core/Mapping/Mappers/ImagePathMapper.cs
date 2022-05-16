@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 using Newtonsoft.Json;
@@ -33,10 +34,15 @@ namespace uSync.Core.Mapping
         private readonly string mediaFolder;
         private readonly ILogger<ImagePathMapper> logger;
 
-        public ImagePathMapper(IEntityService entityService,
+        private readonly IConfiguration configuration;
+
+        public ImagePathMapper(
+            IConfiguration configuration,
+            IEntityService entityService,
             ILogger<ImagePathMapper> logger) : base(entityService)
         {
             this.logger = logger;
+            this.configuration = configuration;
 
             // todo: site root might need us to include extra nuget.
             siteRoot = "";
@@ -151,33 +157,11 @@ namespace uSync.Core.Mapping
         /// </remarks>
         private string GetMediaFolderSetting()
         {
-            // TODO: In v8 we work this out based on azure provider settings
+            var folder = this.configuration.GetValue<string>("uSync:MediaFolder", string.Empty);
+            if (!string.IsNullOrEmpty(folder))
+                return folder;
+
             return string.Empty;
-
-
-            // // look in the web.config 
-            // var folder = ConfigurationManager.AppSettings["uSync.mediaFolder"];
-            // if (!string.IsNullOrWhiteSpace(folder))
-            //     return folder;
-
-            // // azure guessing - so for most people seeing this issue, 
-            // // they won't have to do any config, as we will detect it ???
-            // var useDefault = ConfigurationManager.AppSettings["AzureBlobFileSystem.UseDefaultRoute:media"];
-            // if (useDefault != null && bool.TryParse(useDefault, out bool usingDefaultRoute) && !usingDefaultRoute)
-            // {
-            //     // means azure is configured to not use the default root, so the media 
-            //     // will be prepended with /container-name. 
-            //     var containerName = ConfigurationManager.AppSettings["AzureBlobFileSystem.ContainerName:media"];
-            //     if (!string.IsNullOrWhiteSpace(containerName))
-            //     {
-            //         logger.LogDebug("Calculating media folder path from AzureBlobFileSystem settings");
-            //         return $"/{containerName}";
-            //     }
-            // }
-
-
-            // // look in the uSync8.config 
-            // return config.GetExtensionSetting("media", "folder", string.Empty);
         }
 
 
