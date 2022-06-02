@@ -5,11 +5,11 @@
 
 
     <ItemGroup>
-        <PackageReference Include="Umbraco.Cms" Version="10.0.0-rc1" />
-		<PackageReference Include="Our.Umbraco.Community.Contentment" Version="3.0.0" />
-		<PackageReference Include="Our.Umbraco.DocTypeGridEditor" Version="9.0.2" />
+        <PackageReference Include="Umbraco.Cms" Version="10.0.0-rc4" />
+		<PackageReference Include="Our.Umbraco.Community.Contentment" Version="4.0.0-alpha004" />
+		<PackageReference Include="Our.Umbraco.DocTypeGridEditor" Version="10.0.0-rc4" />
 		<PackageReference Include="Umbraco.TheStarterKit" Version="9.0.0" />
-		<PackageReference Include="Bergmania.OpenStreetMap" Version="2.0.1" />
+		<PackageReference Include="Bergmania.OpenStreetMap" Version="4.0.0-rc" />
 	</ItemGroup>
 
 
