@@ -7,8 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.Core", "uSync.Core\uS
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.BackOffice", "uSync.BackOffice\uSync.BackOffice.csproj", "{41BC9446-FAD2-4819-AE8B-2BC5DB84D7C8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.Site", "uSync.Site\uSync.Site.csproj", "{2A471D92-DBDF-4B40-9F8E-4153E46B8558}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.Community.Contrib", "uSync.Community.Contrib\uSync.Community.Contrib.csproj", "{B78A0BB0-E95A-4F38-B75C-A4645AFA49D7}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{AC8D82BC-EAC5-4EB5-8281-92FFA58A786F}"
@@ -31,7 +29,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.Tests", "uSync.Tests\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.SchemaGenerator", "uSync.SchemaGenerator\uSync.SchemaGenerator.csproj", "{1E5B64E5-E8A6-42F2-9079-FB71D6D237D6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "uSync.Backoffice.Assets", "uSync.Backoffice.Assets\uSync.Backoffice.Assets.csproj", "{4ECC3DFD-5BCB-4095-8D06-DE482DF4C6A1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.Backoffice.Assets", "uSync.Backoffice.Assets\uSync.Backoffice.Assets.csproj", "{4ECC3DFD-5BCB-4095-8D06-DE482DF4C6A1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,10 +45,6 @@ Global
 		{41BC9446-FAD2-4819-AE8B-2BC5DB84D7C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{41BC9446-FAD2-4819-AE8B-2BC5DB84D7C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{41BC9446-FAD2-4819-AE8B-2BC5DB84D7C8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2A471D92-DBDF-4B40-9F8E-4153E46B8558}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2A471D92-DBDF-4B40-9F8E-4153E46B8558}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2A471D92-DBDF-4B40-9F8E-4153E46B8558}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2A471D92-DBDF-4B40-9F8E-4153E46B8558}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B78A0BB0-E95A-4F38-B75C-A4645AFA49D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B78A0BB0-E95A-4F38-B75C-A4645AFA49D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B78A0BB0-E95A-4F38-B75C-A4645AFA49D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
