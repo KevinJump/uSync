@@ -31,6 +31,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.SchemaGenerator", "uS
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.Backoffice.Assets", "uSync.Backoffice.Assets\uSync.Backoffice.Assets.csproj", "{4ECC3DFD-5BCB-4095-8D06-DE482DF4C6A1}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.Site", "uSync.Site\uSync.Site.csproj", "{5521C161-D10B-4812-89F7-5DBFB3AF5A2A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -73,6 +75,10 @@ Global
 		{4ECC3DFD-5BCB-4095-8D06-DE482DF4C6A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4ECC3DFD-5BCB-4095-8D06-DE482DF4C6A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4ECC3DFD-5BCB-4095-8D06-DE482DF4C6A1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5521C161-D10B-4812-89F7-5DBFB3AF5A2A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5521C161-D10B-4812-89F7-5DBFB3AF5A2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5521C161-D10B-4812-89F7-5DBFB3AF5A2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5521C161-D10B-4812-89F7-5DBFB3AF5A2A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

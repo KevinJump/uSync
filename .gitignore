@@ -20,10 +20,7 @@ Umbraco_Client/
 Bin/
 # Config/
 Archive/
-uSync.Site/Media/*
-**/uSync.Site/Views/
-**/uSync.Site/App_Plugins/
-!uSync.Site/Media/web.config
+uSync.Site/
 
 [Dd]ist/
 
