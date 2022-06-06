@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 using Umbraco.Cms.Core.Composing;
 using Umbraco.Cms.Core.DependencyInjection;
 using Umbraco.Cms.Core.Manifest;
-using Umbraco.Cms.Core.Notifications;
 
 using uSync.BackOffice;
 
@@ -43,6 +37,8 @@ namespace uSync.Backoffice.Assets
             manifests.Add(new PackageManifest
             {
                 PackageName = uSyncConstants.Package.Name,
+                Version = typeof(uSyncAssetManifestFilter).Assembly.GetName().Version.ToString(3),
+                AllowPackageTelemetry = true,
                 BundleOptions = BundleOptions.None,
                 Scripts = new[]
                 {
