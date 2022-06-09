@@ -79,7 +79,7 @@ namespace uSync.BackOffice
 
             // register for the notifications 
             builder.AddNotificationHandler<ServerVariablesParsingNotification, uSyncServerVariablesHandler>();
-            builder.AddNotificationHandler<UmbracoApplicationStartingNotification, uSyncApplicationStartingHandler>();
+            builder.AddNotificationHandler<UmbracoApplicationStartedNotification, uSyncApplicationStartingHandler>();
             builder.AddHandlerNotifications();
 
             builder.Services.AddSingleton<uSyncHubRoutes>();
