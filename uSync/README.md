@@ -22,7 +22,7 @@ With content syncing enabled it will also do :
 
 ## Config 
 
-for v9 everything minimal config should be required. 
+for v10 everything minimal config should be required. 
 
 ### Turn of content syncing 
 If you only want to sync settings update the appsettings.json file:

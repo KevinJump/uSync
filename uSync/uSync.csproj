@@ -16,7 +16,8 @@
 
 		<PackageLicenseExpression>MPL-2.0</PackageLicenseExpression>
 		<PackageProjectUrl>https://jumoo.co.uk/uSync</PackageProjectUrl>
-		<PackageTags>Umbraco</PackageTags>
+
+		<PackageTags>umbraco usync umbraco-marketplace</PackageTags>
 
 		<RepositoryUrl>https://github.com/KevinJump/uSync8/tree/core/main</RepositoryUrl>
 
