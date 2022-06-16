@@ -11,10 +11,10 @@
 		<PackageReference Include="NUnit" Version="3.13.3" />
 		<PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
 		<PackageReference Include="coverlet.collector" Version="3.0.2" />
-		<PackageReference Include="Umbraco.Cms.Tests" Version="10.0.0-rc5" />
-		<PackageReference Include="Umbraco.Cms.Tests.Integration" Version="10.0.0-rc5" />
+		<PackageReference Include="Umbraco.Cms.Tests" Version="10.0.0" />
+		<PackageReference Include="Umbraco.Cms.Tests.Integration" Version="10.0.0" />
 
-		<PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="10.0.0-rc5" />
+		<PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="10.0.0" />
 
 	</ItemGroup>
 

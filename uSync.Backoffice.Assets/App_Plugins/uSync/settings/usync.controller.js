@@ -264,7 +264,7 @@
 
                     vm.status.message = 'Post import actions';
 
-                    uSync8DashboardService.importPost(vm.results, getClientId())
+                    uSync8DashboardService.importPost(vm.results, options, getClientId())
                         .then(function (results) {
                             vm.working = false;
                             vm.reported = true;
