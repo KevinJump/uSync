@@ -170,12 +170,25 @@ namespace uSync.Core.Serialization.Serializers
             details.AddNotNull(HandleSortOrder(item, sortOrder));
 
             var publishTimer = Stopwatch.StartNew();
+
+
+            if (details.HasWarning() && options.FailOnWarnings())
+            {
+                // Fail on warning. means we don't save or publish because something is wrong ?
+                return SyncAttempt<IContent>.Fail(item.Name, item, ChangeType.ImportFail, "Failed with warnings", details,
+                    new Exception("Import failed because of warnings, and fail on warnings is true"));
+            }
+
             // published status
             // this does the last save and publish
             var saveAttempt = DoSaveOrPublish(item, node, options);
             if (saveAttempt.Success)
             {
                 var message = saveAttempt.Result;
+
+                if (details.Any(x => x.Change == ChangeDetailType.Warning))
+                    message += $" with warning(s)"; 
+
                 if (publishTimer.ElapsedMilliseconds > 10000)
                 {
                     message += $" (Slow publish {publishTimer.ElapsedMilliseconds}ms)";

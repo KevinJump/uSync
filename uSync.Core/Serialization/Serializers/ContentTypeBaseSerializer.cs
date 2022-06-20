@@ -297,6 +297,29 @@ namespace uSync.Core.Serialization.Serializers
             return changes;
         }
 
+        protected SyncAttempt<TObject> DeserializedResult(TObject item, List<uSyncChange> details, SyncSerializerOptions options)
+        {
+            var message = "";
+
+            if (details.HasWarning())
+            {
+                if (options.FailOnWarnings())
+                {
+                    // Fail on warning. means we don't save or publish because something is wrong ?
+                    return SyncAttempt<TObject>.Fail(item.Name, item, ChangeType.ImportFail, "Failed with warnings", details,
+                        new Exception("Import failed because of warnings, and fail on warnings is true"));
+                }
+                else
+                {
+                    message = "Imported with warnings";
+                }
+            }
+
+            return SyncAttempt<TObject>.Succeed(item.Name, item, ChangeType.Import, message, false, details);
+
+        }
+
+
         protected IEnumerable<uSyncChange> DeserializeStructure(TObject item, XElement node)
         {
             logger.LogDebug("Deserializing Structure");
@@ -397,7 +420,11 @@ namespace uSync.Core.Serialization.Serializers
                 bool IsNew = false;
 
                 var property = GetOrCreateProperty(item, key, alias, definitionKey, propertyEditorAlias, compositeProperties, out IsNew);
-                if (property == null) continue;
+                if (property == null)
+                {
+                    changes.AddWarning($"Property/{alias}", alias, $"Property '{alias}' cannot be created (missing datatype?)");
+                    continue;
+                }
 
                 if (key != Guid.Empty && property.Key != key)
                 {

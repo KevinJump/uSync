@@ -125,9 +125,7 @@ namespace uSync.Core.Serialization.Serializers
             // templates 
             details.AddRange(DeserializeTemplates(item, node));
 
-            // contentTypeService.Save(item);
-
-            return SyncAttempt<IContentType>.Succeed(item.Name, item, ChangeType.Import, details);
+            return DeserializedResult(item, details, options);
         }
 
         protected override IEnumerable<uSyncChange> DeserializeExtraProperties(IContentType item, IPropertyType property, XElement node)

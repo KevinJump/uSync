@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 using Newtonsoft.Json;
 
@@ -26,9 +27,10 @@ namespace uSync.Core
             => AddUpdate(changes, name, oldValue, newValue, path, true);
 
         public static void AddUpdate(this List<uSyncChange> changes, string name, string oldValue, string newValue, string path, bool success)
-        {
-            changes.Add(uSyncChange.Update(path, name, oldValue, newValue, success));
-        }
+            => changes.Add(uSyncChange.Update(path, name, oldValue, newValue, success));
+
+        public static void AddWarning(this List<uSyncChange> changes, string path, string name, string warning)
+            => changes.Add(uSyncChange.Warning(path, name, warning));
 
         public static void AddUpdateJson(this List<uSyncChange> changes, string name, object oldValue, object newValue, string path = "")
             => AddUpdateJson(changes, name, oldValue, newValue, path, true);
@@ -39,5 +41,11 @@ namespace uSync.Core
             var newJson = JsonConvert.SerializeObject(newValue, Formatting.Indented);
             AddUpdate(changes, name, oldJson, newJson, path, success);
         }
+
+        public static bool HasErrors(this List<uSyncChange> changes)
+            => changes.Any(x => x.Change == ChangeDetailType.Error);
+
+        public static bool HasWarning(this List<uSyncChange> changes)
+            => changes.Any(x => x.Change == ChangeDetailType.Warning);
     }
 }

@@ -134,8 +134,9 @@ namespace uSync.Core.Serialization.Serializers
 
             // memberTypeService.Save(item);
 
-            return SyncAttempt<IMemberType>.Succeed(item.Name, item, ChangeType.Import, details);
+            return DeserializedResult(item, details, options);
         }
+
         public override SyncAttempt<IMemberType> DeserializeSecondPass(IMemberType item, XElement node, SyncSerializerOptions options)
         {
             CleanTabAliases(item);

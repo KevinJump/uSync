@@ -532,8 +532,9 @@ namespace uSync.Core.Serialization.Serializers
                 }
                 else
                 {
-                    logger.LogWarning("DeserializeProperties: item {Name} doesn't have property {alias} but its in the xml", item.Name, alias);
+                    logger.LogWarning("DeserializeProperties: item {Name} doesn't have property '{alias}' but its in the xml", item.Name, alias);
                     errors += $"{item.Name} does not container property {alias}";
+                    changes.Add(uSyncChange.Warning($"Property/{alias}", alias, $"item {item.Name} does not have a property {alias} but it exists in xml"));
                 }
             }
 
