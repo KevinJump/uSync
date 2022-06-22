@@ -126,7 +126,7 @@ namespace uSync.BackOffice
                     break;
                 case HandlerActions.Report:
                     _mutexService.FireBulkComplete(new uSyncReportCompletedNotification(actions));
-                    break;
+                    break; 
             }
         }
 
