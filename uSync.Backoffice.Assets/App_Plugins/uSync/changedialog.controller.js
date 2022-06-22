@@ -6,7 +6,7 @@
         var vm = this;
         vm.item = $scope.model.item;
 
-        var jsdiff = 'lib/jsdiff/diff.min.js';
+        var jsdiff = 'lib/jsdiff/diff.js';
 
         assetsService.loadJs(jsdiff, $scope).then(function () {
             calcDiffs();
@@ -46,7 +46,7 @@
                     newValueDiff = JSON.stringify(detail.newValue, null, 1);
                 }
 
-                detail.diff = JsDiff.diffWords(oldValueDiff, newValueDiff );
+                detail.diff = Diff.diffWords(oldValueDiff, newValueDiff );
             });
         }
     }

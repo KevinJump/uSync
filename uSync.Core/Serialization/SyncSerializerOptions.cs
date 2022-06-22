@@ -58,7 +58,6 @@ namespace uSync.Core.Serialization
 
         public bool OnePass => Flags.HasFlag(SerializerFlags.OnePass);
 
-
         public TResult GetSetting<TResult>(string key, TResult defaultValue)
         {
             if (this.Settings != null && this.Settings.ContainsKey(key))
@@ -76,6 +75,12 @@ namespace uSync.Core.Serialization
         /// </summary>
         /// <returns></returns>
         public IList<string> GetCultures() => GetSetting(uSyncConstants.CultureKey, string.Empty).ToDelimitedList();
+
+        /// <summary>
+        ///  fail import if for some reasons we have warnings. 
+        /// </summary>
+        public bool FailOnWarnings() => GetSetting<bool>("FailOnWarnings", false);
+
 
         /// <summary>
         ///  Gets the cultures that can be de-serialized from this node.

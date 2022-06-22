@@ -77,9 +77,24 @@ namespace uSync.Core.Serialization.Serializers
             var sortOrder = info.Element("SortOrder").ValueOrDefault(-1);
             HandleSortOrder(item, sortOrder);
 
+
+            if (details.HasWarning() && options.FailOnWarnings())
+            {
+                // Fail on warning. means we don't save or publish because something is wrong ?
+                return SyncAttempt<IMedia>.Fail(item.Name, item, ChangeType.ImportFail, "Failed with warnings", details,
+                    new Exception("Import failed because of warnings, and fail on warnings is true"));
+            }
+
             var saveAttempt = mediaService.Save(item);
-            if (!saveAttempt.Success)
-                return SyncAttempt<IMedia>.Fail(item.Name, item, ChangeType.Fail, "", saveAttempt.Exception);
+            if (!saveAttempt.Success) {
+                var errors = saveAttempt.Result?.EventMessages?.FormatMessages() ?? "";
+                return SyncAttempt<IMedia>.Fail(item.Name, item, ChangeType.Fail, errors, saveAttempt.Exception);
+            }
+
+            // add warning messages if things are missing
+            var message = "";
+            if (details.Any(x => x.Change == ChangeDetailType.Warning))
+                message += $" with warning(s)";
 
             // setting the saved flag on the attempt to true, stops base classes from saving the item.
             return SyncAttempt<IMedia>.Succeed(item.Name, item, ChangeType.Import, "", true, propertyAttempt.Result);

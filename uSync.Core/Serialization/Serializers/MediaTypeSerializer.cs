@@ -84,7 +84,7 @@ namespace uSync.Core.Serialization.Serializers
 
             CleanTabs(item, node, options);
 
-            return SyncAttempt<IMediaType>.Succeed(item.Name, item, ChangeType.Import, details);
+            return DeserializedResult(item, details, options);
         }
 
         public override SyncAttempt<IMediaType> DeserializeSecondPass(IMediaType item, XElement node, SyncSerializerOptions options)

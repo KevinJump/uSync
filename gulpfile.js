@@ -1,4 +1,3 @@
-/// <binding ProjectOpened='default' />
 const { watch, src, dest } = require('gulp');
 const del = require('del');
 var concat = require('gulp-concat');

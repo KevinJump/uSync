@@ -91,6 +91,12 @@ namespace uSync.Core.Models
         public static SyncAttempt<TObject> Fail(string name, TObject item, ChangeType change, string message, Exception ex)
             => new SyncAttempt<TObject>(false, name, item, typeof(TObject).Name, change, message, ex, false);
 
+        public static SyncAttempt<TObject> Fail(string name, TObject item, ChangeType change, string message, IList<uSyncChange> changes, Exception ex)
+            => new SyncAttempt<TObject>(false, name, item, typeof(TObject).Name, change, message, ex, false)
+            {
+                Details = changes ?? new List<uSyncChange>()
+            };
+
         public static SyncAttempt<TObject> Fail(string name, ChangeType change, string message)
             => new SyncAttempt<TObject>(false, name, default(TObject), typeof(TObject).Name, change, message, null, false);
 

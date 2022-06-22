@@ -95,6 +95,16 @@ namespace uSync.Core.Models
                 OldValue = oldValue,
                 Change = ChangeDetailType.Error
             };
+
+        public static uSyncChange Warning(string path, string name, string warning)
+            => new uSyncChange
+            {
+                Name = name,
+                Path = path,
+                NewValue = warning,
+                Change = ChangeDetailType.Warning,
+                Success = false
+            };
     }
 
     public enum ChangeDetailType
@@ -103,7 +113,8 @@ namespace uSync.Core.Models
         Create,
         Update,
         Delete,
-        Error
+        Error,
+        Warning
     }
 
 }
