@@ -219,7 +219,7 @@ namespace uSync8.BackOffice.Services
             {
                 using (var stream = OpenRead(file))
                 {
-                    return XElement.Load(stream);
+                    return XElement.Load(stream, LoadOptions.PreserveWhitespace);
                 }
             }
             catch (Exception ex)
