@@ -71,8 +71,8 @@ dotnet pack ..\uSync\uSync.csproj  --no-build  --no-restore -c $env -o $outFolde
 # .\nuget pack "..\uSync\uSync.nuspec" -version $fullVersion -OutputDirectory $outFolder
 
 
-Get-ChildItem -Path ..\uSync.BackOffice.Assets\wwwroot -Include * -File -Recurse | foreach { $_.Delete()}
-&gulp minify --release $version
+#Get-ChildItem -Path ..\uSync.BackOffice.Assets\wwwroot -Include * -File -Recurse | foreach { $_.Delete()}
+#&gulp minify --release $version
 
 dotnet pack ..\uSync.BackOffice.Assets\uSync.BackOffice.Assets.csproj --no-restore -c $env -o $outFolder /p:ContinuousIntegrationBuild=true,version=$fullVersion 
 

@@ -7,6 +7,19 @@
 		<AddRazorSupportForMvc>true</AddRazorSupportForMvc>
 	</PropertyGroup>
 
+
+	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+		<Message Importance="high" Text=">>> Cleaning version files $(ProjectDir)wwwroot\*.min.*" />
+
+		<ItemGroup>
+			<FilesToDelete Include="$(ProjectDir)wwwroot\usync.*.min.*"/>
+		</ItemGroup>
+		<Delete Files="@(FilesToDelete)" />
+		
+		<Message Importance="high" Text=">>> Building minified scripts [$(PackageVersion)]" />
+		<Exec Command="gulp minify --release $(PackageVersion)" />
+	</Target>
+
 	<ItemGroup>
 		<SupportedPlatform Include="browser" />
 	</ItemGroup>
