@@ -31,6 +31,25 @@ namespace uSync.Core.Mapping
             Constants.PropertyEditors.Aliases.NestedContent
         };
 
+        public override string GetImportValue(string value, string editorAlias)
+        {
+            var stringValue = GetValueAs<string>(value);
+            if (string.IsNullOrWhiteSpace(stringValue) || !stringValue.DetectIsJson()) return value.ToString();
+
+            var nestedJson = JsonConvert.DeserializeObject<JArray>(stringValue);
+            if (nestedJson == null || !nestedJson.Any()) return value.ToString();
+
+            foreach (var item in nestedJson.Cast<JObject>())
+            {
+                var docType = GetDocType(item, this.docTypeAliasValue);
+                if (docType == null) continue;
+
+                GetImportProperties(item, docType);
+            }
+
+            return JsonConvert.SerializeObject(nestedJson);
+        }
+
         public override string GetExportValue(object value, string editorAlias)
         {
             var stringValue = GetValueAs<string>(value);

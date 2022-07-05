@@ -40,6 +40,27 @@ namespace uSync.Core.Mapping
         }
 
         /// <summary>
+        ///  Get the import value for properties used in the this JObject
+        /// </summary>
+        protected JObject GetImportProperties(JObject item, IContentType docType)
+        {
+            foreach (var property in docType.CompositionPropertyTypes)
+            {
+                if (item.ContainsKey(property.Alias))
+                {
+                    var value = item[property.Alias];
+                    if (value != null)
+                    {
+                        var mappedVal = mapperCollection.Value.GetImportValue(value.ToString(), property.PropertyEditorAlias);
+                        item[property.Alias] = mappedVal?.ToString() ?? null; // .GetJsonTokenValue();
+                    }
+                }
+            }
+
+            return item;
+        }
+
+        /// <summary>
         ///  get the export value for the properties used in this JObject
         /// </summary>
         protected JObject GetExportProperties(JObject item, IContentType docType)

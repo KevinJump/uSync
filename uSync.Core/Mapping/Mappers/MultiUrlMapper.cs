@@ -23,6 +23,13 @@ namespace uSync.Core.Mapping
             Constants.PropertyEditors.Aliases.MultiUrlPicker
         };
 
+
+        public override string GetImportValue(string value, string editorAlias)
+        {
+            if (string.IsNullOrWhiteSpace(value)) return null;
+            return base.GetImportValue(value, editorAlias);
+        }
+
         public override IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)
         {
             var links = JsonConvert.DeserializeObject<IEnumerable<LinkDto>>(value.ToString());
