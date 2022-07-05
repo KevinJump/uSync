@@ -35,6 +35,25 @@ namespace uSync8.ContentEdition.Mapping
             this.dataTypeService = dataTypeService;
         }
 
+        protected JObject GetImportProperties(JObject item, IContentType docType)
+        {
+            foreach (var property in docType.CompositionPropertyTypes)
+            {
+                if (item.ContainsKey(property.Alias))
+                {
+                    var value = item[property.Alias];
+                    if (value != null)
+                    {
+                        var mappedVal = SyncValueMapperFactory.GetImportValue((string)value, property.PropertyEditorAlias);
+                        item[property.Alias] = mappedVal?.ToString(); // .GetJsonTokenValue();
+                    }
+                }
+            }
+
+            return item;
+
+        }
+
         /// <summary>
         ///  get the export value for the properties used in this JObject
         /// </summary>
@@ -47,11 +66,11 @@ namespace uSync8.ContentEdition.Mapping
                     var value = item[property.Alias];
                     if (value != null)
                     {
-                        var mappedVal = SyncValueMapperFactory.GetExportValue(value, new SyncPropertyMapInfo {
+                        var mappedVal = SyncValueMapperFactory.GetExportValue(value, new SyncPropertyMapInfo
+                        {
                             PropertyType = property,
                             ContentTypeAlias = docType.Alias
                         });
-
                         item[property.Alias] = mappedVal; // .GetJsonTokenValue();
                     }
                 }

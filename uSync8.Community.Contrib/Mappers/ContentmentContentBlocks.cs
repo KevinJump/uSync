@@ -32,6 +32,35 @@ namespace uSync8.Community.Contrib.Mappers
         };
 
         /// <summary>
+        ///  Import 
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="editorAlias"></param>
+        /// <returns></returns>
+        public override string GetImportValue(string value, string editorAlias)
+        {
+            var stringValue = GetValueAs<string>(value);
+            if (string.IsNullOrWhiteSpace(stringValue) || !stringValue.DetectIsJson()) return value.ToString();
+
+            var elements = JsonConvert.DeserializeObject<JArray>(stringValue);
+            if (elements == null || !elements.Any()) return value.ToString();
+
+            foreach (var item in elements.Cast<JObject>())
+            {
+                var itemValue = item.Value<JObject>("value");
+                if (itemValue == null) continue;
+
+                var doctype = GetDocTypeByKey(item, "elementType");
+                if (doctype == null) continue;
+
+                GetImportProperties(itemValue, doctype);
+            }
+
+            return JsonConvert.SerializeObject(elements, Formatting.Indented);
+        }
+
+
+        /// <summary>
         ///  get the formatted export value, 
         /// </summary>
         /// <remarks>

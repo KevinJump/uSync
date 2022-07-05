@@ -32,6 +32,37 @@ namespace uSync8.ContentEdition.Mapping.Mappers
             "Umbraco.BlockList"
         };
 
+        public override string GetImportValue(string value, string editorAlias)
+        {
+            if (value == null) return string.Empty;
+
+            var jsonValue = GetJsonValue(value);
+            if (jsonValue == null) return value.ToString();
+
+            foreach (var block in contentBlocks)
+            {
+                if (jsonValue.ContainsKey(block))
+                {
+                    var contentData = jsonValue.Value<JArray>(block);
+                    if (contentData == null) continue;
+
+                    foreach (var item in contentData.Cast<JObject>())
+                    {
+                        var doctype = GetDocTypeByKey(item, docTypeKeyAlias);
+                        if (doctype == null) continue;
+
+                        GetImportProperties(item, doctype);
+                    }
+
+                }
+                return JsonConvert.SerializeObject(jsonValue, Formatting.Indented);
+            }
+
+            return value.ToString();
+
+        }
+
+
         public override string GetExportValue(object value, string editorAlias)
         {
             if (value == null) return string.Empty;

@@ -31,6 +31,30 @@ namespace uSync8.Community.Contrib.Mappers
             "bentoitem.editor"
         };
 
+        public override string GetImportValue(string value, string editorAlias)
+        {
+            if (value == null) return string.Empty;
+
+            var jsonValue = GetJsonValue(value);
+            if (jsonValue == null) return value.ToString();
+
+            if (jsonValue.ContainsKey("contentData"))
+            {
+                var contentValue = jsonValue.Value<JObject>("contentData");
+                if (contentValue == null) return value.ToString();
+
+                var docType = GetDocType(contentValue, this.docTypeAliasValue);
+                if (docType == null) return value.ToString();
+
+                GetImportProperties(contentValue, docType);
+
+                return JsonConvert.SerializeObject(jsonValue, Formatting.Indented);
+            }
+
+            return value.ToString();
+        }
+
+
         /// <summary>
         ///  Get any formatted export values. 
         /// </summary>
