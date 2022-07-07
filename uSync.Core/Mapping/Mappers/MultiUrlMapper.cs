@@ -11,6 +11,7 @@ using uSync.Core.Dependency;
 
 namespace uSync.Core.Mapping
 {
+    [NullableMapper]
     public class MultiUrlMapper : SyncValueMapperBase, ISyncMapper
     {
         public MultiUrlMapper(IEntityService entityService) : base(entityService)

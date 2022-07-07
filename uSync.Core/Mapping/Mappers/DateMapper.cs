@@ -1,5 +1,6 @@
 ﻿using System;
 
+using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Services;
 
 namespace uSync.Core.Mapping
@@ -19,7 +20,7 @@ namespace uSync.Core.Mapping
 
         public override string Name => "Custom DateTimeMapper";
 
-        public override string[] Editors => new string[] { "Umbraco.DateTime" };
+        public override string[] Editors => new string[] { Constants.PropertyEditors.Aliases.DateTime };
 
         public override string GetExportValue(object value, string editorAlias)
         {

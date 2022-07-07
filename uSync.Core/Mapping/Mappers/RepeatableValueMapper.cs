@@ -1,4 +1,5 @@
-﻿using Umbraco.Cms.Core.Services;
+﻿using Umbraco.Cms.Core;
+using Umbraco.Cms.Core.Services;
 
 namespace uSync.Core.Mapping
 {
@@ -13,8 +14,8 @@ namespace uSync.Core.Mapping
 
         public override string Name => "Repeatable Text Mapper";
 
-        public override string[] Editors => new string[] {
-            "Umbraco.MultipleTextstring"
+        public override string[] Editors => new string[] { 
+            Constants.PropertyEditors.Aliases.MultipleTextstring
         };
 
         public override string GetImportValue(string value, string editorAlias)

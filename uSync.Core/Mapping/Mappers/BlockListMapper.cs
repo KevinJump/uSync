@@ -5,15 +5,18 @@ using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
+using Umbraco.Cms.Core;
+using Umbraco.Cms.Core.Models;
+using Umbraco.Cms.Core.PropertyEditors;
 using Umbraco.Cms.Core.Services;
 
 using uSync.Core.Dependency;
 
 namespace uSync.Core.Mapping
 {
-    public class BlockListMapper : SyncNestedValueMapperBase, ISyncMapper
+    public class BlockListMapper : SyncNestedJsonValueMapperBase, ISyncMapper
     {
-        private readonly string docTypeKeyAlias = "contentTypeKey";
+        private readonly string docTypeKeyAlias = BlockEditorPropertyEditor.ContentTypeKeyPropertyKey;
         private readonly string[] contentBlocks = new string[]
         {
             "contentData", "settingsData"
@@ -30,38 +33,36 @@ namespace uSync.Core.Mapping
 
         public override string[] Editors => new string[]
         {
-            "Umbraco.BlockList"
+            Constants.PropertyEditors.Aliases.BlockList
         };
 
-        public override string GetExportValue(object value, string editorAlias)
+        protected override string ProcessValues(JToken jsonValue, string editorAlias, Func<JObject, IContentType, JObject> GetPropertiesMethod)
         {
-            if (value == null) return string.Empty;
-
-            var jsonValue = GetJsonValue(value);
-            if (jsonValue == null) return value.ToString();
-
-            foreach (var block in contentBlocks)
+            if (jsonValue is JObject jObjectValue)
             {
-                if (jsonValue.ContainsKey(block))
+                foreach (var block in contentBlocks)
                 {
-                    var contentData = jsonValue.Value<JArray>(block);
-                    if (contentData == null) continue;
-
-                    foreach (var item in contentData.Cast<JObject>())
+                    if (jObjectValue.ContainsKey(block))
                     {
-                        var doctype = GetDocTypeByKey(item, docTypeKeyAlias);
-                        if (doctype == null) continue;
+                        var contentData = jsonValue.Value<JArray>(block);
+                        if (contentData == null) continue;
 
-                        GetExportProperties(item, doctype);
+                        foreach (var item in contentData.Cast<JObject>())
+                        {
+                            var doctype = GetDocTypeByKey(item, docTypeKeyAlias);
+                            if (doctype == null) continue;
+
+                            GetPropertiesMethod(item, doctype);
+                        }
                     }
-
                 }
-                return JsonConvert.SerializeObject(jsonValue, Formatting.Indented);
+
+                return JsonConvert.SerializeObject(jObjectValue, Formatting.Indented);
             }
 
-            return value.ToString();
-
+            return JsonConvert.SerializeObject(jsonValue, Formatting.Indented);
         }
+
 
         public override IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)
         {

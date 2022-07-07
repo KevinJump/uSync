@@ -83,6 +83,9 @@ namespace uSync.Core.Mapping
             return value;
         }
 
+        /// <summary>
+        ///  cleans and flattens the JSON , so the stuff we import doesn't actually have all the spaces in it. 
+        /// </summary>
         private string GetCleanFlatJson(string stringValue)
         {
             if (string.IsNullOrWhiteSpace(stringValue) || !stringValue.DetectIsJson()) return stringValue;

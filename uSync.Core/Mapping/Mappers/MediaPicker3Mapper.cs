@@ -24,7 +24,7 @@ namespace uSync.Core.Mapping.Mappers
 
         public override string[] Editors => new string[]
         {
-            "Umbraco.MediaPicker3"
+            Constants.PropertyEditors.Aliases.MediaPicker3
         };
 
         public override string GetExportValue(object value, string editorAlias)

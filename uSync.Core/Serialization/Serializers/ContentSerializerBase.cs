@@ -6,6 +6,8 @@ using System.Xml.Linq;
 
 using Microsoft.Extensions.Logging;
 
+using Newtonsoft.Json;
+
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Models.Entities;
@@ -594,6 +596,15 @@ namespace uSync.Core.Serialization.Serializers
             logger.LogTrace("Getting ExportValue [{PropertyEditorAlias}]", propertyType.PropertyEditorAlias);
 
             var exportValue = syncMappers.GetExportValue(value, propertyType.PropertyEditorAlias);
+
+            // TODO: in a perfect world, this is the best answer, don't escape any burried JSON in anyhing
+            // but there might be a couple of property value convertors that don't like their nested json
+            // to not be escaped so we would need to do proper testing. 
+            if (exportValue.DetectIsJson())
+            {
+                var tokenValue = exportValue.GetJsonTokenValue().ExpandAllJsonInToken();
+                return JsonConvert.SerializeObject(tokenValue, Formatting.Indented);
+            }
             logger.LogTrace("Export Value {PropertyEditorAlias} {exportValue}", propertyType.PropertyEditorAlias, exportValue);
             return exportValue;
         }

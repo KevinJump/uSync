@@ -22,6 +22,7 @@ namespace uSync.Core.Mapping
     ///  to do this we would need to map the UDI to something 
     ///  even more generic like a path. 
     /// </remarks>
+    [NullableMapper]
     public class UdiPickerMapper : SyncValueMapperBase, ISyncMapper
     {
         public UdiPickerMapper(IEntityService entityService) : base(entityService)
