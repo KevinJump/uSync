@@ -34,7 +34,7 @@ namespace uSync.Core.Tracking.Impliment
 
             TrackingItem.Many("Property - *", "/Properties/*/Value", "@Culture"),
 
-            TrackingItem.Many("GenericProperty", "/GenericProperties/GenericProperty", "Key")
+            TrackingItem.Many("GenericProperty", "/GenericProperties/GenericProperty", uSyncConstants.Xml.Key)
         };
     }
 }

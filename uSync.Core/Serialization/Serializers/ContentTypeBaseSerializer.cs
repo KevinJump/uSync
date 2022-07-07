@@ -59,7 +59,7 @@ namespace uSync.Core.Serialization.Serializers
 
         protected XElement SerializeInfo(TObject item)
         {
-            return new XElement("Info",
+            return new XElement(uSyncConstants.Xml.Info,
                             new XElement("Name", item.Name),
                             new XElement("Icon", item.Icon),
                             new XElement("Thumbnail", item.Thumbnail),
@@ -77,7 +77,7 @@ namespace uSync.Core.Serialization.Serializers
             foreach (var tab in item.PropertyGroups.OrderBy(x => x.SortOrder))
             {
                 tabs.Add(new XElement("Tab",
-                            new XElement("Key", tab.Key),
+                            new XElement(uSyncConstants.Xml.Key, tab.Key),
                             new XElement("Caption", tab.Name),
                             new XElement("Alias", tab.Alias),
                             new XElement("Type", tab.Type),
@@ -95,9 +95,9 @@ namespace uSync.Core.Serialization.Serializers
             foreach (var property in item.PropertyTypes.OrderBy(x => x.Alias))
             {
                 var propNode = new XElement("GenericProperty",
-                    new XElement("Key", property.Key),
-                    new XElement("Name", property.Name),
-                    new XElement("Alias", property.Alias));
+                    new XElement(uSyncConstants.Xml.Key, property.Key),
+                    new XElement(uSyncConstants.Xml.Name, property.Name),
+                    new XElement(uSyncConstants.Xml.Alias, property.Alias));
 
                 var def = dataTypeService.GetDataType(property.DataTypeId);
                 if (def != null)
@@ -187,8 +187,8 @@ namespace uSync.Core.Serialization.Serializers
                 if (allowedItem != null)
                 {
                     node.Add(new XElement(ItemType,
-                        new XAttribute("Key", allowedItem.Key),
-                        new XAttribute("SortOrder", allowedType.SortOrder), allowedItem.Alias));
+                        new XAttribute(uSyncConstants.Xml.Key, allowedItem.Key),
+                        new XAttribute(uSyncConstants.Xml.SortOrder, allowedType.SortOrder), allowedItem.Alias));
                 }
             }
             return node;
@@ -201,7 +201,7 @@ namespace uSync.Core.Serialization.Serializers
             foreach (var composition in compositions.OrderBy(x => x.Alias))
             {
                 compNode.Add(new XElement("Composition", composition.Alias,
-                    new XAttribute("Key", composition.Key)));
+                    new XAttribute(uSyncConstants.Xml.Key, composition.Key)));
             }
 
             return compNode;
@@ -218,7 +218,7 @@ namespace uSync.Core.Serialization.Serializers
 
             if (node == null) return Enumerable.Empty<uSyncChange>();
 
-            var info = node.Element("Info");
+            var info = node.Element(uSyncConstants.Xml.Info);
             if (info == null) return Enumerable.Empty<uSyncChange>();
 
             List<uSyncChange> changes = new List<uSyncChange>();
@@ -226,17 +226,17 @@ namespace uSync.Core.Serialization.Serializers
             var key = node.GetKey();
             if (item.Key != key)
             {
-                changes.AddUpdate("Key", item.Key, key, "");
+                changes.AddUpdate(uSyncConstants.Xml.Key, item.Key, key, "");
                 item.Key = key;
             }
 
 
             var alias = SetSafeAliasValue(item, node, true);
 
-            var name = info.Element("Name").ValueOrDefault(string.Empty);
+            var name = info.Element(uSyncConstants.Xml.Name).ValueOrDefault(string.Empty);
             if (!string.IsNullOrEmpty(name) && item.Name != name)
             {
-                changes.AddUpdate("Name", item.Name, name, "");
+                changes.AddUpdate(uSyncConstants.Xml.Name, item.Name, name, "");
                 item.Name = name;
             }
 
@@ -289,7 +289,7 @@ namespace uSync.Core.Serialization.Serializers
                 item.IsContainer = isContainer;
             }
 
-            if (!SetMasterFromElement(item, info.Element("Parent")))
+            if (!SetMasterFromElement(item, info.Element(uSyncConstants.Xml.Parent)))
             {
                 SetFolderFromElement(item, info.Element("Folder"));
             }
@@ -336,11 +336,11 @@ namespace uSync.Core.Serialization.Serializers
             {
                 logger.LogDebug("baseNode {0}", baseNode.ToString());
                 var alias = baseNode.Value;
-                var key = baseNode.Attribute("Key").ValueOrDefault(Guid.Empty);
+                var key = baseNode.Attribute(uSyncConstants.Xml.Key).ValueOrDefault(Guid.Empty);
 
                 logger.LogDebug("Structure: {0}", key);
 
-                var itemSortOrder = baseNode.Attribute("SortOrder").ValueOrDefault(sortOrder);
+                var itemSortOrder = baseNode.Attribute(uSyncConstants.Xml.SortOrder).ValueOrDefault(sortOrder);
                 logger.LogDebug("Sort Order: {0}", itemSortOrder);
 
                 IContentTypeBase baseItem = default(IContentTypeBase);
@@ -408,10 +408,10 @@ namespace uSync.Core.Serialization.Serializers
 
             foreach (var propertyNode in propertiesNode.Elements("GenericProperty"))
             {
-                var alias = propertyNode.Element("Alias").ValueOrDefault(string.Empty);
+                var alias = propertyNode.Element(uSyncConstants.Xml.Alias).ValueOrDefault(string.Empty);
                 if (string.IsNullOrEmpty(alias)) continue;
 
-                var key = propertyNode.Element("Key").ValueOrDefault(alias.GetHashCode().ToGuid());
+                var key = propertyNode.Element(uSyncConstants.Xml.Key).ValueOrDefault(alias.GetHashCode().ToGuid());
                 var definitionKey = propertyNode.Element("Definition").ValueOrDefault(Guid.Empty);
                 var propertyEditorAlias = propertyNode.Element("Type").ValueOrDefault(string.Empty);
 
@@ -428,20 +428,20 @@ namespace uSync.Core.Serialization.Serializers
 
                 if (key != Guid.Empty && property.Key != key)
                 {
-                    changes.AddUpdate("Key", property.Key, key, $"{alias}/Key");
+                    changes.AddUpdate(uSyncConstants.Xml.Key, property.Key, key, $"{alias}/Key");
                     property.Key = key;
                 }
 
                 if (property.Alias != alias)
                 {
-                    changes.AddUpdate("Alias", property.Alias, alias, $"{alias}/Alias");
+                    changes.AddUpdate(uSyncConstants.Xml.Alias, property.Alias, alias, $"{alias}/Alias");
                     property.Alias = alias;
                 }
 
-                var name = propertyNode.Element("Name").ValueOrDefault(alias);
+                var name = propertyNode.Element(uSyncConstants.Xml.Name).ValueOrDefault(alias);
                 if (property.Name != name)
                 {
-                    changes.AddUpdate("Name", property.Name, name, $"{alias}/Name");
+                    changes.AddUpdate(uSyncConstants.Xml.Name, property.Name, name, $"{alias}/Name");
                     property.Name = name;
                 }
 
@@ -564,7 +564,7 @@ namespace uSync.Core.Serialization.Serializers
         {
             if (tabNode == null) return string.Empty;
 
-            var alias = tabNode.Attribute("Alias").ValueOrDefault(string.Empty);
+            var alias = tabNode.Attribute(uSyncConstants.Xml.Alias).ValueOrDefault(string.Empty);
             if (!string.IsNullOrWhiteSpace(alias)) return alias;
 
             var name = tabNode.ValueOrDefault(string.Empty);
@@ -752,10 +752,10 @@ namespace uSync.Core.Serialization.Serializers
             foreach (var tab in tabNode.Elements("Tab"))
             {
                 var name = tab.Element("Caption").ValueOrDefault(string.Empty);
-                var alias = tab.Element("Alias").ValueOrDefault(string.Empty);
-                var sortOrder = tab.Element("SortOrder").ValueOrDefault(defaultSort);
+                var alias = tab.Element(uSyncConstants.Xml.Alias).ValueOrDefault(string.Empty);
+                var sortOrder = tab.Element(uSyncConstants.Xml.SortOrder).ValueOrDefault(defaultSort);
                 var tabType = tab.Element("Type").ValueOrDefault(defaultType);
-                var tabKey = tab.Element("Key").ValueOrDefault(Guid.Empty);
+                var tabKey = tab.Element(uSyncConstants.Xml.Key).ValueOrDefault(Guid.Empty);
 
                 // do we block nested tabs ? the file would be corrupt,
                 // but if its introduced later on, we would just work?
@@ -774,25 +774,25 @@ namespace uSync.Core.Serialization.Serializers
                 {
                     if (existing.Alias != alias)
                     {
-                        changes.AddUpdate("Alias", existing.Alias, alias, $"Tabs/{name}/Alias");
+                        changes.AddUpdate(uSyncConstants.Xml.Alias, existing.Alias, alias, $"Tabs/{name}/Alias");
                         existing.Alias = alias;
                     }
 
                     if (existing.Name != name)
                     {
-                        changes.AddUpdate("Alias", existing.Name, name, $"Tabs/{name}/Name");
+                        changes.AddUpdate(uSyncConstants.Xml.Name, existing.Name, name, $"Tabs/{name}/Name");
                         existing.Name = name;
                     }
 
                     if (tabKey != Guid.Empty && existing.Key != tabKey)
                     {
-                        changes.AddUpdate("Key", existing.Key.ToString(), tabKey.ToString(), $"Tabs/{name}/Key");
+                        changes.AddUpdate(uSyncConstants.Xml.Key, existing.Key.ToString(), tabKey.ToString(), $"Tabs/{name}/Key");
                         existing.Key = tabKey;
                     }
 
                     if (existing.SortOrder != sortOrder)
                     {
-                        changes.AddUpdate("SortOrder", existing.SortOrder, sortOrder, $"Tabs/{name}/SortOrder");
+                        changes.AddUpdate(uSyncConstants.Xml.SortOrder, existing.SortOrder, sortOrder, $"Tabs/{name}/SortOrder");
                         existing.SortOrder = sortOrder;
                     }
 
@@ -884,7 +884,7 @@ namespace uSync.Core.Serialization.Serializers
         {
             if (tabNode == null) return string.Empty;
 
-            var alias = tabNode.Element("Alias").ValueOrDefault(string.Empty);
+            var alias = tabNode.Element(uSyncConstants.Xml.Alias).ValueOrDefault(string.Empty);
             if (!string.IsNullOrWhiteSpace(alias)) return alias;
 
             var name = tabNode.Element("Caption").ValueOrDefault(string.Empty);
@@ -956,10 +956,10 @@ namespace uSync.Core.Serialization.Serializers
 
         protected void CleanFolder(TObject item, XElement node)
         {
-            var folderNode = node.Element("Info").Element("Folder");
+            var folderNode = node.Element(uSyncConstants.Xml.Info).Element("Folder");
             if (folderNode != null)
             {
-                var key = folderNode.Attribute("Key").ValueOrDefault(Guid.Empty);
+                var key = folderNode.Attribute(uSyncConstants.Xml.Key).ValueOrDefault(Guid.Empty);
                 if (key != Guid.Empty)
                 {
                     logger.LogDebug("Folder Key {0}", key.ToString());
@@ -977,7 +977,7 @@ namespace uSync.Core.Serialization.Serializers
         {
             logger.LogDebug("{alias} Deserializing Compositions", item.Alias);
 
-            var comps = node?.Element("Info")?.Element("Compositions");
+            var comps = node?.Element(uSyncConstants.Xml.Info)?.Element("Compositions");
             if (comps == null) return Enumerable.Empty<uSyncChange>();
 
             List<IContentTypeComposition> compositions = new List<IContentTypeComposition>();
@@ -985,9 +985,9 @@ namespace uSync.Core.Serialization.Serializers
             foreach (var compositionNode in comps.Elements("Composition"))
             {
                 var alias = compositionNode.Value;
-                var key = compositionNode.Attribute("Key").ValueOrDefault(Guid.Empty);
+                var key = compositionNode.Attribute(uSyncConstants.Xml.Key).ValueOrDefault(Guid.Empty);
 
-                logger.LogDebug("{alias} > Comp {0} {1}", item.Alias, alias, key);
+                logger.LogDebug("{itemAlias} > Comp {alias} {key}", item.Alias, alias, key);
 
                 var type = FindItem(key, alias);
                 if (type != null)
@@ -997,7 +997,7 @@ namespace uSync.Core.Serialization.Serializers
             // compare (but sorted by key) only make the change if it is diffrent.
             if (!Enumerable.SequenceEqual(item.ContentTypeComposition.OrderBy(x => x.Key), compositions.OrderBy(x => x.Key)))
             {
-                var change = uSyncChange.Update("Info", "Compositions",
+                var change = uSyncChange.Update(uSyncConstants.Xml.Info, "Compositions",
                     string.Join(",", item.ContentTypeComposition.Select(x => x.Alias)),
                     string.Join(",", compositions.Select(x => x.Alias)));
 
@@ -1037,7 +1037,7 @@ namespace uSync.Core.Serialization.Serializers
 
             if (masterNode == null) return false;
 
-            var key = masterNode.Attribute("Key").ValueOrDefault(Guid.Empty);
+            var key = masterNode.Attribute(uSyncConstants.Xml.Key).ValueOrDefault(Guid.Empty);
             if (key != Guid.Empty)
             {
                 var entity = entityService.Get(key);
@@ -1162,8 +1162,8 @@ namespace uSync.Core.Serialization.Serializers
                 .Select(x =>
                     new
                     {
-                        Key = (x.Element("Key").ValueOrDefault(Guid.NewGuid()) == Guid.Empty ? Guid.NewGuid() : x.Element("Key").ValueOrDefault(Guid.NewGuid())),
-                        Alias = x.Element("Alias").ValueOrDefault(string.Empty)
+                        Key = (x.Element(uSyncConstants.Xml.Key).ValueOrDefault(Guid.NewGuid()) == Guid.Empty ? Guid.NewGuid() : x.Element(uSyncConstants.Xml.Key).ValueOrDefault(Guid.NewGuid())),
+                        Alias = x.Element(uSyncConstants.Xml.Alias).ValueOrDefault(string.Empty)
                     })
                 .ToDictionary(k => k.Key, a => a.Alias);
 
@@ -1238,9 +1238,9 @@ namespace uSync.Core.Serialization.Serializers
             var sortOrder = 0;
             foreach (var baseNode in structure.Elements(ItemType))
             {
-                if (baseNode.Attribute("SortOrder") == null)
+                if (baseNode.Attribute(uSyncConstants.Xml.SortOrder) == null)
                 {
-                    baseNode.Add(new XAttribute("SortOrder", sortOrder++));
+                    baseNode.Add(new XAttribute(uSyncConstants.Xml.SortOrder, sortOrder++));
                 }
             }
         }

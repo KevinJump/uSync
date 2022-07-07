@@ -75,12 +75,12 @@ namespace uSync.Core.Serialization.Serializers
                 var template = fileService.GetTemplate(item.TemplateId.Value);
                 if (template != null)
                 {
-                    return new XElement("Template",
-                        new XAttribute("Key", template.Key),
+                    return new XElement(uSyncConstants.Xml.Template,
+                        new XAttribute(uSyncConstants.Xml.Key, template.Key),
                         template.Alias);
                 }
             }
-            return new XElement("Template");
+            return new XElement(uSyncConstants.Xml.Template);
         }
 
         private XElement SerailizePublishedStatus(IContent item, SyncSerializerOptions options)
@@ -123,7 +123,6 @@ namespace uSync.Core.Serialization.Serializers
                     if (cultures.IsValidOrBlank(schedule.Culture))
                     {
                         node.Add(new XElement("ContentSchedule",
-                            // new XAttribute("Key", schedule.Id),
                             new XElement("Culture", schedule.Culture),
                             new XElement("Action", schedule.Action),
                             new XElement("Date", schedule.Date.ToString("s"))));

@@ -39,14 +39,14 @@ namespace uSync.Core.Serialization
             var parent = default(TObject);
             var treeItem = default(ITreeEntity);
 
-            var info = node.Element("Info");
+            var info = node.Element(uSyncConstants.Xml.Info);
 
-            var parentNode = info.Element("Parent");
+            var parentNode = info.Element(uSyncConstants.Xml.Parent);
             if (parentNode != null)
             {
                 logger.LogDebug("Finding Parent");
 
-                var parentKey = parentNode.Attribute("Key").ValueOrDefault(Guid.Empty);
+                var parentKey = parentNode.Attribute(uSyncConstants.Xml.Key).ValueOrDefault(Guid.Empty);
                 parent = FindItem(parentKey, parentNode.Value);
                 if (parent != null)
                 {
@@ -63,7 +63,7 @@ namespace uSync.Core.Serialization
                 if (folder != null)
                 {
 
-                    var folderKey = folder.Attribute("Key").ValueOrDefault(Guid.Empty);
+                    var folderKey = folder.Attribute(uSyncConstants.Xml.Key).ValueOrDefault(Guid.Empty);
 
                     logger.LogDebug("Searching for Parent by folder {0}", folderKey);
 
@@ -146,7 +146,6 @@ namespace uSync.Core.Serialization
             {
                 var path = string.Join("/", folders);
                 return new XElement("Folder", path);
-                // new XAttribute("Key", parentKey));
             }
 
             return null;

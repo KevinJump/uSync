@@ -156,9 +156,9 @@ namespace uSync.Core.Serialization.Serializers
             // this means the file stays the same! 
             var key = Int2Guid(item.CultureInfo.LCID);
 
-            return new XElement(ItemType, new XAttribute("Key", key.ToString().ToLower()),
-                new XAttribute("Alias", alias),
-                new XAttribute("Level", level));
+            return new XElement(ItemType, new XAttribute(uSyncConstants.Xml.Key, key.ToString().ToLower()),
+                new XAttribute(uSyncConstants.Xml.Alias, alias),
+                new XAttribute(uSyncConstants.Xml.Level, level));
         }
 
         private Guid Int2Guid(int value)
@@ -226,8 +226,8 @@ namespace uSync.Core.Serialization.Serializers
 
         protected override XElement CleanseNode(XElement node)
         {
-            if (node?.Attribute("Key") != null)
-                node.Attribute("Key").Value = "";
+            if (node?.Attribute(uSyncConstants.Xml.Key) != null)
+                node.Attribute(uSyncConstants.Xml.Key).Value = "";
             return node;
         }
 

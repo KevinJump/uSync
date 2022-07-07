@@ -2,6 +2,27 @@
 {
     public static partial class uSyncConstants
     {
+        public static class Xml
+        {
+            public const string Key = "Key";
+            public const string Alias = "Alias";
+            public const string Level = "Level";
+            public const string Change = "Change";
+
+            public const string Parent = "Parent";
+            public const string Path = "Path";
+
+            public const string Info = "Info";
+            public const string Name = "Name";
+
+            public const string SortOrder = "SortOrder";
+
+            public const string ItemType = "itemType";
+
+            public const string Template = "Template";
+
+        }
+
         // this is our format 'version' - 
         // it only changes when the format of the .config files change
         // we use it to prompt people to do an uptodate export.

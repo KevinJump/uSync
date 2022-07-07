@@ -36,7 +36,7 @@ namespace uSync.Core.Serialization.Serializers
         {
             var item = FindOrCreate(node);
 
-            var info = node?.Element("Info");
+            var info = node?.Element(uSyncConstants.Xml.Info);
             if (info == null)
             {
                 return SyncAttempt<IDomain>.Fail(node.GetAlias(), default(IDomain), ChangeType.Fail, "Missing info section in xml", new ArgumentNullException("Info", "Missing Info Section in XML"));
@@ -58,7 +58,7 @@ namespace uSync.Core.Serialization.Serializers
 
             var rootItem = default(IContent);
 
-            var rootKey = info.Element("Root")?.Attribute("Key").ValueOrDefault(Guid.Empty) ?? Guid.Empty;
+            var rootKey = info.Element("Root")?.Attribute(uSyncConstants.Xml.Key).ValueOrDefault(Guid.Empty) ?? Guid.Empty;
             if (rootKey != Guid.Empty)
             {
                 rootItem = contentService.GetById(rootKey);
@@ -95,10 +95,10 @@ namespace uSync.Core.Serialization.Serializers
         protected override SyncAttempt<XElement> SerializeCore(IDomain item, SyncSerializerOptions options)
         {
             var node = new XElement(ItemType,
-                new XAttribute("Key", item.DomainName.GetDeterministicHashCode().ToGuid()),
-                new XAttribute("Alias", item.DomainName));
+                new XAttribute(uSyncConstants.Xml.Key, item.DomainName.GetDeterministicHashCode().ToGuid()),
+                new XAttribute(uSyncConstants.Xml.Alias, item.DomainName));
 
-            var info = new XElement("Info",
+            var info = new XElement(uSyncConstants.Xml.Info,
                 new XElement("IsWildcard", item.IsWildcard),
                 new XElement("Language", item.LanguageIsoCode));
 
@@ -110,7 +110,7 @@ namespace uSync.Core.Serialization.Serializers
                 if (rootNode != null)
                 {
                     info.Add(new XElement("Root", GetItemPath(rootNode),
-                        new XAttribute("Key", rootNode.Key)));
+                        new XAttribute(uSyncConstants.Xml.Key, rootNode.Key)));
                 }
             }
 

@@ -53,19 +53,19 @@ namespace uSync.Core.Serialization.Serializers
 
             if (item.Key != key)
             {
-                details.AddUpdate("Key", item.Key, key);
+                details.AddUpdate(uSyncConstants.Xml.Key, item.Key, key);
                 item.Key = key;
             }
 
             if (item.Name != name)
             {
-                details.AddUpdate("Name", item.Name, name);
+                details.AddUpdate(uSyncConstants.Xml.Name, item.Name, name);
                 item.Name = name;
             }
 
             if (item.Alias != alias)
             {
-                details.AddUpdate("Alias", item.Alias, alias);
+                details.AddUpdate(uSyncConstants.Xml.Alias, item.Alias, alias);
                 item.Alias = alias;
             }
 
@@ -163,7 +163,7 @@ namespace uSync.Core.Serialization.Serializers
         /// </summary>
         public override bool IsValid(XElement node)
         {
-            if (node?.Element("Info")?.Element("Name") == null) return false;
+            if (node?.Element(uSyncConstants.Xml.Info)?.Element(uSyncConstants.Xml.Name) == null) return false;
             return base.IsValid(node);
         }
 
@@ -175,8 +175,8 @@ namespace uSync.Core.Serialization.Serializers
             if (item is IRelationTypeWithIsDependency dependencyItem)
                 isDependency = dependencyItem.IsDependency;
 
-            node.Add(new XElement("Info",
-                new XElement("Name", item.Name),
+            node.Add(new XElement(uSyncConstants.Xml.Info,
+                new XElement(uSyncConstants.Xml.Name, item.Name),
                 new XElement("ParentType", GetGuidValue(item, nameof(item.ParentObjectType))),
                 new XElement("ChildType", GetGuidValue(item, nameof(item.ChildObjectType))),
                 new XElement("Bidirectional", item.IsBidirectional),

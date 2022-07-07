@@ -128,9 +128,9 @@ namespace uSync.Core.Serialization
         /// <returns></returns>
         protected virtual XElement InitializeBaseNode(TObject item, string alias, int level = 0)
             => new XElement(ItemType,
-                new XAttribute("Key", ItemKey(item).ToString().ToLower()),
-                new XAttribute("Alias", alias),
-                new XAttribute("Level", level));
+                new XAttribute(uSyncConstants.Xml.Key, ItemKey(item).ToString().ToLower()),
+                new XAttribute(uSyncConstants.Xml.Alias, alias),
+                new XAttribute(uSyncConstants.Xml.Level, level));
 
         /// <summary>
         ///  is this a bit of valid xml 
@@ -340,8 +340,8 @@ namespace uSync.Core.Serialization
         {
             if (IsValidOrEmpty(node))
                 return (
-                        key: node.Attribute("Key").ValueOrDefault(Guid.Empty),
-                        alias: node.Attribute("Alias").ValueOrDefault(string.Empty)
+                        key: node.Attribute(uSyncConstants.Xml.Key).ValueOrDefault(Guid.Empty),
+                        alias: node.Attribute(uSyncConstants.Xml.Alias).ValueOrDefault(string.Empty)
                        );
 
             return (key: Guid.Empty, alias: string.Empty);

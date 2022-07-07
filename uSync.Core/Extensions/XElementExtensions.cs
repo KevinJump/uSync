@@ -13,22 +13,23 @@ namespace uSync.Core
         ///  Summary the level (in the tree) for the item represented by the xml
         /// </summary>
         public static int GetLevel(this XElement node)
-            => node.Attribute("Level").ValueOrDefault(0);
+            => node.Attribute(uSyncConstants.Xml.Level).ValueOrDefault(0);
 
         /// <summary>
         ///  the Key (guid) for the item represented by the xml
         /// </summary>
         public static Guid GetKey(this XElement node)
-            => node.Attribute("Key").ValueOrDefault(Guid.Empty);
+            => node.Attribute(uSyncConstants.Xml.Key).ValueOrDefault(Guid.Empty);
 
         /// <summary>
         ///  The alias for the item represented by the xml
         /// </summary>
         public static string GetAlias(this XElement node)
-            => node.Attribute("Alias").ValueOrDefault(string.Empty);
+            => node.Attribute(uSyncConstants.Xml.Alias).ValueOrDefault(string.Empty);
 
         public static int GetItemSortOrder(this XElement node)
-            => node.Element("Info")?.Element("SortOrder").ValueOrDefault(0) ?? 0;
+            => node.Element(uSyncConstants.Xml.Info)?
+                .Element(uSyncConstants.Xml.SortOrder).ValueOrDefault(0) ?? 0;
 
         /// <summary>
         ///  cultures contained within the xml
@@ -51,9 +52,9 @@ namespace uSync.Core
         public static Guid GetParentKey(this XElement node)
         {
             var result = node
-                .Element("Info")?
-                .Element("Parent")?
-                .Attribute("Key").ValueOrDefault(Guid.Empty);
+                .Element(uSyncConstants.Xml.Info)?
+                .Element(uSyncConstants.Xml.Parent)?
+                .Attribute(uSyncConstants.Xml.Key).ValueOrDefault(Guid.Empty);
 
             return result != null && result.HasValue
                 ? result.Value
@@ -68,8 +69,8 @@ namespace uSync.Core
         /// <returns></returns>
         public static string GetPath(this XElement node)
         {
-            return node.Element("Info")?
-                .Element("Path").ValueOrDefault(string.Empty) ?? string.Empty;
+            return node.Element(uSyncConstants.Xml.Info)?
+                .Element(uSyncConstants.Xml.Path).ValueOrDefault(string.Empty) ?? string.Empty;
         }
 
         /// <summary>
@@ -91,9 +92,9 @@ namespace uSync.Core
         public static XElement MakeEmpty(Guid key, SyncActionType change, string alias)
         {
             return new XElement(uSyncConstants.Serialization.Empty,
-                new XAttribute("Key", key),
-                new XAttribute("Alias", alias),
-                new XAttribute("Change", change));
+                new XAttribute(uSyncConstants.Xml.Key, key),
+                new XAttribute(uSyncConstants.Xml.Alias, alias),
+                new XAttribute(uSyncConstants.Xml.Change, change));
         }
 
         /// <summary>
@@ -102,14 +103,16 @@ namespace uSync.Core
         public static SyncActionType GetEmptyAction(this XElement node)
         {
             if (IsEmptyItem(node))
-                return node.Attribute("Change").ValueOrDefault<SyncActionType>(SyncActionType.None);
+                return node.Attribute(uSyncConstants.Xml.Change)
+                    .ValueOrDefault<SyncActionType>(SyncActionType.None);
 
             return SyncActionType.None;
         }
 
         public static string GetItemType(this XElement node)
         {
-            if (node.IsEmptyItem()) return node.Attribute("itemType").ValueOrDefault(string.Empty);
+            if (node.IsEmptyItem()) 
+                return node.Attribute(uSyncConstants.Xml.ItemType).ValueOrDefault(string.Empty);
             return node.Name.LocalName;
         }
 

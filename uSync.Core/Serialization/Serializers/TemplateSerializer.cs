@@ -105,19 +105,19 @@ namespace uSync.Core.Serialization.Serializers
 
             if (item.Key != key)
             {
-                details.AddUpdate("Key", item.Key, key);
+                details.AddUpdate(uSyncConstants.Xml.Key, item.Key, key);
                 item.Key = key;
             }
 
             if (item.Name != name)
             {
-                details.AddUpdate("Name", item.Name, name);
+                details.AddUpdate(uSyncConstants.Xml.Name, item.Name, name);
                 item.Name = name;
             }
 
             if (item.Alias != alias)
             {
-                details.AddUpdate("Alias", item.Alias, alias);
+                details.AddUpdate(uSyncConstants.Xml.Alias, item.Alias, alias);
                 item.Alias = alias;
             }
 

@@ -60,9 +60,9 @@ namespace uSync.Core.Serialization.Serializers
         protected virtual XElement InitializeNode(TObject item, string typeName, SyncSerializerOptions options)
         {
             var node = new XElement(this.ItemType,
-                new XAttribute("Key", item.Key),
-                new XAttribute("Alias", item.Name),
-                new XAttribute("Level", GetLevel(item)));
+                new XAttribute(uSyncConstants.Xml.Key, item.Key),
+                new XAttribute(uSyncConstants.Xml.Alias, item.Name),
+                new XAttribute(uSyncConstants.Xml.Level, GetLevel(item)));
 
             // are we only serizling some cultures ? 
             var cultures = options.GetSetting(uSyncConstants.CultureKey, string.Empty);
@@ -125,7 +125,7 @@ namespace uSync.Core.Serialization.Serializers
         /// </summary>
         protected virtual XElement SerializeInfo(TObject item, SyncSerializerOptions options)
         {
-            var info = new XElement("Info");
+            var info = new XElement(uSyncConstants.Xml.Info);
 
             // find parent. 
             var parentKey = Guid.Empty;
@@ -149,8 +149,8 @@ namespace uSync.Core.Serialization.Serializers
                 }
             }
 
-            info.Add(new XElement("Parent", new XAttribute("Key", parentKey), parentName));
-            info.Add(new XElement("Path", GetItemPath(item)));
+            info.Add(new XElement(uSyncConstants.Xml.Parent, new XAttribute(uSyncConstants.Xml.Key, parentKey), parentName));
+            info.Add(new XElement(uSyncConstants.Xml.Path, GetItemPath(item)));
             info.Add(GetTrashedInfo(item));
             info.Add(new XElement("ContentType", item.ContentType.Alias));
             info.Add(new XElement("CreateDate", item.CreateDate.ToString("s")));
@@ -162,13 +162,13 @@ namespace uSync.Core.Serialization.Serializers
             {
                 if (cultures.IsValidOrBlank(culture))
                 {
-                    title.Add(new XElement("Name", item.GetCultureName(culture),
+                    title.Add(new XElement(uSyncConstants.Xml.Name, item.GetCultureName(culture),
                         new XAttribute("Culture", culture)));
                 }
             }
             info.Add(title);
 
-            info.Add(new XElement("SortOrder", item.SortOrder));
+            info.Add(new XElement(uSyncConstants.Xml.SortOrder, item.SortOrder));
 
             return info;
         }
@@ -184,7 +184,7 @@ namespace uSync.Core.Serialization.Serializers
                 var trashedParent = GetTrashedParent(item);
                 if (trashedParent != null)
                 {
-                    trashed.Add(new XAttribute("Parent", trashedParent.Key));
+                    trashed.Add(new XAttribute(uSyncConstants.Xml.Parent, trashedParent.Key));
                 }
             }
             return trashed;
@@ -289,7 +289,7 @@ namespace uSync.Core.Serialization.Serializers
 
         protected virtual IEnumerable<uSyncChange> DeserializeBase(TObject item, XElement node, SyncSerializerOptions options)
         {
-            var info = node?.Element("Info");
+            var info = node?.Element(uSyncConstants.Xml.Info);
             if (info == null) return Enumerable.Empty<uSyncChange>();
 
             var changes = new List<uSyncChange>();
@@ -305,13 +305,13 @@ namespace uSync.Core.Serialization.Serializers
                 var nodeLevel = CalculateNodeLevel(item, default(TObject));
                 var nodePath = CalculateNodePath(item, default(TObject));
 
-                var parentNode = info.Element("Parent");
+                var parentNode = info.Element(uSyncConstants.Xml.Parent);
                 if (parentNode != null)
                 {
                     var parent = FindParent(parentNode, false);
                     if (parent == null)
                     {
-                        var friendlyPath = info.Element("Path").ValueOrDefault(string.Empty);
+                        var friendlyPath = info.Element(uSyncConstants.Xml.Path).ValueOrDefault(string.Empty);
                         if (!string.IsNullOrWhiteSpace(friendlyPath))
                         {
                             logger.LogDebug("Find Parent failed, will search by path {FriendlyPath}", friendlyPath);
@@ -333,7 +333,7 @@ namespace uSync.Core.Serialization.Serializers
 
                 if (item.ParentId != parentId)
                 {
-                    changes.AddUpdate("Parent", item.ParentId, parentId);
+                    changes.AddUpdate(uSyncConstants.Xml.Parent, item.ParentId, parentId);
                     logger.LogTrace("{Id} Setting Parent {ParentId}", item.Id, parentId);
                     item.ParentId = parentId;
                 }
@@ -342,14 +342,14 @@ namespace uSync.Core.Serialization.Serializers
                 // because they might change without this node being saved).
                 if (item.Path != nodePath)
                 {
-                    changes.AddUpdate("Path", item.Path, nodePath);
+                    changes.AddUpdate(uSyncConstants.Xml.Path, item.Path, nodePath);
                     logger.LogDebug("{Id} Setting Path {idPath} was {oldPath}", item.Id, nodePath, item.Path);
                     item.Path = nodePath;
                 }
 
                 if (item.Level != nodeLevel)
                 {
-                    changes.AddUpdate("Level", item.Level, nodeLevel);
+                    changes.AddUpdate(uSyncConstants.Xml.Level, item.Level, nodeLevel);
                     logger.LogDebug("{Id} Setting Level to {Level} was {OldLevel}", item.Id, nodeLevel, item.Level);
                     item.Level = nodeLevel;
                 }
@@ -359,7 +359,7 @@ namespace uSync.Core.Serialization.Serializers
             var key = node.GetKey();
             if (key != Guid.Empty && item.Key != key)
             {
-                changes.AddUpdate("Key", item.Key, key);
+                changes.AddUpdate(uSyncConstants.Xml.Key, item.Key, key);
                 logger.LogTrace("{Id} Setting Key {Key}", item.Id, key);
                 item.Key = key;
             }
@@ -379,7 +379,7 @@ namespace uSync.Core.Serialization.Serializers
 
         protected IEnumerable<uSyncChange> DeserializeName(TObject item, XElement node, SyncSerializerOptions options)
         {
-            var nameNode = node.Element("Info")?.Element("NodeName");
+            var nameNode = node.Element(uSyncConstants.Xml.Info)?.Element("NodeName");
             if (nameNode == null)
                 return Enumerable.Empty<uSyncChange>();
 
@@ -391,7 +391,7 @@ namespace uSync.Core.Serialization.Serializers
             var name = nameNode.Attribute("Default").ValueOrDefault(string.Empty);
             if (name != string.Empty && item.Name != name)
             {
-                changes.AddUpdate("Name", item.Name, name);
+                changes.AddUpdate(uSyncConstants.Xml.Name, item.Name, name);
                 updated = true;
 
                 item.Name = name;
@@ -401,7 +401,7 @@ namespace uSync.Core.Serialization.Serializers
             {
                 var activeCultures = options.GetDeserializedCultures(node);
 
-                foreach (var cultureNode in nameNode.Elements("Name"))
+                foreach (var cultureNode in nameNode.Elements(uSyncConstants.Xml.Name))
                 {
                     var culture = cultureNode.Attribute("Culture").ValueOrDefault(string.Empty);
                     if (culture == string.Empty) continue;
@@ -580,7 +580,7 @@ namespace uSync.Core.Serialization.Serializers
 
                 item.SortOrder = sortOrder;
 
-                return uSyncChange.Update("SortOrder", "SortOrder", currentSortOrder, sortOrder);
+                return uSyncChange.Update(uSyncConstants.Xml.SortOrder, uSyncConstants.Xml.SortOrder, currentSortOrder, sortOrder);
             }
 
             return null;
@@ -627,7 +627,7 @@ namespace uSync.Core.Serialization.Serializers
         public override bool IsValid(XElement node)
              => node != null
                 && node.GetAlias() != null
-                && node.Element("Info") != null;
+                && node.Element(uSyncConstants.Xml.Info) != null;
 
 
         // these are the functions using the simple 'getItem(alias)' 
@@ -639,7 +639,7 @@ namespace uSync.Core.Serialization.Serializers
 
             var alias = node.GetAlias();
 
-            var parentKey = node.Attribute("Parent").ValueOrDefault(Guid.Empty);
+            var parentKey = node.Attribute(uSyncConstants.Xml.Parent).ValueOrDefault(Guid.Empty);
             if (parentKey != Guid.Empty)
             {
                 item = FindItem(alias, parentKey);
@@ -654,7 +654,7 @@ namespace uSync.Core.Serialization.Serializers
                 parent = FindItem(parentKey);
             }
 
-            var contentTypeAlias = node.Element("Info").Element("ContentType").ValueOrDefault(node.Name.LocalName);
+            var contentTypeAlias = node.Element(uSyncConstants.Xml.Info).Element("ContentType").ValueOrDefault(node.Name.LocalName);
 
             // var contentTypeAlias = node.Name.LocalName;
 
@@ -729,7 +729,7 @@ namespace uSync.Core.Serialization.Serializers
             var attempt = base.SerializeEmpty(item, change, alias);
             if (attempt.Success)
             {
-                attempt.Item.Add(new XAttribute("Level", GetLevel(item)));
+                attempt.Item.Add(new XAttribute(uSyncConstants.Xml.Level, GetLevel(item)));
             }
             return attempt;
         }
@@ -747,7 +747,7 @@ namespace uSync.Core.Serialization.Serializers
             }
 
             // else by level 
-            var parentKey = node.Attribute("Parent").ValueOrDefault(Guid.Empty);
+            var parentKey = node.Attribute(uSyncConstants.Xml.Parent).ValueOrDefault(Guid.Empty);
             if (parentKey != Guid.Empty)
             {
                 var item = FindItem(alias, parentKey);
@@ -811,7 +811,7 @@ namespace uSync.Core.Serialization.Serializers
 
             if (node == null) return default(TObject);
 
-            var key = node.Attribute("Key").ValueOrDefault(Guid.Empty);
+            var key = node.Attribute(uSyncConstants.Xml.Key).ValueOrDefault(Guid.Empty);
             if (key != Guid.Empty)
             {
                 logger.LogTrace("Looking for Parent by Key {Key}", key);
@@ -882,16 +882,16 @@ namespace uSync.Core.Serialization.Serializers
         /// </remarks>
         protected override bool HasParentItem(XElement node)
         {
-            var info = node.Element("Info");
-            var parentNode = info?.Element("Parent");
+            var info = node.Element(uSyncConstants.Xml.Info);
+            var parentNode = info?.Element(uSyncConstants.Xml.Parent);
             if (parentNode == null) return true;
 
-            if (parentNode.Attribute("Key").ValueOrDefault(Guid.Empty) == Guid.Empty) return true;
+            if (parentNode.Attribute(uSyncConstants.Xml.Key).ValueOrDefault(Guid.Empty) == Guid.Empty) return true;
 
             var parent = FindParent(parentNode, false);
             if (parent == null)
             {
-                var friendlyPath = info.Element("Path").ValueOrDefault(string.Empty);
+                var friendlyPath = info.Element(uSyncConstants.Xml.Path).ValueOrDefault(string.Empty);
                 if (!string.IsNullOrWhiteSpace(friendlyPath))
                 {
                     parent = FindParentByPath(friendlyPath, true);

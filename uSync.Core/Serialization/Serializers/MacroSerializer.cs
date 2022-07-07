@@ -32,14 +32,14 @@ namespace uSync.Core.Serialization.Serializers
         {
             var details = new List<uSyncChange>();
 
-            if (node.Element("Name") == null)
+            if (node.Element(uSyncConstants.Xml.Name) == null)
                 throw new ArgumentNullException("XML missing Name parameter");
 
             var item = default(IMacro);
 
             var key = node.GetKey();
             var alias = node.GetAlias();
-            var name = node.Element("Name").ValueOrDefault(string.Empty);
+            var name = node.Element(uSyncConstants.Xml.Name).ValueOrDefault(string.Empty);
 
             var macroSource = node.Element("MacroSource").ValueOrDefault(string.Empty);
             // var macroType = node.Element("MacroType").ValueOrDefault(MacroTypes.PartialView);
@@ -62,19 +62,19 @@ namespace uSync.Core.Serialization.Serializers
 
             if (item.Key != key)
             {
-                details.AddUpdate("Key", item.Key, key);
+                details.AddUpdate(uSyncConstants.Xml.Key, item.Key, key);
                 item.Key = key;
             }
 
             if (item.Name != name)
             {
-                details.AddUpdate("Name", item.Name, name);
+                details.AddUpdate(uSyncConstants.Xml.Name, item.Name, name);
                 item.Name = name;
             }
 
             if (item.Alias != alias)
             {
-                details.AddUpdate("Alias", item.Alias, alias);
+                details.AddUpdate(uSyncConstants.Xml.Alias, item.Alias, alias);
                 item.Alias = alias;
             }
 
@@ -135,10 +135,10 @@ namespace uSync.Core.Serialization.Serializers
                 foreach (var propNode in properties.Elements("Property"))
                 {
 
-                    var propertyAlias = propNode.Element("Alias").ValueOrDefault(string.Empty);
+                    var propertyAlias = propNode.Element(uSyncConstants.Xml.Alias).ValueOrDefault(string.Empty);
                     var editorAlias = propNode.Element("EditorAlias").ValueOrDefault(string.Empty);
-                    var propertyName = propNode.Element("Name").ValueOrDefault(string.Empty);
-                    var sortOrder = propNode.Element("SortOrder").ValueOrDefault(0);
+                    var propertyName = propNode.Element(uSyncConstants.Xml.Name).ValueOrDefault(string.Empty);
+                    var sortOrder = propNode.Element(uSyncConstants.Xml.SortOrder).ValueOrDefault(0);
 
                     logger.LogDebug(" > Property {0} {1} {2} {3}", propertyAlias, editorAlias, propertyName, sortOrder);
 
@@ -177,8 +177,8 @@ namespace uSync.Core.Serialization.Serializers
             else
             {
                 var aliases = properties.Elements("Property")
-                    .Where(x => x.Element("Alias").ValueOrDefault(string.Empty) != string.Empty)
-                    .Select(x => x.Element("Alias").ValueOrDefault(string.Empty))
+                    .Where(x => x.Element(uSyncConstants.Xml.Alias).ValueOrDefault(string.Empty) != string.Empty)
+                    .Select(x => x.Element(uSyncConstants.Xml.Alias).ValueOrDefault(string.Empty))
                     .ToList();
 
                 removalKeys = item.Properties.Values.Where(x => !aliases.Contains(x.Alias))
@@ -197,7 +197,7 @@ namespace uSync.Core.Serialization.Serializers
         {
             var node = this.InitializeBaseNode(item, item.Alias);
 
-            node.Add(new XElement("Name", item.Name));
+            node.Add(new XElement(uSyncConstants.Xml.Name, item.Name));
             node.Add(new XElement("MacroSource", item.MacroSource));
             // node.Add(new XElement("MacroType", item.MacroType));
             node.Add(new XElement("UseInEditor", item.UseInEditor));
@@ -214,9 +214,9 @@ namespace uSync.Core.Serialization.Serializers
                 if (property != null)
                 {
                     properties.Add(new XElement("Property",
-                        new XElement("Name", property.Name),
-                        new XElement("Alias", property.Alias),
-                        new XElement("SortOrder", property.SortOrder),
+                        new XElement(uSyncConstants.Xml.Name, property.Name),
+                        new XElement(uSyncConstants.Xml.Alias, property.Alias),
+                        new XElement(uSyncConstants.Xml.SortOrder, property.SortOrder),
                         new XElement("EditorAlias", property.EditorAlias)));
                 }
             }

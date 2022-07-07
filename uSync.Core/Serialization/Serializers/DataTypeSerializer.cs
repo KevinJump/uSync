@@ -46,8 +46,8 @@ namespace uSync.Core.Serialization.Serializers
 
         protected override SyncAttempt<IDataType> DeserializeCore(XElement node, SyncSerializerOptions options)
         {
-            var info = node.Element("Info");
-            var name = info.Element("Name").ValueOrDefault(string.Empty);
+            var info = node.Element(uSyncConstants.Xml.Info);
+            var name = info.Element(uSyncConstants.Xml.Name).ValueOrDefault(string.Empty);
             var key = node.GetKey();
 
             var attempt = FindOrCreate(node);
@@ -60,13 +60,13 @@ namespace uSync.Core.Serialization.Serializers
             // basic
             if (item.Name != name)
             {
-                details.AddUpdate("Name", item.Name, name, "Name");
+                details.AddUpdate(uSyncConstants.Xml.Name, item.Name, name, uSyncConstants.Xml.Name);
                 item.Name = name;
             }
 
             if (item.Key != key)
             {
-                details.AddUpdate("Key", item.Key, key, "Key");
+                details.AddUpdate(uSyncConstants.Xml.Key, item.Key, key, uSyncConstants.Xml.Key);
                 item.Key = key;
             }
 
@@ -179,8 +179,8 @@ namespace uSync.Core.Serialization.Serializers
         {
             var node = InitializeBaseNode(item, item.Name, item.Level);
 
-            var info = new XElement("Info",
-                new XElement("Name", item.Name),
+            var info = new XElement(uSyncConstants.Xml.Info,
+                new XElement(uSyncConstants.Xml.Name, item.Name),
                 new XElement("EditorAlias", item.EditorAlias),
                 new XElement("DatabaseType", item.DatabaseType));
             // new XElement("SortOrder", item.SortOrder));
@@ -248,7 +248,7 @@ namespace uSync.Core.Serialization.Serializers
             => propertyEditors.FirstOrDefault(x => x.Alias == alias);
 
         protected override string GetItemBaseType(XElement node)
-            => node.Element("Info").Element("EditorAlias").ValueOrDefault(string.Empty);
+            => node.Element(uSyncConstants.Xml.Info).Element("EditorAlias").ValueOrDefault(string.Empty);
 
         public override IDataType FindItem(int id)
             => dataTypeService.GetDataType(id);

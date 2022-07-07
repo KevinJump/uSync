@@ -53,8 +53,8 @@ namespace uSync.Core.Serialization.Serializers
             var parent = item.ContentTypeComposition.FirstOrDefault(x => x.Id == item.ParentId);
             if (parent != null)
             {
-                info.Add(new XElement("Parent", parent.Alias,
-                            new XAttribute("Key", parent.Key)));
+                info.Add(new XElement(uSyncConstants.Xml.Parent, parent.Alias,
+                            new XAttribute(uSyncConstants.Xml.Key, parent.Key)));
             }
             else if (item.Level != 1)
             {
@@ -99,7 +99,7 @@ namespace uSync.Core.Serialization.Serializers
                 foreach (var template in item.AllowedTemplates.OrderBy(x => x.Alias))
                 {
                     node.Add(new XElement("Template", template.Alias,
-                        new XAttribute("Key", template.Key)));
+                        new XAttribute(uSyncConstants.Xml.Key, template.Key)));
                 }
             }
 
@@ -227,7 +227,7 @@ namespace uSync.Core.Serialization.Serializers
 
         private IEnumerable<uSyncChange> DeserializeTemplates(IContentType item, XElement node)
         {
-            var templates = node?.Element("Info")?.Element("AllowedTemplates");
+            var templates = node?.Element(uSyncConstants.Xml.Info)?.Element("AllowedTemplates");
             if (templates == null) return Enumerable.Empty<uSyncChange>();
 
             var allowedTemplates = new List<ITemplate>();
@@ -237,7 +237,7 @@ namespace uSync.Core.Serialization.Serializers
             foreach (var template in templates.Elements("Template"))
             {
                 var alias = template.Value;
-                var key = template.Attribute("Key").ValueOrDefault(Guid.Empty);
+                var key = template.Attribute(uSyncConstants.Xml.Key).ValueOrDefault(Guid.Empty);
 
                 var templateItem = default(ITemplate);
 
@@ -396,9 +396,9 @@ namespace uSync.Core.Serialization.Serializers
 
         protected override XElement CleanseNode(XElement node)
         {
-            if (!_capabilities.HasHistoryCleanup && node.Element("Info")?.Element(_historyCleanupName) != null)
+            if (!_capabilities.HasHistoryCleanup && node.Element(uSyncConstants.Xml.Info)?.Element(_historyCleanupName) != null)
             {
-                node.Element("Info").Element(_historyCleanupName).Remove();
+                node.Element(uSyncConstants.Xml.Info).Element(_historyCleanupName).Remove();
             }
 
             return base.CleanseNode(node);

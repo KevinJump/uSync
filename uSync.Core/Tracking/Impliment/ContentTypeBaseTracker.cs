@@ -34,7 +34,7 @@ namespace uSync.Core.Tracking.Impliment
             TrackingItem.Many("Allowed child node types", "/Structure/MemberType", "@Key"),
 
 
-            TrackingItem.Many("Property", "/GenericProperties/GenericProperty", "Key", "Name"),
+            TrackingItem.Many("Property", "/GenericProperties/GenericProperty", uSyncConstants.Xml.Key, "Name"),
             TrackingItem.Many("Groups", "/Tabs/Tab", "Caption", "Caption")
         };
     }

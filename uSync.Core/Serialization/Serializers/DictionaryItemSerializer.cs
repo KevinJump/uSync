@@ -29,13 +29,13 @@ namespace uSync.Core.Serialization.Serializers
         {
             var item = FindItem(node);
 
-            var info = node.Element("Info");
+            var info = node.Element(uSyncConstants.Xml.Info);
             var alias = node.GetAlias();
 
             var details = new List<uSyncChange>();
 
             Guid? parentKey = null;
-            var parentItemKey = info.Element("Parent").ValueOrDefault(string.Empty);
+            var parentItemKey = info.Element(uSyncConstants.Xml.Parent).ValueOrDefault(string.Empty);
             if (parentItemKey != string.Empty)
             {
                 var parent = localizationService.GetDictionaryItemByKey(parentItemKey);
@@ -65,7 +65,7 @@ namespace uSync.Core.Serialization.Serializers
 
             if (item.Key != key)
             {
-                details.AddUpdate("Key", item.Key, key);
+                details.AddUpdate(uSyncConstants.Xml.Key, item.Key, key);
                 item.Key = key;
             }
 
@@ -151,14 +151,14 @@ namespace uSync.Core.Serialization.Serializers
             if (!string.IsNullOrWhiteSpace(cultures))
                 node.Add(new XAttribute(uSyncConstants.CultureKey, cultures));
 
-            var info = new XElement("Info");
+            var info = new XElement(uSyncConstants.Xml.Info);
 
             if (item.ParentId.HasValue)
             {
                 var parent = FindItem(item.ParentId.Value);
                 if (parent != null)
                 {
-                    info.Add(new XElement("Parent", parent.ItemKey));
+                    info.Add(new XElement(uSyncConstants.Xml.Parent, parent.ItemKey));
                 }
             }
 

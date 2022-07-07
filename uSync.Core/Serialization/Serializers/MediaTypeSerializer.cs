@@ -42,8 +42,8 @@ namespace uSync.Core.Serialization.Serializers
             var parent = item.ContentTypeComposition.FirstOrDefault(x => x.Id == item.ParentId);
             if (parent != null)
             {
-                info.Add(new XElement("Parent", parent.Alias,
-                    new XAttribute("Key", parent.Key)));
+                info.Add(new XElement(uSyncConstants.Xml.Parent, parent.Alias,
+                    new XAttribute(uSyncConstants.Xml.Key, parent.Key)));
             }
             else if (item.Level != 1)
             {
