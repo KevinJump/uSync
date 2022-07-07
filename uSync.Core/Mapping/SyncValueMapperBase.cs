@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using Umbraco.Cms.Core;
@@ -15,9 +16,15 @@ namespace uSync.Core.Mapping
     {
         protected readonly IEntityService entityService;
 
+        private readonly bool _hasNullableValue = false;
+
         public SyncValueMapperBase(IEntityService entityService)
         {
             this.entityService = entityService;
+
+            var meta = GetType().GetCustomAttribute<NullableMapperAttribute>(false);
+            if (meta != null) _hasNullableValue = true;
+
         }
 
         public abstract string Name { get; }
@@ -31,7 +38,14 @@ namespace uSync.Core.Mapping
             => Enumerable.Empty<uSyncDependency>();
 
         public virtual string GetExportValue(object value, string editorAlias)
-            => value.ToString();
+        {
+            // if this is a nullable value, we return null when its blank 
+            if (_hasNullableValue && (value == null || (value is string valueString && string.IsNullOrWhiteSpace(valueString))))
+                return null;
+
+            // default behavior is to string - which returns "" when null. 
+            return value.ToString();
+        }
 
         public virtual string GetImportValue(string value, string editorAlias)
             => value;

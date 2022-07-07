@@ -6,6 +6,8 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 using Umbraco.Cms.Core;
+using Umbraco.Cms.Core.Models;
+using Umbraco.Cms.Core.PropertyEditors;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Extensions;
 
@@ -13,9 +15,10 @@ using uSync.Core.Dependency;
 
 namespace uSync.Core.Mapping
 {
-    public class NestedContentMapper : SyncNestedValueMapperBase, ISyncMapper
+    public class NestedContentMapper : SyncNestedJsonValueMapperBase, ISyncMapper
     {
-        private readonly string docTypeAliasValue = "ncContentTypeAlias";
+        private readonly string docTypeAliasValue = NestedContentPropertyEditor.ContentTypeAliasPropertyKey;
+        
         public NestedContentMapper(
             IEntityService entityService,
             Lazy<SyncValueMapperCollection> mapperCollection,
@@ -31,42 +34,21 @@ namespace uSync.Core.Mapping
             Constants.PropertyEditors.Aliases.NestedContent
         };
 
-        public override string GetImportValue(string value, string editorAlias)
+        protected override string ProcessValues(JToken jsonValue, string editorAlias, Func<JObject, IContentType, JObject> GetPropertiesMethod)
         {
-            var stringValue = GetValueAs<string>(value);
-            if (string.IsNullOrWhiteSpace(stringValue) || !stringValue.DetectIsJson()) return value.ToString();
-
-            var nestedJson = JsonConvert.DeserializeObject<JArray>(stringValue);
-            if (nestedJson == null || !nestedJson.Any()) return value.ToString();
-
-            foreach (var item in nestedJson.Cast<JObject>())
+            if (jsonValue is JArray nestedJson)
             {
-                var docType = GetDocType(item, this.docTypeAliasValue);
-                if (docType == null) continue;
+                foreach (var item in nestedJson.Cast<JObject>())
+                {
+                    var docType = GetDocType(item, this.docTypeAliasValue);
+                    if (docType == null) continue;
 
-                GetImportProperties(item, docType);
+                    GetPropertiesMethod(item, docType);
+                }
+                return JsonConvert.SerializeObject(nestedJson, Formatting.Indented);
             }
 
-            return JsonConvert.SerializeObject(nestedJson);
-        }
-
-        public override string GetExportValue(object value, string editorAlias)
-        {
-            var stringValue = GetValueAs<string>(value);
-            if (string.IsNullOrWhiteSpace(stringValue) || !stringValue.DetectIsJson()) return value.ToString();
-
-            var nestedJson = JsonConvert.DeserializeObject<JArray>(stringValue);
-            if (nestedJson == null || !nestedJson.Any()) return value.ToString();
-
-            foreach (var item in nestedJson.Cast<JObject>())
-            {
-                var docType = GetDocType(item, this.docTypeAliasValue);
-                if (docType == null) continue;
-
-                GetExportProperties(item, docType);
-            }
-
-            return JsonConvert.SerializeObject(nestedJson);
+            return JsonConvert.SerializeObject(jsonValue, Formatting.Indented);
         }
 
         public override IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)

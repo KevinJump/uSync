@@ -11,6 +11,7 @@ using uSync.Core.Dependency;
 
 namespace uSync.Core.Mapping
 {
+    [NullableMapper]
     public class MultiUrlMapper : SyncValueMapperBase, ISyncMapper
     {
         public MultiUrlMapper(IEntityService entityService) : base(entityService)
@@ -22,13 +23,6 @@ namespace uSync.Core.Mapping
         public override string[] Editors => new string[] {
             Constants.PropertyEditors.Aliases.MultiUrlPicker
         };
-
-
-        public override string GetImportValue(string value, string editorAlias)
-        {
-            if (string.IsNullOrWhiteSpace(value)) return null;
-            return base.GetImportValue(value, editorAlias);
-        }
 
         public override IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)
         {

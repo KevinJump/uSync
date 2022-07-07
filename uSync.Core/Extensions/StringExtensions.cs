@@ -116,5 +116,12 @@ namespace uSync.Core
                 return hash1 + (hash2 * 1566083941);
             }
         }
+
+        /// <summary>
+        ///  Is the object a string is it null or blank ?
+        /// </summary>
+        public static bool IsObjectNullOrEmptyString(this object value)
+            => value == null || (value is string valueString && string.IsNullOrWhiteSpace(valueString));
+
     }
 }
