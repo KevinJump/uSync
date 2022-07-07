@@ -1,4 +1,5 @@
 ﻿
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 using Umbraco.Extensions;
@@ -58,23 +59,56 @@ namespace uSync.Core
                         jObject[property.Name] = jObject[property.Name].ExpandAllJsonInToken();
                     }
                     break;
+                case JValue jValue:
+                    if (jValue.Value is null) return null;
+                    return ExpandStringValue(token.ToString());
                 default:
-                    var stringValue = token.ToString();
-                    if (stringValue.DetectIsJson())
-                    {
-                        try
-                        {
-                            return JToken.Parse(stringValue).ExpandAllJsonInToken();
-                        }
-                        catch
-                        {
-                            return stringValue;
-                        }
-                    }
-                    break;
+                    return ExpandStringValue(token.ToString());
             }
 
             return token.ToString().GetJsonTokenValue();
+        }
+
+        private static JToken ExpandStringValue(string stringValue)
+        {
+            if (stringValue.DetectIsJson())
+            {
+                try
+                {
+                    return JToken.Parse(stringValue).ExpandAllJsonInToken();
+                }
+                catch
+                {
+                    return stringValue;
+                }
+            }
+
+            return stringValue.GetJsonTokenValue();
+        }
+
+
+        public static JToken GetJTokenFromObject(this object value)
+        {
+            var stringValue = value.GetValueAs<string>();
+            if (string.IsNullOrWhiteSpace(stringValue) || !stringValue.DetectIsJson()) return null;
+
+            try
+            {
+                var jsonToken = JsonConvert.DeserializeObject<JToken>(stringValue);
+                return jsonToken;
+            }
+            catch
+            {
+                return default;
+            }
+        }
+
+        private static TObject GetValueAs<TObject>(this object value)
+        {
+            if (value == null) return default;
+            var attempt = value.TryConvertTo<TObject>();
+            if (!attempt) return default;
+            return attempt.Result;
         }
     }
 }
