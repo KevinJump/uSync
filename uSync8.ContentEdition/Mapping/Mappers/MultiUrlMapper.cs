@@ -31,6 +31,8 @@ namespace uSync8.ContentEdition.Mapping.Mappers
 
         public override string GetExportValue(object value, string editorAlias)
         {
+            // additionaly make sure we nullify the string on export 
+            if (value == null || (value is string stringValue && string.IsNullOrWhiteSpace(stringValue))) return null;
             return base.GetExportValue(value, editorAlias);
         }
 
