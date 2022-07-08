@@ -1,4 +1,7 @@
 ﻿
+using System.Diagnostics;
+using System.Reflection;
+
 using Umbraco.Cms.Core.Composing;
 using Umbraco.Cms.Core.DependencyInjection;
 using Umbraco.Cms.Core.Manifest;
@@ -34,19 +37,23 @@ namespace uSync.Backoffice.Assets
     {
         public void Filter(List<PackageManifest> manifests)
         {
+            var assembly = typeof(uSyncAssetManifestFilter).Assembly;
+            FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
+            string version = fileVersionInfo.ProductVersion;
+            
             manifests.Add(new PackageManifest
             {
                 PackageName = uSyncConstants.Package.Name,
-                Version = typeof(uSyncAssetManifestFilter).Assembly.GetName().Version.ToString(3),
+                Version = assembly.GetName().Version.ToString(3),
                 AllowPackageTelemetry = true,
                 BundleOptions = BundleOptions.None,
                 Scripts = new[]
                 {
-                    uSyncConstants.Package.PluginPath + "/usync.10.0.0.min.js"
+                    $"{uSyncConstants.Package.PluginPath}/usync.{version}.min.js"
                 },
                 Stylesheets = new[]
                 {
-                    uSyncConstants.Package.PluginPath + "/usync.10.0.0.min.css"
+                    $"{uSyncConstants.Package.PluginPath}/usync.{version}.min.css"
                 }
             }); ;
         }
