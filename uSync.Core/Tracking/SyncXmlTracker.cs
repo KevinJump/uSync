@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml.Linq;
 using System.Xml.XPath;
 
@@ -57,6 +58,9 @@ namespace uSync.Core.Tracking
 
         public IEnumerable<uSyncChange> GetChanges(XElement target, XElement source, SyncSerializerOptions options)
         {
+            if (TrackingItems == null)
+                return Enumerable.Empty<uSyncChange>();
+
             if (target.IsEmptyItem())
                 return GetEmptyFileChange(target, source).AsEnumerableOfOne();
 
