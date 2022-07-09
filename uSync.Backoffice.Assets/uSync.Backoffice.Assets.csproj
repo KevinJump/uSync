@@ -29,13 +29,4 @@
 		<ProjectReference Include="..\uSync.BackOffice\uSync.BackOffice.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<Content Remove="App_Plugins\uSync\" />
-		<Content Remove="App_Plugins\uSync\config\appsettings-usync-schema.json" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="App_Plugins\uSync\config\" />
-	</ItemGroup>	
-
 </Project>

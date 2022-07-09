@@ -30,6 +30,6 @@
     </PropertyGroup>
 
 	<ItemGroup>
-		<None Include="../assets/usync-logo.png" Pack="true" PackagePath="\" />
+		<None Include="../assets/usync-logo.png" Pack="true" PackagePath="\" Visible="false" />
 	</ItemGroup>
 </Project>
