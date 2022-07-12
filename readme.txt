@@ -16,7 +16,7 @@
  Forums : https://our.umbraco.com/packages/developer-tools/usync/usync/
 
  uSync and uSync.ContentEdition are FREE ✔ You can use them
- on any of your projects as many times as your like. 
+ on any of your projects as many times as you like. 
  
  
  --- 
