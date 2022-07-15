@@ -74,7 +74,7 @@ namespace uSync.Core.Serialization.Serializers
         {
             var tabs = new XElement("Tabs");
 
-            foreach (var tab in item.PropertyGroups.OrderBy(x => x.SortOrder))
+            foreach (var tab in item.PropertyGroups.OrderBy(x => x.Key))
             {
                 tabs.Add(new XElement("Tab",
                             new XElement(uSyncConstants.Xml.Key, tab.Key),
