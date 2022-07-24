@@ -889,7 +889,7 @@ namespace uSync8.Core.Serialization.Serializers
                 }
             }
 
-            return false;
+            return item.ParentId > 0;
         }
 
         private PropertyType GetOrCreateProperty(TObject item,
