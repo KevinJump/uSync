@@ -259,7 +259,6 @@ namespace uSync.Core.Serialization.Serializers
 
         private IEnumerable<uSyncChange> DeserializeSchedules(IContent item, XElement node, SyncSerializerOptions options)
         {
-            logger.LogDebug("Deserialize Schedules");
 
             var changes = new List<uSyncChange>();
             var nodeSchedules = new ContentScheduleCollection();
@@ -269,6 +268,7 @@ namespace uSync.Core.Serialization.Serializers
             var schedules = node.Element("Info")?.Element("Schedule");
             if (schedules != null && schedules.HasElements)
             {
+                logger.LogDebug("Deserialize Schedules {name}", item.Name);
 
                 foreach (var schedule in schedules.Elements("ContentSchedule"))
                 {
@@ -295,8 +295,11 @@ namespace uSync.Core.Serialization.Serializers
             if (currentSchedules != null)
             {
                 // remove things that are in the current but not the import. 
+                var toRemove = currentSchedules.FullSchedule.Where(x => FindSchedule(nodeSchedules, x) == null)
+                    .ToList();
 
-                var toRemove = currentSchedules.FullSchedule.Where(x => FindSchedule(nodeSchedules, x) == null);
+                if (toRemove.Count > 0)
+                    logger.LogDebug("Removing Schedules {name} ({count} to remove)", item.Name, toRemove.Count);
 
                 foreach (var oldItem in toRemove)
                 {
@@ -313,6 +316,7 @@ namespace uSync.Core.Serialization.Serializers
 
                 if (changes.Any())
                 {
+                    logger.LogDebug("Saving Schedule changes: {item}", item.Name);
                     contentService.PersistContentSchedule(item, currentSchedules);
                     return changes;
                 }
