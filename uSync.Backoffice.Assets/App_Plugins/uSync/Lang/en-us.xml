@@ -56,7 +56,7 @@
 		<!-- warning messages -->
 		<key alias="oldformat">
 			<![CDATA[This sync folder is from an older version of uSync. While the sync will work, you will get quicker and cleaner results with a more recent export. 
-		  <a href="https://github.com/KevinJump/uSync8/blob/v8/8.7-main/Changes/format.md" target="_blank"><i class="icon icon-info"></i>info</a>]]>
+		  <a href="https://github.com/KevinJump/uSync/blob/v10/dev/changes/format.md" target="_blank"><i class="icon icon-info"></i>info</a>]]>
 		</key>
 		<key alias="createWarning"><![CDATA[One or more handlers are set to create only. [%0%]. Changes within items may not be synchronized]]></key>
 
