@@ -474,12 +474,23 @@ ul.usync-action-list {
 }
 
 .usync-warning-info {
-    color: #3544b1;
+    background-color: #3544b1;
+    padding: 10px;
+    color: #fff;
+    margin: -20px;
+    border-top-right-radius: 3px;
+    border-top-left-radius: 3px;
+    border-bottom: 2px solid #0d47a1;
 }
 
-.usync-warning-warning {
-    color: #f0ac00;
-}
+    .usync-warning-info a {
+        color: #eeee;
+        text-decoration: underline;
+    }
+
+    .usync-warning-warning {
+        color: #f0ac00;
+    }
 
 .-usync-can-select {
     cursor: pointer;

@@ -61,20 +61,20 @@
     </div>
 
     <umb-box ng-if="!vm.showSpinner && (vm.working || vm.reported)">
+        <umb-box-content ng-if="vm.warnings.message.length > 0">
+            <div class="usync-warning usync-warning-{{vm.warnings.type}}">
+                <span ng-bind-html="vm.warnings.message"></span>
+            </div>
+        </umb-box-content>
+
         <umb-box-content class="usync-progress-box">
             <div ng-if="vm.savings.show || vm.perf > 0"
-                  class="text-right muted usync-perf">
-                <span ng-if="vm.savings.show">{{vm.savings.title}} {{vm.savings.message}} <br/></span>
+                 class="text-right muted usync-perf">
+                <span ng-if="vm.savings.show">{{vm.savings.title}} {{vm.savings.message}} <br /></span>
                 <i ng-if="vm.perf > 0">(in {{vm.perf | number : 0}}ms)</i>
             </div>
             <usync-progress-view update="vm.update" status="vm.status" hide-labels="false">
             </usync-progress-view>
-        </umb-box-content>
-        <umb-box-content ng-if="vm.warnings.message.length > 0">
-            {{vm.warnings.message.length}}
-            <div class="usync-warning usync-warning-{{vm.warnings.type}}">
-                <span ng-bind-html="vm.warnings.message"></span>
-            </div>
         </umb-box-content>
     </umb-box>
 
