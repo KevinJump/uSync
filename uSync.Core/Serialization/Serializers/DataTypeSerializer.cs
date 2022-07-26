@@ -16,6 +16,7 @@ using Umbraco.Cms.Core.Services;
 using Umbraco.Extensions;
 
 using uSync.Core.DataTypes;
+using uSync.Core.Json;
 using uSync.Core.Models;
 
 namespace uSync.Core.Serialization.Serializers
@@ -28,6 +29,8 @@ namespace uSync.Core.Serialization.Serializers
         private readonly ConfigurationSerializerCollection configurationSerializers;
         private readonly PropertyEditorCollection propertyEditors;
         private readonly IConfigurationEditorJsonSerializer jsonSerializer;
+
+        private readonly JsonSerializerSettings _jsonSettings; 
 
         public DataTypeSerializer(IEntityService entityService, ILogger<DataTypeSerializer> logger,
             IDataTypeService dataTypeService,
@@ -42,6 +45,11 @@ namespace uSync.Core.Serialization.Serializers
             this.configurationSerializers = configurationSerializers;
             this.propertyEditors = propertyEditors;
             this.jsonSerializer = jsonSerializer;
+
+            _jsonSettings = new JsonSerializerSettings()
+            {
+                ContractResolver = new uSyncContractResolver()
+            };
         }
 
         protected override SyncAttempt<IDataType> DeserializeCore(XElement node, SyncSerializerOptions options)
@@ -136,7 +144,7 @@ namespace uSync.Core.Serialization.Serializers
                 if (serializer == null)
                 {
                     var configObject = JsonConvert.DeserializeObject(config, item.Configuration.GetType());
-                    if (!IsJsonEqual(item.Configuration, configObject))
+                    if (!IsJsonEqual(item.Configuration, configObject, _jsonSettings))
                     {
                         changes.AddUpdateJson("Config", item.Configuration, configObject, "Configuration");
                         item.Configuration = configObject;
@@ -146,7 +154,7 @@ namespace uSync.Core.Serialization.Serializers
                 {
                     logger.LogTrace("Deserializing Config via {0}", serializer.Name);
                     var configObject = serializer.DeserializeConfig(config, item.Configuration.GetType());
-                    if (!IsJsonEqual(item.Configuration, configObject))
+                    if (!IsJsonEqual(item.Configuration, configObject, _jsonSettings))
                     {
                         changes.AddUpdateJson("Config", item.Configuration, configObject, "Configuration");
                         item.Configuration = configObject;
@@ -164,10 +172,10 @@ namespace uSync.Core.Serialization.Serializers
         ///  tells us if the json for an object is equal, helps when the config objects don't have their
         ///  own Equals functions
         /// </summary>
-        private bool IsJsonEqual(object currentObject, object newObject)
+        private bool IsJsonEqual(object currentObject, object newObject, JsonSerializerSettings jsonSettings)
         {
-            var currentString = JsonConvert.SerializeObject(currentObject, Formatting.None);
-            var newString = JsonConvert.SerializeObject(newObject, Formatting.None);
+            var currentString = JsonConvert.SerializeObject(currentObject, Formatting.None, jsonSettings);
+            var newString = JsonConvert.SerializeObject(newObject, Formatting.None, jsonSettings);
 
             return currentString == newString;
         }
@@ -213,7 +221,7 @@ namespace uSync.Core.Serialization.Serializers
                 string config;
                 if (serializer == null)
                 {
-                    config = JsonConvert.SerializeObject(item.Configuration, Formatting.Indented);
+                    config = JsonConvert.SerializeObject(item.Configuration, Formatting.Indented, _jsonSettings);
                 }
                 else
                 {
