@@ -122,7 +122,9 @@ namespace uSync.BackOffice.Configuration
         [DefaultValue("All")]
         public string FirstBootGroup { get; set; } = "All";
 
-
+        /// <summary>
+        /// Disable the default dashboard (so people can't accedently press the buttons).
+        /// </summary>
         [DefaultValue("false")]
         public bool DisableDashboard { get; set; } = false; 
     }

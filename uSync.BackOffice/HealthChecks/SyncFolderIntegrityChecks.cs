@@ -14,7 +14,9 @@ using uSync.Core;
 
 namespace uSync.BackOffice.HealthChecks;
 
-
+/// <summary>
+///  Checks the integrity of the uSync folder, for clashes, missing files etc...
+/// </summary>
 [HealthCheck("018EFC64-51BB-479B-AD09-73F538A1421A", "uSync - Folder Clash check",
     Description = "Check the integrity of the uSync folder",
     Group = "uSync")]
@@ -23,17 +25,22 @@ public class SyncFolderIntegrityChecks : HealthCheck
     private readonly uSyncConfigService _configService;
     private readonly SyncFileService _fileService;
 
+    /// <summary>
+    ///  Constructor 
+    /// </summary>
     public SyncFolderIntegrityChecks(uSyncConfigService configService, SyncFileService fileService)
     {
         _configService = configService;
         _fileService = fileService;
     }
 
+    /// <inheritdoc/>
     public override HealthCheckStatus ExecuteAction(HealthCheckAction action)
     {
         throw new InvalidOperationException("No Actions");
     }
 
+    /// <inheritdoc/>
     public override Task<IEnumerable<HealthCheckStatus>> GetStatus()
     {
         var items = new List<HealthCheckStatus>
