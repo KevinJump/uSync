@@ -14,21 +14,28 @@
             title: 'uSync',
             description: '...',
             navigation: [
-                {
-                    'name': 'uSync',
-                    'alias': 'uSync',
-                    'icon': 'icon-infinity',
-                    'view': Umbraco.Sys.ServerVariables.umbracoSettings.appPluginsPath + '/uSync/settings/default.html',
-                    'active': true
-                },
-                {
-                    'name': 'Settings',
-                    'alias': 'settings',
-                    'icon': 'icon-settings',
-                    'view': Umbraco.Sys.ServerVariables.umbracoSettings.appPluginsPath + '/uSync/settings/settings.html'
-                } 
             ]
         };
+
+        var uSyncSettings = Umbraco.Sys.ServerVariables.uSync;
+
+        if (!uSyncSettings.disabledDashboard) {
+            vm.page.navigation.push({
+                'name': 'uSync',
+                'alias': 'uSync',
+                'icon': 'icon-infinity',
+                'view': Umbraco.Sys.ServerVariables.umbracoSettings.appPluginsPath + '/uSync/settings/default.html',
+                'active': true
+            });
+        }
+
+        vm.page.navigation.push({
+            'name': 'Settings',
+            'alias': 'settings',
+            'icon': 'icon-settings',
+            'view': Umbraco.Sys.ServerVariables.umbracoSettings.appPluginsPath + '/uSync/settings/settings.html',
+        });
+
 
         $timeout(function () {
             navigationService.syncTree({ tree: "uSync", path: "-1" });
@@ -68,6 +75,8 @@
                             });
                     }
                 });
+
+                vm.page.navigation[0].active = true;
             });
     }
 

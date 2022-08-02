@@ -121,6 +121,10 @@ namespace uSync.BackOffice.Configuration
         /// </summary>
         [DefaultValue("All")]
         public string FirstBootGroup { get; set; } = "All";
+
+
+        [DefaultValue("false")]
+        public bool DisableDashboard { get; set; } = false; 
     }
 
 }
