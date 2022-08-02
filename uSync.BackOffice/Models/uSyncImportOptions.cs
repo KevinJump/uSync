@@ -48,6 +48,12 @@ namespace uSync.BackOffice
         /// (reserved for future use)
         /// </summary>
         public bool EnableRollback { get; set; }
+
+
+        /// <summary>
+        ///  should we pause the uSync export events during the import ?
+        /// </summary>
+        public bool PauseDuringImport { get; set; } = true;
     }
 
     /// <summary>
@@ -81,6 +87,16 @@ namespace uSync.BackOffice
         ///  something to process the folder.
         /// </summary>
         public bool IncludeDisabledHandlers { get; set; }
+
+        /// <summary>
+        ///  Pause the events, so export events don't fire when we import 
+        /// </summary>
+        /// <remarks>
+        ///  default behaviour is to pause during an import, but if we don't 
+        ///  want to (for exporter etc) this means we can keep the uSync folder
+        ///  in sync because we will cause a default export when an import happens.
+        /// </remarks>
+        public bool PauseDuringImport { get; set; } = true; 
 
     }
 }

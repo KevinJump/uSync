@@ -38,7 +38,7 @@ namespace uSync.BackOffice
 
             lock (_importLock)
             {
-                using (var pause = _mutexService.ImportPause())
+                using (var pause = _mutexService.ImportPause(options.PauseDuringImport))
                 {
                     var handlerPair = _handlerFactory.GetValidHandler(handlerAlias, new SyncHandlerOptions
                     {
@@ -63,7 +63,7 @@ namespace uSync.BackOffice
         {
             lock (_importLock)
             {
-                using (var pause = _mutexService.ImportPause())
+                using (var pause = _mutexService.ImportPause(true))
                 {
                     var handlers = _handlerFactory.GetValidHandlers(new SyncHandlerOptions { Set = handlerSet, Action = HandlerActions.Import });
                     return PerformPostImport(rootFolder, handlers, actions);

@@ -72,7 +72,7 @@ namespace uSync.BackOffice
         {
             lock (_importLock)
             {
-                using (var pause = _mutexService.ImportPause())
+                using (var pause = _mutexService.ImportPause(options.PauseDuringImport))
                 {
                     var orderedNodes = LoadOrderedNodes(folder);
 
@@ -127,7 +127,7 @@ namespace uSync.BackOffice
         {
             lock (_importLock)
             {
-                using (var pause = _mutexService.ImportPause())
+                using (var pause = _mutexService.ImportPause(options.PauseDuringImport))
                 {
                     SyncHandlerOptions syncHandlerOptions = HandlerOptionsFromPaged(options);
 
@@ -176,7 +176,7 @@ namespace uSync.BackOffice
 
             lock (_importLock)
             {
-                using (var pause = _mutexService.ImportPause())
+                using (var pause = _mutexService.ImportPause(options.PauseDuringImport))
                 {
 
                     SyncHandlerOptions syncHandlerOptions = HandlerOptionsFromPaged(options);
@@ -230,7 +230,7 @@ namespace uSync.BackOffice
 
             lock (_importLock)
             {
-                using (var pause = _mutexService.ImportPause())
+                using (var pause = _mutexService.ImportPause(options.PauseDuringImport))
                 {
                     SyncHandlerOptions syncHandlerOptions = new SyncHandlerOptions(options.HandlerSet);
 

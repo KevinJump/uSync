@@ -1,4 +1,6 @@
 ﻿
+using System;
+
 using Umbraco.Cms.Core.Events;
 
 namespace uSync.BackOffice.Services
@@ -46,8 +48,12 @@ namespace uSync.BackOffice.Services
         ///  you should wrap code that might trigger umbraco events in using(var pause = _mutexService.ImportPause())
         ///  this will ensure that uSync doesn't then pickupt the imports as new things and saves them to disk.
         /// </remarks>
+        [Obsolete("You should tell usync if it needs to pause or not during the process (removed in v12)")]
         public uSyncImportPause ImportPause()
             => new uSyncImportPause(this);
+
+        public uSyncImportPause ImportPause(bool pause)
+            => new uSyncImportPause(this, pause);
 
 
 

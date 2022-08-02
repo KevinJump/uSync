@@ -20,6 +20,16 @@ namespace uSync.BackOffice
             _mutexService.Pause();
         }
 
+        /// <summary>
+        ///  generate a pause object, but only pause if told to do so.
+        /// </summary>
+        public uSyncImportPause(uSyncEventService mutexService, bool pause)
+        {
+            _mutexService = mutexService;
+            if (pause)
+                _mutexService.Pause();
+        }
+
         /// <inheritdoc/>
         public void Dispose()
         {

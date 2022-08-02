@@ -221,7 +221,7 @@ namespace uSync.BackOffice
             {
                 var sw = Stopwatch.StartNew();
 
-                using (var pause = _mutexService.ImportPause())
+                using (var pause = _mutexService.ImportPause(true))
                 {
 
                     // pre import event

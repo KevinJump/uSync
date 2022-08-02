@@ -88,6 +88,7 @@ namespace uSync.BackOffice.Controllers
                 Callbacks = hubClient.Callbacks(),
                 HandlerSet = handlerSet,
                 RootFolder = uSyncConfig.GetRootFolder(),
+                PauseDuringImport = true,
                 Flags = options.Force ? Core.Serialization.SerializerFlags.Force : Core.Serialization.SerializerFlags.None
             });
 
