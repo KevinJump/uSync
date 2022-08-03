@@ -28,5 +28,16 @@ namespace uSync.Core
         /// </remarks>
         public bool HasHistoryCleanup
             => _version.Version.Major != 9 || _version.Version.Minor >= 1;
+
+        /// <summary>
+        ///  Has a runtime mode introduced in v10.1 
+        /// </summary>
+        /// <remarks>
+        ///  Runtime mode of Production means you can't update views etc.
+        /// </remarks>
+        public bool HasRuntimeMode
+            => _version.Version.Major > 10 ||
+            _version.Version.Major == 10 && _version.Version.Minor > 1;
     }
+            
 }

@@ -4,6 +4,7 @@ using System.IO;
 using System.Xml.Linq;
 
 using Microsoft.AspNetCore.Routing.Template;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 using Umbraco.Cms.Core.IO;
@@ -13,6 +14,7 @@ using Umbraco.Cms.Core.Strings;
 using Umbraco.Extensions;
 
 using uSync.Core.Models;
+using uSync.Core.Versions;
 
 using static Umbraco.Cms.Core.Constants;
 using static Umbraco.Cms.Core.Constants.Conventions;
@@ -26,16 +28,25 @@ namespace uSync.Core.Serialization.Serializers
         private readonly IShortStringHelper shortStringHelper;
         private readonly IFileSystem _viewFileSystem;
 
-        public TemplateSerializer(IEntityService entityService, ILogger<TemplateSerializer> logger,
+        private readonly uSyncCapabilityChecker _capabilityChecker;
+        private readonly IConfiguration _configuration;
+
+        public TemplateSerializer(
+            IEntityService entityService,
+            ILogger<TemplateSerializer> logger,
             IShortStringHelper shortStringHelper,
             IFileService fileService,
-            FileSystems fileSystems)
+            FileSystems fileSystems,
+            IConfiguration configuration,
+            uSyncCapabilityChecker capabilityChecker)
             : base(entityService, logger)
         {
             this.fileService = fileService;
             this.shortStringHelper = shortStringHelper;
 
             _viewFileSystem = fileSystems.MvcViewsFileSystem;
+            _configuration = configuration;
+            _capabilityChecker = capabilityChecker;
         }
 
         protected override SyncAttempt<ITemplate> DeserializeCore(XElement node, SyncSerializerOptions options)
@@ -153,7 +164,29 @@ namespace uSync.Core.Serialization.Serializers
         /// <param name="options"></param>
         /// <returns></returns>
         private bool ShouldGetContentFromNode(XElement node, SyncSerializerOptions options)
-            => node.Element("Contents") != null; // && options.GetSetting(uSyncConstants.Conventions.IncludeContent, false);
+        {
+            if (_capabilityChecker.HasRuntimeMode)
+            {
+                if (node.Element("Contents") != null)
+                {
+                    if (_configuration.IsUmbracoRunningInProductionMode())
+                    {
+                        logger.LogDebug("Template contents will not be imported because site is running in Production mode");
+                        return false;
+                    }
+
+                    // else (we have content - not running in Production) 
+                    return true;
+                }
+
+                // else (we don't have content it doesn't matter)
+                return false;
+            }
+
+            // default 
+            return node.Element("Contents") != null;
+            // && options.GetSetting(uSyncConstants.Conventions.IncludeContent, false);
+        }
 
         public string GetContentFromConfig(XElement node)
             => node.Element("Contents").ValueOrDefault(string.Empty);
