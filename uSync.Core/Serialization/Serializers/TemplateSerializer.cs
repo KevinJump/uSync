@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml.Linq;
 
-using Microsoft.AspNetCore.Routing.Template;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -15,9 +14,6 @@ using Umbraco.Extensions;
 
 using uSync.Core.Models;
 using uSync.Core.Versions;
-
-using static Umbraco.Cms.Core.Constants;
-using static Umbraco.Cms.Core.Constants.Conventions;
 
 namespace uSync.Core.Serialization.Serializers
 {
@@ -82,7 +78,7 @@ namespace uSync.Core.Serialization.Serializers
                     var templatePath = ViewPath(alias);
                     if (_viewFileSystem.FileExists(templatePath))
                     {
-                        logger.LogDebug("Reading {0} contents", templatePath);
+                        logger.LogDebug("Reading {path} contents", templatePath);
                         item.Content = GetContentFromFile(templatePath);
                         item.Path = templatePath;
                     }
@@ -214,18 +210,17 @@ namespace uSync.Core.Serialization.Serializers
         {
             var details = new List<uSyncChange>();
             var saved = false;
-            var msg = "";
 
             var master = node.Element("Parent").ValueOrDefault(string.Empty);
             if (master != string.Empty && item.MasterTemplateAlias != master)
             {
-                logger.LogDebug("Looking for master {0}", master);
+                logger.LogDebug("Looking for master {master}", master);
                 var masterItem = fileService.GetTemplate(master);
                 if (masterItem != null && item.MasterTemplateAlias != master)
                 {
                     details.AddUpdate("Parent", item.MasterTemplateAlias, master);
 
-                    logger.LogDebug("Setting Master {0}", masterItem.Alias);
+                    logger.LogDebug("Setting Master {alias}", masterItem.Alias);
                     item.SetMasterTemplate(masterItem);
 
                     SaveItem(item);
@@ -246,8 +241,7 @@ namespace uSync.Core.Serialization.Serializers
                         var content = System.IO.File.ReadAllText(fullPath);
                         if (content.Contains($"[uSyncMarker:{this.Id}]"))
                         {
-                            logger.LogDebug($"Removing the file from disk, because it exists in a razor view {templatePath}");
-                            msg = "Using Razor views";
+                            logger.LogDebug("Removing the file from disk, because it exists in a razor view {templatePath}", templatePath);
                             _viewFileSystem.DeleteFile(templatePath);
 
                             // we have to tell the handlers we saved it - or they will and write the file back 
@@ -257,7 +251,7 @@ namespace uSync.Core.Serialization.Serializers
                 }
             }
 
-            return SyncAttempt<ITemplate>.Succeed(item.Name, item, ChangeType.Import, msg, saved, details);
+            return SyncAttempt<ITemplate>.Succeed(item.Name, item, ChangeType.Import, "", saved, details);
         }
 
 
