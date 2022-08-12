@@ -7,7 +7,7 @@ assignees: ''
 
 ---
 
-**What package are you feeding bakon** 
+**What package are you feeding back on** 
 The version and package name should be enough for us to know where to look.
 
 **Describe your feedback**
