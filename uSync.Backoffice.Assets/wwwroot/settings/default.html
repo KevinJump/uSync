@@ -75,6 +75,14 @@
             </div>
             <usync-progress-view update="vm.update" status="vm.status" hide-labels="false">
             </usync-progress-view>
+
+            <div ng-if="vm.reported && vm.runmode == 3" class="usync-download-option">
+                <umb-button action="vm.downloadExportFolder()"
+                            button-style="link"
+                            label-key="usync_download"></umb-button>
+
+            </div>
+
         </umb-box-content>
     </umb-box>
 
@@ -83,6 +91,7 @@
     </div>
 
     <div ng-if="vm.reported">
+
         <usync-report-view actions="vm.actions"
                            results="vm.results"
                            hide-action="true"

@@ -17,10 +17,26 @@
 
 		<key alias="import">Import</key>
 		<key alias="importforce">Full Import</key>
+		<key alias="importFile">Import from file</key>
 		<key alias="report">Report</key>
 		<key alias="export">Export</key>
 		<key alias="exportClean">Clean Export</key>
 		<key alias="apply">Apply</key>
+
+		<key alias="download">download</key>
+		<key alias="downloadTitle">Download uSync folder?</key>
+		<key alias="downloadMsg">
+			<![CDATA[
+			<p>Download you usync folder as a zip file?</p>
+			<small><em>The download will contain all files in the uSync folder not just the items you have just exported</em></small>]]>
+		</key>
+
+		<key alias="exportFile">Export to file</key>
+		<key alias="exportFileMsg">
+			<![CDATA[
+			<p>Perform a Export and download the folder as a zip file?</p>
+			<small><em>A normal export will be performed any empty/deletes will be retained, if you don't want that, you should peform a clean export before you download the file</em></small>]]>
+		</key>
 
 		<key alias="details">Details</key>
 

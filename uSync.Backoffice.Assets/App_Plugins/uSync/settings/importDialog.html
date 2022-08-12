@@ -1,0 +1,129 @@
+﻿<div ng-controller="uSyncImportDialogController as vm">
+    <umb-editor-panel>
+        <umb-editor-header name="'Import file'"
+                           description="'import your uSync folder'"
+                           name-locked="true"
+                           description-locked="true"
+                           hide-alias="true"
+                           hide-icon="true"></umb-editor-header>
+
+
+        <umb-editor-container class="form-horizontal">
+
+            <umb-box  ng-if="!vm.uploaded">
+                <umb-box-header title="Import from file"
+                                description="Import files into your uSync folder">
+                </umb-box-header>
+                <umb-box-content>
+                    <p>
+                        Select file to import, the files in the zip folder
+                        will be extracted into your local uSync folder and
+                        then you can run an import. 
+                    </p>
+                    
+                </umb-box-content>
+
+                <umb-box-content>
+
+                    <umb-control-group label="Clean import"
+                                       description="Clean the uSync folder before importing the files">
+
+                        <umb-toggle on-click="vm.cleanImport = !vm.cleanImport"
+                                    checked="vm.cleanImport"></umb-toggle>
+
+                    </umb-control-group>
+
+                    <umb-control-group label="Import File"
+                                       description="Select a file to import">
+
+                        <div class="usync-import-upload-box">
+
+                            <div class="usync-import-filename">{{vm.file.name}}</div>
+
+                            <input id="usyncimport" type="file"
+                                   accept=".zip;.usync"
+                                   ngf-select
+                                   ngf-model="filesHolder"
+                                   ngf-change="vm.handleFiles($files, $event)"
+                                   ngf-multipart="true"
+                                   class="usync-import-upload-file" />
+
+                            <label for="usyncimport" class="btn btn-default usync-import-file-label">Choose file</label>
+
+                            <umb-button type="button"
+                                        button-style="action"
+                                        label-key="general_upload"
+                                        action="vm.upload(vm.file)"
+                                        ng-if="vm.file != null"
+                                        state="vm.buttonState"
+                                        disabled="vm.buttonState == 'busy'">
+                            </umb-button>
+
+                        </div>
+                    </umb-control-group>
+                </umb-box-content>
+            </umb-box>
+
+            <umb-box ng-if="vm.uploaded && vm.success">
+                <umb-box-header title="Import"></umb-box-header>
+                <umb-box-content>
+
+                    <p>
+                        Your files have been uploaded and you can
+                        now run an import. 
+                    </p>
+                    <p>
+                        Clicking on import will close this dialog
+                        and run a uSync import against the new files.
+                    </p>
+                </umb-box-content>
+            </umb-box>
+
+            <umb-box ng-if="vm.uploaded && !vm.success">
+                <umb-box-header title="Zip errors"
+                                description="uSync noticed one or more things wrong with the zip file">
+                </umb-box-header>
+
+                <umb-box-content>
+                    <ul ng-repeat="error in vm.errors">
+                        <li>{{error}}</li>
+                    </ul>
+                </umb-box-content>
+            </umb-box>
+
+        </umb-editor-container>
+
+        <umb-editor-footer>
+            <umb-editor-footer-content-right>
+
+                <umb-button type="button"
+                            button-style="link"
+                            label-key="general_close"
+                            action="vm.close()"
+                            disabled="vm.working">
+                </umb-button>
+
+                <umb-button type="button"
+                            button-style="action"
+                            label-key="usync_report"
+                            button-state="vm.buttonState"
+                            action="vm.submit('report')"
+                            ng-if="vm.success"
+                            disabled="vm.working">
+                </umb-button>
+
+                <umb-button type="button"
+                            button-style="success"
+                            label-key="usync_import"
+                            button-state="vm.buttonState"
+                            action="vm.submit('import')"
+                            ng-if="vm.success"
+                            disabled="vm.working">
+                </umb-button>
+
+
+            </umb-editor-footer-content-right>
+        </umb-editor-footer>
+
+    </umb-editor-panel>
+</div>

@@ -542,3 +542,23 @@ ul.usync-action-list {
 .umb-overlay.umb-overlay-center.umb-overlay--usync-error {
     width: 720px
 }
+
+
+.usync-import-upload-file { 
+    display: none !important;
+}
+
+.usync-import-filename { 
+    padding: 0.2em 0;
+}
+
+.usync-download-option {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+}
+
+    .usync-download-option .btn {
+        color: #555;
+        font-style: italic;
+    }
