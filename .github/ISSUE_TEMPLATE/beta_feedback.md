@@ -1,8 +1,8 @@
 ---
 name: Beta feedback
 about: Feedback on some beta bit of uSync
-title: '[BETA]'
-labels: ''
+title: '[BETA FEEDBACK]'
+labels: 'beta-feedback'
 assignees: ''
 
 ---
