@@ -12,11 +12,15 @@
 		<EmbedUntrackedSources>true</EmbedUntrackedSources>
 		<IncludeSymbols>true</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+
+		<EnablePackageValidation>true</EnablePackageValidation>
+		<PackageValidationBaselineVersion>10.1.0</PackageValidationBaselineVersion>
+
 	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Umbraco.Cms.Web.Website" Version="10.0.0" />
-		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" /> 
 	</ItemGroup>
 
 </Project>

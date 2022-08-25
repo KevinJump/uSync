@@ -20,18 +20,16 @@ namespace uSync.Core
         /// </remarks>
         public static JToken GetJsonTokenValue(this string value)
         {
-            if (value.DetectIsJson())
+            if (!value.DetectIsJson()) return value;
+            try
             {
-                try
-                {
-                    return JToken.Parse(value);
-                }
-                catch
-                {
-                    // error parsing, so it's not actually json
-                    // it just might look like it a bit.
-                    return value;
-                }
+                return JToken.Parse(value);
+            }
+            catch
+            {
+                // error parsing, so it's not actually json
+                // it just might look like it a bit.
+                return value;
             }
 
             return value;
@@ -61,12 +59,31 @@ namespace uSync.Core
                     break;
                 case JValue jValue:
                     if (jValue.Value is null) return null;
-                    return ExpandStringValue(token.ToString());
+                    return GetJTokenValue(jValue);
+                    // return ExpandStringValue(token.ToString());
                 default:
                     return ExpandStringValue(token.ToString());
             }
 
             return token.ToString().GetJsonTokenValue();
+        }
+
+        private static JToken GetJTokenValue(JValue token)
+        {
+            switch(token.Type)
+            {
+                case JTokenType.Boolean:
+                case JTokenType.Integer:
+                case JTokenType.Date:
+                case JTokenType.Bytes:
+                case JTokenType.Float:
+                case JTokenType.Guid:
+                case JTokenType.Null:
+                case JTokenType.String:
+                    return token;
+                default:
+                    return ExpandStringValue(token.ToString());
+            }
         }
 
         private static JToken ExpandStringValue(string stringValue)
