@@ -9,14 +9,14 @@
 
 
 	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-		<Message Importance="high" Text=">>> Cleaning version files $(ProjectDir)wwwroot\*.min.*" />
+		<Message Importance="high" Text="&gt;&gt;&gt; Cleaning version files $(ProjectDir)wwwroot\*.min.*" />
 
 		<ItemGroup>
-			<FilesToDelete Include="$(ProjectDir)wwwroot\usync.*.min.*"/>
+			<FilesToDelete Include="$(ProjectDir)wwwroot\usync.*.min.*" />
 		</ItemGroup>
 		<Delete Files="@(FilesToDelete)" />
 		
-		<Message Importance="high" Text=">>> Building minified scripts [$(PackageVersion)]" />
+		<Message Importance="high" Text="&gt;&gt;&gt; Building minified scripts [$(PackageVersion)]" />
 		<Exec Command="gulp minify --release $(PackageVersion)" />
 	</Target>
 
@@ -29,4 +29,10 @@
 		<ProjectReference Include="..\uSync.BackOffice\uSync.BackOffice.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<None Include="build\**\*.*">
+			<Pack>true</Pack>
+			<PackagePath>buildTransitive</PackagePath>
+		</None>
+	</ItemGroup>
 </Project>

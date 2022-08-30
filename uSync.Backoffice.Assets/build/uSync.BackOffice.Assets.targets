@@ -1,0 +1,14 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+	<ItemGroup>
+		<uSyncPackageFolder Include="$(MSBuildProjectDirectory)\App_Plugins\uSync\" />
+	</ItemGroup>
+
+	<!-- removing the v9 files, something we can do on build? -->
+	<Target Name="CleanuSyncAssets" BeforeTargets="BeforeBuild;Clean"
+			Condition="Exists(@(uSyncPackageFolder))">
+		<Message Importance="high" Text="Removing legacy uSync9 App_Plugins files" />
+		<RemoveDir Directories="@(uSyncPackageFolder)" ContinueOnError="true"></RemoveDir>
+	</Target>
+
+</Project>
