@@ -31,8 +31,6 @@ namespace uSync.Core
                 // it just might look like it a bit.
                 return value;
             }
-
-            return value;
         }
 
         /// <summary>
