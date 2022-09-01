@@ -6,6 +6,8 @@
 
         var vm = this;
 
+        var _settingsFolder = Umbraco.Sys.ServerVariables.umbracoSettings.appPluginsPath + '/uSync/settings';
+
         vm.selectNavigationItem = function (item) {
             eventsService.emit('usync-dashboard.tab.change', item);
         }
@@ -13,8 +15,7 @@
         vm.page = {
             title: 'uSync',
             description: '...',
-            navigation: [
-            ]
+            navigation: [ ]
         };
 
         var uSyncSettings = Umbraco.Sys.ServerVariables.uSync;
@@ -24,7 +25,7 @@
                 'name': 'uSync',
                 'alias': 'uSync',
                 'icon': 'icon-infinity',
-                'view': Umbraco.Sys.ServerVariables.umbracoSettings.appPluginsPath + '/uSync/settings/default.html',
+                'view': _settingsFolder + '/default.html',
                 'active': true
             });
         }
@@ -33,7 +34,7 @@
             'name': 'Settings',
             'alias': 'settings',
             'icon': 'icon-settings',
-            'view': Umbraco.Sys.ServerVariables.umbracoSettings.appPluginsPath + '/uSync/settings/settings.html',
+            'view': _settingsFolder + '/settings.html',
         });
 
 
@@ -60,7 +61,7 @@
                              'name': 'Add ons',
                              'alias': 'expansion',
                              'icon': 'icon-box',
-                             'view': Umbraco.Sys.ServerVariables.umbracoSettings.appPluginsPath + '/uSync/settings/expansion.html'
+                             'view': _settingsFolder + '/expansion.html'
                          });
                 }
 

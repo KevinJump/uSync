@@ -122,8 +122,8 @@
                     </div>
                     <div class="umb-permission usync-setting-value">
                         <div class="umb-permission__content">
-                            <div>Use guids for filenames</div>
-                            <div class="umb-permission__description">Use the guid of an item as the filename</div>
+                            <div>Use GUIDs for filenames</div>
+                            <div class="umb-permission__description">Use the GUID of an item as the filename</div>
                         </div>
                         <div class="umb-permission__value">
                             <div ng-if="vm.handlerSet.handlerDefaults.guidNames"><i class="icon icon-check color-green"></i></div>
@@ -148,7 +148,7 @@
                         <div class="umb-permission__content">
                             <div>Disabled handlers</div>
                             <div class="umb-permission__description">
-                                Handlers explitily disabled for this handler set <br />
+                                Handlers explicitly disabled for this handler set <br />
                                 <small>(uSync.Complete will add some handlers in here automatically)</small>
                             </div>
                         </div>
@@ -214,7 +214,7 @@
                                 description="Handler sets in the config">
                 </umb-box-header>
                 <umb-box-content>
-                    <p class="color-red">Custom handler sets need to be registered in code, they may appear in this list (which is reads the config to get the list), but they won't work as Handler sets unless they are registered.</p>
+                    <p class="color-red">Custom handler sets need to be registered in code, they may appear in this list (which is reads the configuration to get the list), but they won't work as Handler sets unless they are registered.</p>
 
                     <div ng-repeat="(name, set) in vm.sets" class="accordion-group">
                         <div ng-click="set.showSettings = !set.showSettings"
