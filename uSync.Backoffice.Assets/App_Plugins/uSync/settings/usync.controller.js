@@ -59,10 +59,15 @@
                 labelKey: 'usync_import',
                 handler: function () { importItems(false, vm.everything); }
             },
-            subButtons: [{
-                labelKey: 'usync_importforce',
-                handler: function () { importForce(vm.everything); }
-            }]
+            subButtons: [
+                {
+                    labelKey: 'usync_importforce',
+                    handler: function () { importForce(vm.everything); }
+                },
+                {
+                    labelKey: 'usync_importFile',
+                    handler: function () { importFile(vm.everything) }
+                }]
         };
 
         vm.everything.export = {
@@ -71,10 +76,16 @@
                 labelKey: 'usync_export',
                 handler: function () { exportGroup(vm.everything); }
             },
-            subButtons: [{
-                labelKey: 'usync_exportClean',
-                handler: function () { cleanExport(); }
-            }]
+            subButtons: [
+                {
+                    labelKey: 'usync_exportClean',
+                    handler: function () { cleanExport(); }
+                },
+                {
+                    labelKey: 'usync_exportFile',
+                    handler: function () { exportFile(vm.everything); }
+                }
+            ]
         }
 
         vm.report = report;
@@ -94,8 +105,10 @@
         vm.calcPercentage = calcPercentage;
         vm.openDetail = openDetail;
 
-        vm.changeSet = changeSet; 
-        
+        vm.changeSet = changeSet;
+
+        vm.downloadExportFolder = downloadExportFolder;
+
         init();
 
         function init() {
@@ -132,7 +145,7 @@
                 .then(function (result) {
                     vm.handlers = result.data;
                     vm.status.handlers = vm.handlers;
-                    vm.loading = false; 
+                    vm.loading = false;
                 });
         }
 
@@ -281,7 +294,7 @@
                 });
         }
 
-        function exportGroup(group) {
+        function exportGroup(group, cb) {
 
             if (vm.working === true) return;
 
@@ -309,6 +322,9 @@
                     vm.savings.title = 'All items exported.';
                     vm.savings.message = 'Now go wash your hands 🧼!';
                     eventsService.emit('usync-dashboard.export.complete');
+
+                    if (cb) { cb(); }
+
                 }, function (error) {
                     vm.working = false;
                     group.state = 'error';
@@ -343,6 +359,97 @@
                         }
                     });
                 });
+        }
+
+        var overlayView =
+            Umbraco.Sys.ServerVariables.umbracoSettings.appPluginsPath + '/uSync/settings/overlay.html';
+
+
+        function exportFile(group) {
+
+            localizationService.localizeMany([
+                "usync_exportFile",
+                "usync_exportFileMsg",
+                "usync_export", "general_close"])
+                .then(function (values) {
+
+                    overlayService.open({
+                        view: overlayView,
+                        title: values[0],
+                        content: values[1],
+                        submitButtonLabel: values[2],
+                        closeButtonLabel: values[3],
+                        submit: function () {
+                            overlayService.close();
+
+                            uSync8DashboardService.cleanExport()
+                                .then(function () {
+                                    exportGroup(group, function () {
+                                        getExportFolderAsFile();
+                                    });
+                                });
+                        },
+                        close: function () {
+                            overlayService.close();
+                        }
+                    });
+                });
+        }
+
+        function downloadExportFolder() {
+
+            localizationService.localizeMany([
+                "usync_downloadTitle",
+                "usync_downloadMsg",
+                "usync_download", "general_close"])
+                .then(function (values) {
+
+                    overlayService.open({
+                        view: overlayView,
+                        title: values[0],
+                        content: values[1],
+                        submitButtonLabel: values[2],
+                        closeButtonLabel: values[3],
+                        submit: function () {
+                            overlayService.close();
+                            getExportFolderAsFile();
+                        },
+                        close: function () {
+                            overlayService.close();
+                        }
+                    });
+                });
+        }
+
+        function getExportFolderAsFile() {
+            uSync8DashboardService.downloadExport()
+                .then(function (result) {
+                    console.log('done');
+                });
+        }
+
+        function importFile(group) {
+
+            editorService.open({
+                title: 'Import from file',
+                size: 'small',
+                view: Umbraco.Sys.ServerVariables.umbracoSettings.appPluginsPath + '/uSync/settings/importDialog.html',
+                submit: function (action) {
+                    editorService.close();
+                    console.log(action);
+
+                    if (action == 'import ') {
+                        importItems(false, group);
+                    }
+                    else {
+                        report(group);
+                    }
+                },
+                close: function () {
+                    editorService.close();
+                }
+            });
+
         }
 
         // add a little joy to the process.
@@ -420,7 +527,7 @@
                                 defaultButton: {
                                     labelKey: 'usync_export',
                                     handler: function () { exportGroup(groupInfo) }
-                                }                                
+                                }
                             };
 
 

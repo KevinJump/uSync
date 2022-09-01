@@ -11,6 +11,8 @@ using Microsoft.Extensions.Logging;
 
 using Umbraco.Cms.Core.Extensions;
 
+using uSync.Core;
+
 namespace uSync.BackOffice.Services
 {
     /// <summary>
@@ -304,7 +306,54 @@ namespace uSync.BackOffice.Services
             return string.Empty;
         }
 
+
+        public void DeleteFolder(string folder, bool safe = false)
+        {
+            try
+            {
+                var resolvedFolder = GetAbsPath(folder);
+                if (Directory.Exists(resolvedFolder))
+                    Directory.Delete(resolvedFolder, true);
+            }
+            catch(Exception ex)
+            {
+                // can happen when its locked, question is - do you care?
+                logger.LogWarning(ex, "Failed to remove directory {folder}", folder);
+                if (!safe) throw; 
+            }
+        }
+
+        public void CopyFolder(string source, string target)
+        {
+            var resolvedSource = GetAbsPath(source).TrimEnd(Path.DirectorySeparatorChar); ;
+            var resolvedTarget = GetAbsPath(target).TrimEnd(Path.DirectorySeparatorChar);
+
+            if (!Directory.Exists(resolvedSource))
+                throw new DirectoryNotFoundException(source);
+
+            Directory.CreateDirectory(resolvedTarget);
+
+            // create all the sub folders 
+            var folders = Directory.GetDirectories(resolvedSource, "*", SearchOption.AllDirectories);
+            foreach(var folder in folders)
+            {
+                Directory.CreateDirectory(folder.Replace(resolvedSource, resolvedTarget));
+            }
+
+            // copy all the files
+            var files = Directory.GetFiles(resolvedSource, "*.*", SearchOption.AllDirectories);
+            foreach(var file in files)
+            {
+                File.Copy(file, file.Replace(resolvedSource, resolvedTarget), true);
+            }
+               
+        }
+
+
         // TODO: this doesn't need to be public? 
+
+
+
 
         /// <summary>
         ///  Locking item for saves. 
@@ -331,5 +380,68 @@ namespace uSync.BackOffice.Services
                 }
             }
         }
+
+        /// <summary>
+        ///  run some basic sanity checks on a folder to see if it looks like a good 
+        ///  set of uSync files ? 
+        /// </summary>
+        /// <param name="folder"></param>
+        /// <returns></returns>
+        public List<string> VerifyFolder(string folder, string extension)
+        {
+            var resolvedFolder = GetAbsPath(folder);
+            if (!DirectoryExists(resolvedFolder))
+                throw new DirectoryNotFoundException(folder);
+
+            var keys = new Dictionary<Guid, string>();
+            var errors = new List<string>();
+
+            var files = Directory.GetFiles(resolvedFolder, $"*.{extension}", SearchOption.AllDirectories)
+                            .ToList();
+
+            if (files.Count == 0)
+            {
+                errors.Add($"There are no files with extension .{extension} in this zip file, is it even an import?");
+                return errors;
+            }
+
+
+            foreach (var file in files)
+            {
+                try
+                {
+                    var node = XElement.Load(file);
+
+                    if (!node.IsEmptyItem())
+                    {
+                        var key = node.GetKey();
+                        var folderName = Path.GetFileName(Path.GetDirectoryName(file));
+                        var filename = Path.GetFileName(file);
+                        var filepath = GetShortFileName(file);
+
+                        if (!keys.ContainsKey(key))
+                        {
+                            keys[key] = filepath;
+                        }
+                        else
+                        {
+                            errors.Add($"Clash {filepath} shares an id with {keys[key]}");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    errors.Add($"{GetShortFileName(file)} is invalid {ex.Message}");
+                }
+            }
+
+            return errors;
+        }
+
+        string GetShortFileName(string file)
+            => $"{Path.DirectorySeparatorChar}{Path.GetFileName(Path.GetDirectoryName(file))}" +
+            $"{Path.DirectorySeparatorChar}{Path.GetFileName(file)}";
+
     }
+
 }
