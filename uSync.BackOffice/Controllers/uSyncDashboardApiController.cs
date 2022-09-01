@@ -1,5 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Mime;
+using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
@@ -10,6 +15,7 @@ using Microsoft.Extensions.Logging;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 
 using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Composing;
@@ -21,6 +27,7 @@ using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Hubs;
+using uSync.BackOffice.Services;
 using uSync.BackOffice.SyncHandlers;
 
 namespace uSync.BackOffice.Controllers
@@ -36,6 +43,7 @@ namespace uSync.BackOffice.Controllers
         private readonly ILocalizedTextService textService;
 
         private readonly uSyncService uSyncService;
+        private readonly SyncFileService _syncFileService;
         private readonly SyncHandlerFactory handlerFactory;
         private readonly IHubContext<SyncHub> hubContext;
 
@@ -45,12 +53,15 @@ namespace uSync.BackOffice.Controllers
 
         private readonly IConfiguration _configuration;
 
+        private readonly string _uSyncTempPath;
+
         /// <summary>
         /// Create a new uSyncDashboardApi Controller (via DI)
         /// </summary>
         public uSyncDashboardApiController(
             IConfiguration configuration,
             AppCaches appCaches,
+            Umbraco.Cms.Core.Hosting.IHostingEnvironment hostingEnvironment,
             IWebHostEnvironment hostEnvironment,
             ILocalizedTextService textService,
             ILogger<uSyncDashboardApiController> logger,
@@ -58,7 +69,8 @@ namespace uSync.BackOffice.Controllers
             uSyncService uSyncService,
             SyncHandlerFactory syncHandlerFactory,
             IHubContext<SyncHub> hubContext,
-            uSyncConfigService uSyncConfig)
+            uSyncConfigService uSyncConfig,
+            SyncFileService syncFileService)
         {
             this.appCaches = appCaches;
             this.hostEnvironment = hostEnvironment;
@@ -75,6 +87,9 @@ namespace uSync.BackOffice.Controllers
 
             _configuration = configuration;
 
+            _uSyncTempPath = Path.GetFullPath(
+                Path.Combine(hostingEnvironment.LocalTempPath, "uSync", "FileImport"));
+            _syncFileService = syncFileService;
         }
 
         /// <summary>
@@ -106,12 +121,12 @@ namespace uSync.BackOffice.Controllers
             var section = _configuration.GetSection(uSync.Configuration.uSyncSetsConfig);
             var sets = new Dictionary<string, uSyncHandlerSetSettings>();
 
-            foreach(var item in section.GetChildren())
+            foreach (var item in section.GetChildren())
             {
                 sets.Add(item.Key, uSyncConfig.GetSetSettings(item.Key));
             }
 
-            return sets; 
+            return sets;
         }
 
         /// <summary>
@@ -275,7 +290,7 @@ namespace uSync.BackOffice.Controllers
             var sets = JsonConvert.SerializeObject(uSyncConfig.GetSetSettings(uSync.Sets.DefaultSet));
 
             var result = "{ " +
-                "\"Settings\" : " + settings + "," + 
+                "\"Settings\" : " + settings + "," +
                 "\"Sets\" : { " +
                     "\"Default\" : " + sets +
                 "}" +
@@ -283,7 +298,95 @@ namespace uSync.BackOffice.Controllers
 
             return JsonConvert.DeserializeObject<JObject>(result);
         }
-    }
 
-    
+
+        /// <summary>
+        ///  zips up your uSync folder and presents it to you. 
+        /// </summary>
+        [HttpPost]
+        public ActionResult DownloadExport()
+        {
+            var stream = uSyncService.CompressFolder(uSyncConfig.GetRootFolder());
+            return new FileStreamResult(stream, MediaTypeNames.Application.Zip)
+            {
+                FileDownloadName = $"usync_export_{DateTime.Now:yyyMMdd_HHmmss}.zip"
+            };
+        }
+
+        [HttpPost]
+        public async Task<UploadImportResult> UploadImport()
+        {
+            var file = Request.Form.Files[0];
+            var clean = Request.Form["clean"];
+
+            if (file.Length > 0)
+            {
+                var tempFile = Path.Combine(_uSyncTempPath, 
+                    Path.GetFileNameWithoutExtension(Path.GetRandomFileName()) + ".zip");
+
+                Directory.CreateDirectory(Path.GetDirectoryName(tempFile));
+
+                using (var stream = new FileStream(tempFile, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+
+                // uSyncService.DeCompressFile(temp, uSyncConfig.GetRootFolder());
+                var tempFolder =
+                    Path.Combine(_uSyncTempPath, 
+                        Path.GetFileNameWithoutExtension(tempFile));
+
+                try
+                {
+                    //
+                    // we could just uncompress direcly into the correct location
+                    // but by doing it this way we can run some sanity checks before we wipe 
+                    // a users usync folder. 
+
+                    uSyncService.DeCompressFile(tempFile, tempFolder);
+
+                    bool.TryParse(clean, out bool cleanFirst);
+
+                    var errors = _syncFileService.VerifyFolder(tempFolder,
+                        uSyncConfig.Settings.DefaultExtension);
+                    if (errors.Count > 0)
+                    {
+                        return new UploadImportResult(false)
+                        {
+                            Errors = errors
+                        };
+                    }
+
+                    // copy the files across. 
+                    uSyncService.ReplaceFiles(tempFolder,
+                        uSyncConfig.GetRootFolder(), cleanFirst);
+
+
+                    return new UploadImportResult(true);
+                }
+                catch { throw; }
+                finally
+                {
+                    // remove the temp zip/folder
+                    _syncFileService.DeleteFile(tempFile);
+                    _syncFileService.DeleteFolder(tempFolder, true);
+                }
+            }
+
+            throw new ArgumentException("Unsupported");
+        }
+
+        [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
+        public class UploadImportResult
+        {
+            public UploadImportResult(bool success)
+            {
+                Success = success;
+            }
+
+            public bool Success { get; set; }
+
+            public IEnumerable<string> Errors { get; set; }
+        }
+    }
 }
