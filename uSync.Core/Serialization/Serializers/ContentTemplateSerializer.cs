@@ -19,7 +19,7 @@ namespace uSync.Core.Serialization.Serializers
     [SyncSerializer("C4E0E6F8-2742-4C7A-9244-321D5592987A", "contentTemplateSerializer", uSyncConstants.Serialization.Content)]
     public class ContentTemplateSerializer : ContentSerializer, ISyncSerializer<IContent>
     {
-        private readonly IContentTypeService contentTypeService;
+        private readonly IContentTypeService _contentTypeService;
 
         public ContentTemplateSerializer(
             IEntityService entityService,
@@ -33,7 +33,7 @@ namespace uSync.Core.Serialization.Serializers
             SyncValueMapperCollection syncMappers)
             : base(entityService, localizationService, relationService, shortStringHelper, logger, contentService, fileService, syncMappers)
         {
-            this.contentTypeService = contentTypeService;
+            _contentTypeService = contentTypeService;
             this.umbracoObjectType = UmbracoObjectTypes.DocumentBlueprint;
         }
 
@@ -84,7 +84,7 @@ namespace uSync.Core.Serialization.Serializers
                 contentTypeAlias = node.GetAlias();
             }
 
-            var contentType = contentTypeService.Get(contentTypeAlias);
+            var contentType = _contentTypeService.Get(contentTypeAlias);
             if (contentType != null)
             {
                 var blueprints = contentService.GetBlueprintsForContentTypes(contentType.Id);
@@ -100,7 +100,7 @@ namespace uSync.Core.Serialization.Serializers
 
         public override IContent FindItem(Guid key)
         {
-            // TODO: Umbraco 8 bug, the key isn sometimes an old version
+            // TODO: Umbraco 8 bug, the key is sometimes an old version
             var entity = entityService.Get(key);
             if (entity != null)
                 return contentService.GetBlueprintById(entity.Id);
@@ -115,7 +115,7 @@ namespace uSync.Core.Serialization.Serializers
 
         protected override Attempt<IContent> CreateItem(string alias, ITreeEntity parent, string itemType)
         {
-            var contentType = contentTypeService.Get(itemType);
+            var contentType = _contentTypeService.Get(itemType);
             if (contentType == null) return
                     Attempt.Fail<IContent>(null, new ArgumentException($"Missing content Type {itemType}"));
 

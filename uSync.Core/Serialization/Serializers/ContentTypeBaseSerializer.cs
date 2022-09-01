@@ -22,12 +22,12 @@ namespace uSync.Core.Serialization.Serializers
     public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializerBase<TObject>
         where TObject : IContentTypeComposition
     {
-        private readonly IDataTypeService dataTypeService;
-        private readonly IContentTypeBaseService<TObject> baseService;
+        private readonly IDataTypeService _dataTypeService;
+        private readonly IContentTypeBaseService<TObject> _baseService;
         protected readonly IShortStringHelper shortStringHelper;
 
-        private readonly IAppCache appCache;
-        private readonly IContentTypeService contentTypeService;
+        private readonly IAppCache _appCache;
+        private readonly IContentTypeService _contentTypeService;
 
         private List<string> aliasCache { get; set; }
 
@@ -42,12 +42,12 @@ namespace uSync.Core.Serialization.Serializers
             IContentTypeService contentTypeService)
             : base(entityService, logger, containerType)
         {
-            this.dataTypeService = dataTypeService;
-            this.baseService = baseService;
+            _dataTypeService = dataTypeService;
+            _baseService = baseService;
             this.shortStringHelper = shortStringHelper;
 
-            appCache = appCaches.RuntimeCache;
-            this.contentTypeService = contentTypeService; 
+            _appCache = appCaches.RuntimeCache;
+            _contentTypeService = contentTypeService; 
         }
 
         #region Serialization 
@@ -99,7 +99,7 @@ namespace uSync.Core.Serialization.Serializers
                     new XElement(uSyncConstants.Xml.Name, property.Name),
                     new XElement(uSyncConstants.Xml.Alias, property.Alias));
 
-                var def = dataTypeService.GetDataType(property.DataTypeId);
+                var def = _dataTypeService.GetDataType(property.DataTypeId);
                 if (def != null)
                 {
                     propNode.Add(new XElement("Definition", def.Key));
@@ -119,7 +119,7 @@ namespace uSync.Core.Serialization.Serializers
 
                 propNode.Add(new XElement("SortOrder", property.SortOrder));
 
-                // cross version compatability, pre v8.17 - tabs are by name. 
+                // cross version compatibility, before v8.17 - tabs are by name. 
                 var tab = item.PropertyGroups.FirstOrDefault(x => x.PropertyTypes.Contains(property));
                 var tabNode = new XElement("Tab", tab != null ? tab.Name : "");
                 if (tab != null) tabNode.Add(new XAttribute("Alias", tab.Alias));
@@ -145,7 +145,7 @@ namespace uSync.Core.Serialization.Serializers
         ///  Serialize properties that have been introduced in later versions of umbraco.
         /// </summary>
         /// <remarks>
-        ///  by doing this like this it makes us keep our backwards compatability, while also supporting 
+        ///  by doing this like this it makes us keep our backwards compatibility, while also supporting 
         ///  newer properties. 
         /// </remarks>
         protected void SerializeNewProperty<TValue>(XElement node, IPropertyType property, string propertyName)
@@ -209,12 +209,12 @@ namespace uSync.Core.Serialization.Serializers
 
         #endregion
 
-        #region Deserialization
+        #region De-serialization
 
 
         protected IEnumerable<uSyncChange> DeserializeBase(TObject item, XElement node)
         {
-            logger.LogDebug("Deserializing Base");
+            logger.LogDebug("De-serializing Base");
 
             if (node == null) return Enumerable.Empty<uSyncChange>();
 
@@ -322,7 +322,7 @@ namespace uSync.Core.Serialization.Serializers
 
         protected IEnumerable<uSyncChange> DeserializeStructure(TObject item, XElement node)
         {
-            logger.LogDebug("Deserializing Structure");
+            logger.LogDebug("De-serializing Structure");
 
             var structure = node.Element("Structure");
             if (structure == null) return Enumerable.Empty<uSyncChange>();
@@ -334,40 +334,40 @@ namespace uSync.Core.Serialization.Serializers
 
             foreach (var baseNode in structure.Elements(ItemType))
             {
-                logger.LogDebug("baseNode {0}", baseNode.ToString());
+                logger.LogDebug("baseNode {base}", baseNode.ToString());
                 var alias = baseNode.Value;
                 var key = baseNode.Attribute(uSyncConstants.Xml.Key).ValueOrDefault(Guid.Empty);
 
-                logger.LogDebug("Structure: {0}", key);
+                logger.LogDebug("Structure: {key}", key);
 
                 var itemSortOrder = baseNode.Attribute(uSyncConstants.Xml.SortOrder).ValueOrDefault(sortOrder);
-                logger.LogDebug("Sort Order: {0}", itemSortOrder);
+                logger.LogDebug("Sort Order: {sortOrder}", itemSortOrder);
 
                 IContentTypeBase baseItem = default(IContentTypeBase);
 
                 if (key != Guid.Empty)
                 {
-                    logger.LogDebug("Structure By Key {0}", key);
-                    // lookup by key (our prefered way)
+                    logger.LogDebug("Structure By Key {key}", key);
+                    // lookup by key (our preferred way)
                     baseItem = FindItem(key);
                 }
 
                 if (baseItem == null)
                 {
-                    logger.LogDebug("Structure By Alias: {0}", alias);
+                    logger.LogDebug("Structure By Alias: {alias}", alias);
                     // lookup by alias (less nice)
                     baseItem = FindItem(alias);
                 }
 
                 if (baseItem != null)
                 {
-                    logger.LogDebug("Structure Found {0}", baseItem.Alias);
+                    logger.LogDebug("Structure Found {alias}", baseItem.Alias);
                     allowed.Add(new ContentTypeSort(baseItem.Id, itemSortOrder));
                     sortOrder = itemSortOrder + 1;
                 }
             }
 
-            logger.LogDebug("Structure: {0} items", allowed.Count);
+            logger.LogDebug("Structure: {count} items", allowed.Count);
 
             // compare the two lists (the equality compare fails because the id value is lazy)
             var currentHash =
@@ -391,7 +391,7 @@ namespace uSync.Core.Serialization.Serializers
 
         protected IEnumerable<uSyncChange> DeserializeProperties(TObject item, XElement node, SyncSerializerOptions options)
         {
-            logger.LogDebug("Deserializing Properties");
+            logger.LogDebug("De-serializing Properties");
 
             var propertiesNode = node?.Element("GenericProperties");
             if (propertiesNode == null) return Enumerable.Empty<uSyncChange>();
@@ -415,14 +415,14 @@ namespace uSync.Core.Serialization.Serializers
                 var definitionKey = propertyNode.Element("Definition").ValueOrDefault(Guid.Empty);
                 var propertyEditorAlias = propertyNode.Element("Type").ValueOrDefault(string.Empty);
 
-                logger.LogDebug(" > Property: {0} {1} {2} {3}", alias, key, definitionKey, propertyEditorAlias);
+                logger.LogDebug(" > Property: {alias} {key} {definitionKey} {editorAlias}", alias, key, definitionKey, propertyEditorAlias);
 
                 bool IsNew = false;
 
                 var property = GetOrCreateProperty(item, key, alias, definitionKey, propertyEditorAlias, compositeProperties, out IsNew);
                 if (property == null)
                 {
-                    changes.AddWarning($"Property/{alias}", alias, $"Property '{alias}' cannot be created (missing datatype?)");
+                    changes.AddWarning($"Property/{alias}", alias, $"Property '{alias}' cannot be created (missing DataType?)");
                     continue;
                 }
 
@@ -547,7 +547,7 @@ namespace uSync.Core.Serialization.Serializers
             }
             else
             {
-                logger.LogDebug("Property Removal disabled by config");
+                logger.LogDebug("Property Removal disabled by configuration");
             }
 
             return changes;
@@ -558,7 +558,7 @@ namespace uSync.Core.Serialization.Serializers
         ///  Get the alias for the tab (assuming it exists).
         /// </summary>
         /// <remarks>
-        ///  gives us some backwards compatability with pre 8.17 sites, which didn't have tabs.
+        ///  gives us some backwards compatibility with 8.17 or older sites, which didn't have tabs.
         /// </remarks>
         private string GetTabAlias(TObject item, XElement tabNode)
         {
@@ -581,7 +581,7 @@ namespace uSync.Core.Serialization.Serializers
 
 
         /// <summary>
-        ///  sets teh alias to a 'safe' value so it there is a clash 
+        ///  sets the alias to a 'safe' value so it there is a clash 
         ///  (because of a rename) it will still work
         /// </summary>
         /// <param name="item"></param>
@@ -633,11 +633,11 @@ namespace uSync.Core.Serialization.Serializers
 
         private void EnsureAliasCache()
         {
-            aliasCache = appCache.GetCacheItem<List<string>>(
+            aliasCache = _appCache.GetCacheItem<List<string>>(
                 $"usync_{this.Id}", () =>
                 {
                     var sw = Stopwatch.StartNew();
-                    var aliases = contentTypeService.GetAllContentTypeAliases().ToList();
+                    var aliases = _contentTypeService.GetAllContentTypeAliases().ToList();
                     sw.Stop();
                     this.logger.LogDebug("Cache hit, 'usync_{id}' fetching all aliases {time}ms", this.Id, sw.ElapsedMilliseconds);
                     return aliases;
@@ -648,7 +648,7 @@ namespace uSync.Core.Serialization.Serializers
         protected void ClearAliases()
         {
             aliasCache = null;
-            appCache.ClearByKey($"usync_{this.Id}");
+            _appCache.ClearByKey($"usync_{this.Id}");
         }
 
         protected void RemoveAlias(string alias)
@@ -664,8 +664,8 @@ namespace uSync.Core.Serialization.Serializers
 
         private void RefreshAliasCache()
         {
-            appCache.ClearByKey($"usync_{this.Id}");
-            appCache.GetCacheItem($"usync_{this.Id}", () => { return aliasCache; });
+            _appCache.ClearByKey($"usync_{this.Id}");
+            _appCache.GetCacheItem($"usync_{this.Id}", () => { return aliasCache; });
         }
 
         protected void AddAlias(string alias)
@@ -682,11 +682,11 @@ namespace uSync.Core.Serialization.Serializers
 
 
         /// <summary>
-        ///  Deserialize properties added in later versions of Umbraco.
+        ///  De-serialize properties added in later versions of Umbraco.
         /// </summary>
         /// <remarks>
         ///  using reflection to find properties that might have been added in later versions of umbraco.
-        ///  doing it this way means we can maintain backwards compatability.
+        ///  doing it this way means we can maintain backwards compatibility.
         /// </remarks>
         protected uSyncChange DeserializeNewProperty<TValue>(IPropertyType property, XElement node, string propertyName)
         {
@@ -738,7 +738,7 @@ namespace uSync.Core.Serialization.Serializers
 
         protected IEnumerable<uSyncChange> DeserializeTabs(TObject item, XElement node)
         {
-            logger.LogDebug("Deserializing Tabs");
+            logger.LogDebug("De-serializing Tabs");
 
             var tabNode = node.Element("Tabs");
             if (tabNode == null) return Enumerable.Empty<uSyncChange>();
@@ -761,13 +761,13 @@ namespace uSync.Core.Serialization.Serializers
                 // but if its introduced later on, we would just work?
                 // if (alias.IndexOf('/') != -1) tabType = PropertyGroupType.Group;
 
-                if (string.IsNullOrWhiteSpace(alias))
-                {
-                    item.PropertyGroups.FirstOrDefault(x => x.Name.InvariantEquals(name));
-                }
+                //if (string.IsNullOrWhiteSpace(alias))
+                //{
+                //    item.PropertyGroups.FirstOrDefault(x => x.Name.InvariantEquals(name));
+                //}
 
 
-                logger.LogDebug("> Tab {0} {1} {2}", name, alias, sortOrder);
+                logger.LogDebug("> Tab {name} {alias} {sortOrder}", name, alias, sortOrder);
 
                 var existing = FindTab(item, alias, name, tabKey);
                 if (existing != null)
@@ -816,7 +816,7 @@ namespace uSync.Core.Serialization.Serializers
 
                     // if the alias & type would clash with something already in the tree
                     // *e.g this is a group with `name` when tab with `name` already being used
-                    // by ancestor or decendant.
+                    // by ancestor or descendant.
                     if (TabClashesWithExisting(item, alias, tabType))
                         alias = SyncPropertyGroupHelpers.GetTempTabAlias(alias);
 
@@ -857,13 +857,13 @@ namespace uSync.Core.Serialization.Serializers
         }
 
         /// <summary>
-        ///  calulcate what the default type of group is. 
+        ///  calculate what the default type of group is. 
         /// </summary>
         /// <remarks>
         ///  this shouldn't be an issue, but when we import legacy items we don't know what type
         ///  of thing the group it (tab or group). 
         ///  
-        ///  by default they are probibly groups, but if the doctype already has tabs they need
+        ///  by default they are probably groups, but if the DocType already has tabs they need
         ///  to be treated as new tabs or they don't appear.
         /// </remarks>
         private PropertyGroupType GetDefaultTabType(XElement node)
@@ -941,7 +941,7 @@ namespace uSync.Core.Serialization.Serializers
                         }
                         else
                         {
-                            logger.LogDebug("Removing {0}", tab.Alias);
+                            logger.LogDebug("Removing tab : {alias}", tab.Alias);
                             changes.Add(uSyncChange.Delete($"Tabs/{tab.Alias}", tab.Alias, tab.Alias));
                             item.PropertyGroups.Remove(tab);
                         }
@@ -962,7 +962,7 @@ namespace uSync.Core.Serialization.Serializers
                 var key = folderNode.Attribute(uSyncConstants.Xml.Key).ValueOrDefault(Guid.Empty);
                 if (key != Guid.Empty)
                 {
-                    logger.LogDebug("Folder Key {0}", key.ToString());
+                    logger.LogDebug("Folder Key {key}", key.ToString());
                     var folder = FindContainer(key);
                     if (folder == null)
                     {
@@ -975,7 +975,7 @@ namespace uSync.Core.Serialization.Serializers
 
         protected IEnumerable<uSyncChange> DeserializeCompositions(TObject item, XElement node)
         {
-            logger.LogDebug("{alias} Deserializing Compositions", item.Alias);
+            logger.LogDebug("{alias} De-serializing Compositions", item.Alias);
 
             var comps = node?.Element(uSyncConstants.Xml.Info)?.Element("Compositions");
             if (comps == null) return Enumerable.Empty<uSyncChange>();
@@ -994,7 +994,7 @@ namespace uSync.Core.Serialization.Serializers
                     compositions.Add(type);
             }
 
-            // compare (but sorted by key) only make the change if it is diffrent.
+            // compare (but sorted by key) only make the change if it is different.
             if (!Enumerable.SequenceEqual(item.ContentTypeComposition.OrderBy(x => x.Key), compositions.OrderBy(x => x.Key)))
             {
                 var change = uSyncChange.Update(uSyncConstants.Xml.Info, "Compositions",
@@ -1062,7 +1062,7 @@ namespace uSync.Core.Serialization.Serializers
             List<string> compositeProperties,
             out bool IsNew)
         {
-            logger.LogDebug("GetOrCreateProperty {0} [{1}]", key, alias);
+            logger.LogDebug("GetOrCreateProperty {key} [{alias}]", key, alias);
 
             IsNew = false;
 
@@ -1071,7 +1071,7 @@ namespace uSync.Core.Serialization.Serializers
             if (key != Guid.Empty)
             {
                 // should we throw - not a valid sync file ?
-                // or carry on with best endevours ? 
+                // or carry on with best endeavors ? 
                 property = item.PropertyTypes.SingleOrDefault(x => x.Key == key);
             }
 
@@ -1087,21 +1087,21 @@ namespace uSync.Core.Serialization.Serializers
             IDataType dataType = default(IDataType);
             if (definitionKey != Guid.Empty)
             {
-                dataType = dataTypeService.GetDataType(definitionKey);
+                dataType = _dataTypeService.GetDataType(definitionKey);
             }
 
             if (dataType == null && !string.IsNullOrEmpty(propertyEditorAlias))
             {
-                dataType = dataTypeService.GetDataType(propertyEditorAlias);
+                dataType = _dataTypeService.GetDataType(propertyEditorAlias);
             }
 
             if (dataType == null)
             {
-                logger.LogWarning("Cannot find underling datatype {key} {alias} for {property} it is likely you are missing a package?", definitionKey, propertyEditorAlias, alias);
+                logger.LogWarning("Cannot find underling DataType {key} {alias} for {property} it is likely you are missing a package?", definitionKey, propertyEditorAlias, alias);
                 return null;
             }
 
-            // we set it here, this means if the file is in conflict (because its changed in the datatype), 
+            // we set it here, this means if the file is in conflict (because its changed in the DataType), 
             // we shouldn't reset it later on should we set the editor alias value. 
             editorAlias = dataType.EditorAlias;
 
@@ -1111,7 +1111,7 @@ namespace uSync.Core.Serialization.Serializers
 
                 if (PropertyExistsOnComposite(item, alias, compositeProperties))
                 {
-                    logger.LogDebug("Cannot create property here {0} as it exist on Composition", item.Name);
+                    logger.LogDebug("Cannot create property here {name} as it exist on Composition", item.Name);
                     // can't create here, its on a composite
                     return null;
                 }
@@ -1125,10 +1125,10 @@ namespace uSync.Core.Serialization.Serializers
 
             // thing that could break if they where blank. 
             // update, only set this if its not already set (because we don't want to break things!)
-            // also update it if its not the same as the datatype, (because that has to match)
+            // also update it if its not the same as the DataType, (because that has to match)
             if (!property.PropertyEditorAlias.Equals(editorAlias))
             {
-                logger.LogDebug("Property Editor Alias mismatch {0} != {1} fixing...", property.PropertyEditorAlias, editorAlias);
+                logger.LogDebug("Property Editor Alias mismatch {propertyEditorAlias} != {editorAlias} fixing...", property.PropertyEditorAlias, editorAlias);
                 property.PropertyEditorAlias = editorAlias;
             }
 
@@ -1183,7 +1183,7 @@ namespace uSync.Core.Serialization.Serializers
                 {
                     // if you remove something with lots of 
                     // content this can timeout (still? - need to check on v8)
-                    logger.LogDebug("Removing {0}", alias);
+                    logger.LogDebug("Removing {alias}", alias);
 
                     changes.Add(uSyncChange.Delete($"Property/{alias}", alias, ""));
 
@@ -1223,11 +1223,11 @@ namespace uSync.Core.Serialization.Serializers
         }
 
         /// <summary>
-        ///  Add missing sort value to xml before compare.
+        ///  Add missing sort value to XML before compare.
         /// </summary>
         /// <remarks>
-        /// Adds the sort order attribute to the xml, if its missing, this reduces the 
-        /// number of false positives between old and newer versions of the xml.
+        /// Adds the sort order attribute to the XML, if its missing, this reduces the 
+        /// number of false positives between old and newer versions of the XML.
         /// and it doesn't cost anywhere as much as the db lookups do.
         /// </remarks>
         private void AddStructureSort(XElement node)
@@ -1256,7 +1256,7 @@ namespace uSync.Core.Serialization.Serializers
                 // make this call once per item (and only if we are looking for new properties)
                 // should improve the speed of first time syncs.
 
-                // properties that are on the compoistions this item is using. 
+                // properties that are on the compositions this item is using. 
                 compositeProperties = item.ContentTypeComposition?.SelectMany(x => x.PropertyTypes.Select(y => y.Alias)).ToList() ?? new List<string>();
             }
 
@@ -1267,47 +1267,47 @@ namespace uSync.Core.Serialization.Serializers
         #region Finders
 
         public override TObject FindItem(int id)
-            => baseService.Get(id);
+            => _baseService.Get(id);
 
         public override TObject FindItem(Guid key)
-            => baseService.Get(key);
+            => _baseService.Get(key);
 
         public override TObject FindItem(string alias)
-            => baseService.Get(alias);
+            => _baseService.Get(alias);
 
 
         override protected EntityContainer FindContainer(Guid key)
-            => baseService.GetContainer(key);
+            => _baseService.GetContainer(key);
 
         override protected IEnumerable<EntityContainer> FindContainers(string folder, int level)
-            => baseService.GetContainers(folder, level);
+            => _baseService.GetContainers(folder, level);
 
         override protected Attempt<OperationResult<OperationResultType, EntityContainer>> CreateContainer(int parentId, string name)
-            => baseService.CreateContainer(parentId, Guid.NewGuid(), name);
+            => _baseService.CreateContainer(parentId, Guid.NewGuid(), name);
 
         public override void SaveItem(TObject item)
         {
-            if (item.IsDirty()) baseService.Save(item);
+            if (item.IsDirty()) _baseService.Save(item);
         }
 
 
         public override void Save(IEnumerable<TObject> items)
-            => baseService.Save(items);
+            => _baseService.Save(items);
 
         protected override void SaveContainer(EntityContainer container)
         {
-            logger.LogDebug("Saving Container: {0}", container.Key);
-            baseService.SaveContainer(container);
+            logger.LogDebug("Saving Container: {key}", container.Key);
+            _baseService.SaveContainer(container);
         }
 
         public override void DeleteItem(TObject item)
-            => baseService.Delete(item);
+            => _baseService.Delete(item);
 
         public override string ItemAlias(TObject item)
             => item.Alias;
 
         protected override IEnumerable<EntityContainer> GetContainers(TObject item)
-            => baseService.GetContainers(item);
+            => _baseService.GetContainers(item);
 
         #endregion
 
@@ -1322,10 +1322,10 @@ namespace uSync.Core.Serialization.Serializers
         // import, 
         //
         // so the load will only be called if we need to check for a clash 
-        // and once we have called it once, we won't call it again for this doctype
+        // and once we have called it once, we won't call it again for this DocType
         // import.
         //
-        // we could go full cache, and keep a history all all tab aliases across umbraco
+        // we could go full cache, and keep a history all tab aliases across umbraco
         // but it might not give us enough performance gain for how hard it would be 
         // to ensure it doesn't become out of sync.
         // 
@@ -1346,7 +1346,7 @@ namespace uSync.Core.Serialization.Serializers
                     .SafeDistinctBy(x => x.Alias)
                     .ToDictionary(k => k.Alias, v => v.Type);
 
-                var dependents = baseService.GetAll()
+                var dependents = _baseService.GetAll()
                     .Where(x => x.CompositionIds().Contains(item.Id))
                     .SelectMany(x => x.PropertyGroups)
                     .SafeDistinctBy(x => x.Alias)

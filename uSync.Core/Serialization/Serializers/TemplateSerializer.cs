@@ -20,8 +20,8 @@ namespace uSync.Core.Serialization.Serializers
     [SyncSerializer("D0E0769D-CCAE-47B4-AD34-4182C587B08A", "Template Serializer", uSyncConstants.Serialization.Template)]
     public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer<ITemplate>
     {
-        private readonly IFileService fileService;
-        private readonly IShortStringHelper shortStringHelper;
+        private readonly IFileService _fileService;
+        private readonly IShortStringHelper _shortStringHelper;
         private readonly IFileSystem _viewFileSystem;
 
         private readonly uSyncCapabilityChecker _capabilityChecker;
@@ -37,8 +37,8 @@ namespace uSync.Core.Serialization.Serializers
             uSyncCapabilityChecker capabilityChecker)
             : base(entityService, logger)
         {
-            this.fileService = fileService;
-            this.shortStringHelper = shortStringHelper;
+            this._fileService = fileService;
+            this._shortStringHelper = shortStringHelper;
 
             _viewFileSystem = fileSystems.MvcViewsFileSystem;
             _configuration = configuration;
@@ -56,14 +56,13 @@ namespace uSync.Core.Serialization.Serializers
             var details = new List<uSyncChange>();
 
             if (key != Guid.Empty)
-                item = fileService.GetTemplate(key);
+                item = _fileService.GetTemplate(key);
 
-            if (item == null)
-                item = fileService.GetTemplate(alias);
+            item ??= _fileService.GetTemplate(alias);
 
             if (item == null)
             {
-                item = new Template(shortStringHelper, name, alias);
+                item = new Template(_shortStringHelper, name, alias);
                 details.AddNew(alias, alias, "Template");
 
                 if (ShouldGetContentFromNode(node, options))
@@ -215,7 +214,7 @@ namespace uSync.Core.Serialization.Serializers
             if (master != string.Empty && item.MasterTemplateAlias != master)
             {
                 logger.LogDebug("Looking for master {master}", master);
-                var masterItem = fileService.GetTemplate(master);
+                var masterItem = _fileService.GetTemplate(master);
                 if (masterItem != null && item.MasterTemplateAlias != master)
                 {
                     details.AddUpdate("Parent", item.MasterTemplateAlias, master);
@@ -284,7 +283,7 @@ namespace uSync.Core.Serialization.Serializers
             while (!string.IsNullOrWhiteSpace(current.MasterTemplateAlias) && level < 20)
             {
                 level++;
-                var parent = fileService.GetTemplate(current.MasterTemplateAlias);
+                var parent = _fileService.GetTemplate(current.MasterTemplateAlias);
                 if (parent == null) return level;
 
                 current = parent;
@@ -294,22 +293,22 @@ namespace uSync.Core.Serialization.Serializers
         }
 
         public override ITemplate FindItem(int id)
-            => fileService.GetTemplate(id);
+            => _fileService.GetTemplate(id);
 
         public override ITemplate FindItem(string alias)
-            => fileService.GetTemplate(alias);
+            => _fileService.GetTemplate(alias);
 
         public override ITemplate FindItem(Guid key)
-            => fileService.GetTemplate(key);
+            => _fileService.GetTemplate(key);
 
         public override void SaveItem(ITemplate item)
-            => fileService.SaveTemplate(item);
+            => _fileService.SaveTemplate(item);
 
         public override void Save(IEnumerable<ITemplate> items)
-            => fileService.SaveTemplate(items);
+            => _fileService.SaveTemplate(items);
 
         public override void DeleteItem(ITemplate item)
-            => fileService.DeleteTemplate(item.Alias);
+            => _fileService.DeleteTemplate(item.Alias);
 
         public override string ItemAlias(ITemplate item)
             => item.Alias;

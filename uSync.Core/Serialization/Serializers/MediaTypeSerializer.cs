@@ -7,7 +7,6 @@ using Microsoft.Extensions.Logging;
 
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Cache;
-using Umbraco.Cms.Core.Configuration;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Models.Entities;
 using Umbraco.Cms.Core.Services;
@@ -20,7 +19,7 @@ namespace uSync.Core.Serialization.Serializers
     [SyncSerializer("B3073706-5037-4FBD-A015-DF38D61F2934", "MediaTypeSerializer", uSyncConstants.Serialization.MediaType)]
     public class MediaTypeSerializer : ContentTypeBaseSerializer<IMediaType>, ISyncSerializer<IMediaType>
     {
-        private readonly IMediaTypeService mediaTypeService;
+        private readonly IMediaTypeService _mediaTypeService;
 
         public MediaTypeSerializer(
             IEntityService entityService, ILogger<MediaTypeSerializer> logger,
@@ -31,7 +30,7 @@ namespace uSync.Core.Serialization.Serializers
             IContentTypeService contentTypeService)
             : base(entityService, logger, dataTypeService, mediaTypeService, UmbracoObjectTypes.MediaTypeContainer, shortStringHelper, appCaches, contentTypeService)
         {
-            this.mediaTypeService = mediaTypeService;
+            this._mediaTypeService = mediaTypeService;
         }
 
         protected override SyncAttempt<XElement> SerializeCore(IMediaType item, SyncSerializerOptions options)
@@ -101,7 +100,7 @@ namespace uSync.Core.Serialization.Serializers
 
             bool saveInSerializer = !options.Flags.HasFlag(SerializerFlags.DoNotSave);
             if (saveInSerializer && item.IsDirty())
-                mediaTypeService.Save(item);
+                _mediaTypeService.Save(item);
 
             return SyncAttempt<IMediaType>.Succeed(item.Name, item, ChangeType.Import, "", saveInSerializer, details);
         }

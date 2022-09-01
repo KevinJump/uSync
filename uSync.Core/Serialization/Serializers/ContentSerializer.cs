@@ -85,7 +85,7 @@ namespace uSync.Core.Serialization.Serializers
 
         private XElement SerailizePublishedStatus(IContent item, SyncSerializerOptions options)
         {
-            // get the list of cultures we are serializing from the config
+            // get the list of cultures we are serializing from the configuration
             var activeCultures = options.GetCultures();
 
             var published = new XElement("Published");
@@ -135,7 +135,7 @@ namespace uSync.Core.Serialization.Serializers
 
         #endregion
 
-        #region Deserialization
+        #region De-serialization
 
         protected override SyncAttempt<IContent> DeserializeCore(XElement node, SyncSerializerOptions options)
         {
@@ -268,7 +268,7 @@ namespace uSync.Core.Serialization.Serializers
             var schedules = node.Element("Info")?.Element("Schedule");
             if (schedules != null && schedules.HasElements)
             {
-                logger.LogDebug("Deserialize Schedules {name}", item.Name);
+                logger.LogDebug("De-serialize Schedules {name}", item.Name);
 
                 foreach (var schedule in schedules.Elements("ContentSchedule"))
                 {
@@ -306,7 +306,7 @@ namespace uSync.Core.Serialization.Serializers
                     if (cultures.IsValidOrBlank(oldItem.Culture))
                     {
                         logger.LogDebug("Removing Schedule : {culture} {action} {date}", oldItem.Culture, oldItem.Action, oldItem.Date);
-                        // only remove a culture if this seralization included it. 
+                        // only remove a culture if this serialization included it. 
                         // we don't remove things we didn't serialize. 
                         currentSchedules.Remove(oldItem);
 
@@ -394,7 +394,7 @@ namespace uSync.Core.Serialization.Serializers
                     // culture based publishing.
                     var cultures = options.GetDeserializedCultures(node);
 
-                    // Only unpublish other cultures, when we are not already filtered by cultures
+                    // Only unpublished cultures, when we are not already filtered by cultures
                     // this stops things we don't care about this time being unpublished.
                     var unpublishMissingCultures = cultures.Count == 0;
 
@@ -477,7 +477,7 @@ namespace uSync.Core.Serialization.Serializers
             }
             catch (ArgumentNullException ex)
             {
-                // we can get thrown a null argument exception by the notifer, 
+                // we can get thrown a null argument exception by the notifier, 
                 // which is non critical! but we are ignoring this error. ! <= 8.1.5
                 if (!ex.Message.Contains("siteUri")) throw;
                 return Attempt.Succeed($"Published");
@@ -485,7 +485,7 @@ namespace uSync.Core.Serialization.Serializers
         }
 
         /// <summary>
-        ///  Publish/unpublish Specified cultures for an item, and optionally unpublish missing cultures
+        ///  Publish/unpublish Specified cultures for an item, and optionally un-publish missing cultures
         /// </summary>
         /// <param name="item"></param>
         /// <param name="cultures"></param>
@@ -543,7 +543,7 @@ namespace uSync.Core.Serialization.Serializers
             }
             catch (ArgumentNullException ex)
             {
-                // we can get thrown a null argument exception by the notifer, 
+                // we can get thrown a null argument exception by the notifier, 
                 // which is non critical! but we are ignoring this error. ! <= 8.1.5
                 if (!ex.Message.Contains("siteUri")) throw;
                 return Attempt.Succeed($"Published");
@@ -623,7 +623,7 @@ namespace uSync.Core.Serialization.Serializers
             }
             catch (ArgumentNullException ex)
             {
-                // we can get thrown a null argument exception by the notifer, 
+                // we can get thrown a null argument exception by the notifier, 
                 // which is non critical! but we are ignoring this error. ! <= 8.1.5
                 if (!ex.Message.Contains("siteUri")) throw;
             }
@@ -637,7 +637,7 @@ namespace uSync.Core.Serialization.Serializers
             }
             catch (ArgumentNullException ex)
             {
-                // we can get thrown a null argument exception by the notifer, 
+                // we can get thrown a null argument exception by the notifier, 
                 // which is non critical! but we are ignoring this error. ! <= 8.1.5
                 if (!ex.Message.Contains("siteUri")) throw;
             }

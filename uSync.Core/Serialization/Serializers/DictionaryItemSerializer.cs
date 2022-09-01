@@ -16,13 +16,13 @@ namespace uSync.Core.Serialization.Serializers
     [SyncSerializer("4D18F4C3-6EBC-4AAD-8D20-6353BDBBD484", "Dicrionary Serializer", uSyncConstants.Serialization.Dictionary)]
     public class DictionaryItemSerializer : SyncSerializerBase<IDictionaryItem>, ISyncSerializer<IDictionaryItem>
     {
-        private readonly ILocalizationService localizationService;
+        private readonly ILocalizationService _localizationService;
 
         public DictionaryItemSerializer(IEntityService entityService, ILogger<DictionaryItemSerializer> logger,
             ILocalizationService localizationService)
             : base(entityService, logger)
         {
-            this.localizationService = localizationService;
+            this._localizationService = localizationService;
         }
 
         protected override SyncAttempt<IDictionaryItem> DeserializeCore(XElement node, SyncSerializerOptions options)
@@ -38,7 +38,7 @@ namespace uSync.Core.Serialization.Serializers
             var parentItemKey = info.Element(uSyncConstants.Xml.Parent).ValueOrDefault(string.Empty);
             if (parentItemKey != string.Empty)
             {
-                var parent = localizationService.GetDictionaryItemByKey(parentItemKey);
+                var parent = _localizationService.GetDictionaryItemByKey(parentItemKey);
                 if (parent != null)
                 {
                     parentKey = parent.Key;
@@ -69,7 +69,7 @@ namespace uSync.Core.Serialization.Serializers
                 item.Key = key;
             }
 
-            // key only translationm, would not add the translation values. 
+            // key only translation, would not add the translation values. 
             if (!options.GetSetting("KeysOnly", false))
             {
                 details.AddRange(DeserializeTranslations(item, node, options));
@@ -109,7 +109,7 @@ namespace uSync.Core.Serialization.Serializers
                 }
                 else
                 {
-                    var lang = localizationService.GetLanguageByIsoCode(language);
+                    var lang = _localizationService.GetLanguageByIsoCode(language);
                     if (lang != null)
                     {
                         changes.AddNew(language, translation.Value, $"{item.ItemKey}/{language}");
@@ -185,13 +185,13 @@ namespace uSync.Core.Serialization.Serializers
         }
 
         public override IDictionaryItem FindItem(int id)
-            => localizationService.GetDictionaryItemById(id);
+            => _localizationService.GetDictionaryItemById(id);
 
         public override IDictionaryItem FindItem(Guid key)
-            => localizationService.GetDictionaryItemById(key);
+            => _localizationService.GetDictionaryItemById(key);
 
         public override IDictionaryItem FindItem(string alias)
-            => localizationService.GetDictionaryItemByKey(alias);
+            => _localizationService.GetDictionaryItemByKey(alias);
 
         private int GetLevel(IDictionaryItem item, int level = 0)
         {
@@ -205,10 +205,10 @@ namespace uSync.Core.Serialization.Serializers
         }
 
         public override void SaveItem(IDictionaryItem item)
-            => localizationService.Save(item);
+            => _localizationService.Save(item);
 
         public override void DeleteItem(IDictionaryItem item)
-            => localizationService.Delete(item);
+            => _localizationService.Delete(item);
 
         public override string ItemAlias(IDictionaryItem item)
             => item.ItemKey;

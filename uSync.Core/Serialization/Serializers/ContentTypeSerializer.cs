@@ -22,8 +22,8 @@ namespace uSync.Core.Serialization.Serializers
     [SyncSerializer("B3F7F247-6077-406D-8480-DB1004C8211C", "ContentTypeSerializer", uSyncConstants.Serialization.ContentType)]
     public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, ISyncSerializer<IContentType>
     {
-        private readonly IContentTypeService contentTypeService;
-        private readonly IFileService fileService;
+        private readonly IContentTypeService _contentTypeService;
+        private readonly IFileService _fileService;
 
         private readonly uSyncCapabilityChecker _capabilities;
 
@@ -37,8 +37,8 @@ namespace uSync.Core.Serialization.Serializers
             uSyncCapabilityChecker uSyncCapabilityChecker)
             : base(entityService, logger, dataTypeService, contentTypeService, UmbracoObjectTypes.DocumentTypeContainer, shortStringHelper, appCaches, contentTypeService)
         {
-            this.contentTypeService = contentTypeService;
-            this.fileService = fileService;
+            this._contentTypeService = contentTypeService;
+            this._fileService = fileService;
             _capabilities = uSyncCapabilityChecker;
         }
 
@@ -174,7 +174,7 @@ namespace uSync.Core.Serialization.Serializers
                 dirty += historyUpdated ? " CleanupHistory" : "";
                 logger.LogDebug("Saving in Serializer because item is dirty [{properties}]", dirty);
 
-                contentTypeService.Save(item);
+                _contentTypeService.Save(item);
             }
 
             CleanFolder(item, node);
@@ -199,7 +199,7 @@ namespace uSync.Core.Serialization.Serializers
             var masterTemplate = info.Element("DefaultTemplate").ValueOrDefault(string.Empty);
             if (!string.IsNullOrEmpty(masterTemplate))
             {
-                var template = fileService.GetTemplate(masterTemplate);
+                var template = _fileService.GetTemplate(masterTemplate);
                 if (template != null)
                 {
                     if (item.DefaultTemplate == null || template.Alias != item.DefaultTemplate.Alias)
@@ -242,14 +242,14 @@ namespace uSync.Core.Serialization.Serializers
                 var templateItem = default(ITemplate);
 
                 if (key != Guid.Empty)
-                    templateItem = fileService.GetTemplate(key);
+                    templateItem = _fileService.GetTemplate(key);
 
                 if (templateItem == null)
-                    templateItem = fileService.GetTemplate(alias);
+                    templateItem = _fileService.GetTemplate(alias);
 
                 if (templateItem != null)
                 {
-                    logger.LogDebug("Adding Template: {0}", templateItem.Alias);
+                    logger.LogDebug("Adding Template: {alias}", templateItem.Alias);
                     allowedTemplates.Add(templateItem);
                 }
             }
@@ -295,52 +295,50 @@ namespace uSync.Core.Serialization.Serializers
 
         protected override void SaveContainer(EntityContainer container)
         {
-            logger.LogDebug("Saving Container (In main class) {0}", container.Key.ToString());
-            contentTypeService.SaveContainer(container);
+            logger.LogDebug("Saving Container (In main class) {key}", container.Key.ToString());
+            _contentTypeService.SaveContainer(container);
         }
 
         /// History Cleanup (added in v9.1) 
-         
 
-        private string _historyCleanupName = "HistoryCleanup";
-        private string[] _historyCleanupProperties = new string[]
+
+        private readonly string _historyCleanupName = "HistoryCleanup";
+        private readonly string[] _historyCleanupProperties = new string[]
         {
             "PreventCleanup", "KeepAllVersionsNewerThanDays", "KeepLatestVersionPerDayForDays"
         };
 
         private XElement SerializeCleanupHistory(IContentType item)
         {
-            if (_capabilities.HasHistoryCleanup)
+            if (!_capabilities.HasHistoryCleanup) return null;
+
+            try
             {
-                try
+                var historyCleanupInfo = item.GetType().GetProperty(_historyCleanupName);
+                if (historyCleanupInfo == null) return null;
+
+                var historyCleanup = historyCleanupInfo.GetValue(item);
+                if (historyCleanup == null) return null;
+
+                var history = new XElement(_historyCleanupName);
+                foreach (var propertyName in _historyCleanupProperties)
                 {
-                    var historyCleanupInfo = item.GetType().GetProperty(_historyCleanupName);
-                    if (historyCleanupInfo != null)
+                    var property = historyCleanup.GetType().GetProperty(propertyName);
+                    if (property != null)
                     {
-                        var historyCleanup = historyCleanupInfo.GetValue(item);
-                        if (historyCleanup != null)
-                        {
-                            var history = new XElement(_historyCleanupName);
-                            foreach (var propertyName in _historyCleanupProperties)
-                            {
-                                var property = historyCleanup.GetType().GetProperty(propertyName);
-                                if (property != null)
-                                {
-                                    history.Add(new XElement(property.Name, GetPropertyAs<string>(property, historyCleanup) ?? ""));
-                                }
-                            }
-                            return history;
-                        }
+                        history.Add(new XElement(property.Name, GetPropertyAs<string>(property, historyCleanup) ?? ""));
                     }
                 }
-                catch (Exception ex)
-                {
-                    // we are very defensive. with the 'new' - if for some reason we can't read this, log it, but carry on.
-                    logger.LogWarning(ex, "Error tryng to get the HistoryCleanup settings for this node.");
-                }
-            }
 
-            return null;
+                return history;
+
+            }
+            catch (Exception ex)
+            {
+                // we are very defensive. with the 'new' - if for some reason we can't read this, log it, but carry on.
+                logger.LogWarning(ex, "Error trying to get the HistoryCleanup settings for this node.");
+                return null;
+            }
         }
 
 
@@ -388,14 +386,15 @@ namespace uSync.Core.Serialization.Serializers
             }
             catch (Exception ex)
             {
-                logger.LogWarning(ex, "Error tryng to get the HistoryCleanup settings for this node.");
+                logger.LogWarning(ex, "Error trying to get the HistoryCleanup settings for this node.");
+                return emtpy;
             }
 
-            return emtpy;
         }
 
         protected override XElement CleanseNode(XElement node)
         {
+            // remove the history node when comparing, if this version doesn't support it but it is in the XML
             if (!_capabilities.HasHistoryCleanup && node.Element(uSyncConstants.Xml.Info)?.Element(_historyCleanupName) != null)
             {
                 node.Element(uSyncConstants.Xml.Info).Element(_historyCleanupName).Remove();

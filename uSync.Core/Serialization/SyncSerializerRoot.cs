@@ -377,7 +377,7 @@ namespace uSync.Core.Serialization
         {
             var (key, alias) = FindKeyAndAlias(node);
 
-            logger.LogTrace("Base: Find Item {0} [{1}]", key, alias);
+            logger.LogTrace("Base: Find Item {key} [{alias}]", key, alias);
 
             if (key != Guid.Empty)
             {
@@ -387,11 +387,11 @@ namespace uSync.Core.Serialization
 
             if (!string.IsNullOrWhiteSpace(alias))
             {
-                logger.LogTrace("Base: Lookup by Alias: {0}", alias);
+                logger.LogTrace("Base: Lookup by Alias: {alias}", alias);
                 return FindItem(alias);
             }
 
-            return default(TObject);
+            return default;
         }
         #endregion
 

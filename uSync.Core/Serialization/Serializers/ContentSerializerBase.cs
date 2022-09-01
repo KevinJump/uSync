@@ -71,7 +71,7 @@ namespace uSync.Core.Serialization.Serializers
                 node.Add(new XAttribute(uSyncConstants.CultureKey, cultures));
             }
 
-            // are we only serizling some segments ? 
+            // are we only serializing some segments ? 
             var segments = options.GetSetting(uSyncConstants.SegmentKey, string.Empty);
             if (IsPartialSegmentElement(item, segments))
             {
@@ -80,7 +80,7 @@ namespace uSync.Core.Serialization.Serializers
 
             // are we including the default (not variant) values in the serialized result? 
             // we only worry about this when we are passing partial cultures or segments 
-            // to the file, when we sync complte content items, this is reduntant. 
+            // to the file, when we sync complete content items, this is redundant. 
             if (options.GetSetting(uSyncConstants.DefaultsKey, true) && IsPartialElement(item, cultures ,segments)) {
                 node.Add(new XAttribute(uSyncConstants.DefaultsKey, true));
             }
@@ -217,13 +217,13 @@ namespace uSync.Core.Serialization.Serializers
 
                 // this can cause us false change readings
                 // but we need to preserve the values if they are blank
-                // because we have to be able to set them to blank on deserialization
+                // because we have to be able to set them to blank when we deserialize them.
                 foreach (var value in property.Values)
                 {
                     var valueNode = new XElement("Value");
 
                     // valid if there is no culture, or segment and 
-                    // we are includeing default values
+                    // we are including default values
                     var validNode = string.IsNullOrWhiteSpace(value.Culture)
                         && string.IsNullOrWhiteSpace(value.Segment)
                         && includeDefaults;
@@ -269,7 +269,7 @@ namespace uSync.Core.Serialization.Serializers
             return node;
         }
 
-        // allows us to swich between published / edited easier.
+        // allows us to switch between published / edited easier.
         protected virtual object GetPropertyValue(IPropertyValue value)
             => value.EditedValue;
 
@@ -280,7 +280,7 @@ namespace uSync.Core.Serialization.Serializers
                 // check the parent exists. 
                 if (!this.HasParentItem(node))
                 {
-                    return SyncAttempt<TObject>.Fail(node.GetAlias(), ChangeType.ParentMissing, $"The parent node for this item is missing, and config is set to not import when a parent is missing");
+                    return SyncAttempt<TObject>.Fail(node.GetAlias(), ChangeType.ParentMissing, $"The parent node for this item is missing, and configuration is set to not import when a parent is missing");
 
                 }
             }
@@ -327,7 +327,7 @@ namespace uSync.Core.Serialization.Serializers
                     }
                     else
                     {
-                        logger.LogDebug("Unable to find parent but parent node is set in config");
+                        logger.LogDebug("Unable to find parent but parent node is set in configuration");
                     }
                 }
 
@@ -445,7 +445,7 @@ namespace uSync.Core.Serialization.Serializers
                 {
                     var current = item.Properties[alias];
 
-                    logger.LogTrace("Derserialize Property {0} {1}", alias, current.PropertyType.PropertyEditorAlias);
+                    logger.LogTrace("De-serialize Property {0} {1}", alias, current.PropertyType.PropertyEditorAlias);
 
                     var values = property.Elements("Value").ToList();
 
@@ -478,13 +478,13 @@ namespace uSync.Core.Serialization.Serializers
                                         logger.LogWarning("{item} Culture {culture} in file, but is not default so not being used", item.Name, culture);
                                         continue;
                                     }
-                                    logger.LogWarning("{item} Cannot set value on culture {culture} because it is not avalible for this property - value in default language will be used", item.Name, culture);
+                                    logger.LogWarning("{item} Cannot set value on culture {culture} because it is not available for this property - value in default language will be used", item.Name, culture);
                                     culture = string.Empty;
                                 }
                                 else if (!item.AvailableCultures.InvariantContains(culture))
                                 {
                                     // this culture isn't one of the ones, that can be set on this language. 
-                                    logger.LogWarning("{item} Culture {culture} is not one of the avalible cultures, so we cannot set this value", item.Name, culture);
+                                    logger.LogWarning("{item} Culture {culture} is not one of the available cultures, so we cannot set this value", item.Name, culture);
                                     continue;
                                 }
                             }
@@ -496,7 +496,7 @@ namespace uSync.Core.Serialization.Serializers
 
                                     if (values.Count == 1)
                                     {
-                                        // there is only one value - so we should set the default variant with this for consistancy?
+                                        // there is only one value - so we should set the default variant with this for consistency?
                                         culture = localizationService.GetDefaultLanguageIsoCode();
                                         logger.LogDebug("Property {Alias} contains a single value that has no culture setting default culture {Culture}", alias, culture);
                                     }
@@ -525,7 +525,7 @@ namespace uSync.Core.Serialization.Serializers
                         }
                         catch (Exception ex)
                         {
-                            // capture here to be less agressive with failure. 
+                            // capture here to be less aggressive with failure. 
                             // if one property fails the rest will still go in.
                             logger.LogWarning("{item} Failed to set [{alias}] {propValue} Ex: {Exception}", item.Name, alias, propValue, ex.ToString());
                             errors += $"Failed to set [{alias}] {ex.Message} <br/>";
@@ -534,9 +534,9 @@ namespace uSync.Core.Serialization.Serializers
                 }
                 else
                 {
-                    logger.LogWarning("DeserializeProperties: item {Name} doesn't have property '{alias}' but its in the xml", item.Name, alias);
+                    logger.LogWarning("DeserializeProperties: item {Name} doesn't have property '{alias}' but its in the XML", item.Name, alias);
                     errors += $"{item.Name} does not container property {alias}";
-                    changes.Add(uSyncChange.Warning($"Property/{alias}", alias, $"item {item.Name} does not have a property {alias} but it exists in xml"));
+                    changes.Add(uSyncChange.Warning($"Property/{alias}", alias, $"item {item.Name} does not have a property {alias} but it exists in XML"));
                 }
             }
 
@@ -548,7 +548,7 @@ namespace uSync.Core.Serialization.Serializers
         /// </summary>
         /// <remarks>
         ///   Object.Equals will check nulls, and object values. but 
-        ///   the value from the xml will not be coming back as the 
+        ///   the value from the XML will not be coming back as the 
         ///   same type as that in the object (if its set). 
         ///   
         ///   So we attempt to convert to the type stored in the current
@@ -558,7 +558,7 @@ namespace uSync.Core.Serialization.Serializers
         {
             if (Object.Equals(current, newValue)) return false;
 
-            // diffrent types? 
+            // different types? 
             if (current != null && newValue != null && current.GetType() != newValue.GetType())
             {
                 var currentType = current.GetType();
@@ -597,8 +597,8 @@ namespace uSync.Core.Serialization.Serializers
 
             var exportValue = syncMappers.GetExportValue(value, propertyType.PropertyEditorAlias);
 
-            // TODO: in a perfect world, this is the best answer, don't escape any burried JSON in anyhing
-            // but there might be a couple of property value convertors that don't like their nested json
+            // TODO: in a perfect world, this is the best answer, don't escape any buried JSON in anything
+            // but there might be a couple of property value converters that don't like their nested JSON
             // to not be escaped so we would need to do proper testing. 
             if (exportValue.DetectIsJson())
             {
@@ -762,8 +762,8 @@ namespace uSync.Core.Serialization.Serializers
 
         public override TObject FindItem(string alias)
         {
-            // we can't relaibly do this - because names can be the same
-            // across the content treee. but we should have overridden all classes that call this 
+            // For content based items we can't reliably do this - because names can be the same
+            // across the content tree. but we should have overridden all classes that call this 
             // function above.
             return default(TObject);
         }
@@ -849,7 +849,7 @@ namespace uSync.Core.Serialization.Serializers
                     // if we get lost 1/2 way we are returning that as the path? which would put us in an odd place?
                     logger.LogTrace("Didn't find {folder} returning last found Parent", folder);
 
-                    // if we don't fail on exact this is ok, 
+                    // if we don't fail on exact this is OK, 
                     // else its not - so we haven't 'found' the right place.
                     return !failIfNotExact ? item : default;
                 }
@@ -874,7 +874,7 @@ namespace uSync.Core.Serialization.Serializers
         #endregion
 
         /// <summary>
-        ///  will check the xml to see if the sepecified parent exists in umbraco
+        ///  will check the XML to see if the specified parent exists in umbraco
         /// </summary>
         /// <remarks>
         ///  Will first look for the parent based on the key, if this fails

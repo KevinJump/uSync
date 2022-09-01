@@ -17,9 +17,9 @@ namespace uSync.Core.Serialization.Serializers
     [SyncSerializer("9A5C253C-71FA-4FC0-9B7C-9D0522AAE880", "Domain Serializer", uSyncConstants.Serialization.Domain)]
     public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncSerializer<IDomain>
     {
-        private readonly IDomainService domainService;
-        private readonly IContentService contentService;
-        private readonly ILocalizationService localizationService;
+        private readonly IDomainService _domainService;
+        private readonly IContentService _contentService;
+        private readonly ILocalizationService _localizationService;
 
         public DomainSerializer(IEntityService entityService, ILogger<DomainSerializer> logger,
             IDomainService domainService,
@@ -27,9 +27,9 @@ namespace uSync.Core.Serialization.Serializers
             ILocalizationService localizationService)
             : base(entityService, logger)
         {
-            this.domainService = domainService;
-            this.contentService = contentService;
-            this.localizationService = localizationService;
+            this._domainService = domainService;
+            this._contentService = contentService;
+            this._localizationService = localizationService;
         }
 
         protected override SyncAttempt<IDomain> DeserializeCore(XElement node, SyncSerializerOptions options)
@@ -48,7 +48,7 @@ namespace uSync.Core.Serialization.Serializers
 
             if (!string.IsNullOrWhiteSpace(isoCode))
             {
-                var language = localizationService.GetLanguageByIsoCode(isoCode);
+                var language = _localizationService.GetLanguageByIsoCode(isoCode);
                 if (language != null && item.LanguageId != language.Id)
                 {
                     changes.AddUpdate("Id", item.LanguageId, language.Id);
@@ -61,7 +61,7 @@ namespace uSync.Core.Serialization.Serializers
             var rootKey = info.Element("Root")?.Attribute(uSyncConstants.Xml.Key).ValueOrDefault(Guid.Empty) ?? Guid.Empty;
             if (rootKey != Guid.Empty)
             {
-                rootItem = contentService.GetById(rootKey);
+                rootItem = _contentService.GetById(rootKey);
             }
 
             if (rootItem == default(IContent))
@@ -105,7 +105,7 @@ namespace uSync.Core.Serialization.Serializers
 
             if (item.RootContentId.HasValue)
             {
-                var rootNode = contentService.GetById(item.RootContentId.Value);
+                var rootNode = _contentService.GetById(item.RootContentId.Value);
 
                 if (rootNode != null)
                 {
@@ -121,13 +121,13 @@ namespace uSync.Core.Serialization.Serializers
         }
 
         public override IDomain FindItem(int id)
-            => domainService.GetById(id);
+            => _domainService.GetById(id);
 
         public override IDomain FindItem(Guid key)
             => null;
 
         public override IDomain FindItem(string alias)
-            => domainService.GetByName(alias);
+            => _domainService.GetByName(alias);
 
 
         /// <summary>
@@ -177,7 +177,7 @@ namespace uSync.Core.Serialization.Serializers
                 var children = entityService.GetChildren(parent.Id, UmbracoObjectTypes.Document);
                 var child = children.FirstOrDefault(x => x.Name.InvariantEquals(alias));
                 if (child != null)
-                    return contentService.GetById(child.Id);
+                    return _contentService.GetById(child.Id);
             }
 
             return default(IContent);
@@ -185,10 +185,10 @@ namespace uSync.Core.Serialization.Serializers
 
 
         public override void SaveItem(IDomain item)
-            => domainService.Save(item);
+            => _domainService.Save(item);
 
         public override void DeleteItem(IDomain item)
-            => domainService.Delete(item);
+            => _domainService.Delete(item);
 
         public override string ItemAlias(IDomain item)
             => item.DomainName;

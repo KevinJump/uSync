@@ -19,15 +19,13 @@ namespace uSync.Core.Serialization.Serializers
         uSyncConstants.Serialization.Language, IsTwoPass = true)]
     public class LanguageSerializer : SyncSerializerBase<ILanguage>, ISyncSerializer<ILanguage>
     {
-        private readonly ILocalizationService localizationService;
-        private readonly GlobalSettings globalSettings;
+        private readonly ILocalizationService _localizationService;
 
         public LanguageSerializer(IEntityService entityService, ILogger<LanguageSerializer> logger,
-            ILocalizationService localizationService, IOptions<GlobalSettings> globalSettings)
+            ILocalizationService localizationService)
             : base(entityService, logger)
         {
-            this.localizationService = localizationService;
-            this.globalSettings = globalSettings.Value;
+            this._localizationService = localizationService;
         }
 
         private CultureInfo GetCulture(string isoCode)
@@ -36,16 +34,16 @@ namespace uSync.Core.Serialization.Serializers
         protected override SyncAttempt<ILanguage> DeserializeCore(XElement node, SyncSerializerOptions options)
         {
             var isoCode = node.Element("IsoCode").ValueOrDefault(string.Empty);
-            logger.LogDebug("Derserializing {0}", isoCode);
+            logger.LogDebug("Derserializing {isoCode}", isoCode);
 
-            var item = localizationService.GetLanguageByIsoCode(isoCode);
+            var item = _localizationService.GetLanguageByIsoCode(isoCode);
             var culture = GetCulture(isoCode);
 
             var details = new List<uSyncChange>();
 
             if (item == null)
             {
-                logger.LogDebug("Creating New Language: {0}", isoCode);
+                logger.LogDebug("Creating New Language: {isoCode}", isoCode);
                 item = new Language(isoCode, culture.DisplayName);
                 details.AddNew(isoCode, isoCode, "Language");
             }
@@ -120,7 +118,7 @@ namespace uSync.Core.Serialization.Serializers
             }
 
             if (!options.Flags.HasFlag(SerializerFlags.DoNotSave) && item.IsDirty())
-                localizationService.Save(item);
+                _localizationService.Save(item);
 
             return SyncAttempt<ILanguage>.Succeed(item.CultureName, item, ChangeType.Import, details);
         }
@@ -138,7 +136,7 @@ namespace uSync.Core.Serialization.Serializers
                 else
                 {
                     // 8.5+ we store the iso in the fallback value, its more reliable.
-                    var fallback = localizationService.GetLanguageByIsoCode(fallbackIso);
+                    var fallback = _localizationService.GetLanguageByIsoCode(fallbackIso);
                     if (fallback != null)
                     {
                         return fallback.Id;
@@ -180,7 +178,7 @@ namespace uSync.Core.Serialization.Serializers
 
             if (item.FallbackLanguageId != null)
             {
-                var fallback = localizationService.GetLanguageById(item.FallbackLanguageId.Value);
+                var fallback = _localizationService.GetLanguageById(item.FallbackLanguageId.Value);
                 if (fallback != null)
                 {
                     node.Add(new XElement("Fallback", fallback.IsoCode));
@@ -207,21 +205,21 @@ namespace uSync.Core.Serialization.Serializers
             //
             // based on that we need to check that the language we get back actually has the 
             // code we asked for from the api.
-            var item = localizationService.GetLanguageByIsoCode(alias);
+            var item = _localizationService.GetLanguageByIsoCode(alias);
             if (item == null || !item.CultureInfo.Name.InvariantEquals(alias)) return null;
             return item;
         }
 
         public override ILanguage FindItem(int id)
-            => localizationService.GetLanguageById(id);
+            => _localizationService.GetLanguageById(id);
 
         public override ILanguage FindItem(Guid key) => default(ILanguage);
 
         public override void SaveItem(ILanguage item)
-            => localizationService.Save(item);
+            => _localizationService.Save(item);
 
         public override void DeleteItem(ILanguage item)
-            => localizationService.Delete(item);
+            => _localizationService.Delete(item);
 
 
         protected override XElement CleanseNode(XElement node)

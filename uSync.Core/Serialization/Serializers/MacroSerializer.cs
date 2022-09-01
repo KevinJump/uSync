@@ -16,16 +16,16 @@ namespace uSync.Core.Serialization.Serializers
     [SyncSerializer("CBB3FDA1-F7B3-470E-B78F-EB316576C8C6", "Macro Serializer", uSyncConstants.Serialization.Macro)]
     public class MacroSerializer : SyncSerializerBase<IMacro>, ISyncSerializer<IMacro>
     {
-        private readonly IMacroService macroService;
-        private readonly IShortStringHelper shortStringHelper;
+        private readonly IMacroService _macroService;
+        private readonly IShortStringHelper _shortStringHelper;
 
         public MacroSerializer(
             IEntityService entityService, ILogger<MacroSerializer> logger,
             IMacroService macroService, IShortStringHelper shortStringHelper)
             : base(entityService, logger)
         {
-            this.macroService = macroService;
-            this.shortStringHelper = shortStringHelper;
+            this._macroService = macroService;
+            this._shortStringHelper = shortStringHelper;
         }
 
         protected override SyncAttempt<IMacro> DeserializeCore(XElement node, SyncSerializerOptions options)
@@ -33,30 +33,27 @@ namespace uSync.Core.Serialization.Serializers
             var details = new List<uSyncChange>();
 
             if (node.Element(uSyncConstants.Xml.Name) == null)
-                throw new ArgumentNullException("XML missing Name parameter");
-
-            var item = default(IMacro);
+                throw new NullReferenceException("XML missing Name parameter");
 
             var key = node.GetKey();
             var alias = node.GetAlias();
             var name = node.Element(uSyncConstants.Xml.Name).ValueOrDefault(string.Empty);
 
             var macroSource = node.Element("MacroSource").ValueOrDefault(string.Empty);
-            // var macroType = node.Element("MacroType").ValueOrDefault(MacroTypes.PartialView);
 
-            logger.LogDebug("Macro by Key [{0}]", key);
-            item = macroService.GetById(key);
+            logger.LogDebug("Macro by Key [{key}]", key);
+            var item = _macroService.GetById(key);
 
             if (item == null)
             {
-                logger.LogDebug("Macro by Alias [{0}]", key);
-                item = macroService.GetByAlias(alias);
+                logger.LogDebug("Macro by Alias [{alias}]", alias);
+                item = _macroService.GetByAlias(alias);
             }
 
             if (item == null)
             {
-                logger.LogDebug("Creating New [{0}]", key);
-                item = new Macro(shortStringHelper, alias, name, macroSource);
+                logger.LogDebug("Creating New [{alias}]", alias);
+                item = new Macro(_shortStringHelper, alias, name, macroSource);
                 details.Add(uSyncChange.Create(alias, name, "New Macro"));
             }
 
@@ -140,18 +137,19 @@ namespace uSync.Core.Serialization.Serializers
                     var propertyName = propNode.Element(uSyncConstants.Xml.Name).ValueOrDefault(string.Empty);
                     var sortOrder = propNode.Element(uSyncConstants.Xml.SortOrder).ValueOrDefault(0);
 
-                    logger.LogDebug(" > Property {0} {1} {2} {3}", propertyAlias, editorAlias, propertyName, sortOrder);
+                    logger.LogDebug(" > Property {propertyAlias} {editorAlias} {propertyName} {sortOrder}",
+                        propertyAlias, editorAlias, propertyName, sortOrder);
 
                     var propPath = $"{alias}: {propertyName}";
 
                     if (item.Properties.ContainsKey(propertyAlias))
                     {
-                        logger.LogDebug(" >> Updating {0}", propertyAlias);
+                        logger.LogDebug(" >> Updating {propertyAlias}", propertyAlias);
                         item.Properties.UpdateProperty(propertyAlias, propertyName, sortOrder, editorAlias);
                     }
                     else
                     {
-                        logger.LogDebug(" >> Adding {0}", propertyAlias);
+                        logger.LogDebug(" >> Adding {propertyAlias}", propertyAlias);
                         details.Add(uSyncChange.Create(propPath, "Property", propertyAlias));
                         item.Properties.Add(new MacroProperty(propertyAlias, propertyName, sortOrder, editorAlias));
                     }
@@ -232,19 +230,19 @@ namespace uSync.Core.Serialization.Serializers
         }
 
         public override IMacro FindItem(int id)
-            => macroService.GetById(id);
+            => _macroService.GetById(id);
 
         public override IMacro FindItem(Guid key)
-            => macroService.GetById(key);
+            => _macroService.GetById(key);
 
         public override IMacro FindItem(string alias)
-            => macroService.GetByAlias(alias);
+            => _macroService.GetByAlias(alias);
 
         public override void SaveItem(IMacro item)
-            => macroService.Save(item);
+            => _macroService.Save(item);
 
         public override void DeleteItem(IMacro item)
-            => macroService.Delete(item);
+            => _macroService.Delete(item);
 
         public override string ItemAlias(IMacro item)
             => item.Alias;

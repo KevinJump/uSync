@@ -26,7 +26,7 @@ namespace uSync.Core.Serialization.Serializers
     [SyncSerializer("B4060604-CF5A-46D6-8F00-257579A658E6", "MediaSerializer", uSyncConstants.Serialization.Media)]
     public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncSerializer<IMedia>
     {
-        private readonly IMediaService mediaService;
+        private readonly IMediaService _mediaService;
 
         public MediaSerializer(
             IEntityService entityService,
@@ -38,7 +38,7 @@ namespace uSync.Core.Serialization.Serializers
             SyncValueMapperCollection syncMappers)
             : base(entityService, localizationService, relationService, shortStringHelper, logger, UmbracoObjectTypes.Media, syncMappers)
         {
-            this.mediaService = mediaService;
+            this._mediaService = mediaService;
             this.relationAlias = Constants.Conventions.RelationTypes.RelateParentMediaFolderOnDeleteAlias;
 
             // we don't serialize the media properties, 
@@ -85,7 +85,7 @@ namespace uSync.Core.Serialization.Serializers
                     new Exception("Import failed because of warnings, and fail on warnings is true"));
             }
 
-            var saveAttempt = mediaService.Save(item);
+            var saveAttempt = _mediaService.Save(item);
             if (!saveAttempt.Success) {
                 var errors = saveAttempt.Result?.EventMessages?.FormatMessages() ?? "";
                 return SyncAttempt<IMedia>.Fail(item.Name, item, ChangeType.Fail, errors, saveAttempt.Exception);
@@ -106,7 +106,7 @@ namespace uSync.Core.Serialization.Serializers
             {
                 // if the item is trashed, then moving it back to the parent value 
                 // restores it.
-                mediaService.Move(item, item.ParentId);
+                _mediaService.Move(item, item.ParentId);
 
                 CleanRelations(item, "relateParentMediaFolderOnDelete");
 
@@ -118,7 +118,7 @@ namespace uSync.Core.Serialization.Serializers
                 CleanRelations(item, "relateParentMediaFolderOnDelete");
 
                 // move to the recycle bin
-                mediaService.MoveToRecycleBin(item);
+                _mediaService.MoveToRecycleBin(item);
                 return uSyncChange.Update("Moved to Bin", item.Name, "", "Recycle Bin");
             }
 
@@ -160,7 +160,7 @@ namespace uSync.Core.Serialization.Serializers
 
                     if (!string.IsNullOrWhiteSpace(path))
                     {
-                        using (var stream = mediaService.GetMediaFileContentStream(path))
+                        using (var stream = _mediaService.GetMediaFileContentStream(path))
                         {
                             if (stream != null)
                             {
@@ -206,13 +206,13 @@ namespace uSync.Core.Serialization.Serializers
         protected override Attempt<IMedia> CreateItem(string alias, ITreeEntity parent, string itemType)
         {
             var parentId = parent != null ? parent.Id : -1;
-            var item = mediaService.CreateMedia(alias, parentId, itemType);
+            var item = _mediaService.CreateMedia(alias, parentId, itemType);
             return Attempt.Succeed((IMedia)item);
         }
 
         public override IMedia FindItem(int id)
         {
-            var item = mediaService.GetById(id);
+            var item = _mediaService.GetById(id);
             if (item != null)
             {
                 AddToNameCache(id, item.Key, item.Name);
@@ -223,11 +223,11 @@ namespace uSync.Core.Serialization.Serializers
 
 
         public override IMedia FindItem(Guid key)
-            => mediaService.GetById(key);
+            => _mediaService.GetById(key);
 
         protected override IMedia FindAtRoot(string alias)
         {
-            var rootNodes = mediaService.GetRootMedia();
+            var rootNodes = _mediaService.GetRootMedia();
             if (rootNodes.Any())
             {
                 return rootNodes.FirstOrDefault(x => x.Name.ToSafeAlias(shortStringHelper).InvariantEquals(alias));
@@ -237,13 +237,13 @@ namespace uSync.Core.Serialization.Serializers
         }
 
         public override void Save(IEnumerable<IMedia> items)
-            => mediaService.Save(items);
+            => _mediaService.Save(items);
 
         public override void SaveItem(IMedia item)
-            => mediaService.Save(item);
+            => _mediaService.Save(item);
 
         public override void DeleteItem(IMedia item)
-            => mediaService.Delete(item);
+            => _mediaService.Delete(item);
 
     }
 

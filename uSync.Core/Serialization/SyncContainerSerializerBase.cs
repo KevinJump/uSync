@@ -35,7 +35,6 @@ namespace uSync.Core.Serialization
             logger.LogDebug("FindOrCreate: Creating");
 
             // create
-            var parentId = -1;
             var parent = default(TObject);
             var treeItem = default(ITreeEntity);
 
@@ -50,9 +49,8 @@ namespace uSync.Core.Serialization
                 parent = FindItem(parentKey, parentNode.Value);
                 if (parent != null)
                 {
-                    logger.LogDebug("Parent Found {0}", parent.Id);
+                    logger.LogDebug("Parent Found {parentId}", parent.Id);
                     treeItem = parent;
-                    parentId = parent.Id;
                 }
             }
 
@@ -65,13 +63,13 @@ namespace uSync.Core.Serialization
 
                     var folderKey = folder.Attribute(uSyncConstants.Xml.Key).ValueOrDefault(Guid.Empty);
 
-                    logger.LogDebug("Searching for Parent by folder {0}", folderKey);
+                    logger.LogDebug("Searching for Parent by folder {folderKey}", folderKey);
 
                     var container = FindFolder(folderKey, folder.Value);
                     if (container != null)
                     {
                         treeItem = container;
-                        logger.LogDebug("Parent is Folder {0}", treeItem.Id);
+                        logger.LogDebug("Parent is Folder {TreeItemId}", treeItem.Id);
 
                         // update the container key if its different (because we don't serialize folders on their own)
                         if (container.Key != folderKey)
@@ -120,11 +118,11 @@ namespace uSync.Core.Serialization
             if (item.ParentId <= 0) return null;
             // return GetFolderNode(GetContainers(item));
 
-            if (!folderCache.ContainsKey(item.ParentId))
+            if (!_folderCache.ContainsKey(item.ParentId))
             {
-                folderCache[item.ParentId] = GetFolderNode(GetContainers(item));
+                _folderCache[item.ParentId] = GetFolderNode(GetContainers(item));
             }
-            return folderCache[item.ParentId];
+            return _folderCache[item.ParentId];
         }
 
         protected abstract IEnumerable<EntityContainer> GetContainers(TObject item);
@@ -195,7 +193,7 @@ namespace uSync.Core.Serialization
 
                 if (current != null)
                 {
-                    logger.LogDebug("Folder Found {0}", current.Name);
+                    logger.LogDebug("Folder Found {name}", current.Name);
                     return current;
                 }
             }
@@ -218,11 +216,11 @@ namespace uSync.Core.Serialization
         /// <remarks>
         ///  only used on serialization, allows us to only build the folder path for a set of containers once.
         /// </remarks>
-        private Dictionary<int, XElement> folderCache = new Dictionary<int, XElement>();
+        private Dictionary<int, XElement> _folderCache = new();
 
         private void ClearFolderCache()
         {
-            folderCache = new Dictionary<int, XElement>();
+            _folderCache = new Dictionary<int, XElement>();
         }
 
         public void InitializeCache()

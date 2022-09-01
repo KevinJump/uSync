@@ -24,11 +24,11 @@ namespace uSync.Core.Serialization.Serializers
     [SyncSerializer("C06E92B7-7440-49B7-B4D2-AF2BF4F3D75D", "DataType Serializer", uSyncConstants.Serialization.DataType)]
     public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncSerializer<IDataType>
     {
-        private readonly IDataTypeService dataTypeService;
-        private readonly DataEditorCollection dataEditors;
-        private readonly ConfigurationSerializerCollection configurationSerializers;
-        private readonly PropertyEditorCollection propertyEditors;
-        private readonly IConfigurationEditorJsonSerializer jsonSerializer;
+        private readonly IDataTypeService _dataTypeService;
+        private readonly DataEditorCollection _dataEditors;
+        private readonly ConfigurationSerializerCollection _configurationSerializers;
+        private readonly PropertyEditorCollection _propertyEditors;
+        private readonly IConfigurationEditorJsonSerializer _jsonSerializer;
 
         private readonly JsonSerializerSettings _jsonSettings; 
 
@@ -40,11 +40,11 @@ namespace uSync.Core.Serialization.Serializers
             IConfigurationEditorJsonSerializer jsonSerializer)
             : base(entityService, logger, UmbracoObjectTypes.DataTypeContainer)
         {
-            this.dataTypeService = dataTypeService;
-            this.dataEditors = dataEditors;
-            this.configurationSerializers = configurationSerializers;
-            this.propertyEditors = propertyEditors;
-            this.jsonSerializer = jsonSerializer;
+            this._dataTypeService = dataTypeService;
+            this._dataEditors = dataEditors;
+            this._configurationSerializers = configurationSerializers;
+            this._propertyEditors = propertyEditors;
+            this._jsonSerializer = jsonSerializer;
 
             _jsonSettings = new JsonSerializerSettings()
             {
@@ -82,7 +82,7 @@ namespace uSync.Core.Serialization.Serializers
             if (editorAlias != item.EditorAlias)
             {
                 // change the editor type.....
-                var newEditor = dataEditors.FirstOrDefault(x => x.Alias.InvariantEquals(editorAlias));
+                var newEditor = _dataEditors.FirstOrDefault(x => x.Alias.InvariantEquals(editorAlias));
                 if (newEditor != null)
                 {
                     details.AddUpdate("EditorAlias", item.EditorAlias, editorAlias, "EditorAlias");
@@ -140,7 +140,7 @@ namespace uSync.Core.Serialization.Serializers
             {
                 var changes = new List<uSyncChange>();
 
-                var serializer = this.configurationSerializers.GetSerializer(item.EditorAlias);
+                var serializer = this._configurationSerializers.GetSerializer(item.EditorAlias);
                 if (serializer == null)
                 {
                     var configObject = JsonConvert.DeserializeObject(config, item.Configuration.GetType());
@@ -210,13 +210,13 @@ namespace uSync.Core.Serialization.Serializers
         }
 
         protected override IEnumerable<EntityContainer> GetContainers(IDataType item)
-            => dataTypeService.GetContainers(item);
+            => _dataTypeService.GetContainers(item);
 
         private XElement SerializeConfiguration(IDataType item)
         {
             if (item.Configuration != null)
             {
-                var serializer = this.configurationSerializers.GetSerializer(item.EditorAlias);
+                var serializer = this._configurationSerializers.GetSerializer(item.EditorAlias);
 
                 string config;
                 if (serializer == null)
@@ -242,7 +242,7 @@ namespace uSync.Core.Serialization.Serializers
             if (editorType == null)
                 return Attempt.Fail<IDataType>(null, new ArgumentException($"(Missing Package?) DataEditor {itemType} is not installed"));
 
-            var item = new DataType(editorType, jsonSerializer, -1);
+            var item = new DataType(editorType, _jsonSerializer, -1);
 
             item.Name = alias;
 
@@ -253,46 +253,46 @@ namespace uSync.Core.Serialization.Serializers
         }
 
         private IDataEditor FindDataEditor(string alias)
-            => propertyEditors.FirstOrDefault(x => x.Alias == alias);
+            => _propertyEditors.FirstOrDefault(x => x.Alias == alias);
 
         protected override string GetItemBaseType(XElement node)
             => node.Element(uSyncConstants.Xml.Info).Element("EditorAlias").ValueOrDefault(string.Empty);
 
         public override IDataType FindItem(int id)
-            => dataTypeService.GetDataType(id);
+            => _dataTypeService.GetDataType(id);
 
         public override IDataType FindItem(Guid key)
-            => dataTypeService.GetDataType(key);
+            => _dataTypeService.GetDataType(key);
 
         public override IDataType FindItem(string alias)
-            => dataTypeService.GetDataType(alias);
+            => _dataTypeService.GetDataType(alias);
 
         protected override EntityContainer FindContainer(Guid key)
-            => dataTypeService.GetContainer(key);
+            => _dataTypeService.GetContainer(key);
 
         protected override IEnumerable<EntityContainer> FindContainers(string folder, int level)
-            => dataTypeService.GetContainers(folder, level);
+            => _dataTypeService.GetContainers(folder, level);
 
         protected override Attempt<OperationResult<OperationResultType, EntityContainer>> CreateContainer(int parentId, string name)
-            => dataTypeService.CreateContainer(parentId, Guid.NewGuid(), name);
+            => _dataTypeService.CreateContainer(parentId, Guid.NewGuid(), name);
 
         public override void SaveItem(IDataType item)
         {
             if (item.IsDirty())
-                dataTypeService.Save(item);
+                _dataTypeService.Save(item);
         }
 
         public override void Save(IEnumerable<IDataType> items)
         {
             // if we don't trigger then the cache doesn't get updated :(
-            dataTypeService.Save(items.Where(x => x.IsDirty()));
+            _dataTypeService.Save(items.Where(x => x.IsDirty()));
         }
 
         protected override void SaveContainer(EntityContainer container)
-            => dataTypeService.SaveContainer(container);
+            => _dataTypeService.SaveContainer(container);
 
         public override void DeleteItem(IDataType item)
-            => dataTypeService.Delete(item);
+            => _dataTypeService.Delete(item);
 
 
         public override string ItemAlias(IDataType item)

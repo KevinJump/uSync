@@ -19,14 +19,14 @@ namespace uSync.Core.Serialization.Serializers
     public class RelationTypeSerializer
         : SyncSerializerBase<IRelationType>, ISyncSerializer<IRelationType>
     {
-        private IRelationService relationService;
+        private IRelationService _relationService;
 
         public RelationTypeSerializer(IEntityService entityService,
             IRelationService relationService,
             ILogger<RelationTypeSerializer> logger)
             : base(entityService, logger)
         {
-            this.relationService = relationService;
+            this._relationService = relationService;
         }
 
         protected override SyncAttempt<IRelationType> DeserializeCore(XElement node, SyncSerializerOptions options)
@@ -44,10 +44,7 @@ namespace uSync.Core.Serialization.Serializers
 
             var item = FindItem(node);
 
-            if (item == null)
-            {
-                item = CreateRelation(name, alias, bidirectional, parentType, childType, isDependency);
-            }
+            item ??= CreateRelation(name, alias, bidirectional, parentType, childType, isDependency);
 
             var details = new List<uSyncChange>();
 
@@ -110,7 +107,7 @@ namespace uSync.Core.Serialization.Serializers
         {
             var changes = new List<uSyncChange>();
 
-            var existing = relationService
+            var existing = _relationService
                 .GetAllRelationsByRelationType(relationType.Id)
                 .ToList();
 
@@ -136,7 +133,7 @@ namespace uSync.Core.Serialization.Serializers
                 if (!existing.Any(x => x.ParentId == parentItem.Id && x.ChildId == childItem.Id))
                 {
                     // missing from the current list... add it.
-                    relationService.Save(new Relation(parentItem.Id, childItem.Id, relationType));
+                    _relationService.Save(new Relation(parentItem.Id, childItem.Id, relationType));
                     changes.Add(uSyncChange.Create(relationType.Alias, parentItem.Name, childItem.Name));
                 }
 
@@ -151,7 +148,7 @@ namespace uSync.Core.Serialization.Serializers
                 foreach (var obsoleteRelation in obsolete)
                 {
                     changes.Add(uSyncChange.Delete(relationType.Alias, obsoleteRelation.ParentId.ToString(), obsoleteRelation.ChildId.ToString()));
-                    relationService.Delete(obsoleteRelation);
+                    _relationService.Delete(obsoleteRelation);
                 }
             }
 
@@ -203,10 +200,10 @@ namespace uSync.Core.Serialization.Serializers
         }
 
         /// <summary>
-        ///  gets a value from the interface that might be Guid or Guid?
+        ///  gets a value from the interface that might be GUID or GUID?
         /// </summary>
         /// <remarks>
-        ///  works around the interface changing v8.6 from Guid to Guid?
+        ///  works around the interface changing v8.6 from GUID to GUID?
         /// </remarks>
         private Guid? GetGuidValue(IRelationType item, string propertyName)
         {
@@ -242,7 +239,7 @@ namespace uSync.Core.Serialization.Serializers
 
         private XElement SerializeRelations(IRelationType item)
         {
-            var relations = relationService.GetAllRelationsByRelationType(item.Id);
+            var relations = _relationService.GetAllRelationsByRelationType(item.Id);
 
             var node = new XElement("Relations");
 
@@ -250,7 +247,7 @@ namespace uSync.Core.Serialization.Serializers
             {
                 var relationNode = new XElement("Relation");
 
-                var entities = relationService.GetEntitiesFromRelation(relation);
+                var entities = _relationService.GetEntitiesFromRelation(relation);
 
                 if (entities.Item1 != null)
                     relationNode.Add(new XElement("Parent", entities.Item1.Key));
@@ -269,21 +266,21 @@ namespace uSync.Core.Serialization.Serializers
         // control methods.
 
         public override void DeleteItem(IRelationType item)
-            => relationService.Delete(item);
+            => _relationService.Delete(item);
 
         public override IRelationType FindItem(int id)
-            => relationService.GetRelationTypeById(id);
+            => _relationService.GetRelationTypeById(id);
 
         public override IRelationType FindItem(Guid key)
-            => relationService.GetRelationTypeById(key); // ??
+            => _relationService.GetRelationTypeById(key); // ??
 
         public override IRelationType FindItem(string alias)
-            => relationService.GetRelationTypeByAlias(alias);
+            => _relationService.GetRelationTypeByAlias(alias);
 
         public override string ItemAlias(IRelationType item)
             => item.Alias;
 
         public override void SaveItem(IRelationType item)
-            => relationService.Save(item);
+            => _relationService.Save(item);
     }
 }

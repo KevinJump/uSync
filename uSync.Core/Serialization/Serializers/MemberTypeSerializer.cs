@@ -20,7 +20,7 @@ namespace uSync.Core.Serialization.Serializers
     [SyncSerializer("F45B5C7B-C206-4971-858B-6D349E153ACE", "MemberTypeSerializer", uSyncConstants.Serialization.MemberType)]
     public class MemberTypeSerializer : ContentTypeBaseSerializer<IMemberType>, ISyncSerializer<IMemberType>
     {
-        private readonly IMemberTypeService memberTypeService;
+        private readonly IMemberTypeService _memberTypeService;
 
         public MemberTypeSerializer(
             IEntityService entityService, ILogger<MemberTypeSerializer> logger,
@@ -31,7 +31,7 @@ namespace uSync.Core.Serialization.Serializers
             IContentTypeService contentTypeService)
             : base(entityService, logger, dataTypeService, memberTypeService, UmbracoObjectTypes.Unknown, shortStringHelper, appCaches, contentTypeService)
         {
-            this.memberTypeService = memberTypeService;
+            this._memberTypeService = memberTypeService;
         }
 
         protected override SyncAttempt<XElement> SerializeCore(IMemberType item, SyncSerializerOptions options)
@@ -72,19 +72,19 @@ namespace uSync.Core.Serialization.Serializers
         }
 
         //
-        // for the member type, the built in properties are created with guid's that are really int values
+        // for the member type, the built in properties are created with GUIDs that are really int values
         // as a result the Key value you get back for them, can change between reboots. 
         //
         // here we tag on to the SerializeProperties step, and blank the Key value for any of the built in 
         // properties. 
         //
-        //   this means we don't get false posistives between reboots, 
+        //   this means we don't get false positives between reboots, 
         //   it also means that these properties won't get deleted if/when they are removed - but 
         //   we limit it only to these items by listing them (so custom items in a member type will still
         //   get removed when required. 
         // 
 
-        private static Dictionary<string, string> buildInProperties = new Dictionary<string, string>()
+        private static readonly Dictionary<string, string> _builtInProperties = new()
         {
             {  "umbracoMemberApproved", "e79dccfb-0000-0000-0000-000000000000" },
             {  "umbracoMemberComments", "2a280588-0000-0000-0000-000000000000" },
@@ -103,9 +103,9 @@ namespace uSync.Core.Serialization.Serializers
             foreach (var property in node.Elements("GenericProperty"))
             {
                 var alias = property.Element("Alias").ValueOrDefault(string.Empty);
-                if (!string.IsNullOrWhiteSpace(alias) && buildInProperties.ContainsKey(alias))
+                if (!string.IsNullOrWhiteSpace(alias) && _builtInProperties.ContainsKey(alias))
                 {
-                    var key = buildInProperties[alias];
+                    var key = _builtInProperties[alias];
                     if (!item.Alias.InvariantEquals("Member"))
                     {
                         key = $"{item.Alias}{alias}".GetDeterministicHashCode().ToGuid().ToString();
@@ -146,7 +146,7 @@ namespace uSync.Core.Serialization.Serializers
 
             bool saveInSerializer = !options.Flags.HasFlag(SerializerFlags.DoNotSave);
             if (saveInSerializer && item.IsDirty())
-                memberTypeService.Save(item);
+                _memberTypeService.Save(item);
 
             return SyncAttempt<IMemberType>.Succeed(item.Name, item, ChangeType.Import, string.Empty, saveInSerializer, details);
         }
