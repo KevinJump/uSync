@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Xml.Linq;
 
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -21,12 +22,23 @@ namespace uSync.Core.Serialization.Serializers
     {
         private readonly ILocalizationService _localizationService;
 
-        public LanguageSerializer(IEntityService entityService, ILogger<LanguageSerializer> logger,
+        [Obsolete("Will remove GlobalSettings in v11")]
+        public LanguageSerializer(IEntityService entityService,
+            ILogger<LanguageSerializer> logger,
+            ILocalizationService localizationService,
+            IOptions<GlobalSettings> options)
+            : this(entityService, logger, localizationService)
+        { }
+
+        [ActivatorUtilitiesConstructor]
+        public LanguageSerializer(IEntityService entityService,
+            ILogger<LanguageSerializer> logger,
             ILocalizationService localizationService)
             : base(entityService, logger)
         {
             this._localizationService = localizationService;
         }
+
 
         private CultureInfo GetCulture(string isoCode)
             => CultureInfo.GetCultureInfo(isoCode);

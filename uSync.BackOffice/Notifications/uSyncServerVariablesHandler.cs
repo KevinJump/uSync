@@ -1,9 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Options;
 
+using Umbraco.Cms.Core.Configuration.Models;
 using Umbraco.Cms.Core.Events;
+using Umbraco.Cms.Core.Hosting;
 using Umbraco.Cms.Core.Notifications;
+using Umbraco.Cms.Core.Routing;
 using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;
@@ -21,8 +26,18 @@ namespace uSync.BackOffice.Notifications
         private readonly LinkGenerator _linkGenerator;
         private readonly uSyncHubRoutes _uSyncHubRoutes;
 
+        [Obsolete("Will remove GlobalSettings & HostingEnvrionment in v11")]
+        public uSyncServerVariablesHandler(LinkGenerator linkGenerator,
+            UriUtility uriUtility,
+            IOptions<GlobalSettings> globalSettings,
+            uSyncConfigService uSyncConfigService,
+            IHostingEnvironment hostingEnvironment,
+            uSyncHubRoutes hubRoutes)
+            : this(linkGenerator, uSyncConfigService, hubRoutes) { }
+
+
         /// <inheritdoc cref="INotificationHandler{TNotification}" />
-        public uSyncServerVariablesHandler(LinkGenerator linkGenerator, 
+        public uSyncServerVariablesHandler(LinkGenerator linkGenerator,
             uSyncConfigService uSyncConfigService,
             uSyncHubRoutes hubRoutes)
         {

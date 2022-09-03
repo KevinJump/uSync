@@ -4,6 +4,7 @@ using System.IO;
 using System.Xml.Linq;
 
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using Umbraco.Cms.Core.IO;
@@ -27,6 +28,17 @@ namespace uSync.Core.Serialization.Serializers
         private readonly uSyncCapabilityChecker _capabilityChecker;
         private readonly IConfiguration _configuration;
 
+        [Obsolete("call with compatibility checker - will remove in v11")]
+        public TemplateSerializer(
+            IEntityService entityService,
+            ILogger<TemplateSerializer> logger,
+            IShortStringHelper shortStringHelper,
+            IFileService fileService,
+            FileSystems fileSystems
+        ) : this(entityService, logger, shortStringHelper, fileService, fileSystems, null, null)
+        { }
+
+        [ActivatorUtilitiesConstructor]
         public TemplateSerializer(
             IEntityService entityService,
             ILogger<TemplateSerializer> logger,
@@ -160,7 +172,9 @@ namespace uSync.Core.Serialization.Serializers
         /// <returns></returns>
         private bool ShouldGetContentFromNode(XElement node, SyncSerializerOptions options)
         {
-            if (_capabilityChecker.HasRuntimeMode)
+            if (_capabilityChecker != null 
+                && _configuration != null 
+                && _capabilityChecker.HasRuntimeMode)
             {
                 if (node.Element("Contents") != null)
                 {

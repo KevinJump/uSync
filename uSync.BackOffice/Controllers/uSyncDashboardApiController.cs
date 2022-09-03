@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using Newtonsoft.Json;
@@ -55,9 +56,27 @@ namespace uSync.BackOffice.Controllers
 
         private readonly string _uSyncTempPath;
 
+        [Obsolete]
+        public uSyncDashboardApiController(
+            IConfiguration configuration,
+            AppCaches appCaches,
+            IWebHostEnvironment hostEnvironment,
+            ILocalizedTextService textService,
+            ILogger<uSyncDashboardApiController> logger,
+            ITypeFinder typeFinder,
+            uSyncService uSyncService,
+            SyncHandlerFactory syncHandlerFactory,
+            IHubContext<SyncHub> hubContext,
+            uSyncConfigService uSyncConfig)
+            :this(configuration, appCaches, null, hostEnvironment,
+                 textService, logger, typeFinder, uSyncService,
+                 syncHandlerFactory, hubContext, uSyncConfig, null) 
+        { }
+
         /// <summary>
         /// Create a new uSyncDashboardApi Controller (via DI)
         /// </summary>
+        [ActivatorUtilitiesConstructor]
         public uSyncDashboardApiController(
             IConfiguration configuration,
             AppCaches appCaches,
@@ -86,10 +105,19 @@ namespace uSync.BackOffice.Controllers
             this.uSyncConfig = uSyncConfig;
 
             _configuration = configuration;
-
-            _uSyncTempPath = Path.GetFullPath(
-                Path.Combine(hostingEnvironment.LocalTempPath, "uSync", "FileImport"));
             _syncFileService = syncFileService;
+
+            if (hostingEnvironment != null)
+            {
+
+                _uSyncTempPath = Path.GetFullPath(
+                    Path.Combine(hostingEnvironment.LocalTempPath, "uSync", "FileImport"));
+            }
+            else
+            {
+                _uSyncTempPath = Path.GetFullPath(
+                    Path.Combine(hostEnvironment.ContentRootPath, "uSync", "Temp", "FileImport"));
+            }
         }
 
         /// <summary>
