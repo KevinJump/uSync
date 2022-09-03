@@ -1,12 +1,8 @@
 ﻿using System.Collections.Generic;
 
 using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.Options;
 
-using Umbraco.Cms.Core.Configuration.Models;
 using Umbraco.Cms.Core.Events;
-using Umbraco.Cms.Core.Hosting;
-using Umbraco.Cms.Core.Routing;
 using Umbraco.Cms.Core.Notifications;
 using Umbraco.Extensions;
 
@@ -21,30 +17,18 @@ namespace uSync.BackOffice.Notifications
     /// </summary>
     public class uSyncServerVariablesHandler : INotificationHandler<ServerVariablesParsingNotification>
     {
-        private uSyncConfigService uSyncConfig;
+        private readonly uSyncConfigService _uSyncConfig;
+        private readonly LinkGenerator _linkGenerator;
+        private readonly uSyncHubRoutes _uSyncHubRoutes;
 
-        private LinkGenerator linkGenerator;
-        private UriUtility uriUtility;
-
-        private uSyncHubRoutes uSyncHubRoutes;
-
-        private string umbracoMvcArea;
-
-
-        /// <inheritdoc/>
-        public uSyncServerVariablesHandler(LinkGenerator linkGenerator, UriUtility uriUtility,
-            IOptions<GlobalSettings> globalSettings,
+        /// <inheritdoc cref="INotificationHandler{TNotification}" />
+        public uSyncServerVariablesHandler(LinkGenerator linkGenerator, 
             uSyncConfigService uSyncConfigService,
-            IHostingEnvironment hostingEnvironment,
             uSyncHubRoutes hubRoutes)
         {
-            this.linkGenerator = linkGenerator;
-            this.uriUtility = uriUtility;
-            this.uSyncConfig = uSyncConfigService;
-            this.uSyncHubRoutes = hubRoutes;
-
-            umbracoMvcArea = globalSettings.Value.GetUmbracoMvcArea(hostingEnvironment);
-
+            _linkGenerator = linkGenerator;
+            _uSyncConfig = uSyncConfigService;
+            _uSyncHubRoutes = hubRoutes;
         }
 
 
@@ -53,15 +37,10 @@ namespace uSync.BackOffice.Notifications
         {
             notification.ServerVariables.Add("uSync", new Dictionary<string, object>
             {
-                { "uSyncService", linkGenerator.GetUmbracoApiServiceBaseUrl<uSyncDashboardApiController>(controller => controller.GetApi()) },
-                { "signalRHub",  uSyncHubRoutes.GetuSyncHubRoute() },
-                { "disabledDashboard", uSyncConfig.Settings.DisableDashboard }
+                { "uSyncService", _linkGenerator.GetUmbracoApiServiceBaseUrl<uSyncDashboardApiController>(controller => controller.GetApi()) },
+                { "signalRHub",  _uSyncHubRoutes.GetuSyncHubRoute() },
+                { "disabledDashboard", _uSyncConfig.Settings.DisableDashboard }
             });
-        }
-
-        private string GetSignalRHub()
-        {
-            return $"/{umbracoMvcArea}/{nameof(SyncHub)}";
         }
     }
 }

@@ -188,7 +188,7 @@ namespace uSync.BackOffice
         Complete,
 
         /// <summary>
-        ///  error - the handler encounted one or more errors
+        ///  error - the handler encountered one or more errors
         /// </summary>
         Error
     }

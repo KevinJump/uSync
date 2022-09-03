@@ -4,7 +4,7 @@ using Newtonsoft.Json.Serialization;
 namespace uSync.BackOffice.Models
 {
     /// <summary>
-    ///  An add on to usync, which allows you to inject a view onto the usync page
+    ///  An add on to uSync, which allows you to inject a view onto the uSync page
     ///  just like a content app. 
     /// </summary>
     [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]

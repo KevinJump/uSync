@@ -60,7 +60,7 @@ namespace uSync.BackOffice.Boot
             var sw = Stopwatch.StartNew();
             var changes = 0;
 
-            _logger.LogInformation("Import on Firstboot Set - will import {group} handler groups", 
+            _logger.LogInformation("Import on First-boot Set - will import {group} handler groups", 
                 _uSyncConfig.Settings.FirstBootGroup); 
 
             // if config service is set to import on first boot then this 

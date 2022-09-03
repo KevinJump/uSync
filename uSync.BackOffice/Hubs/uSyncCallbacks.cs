@@ -15,7 +15,7 @@ namespace uSync.BackOffice
         public SyncEventCallback Callback { get; private set; }
 
         /// <summary>
-        ///  Update event callbakc
+        ///  Update event callback
         /// </summary>
         public SyncUpdateCallback Update { get; private set; }
 

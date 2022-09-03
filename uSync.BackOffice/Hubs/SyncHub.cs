@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.SignalR;
@@ -17,7 +18,7 @@ namespace uSync.BackOffice.Hubs
         /// Used to give the hub a purpose - not called 
         /// </remarks>
         public string GetTime()
-            => DateTime.Now.ToString();
+            => DateTime.Now.ToString(CultureInfo.InvariantCulture);
     }
 
     /// <summary>

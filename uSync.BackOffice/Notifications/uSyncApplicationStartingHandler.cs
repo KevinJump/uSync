@@ -22,17 +22,13 @@ namespace uSync.BackOffice.Notifications
     /// </summary>
     public class uSyncApplicationStartingHandler : INotificationHandler<UmbracoApplicationStartedNotification>
     {
-        private ILogger<uSyncApplicationStartingHandler> _logger;
-
-        private IRuntimeState _runtimeState;
-        private IServerRoleAccessor _serverRegistrar;
-
-        private IUmbracoContextFactory _umbracoContextFactory;
-
+        private readonly ILogger<uSyncApplicationStartingHandler> _logger;
+        private readonly IRuntimeState _runtimeState;
+        private readonly IServerRoleAccessor _serverRegistrar;
+        private readonly IUmbracoContextFactory _umbracoContextFactory;
         private readonly uSyncConfigService _uSyncConfig;
-
-        private SyncFileService _syncFileService;
-        private uSyncService _uSyncService;
+        private readonly SyncFileService _syncFileService;
+        private readonly uSyncService _uSyncService;
         
         /// <summary>
         /// Generate a new uSyncApplicationStartingHandler object
@@ -46,21 +42,21 @@ namespace uSync.BackOffice.Notifications
             SyncFileService syncFileService,
             uSyncService uSyncService)
         {
-            this._runtimeState = runtimeState;
-            this._serverRegistrar = serverRegistrar;
+            _runtimeState = runtimeState;
+            _serverRegistrar = serverRegistrar;
 
-            this._umbracoContextFactory = umbracoContextFactory;
+            _umbracoContextFactory = umbracoContextFactory;
 
-            this._logger = logger;
+            _logger = logger;
 
-            this._uSyncConfig = uSyncConfigService;
+            _uSyncConfig = uSyncConfigService;
 
-            this._syncFileService = syncFileService;
-            this._uSyncService = uSyncService;
+            _syncFileService = syncFileService;
+            _uSyncService = uSyncService;
         }
 
         /// <summary>
-        ///  Handle the appliction starting notification event.
+        ///  Handle the application starting notification event.
         /// </summary>
         public void Handle(UmbracoApplicationStartedNotification notification)
         {
@@ -92,7 +88,7 @@ namespace uSync.BackOffice.Notifications
             {
                 using (var reference = _umbracoContextFactory.EnsureUmbracoContext())
                 {
-                    if (IsExportAtStatupEnabled() || (IsExportOnSaveOn() && !_syncFileService.RootExists(_uSyncConfig.GetRootFolder())))
+                    if (IsExportAtStartupEnabled() || (IsExportOnSaveOn() && !_syncFileService.RootExists(_uSyncConfig.GetRootFolder())))
                     {
 
                         var options = new SyncHandlerOptions
@@ -104,7 +100,7 @@ namespace uSync.BackOffice.Notifications
                         _uSyncService.Export(_uSyncConfig.GetRootFolder(), options);
                     }
 
-                    if (IsImportAtStatupEnabled())
+                    if (IsImportAtStartupEnabled())
                     {
                         _logger.LogInformation("uSync: Running Import at startup {group}", _uSyncConfig.Settings.ImportAtStartup);
 
@@ -144,7 +140,7 @@ namespace uSync.BackOffice.Notifications
             => _syncFileService.FileExists($"{folder}/usync.stop");
 
         /// <summary>
-        ///  Process the once file (if it exsits we rename it to usync.stop).
+        ///  Process the once file (if it exists we rename it to usync.stop).
         /// </summary>
         private void ProcessOnceFile(string folder)
         {
@@ -162,10 +158,10 @@ namespace uSync.BackOffice.Notifications
         private bool IsExportOnSaveOn()
             => IsGroupSettingEnabled(_uSyncConfig.Settings.ExportOnSave);
 
-        private bool IsImportAtStatupEnabled()
+        private bool IsImportAtStartupEnabled()
             => IsGroupSettingEnabled(_uSyncConfig.Settings.ImportAtStartup);
 
-        private bool IsExportAtStatupEnabled()
+        private bool IsExportAtStartupEnabled()
             => IsGroupSettingEnabled(_uSyncConfig.Settings.ExportAtStartup);
 
 

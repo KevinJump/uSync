@@ -36,21 +36,14 @@ namespace uSync.BackOffice.Hubs
         /// </summary>
         public void CreateRoutes(IEndpointRouteBuilder endpoints)
         {
-            switch (_runtimeState.Level)
-            {
-                case Umbraco.Cms.Core.RuntimeLevel.Run:
-                    endpoints.MapHub<SyncHub>(GetuSyncHubRoute());
-                    break;
-            }
-
+            if (_runtimeState.Level == Umbraco.Cms.Core.RuntimeLevel.Run) 
+                endpoints.MapHub<SyncHub>(GetuSyncHubRoute());
         }
 
         /// <summary>
         /// Get the path to the uSync SignalR route
         /// </summary>
         public string GetuSyncHubRoute()
-        {
-            return $"/{_umbracoPathSegment}/{nameof(SyncHub)}";
-        }
+            => $"/{_umbracoPathSegment}/{nameof(SyncHub)}";
     }
 }
