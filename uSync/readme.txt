@@ -17,5 +17,5 @@
    uSync is FREE ✔ You can use them on any of your projects 
    as many times as your like. 
 
-- 🦄🎈🎂 🥇🥾 🔟-
+- 🦄🎈🎂 🥇🥾 🔟 🗄️-
 
