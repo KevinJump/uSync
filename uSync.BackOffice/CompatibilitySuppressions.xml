@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Suppressions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:uSync.BackOffice.Notifications.uSyncApplicationStartingHandler</Target>
+    <Left>lib/net6.0/uSync.BackOffice.dll</Left>
+    <Right>lib/net6.0/uSync.BackOffice.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:uSync.BackOffice.Notifications.uSyncServerVariablesHandler</Target>
+    <Left>lib/net6.0/uSync.BackOffice.dll</Left>
+    <Right>lib/net6.0/uSync.BackOffice.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:uSync.BackOffice.Controllers.uSyncDashboardApiController.#ctor(Microsoft.Extensions.Configuration.IConfiguration,Umbraco.Cms.Core.Cache.AppCaches,Microsoft.AspNetCore.Hosting.IWebHostEnvironment,Umbraco.Cms.Core.Services.ILocalizedTextService,Microsoft.Extensions.Logging.ILogger{uSync.BackOffice.Controllers.uSyncDashboardApiController},Umbraco.Cms.Core.Composing.ITypeFinder,uSync.BackOffice.uSyncService,uSync.BackOffice.SyncHandlers.SyncHandlerFactory,Microsoft.AspNetCore.SignalR.IHubContext{uSync.BackOffice.Hubs.SyncHub},uSync.BackOffice.Configuration.uSyncConfigService)</Target>
+    <Left>lib/net6.0/uSync.BackOffice.dll</Left>
+    <Right>lib/net6.0/uSync.BackOffice.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+</Suppressions>

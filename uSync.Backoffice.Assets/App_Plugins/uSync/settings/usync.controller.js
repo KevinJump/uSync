@@ -27,9 +27,7 @@
         vm.perf = 0;
 
         vm.showAdvanced = false;
-
         vm.hasuSyncForms = false;
-
         vm.canHaveForms = false;
 
         var modes = {
@@ -63,10 +61,6 @@
                 {
                     labelKey: 'usync_importforce',
                     handler: function () { importForce(vm.everything); }
-                },
-                {
-                    labelKey: 'usync_importFile',
-                    handler: function () { importFile(vm.everything) }
                 }]
         };
 
@@ -80,10 +74,6 @@
                 {
                     labelKey: 'usync_exportClean',
                     handler: function () { cleanExport(); }
-                },
-                {
-                    labelKey: 'usync_exportFile',
-                    handler: function () { exportFile(vm.everything); }
                 }
             ]
         }
@@ -131,6 +121,19 @@
                     vm.versionLoaded = true;
                     vm.versionInfo = result.data;
                 });
+
+
+            if (Umbraco.Sys.ServerVariables.uSync.showFileActions) {
+                vm.everything.import.subButtons.push({
+                    labelKey: 'usync_importFile',
+                    handler: function () { importFile(vm.everything) }
+                });
+
+                vm.everything.export.subButtons.push({
+                    labelKey: 'usync_exportFile',
+                    handler: function () { exportFile(vm.everything); }
+                });
+            }
 
         }
 

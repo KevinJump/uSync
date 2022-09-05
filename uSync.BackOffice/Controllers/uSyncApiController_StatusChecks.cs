@@ -28,7 +28,7 @@ namespace uSync.BackOffice.Controllers
     public partial class uSyncDashboardApiController
     {
         /// <summary>
-        ///  Get the Addon's splash JSON to display in the addOn tab.
+        ///  Get the Add-ons splash JSON to display in the addOn tab.
         /// </summary>
         /// <returns></returns>
         [HttpGet]
@@ -48,9 +48,9 @@ namespace uSync.BackOffice.Controllers
 
         private async Task<string> GetContent()
         {
-            if (!uSyncConfig.Settings.AddOnPing) return GetLocal();
+            if (!_uSyncConfig.Settings.AddOnPing) return GetLocal();
 
-            var cachedContent = appCaches.RuntimeCache.GetCacheItem<string>("usync_addon");
+            var cachedContent = _appCaches.RuntimeCache.GetCacheItem<string>("usync_addon");
             if (!string.IsNullOrEmpty(cachedContent)) return cachedContent;
 
             var remote = "https://jumoo.co.uk/usync/addon/82/";
@@ -64,7 +64,7 @@ namespace uSync.BackOffice.Controllers
                         var json = await response.Content.ReadAsStringAsync();
                         if (!string.IsNullOrWhiteSpace(json))
                         {
-                            appCaches.RuntimeCache.InsertCacheItem<string>("usync_json",
+                            _appCaches.RuntimeCache.InsertCacheItem<string>("usync_json",
                                 () => json);
                         }
 
@@ -82,7 +82,7 @@ namespace uSync.BackOffice.Controllers
         {
             try
             {
-                var localFile = Path.Combine(hostEnvironment.ContentRootPath, "App_Plugins", "usync", "addons.txt");
+                var localFile = Path.Combine(_hostEnvironment.ContentRootPath, "App_Plugins", "usync", "addons.txt");
                 if (System.IO.File.Exists(localFile))
                 {
                     return System.IO.File.ReadAllText(localFile);
@@ -96,7 +96,7 @@ namespace uSync.BackOffice.Controllers
         }
 
         /// <summary>
-        ///  get the info about installed uSync Addons
+        ///  get the info about installed uSync Add-ons
         /// </summary>
         [HttpGet]
         public AddOnInfo GetAddOns()
@@ -104,7 +104,7 @@ namespace uSync.BackOffice.Controllers
             var addOnInfo = new AddOnInfo();
 
 
-            var addOns = typeFinder.FindClassesOfType<ISyncAddOn>();
+            var addOns = _typeFinder.FindClassesOfType<ISyncAddOn>();
             foreach (var addOn in addOns)
             {
                 var instance = Activator.CreateInstance(addOn) as ISyncAddOn;
@@ -116,8 +116,6 @@ namespace uSync.BackOffice.Controllers
 
 
             addOnInfo.Version = GetuSyncVersion();
-            //addOnInfo.Version = typeof(global::uSync.BackOffice.uSync).Assembly.GetName().Version.ToString(3)
-            //    + uSyncConstants.ReleaseSuffix;
 
             addOnInfo.AddOns = addOnInfo.AddOns.OrderBy(x => x.SortOrder).ToList();
             addOnInfo.AddOnString = string.Join(", ",
@@ -130,7 +128,7 @@ namespace uSync.BackOffice.Controllers
 
         private string GetuSyncVersion()
         {
-            var assembly = typeof(global::uSync.BackOffice.uSync).Assembly;
+            var assembly = typeof(uSync).Assembly;
             try
             {
                 var fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.GetAssemblyFile().FullName);
@@ -149,13 +147,13 @@ namespace uSync.BackOffice.Controllers
         [HttpGet]
         public async Task<uSyncVersionCheck> CheckVersion()
         {
-            var cacheInfo = appCaches.RuntimeCache.GetCacheItem<uSyncVersionCheck>("usync_vcheck");
+            var cacheInfo = _appCaches.RuntimeCache.GetCacheItem<uSyncVersionCheck>("usync_vcheck");
             if (cacheInfo != null) return cacheInfo;
 
             var info = await PerformCheck();
             info.HandlersLoaded = true;
 
-            appCaches.RuntimeCache.InsertCacheItem("usync_vcheck", () => info, new TimeSpan(6, 0, 0));
+            _appCaches.RuntimeCache.InsertCacheItem("usync_vcheck", () => info, new TimeSpan(6, 0, 0));
 
             return info;
         }
@@ -199,14 +197,14 @@ namespace uSync.BackOffice.Controllers
                     }
                     else
                     {
-                        logger.LogDebug("Failed to get version info, {Content}", content);
+                        _logger.LogDebug("Failed to get version info, {Content}", content);
                     }
                 }
             }
             catch (Exception ex)
             {
                 // can't ping.
-                logger.LogDebug("Can't ping for version, {Exception}", ex.Message);
+                _logger.LogDebug("Can't ping for version, {Exception}", ex.Message);
             }
 
             return new uSyncVersionCheck()
@@ -226,7 +224,7 @@ namespace uSync.BackOffice.Controllers
         [HttpPost]
         public uSyncWarningMessage GetSyncWarnings([FromQuery]HandlerActions action, uSyncOptions options)
         {
-            var handlers = handlerFactory.GetValidHandlers(new SyncHandlerOptions
+            var handlers = _handlerFactory.GetValidHandlers(new SyncHandlerOptions
             {
                 Group = options.Group,
                 Action = action
@@ -234,10 +232,10 @@ namespace uSync.BackOffice.Controllers
 
             var message = new uSyncWarningMessage();
 
-            if (this.uSyncConfig.Settings.ShowVersionCheckWarning && !uSyncService.CheckVersionFile(this.uSyncConfig.GetRootFolder()))
+            if (this._uSyncConfig.Settings.ShowVersionCheckWarning && !_uSyncService.CheckVersionFile(this._uSyncConfig.GetRootFolder()))
             {
                 message.Type = "info";
-                message.Message = textService.Localize("usync", "oldformat");
+                message.Message = _textService.Localize("usync", "oldformat");
                 return message;
             }
 
@@ -249,7 +247,7 @@ namespace uSync.BackOffice.Controllers
             if (createOnly.Count > 0)
             {
                 message.Type = "warning";
-                message.Message = textService.Localize("usync", "createWarning", new [] { string.Join(",", createOnly) });
+                message.Message = _textService.Localize("usync", "createWarning", new [] { string.Join(",", createOnly) });
                 return message;
             }
 
@@ -319,7 +317,7 @@ namespace uSync.BackOffice.Controllers
         public bool Remote { get; set; } = false;
 
         /// <summary>
-        ///  is this the 'current' lastest version
+        ///  is this the 'current' latest version
         /// </summary>
         public bool IsCurrent { get; set; }
 

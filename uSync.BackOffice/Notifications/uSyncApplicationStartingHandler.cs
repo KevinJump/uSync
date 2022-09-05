@@ -20,7 +20,7 @@ namespace uSync.BackOffice.Notifications
     /// <summary>
     ///  Run uSync tasks when the site has started up. 
     /// </summary>
-    public class uSyncApplicationStartingHandler : INotificationHandler<UmbracoApplicationStartedNotification>
+    internal class uSyncApplicationStartingHandler : INotificationHandler<UmbracoApplicationStartedNotification>
     {
         private readonly ILogger<uSyncApplicationStartingHandler> _logger;
         private readonly IRuntimeState _runtimeState;

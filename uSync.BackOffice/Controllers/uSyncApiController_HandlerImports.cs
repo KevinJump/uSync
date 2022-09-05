@@ -23,14 +23,14 @@ namespace uSync.BackOffice.Controllers
         public IEnumerable<SyncHandlerView> GetActionHandlers([FromQuery]HandlerActions action, uSyncOptions options)
         {
             var handlerGroup = string.IsNullOrWhiteSpace(options.Group)
-                ? uSyncConfig.Settings.UIEnabledGroups
+                ? _uSyncConfig.Settings.UIEnabledGroups
                 : options.Group;
 
             var handlerSet = string.IsNullOrWhiteSpace(options.Set) 
-                ? uSyncConfig.Settings.DefaultSet
+                ? _uSyncConfig.Settings.DefaultSet
                 : options.Set;
 
-            return handlerFactory.GetValidHandlers(new SyncHandlerOptions
+            return _handlerFactory.GetValidHandlers(new SyncHandlerOptions
             {
                 Group = handlerGroup,
                 Action = action,
@@ -52,42 +52,42 @@ namespace uSync.BackOffice.Controllers
         [HttpPost]
         public SyncActionResult ReportHandler(SyncActionOptions options)
         {
-            var hubClient = new HubClientService(hubContext, options.ClientId);
+            var hubClient = new HubClientService(_hubContext, options.ClientId);
 
             var handlerSet = !string.IsNullOrWhiteSpace(options.Set)
-                ? options.Set : uSyncConfig.Settings.DefaultSet;
+                ? options.Set : _uSyncConfig.Settings.DefaultSet;
 
-            var actions = uSyncService.ReportHandler(options.Handler,
+            var actions = _uSyncService.ReportHandler(options.Handler,
                 new uSyncImportOptions
                 {
                     Callbacks = hubClient.Callbacks(),
                     HandlerSet = handlerSet,
-                    RootFolder = uSyncConfig.GetRootFolder(),                    
+                    RootFolder = _uSyncConfig.GetRootFolder(),                    
                 });
 
             return new SyncActionResult(actions);
         }
 
         /// <summary>
-        ///  Run the import against a given handelr alias
+        ///  Run the import against a given handler alias
         /// </summary>
         /// <remarks>
-        ///  Will use the list of passed handler aliases to only import those aliase values.
+        ///  Will use the list of passed handler aliases to only import those alias values.
         ///  this allows us to break up the import into more requests.
         /// </remarks>
         [HttpPost]
         public SyncActionResult ImportHandler(SyncActionOptions options)
         {
-            var hubClient = new HubClientService(hubContext, options.ClientId);
+            var hubClient = new HubClientService(_hubContext, options.ClientId);
 
             var handlerSet = !string.IsNullOrWhiteSpace(options.Set)
-                ? options.Set : uSyncConfig.Settings.DefaultSet;
+                ? options.Set : _uSyncConfig.Settings.DefaultSet;
 
-            var actions = uSyncService.ImportHandler(options.Handler, new uSyncImportOptions
+            var actions = _uSyncService.ImportHandler(options.Handler, new uSyncImportOptions
             { 
                 Callbacks = hubClient.Callbacks(),
                 HandlerSet = handlerSet,
-                RootFolder = uSyncConfig.GetRootFolder(),
+                RootFolder = _uSyncConfig.GetRootFolder(),
                 PauseDuringImport = true,
                 Flags = options.Force ? Core.Serialization.SerializerFlags.Force : Core.Serialization.SerializerFlags.None
             });
@@ -101,13 +101,13 @@ namespace uSync.BackOffice.Controllers
         [HttpPost]
         public SyncActionResult ImportPost(SyncActionOptions options)
         {
-            var hubClient = new HubClientService(hubContext, options.ClientId);
+            var hubClient = new HubClientService(_hubContext, options.ClientId);
 
             var handlerSet = !string.IsNullOrWhiteSpace(options.Set)
-                ? options.Set : uSyncConfig.Settings.DefaultSet;
+                ? options.Set : _uSyncConfig.Settings.DefaultSet;
 
-            var actions = uSyncService.PerformPostImport(
-                uSyncConfig.GetRootFolder(), 
+            var actions = _uSyncService.PerformPostImport(
+                _uSyncConfig.GetRootFolder(), 
                 handlerSet, 
                 options.Actions);
 
@@ -123,7 +123,7 @@ namespace uSync.BackOffice.Controllers
         {
             try
             {
-                return uSyncService.CleanExportFolder(uSyncConfig.GetRootFolder());
+                return _uSyncService.CleanExportFolder(_uSyncConfig.GetRootFolder());
             }
             catch
             {
@@ -137,17 +137,17 @@ namespace uSync.BackOffice.Controllers
         [HttpPost]
         public SyncActionResult ExportHandler(SyncActionOptions options)
         {
-            var hubClient = new HubClientService(hubContext, options.ClientId);
+            var hubClient = new HubClientService(_hubContext, options.ClientId);
 
             var handlerSet = !string.IsNullOrWhiteSpace(options.Set)
-                ? options.Set : uSyncConfig.Settings.DefaultSet;
+                ? options.Set : _uSyncConfig.Settings.DefaultSet;
 
 
-            var actions = uSyncService.ExportHandler(options.Handler, new uSyncImportOptions
+            var actions = _uSyncService.ExportHandler(options.Handler, new uSyncImportOptions
             {
                 Callbacks = hubClient.Callbacks(),
                 HandlerSet = handlerSet,
-                RootFolder = uSyncConfig.GetRootFolder()
+                RootFolder = _uSyncConfig.GetRootFolder()
             });
 
             return new SyncActionResult(actions);
@@ -159,7 +159,7 @@ namespace uSync.BackOffice.Controllers
         /// <param name="action"></param>
         [HttpPost]
         public void StartProcess([FromQuery]HandlerActions action)
-            => uSyncService.StartBulkProcess(action);
+            => _uSyncService.StartBulkProcess(action);
 
         /// <summary>
         ///  trigger the end of a bulk process (fire events)
@@ -168,6 +168,6 @@ namespace uSync.BackOffice.Controllers
         /// <param name="actions"></param>
         [HttpPost]
         public void FinishProcess([FromQuery]HandlerActions action, IEnumerable<uSyncAction> actions)
-            => uSyncService.FinishBulkProcess(action, actions);
+            => _uSyncService.FinishBulkProcess(action, actions);
     }
 }

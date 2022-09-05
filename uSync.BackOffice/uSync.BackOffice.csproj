@@ -41,5 +41,6 @@
 		<PackageValidationBaselineVersion>10.0.0</PackageValidationBaselineVersion>
 		<EnableStrictModeForCompatibleFrameworksInPackage>true</EnableStrictModeForCompatibleFrameworksInPackage>
 		<EnableStrictModeForCompatibleTfms>true</EnableStrictModeForCompatibleTfms>
+		<!-- <GenerateCompatibilitySuppressionFile>true</GenerateCompatibilitySuppressionFile> -->
 	</PropertyGroup>
 </Project>

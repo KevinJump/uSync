@@ -18,6 +18,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 
+using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Composing;
 using Umbraco.Cms.Core.Services;
@@ -26,6 +27,7 @@ using Umbraco.Cms.Web.Common.Attributes;
 using Umbraco.Cms.Web.Common.Authorization;
 using Umbraco.Extensions;
 
+using uSync.BackOffice.Authorization;
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Hubs;
 using uSync.BackOffice.Services;
@@ -35,43 +37,27 @@ namespace uSync.BackOffice.Controllers
 {
     [PluginController("uSync")]
     [Authorize(Policy = AuthorizationPolicies.SectionAccessSettings)]
+    [Authorize(Policy = SyncAuthorizationPolicies.TreeAccessuSync)]
     public partial class uSyncDashboardApiController : UmbracoAuthorizedJsonController
     {
 
-        private readonly AppCaches appCaches;
-        private readonly IWebHostEnvironment hostEnvironment;
-        private readonly ILogger<uSyncDashboardApiController> logger;
-        private readonly ILocalizedTextService textService;
+        private readonly AppCaches _appCaches;
+        private readonly IWebHostEnvironment _hostEnvironment;
+        private readonly ILogger<uSyncDashboardApiController> _logger;
+        private readonly ILocalizedTextService _textService;
 
-        private readonly uSyncService uSyncService;
+        private readonly uSyncService _uSyncService;
         private readonly SyncFileService _syncFileService;
-        private readonly SyncHandlerFactory handlerFactory;
-        private readonly IHubContext<SyncHub> hubContext;
+        private readonly SyncHandlerFactory _handlerFactory;
+        private readonly IHubContext<SyncHub> _hubContext;
 
-        private uSyncConfigService uSyncConfig;
+        private uSyncConfigService _uSyncConfig;
 
-        private readonly ITypeFinder typeFinder;
+        private readonly ITypeFinder _typeFinder;
 
         private readonly IConfiguration _configuration;
 
         private readonly string _uSyncTempPath;
-
-        [Obsolete]
-        public uSyncDashboardApiController(
-            IConfiguration configuration,
-            AppCaches appCaches,
-            IWebHostEnvironment hostEnvironment,
-            ILocalizedTextService textService,
-            ILogger<uSyncDashboardApiController> logger,
-            ITypeFinder typeFinder,
-            uSyncService uSyncService,
-            SyncHandlerFactory syncHandlerFactory,
-            IHubContext<SyncHub> hubContext,
-            uSyncConfigService uSyncConfig)
-            :this(configuration, appCaches, null, hostEnvironment,
-                 textService, logger, typeFinder, uSyncService,
-                 syncHandlerFactory, hubContext, uSyncConfig, null) 
-        { }
 
         /// <summary>
         /// Create a new uSyncDashboardApi Controller (via DI)
@@ -91,18 +77,18 @@ namespace uSync.BackOffice.Controllers
             uSyncConfigService uSyncConfig,
             SyncFileService syncFileService)
         {
-            this.appCaches = appCaches;
-            this.hostEnvironment = hostEnvironment;
-            this.textService = textService;
-            this.logger = logger;
+            _appCaches = appCaches;
+            _hostEnvironment = hostEnvironment;
+            _textService = textService;
+            _logger = logger;
 
-            this.typeFinder = typeFinder;
+            _typeFinder = typeFinder;
 
-            this.uSyncService = uSyncService;
-            this.handlerFactory = syncHandlerFactory;
-            this.hubContext = hubContext;
+            _uSyncService = uSyncService;
+            _handlerFactory = syncHandlerFactory;
+            _hubContext = hubContext;
 
-            this.uSyncConfig = uSyncConfig;
+            _uSyncConfig = uSyncConfig;
 
             _configuration = configuration;
             _syncFileService = syncFileService;
@@ -121,7 +107,7 @@ namespace uSync.BackOffice.Controllers
         }
 
         /// <summary>
-        ///  Stub - get api used to locate api in umbraco
+        ///  Stub - get API used to locate API in umbraco
         /// </summary>
         /// <returns></returns>
         public bool GetApi() => true;
@@ -131,14 +117,14 @@ namespace uSync.BackOffice.Controllers
         /// </summary>
         [HttpGet]
         public uSyncSettings GetSettings()
-            => this.uSyncConfig.Settings;
+            => this._uSyncConfig.Settings;
 
         /// <summary>
-        /// Return the default set name based on config
+        /// Return the default set name based on configuration
         /// </summary>
         [HttpGet]
         public string GetDefaultSet()
-            => this.uSyncConfig.Settings.DefaultSet;
+            => this._uSyncConfig.Settings.DefaultSet;
 
         /// <summary>
         /// Get all the defined sets from the configuration
@@ -151,7 +137,7 @@ namespace uSync.BackOffice.Controllers
 
             foreach (var item in section.GetChildren())
             {
-                sets.Add(item.Key, uSyncConfig.GetSetSettings(item.Key));
+                sets.Add(item.Key, _uSyncConfig.GetSetSettings(item.Key));
             }
 
             return sets;
@@ -169,7 +155,7 @@ namespace uSync.BackOffice.Controllers
         /// </summary>
         [HttpGet]
         public uSyncHandlerSetSettings GetHandlerSetSettings(string id)
-            => this.uSyncConfig.GetSetSettings(id);
+            => this._uSyncConfig.GetSetSettings(id);
 
         /// <summary>
         ///  get a list of loaded handlers 
@@ -177,7 +163,7 @@ namespace uSync.BackOffice.Controllers
         /// <returns></returns>
         [HttpGet]
         public IEnumerable<object> GetLoadedHandlers()
-            => handlerFactory.GetAll();
+            => _handlerFactory.GetAll();
 
         /// <summary>
         ///  return handler groups for all enabled handlers
@@ -185,18 +171,18 @@ namespace uSync.BackOffice.Controllers
         [HttpGet]
         public IDictionary<string, string> GetHandlerGroups(string set)
         {
-            var handlerSet = !string.IsNullOrWhiteSpace(set) ? set : uSyncConfig.Settings.DefaultSet;
+            var handlerSet = !string.IsNullOrWhiteSpace(set) ? set : _uSyncConfig.Settings.DefaultSet;
 
             var options = new SyncHandlerOptions(handlerSet)
             {
-                Group = uSyncConfig.Settings.UIEnabledGroups
+                Group = _uSyncConfig.Settings.UIEnabledGroups
             };
 
-            var groups = handlerFactory.GetValidHandlerGroupsAndIcons(options);
+            var groups = _handlerFactory.GetValidHandlerGroupsAndIcons(options);
 
             // if nothing is set, we add everything marker.
-            if (string.IsNullOrWhiteSpace(uSyncConfig.Settings.UIEnabledGroups) ||
-                uSyncConfig.Settings.UIEnabledGroups.InvariantContains("all"))
+            if (string.IsNullOrWhiteSpace(_uSyncConfig.Settings.UIEnabledGroups) ||
+                _uSyncConfig.Settings.UIEnabledGroups.InvariantContains("all"))
             {
                 groups.Add("_everything", "");
             }
@@ -211,7 +197,7 @@ namespace uSync.BackOffice.Controllers
         [HttpGet]
         public IEnumerable<string> GetAllHandlerGroups()
         {
-            return handlerFactory.GetGroups();
+            return _handlerFactory.GetGroups();
         }
 
         /// <summary>
@@ -220,14 +206,14 @@ namespace uSync.BackOffice.Controllers
         [HttpGet]
         public IEnumerable<SyncHandlerSummary> GetHandlers(string set)
         {
-            var handlerSet = !string.IsNullOrWhiteSpace(set) ? set : uSyncConfig.Settings.DefaultSet;
+            var handlerSet = !string.IsNullOrWhiteSpace(set) ? set : _uSyncConfig.Settings.DefaultSet;
 
             var options = new SyncHandlerOptions(handlerSet)
             {
-                Group = uSyncConfig.Settings.UIEnabledGroups,
+                Group = _uSyncConfig.Settings.UIEnabledGroups,
             };
 
-            return handlerFactory.GetValidHandlers(options)
+            return _handlerFactory.GetValidHandlers(options)
                 .Select(x => new SyncHandlerSummary()
                 {
                     Icon = x.Handler.Icon,
@@ -242,11 +228,11 @@ namespace uSync.BackOffice.Controllers
         [HttpPost]
         public IEnumerable<uSyncAction> Report(uSyncOptions options)
         {
-            var hubClient = new HubClientService(hubContext, options.ClientId);
+            var hubClient = new HubClientService(_hubContext, options.ClientId);
 
 
 
-            return uSyncService.Report(uSyncConfig.GetRootFolder(), new SyncHandlerOptions()
+            return _uSyncService.Report(_uSyncConfig.GetRootFolder(), new SyncHandlerOptions()
             {
                 Group = options.Group
             },
@@ -259,14 +245,14 @@ namespace uSync.BackOffice.Controllers
         [HttpPost]
         public IEnumerable<uSyncAction> Export(uSyncOptions options)
         {
-            var hubClient = new HubClientService(hubContext, options.ClientId);
+            var hubClient = new HubClientService(_hubContext, options.ClientId);
 
             if (options.Clean)
             {
-                uSyncService.CleanExportFolder(uSyncConfig.GetRootFolder());
+                _uSyncService.CleanExportFolder(_uSyncConfig.GetRootFolder());
             }
 
-            return uSyncService.Export(uSyncConfig.GetRootFolder(), new SyncHandlerOptions()
+            return _uSyncService.Export(_uSyncConfig.GetRootFolder(), new SyncHandlerOptions()
             {
                 Group = options.Group
             },
@@ -280,8 +266,8 @@ namespace uSync.BackOffice.Controllers
         [HttpPut]
         public IEnumerable<uSyncAction> Import(uSyncOptions options)
         {
-            var hubClient = new HubClientService(hubContext, options.ClientId);
-            return uSyncService.Import(uSyncConfig.GetRootFolder(), options.Force, new SyncHandlerOptions()
+            var hubClient = new HubClientService(_hubContext, options.ClientId);
+            return _uSyncService.Import(_uSyncConfig.GetRootFolder(), options.Force, new SyncHandlerOptions()
             {
                 Group = options.Group
             },
@@ -293,7 +279,7 @@ namespace uSync.BackOffice.Controllers
         /// </summary>
         [HttpPut]
         public uSyncAction ImportItem(uSyncAction item)
-            => uSyncService.ImportSingleAction(item);
+            => _uSyncService.ImportSingleAction(item);
 
         /// <summary>
         ///  Save the settings to disk 
@@ -314,8 +300,8 @@ namespace uSync.BackOffice.Controllers
         public JObject GetChangedSettings()
         {
 
-            var settings = JsonConvert.SerializeObject(uSyncConfig.Settings);
-            var sets = JsonConvert.SerializeObject(uSyncConfig.GetSetSettings(uSync.Sets.DefaultSet));
+            var settings = JsonConvert.SerializeObject(_uSyncConfig.Settings);
+            var sets = JsonConvert.SerializeObject(_uSyncConfig.GetSetSettings(uSync.Sets.DefaultSet));
 
             var result = "{ " +
                 "\"Settings\" : " + settings + "," +
@@ -332,16 +318,21 @@ namespace uSync.BackOffice.Controllers
         ///  zips up your uSync folder and presents it to you. 
         /// </summary>
         [HttpPost]
+        [Authorize(Roles = Constants.Security.AdminGroupAlias)]
         public ActionResult DownloadExport()
         {
-            var stream = uSyncService.CompressFolder(uSyncConfig.GetRootFolder());
+            var stream = _uSyncService.CompressFolder(_uSyncConfig.GetRootFolder());
             return new FileStreamResult(stream, MediaTypeNames.Application.Zip)
             {
                 FileDownloadName = $"usync_export_{DateTime.Now:yyyMMdd_HHmmss}.zip"
             };
         }
 
+        /// <summary>
+        ///  Upload a zip file and import it as the uSync folder
+        /// </summary>
         [HttpPost]
+        [Authorize(Roles = Constants.Security.AdminGroupAlias)]
         public async Task<UploadImportResult> UploadImport()
         {
             var file = Request.Form.Files[0];
@@ -367,16 +358,16 @@ namespace uSync.BackOffice.Controllers
                 try
                 {
                     //
-                    // we could just uncompress direcly into the correct location
+                    // we could just uncompress directly into the correct location
                     // but by doing it this way we can run some sanity checks before we wipe 
                     // a users usync folder. 
 
-                    uSyncService.DeCompressFile(tempFile, tempFolder);
+                    _uSyncService.DeCompressFile(tempFile, tempFolder);
 
                     bool.TryParse(clean, out bool cleanFirst);
 
                     var errors = _syncFileService.VerifyFolder(tempFolder,
-                        uSyncConfig.Settings.DefaultExtension);
+                        _uSyncConfig.Settings.DefaultExtension);
                     if (errors.Count > 0)
                     {
                         return new UploadImportResult(false)
@@ -386,8 +377,8 @@ namespace uSync.BackOffice.Controllers
                     }
 
                     // copy the files across. 
-                    uSyncService.ReplaceFiles(tempFolder,
-                        uSyncConfig.GetRootFolder(), cleanFirst);
+                    _uSyncService.ReplaceFiles(tempFolder,
+                        _uSyncConfig.GetRootFolder(), cleanFirst);
 
 
                     return new UploadImportResult(true);
@@ -404,16 +395,28 @@ namespace uSync.BackOffice.Controllers
             throw new ArgumentException("Unsupported");
         }
 
+        /// <summary>
+        ///  result class - for when an file is uploaded
+        /// </summary>
         [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
         public class UploadImportResult
         {
+            /// <summary>
+            ///  constructor. 
+            /// </summary>
             public UploadImportResult(bool success)
             {
                 Success = success;
             }
 
+            /// <summary>
+            ///  Upload was success 
+            /// </summary>
             public bool Success { get; set; }
 
+            /// <summary>
+            ///  Any errors that may have happened as a result of the upload.
+            /// </summary>
             public IEnumerable<string> Errors { get; set; }
         }
     }

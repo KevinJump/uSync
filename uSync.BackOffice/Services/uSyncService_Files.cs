@@ -11,7 +11,11 @@ namespace uSync.BackOffice;
 
 public partial class uSyncService
 {
-
+    /// <summary>
+    ///  Zip up the contents of a folder
+    /// </summary>
+    /// <param name="folder">Path of folder to compress</param>
+    /// <returns>Stream of zip file for folder</returns>
     public MemoryStream CompressFolder(string folder)
     {
         if (!Directory.Exists(folder))
@@ -34,6 +38,9 @@ public partial class uSyncService
         return stream;
     }
 
+    /// <summary>
+    ///  unzip a folder
+    /// </summary>
     public void DeCompressFile(string zipArchive, string target)
     {
         if (string.IsNullOrWhiteSpace(target))
@@ -67,6 +74,9 @@ public partial class uSyncService
         }
     }
 
+    /// <summary>
+    ///  replaces files in a folder with those from source.
+    /// </summary>
     public void ReplaceFiles(string source, string target, bool clean)
     {
         if (clean)

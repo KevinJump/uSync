@@ -306,7 +306,9 @@ namespace uSync.BackOffice.Services
             return string.Empty;
         }
 
-
+        /// <summary>
+        /// Remove a folder from disk
+        /// </summary>
         public void DeleteFolder(string folder, bool safe = false)
         {
             try
@@ -323,6 +325,9 @@ namespace uSync.BackOffice.Services
             }
         }
 
+        /// <summary>
+        ///  copy the contents of a folder 
+        /// </summary>
         public void CopyFolder(string source, string target)
         {
             var resolvedSource = GetAbsPath(source).TrimEnd(Path.DirectorySeparatorChar); ;
@@ -352,9 +357,6 @@ namespace uSync.BackOffice.Services
 
         // TODO: this doesn't need to be public? 
 
-
-
-
         /// <summary>
         ///  Locking item for saves. 
         /// </summary>
@@ -363,9 +365,6 @@ namespace uSync.BackOffice.Services
         /// <summary>
         ///  save an object to an XML file representing it.
         /// </summary>
-        /// <typeparam name="TObject"></typeparam>
-        /// <param name="file"></param>
-        /// <param name="item"></param>
         public void SaveXml<TObject>(string file, TObject item)
         {
             lock (_saveLock)
@@ -385,8 +384,6 @@ namespace uSync.BackOffice.Services
         ///  run some basic sanity checks on a folder to see if it looks like a good 
         ///  set of uSync files ? 
         /// </summary>
-        /// <param name="folder"></param>
-        /// <returns></returns>
         public List<string> VerifyFolder(string folder, string extension)
         {
             var resolvedFolder = GetAbsPath(folder);
