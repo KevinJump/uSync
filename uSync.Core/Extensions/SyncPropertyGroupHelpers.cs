@@ -45,6 +45,12 @@ namespace uSync.Core
             var tab = groups.FirstOrDefault(x => x.Alias.InvariantEquals(alias));
             if (tab != null) return tab;
 
+            // Fall-back look for things when they don't contain the full alias ?
+            // e.g. "mytab/mygroup" - but the alias is "mygroup" ? 
+            tab = groups.FirstOrDefault(x => x.Alias.EndsWith($"/{alias}"));
+            if (tab != null) return tab;
+
+
             var tempAlias = GetTempTabAlias(alias);
             tab = groups.FirstOrDefault(x => x.Alias.InvariantEquals(tempAlias));
             if (tab != null) return tab;

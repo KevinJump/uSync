@@ -501,21 +501,30 @@ namespace uSync.Core.Serialization.Serializers
                 if (IsNew)
                 {
                     changes.AddNew(alias, name, alias);
-                    logger.LogDebug("Property is new adding to tab.");
+                    logger.LogDebug("Property {alias} is new adding to tab. {tabAlias}", alias, tabAlias ?? "(No tab name)");
 
                     if (string.IsNullOrWhiteSpace(tabAlias))
                     {
+                        
                         item.AddPropertyType(property);
                     }
                     else
                     {
                         var tabGroup = item.PropertyGroups.FindTab(tabAlias);
-                        item.AddPropertyType(property, tabGroup?.Alias ?? tabAlias);
+                        if (tabGroup == null)
+                        {
+                            logger.LogWarning("Unable to find tab {tabAlias} it doesn't seem to exist on the content type", tabAlias);
+                            changes.AddWarning(alias, name, $"Unable to find tab {tabAlias} to add property too");
+                        }
+                        else
+                        {
+                            item.AddPropertyType(property, tabGroup?.Alias ?? tabAlias);
+                        }
                     }
                 }
                 else
                 {
-                    logger.LogDebug("Property exists, checking tab location");
+                    logger.LogDebug("Property {alias} exists, checking tab location {tabAlias}", alias, tabAlias);
                     // we need to see if this one has moved. 
                     if (!string.IsNullOrWhiteSpace(tabAlias))
                     {
@@ -532,6 +541,7 @@ namespace uSync.Core.Serialization.Serializers
                         else
                         {
                             logger.LogWarning("Cannot find tab {alias} to add {property} to", tabAlias, property.Alias);
+                            changes.AddWarning(alias, name, $"Unable to find tab {tabAlias} to add property too");
                         }
                     }
                 }
