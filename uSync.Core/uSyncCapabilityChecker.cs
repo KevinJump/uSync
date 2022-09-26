@@ -38,6 +38,12 @@ namespace uSync.Core
         public bool HasRuntimeMode
             => _version.Version.Major > 10 ||
             _version.Version.Major == 10 && _version.Version.Minor > 1;
+
+
+        /// <summary>
+        ///  User groups has Language Permissions - introduced in Umbraco 10.2.0
+        /// </summary>
+        public bool HasGroupLanguagePermissions => _version.Version >= new Version(10, 2, 0);
     }
             
 }
