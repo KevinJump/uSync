@@ -10,6 +10,7 @@ using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Notifications;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Strings;
+using Umbraco.Cms.Web.BackOffice.Middleware;
 using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;
@@ -89,11 +90,13 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
 
             if (!ImportPaths(node, config)) return false;
 
+            if (!ByDocTypeConfigCheck(node, config)) return false;
+
             return true;
         }
 
         /// <summary>
-        /// Import an item that is inthe trached state in the XML file.
+        /// Import an item that is in the trashed state in the XML file.
         /// </summary>
         /// <remarks>
         /// Trashed items are only imported when the "ImportTrashed" setting is true on the handler
@@ -117,7 +120,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
                 var path = node.Element("Info")?.Element("Path").ValueOrDefault(string.Empty);
                 if (!string.IsNullOrWhiteSpace(path) && !include.Any(x => path.InvariantStartsWith(x)))
                 {
-                    logger.LogDebug("Not processing item, {0} path {1} not in include path", node.Attribute("Alias").ValueOrDefault("unknown"), path);
+                    logger.LogDebug("Not processing item, {alias} path {path} not in include path", node.GetAlias(), path);
                     return false;
                 }
             }
@@ -129,9 +132,32 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
                 var path = node.Element("Info")?.Element("Path").ValueOrDefault(string.Empty);
                 if (!string.IsNullOrWhiteSpace(path) && exclude.Any(x => path.InvariantStartsWith(x)))
                 {
-                    logger.LogDebug("Not processing item, {0} path {1} is excluded", node.Attribute("Alias").ValueOrDefault("unknown"), path);
+                    logger.LogDebug("Not processing item, {alias} path {path} is excluded", node.GetAlias(), path);
                     return false;
                 }
+            }
+
+            return true;
+        }
+
+        private bool ByDocTypeConfigCheck(XElement node, HandlerSettings config)
+        {
+            var includeDocTypes = config.GetSetting("IncludeContentTypes", "").Split(',', StringSplitOptions.RemoveEmptyEntries);
+             
+            var doctype = node.Element("Info")?.Element("ContentType").ValueOrDefault(string.Empty);
+            if (string.IsNullOrEmpty(doctype)) return true;
+
+            if (includeDocTypes.Length > 0 && !includeDocTypes.InvariantContains(doctype))
+            {
+                logger.LogDebug("Not processing {alias} as it in not in the Included by ContentType list {contentType}", node.GetAlias(), doctype);
+                return false;
+            }
+
+            var excludeDocTypes = config.GetSetting("ExcludeContentTypes", "").Split(',', StringSplitOptions.RemoveEmptyEntries);
+            if (excludeDocTypes.Length > 0 && excludeDocTypes.InvariantContains(doctype))
+            {
+                logger.LogDebug("Not processing {alias} as it is excluded by ContentType {contentType}", node.GetAlias(), doctype);
+                return false;
             }
 
             return true;
@@ -142,7 +168,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         ///  Should we save this value to disk?
         /// </summary>
         /// <remarks>
-        ///  In general we save everything to disk, even if we are not going to remimport it later
+        ///  In general we save everything to disk, even if we are not going to re-import it later
         ///  but you can stop this with RulesOnExport = true in the settings 
         /// </remarks>
 
@@ -157,6 +183,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
                 // we run the import rules (but not the base rules as that would confuse.)
                 if (!ImportTrashedItem(node, config)) return false;
                 if (!ImportPaths(node, config)) return false;
+                if (!ByDocTypeConfigCheck(node, config)) return false;
             }
 
             return true;
