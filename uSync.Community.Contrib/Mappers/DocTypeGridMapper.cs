@@ -96,7 +96,7 @@ namespace uSync8.Community.Contrib.Mappers
                 if (item.ContainsKey(property.Alias))
                 {
                     var value = item[property.Alias];
-                    if (value != null)
+                    if (value != null && value.HasValues)
                     {
                         var mappedVal = mapperCollection.Value.GetExportValue(value, property.PropertyEditorAlias).ToString();
                         item[property.Alias] = mappedVal.GetJsonTokenValue().ExpandAllJsonInToken();
