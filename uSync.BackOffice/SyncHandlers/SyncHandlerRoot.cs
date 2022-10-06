@@ -30,7 +30,7 @@ namespace uSync.BackOffice.SyncHandlers
     /// Root base class for all handlers 
     /// </summary>
     /// <remarks>
-    /// If the Handler manages something that Impliments IEntity use SyncBaseHandler
+    /// If the Handler manages something that Implements IEntity use SyncBaseHandler
     /// </remarks>
     public abstract class SyncHandlerRoot<TObject, TContainer>
     {
@@ -60,7 +60,7 @@ namespace uSync.BackOffice.SyncHandlers
         protected readonly IList<ISyncTracker<TObject>> trackers;
 
         /// <summary>
-        /// The serializer to use for importing/exporting items
+        /// The Serializer to use for importing/exporting items
         /// </summary>
         protected ISyncSerializer<TObject> serializer;
 
@@ -70,7 +70,7 @@ namespace uSync.BackOffice.SyncHandlers
         protected readonly IAppPolicyCache runtimeCache;
 
         /// <summary>
-        ///  Alias of the handler, used when getting settings from the config file
+        ///  Alias of the handler, used when getting settings from the configuration file
         /// </summary>
         public string Alias { get; private set; }
 
@@ -99,7 +99,7 @@ namespace uSync.BackOffice.SyncHandlers
         public string Icon { get; private set; }
 
         /// <summary>
-        ///  does this handler require two passes at the import (e.g datatypes import once, and then again after doctypes)
+        ///  does this handler require two passes at the import (e.g data-types import once, and then again after doc-types)
         /// </summary>
         protected bool IsTwoPass = false;
 
@@ -111,7 +111,7 @@ namespace uSync.BackOffice.SyncHandlers
         /// <summary>
         ///  Is the handler enabled 
         /// </summary>
-        public bool Enabled { get; set; } = true; 
+        public bool Enabled { get; set; } = true;
 
 
         /// <summary>
@@ -227,7 +227,7 @@ namespace uSync.BackOffice.SyncHandlers
             this.DefaultConfig = defaultSet.GetHandlerSettings(this.Alias);
 
             if (defaultSet.DisabledHandlers.InvariantContains(this.Alias))
-                this.DefaultConfig.Enabled = false; 
+                this.DefaultConfig.Enabled = false;
 
             rootFolder = uSyncConfig.GetRootFolder();
         }
@@ -235,7 +235,7 @@ namespace uSync.BackOffice.SyncHandlers
         #region Importing 
 
         /// <summary>
-        ///  Import everything from a given folder, using the supplied config settings.
+        ///  Import everything from a given folder, using the supplied configuration settings.
         /// </summary>
         public IEnumerable<uSyncAction> ImportAll(string folder, HandlerSettings config, bool force, SyncUpdateCallback callback = null)
         {
@@ -379,7 +379,7 @@ namespace uSync.BackOffice.SyncHandlers
         }
 
         /// <summary>
-        ///  Import a single item from a usync xml file
+        ///  Import a single item from a usync XML file
         /// </summary>
         virtual public IEnumerable<uSyncAction> Import(string file, HandlerSettings config, bool force)
         {
@@ -399,11 +399,11 @@ namespace uSync.BackOffice.SyncHandlers
         {
             if (!ShouldImport(node, settings))
             {
-                return uSyncAction.SetAction(true, node.GetAlias(), message: "Change blocked (based on config)")
+                return uSyncAction.SetAction(true, node.GetAlias(), message: "Change blocked (based on configuration)")
                     .AsEnumerableOfOne();
             }
 
-            if (_mutexService.FireItemStartingEvent(new uSyncImportingItemNotification(node, (ISyncHandler)this )))
+            if (_mutexService.FireItemStartingEvent(new uSyncImportingItemNotification(node, (ISyncHandler)this)))
             {
                 // blocked
                 return uSyncActionHelper<TObject>
@@ -436,7 +436,7 @@ namespace uSync.BackOffice.SyncHandlers
             catch (Exception ex)
             {
                 logger.LogWarning("{alias}: Import Failed : {exception}", this.Alias, ex.ToString());
-                return uSyncAction.Fail(Path.GetFileName(filename), this.handlerType, ChangeType.Fail, 
+                return uSyncAction.Fail(Path.GetFileName(filename), this.handlerType, ChangeType.Fail,
                     $"{this.Alias} Import Fail: {ex.Message}", ex)
                     .AsEnumerableOfOne();
             }
@@ -467,7 +467,7 @@ namespace uSync.BackOffice.SyncHandlers
                         }
                     }
 
-                    // If the second attemt has change details add them to the first attempt
+                    // If the second attempt has change details add them to the first attempt
                     if (attempt.Details != null && attempt.Details.Any())
                     {
                         if (actions.Any(x => x.FileName == item.update.Key))
@@ -565,8 +565,8 @@ namespace uSync.BackOffice.SyncHandlers
         }
 
         /// <summary>
-        ///  given a folder we calculate what items we can remove, becuase they are 
-        ///  not in one the the files in the folder.
+        ///  given a folder we calculate what items we can remove, because they are 
+        ///  not in one the files in the folder.
         /// </summary>
         protected virtual IEnumerable<uSyncAction> CleanFolder(string cleanFile, bool reportOnly, bool flat)
         {
@@ -576,7 +576,7 @@ namespace uSync.BackOffice.SyncHandlers
 
             // get the keys for every item in this folder. 
 
-            // this would works on the flat folder stucture too, 
+            // this would works on the flat folder structure too, 
             // there we are being super defensive, so if an item
             // is anywhere in the folder it won't get removed
             // even if the folder is wrong
@@ -610,7 +610,7 @@ namespace uSync.BackOffice.SyncHandlers
         /// </summary>
         /// <remarks>
         ///  This is disk intensive, (checking the .config files all the time)
-        ///  so we cache it, and if we are using the flat folder stucture, then
+        ///  so we cache it, and if we are using the flat folder structure, then
         ///  we only do it once, so its quicker. 
         /// </remarks>
         protected IList<Guid> GetFolderKeys(string folder, bool flat)
@@ -657,19 +657,19 @@ namespace uSync.BackOffice.SyncHandlers
         }
 
         /// <summary>
-        ///  remove an items that are not listed in the guids to keep
+        ///  remove an items that are not listed in the GUIDs to keep
         /// </summary>
         /// <param name="parent">parent item that all keys will be under</param>
-        /// <param name="keysToKeep">list of guids of items we don't want to delete</param>
+        /// <param name="keysToKeep">list of GUIDs of items we don't want to delete</param>
         /// <param name="reportOnly">will just report what would happen (doesn't do the delete)</param>
         /// <returns>list of delete actions</returns>
         protected abstract IEnumerable<uSyncAction> DeleteMissingItems(TObject parent, IEnumerable<Guid> keysToKeep, bool reportOnly);
 
         /// <summary>
-        /// Remove an items that are not listed in the guids to keep.
+        /// Remove an items that are not listed in the GUIDs to keep.
         /// </summary>
         /// <param name="parentId">parent item that all keys will be under</param>
-        /// <param name="keysToKeep">list of guids of items we don't want to delete</param>
+        /// <param name="keysToKeep">list of GUIDs of items we don't want to delete</param>
         /// <param name="reportOnly">will just report what would happen (doesn't do the delete)</param>
         /// <returns>list of delete actions</returns>
         protected virtual IEnumerable<uSyncAction> DeleteMissingItems(int parentId, IEnumerable<Guid> keysToKeep, bool reportOnly)
@@ -687,7 +687,7 @@ namespace uSync.BackOffice.SyncHandlers
         virtual protected bool ShouldImport(XElement node, HandlerSettings config)
         {
             // if createOnly is on, then we only create things that are not already there. 
-            // this lookup is slow(ish) so we only do it if we have to.
+            // this lookup is slow (relatively) so we only do it if we have to.
             if (config.GetSetting(Core.uSyncConstants.DefaultSettings.CreateOnly, Core.uSyncConstants.DefaultSettings.CreateOnly_Default)
                 || config.GetSetting(Core.uSyncConstants.DefaultSettings.OneWay, Core.uSyncConstants.DefaultSettings.CreateOnly_Default))
             {
@@ -719,7 +719,7 @@ namespace uSync.BackOffice.SyncHandlers
 
 
         /// <summary>
-        ///  Check to see if this elment should be exported. 
+        ///  Check to see if this element should be exported. 
         /// </summary>
         virtual protected bool ShouldExport(XElement node, HandlerSettings config) => true;
 
@@ -732,7 +732,7 @@ namespace uSync.BackOffice.SyncHandlers
         /// </summary>
         virtual public IEnumerable<uSyncAction> ExportAll(string folder, HandlerSettings config, SyncUpdateCallback callback)
         {
-            // we dont clean the folder out on an export all. 
+            // we don't clean the folder out on an export all. 
             // because the actions (renames/deletes) live in the folder
             //
             // there will have to be a different clean option
@@ -828,13 +828,13 @@ namespace uSync.BackOffice.SyncHandlers
         virtual public IEnumerable<uSyncAction> Export(TObject item, string folder, HandlerSettings config)
         {
             if (item == null)
-                return uSyncAction.Fail(nameof(item), typeof(TObject).ToString(), ChangeType.Fail, "Item not set", 
+                return uSyncAction.Fail(nameof(item), typeof(TObject).ToString(), ChangeType.Fail, "Item not set",
                     new ArgumentNullException(nameof(item))).AsEnumerableOfOne();
 
-            if (_mutexService.FireItemStartingEvent(new uSyncExportingItemNotification<TObject>(item, (ISyncHandler)this))) 
+            if (_mutexService.FireItemStartingEvent(new uSyncExportingItemNotification<TObject>(item, (ISyncHandler)this)))
             {
                 return uSyncActionHelper<TObject>
-                    .ReportAction(ChangeType.NoChange, GetItemName(item), string.Empty, string.Empty, GetItemKey(item), this.Alias, 
+                    .ReportAction(ChangeType.NoChange, GetItemName(item), string.Empty, string.Empty, GetItemKey(item), this.Alias,
                                     "Change stopped by delegate event")
                     .AsEnumerableOfOne();
             }
@@ -852,7 +852,7 @@ namespace uSync.BackOffice.SyncHandlers
                 }
                 else
                 {
-                    return uSyncAction.SetAction(true, filename, type: typeof(TObject).ToString(), change: ChangeType.NoChange, message: "Not Exported (Based on config)", filename: filename).AsEnumerableOfOne();
+                    return uSyncAction.SetAction(true, filename, type: typeof(TObject).ToString(), change: ChangeType.NoChange, message: "Not Exported (Based on configuration)", filename: filename).AsEnumerableOfOne();
                 }
             }
 
@@ -885,10 +885,10 @@ namespace uSync.BackOffice.SyncHandlers
             callback?.Invoke("Done", 3, 3);
             return actions;
         }
-        
+
         private List<uSyncAction> ValidateReport(string folder, List<uSyncAction> actions)
         {
-            // Alters the existing list, by chaning the type as needed.
+            // Alters the existing list, by changing the type as needed.
             var validationActions = ReportMissingParents(actions.ToArray());
 
             // adds new actions - for delete clashes.
@@ -915,7 +915,7 @@ namespace uSync.BackOffice.SyncHandlers
                     var duplicateAction = uSyncActionHelper<TObject>.ReportActionFail(deleteAction.Name,
                         $"Duplicate! {deleteAction.Name} exists both as delete and import action");
 
-                    // create a detail message to tell people what has happend.
+                    // create a detail message to tell people what has happened.
                     duplicateAction.DetailMessage = "uSync detected a duplicate actions, where am item will be both created and deleted.";
                     var details = new List<uSyncChange>();
 
@@ -977,7 +977,7 @@ namespace uSync.BackOffice.SyncHandlers
         {
             if (GetItemKey(item) == node.GetKey()) return true;
 
-            // yes this is an or, we've done it explicity, so you can tell!
+            // yes this is an or, we've done it explicitly, so you can tell!
             if (node.GetAlias().Equals(this.GetItemAlias(item), StringComparison.InvariantCultureIgnoreCase)) return true;
 
             return false;
@@ -1052,7 +1052,7 @@ namespace uSync.BackOffice.SyncHandlers
         }
 
         /// <summary>
-        /// Report on any changes for a single xml node.
+        /// Report on any changes for a single XML node.
         /// </summary>
         protected virtual IEnumerable<uSyncAction> ReportElement(XElement node, string filename, HandlerSettings config)
             => ReportElement(node, filename, config ?? this.DefaultConfig, new uSyncImportOptions());
@@ -1065,7 +1065,7 @@ namespace uSync.BackOffice.SyncHandlers
         {
             try
             {
-                // pre event reporting 
+                //  starting reporting notification
                 //  this lets us intercept a report and 
                 //  shortcut the checking (sometimes).
                 if (_mutexService.FireItemStartingEvent(new uSyncReportingItemNotification(node)))
@@ -1082,13 +1082,13 @@ namespace uSync.BackOffice.SyncHandlers
                 var serializerOptions = new SyncSerializerOptions(options.Flags, settings.Settings);
                 serializerOptions.MergeSettings(options.Settings);
 
-                // check if this item is current (the provided xml and exported xml match)
+                // check if this item is current (the provided XML and exported XML match)
                 var change = IsItemCurrent(node, serializerOptions);
 
                 var action = uSyncActionHelper<TObject>
                         .ReportAction(change.Change, node.GetAlias(), node.GetPath(), GetNameFromFileOrNode(filename, node), node.GetKey(), this.Alias, "");
 
-                
+
 
                 action.Message = "";
 
@@ -1101,7 +1101,7 @@ namespace uSync.BackOffice.SyncHandlers
                     action.Details = GetChanges(node, change.CurrentNode, serializerOptions);
                     if (action.Change != ChangeType.Create && (action.Details == null || action.Details.Count() == 0))
                     {
-                        action.Message = "xml is different - but properties may not have changed";
+                        action.Message = "XML is different - but properties may not have changed";
                         action.Details = MakeRawChange(node, change.CurrentNode, serializerOptions).AsEnumerableOfOne();
                     }
                     else
@@ -1152,7 +1152,7 @@ namespace uSync.BackOffice.SyncHandlers
                 else
                 {
                     return uSyncActionHelper<TObject>.ReportAction(ChangeType.NoChange, node.GetAlias(), node.GetPath(), file, node.GetKey(),
-                        this.Alias, "Will not be imported (Based on config)")
+                        this.Alias, "Will not be imported (Based on configuration)")
                         .AsEnumerableOfOne<uSyncAction>();
                 }
             }
@@ -1187,8 +1187,8 @@ namespace uSync.BackOffice.SyncHandlers
 
             var group = !string.IsNullOrWhiteSpace(DefaultConfig.Group) ? DefaultConfig.Group : this.Group;
 
-            if (uSyncConfig.Settings.ExportOnSave.InvariantContains("All")|| 
-                uSyncConfig.Settings.ExportOnSave.InvariantContains(group)) 
+            if (uSyncConfig.Settings.ExportOnSave.InvariantContains("All") ||
+                uSyncConfig.Settings.ExportOnSave.InvariantContains(group))
             {
                 return HandlerActions.Save.IsValidAction(DefaultConfig.Actions);
             }
@@ -1205,7 +1205,15 @@ namespace uSync.BackOffice.SyncHandlers
 
             foreach (var item in notification.DeletedEntities)
             {
-                ExportDeletedItem(item, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
+                try
+                {
+                    ExportDeletedItem(item, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogWarning(ex, "Failed to create delete marker");
+                    notification.Messages.Add(new EventMessage("uSync", $"Failed to mark as deleted : {ex.Message}", EventMessageType.Warning));
+                }
             }
         }
 
@@ -1219,11 +1227,18 @@ namespace uSync.BackOffice.SyncHandlers
 
             foreach (var item in notification.SavedEntities)
             {
-                var attempts = Export(item, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
-
-                foreach (var attempt in attempts.Where(x => x.Success))
+                try
                 {
-                    this.CleanUp(item, attempt.FileName, Path.Combine(rootFolder, this.DefaultFolder));
+                    var attempts = Export(item, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
+                    foreach (var attempt in attempts.Where(x => x.Success))
+                    {
+                        this.CleanUp(item, attempt.FileName, Path.Combine(rootFolder, this.DefaultFolder));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    logger.LogWarning(ex, "Failed to create uSync export file");
+                    notification.Messages.Add(new EventMessage("uSync", $"Failed to create export file : {ex.Message}", EventMessageType.Warning));
                 }
             }
         }
@@ -1234,15 +1249,24 @@ namespace uSync.BackOffice.SyncHandlers
         /// <param name="notification"></param>
         public virtual void Handle(MovedNotification<TObject> notification)
         {
-            if (!ShouldProcessEvent()) return;
-            HandleMove(notification.MoveInfoCollection);
+            try
+            {
+                if (!ShouldProcessEvent()) return;
+                HandleMove(notification.MoveInfoCollection);
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Failed to export move operation");
+                notification.Messages.Add(new EventMessage("uSync", $"Failed to export move : {ex.Message}", EventMessageType.Warning));
+            }
+
         }
 
         /// <summary>
         /// Process a collection of move events 
         /// </summary>
         /// <remarks>
-        /// This has been seperated out, because we also call this code when a handler supports
+        /// This has been separated out, because we also call this code when a handler supports
         /// recycle bin events 
         /// </remarks>
         protected void HandleMove(IEnumerable<MoveEventInfo<TObject>> moveInfoCollection)
@@ -1268,7 +1292,7 @@ namespace uSync.BackOffice.SyncHandlers
         /// Export any deletes items to disk 
         /// </summary>
         /// <remarks>
-        /// Deleted items get 'emtpy' files on disk so we know they where deleted
+        /// Deleted items get 'empty' files on disk so we know they where deleted
         /// </remarks>
         protected virtual void ExportDeletedItem(TObject item, string folder, HandlerSettings config)
         {
@@ -1295,7 +1319,7 @@ namespace uSync.BackOffice.SyncHandlers
         }
 
         /// <summary>
-        ///  Cleans up the handler folder, removing duplicate configs for this item
+        ///  Cleans up the handler folder, removing duplicate files for this item
         ///  </summary>
         ///  <remarks>
         ///   e.g if someone renames a thing (and we are using the name in the file) 
@@ -1316,7 +1340,7 @@ namespace uSync.BackOffice.SyncHandlers
                     {
                         var node = syncFileService.LoadXElement(file);
 
-                        // if this xml file matches the item we have just saved. 
+                        // if this XML file matches the item we have just saved. 
 
                         if (!node.IsEmptyItem() || node.GetEmptyAction() != SyncActionType.Rename)
                         {
@@ -1352,7 +1376,7 @@ namespace uSync.BackOffice.SyncHandlers
         #endregion
 
         // 98% of the time the serializer can do all these calls for us, 
-        // but for blueprints, we want to get diffrent items, (but still use the 
+        // but for blueprints, we want to get different items, (but still use the 
         // content serializer) so we override them.
 
 
@@ -1407,7 +1431,7 @@ namespace uSync.BackOffice.SyncHandlers
         /// <param name="item">Item to derive path for</param>
         /// <param name="useGuid">should we use the key value in the path</param>
         /// <param name="isFlat">should the file be flat and ignore any sub folders?</param>
-        /// <returns>relative filepath to use for an item</returns>
+        /// <returns>relative file path to use for an item</returns>
         virtual protected string GetItemPath(TObject item, bool useGuid, bool isFlat)
             => useGuid ? GetItemKey(item).ToString() : GetItemFileName(item);
 
@@ -1433,7 +1457,7 @@ namespace uSync.BackOffice.SyncHandlers
             if (isFlat && GuidNames) return Path.Combine(folder, $"{GetItemKey(item)}.{this.uSyncConfig.Settings.DefaultExtension}");
             var path = Path.Combine(folder, $"{this.GetItemPath(item, GuidNames, isFlat)}.{this.uSyncConfig.Settings.DefaultExtension}");
 
-            // if this is flat but not using guid filenames, then we check for clashes.
+            // if this is flat but not using GUID filenames, then we check for clashes.
             if (isFlat && !GuidNames) return CheckAndFixFileClash(path, item);
             return path;
         }
@@ -1445,15 +1469,15 @@ namespace uSync.BackOffice.SyncHandlers
         /// <remarks>
         ///  clashes we want to resolve can occur when the safeFilename for an item
         ///  matches with the safe file name for something else. e.g
-        ///     1 Special Doctype 
-        ///     2 Special Doctype 
+        ///     1 Special Doc-type 
+        ///     2 Special Doc-type 
         ///     
         ///  Will both resolve to SpecialDocType.Config
         ///  
         ///  the first item to be written to disk for a clash will get the 'normal' name
         ///  all subsequent items will get the appended name. 
         ///  
-        ///  this can be completely sidesteped by using guid filenames. 
+        ///  this can be completely sidestepped by using GUID filenames. 
         /// </remarks>
         virtual protected string CheckAndFixFileClash(string path, TObject item)
         {
@@ -1466,7 +1490,7 @@ namespace uSync.BackOffice.SyncHandlers
                 if (GetXmlMatchString(node) == GetItemMatchString(item)) return path;
 
                 // get here we have a clash, we should append something
-                var append = GetItemKey(item).ToShortKeyString(8); // (this is the shortened guid like media folders do)
+                var append = GetItemKey(item).ToShortKeyString(8); // (this is the shortened GUID like media folders do)
                 return Path.Combine(Path.GetDirectoryName(path),
                     Path.GetFileNameWithoutExtension(path) + "_" + append + Path.GetExtension(path));
             }
@@ -1479,14 +1503,14 @@ namespace uSync.BackOffice.SyncHandlers
         /// </summary>
         /// <remarks>
         ///  this works because unless it's content/media you can't actually have 
-        ///  clashing aliases at diffrent levels in the folder structure. 
+        ///  clashing aliases at different levels in the folder structure. 
         ///  
         ///  So just checking the alias works, for content we overwrite these two functions.
         /// </remarks>
         protected virtual string GetItemMatchString(TObject item) => GetItemAlias(item);
 
         /// <summary>
-        ///  Calculate the matching item string frol the loaded uSync xml element 
+        ///  Calculate the matching item string from the loaded uSync XML element 
         /// </summary>
         protected virtual string GetXmlMatchString(XElement node) => node.GetAlias();
 
@@ -1708,7 +1732,7 @@ namespace uSync.BackOffice.SyncHandlers
         }
 
         /// <summary>
-        /// Calculate the current status of an item compared to the XML in a potental import
+        /// Calculate the current status of an item compared to the XML in a potential import
         /// </summary>
         public ChangeType GetItemStatus(XElement node)
         {
@@ -1733,7 +1757,7 @@ namespace uSync.BackOffice.SyncHandlers
             // make sure the runtime cache is clean.
             var key = GetCacheKeyBase();
 
-            // this also cleares the folder cache - as its a starts with call.
+            // this also clears the folder cache - as its a starts with call.
             runtimeCache.ClearByKey(key);
             return key;
         }
