@@ -29,11 +29,12 @@ namespace uSync.Core.Mapping
             : base(entityService, mapperCollection, contentTypeService, dataTypeService)
         { }
 
-        public override string Name => "Block List Mapper";
+        public override string Name => "Block List/Grid Mapper";
 
         public override string[] Editors => new string[]
         {
-            Constants.PropertyEditors.Aliases.BlockList
+            Constants.PropertyEditors.Aliases.BlockList,
+            "Umbraco.BlockGrid"
         };
 
         protected override string ProcessValues(JToken jsonValue, string editorAlias, Func<JObject, IContentType, JObject> GetPropertiesMethod)
