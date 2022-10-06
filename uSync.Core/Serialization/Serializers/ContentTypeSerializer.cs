@@ -94,7 +94,7 @@ namespace uSync.Core.Serialization.Serializers
         private XElement SerailizeTemplates(IContentType item)
         {
             var node = new XElement("AllowedTemplates");
-            if (item.AllowedTemplates.Any())
+            if (item.AllowedTemplates != null && item.AllowedTemplates.Any())
             {
                 foreach (var template in item.AllowedTemplates.OrderBy(x => x.Alias))
                 {
