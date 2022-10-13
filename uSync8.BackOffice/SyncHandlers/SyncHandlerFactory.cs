@@ -120,7 +120,7 @@ namespace uSync8.BackOffice.SyncHandlers
         {
             var handlers = GetValidHandlers(options);
             var groups = handlers
-                .Select(x => x.Handler.Group)
+                .Select(x => GetHandlerGroup(x))
                 .ToList();
 
             groups.AddRange(handlers.Where(x => !string.IsNullOrWhiteSpace(x.Settings.Group))
@@ -128,6 +128,11 @@ namespace uSync8.BackOffice.SyncHandlers
 
             return groups.Distinct();              
         }
+
+        private string GetHandlerGroup(ExtendedHandlerConfigPair handlerConfigPair)
+            => !string.IsNullOrWhiteSpace(handlerConfigPair.Settings.Group)
+                    ? handlerConfigPair.Settings.Group
+                    : handlerConfigPair.Handler.Group;
 
         public IEnumerable<ExtendedHandlerConfigPair> GetValidHandlers(string[] aliases, SyncHandlerOptions options = null)
             => GetValidHandlers(options)
