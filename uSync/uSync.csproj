@@ -19,7 +19,7 @@
 
 		<PackageTags>umbraco usync umbraco-marketplace</PackageTags>
 
-		<RepositoryUrl>https://github.com/KevinJump/uSync8/tree/core/main</RepositoryUrl>
+		<RepositoryUrl>https://github.com/KevinJump/uSync</RepositoryUrl>
 
 		<Copyright>Jumoo @ 2013-2021</Copyright>
 		<Description>Core serializers for uSync to read / write information to / from Umbraco CMS.</Description>
