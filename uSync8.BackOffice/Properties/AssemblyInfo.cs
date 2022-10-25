@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("uSync8.BackOffice")]
-[assembly: AssemblyCopyright("Copyright © 2019-21")]
+[assembly: AssemblyCopyright("© Jumoo. All rights reserved")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -31,5 +31,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("8.11.1.0")]
-[assembly: AssemblyFileVersion("8.11.1.0")]
+[assembly: AssemblyVersion("8.11.2.0")]
+[assembly: AssemblyFileVersion("8.11.2.0")]
