@@ -28,18 +28,32 @@ namespace uSync.Core.Serialization.Serializers
             IEntityService entityService,
             ILocalizationService localizationService,
             IRelationService relationService,
+            IUserService userService,
             IShortStringHelper shortStringHelper,
             ILogger<ContentSerializer> logger,
             IContentService contentService,
             IFileService fileService,
             SyncValueMapperCollection syncMappers)
-            : base(entityService, localizationService, relationService, shortStringHelper, logger, UmbracoObjectTypes.Document, syncMappers)
+            : base(entityService, localizationService, relationService, userService, shortStringHelper, logger, UmbracoObjectTypes.Document, syncMappers)
         {
             this.contentService = contentService;
             this.fileService = fileService;
 
             this.relationAlias = Constants.Conventions.RelationTypes.RelateParentDocumentOnDeleteAlias;
         }
+
+        [Obsolete("Content Serializer requires the user service (will remove v12")]
+        public ContentSerializer(
+          IEntityService entityService,
+          ILocalizationService localizationService,
+          IRelationService relationService,
+          IShortStringHelper shortStringHelper,
+          ILogger<ContentSerializer> logger,
+          IContentService contentService,
+          IFileService fileService,
+          SyncValueMapperCollection syncMappers)
+          : this(entityService, localizationService, relationService, null, shortStringHelper, logger, contentService, fileService, syncMappers)
+        { }
 
         #region Serialization
 
@@ -132,7 +146,6 @@ namespace uSync.Core.Serialization.Serializers
 
             return node;
         }
-
         #endregion
 
         #region De-serialization
@@ -161,7 +174,6 @@ namespace uSync.Core.Serialization.Serializers
             {
                 return SyncAttempt<IContent>.Fail(item.Name, item, ChangeType.ImportFail, "Failed to deserialize properties", attempt.Exception);
             }
-
             details.AddRange(propertiesAttempt.Result);
 
             // sort order
@@ -384,6 +396,8 @@ namespace uSync.Core.Serialization.Serializers
                 return Attempt.Succeed("No Changes");
             }
 
+            var userId = GetUserId(node.Element("Info")?.Element(UserInfoElement)?.Element("Creator").ValueOrDefault(string.Empty));
+
             var publishedNode = node.Element("Info")?.Element("Published");
             if (!item.Trashed && publishedNode != null)
             {
@@ -420,7 +434,7 @@ namespace uSync.Core.Serialization.Serializers
 
                     if (cultureStatuses.Count > 0)
                     {
-                        return PublishItem(item, cultureStatuses, unpublishMissingCultures);
+                        return PublishItem(item, cultureStatuses, unpublishMissingCultures, userId);
                     }
                 }
                 else
@@ -433,15 +447,16 @@ namespace uSync.Core.Serialization.Serializers
 
                     if (state == uSyncContentState.Published)
                     {
-                        return PublishItem(item);
+                        return PublishItem(item, userId);
                     }
                     else if (state == uSyncContentState.Unpublished && item.Published == true)
                     {
-                        contentService.Unpublish(item);
+                        contentService.Unpublish(item, userId: userId);
                     }
                 }
             }
 
+            contentService.Save(item, userId);
             this.SaveItem(item);
             return Attempt.Succeed("Saved");
         }
@@ -463,11 +478,15 @@ namespace uSync.Core.Serialization.Serializers
             return schedules;
         }
 
+        [Obsolete("Pass in user id, Will be removed in v12")]
         public Attempt<string> PublishItem(IContent item)
+            => PublishItem(item, -1);
+
+        public Attempt<string> PublishItem(IContent item, int userId)
         {
             try
             {
-                var result = contentService.SaveAndPublish(item);
+                var result = contentService.SaveAndPublish(item, userId: userId);
                 if (!result.Success)
                 {
                     var messages = result.EventMessages.FormatMessages(",");
@@ -491,9 +510,9 @@ namespace uSync.Core.Serialization.Serializers
         /// <param name="cultures"></param>
         /// <param name="unpublishMissing"></param>
         /// <returns></returns>
-        private Attempt<string> PublishItem(IContent item, IDictionary<string, uSyncContentState> cultures, bool unpublishMissing)
+        private Attempt<string> PublishItem(IContent item, IDictionary<string, uSyncContentState> cultures, bool unpublishMissing, int userId)
         {
-            if (cultures == null) return PublishItem(item);
+            if (cultures == null) return PublishItem(item, userId);
 
             try
             {
@@ -506,7 +525,7 @@ namespace uSync.Core.Serialization.Serializers
 
                 if (publishedCultures.Length > 0)
                 {
-                    var result = contentService.SaveAndPublish(item, publishedCultures);
+                    var result = contentService.SaveAndPublish(item, publishedCultures, userId);
 
                     // if this fails, we return the result
                     if (!result.Success) return result.ToAttempt();
@@ -527,7 +546,7 @@ namespace uSync.Core.Serialization.Serializers
                     {
                         // unpublish if the culture is currently published.
                         if (item.PublishedCultures.InvariantContains(culture))
-                            contentService.Unpublish(item, culture);
+                            contentService.Unpublish(item, culture, userId);
                     }
                 }
 
@@ -537,7 +556,7 @@ namespace uSync.Core.Serialization.Serializers
 
                 // if we get to this point and no save has been called, we should call it. 
                 if (!hasBeenSaved && item.IsDirty())
-                    contentService.Save(item);
+                    contentService.Save(item, userId);
 
                 return Attempt.Succeed("Done");
             }
@@ -642,5 +661,6 @@ namespace uSync.Core.Serialization.Serializers
                 if (!ex.Message.Contains("siteUri")) throw;
             }
         }
+
     }
 }

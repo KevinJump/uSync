@@ -25,13 +25,14 @@ namespace uSync.Core.Serialization.Serializers
             IEntityService entityService,
             ILocalizationService localizationService,
             IRelationService relationService,
+            IUserService userService,
             IShortStringHelper shortStringHelper,
             ILogger<ContentTemplateSerializer> logger,
             IContentService contentService,
             IFileService fileService,
             IContentTypeService contentTypeService,
             SyncValueMapperCollection syncMappers)
-            : base(entityService, localizationService, relationService, shortStringHelper, logger, contentService, fileService, syncMappers)
+            : base(entityService, localizationService, relationService, userService, shortStringHelper, logger, contentService, fileService, syncMappers)
         {
             _contentTypeService = contentTypeService;
             this.umbracoObjectType = UmbracoObjectTypes.DocumentBlueprint;

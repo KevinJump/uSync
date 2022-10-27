@@ -223,12 +223,12 @@ namespace uSync.Core.Serialization
             _folderCache = new Dictionary<int, XElement>();
         }
 
-        public void InitializeCache()
+        public virtual void InitializeCache()
         {
             ClearFolderCache();
         }
 
-        public void DisposeCache()
+        public virtual void DisposeCache()
         {
             ClearFolderCache();
         }

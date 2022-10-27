@@ -4,6 +4,8 @@ using System.Globalization;
 using System.Linq;
 using System.Xml.Linq;
 
+using Examine;
+
 using Microsoft.Extensions.Logging;
 
 using Newtonsoft.Json;
@@ -21,17 +23,20 @@ using uSync.Core.Models;
 
 namespace uSync.Core.Serialization.Serializers
 {
-    public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TObject>, ISyncContentSerializer<TObject>
+    public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TObject>, ISyncContentSerializer<TObject>,
+        ISyncCachedSerializer
         where TObject : IContentBase
     {
         protected UmbracoObjectTypes umbracoObjectType;
         protected SyncValueMapperCollection syncMappers;
 
-
         protected readonly IShortStringHelper shortStringHelper;
 
         protected ILocalizationService localizationService;
         protected IRelationService relationService;
+
+        protected IUserService _userService;
+
 
         protected string relationAlias;
 
@@ -39,6 +44,7 @@ namespace uSync.Core.Serialization.Serializers
             IEntityService entityService,
             ILocalizationService localizationService,
             IRelationService relationService,
+            IUserService userService,
             IShortStringHelper shortStringHelper,
             ILogger<ContentSerializerBase<TObject>> logger,
             UmbracoObjectTypes umbracoObjectType,
@@ -52,7 +58,22 @@ namespace uSync.Core.Serialization.Serializers
 
             this.localizationService = localizationService;
             this.relationService = relationService;
+            
+            _userService = userService;
         }
+
+        [Obsolete("Use constructor that passes all parameters - will obsolete in v12")]
+        public ContentSerializerBase(
+           IEntityService entityService,
+           ILocalizationService localizationService,
+           IRelationService relationService,
+           IShortStringHelper shortStringHelper,
+           ILogger<ContentSerializerBase<TObject>> logger,
+           UmbracoObjectTypes umbracoObjectType,
+           SyncValueMapperCollection syncMappers)
+           : this(entityService, localizationService, relationService, null, shortStringHelper, logger, umbracoObjectType, syncMappers)
+        { }
+        
 
         /// <summary>
         ///  Initialize the XElement with the core Key, Name, Level values
@@ -169,6 +190,9 @@ namespace uSync.Core.Serialization.Serializers
             info.Add(title);
 
             info.Add(new XElement(uSyncConstants.Xml.SortOrder, item.SortOrder));
+
+            if (options.GetSetting("IncludeUserInfo", false))
+                info.Add(SerializeUserInfo(item, options));
 
             return info;
         }
@@ -373,6 +397,8 @@ namespace uSync.Core.Serialization.Serializers
             }
 
             changes.AddRange(DeserializeName(item, node, options));
+            changes.AddRange(DeSerializeUserInfo(item, node));
+
 
             return changes;
         }
@@ -954,6 +980,94 @@ namespace uSync.Core.Serialization.Serializers
 
         }
 
+
+        #region userstuff.
+
+        protected static string UserInfoElement = "UserInfo";
+
+        protected virtual XElement SerializeUserInfo(TObject item, SyncSerializerOptions options)
+        {
+            return new XElement(UserInfoElement,
+                    new XElement("Writer", GetUsername(item.WriterId)),
+                    new XElement("Creator", GetUsername(item.CreatorId)));
+        }
+
+        protected virtual IEnumerable<uSyncChange> DeSerializeUserInfo(TObject item, XElement node)
+        {
+            var users = node.Element(uSyncConstants.Xml.Info)?.Element(UserInfoElement);
+            if (users == null) return Enumerable.Empty<uSyncChange>();
+
+            var changes = new List<uSyncChange>();
+
+            var writerId = GetUserId(users.Element("Writer").ValueOrDefault(string.Empty));
+            if (writerId != -1 && item.WriterId != writerId)
+            {
+                changes.AddUpdate("writer", item.WriterId, writerId, "Info/WriterId");
+                item.WriterId = writerId;
+            }
+
+            var creatorId = GetUserId(users.Element("Creator").ValueOrDefault(string.Empty));
+            if (creatorId != -1 && item.CreatorId != creatorId)
+            {
+                changes.AddUpdate("creator", item.WriterId, writerId, "Info/CreatorId");
+                item.CreatorId = creatorId;
+            }
+
+            return changes;
+
+        }
+
+        protected override XElement CleanseNode(XElement node)
+        {
+            // for comparisons etc, the user fields are blank. 
+            node.Element(uSyncConstants.Xml.Info).Element(UserInfoElement)?.Remove();
+            return node;
+        }
+
+        private Dictionary<string, int> _userLookup = new Dictionary<string, int>();
+
+        protected string GetUsername(int id)
+        {
+            if (id == 0) return string.Empty;
+
+            if (_userLookup.ContainsValue(id))
+            {
+                return _userLookup
+                    .FirstOrDefault(x => x.Value == id, new KeyValuePair<string, int>(string.Empty, -1))
+                    .Key ?? string.Empty;
+            }
+
+            var username = _userService?.GetUserById(id)?.Username ?? string.Empty;
+
+            if (!string.IsNullOrWhiteSpace(username))
+                _userLookup[username] = id;
+
+            return username;
+           
+
+        }
+
+        protected int GetUserId(string username)
+        {
+            if (string.IsNullOrEmpty(username)) return -1;
+
+            if (!_userLookup.ContainsKey(username))
+                _userLookup[username] = _userService?.GetByUsername(username)?.Id ?? -1;
+
+            return _userLookup[username];
+        }
+
+        public void InitializeCache()
+        {
+            _userLookup = new Dictionary<string, int>();
+        }
+
+        public void DisposeCache()
+        {
+            _userLookup = new Dictionary<string, int>();
+        }
+
+        #endregion
 
     }
 }

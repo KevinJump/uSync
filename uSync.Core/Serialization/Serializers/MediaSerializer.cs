@@ -32,11 +32,12 @@ namespace uSync.Core.Serialization.Serializers
             IEntityService entityService,
             ILocalizationService localizationService,
             IRelationService relationService,
+            IUserService userService,
             IShortStringHelper shortStringHelper,
             ILogger<MediaSerializer> logger,
             IMediaService mediaService,
             SyncValueMapperCollection syncMappers)
-            : base(entityService, localizationService, relationService, shortStringHelper, logger, UmbracoObjectTypes.Media, syncMappers)
+            : base(entityService, localizationService, relationService, userService, shortStringHelper, logger, UmbracoObjectTypes.Media, syncMappers)
         {
             this._mediaService = mediaService;
             this.relationAlias = Constants.Conventions.RelationTypes.RelateParentMediaFolderOnDeleteAlias;
@@ -50,6 +51,18 @@ namespace uSync.Core.Serialization.Serializers
                 "umbracoWidth", "umbracoHeight", "umbracoBytes", "umbracoExtension"
             };
         }
+
+        [Obsolete("Use constructor that takes all parameters (will obsolete in v12)")]
+        public MediaSerializer(
+          IEntityService entityService,
+          ILocalizationService localizationService,
+          IRelationService relationService,
+          IShortStringHelper shortStringHelper,
+          ILogger<MediaSerializer> logger,
+          IMediaService mediaService,
+          SyncValueMapperCollection syncMappers)
+            : this(entityService, localizationService, relationService, null, shortStringHelper, logger, mediaService, syncMappers)
+        { }
 
         protected override SyncAttempt<IMedia> DeserializeCore(XElement node, SyncSerializerOptions options)
         {
