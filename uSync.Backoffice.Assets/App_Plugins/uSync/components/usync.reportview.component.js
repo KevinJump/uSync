@@ -94,6 +94,8 @@
                     return 'icon-check color-green';
                 case 'Export':
                     return 'icon-check color-green';
+                case 'Information':
+                    return 'icon-info color-blue';
                 default:
                     return 'icon-flag color-red';
             }

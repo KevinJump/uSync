@@ -126,7 +126,19 @@ namespace uSync.BackOffice.Configuration
         /// Disable the default dashboard (so people can't accedently press the buttons).
         /// </summary>
         [DefaultValue("false")]
-        public bool DisableDashboard { get; set; } = false; 
+        public bool DisableDashboard { get; set; } = false;
+
+        /// <summary>
+        ///  summerize results (for when there are loads and loads of items)
+        /// </summary>
+        [DefaultValue("false")]
+        public bool SummaryDashboard { get; set; } = true;
+
+        /// <summary>
+        ///  limit of items to display before flicking to summary view. (this is per handler)
+        /// </summary>
+        public int SummaryLimit { get; set; } = 1000;
+       
     }
 
 }
