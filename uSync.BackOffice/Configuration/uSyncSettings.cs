@@ -137,6 +137,7 @@ namespace uSync.BackOffice.Configuration
         /// <summary>
         ///  limit of items to display before flicking to summary view. (this is per handler)
         /// </summary>
+        [DefaultValue(1000)]
         public int SummaryLimit { get; set; } = 1000;
        
     }
