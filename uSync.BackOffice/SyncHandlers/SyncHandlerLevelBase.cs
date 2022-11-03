@@ -67,10 +67,9 @@ namespace uSync.BackOffice.SyncHandlers
 
             foreach (var item in orderedFiles.Select((Node, Index) => new { Node, Index }))
             {
-                var filename = Path.GetFileNameWithoutExtension(item.Node.File);
-                callback?.Invoke($"{filename}", item.Index, orderedFiles.Count);
+                callback?.Invoke(item.Node.Alias, item.Index, orderedFiles.Count);
 
-                logger.LogTrace("{Index} Importing: {File}, [Level {Level}]", item.Index, filename, item.Node.Level);
+                logger.LogTrace("{Index} Importing: {File}, [Level {Level}]", item.Index, item.Node.Alias, item.Node.Level);
 
                 var result = Import(item.Node.File, config, flags);
                 foreach (var attempt in result)
@@ -144,6 +143,7 @@ namespace uSync.BackOffice.SyncHandlers
                     {
                         nodes.Add(new LeveledFile
                         {
+                            Alias = node.GetAlias(),
                             Level = (node.GetLevel() * 1000) + node.GetItemSortOrder(), // will hopefully let us put things in sort order in one go. 
                             File = file
                         });
@@ -167,6 +167,7 @@ namespace uSync.BackOffice.SyncHandlers
 
         private class LeveledFile
         {
+            public string Alias { get; set; }
             public int Level { get; set; }
             public string File { get; set; }
         }

@@ -1028,25 +1028,24 @@ namespace uSync.BackOffice.SyncHandlers
             List<uSyncAction> actions = new List<uSyncAction>();
 
 
-            var files = GetImportFiles(folder);
+            var files = GetImportFiles(folder).ToList();
 
             int count = 0;
-            int total = files.Count();
 
-            logger.LogDebug("ReportFolder: {folder} ({count} files)", folder, total);
+            logger.LogDebug("ReportFolder: {folder} ({count} files)", folder, files.Count);
 
             foreach (string file in files)
             {
                 count++;
-                callback?.Invoke(Path.GetFileNameWithoutExtension(file), count, total);
+                callback?.Invoke(Path.GetFileNameWithoutExtension(file), count, files.Count);
 
                 actions.AddRange(ReportItem(file, config));
-            }
+                }
 
             foreach (var children in syncFileService.GetDirectories(folder))
-            {
+                {
                 actions.AddRange(ReportFolder(children, config, callback));
-            }
+                }
 
             return actions;
         }
@@ -1145,16 +1144,16 @@ namespace uSync.BackOffice.SyncHandlers
             {
                 var node = syncFileService.LoadXElement(file);
 
-                if (ShouldImport(node, config))
-                {
-                    return ReportElement(node, file, config);
-                }
-                else
-                {
-                    return uSyncActionHelper<TObject>.ReportAction(ChangeType.NoChange, node.GetAlias(), node.GetPath(), file, node.GetKey(),
-                        this.Alias, "Will not be imported (Based on configuration)")
-                        .AsEnumerableOfOne<uSyncAction>();
-                }
+            if (ShouldImport(node, config))
+            {
+                return ReportElement(node, file, config);
+            }
+            else
+            {
+                return uSyncActionHelper<TObject>.ReportAction(ChangeType.NoChange, node.GetAlias(), node.GetPath(), file, node.GetKey(),
+                    this.Alias, "Will not be imported (Based on configuration)")
+                    .AsEnumerableOfOne<uSyncAction>();
+            }
             }
             catch (Exception ex)
             {
