@@ -7,14 +7,14 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.3.2" /> 
 		<PackageReference Include="NUnit" Version="3.13.3" />
 		<PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
 		<PackageReference Include="coverlet.collector" Version="3.0.2" />
-		<PackageReference Include="Umbraco.Cms.Tests" Version="10.0.0" />
-		<PackageReference Include="Umbraco.Cms.Tests.Integration" Version="10.0.0" />
+		<PackageReference Include="Umbraco.Cms.Tests" Version="11.0.0-rc1" />
+		<PackageReference Include="Umbraco.Cms.Tests.Integration" Version="11.0.0-rc1" />
 
-		<PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="10.0.0" />
+		<PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="11.0.0-rc1" />
 
 	</ItemGroup>
 
