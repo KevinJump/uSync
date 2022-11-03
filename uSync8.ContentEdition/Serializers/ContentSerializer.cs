@@ -164,7 +164,7 @@ namespace uSync8.ContentEdition.Serializers
 
             details.AddNotNull(DeserializeTemplate(item, node));
             details.AddRange(DeserializeSchedules(item, node, options));
-            
+
 
             return SyncAttempt<IContent>.Succeed(item.Name, item, ChangeType.Import, details);
         }
@@ -475,7 +475,12 @@ namespace uSync8.ContentEdition.Serializers
                     var result = contentService.SaveAndPublish(item, publishedCultures);
 
                     // if this fails, we return the result
-                    if (!result.Success) return result.ToAttempt();
+                    if (!result.Success)
+                    {
+                        var messages = result.EventMessages.FormatMessages(",");
+                        logger.Error<ContentSerializer>("Failed to publish {result} : {messages}", result.Result, messages);
+                        return result.ToAttempt();
+                    }
 
                     // if its published here it's also saved, so we can skip the save below.
                     hasBeenSaved = true;
