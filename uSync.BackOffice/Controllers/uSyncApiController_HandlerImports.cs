@@ -63,7 +63,10 @@ namespace uSync.BackOffice.Controllers
                     Callbacks = hubClient.Callbacks(),
                     HandlerSet = handlerSet,
                     RootFolder = _uSyncConfig.GetRootFolder(),                    
-                });
+                }).ToList();
+
+            if (_uSyncConfig.Settings.SummaryDashboard || actions.Count > _uSyncConfig.Settings.SummaryLimit)
+                actions = actions.ConvertToSummary(_uSyncConfig.Settings.SummaryDashboard).ToList();
 
             return new SyncActionResult(actions);
         }
@@ -90,7 +93,10 @@ namespace uSync.BackOffice.Controllers
                 RootFolder = _uSyncConfig.GetRootFolder(),
                 PauseDuringImport = true,
                 Flags = options.Force ? Core.Serialization.SerializerFlags.Force : Core.Serialization.SerializerFlags.None
-            });
+            }).ToList();
+
+            if (_uSyncConfig.Settings.SummaryDashboard || actions.Count > _uSyncConfig.Settings.SummaryLimit)
+                actions = actions.ConvertToSummary(_uSyncConfig.Settings.SummaryDashboard).ToList();
 
             return new SyncActionResult(actions);
         }
@@ -148,7 +154,10 @@ namespace uSync.BackOffice.Controllers
                 Callbacks = hubClient.Callbacks(),
                 HandlerSet = handlerSet,
                 RootFolder = _uSyncConfig.GetRootFolder()
-            });
+            }).ToList();
+
+            if (_uSyncConfig.Settings.SummaryDashboard || actions.Count > _uSyncConfig.Settings.SummaryLimit)
+                actions = actions.ConvertToSummary(_uSyncConfig.Settings.SummaryDashboard).ToList();
 
             return new SyncActionResult(actions);
         }

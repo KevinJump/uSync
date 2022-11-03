@@ -1,9 +1,13 @@
 ﻿using System;
+using System.IO;
+using System.Linq;
 
 using Microsoft.Extensions.Logging;
 
 using Umbraco.Cms.Core.Cache;
+using Umbraco.Cms.Core.Events;
 using Umbraco.Cms.Core.Models;
+using Umbraco.Cms.Core.Notifications;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Strings;
 
@@ -20,7 +24,9 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
     /// </summary>
     [SyncHandler(uSyncConstants.Handlers.ContentTemplateHandler, "Blueprints", "Blueprints", uSyncConstants.Priorites.ContentTemplate
         , Icon = "icon-document-dashed-line usync-addon-icon", IsTwoPass = true, EntityType = UdiEntityType.DocumentBlueprint)]
-    public class ContentTemplateHandler : ContentHandlerBase<IContent, IContentService>, ISyncHandler
+    public class ContentTemplateHandler : ContentHandlerBase<IContent, IContentService>, ISyncHandler,
+        INotificationHandler<ContentSavedBlueprintNotification>,
+        INotificationHandler<ContentDeletedBlueprintNotification>
     {
         /// <summary>
         /// ContentTypeHandler belongs to the Content group by default
@@ -74,5 +80,43 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         /// </summary>
         protected override IContent GetFromService(string alias)
             => null;
+
+        public void Handle(ContentSavedBlueprintNotification notification)
+        {
+            if (!ShouldProcessEvent()) return;
+
+            var item = notification.SavedBlueprint;
+            try
+            {
+                var attempts = Export(item, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
+                foreach (var attempt in attempts.Where(x => x.Success))
+                {
+                    this.CleanUp(item, attempt.FileName, Path.Combine(rootFolder, this.DefaultFolder));
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Failed to create uSync export file");
+                notification.Messages.Add(new EventMessage("uSync", $"Failed to create export file : {ex.Message}", EventMessageType.Warning));
+            }
+        }
+
+        public void Handle(ContentDeletedBlueprintNotification notification)
+        {
+            if (!ShouldProcessEvent()) return;
+
+            foreach(var item in notification.DeletedBlueprints)
+            {
+                try
+                {
+                    ExportDeletedItem(item, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogWarning(ex, "Failed to create delete marker");
+                    notification.Messages.Add(new EventMessage("uSync", $"Failed to mark as deleted : {ex.Message}", EventMessageType.Warning));
+                }
+            }
+        }
     }
 }

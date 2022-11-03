@@ -158,7 +158,7 @@ namespace uSync.Core.Serialization.Serializers
             var cultures = options.GetCultures();
 
             var title = new XElement("NodeName", new XAttribute("Default", item.Name));
-            foreach (var culture in item.AvailableCultures)
+            foreach (var culture in item.AvailableCultures.OrderBy(x => x))
             {
                 if (cultures.IsValidOrBlank(culture))
                 {
@@ -218,7 +218,7 @@ namespace uSync.Core.Serialization.Serializers
                 // this can cause us false change readings
                 // but we need to preserve the values if they are blank
                 // because we have to be able to set them to blank when we deserialize them.
-                foreach (var value in property.Values)
+                foreach (var value in property.Values.OrderBy(x => x.Culture ?? ""))
                 {
                     var valueNode = new XElement("Value");
 

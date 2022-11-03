@@ -171,9 +171,9 @@ namespace uSync.BackOffice
 
             builder.AddNotificationHandler<RelationTypeSavedNotification, RelationTypeHandler>();
             builder.AddNotificationHandler<RelationTypeDeletedNotification, RelationTypeHandler>();
-
-            // builder.AddNotificationHandler<ContentSavedBlueprintNotification, ContentHandler>();
-            // builder.AddNotificationHandler<ContentDeletedBlueprintNotification, ContentHandler>();
+            
+            builder.AddNotificationHandler<ContentSavedBlueprintNotification, ContentTemplateHandler>();
+            builder.AddNotificationHandler<ContentDeletedBlueprintNotification, ContentTemplateHandler>();
 
             // cache lifecylce manager
             builder.

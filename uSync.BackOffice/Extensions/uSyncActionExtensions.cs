@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
+using Org.BouncyCastle.Crypto.Tls;
+using Org.BouncyCastle.Security;
+
 using Umbraco.Extensions;
 
 using uSync.BackOffice.SyncHandlers;
@@ -32,6 +35,25 @@ namespace uSync.BackOffice
                 actions.Count() == 0 || 
                 actions.InvariantContains("all") ||
                 actions.InvariantContains(requestedAction.ToString());
+
+
+        public static IEnumerable<uSyncAction> ConvertToSummary(this IEnumerable<uSyncAction> actions, bool strict)
+        {
+            var summary = new List<uSyncAction>();
+
+            foreach(var items in actions.GroupBy(x => x.HandlerAlias))
+            {
+                var fails = items.Where(x => !x.Success).ToList();
+
+                summary.Add(uSyncAction.SetAction(true, items.Key, items.Key, Core.ChangeType.Information,
+                    $"({items.CountChanges()}/{items.Count()} Changes) ({fails.Count} failures)"));              
+
+                if (!strict) summary.AddRange(fails);
+               
+            }
+
+            return summary;
+        }
 
     }
 }
