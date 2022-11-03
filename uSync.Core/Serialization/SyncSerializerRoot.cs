@@ -316,7 +316,7 @@ namespace uSync.Core.Serialization
                     node.Save(writer);
                     writer.Flush();
                     s.Position = 0;
-                    using (var hashAlgorithm = HashAlgorithm.Create(CryptoConfig.AllowOnlyFipsAlgorithms ? "SHA1" : "MD5"))
+                    using (HashAlgorithm hashAlgorithm = CryptoConfig.AllowOnlyFipsAlgorithms ? SHA1.Create() : MD5.Create())
                     {
                         return BitConverter.ToString(hashAlgorithm.ComputeHash(s)).Replace("-", "").ToLower();
                     }
