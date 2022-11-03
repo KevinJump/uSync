@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<language alias="fr" intName="French" localName="French" lcid="" culture="fr">
+	<creator>
+		<name>Michael</name>
+		<link>https://github.com/mikecp</link>
+	</creator>
+	<area alias="treeHeaders">
+		<key alias="sync">Synchronisation</key>
+		<key alias="usync">uSync</key>
+	</area>
+	<area alias="usync">
+		<key alias="name">uSync</key>
+		<key alias="intro">Disque d'origine et de destination des éléments de base de données</key>
+
+		<key alias="newer">Une version plus récente de uSync est disponible</key>
+		<key alias="noHandlers"><![CDATA[Aucun handler n'a été chargé, vous ne pouvez donc rien synchroniser - vérifiez votre fichier uSync8.config, il pourrait être corrompu ou manquant 😢]]></key>
+
+		<key alias="import">Importer</key>
+		<key alias="importforce">Tout importer</key>
+		<key alias="importFile">Importer depuis un fichier</key>
+		<key alias="report">Faire rapport</key>
+		<key alias="export">Exporter</key>
+		<key alias="exportClean">Exporter et nettoyer</key>
+		<key alias="apply">Appliquer</key>
+
+		<key alias="download">télécharger</key>
+		<key alias="downloadTitle">Télécharger le répertoire uSync?</key>
+		<key alias="downloadMsg">
+			<![CDATA[
+			<p>Télécharger votre répertoire usync sous forme de fichier zip?</p>
+			<small><em>Le téléchargement contiendra tous les fichiers du répertoire uSync, pas uniquement les éléments que vous venez d'exporter</em></small>]]>
+		</key>
+
+		<key alias="exportFile">Exporter vers un fichier</key>
+		<key alias="exportFileMsg">
+			<![CDATA[
+			<p>Réaliser un export et télécharger le répertoirs sous forme de fichier zip?</p>
+			<small><em>Un export normal sera réalisé, tout ce qui est vide ou a été supprimé sera gardé, si vous ne souhaitez pas cela, vous devriez réaliser un export avec nettoyage avant de télécharger le fichier</em></small>]]>
+		</key>
+
+		<key alias="details">Détails</key>
+
+		<key alias="handlers">Item Handlers</key>
+		<key alias="savesettings">Enregistrer les paramètres</key>
+
+		<key alias="import-content">Importer du Contenu/Media</key>
+		<key alias="import-settings">Importer les paramètres</key>
+		<key alias="import-members">Importer les Membres</key>
+		<key alias="import-users">Importer les Utilisateurs</key>
+
+		<key alias="everything">Tout</key>
+		<key alias="everything-description">Tous les Paramètres, le Contenu et le reste</key>
+
+		<key alias="settings-description">Types de données, Types de documents et tous les paramètres</key>
+		<key alias="content-description">Contenu, Media et les éléments associés</key>
+		<key alias="members-description">Membres et groupes de Membres</key>
+		<key alias="users-description">Utilisateurs et groupes d'Utilisateurs</key>
+
+		<key alias="report-content">Faire rapport du Contenu/Media</key>
+		<key alias="report-settings">Faire rapport des Paramètres</key>
+		<key alias="report-members">Faire rapport des Membres</key>
+		<key alias="report-users">Farie rapport des Utilisateurs</key>
+
+		<key alias="tableType">Type</key>
+		<key alias="tableName">Nom</key>
+		<key alias="tableChange">Modification</key>
+		<key alias="tableMessage">Message</key>
+
+		<key alias="nochange"><![CDATA[<h4>Pas de modifications</h4>]]></key>
+		<key alias="nochange_quote"><![CDATA[Les choses ne doivent pas changer le monde pour être importantes]]></key>
+
+		<!-- warning messages -->
+		<key alias="oldformat">
+			<![CDATA[Ce répertoire de syncro provient d'une ancienne version de uSync. Bien que la synchro va fonctionner, vous obtiendrez des résultats plus rapides et plus propres avec une version plus récente. 
+		  <a href="https://github.com/KevinJump/uSync/blob/v10/dev/changes/format.md" target="_blank"><i class="icon icon-info"></i>info</a>]]>
+		</key>
+
+		<key alias="createWarning"><![CDATA[Un ou plusieurs handlers sont destinés à la création uniquement. [%0%]. Les changements au sein de ces éléments pourraient ne pas être synchronisés]]></key>
+		<key alias="forms"><![CDATA[Utilisez-vous Umbraco forms? - vous pouvez maintenant synchroniser les formes et les paramètres avec <a href="http://jumoo.co.uk/usync/forms" target="_blank">uSync.FormsEdition</a>]]></key>
+
+		<key alias="cleanTitle">Exporter et nettoyer</key>
+		<key alias="cleanMsg"><![CDATA[Etes-vous certain.e? Un export avec nettoyage supprimera tout le contenu du répertoire uSync. Vous perdrez toute action enregistrée de suppression ou renommage.]]></key>
+		<key alias="cleanSubmit">Oui, réaliser un export avec nettoyage</key>
+		<key alias="cleanClose">Non, fermer</key>
+
+
+		<key alias="saving">Vous venez d'économiser à peu près %0% de secondes</key>
+		<key alias="godo0">Ca vaut la peine de vérifier</key>
+		<key alias="godo1">Allez prendre un café ☕</key>
+		<key alias="godo2">Allez discuter vite fait</key>
+		<key alias="godo3">Allez faire un belle balade dehors 🌲 🦆</key>
+		<key alias="godo4">Vous méritez une pause</key>
+
+	</area>
+	<area alias="dashboardTabs">
+		<key alias="usync">uSync</key>
+	</area>
+</language>
