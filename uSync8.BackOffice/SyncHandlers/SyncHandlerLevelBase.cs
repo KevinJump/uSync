@@ -100,10 +100,9 @@ namespace uSync8.BackOffice.SyncHandlers
 
             foreach (var item in orderedFiles.Select((Node, Index) => new { Node, Index }))
             {
-                var filename = Path.GetFileNameWithoutExtension(item.Node.File);
-                callback?.Invoke($"{filename}", item.Index, orderedFiles.Count);
-
-                logger.Verbose(handlerType, "{Index} Importing: {File}, [Level {Level}]", item.Index, filename, item.Node.Level);
+                callback?.Invoke($"{item.Node.Name}", item.Index, orderedFiles.Count);
+                
+                logger.Verbose(handlerType, "{Index} Importing: {File}, [Level {Level}]", item.Index, item.Node.Name, item.Node.Level);
 
                 var result = Import(item.Node.File, config, flags);
                 foreach (var attempt in result)
@@ -178,6 +177,7 @@ namespace uSync8.BackOffice.SyncHandlers
                         nodes.Add(new LeveledFile
                         {
                             Level = node.GetLevel(),
+                            Name = node.GetAlias(),
                             File = file
                         });
                     }
@@ -189,6 +189,13 @@ namespace uSync8.BackOffice.SyncHandlers
                     actions.Add(uSyncActionHelper<TObject>.SetAction(
                         SyncAttempt<TObject>.Fail(Path.GetFileName(file), ChangeType.Fail, $"Failed to Load: {ex.Message}"), file, Guid.Empty, this.Alias, false));
                 }
+                catch (Exception ex)
+                {
+                    logger.Warn(handlerType, $"Error loading file: {file} [{ex.Message}]");
+                    actions.Add(uSyncActionHelper<TObject>.SetAction(
+                        SyncAttempt<TObject>.Fail(Path.GetFileName(file), ChangeType.Fail, $"Failed to Load: {ex.Message}"), file, Guid.Empty, this.Alias, false));
+                    throw;
+                }
             }
 
             return nodes.OrderBy(x => x.Level).ToList();
@@ -198,6 +205,7 @@ namespace uSync8.BackOffice.SyncHandlers
         private class LeveledFile
         {
             public int Level { get; set; }
+            public string Name { get; set; }
             public string File { get; set; }
         }
 
