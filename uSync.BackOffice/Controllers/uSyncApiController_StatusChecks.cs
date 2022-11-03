@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 using Newtonsoft.Json;
@@ -168,7 +169,8 @@ namespace uSync.BackOffice.Controllers
                 using (var client = new HttpClient())
                 {
                     client.BaseAddress = new Uri("https://jumoo.co.uk");
-                    // client.BaseAddress = new Uri("http://jumoo.local");
+                    if (_configuration.GetValue<bool>("uSyncCheckLocal", false))
+                        client.BaseAddress = new Uri("http://jumoo.localhost");
 
                     var url = $"/usync/version/?u={addOnInfo.Version}";
                     if (addOnInfo.AddOns.Any())
