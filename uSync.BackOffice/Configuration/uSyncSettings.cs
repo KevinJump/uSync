@@ -132,7 +132,7 @@ namespace uSync.BackOffice.Configuration
         ///  summerize results (for when there are loads and loads of items)
         /// </summary>
         [DefaultValue("false")]
-        public bool SummaryDashboard { get; set; } = true;
+        public bool SummaryDashboard { get; set; } = false;
 
         /// <summary>
         ///  limit of items to display before flicking to summary view. (this is per handler)
