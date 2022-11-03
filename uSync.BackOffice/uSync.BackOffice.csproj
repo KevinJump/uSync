@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net6.0</TargetFrameworks>
+		<TargetFrameworks>net7.0</TargetFrameworks>
 
 		<ContentTargetFolders>.</ContentTargetFolders>
 
@@ -19,8 +19,8 @@
 
 
 	<ItemGroup>
-		<PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="10.0.0" />
-		<PackageReference Include="Umbraco.Cms.Web.Website" Version="10.0.0" />
+		<PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="11.0.0-rc1" />
+		<PackageReference Include="Umbraco.Cms.Web.Website" Version="11.0.0-rc1" />
 		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
 	</ItemGroup>
 
@@ -36,11 +36,12 @@
 	</ItemGroup>
 
 	<!-- Package Validation -->
+	<!--
 	<PropertyGroup>
 		<EnablePackageValidation>true</EnablePackageValidation>
-		<PackageValidationBaselineVersion>10.0.0</PackageValidationBaselineVersion>
+		<PackageValidationBaselineVersion>11.0.0</PackageValidationBaselineVersion>
 		<EnableStrictModeForCompatibleFrameworksInPackage>true</EnableStrictModeForCompatibleFrameworksInPackage>
-		<EnableStrictModeForCompatibleTfms>true</EnableStrictModeForCompatibleTfms>
+		<EnableStrictModeForCompatibleTfms>true</EnableStrictModeForCompatibleTfms> -->
 		<!-- <GenerateCompatibilitySuppressionFile>true</GenerateCompatibilitySuppressionFile> -->
-	</PropertyGroup>
+	<!-- </PropertyGroup> -->
 </Project>
