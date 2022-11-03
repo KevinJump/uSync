@@ -65,6 +65,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CultureSortHealthCheck.cs" />
     <Compile Include="Extensions\ContentScheduleExtensions.cs" />
     <Compile Include="Extensions\EventMessageExtensions.cs" />
     <Compile Include="Extensions\MediaFolderExtensions.cs" />
