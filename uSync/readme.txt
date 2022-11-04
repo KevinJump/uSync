@@ -3,11 +3,11 @@
             |  ||  |`.  `-. \  '  / |      \| .--' 
             '  ''  '.-'    | \   '  |  ||  |\ `--. 
              `----' `-----'.-'  /   `--''--' `---' 
-                           `---'  v10.x            
+                           `---'  v11.x            
 
-               Welcome to uSync 10 for Umbraco 10
+               Welcome to uSync 11 for Umbraco 11
 
-   Thanks for Installing uSync 10, All the bits of your Umbraco settings 
+   Thanks for Installing uSync 11, All the bits of your Umbraco settings 
    and content will now be saved to disk.
 
    Repo   : https://github.com/KevinJump/uSync/tree/v10/dev
