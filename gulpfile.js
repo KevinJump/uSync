@@ -12,7 +12,7 @@ const sourceFolders = [
 
 const pluginName = 'uSync';
 const destination = 'uSync.Site/App_Plugins/uSync';
-const minDest = 'uSync.BackOffice.Assets/wwwroot/';
+const minDest = 'uSync.BackOffice.Assets/wwwroot/uSync';
 
 // fetch command line arguments
 const arg = (argList => {
@@ -124,7 +124,7 @@ exports.minify = function (cb) {
 
         minifyJs(jsfiles, version);
         minifyCss(cssFiles, version);
-        updateManifest(sourceFolder + "/package.manifest", version);
+        // updateManifest(sourceFolder + "/package.manifest", version);
         copyRequired(source, sourceFolder, minDest);
         copySpecific(sourceFolder + '**/nonodes.css', sourceFolder, minDest);
     });
