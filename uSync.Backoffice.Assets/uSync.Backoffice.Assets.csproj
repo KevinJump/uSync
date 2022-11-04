@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<TargetFramework>net7.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
-		<StaticWebAssetBasePath>App_Plugins/uSync</StaticWebAssetBasePath>
+		<StaticWebAssetBasePath>App_Plugins</StaticWebAssetBasePath>
 		<AddRazorSupportForMvc>true</AddRazorSupportForMvc>
 	</PropertyGroup>
 
@@ -22,7 +22,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="7.0.0-rc.2.22476.2" />
-		<PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="11.0.0-rc1" />
+		<PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="11.0.0-rc3" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -34,5 +34,9 @@
 			<Pack>true</Pack>
 			<PackagePath>buildTransitive</PackagePath>
 		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="wwwroot\" />
 	</ItemGroup>
 </Project>
