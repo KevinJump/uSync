@@ -36,5 +36,10 @@ namespace uSync.BackOffice.Controllers
         /// </summary>
         public IEnumerable<uSyncAction> Actions { get; set; }
 
+        /// <summary>
+        ///  the folder (has to be in the uSync folder) you want to import
+        /// </summary>
+        public string Folder { get; set; }
+
     }
 }
