@@ -152,7 +152,8 @@
         function reportHandler(handler, options, clientId) {
             return $http.post(serviceRoot + 'ReportHandler', {
                 handler: handler,
-                clientId: clientId
+                clientId: clientId,
+                folder: options.folder
             });
         }
 
@@ -161,7 +162,8 @@
                 handler: handler,
                 clientId: clientId,
                 force: options.force,
-                set: options.set
+                set: options.set,
+                folder: options.folder
             });
         }
 
@@ -169,7 +171,8 @@
             return $http.post(serviceRoot + 'ImportPost', {
                 actions: actions,
                 clientId: clientId,
-                set: options.set
+                set: options.set,
+                folder: options.folder
             });
         }
 
@@ -177,7 +180,8 @@
             return $http.post(serviceRoot + 'ExportHandler', {
                 handler: handler,
                 clientId: clientId,
-                set: options.set
+                set: options.set,
+                folder: options.folder
             });
         }
 
