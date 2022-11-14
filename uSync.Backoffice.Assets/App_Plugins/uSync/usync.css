@@ -562,3 +562,14 @@ ul.usync-action-list {
         color: #555;
         font-style: italic;
     }
+
+
+    .usync-table-header {
+        background-color: #fafafa;
+    }
+
+    .usync-table-detail {
+        background-color: #fff;
+        border: 1px solid #eee;
+        border-top: none;
+    }
