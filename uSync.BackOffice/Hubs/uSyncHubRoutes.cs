@@ -28,7 +28,8 @@ namespace uSync.BackOffice.Hubs
             IRuntimeState runtimeState)
         {
             _runtimeState = runtimeState;
-            _umbracoPathSegment = globalSettings.Value.GetUmbracoMvcArea(hostingEnvironment);
+            // _umbracoPathSegment = globalSettings.Value.GetUmbracoMvcArea(hostingEnvironment);
+            _umbracoPathSegment = "__uSync__";
         }
 
         /// <summary>
