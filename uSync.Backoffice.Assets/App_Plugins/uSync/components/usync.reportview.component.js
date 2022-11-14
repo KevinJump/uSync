@@ -30,9 +30,13 @@
         vm.openDetail = openDetail;
         vm.showAll = vm.showAll || false;
 
+        vm.groups = [];
+
         vm.$onInit = function () {
             vm.hideLink = vm.hideLink ? true : false;
             vm.hideAction = vm.hideAction ? true : false;
+
+            vm.groups = groupChanges(vm.results);
         };
 
 
@@ -184,6 +188,40 @@
         function status(item) {
             if (item.applyState === undefined) return 'init';
             return item.applyState;
+        }
+
+        // group changes. 
+        function groupChanges(results) {
+
+            vm.groupInfo = [];
+
+            var grouped = _.groupBy(results, function (result) {
+                return result.itemType;
+            });
+
+            _.forEach(grouped, function (group, key) {
+                vm.groupInfo[key] = {
+                    visible: false,
+                    icon: getGroupIcon(group),
+                    changes: countChanges(group),
+                    count: group.length
+                };
+            });
+
+            return grouped;
+        } 
+
+        function getGroupIcon(group) {
+            _.forEach(group, function (item) {
+                if (!item.success) {
+                    return "icon-delete color-red";
+                }
+                else if (hasFailedDetail(item.details)) {
+                    return "icon-alert color-yellow";
+                }
+            });
+
+            return "icon-check color-green";
         }
 
     }
