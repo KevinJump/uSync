@@ -21,8 +21,8 @@
 	</Target>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="7.0.0-rc.2.22476.2" />
-		<PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="11.0.0-rc3" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="7.0.0" />
+		<PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="11.0.0-rc4" />
 	</ItemGroup>
 
 	<ItemGroup>
