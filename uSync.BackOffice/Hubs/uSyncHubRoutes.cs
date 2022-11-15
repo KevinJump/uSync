@@ -9,6 +9,8 @@ using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Web.Common.Routing;
 using Umbraco.Extensions;
 
+using uSync.BackOffice.Configuration;
+
 namespace uSync.BackOffice.Hubs
 {
     /// <summary>
@@ -23,13 +25,21 @@ namespace uSync.BackOffice.Hubs
         ///  Constructor (called via DI)
         /// </summary>
         public uSyncHubRoutes(
+            IOptions<uSyncSettings> uSyncSettings,
             IOptions<GlobalSettings> globalSettings,
             IHostingEnvironment hostingEnvironment,
             IRuntimeState runtimeState)
         {
             _runtimeState = runtimeState;
-            // _umbracoPathSegment = globalSettings.Value.GetUmbracoMvcArea(hostingEnvironment);
-            _umbracoPathSegment = "__uSync__";
+
+            if (!string.IsNullOrWhiteSpace(uSyncSettings.Value?.SignalRRoot))
+            {
+                _umbracoPathSegment = uSyncSettings.Value.SignalRRoot;
+            }
+            else
+            {
+                _umbracoPathSegment = globalSettings.Value.GetUmbracoMvcArea(hostingEnvironment);
+            }
         }
 
         /// <summary>
