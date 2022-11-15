@@ -3,7 +3,7 @@ using System.IO;
 using System.Threading.Tasks;
 using CommandLine;
 
-namespace uSync.SchemaGenerator
+namespace uSync
 {
     /// <summary>
     ///  Generate the JSON Schema file for uSync. 

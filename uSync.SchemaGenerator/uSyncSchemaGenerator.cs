@@ -12,7 +12,7 @@ using Newtonsoft.Json.Serialization;
 
 using NJsonSchema.Generation;
 
-namespace uSync.SchemaGenerator
+namespace uSync
 {
     internal class uSyncSchemaGenerator
     {

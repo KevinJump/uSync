@@ -1,18 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using CommandLine;
 
-using CommandLine;
-
-namespace uSync.SchemaGenerator
+namespace uSync
 {
     internal class Options
     {
         [Option('o', "outputFile", Required = false,
             HelpText = "",
-            Default = "..\\uSync.Backoffice.Assets\\wwwroot\\config\\appsettings-usync-schema.json")]
+            Default = "..\\uSync.Backoffice.Targets\\appsettings-schema.usync.json")]
         public string OutputFile { get; set; }
     }
 }

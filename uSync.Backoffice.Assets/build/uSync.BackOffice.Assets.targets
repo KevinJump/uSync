@@ -10,6 +10,15 @@
 		<Message Importance="high" Text="Removing legacy uSync9 App_Plugins files" />
 		<RemoveDir Directories="@(uSyncPackageFolder)" ContinueOnError="true"></RemoveDir>
 	</Target>
+	
+	<!-- copy the schema file, inject the schema! -->
+	<Target Name="CopyuSyncAppSettingsSchema" AfterTargets="CopyAppsettingsSchema">
+		<ItemGroup>
+			<_uSyncSchemaFiles Include="$(MSBuildThisFileDirectory)..\appsettings-schema.usync.json"></_uSyncSchemaFiles>
+		</ItemGroup>
+		<Message Text="Copying appsettings-schema.usync.json file"></Message>
+		<Copy SourceFiles="@(_uSyncSchemaFiles)" DestinationFolder="$(MSBuildProjectDirectory)" SkipUnchangedFiles="true" />
+	</Target>
 
 	<ItemGroup>
 		<Content Remove="uSync/**" />

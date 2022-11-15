@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+	<PropertyGroup>
+		<_sourceSchema>$(MSBuildThisFileDirectory)..\schema\appsettings-schema.usync.json</_sourceSchema>
+		<_targetSchema>$(MSBuildProjectDirectory)\appsettings-schema.json</_targetSchema>
+		<_targetFolder>$(MSBuildProjectDirectory)</_targetFolder>
+	</PropertyGroup>
+
+	<!--It is generated a target which is executed before the compilation-->
+	<Target Name="uSyncSchemaInject" AfterTargets="CopyAppsettingsSchema">
+		<!--Calling our custom task-->
+		<Message Importance="High" Text="Adding uSync settings to appsettings-schema.json" />
+
+		<Copy SourceFiles="$(_sourceSchema)" DestinationFolder="$(_targetFolder)" />
+		<InsertuSyncSchemaReference
+			Name="uSync"
+			Reference="appsettings-schema.usync.json#/definitions/USyncuSyncDefinition"
+			TargetFile="$(_targetSchema)"/>
+	</Target>
+
+	<Target Name="CopyProjectReferencesToPackage" DependsOnTargets="ResolveReferences">
+		<ItemGroup>
+			<!-- The dependencies of your MSBuild task must be packaged inside the package, they cannot be expressed as normal PackageReferences -->
+			<BuildOutputInPackage Include="@(ReferenceCopyLocalPaths)" TargetPath="%(ReferenceCopyLocalPaths.DestinationSubPath)" />
+		</ItemGroup>
+	</Target>
+
+	<!-- This target adds the generated deps.json file to our package output -->
+	<Target Name="AddBuildDependencyFileToBuiltProjectOutputGroupOutput" BeforeTargets="BuiltProjectOutputGroup" Condition=" '$(GenerateDependencyFile)' == 'true'">
+
+		<ItemGroup>
+			<BuiltProjectOutputGroupOutput Include="$(ProjectDepsFilePath)" TargetPath="$(ProjectDepsFileName)" FinalOutputPath="$(ProjectDepsFilePath)" />
+		</ItemGroup>
+	</Target>
+</Project>
