@@ -95,7 +95,7 @@ namespace uSync.Core.Serialization.Serializers
                     }
                     else
                     {
-                        if (!options.GetSetting<bool>("UsingRazorViews", false))
+                        if (!ViewsAreCompiled(options))
                         {
                             // template is missing
                             // we can't create 
@@ -178,7 +178,7 @@ namespace uSync.Core.Serialization.Serializers
             {
                 if (node.Element("Contents") != null)
                 {
-                    if (_configuration.IsUmbracoRunningInProductionMode())
+                    if (ViewsAreCompiled(options))
                     {
                         logger.LogDebug("Template contents will not be imported because site is running in Production mode");
                         return false;
@@ -241,7 +241,7 @@ namespace uSync.Core.Serialization.Serializers
                 }
             }
 
-            if (options.GetSetting("UsingRazorViews", false))
+            if (ViewsAreCompiled(options))
             {
                 // using razor views - we delete the template file at the end (because its in a razor view). 
                 var templatePath = ViewPath(item.Alias);
@@ -342,5 +342,9 @@ namespace uSync.Core.Serialization.Serializers
 
         private string ViewPath(string alias)
             => _viewFileSystem.GetRelativePath(alias.Replace(" ", "") + ".cshtml");
+
+        private bool ViewsAreCompiled(SyncSerializerOptions options)
+            => _configuration.IsUmbracoRunningInProductionMode()
+                || options.GetSetting("UsingRazorViews", false);
     }
 }
