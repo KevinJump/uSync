@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 using uSync.BackOffice.Configuration;
 
-namespace uSync.SchemaGenerator
+namespace uSync
 {
     internal class AppSettings
     {

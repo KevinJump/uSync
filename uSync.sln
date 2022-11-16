@@ -31,7 +31,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.SchemaGenerator", "uS
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.Backoffice.Assets", "uSync.Backoffice.Assets\uSync.Backoffice.Assets.csproj", "{4ECC3DFD-5BCB-4095-8D06-DE482DF4C6A1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "uSync.Site", "uSync.Site\uSync.Site.csproj", "{0A1CBCE0-4EBA-4C76-BE08-CAAD33A76540}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.Site", "uSync.Site\uSync.Site.csproj", "{0A1CBCE0-4EBA-4C76-BE08-CAAD33A76540}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
