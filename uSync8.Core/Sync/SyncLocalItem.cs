@@ -1,5 +1,7 @@
 ﻿using Newtonsoft.Json.Serialization;
 using Newtonsoft.Json;
+
+using System;
 using System.Collections.Generic;
 
 using Umbraco.Core;
@@ -40,7 +42,18 @@ namespace uSync8.Core.Sync
         ///  when variants are present the user can be presented with 
         ///  the option of what languages they want to sync.
         /// </remarks>
+        [Obsolete("Use All Variants when returning variants so we know whas is avalible.")]
         public Dictionary<string, string> Variants { get; set; }
+
+        /// <summary>
+        ///  details of all variants, 
+        /// </summary>
+        /// <remarks>
+        ///  tells us if the variant exists is published or not, allows us to show 
+        ///  the unpublished variants in the UI and more importantly tell if they 
+        ///  exist. 
+        /// </remarks>
+        public Dictionary<string, SyncVariantInfo> AllVariants { get; set; }
 
         /// <summary>
         ///  Syncing of this item requires that the files be synced. 
@@ -70,6 +83,13 @@ namespace uSync8.Core.Sync
         {
             Id = id.ToString();
         }
+    }
+
+    [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
+    public class SyncVariantInfo
+    {
+        public string Name { get; set; }
+        public bool Published { get; set; }
     }
 
 }
