@@ -23,24 +23,21 @@
         var vm = this;
 
         vm.showChange = showChange;
-        vm.getIcon = getIcon;
         vm.getChangeClass = getChangeClass;
-        vm.getTypeName = getTypeName;
-        vm.countChanges = countChanges;
         vm.openDetail = openDetail;
         vm.showAll = vm.showAll || false;
 
         vm.groups = [];
+        vm.totals = {};
 
         vm.$onInit = function () {
             vm.hideLink = vm.hideLink ? true : false;
             vm.hideAction = vm.hideAction ? true : false;
 
-            vm.groups = groupChanges(vm.results);
+            vm.groups = groupCounts(vm.results);
+            vm.totals = getCounts(vm.results, true);
         };
 
-
-        vm.apply = apply;
         vm.status = status;
 
         /////////
@@ -107,20 +104,9 @@
 
         function getTypeName(typeName) {
             if (typeName !== undefined) {
-                return typeName.substring(typeName.lastIndexOf('.') + 1);
+                return typeName.substring(1);
             }
             return "??";
-        }
-
-        function countChanges(changes) {
-            var count = 0;
-            angular.forEach(changes, function (val, key) {
-                if (val.change !== 'NoChange') {
-                    count++;
-                }
-            });
-
-            return count;
         }
 
         function openDetail(item) {
@@ -128,6 +114,7 @@
             var options = {
                 item: item,
                 title: 'uSync Change',
+                showApply: !vm.hideAction,
                 view: Umbraco.Sys.ServerVariables.application.applicationPath + "App_Plugins/uSync/changedialog.html",
                 close: function () {
                     editorService.close();
@@ -136,22 +123,12 @@
             editorService.open(options);
         }
 
-        function apply(item) {
-
-            // do some application thing (apply just one item)
-            item.applyState = 'busy';
-            uSync8DashboardService.importItem(item)
-                .then(function (result) {
-                    item.applyState = 'success';
-                }, function (error) {
-                    console.error(error);
-                    item.applyState = 'error';
-                });
-        }
-
         vm.select = select;
 
-        function select(item) {
+        function select(item, $event) {
+
+            $event.stopPropagation();
+
             if (vm.allowSelect && vm.selection !== undefined) {
                 var index = _.findIndex(vm.selection,
                     (x) => (x.key == item.key && x.name == item.name)
@@ -191,7 +168,7 @@
         }
 
         // group changes. 
-        function groupChanges(results) {
+        function groupCounts(results) {
 
             vm.groupInfo = [];
 
@@ -203,13 +180,71 @@
                 vm.groupInfo[key] = {
                     visible: false,
                     icon: getGroupIcon(group),
-                    changes: countChanges(group),
-                    count: group.length
+                    counts: getCounts(group),
+                    name = key.substring(1) + "s"
                 };
             });
 
             return grouped;
         } 
+
+        function getCounts(group, addItemInfo) {
+
+            var counts = {
+                total: group.length,
+                changes: 0,
+                updates: 0,
+                deletes: 0,
+                imports: 0,
+                exports: 0,
+                infos: 0,
+                errors: 0,
+                noChange: 0
+            };
+
+            _.forEach(group, function (item) {
+
+
+                switch (item.change) {
+                    case 'NoChange':
+                        counts.noChange++;
+                        break;
+                    case 'Update':
+                        counts.updates++;
+                        break;
+                    case 'Delete':
+                        counts.deletes++;
+                        break;
+                    case 'Import':
+                        counts.imports++;
+                        break;
+                    case 'Export':
+                        counts.exports++;
+                        break;
+                    case 'Information':
+                        counts.infos++;
+                        break;
+                    default:
+                        counts.errors++;
+                }
+
+                if (addItemInfo) {
+                    item._icon = getIcon(item);
+                    item._typename = getTypeName(item.itemType);
+                }
+            });
+
+            // or changes.changes = changes.total - changes.noChange; // ??
+            counts.changes =
+                counts.updates +
+                counts.deletes +
+                counts.imports +
+                counts.exports +
+                counts.infos +
+                counts.exports;
+
+            return counts;                
+        }
 
         function getGroupIcon(group) {
             _.forEach(group, function (item) {

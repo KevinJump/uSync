@@ -1,0 +1,25 @@
+﻿<div>
+    <div ng-if="!model.done">
+        <localize key="usync_apply-intro"></localize>
+    </div>
+
+    <div ng-if="model.done">
+        <div ng-if="model.success">
+
+            <h4 ng-if="model.item._result.success">
+                <localize key="usync_apply-success"></localize>
+            </h4>
+            <h4 ng-if="!model.item._result.success">
+                <localize key="usync_apply-failure"></localize>
+            </h4>
+
+            <div class="mt2 p2"
+                 ng-class="{ 'color-red' : !model.item._result.success}">
+                {{model.item._result.message}}
+            </div>
+        </div>
+        <div ng-if="!model.success">
+            <localize key="usync_apply-failure"></localize>
+        </div>
+    </div>
+</div>

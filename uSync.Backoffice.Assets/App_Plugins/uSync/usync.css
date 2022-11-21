@@ -573,3 +573,64 @@ ul.usync-action-list {
         border: 1px solid #eee;
         border-top: none;
     }
+
+.usync-summaries {
+}
+
+.usync-summary {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px;
+    border: 1px solid #eee;
+    cursor: pointer;
+}
+
+    .usync-summary:hover {
+        background-color: #ededed;
+    }
+
+    .usync-summary-group.active .usync-summary {
+        background-color: #fafafa;
+    }
+
+
+
+.usync-summary-icon {
+    flex: 0 0 25px
+}
+
+.usync-summary-type {
+    flex-basis: 25%;
+    flex-grow: 1;
+}
+
+.usync-summary-number {
+    display: flex;
+}
+
+    .usync-summary-number > div {
+        padding: 0 5px;
+    }
+
+        .usync-summary-number > div:first-child {
+            width: 60px;
+            text-align: right;
+        }
+
+        .usync-summary-number > div:last-child {
+            color: #cacaca;
+        }
+
+.usync-summary-expand {
+    display: flex;
+    align-items: center;
+}
+
+.usync-summary-expand .icon {
+    color: #cacaca;
+    display: block;
+}
+
+.usync-summary-expand.active .icon {
+    transform: rotateX(180deg);
+}
