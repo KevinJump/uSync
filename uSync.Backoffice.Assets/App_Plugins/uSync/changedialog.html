@@ -10,6 +10,14 @@
             <umb-box>
                 <umb-box-header title="{{vm.item.name}}"
                                 description="{{vm.getTypeName(vm.item.itemType)}} {{vm.item.message}}">
+
+                    <umb-button type="button"
+                                button-style="action btn-sm"
+                                label-key="usync_apply"
+                                action="vm.apply(vm.item)"
+                                ng-if="vm.showApply == true"
+                    </umb-button>
+
                 </umb-box-header>
                 <umb-box-container>
                     <umb-box-content>
@@ -38,7 +46,9 @@
                                     </div>
                                     <div class="umb-table-body">
                                         <div ng-repeat="detail in vm.item.details" class="umb-table-row"
-                                             ng-class="{'usync-row-delete': detail.change == 'Delete', 'usync-row-create' : detail.change == 'Create', 'usync-row-warn' }">
+                                             ng-class="{'usync-row-delete': detail.change == 'Delete', 
+                                             'usync-row-create' : detail.change == 'Create', 
+                                             'usync-row-warn' : detail.change == 'Error' }">
                                             <div class="umb-table-cell">
                                                 <i ng-if="detail.change == 'Create'" class="icon icon-add color-green"></i>
                                                 <i ng-if="detail.change == 'NoChange'" class="icon icon-check color-green"></i>

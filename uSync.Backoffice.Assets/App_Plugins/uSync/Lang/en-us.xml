@@ -91,6 +91,9 @@
 		<key alias="godo3">Go for a nice walk outside 🌲 🦆</key>
 		<key alias="godo4">You deserve a break</key>
 
+		<key alias="apply-intro">Applying individual changes can cause issues if the dependencies of this item are not already in sync.</key>
+		<key alias="apply-success">Import complete</key>
+		<key alias="apply-failure">Import failed</key>
 	</area>
 	<area alias="dashboardTabs">
 		<key alias="usync">uSync</key>
