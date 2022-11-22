@@ -6,7 +6,7 @@ namespace uSync
     {
         [Option('o', "outputFile", Required = false,
             HelpText = "",
-            Default = "..\\uSync.Backoffice.Targets\\appsettings-schema.usync.json")]
+            Default = "..\\uSync.Backoffice.Assets\\appsettings-schema.usync.json")]
         public string OutputFile { get; set; }
     }
 }
