@@ -27,7 +27,7 @@
 				<dependency id="Microsoft.AspNet.SignalR.Core" version="2.4.0"/>
 			</group>
 		</dependencies>
-		<tags>umbraco usync</tags>
+		<tags>umbraco usync umbraco-marketplace</tags>
 		<repository type="git" url="https://github.com/KevinJump/uSync" />
 	</metadata>
 	<files>
