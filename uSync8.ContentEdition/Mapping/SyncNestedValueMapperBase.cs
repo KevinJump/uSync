@@ -124,7 +124,7 @@ namespace uSync8.ContentEdition.Mapping
         /// </summary>
         protected uSyncDependency CreateDocTypeDependency(string alias, DependencyFlags flags)
         {
-            var item = contentTypeService.Get(alias);
+            var item = SyncValueMapperFactory.EnityCache.GetContentType(alias);
             if (item != null)
             {
                 return CreateDocTypeDependency(item, flags);
@@ -184,7 +184,7 @@ namespace uSync8.ContentEdition.Mapping
                 var attempt = json[keyAlias].TryConvertTo<Guid>();
                 if (attempt.Success)
                 {
-                    return contentTypeService.Get(attempt.Result);
+                    return SyncValueMapperFactory.EnityCache.GetContentType(attempt.Result);
                 }
             }
 
@@ -194,7 +194,7 @@ namespace uSync8.ContentEdition.Mapping
         protected IContentType GetDocType(string alias)
         {
             if (string.IsNullOrWhiteSpace(alias)) return default;
-            return contentTypeService.Get(alias);
+            return SyncValueMapperFactory.EnityCache.GetContentType(alias);
         }
 
 
