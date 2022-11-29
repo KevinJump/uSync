@@ -16,7 +16,7 @@ namespace uSync.Core.Mapping
 {
     public class BlockListMapper : SyncNestedJsonValueMapperBase, ISyncMapper
     {
-        private readonly string docTypeKeyAlias = BlockEditorPropertyEditor.ContentTypeKeyPropertyKey;
+        private readonly string docTypeKeyAlias = "contentTypeKey"; //  BlockEditorPropertyEditor.ContentTypeKeyPropertyKey;
         private readonly string[] contentBlocks = new string[]
         {
             "contentData", "settingsData"
