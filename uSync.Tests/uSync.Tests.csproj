@@ -9,15 +9,15 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0-preview-20221003-04" /> 
 		<PackageReference Include="NUnit" Version="3.13.3" />
-		<PackageReference Include="NUnit3TestAdapter" Version="4.3.0" />
+		<PackageReference Include="NUnit3TestAdapter" Version="4.3.1" />
 		<PackageReference Include="coverlet.collector" Version="3.2.0">
 		  <PrivateAssets>all</PrivateAssets>
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Umbraco.Cms.Tests" Version="11.0.0-rc4" />
-		<PackageReference Include="Umbraco.Cms.Tests.Integration" Version="11.0.0-rc4" />
+		<PackageReference Include="Umbraco.Cms.Tests" Version="11.0.0-rc5" />
+		<PackageReference Include="Umbraco.Cms.Tests.Integration" Version="11.0.0-rc5" />
 
-		<PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="11.0.0-rc4" />
+		<PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="11.0.0-rc5" />
 
 	</ItemGroup>
 
