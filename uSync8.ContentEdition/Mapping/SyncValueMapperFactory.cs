@@ -5,6 +5,7 @@ using System.Linq;
 using Umbraco.Core;
 using Umbraco.Core.Composing;
 
+using uSync8.Core.Cache;
 using uSync8.Core.Dependency;
 
 namespace uSync8.ContentEdition.Mapping
@@ -59,6 +60,9 @@ namespace uSync8.ContentEdition.Mapping
                     .GetInstance<SyncValueMapperCollection>()
                     .GetImportValue(value, propertyMapInfo);
         }
+
+        public static SyncEntityCache EnityCache =>
+            Current.Factory.GetInstance<SyncValueMapperCollection>().EntityCache;
 
         public static IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)
         {
