@@ -12,7 +12,7 @@
 		<Message Importance="high" Text="&gt;&gt;&gt; Cleaning version files $(ProjectDir)wwwroot\*.min.*" />
 
 		<ItemGroup>
-			<FilesToDelete Include="$(ProjectDir)wwwroot\usync.*.min.*" />
+			<FilesToDelete Include="$(ProjectDir)wwwroot\**\usync.*.min.*" />
 		</ItemGroup>
 		<Delete Files="@(FilesToDelete)" />
 		
