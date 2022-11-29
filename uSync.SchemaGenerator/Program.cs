@@ -3,6 +3,8 @@ using System.IO;
 using System.Threading.Tasks;
 using CommandLine;
 
+using NPoco.fastJSON;
+
 namespace uSync
 {
     /// <summary>
@@ -28,7 +30,11 @@ namespace uSync
         private static async Task Execute(Options options)
         {
             var generator = new uSyncSchemaGenerator();
-            var schema = generator.Generate();
+            // very specific, for uSync we want everything but the first element
+            // to be upper cased, it doesn't really matter but it looks "right"
+
+            var schema = generator.Generate()
+                .Replace("\"USync\"", "\"uSync\"");
 
             var path = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, options.OutputFile));
             Console.WriteLine("Path to use {0}", path);

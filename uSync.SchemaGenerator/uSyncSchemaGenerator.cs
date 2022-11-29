@@ -20,7 +20,8 @@ namespace uSync
 
         public uSyncSchemaGenerator()
         {
-            _schemaGenerator = new JsonSchemaGenerator(new uSyncSchemaGeneratorSettings());
+            _schemaGenerator = new JsonSchemaGenerator(
+                new uSyncSchemaGeneratorSettings());
         }
 
         public string Generate() 
