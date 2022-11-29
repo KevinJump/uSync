@@ -5,6 +5,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<EnableDefaultContentItems>false</EnableDefaultContentItems>
+		<NoWarn>NU5100;NU5128</NoWarn>
 	</PropertyGroup>
 
 	<PropertyGroup>
