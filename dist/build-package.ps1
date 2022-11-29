@@ -69,6 +69,8 @@ dotnet pack ..\uSync.BackOffice\uSync.BackOffice.csproj  --no-build  --no-restor
 
 dotnet pack ..\uSync.AutoTemplates\uSync.AutoTemplates.csproj --no-build --no-restore -c $env -o $outFolder /p:$buildParams
 
+dotnet pack ..\uSync.BackOffice.Targets\uSync.BackOffice.Targets.csproj --no-build --no-restore -c $env -o $outFolder /p:$buildParams
+
 dotnet pack ..\uSync\uSync.csproj  --no-build  --no-restore -c $env -o $outFolder /p:$buildParams
 # .\nuget pack "..\uSync\uSync.nuspec" -version $fullVersion -OutputDirectory $outFolder
 

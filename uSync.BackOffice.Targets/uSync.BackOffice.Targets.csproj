@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<EnableDefaultContentItems>false</EnableDefaultContentItems>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<IncludeBuildOutput>false</IncludeBuildOutput>
+		<IncludeSymbols>false</IncludeSymbols>	
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Content Include="buildTransitive\**" PackagePath="buildTransitive" />
+		<Content Include="appsettings-schema.usync.json" PackagePath="" />
+	</ItemGroup>
+
+</Project>
