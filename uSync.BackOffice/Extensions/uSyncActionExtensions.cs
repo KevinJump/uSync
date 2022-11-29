@@ -36,8 +36,10 @@ namespace uSync.BackOffice
                 actions.InvariantContains("all") ||
                 actions.InvariantContains(requestedAction.ToString());
 
-
-        public static IEnumerable<uSyncAction> ConvertToSummary(this IEnumerable<uSyncAction> actions, bool strict)
+        /// <summary>
+        ///  Convert a list of actions into a summary list of actions, uses less cpu when people sync massive amounts of content.
+        /// </summary>
+       public static IEnumerable<uSyncAction> ConvertToSummary(this IEnumerable<uSyncAction> actions, bool strict)
         {
             var summary = new List<uSyncAction>();
 
