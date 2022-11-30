@@ -126,7 +126,7 @@ namespace uSync.Core.Mapping
         /// </summary>
         protected uSyncDependency CreateDocTypeDependency(string alias, DependencyFlags flags)
         {
-            var item = contentTypeService.Get(alias);
+            var item = GetDocType(alias);
             if (item != null)
             {
                 return CreateDocTypeDependency(item, flags);
@@ -182,7 +182,8 @@ namespace uSync.Core.Mapping
                 var attempt = json[keyAlias].TryConvertTo<Guid>();
                 if (attempt.Success)
                 {
-                    return contentTypeService.Get(attempt.Result);
+                    return mapperCollection.Value?.EntityCache.GetContentType(attempt.Result) 
+                         ?? contentTypeService.Get(attempt.Result);
                 }
             }
 
@@ -192,7 +193,8 @@ namespace uSync.Core.Mapping
         protected IContentType GetDocType(string alias)
         {
             if (string.IsNullOrWhiteSpace(alias)) return default;
-            return contentTypeService.Get(alias);
+            return mapperCollection.Value?.EntityCache.GetContentType(alias) 
+                ?? contentTypeService.Get(alias);
         }
 
 
