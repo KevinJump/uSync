@@ -24,14 +24,19 @@ namespace uSync.Core.Cache
         private readonly DictionaryAppCache cache = new DictionaryAppCache();
         private readonly DictionaryAppCache keyCache = new DictionaryAppCache();
         private readonly DictionaryAppCache nameCache = new DictionaryAppCache();
+        private readonly DictionaryAppCache docTypeCache = new DictionaryAppCache();
 
         private readonly IEntityService entityService;
+        private readonly IContentTypeService _contentTypeService;
 
         private bool _cacheEnabled;
 
-        public SyncEntityCache(IEntityService entityService)
+        public SyncEntityCache(
+            IEntityService entityService,
+            IContentTypeService contentTypeService)
         {
             this.entityService = entityService;
+            _contentTypeService = contentTypeService;
             this._cacheEnabled = true;
         }
         public CachedName GetName(int id)
@@ -133,8 +138,6 @@ namespace uSync.Core.Cache
                 return null;
             }
         }
-
-
         public IEnumerable<IEntitySlim> GetAll(UmbracoObjectTypes objectType, int[] ids)
         {
             if (!_cacheEnabled) return entityService.GetAll(objectType, ids);
@@ -167,11 +170,26 @@ namespace uSync.Core.Cache
             return items;
         }
 
+
+        public IContentType GetContentType(string alias)
+        {
+            if (!_cacheEnabled) return _contentTypeService.Get(alias);
+
+            return docTypeCache.GetCacheItem(alias, () => _contentTypeService.Get(alias));
+        }
+
+        public IContentType GetContentType(Guid id) 
+        {
+            if (!_cacheEnabled) return _contentTypeService.Get(id);
+            return docTypeCache.GetCacheItem(id.ToString(), () => _contentTypeService.Get(id));
+        }
+
         public void Clear()
         {
             cache.Clear();
             keyCache.Clear();
             nameCache.Clear();
+            docTypeCache.Clear();
         }
     }
 }
