@@ -1,4 +1,6 @@
 ﻿
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -125,5 +127,8 @@ namespace uSync.Core
             if (!attempt) return default;
             return attempt.Result;
         }
+
+        public static bool IsAngularExpression(this string value)
+            => value.StartsWith("{{") && value.EndsWith("}}");
     }
 }
