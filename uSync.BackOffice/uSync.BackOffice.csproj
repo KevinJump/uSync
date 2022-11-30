@@ -9,7 +9,7 @@
 		<PackageId>uSync.BackOffice</PackageId>
 		<Title>uSync.BackOffice</Title>
 
-		<Description>Core serializers for uSync to read / write information to / from Umbraco CMS.</Description>
+		<Description>Umbraco Backoffice and Events for uSync.</Description>
 
 	</PropertyGroup>
 

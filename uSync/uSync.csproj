@@ -22,7 +22,7 @@
 		<RepositoryUrl>https://github.com/KevinJump/uSync</RepositoryUrl>
 
 		<Copyright>Jumoo @ 2013-2021</Copyright>
-		<Description>Core serializers for uSync to read / write information to / from Umbraco CMS.</Description>
+		<Description>Sync Umbraco to and from disk and between instances</Description>
 
 		<EmbedUntrackedSources>true</EmbedUntrackedSources>
 		<IncludeSymbols>false</IncludeSymbols>

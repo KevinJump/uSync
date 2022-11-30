@@ -16,12 +16,15 @@
 		<PackageIcon>usync-logo.png</PackageIcon>
 
 		<PackageReleaseNotes>
-	<![CDATA[9.0 - Dotnet core version
-9.1 - Net 5/6 targets
-9.2 - Peformance improvements
-9.3 - Single pass
-9.4 - First boot
-10 - Umbraco 10 version]]>
+	<![CDATA[9.0 : Dotnet core version
+ - 9.1 : Net 5/6 targets
+ - 9.2 : Peformance improvements
+ - 9.3 : Single pass
+ - 9.4 : First boot
+10.0 : Umbraco 10 release
+ - 10.1 : Umbraco 'Production' mode support
+ - 10.2 : Upload / Download Syncs
+11.0 : Umbraco 11 release]]>
 		</PackageReleaseNotes>
 
 		<EmbedUntrackedSources>true</EmbedUntrackedSources>
