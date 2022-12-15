@@ -21,7 +21,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\uSync.BackOffice\uSync.BackOffice.csproj" />
+		<PackageReference Include="uSync.BackOffice" Version="10.0.0" />
+		<!-- <ProjectReference Include="..\uSync.BackOffice\uSync.BackOffice.csproj" /> -->
 	</ItemGroup>
 
 </Project>
