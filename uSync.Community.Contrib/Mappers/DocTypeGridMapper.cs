@@ -86,7 +86,7 @@ namespace uSync8.Community.Contrib.Mappers
             // then a nested content, but not by much.
             GetExportJsonValues(docValue, docType);
 
-            return JsonConvert.SerializeObject(jsonValue, Formatting.Indented);
+            return JsonConvert.SerializeObject(jsonValue.ExpandAllJsonInToken(true), Formatting.Indented);
         }
 
         private JObject GetExportJsonValues(JObject item, IContentType docType)
@@ -130,7 +130,7 @@ namespace uSync8.Community.Contrib.Mappers
                 // then a nested content, but not by much.
                 GetImportJsonValue(docValue, docType);
 
-                return JsonConvert.SerializeObject(jsonValue, Formatting.Indented);
+                return JsonConvert.SerializeObject(jsonValue.ExpandAllJsonInToken(true), Formatting.Indented);
             }
             catch (Exception ex)
             {
@@ -149,7 +149,7 @@ namespace uSync8.Community.Contrib.Mappers
                 if (item.ContainsKey(property.Alias))
                 {
                     var value = item[property.Alias];
-                    if (value != null)
+                    if (value != null && value.HasValues)
                     {
                         var mappedVal = mapperCollection.Value.GetImportValue(value.ToString(), property.PropertyEditorAlias).ToString();
                         item[property.Alias] = mappedVal.GetJsonTokenValue().ExpandAllJsonInToken();
