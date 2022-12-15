@@ -35,11 +35,14 @@ namespace uSync.Core
             }
         }
 
+        public static JToken ExpandAllJsonInToken(this JToken token)
+            => ExpandAllJsonInToken(token, false);
+
         /// <summary>
         ///  Will recurse through a JToken value, and expand and child values that may contain escaped 
         ///  JSON (in the GRID all the json is true).
         /// </summary>
-        public static JToken ExpandAllJsonInToken(this JToken token)
+        public static JToken ExpandAllJsonInToken(this JToken token, bool fullStringExpansion)
         {
             if (token == null) return null;
 
@@ -48,18 +51,18 @@ namespace uSync.Core
                 case JArray jArray:
                     for(int i = 0; i < jArray.Count; i++)
                     {
-                        jArray[i] = jArray[i].ExpandAllJsonInToken();
+                        jArray[i] = jArray[i].ExpandAllJsonInToken(fullStringExpansion);
                     }
                     break;
                 case JObject jObject:
                     foreach(var property in jObject.Properties())
                     {
-                        jObject[property.Name] = jObject[property.Name].ExpandAllJsonInToken();
+                        jObject[property.Name] = jObject[property.Name].ExpandAllJsonInToken(fullStringExpansion);
                     }
                     break;
                 case JValue jValue:
                     if (jValue.Value is null) return null;
-                    return GetJTokenValue(jValue);
+                    return GetJTokenValue(jValue, fullStringExpansion);
                     // return ExpandStringValue(token.ToString());
                 default:
                     return ExpandStringValue(token.ToString());
@@ -68,7 +71,7 @@ namespace uSync.Core
             return token.ToString().GetJsonTokenValue();
         }
 
-        private static JToken GetJTokenValue(JValue token)
+        private static JToken GetJTokenValue(JValue token, bool fullStringExpansion)
         {
             switch(token.Type)
             {
@@ -79,8 +82,13 @@ namespace uSync.Core
                 case JTokenType.Float:
                 case JTokenType.Guid:
                 case JTokenType.Null:
-                case JTokenType.String:
                     return token;
+                case JTokenType.String:
+                    if (!fullStringExpansion)
+                    {
+                        return token;
+                    }
+                    return ExpandStringValue(token.ToString());
                 default:
                     return ExpandStringValue(token.ToString());
             }
@@ -88,7 +96,7 @@ namespace uSync.Core
 
         private static JToken ExpandStringValue(string stringValue)
         {
-            if (stringValue.DetectIsJson())
+            if (stringValue.DetectIsJson() && !stringValue.IsAngularExpression())
             {
                 try
                 {
