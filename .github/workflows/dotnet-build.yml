@@ -14,6 +14,7 @@ jobs:
     env:
       CONFIG: 'Release'
       SOLUTION_FILE: './uSync.sln'
+      OUT_FOLDER: './build.out/'
 
     steps:
     
@@ -42,40 +43,9 @@ jobs:
     - run: npm install
 
 
-    - name: Display GitVersion outputs - Help for debugging for now
+    - name: Display GitVersion SemVer
       run: |
-        echo "Major: ${{ steps.gitversion.outputs.major }}"
-        echo "Minor: ${{ steps.gitversion.outputs.minor }}"
-        echo "Patch: ${{ steps.gitversion.outputs.patch }}"
-        echo "PreReleaseTag: ${{ steps.gitversion.outputs.preReleaseTag }}"
-        echo "PreReleaseTagWithDash: ${{ steps.gitversion.outputs.preReleaseTagWithDash }}"
-        echo "PreReleaseLabel: ${{ steps.gitversion.outputs.preReleaseLabel }}"
-        echo "PreReleaseNumber: ${{ steps.gitversion.outputs.preReleaseNumber }}"
-        echo "WeightedPreReleaseNumber: ${{ steps.gitversion.outputs.weightedPreReleaseNumber }}"
-        echo "BuildMetaData: ${{ steps.gitversion.outputs.buildMetaData }}"
-        echo "BuildMetaDataPadded: ${{ steps.gitversion.outputs.buildMetaDataPadded }}"
-        echo "FullBuildMetaData: ${{ steps.gitversion.outputs.fullBuildMetaData }}"
-        echo "MajorMinorPatch: ${{ steps.gitversion.outputs.majorMinorPatch }}"
-        echo "SemVer: ${{ steps.gitversion.outputs.semVer }}"
-        echo "LegacySemVer: ${{ steps.gitversion.outputs.legacySemVer }}"
-        echo "LegacySemVerPadded: ${{ steps.gitversion.outputs.legacySemVerPadded }}"
-        echo "AssemblySemVer: ${{ steps.gitversion.outputs.assemblySemVer }}"
-        echo "AssemblySemFileVer: ${{ steps.gitversion.outputs.assemblySemFileVer }}"
-        echo "FullSemVer: ${{ steps.gitversion.outputs.fullSemVer }}"
-        echo "InformationalVersion: ${{ steps.gitversion.outputs.informationalVersion }}"
-        echo "BranchName: ${{ steps.gitversion.outputs.branchName }}"
-        echo "EscapedBranchName: ${{ steps.gitversion.outputs.escapedBranchName }}"
-        echo "Sha: ${{ steps.gitversion.outputs.sha }}"
-        echo "ShortSha: ${{ steps.gitversion.outputs.shortSha }}"
-        echo "NuGetVersionV2: ${{ steps.gitversion.outputs.nuGetVersionV2 }}"
-        echo "NuGetVersion: ${{ steps.gitversion.outputs.nuGetVersion }}"
-        echo "NuGetPreReleaseTagV2: ${{ steps.gitversion.outputs.nuGetPreReleaseTagV2 }}"
-        echo "NuGetPreReleaseTag: ${{ steps.gitversion.outputs.nuGetPreReleaseTag }}"
-        echo "VersionSourceSha: ${{ steps.gitversion.outputs.versionSourceSha }}"
-        echo "CommitsSinceVersionSource: ${{ steps.gitversion.outputs.commitsSinceVersionSource }}"
-        echo "CommitsSinceVersionSourcePadded: ${{ steps.gitversion.outputs.commitsSinceVersionSourcePadded }}"
-        echo "UncommittedChanges: ${{ steps.gitversion.outputs.uncommittedChanges }}"
-        echo "CommitDate: ${{ steps.gitversion.outputs.commitDate }}"
+       echo "FullSemVer: ${{ steps.gitversion.outputs.fullSemVer }}"
               
 # ------------------------
 # actual builds / packages 
@@ -88,23 +58,29 @@ jobs:
 #      run: dotnet run -c ${{env.Config}} --project ./uSync.SchemaGenerator/uSync.SchemaGenerator.csproj 
 
     - name: Build uSync.Core
-      run: dotnet build ./uSync.Core/uSync.Core.csproj --no-restore -c ${{env.CONFIG}}
+      run: dotnet pack ./uSync.Core/uSync.Core.csproj --no-restore -c ${{env.CONFIG}} --output ${{env.OUT_FOLDER}} /p:version=${{steps.gitversion.outputs.fullSemVer}}
 
     - name: Build uSync.Community.Contrib
-      run: dotnet build ./uSync.Community.Contrib/uSync.Community.Contrib.csproj --no-restore -c ${{env.CONFIG}}
+      run: dotnet pack ./uSync.Community.Contrib/uSync.Community.Contrib.csproj --no-restore -c ${{env.CONFIG}} --output ${{env.OUT_FOLDER}} /p:version=${{steps.gitversion.outputs.fullSemVer}}
 
     - name: Build uSync.DataTypeSerializers
-      run: dotnet build ./uSync.Community.DataTypeSerializers/uSync.Community.DataTypeSerializers.csproj -c ${{env.CONFIG}}
+      run: dotnet pack ./uSync.Community.DataTypeSerializers/uSync.Community.DataTypeSerializers.csproj -c ${{env.CONFIG}} --output ${{env.OUT_FOLDER}} /p:version=${{steps.gitversion.outputs.fullSemVer}}
 
     - name: Build uSync.BackOffice
-      run: dotnet build ./uSync.BackOffice/uSync.BackOffice.csproj --no-restore -c ${{env.CONFIG}}
+      run: dotnet pack ./uSync.BackOffice/uSync.BackOffice.csproj --no-restore -c ${{env.CONFIG}} --output ${{env.OUT_FOLDER}} /p:version=${{steps.gitversion.outputs.fullSemVer}}
 
     - name: Build uSync.BackOfficeAssets
-      run: dotnet build ./uSync.BackOffice.Assets/uSync.BackOffice.Assets.csproj --no-restore -c ${{env.CONFIG}}
+      run: dotnet pack ./uSync.BackOffice.Assets/uSync.BackOffice.Assets.csproj --no-restore -c ${{env.CONFIG}} --output ${{env.OUT_FOLDER}} /p:version=${{steps.gitversion.outputs.fullSemVer}}
 
     - name: Build uSync.BackOfficeTargets
-      run: dotnet build ./uSync.BackOffice.Targets/uSync.BackOffice.Targets.csproj --no-restore -c ${{env.CONFIG}}
+      run: dotnet pack ./uSync.BackOffice.Targets/uSync.BackOffice.Targets.csproj --no-restore -c ${{env.CONFIG}} --output ${{env.OUT_FOLDER}} /p:version=${{steps.gitversion.outputs.fullSemVer}}
 
     - name: Build uSync
-      run: dotnet build ./uSync/uSync.csproj --no-restore -c ${{env.CONFIG}}
+      run: dotnet pack ./uSync/uSync.csproj --no-restore -c ${{env.CONFIG}} --output ${{env.OUT_FOLDER}} /p:version=${{steps.gitversion.outputs.fullSemVer}}
       
+    - name: Upload nuget file as build artifact      
+      uses: actions/upload-artifact@v2
+      with:
+        name: Nuget Build Output
+        path: ${{env.OUT_FOLDER}}
+  
