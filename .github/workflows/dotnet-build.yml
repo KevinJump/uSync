@@ -54,8 +54,8 @@ jobs:
     - name: Restore
       run: dotnet restore ./uSync/uSync.csproj 
         
-#    - name: Generate AppSettings Schema
-#      run: dotnet run -c ${{env.Config}} --project ./uSync.SchemaGenerator/uSync.SchemaGenerator.csproj 
+    - name: Generate AppSettings Schema
+      run: dotnet run -c ${{env.Config}} --project ./uSync.SchemaGenerator/uSync.SchemaGenerator.csproj 
 
     - name: Build uSync.Core
       run: dotnet pack ./uSync.Core/uSync.Core.csproj --no-restore -c ${{env.CONFIG}} --output ${{env.OUT_FOLDER}} /p:version=${{steps.gitversion.outputs.fullSemVer}}
@@ -84,3 +84,6 @@ jobs:
         name: Nuget Build Output
         path: ${{env.OUT_FOLDER}}
   
+    - name: Push to Jumoo GitHub Nuget Repo
+      if: ${{ github.event_name != 'pull_request' }}
+      run: dotnet nuget push ./build.out/*.nupkg --skip-duplicate --source https://nuget.pkg.github.com/jumoo/index.json --api-key ${{ github.token }}
