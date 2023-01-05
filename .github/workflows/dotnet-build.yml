@@ -12,8 +12,8 @@ jobs:
     runs-on: windows-latest 
 
     env:
-      CONFIG: 'Release'
-      SOLUTION_FILE: './uSync.sln'
+      CONFIG: Release
+      SOLUTION_FILE: ./uSync.sln
 
     steps:
     - name: Checkout
@@ -28,5 +28,5 @@ jobs:
         dotnet-version: 7.0.x
 
     - name: Build
-      run: dotnet build $SOLUTION_FILE --no-restore -c $CONFIG
+      run: dotnet build ${{SOLUTION_FILE}} --no-restore -c ${{CONFIG}}
       
