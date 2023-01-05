@@ -49,11 +49,11 @@ jobs:
 # ------------------------
 # actual builds / packages 
 # ------------------------
-    - name: tests
-      run: dotnet test ./uSync.Tests/uSync.Tests.csproj
-
     - name: Restore
       run: dotnet restore ./uSync/uSync.csproj 
+
+    - name: tests
+      run: dotnet test ./uSync.Tests/uSync.Tests.csproj
         
     - name: Generate AppSettings Schema
       run: dotnet run -c ${{env.Config}} --project ./uSync.SchemaGenerator/uSync.SchemaGenerator.csproj 
