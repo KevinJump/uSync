@@ -1,4 +1,4 @@
-name: .NET Build
+name: Package up.
 
 on:
   push:
@@ -84,6 +84,15 @@ jobs:
         name: Nuget Build Output
         path: ${{env.OUT_FOLDER}}
   
+    # can't use wilecards with dotnet nuget command 
     - name: Push to Jumoo GitHub Nuget Repo
       if: ${{ github.event_name != 'pull_request' }}
-      run: dotnet nuget push ./build.out/*.nupkg --skip-duplicate --source https://nuget.pkg.github.com/jumoo/index.json --api-key ${{ github.token }}
+      run: |
+        dotnet nuget push ./build.out/uSync.nupkg --skip-duplicate --source https://nuget.pkg.github.com/jumoo/index.json --api-key ${{ github.token }}
+        dotnet nuget push ./build.out/uSync.Core.nupkg --skip-duplicate --source https://nuget.pkg.github.com/jumoo/index.json --api-key ${{ github.token }}
+        dotnet nuget push ./build.out/uSync.BackOffice.nupkg --skip-duplicate --source https://nuget.pkg.github.com/jumoo/index.json --api-key ${{ github.token }}
+        dotnet nuget push ./build.out/uSync.BackOffice.Assets.nupkg --skip-duplicate --source https://nuget.pkg.github.com/jumoo/index.json --api-key ${{ github.token }}
+        dotnet nuget push ./build.out/uSync.BackOffice.Targets.nupkg --skip-duplicate --source https://nuget.pkg.github.com/jumoo/index.json --api-key ${{ github.token }}
+        dotnet nuget push ./build.out/uSync.Community.Contrib.nupkg --skip-duplicate --source https://nuget.pkg.github.com/jumoo/index.json --api-key ${{ github.token }}
+        dotnet nuget push ./build.out/uSync.Community.DataTypeSerializers.nupkg --skip-duplicate --source https://nuget.pkg.github.com/jumoo/index.json --api-key ${{ github.token }}
+        dotnet nuget push ./build.out/uSync.AutoTemplates.nupkg --skip-duplicate --source https://nuget.pkg.github.com/jumoo/index.json --api-key ${{ github.token }}
