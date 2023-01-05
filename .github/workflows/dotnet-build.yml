@@ -21,8 +21,11 @@ jobs:
       with:
         fetch-depth: 0   
         
-    - name: Generate AppSettings Schema
-      run: dotnet run -c ${{env.Config}} --project ./uSync.SchemaGenerator/uSync.SchemaGenerator.csproj 
+    - name: Restore
+      run: dotnet restore ./uSync/uSync.csproj 
+        
+#    - name: Generate AppSettings Schema
+#      run: dotnet run -c ${{env.Config}} --project ./uSync.SchemaGenerator/uSync.SchemaGenerator.csproj 
 
     - name: Build uSync.Core
       run: dotnet build ./uSync.Core/uSync.Core.csproj --no-restore -c ${{env.CONFIG}}
