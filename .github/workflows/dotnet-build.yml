@@ -12,8 +12,8 @@ jobs:
     runs-on: windows-latest 
 
     env:
-      CONFIG: Release
-      SOLUTION_FILE: ./uSync.sln
+      CONFIG: 'Release'
+      SOLUTION_FILE: './uSync.sln'
 
     steps:
     - name: Checkout
