@@ -1,9 +1,10 @@
 assembly-versioning-scheme: MajorMinorPatch
 mode: ContinuousDeployment
 branches:
-  v11/dev:
+  main:
     mode: ContinuousDeployment
     tag: ''
+    regex: ^v11\/dev$
   pull-request:
     mode: ContinuousDeployment
 ignore:
