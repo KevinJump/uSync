@@ -1,9 +1,11 @@
 assembly-versioning-scheme: MajorMinorPatch
-mode: ContinuousDelivery
-branches: 
-  main:
-    mode: ContinuousDelivery
-    regex: ^v9\/main$
+mode: ContinuousDeployment
+branches:
+  v11/dev:
+    mode: ContinuousDeployment
+    tag: ''
+  pull-request:
+    mode: ContinuousDeployment
 ignore:
   sha: []
-
+merge-message-formats: {}
