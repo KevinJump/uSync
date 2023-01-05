@@ -19,14 +19,29 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
       with:
-        fetch-depth: 0
+        fetch-depth: 0   
+        
+    - name: Generate AppSettings Schema
+      run: dotnet run -c ${{env.Config}} --project ./uSync.SchemaGenerator/uSync.SchemaGenerator.csproj 
 
-    # Install the .NET Core workload
-    - name: Install .NET Core
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: 7.0.x
+    - name: Build uSync.Core
+      run: dotnet build ./uSync.Core/uSync.Core.csproj --no-restore -c ${{env.CONFIG}}
 
-    - name: Build
-      run: dotnet build ${{env.SOLUTION_FILE}} --no-restore -c ${{env.CONFIG}}
+    - name: Build uSync.Community.Contrib
+      run: dotnet build ./uSync.Community.Contrib/uSync.Community.Contrib.csproj --no-restore -c ${{env.CONFIG}}
+
+    - name: Build uSync.DataTypeSerializers
+      run: dotnet build ./uSync.Community.DataTypeSerializers/uSync.Community.DataTypeSerializers.csproj --no-restore -c ${{env.CONFIG}}
+
+    - name: Build uSync.BackOffice
+      run: dotnet build ./uSync.BackOffice/uSync.BackOffice.csproj --no-restore -c ${{env.CONFIG}}
+
+    - name: Build uSync.BackOfficeAssets
+      run: dotnet build ./uSync.BackOffice.Assets/uSync.BackOffice.Assets.csproj --no-restore -c ${{env.CONFIG}}
+
+    - name: Build uSync.BackOfficeTargets
+      run: dotnet build ./uSync.BackOffice.Targets/uSync.BackOffice.Targets.csproj --no-restore -c ${{env.CONFIG}}
+
+    - name: Build uSync
+      run: dotnet build ./uSync/uSync.csproj --no-restore -c ${{env.CONFIG}}
       
