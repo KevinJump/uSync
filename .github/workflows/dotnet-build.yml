@@ -87,12 +87,4 @@ jobs:
     # can't use wilecards with dotnet nuget command 
     - name: Push to Jumoo GitHub Nuget Repo
       if: ${{ github.event_name != 'pull_request' }}
-      run: |
-        dotnet nuget push ./build.out/uSync.${{steps.gitversion.outputs.fullSemVer}}.nupkg --skip-duplicate --source https://nuget.pkg.github.com/jumoo/index.json --api-key ${{ github.token }}
-        dotnet nuget push ./build.out/uSync.Core.${{steps.gitversion.outputs.fullSemVer}}.nupkg --skip-duplicate --source https://nuget.pkg.github.com/jumoo/index.json --api-key ${{ github.token }}
-        dotnet nuget push ./build.out/uSync.BackOffice.${{steps.gitversion.outputs.fullSemVer}}.nupkg --skip-duplicate --source https://nuget.pkg.github.com/jumoo/index.json --api-key ${{ github.token }}
-        dotnet nuget push ./build.out/uSync.BackOffice.Assets.${{steps.gitversion.outputs.fullSemVer}}.nupkg --skip-duplicate --source https://nuget.pkg.github.com/jumoo/index.json --api-key ${{ github.token }}
-        dotnet nuget push ./build.out/uSync.BackOffice.Targets.${{steps.gitversion.outputs.fullSemVer}}.nupkg --skip-duplicate --source https://nuget.pkg.github.com/jumoo/index.json --api-key ${{ github.token }}
-        dotnet nuget push ./build.out/uSync.Community.Contrib.${{steps.gitversion.outputs.fullSemVer}}.nupkg --skip-duplicate --source https://nuget.pkg.github.com/jumoo/index.json --api-key ${{ github.token }}
-        dotnet nuget push ./build.out/uSync.Community.DataTypeSerializers.${{steps.gitversion.outputs.fullSemVer}}.nupkg --skip-duplicate --source https://nuget.pkg.github.com/jumoo/index.json --api-key ${{ github.token }}
-        dotnet nuget push ./build.out/uSync.AutoTemplates.${{steps.gitversion.outputs.fullSemVer}}.nupkg --skip-duplicate --source https://nuget.pkg.github.com/jumoo/index.json --api-key ${{ github.token }}
+      run: dotnet nuget push ./build.out/*.nupkg --skip-duplicate --source https://nuget.pkg.github.com/kevinjump/index.json --api-key ${{ github.token }}
