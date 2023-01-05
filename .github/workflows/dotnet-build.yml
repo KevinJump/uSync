@@ -34,6 +34,13 @@ jobs:
         useConfigFile: true
         configFilePath: ./GitVersion.yml
 
+    - name: Restore npm
+      uses: actions/setup-node@v3
+      with: 
+        node-version: 18
+        cache: 'npm'
+
+
     - name: Display GitVersion outputs - Help for debugging for now
       run: |
         echo "Major: ${{ steps.gitversion.outputs.major }}"
