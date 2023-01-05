@@ -39,6 +39,7 @@ jobs:
       with: 
         node-version: 18
         cache: 'npm'
+    - run: npm install
 
 
     - name: Display GitVersion outputs - Help for debugging for now
