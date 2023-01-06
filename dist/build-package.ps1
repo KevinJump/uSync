@@ -52,7 +52,7 @@ Write-Host "Folder   :" $outFolder
 "----------------------------------"; ""
 
 ""; "##### Restoring project"; "--------------------------------"; ""
-dotnet restore ..
+dotnet restore ..\uSync.sln
 
 ""; "##### Building project"; "--------------------------------"; ""
 dotnet build ..\uSync.sln -c $env /p:$buildParams
@@ -64,7 +64,7 @@ dotnet run -c $env --project ..\uSync.SchemaGenerator\uSync.SchemaGenerator.cspr
 
 dotnet pack ..\uSync.Core\uSync.Core.csproj --no-restore --no-build -c $env -o $outFolder /p:$buildParams
 dotnet pack ..\uSync.Community.Contrib\uSync.Community.Contrib.csproj  --no-build  --no-restore -c $env -o $outFolder /p:$buildParams
-dotnet pack ..\uSync.Community.DataTypeSerializers\uSync.Community.DataTypeSerializers.csproj  --no-build  --no-restore -c $env -o $outFolder /p$buildParams
+dotnet pack ..\uSync.Community.DataTypeSerializers\uSync.Community.DataTypeSerializers.csproj  --no-build  --no-restore -c $env -o $outFolder /p:$buildParams
 dotnet pack ..\uSync.BackOffice\uSync.BackOffice.csproj  --no-build  --no-restore -c $env -o $outFolder /p:$buildParams
 
 dotnet pack ..\uSync.AutoTemplates\uSync.AutoTemplates.csproj --no-build --no-restore -c $env -o $outFolder /p:$buildParams

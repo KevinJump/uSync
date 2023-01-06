@@ -81,6 +81,10 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         protected override IContent GetFromService(string alias)
             => null;
 
+        /// <summary>
+        ///  Manage blueprint save notifications
+        /// </summary>
+        /// <param name="notification"></param>
         public void Handle(ContentSavedBlueprintNotification notification)
         {
             if (!ShouldProcessEvent()) return;
@@ -101,6 +105,9 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             }
         }
 
+        /// <summary>
+        ///  manage blueprint delete notifications
+        /// </summary>
         public void Handle(ContentDeletedBlueprintNotification notification)
         {
             if (!ShouldProcessEvent()) return;

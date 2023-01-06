@@ -36,7 +36,9 @@ namespace uSync.BackOffice
                 actions.InvariantContains("all") ||
                 actions.InvariantContains(requestedAction.ToString());
 
-
+        /// <summary>
+        ///  Convert the results list into a summary list so less data is spewed out in the AngularJs
+        /// </summary>
         public static IEnumerable<uSyncAction> ConvertToSummary(this IEnumerable<uSyncAction> actions, bool strict)
         {
             var summary = new List<uSyncAction>();
