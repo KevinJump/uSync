@@ -1,0 +1,98 @@
+name: Package up.
+
+on:
+  push:
+    branches: [ "v10/dev" ]
+  pull_request:
+    branches: [ "v10/dev" ]
+
+jobs:
+
+  build:
+    runs-on: windows-latest 
+
+    env:
+      CONFIG: 'Release'
+      SOLUTION_FILE: './uSync.sln'
+      OUT_FOLDER: './build.out/'
+
+    steps:
+    
+    - name: Install GitVersion
+      uses: gittools/actions/gitversion/setup@v0.9.7
+      with:
+        versionSpec: '5.x'    
+    
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0   
+    
+    - name: Determine Version with GitVersion (MSBuild in Proj will do this)
+      id:   gitversion
+      uses: gittools/actions/gitversion/execute@v0.9.15
+      with:
+        useConfigFile: true
+        configFilePath: ./GitVersion.yml
+
+    - name: Restore npm
+      uses: actions/setup-node@v3
+      with: 
+        node-version: 18
+        cache: 'npm'
+    - run: npm install
+
+    - name: Display GitVersion SemVer
+      run: |
+       echo "FullSemVer: ${{ steps.gitversion.outputs.fullSemVer }}"
+              
+# ------------------------
+# actual builds / packages 
+# ------------------------
+    - name: Restore
+      run: dotnet restore ./uSync/uSync.csproj 
+
+    - name: tests
+      run: dotnet test ./uSync.Tests/uSync.Tests.csproj
+        
+    - name: Generate AppSettings Schema
+      run: dotnet run -c ${{env.Config}} --project ./uSync.SchemaGenerator/uSync.SchemaGenerator.csproj 
+
+    - name: Build uSync.Core
+      run: dotnet pack ./uSync.Core/uSync.Core.csproj --no-restore -c ${{env.CONFIG}} --output ${{env.OUT_FOLDER}} /p:version=${{steps.gitversion.outputs.fullSemVer}}
+
+    - name: Build uSync.Community.Contrib
+      run: dotnet pack ./uSync.Community.Contrib/uSync.Community.Contrib.csproj --no-restore -c ${{env.CONFIG}} --output ${{env.OUT_FOLDER}} /p:version=${{steps.gitversion.outputs.fullSemVer}}
+
+    - name: Build uSync.DataTypeSerializers
+      run: dotnet pack ./uSync.Community.DataTypeSerializers/uSync.Community.DataTypeSerializers.csproj -c ${{env.CONFIG}} --output ${{env.OUT_FOLDER}} /p:version=${{steps.gitversion.outputs.fullSemVer}}
+
+    - name: Build uSync.BackOffice
+      run: dotnet pack ./uSync.BackOffice/uSync.BackOffice.csproj --no-restore -c ${{env.CONFIG}} --output ${{env.OUT_FOLDER}} /p:version=${{steps.gitversion.outputs.fullSemVer}}
+
+    - name: Build uSync.BackOfficeAssets
+      run: dotnet pack ./uSync.BackOffice.Assets/uSync.BackOffice.Assets.csproj --no-restore -c ${{env.CONFIG}} --output ${{env.OUT_FOLDER}} /p:version=${{steps.gitversion.outputs.fullSemVer}}
+
+    - name: Build uSync.BackOfficeTargets
+      run: dotnet pack ./uSync.BackOffice.Targets/uSync.BackOffice.Targets.csproj --no-restore -c ${{env.CONFIG}} --output ${{env.OUT_FOLDER}} /p:version=${{steps.gitversion.outputs.fullSemVer}}
+
+    - name: Build uSync
+      run: dotnet pack ./uSync/uSync.csproj --no-restore -c ${{env.CONFIG}} --output ${{env.OUT_FOLDER}} /p:version=${{steps.gitversion.outputs.fullSemVer}}
+      
+    - name: Upload nuget file as build artifact      
+      uses: actions/upload-artifact@v2
+      with:
+        name: Nuget Build Output
+        path: ${{env.OUT_FOLDER}}
+  
+    # can't use wilecards with dotnet nuget command 
+    - name: Push to Jumoo GitHub Nuget Repo
+      if: ${{ github.event_name != 'pull_request' }}
+      run: | 
+        dotnet nuget push ./build.out/uSync.${{steps.gitversion.outputs.fullSemVer}}.nupkg --skip-duplicate --source https://nuget.pkg.github.com/kevinjump/index.json --api-key ${{ github.token }}
+        dotnet nuget push ./build.out/uSync.Core.${{steps.gitversion.outputs.fullSemVer}}.nupkg --skip-duplicate --source https://nuget.pkg.github.com/kevinjump/index.json --api-key ${{ github.token }}
+        dotnet nuget push ./build.out/uSync.BackOffice.${{steps.gitversion.outputs.fullSemVer}}.nupkg --skip-duplicate --source https://nuget.pkg.github.com/kevinjump/index.json --api-key ${{ github.token }}
+        dotnet nuget push ./build.out/uSync.BackOffice.Assets.${{steps.gitversion.outputs.fullSemVer}}.nupkg --skip-duplicate --source https://nuget.pkg.github.com/kevinjump/index.json --api-key ${{ github.token }}
+        dotnet nuget push ./build.out/uSync.BackOffice.Targets.${{steps.gitversion.outputs.fullSemVer}}.nupkg --skip-duplicate --source https://nuget.pkg.github.com/kevinjump/index.json --api-key ${{ github.token }}
+        dotnet nuget push ./build.out/uSync.Community.Contrib.${{steps.gitversion.outputs.fullSemVer}}.nupkg --skip-duplicate --source https://nuget.pkg.github.com/kevinjump/index.json --api-key ${{ github.token }}
+        dotnet nuget push ./build.out/uSync.Community.DataTypeSerializers.${{steps.gitversion.outputs.fullSemVer}}.nupkg --skip-duplicate --source https://nuget.pkg.github.com/kevinjump/index.json --api-key ${{ github.token }}
