@@ -5,7 +5,10 @@ using System.Linq;
 using System.Reflection;
 using System.Xml.Linq;
 
+using Microsoft.AspNetCore.Razor.Language.Intermediate;
 using Microsoft.Extensions.Logging;
+
+using Polly;
 
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Cache;
@@ -746,105 +749,125 @@ namespace uSync.Core.Serialization.Serializers
             return Enumerable.Empty<uSyncChange>();
         }
 
+        private class TabInfo
+        {
+            public string Name { get; set; }
+            public string Alias { get; set; }
+
+            public int SortOrder { get; set; }
+            public PropertyGroupType Type { get; set; }
+            public Guid Key { get; set; }
+            public int Depth { get; set; }
+        }
+
+        private IList<TabInfo> LoadTabInfo(XElement node)
+        {
+            var tabNode = node.Element("Tabs");
+            if (tabNode == null) return null; 
+
+            var tabs = new List<TabInfo>();
+
+            var defaultSort = 0;
+            var defaultType = GetDefaultTabType(tabNode);
+
+            foreach (var tab in tabNode.Elements("Tab"))
+            {
+                var tabInfo = new TabInfo
+                {
+                    Name = tab.Element("Caption").ValueOrDefault(string.Empty),
+                    Alias = tab.Element(uSyncConstants.Xml.Alias).ValueOrDefault(string.Empty),
+                    SortOrder = tab.Element(uSyncConstants.Xml.SortOrder).ValueOrDefault(defaultSort),
+                    Type = tab.Element("Type").ValueOrDefault(defaultType),
+                    Key = tab.Element(uSyncConstants.Xml.Key).ValueOrDefault(Guid.Empty)
+                };
+
+                tabInfo.Depth = tabInfo.Alias.Count(x => x == '/');
+
+                tabs.Add(tabInfo);
+
+                defaultSort = tabInfo.SortOrder + 1;
+            }
+
+            return tabs;
+        }
+
         protected IEnumerable<uSyncChange> DeserializeTabs(TObject item, XElement node)
         {
             logger.LogDebug("De-serializing Tabs");
 
-            var tabNode = node.Element("Tabs");
-            if (tabNode == null) return Enumerable.Empty<uSyncChange>();
-
-            var defaultSort = 0;
-
-            var defaultType = GetDefaultTabType(tabNode);
+            var tabs = LoadTabInfo(node);   
+            if (tabs == null) return Enumerable.Empty<uSyncChange>();
 
             var changes = new List<uSyncChange>();
 
-            foreach (var tab in tabNode.Elements("Tab"))
+            foreach(var tab in tabs.OrderBy(x=> x.Depth))
             {
-                var name = tab.Element("Caption").ValueOrDefault(string.Empty);
-                var alias = tab.Element(uSyncConstants.Xml.Alias).ValueOrDefault(string.Empty);
-                var sortOrder = tab.Element(uSyncConstants.Xml.SortOrder).ValueOrDefault(defaultSort);
-                var tabType = tab.Element("Type").ValueOrDefault(defaultType);
-                var tabKey = tab.Element(uSyncConstants.Xml.Key).ValueOrDefault(Guid.Empty);
+                logger.LogDebug("> Tab {name} {alias} {sortOrder} {depth}", tab.Name, tab.Alias, tab.SortOrder, tab.Depth);
 
-                // do we block nested tabs ? the file would be corrupt,
-                // but if its introduced later on, we would just work?
-                // if (alias.IndexOf('/') != -1) tabType = PropertyGroupType.Group;
-
-                //if (string.IsNullOrWhiteSpace(alias))
-                //{
-                //    item.PropertyGroups.FirstOrDefault(x => x.Name.InvariantEquals(name));
-                //}
-
-
-                logger.LogDebug("> Tab {name} {alias} {sortOrder}", name, alias, sortOrder);
-
-                var existing = FindTab(item, alias, name, tabKey);
+                var existing = FindTab(item, tab.Alias, tab.Name, tab.Key);
                 if (existing != null)
                 {
-                    if (existing.Alias != alias)
+                    if (existing.Alias != tab.Alias)
                     {
-                        changes.AddUpdate(uSyncConstants.Xml.Alias, existing.Alias, alias, $"Tabs/{name}/Alias");
-                        existing.Alias = alias;
+                        changes.AddUpdate(uSyncConstants.Xml.Alias, existing.Alias, tab.Alias, $"Tabs/{tab.Name}/Alias");
+                        existing.Alias = tab.Alias;
                     }
 
-                    if (existing.Name != name)
+                    if (existing.Name != tab.Name)
                     {
-                        changes.AddUpdate(uSyncConstants.Xml.Name, existing.Name, name, $"Tabs/{name}/Name");
-                        existing.Name = name;
+                        changes.AddUpdate(uSyncConstants.Xml.Name, existing.Name, tab.Name, $"Tabs/{tab.Name}/Name");
+                        existing.Name = tab.Name;
                     }
 
-                    if (tabKey != Guid.Empty && existing.Key != tabKey)
+                    if (tab.Key != Guid.Empty && existing.Key != tab.Key)
                     {
-                        changes.AddUpdate(uSyncConstants.Xml.Key, existing.Key.ToString(), tabKey.ToString(), $"Tabs/{name}/Key");
-                        existing.Key = tabKey;
+                        changes.AddUpdate(uSyncConstants.Xml.Key, existing.Key.ToString(), tab.Key.ToString(), $"Tabs/{tab.Name}/Key");
+                        existing.Key = tab.Key;
                     }
 
-                    if (existing.SortOrder != sortOrder)
+                    if (existing.SortOrder != tab.SortOrder)
                     {
-                        changes.AddUpdate(uSyncConstants.Xml.SortOrder, existing.SortOrder, sortOrder, $"Tabs/{name}/SortOrder");
-                        existing.SortOrder = sortOrder;
+                        changes.AddUpdate(uSyncConstants.Xml.SortOrder, existing.SortOrder, tab.SortOrder, $"Tabs/{tab.Name}/SortOrder");
+                        existing.SortOrder = tab.SortOrder;
                     }
 
-                    if (existing.Type != tabType)
+                    if (existing.Type != tab.Type)
                     {
                         // check for clash. 
-                        if (TabClashesWithExisting(item, alias, tabType))
+                        if (TabClashesWithExisting(item, tab.Alias, tab.Type))
                         {
-                            existing.Alias = SyncPropertyGroupHelpers.GetTempTabAlias(alias);
+                            existing.Alias = SyncPropertyGroupHelpers.GetTempTabAlias(tab.Alias);
                         }
 
-                        changes.AddUpdate("Tab type", existing.Type, tabType, $"Tabs/{name}/Type");
-                        existing.Type = tabType;
+                        changes.AddUpdate("Tab type", existing.Type, tab.Type, $"Tabs/{tab.Name}/Type");
+                        existing.Type = tab.Type;
                     }
                 }
                 else
                 {
                     // if the alias is blank, we make it up.
-                    if (string.IsNullOrWhiteSpace(alias))
-                        alias = name.ToSafeAlias(shortStringHelper, true);
+                    if (string.IsNullOrWhiteSpace(tab.Alias))
+                        tab.Alias = tab.Name.ToSafeAlias(shortStringHelper, true);
 
                     // if the alias & type would clash with something already in the tree
                     // *e.g this is a group with `name` when tab with `name` already being used
                     // by ancestor or descendant.
-                    if (TabClashesWithExisting(item, alias, tabType))
-                        alias = SyncPropertyGroupHelpers.GetTempTabAlias(alias);
+                    if (TabClashesWithExisting(item, tab.Alias, tab.Type))
+                        tab.Alias = SyncPropertyGroupHelpers.GetTempTabAlias(tab.Alias);
 
                     // create the tab
-                    item.AddPropertyGroup(alias, name);
-                    var propertyGroup = item.PropertyGroups[alias];
+                    item.AddPropertyGroup(tab.Alias, tab.Name);
+                    var propertyGroup = item.PropertyGroups[tab.Alias];
 
-                    changes.AddNew(name, name, $"Tabs/{name}");
-                    var newTab = item.PropertyGroups.FirstOrDefault(x => x.Alias.InvariantEquals(alias));
+                    changes.AddNew(tab.Name, tab.Name, $"Tabs/{tab.Name}");
+                    var newTab = item.PropertyGroups.FirstOrDefault(x => x.Alias.InvariantEquals(tab.Alias));
                     if (newTab != null)
                     {
-                        newTab.SortOrder = sortOrder;
-                        newTab.Type = tabType;
-                        if (tabKey != Guid.Empty) newTab.Key = tabKey;
+                        newTab.SortOrder = tab.SortOrder;
+                        newTab.Type = tab.Type;
+                        if (tab.Key != Guid.Empty) newTab.Key = tab.Key;
                     }
                 }
-
-                defaultSort = sortOrder + 1;
             }
 
             ClearAllTabsCache();
