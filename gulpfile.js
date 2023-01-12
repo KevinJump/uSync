@@ -124,7 +124,7 @@ exports.minify = function (cb) {
 
         minifyJs(jsfiles, version);
         minifyCss(cssFiles, version);
-        updateManifest(sourceFolder + "/package.manifest", version);
+        // updateManifest(sourceFolder + "/package.manifest", version);
         copyRequired(source, sourceFolder, minDest);
         copySpecific(sourceFolder + '**/nonodes.css', sourceFolder, minDest);
     });
