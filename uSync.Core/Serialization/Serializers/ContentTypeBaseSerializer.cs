@@ -5,14 +5,10 @@ using System.Linq;
 using System.Reflection;
 using System.Xml.Linq;
 
-using Microsoft.AspNetCore.Razor.Language.Intermediate;
 using Microsoft.Extensions.Logging;
-
-using Polly;
 
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Cache;
-using Umbraco.Cms.Core.Configuration;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Strings;
