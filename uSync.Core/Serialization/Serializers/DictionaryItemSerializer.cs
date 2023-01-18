@@ -65,8 +65,21 @@ namespace uSync.Core.Serialization.Serializers
 
             if (item.Key != key)
             {
+                // If the key is diffrent we can't update it (DB Contraints in Umbraco)
+                // so we just carry on, we no longer check the key when comparing
+                // so if the keys mismatch then things will continue to work.
+                // renaming of mismatched key values might result in duplicates.
+                // but the workarounds could also end up creating far to many extra records
+                // (we would delete/recreate one each time you synced)
+
+                logger.LogInformation("Dictionary keys (Guids) do not match - we can continue with this, but renaming dictionary items from a source computer with a mismatched key value might result in duplicate entries in your dictionary values.");
                 details.AddUpdate(uSyncConstants.Xml.Key, item.Key, key);
-                item.Key = key;
+
+                if (options.GetSetting<bool>("ForceKeySync", false))
+                {
+                    logger.LogDebug("Forcing key sync of dictionary item - if the keys are out of sync on existing items this can cause a SQL Contraint error");
+                    item.Key = key;
+                }
             }
 
             // key only translation, would not add the translation values. 
@@ -212,5 +225,13 @@ namespace uSync.Core.Serialization.Serializers
 
         public override string ItemAlias(IDictionaryItem item)
             => item.ItemKey;
+
+        protected override XElement CleanseNode(XElement node)
+        {
+            var clone = XElement.Parse(node.ToString());
+            var keyAttribute = clone.Attribute("Key");
+            if (keyAttribute != null) keyAttribute.Value = Guid.Empty.ToString();
+            return base.CleanseNode(clone);  
+        }
     }
 }
