@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Xml.Linq;
 
 using Umbraco.Extensions;
@@ -19,7 +20,7 @@ namespace uSync.Core.Serialization
 
         public SyncSerializerOptions(Dictionary<string, string> settings)
         {
-            this.Settings = settings != null ? new Dictionary<string, string>(settings) : new Dictionary<string, string>();
+            this.Settings = settings != null ? new Dictionary<string, string>(settings) : new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
 
         }
 
@@ -119,7 +120,7 @@ namespace uSync.Core.Serialization
         /// </summary>
         public void MergeSettings(Dictionary<string, string> newSettings)
         {
-            if (Settings == null) Settings = new Dictionary<string, string>();
+            if (Settings == null) Settings = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
             if (newSettings != null)
             {
                 foreach (var kvp in newSettings)
