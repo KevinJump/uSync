@@ -364,7 +364,7 @@ namespace uSync.BackOffice.SyncHandlers
             catch (Exception ex)
             {
                 logger.LogWarning("{alias}: Import Failed : {exception}", this.Alias, ex.ToString());
-                return uSyncAction.Fail(Path.GetFileName(filePath), this.handlerType, ChangeType.Fail, $"Import Fail: {ex.Message}", ex)
+                return uSyncAction.Fail(Path.GetFileName(filePath), this.handlerType, ChangeType.Fail, $"Import Fail: {ex.Message}", new Exception(ex.Message, ex))
                     .AsEnumerableOfOne();
             }
         }
@@ -437,7 +437,7 @@ namespace uSync.BackOffice.SyncHandlers
             {
                 logger.LogWarning("{alias}: Import Failed : {exception}", this.Alias, ex.ToString());
                 return uSyncAction.Fail(Path.GetFileName(filename), this.handlerType, ChangeType.Fail,
-                    $"{this.Alias} Import Fail: {ex.Message}", ex)
+                    $"{this.Alias} Import Fail: {ex.Message}", new Exception(ex.Message))
                     .AsEnumerableOfOne();
             }
 
