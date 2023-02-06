@@ -64,6 +64,15 @@ namespace uSync.Core.Serialization.Serializers
 
             details.AddRange(DeserializeBase(item, node, options));
 
+            var propertiesAttempt = DeserializeProperties(item, node, options);
+            if (!propertiesAttempt.Success)
+            {
+                return SyncAttempt<IContent>.Fail(item.Name, item, ChangeType.ImportFail, "Failed to deserialized properties", attempt.Exception);
+            }
+
+            details.AddRange(propertiesAttempt.Result);
+
+
             // contentService.SaveBlueprint(item);
 
             return SyncAttempt<IContent>.Succeed(item.Name, item, ChangeType.Import, details);
