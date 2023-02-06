@@ -21,7 +21,8 @@ namespace uSync.BackOffice.Boot
             : base("uSync_FirstBoot")
         {
             From(string.Empty)
-                    .To<FirstBootMigration>("FirstBoot-Migration");
+                    .To<FirstBootMigration>("FirstBoot-Migration")
+                    .To<LogViewerMigration>("Logviewer-Migration");
         }
     }
 
