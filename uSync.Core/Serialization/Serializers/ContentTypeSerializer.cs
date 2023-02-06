@@ -123,7 +123,7 @@ namespace uSync.Core.Serialization.Serializers
             details.AddRange(DeserializeContentTypeProperties(item, node));
 
             // templates 
-            details.AddRange(DeserializeTemplates(item, node));
+            details.AddRange(DeserializeTemplates(item, node, options));
 
             return DeserializedResult(item, details, options);
         }
@@ -225,7 +225,7 @@ namespace uSync.Core.Serialization.Serializers
             return changes;
         }
 
-        private IEnumerable<uSyncChange> DeserializeTemplates(IContentType item, XElement node)
+        private IEnumerable<uSyncChange> DeserializeTemplates(IContentType item, XElement node, SyncSerializerOptions options)
         {
             var templates = node?.Element(uSyncConstants.Xml.Info)?.Element("AllowedTemplates");
             if (templates == null) return Enumerable.Empty<uSyncChange>();
@@ -254,9 +254,14 @@ namespace uSync.Core.Serialization.Serializers
                 }
             }
 
+			var currentTemplates = string.Join(",", item.AllowedTemplates.Select(x => x.Alias).OrderBy(x => x));
+			var newTemplates = string.Join(",", allowedTemplates.Select(x => x.Alias).OrderBy(x => x));
 
-            var currentTemplates = string.Join(",", item.AllowedTemplates.Select(x => x.Alias).OrderBy(x => x));
-            var newTemplates = string.Join(",", allowedTemplates.Select(x => x.Alias).OrderBy(x => x));
+            // New "KeepTemplates" Option, will merge uSync templates with existing ones (not a complete sync!)
+			if (options.GetSetting<bool>("KeepTemplates", false)) {
+                allowedTemplates = allowedTemplates.Concat(item.AllowedTemplates.Where(x => !newTemplates.InvariantContains(x.Alias))).ToList();
+				newTemplates = string.Join(",", allowedTemplates.Select(x => x.Alias).OrderBy(x => x));
+			}
 
             if (currentTemplates != newTemplates)
             {
