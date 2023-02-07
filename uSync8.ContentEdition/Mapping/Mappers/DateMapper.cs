@@ -29,7 +29,7 @@ namespace uSync8.ContentEdition.Mapping.Mappers
 
         private string GetFormattedDateFromValue(object value)
         {
-			if (value == null) return string.Empty;
+            if (value == null) return null;
 
             // if it's a date, return it like one.
             if (value is DateTime date)
