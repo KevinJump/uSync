@@ -22,8 +22,14 @@ namespace uSync.Core.Mapping
 
         public override string[] Editors => new string[] { Constants.PropertyEditors.Aliases.DateTime };
 
-        public override string GetExportValue(object value, string editorAlias)
-        {
+		public override string GetImportValue(string value, string editorAlias)
+			=> GetFormattedDateTime(value);
+
+		public override string GetExportValue(object value, string editorAlias)
+			=> GetFormattedDateTime(value);
+
+		private string GetFormattedDateTime(object value) 
+        { 
             // if it's a date, return it like one.
             if (value is DateTime date)
             {
