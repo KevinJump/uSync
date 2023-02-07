@@ -21,8 +21,16 @@ namespace uSync8.ContentEdition.Mapping.Mappers
 
         public override string[] Editors => new string[] { "Umbraco.DateTime" };
 
-        public override string GetExportValue(object value, string editorAlias)
+		public override string GetImportValue(string value, string editorAlias)
+			=> GetFormattedDateFromValue(value);
+
+		public override string GetExportValue(object value, string editorAlias)
+			=> GetFormattedDateFromValue(value);
+
+        private string GetFormattedDateFromValue(object value)
         {
+			if (value == null) return string.Empty;
+
             // if it's a date, return it like one.
             if (value is DateTime date)
             {
