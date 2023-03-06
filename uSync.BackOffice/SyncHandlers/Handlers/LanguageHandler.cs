@@ -5,6 +5,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Xml.Linq;
 
 using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Events;
@@ -62,6 +63,33 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         /// <inheritdoc/>
         protected override string GetItemPath(ILanguage item, bool useGuid, bool isFlat)
             => item.IsoCode.ToSafeFileName(shortStringHelper);
+
+
+        /// <summary>
+        ///  ensure we import the 'default' language first, so we don't get errors doing it. 
+        /// </summary>
+        protected override IEnumerable<string> GetImportFiles(string folder)
+        {
+            var files = base.GetImportFiles(folder);
+
+            try
+            {
+                Dictionary<string, string> ordered = new Dictionary<string, string>();
+                foreach (var file in files)
+                {
+                    var node = XElement.Load(file);
+                    var order = (node.Element("IsDefault").ValueOrDefault(false) ? "0" : "1") + Path.GetFileName(file);
+                    ordered[file] = order;
+                }
+
+                return ordered.OrderBy(x => x.Value).Select(x => x.Key).ToList();
+            }
+            catch
+            {
+                return files;
+            }
+
+        }
 
         /// <inheritdoc/>
         protected override IEnumerable<IEntity> GetChildItems(int parent)

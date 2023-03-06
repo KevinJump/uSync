@@ -34,7 +34,7 @@ namespace uSync.BackOffice.Boot
             });
 
             // add notification handler to do the actual first boot run. 
-            builder.AddNotificationHandler<UmbracoApplicationStartingNotification, FirstBootAppStartingHandler>();
+            builder.AddNotificationHandler<UmbracoApplicationStartedNotification, FirstBootAppStartingHandler>();
            
             return builder;
         }
@@ -44,29 +44,32 @@ namespace uSync.BackOffice.Boot
     ///  Handler to mange app starting for first boot migrations 
     /// </summary>
     public class FirstBootAppStartingHandler
-        : INotificationHandler<UmbracoApplicationStartingNotification>
+        : INotificationHandler<UmbracoApplicationStartedNotification>
     {
 
         private readonly ICoreScopeProvider _scopeProvider;
         private readonly IKeyValueService _keyValueService;
         private readonly IMigrationPlanExecutor _migrationPlanExecutor;
+        private readonly IRuntimeState _runtimeState;
 
         /// <inheritdoc/>
         public FirstBootAppStartingHandler(
             ICoreScopeProvider scopeProvider,
             IKeyValueService keyValueService,
-            IMigrationPlanExecutor migrationPlanExecutor)
+            IMigrationPlanExecutor migrationPlanExecutor,
+            IRuntimeState runtimeState)
         {
             _scopeProvider = scopeProvider;
             _keyValueService = keyValueService;
             _migrationPlanExecutor = migrationPlanExecutor;
+            _runtimeState = runtimeState;
         }
 
 
         /// <inheritdoc/>
-        public void Handle(UmbracoApplicationStartingNotification notification)
+        public void Handle(UmbracoApplicationStartedNotification notification)
         {
-            if (notification.RuntimeLevel == Umbraco.Cms.Core.RuntimeLevel.Run)
+            if (_runtimeState.Level == Umbraco.Cms.Core.RuntimeLevel.Run)
             {
                 var firstBootMigration = new FirstBootMigrationPlan();
                 var upgrader = new Upgrader(firstBootMigration);
