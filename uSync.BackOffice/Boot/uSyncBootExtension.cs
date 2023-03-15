@@ -1,4 +1,6 @@
 ﻿
+using System;
+
 using Microsoft.Extensions.DependencyInjection;
 
 using Umbraco.Cms.Core.Configuration.Models;
@@ -44,7 +46,8 @@ namespace uSync.BackOffice.Boot
     ///  Handler to mange app starting for first boot migrations 
     /// </summary>
     public class FirstBootAppStartingHandler
-        : INotificationHandler<UmbracoApplicationStartedNotification>
+        : INotificationHandler<UmbracoApplicationStartedNotification>,
+        INotificationHandler<UmbracoApplicationStartingNotification>
     {
 
         private readonly ICoreScopeProvider _scopeProvider;
@@ -81,6 +84,12 @@ namespace uSync.BackOffice.Boot
                 if (currentState == null || currentState != firstBootMigration.FinalState)
                     upgrader.Execute(_migrationPlanExecutor, _scopeProvider, _keyValueService);
             }
+        }
+
+        [Obsolete("Remove in v13")]
+        public void Handle(UmbracoApplicationStartingNotification notification)
+        {
+            // no-op
         }
     }
 }
