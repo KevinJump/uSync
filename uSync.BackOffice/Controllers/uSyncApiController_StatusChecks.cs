@@ -50,7 +50,7 @@ namespace uSync.BackOffice.Controllers
         {
             if (!_uSyncConfig.Settings.AddOnPing) return GetLocal();
 
-            var cachedContent = _appCaches.RuntimeCache.GetCacheItem<string>("usync_addon");
+            var cachedContent = _appCaches.RuntimeCache.GetCacheItem<string>("usync_json");
             if (!string.IsNullOrEmpty(cachedContent)) return cachedContent;
 
             var remote = "https://jumoo.co.uk/usync/addon/82/";
