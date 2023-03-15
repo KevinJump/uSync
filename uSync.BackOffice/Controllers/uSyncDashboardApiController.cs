@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Net.Mime;
 using System.Threading.Tasks;
 
@@ -24,7 +23,6 @@ using Umbraco.Cms.Core.Composing;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Web.BackOffice.Controllers;
 using Umbraco.Cms.Web.Common.Attributes;
-using Umbraco.Cms.Web.Common.Authorization;
 using Umbraco.Extensions;
 
 using uSync.BackOffice.Authorization;
@@ -36,7 +34,7 @@ using uSync.BackOffice.SyncHandlers;
 namespace uSync.BackOffice.Controllers
 {
     [PluginController("uSync")]
-    [Authorize(Policy = AuthorizationPolicies.SectionAccessSettings)]
+    // [Authorize(Policy = AuthorizationPolicies.SectionAccessSettings)]
     [Authorize(Policy = SyncAuthorizationPolicies.TreeAccessuSync)]
     public partial class uSyncDashboardApiController : UmbracoAuthorizedJsonController
     {
