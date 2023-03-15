@@ -82,7 +82,7 @@ namespace uSync8.Community.Contrib.Mappers
 
             // the doctypegrid editor wants the values in "real" json
             // as opposed to quite a few of these properties that 
-            // have it in 'escaped' json. so slightly diffrent 
+            // have it in 'escaped' json. so slightly different 
             // then a nested content, but not by much.
             GetExportJsonValues(docValue, docType);
 
@@ -126,7 +126,7 @@ namespace uSync8.Community.Contrib.Mappers
 
                 // the doctypegrid editor wants the values in "real" json
                 // as opposed to quite a few of these properties that 
-                // have it in 'escaped' json. so slightly diffrent 
+                // have it in 'escaped' json. so slightly different 
                 // then a nested content, but not by much.
                 GetImportJsonValue(docValue, docType);
 

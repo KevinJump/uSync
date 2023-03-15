@@ -65,7 +65,7 @@ namespace uSync.Core.Serialization.Serializers
 
             if (item.Key != key)
             {
-                // If the key is diffrent we can't update it (DB Contraints in Umbraco)
+                // If the key is different we can't update it (DB Contraints in Umbraco)
                 // so we just carry on, we no longer check the key when comparing
                 // so if the keys mismatch then things will continue to work.
                 // renaming of mismatched key values might result in duplicates.

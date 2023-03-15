@@ -38,7 +38,7 @@ namespace uSync.Core.Mapping.Mappers
             // 
             // we do this because sometimes (and with the starter kit especially)
             // the json might have extra spaces in it, so compared with a server 
-            // where this has been imported vs created it can be diffrent but the same.
+            // where this has been imported vs created it can be different but the same.
 
             // by reading in the json and then spitting it out again, we remove any
             // rouge spacing - so our compare fires through as if nothing has changed.
