@@ -46,7 +46,7 @@ namespace uSync.BackOffice.SyncHandlers
         {
             if (item.Key == node.GetKey()) return true;
 
-            // in a tree items can have the same alias in diffrent places.
+            // in a tree items can have the same alias in different places.
             // so we only do this match on key.
             return false;            
 

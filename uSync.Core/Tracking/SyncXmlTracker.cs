@@ -94,7 +94,7 @@ namespace uSync.Core.Tracking
            => GetSerializer(target).IsCurrent(target, source, options);
 
         /// <summary>
-        ///  actually kicks off here, if you have two xml files that are diffrent. 
+        ///  actually kicks off here, if you have two xml files that are different. 
         /// </summary>
 
         private IEnumerable<uSyncChange> CalculateDiffrences(XElement target, XElement source)

@@ -8,7 +8,7 @@
     ///  are special. 
     ///  
     ///  content and media have node based permissions
-    ///  so have to be handled slightly diffrently when 
+    ///  so have to be handled slightly differently when 
     ///  we work out if a user has permission to see them
     ///  
     ///  when something doesn't have node based permissions
