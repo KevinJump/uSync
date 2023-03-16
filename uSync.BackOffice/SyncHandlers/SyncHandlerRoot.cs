@@ -358,13 +358,13 @@ namespace uSync.BackOffice.SyncHandlers
             }
             catch (FileNotFoundException notFoundException)
             {
-                return uSyncAction.Fail(Path.GetFileName(filePath), this.handlerType, ChangeType.Fail, $"File not found {notFoundException.Message}", notFoundException)
+                return uSyncAction.Fail(Path.GetFileName(filePath), this.handlerType, this.ItemType, ChangeType.Fail, $"File not found {notFoundException.Message}", notFoundException)
                     .AsEnumerableOfOne();
             }
             catch (Exception ex)
             {
                 logger.LogWarning("{alias}: Import Failed : {exception}", this.Alias, ex.ToString());
-                return uSyncAction.Fail(Path.GetFileName(filePath), this.handlerType, ChangeType.Fail, $"Import Fail: {ex.Message}", new Exception(ex.Message, ex))
+                return uSyncAction.Fail(Path.GetFileName(filePath), this.handlerType, this.ItemType, ChangeType.Fail, $"Import Fail: {ex.Message}", new Exception(ex.Message, ex))
                     .AsEnumerableOfOne();
             }
         }
@@ -436,7 +436,7 @@ namespace uSync.BackOffice.SyncHandlers
             catch (Exception ex)
             {
                 logger.LogWarning("{alias}: Import Failed : {exception}", this.Alias, ex.ToString());
-                return uSyncAction.Fail(Path.GetFileName(filename), this.handlerType, ChangeType.Fail,
+                return uSyncAction.Fail(Path.GetFileName(filename), this.handlerType, this.ItemType, ChangeType.Fail,
                     $"{this.Alias} Import Fail: {ex.Message}", new Exception(ex.Message))
                     .AsEnumerableOfOne();
             }
@@ -533,7 +533,7 @@ namespace uSync.BackOffice.SyncHandlers
             catch (Exception ex)
             {
                 logger.LogWarning($"Second Import Failed: {ex}");
-                return uSyncAction.Fail(action.Name, action.ItemType, ChangeType.ImportFail, "Second import failed", ex).AsEnumerableOfOne();
+                return uSyncAction.Fail(action.Name, this.handlerType, action.ItemType, ChangeType.ImportFail, "Second import failed", ex).AsEnumerableOfOne();
             }
         }
 
@@ -817,7 +817,7 @@ namespace uSync.BackOffice.SyncHandlers
             if (item != null)
                 return Export(item, folder, settings);
 
-            return uSyncAction.Fail(nameof(udi), typeof(TObject).ToString(), ChangeType.Fail, $"Item not found {udi}",
+            return uSyncAction.Fail(nameof(udi), this.handlerType, this.ItemType, ChangeType.Fail, $"Item not found {udi}",
                  new KeyNotFoundException(nameof(udi)))
                 .AsEnumerableOfOne();
         }
@@ -828,7 +828,7 @@ namespace uSync.BackOffice.SyncHandlers
         virtual public IEnumerable<uSyncAction> Export(TObject item, string folder, HandlerSettings config)
         {
             if (item == null)
-                return uSyncAction.Fail(nameof(item), typeof(TObject).ToString(), ChangeType.Fail, "Item not set",
+                return uSyncAction.Fail(nameof(item), this.handlerType, this.ItemType, ChangeType.Fail, "Item not set",
                     new ArgumentNullException(nameof(item))).AsEnumerableOfOne();
 
             if (_mutexService.FireItemStartingEvent(new uSyncExportingItemNotification<TObject>(item, (ISyncHandler)this)))
