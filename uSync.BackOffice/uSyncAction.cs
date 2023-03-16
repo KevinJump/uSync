@@ -130,8 +130,14 @@ namespace uSync.BackOffice
         /// <summary>
         ///  create a fail uSyncAction object
         /// </summary>
+        [Obsolete("Pass handler type with fail - Will remove in v13")]
         public static uSyncAction Fail(string name, string type, ChangeType change, string message, Exception ex)
             => new uSyncAction(false, name, type, change, message, ex, string.Empty);
+
+        public static uSyncAction Fail(string name, string handlerType, string itemType, ChangeType change, string message, Exception ex)
+            => new uSyncAction(false, name, itemType, change, message, ex, string.Empty, handlerType);
+
+
     }
 
     /// <summary>
