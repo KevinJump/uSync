@@ -134,6 +134,9 @@ namespace uSync.BackOffice
         public static uSyncAction Fail(string name, string type, ChangeType change, string message, Exception ex)
             => new uSyncAction(false, name, type, change, message, ex, string.Empty);
 
+        /// <summary>
+        ///  create a fail uSyncAction object
+        /// </summary>
         public static uSyncAction Fail(string name, string handlerType, string itemType, ChangeType change, string message, Exception ex)
             => new uSyncAction(false, name, itemType, change, message, ex, string.Empty, handlerType);
 
