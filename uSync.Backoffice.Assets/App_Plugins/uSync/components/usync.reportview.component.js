@@ -241,7 +241,7 @@
                 counts.imports +
                 counts.exports +
                 counts.infos +
-                counts.exports;
+                counts.errors;
 
             return counts;                
         }

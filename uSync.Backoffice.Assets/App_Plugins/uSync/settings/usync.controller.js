@@ -195,6 +195,7 @@
 
                             handler.status = 2;
                             handler.changes = countChanges(result.data.actions);
+                            handler.inError = hasErrors(result.data.actions);
 
                             index++;
                             vm.status.count = index;
@@ -599,6 +600,16 @@
             });
 
             return count;
+        }
+
+        function hasErrors(changes) {
+            for (let i = 0; i < changes.length; i++) {
+                if (!changes[i].success) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         function calcPercentage(status) {
