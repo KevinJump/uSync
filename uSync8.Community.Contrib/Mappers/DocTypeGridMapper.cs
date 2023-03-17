@@ -149,7 +149,7 @@ namespace uSync8.Community.Contrib.Mappers
                     var value = item[property.Alias];
                     if (value != null)
                     {
-                        var mappedVal = SyncValueMapperFactory.GetImportValue(value.ToString(), property.PropertyEditorAlias).ToString();
+                        var mappedVal = SyncValueMapperFactory.GetImportValue(value.ToString(), property.PropertyEditorAlias)?.ToString() ?? value.ToString();
                         item[property.Alias] = mappedVal.GetJsonTokenValue().ExpandAllJsonInToken();
                     }
                 }
