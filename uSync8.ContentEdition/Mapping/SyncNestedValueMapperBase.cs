@@ -44,8 +44,15 @@ namespace uSync8.ContentEdition.Mapping
                     var value = item[property.Alias];
                     if (value != null)
                     {
-                        var mappedVal = SyncValueMapperFactory.GetImportValue((string)value, property.PropertyEditorAlias);
-                        item[property.Alias] = mappedVal?.ToString(); // .GetJsonTokenValue();
+                        if (value is JContainer)
+                        {
+                            var mappedVal = SyncValueMapperFactory.GetImportValue(JsonConvert.SerializeObject(value), property.PropertyEditorAlias);
+                            item[property.Alias] = mappedVal?.ToString(); // .GetJsonTokenValue();
+                        }
+                        else {
+                            var mappedVal = SyncValueMapperFactory.GetImportValue((string)value, property.PropertyEditorAlias);
+                            item[property.Alias] = mappedVal?.ToString(); // .GetJsonTokenValue();
+                        }
                     }
                 }
             }
