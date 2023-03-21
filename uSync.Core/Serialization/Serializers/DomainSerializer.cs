@@ -5,17 +5,12 @@ using System.Xml.Linq;
 
 using Microsoft.Extensions.Logging;
 
-using NUglify.JavaScript;
-
-using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Models.Entities;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Extensions;
 
 using uSync.Core.Models;
-
-using static Umbraco.Cms.Core.Constants.HttpContext;
 
 namespace uSync.Core.Serialization.Serializers
 {
