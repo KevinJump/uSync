@@ -44,6 +44,11 @@ namespace uSync.Core
         ///  User groups has Language Permissions - introduced in Umbraco 10.2.0
         /// </summary>
         public bool HasGroupLanguagePermissions => _version.Version >= new Version(10, 2, 0);
+
+        /// <summary>
+        ///  Domains (Culture and Hostnames) can be sorted - introduced in v11.3.0
+        /// </summary>
+        public bool HasSortableDomains => _version.Version >= new Version(11, 3, 0);
     }
             
 }
