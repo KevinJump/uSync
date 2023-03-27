@@ -45,5 +45,10 @@ namespace uSync.BackOffice.Models
         ///  sort order - the lower the further up the list you will be. 
         /// </summary>
         int SortOrder { get; }
+
+        /// <summary>
+        ///  Does this add-on require the admin user (we use this to hide the licence tab in uSync.Complete)
+        /// </summary>
+        bool RequiresAdmin() => false;
     }
 }

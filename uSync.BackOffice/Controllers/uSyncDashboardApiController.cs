@@ -20,6 +20,7 @@ using Newtonsoft.Json.Serialization;
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Composing;
+using Umbraco.Cms.Core.Security;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Web.BackOffice.Controllers;
 using Umbraco.Cms.Web.Common.Attributes;
@@ -52,10 +53,11 @@ namespace uSync.BackOffice.Controllers
         private uSyncConfigService _uSyncConfig;
 
         private readonly ITypeFinder _typeFinder;
-
         private readonly IConfiguration _configuration;
 
         private readonly string _uSyncTempPath;
+
+        private readonly IBackOfficeSecurityAccessor _backOfficeSecurityAccessor;
 
         /// <summary>
         /// Create a new uSyncDashboardApi Controller (via DI)
@@ -73,7 +75,8 @@ namespace uSync.BackOffice.Controllers
             SyncHandlerFactory syncHandlerFactory,
             IHubContext<SyncHub> hubContext,
             uSyncConfigService uSyncConfig,
-            SyncFileService syncFileService)
+            SyncFileService syncFileService,
+            IBackOfficeSecurityAccessor backOfficeSecurityAccessor)
         {
             _appCaches = appCaches;
             _hostEnvironment = hostEnvironment;
@@ -90,6 +93,8 @@ namespace uSync.BackOffice.Controllers
 
             _configuration = configuration;
             _syncFileService = syncFileService;
+
+            _backOfficeSecurityAccessor = backOfficeSecurityAccessor;
 
             if (hostingEnvironment != null)
             {
