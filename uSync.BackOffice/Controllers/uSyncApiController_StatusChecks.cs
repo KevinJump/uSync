@@ -101,16 +101,19 @@ namespace uSync.BackOffice.Controllers
         [HttpGet]
         public AddOnInfo GetAddOns()
         {
+            var isAdminUser = _backOfficeSecurityAccessor.BackOfficeSecurity.CurrentUser.IsAdmin();
+
             var addOnInfo = new AddOnInfo();
-
-
             var addOns = _typeFinder.FindClassesOfType<ISyncAddOn>();
             foreach (var addOn in addOns)
             {
                 var instance = Activator.CreateInstance(addOn) as ISyncAddOn;
                 if (instance != null)
                 {
-                    addOnInfo.AddOns.Add(instance);
+                    if (!instance.RequiresAdmin() || isAdminUser)
+                    {
+                        addOnInfo.AddOns.Add(instance);
+                    }
                 }
             }
 
