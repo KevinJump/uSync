@@ -139,7 +139,12 @@ namespace uSync.BackOffice.Configuration
         /// </summary>
         [DefaultValue(1000)]
         public int SummaryLimit { get; set; } = 1000;
-       
+
+        /// <summary>
+        ///  list of addon (tabs) you don't want to show inside uSync dashboard.
+        /// </summar>
+        public string HideAddOns { get; set; } = "licence";
+
     }
 
 }

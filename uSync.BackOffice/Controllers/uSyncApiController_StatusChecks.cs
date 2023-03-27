@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -110,13 +109,11 @@ namespace uSync.BackOffice.Controllers
                 var instance = Activator.CreateInstance(addOn) as ISyncAddOn;
                 if (instance != null)
                 {
-                    if (!instance.RequiresAdmin() || isAdminUser)
-                    {
+                    if (AddOnIsVisible(instance, isAdminUser)) {  
                         addOnInfo.AddOns.Add(instance);
                     }
                 }
             }
-
 
             addOnInfo.Version = GetuSyncVersion();
 
@@ -128,6 +125,12 @@ namespace uSync.BackOffice.Controllers
 
             return addOnInfo;
         }
+
+        /// <summary>
+        ///  rules for how an Add on is displayed.
+        /// </summary>
+        private bool AddOnIsVisible(ISyncAddOn addOn, bool isAdmin)
+            => isAdmin || !_uSyncConfig.Settings.HideAddOns.Contains(addOn.Alias, StringComparison.OrdinalIgnoreCase);
 
         private string GetuSyncVersion()
         {
