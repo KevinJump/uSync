@@ -20,16 +20,26 @@ namespace uSync.Core.Serialization.Serializers
         private readonly IDomainService _domainService;
         private readonly IContentService _contentService;
         private readonly ILocalizationService _localizationService;
+        private readonly uSyncCapabilityChecker _capabilityChecker;
 
+        [Obsolete("Pass in the capablity checker (will be removed in v13)")]
         public DomainSerializer(IEntityService entityService, ILogger<DomainSerializer> logger,
             IDomainService domainService,
             IContentService contentService,
             ILocalizationService localizationService)
+            : this(entityService, logger, domainService, contentService, localizationService, null)
+        {  }
+        public DomainSerializer(IEntityService entityService, ILogger<DomainSerializer> logger,
+            IDomainService domainService,
+            IContentService contentService,
+            ILocalizationService localizationService,
+            uSyncCapabilityChecker capabilityChecker)
             : base(entityService, logger)
         {
             this._domainService = domainService;
             this._contentService = contentService;
             this._localizationService = localizationService;
+            _capabilityChecker = capabilityChecker;
         }
 
         protected override SyncAttempt<IDomain> DeserializeCore(XElement node, SyncSerializerOptions options)
@@ -79,6 +89,17 @@ namespace uSync.Core.Serialization.Serializers
                 item.RootContentId = rootItem.Id;
             }
 
+            if (_capabilityChecker?.HasSortableDomains == true)
+            {
+                var sortOrder = info.Element(_sortablePropertyName).ValueOrDefault(-2);
+                var existing = GetSortableValue(item);
+                if (sortOrder != -2 && sortOrder != existing)
+                {
+                    changes.AddUpdate(_sortablePropertyName, sortOrder, existing);
+                    SetSortableValue(item, sortOrder);
+                }
+            }
+
             return SyncAttempt<IDomain>.Succeed(item.DomainName, item, ChangeType.Import, changes);
 
         }
@@ -114,10 +135,70 @@ namespace uSync.Core.Serialization.Serializers
                 }
             }
 
+            if (_capabilityChecker?.HasSortableDomains == true)
+            {
+                // domains can be sorted. we need to get the value via reflection.
+                info.Add(new XElement(_sortablePropertyName, GetSortableValue(item)));
+            }
+
             node.Add(info);
 
             return SyncAttempt<XElement>.SucceedIf(
                 node != null, item.DomainName, node, typeof(IDomain), ChangeType.Export);
+        }
+
+        private const string _sortablePropertyName = "SortOrder";
+
+        /// <summary>
+        ///  Retreive the SortOrder value for the item
+        /// </summary>
+        /// <remarks>
+        ///  11.3.0+ sortable value got added to the IDomain interface.
+        /// </remarks>
+        private int GetSortableValue(IDomain item)
+        {
+            var property = item.GetType().GetProperty(_sortablePropertyName);
+            if (property == null) return 0;
+
+            var result = property.GetValue(item);
+
+            var attempt = result.TryConvertTo<int>();
+            return attempt.Success ? attempt.Result : 0;
+        }
+
+        /// <summary>
+        ///  Set the SortOrder value for the item
+        /// </summary>
+        /// <remarks>
+        ///  11.3.0+ sortable value got added to the IDomain interface.
+        /// </remarks>
+        private void SetSortableValue(IDomain item, int sortOrder)
+        {
+            var property = item.GetType().GetProperty(_sortablePropertyName);
+            if (property == null) return;
+
+            property.SetValue(item, sortOrder);
+        }
+
+        /// <summary>
+        ///  clean the xml of properties we don't want to compare
+        /// </summary>
+        /// <remarks>
+        ///  in v11.3.0+ sort order got added, if we are running less than this, we want to 
+        ///  remove the sort order property from the xml so it doesn't get compared when it 
+        ///  can't be set. 
+        /// </remarks>
+        protected override XElement CleanseNode(XElement node)
+        {
+            if (_capabilityChecker?.HasSortableDomains != true
+                && node.Element(uSyncConstants.Xml.Info)?.Element(_sortablePropertyName) != null)
+            {
+                // doesn't have sortable domains, remove the sortable value from the XML
+                // so we don't get a false posistive when down syncing.
+                node.Element(uSyncConstants.Xml.Info).Element(_sortablePropertyName).Remove();
+            }
+
+            return base.CleanseNode(node);
         }
 
         public override IDomain FindItem(int id)
