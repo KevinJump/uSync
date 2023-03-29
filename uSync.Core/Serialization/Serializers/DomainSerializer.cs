@@ -124,7 +124,7 @@ namespace uSync.Core.Serialization.Serializers
             => _domainService.GetById(id);
 
         public override IDomain FindItem(Guid key)
-            => null;
+            => _domainService.GetAll(true).FirstOrDefault(x => x.Key == key);
 
         public override IDomain FindItem(string alias)
             => _domainService.GetByName(alias);
