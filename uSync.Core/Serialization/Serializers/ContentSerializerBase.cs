@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Xml.Linq;
 
 using Microsoft.Extensions.Logging;
@@ -206,6 +207,7 @@ namespace uSync.Core.Serialization.Serializers
                 || options.GetSetting(uSyncConstants.DefaultsKey, false);
 
             var excludedProperties = GetExcludedProperties(options);
+            var availableCultures = item.AvailableCultures.ToList();
 
             var node = new XElement("Properties");
 
@@ -213,7 +215,7 @@ namespace uSync.Core.Serialization.Serializers
                 .Where(x => !excludedProperties.InvariantContains(x.Alias))
                 .OrderBy(x => x.Alias))
             {
-                var propertyNode = new XElement(property.Alias);
+                var elements = new List<XElement>();
 
                 // this can cause us false change readings
                 // but we need to preserve the values if they are blank
@@ -246,22 +248,35 @@ namespace uSync.Core.Serialization.Serializers
                     if (validNode)
                     {
                         valueNode.Add(new XCData(GetExportValue(GetPropertyValue(value), property.PropertyType, value.Culture, value.Segment)));
-                        propertyNode.Add(valueNode);
+                        elements.Add(valueNode);
                     }
                 }
 
                 if (property.Values == null || property.Values.Count == 0 && includeDefaults)
                 {
-                    // add a blank one, for change clarity
-                    // we do it like this because then it doesn't get collapsed in the XML serialization
-                    var emptyValue = new XElement("Value");
-                    emptyValue.Add(new XCData(string.Empty));
-
-                    propertyNode.Add(emptyValue);
+                    if (property.PropertyType.VariesByCulture())
+                    {
+                        foreach(var culture in availableCultures)
+                        {
+                            elements.Add(new XElement("Value",
+                                new XAttribute("Culture", culture),
+                                new XCData(string.Empty)));
+                        }
+                    }
+                    else
+                    {
+                        // add a blank one, for change clarity
+                        // we do it like this because then it doesn't get collapsed in the XML serialization
+                        elements.Add(new XElement("Value",
+                            new XCData(string.Empty)));
+                    }
                 }
 
-                if (propertyNode.HasElements)
+                if (elements.Count > 0)
                 {
+                    // we sort them at the end because we might end up adding a blank culture value last. 
+                    var propertyNode = new XElement(property.Alias);
+                    propertyNode.Add(elements.OrderBy(x => x.Attribute("Culture").ValueOrDefault("")));
                     node.Add(propertyNode);
                 }
             }
