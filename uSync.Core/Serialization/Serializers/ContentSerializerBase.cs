@@ -252,23 +252,31 @@ namespace uSync.Core.Serialization.Serializers
                     }
                 }
 
-                if (property.Values == null || property.Values.Count == 0 && includeDefaults)
+
+                if (includeDefaults)
                 {
                     if (property.PropertyType.VariesByCulture())
                     {
-                        foreach(var culture in availableCultures)
+                        foreach (var culture in availableCultures)
                         {
-                            elements.Add(new XElement("Value",
-                                new XAttribute("Culture", culture),
-                                new XCData(string.Empty)));
+                            if (!cultures.IsValid(culture)) continue;
+
+                            // add a blank value for any missing culture values.
+                            if (!property.Values.Any(x => (x.Culture ?? "").Equals(culture, StringComparison.OrdinalIgnoreCase)))
+                            {
+                                elements.Add(new XElement("Value",
+                                    new XAttribute("Culture", culture),
+                                    new XCData(string.Empty)));
+                            }
                         }
                     }
-                    else
+                    else if (property.Values == null || property.Values.Count == 0)
                     {
                         // add a blank one, for change clarity
                         // we do it like this because then it doesn't get collapsed in the XML serialization
                         elements.Add(new XElement("Value",
                             new XCData(string.Empty)));
+
                     }
                 }
 
