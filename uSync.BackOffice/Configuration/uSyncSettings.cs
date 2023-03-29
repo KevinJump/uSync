@@ -142,7 +142,7 @@ namespace uSync.BackOffice.Configuration
 
         /// <summary>
         ///  list of addon (tabs) you don't want to show inside uSync dashboard.
-        /// </summar>
+        /// </summary>
         public string HideAddOns { get; set; } = "licence";
 
     }
