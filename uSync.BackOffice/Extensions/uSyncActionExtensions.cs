@@ -39,7 +39,7 @@ namespace uSync.BackOffice
         /// <summary>
         ///  Convert a list of actions into a summary list of actions, uses less cpu when people sync massive amounts of content.
         /// </summary>
-       public static IEnumerable<uSyncAction> ConvertToSummary(this IEnumerable<uSyncAction> actions, bool strict)
+        public static IEnumerable<uSyncAction> ConvertToSummary(this IEnumerable<uSyncAction> actions, bool strict)
         {
             var summary = new List<uSyncAction>();
 

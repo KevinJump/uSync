@@ -35,6 +35,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.Site", "uSync.Site\uS
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "uSync.BackOffice.Targets", "uSync.BackOffice.Targets\uSync.BackOffice.Targets.csproj", "{B09F319A-7066-4B1B-B97D-F609B558C9F4}"
 EndProject
+
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

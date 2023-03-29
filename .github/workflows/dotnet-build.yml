@@ -2,9 +2,9 @@ name: Package up.
 
 on:
   push:
-    branches: [ "v11/dev" ]
+    branches: [ "shared/merge" ]
   pull_request:
-    branches: [ "v11/dev" ]
+    branches: [ "shared/merge" ]
 
 jobs:
 

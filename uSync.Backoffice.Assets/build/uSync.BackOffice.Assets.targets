@@ -11,5 +11,16 @@
 		<RemoveDir Directories="@(uSyncPackageFolder)" ContinueOnError="true"></RemoveDir>
 	</Target>
 
+	<ItemGroup>
+		<Content Remove="uSync/**" />
+	</ItemGroup>
+
+	<Target Name="PublishuSyncFiles" BeforeTargets="PrepareForPublish">
+		<ItemGroup>
+			<uSyncFiles Include="uSync/**;" />
+		</ItemGroup>
+		<Message Text="Copying uSync files: #@(uSyncFiles->Count()) files" Importance="high" />
+		<Copy SourceFiles="@(uSyncFiles)" DestinationFolder="$(PublishDir)\uSync\%(RecursiveDir)" SkipUnchangedFiles="true" />
+	</Target>
 
 </Project>
