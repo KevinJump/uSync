@@ -181,9 +181,22 @@ namespace uSync.BackOffice.Controllers
         /// <param name="actions"></param>
         [HttpPost]
         public void FinishProcess([FromQuery]HandlerActions action, IEnumerable<uSyncAction> actions)
-            => _uSyncService.FinishBulkProcess(action, actions);
+        {
+            _uSyncService.FinishBulkProcess(action, actions);
+            _logger.LogInformation("{user} finished {action} process ({changes} changes)", GetCurrentUser(), action, actions.CountChanges());
+        }
 
-
+        private string GetCurrentUser()
+        {
+            try
+            {
+                return _backOfficeSecurityAccessor.BackOfficeSecurity?.CurrentUser?.Name ?? "User";
+            }
+            catch
+            {
+                return "User";
+            }
+        }
 
 
         private string GetValidImportFolder(string folder)
