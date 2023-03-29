@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Options;
 
+using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Configuration.Models;
 using Umbraco.Cms.Core.Hosting;
 using Umbraco.Cms.Core.Services;
@@ -36,8 +37,15 @@ namespace uSync.BackOffice.Hubs
         /// </summary>
         public void CreateRoutes(IEndpointRouteBuilder endpoints)
         {
-            if (_runtimeState.Level == Umbraco.Cms.Core.RuntimeLevel.Run) 
-                endpoints.MapHub<SyncHub>(GetuSyncHubRoute());
+            switch (_runtimeState.Level)
+            {
+                case RuntimeLevel.Install:
+                case RuntimeLevel.Upgrade:
+                case RuntimeLevel.Run:
+                    endpoints.MapHub<SyncHub>(GetuSyncHubRoute());
+                    break;
+
+            }
         }
 
         /// <summary>
