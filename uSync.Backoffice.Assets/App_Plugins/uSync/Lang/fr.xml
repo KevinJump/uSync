@@ -72,11 +72,11 @@
 		<!-- warning messages -->
 		<key alias="oldformat">
 			<![CDATA[Ce répertoire de syncro provient d'une ancienne version de uSync. Bien que la synchro va fonctionner, vous obtiendrez des résultats plus rapides et plus propres avec une version plus récente. 
-		  <a href="https://github.com/KevinJump/uSync/blob/v10/dev/changes/format.md" target="_blank"><i class="icon icon-info"></i>info</a>]]>
+		  <a href="https://github.com/KevinJump/uSync/blob/v10/dev/changes/format.md" target="_blank" rel="noopener"><i class="icon icon-info"></i>info</a>]]>
 		</key>
 
 		<key alias="createWarning"><![CDATA[Un ou plusieurs handlers sont destinés à la création uniquement. [%0%]. Les changements au sein de ces éléments pourraient ne pas être synchronisés]]></key>
-		<key alias="forms"><![CDATA[Utilisez-vous Umbraco forms? - vous pouvez maintenant synchroniser les formes et les paramètres avec <a href="http://jumoo.co.uk/usync/forms" target="_blank">uSync.FormsEdition</a>]]></key>
+		<key alias="forms"><![CDATA[Utilisez-vous Umbraco forms? - vous pouvez maintenant synchroniser les formes et les paramètres avec <a href="http://jumoo.co.uk/usync/forms" rel="noopener" target="_blank">uSync.FormsEdition</a>]]></key>
 
 		<key alias="cleanTitle">Exporter et nettoyer</key>
 		<key alias="cleanMsg"><![CDATA[Etes-vous certain.e? Un export avec nettoyage supprimera tout le contenu du répertoire uSync. Vous perdrez toute action enregistrée de suppression ou renommage.]]></key>

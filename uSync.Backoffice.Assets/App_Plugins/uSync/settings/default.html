@@ -14,7 +14,7 @@
     <div ng-if="vm.versionLoaded && vm.versionInfo.isCurrent != true" class="alert alert-info usync-alert">
         <localize key="usync_newer"></localize> [v{{vm.versionInfo.versionInfo.core}}]
         <span ng-if="vm.versionInfo.versionInfo.message">
-            <a href="{{vm.versionInfo.versionInfo.link}}" target="_blank">
+            <a href="{{vm.versionInfo.versionInfo.link}}" target="_blank" rel="noopener">
                 {{vm.versionInfo.versionInfo.message}}
             </a>
         </span>
