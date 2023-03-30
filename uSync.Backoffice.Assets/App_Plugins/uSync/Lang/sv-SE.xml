@@ -56,11 +56,11 @@
 	<!-- warning messages -->
 	<key alias="oldformat">
 		<![CDATA[Denna synkroniseringsmapp är från en äldre version av uSync. Synken kommer fungera, men du kommer få ett snabbare och enklare resultat om du använder export från senare version. 
-	  <a href="https://github.com/KevinJump/uSync8/blob/v8/8.7-main/Changes/format.md" target="_blank"><i class="icon icon-info"></i>info</a>]]>
+	  <a href="https://github.com/KevinJump/uSync8/blob/v8/8.7-main/Changes/format.md" target="_blank" rel="noopener"><i class="icon icon-info"></i>info</a>]]>
 	</key>
 	<key alias="createWarning"><![CDATA[En eller flera hanterare (handlers) är inställda att bara skapas. Ändringar i andra objekt kanske inte kommer synkas]]></key>
 
-	<key alias="forms"><![CDATA[Använder du Umbraco forms? Du kan även synka formulär med dess inställningar med <a href="http://jumoo.co.uk/usync/forms" target="_blank">uSync.FormsEdition</a>]]></key>
+	<key alias="forms"><![CDATA[Använder du Umbraco forms? Du kan även synka formulär med dess inställningar med <a href="http://jumoo.co.uk/usync/forms" target="_blank" rel="noopener">uSync.FormsEdition</a>]]></key>
 
   </area>
   <area alias="dashboardTabs">
