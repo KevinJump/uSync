@@ -188,6 +188,8 @@ namespace uSync8.ContentEdition.Serializers
             var includeDefaults = (cultures.Count == 0 && segments.Count == 0)
                 || options.GetSetting(uSyncConstants.DefaultsKey, false);
 
+            var availableCultures = item.AvailableCultures.ToList();
+
             var node = new XElement("Properties");
 
             var contentTypeAlias = item.ContentType?.Alias;
@@ -196,7 +198,7 @@ namespace uSync8.ContentEdition.Serializers
                 .Where(x => !dontSerialize.InvariantContains(x.Alias))
                 .OrderBy(x => x.Alias))
             {
-                var propertyNode = new XElement(property.Alias);
+                var elements = new List<XElement>();
 
                 // this can cause us false change readings
                 // but we need to preserve the values if they are blank
@@ -210,7 +212,6 @@ namespace uSync8.ContentEdition.Serializers
                     var validNode = string.IsNullOrWhiteSpace(value.Culture)
                         && string.IsNullOrWhiteSpace(value.Segment)
                         && includeDefaults;
-
 
                     // or b) it is a valid culture/segment. 
                     if (!string.IsNullOrWhiteSpace(value.Culture) && cultures.IsValid(value.Culture))
@@ -230,22 +231,34 @@ namespace uSync8.ContentEdition.Serializers
                     {
                         var exportValueAttempt = GetExportValue(GetPropertyValue(value), contentTypeAlias, property.PropertyType, value.Culture, value.Segment);
                         valueNode.Add(new XCData(exportValueAttempt.Result));
-                        propertyNode.Add(valueNode);
+                        elements.Add(valueNode);
                     }
                 }
 
-                if (property.Values == null || property.Values.Count == 0 && includeDefaults)
+                if (property.PropertyType.VariesByCulture())
                 {
-                    // add a blank one, for change clarity
-                    // we do it like this because then it doesn't get collapsed in the XML serialization
-                    var emptyValue = new XElement("Value");
-                    emptyValue.Add(new XCData(string.Empty));
+                    foreach (var culture in availableCultures)
+                    {
+                        if (!cultures.IsValid(culture)) continue;
 
-                    propertyNode.Add(emptyValue);
+                        if (!property.Values.Any(x => (x.Culture ?? "").Equals(culture, StringComparison.OrdinalIgnoreCase)))
+                        {
+                            elements.Add(new XElement("Value",
+                                new XAttribute("Culture", culture),
+                                new XCData(string.Empty)));
+                        }
+                    }
+                }
+                else if (includeDefaults && (property.Values == null || property.Values.Count == 0))
+                {
+                    elements.Add(new XElement("Value",
+                        new XCData(string.Empty)));
                 }
 
-                if (propertyNode.HasElements)
+                if (elements.Count > 0)
                 {
+                    var propertyNode = new XElement(property.Alias);
+                    propertyNode.Add(elements.OrderBy(x => x.Attribute("Culture").ValueOrDefault("")));
                     node.Add(propertyNode);
                 }
             }
@@ -497,7 +510,7 @@ namespace uSync8.ContentEdition.Serializers
                             }
 
                             // get here ... set the value
-                            var itemValueAttempt = GetImportValue(propValue, contentTypeAlias,  current.PropertyType, culture, segment);
+                            var itemValueAttempt = GetImportValue(propValue, contentTypeAlias, current.PropertyType, culture, segment);
                             var currentValue = item.GetValue(alias, culture, segment);
 
                             var itemValue = itemValueAttempt.Result;
@@ -603,7 +616,7 @@ namespace uSync8.ContentEdition.Serializers
                 logger.Verbose(serializerType, "Export Value {PropertyEditorAlias} {exportValue}", propertyType.PropertyEditorAlias, exportValue);
                 return Attempt.Succeed(exportValue);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 // things can go wrong (e.g if the data is corrupt)
                 logger.Error(serializerType, ex, "Error Getting Export value {PropertyEditorAlias} {Value} - mapping may have not occured", propertyType.PropertyEditorAlias, value);
@@ -630,7 +643,7 @@ namespace uSync8.ContentEdition.Serializers
                 logger.Verbose(serializerType, "Import Value {PropertyEditorAlias} {importValue}", propertyType.PropertyEditorAlias, importValue);
                 return Attempt.Succeed(importValue);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 // things can go wrong (e.g if the data is corrupt)
                 logger.Error(serializerType, ex, "Error Getting Import value {PropertyEditorAlias} {Value} - mapping may have not occured", propertyType.PropertyEditorAlias, value);
@@ -712,7 +725,8 @@ namespace uSync8.ContentEdition.Serializers
             foreach (var id in ids.Where(x => x != -1))
             {
                 var cachedItem = GetCachedName(id);
-                if (cachedItem == null) {
+                if (cachedItem == null)
+                {
                     lookups.Add(id);
                     friendlyPath += $"/[{id}]";
                 }
@@ -937,7 +951,7 @@ namespace uSync8.ContentEdition.Serializers
                     }
                 }
             }
-            catch(Exception exception)
+            catch (Exception exception)
             {
                 logger.Warn<ContentSerializer>(exception, "Error cleaning up relations: {id}", item.Id);
             }
