@@ -98,6 +98,23 @@ namespace uSync8.Core.Extensions
             return node.Name.LocalName;
         }
 
+        /// <summary>
+        ///  helper - is the current node a content item.
+        /// </summary>
+        public static bool IsContent(this XElement node)
+            => node.GetItemType().Equals("content", StringComparison.OrdinalIgnoreCase);
+
+        /// <summary>
+        ///  is the current node for a content blueprint. 
+        /// </summary>
+        /// <remarks>
+        ///  sometimes depending on how the import has been fired we can't tell just from the 
+        ///  folder if we are importing content or a blueprint - the helper function lets 
+        ///  us work this out.
+        /// </remarks>
+        public static bool IsBlueprint(this XElement node)
+            => node.Element("Info")?.Element("IsBlueprint").ValueOrDefault(false) == true;
+
 
         /// <summary>
         ///  Get the value of the XML Node or return a default value

@@ -2,15 +2,15 @@
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
-
-using Microsoft.Owin.Security.DataHandler.Encoder;
-
 using Umbraco.Core;
+using Umbraco.Core.Models;
 
 using uSync8.BackOffice.SyncHandlers;
 using uSync8.Core;
 using uSync8.Core.Extensions;
 using uSync8.Core.Serialization;
+
+using static Umbraco.Core.Constants;
 
 namespace uSync8.BackOffice
 {
@@ -90,6 +90,14 @@ namespace uSync8.BackOffice
                         {
                             lastType = itemType;
                             handlerPair = handlerFactory.GetValidHandlerByTypeName(itemType, syncHandlerOptions);
+
+                            // special case, blueprints looks like IContent items, except they are slightly diffrent
+                            // so we check for them speicifically and get the handler for the enity rather than the object type.
+                            if (item.Node.IsContent() && item.Node.IsBlueprint())
+                            {
+                                lastType = UdiEntityType.DocumentBlueprint;
+                                handlerPair = handlerFactory.GetValidHandlerByEntityType(UdiEntityType.DocumentBlueprint);
+                            }
                         }
 
                         options.Callbacks?.Update?.Invoke(item.Node.GetAlias(), 
