@@ -1,4 +1,6 @@
 ﻿
+using System.Linq;
+
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Services;
 
@@ -14,7 +16,14 @@ namespace uSync.Core
             if (result.Success) return Attempt.Succeed("Published");
 
             var errorMessage = result.EventMessages.FormatMessages(":");
-            return Attempt.Fail($"Publish failed: {result.Result} {errorMessage}");
+            var message = $"Publish Failed: {result.Result} [{errorMessage}]";
+
+            if (result.InvalidProperties != null && result.InvalidProperties.Any())
+            {
+                message += string.Join(",", result.InvalidProperties.Select(x => x.Alias));
+            }
+
+            return Attempt.Fail(message);
         }
     }
 }
