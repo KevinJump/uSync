@@ -11,6 +11,8 @@ using uSync.BackOffice.SyncHandlers;
 using uSync.BackOffice.SyncHandlers.Interfaces;
 using uSync.Core;
 
+using static Umbraco.Cms.Core.Constants;
+
 namespace uSync.BackOffice
 {
 
@@ -96,6 +98,14 @@ namespace uSync.BackOffice
                         {
                             lastType = itemType;
                             handlerPair = _handlerFactory.GetValidHandlerByTypeName(itemType, syncHandlerOptions);
+
+                            // special case, blueprints looks like IContent items, except they are slightly diffrent
+                            // so we check for them speicifically and get the handler for the enity rather than the object type.
+                            if (item.Node.IsContent() && item.Node.IsBlueprint())
+                            {
+                                lastType = UdiEntityType.DocumentBlueprint;
+                                handlerPair = _handlerFactory.GetValidHandlerByEntityType(UdiEntityType.DocumentBlueprint);
+                            }
                         }
 
                         if (handlerPair == null)
@@ -148,9 +158,9 @@ namespace uSync.BackOffice
                             handlerPair = _handlerFactory.GetValidHandler(action.HandlerAlias, syncHandlerOptions);
                         }
 
-                        if (handlerPair == null) 
+                        if (handlerPair == null)
                         {
-                            _logger.LogWarning("No handler was found for {alias} item might not process correctly",  action.HandlerAlias);
+                            _logger.LogWarning("No handler was found for {alias} item might not process correctly", action.HandlerAlias);
                             continue;
                         }
 
