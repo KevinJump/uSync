@@ -207,13 +207,20 @@ namespace uSync.Core.Serialization.Serializers
                 || options.GetSetting(uSyncConstants.DefaultsKey, false);
 
             var excludedProperties = GetExcludedProperties(options);
+            var excludedPropertiesPattern = GetExcludedPropertiesPattern(options);
             var availableCultures = item.AvailableCultures.ToList();
 
             var node = new XElement("Properties");
+            var includedProperties = item.Properties
+                .Where(x => !excludedProperties.InvariantContains(x.Alias));
 
-            foreach (var property in item.Properties
-                .Where(x => !excludedProperties.InvariantContains(x.Alias))
-                .OrderBy(x => x.Alias))
+            if(excludedPropertiesPattern is not null)
+            {
+                includedProperties = includedProperties
+                 .Where(x => !excludedPropertiesPattern.IsMatch(x.Alias));
+            }
+
+            foreach (var property in includedProperties.OrderBy(x => x.Alias))
             {
                 var elements = new List<XElement>();
 
@@ -974,7 +981,27 @@ namespace uSync.Core.Serialization.Serializers
                 exclude.AddRange(excludeOptions.ToDelimitedList());
 
             return exclude;
+        }
 
+        private Regex GetExcludedPropertiesPattern(SyncSerializerOptions options)
+        {
+            const string settingsKey = "DoNotSerializePattern";
+
+            string pattern = options.GetSetting<string>(settingsKey, "");
+            if (string.IsNullOrWhiteSpace(pattern))
+            {
+                return null;
+            }
+
+            try
+            {
+                return new Regex(pattern);
+            }
+            catch (ArgumentException ex)
+            {
+                logger.LogDebug("Unable to parse pattern '{pattern}' from '{settingsKey}' as Regex. {error}. Pattern will not be considered.", pattern, settingsKey, ex.Message);
+                return null;
+            }
         }
 
 
