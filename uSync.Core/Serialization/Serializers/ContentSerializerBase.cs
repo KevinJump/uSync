@@ -207,15 +207,20 @@ namespace uSync.Core.Serialization.Serializers
                 || options.GetSetting(uSyncConstants.DefaultsKey, false);
 
             var excludedProperties = GetExcludedProperties(options);
-            var excludedPropertyPatterns = GetExcludedPropertyPatterns(options);
+            var excludedPropertyPattern = GetExcludedPropertyPattern(options);
             var availableCultures = item.AvailableCultures.ToList();
 
             var node = new XElement("Properties");
+            var includedProperties = item.Properties
+                .Where(x => !excludedProperties.InvariantContains(x.Alias));
 
-            foreach (var property in item.Properties
-                .Where(x => !excludedProperties.InvariantContains(x.Alias))
-                .Where(x => !excludedPropertyPatterns.Any(y => y.IsMatch(x.Alias)))
-                .OrderBy(x => x.Alias))
+            if(excludedPropertyPattern is not null)
+            {
+                includedProperties = includedProperties
+                 .Where(x => !excludedPropertyPattern.IsMatch(x.Alias));
+            }
+
+            foreach (var property in includedProperties.OrderBy(x => x.Alias))
             {
                 var elements = new List<XElement>();
 
@@ -978,28 +983,25 @@ namespace uSync.Core.Serialization.Serializers
             return exclude;
         }
 
-        private List<Regex> GetExcludedPropertyPatterns(SyncSerializerOptions options)
+        private Regex GetExcludedPropertyPattern(SyncSerializerOptions options)
         {
             const string settingsKey = "DoNotSerializePatterns";
 
-            List<Regex> exclude = new List<Regex>();
-            string excludeOptions = options.GetSetting<string>(settingsKey, "");
-            if (!string.IsNullOrWhiteSpace(excludeOptions))
+            string pattern = options.GetSetting<string>(settingsKey, "");
+            if (string.IsNullOrWhiteSpace(pattern))
             {
-                foreach (string pattern in excludeOptions.ToDelimitedList())
-                {
-                    try
-                    {
-                        exclude.Add(new Regex(pattern));
-                    }
-                    catch (ArgumentException ex)
-                    {
-                        logger.LogDebug("Unable to parse pattern '{pattern}' from '{settingsKey}' as Regex. {error}. Pattern will not be considered.", pattern, settingsKey, ex.Message);
-                    }
-                }
+                return null;
             }
 
-            return exclude;
+            try
+            {
+                return new Regex(pattern);
+            }
+            catch (ArgumentException ex)
+            {
+                logger.LogDebug("Unable to parse pattern '{pattern}' from '{settingsKey}' as Regex. {error}. Pattern will not be considered.", pattern, settingsKey, ex.Message);
+                return null;
+            }
         }
 
 
