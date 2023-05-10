@@ -985,7 +985,7 @@ namespace uSync.Core.Serialization.Serializers
 
         private Regex GetExcludedPropertyPattern(SyncSerializerOptions options)
         {
-            const string settingsKey = "DoNotSerializePatterns";
+            const string settingsKey = "DoNotSerializePattern";
 
             string pattern = options.GetSetting<string>(settingsKey, "");
             if (string.IsNullOrWhiteSpace(pattern))
