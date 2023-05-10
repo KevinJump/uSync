@@ -207,17 +207,17 @@ namespace uSync.Core.Serialization.Serializers
                 || options.GetSetting(uSyncConstants.DefaultsKey, false);
 
             var excludedProperties = GetExcludedProperties(options);
-            var excludedPropertyPattern = GetExcludedPropertyPattern(options);
+            var excludedPropertiesPattern = GetExcludedPropertiesPattern(options);
             var availableCultures = item.AvailableCultures.ToList();
 
             var node = new XElement("Properties");
             var includedProperties = item.Properties
                 .Where(x => !excludedProperties.InvariantContains(x.Alias));
 
-            if(excludedPropertyPattern is not null)
+            if(excludedPropertiesPattern is not null)
             {
                 includedProperties = includedProperties
-                 .Where(x => !excludedPropertyPattern.IsMatch(x.Alias));
+                 .Where(x => !excludedPropertiesPattern.IsMatch(x.Alias));
             }
 
             foreach (var property in includedProperties.OrderBy(x => x.Alias))
@@ -983,7 +983,7 @@ namespace uSync.Core.Serialization.Serializers
             return exclude;
         }
 
-        private Regex GetExcludedPropertyPattern(SyncSerializerOptions options)
+        private Regex GetExcludedPropertiesPattern(SyncSerializerOptions options)
         {
             const string settingsKey = "DoNotSerializePattern";
 
