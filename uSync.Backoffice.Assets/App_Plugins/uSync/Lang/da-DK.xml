@@ -1,0 +1,100 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<language alias="da" intName="Danish" localName="Dansk" lcid="" culture="da-DK">
+	<creator>
+		<name>Jumoo</name>
+		<link>http://jumoo.uk</link>
+	</creator>
+	<area alias="treeHeaders">
+		<key alias="sync">Synkronisering</key>
+		<key alias="usync">uSync</key>
+	</area>
+	<area alias="usync">
+		<key alias="name">uSync</key>
+		<key alias="intro">Database-elementer til og fra disk</key>
+
+		<key alias="newer">Der findes en nyere version af uSync</key>
+		<key alias="noHandlers"><![CDATA[Ingen handlers blev indlæst, så du kan ikke synkronisere noget - check dine indstillinger i appsettings.json-filen, da der kan være beskadigede eller ugyldige indstillinger deri 😢]]></key>
+
+		<key alias="import">Import</key>
+		<key alias="importforce">Fuld Import</key>
+		<key alias="importFile">Import fra fil</key>
+		<key alias="report">Rapportér</key>
+		<key alias="export">Eksportér</key>
+		<key alias="exportClean">Ren Eksport</key>
+		<key alias="apply">Anvend</key>
+
+		<key alias="download">download</key>
+		<key alias="downloadTitle">Download uSync-mappen?</key>
+		<key alias="downloadMsg">
+			<![CDATA[
+			<p>Download din uSync-mappe som zip-fil?</p>
+			<small><em>Downloaden vil indeholde alle filer i uSync-mappen, ikke kun de emner du lige har eksporteret</em></small>]]>
+		</key>
+
+		<key alias="exportFile">Eksportér til fil</key>
+		<key alias="exportFileMsg">
+			<![CDATA[
+			<p>Eksportér og download mappen som zip-file?</p>
+			<small><em>En normal eksport udføres med tomme/slettede emner bibeholdt. Hvis du ikke ønsker dette, skal du lave en ren eksport inden du downloader filen</em></small>]]>
+		</key>
+
+		<key alias="details">Detaljer</key>
+
+		<key alias="handlers">Item Handlers</key>
+		<key alias="savesettings">Gem Indstillinger</key>
+
+		<key alias="import-content">Importér Indhold/Media</key>
+		<key alias="import-settings">Importér Indstillinger</key>
+		<key alias="import-members">Importér Medlemmer</key>
+		<key alias="import-users">Importér Brugere</key>
+
+		<key alias="everything">Alting</key>
+		<key alias="everything-description">Alle Indstillinger, Indhold og andet</key>
+
+		<key alias="settings-description">Datatyper, Dokumenttyper og alle Indstillinger</key>
+		<key alias="content-description">Indhold, Media og relaterede emner</key>
+		<key alias="members-description">Medlemmer og Medlemsgrupper</key>
+		<key alias="users-description">Brugere og Brugergrupper</key>
+
+		<key alias="report-content">Rapportér Indhold/Media</key>
+		<key alias="report-settings">Rapportér Indstillinger</key>
+		<key alias="report-members">Rapportér Medlemmer</key>
+		<key alias="report-users">Rapportér Brugere</key>
+
+		<key alias="tableType">Type</key>
+		<key alias="tableName">Navn</key>
+		<key alias="tableChange">Ændring</key>
+		<key alias="tableMessage">Besked</key>
+
+		<key alias="nochange"><![CDATA[<h4>Ingen ændringer</h4>]]></key>
+		<key alias="nochange_quote"><![CDATA[Things don't have to change the world to be important]]></key>
+
+		<!-- warning messages -->
+		<key alias="oldformat">
+			<![CDATA[Denne synkroniseringsmappe er fra en ældre version af uSync. Synkroniseringen vil stadig fungere, men du vil få hurtigere og bedre resultater med en nyere eksport.  
+		  <a href="https://github.com/KevinJump/uSync/blob/v10/dev/changes/format.md" target="_blank" rel="noopener"><i class="icon icon-info"></i>info</a>]]>
+		</key>
+		<key alias="createWarning"><![CDATA[En eller flere handlers are sat til kun at oprette. [%0%]. Ændringer i elementer bliver muligvis ikke synkroniseret]]></key>
+
+		<key alias="forms"><![CDATA[Bruger du Umbraco Forms? Du kan nu synkronisere formularer og indstillinger med <a href="http://jumoo.co.uk/usync/forms" target="_blank" rel="noopener">uSync.FormsEdition</a>]]></key>
+
+		<key alias="cleanTitle">Ren Eksport</key>
+		<key alias="cleanMsg"><![CDATA[Er du sikker? En ren eksport vil slette alt indholdet i uSync-mappen. Du vil miste gemte Slet- eller Omdøb-operationer.]]></key>
+		<key alias="cleanSubmit">Ja, kør en ren eksport</key>
+		<key alias="cleanClose">Nej, luk</key>
+
+		<key alias="saving">Du har lige sparet %0% sekunder (agtigt)</key>
+		<key alias="godo0">Værd at undersøge</key>
+		<key alias="godo1">Tag en kop kaffe ☕</key>
+		<key alias="godo2">Tag en hurtig snak</key>
+		<key alias="godo3">Gå en god tur udenfor 🌲 🦆</key>
+		<key alias="godo4">Du fortjener en pause</key>
+
+		<key alias="apply-intro">Det kan skabe problemer at anvende individuelle ændringer, hvis afhængighederne til dette emne ikke allerede er synkroniseret.</key>
+		<key alias="apply-success">Import gennemført</key>
+		<key alias="apply-failure">Import fejlede</key>
+	</area>
+	<area alias="dashboardTabs">
+		<key alias="usync">uSync</key>
+	</area>
+</language>
