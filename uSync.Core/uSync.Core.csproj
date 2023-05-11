@@ -13,6 +13,8 @@
 		<IncludeSymbols>true</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 
+		<PackageReadmeFile>readme.md</PackageReadmeFile>
+
 		<EnablePackageValidation>true</EnablePackageValidation>
 		<!-- <PackageValidationBaselineVersion>11.0.0</PackageValidationBaselineVersion> -->
 
@@ -23,7 +25,11 @@
 		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" /> 
 	</ItemGroup>
 
-	<!-- Package Validation -->
+	<ItemGroup>
+		<None Include="readme.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
+
+		<!-- Package Validation -->
 	<PropertyGroup>
 		<EnablePackageValidation>true</EnablePackageValidation>
 		<PackageValidationBaselineVersion>11.0.0</PackageValidationBaselineVersion>

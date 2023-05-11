@@ -11,6 +11,7 @@
 
 		<Description>Umbraco Backoffice and Events for uSync.</Description>
 
+		<PackageReadmeFile>readme.md</PackageReadmeFile>
 	</PropertyGroup>
 
 	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
@@ -34,6 +35,12 @@
 		<EmbeddedResource Remove="Commands\**" />
 		<None Remove="Commands\**" />
 	</ItemGroup>
+
+
+	<ItemGroup>
+		<None Include="readme.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
+
 
 	<!-- Package Validation -->
 	<!-- 

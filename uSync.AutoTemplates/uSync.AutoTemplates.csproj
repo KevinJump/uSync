@@ -2,10 +2,17 @@
 
 	<PropertyGroup>
 		<TargetFramework>net7.0</TargetFramework>
+		<PackageReadmeFile>readme.md</PackageReadmeFile>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="11.0.0" />
+	</ItemGroup>
+
+
+
+	<ItemGroup>
+		<None Include="readme.md" Pack="true" PackagePath="\" />
 	</ItemGroup>
 
 </Project>

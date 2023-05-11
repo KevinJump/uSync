@@ -7,8 +7,11 @@
 		<VersionPrefix>9.0.0</VersionPrefix>
 
 		<Description>
-			Contribted value mappers for uSync 9.
+			Contribted value mappers for uSync.
 		</Description>
+
+		<PackageReadmeFile>readme.md</PackageReadmeFile>
+
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -19,6 +22,10 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\uSync.Core\uSync.Core.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="readme.md" Pack="true" PackagePath="\" />
 	</ItemGroup>
 
 
