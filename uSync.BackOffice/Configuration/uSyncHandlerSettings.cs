@@ -53,7 +53,7 @@ namespace uSync.BackOffice.Configuration
         /// <summary>
         /// Additional settings for the handler
         /// </summary>
-        public Dictionary<string, string> Settings { get; set; } = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
+        public Dictionary<string, object> Settings { get; set; } = new Dictionary<string, object>(StringComparer.InvariantCultureIgnoreCase);
     }
 
     /// <summary>
@@ -89,7 +89,7 @@ namespace uSync.BackOffice.Configuration
         public static void AddSetting<TObject>(this HandlerSettings settings, string key, TObject value)
         {
             if (settings.Settings == null)
-                settings.Settings = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
+                settings.Settings = new Dictionary<string, object>(StringComparer.InvariantCultureIgnoreCase);
 
             settings.Settings[key] = value.ToString();
         }
@@ -109,7 +109,7 @@ namespace uSync.BackOffice.Configuration
                 UseFlatStructure = settings.UseFlatStructure,
                 Group = settings.Group,
                 GuidNames = settings.GuidNames,
-                Settings = new Dictionary<string, string>(settings.Settings, StringComparer.InvariantCultureIgnoreCase)
+                Settings = new Dictionary<string, object>(settings.Settings, StringComparer.InvariantCultureIgnoreCase)
             };
         }
 

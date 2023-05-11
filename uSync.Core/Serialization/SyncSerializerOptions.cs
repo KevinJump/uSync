@@ -18,13 +18,13 @@ namespace uSync.Core.Serialization
             this.Flags = flags;
         }
 
-        public SyncSerializerOptions(Dictionary<string, string> settings)
+        public SyncSerializerOptions(Dictionary<string, object> settings)
         {
-            this.Settings = settings != null ? new Dictionary<string, string>(settings) : new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
+            this.Settings = settings != null ? new Dictionary<string, object>(settings) : new Dictionary<string, object>(StringComparer.InvariantCultureIgnoreCase);
 
         }
 
-        public SyncSerializerOptions(SerializerFlags flags, Dictionary<string, string> settings)
+        public SyncSerializerOptions(SerializerFlags flags, Dictionary<string, object> settings)
             : this(settings)
         {
             this.Flags = flags;
@@ -46,7 +46,7 @@ namespace uSync.Core.Serialization
         /// <summary>
         ///  Parameterized options, custom for each handler
         /// </summary>
-        public Dictionary<string, string> Settings { get; internal set; }
+        public Dictionary<string, object> Settings { get; internal set; }
 
         /// <summary>
         ///  flag properties, we can move this away from flags if we want to.
@@ -102,7 +102,7 @@ namespace uSync.Core.Serialization
 
         public string SwapValue(string key, string newValue)
         {
-            string oldValue = null;
+            object oldValue = null;
 
             if (!this.Settings.ContainsKey(key))
                 oldValue = this.Settings[key];
@@ -112,7 +112,7 @@ namespace uSync.Core.Serialization
             else
                 this.Settings[key] = newValue;
 
-            return oldValue;
+            return oldValue.ToString();
         }
 
         /// <summary>
@@ -120,7 +120,7 @@ namespace uSync.Core.Serialization
         /// </summary>
         public void MergeSettings(Dictionary<string, string> newSettings)
         {
-            if (Settings == null) Settings = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
+            if (Settings == null) Settings = new Dictionary<string, object>(StringComparer.InvariantCultureIgnoreCase);
             if (newSettings != null)
             {
                 foreach (var kvp in newSettings)
