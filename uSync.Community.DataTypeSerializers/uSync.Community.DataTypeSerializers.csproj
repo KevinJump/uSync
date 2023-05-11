@@ -12,6 +12,9 @@
 		<EmbedUntrackedSources>true</EmbedUntrackedSources>
 		<IncludeSymbols>true</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+
+		<PackageReadmeFile>readme.md</PackageReadmeFile>
+
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -24,5 +27,10 @@
 		<PackageReference Include="uSync.BackOffice" Version="10.0.0" />
 		<!-- <ProjectReference Include="..\uSync.BackOffice\uSync.BackOffice.csproj" /> -->
 	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="readme.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
+
 
 </Project>

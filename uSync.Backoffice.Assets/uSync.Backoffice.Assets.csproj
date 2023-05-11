@@ -5,6 +5,9 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<StaticWebAssetBasePath>App_Plugins</StaticWebAssetBasePath>
 		<AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+
+		<PackageReadmeFile>readme.md</PackageReadmeFile>
+
 	</PropertyGroup>
 
 
@@ -40,4 +43,9 @@
 	<ItemGroup>
 	  <Folder Include="wwwroot\" />
 	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="readme.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
+
 </Project>

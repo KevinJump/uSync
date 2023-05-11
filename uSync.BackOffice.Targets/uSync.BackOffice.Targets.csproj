@@ -6,6 +6,9 @@
 		<Nullable>enable</Nullable>
 		<EnableDefaultContentItems>false</EnableDefaultContentItems>
 		<NoWarn>NU5100;NU5128</NoWarn>
+
+		<PackageReadmeFile>readme.md</PackageReadmeFile>
+
 	</PropertyGroup>
 
 	<PropertyGroup>
@@ -16,6 +19,10 @@
 	<ItemGroup>
 		<Content Include="buildTransitive\**" PackagePath="buildTransitive" />
 		<Content Include="appsettings-schema.usync.json" PackagePath="" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="readme.md" Pack="true" PackagePath="\" />
 	</ItemGroup>
 
 </Project>
