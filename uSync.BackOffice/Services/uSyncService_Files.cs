@@ -18,10 +18,12 @@ public partial class uSyncService
     /// <returns>Stream of zip file for folder</returns>
     public MemoryStream CompressFolder(string folder)
     {
-        if (!Directory.Exists(folder))
-            throw new DirectoryNotFoundException(folder);
+        var fullPath = _syncFileService.GetAbsPath(folder);
 
-        var directoryInfo = new DirectoryInfo(folder);
+        if (!Directory.Exists(fullPath))
+            throw new DirectoryNotFoundException(fullPath);
+
+        var directoryInfo = new DirectoryInfo(fullPath);
         var files = directoryInfo.GetFiles("*.*", SearchOption.AllDirectories);
 
         var stream = new MemoryStream();
@@ -29,7 +31,7 @@ public partial class uSyncService
         {
             foreach (var file in files)
             {
-                var relativePath = GetRelativePath(folder, file.FullName);
+                var relativePath = GetRelativePath(fullPath, file.FullName);
                 archive.CreateEntryFromFile(file.FullName, relativePath);
             }
         }
