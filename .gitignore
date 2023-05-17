@@ -5,6 +5,8 @@ uSync.BackOffice.Assets/wwwroot/
 uSyncSource.Site/App_Plugins/
 *.zip
 
+uSync.*.Site/
+
 # User-specific files
 *.suo
 *.user

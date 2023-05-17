@@ -1,15 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net7.0</TargetFramework>
+		<TargetFrameworks>net6.0;net7.0</TargetFrameworks>
 		<PackageReadmeFile>readme.md</PackageReadmeFile>
 	</PropertyGroup>
 
-	<ItemGroup>
+	<ItemGroup Condition=" '$(TargetFramework)' == 'net7.0' ">
 		<PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="11.0.0" />
 	</ItemGroup>
 
-
+	<ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
+		<PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="10.0.0" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<None Include="readme.md" Pack="true" PackagePath="\" />

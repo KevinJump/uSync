@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net7.0</TargetFrameworks>
+		<TargetFrameworks>net6.0;net7.0</TargetFrameworks>
 
 		<PackageId>uSync.Community.DataTypeSerializers</PackageId>
 
@@ -17,15 +17,24 @@
 
 	</PropertyGroup>
 
+
 	<ItemGroup>
-		<PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="11.0.0" />
-		<PackageReference Include="Umbraco.Cms.Web.Website" Version="11.0.0" />
 		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
 	</ItemGroup>
 
+	<ItemGroup Condition=" '$(TargetFramework)' == 'net7.0' ">
+		<PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="11.0.0" />
+		<PackageReference Include="Umbraco.Cms.Web.Website" Version="11.0.0" />
+	</ItemGroup>
+
+	<ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
+		<PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="10.0.0" />
+		<PackageReference Include="Umbraco.Cms.Web.Website" Version="10.0.0" />
+	</ItemGroup>
+
+
 	<ItemGroup>
 		<PackageReference Include="uSync.BackOffice" Version="10.0.0" />
-		<!-- <ProjectReference Include="..\uSync.BackOffice\uSync.BackOffice.csproj" /> -->
 	</ItemGroup>
 
 	<ItemGroup>

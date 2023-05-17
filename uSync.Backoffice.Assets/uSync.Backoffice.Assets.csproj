@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
 	<PropertyGroup>
-		<TargetFramework>net7.0</TargetFramework>
+		<TargetFrameworks>net6.0;net7.0</TargetFrameworks>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<StaticWebAssetBasePath>App_Plugins</StaticWebAssetBasePath>
 		<AddRazorSupportForMvc>true</AddRazorSupportForMvc>
@@ -23,12 +23,17 @@
 		<Exec Command="gulp minify --release $(PackageVersion)" />
 	</Target>
 
-	<ItemGroup>
+	<ItemGroup Condition=" '$(TargetFramework)' == 'net7.0' ">
 		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="7.0.0" />
 		<PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="11.0.0" />
 	</ItemGroup>
 
-	<ItemGroup>
+	<ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.0" />
+		<PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="10.0.0" />
+	</ItemGroup>
+
+		<ItemGroup>
 		<ProjectReference Include="..\uSync.BackOffice.Targets\uSync.BackOffice.Targets.csproj" />
 		<ProjectReference Include="..\uSync.BackOffice\uSync.BackOffice.csproj" />
 	</ItemGroup>
