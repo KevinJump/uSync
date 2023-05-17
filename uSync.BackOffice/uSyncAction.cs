@@ -165,7 +165,7 @@ namespace uSync.BackOffice
         /// <summary>
         ///  Create a new report action
         /// </summary>
-        [Obsolete("Reporting with the Path gives better feedback to the user.")]
+        [Obsolete("Reporting with the Path gives better feedback to the user. v13")]
         public static uSyncAction ReportAction(ChangeType changeType, string name, string file, Guid key, string handlerAlias, string message)
         {
             return new uSyncAction(true, name, typeof(T).Name, changeType, message, null, file, handlerAlias)

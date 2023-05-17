@@ -28,17 +28,6 @@ namespace uSync.Core.Serialization.Serializers
         private readonly uSyncCapabilityChecker _capabilityChecker;
         private readonly IConfiguration _configuration;
 
-        [Obsolete("call with compatibility checker - will remove in v11")]
-        public TemplateSerializer(
-            IEntityService entityService,
-            ILogger<TemplateSerializer> logger,
-            IShortStringHelper shortStringHelper,
-            IFileService fileService,
-            FileSystems fileSystems
-        ) : this(entityService, logger, shortStringHelper, fileService, fileSystems, null, null)
-        { }
-
-        [ActivatorUtilitiesConstructor]
         public TemplateSerializer(
             IEntityService entityService,
             ILogger<TemplateSerializer> logger,

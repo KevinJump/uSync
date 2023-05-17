@@ -44,7 +44,7 @@ namespace uSync.Core.Sync
         ///  when variants are present the user can be presented with 
         ///  the option of what languages they want to sync.
         /// </remarks>
-        [Obsolete("Use All Variants when returning variants so we know whas is avalible.")]
+        [Obsolete("Use All Variants when returning variants so we know whas is avalible. v13")]
         public Dictionary<string, string> Variants { get; set; }
 
         /// <summary>

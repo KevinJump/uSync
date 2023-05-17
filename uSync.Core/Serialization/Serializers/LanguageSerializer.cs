@@ -22,15 +22,6 @@ namespace uSync.Core.Serialization.Serializers
     {
         private readonly ILocalizationService _localizationService;
 
-        [Obsolete("Will remove GlobalSettings in v11")]
-        public LanguageSerializer(IEntityService entityService,
-            ILogger<LanguageSerializer> logger,
-            ILocalizationService localizationService,
-            IOptions<GlobalSettings> options)
-            : this(entityService, logger, localizationService)
-        { }
-
-        [ActivatorUtilitiesConstructor]
         public LanguageSerializer(IEntityService entityService,
             ILogger<LanguageSerializer> logger,
             ILocalizationService localizationService)
