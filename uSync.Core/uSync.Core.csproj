@@ -14,10 +14,6 @@
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 
 		<PackageReadmeFile>readme.md</PackageReadmeFile>
-
-		<EnablePackageValidation>true</EnablePackageValidation>
-		<!-- <PackageValidationBaselineVersion>11.0.0</PackageValidationBaselineVersion> -->
-
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -29,7 +25,7 @@
 		<None Include="readme.md" Pack="true" PackagePath="\" />
 	</ItemGroup>
 
-		<!-- Package Validation -->
+	<!-- Package Validation -->
 	<PropertyGroup>
 		<EnablePackageValidation>true</EnablePackageValidation>
 		<PackageValidationBaselineVersion>11.0.0</PackageValidationBaselineVersion>

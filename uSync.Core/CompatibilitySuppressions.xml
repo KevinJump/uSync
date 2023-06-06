@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- https://learn.microsoft.com/en-us/dotnet/fundamentals/package-validation/diagnostic-ids -->
+<Suppressions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<!-- DI Constructor for ImagePathMapper now included GlobalSettings-->
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:uSync.Core.Mapping.ImagePathMapper.#ctor(Microsoft.Extensions.Configuration.IConfiguration,Umbraco.Cms.Core.Services.IEntityService,Microsoft.Extensions.Logging.ILogger{uSync.Core.Mapping.ImagePathMapper})</Target>
+    <Left>lib/net7.0/uSync.Core.dll</Left>
+    <Right>lib/net7.0/uSync.Core.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+</Suppressions>
