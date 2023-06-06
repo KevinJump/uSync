@@ -5,11 +5,13 @@ using System.Text.RegularExpressions;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 using Umbraco.Cms.Core;
+using Umbraco.Cms.Core.Configuration.Models;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Extensions;
 
@@ -30,14 +32,17 @@ namespace uSync.Core.Mapping
     /// </remarks>
     public class ImagePathMapper : SyncValueMapperBase, ISyncMapper
     {
+        private const string s_genericMediaPath = "/media";
+
         private readonly string siteRoot;
-        private readonly string mediaFolder;
+        private string _mediaFolder;
         private readonly ILogger<ImagePathMapper> logger;
 
         private readonly IConfiguration configuration;
 
         public ImagePathMapper(
             IConfiguration configuration,
+            IOptionsMonitor<GlobalSettings> _globalOptions,
             IEntityService entityService,
             ILogger<ImagePathMapper> logger) : base(entityService)
         {
@@ -46,11 +51,13 @@ namespace uSync.Core.Mapping
 
             // todo: site root might need us to include extra nuget.
             siteRoot = "";
-            mediaFolder = GetMediaFolderSetting();
 
-            if (!string.IsNullOrWhiteSpace(mediaFolder))
+            _mediaFolder = GetMediaFolderSetting(_globalOptions.CurrentValue.UmbracoMediaPath.TrimStart('~'));
+            _globalOptions.OnChange(x => _mediaFolder = GetMediaFolderSetting(x.UmbracoMediaPath.TrimStart('~')));
+
+            if (!string.IsNullOrWhiteSpace(_mediaFolder))
             {
-                logger.LogDebug("Media Folders: [{media}]", mediaFolder);
+                logger.LogDebug("Media Folders: [{media}]", _mediaFolder);
             }
         }
 
@@ -99,7 +106,7 @@ namespace uSync.Core.Mapping
             if (siteRoot.Length > 0 && !string.IsNullOrWhiteSpace(filepath) && filepath.InvariantStartsWith(siteRoot))
                 path = filepath.Substring(siteRoot.Length);
 
-            return ReplacePath(path, mediaFolder, "/media");
+            return ReplacePath(path, _mediaFolder, s_genericMediaPath);
         }
 
         private string PrePendSitePath(string filepath)
@@ -108,7 +115,7 @@ namespace uSync.Core.Mapping
             if (siteRoot.Length > 0 && !string.IsNullOrEmpty(filepath))
                 path = $"{siteRoot}{filepath}";
 
-            return ReplacePath(path, "/media", mediaFolder);
+            return ReplacePath(path, s_genericMediaPath, _mediaFolder);
         }
 
 
@@ -131,7 +138,8 @@ namespace uSync.Core.Mapping
         private string ReplacePath(string filepath, string currentPath, string targetPath)
         {
             if (!string.IsNullOrWhiteSpace(targetPath)
-                && !string.IsNullOrWhiteSpace(currentPath))
+                && !string.IsNullOrWhiteSpace(currentPath)
+                && !currentPath.Equals(targetPath))
             {
                 return Regex.Replace(filepath, $"^{currentPath}", targetPath, RegexOptions.IgnoreCase);
             }
@@ -155,13 +163,12 @@ namespace uSync.Core.Mapping
         ///     </media>
         ///  </backoffice>
         /// </remarks>
-        private string GetMediaFolderSetting()
+        private string GetMediaFolderSetting(string umbracoMediaPath)
         {
             var folder = this.configuration.GetValue<string>("uSync:MediaFolder", string.Empty);
-            if (!string.IsNullOrEmpty(folder))
-                return folder;
+            if (!string.IsNullOrEmpty(folder)) return folder;
 
-            return string.Empty;
+            return umbracoMediaPath;
         }
 
 
