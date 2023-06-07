@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Suppressions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:uSync.Core.Mapping.ImagePathMapper.#ctor(Microsoft.Extensions.Configuration.IConfiguration,Umbraco.Cms.Core.Services.IEntityService,Microsoft.Extensions.Logging.ILogger{uSync.Core.Mapping.ImagePathMapper})</Target>
+    <Left>lib/net6.0/uSync.Core.dll</Left>
+    <Right>lib/net6.0/uSync.Core.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+</Suppressions>
