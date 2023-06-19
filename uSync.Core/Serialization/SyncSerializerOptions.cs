@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Xml.Linq;
 
+using Org.BouncyCastle.Bcpg.Sig;
+
 using Umbraco.Extensions;
 
 namespace uSync.Core.Serialization
@@ -11,6 +13,9 @@ namespace uSync.Core.Serialization
     /// </summary>
     public class SyncSerializerOptions
     {
+        // the user who is doing the serialization 
+        public int UserId = -1;
+
         public SyncSerializerOptions() { }
 
         public SyncSerializerOptions(SerializerFlags flags)
@@ -28,6 +33,12 @@ namespace uSync.Core.Serialization
             : this(settings)
         {
             this.Flags = flags;
+        }
+
+        public SyncSerializerOptions(SerializerFlags flags, Dictionary<string, string> settings, int userId)
+            : this(flags, settings)
+        {
+            UserId = userId;
         }
 
         /// <summary>

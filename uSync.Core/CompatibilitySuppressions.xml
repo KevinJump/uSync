@@ -1,10 +1,30 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <!-- https://learn.microsoft.com/en-us/dotnet/fundamentals/package-validation/diagnostic-ids -->
 <Suppressions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-	<!-- DI Constructor for ImagePathMapper now included GlobalSettings-->
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:uSync.Core.Mapping.ImagePathMapper.#ctor(Microsoft.Extensions.Configuration.IConfiguration,Umbraco.Cms.Core.Services.IEntityService,Microsoft.Extensions.Logging.ILogger{uSync.Core.Mapping.ImagePathMapper})</Target>
+    <Left>lib/net7.0/uSync.Core.dll</Left>
+    <Right>lib/net7.0/uSync.Core.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:uSync.Core.Serialization.Serializers.ContentSerializer.#ctor(Umbraco.Cms.Core.Services.IEntityService,Umbraco.Cms.Core.Services.ILocalizationService,Umbraco.Cms.Core.Services.IRelationService,Umbraco.Cms.Core.Strings.IShortStringHelper,Microsoft.Extensions.Logging.ILogger{uSync.Core.Serialization.Serializers.ContentSerializer},Umbraco.Cms.Core.Services.IContentService,Umbraco.Cms.Core.Services.IFileService,uSync.Core.Mapping.SyncValueMapperCollection)</Target>
+    <Left>lib/net7.0/uSync.Core.dll</Left>
+    <Right>lib/net7.0/uSync.Core.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:uSync.Core.Serialization.Serializers.ContentSerializer.PublishItem(Umbraco.Cms.Core.Models.IContent)</Target>
+    <Left>lib/net7.0/uSync.Core.dll</Left>
+    <Right>lib/net7.0/uSync.Core.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:uSync.Core.Serialization.Serializers.ContentTemplateSerializer.#ctor(Umbraco.Cms.Core.Services.IEntityService,Umbraco.Cms.Core.Services.ILocalizationService,Umbraco.Cms.Core.Services.IRelationService,Umbraco.Cms.Core.Strings.IShortStringHelper,Microsoft.Extensions.Logging.ILogger{uSync.Core.Serialization.Serializers.ContentTemplateSerializer},Umbraco.Cms.Core.Services.IContentService,Umbraco.Cms.Core.Services.IFileService,Umbraco.Cms.Core.Services.IContentTypeService,uSync.Core.Mapping.SyncValueMapperCollection)</Target>
     <Left>lib/net7.0/uSync.Core.dll</Left>
     <Right>lib/net7.0/uSync.Core.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>

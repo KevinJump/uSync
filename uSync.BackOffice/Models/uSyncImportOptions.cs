@@ -54,6 +54,11 @@ namespace uSync.BackOffice
         ///  should we pause the uSync export events during the import ?
         /// </summary>
         public bool PauseDuringImport { get; set; } = true;
+
+        /// <summary>
+        ///  the user doing the import. 
+        /// </summary>
+        public int UserId { get; set; } = -1;
     }
 
     /// <summary>

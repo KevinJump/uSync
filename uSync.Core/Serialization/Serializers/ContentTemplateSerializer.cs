@@ -30,8 +30,9 @@ namespace uSync.Core.Serialization.Serializers
             IContentService contentService,
             IFileService fileService,
             IContentTypeService contentTypeService,
-            SyncValueMapperCollection syncMappers)
-            : base(entityService, localizationService, relationService, shortStringHelper, logger, contentService, fileService, syncMappers)
+            SyncValueMapperCollection syncMappers,
+            IUserService userService)
+            : base(entityService, localizationService, relationService, shortStringHelper, logger, contentService, fileService, syncMappers, userService)
         {
             _contentTypeService = contentTypeService;
             this.umbracoObjectType = UmbracoObjectTypes.DocumentBlueprint;
@@ -143,7 +144,7 @@ namespace uSync.Core.Serialization.Serializers
 
         protected override Attempt<string> DoSaveOrPublish(IContent item, XElement node, SyncSerializerOptions options)
         {
-            contentService.SaveBlueprint(item);
+            contentService.SaveBlueprint(item, options.UserId);
             return Attempt.Succeed<string>("blueprint saved");
         }
 
