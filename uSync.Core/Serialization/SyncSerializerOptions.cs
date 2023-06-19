@@ -11,6 +11,9 @@ namespace uSync.Core.Serialization
     /// </summary>
     public class SyncSerializerOptions
     {
+        // the user who is doing the serialization 
+        public int UserId = -1;
+
         public SyncSerializerOptions() { }
 
         public SyncSerializerOptions(SerializerFlags flags)

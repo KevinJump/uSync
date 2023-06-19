@@ -13,6 +13,7 @@ using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Strings;
 using Umbraco.Extensions;
 
+using uSync.Core.Extensions;
 using uSync.Core.Mapping;
 using uSync.Core.Models;
 
@@ -23,6 +24,7 @@ namespace uSync.Core.Serialization.Serializers
     {
         protected readonly IContentService contentService;
         protected readonly IFileService fileService;
+        protected readonly IUserService userService;
 
         public ContentSerializer(
             IEntityService entityService,
@@ -32,13 +34,15 @@ namespace uSync.Core.Serialization.Serializers
             ILogger<ContentSerializer> logger,
             IContentService contentService,
             IFileService fileService,
-            SyncValueMapperCollection syncMappers)
+            SyncValueMapperCollection syncMappers,
+            IUserService userService)
             : base(entityService, localizationService, relationService, shortStringHelper, logger, UmbracoObjectTypes.Document, syncMappers)
         {
             this.contentService = contentService;
             this.fileService = fileService;
 
             this.relationAlias = Constants.Conventions.RelationTypes.RelateParentDocumentOnDeleteAlias;
+            this.userService = userService;
         }
 
         #region Serialization
@@ -64,6 +68,11 @@ namespace uSync.Core.Serialization.Serializers
             info.Add(SerailizePublishedStatus(item, options));
             info.Add(SerializeSchedule(item, options));
             info.Add(SerializeTemplate(item, options));
+
+            if (options.GetSetting<bool>("IncludeUserInfo", true))
+            {
+                info.Add(SerializerWriterInfo(item, options));
+            }
 
             return info;
         }
@@ -133,6 +142,19 @@ namespace uSync.Core.Serialization.Serializers
             return node;
         }
 
+
+        private XElement SerializerWriterInfo(IContent item, SyncSerializerOptions options)
+        {
+            var userInfoNode = new XElement("UserInfo");
+            var usernames = new Dictionary<int, string>();
+            
+            userInfoNode.Add(new XElement("Writer", usernames.GetUsername(item.WriterId, userService.GetUserById)));
+            userInfoNode.Add(new XElement("Creator", usernames.GetUsername(item.CreatorId, userService.GetUserById)));
+            userInfoNode.Add(new XElement("Publisher", usernames.GetUsername(item.PublisherId, userService.GetUserById)));
+
+            return userInfoNode;
+        }
+
         #endregion
 
         #region De-serialization
@@ -176,6 +198,15 @@ namespace uSync.Core.Serialization.Serializers
                 // Fail on warning. means we don't save or publish because something is wrong ?
                 return SyncAttempt<IContent>.Fail(item.Name, item, ChangeType.ImportFail, "Failed with warnings", details,
                     new Exception("Import failed because of warnings, and fail on warnings is true"));
+            }
+
+            // read user ids from the xml, 
+            var userId = DeserializeWriterInfo(item, node, options);
+
+            // if the userId hasn't been set in the options , we use the one from the xml.
+            if (options.UserId == -1)
+            {
+                options.UserId = userId;
             }
 
             // published status
@@ -238,6 +269,20 @@ namespace uSync.Core.Serialization.Serializers
             }
 
             return null;
+        }
+
+        public int DeserializeWriterInfo(IContent item, XElement node, SyncSerializerOptions options)
+        {
+            var writerNode = node.Element("Info")?.Element("UserInfo");
+            if (writerNode == null) return -1;
+
+            var emails = new Dictionary<string, int>();
+
+            item.CreatorId = emails.GetEmails(writerNode.Element("Creator").ValueOrDefault(string.Empty), userService.GetByEmail);
+            item.WriterId = emails.GetEmails(writerNode.Element("Writer").ValueOrDefault(string.Empty), userService.GetByEmail);
+            item.PublisherId = emails.GetEmails(writerNode.Element("Publisher").ValueOrDefault(string.Empty), userService.GetByEmail);
+
+            return item.WriterId;
         }
 
         /// <summary>
@@ -420,7 +465,7 @@ namespace uSync.Core.Serialization.Serializers
 
                     if (cultureStatuses.Count > 0)
                     {
-                        return PublishItem(item, cultureStatuses, unpublishMissingCultures);
+                        return PublishItem(item, cultureStatuses, unpublishMissingCultures, options.UserId);
                     }
                 }
                 else
@@ -433,7 +478,7 @@ namespace uSync.Core.Serialization.Serializers
 
                     if (state == uSyncContentState.Published)
                     {
-                        return PublishItem(item);
+                        return PublishItem(item, options.UserId);
                     }
                     else if (state == uSyncContentState.Unpublished && item.Published == true)
                     {
@@ -442,7 +487,7 @@ namespace uSync.Core.Serialization.Serializers
                 }
             }
 
-            this.SaveItem(item);
+            this.SaveItem(item, options.UserId);
             return Attempt.Succeed("Saved");
         }
 
@@ -463,11 +508,11 @@ namespace uSync.Core.Serialization.Serializers
             return schedules;
         }
 
-        public Attempt<string> PublishItem(IContent item)
+        public Attempt<string> PublishItem(IContent item, int userId)
         {
             try
             {
-                var result = contentService.SaveAndPublish(item);
+                var result = contentService.SaveAndPublish(item, userId: userId);
                 if (!result.Success)
                 {
                     var messages = result.EventMessages.FormatMessages(",");
@@ -496,9 +541,9 @@ namespace uSync.Core.Serialization.Serializers
         /// <param name="cultures"></param>
         /// <param name="unpublishMissing"></param>
         /// <returns></returns>
-        private Attempt<string> PublishItem(IContent item, IDictionary<string, uSyncContentState> cultures, bool unpublishMissing)
+        private Attempt<string> PublishItem(IContent item, IDictionary<string, uSyncContentState> cultures, bool unpublishMissing, int userId)
         {
-            if (cultures == null) return PublishItem(item);
+            if (cultures == null) return PublishItem(item, userId);
 
             try
             {
@@ -511,7 +556,7 @@ namespace uSync.Core.Serialization.Serializers
 
                 if (publishedCultures.Length > 0)
                 {
-                    var result = contentService.SaveAndPublish(item, publishedCultures);
+                    var result = contentService.SaveAndPublish(item, publishedCultures, userId);
 
                     // if this fails, we return the result
                     if (!result.Success)
@@ -542,7 +587,7 @@ namespace uSync.Core.Serialization.Serializers
                     {
                         // unpublish if the culture is currently published.
                         if (item.PublishedCultures.InvariantContains(culture))
-                            contentService.Unpublish(item, culture);
+                            contentService.Unpublish(item, culture, userId);
                     }
                 }
 
@@ -631,10 +676,13 @@ namespace uSync.Core.Serialization.Serializers
             => contentService.Save(items);
 
         public override void SaveItem(IContent item)
+            => SaveItem(item, -1);
+
+        public void SaveItem(IContent item, int userId)
         {
             try
             {
-                contentService.Save(item);
+                contentService.Save(item, userId);
             }
             catch (ArgumentNullException ex)
             {
