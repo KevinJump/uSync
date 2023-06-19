@@ -28,7 +28,12 @@ namespace uSync.BackOffice.SyncHandlers
         /// <summary>
         ///  include handlers that are by default disabled 
         /// </summary>
-        public bool IncludeDisabled { get; set; } = false; 
+        public bool IncludeDisabled { get; set; } = false;
+
+        /// <summary>
+        ///  the user id doing all the work.
+        /// </summary>
+        public int UserId { get; set; } = -1;
 
         /// <summary>
         /// Default constructor
@@ -44,14 +49,26 @@ namespace uSync.BackOffice.SyncHandlers
             this.Set = setName;
         }
 
+        public SyncHandlerOptions(string setName, int userId)
+            :this(setName)
+        {
+            this.UserId = userId;
+        }
+
         /// <summary>
         /// Construct options with set and handler action set.
         /// </summary>
         public SyncHandlerOptions(string setName, HandlerActions action)
-            : this()
+            : this(setName)
         {
             this.Set = setName;
             this.Action = action;
+        }
+
+        public SyncHandlerOptions(string setName, HandlerActions action, int userId)
+            : this(setName, action)
+        {
+            this.UserId = userId;
         }
     }
 

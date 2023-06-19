@@ -242,7 +242,8 @@ namespace uSync.BackOffice
             {
                 using (var pause = _mutexService.ImportPause(options.PauseDuringImport))
                 {
-                    SyncHandlerOptions syncHandlerOptions = new SyncHandlerOptions(options.HandlerSet);
+                    SyncHandlerOptions syncHandlerOptions = new SyncHandlerOptions(
+                        options.HandlerSet, options.UserId);
 
                     var cleans = actions
                         .Where(x => x.Change == ChangeType.Clean && !string.IsNullOrWhiteSpace(x.FileName))
@@ -274,7 +275,7 @@ namespace uSync.BackOffice
         }
 
         private SyncHandlerOptions HandlerOptionsFromPaged(uSyncPagedImportOptions options)
-            => new SyncHandlerOptions(options.HandlerSet)
+            => new SyncHandlerOptions(options.HandlerSet, options.UserId)
             {
                 IncludeDisabled = options.IncludeDisabledHandlers
             };

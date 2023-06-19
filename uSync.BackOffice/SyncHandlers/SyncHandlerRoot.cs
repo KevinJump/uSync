@@ -414,7 +414,7 @@ namespace uSync.BackOffice.SyncHandlers
             try
             {
                 // merge the options from the handler and any import options into our serializer options.
-                var serializerOptions = new SyncSerializerOptions(options.Flags, settings.Settings);
+                var serializerOptions = new SyncSerializerOptions(options.Flags, settings.Settings, options.UserId);
                 serializerOptions.MergeSettings(options.Settings);
 
                 // get the item.
@@ -522,7 +522,7 @@ namespace uSync.BackOffice.SyncHandlers
                 if (item == null) return Enumerable.Empty<uSyncAction>();
 
                 // merge the options from the handler and any import options into our serializer options.
-                var serializerOptions = new SyncSerializerOptions(options?.Flags ?? SerializerFlags.None, settings.Settings);
+                var serializerOptions = new SyncSerializerOptions(options?.Flags ?? SerializerFlags.None, settings.Settings, options?.UserId ?? -1);
                 serializerOptions.MergeSettings(options?.Settings);
 
                 // do the second pass on this item
@@ -1078,7 +1078,7 @@ namespace uSync.BackOffice.SyncHandlers
                 var actions = new List<uSyncAction>();
 
                 // get the serializer options
-                var serializerOptions = new SyncSerializerOptions(options.Flags, settings.Settings);
+                var serializerOptions = new SyncSerializerOptions(options.Flags, settings.Settings, options.UserId);
                 serializerOptions.MergeSettings(options.Settings);
 
                 // check if this item is current (the provided XML and exported XML match)
