@@ -69,7 +69,7 @@ namespace uSync.Core.Serialization.Serializers
             info.Add(SerializeSchedule(item, options));
             info.Add(SerializeTemplate(item, options));
 
-            if (options.GetSetting<bool>("IncludeUserInfo", true))
+            if (options.GetSetting<bool>("IncludeUserInfo", false))
             {
                 info.Add(SerializerWriterInfo(item, options));
             }
