@@ -21,7 +21,7 @@
 
 		<RepositoryUrl>https://github.com/KevinJump/uSync</RepositoryUrl>
 
-		<Copyright>Jumoo @ 2013-2021</Copyright>
+		<Copyright>Jumoo @ 2013-2023</Copyright>
 		<Description>Sync Umbraco to and from disk and between instances</Description>
 
 		<EmbedUntrackedSources>true</EmbedUntrackedSources>
