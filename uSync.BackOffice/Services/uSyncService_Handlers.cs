@@ -2,6 +2,8 @@
 using System.IO;
 using System.Linq;
 
+using Umbraco.Cms.Core.Scoping;
+
 using uSync.BackOffice.SyncHandlers;
 using uSync.Core.Serialization;
 
@@ -49,9 +51,13 @@ namespace uSync.BackOffice
                     if (handlerPair == null) return Enumerable.Empty<uSyncAction>();
                     var folder = GetHandlerFolder(options.RootFolder, handlerPair.Handler);
 
-                    return handlerPair.Handler.ImportAll(folder, handlerPair.Settings,
-                        options.Flags.HasFlag(SerializerFlags.Force),
-                        options.Callbacks?.Update);
+                    using (ICoreScope scope = _scopeProvider.CreateCoreScope()) {
+                        using (scope.Notifications.Suppress()) {
+                            return handlerPair.Handler.ImportAll(folder, handlerPair.Settings,
+                                options.Flags.HasFlag(SerializerFlags.Force),
+                                options.Callbacks?.Update);
+                        }
+                    }
                 }
             }
         }

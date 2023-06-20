@@ -1,6 +1,6 @@
 <Project>
     <PropertyGroup>
-		<VersionPrefix>11.0.0</VersionPrefix>
+		<VersionPrefix>12.0.0</VersionPrefix>
 		<Authors>Kevin Jump</Authors>
 		<Company>Jumoo</Company>
 
@@ -21,10 +21,11 @@
  - 9.2 : Peformance improvements
  - 9.3 : Single pass
  - 9.4 : First boot
-10.0 : Umbraco 10 release
+10.0 : Umbraco 10 release (LTS)
  - 10.1 : Umbraco 'Production' mode support
  - 10.2 : Upload / Download Syncs
-11.0 : Umbraco 11 release]]>
+11.0 : Umbraco 11 release
+12.0 : Umbraco 12 release ]]>
 		</PackageReleaseNotes>
 
 		<EmbedUntrackedSources>true</EmbedUntrackedSources>

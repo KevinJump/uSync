@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 
 using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Events;
+using Umbraco.Cms.Core.Scoping;
 using Umbraco.Cms.Core.Semver;
 using Umbraco.Extensions;
 
@@ -43,6 +44,7 @@ namespace uSync.BackOffice
         private SyncFileService _syncFileService;
         private readonly uSyncEventService _mutexService;
 
+        private readonly ICoreScopeProvider _scopeProvider;
 
         private readonly IAppCache _appCache;
 
@@ -56,7 +58,8 @@ namespace uSync.BackOffice
             SyncHandlerFactory handlerFactory,
             SyncFileService syncFileService,
             uSyncEventService mutexService,
-            AppCaches appCaches)
+            AppCaches appCaches,
+            ICoreScopeProvider scopeProvider)
         {
             this._logger = logger;
 
@@ -71,6 +74,7 @@ namespace uSync.BackOffice
 
             uSyncTriggers.DoExport += USyncTriggers_DoExport;
             uSyncTriggers.DoImport += USyncTriggers_DoImport;
+            _scopeProvider = scopeProvider;
         }
 
         /// <summary>
@@ -184,11 +188,15 @@ namespace uSync.BackOffice
         /// <returns>List of actions detailing what did and didn't change</returns>
         public IEnumerable<uSyncAction> Import(string folder, bool force, SyncHandlerOptions handlerOptions, uSyncCallbacks callbacks = null)
         {
-            if (handlerOptions == null) handlerOptions = new SyncHandlerOptions();
-            handlerOptions.Action = HandlerActions.Import;
+            using ICoreScope scope = _scopeProvider.CreateCoreScope();
+            using (scope.Notifications.Suppress())
+            {
+                if (handlerOptions == null) handlerOptions = new SyncHandlerOptions();
+                handlerOptions.Action = HandlerActions.Import;
 
-            var handlers = _handlerFactory.GetValidHandlers(handlerOptions);
-            return Import(folder, force, handlers, callbacks);
+                var handlers = _handlerFactory.GetValidHandlers(handlerOptions);
+                return Import(folder, force, handlers, callbacks);
+            }
         }
 
         /// <summary>
