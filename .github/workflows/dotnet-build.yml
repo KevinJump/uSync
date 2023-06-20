@@ -21,7 +21,7 @@ jobs:
     - name: Setup dotnet
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: "7.0.7"
+        dotnet-version: "7.0.304"
     
     - name: Install GitVersion
       uses: gittools/actions/gitversion/setup@v0.9.7
