@@ -1,9 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-using Org.BouncyCastle.Crypto.Tls;
-using Org.BouncyCastle.Security;
-
 using Umbraco.Extensions;
 
 using uSync.BackOffice.SyncHandlers;
