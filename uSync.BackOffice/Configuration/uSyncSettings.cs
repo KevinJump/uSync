@@ -145,6 +145,13 @@ namespace uSync.BackOffice.Configuration
         /// </summary>
         public string HideAddOns { get; set; } = "licence";
 
+        /// <summary>
+        ///  turns of use of the Notifications.Supress method, so notifications
+        ///  fire after every item is imported.
+        /// </summary>
+        [DefaultValue("false")]
+        public bool DisableNotificationSuppression { get; set; } = false; 
+
     }
 
 }

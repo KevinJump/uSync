@@ -2,6 +2,8 @@
 using System.IO;
 using System.Linq;
 
+using Microsoft.Extensions.Logging;
+
 using Umbraco.Cms.Core.Scoping;
 
 using uSync.BackOffice.SyncHandlers;
@@ -51,18 +53,28 @@ namespace uSync.BackOffice
                     if (handlerPair == null) return Enumerable.Empty<uSyncAction>();
                     var folder = GetHandlerFolder(options.RootFolder, handlerPair.Handler);
 
-                    using ICoreScope scope = _scopeProvider.CreateCoreScope();
-                    using (scope.Notifications.Suppress())
+                    if (!_uSyncConfig.Settings.DisableNotificationSuppression)
                     {
-                        var results = handlerPair.Handler.ImportAll(folder, handlerPair.Settings,
+                        _logger.LogDebug("Performing Import - suppressing notifications");
+
+                        using ICoreScope scope = _scopeProvider.CreateCoreScope();
+                        using (scope.Notifications.Suppress())
+                        {
+                            var results = handlerPair.Handler.ImportAll(folder, handlerPair.Settings,
+                                options.Flags.HasFlag(SerializerFlags.Force),
+                                options.Callbacks?.Update);
+
+                            scope.Complete();
+
+                            return results;
+                        }
+                    }
+                    else
+                    {
+                        return handlerPair.Handler.ImportAll(folder, handlerPair.Settings,
                             options.Flags.HasFlag(SerializerFlags.Force),
                             options.Callbacks?.Update);
-
-                        scope.Complete();
-
-                        return results;
                     }
-
                 }
             }
         }

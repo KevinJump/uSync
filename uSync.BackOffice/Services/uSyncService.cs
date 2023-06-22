@@ -179,7 +179,7 @@ namespace uSync.BackOffice
         private static object _importLock = new object();
 
         /// <summary>
-        ///  Import items into umbraco from a given folder
+        ///  Import items into Umbraco from a given folder
         /// </summary>
         /// <param name="folder">Folder to use for the import</param>
         /// <param name="force">Push changes in even if there is no difference between the file and the item in umbraco</param>
@@ -188,23 +188,32 @@ namespace uSync.BackOffice
         /// <returns>List of actions detailing what did and didn't change</returns>
         public IEnumerable<uSyncAction> Import(string folder, bool force, SyncHandlerOptions handlerOptions, uSyncCallbacks callbacks = null)
         {
-            using ICoreScope scope = _scopeProvider.CreateCoreScope();
-            using (scope.Notifications.Suppress())
+            if (handlerOptions == null) handlerOptions = new SyncHandlerOptions();
+            handlerOptions.Action = HandlerActions.Import;
+
+            var handlers = _handlerFactory.GetValidHandlers(handlerOptions);
+
+            if (!_uSyncConfig.Settings.DisableNotificationSuppression)
             {
-                if (handlerOptions == null) handlerOptions = new SyncHandlerOptions();
-                handlerOptions.Action = HandlerActions.Import;
+                _logger.LogDebug("Performing Import - suppressing notifications");
+                using ICoreScope scope = _scopeProvider.CreateCoreScope();
+                using (scope.Notifications.Suppress())
+                {
+                    var results = Import(folder, force, handlers, callbacks);
+                    scope.Complete();
 
-                var handlers = _handlerFactory.GetValidHandlers(handlerOptions);
-                var results = Import(folder, force, handlers, callbacks);
-
-                scope.Complete();
-
-                return results;
+                    return results;
+                }
+            }
+            else
+            {
+                // no suppression of notifications 
+                return Import(folder, force, handlers, callbacks);
             }
         }
 
         /// <summary>
-        ///  Import items into umbraco from a given folder
+        ///  Import items into Umbraco from a given folder
         /// </summary>
         /// <param name="folder">Folder to use for the import</param>
         /// <param name="force">Push changes in even if there is no difference between the file and the item in umbraco</param>
