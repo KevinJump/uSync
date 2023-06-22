@@ -43,6 +43,7 @@ namespace uSync.Backoffice.Assets
             
             manifests.Add(new PackageManifest
             {
+                PackageId = "uSync",
                 PackageName = uSyncConstants.Package.Name,
                 Version = assembly.GetName().Version.ToString(3),
                 AllowPackageTelemetry = true,
