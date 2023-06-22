@@ -51,13 +51,18 @@ namespace uSync.BackOffice
                     if (handlerPair == null) return Enumerable.Empty<uSyncAction>();
                     var folder = GetHandlerFolder(options.RootFolder, handlerPair.Handler);
 
-                    using (ICoreScope scope = _scopeProvider.CreateCoreScope()) {
-                        using (scope.Notifications.Suppress()) {
-                            return handlerPair.Handler.ImportAll(folder, handlerPair.Settings,
-                                options.Flags.HasFlag(SerializerFlags.Force),
-                                options.Callbacks?.Update);
-                        }
+                    using ICoreScope scope = _scopeProvider.CreateCoreScope();
+                    using (scope.Notifications.Suppress())
+                    {
+                        var results = handlerPair.Handler.ImportAll(folder, handlerPair.Settings,
+                            options.Flags.HasFlag(SerializerFlags.Force),
+                            options.Callbacks?.Update);
+
+                        scope.Complete();
+
+                        return results;
                     }
+
                 }
             }
         }

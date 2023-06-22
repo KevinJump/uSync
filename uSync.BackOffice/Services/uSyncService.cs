@@ -195,7 +195,11 @@ namespace uSync.BackOffice
                 handlerOptions.Action = HandlerActions.Import;
 
                 var handlers = _handlerFactory.GetValidHandlers(handlerOptions);
-                return Import(folder, force, handlers, callbacks);
+                var results = Import(folder, force, handlers, callbacks);
+
+                scope.Complete();
+
+                return results;
             }
         }
 
