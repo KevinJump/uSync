@@ -14,10 +14,10 @@
 		  <PrivateAssets>all</PrivateAssets>
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Umbraco.Cms.Tests" Version="12.0.0-rc4" />
-		<PackageReference Include="Umbraco.Cms.Tests.Integration" Version="12.0.0-rc4" />
+		<PackageReference Include="Umbraco.Cms.Tests" Version="12.0.0" />
+		<PackageReference Include="Umbraco.Cms.Tests.Integration" Version="12.0.0" />
 
-		<PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="12.0.0-rc4" />
+		<PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="12.0.0" />
 
 	</ItemGroup>
 
