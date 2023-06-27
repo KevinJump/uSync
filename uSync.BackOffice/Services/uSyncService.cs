@@ -15,6 +15,7 @@ using Umbraco.Cms.Core.Semver;
 using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;
+using uSync.BackOffice.Extensions;
 using uSync.BackOffice.Services;
 using uSync.BackOffice.SyncHandlers;
 using uSync.Core;
@@ -93,7 +94,7 @@ namespace uSync.BackOffice
         /// </summary>
         /// <param name="folder">Folder to run the report for</param>
         /// <param name="handlerOptions">Options to use for the report - used to load the handlers.</param>
-        /// <param name="callbacks">Callback functions to keep UI uptodate</param>
+        /// <param name="callbacks">Callback functions to keep UI upto date</param>
         /// <returns>List of actions detailing what would and wouldn't change</returns>
         public IEnumerable<uSyncAction> Report(string folder, SyncHandlerOptions handlerOptions, uSyncCallbacks callbacks = null)
         {
@@ -109,7 +110,7 @@ namespace uSync.BackOffice
         /// </summary>
         /// <param name="folder">Folder to run the report for</param>
         /// <param name="handlerAliases">List of Aliases for the sync handlers to use</param>
-        /// <param name="callbacks">Callback functions to keep UI uptodate</param>
+        /// <param name="callbacks">Callback functions to keep UI upto date</param>
         /// <returns>List of actions detailing what would and wouldn't change</returns>
         public IEnumerable<uSyncAction> Report(string folder, IEnumerable<string> handlerAliases, uSyncCallbacks callbacks)
         {
@@ -122,7 +123,7 @@ namespace uSync.BackOffice
         /// </summary>
         /// <param name="folder">Folder to run the report for</param>
         /// <param name="handlers">List of SyncHandlers to use for the report</param>
-        /// <param name="callbacks">Callback functions to keep UI uptodate</param>
+        /// <param name="callbacks">Callback functions to keep UI upto date</param>
         /// <returns>List of actions detailing what would and wouldn't change</returns>
         public IEnumerable<uSyncAction> Report(string folder, IEnumerable<HandlerConfigPair> handlers, uSyncCallbacks callbacks)
         {
@@ -131,7 +132,7 @@ namespace uSync.BackOffice
 
             _mutexService.FireBulkStarting(new uSyncReportStartingNotification());
 
-            _logger.LogDebug("Reporting For [{0}]", string.Join(",", handlers.Select(x => x.Handler.Name)));
+            _logger.LogDebug("Reporting For [{handlers}]", string.Join(",", handlers.Select(x => x.Handler.Name)));
 
             var actions = new List<uSyncAction>();
 
@@ -182,7 +183,7 @@ namespace uSync.BackOffice
         ///  Import items into Umbraco from a given folder
         /// </summary>
         /// <param name="folder">Folder to use for the import</param>
-        /// <param name="force">Push changes in even if there is no difference between the file and the item in umbraco</param>
+        /// <param name="force">Push changes in even if there is no difference between the file and the item in Umbraco</param>
         /// <param name="handlerOptions">Handler options to use (used to calculate handlers to use)</param>
         /// <param name="callbacks">Callbacks to keep UI informed</param>
         /// <returns>List of actions detailing what did and didn't change</returns>
@@ -193,22 +194,13 @@ namespace uSync.BackOffice
 
             var handlers = _handlerFactory.GetValidHandlers(handlerOptions);
 
-            if (!_uSyncConfig.Settings.DisableNotificationSuppression)
+            using ICoreScope scope = _scopeProvider.CreateCoreScope();
+            using (scope.SuppressScopeByConfig(_uSyncConfig))
             {
-                _logger.LogDebug("Performing Import - suppressing notifications");
-                using ICoreScope scope = _scopeProvider.CreateCoreScope();
-                using (scope.Notifications.Suppress())
-                {
-                    var results = Import(folder, force, handlers, callbacks);
-                    scope.Complete();
+                var results = Import(folder, force, handlers, callbacks);
+                scope.Complete();
 
-                    return results;
-                }
-            }
-            else
-            {
-                // no suppression of notifications 
-                return Import(folder, force, handlers, callbacks);
+                return results;
             }
         }
 
@@ -216,7 +208,7 @@ namespace uSync.BackOffice
         ///  Import items into Umbraco from a given folder
         /// </summary>
         /// <param name="folder">Folder to use for the import</param>
-        /// <param name="force">Push changes in even if there is no difference between the file and the item in umbraco</param>
+        /// <param name="force">Push changes in even if there is no difference between the file and the item in Umbraco</param>
         /// <param name="handlerAliases">List of aliases for the handlers you want to use</param>
         /// <param name="callbacks">Callbacks to keep UI informed</param>
         /// <returns>List of actions detailing what did and didn't change</returns>
@@ -227,10 +219,10 @@ namespace uSync.BackOffice
         }
 
         /// <summary>
-        ///  Import items into umbraco from a given folder
+        ///  Import items into Umbraco from a given folder
         /// </summary>
         /// <param name="folder">Folder to use for the import</param>
-        /// <param name="force">Push changes in even if there is no difference between the file and the item in umbraco</param>
+        /// <param name="force">Push changes in even if there is no difference between the file and the item in Umbraco</param>
         /// <param name="handlers">List of Handlers &amp; config to use for import</param>
         /// <param name="callbacks">Callbacks to keep UI informed</param>
         /// <returns>List of actions detailing what did and didn't change</returns>
@@ -247,7 +239,7 @@ namespace uSync.BackOffice
                 {
 
                     // pre import event
-                    _mutexService.FireBulkStarting(new uSyncImportStartingNotification()); 
+                    _mutexService.FireBulkStarting(new uSyncImportStartingNotification());
 
                     var actions = new List<uSyncAction>();
 
@@ -385,7 +377,7 @@ namespace uSync.BackOffice
 
 
         /// <summary>
-        ///  Export items from umbraco into a given folder
+        ///  Export items from Umbraco into a given folder
         /// </summary>
         /// <param name="folder">folder to place items</param>
         /// <param name="handlerOptions">Handler options to use when loading handlers</param>
@@ -448,7 +440,7 @@ namespace uSync.BackOffice
                 var versionNode = new XElement("uSync",
                     new XAttribute("version", typeof(uSync).Assembly.GetName().Version.ToString()),
                     new XAttribute("format", Core.uSyncConstants.FormatVersion));
-                // remove date, we don't really care, and it causes uncessery git changes.
+                // remove date, we don't really care, and it causes unnecessary git changes.
 
                 Directory.CreateDirectory(Path.GetDirectoryName(versionFile));
 
@@ -461,7 +453,7 @@ namespace uSync.BackOffice
         }
 
         /// <summary>
-        ///  Export items from umbraco into a given folder
+        ///  Export items from Umbraco into a given folder
         /// </summary>
         /// <param name="folder">folder to place items</param>
         /// <param name="handlerAliases">aliases for the handlers to use while exporting</param>
@@ -474,7 +466,7 @@ namespace uSync.BackOffice
         }
 
         /// <summary>
-        ///  Export items from umbraco into a given folder
+        ///  Export items from Umbraco into a given folder
         /// </summary>
         /// <param name="folder">folder to place items</param>
         /// <param name="handlers">Handler config pairs</param>
@@ -536,7 +528,7 @@ namespace uSync.BackOffice
         {
             if (e.EntityTypes != null && !string.IsNullOrWhiteSpace(e.Folder))
             {
-                _logger.LogInformation("Import Triggered by downlevel change {0}", e.Folder);
+                _logger.LogInformation("Import Triggered by downlevel change {folder}", e.Folder);
 
                 var handlers = _handlerFactory
                     .GetValidHandlersByEntityType(e.EntityTypes, e.HandlerOptions);
@@ -553,7 +545,7 @@ namespace uSync.BackOffice
         {
             if (e.EntityTypes != null && !string.IsNullOrWhiteSpace(e.Folder))
             {
-                _logger.LogInformation("Export Triggered by downlevel change {0}", e.Folder);
+                _logger.LogInformation("Export Triggered by downlevel change {folder}", e.Folder);
 
                 var handlers = _handlerFactory
                     .GetValidHandlersByEntityType(e.EntityTypes, e.HandlerOptions);

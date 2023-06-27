@@ -2,10 +2,9 @@
 using System.IO;
 using System.Linq;
 
-using Microsoft.Extensions.Logging;
-
 using Umbraco.Cms.Core.Scoping;
 
+using uSync.BackOffice.Extensions;
 using uSync.BackOffice.SyncHandlers;
 using uSync.Core.Serialization;
 
@@ -39,7 +38,6 @@ namespace uSync.BackOffice
         /// </summary>
         public IEnumerable<uSyncAction> ImportHandler(string handlerAlias, uSyncImportOptions options)
         {
-
             lock (_importLock)
             {
                 using (var pause = _mutexService.ImportPause(options.PauseDuringImport))
@@ -53,27 +51,16 @@ namespace uSync.BackOffice
                     if (handlerPair == null) return Enumerable.Empty<uSyncAction>();
                     var folder = GetHandlerFolder(options.RootFolder, handlerPair.Handler);
 
-                    if (!_uSyncConfig.Settings.DisableNotificationSuppression)
+                    using ICoreScope scope = _scopeProvider.CreateCoreScope();
+                    using (scope.SuppressScopeByConfig(_uSyncConfig))
                     {
-                        _logger.LogDebug("Performing Import - suppressing notifications");
-
-                        using ICoreScope scope = _scopeProvider.CreateCoreScope();
-                        using (scope.Notifications.Suppress())
-                        {
-                            var results = handlerPair.Handler.ImportAll(folder, handlerPair.Settings,
-                                options.Flags.HasFlag(SerializerFlags.Force),
-                                options.Callbacks?.Update);
-
-                            scope.Complete();
-
-                            return results;
-                        }
-                    }
-                    else
-                    {
-                        return handlerPair.Handler.ImportAll(folder, handlerPair.Settings,
+                        var results = handlerPair.Handler.ImportAll(folder, handlerPair.Settings,
                             options.Flags.HasFlag(SerializerFlags.Force),
                             options.Callbacks?.Update);
+
+                        scope.Complete();
+
+                        return results;
                     }
                 }
             }
@@ -154,7 +141,7 @@ namespace uSync.BackOffice
         }
 
         /// <summary>
-        ///  gets the phyical folder for a handler. ( root + handlerfolder)
+        ///  gets the physical folder for a handler. ( root + handler folder)
         /// </summary>
         private string GetHandlerFolder(string rootFolder, ISyncHandler handler)
             => Path.Combine(rootFolder, handler.DefaultFolder);

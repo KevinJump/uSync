@@ -5,8 +5,10 @@ using System.Xml.Linq;
 
 using Microsoft.Extensions.Logging;
 
+using Umbraco.Cms.Core.Scoping;
 using Umbraco.Extensions;
 
+using uSync.BackOffice.Extensions;
 using uSync.BackOffice.SyncHandlers;
 using uSync.BackOffice.SyncHandlers.Interfaces;
 using uSync.Core;
@@ -17,12 +19,12 @@ namespace uSync.BackOffice
 {
 
     /// <summary>
-    /// Implimentation of paged import methods.
+    /// Implementation of paged import methods.
     /// </summary>
     public partial class uSyncService
     {
         /// <summary>
-        ///  Peform a paged report against a given folder 
+        ///  Perform a paged report against a given folder 
         /// </summary>
         public IEnumerable<uSyncAction> ReportPartial(string folder, uSyncPagedImportOptions options, out int total)
         {
@@ -68,7 +70,7 @@ namespace uSync.BackOffice
         }
 
         /// <summary>
-        ///  Peform a paged Import against a given folder 
+        ///  Perform a paged Import against a given folder 
         /// </summary>
         public IEnumerable<uSyncAction> ImportPartial(string folder, uSyncPagedImportOptions options, out int total)
         {
@@ -91,38 +93,45 @@ namespace uSync.BackOffice
 
                     var index = options.PageNumber * options.PageSize;
 
-                    foreach (var item in orderedNodes.Skip(options.PageNumber * options.PageSize).Take(options.PageSize))
+                    using ICoreScope scope = _scopeProvider.CreateCoreScope();
+                    using (scope.SuppressScopeByConfig(_uSyncConfig))
                     {
-                        var itemType = item.Node.GetItemType();
-                        if (!itemType.InvariantEquals(lastType))
+                        foreach (var item in orderedNodes.Skip(options.PageNumber * options.PageSize).Take(options.PageSize))
                         {
-                            lastType = itemType;
-                            handlerPair = _handlerFactory.GetValidHandlerByTypeName(itemType, syncHandlerOptions);
-
-                            // special case, blueprints looks like IContent items, except they are slightly diffrent
-                            // so we check for them speicifically and get the handler for the enity rather than the object type.
-                            if (item.Node.IsContent() && item.Node.IsBlueprint())
+                            var itemType = item.Node.GetItemType();
+                            if (!itemType.InvariantEquals(lastType))
                             {
-                                lastType = UdiEntityType.DocumentBlueprint;
-                                handlerPair = _handlerFactory.GetValidHandlerByEntityType(UdiEntityType.DocumentBlueprint);
+                                lastType = itemType;
+                                handlerPair = _handlerFactory.GetValidHandlerByTypeName(itemType, syncHandlerOptions);
+
+                                // special case, blueprints looks like IContent items, except they are slightly different
+                                // so we check for them specifically and get the handler for the entity rather than the object type.
+                                if (item.Node.IsContent() && item.Node.IsBlueprint())
+                                {
+                                    lastType = UdiEntityType.DocumentBlueprint;
+                                    handlerPair = _handlerFactory.GetValidHandlerByEntityType(UdiEntityType.DocumentBlueprint);
+                                }
                             }
+
+                            if (handlerPair == null)
+                            {
+                                _logger.LogWarning("No handler was found for {alias} item might not process correctly", itemType);
+                                continue;
+                            }
+
+                            options.Callbacks?.Update?.Invoke(item.Node.GetAlias(),
+                                CalculateProgress(index, total, options.ProgressMin, options.ProgressMax), 100);
+
+                            if (handlerPair != null)
+                            {
+                                actions.AddRange(handlerPair.Handler.ImportElement(item.Node, item.FileName, handlerPair.Settings, options));
+                            }
+
+                            index++;
                         }
 
-                        if (handlerPair == null)
-                        {
-                            _logger.LogWarning("No handler was found for {alias} item might not process correctly", itemType);
-                            continue;
-                        }
+                        scope.Complete();
 
-                        options.Callbacks?.Update?.Invoke(item.Node.GetAlias(),
-                            CalculateProgress(index, total, options.ProgressMin, options.ProgressMax), 100);
-
-                        if (handlerPair != null)
-                        {
-                            actions.AddRange(handlerPair.Handler.ImportElement(item.Node, item.FileName, handlerPair.Settings, options));
-                        }
-
-                        index++;
                     }
 
                     return actions;
@@ -131,7 +140,7 @@ namespace uSync.BackOffice
         }
 
         /// <summary>
-        ///  Peform a paged Import second pass against a given folder 
+        ///  Perform a paged Import second pass against a given folder 
         /// </summary>
         public IEnumerable<uSyncAction> ImportPartialSecondPass(IEnumerable<uSyncAction> actions, uSyncPagedImportOptions options)
         {
@@ -178,7 +187,7 @@ namespace uSync.BackOffice
         }
 
         /// <summary>
-        ///  Peform a paged Import post import against a given folder 
+        ///  Perform a paged Import post import against a given folder 
         /// </summary>
         public IEnumerable<uSyncAction> ImportPartialPostImport(IEnumerable<uSyncAction> actions, uSyncPagedImportOptions options)
         {
@@ -232,7 +241,7 @@ namespace uSync.BackOffice
         }
 
         /// <summary>
-        ///  Peform a paged Clean after import for a given folder 
+        ///  Perform a paged Clean after import for a given folder 
         /// </summary>
         public IEnumerable<uSyncAction> ImportPostCleanFiles(IEnumerable<uSyncAction> actions, uSyncPagedImportOptions options)
         {
