@@ -49,6 +49,9 @@ namespace uSync.BackOffice.SyncHandlers
             this.Set = setName;
         }
 
+        /// <summary>
+        ///  construct for a given site and userId
+        /// </summary>
         public SyncHandlerOptions(string setName, int userId)
             :this(setName)
         {
@@ -65,6 +68,9 @@ namespace uSync.BackOffice.SyncHandlers
             this.Action = action;
         }
 
+        /// <summary>
+        ///  construct for a given set, action and userId
+        /// </summary>
         public SyncHandlerOptions(string setName, HandlerActions action, int userId)
             : this(setName, action)
         {
