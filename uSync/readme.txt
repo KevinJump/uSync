@@ -3,7 +3,7 @@
                  / / / |__ \/ / / / __ \/ ___/
                 / /_/ /__/ / /_/ / / / / /__  
                 \__,_/____/\__, /_/ /_/\___/  
-                          /____/  v11.x            
+                          /____/  v12.x            
 
    Thanks for Installing uSync Eleven, 
    
@@ -16,5 +16,5 @@
    uSync is FREE ✔ You can use them on any of your projects as many times as
    your like. 
 
-   - 🦄🎈🎂 🥇🥾 🔟 🗄️👻 -
+   - 🦄🎈🎂 🥇🥾 🔟 🗄️👻 🥊 -
     
