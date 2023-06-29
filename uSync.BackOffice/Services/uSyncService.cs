@@ -194,14 +194,7 @@ namespace uSync.BackOffice
 
             var handlers = _handlerFactory.GetValidHandlers(handlerOptions);
 
-            using ICoreScope scope = _scopeProvider.CreateCoreScope();
-            using (scope.SuppressScopeByConfig(_uSyncConfig))
-            {
-                var results = Import(folder, force, handlers, callbacks);
-                scope.Complete();
-
-                return results;
-            }
+            return Import(folder, force, handlers, callbacks);
         }
 
         /// <summary>
