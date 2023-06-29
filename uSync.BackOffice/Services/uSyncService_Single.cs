@@ -93,8 +93,7 @@ namespace uSync.BackOffice
 
                     var index = options.PageNumber * options.PageSize;
 
-                    using ICoreScope scope = _scopeProvider.CreateCoreScope();
-                    using (scope.SuppressScopeByConfig(_uSyncConfig))
+                    using var scope = _scopeProvider.CreateNotificationScope(_eventAggregator, _logger);
                     {
                         try
                         {
@@ -164,8 +163,7 @@ namespace uSync.BackOffice
 
                     var index = options.PageNumber * options.PageSize;
 
-                    using ICoreScope scope = _scopeProvider.CreateCoreScope();
-                    using (scope.SuppressScopeByConfig(_uSyncConfig))
+                    using var scope = _scopeProvider.CreateNotificationScope(_eventAggregator, _logger);
                     {
                         try
                         {
