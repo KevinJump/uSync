@@ -96,41 +96,46 @@ namespace uSync.BackOffice
                     using ICoreScope scope = _scopeProvider.CreateCoreScope();
                     using (scope.SuppressScopeByConfig(_uSyncConfig))
                     {
-                        foreach (var item in orderedNodes.Skip(options.PageNumber * options.PageSize).Take(options.PageSize))
+                        try
                         {
-                            var itemType = item.Node.GetItemType();
-                            if (!itemType.InvariantEquals(lastType))
+                            foreach (var item in orderedNodes.Skip(options.PageNumber * options.PageSize).Take(options.PageSize))
                             {
-                                lastType = itemType;
-                                handlerPair = _handlerFactory.GetValidHandlerByTypeName(itemType, syncHandlerOptions);
-
-                                // special case, blueprints looks like IContent items, except they are slightly different
-                                // so we check for them specifically and get the handler for the entity rather than the object type.
-                                if (item.Node.IsContent() && item.Node.IsBlueprint())
+                                var itemType = item.Node.GetItemType();
+                                if (!itemType.InvariantEquals(lastType))
                                 {
-                                    lastType = UdiEntityType.DocumentBlueprint;
-                                    handlerPair = _handlerFactory.GetValidHandlerByEntityType(UdiEntityType.DocumentBlueprint);
+                                    lastType = itemType;
+                                    handlerPair = _handlerFactory.GetValidHandlerByTypeName(itemType, syncHandlerOptions);
+
+                                    // special case, blueprints looks like IContent items, except they are slightly different
+                                    // so we check for them specifically and get the handler for the entity rather than the object type.
+                                    if (item.Node.IsContent() && item.Node.IsBlueprint())
+                                    {
+                                        lastType = UdiEntityType.DocumentBlueprint;
+                                        handlerPair = _handlerFactory.GetValidHandlerByEntityType(UdiEntityType.DocumentBlueprint);
+                                    }
                                 }
+
+                                if (handlerPair == null)
+                                {
+                                    _logger.LogWarning("No handler was found for {alias} item might not process correctly", itemType);
+                                    continue;
+                                }
+
+                                options.Callbacks?.Update?.Invoke(item.Node.GetAlias(),
+                                    CalculateProgress(index, total, options.ProgressMin, options.ProgressMax), 100);
+
+                                if (handlerPair != null)
+                                {
+                                    actions.AddRange(handlerPair.Handler.ImportElement(item.Node, item.FileName, handlerPair.Settings, options));
+                                }
+
+                                index++;
                             }
-
-                            if (handlerPair == null)
-                            {
-                                _logger.LogWarning("No handler was found for {alias} item might not process correctly", itemType);
-                                continue;
-                            }
-
-                            options.Callbacks?.Update?.Invoke(item.Node.GetAlias(),
-                                CalculateProgress(index, total, options.ProgressMin, options.ProgressMax), 100);
-
-                            if (handlerPair != null)
-                            {
-                                actions.AddRange(handlerPair.Handler.ImportElement(item.Node, item.FileName, handlerPair.Settings, options));
-                            }
-
-                            index++;
                         }
-
-                        scope.Complete();
+                        finally
+                        {
+                            scope.Complete();
+                        }
 
                     }
 
@@ -159,26 +164,37 @@ namespace uSync.BackOffice
 
                     var index = options.PageNumber * options.PageSize;
 
-                    foreach (var action in actions.Skip(options.PageNumber * options.PageSize).Take(options.PageSize))
+                    using ICoreScope scope = _scopeProvider.CreateCoreScope();
+                    using (scope.SuppressScopeByConfig(_uSyncConfig))
                     {
-                        if (!action.HandlerAlias.InvariantEquals(lastType))
+                        try
                         {
-                            lastType = action.HandlerAlias;
-                            handlerPair = _handlerFactory.GetValidHandler(action.HandlerAlias, syncHandlerOptions);
-                        }
+                            foreach (var action in actions.Skip(options.PageNumber * options.PageSize).Take(options.PageSize))
+                            {
+                                if (!action.HandlerAlias.InvariantEquals(lastType))
+                                {
+                                    lastType = action.HandlerAlias;
+                                    handlerPair = _handlerFactory.GetValidHandler(action.HandlerAlias, syncHandlerOptions);
+                                }
 
-                        if (handlerPair == null)
+                                if (handlerPair == null)
+                                {
+                                    _logger.LogWarning("No handler was found for {alias} item might not process correctly", action.HandlerAlias);
+                                    continue;
+                                }
+
+                                options.Callbacks?.Update?.Invoke($"Second Pass: {action.Name}",
+                                    CalculateProgress(index, total, options.ProgressMin, options.ProgressMax), 100);
+
+                                secondPassActions.AddRange(handlerPair.Handler.ImportSecondPass(action, handlerPair.Settings, options));
+
+                                index++;
+                            }
+                        }
+                        finally
                         {
-                            _logger.LogWarning("No handler was found for {alias} item might not process correctly", action.HandlerAlias);
-                            continue;
+                            scope.Complete();
                         }
-
-                        options.Callbacks?.Update?.Invoke($"Second Pass: {action.Name}",
-                            CalculateProgress(index, total, options.ProgressMin, options.ProgressMax), 100);
-
-                        secondPassActions.AddRange(handlerPair.Handler.ImportSecondPass(action, handlerPair.Settings, options));
-
-                        index++;
                     }
 
                     return secondPassActions;
