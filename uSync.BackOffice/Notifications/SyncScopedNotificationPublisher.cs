@@ -3,7 +3,6 @@ using System.Linq;
 
 using Microsoft.Extensions.Logging;
 
-using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Events;
 using Umbraco.Cms.Core.Notifications;
 
@@ -18,7 +17,7 @@ internal class SyncScopedNotificationPublisher
     private readonly SyncUpdateCallback _updateCallback;
 
     public SyncScopedNotificationPublisher(
-        IEventAggregator eventAggregator,        
+        IEventAggregator eventAggregator,
         ILogger<SyncScopedNotificationPublisher> logger,
         SyncUpdateCallback callback)
         : base(eventAggregator, false)
@@ -30,17 +29,21 @@ internal class SyncScopedNotificationPublisher
 
     protected override void PublishScopedNotifications(IList<INotification> notifications)
     {
-        _logger.LogDebug("Publishing Notification [{count}]", notifications.Count);
-        _updateCallback?.Invoke($"Processing notifications [{notifications.Count}]", 9, 10);
-
-        var grouped = notifications
-            .Where(x => x != null)
-            .GroupBy(x => x.GetType().Name);
-
-        foreach(var n in grouped)
+        // checking count means we don't send signalR messages when we don't need to.
+        if (notifications.Count > 0)
         {
-            _logger.LogDebug("Push: {x} {count}", n.Key, n.Count());
-            _eventAggregator.Publish(n);
+            //_updateCallback?.Invoke($"Processing notifications [{notifications.Count}]", 9, 10);
+            _logger.LogDebug("Publishing Notifications [{count}]", notifications.Count);
+
+            var groupedNotifications = notifications
+                .Where(x => x != null)
+                .GroupBy(x => x.GetType().Name);
+
+            foreach (var items in groupedNotifications)
+            {
+                _updateCallback?.Invoke($"Processing {items.Key}s ({items.Count()})", 90, 100);
+                _eventAggregator.Publish(items);
+            }
         }
     }
 }
