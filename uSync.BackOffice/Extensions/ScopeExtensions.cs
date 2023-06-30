@@ -7,6 +7,7 @@ using Umbraco.Cms.Core.Scoping;
 
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Notifications;
+using uSync.BackOffice.SyncHandlers;
 
 namespace uSync.BackOffice.Extensions;
 internal static class ScopeExtensions
@@ -17,10 +18,15 @@ internal static class ScopeExtensions
             : scope.Notifications.Suppress();
 
 
-    public static ICoreScope CreateNotificationScope(this ICoreScopeProvider scopeProvider, IEventAggregator eventAggregator, ILogger<uSyncService> logger)
+    public static ICoreScope CreateNotificationScope(
+        this ICoreScopeProvider scopeProvider,
+        IEventAggregator eventAggregator,
+        ILoggerFactory loggerFactory,
+        SyncUpdateCallback callback)
     {
+        
         var notificationPublisher = new SyncScopedNotificationPublisher(
-            eventAggregator, logger);
+            eventAggregator, loggerFactory.CreateLogger<SyncScopedNotificationPublisher>(), callback);
 
         return scopeProvider.CreateCoreScope(
             scopedNotificationPublisher: notificationPublisher, 

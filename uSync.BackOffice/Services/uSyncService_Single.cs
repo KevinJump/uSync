@@ -93,7 +93,7 @@ namespace uSync.BackOffice
 
                     var index = options.PageNumber * options.PageSize;
 
-                    using var scope = _scopeProvider.CreateNotificationScope(_eventAggregator, _logger);
+                    using var scope = _scopeProvider.CreateNotificationScope(_eventAggregator, _loggerFactory, options.Callbacks?.Update);
                     {
                         try
                         {
@@ -163,7 +163,7 @@ namespace uSync.BackOffice
 
                     var index = options.PageNumber * options.PageSize;
 
-                    using var scope = _scopeProvider.CreateNotificationScope(_eventAggregator, _logger);
+                    using var scope = _scopeProvider.CreateNotificationScope(_eventAggregator, _loggerFactory, options.Callbacks?.Update);
                     {
                         try
                         {

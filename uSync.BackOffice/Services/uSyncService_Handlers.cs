@@ -3,6 +3,8 @@ using System.Data;
 using System.IO;
 using System.Linq;
 
+using Microsoft.Extensions.Logging;
+
 using Umbraco.Cms.Core.Scoping;
 
 using uSync.BackOffice.Extensions;
@@ -53,12 +55,14 @@ namespace uSync.BackOffice
                     if (handlerPair == null) return Enumerable.Empty<uSyncAction>();
                     var folder = GetHandlerFolder(options.RootFolder, handlerPair.Handler);
 
-
-                    using var scope = _scopeProvider.CreateNotificationScope(_eventAggregator, _logger);
+                    _logger.LogDebug("> Import Handler {handler}", handlerAlias);
+                    using var scope = _scopeProvider.CreateNotificationScope(_eventAggregator, _loggerFactory, options.Callbacks?.Update);
 
                     var results = handlerPair.Handler.ImportAll(folder, handlerPair.Settings,
                         options.Flags.HasFlag(SerializerFlags.Force),
                         options.Callbacks?.Update);
+                    
+                    _logger.LogDebug("< Import Handler {handler}", handlerAlias);
 
                     scope.Complete();
 
