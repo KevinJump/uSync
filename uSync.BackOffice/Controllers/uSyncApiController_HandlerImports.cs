@@ -121,6 +121,8 @@ namespace uSync.BackOffice.Controllers
                 handlerSet, 
                 options.Actions);
 
+            hubClient.Callbacks()?.Update("Import Complete", 1, 1);
+
             return new SyncActionResult(actions);
         }
 

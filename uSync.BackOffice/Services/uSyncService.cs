@@ -37,6 +37,7 @@ namespace uSync.BackOffice
         public delegate void SyncEventCallback(SyncProgressSummary summary);
 
         private readonly ILogger<uSyncService> _logger;
+        private readonly ILoggerFactory _loggerFactory;
 
         private readonly IEventAggregator _eventAggregator;
 
@@ -60,7 +61,8 @@ namespace uSync.BackOffice
             SyncFileService syncFileService,
             uSyncEventService mutexService,
             AppCaches appCaches,
-            ICoreScopeProvider scopeProvider)
+            ICoreScopeProvider scopeProvider,
+            ILoggerFactory loggerFactory)
         {
             this._logger = logger;
 
@@ -76,6 +78,7 @@ namespace uSync.BackOffice
             uSyncTriggers.DoExport += USyncTriggers_DoExport;
             uSyncTriggers.DoImport += USyncTriggers_DoImport;
             _scopeProvider = scopeProvider;
+            _loggerFactory = loggerFactory;
         }
 
         /// <summary>
@@ -193,7 +196,6 @@ namespace uSync.BackOffice
             handlerOptions.Action = HandlerActions.Import;
 
             var handlers = _handlerFactory.GetValidHandlers(handlerOptions);
-
             return Import(folder, force, handlers, callbacks);
         }
 
