@@ -14,7 +14,7 @@
    Forums : https://our.umbraco.com/packages/developer-tools/usync/usync/
 
    uSync is FREE ✔ You can use them on any of your projects as many times as
-   your like. 
+   you like. 
 
    - 🦄🎈🎂 🥇🥾 🔟 🗄️👻 🥊 -
     
