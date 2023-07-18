@@ -33,6 +33,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Umbraco.Cms" Version="[12,)" ExcludeAssets="contentfiles;build;buildTransitive" />
 		<ProjectReference Include="..\uSync.Backoffice.Assets\uSync.BackOffice.Assets.csproj" />
 		<ProjectReference Include="..\uSync.BackOffice\uSync.BackOffice.csproj" />
 	</ItemGroup>
