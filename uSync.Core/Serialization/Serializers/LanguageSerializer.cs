@@ -66,17 +66,26 @@ namespace uSync.Core.Serialization.Serializers
                 item.IsoCode = isoCode;
             }
 
-            try
+            var name = node.Element("Name").ValueOrDefault(string.Empty);
+            if (string.IsNullOrEmpty(name)) 
             {
-                if (item.CultureName != culture.DisplayName)
+                try
                 {
-                    details.AddUpdate("CultureName", item.CultureName, culture.DisplayName);
-                    item.CultureName = culture.DisplayName;
+                    if (item.CultureName != culture.DisplayName)
+                    {
+                        details.AddUpdate("CultureName", item.CultureName, culture.DisplayName);
+                        item.CultureName = culture.DisplayName;
+                    }
+                }
+                catch
+                {
+                    logger.LogWarning("Can't set culture name based on IsoCode");
                 }
             }
-            catch
+            else if (item.CultureName != name)
             {
-                logger.LogWarning("Can't set culture name based on IsoCode");
+                details.AddUpdate("CultureName", item.CultureName, name);
+                item.CultureName = name;
             }
 
             var mandatory = node.Element("IsMandatory").ValueOrDefault(false);
@@ -184,6 +193,7 @@ namespace uSync.Core.Serialization.Serializers
 
             // don't serialize the ID, it changes and we don't use it! 
             // node.Add(new XElement("Id", item.Id));
+            node.Add(new XElement("Name", item.CultureName));
             node.Add(new XElement("IsoCode", item.IsoCode));
             node.Add(new XElement("IsMandatory", item.IsMandatory));
             node.Add(new XElement("IsDefault", item.IsDefault));
