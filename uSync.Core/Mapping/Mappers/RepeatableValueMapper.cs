@@ -1,5 +1,8 @@
-﻿using Umbraco.Cms.Core;
+﻿using Newtonsoft.Json;
+
+using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Services;
+using Umbraco.Extensions;
 
 namespace uSync.Core.Mapping
 {
@@ -14,12 +17,26 @@ namespace uSync.Core.Mapping
 
         public override string Name => "Repeatable Text Mapper";
 
-        public override string[] Editors => new string[] { 
+        public override string[] Editors => new string[] {
             Constants.PropertyEditors.Aliases.MultipleTextstring
         };
 
         public override string GetImportValue(string value, string editorAlias)
         {
+            if (value.DetectIsJson())
+            {
+                try
+                {
+                    var result = JsonConvert.SerializeObject(JsonConvert.DeserializeObject<object>(value));
+                    return result;
+                }
+                catch
+                {
+                    return value;
+                }
+            }
+
+
             if (!value.Contains('\r'))
             {
                 return value.Replace("\n", "\r\n");
