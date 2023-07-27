@@ -27,7 +27,9 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
     public class MemberTypeHandler : SyncHandlerContainerBase<IMemberType, IMemberTypeService>, ISyncHandler,
         INotificationHandler<SavedNotification<IMemberType>>,
         INotificationHandler<MovedNotification<IMemberType>>,
-        INotificationHandler<DeletedNotification<IMemberType>>
+        INotificationHandler<DeletedNotification<IMemberType>>,
+        INotificationHandler<EntityContainerSavedNotification>,
+        INotificationHandler<EntityContainerRenamedNotification>
     {
         private readonly IMemberTypeService memberTypeService;
 
