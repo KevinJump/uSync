@@ -144,7 +144,18 @@ namespace uSync.BackOffice.SyncHandlers
         {
             if (_mutexService.IsPaused) return;
 
-            foreach (var folder in notification.SavedEntities)
+            ProcessContainerChanges(notification.SavedEntities);
+        }
+
+        public virtual void Handle(EntityContainerRenamedNotification notification)
+        {
+            if (_mutexService.IsPaused) return;
+            ProcessContainerChanges(notification.Entities);
+        }
+
+        private void ProcessContainerChanges(IEnumerable<EntityContainer> containers)
+        {
+            foreach (var folder in containers)
             {
                 if (folder.ContainedObjectType == this.itemObjectType.GetGuid())
                 {
