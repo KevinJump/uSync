@@ -106,7 +106,7 @@ namespace uSync.BackOffice
             });
 
             if (handlerPair == null) return Enumerable.Empty<uSyncAction>();
-            var exportFolder = options.Folders.LastOrDefault();
+            var exportFolder = options.Folders.FirstOrDefault();
 
             if (exportFolder != null)
             {

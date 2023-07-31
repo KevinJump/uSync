@@ -27,8 +27,8 @@ namespace uSync.BackOffice.Configuration
         public string[] GetCombinedFolders()
             => new[]
             {
-                GetBaseFolder(),
                 GetRootFolder(),
+                GetBaseFolder(),
             };
 
         private IOptionsMonitor<uSyncHandlerSetSettings> setOptionsMonitor;
