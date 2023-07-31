@@ -31,7 +31,8 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         INotificationHandler<SavedNotification<IDataType>>,
         INotificationHandler<MovedNotification<IDataType>>,
         INotificationHandler<DeletedNotification<IDataType>>,
-        INotificationHandler<EntityContainerSavedNotification>
+        INotificationHandler<EntityContainerSavedNotification>,
+        INotificationHandler<EntityContainerRenamedNotification>
     {
         private readonly IDataTypeService dataTypeService;
 

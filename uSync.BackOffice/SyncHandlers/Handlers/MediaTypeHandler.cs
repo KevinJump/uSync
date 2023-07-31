@@ -28,7 +28,8 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         INotificationHandler<SavedNotification<IMediaType>>,
         INotificationHandler<DeletedNotification<IMediaType>>,
         INotificationHandler<MovedNotification<IMediaType>>,
-        INotificationHandler<EntityContainerSavedNotification>
+        INotificationHandler<EntityContainerSavedNotification>,        
+        INotificationHandler<EntityContainerRenamedNotification>
     // INotificationHandler<MediaTypeSavedNotification>
     {
         private readonly IMediaTypeService mediaTypeService;

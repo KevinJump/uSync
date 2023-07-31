@@ -127,20 +127,25 @@ namespace uSync.BackOffice
             builder.AddNotificationHandler<DataTypeDeletedNotification, DataTypeHandler>();
             builder.AddNotificationHandler<DataTypeMovedNotification, DataTypeHandler>();
             builder.AddNotificationHandler<EntityContainerSavedNotification, DataTypeHandler>();
+            builder.AddNotificationHandler<EntityContainerRenamedNotification, DataTypeHandler>();
 
             builder.AddNotificationHandler<ContentTypeSavedNotification, ContentTypeHandler>();
             builder.AddNotificationHandler<ContentTypeDeletedNotification, ContentTypeHandler>();
             builder.AddNotificationHandler<ContentTypeMovedNotification, ContentTypeHandler>();
             builder.AddNotificationHandler<EntityContainerSavedNotification, ContentTypeHandler>();
+            builder.AddNotificationHandler<EntityContainerRenamedNotification, ContentTypeHandler>();
 
             builder.AddNotificationHandler<MediaTypeSavedNotification, MediaTypeHandler>();
             builder.AddNotificationHandler<MediaTypeDeletedNotification, MediaTypeHandler>();
             builder.AddNotificationHandler<MediaTypeMovedNotification, MediaTypeHandler>();
             builder.AddNotificationHandler<EntityContainerSavedNotification, MediaTypeHandler>();
+            builder.AddNotificationHandler<EntityContainerRenamedNotification, MediaTypeHandler>();
 
             builder.AddNotificationHandler<MemberTypeSavedNotification, MemberTypeHandler>();
             builder.AddNotificationHandler<MemberTypeSavedNotification, MemberTypeHandler>();
             builder.AddNotificationHandler<MemberTypeMovedNotification, MemberTypeHandler>();
+            builder.AddNotificationHandler<EntityContainerSavedNotification, MemberTypeHandler>();
+            builder.AddNotificationHandler<EntityContainerRenamedNotification, MemberTypeHandler>();
 
             builder.AddNotificationHandler<LanguageSavingNotification, LanguageHandler>();
             builder.AddNotificationHandler<LanguageSavedNotification, LanguageHandler>();
