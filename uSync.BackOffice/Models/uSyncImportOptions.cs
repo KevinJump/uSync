@@ -40,9 +40,19 @@ namespace uSync.BackOffice
         public uSyncCallbacks Callbacks { get; set; }
 
         /// <summary>
-        /// Root folder for all uSync operations
+        ///  folders that files are read from.
         /// </summary>
-        public string RootFolder { get; set; }
+        public string[] Folders { get; set; }
+
+        ///// <summary>
+        ///// Root folder for all uSync operations
+        ///// </summary>
+        //public string RootFolder { get; set; }
+
+        ///// <summary>
+        /////  a base folder to throw into the mix.
+        ///// </summary>
+        //public string BaseFolder { get; set; }
 
         /// <summary>
         /// (reserved for future use)

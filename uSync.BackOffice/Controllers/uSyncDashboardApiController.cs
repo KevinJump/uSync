@@ -233,13 +233,12 @@ namespace uSync.BackOffice.Controllers
         {
             var hubClient = new HubClientService(_hubContext, options.ClientId);
 
-
-
-            return _uSyncService.Report(_uSyncConfig.GetRootFolder(), new SyncHandlerOptions()
+            var handlerOptions = new SyncHandlerOptions()
             {
-                Group = options.Group
-            },
-            hubClient.Callbacks());
+                Group = options.Group,
+            };
+
+            return _uSyncService.Report(_uSyncConfig.GetCombinedFolders(), handlerOptions, hubClient.Callbacks());
         }
 
         /// <summary>
@@ -270,7 +269,8 @@ namespace uSync.BackOffice.Controllers
         public IEnumerable<uSyncAction> Import(uSyncOptions options)
         {
             var hubClient = new HubClientService(_hubContext, options.ClientId);
-            return _uSyncService.Import(_uSyncConfig.GetRootFolder(), options.Force, new SyncHandlerOptions()
+
+            return _uSyncService.Import(_uSyncConfig.GetCombinedFolders(), options.Force, new SyncHandlerOptions()
             {
                 Group = options.Group
             },

@@ -76,12 +76,12 @@ namespace uSync.BackOffice.SyncHandlers
         string EntityType { get; }
 
         /// <summary>
-        /// The type name of the items hanled (Item.getType().ToString())
+        /// The type name of the items handled (Item.getType().ToString())
         /// </summary>
         string TypeName { get; }
 
         /// <summary>
-        /// Export an item based on the int id value in umbraco
+        /// Export an item based on the int id value in Umbraco
         /// </summary>
         IEnumerable<uSyncAction> Export(int id, string folder, HandlerSettings settings);
 
@@ -95,7 +95,7 @@ namespace uSync.BackOffice.SyncHandlers
         /// </summary>
         /// <param name="folder">folder to use when exporting</param>
         /// <param name="settings">Handler settings to use for export</param>
-        /// <param name="callback">Callbacks to keep UI uptodate</param>
+        /// <param name="callback">Callbacks to keep UI upto date</param>
         /// <returns>List of actions detailing changes</returns>
         IEnumerable<uSyncAction> ExportAll(string folder, HandlerSettings settings, SyncUpdateCallback callback);
 
@@ -124,9 +124,12 @@ namespace uSync.BackOffice.SyncHandlers
         /// <param name="folder">folder to use when Importing</param>
         /// <param name="settings">Handler settings to use for import</param>
         /// <param name="force">Force the import even if the settings haven't changed</param>
-        /// <param name="callback">Callbacks to keep UI uptodate</param>
+        /// <param name="callback">Callbacks to keep UI upto date</param>
         /// <returns>List of actions detailing changes</returns>
+        /// 
+        [Obsolete("Pass in array of folders for fallback and roots")]
         IEnumerable<uSyncAction> ImportAll(string folder, HandlerSettings settings, bool force, SyncUpdateCallback callback);
+        IEnumerable<uSyncAction> ImportAll(string[] folders, HandlerSettings settings, bool force, SyncUpdateCallback callback);
 
         /// <summary>
         ///  Import from a single node. 
@@ -138,9 +141,19 @@ namespace uSync.BackOffice.SyncHandlers
         /// </summary>
         /// <param name="folder">folder to use when reporting</param>
         /// <param name="settings">Handler settings to use for report</param>
-        /// <param name="callback">Callbacks to keep UI uptodate</param>
+        /// <param name="callback">Callbacks to keep UI upto date</param>
         /// <returns>List of actions detailing changes</returns>
+        [Obsolete("Pass in folders for roots functionality")]
         IEnumerable<uSyncAction> Report(string folder, HandlerSettings settings, SyncUpdateCallback callback);
+
+        /// <summary>
+        ///  report all items across multiple folders. 
+        /// </summary>
+        /// <param name="folders">list folder to use when reporting</param>
+        /// <param name="settings">Handler settings to use for report</param>
+        /// <param name="callback">Callbacks to keep UI upto date</param>
+        /// <returns>List of actions detailing changes</returns>
+        IEnumerable<uSyncAction> Report(string[] folders, HandlerSettings settings, SyncUpdateCallback callback);
 
         /// <summary>
         /// Report a single item based on loaded uSync xml
@@ -154,12 +167,12 @@ namespace uSync.BackOffice.SyncHandlers
         IEnumerable<uSyncAction> ImportSecondPass(uSyncAction action, HandlerSettings settings, uSyncImportOptions options);
 
         /// <summary>
-        ///  default impimentation, roothandler does do this. 
+        ///  default implementation, root handler does do this. 
         /// </summary>
         Udi FindFromNode(XElement node) => null;
 
         /// <summary>
-        ///  is this a current node (roothandler can do this too)
+        ///  is this a current node (root handler can do this too)
         /// </summary>
         ChangeType GetItemStatus(XElement node) => ChangeType.NoChange;
 

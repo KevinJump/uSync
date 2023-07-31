@@ -176,6 +176,27 @@ namespace uSync.BackOffice.Services
             => GetFiles(folder, extensions, false);
 
         /// <summary>
+        ///  gets a combined list of files from a folder. 
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<string> GetCombinedFiles(string[] folders, string extensions)
+        {
+            var combinedFiles = new List<string>();
+            var existing = new List<string>();
+
+            foreach(var folder in folders)
+            {
+                var files = GetFiles(folder, extensions, false);
+                var f = files.Where(x => !existing.Contains(Path.GetFileName(x), StringComparer.OrdinalIgnoreCase));
+
+                combinedFiles.AddRange(f);
+                existing.AddRange(f.Select(Path.GetFileName));
+            }
+
+            return combinedFiles;
+        }
+
+        /// <summary>
         ///  get all the files in a folder, 
         /// </summary>
         /// <param name="folder">path to the folder</param>
@@ -206,6 +227,29 @@ namespace uSync.BackOffice.Services
             }
 
             return Enumerable.Empty<string>();
+        }
+
+        public Dictionary<string, List<string>> GetDirectories(string[] folders)
+        {
+            var directories = new Dictionary<string, List<string>>();
+
+            foreach(var folder in folders)
+            {
+                var absFolder = GetAbsPath(folder);
+
+                foreach(var directory in GetDirectories(folder))
+                {
+                    var directoryName = directory.Substring(absFolder.Length);
+
+                    if (directories.ContainsKey(directoryName))
+                        directories[directoryName].Add(directory);
+                    else
+                        directories[directoryName] = new List<string> { directory };
+                       
+                }
+            }
+
+            return directories;
         }
 
         /// <summary>

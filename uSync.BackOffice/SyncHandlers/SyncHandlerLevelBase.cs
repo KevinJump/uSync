@@ -47,17 +47,20 @@ namespace uSync.BackOffice.SyncHandlers
 
         /// <inheritdoc/>
         protected override IEnumerable<uSyncAction> ImportFolder(string folder, HandlerSettings config, Dictionary<string, TObject> updates, bool force, SyncUpdateCallback callback)
-        {
+            => ImportFolder(new[] { folder }, config, updates, force, callback);
+               
+        protected override IEnumerable<uSyncAction> ImportFolder(string[] folders, HandlerSettings config, Dictionary<string, TObject> updates, bool force, SyncUpdateCallback callback)
+        { 
             // if not using flat then directory structure is sorting them for us. 
             if (config.UseFlatStructure == false)
-                return base.ImportFolder(folder, config, updates, force, callback);
+                return base.ImportFolder(folders, config, updates, force, callback);
 
             List<uSyncAction> actions = new List<uSyncAction>();
 
             callback?.Invoke("Calculating import order", 0, 1);
             logger.LogDebug("Calculating import order");
 
-            var orderedFiles = GetLevelOrderedFiles(folder, actions);
+            var orderedFiles = GetLevelOrderedFiles(folders, actions);
 
             // process.
             var flags = SerializerFlags.None;
@@ -98,10 +101,10 @@ namespace uSync.BackOffice.SyncHandlers
                 serializer.Save(updates.Select(x => x.Value));
             }
 
-            var folders = syncFileService.GetDirectories(folder);
-            foreach (var children in folders)
+            var subFolders = syncFileService.GetDirectories(folders);
+            foreach (var children in subFolders)
             {
-                actions.AddRange(ImportFolder(children, config, updates, force, callback));
+                actions.AddRange(ImportFolder(children.Value.ToArray(), config, updates, force, callback));
             }
 
             if (actions.All(x => x.Success))
@@ -129,11 +132,11 @@ namespace uSync.BackOffice.SyncHandlers
         /// <summary>
         ///  Get all the files in a folder and return them sorted by their level 
         /// </summary>
-        private IList<LeveledFile> GetLevelOrderedFiles(string folder, IList<uSyncAction> actions)
+        private IList<LeveledFile> GetLevelOrderedFiles(string[] folders, IList<uSyncAction> actions)
         {
             List<LeveledFile> nodes = new List<LeveledFile>();
 
-            var files = syncFileService.GetFiles(folder, $"*.{this.uSyncConfig.Settings.DefaultExtension}");
+            var files = syncFileService.GetCombinedFiles(folders, $"*.{this.uSyncConfig.Settings.DefaultExtension}");
             foreach (var file in files)
             {
                 try

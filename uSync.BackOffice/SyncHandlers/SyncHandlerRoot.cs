@@ -238,6 +238,9 @@ namespace uSync.BackOffice.SyncHandlers
         ///  Import everything from a given folder, using the supplied configuration settings.
         /// </summary>
         public IEnumerable<uSyncAction> ImportAll(string folder, HandlerSettings config, bool force, SyncUpdateCallback callback = null)
+            => ImportAll(new[] { folder }, config, force, callback);
+
+        public IEnumerable<uSyncAction> ImportAll(string[] folders, HandlerSettings config, bool force, SyncUpdateCallback callback = null)
         {
             // using (logger.DebugDuration(handlerType, $"Importing {Alias} {Path.GetFileName(folder)}", $"Import complete {Alias}"))
             {
@@ -249,7 +252,7 @@ namespace uSync.BackOffice.SyncHandlers
                 logger.LogDebug("Clearing KeyCache {key}", cacheKey);
                 runtimeCache.ClearByKey(cacheKey);
 
-                actions.AddRange(ImportFolder(folder, config, updates, force, callback));
+                actions.AddRange(ImportFolder(folders, config, updates, force, callback));
 
                 if (updates.Count > 0)
                 {
@@ -270,9 +273,12 @@ namespace uSync.BackOffice.SyncHandlers
         ///  Import everything in a given (child) folder, based on setting
         /// </summary>
         protected virtual IEnumerable<uSyncAction> ImportFolder(string folder, HandlerSettings config, Dictionary<string, TObject> updates, bool force, SyncUpdateCallback callback)
+            => ImportFolder(new[] { folder}, config, updates, force, callback);    
+
+        protected virtual IEnumerable<uSyncAction> ImportFolder(string[] folders, HandlerSettings config, Dictionary<string, TObject> updates, bool force, SyncUpdateCallback callback)
         {
             List<uSyncAction> actions = new List<uSyncAction>();
-            var files = GetImportFiles(folder);
+            var files = GetImportFiles(folders);
 
             var flags = SerializerFlags.None;
             if (force) flags |= SerializerFlags.Force;
@@ -314,10 +320,10 @@ namespace uSync.BackOffice.SyncHandlers
                 serializer.Save(updates.Select(x => x.Value));
             }
 
-            var folders = syncFileService.GetDirectories(folder);
-            foreach (var children in folders)
+            var subFolders = syncFileService.GetDirectories(folders);
+            foreach (var children in subFolders)
             {
-                actions.AddRange(ImportFolder(children, config, updates, force, callback));
+                actions.AddRange(ImportFolder(children.Value.ToArray(), config, updates, force, callback));
             }
 
             if (actions.All(x => x.Success) && cleanMarkers.Count > 0)
@@ -675,6 +681,10 @@ namespace uSync.BackOffice.SyncHandlers
         protected virtual IEnumerable<uSyncAction> DeleteMissingItems(int parentId, IEnumerable<Guid> keysToKeep, bool reportOnly)
             => Enumerable.Empty<uSyncAction>();
 
+
+        protected virtual IEnumerable<string> GetImportFiles(string[] folders)
+            => syncFileService.GetCombinedFiles(folders, $"*.{this.uSyncConfig.Settings.DefaultExtension}").OrderBy(Path.GetFileNameWithoutExtension);
+
         /// <summary>
         ///  Get the files we are going to import from a folder. 
         /// </summary>
@@ -869,16 +879,19 @@ namespace uSync.BackOffice.SyncHandlers
         /// Run a report based on a given folder
         /// </summary>
         public IEnumerable<uSyncAction> Report(string folder, HandlerSettings config, SyncUpdateCallback callback)
+            => Report(new[] { folder }, config, callback);
+
+        public IEnumerable<uSyncAction> Report(string[] folders, HandlerSettings config, SyncUpdateCallback callback)
         {
             var actions = new List<uSyncAction>();
 
             var cacheKey = PrepCaches();
 
             callback?.Invoke("Checking Actions", 1, 3);
-            actions.AddRange(ReportFolder(folder, config, callback));
+            actions.AddRange(ReportFolders(folders, config, callback));
 
             callback?.Invoke("Validating Report", 2, 3);
-            actions = ValidateReport(folder, actions);
+            actions = ValidateReport(folders, actions);
 
             CleanCaches(cacheKey);
 
@@ -886,13 +899,16 @@ namespace uSync.BackOffice.SyncHandlers
             return actions;
         }
 
-        private List<uSyncAction> ValidateReport(string folder, List<uSyncAction> actions)
+        private List<uSyncAction> ValidateReport(string[] folders, List<uSyncAction> actions)
         {
             // Alters the existing list, by changing the type as needed.
             var validationActions = ReportMissingParents(actions.ToArray());
 
-            // adds new actions - for delete clashes.
-            validationActions.AddRange(ReportDeleteCheck(folder, validationActions));
+            foreach (var folder in folders)
+            {
+                // adds new actions - for delete clashes.
+                validationActions.AddRange(ReportDeleteCheck(folder, validationActions));
+            }
 
             return validationActions.ToList();
         }
@@ -1020,36 +1036,33 @@ namespace uSync.BackOffice.SyncHandlers
             return actions.ToList();
         }
 
-        /// <summary>
-        ///  Run a report on a given folder
-        /// </summary>
-        public virtual IEnumerable<uSyncAction> ReportFolder(string folder, HandlerSettings config, SyncUpdateCallback callback)
+        public virtual IEnumerable<uSyncAction> ReportFolders(string[] folders, HandlerSettings config, SyncUpdateCallback callback)
         {
-            List<uSyncAction> actions = new List<uSyncAction>();
-
-
-            var files = GetImportFiles(folder).ToList();
+            List<uSyncAction> actions = new();
+            var files = GetImportFiles(folders).ToList();
 
             int count = 0;
 
-            logger.LogDebug("ReportFolder: {folder} ({count} files)", folder, files.Count);
-
-            foreach (string file in files)
+            foreach ( var file in files)
             {
                 count++;
-                callback?.Invoke(Path.GetFileNameWithoutExtension(file), count, files.Count);
-
                 actions.AddRange(ReportItem(file, config));
-                }
+            }
 
-            foreach (var children in syncFileService.GetDirectories(folder))
-                {
-                actions.AddRange(ReportFolder(children, config, callback));
-                }
+            foreach(var child in syncFileService.GetDirectories(folders))
+            {
+                actions.AddRange(ReportFolders(child.Value.ToArray(), config, callback));
+            }
 
             return actions;
         }
 
+        /// <summary>
+        ///  Run a report on a given folder
+        /// </summary>
+        public virtual IEnumerable<uSyncAction> ReportFolder(string folder, HandlerSettings config, SyncUpdateCallback callback)
+            => ReportFolders(new[] { folder }, config, callback);
+        
         /// <summary>
         /// Report on any changes for a single XML node.
         /// </summary>

@@ -21,6 +21,16 @@ namespace uSync.BackOffice.Configuration
         public string GetRootFolder()
             => Settings.RootFolder.TrimStart('/');
 
+        public string GetBaseFolder()
+            => Settings.BaseFolder.TrimStart('/');
+
+        public string[] GetCombinedFolders()
+            => new[]
+            {
+                GetBaseFolder(),
+                GetRootFolder(),
+            };
+
         private IOptionsMonitor<uSyncHandlerSetSettings> setOptionsMonitor;
 
         /// <summary>

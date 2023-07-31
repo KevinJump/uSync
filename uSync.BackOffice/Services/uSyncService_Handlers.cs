@@ -1,14 +1,10 @@
 ﻿using System.Collections.Generic;
-using System.Data;
 using System.IO;
 using System.Linq;
 
 using Microsoft.Extensions.Logging;
 
-using Umbraco.Cms.Core.Scoping;
-
 using uSync.BackOffice.Extensions;
-using uSync.BackOffice.Notifications;
 using uSync.BackOffice.SyncHandlers;
 using uSync.Core.Serialization;
 
@@ -32,9 +28,20 @@ namespace uSync.BackOffice
             });
 
             if (handlerPair == null) return Enumerable.Empty<uSyncAction>();
-            var folder = GetHandlerFolder(options.RootFolder, handlerPair.Handler);
 
-            return handlerPair.Handler.Report(folder, handlerPair.Settings, options.Callbacks?.Update);
+            var folders = GetHandlerFolders(options.Folders, handlerPair.Handler);
+            return handlerPair.Handler.Report(folders, handlerPair.Settings, options.Callbacks?.Update);
+        }
+
+        private string[] GetHandlerFolders(string[] folders, ISyncHandler handler)
+        {
+            var handlerFolders = new List<string>();
+            foreach (var folder in folders)
+            {
+                handlerFolders.Add(GetHandlerFolder(folder, handler));
+            }
+            return handlerFolders.ToArray();
+
         }
 
         /// <summary>
@@ -53,12 +60,13 @@ namespace uSync.BackOffice
                     });
 
                     if (handlerPair == null) return Enumerable.Empty<uSyncAction>();
-                    var folder = GetHandlerFolder(options.RootFolder, handlerPair.Handler);
+
+                    var folders = GetHandlerFolders(options.Folders, handlerPair.Handler);
 
                     _logger.LogDebug("> Import Handler {handler}", handlerAlias);
                     using var scope = _scopeProvider.CreateNotificationScope(_eventAggregator, _loggerFactory, options.Callbacks?.Update);
 
-                    var results = handlerPair.Handler.ImportAll(folder, handlerPair.Settings,
+                    var results = handlerPair.Handler.ImportAll(folders, handlerPair.Settings,
                         options.Flags.HasFlag(SerializerFlags.Force),
                         options.Callbacks?.Update);
                     
@@ -74,14 +82,14 @@ namespace uSync.BackOffice
         /// <summary>
         ///  perform the post import actions for a handler 
         /// </summary>
-        public IEnumerable<uSyncAction> PerformPostImport(string rootFolder, string handlerSet, IEnumerable<uSyncAction> actions)
+        public IEnumerable<uSyncAction> PerformPostImport(string[] rootFolders, string handlerSet, IEnumerable<uSyncAction> actions)
         {
             lock (_importLock)
             {
                 using (var pause = _mutexService.ImportPause(true))
                 {
                     var handlers = _handlerFactory.GetValidHandlers(new SyncHandlerOptions { Set = handlerSet, Action = HandlerActions.Import });
-                    return PerformPostImport(rootFolder, handlers, actions);
+                    return PerformPostImport(rootFolders, handlers, actions);
                 }
             }
         }
@@ -98,9 +106,16 @@ namespace uSync.BackOffice
             });
 
             if (handlerPair == null) return Enumerable.Empty<uSyncAction>();
-            var folder = GetHandlerFolder(options.RootFolder, handlerPair.Handler);
+            var exportFolder = options.Folders.LastOrDefault();
 
-            return handlerPair.Handler.ExportAll(folder, handlerPair.Settings, options.Callbacks?.Update);
+            if (exportFolder != null)
+            {
+                var folder = GetHandlerFolder(exportFolder, handlerPair.Handler);
+
+                return handlerPair.Handler.ExportAll(folder, handlerPair.Settings, options.Callbacks?.Update);
+            }
+
+            return Enumerable.Empty<uSyncAction>();
         }
 
         /// <summary>

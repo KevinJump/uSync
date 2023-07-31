@@ -24,13 +24,13 @@ namespace uSync.BackOffice.Controllers
         ///  Get the list of handler aliases to use for any give action
         /// </summary>
         [HttpPost]
-        public IEnumerable<SyncHandlerView> GetActionHandlers([FromQuery]HandlerActions action, uSyncOptions options)
+        public IEnumerable<SyncHandlerView> GetActionHandlers([FromQuery] HandlerActions action, uSyncOptions options)
         {
             var handlerGroup = string.IsNullOrWhiteSpace(options.Group)
                 ? _uSyncConfig.Settings.UIEnabledGroups
                 : options.Group;
 
-            var handlerSet = string.IsNullOrWhiteSpace(options.Set) 
+            var handlerSet = string.IsNullOrWhiteSpace(options.Set)
                 ? _uSyncConfig.Settings.DefaultSet
                 : options.Set;
 
@@ -66,7 +66,10 @@ namespace uSync.BackOffice.Controllers
                 {
                     Callbacks = hubClient.Callbacks(),
                     HandlerSet = handlerSet,
-                    RootFolder = GetValidImportFolder(options.Folder),                    
+                    Folders = new[] {
+                        GetValidImportFolder(options.BaseFolder, _uSyncConfig.GetBaseFolder()),
+                        GetValidImportFolder(options.Folder),
+                    }
                 }).ToList();
 
             if (_uSyncConfig.Settings.SummaryDashboard || actions.Count > _uSyncConfig.Settings.SummaryLimit)
@@ -91,10 +94,13 @@ namespace uSync.BackOffice.Controllers
                 ? options.Set : _uSyncConfig.Settings.DefaultSet;
 
             var actions = _uSyncService.ImportHandler(options.Handler, new uSyncImportOptions
-            { 
+            {
                 Callbacks = hubClient.Callbacks(),
                 HandlerSet = handlerSet,
-                RootFolder = GetValidImportFolder(options.Folder),
+                Folders = new[] {
+                    GetValidImportFolder(options.BaseFolder, _uSyncConfig.GetBaseFolder()),
+                    GetValidImportFolder(options.Folder)
+                },
                 PauseDuringImport = true,
                 Flags = options.Force ? Core.Serialization.SerializerFlags.Force : Core.Serialization.SerializerFlags.None
             }).ToList();
@@ -116,9 +122,16 @@ namespace uSync.BackOffice.Controllers
             var handlerSet = !string.IsNullOrWhiteSpace(options.Set)
                 ? options.Set : _uSyncConfig.Settings.DefaultSet;
 
-            var actions = _uSyncService.PerformPostImport(
-                GetValidImportFolder(options.Folder), 
-                handlerSet, 
+            var folders = new List<string>
+            {
+                GetValidImportFolder(options.Folder),
+            };
+
+            if (!string.IsNullOrEmpty(options.BaseFolder))
+                folders.Add(GetValidImportFolder(options.BaseFolder, _uSyncConfig.GetBaseFolder()));
+
+            var actions = _uSyncService.PerformPostImport(folders.ToArray(),
+                handlerSet,
                 options.Actions);
 
             hubClient.Callbacks()?.Update("Import Complete", 1, 1);
@@ -154,12 +167,15 @@ namespace uSync.BackOffice.Controllers
             var handlerSet = !string.IsNullOrWhiteSpace(options.Set)
                 ? options.Set : _uSyncConfig.Settings.DefaultSet;
 
-
             var actions = _uSyncService.ExportHandler(options.Handler, new uSyncImportOptions
             {
                 Callbacks = hubClient.Callbacks(),
                 HandlerSet = handlerSet,
-                RootFolder = GetValidImportFolder(options.Folder)
+                Folders = new[]
+                {
+                    GetValidImportFolder(options.BaseFolder, _uSyncConfig.GetBaseFolder()),
+                    GetValidImportFolder(options.Folder)
+                }               
             }).ToList();
 
             if (_uSyncConfig.Settings.SummaryDashboard || actions.Count > _uSyncConfig.Settings.SummaryLimit)
@@ -173,7 +189,7 @@ namespace uSync.BackOffice.Controllers
         /// </summary>
         /// <param name="action"></param>
         [HttpPost]
-        public void StartProcess([FromQuery]HandlerActions action)
+        public void StartProcess([FromQuery] HandlerActions action)
             => _uSyncService.StartBulkProcess(action);
 
         /// <summary>
@@ -182,7 +198,7 @@ namespace uSync.BackOffice.Controllers
         /// <param name="action"></param>
         /// <param name="actions"></param>
         [HttpPost]
-        public void FinishProcess([FromQuery]HandlerActions action, IEnumerable<uSyncAction> actions)
+        public void FinishProcess([FromQuery] HandlerActions action, IEnumerable<uSyncAction> actions)
         {
             _uSyncService.FinishBulkProcess(action, actions);
             _logger.LogInformation("{user} finished {action} process ({changes} changes)", GetCurrentUser(), action, actions.CountChanges());
@@ -202,15 +218,17 @@ namespace uSync.BackOffice.Controllers
 
 
         private string GetValidImportFolder(string folder)
+            => GetValidImportFolder(folder, _uSyncConfig.GetRootFolder());
+
+        private string GetValidImportFolder(string folder, string fallback)
         {
-            if (string.IsNullOrWhiteSpace(folder)) return _uSyncConfig.GetRootFolder();
+            if (string.IsNullOrEmpty(folder)) return fallback;
 
             // else check its a valid folder. 
             var fullPath = _syncFileService.GetAbsPath(folder);
-            var fullRoot = _syncFileService.GetAbsPath(_uSyncConfig.GetRootFolder());
+            var fullRoot = _syncFileService.GetAbsPath(fallback);
 
-
-            var rootParent = Path.GetDirectoryName(fullRoot.TrimEnd(new char[] {'/', '\\'}));
+            var rootParent = Path.GetDirectoryName(fullRoot.TrimEnd(new char[] { '/', '\\' }));
             _logger.LogDebug("Import Folder: {fullPath} {rootPath} {fullRoot}", fullPath, rootParent, fullRoot);
 
             if (fullPath.StartsWith(rootParent))

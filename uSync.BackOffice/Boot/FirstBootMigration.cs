@@ -61,8 +61,8 @@ namespace uSync.BackOffice.Boot
             var sw = Stopwatch.StartNew();
             var changes = 0;
 
-            _logger.LogInformation("Import on First-boot Set - will import {group} handler groups", 
-                _uSyncConfig.Settings.FirstBootGroup); 
+            _logger.LogInformation("Import on First-boot Set - will import {group} handler groups",
+                _uSyncConfig.Settings.FirstBootGroup);
 
             // if config service is set to import on first boot then this 
             // will let uSync do a first boot import 
@@ -72,7 +72,7 @@ namespace uSync.BackOffice.Boot
 
             using (var reference = _umbracoContextFactory.EnsureUmbracoContext())
             {
-                var results = _uSyncService.Import(_uSyncConfig.GetRootFolder(), false, new SyncHandlerOptions
+                var results = _uSyncService.Import(_uSyncConfig.GetCombinedFolders(), false, new SyncHandlerOptions
                 {
                     Group = _uSyncConfig.Settings.FirstBootGroup
                 });

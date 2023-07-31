@@ -41,5 +41,10 @@ namespace uSync.BackOffice.Controllers
         /// </summary>
         public string Folder { get; set; }
 
+        /// <summary>
+        ///  folder to take base values from 
+        /// </summary>
+        public string BaseFolder { get; set; }
+
     }
 }

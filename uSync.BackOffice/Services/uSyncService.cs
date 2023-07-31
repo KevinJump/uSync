@@ -100,12 +100,15 @@ namespace uSync.BackOffice
         /// <param name="callbacks">Callback functions to keep UI upto date</param>
         /// <returns>List of actions detailing what would and wouldn't change</returns>
         public IEnumerable<uSyncAction> Report(string folder, SyncHandlerOptions handlerOptions, uSyncCallbacks callbacks = null)
+            => Report(new[] { folder }, handlerOptions, callbacks);
+        
+        public IEnumerable<uSyncAction> Report(string[] folders, SyncHandlerOptions handlerOptions, uSyncCallbacks callbacks = null)
         {
             if (handlerOptions == null) handlerOptions = new SyncHandlerOptions();
             handlerOptions.Action = HandlerActions.Report;
 
             var handlers = _handlerFactory.GetValidHandlers(handlerOptions);
-            return Report(folder, handlers, callbacks);
+            return Report(folders.ToArray(), handlers, callbacks);
         }
 
         /// <summary>
@@ -115,10 +118,10 @@ namespace uSync.BackOffice
         /// <param name="handlerAliases">List of Aliases for the sync handlers to use</param>
         /// <param name="callbacks">Callback functions to keep UI upto date</param>
         /// <returns>List of actions detailing what would and wouldn't change</returns>
-        public IEnumerable<uSyncAction> Report(string folder, IEnumerable<string> handlerAliases, uSyncCallbacks callbacks)
+        public IEnumerable<uSyncAction> Report(string[] folders, IEnumerable<string> handlerAliases, uSyncCallbacks callbacks)
         {
             var handlers = _handlerFactory.GetDefaultHandlers(handlerAliases);
-            return Report(folder, handlers, callbacks);
+            return Report(folders, handlers, callbacks);
         }
 
         /// <summary>
@@ -129,8 +132,10 @@ namespace uSync.BackOffice
         /// <param name="callbacks">Callback functions to keep UI upto date</param>
         /// <returns>List of actions detailing what would and wouldn't change</returns>
         public IEnumerable<uSyncAction> Report(string folder, IEnumerable<HandlerConfigPair> handlers, uSyncCallbacks callbacks)
-        {
+            => Report(new[] { folder }, handlers, callbacks);
 
+        public IEnumerable<uSyncAction> Report(string[] folders, IEnumerable<HandlerConfigPair> handlers, uSyncCallbacks callbacks)
+        { 
             var sw = Stopwatch.StartNew();
 
             _mutexService.FireBulkStarting(new uSyncReportStartingNotification());
@@ -152,7 +157,9 @@ namespace uSync.BackOffice
 
                 callbacks?.Callback?.Invoke(summary);
 
-                var handlerActions = handler.Report($"{folder}/{handler.DefaultFolder}", handlerSettings, callbacks?.Update);
+                var allFolders = folders.Select(x => $"{x}/{handler.DefaultFolder}").ToArray();
+
+                var handlerActions = handler.Report(allFolders, handlerSettings, callbacks?.Update);
                 actions.AddRange(handlerActions);
 
                 summary.UpdateHandler(handler.Name, HandlerStatus.Complete,
@@ -191,12 +198,15 @@ namespace uSync.BackOffice
         /// <param name="callbacks">Callbacks to keep UI informed</param>
         /// <returns>List of actions detailing what did and didn't change</returns>
         public IEnumerable<uSyncAction> Import(string folder, bool force, SyncHandlerOptions handlerOptions, uSyncCallbacks callbacks = null)
+            => Import(new[] { folder }, force, handlerOptions, callbacks);
+
+        public IEnumerable<uSyncAction> Import(string[] folders, bool force, SyncHandlerOptions handlerOptions, uSyncCallbacks callbacks = null)
         {
             if (handlerOptions == null) handlerOptions = new SyncHandlerOptions();
             handlerOptions.Action = HandlerActions.Import;
 
             var handlers = _handlerFactory.GetValidHandlers(handlerOptions);
-            return Import(folder, force, handlers, callbacks);
+            return Import(folders, force, handlers, callbacks);
         }
 
         /// <summary>
@@ -208,6 +218,9 @@ namespace uSync.BackOffice
         /// <param name="callbacks">Callbacks to keep UI informed</param>
         /// <returns>List of actions detailing what did and didn't change</returns>
         public IEnumerable<uSyncAction> Import(string folder, bool force, IEnumerable<string> handlerAliases, uSyncCallbacks callbacks)
+            => Import(new[] { folder }, force, handlerAliases, callbacks);
+
+        public IEnumerable<uSyncAction> Import(string[] folder, bool force, IEnumerable<string> handlerAliases, uSyncCallbacks callbacks)
         {
             var handlers = _handlerFactory.GetDefaultHandlers(handlerAliases);
             return Import(folder, force, handlers, callbacks);
@@ -222,6 +235,9 @@ namespace uSync.BackOffice
         /// <param name="callbacks">Callbacks to keep UI informed</param>
         /// <returns>List of actions detailing what did and didn't change</returns>
         public IEnumerable<uSyncAction> Import(string folder, bool force, IEnumerable<HandlerConfigPair> handlers, uSyncCallbacks callbacks)
+            => Import(new[] { folder }, force, handlers, callbacks);    
+
+        public IEnumerable<uSyncAction> Import(string[] folders, bool force, IEnumerable<HandlerConfigPair> handlers, uSyncCallbacks callbacks)
         {
             // if its blank, we just throw it back empty. 
             if (handlers == null || !handlers.Any()) return Enumerable.Empty<uSyncAction>();
@@ -258,7 +274,9 @@ namespace uSync.BackOffice
 
                         callbacks?.Callback?.Invoke(summary);
 
-                        var handlerActions = handler.ImportAll($"{folder}/{handler.DefaultFolder}", handlerSettings, force, callbacks?.Update);
+                        var handlerFolders = folders.Select(x => $"{x}/{handler.DefaultFolder}").ToArray();
+                        var handlerActions = handler.ImportAll(handlerFolders, handlerSettings, force, callbacks?.Update);
+
                         actions.AddRange(handlerActions);
 
                         summary.UpdateHandler(handler.Name, HandlerStatus.Complete,
@@ -275,7 +293,7 @@ namespace uSync.BackOffice
 
                     callbacks?.Callback?.Invoke(summary);
 
-                    actions.AddRange(PerformPostImport(folder, handlers, actions));
+                    actions.AddRange(PerformPostImport(folders, handlers, actions));
 
                     sw.Stop();
                     summary.UpdateHandler("Post Import", HandlerStatus.Complete, "Import Completed", 0);
@@ -297,7 +315,7 @@ namespace uSync.BackOffice
             }
         }
 
-        private IEnumerable<uSyncAction> PerformPostImport(string rootFolder, IEnumerable<HandlerConfigPair> handlers, IEnumerable<uSyncAction> actions)
+        private IEnumerable<uSyncAction> PerformPostImport(string[] rootFolders, IEnumerable<HandlerConfigPair> handlers, IEnumerable<uSyncAction> actions)
         {
             var postImportActions = actions.Where(x => x.Success && x.Change > Core.ChangeType.NoChange && x.RequiresPostProcessing).ToList();
             if (postImportActions.Count == 0) return Enumerable.Empty<uSyncAction>();
@@ -312,10 +330,13 @@ namespace uSync.BackOffice
 
                     if (handlerActions.Any())
                     {
-                        var handlerFolder = GetHandlerFolder(rootFolder, handlerPair.Handler);
-                        var postActions = postImportHandler.ProcessPostImport(handlerFolder, handlerActions, handlerPair.Settings);
-                        if (postActions != null)
-                            results.AddRange(postActions);
+                        foreach (var rootFolder in rootFolders)
+                        {
+                            var handlerFolder = GetHandlerFolder(rootFolder, handlerPair.Handler);
+                            var postActions = postImportHandler.ProcessPostImport(handlerFolder, handlerActions, handlerPair.Settings);
+                            if (postActions != null)
+                                results.AddRange(postActions);
+                        }
                     }
                 }
             }
@@ -528,7 +549,12 @@ namespace uSync.BackOffice
                 var handlers = _handlerFactory
                     .GetValidHandlersByEntityType(e.EntityTypes, e.HandlerOptions);
 
-                if (handlers.Any()) this.Import(e.Folder, false, handlers, null);
+                var folders = new[]
+                {
+                    e.Folder, _syncFileService.GetAbsPath(_uSyncConfig.Settings.BaseFolder)
+                };
+
+                if (handlers.Any()) this.Import(folders, false, handlers, null);
             }
         }
 

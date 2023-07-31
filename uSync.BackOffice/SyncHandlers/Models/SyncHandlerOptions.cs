@@ -36,6 +36,11 @@ namespace uSync.BackOffice.SyncHandlers
         public int UserId { get; set; } = -1;
 
         /// <summary>
+        ///  a base folder to merge into the mix.
+        /// </summary>
+        public string BaseFolder { get; set; } = string.Empty;
+
+        /// <summary>
         /// Default constructor
         /// </summary>
         public SyncHandlerOptions() { }

@@ -20,6 +20,12 @@ namespace uSync.BackOffice.Configuration
         public string RootFolder { get; set; } = "uSync/v9/";
 
         /// <summary>
+        ///  location to look for 'base' files. 
+        /// </summary>
+        [DefaultValue("uSync/root/")]
+        public string BaseFolder { get; set; } = "uSync/root/";
+
+        /// <summary>
         /// The default handler set to use on all notification triggered events
         /// </summary>
         [DefaultValue(uSync.Sets.DefaultSet)]
