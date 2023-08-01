@@ -26,6 +26,12 @@ namespace uSync.BackOffice.Configuration
         public string BaseFolder { get; set; } = "uSync/root/";
 
         /// <summary>
+        ///  lock the items that come from base.
+        /// </summary>
+        [DefaultValue(true)]
+        public bool LockBase { get; set; } = true;
+
+        /// <summary>
         /// The default handler set to use on all notification triggered events
         /// </summary>
         [DefaultValue(uSync.Sets.DefaultSet)]

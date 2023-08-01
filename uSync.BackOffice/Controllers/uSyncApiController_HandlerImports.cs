@@ -66,10 +66,7 @@ namespace uSync.BackOffice.Controllers
                 {
                     Callbacks = hubClient.Callbacks(),
                     HandlerSet = handlerSet,
-                    Folders = new[] {
-                        GetValidImportFolder(options.BaseFolder, _uSyncConfig.GetBaseFolder()),
-                        GetValidImportFolder(options.Folder),
-                    }
+                    Folders = GetValidFolders(options)
                 }).ToList();
 
             if (_uSyncConfig.Settings.SummaryDashboard || actions.Count > _uSyncConfig.Settings.SummaryLimit)
@@ -97,10 +94,7 @@ namespace uSync.BackOffice.Controllers
             {
                 Callbacks = hubClient.Callbacks(),
                 HandlerSet = handlerSet,
-                Folders = new[] {
-                    GetValidImportFolder(options.BaseFolder, _uSyncConfig.GetBaseFolder()),
-                    GetValidImportFolder(options.Folder)
-                },
+                Folders = GetValidFolders(options),
                 PauseDuringImport = true,
                 Flags = options.Force ? Core.Serialization.SerializerFlags.Force : Core.Serialization.SerializerFlags.None
             }).ToList();
@@ -122,17 +116,9 @@ namespace uSync.BackOffice.Controllers
             var handlerSet = !string.IsNullOrWhiteSpace(options.Set)
                 ? options.Set : _uSyncConfig.Settings.DefaultSet;
 
-            var folders = new List<string>
-            {
-                GetValidImportFolder(options.Folder),
-            };
+            var folders = GetValidFolders(options);
 
-            if (!string.IsNullOrEmpty(options.BaseFolder))
-                folders.Add(GetValidImportFolder(options.BaseFolder, _uSyncConfig.GetBaseFolder()));
-
-            var actions = _uSyncService.PerformPostImport(folders.ToArray(),
-                handlerSet,
-                options.Actions);
+            var actions = _uSyncService.PerformPostImport(folders, handlerSet, options.Actions);
 
             hubClient.Callbacks()?.Update("Import Complete", 1, 1);
 
@@ -171,11 +157,7 @@ namespace uSync.BackOffice.Controllers
             {
                 Callbacks = hubClient.Callbacks(),
                 HandlerSet = handlerSet,
-                Folders = new[]
-                {
-                    GetValidImportFolder(options.BaseFolder, _uSyncConfig.GetBaseFolder()),
-                    GetValidImportFolder(options.Folder)
-                }               
+                Folders = GetValidFolders(options)
             }).ToList();
 
             if (_uSyncConfig.Settings.SummaryDashboard || actions.Count > _uSyncConfig.Settings.SummaryLimit)
@@ -216,6 +198,18 @@ namespace uSync.BackOffice.Controllers
             }
         }
 
+        private string[] GetValidFolders(SyncActionOptions options)
+        {
+            var folders = new List<string>
+            {
+                GetValidImportFolder(options.Folder, _uSyncConfig.GetRootFolder()),
+            };
+
+            if (!string.IsNullOrEmpty(options.BaseFolder))
+                folders.Add(GetValidImportFolder(options.BaseFolder, _uSyncConfig.GetBaseFolder()));
+
+            return folders.ToArray();
+        }
 
         private string GetValidImportFolder(string folder)
             => GetValidImportFolder(folder, _uSyncConfig.GetRootFolder());

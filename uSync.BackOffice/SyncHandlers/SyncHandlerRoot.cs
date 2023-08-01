@@ -835,7 +835,11 @@ namespace uSync.BackOffice.SyncHandlers
         /// <summary>
         /// Export a given item to disk
         /// </summary>
+        /// 
         virtual public IEnumerable<uSyncAction> Export(TObject item, string folder, HandlerSettings config)
+            => Export(item, folder, config, false);
+
+        virtual public IEnumerable<uSyncAction> Export(TObject item, string folder, HandlerSettings config, bool fromEvent)
         {
             if (item == null)
                 return uSyncAction.Fail(nameof(item), this.handlerType, this.ItemType, ChangeType.Fail, "Item not set",
@@ -849,17 +853,38 @@ namespace uSync.BackOffice.SyncHandlers
                     .AsEnumerableOfOne();
             }
 
+         
+
             var filename = GetPath(folder, item, config.GuidNames, config.UseFlatStructure)
                 .ToAppSafeFileName();
 
-            var attempt = SerializeItem(item, new SyncSerializerOptions(config.Settings));
+            var serializerOptions = new SyncSerializerOptions(config.Settings);
+            var attempt = SerializeItem(item, serializerOptions);
             if (attempt.Success)
             {
                 if (ShouldExport(attempt.Item, config))
                 {
-                    // only write the file to disk if it should be exported.
-                    syncFileService.SaveXElement(attempt.Item, filename);
-                }
+                    if (ExistsInBase(item))
+                    {
+                        if (fromEvent && uSyncConfig.Settings.LockBase)
+                        {
+                            return uSyncAction.SetAction(true, nameof(item), type: this.handlerType, change: ChangeType.NoChange, message: "Item exists in base and will not be exported")
+                                .AsEnumerableOfOne();
+                        }
+
+                        if (IsDifferentFromBase(attempt.Item, item, serializerOptions))
+                        {
+                            // if we are not locking the base, then 
+                            // when something is different it is exported to root. 
+                            syncFileService.SaveXElement(attempt.Item, filename);
+                        }
+                    }
+                    else
+                    {
+                        // only write the file to disk if it should be exported.
+                        syncFileService.SaveXElement(attempt.Item, filename);
+                    }
+                    }
                 else
                 {
                     return uSyncAction.SetAction(true, filename, type: typeof(TObject).ToString(), change: ChangeType.NoChange, message: "Not Exported (Based on configuration)", filename: filename).AsEnumerableOfOne();
@@ -1229,6 +1254,49 @@ namespace uSync.BackOffice.SyncHandlers
             }
         }
 
+        public virtual void Handle(SavingNotification<TObject> notification)
+        {
+            // if we are not locking base elements
+            if (!uSyncConfig.Settings.LockBase) return;
+
+            // standard, should we process this event check.
+            if (!ShouldProcessEvent()) return;
+
+            // if the base folder doesn't exist, exit
+            if (!syncFileService.DirectoryExists(uSyncConfig.GetBaseFolder())) return;
+
+            foreach (var item in notification.SavedEntities)
+            {
+                if (ExistsInBase(item)) 
+                { 
+                    // this file exists in the 'base' folder, 
+                    // so we should block the saving of it.
+                    notification.CancelOperation(new EventMessage("error", "Base items are locked", EventMessageType.Error));
+                }
+            }
+        }
+
+        protected bool ExistsInBase(TObject item)
+        {
+            var folder = Path.Combine(uSyncConfig.GetBaseFolder(), this.DefaultFolder);
+            var path = GetPath(folder, item, DefaultConfig.GuidNames, DefaultConfig.UseFlatStructure)
+                .ToAppSafeFileName();
+
+            return syncFileService.FileExists(path);
+        }
+
+        protected bool IsDifferentFromBase(XElement element, TObject item, SyncSerializerOptions options)
+        {
+            var folder = Path.Combine(uSyncConfig.GetBaseFolder(), this.DefaultFolder);
+            var path = GetPath(folder, item, DefaultConfig.GuidNames, DefaultConfig.UseFlatStructure)
+                .ToAppSafeFileName();
+
+            if (!syncFileService.FileExists(path)) return true;
+
+            var baseXml = XElement.Load(path);
+            return serializer.IsCurrent(element, baseXml, options) != ChangeType.NoChange;
+        }
+
         /// <summary>
         /// Handle the Umbraco Saved notification for items. 
         /// </summary>
@@ -1241,7 +1309,7 @@ namespace uSync.BackOffice.SyncHandlers
             {
                 try
                 {
-                    var attempts = Export(item, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
+                    var attempts = Export(item, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig, !uSyncConfig.Settings.LockBase);
                     foreach (var attempt in attempts.Where(x => x.Success))
                     {
                         this.CleanUp(item, attempt.FileName, Path.Combine(rootFolder, this.DefaultFolder));
