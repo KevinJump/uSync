@@ -9,7 +9,7 @@ namespace uSync.BackOffice.Services
     ///  handles the events and locks for uSync events. 
     /// </summary>
     /// <remarks>
-    ///  stops us tripping up over usync firing save events etc while importing
+    ///  stops us tripping up over uSync firing save events etc while importing
     ///  gives us one place to fire our notifications from 
     /// </remarks>
     public class uSyncEventService
@@ -37,14 +37,14 @@ namespace uSync.BackOffice.Services
         public void Pause() => IsPaused = true;
 
         /// <summary>
-        ///  unpause the uSync triggering process
+        ///  un-pause the uSync triggering process
         /// </summary>
         public void UnPause() => IsPaused = false;
 
         /// <summary>
         ///  get an import pause object (pauses the import until it is disposed)
         /// </summary>
-        [Obsolete("You should tell usync if it needs to pause or not during the process (removed in v12)")]
+        [Obsolete("You should tell uSync if it needs to pause or not during the process (removed in v12)")]
         public uSyncImportPause ImportPause()
             => new uSyncImportPause(this);
 
@@ -52,8 +52,8 @@ namespace uSync.BackOffice.Services
         ///  get an import pause object (pauses the import until it is disposed)
         /// </summary>
         /// <remarks>
-        ///  you should wrap code that might trigger umbraco events in using(var pause = _mutexService.ImportPause())
-        ///  this will ensure that uSync doesn't then pickupt the imports as new things and saves them to disk.
+        ///  you should wrap code that might trigger Umbraco events in using(var pause = _mutexService.ImportPause())
+        ///  this will ensure that uSync doesn't then pickup the imports as new things and saves them to disk.
         /// </remarks>
         public uSyncImportPause ImportPause(bool pause)
             => new uSyncImportPause(this, pause);
