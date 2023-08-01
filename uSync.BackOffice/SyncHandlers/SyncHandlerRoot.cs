@@ -1309,7 +1309,7 @@ namespace uSync.BackOffice.SyncHandlers
             {
                 try
                 {
-                    var attempts = Export(item, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig, !uSyncConfig.Settings.LockBase);
+                    var attempts = Export(item, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig, true);
                     foreach (var attempt in attempts.Where(x => x.Success))
                     {
                         this.CleanUp(item, attempt.FileName, Path.Combine(rootFolder, this.DefaultFolder));
