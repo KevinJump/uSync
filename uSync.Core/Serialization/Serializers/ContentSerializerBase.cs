@@ -169,7 +169,10 @@ namespace uSync.Core.Serialization.Serializers
             }
             info.Add(title);
 
-            info.Add(new XElement(uSyncConstants.Xml.SortOrder, item.SortOrder));
+            if (!options.GetSetting<bool>("IgnoreSortOrder", false))
+            {
+                info.Add(new XElement(uSyncConstants.Xml.SortOrder, item.SortOrder));
+            }
 
             return info;
         }

@@ -74,8 +74,11 @@ namespace uSync.Core.Serialization.Serializers
 
             var info = node.Element("Info");
 
-            var sortOrder = info.Element("SortOrder").ValueOrDefault(-1);
-            HandleSortOrder(item, sortOrder);
+            if (!options.GetSetting<bool>("IgnoreSortOrder", false))
+            {
+                var sortOrder = info.Element("SortOrder").ValueOrDefault(-1);
+                HandleSortOrder(item, sortOrder);
+            }
 
 
             if (details.HasWarning() && options.FailOnWarnings())
