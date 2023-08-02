@@ -15,6 +15,7 @@ using Umbraco.Extensions;
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
 using uSync.Core;
+using uSync.Core.Serialization;
 
 namespace uSync.BackOffice.SyncHandlers
 {
@@ -105,6 +106,11 @@ namespace uSync.BackOffice.SyncHandlers
         /// <returns></returns>
         protected IEnumerable<uSyncAction> UpdateFolder(int folderId, string folder, HandlerSettings config)
         {
+            if (this.serializer is SyncContainerSerializerBase<TObject> containerSerializer)
+            {
+                containerSerializer.InitializeCache();
+            }
+
             var actions = new List<uSyncAction>();
             var folders = GetFolders(folderId);
             foreach (var fdlr in folders)
