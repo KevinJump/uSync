@@ -186,9 +186,12 @@ namespace uSync.Core.Serialization.Serializers
 
             details.AddRange(propertiesAttempt.Result);
 
-            // sort order
-            var sortOrder = node.Element("Info").Element("SortOrder").ValueOrDefault(-1);
-            details.AddNotNull(HandleSortOrder(item, sortOrder));
+            if (!options.GetSetting<bool>("IgnoreSortOrder", false))
+            {
+                // sort order
+                var sortOrder = node.Element("Info").Element("SortOrder").ValueOrDefault(-1);
+                details.AddNotNull(HandleSortOrder(item, sortOrder));
+            }
 
             var publishTimer = Stopwatch.StartNew();
 
