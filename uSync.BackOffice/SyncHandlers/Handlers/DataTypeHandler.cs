@@ -26,7 +26,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
     ///  Handler to manage DataTypes via uSync
     /// </summary>
     [SyncHandler(uSyncConstants.Handlers.DataTypeHandler, "Datatypes", "DataTypes", uSyncConstants.Priorites.DataTypes,
-        Icon = "icon-autofill", EntityType = UdiEntityType.DataType)]
+        Icon = "icon-autofill", IsTwoPass = true, EntityType = UdiEntityType.DataType)]
     public class DataTypeHandler : SyncHandlerContainerBase<IDataType, IDataTypeService>, ISyncHandler, ISyncPostImportHandler,
         INotificationHandler<SavedNotification<IDataType>>,
         INotificationHandler<MovedNotification<IDataType>>,
@@ -67,9 +67,14 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             if (actions == null || !actions.Any())
                 return null;
 
+            var results = new List<uSyncAction>();  
+
             foreach (var action in actions)
             {
-                var result = Import(action.FileName, config, SerializerFlags.None);
+                var result = Import(action.FileName, config, SerializerFlags.LastPass);
+
+                results.AddRange(result);
+
                 foreach (var attempt in result)
                 {
                     if (attempt.Success && attempt.Item is IDataType dataType)
@@ -79,7 +84,9 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
                 }
             }
 
-            return CleanFolders(folder, -1);
+            results.AddRange(CleanFolders(folder, -1));
+
+            return results;
         }
 
         /// <summary>

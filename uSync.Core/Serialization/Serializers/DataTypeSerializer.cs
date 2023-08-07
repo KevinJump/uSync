@@ -52,6 +52,26 @@ namespace uSync.Core.Serialization.Serializers
             };
         }
 
+        /// <summary>
+        ///  Process deletes
+        /// </summary>
+        /// <remarks>
+        ///  datatypes are deleted late (in the last pass)
+        ///  this means they are actually deleted at the very
+        ///  end of the process. 
+        /// </remarks>
+        protected override SyncAttempt<IDataType> ProcessDelete(Guid key, string alias, SerializerFlags flags)
+        {
+            if (flags.HasFlag(SerializerFlags.LastPass)) 
+            {
+                logger.LogDebug("Processing deletes as part of the last pass)");
+                return base.ProcessDelete(key, alias, flags);
+            }
+
+            logger.LogDebug("Delete not processing as this is not the final pass");
+            return SyncAttempt<IDataType>.Succeed(alias, ChangeType.Hidden);
+        }
+
         protected override SyncAttempt<IDataType> DeserializeCore(XElement node, SyncSerializerOptions options)
         {
             var info = node.Element(uSyncConstants.Xml.Info);

@@ -43,7 +43,7 @@
         /////////
 
         function showChange(change) {
-            return vm.showAll || (change !== 'NoChange' && change !== 'Removed');
+            return vm.showAll || (change !== 'NoChange' && change !== 'Removed' && change !== 'Hidden');
         }
 
         function hasFailedDetail(details) {
@@ -223,6 +223,8 @@
                         break;
                     case 'Information':
                         counts.infos++;
+                        break;
+                    case 'Hidden':
                         break;
                     default:
                         counts.errors++;

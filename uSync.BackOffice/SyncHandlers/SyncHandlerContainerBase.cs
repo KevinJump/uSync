@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Xml.Linq;
 
 using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Models;
@@ -168,6 +169,27 @@ namespace uSync.BackOffice.SyncHandlers
                     UpdateFolder(folder.Id, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
                 }
             }
+        }
+
+        /// <summary>
+        ///  Does this item match the one in a given xml file? 
+        /// </summary>
+        /// <remarks>
+        ///  container based tree's aren't really trees - as in things can't have the same 
+        ///  name inside a folder as something else that might be outside the folder.
+        ///  
+        ///  this means when we are comparing files for clean up, we also want to check the 
+        ///  alias. so we check the key (in the base) and if doesn't match we check the alias.
+        ///  
+        ///  under default setup none of this matters because the name of the item is the file
+        ///  name so we find/overwrite it anyway, 
+        ///  
+        ///  but for guid / folder structured setups we need to do this compare. 
+        /// </remarks>
+        protected override bool DoItemsMatch(XElement node, TObject item)
+        {
+            if (base.DoItemsMatch(node, item)) return true;
+            return node.GetAlias().InvariantEquals(GetItemAlias(item));
         }
     }
 }
