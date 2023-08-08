@@ -97,6 +97,8 @@
                     return 'icon-check color-green';
                 case 'Information':
                     return 'icon-info color-blue';
+                case 'Create':
+                    return 'icon-light-up color-green';
                 default:
                     return 'icon-flag color-red';
             }
@@ -193,6 +195,7 @@
             var counts = {
                 total: group.length,
                 changes: 0,
+                creates: 0,
                 updates: 0,
                 deletes: 0,
                 imports: 0,
@@ -209,6 +212,9 @@
                     case 'NoChange':
                         counts.noChange++;
                         break;
+                    case 'Create':
+                        counts.creates++;
+                        break;s
                     case 'Update':
                         counts.updates++;
                         break;
@@ -238,6 +244,7 @@
 
             // or changes.changes = changes.total - changes.noChange; // ??
             counts.changes =
+                counts.creates +
                 counts.updates +
                 counts.deletes +
                 counts.imports +
