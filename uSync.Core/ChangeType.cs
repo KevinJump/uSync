@@ -50,7 +50,15 @@ namespace uSync.Core
         Mismatch,
 
         [EnumMember(Value = "ParentMissing")]
-        ParentMissing
+        ParentMissing,
+
+        /// <summary>
+        ///  Hidden changes, don't show up in the UI
+        ///  but they are processed like changes, so 
+        ///  get passed to second and last pass attempts
+        /// </summary>
+        [EnumMember(Value = "Hidden")]
+        Hidden = 101
     }
 
 }
