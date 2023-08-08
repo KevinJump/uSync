@@ -34,6 +34,40 @@ namespace uSync8.Core.Serialization.Serializers
             this.configurationSerializers = configurationSerializers;
         }
 
+        /// <summary>
+        ///  Process deletes
+        /// </summary>
+        /// <remarks>
+        ///  datatypes are deleted late (in the last pass)
+        ///  this means they are actually deleted at the very
+        ///  end of the process. 
+        ///  
+        ///  In theory this should be fine, 
+        ///  
+        ///  any content types that may or may not use
+        ///  datatypes we are about to delete will have
+        ///  already been updated. 
+        /// 
+        ///  by moving the datatypes to the end we capture the 
+        ///  case where the datatype might have been replaced 
+        ///  in the content type, by not deleting first we 
+        ///  stop the triggering of any of Umbraco's delete
+        ///  processes.
+        ///  
+        ///  this only works because we are keeping the track of
+        ///  all the deletes and renames when they happen
+        ///  and we can only reliably do that for items
+        ///  that have ContainerTree's because they are not 
+        ///  real trees - but flat (each alias is unique)
+        /// </remarks>
+        protected override SyncAttempt<IDataType> ProcessDelete(Guid key, string alias, SerializerFlags flags)
+        {
+            if (flags.HasFlag(SerializerFlags.LastPass)) 
+                return base.ProcessDelete(key, alias, flags);
+
+            return SyncAttempt<IDataType>.Succeed(alias, ChangeType.Hidden);
+        }
+
         protected override SyncAttempt<IDataType> DeserializeCore(XElement node, SyncSerializerOptions options)
         {
             var info = node.Element("Info");

@@ -417,7 +417,7 @@
         function countChanges(changes) {
             var count = 0;
             angular.forEach(changes, function (val, key) {
-                if (val.Change !== 'NoChange') {
+                if (val.Change !== 'NoChange' && val.Change !== 'Hidden') {
                     count++;
                 }
             });

@@ -19,7 +19,8 @@
         Fail = 11,
         ImportFail,
         Mismatch,
-        ParentMissing
+        ParentMissing,
+        Hidden = 101
     }
 
 }

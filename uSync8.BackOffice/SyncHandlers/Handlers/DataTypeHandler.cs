@@ -22,7 +22,7 @@ using static Umbraco.Core.Constants;
 namespace uSync8.BackOffice.SyncHandlers.Handlers
 {
     [SyncHandler("dataTypeHandler", "Datatypes", "DataTypes", uSyncBackOfficeConstants.Priorites.DataTypes,
-        Icon = "icon-autofill", EntityType = UdiEntityType.DataType)]
+        Icon = "icon-autofill", EntityType = UdiEntityType.DataType, IsTwoPass = true)]
     public class DataTypeHandler : SyncHandlerContainerBase<IDataType, IDataTypeService>, ISyncExtendedHandler, ISyncPostImportHandler, ISyncItemHandler
     {
         private readonly IDataTypeService dataTypeService;
@@ -90,19 +90,23 @@ namespace uSync8.BackOffice.SyncHandlers.Handlers
             if (actions == null || !actions.Any())
                 return null;
 
+            var results = new List<uSyncAction>();
+
             foreach (var action in actions)
             {
-                var result = Import(action.FileName, config, SerializerFlags.None);
-                foreach (var attempt in result)
-                {
-                    if (attempt.Success && attempt.Item is IDataType dataType)
-                    {
-                        ImportSecondPass(action.FileName, dataType, config, null);
-                    }
-                }
+                results.AddRange(Import(action.FileName, config, SerializerFlags.LastPass));
+                //foreach (var attempt in result)
+                //{
+                //    if (attempt.Success && attempt.Item is IDataType dataType)
+                //    {
+                //        ImportSecondPass(action.FileName, dataType, config, null);
+                //    }
+                //}
             }
 
-            return CleanFolders(folder, -1);
+            results.AddRange(CleanFolders(folder, -1));
+
+            return results;
         }
 
         protected override IDataType GetFromService(Guid key)
