@@ -25,7 +25,7 @@ namespace uSync.BackOffice
         ///  count how many actions in this list are for changes
         /// </summary>
         public static int CountChanges(this IEnumerable<uSyncAction> actions)
-            => actions.Count(x => x.Change > Core.ChangeType.NoChange);
+            => actions.Count(x => x.Change > Core.ChangeType.NoChange && x.Change < Core.ChangeType.Hidden);
 
         /// <summary>
         ///  checks to see if the reuqested action is valid for the configured list of actions.

@@ -26,7 +26,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
     ///  Handler to manage DataTypes via uSync
     /// </summary>
     [SyncHandler(uSyncConstants.Handlers.DataTypeHandler, "Datatypes", "DataTypes", uSyncConstants.Priorites.DataTypes,
-        Icon = "icon-autofill", EntityType = UdiEntityType.DataType)]
+        Icon = "icon-autofill", IsTwoPass = true, EntityType = UdiEntityType.DataType)]
     public class DataTypeHandler : SyncHandlerContainerBase<IDataType, IDataTypeService>, ISyncHandler, ISyncPostImportHandler,
         INotificationHandler<SavedNotification<IDataType>>,
         INotificationHandler<MovedNotification<IDataType>>,
@@ -61,25 +61,39 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         /// Datatypes have to exist early on so DocumentTypes can reference them, but
         /// some doctypes reference content or document types, so we re-process them
         /// at the end of the import process to ensure those settings can be made too.
+        /// 
+        /// HOWEVER: The above isn't a problem Umbraco 10+ - the references can be set
+        /// before the actual doctypes exist, so we can do that in one pass.
+        /// 
+        /// HOWEVER: If we move deletes to the end , we still need to process them. 
+        /// but deletes are always 'change' = 'Hidden', so we only process hidden changes
         /// </remarks>
         public override IEnumerable<uSyncAction> ProcessPostImport(string folder, IEnumerable<uSyncAction> actions, HandlerSettings config)
         {
             if (actions == null || !actions.Any())
                 return null;
 
-            foreach (var action in actions)
+            var results = new List<uSyncAction>(); 
+            
+
+            // we only do deletes here. 
+            foreach (var action in actions.Where(x => x.Change == ChangeType.Hidden))
             {
-                var result = Import(action.FileName, config, SerializerFlags.None);
-                foreach (var attempt in result)
-                {
-                    if (attempt.Success && attempt.Item is IDataType dataType)
-                    {
-                        ImportSecondPass(action.FileName, dataType, config, null);
-                    }
-                }
+                var result = Import(action.FileName, config, SerializerFlags.LastPass);
+                results.AddRange(result);
+
+                //foreach (var attempt in result)
+                //{
+                //    if (attempt.Success && attempt.Item is IDataType dataType)
+                //    {
+                //        ImportSecondPass(action.FileName, dataType, config, null);
+                //    }
+                //}
             }
 
-            return CleanFolders(folder, -1);
+            results.AddRange(CleanFolders(folder, -1));
+
+            return results;
         }
 
         /// <summary>
