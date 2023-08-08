@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 using Microsoft.Extensions.Logging;
@@ -33,7 +34,8 @@ internal class SyncScopedNotificationPublisher
         if (notifications.Count > 0)
         {
             //_updateCallback?.Invoke($"Processing notifications [{notifications.Count}]", 9, 10);
-            _logger.LogDebug("Publishing Notifications [{count}]", notifications.Count);
+            _logger.LogDebug(">> Publishing Notifications [{count}]", notifications.Count);
+            var sw = Stopwatch.StartNew();
 
             var groupedNotifications = notifications
                 .Where(x => x != null)
@@ -44,6 +46,12 @@ internal class SyncScopedNotificationPublisher
                 _updateCallback?.Invoke($"Processing {items.Key}s ({items.Count()})", 90, 100);
                 _eventAggregator.Publish(items);
             }
+
+            sw.Stop();
+            _logger.LogDebug("<< Notifications processed - {elapsed}ms", sw.ElapsedMilliseconds);
+
+            if (sw.ElapsedMilliseconds / notifications.Count > 2000)
+                _logger.LogWarning("Processing notifications is slow, you should check for custom code running on notification events that may slow this down");
         }
     }
 }

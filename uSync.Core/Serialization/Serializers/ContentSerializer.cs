@@ -515,6 +515,7 @@ namespace uSync.Core.Serialization.Serializers
         {
             try
             {
+                logger.LogDebug("Publishing: {item} as User:{user}", item.Name, userId);
                 var result = contentService.SaveAndPublish(item, userId: userId);
                 if (!result.Success)
                 {
@@ -559,6 +560,9 @@ namespace uSync.Core.Serialization.Serializers
 
                 if (publishedCultures.Length > 0)
                 {
+                    logger.LogDebug("Publishing {item} as {user} for {cultures}", item.Name, userId,
+                        string.Join(",", publishedCultures));
+
                     var result = contentService.SaveAndPublish(item, publishedCultures, userId);
 
                     // if this fails, we return the result
@@ -590,7 +594,13 @@ namespace uSync.Core.Serialization.Serializers
                     {
                         // unpublish if the culture is currently published.
                         if (item.PublishedCultures.InvariantContains(culture))
+                        {
+                            logger.LogDebug("Unpublishing {item} as {user} for {culture}",
+                                item.Name, userId, culture);
+
                             contentService.Unpublish(item, culture, userId);
+                        }
+
                     }
                 }
 
@@ -600,7 +610,10 @@ namespace uSync.Core.Serialization.Serializers
 
                 // if we get to this point and no save has been called, we should call it. 
                 if (!hasBeenSaved && item.IsDirty())
+                {
+                    logger.LogDebug("Saving {item} because we didn't publish it", item.Name);
                     contentService.Save(item);
+                }
 
                 return Attempt.Succeed("Done");
             }
@@ -629,7 +642,7 @@ namespace uSync.Core.Serialization.Serializers
             {
                 foreach (var culture in missingCultures)
                 {
-                    logger.LogDebug("Unpublishing culture not defined in config file {culture}", culture);
+                    logger.LogDebug("Unpublishing {item} culture not defined in config file {culture}", item.Name, culture);
                     contentService.Unpublish(item, culture);
                 }
             }

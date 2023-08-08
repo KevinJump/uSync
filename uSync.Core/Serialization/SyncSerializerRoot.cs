@@ -75,30 +75,24 @@ namespace uSync.Core.Serialization
                 var check = CanDeserialize(node, options);
                 if (!check.Success) return check;
 
-                logger.LogDebug("Base: Deserializing {0}", ItemType);
+                var alias = node.GetAlias();
+
+                logger.LogDebug(" >> Deserializing {alias} - {type}", alias, ItemType);
                 var result = DeserializeCore(node, options);
+                logger.LogDebug(" << Deserialized result {alias} - {result}", alias, result.Success);
 
                 if (result.Success)
                 {
-                    logger.LogDebug("Base: Deserialize Core Success {0}", ItemType);
-
                     if (!result.Saved && !options.Flags.HasFlag(SerializerFlags.DoNotSave))
                     {
-                        logger.LogDebug("Base: Serializer Saving (No DoNotSaveFlag) {0}", ItemAlias(result.Item));
-                        // save 
+                        logger.LogDebug("Saving - {alias}", alias);
                         SaveItem(result.Item);
                     }
 
                     if (options.OnePass)
                     {
-                        logger.LogDebug("Base: Processing item in one pass {0}", ItemAlias(result.Item));
-
-                        var secondAttempt = DeserializeSecondPass(result.Item, node, options);
-
-                        logger.LogDebug("Base: Second Pass Result {0} {1}", ItemAlias(result.Item), secondAttempt.Success);
-
-                        // if its the second pass, we return the results of that pass
-                        return secondAttempt;
+                        logger.LogDebug("Deserialized {alias} - second pass", alias);
+                        return DeserializeSecondPass(result.Item, node, options);
                     }
                 }
 

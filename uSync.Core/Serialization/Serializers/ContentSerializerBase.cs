@@ -339,7 +339,7 @@ namespace uSync.Core.Serialization.Serializers
                 var nodePath = CalculateNodePath(item, default(TObject));
 
                 var parentNode = info.Element(uSyncConstants.Xml.Parent);
-                if (parentNode != null)
+                if (parentNode != null && parentNode.Attribute(uSyncConstants.Xml.Key).ValueOrDefault(Guid.Empty) != Guid.Empty)
                 {
                     var parent = FindParent(parentNode, false);
                     if (parent == null)
