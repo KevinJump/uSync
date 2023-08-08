@@ -42,7 +42,7 @@
         /////////
 
         function showChange(change) {
-            return vm.showAll || (change !== 'NoChange' && change !== 'Removed');
+            return vm.showAll || (change !== 'NoChange' && change !== 'Removed' && change !== 'Hidden');
         }
 
         function hasFailedDetail(details) {
@@ -111,7 +111,7 @@
         function countChanges(changes) {
             var count = 0;
             angular.forEach(changes, function (val, key) {
-                if (val.change !== 'NoChange') {
+                if (val.change !== 'NoChange' && val.change !== 'Hidden') {
                     count++;
                 }
             });
