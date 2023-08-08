@@ -42,7 +42,7 @@
         /////////
 
         function showChange(change) {
-            return vm.showAll || (change !== 'NoChange' && change !== 'Removed' && change !== 'Hidden');
+            return vm.showAll && change !== 'Hidden' || (change !== 'NoChange' && change !== 'Removed' && change !== 'Hidden');
         }
 
         function hasFailedDetail(details) {
