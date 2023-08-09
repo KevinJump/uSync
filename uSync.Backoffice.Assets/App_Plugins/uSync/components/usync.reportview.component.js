@@ -96,6 +96,8 @@
                     return 'icon-check color-green';
                 case 'Information':
                     return 'icon-info color-blue';
+                case 'Create':
+                    return 'icon-light-up color-green';
                 default:
                     return 'icon-flag color-red';
             }
