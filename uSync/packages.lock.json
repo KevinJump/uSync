@@ -2208,6 +2208,12 @@
         "dependencies": {
           "Umbraco.Cms.Web.Website": "[12.0.0, )"
         }
+      },
+      "usync.history": {
+        "type": "Project",
+        "dependencies": {
+          "uSync.BackOffice": "[12.0.0, )"
+        }
       }
     }
   }
