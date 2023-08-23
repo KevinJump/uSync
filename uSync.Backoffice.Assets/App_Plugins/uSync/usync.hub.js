@@ -18,6 +18,10 @@
         //////////////
 
         function initHub(callback) {
+            initializeHub(Umbraco.Sys.ServerVariables.uSync.signalRHub, callback);
+        }
+
+        function initializeHub(url, callback) { 
 
             callbacks.push(callback);
 
@@ -34,7 +38,7 @@
                         .then(function () {
                             while (callbacks.length) {
                                 var cb = callbacks.pop();
-                                hubSetup(cb);
+                                hubSetup(url, cb);
                             }
                             starting = false;
                         });
@@ -42,17 +46,17 @@
                 else {
                     while (callbacks.length) {
                         var cb = callbacks.pop();
-                        hubSetup(cb);
+                        hubSetup(url, cb);
                     }
                     starting = false;
                 }
             }
         }
 
-        function hubSetup(callback) {
+        function hubSetup(url, callback) {
 
             $.connection = new signalR.HubConnectionBuilder()
-                .withUrl(Umbraco.Sys.ServerVariables.uSync.signalRHub)
+                .withUrl(url)
                 .withAutomaticReconnect()
                 .configureLogging(signalR.LogLevel.Warning)
                 .build();

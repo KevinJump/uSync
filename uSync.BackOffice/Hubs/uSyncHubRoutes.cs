@@ -13,7 +13,7 @@ using Umbraco.Extensions;
 namespace uSync.BackOffice.Hubs
 {
     /// <summary>
-    /// Handles SignlarR routes for uSync
+    /// Handles SignalR routes for uSync
     /// </summary>
     public class uSyncHubRoutes : IAreaRoutes
     {
