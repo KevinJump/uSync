@@ -44,7 +44,7 @@ namespace uSync
         ///  usync.json, usync.[environment].json and usync.[machinename].json to the list of configuration
         ///  locations
         /// </remarks>
-        /// <param name="hostBuilder">Host builer object from Configure method</param>
+        /// <param name="hostBuilder">Host builder object from Configure method</param>
         /// <param name="filename">name of json file to add (default usync.json)</param>
         public static IHostBuilder ConfigureuSyncConfig(this IHostBuilder hostBuilder, string filename = "usync.json")
         {
@@ -59,7 +59,7 @@ namespace uSync
         /// </summary>
         /// <remarks>
         ///  this extension method gives us a way to see which values have been changed from the 
-        ///  default values by comparing to objects. and retrunign a JToken value that only
+        ///  default values by comparing to objects. and returning a JToken value that only
         ///  contains the changed values - we use this to show users what has changed in their 
         ///  configuration.
         /// </remarks>

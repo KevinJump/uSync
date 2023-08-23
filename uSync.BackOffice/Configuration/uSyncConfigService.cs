@@ -4,16 +4,16 @@ using Microsoft.Extensions.Options;
 namespace uSync.BackOffice.Configuration
 {
     /// <summary>
-    ///  manages the configuration settings for uSync, 
+    ///  Manages the configuration settings for uSync, 
     /// </summary>
     public class uSyncConfigService
     {
+        private IOptionsMonitor<uSyncHandlerSetSettings> _setOptionsMonitor;
+
         /// <summary>
         ///  uSync settings loaded from configuration
         /// </summary>
-        public uSyncSettings Settings => _settingsMonitor.CurrentValue;
-
-        private IOptionsMonitor<uSyncSettings> _settingsMonitor; 
+        public uSyncSettings Settings { get; set; }
 
         /// <summary>
         ///  The unmapped root folder for uSync.
@@ -21,7 +21,6 @@ namespace uSync.BackOffice.Configuration
         public string GetRootFolder()
             => Settings.RootFolder.TrimStart('/');
 
-        private IOptionsMonitor<uSyncHandlerSetSettings> setOptionsMonitor;
 
         /// <summary>
         /// Constructor for config service
@@ -30,15 +29,22 @@ namespace uSync.BackOffice.Configuration
             IOptionsMonitor<uSyncSettings> settingsOptionsMonitor,
             IOptionsMonitor<uSyncHandlerSetSettings> setOptionsMonitor)
         {
-            _settingsMonitor = settingsOptionsMonitor;
-            this.setOptionsMonitor = setOptionsMonitor;
+            Settings = settingsOptionsMonitor.CurrentValue;
+
+            settingsOptionsMonitor.OnChange(options =>
+            {
+                Settings = options;
+            });
+
+            _setOptionsMonitor = setOptionsMonitor;
+
         }
 
         /// <summary>
         ///  get the settings for a named handler set.
         /// </summary>
-        public uSyncHandlerSetSettings GetSetSettings(string setname)
-            => setOptionsMonitor.Get(setname);
+        public uSyncHandlerSetSettings GetSetSettings(string setName)
+            => _setOptionsMonitor.Get(setName);
 
         /// <summary>
         ///  get the default handler settings for handlers
