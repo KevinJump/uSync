@@ -96,6 +96,7 @@ namespace uSync.BackOffice.Configuration
         /// location of SignalR hub script
         /// </summary>
         [DefaultValue("")]
+        [Obsolete("Will remove the option to move the route in v13")]
         public string SignalRRoot { get; set; } = string.Empty;
 
         /// <summary>
