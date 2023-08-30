@@ -14,10 +14,9 @@ using Umbraco.Cms.Web.BackOffice.Trees;
 using Umbraco.Cms.Web.Common.Attributes;
 using Umbraco.Cms.Web.Common.ModelBinders;
 using Umbraco.Extensions;
-
 using uSync.BackOffice.Models;
 
-namespace uSync.BackOffice.Controllers.Trees
+namespace uSync.BackOffice.Expansions
 {
     /// <summary>
     ///  Tree controller for the 'uSync' tree
@@ -28,20 +27,17 @@ namespace uSync.BackOffice.Controllers.Trees
     [PluginController(uSync.Name)]
     public class uSyncTreeController : TreeController
     {
-        public readonly ITypeFinder _typeFinder;
-
-        public IList<ISyncTreeNode> _treeNodes;
+        public SyncTreeNodeCollection _treeNodes;
 
         /// <inheritdoc/>
         public uSyncTreeController(
             ILocalizedTextService localizedTextService,
             UmbracoApiControllerTypeCollection umbracoApiControllerTypeCollection,
             IEventAggregator eventAggregator,
-            ITypeFinder typeFinder)
+            SyncTreeNodeCollection treeNodes)
             : base(localizedTextService, umbracoApiControllerTypeCollection, eventAggregator)
         {
-            _typeFinder = typeFinder;
-            _treeNodes = GetTreeNodes();
+            _treeNodes = treeNodes;
         }
 
         /// <inheritdoc/>
@@ -49,7 +45,7 @@ namespace uSync.BackOffice.Controllers.Trees
         {
             var result = base.CreateRootNode(queryStrings);
 
-            result.Value.RoutePath = $"{this.SectionAlias}/{uSync.Trees.uSync}/dashboard";
+            result.Value.RoutePath = $"{SectionAlias}/{uSync.Trees.uSync}/dashboard";
             result.Value.Icon = "icon-infinity";
             result.Value.HasChildren = _treeNodes.Count > 0;
             result.Value.MenuUrl = null;
@@ -57,10 +53,18 @@ namespace uSync.BackOffice.Controllers.Trees
             return result.Value;
         }
 
+        private string getParentId(string id) 
+            => id.IndexOf('_') < 0 ? id : id.Substring(0, id.IndexOf("_"));
+
         /// <inheritdoc/>
         protected override ActionResult<MenuItemCollection> GetMenuForNode(string id, [ModelBinder(typeof(HttpQueryStringModelBinder))] FormCollection queryStrings)
         {
-            return null;
+            if (_treeNodes.Count == 0) return null;
+            if (id == Constants.System.RootString) return null;
+
+            var parentId = getParentId(id);
+            var current = _treeNodes.FirstOrDefault(x => x.Id == parentId);
+            return current?.GetMenuItems(id, queryStrings) ?? null;
         }
 
         /// <inheritdoc/>
@@ -70,7 +74,7 @@ namespace uSync.BackOffice.Controllers.Trees
 
             var collection = new TreeNodeCollection();
 
-            if (id == "-1")
+            if (id == Constants.System.RootString)
             {
                 foreach (var node in _treeNodes.OrderBy(x => x.Weight))
                 {
@@ -80,7 +84,7 @@ namespace uSync.BackOffice.Controllers.Trees
                         queryStrings,
                         node.Title,
                         node.Icon,
-                        $"{this.SectionAlias}/{node.TreeAlias}/{node.Alias}");
+                        $"{SectionAlias}/{node.TreeAlias}/{node.Alias}");
 
                     var children = node.GetChildNodes(id, queryStrings);
                     if (children != null)
@@ -94,21 +98,21 @@ namespace uSync.BackOffice.Controllers.Trees
             }
             else
             {
-                var treeNode = _treeNodes.FirstOrDefault(x => x.Id == id);
+                var treeNode = _treeNodes.FirstOrDefault(x => x.Id == getParentId(id));
                 if (treeNode != null)
                 {
                     var children = treeNode.GetChildNodes(id, queryStrings);
                     if (children != null)
                     {
-                        foreach(var child in children)
+                        foreach (var child in children)
                         {
                             collection.Add(CreateTreeNode(
-                                child.Id, 
-                                id, 
-                                queryStrings, 
+                                $"{id}_{child.Id}",
+                                id,
+                                queryStrings,
                                 child.Title,
                                 child.Icon,
-                                $"{this.SectionAlias}/{treeNode.TreeAlias}/{child.Alias}"));
+                                $"{SectionAlias}/{treeNode.TreeAlias}/{child.Path}"));
                         }
                     }
                 }
@@ -116,21 +120,6 @@ namespace uSync.BackOffice.Controllers.Trees
 
             return collection;
 
-        }
-
-        private IList<ISyncTreeNode> GetTreeNodes()
-        {
-            var treeNodes = new List<ISyncTreeNode>();
-            var nodes = _typeFinder.FindClassesOfType<ISyncTreeNode>();
-            foreach(var node in nodes)
-            {
-                if (Activator.CreateInstance(node) is ISyncTreeNode instance)
-                {
-                    treeNodes.Add(instance);
-                }
-            }
-
-            return treeNodes;
         }
     }
 }
