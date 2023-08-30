@@ -31,7 +31,11 @@
 		<EmbedUntrackedSources>true</EmbedUntrackedSources>
 		<IncludeSymbols>true</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    </PropertyGroup>
+
+		<!-- don't append the build onto the version -->
+		<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+
+	</PropertyGroup>
 
 	<ItemGroup>
 		<None Include="../assets/usync-logo.png" Pack="true" PackagePath="\" Visible="false" />
