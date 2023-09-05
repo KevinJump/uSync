@@ -95,5 +95,3 @@ Write-Host "uSync Packaged : $fullVersion"
 
 Remove-Item ".\last-build-*" 
 Out-File -FilePath ".\last-build-$fullVersion.txt" -InputObject $fullVersion
-
-[console]::beep(1984,500)
