@@ -115,7 +115,8 @@ namespace uSync.Core
         public static JToken GetJTokenFromObject(this object value)
         {
             var stringValue = value.GetValueAs<string>();
-            if (string.IsNullOrWhiteSpace(stringValue) || !stringValue.DetectIsJson()) return null;
+            if (string.IsNullOrWhiteSpace(stringValue) || !stringValue.DetectIsJson())
+                return stringValue;
 
             try
             {
@@ -128,7 +129,7 @@ namespace uSync.Core
             }
         }
 
-        private static TObject GetValueAs<TObject>(this object value)
+        public static TObject GetValueAs<TObject>(this object value)
         {
             if (value == null) return default;
             var attempt = value.TryConvertTo<TObject>();
