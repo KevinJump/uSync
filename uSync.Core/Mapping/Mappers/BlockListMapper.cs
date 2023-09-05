@@ -54,6 +54,13 @@ namespace uSync.Core.Mapping
             return b;
         }
 
+
+        protected override JToken GetExportProperty(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value) || !value.DetectIsJson()) return value;
+            return value.GetJsonTokenValue();
+        }
+
         protected override string ProcessValues(JToken jsonValue, string editorAlias, Func<JObject, IContentType, JObject> GetPropertiesMethod)
         {
             if (jsonValue is JObject jObjectValue)
