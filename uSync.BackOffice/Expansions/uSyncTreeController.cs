@@ -28,16 +28,19 @@ namespace uSync.BackOffice.Expansions
     public class uSyncTreeController : TreeController
     {
         public SyncTreeNodeCollection _treeNodes;
+        private readonly MenuItemCollectionFactory _menuItemsFactory;
 
         /// <inheritdoc/>
         public uSyncTreeController(
             ILocalizedTextService localizedTextService,
             UmbracoApiControllerTypeCollection umbracoApiControllerTypeCollection,
             IEventAggregator eventAggregator,
-            SyncTreeNodeCollection treeNodes)
+            SyncTreeNodeCollection treeNodes,
+            MenuItemCollectionFactory menuItemsFactory)
             : base(localizedTextService, umbracoApiControllerTypeCollection, eventAggregator)
         {
             _treeNodes = treeNodes;
+            _menuItemsFactory = menuItemsFactory;
         }
 
         /// <inheritdoc/>
@@ -59,12 +62,14 @@ namespace uSync.BackOffice.Expansions
         /// <inheritdoc/>
         protected override ActionResult<MenuItemCollection> GetMenuForNode(string id, [ModelBinder(typeof(HttpQueryStringModelBinder))] FormCollection queryStrings)
         {
-            if (_treeNodes.Count == 0) return null;
-            if (id == Constants.System.RootString) return null;
+            var defaultMenu = _menuItemsFactory.Create();
+
+            if (_treeNodes.Count == 0) return defaultMenu;
+            if (id == Constants.System.RootString) return defaultMenu;
 
             var parentId = getParentId(id);
             var current = _treeNodes.FirstOrDefault(x => x.Id == parentId);
-            return current?.GetMenuItems(id, queryStrings) ?? null;
+            return current?.GetMenuItems(id, queryStrings) ?? defaultMenu;
         }
 
         /// <inheritdoc/>
@@ -87,7 +92,7 @@ namespace uSync.BackOffice.Expansions
                         $"{SectionAlias}/{node.TreeAlias}/{node.Alias}");
 
                     var children = node.GetChildNodes(id, queryStrings);
-                    if (children != null)
+                    if (children?.Any() == true)
                         treeNode.HasChildren = true;
 
                     collection.Add(treeNode);
