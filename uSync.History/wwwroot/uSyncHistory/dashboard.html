@@ -1,3 +1,19 @@
-<h1>
-    words
-</h1>
+<div ng-controller="uSyncHistoryController as vm">
+    <umb-box>
+        <umb-box-header title="History" description="Things you have done.">
+        </umb-box-header>
+        <umb-box-content>
+            <div ng-repeat="item in vm.history"
+                 ng-click="vm.loadHistory(item)"
+                 style="cursor:pointer;">
+                {{item}}
+            </div>
+            <div ng-if="vm.historyFile.length>0">
+                <usync-report-view actions="vm.actions"
+                                   results="vm.historyFile"
+                                   hide-action="true"
+                                   hide-link="false"></usync-report-view>
+            </div>
+        </umb-box-content>
+    </umb-box>
+</div>

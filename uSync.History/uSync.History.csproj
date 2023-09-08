@@ -7,11 +7,23 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Content Remove="wwwroot\usynchistory\dashboard.controller.js" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <_ContentIncludedByDefault Remove="wwwroot\usynchistory\dashboard.controller.js" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<ProjectReference Include="..\uSync.BackOffice\uSync.BackOffice.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <Folder Include="wwwroot\uSyncHistory\" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Include="wwwroot\usynchistory\dashboard.controller.js" />
 	</ItemGroup>
 
 </Project>
