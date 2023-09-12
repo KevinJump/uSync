@@ -40,6 +40,19 @@ namespace uSync.Core.Mapping
         }
 
         /// <summary>
+        ///   Gets the import property representation as a JToken
+        /// </summary>
+        /// <remarks>
+        ///  this usually is a bit of nested json, but sometimes 
+        ///  some properties want it to be json serialized into a string.
+        /// </remarks>
+        protected virtual JToken GetImportProperty(object value)
+            => value?.ToString().GetJsonTokenValue() ?? null;
+
+        protected virtual JToken GetExportProperty(string value)
+            => value;
+
+        /// <summary>
         ///  Get the import value for properties used in the this JObject
         /// </summary>
         protected JObject GetImportProperties(JObject item, IContentType docType)
@@ -52,8 +65,7 @@ namespace uSync.Core.Mapping
                     if (value != null)
                     {
                         var mappedVal = mapperCollection.Value.GetImportValue(value.ToString(), property.PropertyEditorAlias);
-                        item[property.Alias] = // mappedVal?.ToString() ?? null;
-                                               mappedVal?.ToString().GetJsonTokenValue() ?? null;
+                        item[property.Alias] = GetImportProperty(mappedVal);
                     }
                 }
             }
@@ -74,7 +86,7 @@ namespace uSync.Core.Mapping
                     if (value != null)
                     {
                         var mappedVal = mapperCollection.Value.GetExportValue(value, property.PropertyEditorAlias);
-                        item[property.Alias] = mappedVal; // .GetJsonTokenValue();
+                        item[property.Alias] = GetExportProperty(mappedVal);
                     }
                 }
             }
@@ -108,14 +120,14 @@ namespace uSync.Core.Mapping
         protected IEnumerable<uSyncDependency> GetPropertyDependencies(
             IDictionary<string, object> properties, DependencyFlags flags)
         {
-            var dependencies = new List<uSyncDependency>();
 
-            if (properties.Any())
+            if (!properties.Any())
+                return Enumerable.Empty<uSyncDependency>();
+
+            var dependencies = new List<uSyncDependency>();
+            foreach (var property in properties)
             {
-                foreach (var property in properties)
-                {
-                    dependencies.AddRange(mapperCollection.Value.GetDependencies(property.Value, property.Key, flags));
-                }
+                dependencies.AddRange(mapperCollection.Value.GetDependencies(property.Value, property.Key, flags));
             }
 
             return dependencies;
@@ -183,7 +195,7 @@ namespace uSync.Core.Mapping
                 var attempt = json[keyAlias].TryConvertTo<Guid>();
                 if (attempt.Success)
                 {
-                    return mapperCollection.Value?.EntityCache.GetContentType(attempt.Result) 
+                    return mapperCollection.Value?.EntityCache.GetContentType(attempt.Result)
                          ?? contentTypeService.Get(attempt.Result);
                 }
             }
@@ -194,7 +206,7 @@ namespace uSync.Core.Mapping
         protected IContentType GetDocType(string alias)
         {
             if (string.IsNullOrWhiteSpace(alias)) return default;
-            return mapperCollection.Value?.EntityCache.GetContentType(alias) 
+            return mapperCollection.Value?.EntityCache.GetContentType(alias)
                 ?? contentTypeService.Get(alias);
         }
 
