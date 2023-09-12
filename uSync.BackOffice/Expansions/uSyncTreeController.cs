@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 using Umbraco.Cms.Core;
-using Umbraco.Cms.Core.Composing;
 using Umbraco.Cms.Core.Events;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Trees;
@@ -14,7 +11,6 @@ using Umbraco.Cms.Web.BackOffice.Trees;
 using Umbraco.Cms.Web.Common.Attributes;
 using Umbraco.Cms.Web.Common.ModelBinders;
 using Umbraco.Extensions;
-using uSync.BackOffice.Models;
 
 namespace uSync.BackOffice.Expansions
 {
@@ -28,7 +24,7 @@ namespace uSync.BackOffice.Expansions
     public class uSyncTreeController : TreeController
     {
         public SyncTreeNodeCollection _treeNodes;
-        private readonly MenuItemCollectionFactory _menuItemsFactory;
+        private readonly IMenuItemCollectionFactory _menuItemsFactory;
 
         /// <inheritdoc/>
         public uSyncTreeController(
@@ -36,7 +32,7 @@ namespace uSync.BackOffice.Expansions
             UmbracoApiControllerTypeCollection umbracoApiControllerTypeCollection,
             IEventAggregator eventAggregator,
             SyncTreeNodeCollection treeNodes,
-            MenuItemCollectionFactory menuItemsFactory)
+            IMenuItemCollectionFactory menuItemsFactory)
             : base(localizedTextService, umbracoApiControllerTypeCollection, eventAggregator)
         {
             _treeNodes = treeNodes;
