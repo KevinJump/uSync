@@ -517,6 +517,10 @@ namespace uSync.BackOffice.SyncHandlers
             try
             {
                 var file = action.FileName;
+
+                if (!syncFileService.FileExists(file)) 
+                    return Enumerable.Empty<uSyncAction>();
+
                 var node = syncFileService.LoadXElement(file);
                 var item = GetFromService(node.GetKey());
                 if (item == null) return Enumerable.Empty<uSyncAction>();
@@ -632,7 +636,7 @@ namespace uSync.BackOffice.SyncHandlers
                 {
                     var node = XElement.Load(file);
                     var key = node.GetKey();
-                    if (!keys.Contains(key))
+                    if (key != Guid.Empty && !keys.Contains(key))
                     {
                         keys.Add(key);
                     }
