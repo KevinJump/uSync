@@ -24,7 +24,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
     /// </summary>
     [SyncHandler(uSyncConstants.Handlers.ContentHandler, "Content", "Content", uSyncConstants.Priorites.Content
         , Icon = "icon-document usync-addon-icon", IsTwoPass = true, EntityType = UdiEntityType.Document)]
-    public class ContentHandler : ContentHandlerBase<IContent, IContentService>, ISyncHandler, ISyncCleanEntryHandler,
+    public class ContentHandler : ContentHandlerBase<IContent, IContentService>, ISyncHandler,
         INotificationHandler<SavedNotification<IContent>>,
         INotificationHandler<DeletedNotification<IContent>>,
         INotificationHandler<MovedNotification<IContent>>,

@@ -210,5 +210,12 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
 
             }
         }
+
+        /// <summary>
+        ///  we don't support language deletion (because the keys are unstable)
+        /// </summary>
+        protected override IEnumerable<uSyncAction> DeleteMissingItems(int parentId, IEnumerable<Guid> keys, bool reportOnly)
+            => Enumerable.Empty<uSyncAction>(); 
+            
     }
 }

@@ -205,7 +205,7 @@ namespace uSync.BackOffice.SyncHandlers
             {
                 if (!options.IncludeDisabled && handlerSetSettings.DisabledHandlers.InvariantContains(handler.Alias))
                 {
-                    _logger.LogDebug("Handler {hadler} is in the disabled handler list", handler.Alias);
+                    _logger.LogTrace("Handler {handler} is in the disabled handler list", handler.Alias);
                     continue;
                 }
 
@@ -220,7 +220,7 @@ namespace uSync.BackOffice.SyncHandlers
                 {
                     _logger.LogDebug("No Handler with {alias} has been loaded", handler.Alias);
                     // only log if we are doing the default 'everything' group 
-                    // because weh nfoing groups we choose not to load things. 
+                    // because when foing groups we choose not to load things. 
                     if (string.IsNullOrWhiteSpace(options.Group))
                         _logger.LogWarning("No Handler with {alias} has been loaded", handler.Alias);
                 }

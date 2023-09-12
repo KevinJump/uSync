@@ -19,6 +19,7 @@ using uSync.BackOffice.Authorization;
 using uSync.BackOffice.Boot;
 using uSync.BackOffice.Cache;
 using uSync.BackOffice.Configuration;
+using uSync.BackOffice.Expansions;
 using uSync.BackOffice.Hubs;
 using uSync.BackOffice.Notifications;
 using uSync.BackOffice.Services;
@@ -88,6 +89,8 @@ namespace uSync.BackOffice
 
             builder.Services.AddAuthorization(o => CreatePolicies(o));
 
+            builder.WithCollectionBuilder<SyncTreeNodeCollectionBuilder>()
+                .Add(() => builder.TypeLoader.GetTypes<ISyncTreeNode>());
 
             return builder;
         }

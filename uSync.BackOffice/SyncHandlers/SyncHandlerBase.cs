@@ -6,7 +6,6 @@ using System.Xml.Linq;
 
 using Microsoft.Extensions.Logging;
 
-using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Models.Entities;
@@ -15,10 +14,9 @@ using Umbraco.Cms.Core.Strings;
 
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
+using uSync.BackOffice.SyncHandlers.Interfaces;
 using uSync.Core;
 using uSync.Core.Models;
-
-using static System.Net.WebRequestMethods;
 
 namespace uSync.BackOffice.SyncHandlers
 {
@@ -26,8 +24,7 @@ namespace uSync.BackOffice.SyncHandlers
     ///  Base class for any Handlers that manage IEntity type objects
     /// </summary>
     public abstract class SyncHandlerBase<TObject, TService>
-        : SyncHandlerRoot<TObject, IEntity>
-
+        : SyncHandlerRoot<TObject, IEntity>, ISyncCleanEntryHandler
         where TObject : IEntity
         where TService : IService
     {
@@ -96,14 +93,29 @@ namespace uSync.BackOffice.SyncHandlers
 
         private int GetCleanParentId(string cleanFile)
         {
-            var parent = GetCleanParent(cleanFile);
-            if (parent == null)
+            var node = XElement.Load(cleanFile);
+            var id = node.Attribute("Id").ValueOrDefault(0);
+            if (id != 0) return id;
+            return GetCleanParent(cleanFile)?.Id ?? 0;
+        }
+
+        /// <summary>
+        ///  Process any cleanup actions that may have been loaded up
+        /// </summary>
+        public virtual IEnumerable<uSyncAction> ProcessCleanActions(string folder, IEnumerable<uSyncAction> actions, HandlerSettings config)
+        {
+            var cleans = actions.Where(x => x.Change == ChangeType.Clean && !string.IsNullOrWhiteSpace(x.FileName)).ToList();
+            if (cleans.Count == 0) return Enumerable.Empty<uSyncAction>();
+
+            var results = new List<uSyncAction>();
+
+            foreach (var clean in cleans)
             {
-                var node = XElement.Load(cleanFile);
-                var id = node.Attribute("Id").ValueOrDefault(0);
-                if (id == Constants.System.Root) return Constants.System.Root;
+                if (!string.IsNullOrWhiteSpace(clean.FileName))
+                    results.AddRange(CleanFolder(clean.FileName, false, config.UseFlatStructure));
             }
-            return parent?.Id ?? 0;
+
+            return results;
         }
 
         /// <inheritdoc/>
@@ -120,15 +132,28 @@ namespace uSync.BackOffice.SyncHandlers
             var actions = new List<uSyncAction>();
             foreach (var item in items.Where(x => !keys.Contains(x.Key)))
             {
+                logger.LogDebug("DeleteMissingItems: Found {item} that is not in file list (Reporting: {reportOnly})", item.Id, reportOnly);
+
                 var name = String.Empty;
                 if (item is IEntitySlim slim) name = slim.Name;
+
                 if (string.IsNullOrEmpty(name) || !reportOnly)
                 {
-                    var actualItem = GetFromService(item.Key);
+                    var actualItem = GetFromService(item.Id);
+                    if (actualItem == null)
+                    {
+                        logger.LogDebug("Actual Item {id} can't be found", item.Id);
+                        continue;
+                    }
+
                     name = GetItemName(actualItem);
 
                     // actually do the delete if we are really not reporting
-                    if (!reportOnly) DeleteViaService(actualItem);
+                    if (!reportOnly)
+                    {
+                        logger.LogInformation("Deleting item: {id} {name} as part of a 'clean' import", actualItem.Id, name);
+                        DeleteViaService(actualItem);
+                    }
                 }
 
                 // for reporting - we use the entity name,
