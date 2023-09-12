@@ -28,7 +28,7 @@ namespace uSync.BackOffice.Expansions
     public class uSyncTreeController : TreeController
     {
         public SyncTreeNodeCollection _treeNodes;
-        private readonly MenuItemCollectionFactory _menuItemsFactory;
+        private readonly IMenuItemCollectionFactory _menuItemsFactory;
 
         /// <inheritdoc/>
         public uSyncTreeController(
@@ -36,7 +36,7 @@ namespace uSync.BackOffice.Expansions
             UmbracoApiControllerTypeCollection umbracoApiControllerTypeCollection,
             IEventAggregator eventAggregator,
             SyncTreeNodeCollection treeNodes,
-            MenuItemCollectionFactory menuItemsFactory)
+            IMenuItemCollectionFactory menuItemsFactory)
             : base(localizedTextService, umbracoApiControllerTypeCollection, eventAggregator)
         {
             _treeNodes = treeNodes;
