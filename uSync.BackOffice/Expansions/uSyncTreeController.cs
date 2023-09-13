@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 using Umbraco.Cms.Core;
-using Umbraco.Cms.Core.Composing;
 using Umbraco.Cms.Core.Events;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Trees;
@@ -14,7 +11,6 @@ using Umbraco.Cms.Web.BackOffice.Trees;
 using Umbraco.Cms.Web.Common.Attributes;
 using Umbraco.Cms.Web.Common.ModelBinders;
 using Umbraco.Extensions;
-using uSync.BackOffice.Models;
 
 namespace uSync.BackOffice.Expansions
 {
@@ -27,7 +23,7 @@ namespace uSync.BackOffice.Expansions
     [PluginController(uSync.Name)]
     public class uSyncTreeController : TreeController
     {
-        public SyncTreeNodeCollection _treeNodes;
+        private readonly SyncTreeNodeCollection _treeNodes;
         private readonly IMenuItemCollectionFactory _menuItemsFactory;
 
         /// <inheritdoc/>
@@ -56,7 +52,7 @@ namespace uSync.BackOffice.Expansions
             return result.Value;
         }
 
-        private string getParentId(string id) 
+        private static string GetParentId(string id) 
             => id.IndexOf('_') < 0 ? id : id.Substring(0, id.IndexOf("_"));
 
         /// <inheritdoc/>
@@ -67,7 +63,7 @@ namespace uSync.BackOffice.Expansions
             if (_treeNodes.Count == 0) return defaultMenu;
             if (id == Constants.System.RootString) return defaultMenu;
 
-            var parentId = getParentId(id);
+            var parentId = GetParentId(id);
             var current = _treeNodes.FirstOrDefault(x => x.Id == parentId);
             return current?.GetMenuItems(id, queryStrings) ?? defaultMenu;
         }
@@ -103,7 +99,7 @@ namespace uSync.BackOffice.Expansions
             }
             else
             {
-                var treeNode = _treeNodes.FirstOrDefault(x => x.Id == getParentId(id));
+                var treeNode = _treeNodes.FirstOrDefault(x => x.Id == GetParentId(id));
                 if (treeNode != null)
                 {
                     var children = treeNode.GetChildNodes(id, queryStrings);
