@@ -182,8 +182,6 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         }
 
         private bool IsOneWay(HandlerSettings config)
-        {
-            return (config.Settings.ContainsKey("OneWay") && config.Settings["OneWay"].InvariantEquals("true"));
-        }
+            => config.GetSetting("OneWay", true);
     }
 }

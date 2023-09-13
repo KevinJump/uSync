@@ -31,9 +31,9 @@ namespace uSync.BackOffice.Cache
 
 
     {
-        private readonly SyncEntityCache entityCache;
-        private readonly ILogger<CacheLifecycleManager> logger;
-        private readonly uSyncEventService eventService;
+        private readonly SyncEntityCache _entityCache;
+        private readonly ILogger<CacheLifecycleManager> _logger;
+        private readonly uSyncEventService _eventService;
 
         /// <summary>
         ///  Constructor
@@ -43,9 +43,9 @@ namespace uSync.BackOffice.Cache
             SyncEntityCache entityCache,
             uSyncEventService eventService)
         {
-            this.logger = logger;
-            this.entityCache = entityCache;
-            this.eventService = eventService;
+            _logger = logger;
+            _entityCache = entityCache;
+            _eventService = eventService;
         }
 
 
@@ -111,19 +111,19 @@ namespace uSync.BackOffice.Cache
 
         private void OnBulkActionComplete()
         {
-            entityCache.Clear();
+            _entityCache.Clear();
         }
 
         private void ClearOnEvents()
         {
             try
             {
-                if (eventService.IsPaused) return;
-                entityCache.Clear();
+                if (_eventService.IsPaused) return;
+                _entityCache.Clear();
             }
             catch(Exception ex)
             {
-                logger.LogWarning(ex, "Failed to clean the entity name cache");
+                _logger.LogWarning(ex, "Failed to clean the entity name cache");
             }
         }
     }
