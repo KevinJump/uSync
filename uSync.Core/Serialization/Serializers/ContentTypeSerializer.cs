@@ -151,7 +151,7 @@ namespace uSync.Core.Serialization.Serializers
 
             SetSafeAliasValue(item, node, false);
 
-            details.AddRange(DeserializeCompositions(item, node));
+            // details.AddRange(DeserializeCompositions(item, node));
             details.AddRange(DeserializeStructure(item, node));
 
             // When doing this reflectiony - it doesn't set is dirty. 

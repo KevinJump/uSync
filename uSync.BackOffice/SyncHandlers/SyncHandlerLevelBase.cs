@@ -130,7 +130,7 @@ namespace uSync.BackOffice.SyncHandlers
         /// <summary>
         ///  Get all the files in a folder and return them sorted by their level 
         /// </summary>
-        private IList<LeveledFile> GetLevelOrderedFiles(string folder, IList<uSyncAction> actions)
+        protected virtual IList<LeveledFile> GetLevelOrderedFiles(string folder, IList<uSyncAction> actions)
         {
             List<LeveledFile> nodes = new List<LeveledFile>();
 
@@ -162,14 +162,14 @@ namespace uSync.BackOffice.SyncHandlers
             return nodes.OrderBy(x => x.Level).ToList();
         }
 
-        private class LeveledFile
+        protected class LeveledFile
         {
             public string Alias { get; set; }
             public int Level { get; set; }
             public string File { get; set; }
         }
 
-        private XElement LoadNode(string path)
+        protected XElement LoadNode(string path)
         {
             syncFileService.EnsureFileExists(path);
 
