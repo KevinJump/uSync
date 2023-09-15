@@ -19,24 +19,32 @@ namespace uSync.History.Controllers
             _syncFileService = syncFileService;
         }
         
-        public IEnumerable<string> GetHistory()
+        public IEnumerable<HistoryInfo> GetHistory()
         {
             var rootFolder = _syncFileService.GetAbsPath(_configService.GetRootFolder());
             var historyFolder = Path.GetFullPath(Path.Combine(rootFolder, "..", "history"));
             var files = _syncFileService.GetFiles(historyFolder, "*.json")
                 .Select(x => x.Substring(historyFolder.Length + 1));
 
-            return files;
+            var list = new List<HistoryInfo>();
+            foreach(var file in files) 
+            {
+                list.Add(LoadHistory(file));
+            }
+
+            return list;
         }
 
-        public List<uSyncAction> LoadHistory(string filePath)
+        public HistoryInfo LoadHistory(string filePath)
         {
             var rootFolder = _syncFileService.GetAbsPath(_configService.GetRootFolder());
             var historyFolder = Path.GetFullPath(Path.Combine(rootFolder, "..", "history"));
             var fullPath = Path.Combine(historyFolder, filePath);
             string contents = _syncFileService.LoadContent(fullPath);
 
-            var actions = JsonConvert.DeserializeObject<List<uSyncAction>>(contents);
+            var actions = JsonConvert.DeserializeObject<HistoryInfo>(contents);
+
+            actions.FilePath = filePath;
 
             return actions;
         }

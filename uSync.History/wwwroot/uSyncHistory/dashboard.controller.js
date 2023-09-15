@@ -17,9 +17,12 @@
                 });
         }
 
-        function loadHistory(filePath) {
+        function loadHistory(item) {
+            console.log(item);
+            item.selected = true;
+            vm.historyFile = [];
             // call the thing - get the contents of a history file. 
-            $http.get("/umbraco/backoffice/usync/usynchistory/LoadHistory?filePath="+filePath)
+            $http.get("/umbraco/backoffice/usync/usynchistory/LoadHistory?filePath="+item.filePath)
                 .then(function (result) {
                     console.log(result.data);
                     vm.historyFile = result.data;

@@ -3,14 +3,51 @@
         <umb-box-header title="History" description="Things you have done.">
         </umb-box-header>
         <umb-box-content>
-            <div ng-repeat="item in vm.history"
-                 ng-click="vm.loadHistory(item)"
-                 style="cursor:pointer;">
-                {{item}}
+
+            <div class="umb-table usync-table-detail">
+                <div class="umb-table-body">
+                    <div ng-repeat="item in vm.history">
+                        <div class="umb-table-row"
+                             ng-class="{'selected': item.selected}"
+                             ng-click="vm.loadHistory(item)"
+                             style="cursor:pointer;">
+                            <div class="umb-table-cell">
+                                <i class="icon icon-box" ng-if="item.method=='Import'"></i>
+                                <i class="icon icon-shipping" ng-if="item.method=='Export'"></i>
+                            </div>
+                            <div class="umb-table-cell">
+                                {{item.method}}
+                            </div>
+                            <div class="umb-table-cell umb-table__name">
+                                <div>
+                                    {{item.username}}
+                                </div>
+                            </div>
+                            <div class="umb-table-cell">
+                                {{item.date | date:'medium'}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div ng-if="vm.historyFile.length>0">
+        </umb-box-content>
+    </umb-box>
+    <umb-box>
+        <umb-box-content ng-if="vm.historyFile.actions.length>0">
+            <div>
+                <div class="flex justify-between">
+                    <div>
+                        {{vm.historyFile.method}}
+                    </div>
+                    <div>
+                        {{vm.historyFile.username}}
+                    </div>
+                    <div>
+                        {{vm.historyFile.date | date:'medium'}}
+                    </div>
+                </div>
                 <usync-report-view actions="vm.actions"
-                                   results="vm.historyFile"
+                                   results="vm.historyFile.actions"
                                    hide-action="true"
                                    hide-link="false"></usync-report-view>
             </div>

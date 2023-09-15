@@ -9,6 +9,7 @@ namespace uSync.History
         public void Compose(IUmbracoBuilder builder)
         {
             builder.AddNotificationHandler<uSyncImportCompletedNotification, uSyncHistoryNotificationHandler>();
+            builder.AddNotificationHandler<uSyncExportCompletedNotification, uSyncHistoryNotificationHandler>();
             // don't add if the filter is already there .
             if (!builder.ManifestFilters().Has<uSyncHistoryManifestFilter>())
             {
