@@ -79,7 +79,7 @@
 		<key alias="forms"><![CDATA[Are you using Umbraco forms? - you can now sync forms and settings with <a href="http://jumoo.co.uk/usync/forms" target="_blank" rel="noopener">uSync.FormsEdition</a>]]></key>
 
 		<key alias="cleanTitle">Clean export</key>
-		<key alias="cleanMsg"><![CDATA[Are you sure ? A clean export will delete all the contents of the uSync folder. You will loose any stored delete or rename actions.]]></key>
+		<key alias="cleanMsg"><![CDATA[Are you sure? A clean export will delete all the contents of the uSync folder. You will lose any stored delete or rename actions.]]></key>
 		<key alias="cleanSubmit">Yes, run a clean export</key>
 		<key alias="cleanClose">No, close</key>
 
@@ -91,7 +91,8 @@
 		<key alias="godo3">Go for a nice walk outside 🌲 🦆</key>
 		<key alias="godo4">You deserve a break</key>
 
-		<key alias="apply-intro">Applying individual changes can cause issues if the dependencies of this item are not already in sync.</key>
+		<key alias="apply-intro">Applying individual changes can cause issues if the dependencies of
+			this item are not already in sync.</key>
 		<key alias="apply-success">Import complete</key>
 		<key alias="apply-failure">Import failed</key>
 	</area>
