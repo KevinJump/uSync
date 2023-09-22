@@ -12,6 +12,11 @@ When uSync performs a report/import it checks the version against a file in the 
 
 Our recommendation is to perform a new export when the format version changes
 
+## v10.7
+
+- Language Names : We now seialize the language name, so if someone changes it (i didn't know you could!) it gets serialized
+- BlockList Json : We now tidy the Json on export and then munge it back (into escaped json) on import, this means it is consistant in the XML file, and it looks nice when you are source controlling the files. 
+
 ## v10.1 
 
 ### Change to order of Json properties in datatypes. 
