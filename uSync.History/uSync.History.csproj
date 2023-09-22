@@ -12,6 +12,7 @@
 
 	<ItemGroup>
 	  <_ContentIncludedByDefault Remove="wwwroot\usynchistory\dashboard.controller.js" />
+	  <_ContentIncludedByDefault Remove="wwwroot\usynchistory\history.html" />
 	</ItemGroup>
 
 	<ItemGroup>

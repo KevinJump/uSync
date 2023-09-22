@@ -1,0 +1,39 @@
+<div>
+
+    <umb-editor-view>
+
+        <umb-editor-header name="model.title"
+                           description="model.description"
+                           name-locked="true"
+                           description-locked="true"
+                           hide-alias="true"
+                           hide-icon="true">
+        </umb-editor-header>
+
+        <umb-editor-container>
+            <umb-box>
+                <umb-box-content>
+                    <usync-report-view actions="vm.actions"
+                                       results="model.actions"
+                                       hide-action="true"
+                                       hide-link="false">
+
+                    </usync-report-view>
+                </umb-box-content>
+            </umb-box>
+        </umb-editor-container>
+
+        <umb-editor-footer>
+            <umb-editor-footer-content-right>
+                <umb-button type="button"
+                            button-style="link"
+                            label-key="general_close"
+                            shortcut="esc"
+                            action="model.close()">
+                </umb-button>
+            </umb-editor-footer-content-right>
+        </umb-editor-footer>
+
+    </umb-editor-view>
+
+</div>
