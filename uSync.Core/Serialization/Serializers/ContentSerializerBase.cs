@@ -341,26 +341,33 @@ namespace uSync.Core.Serialization.Serializers
                 var parentNode = info.Element(uSyncConstants.Xml.Parent);
                 if (parentNode != null && parentNode.Attribute(uSyncConstants.Xml.Key).ValueOrDefault(Guid.Empty) != Guid.Empty)
                 {
-                    var parent = FindParent(parentNode, false);
-                    if (parent == null)
+                    if (parentNode.GetKey() == Guid.Empty)
                     {
-                        var friendlyPath = info.Element(uSyncConstants.Xml.Path).ValueOrDefault(string.Empty);
-                        if (!string.IsNullOrWhiteSpace(friendlyPath))
-                        {
-                            logger.LogDebug("Find Parent failed, will search by path {FriendlyPath}", friendlyPath);
-                            parent = FindParentByPath(friendlyPath);
-                        }
-                    }
-
-                    if (parent != null)
-                    {
-                        parentId = parent.Id;
-                        nodePath = CalculateNodePath(item, parent);
-                        nodeLevel = CalculateNodeLevel(item, parent);
+                        logger.LogDebug("Parent is root (-1)");
                     }
                     else
                     {
-                        logger.LogDebug("Unable to find parent but parent node is set in configuration");
+                        var parent = FindParent(parentNode, false);
+                        if (parent == null)
+                        {
+                            var friendlyPath = info.Element(uSyncConstants.Xml.Path).ValueOrDefault(string.Empty);
+                            if (!string.IsNullOrWhiteSpace(friendlyPath))
+                            {
+                                logger.LogDebug("Find Parent failed, will search by path {FriendlyPath}", friendlyPath);
+                                parent = FindParentByPath(friendlyPath);
+                            }
+                        }
+
+                        if (parent != null)
+                        {
+                            parentId = parent.Id;
+                            nodePath = CalculateNodePath(item, parent);
+                            nodeLevel = CalculateNodeLevel(item, parent);
+                        }
+                        else
+                        {
+                            logger.LogDebug("Unable to find parent but parent node is set in configuration");
+                        }
                     }
                 }
 
