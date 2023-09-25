@@ -475,6 +475,10 @@ namespace uSync.Core.Serialization.Serializers
                 {
                     var messages = result.EventMessages.FormatMessages(",");
                     logger.LogError("Failed to publish {result} : {messages}", result.Result, messages);
+                    if (result.InvalidProperties != null)
+                    {
+                        logger.LogError("Invalid Properties: {properties}", string.Join(", ", result.InvalidProperties.Select(x => x.Alias)));
+                    }
                 }
                 return result.ToAttempt();
             }
@@ -512,7 +516,17 @@ namespace uSync.Core.Serialization.Serializers
                     var result = contentService.SaveAndPublish(item, publishedCultures);
 
                     // if this fails, we return the result
-                    if (!result.Success) return result.ToAttempt();
+                    if (!result.Success)
+                    {
+                        var messages = result.EventMessages?.FormatMessages(",") ?? "";
+                        logger.LogError("Failed to publish {result} [{messages}]", result.Result, messages);
+                        if (result.InvalidProperties != null)
+                        {
+                            logger.LogError("Invalid Properties: {properties}", string.Join(", ", result.InvalidProperties.Select(x => x.Alias)));
+                        }
+
+                        return result.ToAttempt();
+                    }
 
                     // if its published here it's also saved, so we can skip the save below.
                     hasBeenSaved = true;
