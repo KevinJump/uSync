@@ -21,4 +21,11 @@
     <Right>lib/net6.0/uSync.BackOffice.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:uSync.BackOffice.Controllers.Trees.uSyncTreeController</Target>
+    <Left>lib/net6.0/uSync.BackOffice.dll</Left>
+    <Right>lib/net6.0/uSync.BackOffice.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
 </Suppressions>
