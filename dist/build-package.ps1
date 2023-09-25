@@ -43,6 +43,8 @@ if (![string]::IsNullOrWhiteSpace($suffix)) {
     $outFolder = ".\$majorFolder\$version\$version-$suffixFolder\$fullVersion"
 }
 
+$sln_file = "..\uSync_10.sln"
+
 "----------------------------------"
 Write-Host "Version  :" $fullVersion
 Write-Host "Config   :" $env
@@ -50,10 +52,10 @@ Write-Host "Folder   :" $outFolder
 "----------------------------------"; ""
 
 ""; "##### Restoring project"; "--------------------------------"; ""
-dotnet restore ..\uSync.sln
+dotnet restore $sln_file
 
 ""; "##### Building project"; "--------------------------------"; ""
-dotnet build ..\uSync.sln -c $env  -p:Version=$fullVersion -p:ContinuousIntegrationBuild=true
+dotnet build $sln_file -c $env  -p:Version=$fullVersion -p:ContinuousIntegrationBuild=true
 
 ""; "##### Generating the json schema"; "----------------------------------" ; ""
 dotnet run -c $env --project ..\uSync.SchemaGenerator\uSync.SchemaGenerator.csproj --no-build
