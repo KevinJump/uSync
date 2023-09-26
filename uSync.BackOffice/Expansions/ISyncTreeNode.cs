@@ -14,6 +14,11 @@ namespace uSync.BackOffice.Expansions
     public interface ISyncTreeNode
     {
         /// <summary>
+        ///  if the tree node is in-fact enabled. 
+        /// </summary>
+        public bool Disabled { get; }
+
+        /// <summary>
         ///  position in the tree, (higher is lower down the tree)
         /// </summary>
         public int Weight { get; }

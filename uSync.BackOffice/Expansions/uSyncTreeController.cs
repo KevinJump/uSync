@@ -77,7 +77,7 @@ namespace uSync.BackOffice.Expansions
 
             if (id == Constants.System.RootString)
             {
-                foreach (var node in _treeNodes.OrderBy(x => x.Weight))
+                foreach (var node in _treeNodes.Where(x => !x.Disabled).OrderBy(x => x.Weight))
                 {
                     var treeNode = CreateTreeNode(
                         node.Id,
@@ -85,7 +85,7 @@ namespace uSync.BackOffice.Expansions
                         queryStrings,
                         node.Title,
                         node.Icon,
-                        $"{SectionAlias}/{node.TreeAlias}/{node.Alias}");
+                        $"{SectionAlias}/{node.TreeAlias}/{node.Alias}");                      
 
                     var children = node.GetChildNodes(id, queryStrings);
                     if (children?.Any() == true)
