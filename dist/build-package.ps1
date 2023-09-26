@@ -51,11 +51,13 @@ Write-Host "Config   :" $env
 Write-Host "Folder   :" $outFolder
 "----------------------------------"; ""
 
+$sln_name = "..\uSync_12.sln";
+
 ""; "##### Restoring project"; "--------------------------------"; ""
 dotnet restore ..
 
 ""; "##### Building project"; "--------------------------------"; ""
-dotnet build ..\uSync.sln -c $env -p:Version=$fullVersion -p:ContinuousIntegrationBuild=true
+dotnet build $sln_name -c $env -p:Version=$fullVersion -p:ContinuousIntegrationBuild=true
 
 ""; "##### Generating the json schema"; "----------------------------------" ; ""
 dotnet run -c $env --project ..\uSync.SchemaGenerator\uSync.SchemaGenerator.csproj --no-build

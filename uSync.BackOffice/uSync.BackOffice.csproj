@@ -43,12 +43,12 @@
 
 
 	<!-- Package Validation -->
-	<!--
 	<PropertyGroup>
+		<GenerateCompatibilitySuppressionFile>true</GenerateCompatibilitySuppressionFile>
+
 		<EnablePackageValidation>true</EnablePackageValidation>
 		<PackageValidationBaselineVersion>12.0.0</PackageValidationBaselineVersion>
 		<EnableStrictModeForCompatibleFrameworksInPackage>true</EnableStrictModeForCompatibleFrameworksInPackage>
 		<EnableStrictModeForCompatibleTfms>true</EnableStrictModeForCompatibleTfms> 
 	</PropertyGroup>
-	-->
 </Project>
