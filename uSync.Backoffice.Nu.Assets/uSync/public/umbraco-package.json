@@ -21,23 +21,13 @@
       ]
     },
     {
-      "type": "section",
-      "alias": "uSync.Section",
-      "name": "uSync Section",
-      "weight": 450,
-      "meta": {
-        "label": "Syncronisation",
-        "pathname": "usync-section"
-      }
-    },
-    {
       "type": "sectionSidebarApp",
       "kind": "menu",
-      "alias": "uSync.Menu",
-      "name": "uSync sidebar menu",
+      "alias": "uSync.SidebarMenu",
+      "name": "uSync SidebarMenu",
       "weight": 500,
       "meta": {
-        "label": "uSync",
+        "label": "Syncronization",
         "menu": "uSync.Menu"
       },
       "conditions": [
@@ -46,6 +36,36 @@
           "match": "Umb.Section.Settings"
         }
       ]
+    },
+    {
+      "type": "menu",
+      "alias": "uSync.Menu",
+      "name": "uSync Menu",
+      "meta": {
+        "label": "uSync"
+      }
+    },
+    {
+      "type": "menuItem",
+      "alias": "uSync.Menu.Dashboard",
+      "name": "uSync Dashboard Item",
+      "weight": 300,
+      "meta": {
+        "label": "uSync",
+        "icon": "umb:infinity",
+        "entityType": "usync-dashboard",
+        "menus": [ "uSync.Menu" ]
+      }
+    },
+    {
+      "type": "workspace",
+      "alias": "uSync.Workspace",
+      "name": "uSync Workspace",
+      "js": "/App_Plugins/uSync/usync.js",
+      "meta": {
+        "label": "uSync View",
+        "entityType": "usync-dashboard"
+      }
     }
   ]
 }
