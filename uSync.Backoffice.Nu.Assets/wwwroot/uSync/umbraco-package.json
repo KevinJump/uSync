@@ -1,0 +1,51 @@
+{
+  "$schema": "../../../uSync.Site/umbraco-package-schema.json",
+  "name": "uSync",
+  "version": "14.0.0",
+  "extensions": [
+    {
+      "type": "dashboard",
+      "alias": "uSync.Dashboard",
+      "name": "uSync",
+      "js": "/App_Plugins/uSync/usync.js",
+      "weight": -1,
+      "meta": {
+        "label": "uSync",
+        "pathname": "usync-dashboard"
+      },
+      "conditions": [
+        {
+          "alias": "Umb.Condition.SectionAlias",
+          "match": "Umb.Section.Settings"
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "alias": "uSync.Section",
+      "name": "uSync Section",
+      "weight": 450,
+      "meta": {
+        "label": "Syncronisation",
+        "pathname": "usync-section"
+      }
+    },
+    {
+      "type": "sectionSidebarApp",
+      "kind": "menu",
+      "alias": "uSync.Menu",
+      "name": "uSync sidebar menu",
+      "weight": 500,
+      "meta": {
+        "label": "uSync",
+        "menu": "uSync.Menu"
+      },
+      "conditions": [
+        {
+          "alias": "Umb.Condition.SectionAlias",
+          "match": "Umb.Section.Settings"
+        }
+      ]
+    }
+  ]
+}

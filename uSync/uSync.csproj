@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net7.0</TargetFrameworks>
+		<TargetFrameworks>net8.0</TargetFrameworks>
 		<ContentTargetFolders>.</ContentTargetFolders>
 
 		<Product>uSync</Product>
@@ -33,7 +33,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\uSync.Backoffice.Assets\uSync.BackOffice.Assets.csproj" />
+		<ProjectReference Include="..\uSync.Backoffice.Nu.Assets\uSync.Backoffice.Nu.Assets.csproj" />
 		<ProjectReference Include="..\uSync.BackOffice\uSync.BackOffice.csproj" />
 	</ItemGroup>
 

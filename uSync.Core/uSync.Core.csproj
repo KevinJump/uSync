@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net7.0</TargetFrameworks>
+		<TargetFrameworks>net8.0</TargetFrameworks>
 
 		<PackageId>uSync.Core</PackageId>
 
@@ -17,7 +17,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Umbraco.Cms.Web.Website" Version="12.0.1" />
+		<PackageReference Include="Umbraco.Cms.Web.Website" Version="14.0.0--preview003" />
 		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" /> 
 	</ItemGroup>
 
@@ -26,12 +26,14 @@
 	</ItemGroup>
 
 	<!-- Package Validation -->
+	<!--
 	<PropertyGroup>
 		<GenerateCompatibilitySuppressionFile>true</GenerateCompatibilitySuppressionFile>
 
 		<EnablePackageValidation>true</EnablePackageValidation>
-		<PackageValidationBaselineVersion>12.0.0</PackageValidationBaselineVersion>
+		<PackageValidationBaselineVersion>14.0.0</PackageValidationBaselineVersion>
 		<EnableStrictModeForCompatibleFrameworksInPackage>true</EnableStrictModeForCompatibleFrameworksInPackage>
 		<EnableStrictModeForCompatibleTfms>true</EnableStrictModeForCompatibleTfms>
 	</PropertyGroup>
+	-->
 </Project>

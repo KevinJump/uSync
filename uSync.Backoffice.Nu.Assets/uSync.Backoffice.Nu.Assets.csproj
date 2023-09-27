@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<StaticWebAssetBasePath>/App_Plugins</StaticWebAssetBasePath>
+		<AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\uSync.BackOffice\uSync.BackOffice.csproj" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="7.0.7" />
+		<PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="14.0.0--preview003" />
+	</ItemGroup>
+
+</Project>

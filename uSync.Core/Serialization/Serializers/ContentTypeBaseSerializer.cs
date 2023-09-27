@@ -182,7 +182,7 @@ namespace uSync.Core.Serialization.Serializers
 
             foreach (var allowedType in item.AllowedContentTypes.OrderBy(x => x.SortOrder))
             {
-                var allowedItem = FindItem(allowedType.Id.Value);
+                var allowedItem = FindItem(allowedType.Key);
                 if (allowedItem != null)
                 {
                     node.Add(new XElement(ItemType,
@@ -361,7 +361,7 @@ namespace uSync.Core.Serialization.Serializers
                 if (baseItem != null)
                 {
                     logger.LogDebug("Structure Found {alias}", baseItem.Alias);
-                    allowed.Add(new ContentTypeSort(baseItem.Id, itemSortOrder));
+                    allowed.Add(new ContentTypeSort(baseItem.Key, itemSortOrder, baseItem.Alias));
                     sortOrder = itemSortOrder + 1;
                 }
             }
@@ -370,10 +370,10 @@ namespace uSync.Core.Serialization.Serializers
 
             // compare the two lists (the equality compare fails because the id value is lazy)
             var currentHash =
-                string.Join(":", item.AllowedContentTypes.Select(x => $"{x.Id.Value}-{x.SortOrder}").OrderBy(x => x));
+                string.Join(":", item.AllowedContentTypes.Select(x => $"{x.Key}-{x.SortOrder}").OrderBy(x => x));
 
             var newHash =
-                string.Join(":", allowed.Select(x => $"{x.Id.Value}-{x.SortOrder}").OrderBy(x => x));
+                string.Join(":", allowed.Select(x => $"{x.Key}-{x.SortOrder}").OrderBy(x => x));
 
             if (!currentHash.Equals(newHash))
             {

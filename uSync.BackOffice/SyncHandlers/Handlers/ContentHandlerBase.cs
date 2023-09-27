@@ -203,7 +203,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         public void Handle(MovedToRecycleBinNotification<TObject> notification)
         {
             if (!ShouldProcessEvent()) return;
-            HandleMove(notification.MoveInfoCollection);
+            // HandleMove(notification.MoveInfoCollection);
         }
 
 

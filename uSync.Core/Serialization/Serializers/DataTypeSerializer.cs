@@ -181,21 +181,21 @@ namespace uSync.Core.Serialization.Serializers
                 var serializer = this._configurationSerializers.GetSerializer(item.EditorAlias);
                 if (serializer == null)
                 {
-                    var configObject = JsonConvert.DeserializeObject(config, item.Configuration.GetType());
-                    if (!IsJsonEqual(item.Configuration, configObject, _jsonSettings))
+                    var configObject = JsonConvert.DeserializeObject<IDictionary<string, object>>(config);
+                    if (!IsJsonEqual(item.ConfigurationData, configObject, _jsonSettings))
                     {
-                        changes.AddUpdateJson("Config", item.Configuration, configObject, "Configuration");
-                        item.Configuration = configObject;
+                        changes.AddUpdateJson("Config", item.ConfigurationObject, configObject, "Configuration");
+                        item.ConfigurationData = configObject;
                     }
                 }
                 else
                 {
                     logger.LogTrace("Deserializing Config via {0}", serializer.Name);
-                    var configObject = serializer.DeserializeConfig(config, item.Configuration.GetType());
-                    if (!IsJsonEqual(item.Configuration, configObject, _jsonSettings))
+                    var configObject = serializer.DeserializeConfig(config, item.ConfigurationData.GetType());
+                    if (!IsJsonEqual(item.ConfigurationData, configObject, _jsonSettings))
                     {
-                        changes.AddUpdateJson("Config", item.Configuration, configObject, "Configuration");
-                        item.Configuration = configObject;
+                        changes.AddUpdateJson("Config", item.ConfigurationData, configObject, "Configuration");
+                        item.ConfigurationData = (IDictionary<string, object>)configObject;
                     }
                 }
 
@@ -252,19 +252,19 @@ namespace uSync.Core.Serialization.Serializers
 
         private XElement SerializeConfiguration(IDataType item)
         {
-            if (item.Configuration != null)
+            if (item.ConfigurationData != null)
             {
                 var serializer = this._configurationSerializers.GetSerializer(item.EditorAlias);
 
                 string config;
                 if (serializer == null)
                 {
-                    config = JsonConvert.SerializeObject(item.Configuration, Formatting.Indented, _jsonSettings);
+                    config = JsonConvert.SerializeObject(item.ConfigurationData, Formatting.Indented, _jsonSettings);
                 }
                 else
                 {
                     logger.LogDebug("Serializing Config via {0}", serializer.Name);
-                    config = serializer.SerializeConfig(item.Configuration);
+                    config = serializer.SerializeConfig(item.ConfigurationData);
                 }
 
                 return new XElement("Config", new XCData(config));
