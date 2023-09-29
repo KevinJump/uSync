@@ -5,26 +5,26 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<StaticWebAssetBasePath>App_Plugins</StaticWebAssetBasePath>
 	</PropertyGroup>
+	<PropertyGroup>
+		<Product>uSync.History</Product>
+		<PackageId>uSync.History</PackageId>
+		<Title>uSync.History</Title>
 
-	<ItemGroup>
-	  <Content Remove="wwwroot\usynchistory\dashboard.controller.js" />
-	</ItemGroup>
+		<Authors>Kevin Jump and Henry Jump</Authors>
+		<Company>Jumoo</Company>
+		
+		<PackageTags>umbraco usync</PackageTags>
 
-	<ItemGroup>
-	  <_ContentIncludedByDefault Remove="wwwroot\usynchistory\dashboard.controller.js" />
-	  <_ContentIncludedByDefault Remove="wwwroot\usynchistory\history.html" />
-	</ItemGroup>
+		<RepositoryUrl>https://github.com/KevinJump/uSync</RepositoryUrl>
+
+		<Description>Sync Umbraco to and from disk and between instances</Description>
+
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
+		<IncludeSymbols>false</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+	</PropertyGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\uSync.BackOffice\uSync.BackOffice.csproj" />
 	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="wwwroot\uSyncHistory\" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <None Include="wwwroot\usynchistory\dashboard.controller.js" />
-	</ItemGroup>
-
 </Project>

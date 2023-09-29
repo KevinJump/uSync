@@ -1,6 +1,16 @@
-﻿using Umbraco.Cms.Core.Composing;
+﻿using Microsoft.AspNetCore.Routing;
+using Umbraco.Cms.Core.Composing;
 using Umbraco.Cms.Core.DependencyInjection;
+using Umbraco.Cms.Core.Events;
+using Umbraco.Cms.Core.Notifications;
+using Umbraco.Cms.Core.Security;
+using Umbraco.Cms.Infrastructure.WebAssets;
+using Umbraco.Extensions;
 using uSync.BackOffice;
+using uSync.BackOffice.Configuration;
+using uSync.BackOffice.Controllers;
+using uSync.BackOffice.Hubs;
+using uSync.History.Controllers;
 
 namespace uSync.History
 {
@@ -8,6 +18,8 @@ namespace uSync.History
     {
         public void Compose(IUmbracoBuilder builder)
         {
+            builder.AddNotificationHandler<ServerVariablesParsingNotification, uSyncHistoryServerVariablesHandler>();
+
             builder.AddNotificationHandler<uSyncImportCompletedNotification, uSyncHistoryNotificationHandler>();
             builder.AddNotificationHandler<uSyncExportCompletedNotification, uSyncHistoryNotificationHandler>();
             // don't add if the filter is already there .
@@ -16,6 +28,36 @@ namespace uSync.History
                 // add the package manifest programatically. 
                 builder.ManifestFilters().Append<uSyncHistoryManifestFilter>();
             }
+        }
+    }
+
+    internal class uSyncHistoryServerVariablesHandler : INotificationHandler<ServerVariablesParsingNotification>
+    {
+        private readonly uSyncConfigService _uSyncConfig;
+        private readonly LinkGenerator _linkGenerator;
+        private readonly uSyncHubRoutes _uSyncHubRoutes;
+        private readonly IBackOfficeSecurityAccessor _securityAccessor;
+
+        /// <inheritdoc cref="INotificationHandler{TNotification}" />
+        public uSyncHistoryServerVariablesHandler(LinkGenerator linkGenerator,
+            uSyncConfigService uSyncConfigService,
+            uSyncHubRoutes hubRoutes,
+            IBackOfficeSecurityAccessor securityAccessor)
+        {
+            _linkGenerator = linkGenerator;
+            _uSyncConfig = uSyncConfigService;
+            _uSyncHubRoutes = hubRoutes;
+            _securityAccessor = securityAccessor;
+        }
+
+
+        /// <inheritdoc/>
+        public void Handle(ServerVariablesParsingNotification notification)
+        {
+            notification.ServerVariables.Add("uSyncHistory", new Dictionary<string, object>
+            {
+                { "Service", _linkGenerator.GetUmbracoApiServiceBaseUrl<uSyncHistoryController>(controller => controller.GetApi()) },
+            });
         }
     }
 }

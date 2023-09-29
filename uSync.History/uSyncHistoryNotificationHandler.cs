@@ -52,7 +52,7 @@ namespace uSync.History
             {
                 Actions = actions,
                 Date = DateTime.Now,
-                Username = _backOfficeSecurityAccessor?.BackOfficeSecurity?.CurrentUser?.Username ?? "blank",
+                Username = _backOfficeSecurityAccessor?.BackOfficeSecurity?.CurrentUser?.Username ?? "Background Process",
                 Method = method
             };
 

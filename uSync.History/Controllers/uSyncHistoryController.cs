@@ -20,6 +20,8 @@ namespace uSync.History.Controllers
             _syncFileService = syncFileService;
         }
 
+        public bool GetApi() => true;
+
         public IEnumerable<HistoryInfo> GetHistory()
         {
             var rootFolder = _syncFileService.GetAbsPath(_configService.GetRootFolder());

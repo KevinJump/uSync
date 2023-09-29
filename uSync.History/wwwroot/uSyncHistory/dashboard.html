@@ -1,9 +1,10 @@
 <div ng-controller="uSyncHistoryController as vm">
-    <umb-box>
-        <umb-box-header title="History" description="Things you have done.">
+    <umb-box ng-if="vm.history.length>0">
+        <umb-box-header title-key="uSyncHistory_title" 
+                        description-key="uSyncHistory_description">
             <umb-button type="button"
                         action="vm.clearHistory()"
-                        label="Clear"
+                        label-key="general_clear"
                         button-style="action"></umb-button>
         </umb-box-header>
         <umb-box-content>
@@ -20,7 +21,8 @@
                                 <i class="icon icon-shipping" ng-if="item.method=='Export'"></i>
                             </div>
                             <div class="umb-table-cell">
-                                {{item.method}}
+                                <localize key="usync_{{item.method.toLowerCase()}}"/>
+                                
                             </div>
                             <div class="umb-table-cell umb-table__name">
                                 <div>
@@ -36,25 +38,14 @@
             </div>
         </umb-box-content>
     </umb-box>
-    <umb-box>
-        <umb-box-content ng-if="vm.historyFile.actions.length>0">
-            <div>
-                <div class="flex justify-between">
-                    <div>
-                        {{vm.historyFile.method}}
-                    </div>
-                    <div>
-                        {{vm.historyFile.username}}
-                    </div>
-                    <div>
-                        {{vm.historyFile.date | date:'medium'}}
-                    </div>
-                </div>
-                <usync-report-view actions="vm.actions"
-                                   results="vm.historyFile.actions"
-                                   hide-action="true"
-                                   hide-link="false"></usync-report-view>
+    <div class="usync-fresh-view" ng-if="vm.history.length==0">
+        <umb-empty-state>
+
+            <div class="usync-group-box-title">
+                <i class="icon icon-infinity"></i>
+                <h2><localize key="uSyncHistory_empty"/></h2>
             </div>
-        </umb-box-content>
-    </umb-box>
+
+        </umb-empty-state>
+    </div>
 </div>

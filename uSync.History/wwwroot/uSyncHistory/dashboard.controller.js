@@ -1,27 +1,54 @@
 (function () {
     'use strict';
 
-    function historyController($http, editorService) {
+    function historyController($http, $scope, editorService, eventsService, localizationService, overlayService) {
         var vm = this;
+        var evts = [];
         vm.loadHistory = loadHistory;
         vm.actions = {};
         vm.clearHistory = clearHistory;
 
-        vm.$onInit = function () {
-            getHistoryFiles();
+        vm.$onInit = function () {  
+            evts.push(
+            eventsService.on("usync-dashboard.tab.change", function (name, item) {
+                if (item.alias == "uSyncHistory")
+                {
+                    getHistoryFiles();
+                }
+            }));
         }
+        $scope.$on('$destroy', function () {
+            for (var e in evts) { eventsService.unsubscribe(evts[e]); }
+        });
         function getHistoryFiles() {
-            $http.get("/umbraco/backoffice/usync/usynchistory/GetHistory")
+            $http.get(Umbraco.Sys.ServerVariables.uSyncHistory.Service+"GetHistory")
                 .then(function (result) {
-                    console.log(result.data);
                     vm.history = result.data;
                 });
         }
 
         function clearHistory() {
+            localizationService.localizeMany([
+                "uSyncHistory_clearTitle",
+                "uSyncHistory_clearMessage"])
+                .then(function (data) {
+                    var options = {
+                        title: data[0],
+                        content: data[1],
+                        disableBackdropClick: true,
+                        disableEscKey: true,
+                        confirmType: 'delete',
+                        submit: function () {
+                            doClear();
+                            overlayService.close();
+                        }
+                    };
+                    overlayService.confirm(options);
+                });
+        }
+        function doClear(){
             $http.get("/umbraco/backoffice/usync/usynchistory/ClearHistory")
                 .then(function (result) {
-                    console.log(result.data);
                     getHistoryFiles();
                 });
         }
