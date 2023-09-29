@@ -163,5 +163,13 @@ namespace uSync.BackOffice.SyncHandlers
         /// </summary>
         ChangeType GetItemStatus(XElement node) => ChangeType.NoChange;
 
+
+        /// <summary>
+        ///  precaches the keys of a folder
+        /// </summary>
+        /// <param name="folder"></param>
+        /// <param name="keys"></param>
+        void PreCacheFolderKeys(string folder, IList<Guid> keys)
+        { }
     }
 }
