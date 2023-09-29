@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 
@@ -10,7 +9,6 @@ using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Notifications;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Strings;
-using Umbraco.Cms.Web.BackOffice.Middleware;
 using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;
@@ -28,7 +26,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
     ///  places around the tree, so we have to check for file name
     ///  clashes. 
     /// </remarks>
-    public abstract class ContentHandlerBase<TObject, TService> : SyncHandlerTreeBase<TObject, TService>
+    public abstract class ContentHandlerBase<TObject, TService> : SyncHandlerTreeBase<TObject, TService> 
         where TObject : IContentBase
         where TService : IService
     {
@@ -72,8 +70,8 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
 
         /*
          *  Config options. 
-         *    Include = Paths (comma seperated) (only include if path starts with one of these)
-         *    Exclude = Paths (comma seperated) (exclude if path starts with one of these)
+         *    Include = Paths (comma separated) (only include if path starts with one of these)
+         *    Exclude = Paths (comma separated) (exclude if path starts with one of these)
          *    
          *    RulesOnExport = bool (do we apply the rules on export as well as import?)
          */
@@ -197,25 +195,6 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         /// </summary>
         protected override bool DoActionsMatch(uSyncAction a, uSyncAction b)
             => a.key == b.key;
-
-        /// <summary>
-        ///  Process any cleanup actions that may have been loaded up
-        /// </summary>
-        public virtual IEnumerable<uSyncAction> ProcessCleanActions(string folder, IEnumerable<uSyncAction> actions, HandlerSettings config)
-        {
-            var cleans = actions.Where(x => x.Change == ChangeType.Clean && !string.IsNullOrWhiteSpace(x.FileName)).ToList();
-            if (cleans.Count == 0) return Enumerable.Empty<uSyncAction>();
-
-            var results = new List<uSyncAction>();
-
-            foreach (var clean in cleans)
-            {
-                if (!string.IsNullOrWhiteSpace(clean.FileName))
-                    results.AddRange(CleanFolder(clean.FileName, false, config.UseFlatStructure));
-            }
-
-            return results;
-        }
 
         /// <summary>
         ///  Handle the Umbraco Moved to recycle bin notification, (treated like a move)

@@ -183,7 +183,7 @@
                     visible: false,
                     icon: getGroupIcon(group),
                     counts: getCounts(group),
-                    name = key.substring(1) + "s"
+                    name: key.substring(1) + "s"
                 };
             });
 

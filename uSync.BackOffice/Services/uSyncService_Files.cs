@@ -31,7 +31,9 @@ public partial class uSyncService
         {
             foreach (var file in files)
             {
-                var relativePath = GetRelativePath(fullPath, file.FullName);
+                var relativePath = GetRelativePath(fullPath, file.FullName)
+                    .Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+
                 archive.CreateEntryFromFile(file.FullName, relativePath);
             }
         }

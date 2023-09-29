@@ -15,7 +15,7 @@ using uSync.BackOffice.Configuration;
 namespace uSync.BackOffice.Hubs
 {
     /// <summary>
-    /// Handles SignlarR routes for uSync
+    /// Handles SignalR routes for uSync
     /// </summary>
     public class uSyncHubRoutes : IAreaRoutes
     {
@@ -33,6 +33,7 @@ namespace uSync.BackOffice.Hubs
         {
             _runtimeState = runtimeState;
 
+#pragma warning disable CS0618 // Type or member is obsolete
             if (!string.IsNullOrWhiteSpace(uSyncSettings.Value?.SignalRRoot))
             {
                 _umbracoPathSegment = uSyncSettings.Value.SignalRRoot;
@@ -41,6 +42,7 @@ namespace uSync.BackOffice.Hubs
             {
                 _umbracoPathSegment = globalSettings.Value.GetUmbracoMvcArea(hostingEnvironment);
             }
+#pragma warning restore CS0618 // Type or member is obsolete
         }
 
         /// <summary>

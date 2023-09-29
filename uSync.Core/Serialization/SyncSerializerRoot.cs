@@ -159,9 +159,10 @@ namespace uSync.Core.Serialization
 
             var actionType = node.Attribute("Change").ValueOrDefault<SyncActionType>(SyncActionType.None);
 
-            logger.LogDebug("Empty Node : Processing Action {0}", actionType);
 
             var (key, alias) = FindKeyAndAlias(node);
+
+            logger.LogDebug("Empty Node : Processing Action {actionType} ({key} {alias})", actionType, key, alias);
 
             switch (actionType)
             {

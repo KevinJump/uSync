@@ -14,11 +14,11 @@
       },
       "Umbraco.Cms.Web.Website": {
         "type": "Direct",
-        "requested": "[12.0.0, )",
-        "resolved": "12.0.0",
-        "contentHash": "MryGu+G7QSBoGHp2VZPv60hj/cgvt0pK9+TTYlXeL7XLSRyyIVFq5y3KpBDSanNWyxBjKeZsMWj7wpB8+9DK+A==",
+        "requested": "[12.0.1, )",
+        "resolved": "12.0.1",
+        "contentHash": "h0f27Urd/sXrEkOZvWzZdqglc26UfqZYi0nmSwZC2GdmNjVZ8SxI+Xm26+mcKLnT2oVMA/IkXTRea8vYAfCG4Q==",
         "dependencies": {
-          "Umbraco.Cms.Web.Common": "12.0.0"
+          "Umbraco.Cms.Web.Common": "12.0.1"
         }
       },
       "Asp.Versioning.Abstractions": {
@@ -1999,8 +1999,8 @@
       },
       "Umbraco.Cms.Core": {
         "type": "Transitive",
-        "resolved": "12.0.0",
-        "contentHash": "pP2cyBiUdqJL/f7ji6nCkr9jEv24I5m7CmmXX8RVNXkFLsZvffJgOAqXh/ozJaLr3a4lUPJeNyeSvaYWXMTpLw==",
+        "resolved": "12.0.1",
+        "contentHash": "rJPnp7KBgbDoQusCUG0JPf1+76c2Wc/kNxkECHjXllBi7Ob0KwHgpqGp9KRewSOygSshZXHK2Hp4c3pkK+9Whw==",
         "dependencies": {
           "Microsoft.Extensions.Configuration.Abstractions": "7.0.0",
           "Microsoft.Extensions.FileProviders.Embedded": "7.0.7",
@@ -2021,17 +2021,17 @@
       },
       "Umbraco.Cms.Examine.Lucene": {
         "type": "Transitive",
-        "resolved": "12.0.0",
-        "contentHash": "M7JvsMjMRR1DhF5YPaeeZfYBex+uiblE1qUymrAklGOrkMZn+W3Kakk27Jc1RTN32wAAGW/wxbixHQM2W0TZeQ==",
+        "resolved": "12.0.1",
+        "contentHash": "aY+SAtW6Ukwp9m/GnABBoWPzJm5Rg0Ye04yh5amOcr1D7PunXZtUC4KJySFyAAsKBl8N71oxX8WPr24Xy5M9iA==",
         "dependencies": {
           "Examine": "3.1.0",
-          "Umbraco.Cms.Infrastructure": "12.0.0"
+          "Umbraco.Cms.Infrastructure": "12.0.1"
         }
       },
       "Umbraco.Cms.Infrastructure": {
         "type": "Transitive",
-        "resolved": "12.0.0",
-        "contentHash": "5krqkb4TJtUCJfu0zM2272F9ucDpdQO6nkEJSstnfjsof6Nf4JtMJogqY/0WFNutHk992+jIDJinIf9ShHzYBw==",
+        "resolved": "12.0.1",
+        "contentHash": "nw/h4Q+MCaKTSltTwgXTzH79mpNgwdoV8Wzkb0rO015vZiC2KGxd+XkPgzgMO1Gqb3+8nK20mr1HwYd5QJMLWA==",
         "dependencies": {
           "Examine.Core": "3.1.0",
           "HtmlAgilityPack": "1.11.48",
@@ -2061,26 +2061,26 @@
           "System.IO.FileSystem.AccessControl": "5.0.0",
           "System.Security.Cryptography.Pkcs": "7.0.2",
           "System.Threading.Tasks.Dataflow": "7.0.0",
-          "Umbraco.Cms.Core": "12.0.0",
+          "Umbraco.Cms.Core": "12.0.1",
           "ncrontab": "3.3.1"
         }
       },
       "Umbraco.Cms.PublishedCache.NuCache": {
         "type": "Transitive",
-        "resolved": "12.0.0",
-        "contentHash": "h+Q5sqX+iDN0KlUY24Oi7XMvRAlZw2JzHsrbSQZ3kJlnSKvPB5ohWpG8U5oHlZwsfadaZRkLfYb1slu5c1lUXQ==",
+        "resolved": "12.0.1",
+        "contentHash": "DQfX0pzbofyjIRujjEclwYV/C0ojx9gV97rGOe7NtXN5zMHw2usfPSpBCuwtOAgPpGgQBMBZjxmrJLZerbO3tg==",
         "dependencies": {
           "K4os.Compression.LZ4": "1.3.5",
           "MessagePack": "2.5.108",
           "Newtonsoft.Json": "13.0.3",
           "Umbraco.CSharpTest.Net.Collections": "15.0.0",
-          "Umbraco.Cms.Infrastructure": "12.0.0"
+          "Umbraco.Cms.Infrastructure": "12.0.1"
         }
       },
       "Umbraco.Cms.Web.Common": {
         "type": "Transitive",
-        "resolved": "12.0.0",
-        "contentHash": "LuW9rtGkheo/77T5HdY5VtG9DXXe/Z68crVCiG9BMda6WS/oO6FOoa6ijm07DSe022mS+9j3zaQ4DN7ehiIhdg==",
+        "resolved": "12.0.1",
+        "contentHash": "WKV61k0PSDzaxHgPZiHboxx5NBfX/D5/DlapesTFBTrYSvytFO0Cll0fPorEUxO/Z3SdTVeLcXAjxH557Bmi1A==",
         "dependencies": {
           "Asp.Versioning.Mvc": "7.0.0",
           "Asp.Versioning.Mvc.ApiExplorer": "7.0.0",
@@ -2090,8 +2090,8 @@
           "MiniProfiler.AspNetCore.Mvc": "4.3.8",
           "Smidge.InMemory": "4.3.0",
           "Smidge.Nuglify": "4.3.0",
-          "Umbraco.Cms.Examine.Lucene": "12.0.0",
-          "Umbraco.Cms.PublishedCache.NuCache": "12.0.0"
+          "Umbraco.Cms.Examine.Lucene": "12.0.1",
+          "Umbraco.Cms.PublishedCache.NuCache": "12.0.1"
         }
       },
       "Umbraco.CSharpTest.Net.Collections": {

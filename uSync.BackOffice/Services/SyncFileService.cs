@@ -390,7 +390,7 @@ namespace uSync.BackOffice.Services
             if (!DirectoryExists(resolvedFolder))
                 throw new DirectoryNotFoundException(folder);
 
-            var keys = new Dictionary<Guid, string>();
+            var keys = new Dictionary<string, string>();
             var errors = new List<string>();
 
             var files = Directory.GetFiles(resolvedFolder, $"*.{extension}", SearchOption.AllDirectories)
@@ -411,18 +411,21 @@ namespace uSync.BackOffice.Services
 
                     if (!node.IsEmptyItem())
                     {
-                        var key = node.GetKey();
+                        // make the key unique for the type, then we don't get false
+                        // positives when different bits share ids (like PublicAccess and Content)
+
+                        var key = $"{node.Name.LocalName}_{node.GetKey()}";
                         var folderName = Path.GetFileName(Path.GetDirectoryName(file));
                         var filename = Path.GetFileName(file);
-                        var filepath = GetShortFileName(file);
+                        var filePath = GetShortFileName(file);
 
                         if (!keys.ContainsKey(key))
                         {
-                            keys[key] = filepath;
+                            keys[key] = filePath;
                         }
                         else
                         {
-                            errors.Add($"Clash {filepath} shares an id with {keys[key]}");
+                            errors.Add($"Clash {filePath} shares an id with {keys[key]}");
                         }
                     }
                 }
