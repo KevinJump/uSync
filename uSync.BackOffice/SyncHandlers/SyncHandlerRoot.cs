@@ -610,6 +610,20 @@ namespace uSync.BackOffice.SyncHandlers
         }
 
         /// <summary>
+        ///  pre-populates the cache folder key list. 
+        /// </summary>
+        /// <remarks>
+        ///  this means if we are calling the process multiple times, 
+        ///  we can optimise the key code and only load it once. 
+        /// </remarks>
+        public void PreCacheFolderKeys(string folder, IList<Guid> folderKeys)
+        {
+            var cacheKey = $"{GetCacheKeyBase()}_{folder.GetHashCode()}";
+            runtimeCache.ClearByKey(cacheKey) ; 
+            runtimeCache.GetCacheItem(cacheKey, () => folderKeys);
+        }
+
+        /// <summary>
         ///  Get the GUIDs for all items in a folder
         /// </summary>
         /// <remarks>
@@ -624,10 +638,11 @@ namespace uSync.BackOffice.SyncHandlers
 
             var cacheKey = $"{GetCacheKeyBase()}_{folderKey}";
 
-            logger.LogDebug("Getting Folder Keys : {cacheKey}", cacheKey);
 
             return runtimeCache.GetCacheItem(cacheKey, () =>
             {
+                logger.LogDebug("Getting Folder Keys : {cacheKey}", cacheKey);
+
                 // when it's not flat structure we also get the sub folders. (extra defensive get them all)
                 var keys = new List<Guid>();
                 var files = syncFileService.GetFiles(folder, $"*.{this.uSyncConfig.Settings.DefaultExtension}", !flat).ToList();

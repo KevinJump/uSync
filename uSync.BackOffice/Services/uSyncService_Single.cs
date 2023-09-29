@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 
 using Microsoft.Extensions.Logging;
 
-using Umbraco.Cms.Core.Scoping;
 using Umbraco.Extensions;
 
 using uSync.BackOffice.Extensions;
@@ -39,6 +39,8 @@ namespace uSync.BackOffice
             var actions = new List<uSyncAction>();
             var lastType = string.Empty;
 
+            var folder = Path.GetDirectoryName(orderedNodes.FirstOrDefault()?.FileName ?? options.RootFolder);
+
             SyncHandlerOptions syncHandlerOptions = HandlerOptionsFromPaged(options);
 
             HandlerConfigPair handlerPair = null;
@@ -59,6 +61,8 @@ namespace uSync.BackOffice
                     _logger.LogWarning("No handler was found for {alias} ({itemType}) item might not process correctly", itemType);
                     continue;
                 }
+
+                handlerPair.Handler.PreCacheFolderKeys(folder, orderedNodes.Select(x => x.Key).ToList());
 
                 options.Callbacks?.Update.Invoke(item.Node.GetAlias(),
                     CalculateProgress(index, total, options.ProgressMin, options.ProgressMax), 100);
@@ -352,14 +356,17 @@ namespace uSync.BackOffice
         /// </summary>
         public OrderedNodeInfo(string filename, XElement node)
         {
-            this.FileName = filename;
-            this.Node = node;
+            FileName = filename;
+            Node = node;
+            Key = node.GetKey();
         }
 
         /// <summary>
         ///  xml element of the node
         /// </summary>
         public XElement Node { get; set; }
+
+        public Guid Key { get; set; }
 
         /// <summary>
         ///  path to the physical file 
