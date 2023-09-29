@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<language alias="en" intName="English (US)" localName="English (US)" lcid="" culture="en-US">
+	<creator>
+		<name>Jumoo</name>
+		<link>http://jumoo.uk</link>
+	</creator>
+	<area alias="uSyncHistory">
+		<key alias="title">History</key>
+		<key alias="description">Things you have done.</key>
+		<key alias="empty">u have not Synced anything.</key>
+		<key alias="clearTitle">Are you sure?</key>
+		<key alias="clearMessage">All history files will be permanently deleted.</key>
+	</area>
+</language>

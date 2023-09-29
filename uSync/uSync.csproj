@@ -35,6 +35,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\uSync.Backoffice.Assets\uSync.BackOffice.Assets.csproj" />
 		<ProjectReference Include="..\uSync.BackOffice\uSync.BackOffice.csproj" />
+		<ProjectReference Include="..\uSync.History\uSync.History.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

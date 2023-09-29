@@ -68,6 +68,7 @@ dotnet pack ..\uSync.Core\uSync.Core.csproj --no-restore --no-build -c $env -o $
 dotnet pack ..\uSync.Community.Contrib\uSync.Community.Contrib.csproj  --no-build  --no-restore -c $env -o $outFolder -p:Version=$fullVersion -p:ContinuousIntegrationBuild=true
 dotnet pack ..\uSync.Community.DataTypeSerializers\uSync.Community.DataTypeSerializers.csproj  --no-build  --no-restore -c $env -o $outFolder  -p:Version=$fullVersion -p:ContinuousIntegrationBuild=true
 dotnet pack ..\uSync.BackOffice\uSync.BackOffice.csproj  --no-build  --no-restore -c $env -o $outFolder  -p:Version=$fullVersion -p:ContinuousIntegrationBuild=true
+dotnet pack ..\uSync.History\uSync.History.csproj  --no-build  --no-restore -c $env -o $outFolder  -p:Version=$fullVersion -p:ContinuousIntegrationBuild=true
 
 dotnet pack ..\uSync.AutoTemplates\uSync.AutoTemplates.csproj --no-build --no-restore -c $env -o $outFolder  -p:Version=$fullVersion -p:ContinuousIntegrationBuild=true
 

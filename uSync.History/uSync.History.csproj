@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<StaticWebAssetBasePath>App_Plugins</StaticWebAssetBasePath>
+	</PropertyGroup>
+	<PropertyGroup>
+		<Product>uSync.History</Product>
+		<PackageId>uSync.History</PackageId>
+		<Title>uSync.History</Title>
+
+		<Authors>Kevin Jump and Henry Jump</Authors>
+		<Company>Jumoo</Company>
+		
+		<PackageTags>umbraco usync</PackageTags>
+
+		<RepositoryUrl>https://github.com/KevinJump/uSync</RepositoryUrl>
+
+		<Description>Sync Umbraco to and from disk and between instances</Description>
+
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
+		<IncludeSymbols>false</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\uSync.BackOffice\uSync.BackOffice.csproj" />
+	</ItemGroup>
+</Project>
