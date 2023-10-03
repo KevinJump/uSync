@@ -402,6 +402,9 @@ namespace uSync.Core.Serialization.Serializers
                 // if the item is trashed, then the change of it's parent 
                 // should restore it (as long as we do a move!)
 
+                // if this item is new but in the bin, we can't move it to the bin. 
+                
+
                 contentService.Move(item, item.ParentId);
 
                 // clean out any relations for this item (some versions of Umbraco don't do this on a Move)
@@ -412,12 +415,16 @@ namespace uSync.Core.Serialization.Serializers
             }
             else if (trashed && !item.Trashed)
             {
+                // not already in the recycle bin?
+                if (item.ParentId > Constants.System.RecycleBinContent)
+                {
+                    // clean any relations that may be there (stops an error)
+                    CleanRelations(item, "relateParentDocumentOnDelete");
 
-                // clean any relations that may be there (stops an error)
-                CleanRelations(item, "relateParentDocumentOnDelete");
+                    // move to the recycle bin    
+                    contentService.MoveToRecycleBin(item);
+                }
 
-                // move to the recycle bin
-                contentService.MoveToRecycleBin(item);
                 return uSyncChange.Update("Moved to Bin", item.Name, "", "Recycle Bin");
             }
 
@@ -432,8 +439,9 @@ namespace uSync.Core.Serialization.Serializers
                 return Attempt.Succeed("No Changes");
             }
 
+            var trashed = item.Trashed || (node.Element("Info")?.Element("Trashed").ValueOrDefault(false) ?? false);
             var publishedNode = node.Element("Info")?.Element("Published");
-            if (!item.Trashed && publishedNode != null)
+            if (!trashed && publishedNode != null)
             {
                 var schedules = GetSchedules(node.Element("Info")?.Element("Schedule"));
 
