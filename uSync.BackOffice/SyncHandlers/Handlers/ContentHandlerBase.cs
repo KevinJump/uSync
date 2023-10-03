@@ -105,7 +105,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         {
             // unless the setting is explicit we don't import trashed items. 
             var trashed = node.Element("Info")?.Element("Trashed").ValueOrDefault(false);
-            if (trashed.GetValueOrDefault(false) && !config.GetSetting("ImportTrashed", true)) return false;
+            if (trashed.GetValueOrDefault(false) && !config.GetSetting("ImportTrashed", false)) return false;
 
             return true;
         }
