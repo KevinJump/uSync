@@ -18,12 +18,12 @@ namespace uSync.BackOffice
 {
 
     /// <summary>
-    /// Implimentation of paged import methods.
+    /// Implementation of paged import methods.
     /// </summary>
     public partial class uSyncService
     {
         /// <summary>
-        ///  Peform a paged report against a given folder 
+        ///  Perform a paged report against a given folder 
         /// </summary>
         public IEnumerable<uSyncAction> ReportPartial(string folder, uSyncPagedImportOptions options, out int total)
         {
@@ -31,6 +31,9 @@ namespace uSync.BackOffice
             return ReportPartial(orderedNodes, options, out total); 
         }
 
+        /// <summary>
+        ///  perform a paged report with the supplied ordered nodes
+        /// </summary>
         public IEnumerable<uSyncAction> ReportPartial(IList<OrderedNodeInfo> orderedNodes, uSyncPagedImportOptions options, out int total)
         {
             total = orderedNodes.Count;
@@ -53,15 +56,15 @@ namespace uSync.BackOffice
                 {
                     lastType = itemType;
                     handlerPair = _handlerFactory.GetValidHandlerByTypeName(itemType, syncHandlerOptions);
+
+                    handlerPair?.Handler.PreCacheFolderKeys(folder, orderedNodes.Select(x => x.Key).ToList());
                 }
 
                 if (handlerPair == null)
                 {
-                    _logger.LogWarning("No handler was found for {alias} item might not process correctly", itemType);
+                    _logger.LogWarning("No handler for {itemType} {alias}", itemType, item.Node.GetAlias());
                     continue;
                 }
-
-                handlerPair.Handler.PreCacheFolderKeys(folder, orderedNodes.Select(x => x.Key).ToList());
 
                 options.Callbacks?.Update.Invoke(item.Node.GetAlias(),
                     CalculateProgress(index, total, options.ProgressMin, options.ProgressMax), 100);
@@ -78,7 +81,7 @@ namespace uSync.BackOffice
         }
 
         /// <summary>
-        ///  Peform a paged Import against a given folder 
+        ///  Perform a paged Import against a given folder 
         /// </summary>
         public IEnumerable<uSyncAction> ImportPartial(string folder, uSyncPagedImportOptions options, out int total)
         {
@@ -86,6 +89,9 @@ namespace uSync.BackOffice
             return ImportPartial(orderedNodes, options, out total);
         }
 
+        /// <summary>
+        ///  perform an import of items from the suppled ordered node list. 
+        /// </summary>
         public IEnumerable<uSyncAction> ImportPartial(IList<OrderedNodeInfo> orderedNodes, uSyncPagedImportOptions options, out int total)
         {
             lock (_importLock)
@@ -114,8 +120,8 @@ namespace uSync.BackOffice
                             lastType = itemType;
                             handlerPair = _handlerFactory.GetValidHandlerByTypeName(itemType, syncHandlerOptions);
 
-                            // special case, blueprints looks like IContent items, except they are slightly diffrent
-                            // so we check for them speicifically and get the handler for the enity rather than the object type.
+                            // special case, blueprints looks like IContent items, except they are slightly different
+                            // so we check for them specifically and get the handler for the entity rather than the object type.
                             if (item.Node.IsContent() && item.Node.IsBlueprint())
                             {
                                 lastType = UdiEntityType.DocumentBlueprint;
@@ -146,7 +152,7 @@ namespace uSync.BackOffice
         }
 
         /// <summary>
-        ///  Peform a paged Import second pass against a given folder 
+        ///  Perform a paged Import second pass against a given folder 
         /// </summary>
         public IEnumerable<uSyncAction> ImportPartialSecondPass(IEnumerable<uSyncAction> actions, uSyncPagedImportOptions options)
         {
@@ -193,7 +199,7 @@ namespace uSync.BackOffice
         }
 
         /// <summary>
-        ///  Peform a paged Import post import against a given folder 
+        ///  Perform a paged Import post import against a given folder 
         /// </summary>
         public IEnumerable<uSyncAction> ImportPartialPostImport(IEnumerable<uSyncAction> actions, uSyncPagedImportOptions options)
         {
@@ -247,7 +253,7 @@ namespace uSync.BackOffice
         }
 
         /// <summary>
-        ///  Peform a paged Clean after import for a given folder 
+        ///  Perform a paged Clean after import for a given folder 
         /// </summary>
         public IEnumerable<uSyncAction> ImportPostCleanFiles(IEnumerable<uSyncAction> actions, uSyncPagedImportOptions options)
         {
@@ -343,6 +349,9 @@ namespace uSync.BackOffice
         /// </summary>
         public XElement Node { get; set; }
 
+        /// <summary>
+        ///  the Guid key for this item, so we can cache the list of keys 
+        /// </summary>
         public Guid Key { get; set; }
 
         /// <summary>
