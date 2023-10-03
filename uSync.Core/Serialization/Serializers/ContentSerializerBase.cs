@@ -394,7 +394,17 @@ namespace uSync.Core.Serialization.Serializers
                     item.Level = nodeLevel;
                 }
             }
-
+            else // trashed. 
+            {
+                // we need to set the parent to something,
+                // or the move will fail.
+                if (item.ParentId == -1)
+                {
+                    item.ParentId = item is IContent
+                        ? Constants.System.RecycleBinContent
+                        : Constants.System.RecycleBinMedia;
+                }
+            }
 
             var key = node.GetKey();
             if (key != Guid.Empty && item.Key != key)
@@ -679,13 +689,17 @@ namespace uSync.Core.Serialization.Serializers
 
             var alias = node.GetAlias();
 
-            var parentKey = node.Attribute(uSyncConstants.Xml.Parent).ValueOrDefault(Guid.Empty);
+            var parentKey = node.Element(uSyncConstants.Xml.Info)
+                ?.Element(uSyncConstants.Xml.Parent)
+                ?.Attribute(uSyncConstants.Xml.Key)
+                .ValueOrDefault(Guid.Empty) ?? Guid.Empty;
+
             if (parentKey != Guid.Empty)
             {
                 item = FindItem(alias, parentKey);
                 if (item != null) return Attempt.Succeed(item);
             }
-
+           
             // create
             var parent = default(TObject);
 
