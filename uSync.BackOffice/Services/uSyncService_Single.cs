@@ -32,6 +32,9 @@ namespace uSync.BackOffice
             return ReportPartial(orderedNodes, options, out total); 
         }
 
+        /// <summary>
+        ///  perform a paged report with the supplied ordered nodes
+        /// </summary>
         public IEnumerable<uSyncAction> ReportPartial(IList<OrderedNodeInfo> orderedNodes, uSyncPagedImportOptions options, out int total)
         {
             total = orderedNodes.Count;
@@ -54,15 +57,15 @@ namespace uSync.BackOffice
                 {
                     lastType = itemType;
                     handlerPair = _handlerFactory.GetValidHandlerByTypeName(itemType, syncHandlerOptions);
+
+                    handlerPair?.Handler.PreCacheFolderKeys(folder, orderedNodes.Select(x => x.Key).ToList());
                 }
 
                 if (handlerPair == null)
                 {
-                    _logger.LogWarning("No handler was found for {alias} ({itemType}) item might not process correctly", itemType);
+                    _logger.LogWarning("No handler for {itemType} {alias}", itemType, item.Node.GetAlias());
                     continue;
                 }
-
-                handlerPair.Handler.PreCacheFolderKeys(folder, orderedNodes.Select(x => x.Key).ToList());
 
                 options.Callbacks?.Update.Invoke(item.Node.GetAlias(),
                     CalculateProgress(index, total, options.ProgressMin, options.ProgressMax), 100);
@@ -87,6 +90,9 @@ namespace uSync.BackOffice
             return ImportPartial(orderedNodes, options, out total);
         }
 
+        /// <summary>
+        ///  perform an import of items from the suppled ordered node list. 
+        /// </summary>
         public IEnumerable<uSyncAction> ImportPartial(IList<OrderedNodeInfo> orderedNodes, uSyncPagedImportOptions options, out int total)
         {
             lock (_importLock)
@@ -119,14 +125,14 @@ namespace uSync.BackOffice
                                     lastType = itemType;
                                     handlerPair = _handlerFactory.GetValidHandlerByTypeName(itemType, syncHandlerOptions);
 
-                                    // special case, blueprints looks like IContent items, except they are slightly different
-                                    // so we check for them specifically and get the handler for the entity rather than the object type.
-                                    if (item.Node.IsContent() && item.Node.IsBlueprint())
-                                    {
-                                        lastType = UdiEntityType.DocumentBlueprint;
-                                        handlerPair = _handlerFactory.GetValidHandlerByEntityType(UdiEntityType.DocumentBlueprint);
-                                    }
-                                }
+                            // special case, blueprints looks like IContent items, except they are slightly different
+                            // so we check for them specifically and get the handler for the entity rather than the object type.
+                            if (item.Node.IsContent() && item.Node.IsBlueprint())
+                            {
+                                lastType = UdiEntityType.DocumentBlueprint;
+                                handlerPair = _handlerFactory.GetValidHandlerByEntityType(UdiEntityType.DocumentBlueprint);
+                            }
+                        }
 
                                 if (handlerPair == null)
                                 {
@@ -366,6 +372,9 @@ namespace uSync.BackOffice
         /// </summary>
         public XElement Node { get; set; }
 
+        /// <summary>
+        ///  the Guid key for this item, so we can cache the list of keys 
+        /// </summary>
         public Guid Key { get; set; }
 
         /// <summary>

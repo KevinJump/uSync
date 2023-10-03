@@ -868,6 +868,11 @@ namespace uSync.BackOffice.SyncHandlers
                 {
                     // only write the file to disk if it should be exported.
                     syncFileService.SaveXElement(attempt.Item, filename);
+
+                    if (config.CreateClean && HasChildren(item))
+                    {
+                        CreateCleanFile(GetItemKey(item), filename);
+                    }
                 }
                 else
                 {
@@ -878,6 +883,24 @@ namespace uSync.BackOffice.SyncHandlers
             _mutexService.FireItemCompletedEvent(new uSyncExportedItemNotification(attempt.Item, ChangeType.Export));
 
             return uSyncActionHelper<XElement>.SetAction(attempt, filename, GetItemKey(item), this.Alias).AsEnumerableOfOne();
+        }
+
+        protected virtual bool HasChildren(TObject item)
+            => true; 
+
+        private void CreateCleanFile(Guid key, string filename)
+        {           
+            if (string.IsNullOrWhiteSpace(filename) || key == Guid.Empty)
+                return;
+
+            var folder = Path.GetDirectoryName(filename);
+            var name = Path.GetFileNameWithoutExtension(filename);
+
+            var cleanPath = Path.Combine(folder, $"{name}_clean.config");
+
+            var node = XElementExtensions.MakeEmpty(key, SyncActionType.Clean, $"clean {name} children");
+            node.Add(new XAttribute("itemType", serializer.ItemType));
+            syncFileService.SaveXElement(node, cleanPath);
         }
 
         #endregion
@@ -1764,7 +1787,7 @@ namespace uSync.BackOffice.SyncHandlers
             => !string.IsNullOrWhiteSpace(filename) ? filename : node.GetAlias();
 
 
-        private string GetCacheKeyBase()
+        protected string GetCacheKeyBase()
             => $"keycache_{this.Alias}_{Thread.CurrentThread.ManagedThreadId}";
 
         private string PrepCaches()

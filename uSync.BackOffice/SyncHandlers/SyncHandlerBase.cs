@@ -11,6 +11,7 @@ using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Models.Entities;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Strings;
+using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
@@ -49,6 +50,9 @@ namespace uSync.BackOffice.SyncHandlers
         {
             this.entityService = entityService;
         }
+
+        protected override bool HasChildren(TObject item)
+            => entityService.GetChildren(item.Id).Any();
 
         /// <summary>
         ///  given a folder we calculate what items we can remove, becuase they are 
@@ -189,7 +193,12 @@ namespace uSync.BackOffice.SyncHandlers
         /// </summary>
         virtual protected IEnumerable<IEntity> GetChildItems(int parent)
         {
-            if (this.itemObjectType != UmbracoObjectTypes.Unknown)
+            if (this.itemObjectType == UmbracoObjectTypes.Unknown)
+                return Enumerable.Empty<IEntity>();
+
+            var cacheKey = $"{GetCacheKeyBase()}_parent_{parent}";
+
+            return runtimeCache.GetCacheItem(cacheKey, () =>
             {
                 if (parent == -1)
                 {
@@ -201,9 +210,7 @@ namespace uSync.BackOffice.SyncHandlers
                     // load it, so GetChildren without the object type is quicker. 
                     return entityService.GetChildren(parent);
                 }
-            }
-
-            return Enumerable.Empty<IEntity>();
+            }, null);
         }
 
         /// <summary>
