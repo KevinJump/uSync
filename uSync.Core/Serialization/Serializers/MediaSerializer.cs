@@ -65,7 +65,8 @@ namespace uSync.Core.Serialization.Serializers
             if (node.Element("Info") != null)
             {
                 var trashed = node.Element("Info").Element("Trashed").ValueOrDefault(false);
-                details.AddNotNull( HandleTrashedState(item, trashed));
+                var restoreParent = node.Element("Info").Element("Trashed").Attribute("Parent").ValueOrDefault(Guid.Empty);
+                details.AddNotNull(HandleTrashedState(item, trashed, restoreParent));
             }
 
             var propertyAttempt = DeserializeProperties(item, node, options);
@@ -103,13 +104,15 @@ namespace uSync.Core.Serialization.Serializers
             return SyncAttempt<IMedia>.Succeed(item.Name, item, ChangeType.Import, "", true, propertyAttempt.Result);
         }
 
-        protected override uSyncChange HandleTrashedState(IMedia item, bool trashed)
+        protected override uSyncChange HandleTrashedState(IMedia item, bool trashed, Guid restoreParentKey)
         {
             if (!trashed && item.Trashed)
             {
                 // if the item is trashed, then moving it back to the parent value 
                 // restores it.
-                _mediaService.Move(item, item.ParentId);
+
+                var restoreParentId = GetRelationParentId(item, restoreParentKey, Constants.Conventions.RelationTypes.RelateParentDocumentOnDeleteAlias);
+                _mediaService.Move(item, restoreParentId);
 
                 CleanRelations(item, "relateParentMediaFolderOnDelete");
 

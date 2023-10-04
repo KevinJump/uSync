@@ -371,20 +371,25 @@ namespace uSync.Core.Serialization.Serializers
                     }
                 }
 
-                if (item.ParentId != parentId)
+                if (!item.Trashed)
                 {
-                    changes.AddUpdate(uSyncConstants.Xml.Parent, item.ParentId, parentId);
-                    logger.LogTrace("{Id} Setting Parent {ParentId}", item.Id, parentId);
-                    item.ParentId = parentId;
-                }
+                    // we change if its not in the bin,
+                    // if its in the bin it will get fixed by handle trashed state.
+                    if (item.ParentId != parentId)
+                    {
+                        changes.AddUpdate(uSyncConstants.Xml.Parent, item.ParentId, parentId);
+                        logger.LogTrace("{Id} Setting Parent {ParentId}", item.Id, parentId);
+                        item.ParentId = parentId;
+                    }
 
-                // the following are calculated (not in the file
-                // because they might change without this node being saved).
-                if (item.Path != nodePath)
-                {
-                    changes.AddUpdate(uSyncConstants.Xml.Path, item.Path, nodePath);
-                    logger.LogDebug("{Id} Setting Path {idPath} was {oldPath}", item.Id, nodePath, item.Path);
-                    item.Path = nodePath;
+                    // the following are calculated (not in the file
+                    // because they might change without this node being saved).
+                    if (item.Path != nodePath)
+                    {
+                        changes.AddUpdate(uSyncConstants.Xml.Path, item.Path, nodePath);
+                        logger.LogDebug("{Id} Setting Path {idPath} was {oldPath}", item.Id, nodePath, item.Path);
+                        item.Path = nodePath;
+                    }
                 }
 
                 if (item.Level != nodeLevel)
@@ -636,7 +641,7 @@ namespace uSync.Core.Serialization.Serializers
             return null;
         }
 
-        protected abstract uSyncChange HandleTrashedState(TObject item, bool trashed);
+        protected abstract uSyncChange HandleTrashedState(TObject item, bool trashed, Guid restoreParent);
 
         protected string GetExportValue(object value, IPropertyType propertyType, string culture, string segment)
         {
@@ -993,6 +998,28 @@ namespace uSync.Core.Serialization.Serializers
             {
                 logger.LogWarning(exception, "Error cleaning up relations: {id}", item.Id);
             }
+
+        }
+
+        protected int GetRelationParentId(TObject item, Guid restoreParentKey, string relationType)
+        {
+            var parentId = -1;
+            try
+            {
+                var deleteRelations = relationService.GetByChild(item, relationType);
+                if (deleteRelations.Any())
+                    parentId = deleteRelations.FirstOrDefault()?.ParentId ?? -1;
+
+                if (parentId != -1) return parentId;
+                return restoreParentKey == Guid.Empty ? -1 : entityService.Get(restoreParentKey)?.Id ?? -1;
+            }
+            catch (Exception ex)
+            {
+                // unable to find an existing delete relation.
+                logger.LogWarning(ex, "Error finding restore relation");
+            }
+
+            return -1;
 
         }
 
