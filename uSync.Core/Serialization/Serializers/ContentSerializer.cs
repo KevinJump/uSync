@@ -404,11 +404,11 @@ namespace uSync.Core.Serialization.Serializers
                 // should restore it (as long as we do a move!)
 
 
-                var restoreParentId = GetRelationParentId(item, restoreParentKey, Constants.Conventions.RelationTypes.RelateParentDocumentOnDeleteAlias);
+                var restoreParentId = GetRelationParentId(item, restoreParentKey, Constants.Conventions.RelationTypes.RelateParentMediaFolderOnDeleteAlias);
                 contentService.Move(item, restoreParentId);
 
                 // clean out any relations for this item (some versions of Umbraco don't do this on a Move)
-                CleanRelations(item, Constants.Conventions.RelationTypes.RelateDocumentOnCopyAlias);
+                CleanRelations(item, Constants.Conventions.RelationTypes.RelateParentMediaFolderOnDeleteAlias);
 
                 return uSyncChange.Update("Restored", item.Name, "Recycle Bin", restoreParentKey.ToString());
 
@@ -419,7 +419,7 @@ namespace uSync.Core.Serialization.Serializers
                 if (item.ParentId > Constants.System.RecycleBinContent)
                 {
                     // clean any relations that may be there (stops an error)
-                    CleanRelations(item, "relateParentDocumentOnDelete");
+                    CleanRelations(item, Constants.Conventions.RelationTypes.RelateParentMediaFolderOnDeleteAlias);
 
                     // move to the recycle bin    
                     contentService.MoveToRecycleBin(item);
