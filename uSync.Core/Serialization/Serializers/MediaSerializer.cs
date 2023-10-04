@@ -111,17 +111,17 @@ namespace uSync.Core.Serialization.Serializers
                 // if the item is trashed, then moving it back to the parent value 
                 // restores it.
 
-                var restoreParentId = GetRelationParentId(item, restoreParentKey, Constants.Conventions.RelationTypes.RelateParentDocumentOnDeleteAlias);
+                var restoreParentId = GetRelationParentId(item, restoreParentKey, Constants.Conventions.RelationTypes.RelateParentMediaFolderOnDeleteAlias);
                 _mediaService.Move(item, restoreParentId);
 
-                CleanRelations(item, "relateParentMediaFolderOnDelete");
+                CleanRelations(item, Constants.Conventions.RelationTypes.RelateParentMediaFolderOnDeleteAlias);
 
                 return uSyncChange.Update("Restored", item.Name, "Recycle Bin", item.ParentId.ToString());
             }
             else if (trashed && !item.Trashed)
             {
                 // clean any rouge relations 
-                CleanRelations(item, "relateParentMediaFolderOnDelete");
+                CleanRelations(item, Constants.Conventions.RelationTypes.RelateParentMediaFolderOnDeleteAlias);
 
                 // move to the recycle bin
                 _mediaService.MoveToRecycleBin(item);
