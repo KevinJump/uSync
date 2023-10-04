@@ -641,7 +641,12 @@ namespace uSync.Core.Serialization.Serializers
             return null;
         }
 
-        protected abstract uSyncChange HandleTrashedState(TObject item, bool trashed, Guid restoreParent);
+        [Obsolete("Pass in a restore guid for the parent - should relationships be missing")]
+        protected virtual uSyncChange HandleTrashedState(TObject item, bool trashed)
+            => uSyncChange.NoChange($"Member/{item.Name}", item.Name);
+
+        protected virtual uSyncChange HandleTrashedState(TObject item, bool trashed, Guid restoreParent)
+            => uSyncChange.NoChange($"Member/{item.Name}", item.Name);
 
         protected string GetExportValue(object value, IPropertyType propertyType, string culture, string segment)
         {

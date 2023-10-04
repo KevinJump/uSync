@@ -885,6 +885,13 @@ namespace uSync.BackOffice.SyncHandlers
             return uSyncActionHelper<XElement>.SetAction(attempt, filename, GetItemKey(item), this.Alias).AsEnumerableOfOne();
         }
 
+        /// <summary>
+        ///  does this item have any children ? 
+        /// </summary>
+        /// <remarks>
+        ///  on items where we can check this (quickly) we can reduce the number of checks we might 
+        ///  make on child items or cleaning up where we don't need to. 
+        /// </remarks>
         protected virtual bool HasChildren(TObject item)
             => true; 
 
@@ -1787,6 +1794,10 @@ namespace uSync.BackOffice.SyncHandlers
             => !string.IsNullOrWhiteSpace(filename) ? filename : node.GetAlias();
 
 
+        /// <summary>
+        ///  get thekey for any caches we might call (thread based cache value)
+        /// </summary>
+        /// <returns></returns>
         protected string GetCacheKeyBase()
             => $"keycache_{this.Alias}_{Thread.CurrentThread.ManagedThreadId}";
 
