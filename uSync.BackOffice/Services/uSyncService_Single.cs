@@ -119,6 +119,9 @@ namespace uSync.BackOffice
                         {
                             foreach (var item in orderedNodes.Skip(options.PageNumber * options.PageSize).Take(options.PageSize))
                             {
+                                if (item.Node == null) 
+                                    item.Node = XElement.Load(item.FileName);
+
                                 var itemType = item.Node.GetItemType();
                                 if (!itemType.InvariantEquals(lastType))
                                 {
