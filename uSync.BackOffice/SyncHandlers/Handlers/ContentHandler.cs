@@ -58,6 +58,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             this.serializer = syncItemFactory.GetSerializer<IContent>("ContentSerializer");
         }
 
+        /// <inheritdoc />
         protected override bool HasChildren(IContent item)
             => contentService.HasChildren(item.Id);
 

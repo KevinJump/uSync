@@ -54,6 +54,7 @@ namespace uSync.BackOffice.SyncHandlers
             this.entityService = entityService;
         }
 
+        /// <inheritdoc />
         protected override bool HasChildren(TObject item)
             => entityService.GetChildren(item.Id).Any();
 
