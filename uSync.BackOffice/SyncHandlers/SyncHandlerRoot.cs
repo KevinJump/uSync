@@ -610,6 +610,20 @@ namespace uSync.BackOffice.SyncHandlers
         }
 
         /// <summary>
+        ///  pre-populates the cache folder key list. 
+        /// </summary>
+        /// <remarks>
+        ///  this means if we are calling the process multiple times, 
+        ///  we can optimise the key code and only load it once. 
+        /// </remarks>
+        public void PreCacheFolderKeys(string folder, IList<Guid> folderKeys)
+        {
+            var cacheKey = $"{GetCacheKeyBase()}_{folder.GetHashCode()}";
+            runtimeCache.ClearByKey(cacheKey) ; 
+            runtimeCache.GetCacheItem(cacheKey, () => folderKeys);
+        }
+
+        /// <summary>
         ///  Get the GUIDs for all items in a folder
         /// </summary>
         /// <remarks>
@@ -624,10 +638,11 @@ namespace uSync.BackOffice.SyncHandlers
 
             var cacheKey = $"{GetCacheKeyBase()}_{folderKey}";
 
-            logger.LogDebug("Getting Folder Keys : {cacheKey}", cacheKey);
 
             return runtimeCache.GetCacheItem(cacheKey, () =>
             {
+                logger.LogDebug("Getting Folder Keys : {cacheKey}", cacheKey);
+
                 // when it's not flat structure we also get the sub folders. (extra defensive get them all)
                 var keys = new List<Guid>();
                 var files = syncFileService.GetFiles(folder, $"*.{this.uSyncConfig.Settings.DefaultExtension}", !flat).ToList();
@@ -853,6 +868,11 @@ namespace uSync.BackOffice.SyncHandlers
                 {
                     // only write the file to disk if it should be exported.
                     syncFileService.SaveXElement(attempt.Item, filename);
+
+                    if (config.CreateClean && HasChildren(item))
+                    {
+                        CreateCleanFile(GetItemKey(item), filename);
+                    }
                 }
                 else
                 {
@@ -863,6 +883,31 @@ namespace uSync.BackOffice.SyncHandlers
             _mutexService.FireItemCompletedEvent(new uSyncExportedItemNotification(attempt.Item, ChangeType.Export));
 
             return uSyncActionHelper<XElement>.SetAction(attempt, filename, GetItemKey(item), this.Alias).AsEnumerableOfOne();
+        }
+
+        /// <summary>
+        ///  does this item have any children ? 
+        /// </summary>
+        /// <remarks>
+        ///  on items where we can check this (quickly) we can reduce the number of checks we might 
+        ///  make on child items or cleaning up where we don't need to. 
+        /// </remarks>
+        protected virtual bool HasChildren(TObject item)
+            => true; 
+
+        private void CreateCleanFile(Guid key, string filename)
+        {           
+            if (string.IsNullOrWhiteSpace(filename) || key == Guid.Empty)
+                return;
+
+            var folder = Path.GetDirectoryName(filename);
+            var name = Path.GetFileNameWithoutExtension(filename);
+
+            var cleanPath = Path.Combine(folder, $"{name}_clean.config");
+
+            var node = XElementExtensions.MakeEmpty(key, SyncActionType.Clean, $"clean {name} children");
+            node.Add(new XAttribute("itemType", serializer.ItemType));
+            syncFileService.SaveXElement(node, cleanPath);
         }
 
         #endregion
@@ -1749,7 +1794,11 @@ namespace uSync.BackOffice.SyncHandlers
             => !string.IsNullOrWhiteSpace(filename) ? filename : node.GetAlias();
 
 
-        private string GetCacheKeyBase()
+        /// <summary>
+        ///  get thekey for any caches we might call (thread based cache value)
+        /// </summary>
+        /// <returns></returns>
+        protected string GetCacheKeyBase()
             => $"keycache_{this.Alias}_{Thread.CurrentThread.ManagedThreadId}";
 
         private string PrepCaches()

@@ -173,7 +173,8 @@ namespace uSync.Core.Serialization.Serializers
             if (node.Element("Info") != null)
             {
                 var trashed = node.Element("Info").Element("Trashed").ValueOrDefault(false);
-                details.AddNotNull(HandleTrashedState(item, trashed));
+                var restoreParent = node.Element("Info").Element("Trashed").Attribute("Parent").ValueOrDefault(Guid.Empty);
+                details.AddNotNull(HandleTrashedState(item, trashed, restoreParent));
             }
 
             details.AddNotNull(DeserializeTemplate(item, node));
@@ -395,29 +396,35 @@ namespace uSync.Core.Serialization.Serializers
         }
 
   
-        protected override uSyncChange HandleTrashedState(IContent item, bool trashed)
+        protected override uSyncChange HandleTrashedState(IContent item, bool trashed, Guid restoreParentKey)
         {
             if (!trashed && item.Trashed)
             {
                 // if the item is trashed, then the change of it's parent 
                 // should restore it (as long as we do a move!)
 
-                contentService.Move(item, item.ParentId);
+
+                var restoreParentId = GetRelationParentId(item, restoreParentKey, Constants.Conventions.RelationTypes.RelateParentDocumentOnDeleteAlias);
+                contentService.Move(item, restoreParentId);
 
                 // clean out any relations for this item (some versions of Umbraco don't do this on a Move)
-                CleanRelations(item, "relateParentDocumentOnDelete");
+                CleanRelations(item, Constants.Conventions.RelationTypes.RelateParentDocumentOnDeleteAlias);
 
-                return uSyncChange.Update("Restored", item.Name, "Recycle Bin", item.ParentId.ToString());
+                return uSyncChange.Update("Restored", item.Name, "Recycle Bin", restoreParentKey.ToString());
 
             }
             else if (trashed && !item.Trashed)
             {
+                // not already in the recycle bin?
+                if (item.ParentId > Constants.System.RecycleBinContent)
+                {
+                    // clean any relations that may be there (stops an error)
+                    CleanRelations(item, Constants.Conventions.RelationTypes.RelateParentDocumentOnDeleteAlias);
 
-                // clean any relations that may be there (stops an error)
-                CleanRelations(item, "relateParentDocumentOnDelete");
+                    // move to the recycle bin    
+                    contentService.MoveToRecycleBin(item);
+                }
 
-                // move to the recycle bin
-                contentService.MoveToRecycleBin(item);
                 return uSyncChange.Update("Moved to Bin", item.Name, "", "Recycle Bin");
             }
 
@@ -432,8 +439,9 @@ namespace uSync.Core.Serialization.Serializers
                 return Attempt.Succeed("No Changes");
             }
 
+            var trashed = item.Trashed || (node.Element("Info")?.Element("Trashed").ValueOrDefault(false) ?? false);
             var publishedNode = node.Element("Info")?.Element("Published");
-            if (!item.Trashed && publishedNode != null)
+            if (!trashed && publishedNode != null)
             {
                 var schedules = GetSchedules(node.Element("Info")?.Element("Schedule"));
 

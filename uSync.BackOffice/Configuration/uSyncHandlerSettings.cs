@@ -51,6 +51,14 @@ namespace uSync.BackOffice.Configuration
         public string Group { get; set; } = string.Empty;
 
         /// <summary>
+        ///  create a corresponding _clean file for this export 
+        /// </summary>
+        /// <remarks>
+        ///  the clean file will only get created if the item in question has children.
+        /// </remarks>
+        public bool CreateClean { get; set; } = false;  
+
+        /// <summary>
         /// Additional settings for the handler
         /// </summary>
 

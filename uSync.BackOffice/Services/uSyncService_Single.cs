@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 
 using Microsoft.Extensions.Logging;
 
-using Umbraco.Cms.Core.Scoping;
 using Umbraco.Extensions;
 
 using uSync.BackOffice.Extensions;
@@ -29,10 +29,20 @@ namespace uSync.BackOffice
         public IEnumerable<uSyncAction> ReportPartial(string folder, uSyncPagedImportOptions options, out int total)
         {
             var orderedNodes = LoadOrderedNodes(folder);
+            return ReportPartial(orderedNodes, options, out total); 
+        }
+
+        /// <summary>
+        ///  perform a paged report with the supplied ordered nodes
+        /// </summary>
+        public IEnumerable<uSyncAction> ReportPartial(IList<OrderedNodeInfo> orderedNodes, uSyncPagedImportOptions options, out int total)
+        {
             total = orderedNodes.Count;
 
             var actions = new List<uSyncAction>();
             var lastType = string.Empty;
+
+            var folder = Path.GetDirectoryName(orderedNodes.FirstOrDefault()?.FileName ?? options.RootFolder);
 
             SyncHandlerOptions syncHandlerOptions = HandlerOptionsFromPaged(options);
 
@@ -47,11 +57,13 @@ namespace uSync.BackOffice
                 {
                     lastType = itemType;
                     handlerPair = _handlerFactory.GetValidHandlerByTypeName(itemType, syncHandlerOptions);
+
+                    handlerPair?.Handler.PreCacheFolderKeys(folder, orderedNodes.Select(x => x.Key).ToList());
                 }
 
                 if (handlerPair == null)
                 {
-                    _logger.LogWarning("No handler was found for {alias} ({itemType}) item might not process correctly", itemType);
+                    _logger.LogWarning("No handler for {itemType} {alias}", itemType, item.Node.GetAlias());
                     continue;
                 }
 
@@ -74,11 +86,19 @@ namespace uSync.BackOffice
         /// </summary>
         public IEnumerable<uSyncAction> ImportPartial(string folder, uSyncPagedImportOptions options, out int total)
         {
+            var orderedNodes = LoadOrderedNodes(folder);
+            return ImportPartial(orderedNodes, options, out total);
+        }
+
+        /// <summary>
+        ///  perform an import of items from the suppled ordered node list. 
+        /// </summary>
+        public IEnumerable<uSyncAction> ImportPartial(IList<OrderedNodeInfo> orderedNodes, uSyncPagedImportOptions options, out int total)
+        {
             lock (_importLock)
             {
                 using (var pause = _mutexService.ImportPause(options.PauseDuringImport))
                 {
-                    var orderedNodes = LoadOrderedNodes(folder);
 
                     total = orderedNodes.Count;
 
@@ -99,20 +119,23 @@ namespace uSync.BackOffice
                         {
                             foreach (var item in orderedNodes.Skip(options.PageNumber * options.PageSize).Take(options.PageSize))
                             {
+                                if (item.Node == null) 
+                                    item.Node = XElement.Load(item.FileName);
+
                                 var itemType = item.Node.GetItemType();
                                 if (!itemType.InvariantEquals(lastType))
                                 {
                                     lastType = itemType;
                                     handlerPair = _handlerFactory.GetValidHandlerByTypeName(itemType, syncHandlerOptions);
 
-                                    // special case, blueprints looks like IContent items, except they are slightly different
-                                    // so we check for them specifically and get the handler for the entity rather than the object type.
-                                    if (item.Node.IsContent() && item.Node.IsBlueprint())
-                                    {
-                                        lastType = UdiEntityType.DocumentBlueprint;
-                                        handlerPair = _handlerFactory.GetValidHandlerByEntityType(UdiEntityType.DocumentBlueprint);
-                                    }
-                                }
+                            // special case, blueprints looks like IContent items, except they are slightly different
+                            // so we check for them specifically and get the handler for the entity rather than the object type.
+                            if (item.Node.IsContent() && item.Node.IsBlueprint())
+                            {
+                                lastType = UdiEntityType.DocumentBlueprint;
+                                handlerPair = _handlerFactory.GetValidHandlerByEntityType(UdiEntityType.DocumentBlueprint);
+                            }
+                        }
 
                                 if (handlerPair == null)
                                 {
@@ -306,7 +329,7 @@ namespace uSync.BackOffice
         /// <summary>
         ///  Load the xml in a folder in level order so we process the higher level items first.
         /// </summary>
-        private IList<OrderedNodeInfo> LoadOrderedNodes(string folder)
+        public IList<OrderedNodeInfo> LoadOrderedNodes(string folder)
         {
             var files = _syncFileService.GetFiles(folder, $"*.{_uSyncConfig.Settings.DefaultExtension}", true);
 
@@ -322,19 +345,6 @@ namespace uSync.BackOffice
                 .ToList();
         }
 
-        private class OrderedNodeInfo
-        {
-            public OrderedNodeInfo(string filename, XElement node)
-            {
-                this.FileName = filename;
-                this.Node = node;
-            }
-
-            public XElement Node { get; set; }
-            public string FileName { get; set; }
-        }
-
-
         /// <summary>
         ///  calculate the percentage progress we are making between a range. 
         /// </summary>
@@ -343,6 +353,38 @@ namespace uSync.BackOffice
         /// </remarks>
         private int CalculateProgress(int value, int total, int min, int max)
             => (int)(min + (((float)value / total) * (max - min)));
-
     }
+
+    /// <summary>
+    ///  detail for a usync file that can be ordered
+    /// </summary>
+    public class OrderedNodeInfo
+    {
+        /// <summary>
+        ///  constructor
+        /// </summary>
+        public OrderedNodeInfo(string filename, XElement node)
+        {
+            FileName = filename;
+            Node = node;
+            Key = node.GetKey();
+        }
+
+        /// <summary>
+        ///  xml element of the node
+        /// </summary>
+        public XElement Node { get; set; }
+
+        /// <summary>
+        ///  the Guid key for this item, so we can cache the list of keys 
+        /// </summary>
+        public Guid Key { get; set; }
+
+        /// <summary>
+        ///  path to the physical file 
+        /// </summary>
+        public string FileName { get; set; }
+    }
+
+
 }
