@@ -1130,7 +1130,7 @@ namespace uSync.Core.Serialization.Serializers
 
             if (dataType == null)
             {
-                logger.LogWarning("Cannot find underling DataType {key} {alias} for {property} it is likely you are missing a package?", definitionKey, propertyEditorAlias, alias);
+                logger.LogWarning("Cannot find underling DataType {key} {alias} for {property} - Either your datatypes are out of sync or you are missing a package?", definitionKey, propertyEditorAlias, alias);
                 return null;
             }
 
