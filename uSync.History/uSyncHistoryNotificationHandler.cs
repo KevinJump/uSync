@@ -31,7 +31,7 @@ namespace uSync.History
 
             if (changeActions.Any())
             {
-                SaveActions(changeActions, "Import");
+                SaveActions(changeActions, "Import", notification.Actions.Count());
             }
         }
 
@@ -43,18 +43,20 @@ namespace uSync.History
 
             if (changeActions.Any())
             {
-                SaveActions(changeActions, "Export");
+                SaveActions(changeActions, "Export", notification.Actions.Count());
             }
         }
 
-        private void SaveActions(IEnumerable<uSyncAction> actions, string method)
+        private void SaveActions(IEnumerable<uSyncAction> actions, string method, int total)
         {
             var historyInfo = new HistoryInfo
             {
                 Actions = actions,
                 Date = DateTime.Now,
                 Username = _backOfficeSecurityAccessor?.BackOfficeSecurity?.CurrentUser?.Username ?? "Background Process",
-                Method = method
+                Method = method,
+                Total = total,
+                Changes = actions.CountChanges()
             };
 
             var historyJson = JsonConvert.SerializeObject(historyInfo, Formatting.Indented);
