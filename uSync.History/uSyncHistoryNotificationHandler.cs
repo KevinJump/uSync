@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Umbraco.Cms.Core.Events;
+using Umbraco.Cms.Core.Hosting;
 using Umbraco.Cms.Core.Security;
 using uSync.BackOffice;
 using uSync.BackOffice.Configuration;
@@ -11,15 +12,15 @@ namespace uSync.History
         : INotificationHandler<uSyncImportCompletedNotification>,
         INotificationHandler<uSyncExportCompletedNotification>
     {
-        private readonly uSyncConfigService _configService;
+        private readonly IHostingEnvironment _hostingEnvironment;
         private readonly SyncFileService _syncFileService;
         private readonly IBackOfficeSecurityAccessor _backOfficeSecurityAccessor;
 
-        public uSyncHistoryNotificationHandler(uSyncConfigService configService, SyncFileService syncFileService, IBackOfficeSecurityAccessor backOfficeSecurityAccessor)
+        public uSyncHistoryNotificationHandler(SyncFileService syncFileService, IBackOfficeSecurityAccessor backOfficeSecurityAccessor, IHostingEnvironment hostingEnvironment)
         {
-            _configService = configService;
             _syncFileService = syncFileService;
             _backOfficeSecurityAccessor = backOfficeSecurityAccessor;
+            _hostingEnvironment = hostingEnvironment;
         }
 
         public void Handle(uSyncImportCompletedNotification notification)
@@ -58,8 +59,8 @@ namespace uSync.History
 
             var historyJson = JsonConvert.SerializeObject(historyInfo, Formatting.Indented);
 
-            var rootFolder = _syncFileService.GetAbsPath(_configService.GetRootFolder());
-            var historyFile = Path.Combine(rootFolder, "..", "history", DateTime.Now.ToString("dd_MM_yyyy_HH_mm_ss") + ".json");
+            var rootFolder = _syncFileService.GetAbsPath(_hostingEnvironment.LocalTempPath);
+            var historyFile = Path.Combine(rootFolder, "uSync", "history", DateTime.Now.ToString("dd_MM_yyyy_HH_mm_ss") + ".json");
 
             _syncFileService.CreateFoldersForFile(historyFile);
 
