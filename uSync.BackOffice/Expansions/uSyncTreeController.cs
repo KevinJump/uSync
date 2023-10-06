@@ -23,7 +23,9 @@ namespace uSync.BackOffice.Expansions
     [PluginController(uSync.Name)]
     public class uSyncTreeController : TreeController
     {
+        // collection of tree nodes.
         public SyncTreeNodeCollection _treeNodes;
+
         private readonly IMenuItemCollectionFactory _menuItemsFactory;
 
         /// <inheritdoc/>

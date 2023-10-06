@@ -154,6 +154,9 @@ namespace uSync.BackOffice.SyncHandlers
             ProcessContainerChanges(notification.SavedEntities);
         }
 
+        /// <summary>
+        ///  handler renames of containers.
+        /// </summary>
         public virtual void Handle(EntityContainerRenamedNotification notification)
         {
             if (_mutexService.IsPaused) return;
