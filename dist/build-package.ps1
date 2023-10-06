@@ -101,5 +101,3 @@ Out-File -FilePath ".\last-build-$fullVersion.txt" -InputObject $fullVersion
 
 ## beep means i can look away :) 
 [Console]::Beep(1056, 500)
-[Console]::Beep(880, 500)
-[Console]::Beep(880, 500)
