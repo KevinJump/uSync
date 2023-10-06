@@ -100,4 +100,6 @@ Remove-Item ".\last-build-*"
 Out-File -FilePath ".\last-build-$fullVersion.txt" -InputObject $fullVersion
 
 ## beep means i can look away :) 
-[console]::beep(1984,500)
+[Console]::Beep(1056, 500)
+[Console]::Beep(880, 500)
+[Console]::Beep(880, 500)
