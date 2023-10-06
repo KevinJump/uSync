@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Umbraco.Cms.Core.Hosting;
 using Umbraco.Cms.Infrastructure.Migrations.Expressions.Delete;
 using Umbraco.Cms.Web.BackOffice.Controllers;
 using Umbraco.Cms.Web.Common.Attributes;
@@ -11,21 +12,20 @@ namespace uSync.History.Controllers
     [PluginController("uSync")]
     public class uSyncHistoryController : UmbracoAuthorizedApiController
     {
-        private readonly uSyncConfigService _configService;
+        private readonly IHostingEnvironment _hostingEnvironment;
         private readonly SyncFileService _syncFileService;
 
-        public uSyncHistoryController(uSyncConfigService configService, SyncFileService syncFileService)
+        public uSyncHistoryController(SyncFileService syncFileService, IHostingEnvironment hostingEnvironment)
         {
-            _configService = configService;
             _syncFileService = syncFileService;
+            _hostingEnvironment = hostingEnvironment;
         }
 
         public bool GetApi() => true;
 
         public IEnumerable<HistoryInfo> GetHistory()
         {
-            var rootFolder = _syncFileService.GetAbsPath(_configService.GetRootFolder());
-            var historyFolder = Path.GetFullPath(Path.Combine(rootFolder, "..", "history"));
+            string historyFolder = GetHistoryFolder();
             var files = _syncFileService.GetFiles(historyFolder, "*.json")
                 .Select(x => x.Substring(historyFolder.Length + 1));
 
@@ -38,11 +38,17 @@ namespace uSync.History.Controllers
             return list.OrderByDescending(x => x.Date);
         }
 
+        private string GetHistoryFolder()
+        {
+            var rootFolder = _syncFileService.GetAbsPath(_hostingEnvironment.LocalTempPath);
+            var historyFolder = Path.GetFullPath(Path.Combine(rootFolder, "uSync", "history"));
+            return historyFolder;
+        }
+
         public bool ClearHistory()
         {
             // 1. get history folder
-            var rootFolder = _syncFileService.GetAbsPath(_configService.GetRootFolder());
-            var historyFolder = Path.GetFullPath(Path.Combine(rootFolder, "..", "history"));
+            string historyFolder = GetHistoryFolder();
             // 2. get history files
             var files = _syncFileService.GetFiles(historyFolder, "*.json");
             // 3. delet this
@@ -56,8 +62,7 @@ namespace uSync.History.Controllers
 
         public HistoryInfo LoadHistory(string filePath)
         {
-            var rootFolder = _syncFileService.GetAbsPath(_configService.GetRootFolder());
-            var historyFolder = Path.GetFullPath(Path.Combine(rootFolder, "..", "history"));
+            string historyFolder = GetHistoryFolder();
             var fullPath = Path.Combine(historyFolder, filePath);
             string contents = _syncFileService.LoadContent(fullPath);
 

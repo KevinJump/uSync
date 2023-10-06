@@ -17,5 +17,9 @@ namespace uSync.History
         public string Method { get; set; }
 
         public string FilePath { get; set; }
+        
+        public int Changes { get; set; }
+
+        public int Total { get; set; }
     }
 }

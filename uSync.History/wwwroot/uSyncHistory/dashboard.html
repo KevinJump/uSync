@@ -22,7 +22,9 @@
                             </div>
                             <div class="umb-table-cell">
                                 <localize key="usync_{{item.method.toLowerCase()}}"/>
-                                
+                            </div>
+                            <div class="umb-table-cell">
+                                {{item.changes}}/{{item.total}}
                             </div>
                             <div class="umb-table-cell umb-table__name">
                                 <div>
@@ -38,7 +40,7 @@
             </div>
         </umb-box-content>
     </umb-box>
-    <div class="usync-fresh-view" ng-if="vm.history.length==0">
+    <div class="usync-fresh-view" ng-if="vm.history==null||vm.history.length==0">
         <umb-empty-state>
 
             <div class="usync-group-box-title">

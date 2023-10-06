@@ -1,5 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Umbraco.Cms.Core.Events;
+using Umbraco.Cms.Core.Hosting;
 using Umbraco.Cms.Core.Security;
 using uSync.BackOffice;
 using uSync.BackOffice.Configuration;
@@ -11,15 +13,21 @@ namespace uSync.History
         : INotificationHandler<uSyncImportCompletedNotification>,
         INotificationHandler<uSyncExportCompletedNotification>
     {
-        private readonly uSyncConfigService _configService;
+        private readonly IHostingEnvironment _hostingEnvironment;
         private readonly SyncFileService _syncFileService;
         private readonly IBackOfficeSecurityAccessor _backOfficeSecurityAccessor;
+        private readonly ILogger<uSyncHistoryNotificationHandler> _logger;
 
-        public uSyncHistoryNotificationHandler(uSyncConfigService configService, SyncFileService syncFileService, IBackOfficeSecurityAccessor backOfficeSecurityAccessor)
+        public uSyncHistoryNotificationHandler(
+            SyncFileService syncFileService,
+            IBackOfficeSecurityAccessor backOfficeSecurityAccessor,
+            IHostingEnvironment hostingEnvironment,
+            ILogger<uSyncHistoryNotificationHandler> logger)
         {
-            _configService = configService;
             _syncFileService = syncFileService;
             _backOfficeSecurityAccessor = backOfficeSecurityAccessor;
+            _hostingEnvironment = hostingEnvironment;
+            _logger = logger;
         }
 
         public void Handle(uSyncImportCompletedNotification notification)
@@ -30,7 +38,7 @@ namespace uSync.History
 
             if (changeActions.Any())
             {
-                SaveActions(changeActions, "Import");
+                SaveActions(changeActions, "Import", notification.Actions.Count());
             }
         }
 
@@ -42,28 +50,37 @@ namespace uSync.History
 
             if (changeActions.Any())
             {
-                SaveActions(changeActions, "Export");
+                SaveActions(changeActions, "Export", notification.Actions.Count());
             }
         }
 
-        private void SaveActions(IEnumerable<uSyncAction> actions, string method)
+        private void SaveActions(IEnumerable<uSyncAction> actions, string method, int total)
         {
-            var historyInfo = new HistoryInfo
+            try
             {
-                Actions = actions,
-                Date = DateTime.Now,
-                Username = _backOfficeSecurityAccessor?.BackOfficeSecurity?.CurrentUser?.Username ?? "Background Process",
-                Method = method
-            };
+                var historyInfo = new HistoryInfo
+                {
+                    Actions = actions,
+                    Date = DateTime.Now,
+                    Username = _backOfficeSecurityAccessor?.BackOfficeSecurity?.CurrentUser?.Username ?? "Background Process",
+                    Method = method,
+                    Total = total,
+                    Changes = actions.CountChanges()
+                };
 
-            var historyJson = JsonConvert.SerializeObject(historyInfo, Formatting.Indented);
+                var historyJson = JsonConvert.SerializeObject(historyInfo, Formatting.Indented);
 
-            var rootFolder = _syncFileService.GetAbsPath(_configService.GetRootFolder());
-            var historyFile = Path.Combine(rootFolder, "..", "history", DateTime.Now.ToString("dd_MM_yyyy_HH_mm_ss") + ".json");
+                var rootFolder = _syncFileService.GetAbsPath(_hostingEnvironment.LocalTempPath);
+                var historyFile = Path.Combine(rootFolder, "uSync", "history", DateTime.Now.ToString("dd_MM_yyyy_HH_mm_ss") + ".json");
 
-            _syncFileService.CreateFoldersForFile(historyFile);
+                _syncFileService.CreateFoldersForFile(historyFile);
 
-            _syncFileService.SaveFile(historyFile, historyJson);
+                _syncFileService.SaveFile(historyFile, historyJson);
+            }
+            catch(Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to save history.");
+            }
         }
     }
 }
