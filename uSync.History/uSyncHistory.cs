@@ -9,9 +9,9 @@ namespace uSync.History
 {
     public class uSyncHistory : ISyncAddOn
     {
-        public string Name => "uSync History";
+        public string Name => "_uSync History";
 
-        public string Version => "1.0";
+        public string Version => typeof(uSyncHistory).Assembly.GetName().Version.ToString(3);
 
         public string Icon => "icon-calendar-alt";
 
