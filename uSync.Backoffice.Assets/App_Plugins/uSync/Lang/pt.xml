@@ -1,0 +1,101 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<language alias="pt" intName="Portuguese" localName="Português" lcid="" culture="pt">
+	<creator>
+		<name>Jumoo</name>
+		<link>http://jumoo.uk</link>
+	</creator>
+	<area alias="treeHeaders">
+		<key alias="sync">Sincronizar</key>
+		<key alias="usync">uSync</key>
+	</area>
+	<area alias="usync">
+		<key alias="name">uSync</key>
+		<key alias="intro">Elementos da base de dados de e para o disco</key>
+
+		<key alias="newer">Uma versão mais recente do uSync está disponível</key>
+		<key alias="noHandlers"><![CDATA[Nenhum handler foi carregado, por isso não podemos sincronizar nada - verifica o teu ficheiro uSync8.config, pode não existir ou estar corrumpido 😢]]></key>
+
+		<key alias="import">Importar</key>
+		<key alias="importforce">Importar tudo</key>
+		<key alias="importFile">Importar de ficheiro</key>
+		<key alias="report">Relatório</key>
+		<key alias="export">Exportar</key>
+		<key alias="exportClean">Exportação limpa</key>
+		<key alias="apply">Aplicar</key>
+
+		<key alias="download">Transferir</key>
+		<key alias="downloadTitle">Transferir a pasta do uSync?</key>
+		<key alias="downloadMsg">
+			<![CDATA[
+			<p>Transferir a pasta do usync como ficheiro zip?</p>
+			<small><em>O ficheiro transferido vai conter todos os ficheiros que estão na pasta uSync, não só os items que já foram exportados</em></small>]]>
+		</key>
+
+		<key alias="exportFile">Exportar para ficheiro</key>
+		<key alias="exportFileMsg">
+			<![CDATA[
+			<p>Exportar e transferir a pasta como ficheiro zip?</p>
+			<small><em>Uma exportação normal vai ser feita, ficheiros de items vazios/apagados vão ser incluídos. Se não queres que isso aconteça deves fazer uma exportação limpa antes de transferir o ficheiro.</em></small>]]>
+		</key>
+
+		<key alias="details">Detalhes</key>
+
+		<key alias="handlers">Handlers de items</key>
+		<key alias="savesettings">Guardar definições</key>
+
+		<key alias="import-content">Importar Conteúdo/Multimédia</key>
+		<key alias="import-settings">Importar Definições</key>
+		<key alias="import-members">Importar Membros</key>
+		<key alias="import-users">Importar Utilizadores</key>
+
+		<key alias="everything">Tudo</key>
+		<key alias="everything-description">Todas as Definições, Conteúdo, e outros</key>
+
+		<key alias="settings-description">Tipos de Dados, Tipos de Documentos e todas as definições</key>
+		<key alias="content-description">Conteúdo, Multimédia e items relacionados</key>
+		<key alias="members-description">Membros e grupos de membros</key>
+		<key alias="users-description">Utilizadores e grupos de utilizadores</key>
+
+		<key alias="report-content">Relatório de Conteúdo/Multimédia</key>
+		<key alias="report-settings">Relatório de Definições</key>
+		<key alias="report-members">Relatório de Membros</key>
+		<key alias="report-users">Relatório de Utilizadores</key>
+
+		<key alias="tableType">Tipo</key>
+		<key alias="tableName">Nome</key>
+		<key alias="tableChange">Alteração</key>
+		<key alias="tableMessage">Mensagem</key>
+
+		<key alias="nochange"><![CDATA[<h4>Não houve alterações</h4>]]></key>
+		<key alias="nochange_quote"><![CDATA[As coisas não têm de mudar o mundo para serem importantes]]></key>
+
+		<!-- warning messages -->
+		<key alias="oldformat">
+			<![CDATA[Esta pasta de sync é de uma versão mais antigo do uSync. O sync vai funcionar, mas vais ter resultados mais rápidos e limpos com uma verão mais recente da exportação. 
+		  <a href="https://github.com/KevinJump/uSync/blob/v10/dev/changes/format.md" target="_blank" rel="noopener"><i class="icon icon-info"></i>info</a>]]>
+		</key>
+		<key alias="createWarning"><![CDATA[Um ou mais handlers está configurado como criar apenas. [%0%]. Alterações destes items não vão ser sincronizadas]]></key>
+
+		<key alias="forms"><![CDATA[Usas Umbraco forms? - agora podes sincronizar formulários e definições com <a href="http://jumoo.co.uk/usync/forms" target="_blank" rel="noopener">uSync.FormsEdition</a>]]></key>
+
+		<key alias="cleanTitle">Exportação limpa</key>
+		<key alias="cleanMsg"><![CDATA[Tens a certeza? Uma exportação limpa vai apagar o conteúdo da tua pasta uSync. Vais perder qualquer ação guardada de apagar ou mudar o nome.]]></key>
+		<key alias="cleanSubmit">Sim, fazer uma exportação limpa</key>
+		<key alias="cleanClose">Não, fechar</key>
+
+
+		<key alias="saving">Acabaste de poupar %0% segundos</key>
+		<key alias="godo0">Vale a pena espreitar</key>
+		<key alias="godo1">É tempo de chá ☕ e biscoito 🍫</key>
+		<key alias="godo2">Estica as tuas pernas 🦿</key>
+		<key alias="godo3">Vai fazer uma caminhada no exterior 🌲 🦆</key>
+		<key alias="godo4">Mereces uma pausa</key>
+
+		<key alias="apply-intro">Aplicar mudanças individuais pode causar problemas se dependências deste item não estiverem sincronizadas.</key>
+		<key alias="apply-success">Importação completada</key>
+		<key alias="apply-failure">Importação falhou</key>
+	</area>
+	<area alias="dashboardTabs">
+		<key alias="usync">uSync</key>
+	</area>
+</language>
