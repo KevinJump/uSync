@@ -1,5 +1,11 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.CodeAnalysis.Operations;
+using Microsoft.Extensions.Logging;
 
+using NPoco.RowMappers;
+
+using NUglify.JavaScript.Syntax;
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -16,6 +22,7 @@ using Umbraco.Extensions;
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
 using uSync.Core;
+using uSync.Core.Dependency;
 using uSync.Core.Serialization;
 
 namespace uSync.BackOffice.SyncHandlers
@@ -193,6 +200,82 @@ namespace uSync.BackOffice.SyncHandlers
         {
             if (base.DoItemsMatch(node, item)) return true;
             return node.GetAlias().InvariantEquals(GetItemAlias(item));
+        }
+
+        /// <summary>
+        ///  for containers, we are building a dependency graph.
+        /// </summary>
+        protected override IList<LeveledFile> GetLevelOrderedFiles(string folder, IList<uSyncAction> actions)
+        {
+            var files = syncFileService.GetFiles(folder, $"*.{this.uSyncConfig.Settings.DefaultExtension}");
+
+            var nodes = new Dictionary<Guid, LeveledFile>();
+            var graph = new List<GraphEdge<Guid>>();
+
+            foreach (var file in files)
+            {
+                var node = LoadNode(file);
+                if (node == null) continue;
+
+                var key = node.GetKey();
+                nodes.Add(key, new LeveledFile
+                {
+                    Alias = node.GetAlias(),
+                    File = file,
+                    Level = node.GetLevel(),
+                });
+
+                // you can have circular dependencies in structure :( 
+                // graph.AddRange(GetStructure(node).Select(x => GraphEdge.Create(key, x)));
+
+                graph.AddRange(GetCompositions(node).Select(x => GraphEdge.Create(key, x)));
+            }
+            
+            var cleanGraph = graph.Where(x => x.Node != x.Edge).ToList();
+            var sortedList = nodes.Keys.TopologicalSort(cleanGraph);
+
+            if (sortedList == null)
+                return nodes.Values.OrderBy(x => x.Level).ToList();
+
+            var result = new List<LeveledFile>();
+            foreach(var key in sortedList)
+            {
+                if (nodes.ContainsKey(key))
+                    result.Add(nodes[key]);
+            }
+            return result;
+
+        }
+
+        private IEnumerable<Guid> GetStructure(XElement node)
+        {
+
+            var structure = node.Element("Structure");
+            if (structure == null) return Enumerable.Empty<Guid>();
+
+            return GetKeys(structure);
+        }
+
+        private IEnumerable<Guid> GetCompositions(XElement node)
+        {
+            var compositionNode = node.Element("Info")?.Element("Compositions");
+            if (compositionNode == null) return Enumerable.Empty<Guid>();
+
+            return GetKeys(compositionNode);
+        }
+
+        private IEnumerable<Guid> GetKeys(XElement node)
+        {
+            if (node != null)
+            {
+                foreach (var item in node.Elements())
+                {
+                    var key = item.Attribute("Key").ValueOrDefault(Guid.Empty);
+                    if (key == Guid.Empty) continue;
+
+                    yield return key;
+                }
+            }
         }
     }
 }
