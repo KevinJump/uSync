@@ -306,7 +306,7 @@ namespace uSync.Core.Serialization.Serializers
             => _dataTypeService.GetDataType(alias);
 
         protected override EntityContainer FindContainer(Guid key)
-            => _dataTypeService.GetContainer(key);
+            => key == Guid.Empty ? null : _dataTypeService.GetContainer(key);
 
         protected override IEnumerable<EntityContainer> FindContainers(string folder, int level)
             => _dataTypeService.GetContainers(folder, level);

@@ -188,6 +188,27 @@ namespace uSync.BackOffice.SyncHandlers
 
         // almost everything does this - but languages can't so we need to 
         // let the language Handler override this. 
+  
+        virtual protected IEnumerable<IEntity> GetChildItems(int parent, UmbracoObjectTypes objectType)
+        {
+            var cacheKey = $"{GetCacheKeyBase()}_parent_{parent}_{objectType}";
+
+            return runtimeCache.GetCacheItem(cacheKey, () =>
+            {
+                logger.LogDebug("Cache miss [{key}]", cacheKey);
+                if (parent == -1)
+                {
+                    return entityService.GetChildren(parent, objectType);
+                }
+                else
+                {
+                    // If you ask for the type then you get more info, and there is extra db calls to 
+                    // load it, so GetChildren without the object type is quicker. 
+                    return entityService.GetChildren(parent);
+                }
+            }, null);
+
+        }
 
         /// <summary>
         ///  Get all child items beneath a given item
@@ -197,21 +218,8 @@ namespace uSync.BackOffice.SyncHandlers
             if (this.itemObjectType == UmbracoObjectTypes.Unknown)
                 return Enumerable.Empty<IEntity>();
 
-            var cacheKey = $"{GetCacheKeyBase()}_parent_{parent}";
+            return GetChildItems(parent, this.itemObjectType);
 
-            return runtimeCache.GetCacheItem(cacheKey, () =>
-            {
-                if (parent == -1)
-                {
-                    return entityService.GetChildren(parent, this.itemObjectType);
-                }
-                else
-                {
-                    // If you ask for the type then you get more info, and there is extra db calls to 
-                    // load it, so GetChildren without the object type is quicker. 
-                    return entityService.GetChildren(parent);
-                }
-            }, null);
         }
 
         /// <summary>

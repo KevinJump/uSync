@@ -65,7 +65,7 @@ namespace uSync.BackOffice.SyncHandlers
         protected IEnumerable<uSyncAction> CleanFolders(string folder, int parent)
         {
             var actions = new List<uSyncAction>();
-            var folders = GetFolders(parent);
+            var folders = GetChildItems(parent, this.itemContainerType);
             foreach (var fdlr in folders)
             {
                 actions.AddRange(CleanFolders(folder, fdlr.Id));
@@ -120,13 +120,13 @@ namespace uSync.BackOffice.SyncHandlers
             }
 
             var actions = new List<uSyncAction>();
-            var folders = GetFolders(folderId);
+            var folders = GetChildItems(folderId, this.itemContainerType);
             foreach (var fdlr in folders)
             {
                 actions.AddRange(UpdateFolder(fdlr.Id, folder, config));
             }
 
-            var items = GetChildItems(folderId);
+            var items = GetChildItems(folderId, this.itemObjectType);
             foreach (var item in items)
             {
                 var obj = GetFromService(item.Id);
@@ -156,9 +156,15 @@ namespace uSync.BackOffice.SyncHandlers
         /// <param name="notification"></param>
         public virtual void Handle(EntityContainerSavedNotification notification)
         {
-            if (_mutexService.IsPaused) return;
+            // we are not handling saves, we assume a rename, is just that
+            // if a rename does happen as part of a save then its only 
+            // going to be part of an import, and that will rename the rest of the items
+            // 
+            // performance wise this is a big improvement, for very little/no impact
 
-            ProcessContainerChanges(notification.SavedEntities);
+            // if (!ShouldProcessEvent()) return;
+            // logger.LogDebug("Container(s) saved [{count}]", notification.SavedEntities.Count());
+            // ProcessContainerChanges(notification.SavedEntities);
         }
 
         /// <summary>
@@ -166,7 +172,7 @@ namespace uSync.BackOffice.SyncHandlers
         /// </summary>
         public virtual void Handle(EntityContainerRenamedNotification notification)
         {
-            if (_mutexService.IsPaused) return;
+            if (!ShouldProcessEvent()) return;
             ProcessContainerChanges(notification.Entities);
         }
 
@@ -174,6 +180,7 @@ namespace uSync.BackOffice.SyncHandlers
         {
             foreach (var folder in containers)
             {
+                logger.LogDebug("Processing container change : {name} [{id}]", folder.Name, folder.Id);
                 if (folder.ContainedObjectType == this.itemObjectType.GetGuid())
                 {
                     UpdateFolder(folder.Id, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
@@ -245,6 +252,11 @@ namespace uSync.BackOffice.SyncHandlers
             }
             return result;
 
+        }
+
+        public IEnumerable<Guid> GetGraphIds(XElement node)
+        {
+            return GetCompositions(node);
         }
 
         private IEnumerable<Guid> GetStructure(XElement node)

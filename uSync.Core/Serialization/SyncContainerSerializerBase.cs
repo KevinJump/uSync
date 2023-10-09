@@ -63,7 +63,7 @@ namespace uSync.Core.Serialization
 
                     var folderKey = folder.Attribute(uSyncConstants.Xml.Key).ValueOrDefault(Guid.Empty);
 
-                    logger.LogDebug("Searching for Parent by folder {folderKey}", folderKey);
+                    logger.LogDebug("Searching for Parent by folder {folderKey} {folderValue}", folderKey, folder.Value);
 
                     var container = FindFolder(folderKey, folder.Value);
                     if (container != null)
