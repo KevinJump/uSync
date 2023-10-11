@@ -125,6 +125,9 @@ namespace uSync.Core.Serialization.Serializers
             // templates 
             details.AddRange(DeserializeTemplates(item, node, options));
 
+            // compositions
+            details.AddRange(DeserializeCompositions(item, node));
+
             return DeserializedResult(item, details, options);
         }
 
@@ -151,7 +154,11 @@ namespace uSync.Core.Serialization.Serializers
 
             SetSafeAliasValue(item, node, false);
 
+            // we can do this here, hopefully its not needed 
+            // as we graph sort at the start,
+            // so it should say 'no changes' on a second pass.
             details.AddRange(DeserializeCompositions(item, node));
+            
             details.AddRange(DeserializeStructure(item, node));
 
             // When doing this reflectiony - it doesn't set is dirty. 

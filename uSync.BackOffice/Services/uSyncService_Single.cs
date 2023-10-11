@@ -12,6 +12,7 @@ using uSync.BackOffice.Extensions;
 using uSync.BackOffice.SyncHandlers;
 using uSync.BackOffice.SyncHandlers.Interfaces;
 using uSync.Core;
+using uSync.Core.Dependency;
 
 using static Umbraco.Cms.Core.Constants;
 
@@ -332,9 +333,7 @@ namespace uSync.BackOffice
         public IList<OrderedNodeInfo> LoadOrderedNodes(string folder)
         {
             var files = _syncFileService.GetFiles(folder, $"*.{_uSyncConfig.Settings.DefaultExtension}", true);
-
             var nodes = new List<OrderedNodeInfo>();
-
             foreach (var file in files)
             {
                 nodes.Add(new OrderedNodeInfo(file, _syncFileService.LoadXElement(file)));
@@ -343,6 +342,44 @@ namespace uSync.BackOffice
             return nodes
                 .OrderBy(x => (x.Node.GetLevel() * 1000) + x.Node.GetItemSortOrder())
                 .ToList();
+        }
+
+        public IList<OrderedNodeInfo> LoadOrderedNodes(ISyncHandler handler, string handlerFolder)
+        {
+            if (handler is not ISyncGraphableHandler graphableHandler)
+                return LoadOrderedNodes(handlerFolder);
+
+            var files = _syncFileService.GetFiles(handlerFolder, $"*.{_uSyncConfig.Settings.DefaultExtension}", true);
+            var nodes = new Dictionary<Guid, OrderedNodeInfo>();
+            var graph = new List<GraphEdge<Guid>>();
+            
+            foreach (var file in files)
+            {
+                var node = _syncFileService.LoadXElement(file);
+                if (node == null) continue;
+
+                var key = node.GetKey();
+
+                nodes.Add(key, new OrderedNodeInfo(file, _syncFileService.LoadXElement(file)));
+
+                graph.AddRange(graphableHandler.GetGraphIds(node)
+                    .Select(x => GraphEdge.Create(key, x)));
+            }
+
+            var cleanGraph = graph.Where(x => x.Node != x.Edge).ToList();
+            var sortedList = nodes.Keys.TopologicalSort(cleanGraph);
+
+            if (sortedList == null)
+                return nodes.Values.OrderBy(x => x.Node.GetLevel()).ToList();
+
+            var results = new List<OrderedNodeInfo>();
+            foreach(var key in sortedList)
+            {
+                if (nodes.ContainsKey(key))
+                    results.Add(nodes[key]);
+            }
+            return results;
+
         }
 
         /// <summary>
