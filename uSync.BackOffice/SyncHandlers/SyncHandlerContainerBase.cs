@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 
+using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Models.Entities;
@@ -68,6 +69,7 @@ namespace uSync.BackOffice.SyncHandlers
             var folders = GetChildItems(parent, this.itemContainerType);
             foreach (var fdlr in folders)
             {
+                logger.LogDebug("Checking Container: {folder} for any childItems [{type}]", fdlr.Id, fdlr?.GetType()?.Name ?? "Unknown");
                 actions.AddRange(CleanFolders(folder, fdlr.Id));
 
                 if (!HasChildren(fdlr))
@@ -76,7 +78,11 @@ namespace uSync.BackOffice.SyncHandlers
                     var name = fdlr.Id.ToString();
                     if (fdlr is IEntitySlim slim)
                     {
+                        // if this item isn't an container type, don't delete. 
+                        if (ObjectTypes.GetUmbracoObjectType(slim.NodeObjectType) != this.itemContainerType) continue;
+
                         name = slim.Name;
+                        logger.LogDebug("Folder has no children {name} {type}", name, slim.NodeObjectType);
                     }
 
                     actions.Add(uSyncAction.SetAction(true, name, typeof(EntityContainer).Name, ChangeType.Delete, "Empty Container"));
@@ -87,6 +93,10 @@ namespace uSync.BackOffice.SyncHandlers
             return actions;
         }
 
+        private bool IsContainer(Guid guid)
+            => guid == Constants.ObjectTypes.DataTypeContainer
+            || guid == Constants.ObjectTypes.MediaTypeContainer
+            || guid == Constants.ObjectTypes.DocumentTypeContainer;
 
         /// <summary>
         /// delete a container

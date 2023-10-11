@@ -195,7 +195,7 @@ namespace uSync.BackOffice.SyncHandlers
 
             return runtimeCache.GetCacheItem(cacheKey, () =>
             {
-                logger.LogDebug("Cache miss [{key}]", cacheKey);
+                // logger.LogDebug("Cache miss [{key}]", cacheKey);
                 if (parent == -1)
                 {
                     return entityService.GetChildren(parent, objectType);
@@ -204,7 +204,10 @@ namespace uSync.BackOffice.SyncHandlers
                 {
                     // If you ask for the type then you get more info, and there is extra db calls to 
                     // load it, so GetChildren without the object type is quicker. 
-                    return entityService.GetChildren(parent);
+
+                    // but we need to know that we only get our type so we then filter.
+                    var guidType = ObjectTypes.GetGuid(objectType);
+                    return entityService.GetChildren(parent).Where(x => x.NodeObjectType == guidType);
                 }
             }, null);
 
