@@ -1,10 +1,17 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.CodeAnalysis.Operations;
+using Microsoft.Extensions.Logging;
 
+using NPoco.RowMappers;
+
+using NUglify.JavaScript.Syntax;
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 
+using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Models.Entities;
@@ -16,6 +23,7 @@ using Umbraco.Extensions;
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
 using uSync.Core;
+using uSync.Core.Dependency;
 using uSync.Core.Serialization;
 
 namespace uSync.BackOffice.SyncHandlers
@@ -58,9 +66,10 @@ namespace uSync.BackOffice.SyncHandlers
         protected IEnumerable<uSyncAction> CleanFolders(string folder, int parent)
         {
             var actions = new List<uSyncAction>();
-            var folders = GetFolders(parent);
+            var folders = GetChildItems(parent, this.itemContainerType);
             foreach (var fdlr in folders)
             {
+                logger.LogDebug("Checking Container: {folder} for any childItems [{type}]", fdlr.Id, fdlr?.GetType()?.Name ?? "Unknown");
                 actions.AddRange(CleanFolders(folder, fdlr.Id));
 
                 if (!HasChildren(fdlr))
@@ -69,7 +78,11 @@ namespace uSync.BackOffice.SyncHandlers
                     var name = fdlr.Id.ToString();
                     if (fdlr is IEntitySlim slim)
                     {
+                        // if this item isn't an container type, don't delete. 
+                        if (ObjectTypes.GetUmbracoObjectType(slim.NodeObjectType) != this.itemContainerType) continue;
+
                         name = slim.Name;
+                        logger.LogDebug("Folder has no children {name} {type}", name, slim.NodeObjectType);
                     }
 
                     actions.Add(uSyncAction.SetAction(true, name, typeof(EntityContainer).Name, ChangeType.Delete, "Empty Container"));
@@ -80,6 +93,10 @@ namespace uSync.BackOffice.SyncHandlers
             return actions;
         }
 
+        private bool IsContainer(Guid guid)
+            => guid == Constants.ObjectTypes.DataTypeContainer
+            || guid == Constants.ObjectTypes.MediaTypeContainer
+            || guid == Constants.ObjectTypes.DocumentTypeContainer;
 
         /// <summary>
         /// delete a container
@@ -113,13 +130,13 @@ namespace uSync.BackOffice.SyncHandlers
             }
 
             var actions = new List<uSyncAction>();
-            var folders = GetFolders(folderId);
+            var folders = GetChildItems(folderId, this.itemContainerType);
             foreach (var fdlr in folders)
             {
                 actions.AddRange(UpdateFolder(fdlr.Id, folder, config));
             }
 
-            var items = GetChildItems(folderId);
+            var items = GetChildItems(folderId, this.itemObjectType);
             foreach (var item in items)
             {
                 var obj = GetFromService(item.Id);
@@ -149,9 +166,15 @@ namespace uSync.BackOffice.SyncHandlers
         /// <param name="notification"></param>
         public virtual void Handle(EntityContainerSavedNotification notification)
         {
-            if (_mutexService.IsPaused) return;
+            // we are not handling saves, we assume a rename, is just that
+            // if a rename does happen as part of a save then its only 
+            // going to be part of an import, and that will rename the rest of the items
+            // 
+            // performance wise this is a big improvement, for very little/no impact
 
-            ProcessContainerChanges(notification.SavedEntities);
+            // if (!ShouldProcessEvent()) return;
+            // logger.LogDebug("Container(s) saved [{count}]", notification.SavedEntities.Count());
+            // ProcessContainerChanges(notification.SavedEntities);
         }
 
         /// <summary>
@@ -160,7 +183,7 @@ namespace uSync.BackOffice.SyncHandlers
         /// <param name="notification"></param>
         public virtual void Handle(EntityContainerRenamedNotification notification)
         {
-            if (_mutexService.IsPaused) return;
+            if (!ShouldProcessEvent()) return;
             ProcessContainerChanges(notification.Entities);
         }
 
@@ -168,6 +191,7 @@ namespace uSync.BackOffice.SyncHandlers
         {
             foreach (var folder in containers)
             {
+                logger.LogDebug("Processing container change : {name} [{id}]", folder.Name, folder.Id);
                 if (folder.ContainedObjectType == this.itemObjectType.GetGuid())
                 {
                     UpdateFolder(folder.Id, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
@@ -194,6 +218,87 @@ namespace uSync.BackOffice.SyncHandlers
         {
             if (base.DoItemsMatch(node, item)) return true;
             return node.GetAlias().InvariantEquals(GetItemAlias(item));
+        }
+
+        /// <summary>
+        ///  for containers, we are building a dependency graph.
+        /// </summary>
+        protected override IList<LeveledFile> GetLevelOrderedFiles(string folder, IList<uSyncAction> actions)
+        {
+            var files = syncFileService.GetFiles(folder, $"*.{this.uSyncConfig.Settings.DefaultExtension}");
+
+            var nodes = new Dictionary<Guid, LeveledFile>();
+            var graph = new List<GraphEdge<Guid>>();
+
+            foreach (var file in files)
+            {
+                var node = LoadNode(file);
+                if (node == null) continue;
+
+                var key = node.GetKey();
+                nodes.Add(key, new LeveledFile
+                {
+                    Alias = node.GetAlias(),
+                    File = file,
+                    Level = node.GetLevel(),
+                });
+
+                // you can have circular dependencies in structure :( 
+                // graph.AddRange(GetStructure(node).Select(x => GraphEdge.Create(key, x)));
+
+                graph.AddRange(GetCompositions(node).Select(x => GraphEdge.Create(key, x)));
+            }
+            
+            var cleanGraph = graph.Where(x => x.Node != x.Edge).ToList();
+            var sortedList = nodes.Keys.TopologicalSort(cleanGraph);
+
+            if (sortedList == null)
+                return nodes.Values.OrderBy(x => x.Level).ToList();
+
+            var result = new List<LeveledFile>();
+            foreach(var key in sortedList)
+            {
+                if (nodes.ContainsKey(key))
+                    result.Add(nodes[key]);
+            }
+            return result;
+
+        }
+
+        public IEnumerable<Guid> GetGraphIds(XElement node)
+        {
+            return GetCompositions(node);
+        }
+
+        private IEnumerable<Guid> GetStructure(XElement node)
+        {
+
+            var structure = node.Element("Structure");
+            if (structure == null) return Enumerable.Empty<Guid>();
+
+            return GetKeys(structure);
+        }
+
+        private IEnumerable<Guid> GetCompositions(XElement node)
+        {
+            var compositionNode = node.Element("Info")?.Element("Compositions");
+            if (compositionNode == null) return Enumerable.Empty<Guid>();
+
+            return GetKeys(compositionNode);
+        }
+
+        private IEnumerable<Guid> GetKeys(XElement node)
+        {
+            if (node != null)
+            {
+                foreach (var item in node.Elements())
+                {
+                    var key = item.Attribute("Key").ValueOrDefault(Guid.Empty);
+                    if (key == Guid.Empty) continue;
+
+                    yield return key;
+                }
+            }
         }
     }
 }
