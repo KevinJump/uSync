@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 
 using Umbraco.Core.Services;
 
@@ -36,8 +37,16 @@ namespace uSync8.ContentEdition.Mapping.Mappers
             {
                 return date.ToString("s");
             }
+
+            // try and read it exactly, as a sortable date.
+            var culture = new CultureInfo("en-US");
+            if (DateTime.TryParseExact(value.ToString(), "s", culture, DateTimeStyles.None, out date))
+            {
+                return date.ToString("s");
+            }
             else if (DateTime.TryParse(value.ToString(), out date))
             {
+                // when we are coming from Umbraco it might be the date is parse-able. 
                 return date.ToString("s");
             }
 
