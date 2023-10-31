@@ -120,7 +120,9 @@ namespace uSync.Core.Serialization.Serializers
             if (editorAlias != item.EditorAlias)
             {
                 // change the editor type.....
-                var newEditor = _dataEditors.FirstOrDefault(x => x.Alias.InvariantEquals(editorAlias));
+                var newEditor = _dataEditors.FirstOrDefault(x => x.Alias.InvariantEquals(editorAlias))
+                    ?? _propertyEditors.FirstOrDefault(x => x.Alias.InvariantEquals(editorAlias));
+
                 if (newEditor != null)
                 {
                     details.AddUpdate("EditorAlias", item.EditorAlias, editorAlias, "EditorAlias");
