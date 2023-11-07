@@ -229,6 +229,7 @@ namespace uSync.BackOffice.SyncHandlers
 
             var nodes = new Dictionary<Guid, LeveledFile>();
             var graph = new List<GraphEdge<Guid>>();
+            var renames = new List<LeveledFile>();
 
             foreach (var file in files)
             {
@@ -236,19 +237,33 @@ namespace uSync.BackOffice.SyncHandlers
                 if (node == null) continue;
 
                 var key = node.GetKey();
-                nodes.Add(key, new LeveledFile
+
+                var leveledFile = new LeveledFile
                 {
                     Alias = node.GetAlias(),
                     File = file,
                     Level = node.GetLevel(),
-                });
+                };
 
-                // you can have circular dependencies in structure :( 
-                // graph.AddRange(GetStructure(node).Select(x => GraphEdge.Create(key, x)));
+                if (node.IsEmptyItem()) {
+                    renames.Add(leveledFile);
+                    continue;
+                }
 
-                graph.AddRange(GetCompositions(node).Select(x => GraphEdge.Create(key, x)));
+                if (nodes.TryAdd(key, leveledFile))
+                {
+                    graph.AddRange(GetCompositions(node).Select(x => GraphEdge.Create(key, x)));
+                }
+                else
+                {
+                    logger.LogWarning("Failed to add key when sorting, possible duplicate? {key} {alias} {file} old sort method will be used (may require additional pass)",
+                        key, node.GetAlias(), file);
+
+                    // fall back to the old way. 
+                    return base.GetLevelOrderedFiles(folder, actions);
+                }
             }
-            
+
             var cleanGraph = graph.Where(x => x.Node != x.Edge).ToList();
             var sortedList = nodes.Keys.TopologicalSort(cleanGraph);
 
@@ -261,8 +276,11 @@ namespace uSync.BackOffice.SyncHandlers
                 if (nodes.ContainsKey(key))
                     result.Add(nodes[key]);
             }
-            return result;
 
+            if (renames.Any())
+                result.AddRange(renames);
+
+            return result;
         }
 
         public IEnumerable<Guid> GetGraphIds(XElement node)
