@@ -45,11 +45,16 @@ namespace uSync.Core.Mapping
             if (stringValue == null || !stringValue.DetectIsJson())
                 return stringValue;
 
+            var jsonObject = value.GetJTokenFromObject();
+
+            if (jsonObject == null)
+                return stringValue;
+
             // we have to get the json, the serialize the json,
             // this is to make sure we don't serizlize any formatting
             // (like indented formatting). because that would 
             // register changes that are not there.
-            var b = JsonConvert.SerializeObject(value.GetJTokenFromObject(), Formatting.None);
+            var b = JsonConvert.SerializeObject(jsonObject, Formatting.None);
 
             return b;
         }
