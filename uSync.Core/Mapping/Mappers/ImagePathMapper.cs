@@ -74,30 +74,25 @@ namespace uSync.Core.Mapping
             var stringValue = value?.ToString();
             if (string.IsNullOrWhiteSpace(stringValue)) return stringValue;
 
-            if (stringValue.DetectIsJson())
-            {
-                // json, 
-                var json = JsonConvert.DeserializeObject<JObject>(stringValue);
-                if (json != null)
-                {
-                    var source = json.Value<string>("src");
-                    if (!string.IsNullOrWhiteSpace(source))
-                    {
-                        // strip any virtual directory stuff from it.
-                        json["src"] = StripSitePath(source);
-                        return JsonConvert.SerializeObject(json);
-                    }
-                }
+            if (stringValue.TryParseValidJsonString<JObject>(out JObject json) is false)
+                return StripSitePath(stringValue);
 
-                // we always reserialize if we can, because you can get inconsitancies, 
-                // and spaces in the json (especially from the starterkit)
-                // this just ensures it looks the same across sites (where possible).
-                return JsonConvert.SerializeObject(json, Formatting.Indented);
+            // json, 
+            if (json != null)
+            {
+                var source = json.Value<string>("src");
+                if (!string.IsNullOrWhiteSpace(source))
+                {
+                    // strip any virtual directory stuff from it.
+                    json["src"] = StripSitePath(source);
+                    return JsonConvert.SerializeObject(json);
+                }
             }
 
-
-            // else .
-            return StripSitePath(stringValue);
+            // we always reserialize if we can, because you can get inconsitancies, 
+            // and spaces in the json (especially from the starterkit)
+            // this just ensures it looks the same across sites (where possible).
+            return JsonConvert.SerializeObject(json, Formatting.Indented);
         }
 
         private string StripSitePath(string filepath)
@@ -175,26 +170,17 @@ namespace uSync.Core.Mapping
         public override string GetImportValue(string value, string editorAlias)
         {
             var stringValue = value?.ToString();
-            if (string.IsNullOrWhiteSpace(stringValue)) return stringValue;
+            if (string.IsNullOrWhiteSpace(stringValue) is true) return stringValue;
 
-            if (stringValue.DetectIsJson())
-            {
-                // json, 
-                var json = JsonConvert.DeserializeObject<JObject>(stringValue);
-                if (json != null)
-                {
-                    var source = json.Value<string>("src");
-                    if (!string.IsNullOrWhiteSpace(source))
-                    {
-                        // strip any virtual directory stuff from it.
-                        json["src"] = PrePendSitePath(source);
-                        return JsonConvert.SerializeObject(json);
-                    }
-                }
-            }
-            else
-            {
+            if (stringValue.TryParseValidJsonString(out JObject json) is false)
                 return PrePendSitePath(stringValue);
+
+            var source = json.Value<string>("src");
+            if (string.IsNullOrWhiteSpace(source) is false)
+            {
+                // strip any virtual directory stuff from it.
+                json["src"] = PrePendSitePath(source);
+                return JsonConvert.SerializeObject(json);
             }
 
             return stringValue;
@@ -228,15 +214,10 @@ namespace uSync.Core.Mapping
 
         private string GetImagePath(string stringValue)
         {
-            if (stringValue.DetectIsJson())
+            if (stringValue.TryParseValidJsonString(out JObject json))
             {
-                // json, 
-                var json = JsonConvert.DeserializeObject<JObject>(stringValue);
-                if (json != null)
-                {
-                    var source = json.Value<string>("src");
-                    if (!string.IsNullOrWhiteSpace(source)) return source;
-                }
+                var source = json.Value<string>("src");
+                if (string.IsNullOrWhiteSpace(source) is false) return source;
             }
             else
             {

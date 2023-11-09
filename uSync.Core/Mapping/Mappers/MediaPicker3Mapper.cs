@@ -30,9 +30,10 @@ namespace uSync.Core.Mapping.Mappers
         public override string GetExportValue(object value, string editorAlias)
         {
             var stringValue = value?.ToString();
-            if (string.IsNullOrEmpty(stringValue)) return null;
+            if (string.IsNullOrEmpty(stringValue) is true) return null;
 
-            if (!stringValue.DetectIsJson()) return stringValue;
+            if (stringValue.TryParseValidJsonString(out JArray json) is false)
+                return stringValue;
 
             // re-formatting the json in the picker.
             // 
@@ -45,17 +46,12 @@ namespace uSync.Core.Mapping.Mappers
 
             try
             {
-                var json = JsonConvert.DeserializeObject<JArray>(value.ToString());
-                if (json != null)
-                    return JsonConvert.SerializeObject(json, Formatting.Indented);
+                return JsonConvert.SerializeObject(json, Formatting.Indented);
             }
             catch
             {
                 return stringValue;
             }
-
-            return stringValue;
-
         }
             
 
@@ -63,11 +59,9 @@ namespace uSync.Core.Mapping.Mappers
         {
             // validate string 
             var stringValue = value?.ToString();
-            if (string.IsNullOrWhiteSpace(stringValue) || !stringValue.DetectIsJson())
+            if (!stringValue.TryParseValidJsonString(out JArray images) is false)
                 return Enumerable.Empty<uSyncDependency>();
 
-            // convert to an array. 
-            var images = JsonConvert.DeserializeObject<JArray>(value.ToString());
             if (images == null || !images.Any())
                 return Enumerable.Empty<uSyncDependency>();
 
