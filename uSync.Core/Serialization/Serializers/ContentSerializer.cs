@@ -98,7 +98,11 @@ namespace uSync.Core.Serialization.Serializers
             {
                 if (activeCultures.IsValid(culture))
                 {
-                    published.Add(new XElement("Published", item.IsCulturePublished(culture),
+                    // there is a "bug" in umbraco where if only one language is available 
+                    // and you unpublish it, then the language remains 'published' while
+                    // the default is to be 'unpublished' 
+                    // so if the default is 'unpublished' we take that over a culture value 
+                    published.Add(new XElement("Published", item.Published is false ? false : item.IsCulturePublished(culture),
                         new XAttribute("Culture", culture)));
                 }
             }
