@@ -1,0 +1,83 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<language alias="cy_gb" intName="Welsh (UK)" localName="Cymraeg (UK)" lcid="1106" culture="cy-GB">
+	<creator>
+		<name>Owain Jones</name>
+		<link>https://owainjones.dev/</link>
+	</creator>
+
+	<area alias="treeHeaders">
+		<key alias="sync">Cydamseriad</key>
+		<key alias="usync">uSync</key>
+	</area>
+
+	<area alias="usync">
+		<key alias="name">uSync</key>
+		<key alias="intro">Elfennau cronfa ddata i ac o ddisg</key>
+		<key alias="newer">Mae yna fersiwn fwy diweddar o uSync ar gael</key>
+		<key alias="noHandlers">Nid oes unrhyw Drinwyr wedi'u llwytho, felly ni allwch gysoni unrhyw beth - gwiriwch eich ffeil uSync8.config gallai fod yn llwgr neu ar goll 😢</key>
+		<key alias="import">Mewnforio</key>
+		<key alias="importforce">Mewnforio Llawn</key>
+		<key alias="importFile">Mewnforio o ffeil</key>
+		<key alias="report">Adroddiad</key>
+		<key alias="export">Allforio</key>
+		<key alias="exportClean">Allforio Glân</key>
+		<key alias="apply">Gweithredu</key>
+		<key alias="download">lawrlwytho</key>
+		<key alias="downloadTitle">Lawrlwytho ffolder uSync?</key>
+		<key alias="downloadMsg">
+			&lt;p&gt;Lawrlwytho eich ffolder uSync fel ffeil zip? &lt;/p&gt;
+			&lt;small&gt;&lt;em&gt;Bydd y lawrlwythiad yn cynnwys yr holl ffeiliau yn y ffolder uSync, nid dim ond yr eitemau rydych newydd eu allforio&lt;/em&gt;&lt;/small&gt;
+		</key>
+		<key alias="exportFile">Allforio i ffeil</key>
+		<key alias="exportFileMsg">
+			&lt;p&gt;Gwneud allforio a lawrlwytho'r ffolder fel ffeil zip?&lt;/p&gt;
+			&lt;small&gt;&lt;em&gt;Bydd allforio arferol yn cael ei berfformio, bydd unrhyw wag/dileadau yn cael eu cadw, os nad ydych chi eisiau hynny, dylech berfformio allforiad glân cyn i chi lawrlwytho'r ffeil&lt;/em&gt;&lt;/small&gt;
+		</key>
+		<key alias="details">Manylion</key>
+		<key alias="handlers">Trinwyr Eitemau</key>
+		<key alias="savesettings">Cadw Gosodiadau</key>
+		<key alias="import-content">Mewnforio Cynnwys/Cyfryngau</key>
+		<key alias="import-settings">Mewnforio Gosodiadau</key>
+		<key alias="import-members">Mewnforio Aelodau</key>
+		<key alias="import-users">Mewnforio Defnyddwyr</key>
+		<key alias="everything">Popeth</key>
+		<key alias="everything-description">Pob Gosodiad, Cynnwys, a phethau eraill</key>
+		<key alias="settings-description">Mathau o Ddata, Mathau o Ddogfen a holl osodiadau</key>
+		<key alias="content-description">Cynnwys, Cyfryngau ac eitemau cysylltiedig</key>
+		<key alias="members-description">Aelodau a grwpiau Aelodau</key>
+		<key alias="users-description">Defnyddwyr a Grwpiau Defnyddwyr</key>
+		<key alias="report-content">Adroddiad Cynnwys/Cyfryngau</key>
+		<key alias="report-settings">Adroddiad Gosodiadau</key>
+		<key alias="report-members">Adroddiad Aelodau</key>
+		<key alias="report-users">Adrodd Defnyddwyr</key>
+		<key alias="tableType">Math</key>
+		<key alias="tableName">Enw</key>
+		<key alias="tableChange">Newid</key>
+		<key alias="tableMessage">Neges</key>
+		<key alias="nochange">&lt;h4&gt;Dim Newidiadau&lt;/h4&gt;</key>
+		<key alias="nochange_quote">Does dim rhaid i bethau newid y byd i fod yn bwysig</key>
+		<key alias="oldformat">
+			Daw'r ffolder cydamseriad hwn o fersiwn hŷn o uSync. Tra bydd y cydamseriad'n gweithio, fe gewch ganlyniadau cyflymach a glanach gydag allforiad mwy diweddar.
+			&lt;a href="https://github.com/KevinJump/uSync/blob/v10/dev/changes/format.md" target="_blank" rel="noopener"&gt;&lt;i class="icon icon-info"&gt;&lt;/i&gt;gwybodaeth&lt;/a&gt;
+		</key>
+		<key alias="createWarning">Mae un neu fwy o drinwyr wedi'u gosod i greu yn unig. [%0%]. Mae'n bosibl na fydd newidiadau o fewn eitemau yn cael eu cydamseru</key>
+		<key alias="forms">Ydych chi'n defnyddio Ffurflenni Umbraco? - gallwch nawr cydamseru ffurflenni a gosodiadau gyda &lt;a href="http://jumoo.co.uk/usync/forms" target="_blank" rel="noopener"&gt;uSync.FormsEdition&lt;/a&gt;</key>
+		<key alias="cleanTitle">Allforio glân</key>
+		<key alias="cleanMsg">Wyt ti'n siŵr? Bydd allforyn glân yn dileu holl gynnwys y ffolder uSync. Byddwch yn colli unrhyw gamau dileu neu ailenwi sydd wedi'u storio.</key>
+		<key alias="cleanSubmit">Ie, rhedeg allforiad glân</key>
+		<key alias="cleanClose">Na, cau</key>
+		<key alias="saving">Rydych chi newydd arbed %0% eiliadau-ish</key>
+		<key alias="godo0">Gwerth gwirio</key>
+		<key alias="godo1">Amser am Te ☕ a Bisged 🍫</key>
+		<key alias="godo2">Ymestyn eich coesau🦿</key>
+		<key alias="godo3">Ewch am dro braf y tu allan 🌲 🦆</key>
+		<key alias="godo4">Rydych chi'n haeddu egwyl</key>
+		<key alias="apply-intro">Gall gweithredu newidiadau unigol achosi problemau os nad yw dibyniaethau'r eitem hon eisoes wedi'u cydamseru.</key>
+		<key alias="apply-success">Mewnforio wedi'i gwblhau</key>
+		<key alias="apply-failure">Methodd y mewnforio</key>
+	</area>
+
+	<area alias="dashboardTabs">
+		<key alias="usync">uSync</key>
+	</area>
+</language>
