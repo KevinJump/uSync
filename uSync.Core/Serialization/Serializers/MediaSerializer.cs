@@ -90,7 +90,8 @@ namespace uSync.Core.Serialization.Serializers
             }
 
             var saveAttempt = _mediaService.Save(item);
-            if (!saveAttempt.Success) {
+            if (!saveAttempt.Success)
+            {
                 var errors = saveAttempt.Result?.EventMessages?.FormatMessages() ?? "";
                 return SyncAttempt<IMedia>.Fail(item.Name, item, ChangeType.Fail, errors, saveAttempt.Exception);
             }
@@ -194,19 +195,17 @@ namespace uSync.Core.Serialization.Serializers
 
         private string GetFilePath(string value)
         {
-            if (value.DetectIsJson())
+            if (value.IsValidJsonString() is false)
+                return value;
+
+            // image cropper.
+            var imageCrops = JsonConvert.DeserializeObject<ImageCropperValue>(value, new JsonSerializerSettings
             {
-                // image cropper.
-                var imageCrops = JsonConvert.DeserializeObject<ImageCropperValue>(value, new JsonSerializerSettings
-                {
-                    Culture = CultureInfo.InvariantCulture,
-                    FloatParseHandling = FloatParseHandling.Decimal
-                });
+                Culture = CultureInfo.InvariantCulture,
+                FloatParseHandling = FloatParseHandling.Decimal
+            });
 
-                return imageCrops.Src;
-            }
-
-            return value;
+            return imageCrops.Src;
         }
 
         protected override Attempt<IMedia> CreateItem(string alias, ITreeEntity parent, string itemType)

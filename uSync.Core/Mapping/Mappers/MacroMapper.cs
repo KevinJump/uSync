@@ -61,10 +61,8 @@ namespace uSync.Core.Mapping
 
         private MacroValue LoadMacroValue(string macroString)
         {
-            if (!macroString.DetectIsJson())
-            {
+            if (macroString.IsValidJsonString() is false)
                 return LoadFromMarkup(macroString);
-            }
 
             return JsonConvert.DeserializeObject<MacroValue>(macroString);
         }

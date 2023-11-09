@@ -88,11 +88,11 @@ namespace uSync.Core.Mapping
         /// </summary>
         private string GetCleanFlatJson(string stringValue)
         {
-            if (string.IsNullOrWhiteSpace(stringValue) || !stringValue.DetectIsJson()) return stringValue;
-
+            if (stringValue.TryParseValidJsonString(out JToken result) is false) 
+                return stringValue;
             try
             {
-                return JsonConvert.SerializeObject(JsonConvert.DeserializeObject<JToken>(stringValue));
+                return JsonConvert.SerializeObject(result);
             }
             catch
             {

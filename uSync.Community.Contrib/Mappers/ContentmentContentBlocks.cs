@@ -7,8 +7,8 @@ using Newtonsoft.Json.Linq;
 
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Services;
-using Umbraco.Extensions;
 
+using uSync.Core;
 using uSync.Core.Dependency;
 using uSync.Core.Mapping;
 
@@ -55,10 +55,12 @@ namespace uSync.Community.Contrib.Mappers
         public override IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)
         {
             var stringValue = GetValueAs<string>(value);
-            if (string.IsNullOrWhiteSpace(stringValue) || !stringValue.DetectIsJson()) return Enumerable.Empty<uSyncDependency>();
 
-            var elements = JsonConvert.DeserializeObject<JArray>(stringValue);
-            if (elements == null || !elements.Any()) return Enumerable.Empty<uSyncDependency>();
+            if (stringValue.TryParseValidJsonString(out JArray elements) is false)
+                return Enumerable.Empty<uSyncDependency>();
+
+            if (elements == null || !elements.Any())
+                return Enumerable.Empty<uSyncDependency>();
 
             var dependencies = new List<uSyncDependency>();
 

@@ -290,7 +290,7 @@ namespace uSync.Core.Tracking
 
         private uSyncChange Compare(string target, string source, string path, string name, bool maskValue)
         {
-            if (source.DetectIsJson())
+            if (source.IsValidJsonString() is true)
             {
                 return JsonChange(target, source, path, name, maskValue);
             }
