@@ -55,7 +55,7 @@ namespace uSync.Core.Mapping
         public override IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)
         {
             var stringValue = GetValueAs<string>(value);
-            if (string.IsNullOrWhiteSpace(stringValue) || !stringValue.DetectIsJson())
+            if (stringValue.IsValidJsonString() is false)
                 return Enumerable.Empty<uSyncDependency>();
 
             var nestedJson = JsonConvert.DeserializeObject<JArray>(stringValue);

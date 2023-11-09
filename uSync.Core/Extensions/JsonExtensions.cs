@@ -111,6 +111,23 @@ namespace uSync.Core
             return stringValue.GetJsonTokenValue();
         }
 
+        public static bool IsValidJsonString(this string value)
+        {
+            if (string.IsNullOrWhiteSpace(value) || !value.DetectIsJson())
+                return false; 
+
+            // umbraco thinks it's json, but is it ? 
+
+            try
+            {
+                JToken.Parse(value);
+                return true;
+            }
+            catch {
+                return false; 
+            }
+        }
+
 
         public static JToken GetJTokenFromObject(this object value)
         {

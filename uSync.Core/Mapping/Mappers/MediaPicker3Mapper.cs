@@ -30,9 +30,9 @@ namespace uSync.Core.Mapping.Mappers
         public override string GetExportValue(object value, string editorAlias)
         {
             var stringValue = value?.ToString();
-            if (string.IsNullOrEmpty(stringValue)) return null;
+            if (string.IsNullOrEmpty(stringValue) is true) return null;
 
-            if (!stringValue.DetectIsJson()) return stringValue;
+            if (stringValue.IsValidJsonString() is false) return stringValue;
 
             // re-formatting the json in the picker.
             // 
@@ -63,7 +63,7 @@ namespace uSync.Core.Mapping.Mappers
         {
             // validate string 
             var stringValue = value?.ToString();
-            if (string.IsNullOrWhiteSpace(stringValue) || !stringValue.DetectIsJson())
+            if (!stringValue.IsValidJsonString())
                 return Enumerable.Empty<uSyncDependency>();
 
             // convert to an array. 

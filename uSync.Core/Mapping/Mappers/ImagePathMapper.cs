@@ -74,30 +74,26 @@ namespace uSync.Core.Mapping
             var stringValue = value?.ToString();
             if (string.IsNullOrWhiteSpace(stringValue)) return stringValue;
 
-            if (stringValue.DetectIsJson())
-            {
-                // json, 
-                var json = JsonConvert.DeserializeObject<JObject>(stringValue);
-                if (json != null)
-                {
-                    var source = json.Value<string>("src");
-                    if (!string.IsNullOrWhiteSpace(source))
-                    {
-                        // strip any virtual directory stuff from it.
-                        json["src"] = StripSitePath(source);
-                        return JsonConvert.SerializeObject(json);
-                    }
-                }
+            if (stringValue.IsValidJsonString() is false)
+                return StripSitePath(stringValue);
 
-                // we always reserialize if we can, because you can get inconsitancies, 
-                // and spaces in the json (especially from the starterkit)
-                // this just ensures it looks the same across sites (where possible).
-                return JsonConvert.SerializeObject(json, Formatting.Indented);
+            // json, 
+            var json = JsonConvert.DeserializeObject<JObject>(stringValue);
+            if (json != null)
+            {
+                var source = json.Value<string>("src");
+                if (!string.IsNullOrWhiteSpace(source))
+                {
+                    // strip any virtual directory stuff from it.
+                    json["src"] = StripSitePath(source);
+                    return JsonConvert.SerializeObject(json);
+                }
             }
 
-
-            // else .
-            return StripSitePath(stringValue);
+            // we always reserialize if we can, because you can get inconsitancies, 
+            // and spaces in the json (especially from the starterkit)
+            // this just ensures it looks the same across sites (where possible).
+            return JsonConvert.SerializeObject(json, Formatting.Indented);
         }
 
         private string StripSitePath(string filepath)
@@ -177,7 +173,7 @@ namespace uSync.Core.Mapping
             var stringValue = value?.ToString();
             if (string.IsNullOrWhiteSpace(stringValue)) return stringValue;
 
-            if (stringValue.DetectIsJson())
+            if (stringValue.IsValidJsonString())
             {
                 // json, 
                 var json = JsonConvert.DeserializeObject<JObject>(stringValue);
@@ -228,7 +224,7 @@ namespace uSync.Core.Mapping
 
         private string GetImagePath(string stringValue)
         {
-            if (stringValue.DetectIsJson())
+            if (stringValue.IsValidJsonString())
             {
                 // json, 
                 var json = JsonConvert.DeserializeObject<JObject>(stringValue);

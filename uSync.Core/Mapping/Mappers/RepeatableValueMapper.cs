@@ -23,7 +23,7 @@ namespace uSync.Core.Mapping
 
         public override string GetImportValue(string value, string editorAlias)
         {
-            if (value.DetectIsJson())
+            if (value.IsValidJsonString() is true)
             {
                 try
                 {

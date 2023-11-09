@@ -88,7 +88,8 @@ namespace uSync.Core.Mapping
         /// </summary>
         private string GetCleanFlatJson(string stringValue)
         {
-            if (string.IsNullOrWhiteSpace(stringValue) || !stringValue.DetectIsJson()) return stringValue;
+            if (stringValue.IsValidJsonString() is false) 
+                return stringValue;
 
             try
             {
