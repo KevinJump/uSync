@@ -42,16 +42,12 @@ namespace uSync8.Community.Contrib.Mappers
     {
         private readonly string docTypeAliasValue = "dtgeContentTypeAlias";
 
-        private readonly ILogger logger;
-
         public DocTypeGridMapper(IEntityService entityService,
             IContentTypeService contentTypeService,
             IDataTypeService dataTypeService,
-            ILogger logger)
-            : base(entityService, contentTypeService, dataTypeService)
-        {
-            this.logger = logger;
-        }
+            IProfilingLogger logger)
+            : base(entityService, contentTypeService, dataTypeService, logger)
+        { }
 
         public override string Name => "DocType Grid Mapper";
 
@@ -133,8 +129,8 @@ namespace uSync8.Community.Contrib.Mappers
             catch(Exception ex)
             {
                 // we want to be quite non-destructive on an import, 
-                logger.Warn<DocTypeGridMapper>(ex, "Failed to sanitize the import value for property (turn on debugging for full property value)");
-                logger.Debug<DocTypeGridMapper>("Failed DocTypeValue: {value}", value ?? String.Empty);
+                _logger.Warn<DocTypeGridMapper>(ex, "Failed to sanitize the import value for property (turn on debugging for full property value)");
+                _logger.Debug<DocTypeGridMapper>("Failed DocTypeValue: {value}", value ?? String.Empty);
                
                 return value;
             }

@@ -6,10 +6,10 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 using Umbraco.Core;
+using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Services;
 
-using uSync8.Core;
 using uSync8.Core.Dependency;
 
 namespace uSync8.ContentEdition.Mapping
@@ -25,14 +25,17 @@ namespace uSync8.ContentEdition.Mapping
     {
         protected readonly IContentTypeService contentTypeService;
         protected readonly IDataTypeService dataTypeService;
+        protected readonly ILogger _logger;
 
         public SyncNestedValueMapperBase(IEntityService entityService,
             IContentTypeService contentTypeService,
-            IDataTypeService dataTypeService)
+            IDataTypeService dataTypeService,
+            ILogger logger)
             : base(entityService)
         {
             this.contentTypeService = contentTypeService;
             this.dataTypeService = dataTypeService;
+            _logger = logger;   
         }
 
         protected JObject GetImportProperties(JObject item, IContentType docType)
@@ -50,7 +53,7 @@ namespace uSync8.ContentEdition.Mapping
                             item[property.Alias] = mappedVal?.ToString(); // .GetJsonTokenValue();
                         }
                         else {
-                            var mappedVal = SyncValueMapperFactory.GetImportValue((string)value, property.PropertyEditorAlias);
+                            var mappedVal = SyncValueMapperFactory.GetImportValue(GetStringValue(value), property.PropertyEditorAlias);
                             item[property.Alias] = mappedVal?.ToString(); // .GetJsonTokenValue();
                         }
                     }
@@ -205,5 +208,24 @@ namespace uSync8.ContentEdition.Mapping
         }
 
 
+        protected string GetStringValue(JToken value)
+        {
+            var stringValue = value.ToString();
+            try
+            {
+                if (value.Type is JTokenType.Date)
+                {
+                    var date = value.Value<DateTime>();
+                    stringValue = date.ToString("s");
+                }
+            }
+            catch(Exception ex)
+            {
+                // something might have gone wrong 
+                _logger.Warn<SyncNestedValueMapperBase>(ex, "Error getting formatted value");
+            }
+
+            return stringValue;
+        }
     }
 }

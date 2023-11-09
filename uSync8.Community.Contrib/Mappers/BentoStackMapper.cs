@@ -4,6 +4,7 @@ using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
+using Umbraco.Core.Logging;
 using Umbraco.Core.Services;
 
 using uSync8.ContentEdition.Mapping;
@@ -17,8 +18,9 @@ namespace uSync8.Community.Contrib.Mappers
 
         public BentoStackMapper(IEntityService entityService,
             IContentTypeService contentTypeService,
-            IDataTypeService dataTypeService)
-            : base(entityService, contentTypeService, dataTypeService)
+            IDataTypeService dataTypeService,
+            IProfilingLogger logger)
+            : base(entityService, contentTypeService, dataTypeService, logger)
         { }
 
         public override string Name => "Bento Stack Mapper";

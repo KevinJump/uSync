@@ -4,6 +4,7 @@ using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
+using Umbraco.Core.Logging;
 using Umbraco.Core.Services;
 
 using uSync8.Core;
@@ -21,8 +22,9 @@ namespace uSync8.ContentEdition.Mapping.Mappers
 
         public BlockListMapper(IEntityService entityService,
             IContentTypeService contentTypeService,
-            IDataTypeService dataTypeService)
-            : base(entityService, contentTypeService, dataTypeService)
+            IDataTypeService dataTypeService,
+            ILogger logger)
+            : base(entityService, contentTypeService, dataTypeService, logger)
         { }
 
         public override string Name => "Block List Mapper";

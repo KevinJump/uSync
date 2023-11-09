@@ -12,6 +12,7 @@ using uSync8.ContentEdition.Mapping;
 
 using uSync8.Core.Dependency;
 using Umbraco.Core;
+using Umbraco.Core.Logging;
 
 namespace uSync8.Community.Contrib.Mappers
 {
@@ -20,8 +21,9 @@ namespace uSync8.Community.Contrib.Mappers
     /// </summary>
     public class ContentmentContentBlocks : SyncNestedValueMapperBase, ISyncMapper
     {
-        public ContentmentContentBlocks(IEntityService entityService, IContentTypeService contentTypeService, IDataTypeService dataTypeService) 
-            : base(entityService, contentTypeService, dataTypeService)
+        public ContentmentContentBlocks(IEntityService entityService, IContentTypeService contentTypeService, IDataTypeService dataTypeService,
+            IProfilingLogger logger)
+            : base(entityService, contentTypeService, dataTypeService, logger)
         { }
 
         public override string Name => "Contentment content block mapper";

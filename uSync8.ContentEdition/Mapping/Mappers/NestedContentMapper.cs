@@ -5,8 +5,10 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 using Umbraco.Core;
+using Umbraco.Core.Logging;
 using Umbraco.Core.Services;
 
+using uSync8.Core;
 using uSync8.Core.Dependency;
 
 namespace uSync8.ContentEdition.Mapping.Mappers
@@ -17,8 +19,9 @@ namespace uSync8.ContentEdition.Mapping.Mappers
         public NestedContentMapper(
             IEntityService entityService,
             IContentTypeService contentTypeService,
-            IDataTypeService dataTypeService)
-            : base(entityService, contentTypeService, dataTypeService)
+            IDataTypeService dataTypeService,
+            ILogger logger)
+            : base(entityService, contentTypeService, dataTypeService, logger)
         { }
 
         public override string Name => "Nested Content Mapper";
