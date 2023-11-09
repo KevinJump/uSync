@@ -1,5 +1,6 @@
 ﻿
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.Net.Http.Headers;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -127,6 +128,34 @@ namespace uSync.Core
                 return false; 
             }
         }
+        
+        public static bool TryParseValidJsonString(this string value, out JToken token)
+            => TryParseValidJsonString<JToken>(value, out token);
+       
+        /// <summary>
+        ///  parse a value and return the JSON - only if it's valid JSON 
+        /// </summary>
+        /// <remarks>
+        ///  this value will return false for strings that don't look like json strings (e.g "hello" is false) 
+        /// </remarks>
+        public static bool TryParseValidJsonString<TResult>(this string value, out TResult result)
+            where TResult : JToken
+        {
+            result = default;
+            if (string.IsNullOrWhiteSpace(value) || !value.DetectIsJson())
+                return false;
+
+            try
+            {
+                result = JsonConvert.DeserializeObject<TResult>(value);
+                return true;
+            }
+            catch
+            {
+                return false; 
+            }
+        }
+
 
 
         public static JToken GetJTokenFromObject(this object value)

@@ -55,11 +55,12 @@ namespace uSync.Community.Contrib.Mappers
         public override IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)
         {
             var stringValue = GetValueAs<string>(value);
-            if (stringValue.IsValidJsonString() is false)
+
+            if (stringValue.TryParseValidJsonString(out JArray elements) is false)
                 return Enumerable.Empty<uSyncDependency>();
 
-            var elements = JsonConvert.DeserializeObject<JArray>(stringValue);
-            if (elements == null || !elements.Any()) return Enumerable.Empty<uSyncDependency>();
+            if (elements == null || !elements.Any())
+                return Enumerable.Empty<uSyncDependency>();
 
             var dependencies = new List<uSyncDependency>();
 

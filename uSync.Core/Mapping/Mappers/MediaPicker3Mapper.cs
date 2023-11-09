@@ -32,7 +32,8 @@ namespace uSync.Core.Mapping.Mappers
             var stringValue = value?.ToString();
             if (string.IsNullOrEmpty(stringValue) is true) return null;
 
-            if (stringValue.IsValidJsonString() is false) return stringValue;
+            if (stringValue.TryParseValidJsonString(out JArray json) is false)
+                return stringValue;
 
             // re-formatting the json in the picker.
             // 
@@ -45,17 +46,12 @@ namespace uSync.Core.Mapping.Mappers
 
             try
             {
-                var json = JsonConvert.DeserializeObject<JArray>(value.ToString());
-                if (json != null)
-                    return JsonConvert.SerializeObject(json, Formatting.Indented);
+                return JsonConvert.SerializeObject(json, Formatting.Indented);
             }
             catch
             {
                 return stringValue;
             }
-
-            return stringValue;
-
         }
             
 
@@ -63,11 +59,9 @@ namespace uSync.Core.Mapping.Mappers
         {
             // validate string 
             var stringValue = value?.ToString();
-            if (!stringValue.IsValidJsonString())
+            if (!stringValue.TryParseValidJsonString(out JArray images) is false)
                 return Enumerable.Empty<uSyncDependency>();
 
-            // convert to an array. 
-            var images = JsonConvert.DeserializeObject<JArray>(value.ToString());
             if (images == null || !images.Any())
                 return Enumerable.Empty<uSyncDependency>();
 

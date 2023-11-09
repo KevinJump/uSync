@@ -39,24 +39,21 @@ namespace uSync.Core.Mapping
         protected override JToken GetImportProperty(object value)
         {
             if (value == null) return null;
-
             var stringValue = value.GetValueAs<string>();
-            if (stringValue.IsValidJsonString() is false)
+          
+            if (stringValue.TryParseValidJsonString(out JToken tokenValue) is false)
                 return stringValue;
 
             // we have to get the json, the serialize the json,
             // this is to make sure we don't serizlize any formatting
             // (like indented formatting). because that would 
             // register changes that are not there.
-            return JsonConvert.SerializeObject(value.GetJTokenFromObject(), Formatting.None);
+            return JsonConvert.SerializeObject(tokenValue, Formatting.None);
         }
 
 
         protected override JToken GetExportProperty(string value)
-        {
-            if (!value.IsValidJsonString()) return value;
-            return value.GetJsonTokenValue();
-        }
+            => value.TryParseValidJsonString(out JToken tokenValue) is true ? tokenValue : value;
 
         protected override string ProcessValues(JToken jsonValue, string editorAlias, Func<JObject, IContentType, JObject> GetPropertiesMethod)
         {
