@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Services;
@@ -35,7 +36,15 @@ namespace uSync.Core.Mapping
             {
                 return date.ToString("s");
             }
-            else if (DateTime.TryParse(value.ToString(), out date))
+
+            // try and read it exactly, as a sortable date.
+            var culture = new CultureInfo("en-US");
+            if (DateTime.TryParseExact(value.ToString(), "s", culture, DateTimeStyles.None, out date))
+            {
+                return date.ToString("s");
+            }
+            
+            if (DateTime.TryParse(value.ToString(), out date))
             {
                 return date.ToString("s");
             }

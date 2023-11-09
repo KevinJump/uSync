@@ -64,7 +64,7 @@ namespace uSync.Core.Mapping
                     var value = item[property.Alias];
                     if (value != null)
                     {
-                        var mappedVal = mapperCollection.Value.GetImportValue(value.ToString(), property.PropertyEditorAlias);
+                        var mappedVal = mapperCollection.Value.GetImportValue(GetStringValue(value), property.PropertyEditorAlias);
                         item[property.Alias] = GetImportProperty(mappedVal);
                     }
                 }
@@ -210,6 +210,24 @@ namespace uSync.Core.Mapping
                 ?? contentTypeService.Get(alias);
         }
 
+        protected string GetStringValue(JToken value)
+        {
+            var stringValue = value.ToString();
+            try
+            {
+                if (value.Type is JTokenType.Date)
+                {
+                    var date = value.Value<DateTime>();
+                    stringValue = date.ToString("s");
+                }
+            }
+            catch (Exception ex)
+            {
+                // something might have gone wrong 
+                // _logger.Warn<SyncNestedValueMapperBase>(ex, "Error getting formatted value");
+            }
 
+            return stringValue;
+        }
     }
 }
