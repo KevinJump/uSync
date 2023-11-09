@@ -1,4 +1,7 @@
-﻿namespace uSync8.Core
+﻿using Newtonsoft.Json;
+using System.Globalization;
+
+namespace uSync8.Core
 {
     public static partial class uSyncConstants
     {
@@ -12,6 +15,15 @@
         /// </summary>
         public static class Serialization
         {
+            public static JsonSerializerSettings Settings
+                => new JsonSerializerSettings
+                {
+                    Culture = CultureInfo.InvariantCulture,
+                    FloatParseHandling = FloatParseHandling.Decimal,
+                    DateFormatHandling = DateFormatHandling.IsoDateFormat
+                };
+
+
             public const string ContentType = "ContentType";
             public const string MediaType = "MediaType";
             public const string DataType = "DataType";

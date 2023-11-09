@@ -188,12 +188,8 @@ namespace uSync8.ContentEdition.Serializers
             if (value.DetectIsJson())
             {
                 // image cropper.
-                var imageCrops = JsonConvert.DeserializeObject<ImageCropperValue>(value, new JsonSerializerSettings
-                {
-                    Culture = CultureInfo.InvariantCulture,
-                    FloatParseHandling = FloatParseHandling.Decimal
-                });
-
+                var imageCrops = JsonConvert.DeserializeObject<ImageCropperValue>(value, 
+                    uSyncConstants.Serialization.Settings);
                 return imageCrops.Src;
             }
 
