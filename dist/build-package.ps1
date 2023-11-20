@@ -51,7 +51,7 @@ Write-Host "Config   :" $env
 Write-Host "Folder   :" $outFolder
 "----------------------------------"; ""
 
-$sln_name = "..\uSync_12.sln";
+$sln_name = "..\uSync_13.sln";
 
 ""; "##### Restoring project"; "--------------------------------"; ""
 dotnet restore ..

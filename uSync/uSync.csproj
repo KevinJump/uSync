@@ -1,14 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net7.0</TargetFrameworks>
+		<TargetFrameworks>net8.0</TargetFrameworks>
 		<ContentTargetFolders>.</ContentTargetFolders>
 
 		<Product>uSync</Product>
 		<PackageId>uSync</PackageId>
 		<Title>uSync</Title>
 
-		<VersionPrefix>12.0.0</VersionPrefix>
+		<VersionPrefix>13.0.0</VersionPrefix>
 		<Authors>Kevin Jump</Authors>
 		<Company>Jumoo</Company>
 
@@ -21,7 +21,7 @@
 
 		<RepositoryUrl>https://github.com/KevinJump/uSync</RepositoryUrl>
 
-		<Copyright>Jumoo @ 2013-2021</Copyright>
+		<Copyright>Jumoo @ 2013-2023</Copyright>
 		<Description>Sync Umbraco to and from disk and between instances</Description>
 
 		<EmbedUntrackedSources>true</EmbedUntrackedSources>

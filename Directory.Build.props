@@ -1,6 +1,6 @@
 <Project>
     <PropertyGroup>
-		<VersionPrefix>12.0.0</VersionPrefix>
+		<VersionPrefix>13.0.0</VersionPrefix>
 		<Authors>Kevin Jump</Authors>
 		<Company>Jumoo</Company>
 
@@ -11,7 +11,7 @@
 
 		<RepositoryUrl>https://github.com/KevinJump/uSync8/tree/core/main</RepositoryUrl>
 
-		<Copyright>Jumoo @ 2013-2022</Copyright>
+		<Copyright>Jumoo @ 2013-2023</Copyright>
 
 		<PackageIcon>usync-logo.png</PackageIcon>
 
@@ -26,8 +26,9 @@
 10.0 : Umbraco 10 release (LTS)
  - 10.1 : Umbraco 'Production' mode support
  - 10.2 : Upload / Download Syncs
-11.0 : Umbraco 11 release
-12.0 : Umbraco 12 release ]]>
+11.0 : Umbraco v11 release
+12.0 : Umbraco v12 release
+13.o : Umbraco v13 release]]>
 		</PackageReleaseNotes>
 
 		<EmbedUntrackedSources>true</EmbedUntrackedSources>

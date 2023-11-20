@@ -2,17 +2,7 @@
 <!-- https://learn.microsoft.com/en-us/dotnet/fundamentals/package-validation/diagnostic-ids -->
 <Suppressions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:uSync.BackOffice.Controllers.Trees.uSyncTreeController</Target>
-    <Left>lib/net7.0/uSync.BackOffice.dll</Left>
-    <Right>lib/net7.0/uSync.BackOffice.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:uSync.BackOffice.uSyncService.#ctor(Microsoft.Extensions.Logging.ILogger{uSync.BackOffice.uSyncService},Umbraco.Cms.Core.Events.IEventAggregator,uSync.BackOffice.Configuration.uSyncConfigService,uSync.BackOffice.SyncHandlers.SyncHandlerFactory,uSync.BackOffice.Services.SyncFileService,uSync.BackOffice.Services.uSyncEventService,Umbraco.Cms.Core.Cache.AppCaches,Umbraco.Cms.Core.Scoping.ICoreScopeProvider)</Target>
-    <Left>lib/net7.0/uSync.BackOffice.dll</Left>
-    <Right>lib/net7.0/uSync.BackOffice.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
+    <DiagnosticId>PKV006</DiagnosticId>
+    <Target>net7.0</Target>
   </Suppression>
 </Suppressions>
