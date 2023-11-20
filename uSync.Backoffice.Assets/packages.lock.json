@@ -2326,8 +2326,8 @@
         "dependencies": {
           "Umbraco.Cms.Web.BackOffice": "[13.0.0-rc2, )",
           "Umbraco.Cms.Web.Website": "[13.0.0-rc2, )",
-          "uSync.Community.Contrib": "[9.0.0, )",
-          "uSync.Core": "[12.0.0, )"
+          "uSync.Community.Contrib": "[12.0.0, )",
+          "uSync.Core": "[13.0.0, )"
         }
       },
       "usync.backoffice.targets": {
@@ -2338,7 +2338,7 @@
         "dependencies": {
           "Umbraco.Cms.Web.BackOffice": "[13.0.0-rc2, )",
           "Umbraco.Cms.Web.Website": "[13.0.0-rc2, )",
-          "uSync.Core": "[12.0.0, )"
+          "uSync.Core": "[13.0.0, )"
         }
       },
       "usync.core": {
