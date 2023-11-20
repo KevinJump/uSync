@@ -162,13 +162,30 @@ namespace uSync.BackOffice.SyncHandlers
             return nodes.OrderBy(x => x.Level).ToList();
         }
 
+        /// <summary>
+        ///  object representing a file and its level
+        /// </summary>
         protected class LeveledFile
         {
+            /// <summary>
+            ///  umbraco alias of the item
+            /// </summary>
             public string Alias { get; set; }
+
+            /// <summary>
+            ///  level (e.g 0 is root) of file
+            /// </summary>
             public int Level { get; set; }
+
+            /// <summary>
+            ///  path to the actual file.
+            /// </summary>
             public string File { get; set; }
         }
 
+        /// <summary>
+        ///  Load a XElement node for a given path.
+        /// </summary>
         protected XElement LoadNode(string path)
         {
             syncFileService.EnsureFileExists(path);

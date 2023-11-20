@@ -282,6 +282,9 @@ namespace uSync.BackOffice.SyncHandlers
             return result;
         }
 
+        /// <summary>
+        ///  get the Guid values of any compositions so they can be graphed
+        /// </summary>
         public IEnumerable<Guid> GetGraphIds(XElement node)
         {
             return GetCompositions(node);

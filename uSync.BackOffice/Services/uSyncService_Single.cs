@@ -344,6 +344,12 @@ namespace uSync.BackOffice
                 .ToList();
         }
 
+        /// <summary>
+        ///  load up ordered nodes from a handler folder, 
+        /// </summary>
+        /// <remarks>
+        ///  this makes ordered node loading faster, when we are processing multiple requests, because we don't have to calculate it each time
+        /// </remarks>
         public IList<OrderedNodeInfo> LoadOrderedNodes(ISyncHandler handler, string handlerFolder)
         {
             if (handler is not ISyncGraphableHandler graphableHandler)

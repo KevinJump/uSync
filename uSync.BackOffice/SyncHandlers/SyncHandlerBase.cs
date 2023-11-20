@@ -186,9 +186,13 @@ namespace uSync.BackOffice.SyncHandlers
             return GetChildItems(parent.Id);
         }
 
-        // almost everything does this - but languages can't so we need to 
-        // let the language Handler override this. 
-  
+        /// <summary>
+        ///  Get all child items beneath a given item
+        /// </summary>
+        /// <remarks>
+        ///  Almost everything does this - but languages can't so we need to 
+        ///  let the language Handler override this. 
+        /// </remarks>
         virtual protected IEnumerable<IEntity> GetChildItems(int parent, UmbracoObjectTypes objectType)
         {
             var cacheKey = $"{GetCacheKeyBase()}_parent_{parent}_{objectType}";

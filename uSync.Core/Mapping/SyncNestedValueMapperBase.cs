@@ -221,7 +221,7 @@ namespace uSync.Core.Mapping
                     stringValue = date.ToString("s");
                 }
             }
-            catch (Exception ex)
+            catch 
             {
                 // something might have gone wrong 
                 // _logger.Warn<SyncNestedValueMapperBase>(ex, "Error getting formatted value");
