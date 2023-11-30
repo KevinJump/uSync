@@ -59,7 +59,7 @@ namespace uSync.Core.Mapping.Mappers
         {
             // validate string 
             var stringValue = value?.ToString();
-            if (!stringValue.TryParseValidJsonString(out JArray images) is false)
+            if (stringValue.TryParseValidJsonString(out JArray images) is false)
                 return Enumerable.Empty<uSyncDependency>();
 
             if (images == null || !images.Any())
