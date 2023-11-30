@@ -1,8 +1,4 @@
-﻿
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.Net.Http.Headers;
-
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 using Umbraco.Extensions;
