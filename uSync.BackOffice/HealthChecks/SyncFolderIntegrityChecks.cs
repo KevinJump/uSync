@@ -57,6 +57,15 @@ public class SyncFolderIntegrityChecks : HealthCheck
     private HealthCheckStatus CheckuSyncFolder()
     {
         var root = _fileService.GetAbsPath(_configService.GetRootFolder());
+
+        if (_fileService.DirectoryExists(root) is false)
+        {
+            return new HealthCheckStatus("No uSync folder to check")
+            {
+                ResultType = StatusResultType.Success
+            };
+        }
+
         var clashes = CheckFolder(root);
 
         if (clashes.Count > 0)
@@ -123,6 +132,14 @@ public class SyncFolderIntegrityChecks : HealthCheck
     private HealthCheckStatus CheckConfigFolderValidity()
     {
         var root = _fileService.GetAbsPath(_configService.GetRootFolder());
+
+        if (_fileService.DirectoryExists(root) is false)
+        {
+            return new HealthCheckStatus("No uSync folder to check")
+            {
+                ResultType = StatusResultType.Success
+            };
+        }
 
         List<string> errors = new List<string>();
 
