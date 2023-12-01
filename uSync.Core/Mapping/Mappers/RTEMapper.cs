@@ -3,6 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
+using Microsoft.Extensions.Logging;
+
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Services;
 
@@ -22,7 +27,9 @@ namespace uSync.Core.Mapping
     {
         private readonly Lazy<SyncValueMapperCollection> mapperCollection;
 
-        public RTEMapper(IEntityService entityService, Lazy<SyncValueMapperCollection> mappers)
+        public RTEMapper(
+            IEntityService entityService,
+            Lazy<SyncValueMapperCollection> mappers)
             : base(entityService)
         {
             this.mapperCollection = mappers;
@@ -49,6 +56,34 @@ namespace uSync.Core.Mapping
             if (value == null) return Enumerable.Empty<uSyncDependency>();
 
             var stringValue = value.ToString();
+            if (string.IsNullOrWhiteSpace(stringValue)) return Enumerable.Empty<uSyncDependency>();
+
+            if (stringValue.TryParseValidJsonString(out JObject jObject))
+            {
+                // if its json, it contains the new blocks way of sending shizzel. 
+                return GetBlockDependencies(jObject, editorAlias, flags);
+            }
+
+            return GetSimpleDependencies(stringValue, editorAlias, flags);
+        }
+
+        private IEnumerable<uSyncDependency> GetBlockDependencies(JObject jObject, string editorAlias, DependencyFlags flags)
+        {
+            var dependencies = new List<uSyncDependency>();
+
+            if (jObject.TryGetValue("markup", out JToken markup) && markup != null) { 
+                dependencies.AddRange(GetSimpleDependencies(markup.ToString(), editorAlias, flags));
+            }
+
+            if (jObject.TryGetValue("blocks", out JToken blocks) && blocks != null) {
+                dependencies.AddRange(mapperCollection.Value.GetDependencies(blocks, Constants.PropertyEditors.Aliases.BlockList, flags));
+            }
+
+            return dependencies;
+        }
+
+        private IEnumerable<uSyncDependency> GetSimpleDependencies(string stringValue, string editorAlias, DependencyFlags flags)
+        {
             if (string.IsNullOrWhiteSpace(stringValue)) return Enumerable.Empty<uSyncDependency>();
 
             var dependencies = new List<uSyncDependency>();
