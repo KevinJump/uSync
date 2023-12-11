@@ -5,7 +5,7 @@ using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Sync;
 using Umbraco.Cms.Core.Webhooks;
 
-namespace uSync.BackOffice.WebhookEvents
+namespace uSync.BackOffice.WebhookEvents;
 
 [WebhookEvent("uSync item exported")]
 public class uSyncItemExportedWebhookEvent :
@@ -21,4 +21,3 @@ public class uSyncItemExportedWebhookEvent :
 
     public override string Alias => "uSyncItemExported";
 }
-
