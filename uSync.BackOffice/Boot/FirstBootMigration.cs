@@ -81,7 +81,7 @@ namespace uSync.BackOffice.Boot
             };
 
             sw.Stop();
-            _logger.LogInformation("uSync First boot complete {changes} changes in ({time}ms}",
+            _logger.LogInformation("uSync First boot complete {changes} changes in ({time}ms)",
                 changes, sw.ElapsedMilliseconds);
         }
     }
