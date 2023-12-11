@@ -88,7 +88,7 @@ XCOPY "$outFolder\*.nupkg" "C:\Source\localgit" /Q /Y
 
 if ($push) {
     ""; "##### Pushing to our nighly package feed"; "----------------------------------" ; ""
-    .\nuget.exe push "$outFolder\*.nupkg" -ApiKey AzureDevOps -src https://pkgs.dev.azure.com/jumoo/Public/_packaging/nightly/nuget/v3/index.json
+    nuget push "$outFolder\*.nupkg" -ApiKey AzureDevOps -src https://pkgs.dev.azure.com/jumoo/Public/_packaging/nightly/nuget/v3/index.json
     
     Remove-Item ".\last-push-*" 
     Out-File -FilePath ".\last-push-$fullVersion.txt" -InputObject $fullVersion

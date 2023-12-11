@@ -1,19 +1,16 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System;
+using System.Linq;
+
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-using System;
-using System.Linq;
-using System.Reflection.PortableExecutable;
-
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.DependencyInjection;
-using Umbraco.Cms.Core.Events;
 using Umbraco.Cms.Core.Notifications;
 using Umbraco.Cms.Web.BackOffice.Authorization;
 using Umbraco.Cms.Web.Common.ApplicationBuilder;
-using Umbraco.Extensions;
 
 using uSync.BackOffice.Authorization;
 using uSync.BackOffice.Boot;
