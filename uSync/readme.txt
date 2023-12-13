@@ -3,9 +3,9 @@
                  / / / |__ \/ / / / __ \/ ___/
                 / /_/ /__/ / /_/ / / / / /__  
                 \__,_/____/\__, /_/ /_/\___/  
-                          /____/  v12.x            
+                          /____/  v13.x            
 
-   Thanks for Installing uSync Twelve, 
+   Thanks for Installing uSync Thirteen, 
    
    All the bits of your Umbraco settings and content will now be saved to disk.
 
