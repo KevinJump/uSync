@@ -292,7 +292,7 @@
                         });
                 }, function (error) {
                     vm.working = false;
-                    vm.group.state = 'error';
+                    group.state = 'error';
                     notificationsService.error('Error', error.data.ExceptionMessage ?? error.data.exceptionMessage);
                 });
         }
