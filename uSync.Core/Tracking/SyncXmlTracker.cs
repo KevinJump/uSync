@@ -383,7 +383,7 @@ namespace uSync.Core.Tracking
         public static TrackingItem Many(string name, string path, string key, string valueKey, string sortedKey)
             => new TrackingItem(name, path, false, key, valueKey)
             {
-                SortingKey = key
+                SortingKey = sortedKey
             };
 
         public TrackingItem(string name, string path, bool single)

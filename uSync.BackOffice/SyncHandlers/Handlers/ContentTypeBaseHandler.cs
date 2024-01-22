@@ -16,11 +16,18 @@ using uSync.Core.Models;
 
 namespace uSync.BackOffice.SyncHandlers.Handlers
 {
+    /// <summary>
+    ///  handler base for all ContentTypeBase handlers
+    /// </summary>
     public abstract class ContentTypeBaseHandler<TObject, TService> : SyncHandlerContainerBase<TObject, TService>
         where TObject : ITreeEntity
         where TService : IService
 
     {
+
+        /// <summary>
+        /// Constructor.
+        /// </summary>
         protected ContentTypeBaseHandler(
             ILogger<SyncHandlerContainerBase<TObject, TService>> logger,
             IEntityService entityService,

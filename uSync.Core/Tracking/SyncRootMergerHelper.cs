@@ -28,8 +28,6 @@ public class SyncRootMergerHelper
 
         foreach (var node in nodes[..^1])
         {
-            Console.WriteLine(node.Name.LocalName);
-
             if (node.ToString() == differences.ToString())
                 return (combined, BlankNode(differences));
 
