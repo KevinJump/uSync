@@ -17,7 +17,9 @@ using Umbraco.Cms.Core.Strings;
 using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;
+using uSync.BackOffice.Models;
 using uSync.BackOffice.Services;
+using uSync.BackOffice.SyncHandlers.Models;
 using uSync.Core;
 using uSync.Core.Dependency;
 using uSync.Core.Models;
@@ -122,7 +124,13 @@ namespace uSync.BackOffice.SyncHandlers
         /// <summary>
         ///  the root folder for the handler (based on the settings)
         /// </summary>
+        [Obsolete("we should be using the array of folders, will be removed in v15")]
         protected string rootFolder { get; set; }
+
+        /// <summary>
+        ///  the root folders to use for the handler (based on settings).
+        /// </summary>
+        protected string[] rootFolders { get; set; }
 
         /// <summary>
         ///  the UDIEntityType for the handler objects
@@ -230,6 +238,8 @@ namespace uSync.BackOffice.SyncHandlers
                 this.DefaultConfig.Enabled = false;
 
             rootFolder = uSyncConfig.GetRootFolder();
+
+            rootFolders = uSyncConfig.GetFolders();
         }
 
         #region Importing 
@@ -238,37 +248,127 @@ namespace uSync.BackOffice.SyncHandlers
         ///  Import everything from a given folder, using the supplied configuration settings.
         /// </summary>
         public IEnumerable<uSyncAction> ImportAll(string folder, HandlerSettings config, bool force, SyncUpdateCallback callback = null)
-        {
-            // using (logger.DebugDuration(handlerType, $"Importing {Alias} {Path.GetFileName(folder)}", $"Import complete {Alias}"))
+            => ImportAll([folder], config, new uSyncImportOptions
             {
-                var actions = new List<uSyncAction>();
-                var updates = new Dictionary<string, TObject>();
+                Flags = force ? SerializerFlags.Force : SerializerFlags.None,
+                Callbacks = new uSyncCallbacks(null, callback)
+            });
 
-                var cacheKey = PrepCaches();
+        /// <summary>
+        ///  import everything from a collection of folders, using the supplied config.
+        /// </summary>
+        /// <remarks>
+        ///  allows us to 'merge' a collection of folders down and perform an import against them (without first having to actually merge the folders on disk)
+        /// </remarks>
+        public IEnumerable<uSyncAction> ImportAll(string[] folders, HandlerSettings config, uSyncImportOptions options)
+        {
+            var cacheKey = PrepCaches();
+            runtimeCache.ClearByKey(cacheKey);
 
-                logger.LogDebug("Clearing KeyCache {key}", cacheKey);
-                runtimeCache.ClearByKey(cacheKey);
+            var items = GetMergedItems(folders);
 
-                actions.AddRange(ImportFolder(folder, config, updates, force, callback));
+            // create the update list with items.count space. this is the max size we need this list. 
+            List<uSyncAction> actions = new List<uSyncAction>(items.Count);
+            List<ImportedItem<TObject>> updates = new List<ImportedItem<TObject>>(items.Count);
+            List<string> cleanMarkers = [];
 
-                if (updates.Count > 0)
+            int count = 0;
+            int total = items.Count;
+
+            foreach (var item in items)
+            {
+                count++;
+
+                options.Callbacks?.Update?.Invoke($"Importing {Path.GetFileNameWithoutExtension(item.Path)}", count, total);
+
+                var result = ImportElement(item.Node, item.Path, config, options);
+                foreach (var attempt in result)
                 {
-                    PerformSecondPassImports(updates, actions, config, callback);
+                    if (attempt.Success)
+                    {
+                        if (attempt.Change == ChangeType.Clean)
+                        {
+                            cleanMarkers.Add(item.Path);
+                        }
+                        else if (attempt.Item is not null && attempt.Item is TObject update)
+                        {
+                            updates.Add(new ImportedItem<TObject>(item.Node,update));
+                        }
+                    }
+
+                    if (attempt.Change != ChangeType.Clean)
+                        actions.Add(attempt);
+                }
+            }
+
+            // clean up memory we didn't use in the update list. 
+            updates.TrimExcess();
+
+            // bulk save?
+            if (updates.Count > 0)
+            {
+                if (options.Flags.HasFlag(SerializerFlags.DoNotSave))
+                {
+                    serializer.Save(updates.Select(x => x.Item));
                 }
 
-                logger.LogDebug("Clearing KeyCache {key}", cacheKey);
-
-                CleanCaches(cacheKey);
-
-                callback?.Invoke("Done", 3, 3);
-
-                return actions;
+                PerformSecondPassImports(updates, actions, config, options.Callbacks?.Update);
             }
+
+            if (actions.All(x => x.Success) && cleanMarkers.Count > 0)
+            {
+                PerformImportClean(cleanMarkers, actions, config, options.Callbacks?.Update);
+            }
+
+            CleanCaches(cacheKey);
+            options.Callbacks.Update?.Invoke("Done", 3, 3);
+
+            return actions;
+        }
+
+        /// <summary>
+        ///  get all items for the report/import process.
+        /// </summary>
+        /// <param name="folders"></param>
+        /// <returns></returns>
+        public IReadOnlyList<OrderedNodeInfo> FetchAllNodes(string[] folders)
+            => GetMergedItems(folders);
+
+        /// <summary>
+        ///  method to get the merged folders, handlers that care about orders should override this. 
+        /// </summary>
+        protected virtual IReadOnlyList<OrderedNodeInfo> GetMergedItems(string[] folders)
+        {
+            var baseTracker = trackers.FirstOrDefault() as ISyncTrackerBase;
+            return syncFileService.MergeFolders(folders, uSyncConfig.Settings.DefaultExtension, baseTracker).ToArray();
+        }
+
+        private void PerformImportClean(List<string> cleanMarkers, List<uSyncAction> actions, HandlerSettings config, SyncUpdateCallback callback)
+        {
+            foreach (var item in cleanMarkers.Select((filePath, Index) => new { filePath, Index }))
+            {
+                var folderName = Path.GetFileName(item.filePath);
+                callback?.Invoke($"Cleaning {folderName}", item.Index, cleanMarkers.Count);
+
+                var cleanActions = CleanFolder(item.filePath, false, config.UseFlatStructure);
+                if (cleanActions.Any())
+                {
+                    actions.AddRange(cleanActions);
+                }
+                else
+                {
+                    // nothing to delete, we report this as a no change 
+                    actions.Add(uSyncAction.SetAction(true, $"Folder {Path.GetFileName(item.filePath)}", change: ChangeType.NoChange, filename: item.filePath));
+                }
+            }
+            // remove the actual cleans (they will have been replaced by the deletes
+            actions.RemoveAll(x => x.Change == ChangeType.Clean);
         }
 
         /// <summary>
         ///  Import everything in a given (child) folder, based on setting
         /// </summary>
+        [Obsolete("Import folder method not called directly from v13.1 will be removed in v15")]
         protected virtual IEnumerable<uSyncAction> ImportFolder(string folder, HandlerSettings config, Dictionary<string, TObject> updates, bool force, SyncUpdateCallback callback)
         {
             List<uSyncAction> actions = new List<uSyncAction>();
@@ -447,45 +547,34 @@ namespace uSync.BackOffice.SyncHandlers
         /// <summary>
         ///  Works through a list of items that have been processed and performs the second import pass on them.
         /// </summary>
-        private void PerformSecondPassImports(IDictionary<string, TObject> updates, List<uSyncAction> actions, HandlerSettings config, SyncUpdateCallback callback = null)
+        private void PerformSecondPassImports(List<ImportedItem<TObject>> importedItems, List<uSyncAction> actions, HandlerSettings config, SyncUpdateCallback callback = null)
         {
-            foreach (var item in updates.Select((update, Index) => new { update, Index }))
+            foreach (var item in importedItems.Select((update, Index) => new { update, Index }))
             {
-                callback?.Invoke($"Second Pass {Path.GetFileName(item.update.Key)}", item.Index, updates.Count);
-                var attempt = ImportSecondPass(item.update.Key, item.update.Value, config, callback);
+                var itemKey = item.update.Node.GetKey();
+
+                callback?.Invoke($"Second Pass {item.update.Node.GetKey()}", item.Index, importedItems.Count);
+                var attempt = ImportSecondPass(item.update.Node, item.update.Item, config, callback);
                 if (attempt.Success)
                 {
                     // if the second attempt has a message on it, add it to the first attempt.
-                    if (!string.IsNullOrWhiteSpace(attempt.Message))
+                    if (!string.IsNullOrWhiteSpace(attempt.Message) || attempt.Details?.Any() == true)
                     {
-                        if (actions.Any(x => x.FileName == item.update.Key))
+                        uSyncAction action = actions.FirstOrDefault(x => $"{x.key}_{x.HandlerAlias}" == $"{itemKey}_{this.Alias}", new uSyncAction { key = Guid.Empty });
+                        if (action.key != Guid.Empty)
                         {
-                            var action = actions.FirstOrDefault(x => x.FileName == item.update.Key);
                             actions.Remove(action);
-                            action.Message += attempt.Message;
-                            actions.Add(action);
-                        }
-                    }
+                            action.Message += attempt.Message ?? "";
 
-                    // If the second attempt has change details add them to the first attempt
-                    if (attempt.Details != null && attempt.Details.Any())
-                    {
-                        if (actions.Any(x => x.FileName == item.update.Key))
-                        {
-                            var action = actions.FirstOrDefault(x => x.FileName == item.update.Key);
-
-                            var details = new List<uSyncChange>();
-                            if (action.Details != null)
+                            if (attempt.Details?.Any() == true)
                             {
-                                details.AddRange(action.Details);
+                                var details = action.Details.ToList();
+                                details.AddRange(attempt.Details);
+                                action.Details = details;
                             }
-                            details.AddRange(attempt.Details);
-                            actions.Remove(action);
-                            action.Details = details;
                             actions.Add(action);
                         }
                     }
-
                     if (attempt.Change > ChangeType.NoChange && !attempt.Saved && attempt.Item != null)
                     {
                         serializer.Save(attempt.Item.AsEnumerableOfOne());
@@ -493,10 +582,9 @@ namespace uSync.BackOffice.SyncHandlers
                 }
                 else
                 {
-                    // the second attempt failed - update the action.
-                    if (actions.Any(x => x.FileName == item.update.Key))
+                    uSyncAction action = actions.FirstOrDefault(x => $"{x.key}_{x.HandlerAlias}" == $"{itemKey}_{this.Alias}", new uSyncAction { key = Guid.Empty });
+                    if (action.key != Guid.Empty)
                     {
-                        var action = actions.FirstOrDefault(x => x.FileName == item.update.Key);
                         actions.Remove(action);
                         action.Success = attempt.Success;
                         action.Message = $"Second Pass Fail: {attempt.Message}";
@@ -518,7 +606,7 @@ namespace uSync.BackOffice.SyncHandlers
             {
                 var file = action.FileName;
 
-                if (!syncFileService.FileExists(file)) 
+                if (!syncFileService.FileExists(file))
                     return Enumerable.Empty<uSyncAction>();
 
                 var node = syncFileService.LoadXElement(file);
@@ -545,6 +633,7 @@ namespace uSync.BackOffice.SyncHandlers
         /// <summary>
         ///  Perform a 'second pass' import on a single item.
         /// </summary>
+        [Obsolete("Call method with node element to reduce disk IO, will be removed in v15")]
         virtual public SyncAttempt<TObject> ImportSecondPass(string file, TObject item, HandlerSettings config, SyncUpdateCallback callback)
         {
             if (IsTwoPass)
@@ -566,6 +655,25 @@ namespace uSync.BackOffice.SyncHandlers
             }
 
             return SyncAttempt<TObject>.Succeed(GetItemAlias(item), ChangeType.NoChange);
+        }
+
+        /// <summary>
+        ///  Perform a 'second pass' import on a single item.
+        /// </summary>
+        virtual public SyncAttempt<TObject> ImportSecondPass(XElement node, TObject item, HandlerSettings config, SyncUpdateCallback callback)
+        {
+            if (IsTwoPass is false)
+                return SyncAttempt<TObject>.Succeed(GetItemAlias(item), ChangeType.NoChange);
+
+            try
+            {
+                return DeserializeItemSecondPass(item, node, new SyncSerializerOptions(SerializerFlags.None, config.Settings));
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning($"Second Import Failed: {ex.ToString()}");
+                return SyncAttempt<TObject>.Fail(GetItemAlias(item), item, ChangeType.Fail, ex.Message, ex);
+            }
         }
 
         /// <summary>
@@ -619,7 +727,7 @@ namespace uSync.BackOffice.SyncHandlers
         public void PreCacheFolderKeys(string folder, IList<Guid> folderKeys)
         {
             var cacheKey = $"{GetCacheKeyBase()}_{folder.GetHashCode()}";
-            runtimeCache.ClearByKey(cacheKey) ; 
+            runtimeCache.ClearByKey(cacheKey);
             runtimeCache.GetCacheItem(cacheKey, () => folderKeys);
         }
 
@@ -750,6 +858,12 @@ namespace uSync.BackOffice.SyncHandlers
         /// Export all items to a give folder on the disk
         /// </summary>
         virtual public IEnumerable<uSyncAction> ExportAll(string folder, HandlerSettings config, SyncUpdateCallback callback)
+            => ExportAll([folder], config, callback);
+
+        /// <summary>
+        /// Export all items to a give folder on the disk
+        /// </summary>
+        virtual public IEnumerable<uSyncAction> ExportAll(string[] folders, HandlerSettings config, SyncUpdateCallback callback)
         {
             // we don't clean the folder out on an export all. 
             // because the actions (renames/deletes) live in the folder
@@ -757,13 +871,19 @@ namespace uSync.BackOffice.SyncHandlers
             // there will have to be a different clean option
             // syncFileService.CleanFolder(folder);
 
-            return ExportAll(default, folder, config, callback);
+            return ExportAll(default, folders, config, callback);
         }
 
         /// <summary>
         ///  export all items underneath a given container 
         /// </summary>
         virtual public IEnumerable<uSyncAction> ExportAll(TContainer parent, string folder, HandlerSettings config, SyncUpdateCallback callback)
+            => ExportAll(parent, [folder], config, callback);
+
+        /// <summary>
+        /// Export all items to a give folder on the disk
+        /// </summary>
+        virtual public IEnumerable<uSyncAction> ExportAll(TContainer parent, string[] folders, HandlerSettings config, SyncUpdateCallback callback)
         {
             var actions = new List<uSyncAction>();
 
@@ -772,7 +892,7 @@ namespace uSync.BackOffice.SyncHandlers
                 var containers = GetFolders(parent);
                 foreach (var container in containers)
                 {
-                    actions.AddRange(ExportAll(container, folder, config, callback));
+                    actions.AddRange(ExportAll(container, folders, config, callback));
                 }
             }
 
@@ -791,9 +911,9 @@ namespace uSync.BackOffice.SyncHandlers
                 if (concreteType != null)
                 {  // only export the items (not the containers).
                     callback?.Invoke(GetItemName(concreteType), item.Index, items.Count);
-                    actions.AddRange(Export(concreteType, folder, config));
+                    actions.AddRange(Export(concreteType, folders, config));
                 }
-                actions.AddRange(ExportAll(item.Value, folder, config, callback));
+                actions.AddRange(ExportAll(item.Value, folders, config, callback));
             }
 
             return actions;
@@ -822,19 +942,31 @@ namespace uSync.BackOffice.SyncHandlers
         /// Export a single item based on it's ID
         /// </summary>
         public IEnumerable<uSyncAction> Export(int id, string folder, HandlerSettings settings)
+            => Export(id, [folder], settings);
+
+        /// <summary>
+        ///  Export an item based on its id, observing root behavior. 
+        /// </summary>
+        public IEnumerable<uSyncAction> Export(int id, string[] folders, HandlerSettings settings)
         {
             var item = this.GetFromService(id);
-            return this.Export(item, folder, settings);
+            return this.Export(item, folders, settings);
         }
 
         /// <summary>
         /// Export an single item from a given UDI value
         /// </summary>
         public IEnumerable<uSyncAction> Export(Udi udi, string folder, HandlerSettings settings)
+            => Export(udi, [folder], settings);
+
+        /// <summary>
+        /// Export an single item from a given UDI value
+        /// </summary>
+        public IEnumerable<uSyncAction> Export(Udi udi, string[] folders, HandlerSettings settings)
         {
             var item = FindByUdi(udi);
             if (item != null)
-                return Export(item, folder, settings);
+                return Export(item, folders, settings);
 
             return uSyncAction.Fail(nameof(udi), this.handlerType, this.ItemType, ChangeType.Fail, $"Item not found {udi}",
                  new KeyNotFoundException(nameof(udi)))
@@ -845,6 +977,12 @@ namespace uSync.BackOffice.SyncHandlers
         /// Export a given item to disk
         /// </summary>
         virtual public IEnumerable<uSyncAction> Export(TObject item, string folder, HandlerSettings config)
+            => Export(item, [folder], config);
+
+        /// <summary>
+        /// Export a given item to disk
+        /// </summary>
+        virtual public IEnumerable<uSyncAction> Export(TObject item, string[] folders, HandlerSettings config)
         {
             if (item == null)
                 return uSyncAction.Fail(nameof(item), this.handlerType, this.ItemType, ChangeType.Fail, "Item not set",
@@ -858,9 +996,40 @@ namespace uSync.BackOffice.SyncHandlers
                     .AsEnumerableOfOne();
             }
 
-            var filename = GetPath(folder, item, config.GuidNames, config.UseFlatStructure)
+            var targetFolder = folders.Last();
+
+            var filename = GetPath(targetFolder, item, config.GuidNames, config.UseFlatStructure)
                 .ToAppSafeFileName();
 
+            // 
+            if (IsLockedAtRoot(folders, filename.Substring(targetFolder.Length+1)))
+            {
+                // if we have lock roots on, then this item will not export 
+                // because exporting would mean the root was no longer used.
+                return uSyncAction.SetAction(true, filename,
+                    type: typeof(TObject).ToString(),
+                    change: ChangeType.NoChange,
+                    message: "Not exported (would overwrite root value)",
+                    filename: filename).AsEnumerableOfOne();
+            }
+
+
+            var attempt = Export_DoExport(item, filename, folders, config);
+
+            if (attempt.Change > ChangeType.NoChange)
+                _mutexService.FireItemCompletedEvent(new uSyncExportedItemNotification(attempt.Item, ChangeType.Export));
+
+            return uSyncActionHelper<XElement>.SetAction(attempt, filename, GetItemKey(item), this.Alias).AsEnumerableOfOne();
+        }
+
+        /// <summary>
+        ///  Do the meat of the export 
+        /// </summary>
+        /// <remarks>
+        ///  inheriting this method, means you don't have to repeat all the checks in child handlers. 
+        /// </remarks>
+        protected virtual SyncAttempt<XElement> Export_DoExport(TObject item, string filename, string[] folders, HandlerSettings config)
+        {
             var attempt = SerializeItem(item, new SyncSerializerOptions(config.Settings));
             if (attempt.Success)
             {
@@ -876,13 +1045,39 @@ namespace uSync.BackOffice.SyncHandlers
                 }
                 else
                 {
-                    return uSyncAction.SetAction(true, filename, type: typeof(TObject).ToString(), change: ChangeType.NoChange, message: "Not Exported (Based on configuration)", filename: filename).AsEnumerableOfOne();
+                    return SyncAttempt<XElement>.Succeed(filename, ChangeType.NoChange, "Not Exported (Based on configuration)");
                 }
             }
 
-            _mutexService.FireItemCompletedEvent(new uSyncExportedItemNotification(attempt.Item, ChangeType.Export));
+            return attempt;
+        }
 
-            return uSyncActionHelper<XElement>.SetAction(attempt, filename, GetItemKey(item), this.Alias).AsEnumerableOfOne();
+        /// <summary>
+        ///  Checks to see if this item is locked at the root level (meaning we shouldn't save it)
+        /// </summary>
+        protected bool IsLockedAtRoot(string[] folders, string path)
+        {
+            if (folders.Length <= 1) return false;
+
+            if (ExistsInFolders(folders[..^1], path.TrimStart(['\\', '/'])))
+            {
+                return uSyncConfig.Settings.LockRoot || uSyncConfig.Settings.LockRootTypes.InvariantContains(EntityType); 
+            }
+
+            return false;
+
+            bool ExistsInFolders(string[] folders, string path)
+            {
+                foreach (var folder in folders)
+                {
+                    if (syncFileService.FileExists(Path.Combine(folder, path.TrimStart(['\\', '/']))))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
         }
 
         /// <summary>
@@ -893,10 +1088,13 @@ namespace uSync.BackOffice.SyncHandlers
         ///  make on child items or cleaning up where we don't need to. 
         /// </remarks>
         protected virtual bool HasChildren(TObject item)
-            => true; 
+            => true;
 
-        private void CreateCleanFile(Guid key, string filename)
-        {           
+        /// <summary>
+        ///  create a clean file, which is used as a marker, when performing remote deletes.
+        /// </summary>
+        protected void CreateCleanFile(Guid key, string filename)
+        {
             if (string.IsNullOrWhiteSpace(filename) || key == Guid.Empty)
                 return;
 
@@ -918,19 +1116,35 @@ namespace uSync.BackOffice.SyncHandlers
         /// Run a report based on a given folder
         /// </summary>
         public IEnumerable<uSyncAction> Report(string folder, HandlerSettings config, SyncUpdateCallback callback)
+            => Report([folder], config, callback);
+
+        /// <summary>
+        /// Run a report based on a set of folders. 
+        /// </summary>
+        public IEnumerable<uSyncAction> Report(string[] folders, HandlerSettings config, SyncUpdateCallback callback)
         {
-            var actions = new List<uSyncAction>();
+            List<uSyncAction> actions = [];
 
             var cacheKey = PrepCaches();
 
             callback?.Invoke("Checking Actions", 1, 3);
-            actions.AddRange(ReportFolder(folder, config, callback));
+
+            var items = GetMergedItems(folders);
+
+            int count = 0;
+
+            foreach (var item in items)
+            {
+                count++;
+                callback?.Invoke(Path.GetFileNameWithoutExtension(item.Path), count, items.Count);
+                actions.AddRange(ReportElement(item.Node, item.Filename, config));
+            }
 
             callback?.Invoke("Validating Report", 2, 3);
-            actions = ValidateReport(folder, actions);
+            var validationActions = ReportMissingParents(actions.ToArray());
+            actions.AddRange(ReportDeleteCheck(uSyncConfig.GetRootFolder(), validationActions));
 
             CleanCaches(cacheKey);
-
             callback?.Invoke("Done", 3, 3);
             return actions;
         }
@@ -1074,8 +1288,8 @@ namespace uSync.BackOffice.SyncHandlers
         /// </summary>
         public virtual IEnumerable<uSyncAction> ReportFolder(string folder, HandlerSettings config, SyncUpdateCallback callback)
         {
-            List<uSyncAction> actions = new List<uSyncAction>();
 
+            List<uSyncAction> actions = new List<uSyncAction>();
 
             var files = GetImportFiles(folder).ToList();
 
@@ -1089,12 +1303,12 @@ namespace uSync.BackOffice.SyncHandlers
                 callback?.Invoke(Path.GetFileNameWithoutExtension(file), count, files.Count);
 
                 actions.AddRange(ReportItem(file, config));
-                }
+            }
 
             foreach (var children in syncFileService.GetDirectories(folder))
-                {
+            {
                 actions.AddRange(ReportFolder(children, config, callback));
-                }
+            }
 
             return actions;
         }
@@ -1193,16 +1407,16 @@ namespace uSync.BackOffice.SyncHandlers
             {
                 var node = syncFileService.LoadXElement(file);
 
-            if (ShouldImport(node, config))
-            {
-                return ReportElement(node, file, config);
-            }
-            else
-            {
-                return uSyncActionHelper<TObject>.ReportAction(ChangeType.NoChange, node.GetAlias(), node.GetPath(), file, node.GetKey(),
-                    this.Alias, "Will not be imported (Based on configuration)")
-                    .AsEnumerableOfOne<uSyncAction>();
-            }
+                if (ShouldImport(node, config))
+                {
+                    return ReportElement(node, file, config);
+                }
+                else
+                {
+                    return uSyncActionHelper<TObject>.ReportAction(ChangeType.NoChange, node.GetAlias(), node.GetPath(), file, node.GetKey(),
+                        this.Alias, "Will not be imported (Based on configuration)")
+                        .AsEnumerableOfOne<uSyncAction>();
+                }
             }
             catch (Exception ex)
             {
@@ -1255,7 +1469,8 @@ namespace uSync.BackOffice.SyncHandlers
             {
                 try
                 {
-                    ExportDeletedItem(item, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
+                    var handlerFolders = GetDefaultHandlerFolders();
+                    ExportDeletedItem(item, handlerFolders, DefaultConfig);
                 }
                 catch (Exception ex)
                 {
@@ -1273,14 +1488,16 @@ namespace uSync.BackOffice.SyncHandlers
         {
             if (!ShouldProcessEvent()) return;
 
+            var handlerFolders = GetDefaultHandlerFolders();
+
             foreach (var item in notification.SavedEntities)
             {
                 try
                 {
-                    var attempts = Export(item, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
+                    var attempts = Export(item, handlerFolders, DefaultConfig);
                     foreach (var attempt in attempts.Where(x => x.Success))
                     {
-                        this.CleanUp(item, attempt.FileName, Path.Combine(rootFolder, this.DefaultFolder));
+                        this.CleanUp(item, attempt.FileName, handlerFolders.Last());
                     }
                 }
                 catch (Exception ex)
@@ -1321,7 +1538,8 @@ namespace uSync.BackOffice.SyncHandlers
         {
             foreach (var item in moveInfoCollection)
             {
-                var attempts = Export(item.Entity, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
+                var handlerFolders = GetDefaultHandlerFolders();
+                var attempts = Export(item.Entity, handlerFolders, DefaultConfig);
 
                 if (!this.DefaultConfig.UseFlatStructure)
                 {
@@ -1330,7 +1548,7 @@ namespace uSync.BackOffice.SyncHandlers
 
                     foreach (var attempt in attempts.Where(x => x.Success))
                     {
-                        this.CleanUp(item.Entity, attempt.FileName, Path.Combine(rootFolder, this.DefaultFolder));
+                        this.CleanUp(item.Entity, attempt.FileName, handlerFolders.Last());
                     }
                 }
             }
@@ -1342,11 +1560,21 @@ namespace uSync.BackOffice.SyncHandlers
         /// <remarks>
         /// Deleted items get 'empty' files on disk so we know they where deleted
         /// </remarks>
-        protected virtual void ExportDeletedItem(TObject item, string folder, HandlerSettings config)
+        protected virtual void ExportDeletedItem(TObject item, string[] folders, HandlerSettings config)
         {
             if (item == null) return;
-            var filename = GetPath(folder, item, config.GuidNames, config.UseFlatStructure)
+
+            var targetFolder = folders.Last();
+
+            var filename = GetPath(targetFolder, item, config.GuidNames, config.UseFlatStructure)
                 .ToAppSafeFileName();
+
+            if (IsLockedAtRoot(folders, filename.Substring(targetFolder.Length + 1)))
+            {
+                // don't do anything this thing exists at a higher level. ! 
+                return;
+            }
+            
 
             var attempt = serializer.SerializeEmpty(item, SyncActionType.Delete, string.Empty);
             if (ShouldExport(attempt.Item, config))
@@ -1361,10 +1589,17 @@ namespace uSync.BackOffice.SyncHandlers
 
                     // we only then do this if we are not using flat structure. 
                     if (!DefaultConfig.UseFlatStructure)
-                        this.CleanUp(item, filename, Path.Combine(rootFolder, this.DefaultFolder));
+                        this.CleanUp(item, filename, Path.Combine(folders.Last(), this.DefaultFolder));
                 }
             }
         }
+
+        /// <summary>
+        ///  get all the possible folders for this handlers 
+        /// </summary>
+        protected string[] GetDefaultHandlerFolders()
+            => rootFolders.Select(f => Path.Combine(f, DefaultFolder)).ToArray();
+
 
         /// <summary>
         ///  Cleans up the handler folder, removing duplicate files for this item
@@ -1725,13 +1960,23 @@ namespace uSync.BackOffice.SyncHandlers
 
         #region Serializer Calls 
 
-        private SyncAttempt<XElement> SerializeItem(TObject item, SyncSerializerOptions options)
+        /// <summary>
+        ///  call the serializer to get an items xml.
+        /// </summary>
+        protected SyncAttempt<XElement> SerializeItem(TObject item, SyncSerializerOptions options)
             => serializer.Serialize(item, options);
 
-        private SyncAttempt<TObject> DeserializeItem(XElement node, SyncSerializerOptions options)
+        /// <inheritdoc />
+        /// <summary>
+        ///  turn the xml into an item (and optionally save it to umbraco).
+        /// </summary>
+        protected SyncAttempt<TObject> DeserializeItem(XElement node, SyncSerializerOptions options)
             => serializer.Deserialize(node, options);
 
-        private SyncAttempt<TObject> DeserializeItemSecondPass(TObject item, XElement node, SyncSerializerOptions options)
+        /// <summary>
+        ///  perform a second pass on an item you are importing.
+        /// </summary>
+        protected SyncAttempt<TObject> DeserializeItemSecondPass(TObject item, XElement node, SyncSerializerOptions options)
             => serializer.DeserializeSecondPass(item, node, options);
 
         private SyncChangeInfo IsItemCurrent(XElement node, SyncSerializerOptions options)

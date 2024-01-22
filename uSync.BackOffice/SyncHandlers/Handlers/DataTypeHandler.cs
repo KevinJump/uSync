@@ -68,30 +68,21 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         /// HOWEVER: If we move deletes to the end , we still need to process them. 
         /// but deletes are always 'change' = 'Hidden', so we only process hidden changes
         /// </remarks>
-        public override IEnumerable<uSyncAction> ProcessPostImport(string folder, IEnumerable<uSyncAction> actions, HandlerSettings config)
+        public override IEnumerable<uSyncAction> ProcessPostImport(IEnumerable<uSyncAction> actions, HandlerSettings config)
         {
             if (actions == null || !actions.Any())
-                return null;
+                return Enumerable.Empty<uSyncAction>();
 
-            var results = new List<uSyncAction>(); 
-            
+            var results = new List<uSyncAction>();          
 
             // we only do deletes here. 
             foreach (var action in actions.Where(x => x.Change == ChangeType.Hidden))
             {
-                var result = Import(action.FileName, config, SerializerFlags.LastPass);
-                results.AddRange(result);
-
-                //foreach (var attempt in result)
-                //{
-                //    if (attempt.Success && attempt.Item is IDataType dataType)
-                //    {
-                //        ImportSecondPass(action.FileName, dataType, config, null);
-                //    }
-                //}
+                results.AddRange(
+                    Import(action.FileName, config, SerializerFlags.LastPass));
             }
 
-            results.AddRange(CleanFolders(folder, -1));
+            results.AddRange(CleanFolders(-1));
 
             return results;
         }

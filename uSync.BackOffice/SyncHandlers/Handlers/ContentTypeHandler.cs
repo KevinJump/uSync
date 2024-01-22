@@ -24,7 +24,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
     /// </summary>
     [SyncHandler(uSyncConstants.Handlers.ContentTypeHandler, "DocTypes", "ContentTypes", uSyncConstants.Priorites.ContentTypes,
             IsTwoPass = true, Icon = "icon-item-arrangement", EntityType = UdiEntityType.DocumentType)]
-    public class ContentTypeHandler : SyncHandlerContainerBase<IContentType, IContentTypeService>, ISyncHandler, ISyncPostImportHandler, ISyncGraphableHandler,
+    public class ContentTypeHandler : ContentTypeBaseHandler<IContentType, IContentTypeService>, ISyncHandler, ISyncPostImportHandler, ISyncGraphableHandler,
         INotificationHandler<SavedNotification<IContentType>>,
         INotificationHandler<DeletedNotification<IContentType>>,
         INotificationHandler<MovedNotification<IContentType>>,
@@ -83,6 +83,6 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         ///  Delete a ContentType container via the ContentTypeService
         /// </summary>
         protected override void DeleteFolder(int id)
-            => contentTypeService.DeleteContainer(id);
+            => contentTypeService.DeleteContainer(id);            
     }
 }

@@ -184,28 +184,30 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
                     newLanguages.TryRemove(item.IsoCode, out string name);
                 }
 
+                var targetFolders = GetDefaultHandlerFolders();
+
                 if (item.WasPropertyDirty("IsDefault"))
                 {
-                    // changeing, this change doesn't trigger a save of the other languages.
+                    // changing, this change doesn't trigger a save of the other languages.
                     // so we need to save all language files. 
-                    this.ExportAll(Path.Combine(rootFolder, DefaultFolder), DefaultConfig, null);
+                    this.ExportAll(targetFolders, DefaultConfig, null);
                 }
 
 
-                var attempts = Export(item, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
+                var attempts = Export(item,targetFolders, DefaultConfig);
 
                 if (!newItem && item.WasPropertyDirty(nameof(ILanguage.IsoCode)))
                 {
                     // The language code changed, this can mean we need to do a full content export. 
                     // + we should export the languages again!
-                    uSyncTriggers.TriggerExport(rootFolder, new List<string>() {
+                    uSyncTriggers.TriggerExport(targetFolders, new List<string>() {
                         UdiEntityType.Document, UdiEntityType.Language }, null);
                 }
 
                 // we always clean up languages, because of the way they are stored. 
                 foreach (var attempt in attempts.Where(x => x.Success))
                 {
-                    this.CleanUp(item, attempt.FileName, Path.Combine(rootFolder, this.DefaultFolder));
+                    this.CleanUp(item, attempt.FileName, targetFolders.Last());
                 }
 
             }

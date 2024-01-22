@@ -106,7 +106,7 @@ namespace uSync.BackOffice.Notifications
 
                         if (!HasStopFile(_uSyncConfig.GetRootFolder()))
                         {
-                            _uSyncService.Import(_uSyncConfig.GetRootFolder(), false, new SyncHandlerOptions
+                            _uSyncService.Import(_uSyncConfig.GetFolders(), false, new SyncHandlerOptions
                             {
                                 Group = _uSyncConfig.Settings.ImportAtStartup
                             });

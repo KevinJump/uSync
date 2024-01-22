@@ -239,12 +239,12 @@ namespace uSync.Core.Tracking
             return "";
         }
 
-        private string GetKeyValue(XElement node, string key)
-        {
-            if (key == "#") return node.Name.LocalName;
-            if (key.StartsWith("@")) return node.Attribute(key.Substring(1)).ValueOrDefault(string.Empty);
-            return node.Element(key).ValueOrDefault(string.Empty);
-        }
+            private string GetKeyValue(XElement node, string key)
+            {
+                if (key == "#") return node.Name.LocalName;
+                if (key.StartsWith("@")) return node.Attribute(key.Substring(1)).ValueOrDefault(string.Empty);
+                return node.Element(key).ValueOrDefault(string.Empty);
+            }
 
         private IEnumerable<uSyncChange> CompareNode(XElement target, XElement source, string path, string name, bool maskValue)
         {
@@ -343,6 +343,27 @@ namespace uSync.Core.Tracking
 
         public virtual List<TrackingItem> TrackingItems { get; }
 
+        public virtual XElement MergeFiles(XElement a, XElement b) => b;
+
+        public virtual XElement GetDifferences(List<XElement> nodes)
+            => nodes?.Count > 0 ? nodes[^1] : null;
+
+    }
+
+    public class SyncXmlTrackAndMerger<TObject>
+        : SyncXmlTracker<TObject>
+    {
+        public SyncXmlTrackAndMerger(SyncSerializerCollection serializers) 
+            : base(serializers)
+        {
+        }
+
+        public override XElement MergeFiles(XElement a, XElement b)
+            => SyncRootMergerHelper.GetCombined([a, b], TrackingItems);
+
+        public override XElement GetDifferences(List<XElement> nodes)
+            => SyncRootMergerHelper.GetDifferences(nodes, TrackingItems);
+
     }
 
     public class TrackingItem
@@ -358,6 +379,12 @@ namespace uSync.Core.Tracking
 
         public static TrackingItem Many(string name, string path, string keys, string valueKey)
             => new TrackingItem(name, path, false, keys, valueKey);
+
+        public static TrackingItem Many(string name, string path, string key, string valueKey, string sortedKey)
+            => new TrackingItem(name, path, false, key, valueKey)
+            {
+                SortingKey = key
+            };
 
         public TrackingItem(string name, string path, bool single)
         {
@@ -378,6 +405,8 @@ namespace uSync.Core.Tracking
             this.ValueKey = valueKey;
         }
 
+        // the key something is sorted by. 
+        public string SortingKey { get; set; }
 
         public bool SingleItem { get; set; }
         public string Path { get; set; }

@@ -91,10 +91,11 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             var item = notification.SavedBlueprint;
             try
             {
-                var attempts = Export(item, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
+                var handlerFolders = GetDefaultHandlerFolders();
+                var attempts = Export(item, handlerFolders, DefaultConfig);
                 foreach (var attempt in attempts.Where(x => x.Success))
                 {
-                    this.CleanUp(item, attempt.FileName, Path.Combine(rootFolder, this.DefaultFolder));
+                    this.CleanUp(item, attempt.FileName, handlerFolders.Last());
                 }
             }
             catch (Exception ex)
@@ -115,7 +116,8 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             {
                 try
                 {
-                    ExportDeletedItem(item, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
+                    var handlerFolders = GetDefaultHandlerFolders();
+                    ExportDeletedItem(item, handlerFolders, DefaultConfig);
                 }
                 catch (Exception ex)
                 {

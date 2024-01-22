@@ -1,5 +1,8 @@
 ﻿<div ng-controller="uSync8Controller as vm">
 
+    <div ng-if="model.settings.isRootSite" class="alert alert-warning text-center">
+        <localize key="usync_rootsite"></localize>
+    </div>
 
     <div ng-if="vm.sets.length > 1" class="flex justify-end items-center mb2">
 

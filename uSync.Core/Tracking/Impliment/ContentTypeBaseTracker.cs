@@ -6,7 +6,7 @@ using uSync.Core.Serialization;
 
 namespace uSync.Core.Tracking.Impliment
 {
-    public class ContentTypeBaseTracker<TObject> : SyncXmlTracker<TObject>
+    public class ContentTypeBaseTracker<TObject> : SyncXmlTrackAndMerger<TObject>
         where TObject : IContentTypeBase
     {
         public ContentTypeBaseTracker(SyncSerializerCollection serializers)
@@ -25,6 +25,9 @@ namespace uSync.Core.Tracking.Impliment
             TrackingItem.Single("Element type", "/Info/IsElement"),
             TrackingItem.Single("Folder", "/Info/Folder"),
             TrackingItem.Single("Default Template", "/Info/DefaultTemplate"),
+            
+           
+            TrackingItem.Single("History", "/Info/HistoryCleanup"),
 
             TrackingItem.Many("Compositions", "/Info/Compositions/Composition", "@Key"),
             TrackingItem.Many("AllowedTemplates", "/Info/AllowedTemplates/Template", "@Key"),
@@ -34,7 +37,7 @@ namespace uSync.Core.Tracking.Impliment
             TrackingItem.Many("Allowed child node types", "/Structure/MemberType", "@Key"),
 
 
-            TrackingItem.Many("Property", "/GenericProperties/GenericProperty", uSyncConstants.Xml.Key, "Name"),
+            TrackingItem.Many("Property", "/GenericProperties/GenericProperty", uSyncConstants.Xml.Key, "Name", "Alias"),
             TrackingItem.Many("Groups", "/Tabs/Tab", "Caption", "Caption")
         };
     }

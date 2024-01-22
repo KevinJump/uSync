@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 using uSync.BackOffice.SyncHandlers;
 
@@ -21,11 +22,14 @@ namespace uSync.BackOffice
         /// <param name="entityTypes">entity types to trigger export for</param>
         /// <param name="options">handler options to use for handlers</param>
         public static void TriggerExport(string folder, IEnumerable<string> entityTypes, SyncHandlerOptions options)
+            => TriggerExport([folder], entityTypes, options);
+
+        public static void TriggerExport(string[] folders, IEnumerable<string> entityTypes, SyncHandlerOptions options)
         {
             DoExport?.Invoke(new uSyncTriggerArgs()
             {
                 EntityTypes = entityTypes,
-                Folder = folder,
+                Folder = folders.Last(),
                 HandlerOptions = options
             });
         }

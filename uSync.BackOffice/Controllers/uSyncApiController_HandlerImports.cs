@@ -61,12 +61,14 @@ namespace uSync.BackOffice.Controllers
             var handlerSet = !string.IsNullOrWhiteSpace(options.Set)
                 ? options.Set : _uSyncConfig.Settings.DefaultSet;
 
+            var folders = _uSyncConfig.GetFolders();
+
             var actions = _uSyncService.ReportHandler(options.Handler,
                 new uSyncImportOptions
                 {
                     Callbacks = hubClient.Callbacks(),
                     HandlerSet = handlerSet,
-                    RootFolder = GetValidImportFolder(options.Folder),                    
+                    Folders = folders.Select(GetValidImportFolder).ToArray()
                 }).ToList();
 
             if (_uSyncConfig.Settings.SummaryDashboard || actions.Count > _uSyncConfig.Settings.SummaryLimit)
@@ -90,11 +92,13 @@ namespace uSync.BackOffice.Controllers
             var handlerSet = !string.IsNullOrWhiteSpace(options.Set)
                 ? options.Set : _uSyncConfig.Settings.DefaultSet;
 
+            var folders = _uSyncConfig.GetFolders();
+
             var actions = _uSyncService.ImportHandler(options.Handler, new uSyncImportOptions
             { 
                 Callbacks = hubClient.Callbacks(),
                 HandlerSet = handlerSet,
-                RootFolder = GetValidImportFolder(options.Folder),
+                Folders = folders,
                 PauseDuringImport = true,
                 Flags = options.Force ? Core.Serialization.SerializerFlags.Force : Core.Serialization.SerializerFlags.None
             }).ToList();
@@ -116,8 +120,10 @@ namespace uSync.BackOffice.Controllers
             var handlerSet = !string.IsNullOrWhiteSpace(options.Set)
                 ? options.Set : _uSyncConfig.Settings.DefaultSet;
 
+            var folders = _uSyncConfig.GetFolders();
+
             var actions = _uSyncService.PerformPostImport(
-                GetValidImportFolder(options.Folder), 
+                folders,
                 handlerSet, 
                 options.Actions);
 
@@ -154,12 +160,13 @@ namespace uSync.BackOffice.Controllers
             var handlerSet = !string.IsNullOrWhiteSpace(options.Set)
                 ? options.Set : _uSyncConfig.Settings.DefaultSet;
 
+            var folders = _uSyncConfig.GetFolders();
 
             var actions = _uSyncService.ExportHandler(options.Handler, new uSyncImportOptions
             {
                 Callbacks = hubClient.Callbacks(),
                 HandlerSet = handlerSet,
-                RootFolder = GetValidImportFolder(options.Folder)
+                Folders = folders
             }).ToList();
 
             if (_uSyncConfig.Settings.SummaryDashboard || actions.Count > _uSyncConfig.Settings.SummaryLimit)
@@ -215,7 +222,7 @@ namespace uSync.BackOffice.Controllers
 
             if (fullPath.StartsWith(rootParent))
             {
-                _logger.LogInformation("Using Custom Folder: {fullPath}", folder);
+                _logger.LogDebug("Using Custom Folder: {fullPath}", folder);
                 return folder;
             }
 

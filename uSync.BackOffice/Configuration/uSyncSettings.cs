@@ -20,6 +20,36 @@ namespace uSync.BackOffice.Configuration
         public string RootFolder { get; set; } = "uSync/v9/";
 
         /// <summary>
+        ///  collection of folders uSync looks in when performing imports.
+        /// </summary>
+        [DefaultValue("uSync/Root/, uSync/v9")]
+        public string[] Folders { get; set; } = [
+            "uSync/Root/",
+            "uSync/v9/"
+        ];
+
+        /// <summary>
+        ///  Sets this site to be the root site (so it will save into "uSync/root/")
+        /// </summary>
+        [DefaultValue(false)]
+        public bool IsRootSite { get; set; } = false;
+
+        /// <summary>
+        /// when locked you can't make changes to anything that is in the root
+        /// </summary>
+        public bool LockRoot { get; set; } = false;
+
+        /// <summary>
+        ///  lock specific types at root so they can't be changed in child sites. 
+        /// </summary>
+        /// <remarks>
+        ///  document, media, member, dictionary-item, macro, template, document-type, 
+        ///  media-type, data-type, member-type, member-group, relation-type, forms-form,
+        ///  forms-prevalue, forms-datasource, language
+        /// </remarks>
+        public string[] LockRootTypes { get; set; } = [];
+        
+        /// <summary>
         /// The default handler set to use on all notification triggered events
         /// </summary>
         [DefaultValue(uSync.Sets.DefaultSet)]

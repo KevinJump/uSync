@@ -1,5 +1,6 @@
 ﻿
 using System.Diagnostics;
+using System.Linq;
 
 using Microsoft.Extensions.Logging;
 
@@ -72,10 +73,10 @@ namespace uSync.BackOffice.Boot
 
             using (var reference = _umbracoContextFactory.EnsureUmbracoContext())
             {
-                var results = _uSyncService.Import(_uSyncConfig.GetRootFolder(), false, new SyncHandlerOptions
+                var results = _uSyncService.Import(_uSyncConfig.GetFolders(), false, new SyncHandlerOptions
                 {
                     Group = _uSyncConfig.Settings.FirstBootGroup
-                });
+                }, (uSyncCallbacks)null);
 
                 changes = results.CountChanges();
             };

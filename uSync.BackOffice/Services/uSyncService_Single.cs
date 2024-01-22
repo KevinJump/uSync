@@ -9,10 +9,10 @@ using Microsoft.Extensions.Logging;
 using Umbraco.Extensions;
 
 using uSync.BackOffice.Extensions;
+using uSync.BackOffice.Models;
 using uSync.BackOffice.SyncHandlers;
 using uSync.BackOffice.SyncHandlers.Interfaces;
 using uSync.Core;
-using uSync.Core.Dependency;
 
 using static Umbraco.Cms.Core.Constants;
 
@@ -27,7 +27,15 @@ namespace uSync.BackOffice
         /// <summary>
         ///  Perform a paged report against a given folder 
         /// </summary>
+        [Obsolete("For better performance pass handler, will be removed in v15")]
         public IEnumerable<uSyncAction> ReportPartial(string folder, uSyncPagedImportOptions options, out int total)
+            => ReportPartial([folder], options, out total);
+
+        /// <summary>
+        ///  Perform a paged report against a given folder 
+        /// </summary>
+        [Obsolete("For better performance pass handler, will be removed in v15")]
+        public IEnumerable<uSyncAction> ReportPartial(string[] folder, uSyncPagedImportOptions options, out int total)
         {
             var orderedNodes = LoadOrderedNodes(folder);
             return ReportPartial(orderedNodes, options, out total); 
@@ -43,7 +51,7 @@ namespace uSync.BackOffice
             var actions = new List<uSyncAction>();
             var lastType = string.Empty;
 
-            var folder = Path.GetDirectoryName(orderedNodes.FirstOrDefault()?.FileName ?? options.RootFolder);
+            var folder = Path.GetDirectoryName(orderedNodes.FirstOrDefault()?.Filename ?? options.Folders?.FirstOrDefault() ?? _uSyncConfig.GetRootFolder());
 
             SyncHandlerOptions syncHandlerOptions = HandlerOptionsFromPaged(options);
 
@@ -73,7 +81,7 @@ namespace uSync.BackOffice
 
                 if (handlerPair != null)
                 {
-                    actions.AddRange(handlerPair.Handler.ReportElement(item.Node, item.FileName, handlerPair.Settings, options));
+                    actions.AddRange(handlerPair.Handler.ReportElement(item.Node, item.Filename, handlerPair.Settings, options));
                 }
 
                 index++;
@@ -85,6 +93,7 @@ namespace uSync.BackOffice
         /// <summary>
         ///  Perform a paged Import against a given folder 
         /// </summary>
+        [Obsolete("For better performance pass handler, will be removed in v15")]
         public IEnumerable<uSyncAction> ImportPartial(string folder, uSyncPagedImportOptions options, out int total)
         {
             var orderedNodes = LoadOrderedNodes(folder);
@@ -121,7 +130,7 @@ namespace uSync.BackOffice
                             foreach (var item in orderedNodes.Skip(options.PageNumber * options.PageSize).Take(options.PageSize))
                             {
                                 if (item.Node == null) 
-                                    item.Node = XElement.Load(item.FileName);
+                                    item.Node = XElement.Load(item.Filename);
 
                                 var itemType = item.Node.GetItemType();
                                 if (!itemType.InvariantEquals(lastType))
@@ -129,14 +138,14 @@ namespace uSync.BackOffice
                                     lastType = itemType;
                                     handlerPair = _handlerFactory.GetValidHandlerByTypeName(itemType, syncHandlerOptions);
 
-                            // special case, blueprints looks like IContent items, except they are slightly different
-                            // so we check for them specifically and get the handler for the entity rather than the object type.
-                            if (item.Node.IsContent() && item.Node.IsBlueprint())
-                            {
-                                lastType = UdiEntityType.DocumentBlueprint;
-                                handlerPair = _handlerFactory.GetValidHandlerByEntityType(UdiEntityType.DocumentBlueprint);
-                            }
-                        }
+                                    // special case, blueprints looks like IContent items, except they are slightly different
+                                    // so we check for them specifically and get the handler for the entity rather than the object type.
+                                    if (item.Node.IsContent() && item.Node.IsBlueprint())
+                                    {
+                                        lastType = UdiEntityType.DocumentBlueprint;
+                                        handlerPair = _handlerFactory.GetValidHandlerByEntityType(UdiEntityType.DocumentBlueprint);
+                                    }
+                                }
 
                                 if (handlerPair == null)
                                 {
@@ -149,7 +158,7 @@ namespace uSync.BackOffice
 
                                 if (handlerPair != null)
                                 {
-                                    actions.AddRange(handlerPair.Handler.ImportElement(item.Node, item.FileName, handlerPair.Settings, options));
+                                    actions.AddRange(handlerPair.Handler.ImportElement(item.Node, item.Filename, handlerPair.Settings, options));
                                 }
 
                                 index++;
@@ -330,17 +339,39 @@ namespace uSync.BackOffice
         /// <summary>
         ///  Load the xml in a folder in level order so we process the higher level items first.
         /// </summary>
+        [Obsolete("use handler and multiple folder method will be removed in v15")]
         public IList<OrderedNodeInfo> LoadOrderedNodes(string folder)
+            => LoadOrderedNodes([folder]).ToList();
+
+        /// <summary>
+        ///  Load the xml in a folder in level order so we process the higher level items first.
+        /// </summary>
+        [Obsolete("use handler and multiple folder method will be removed in v15")]
+        public IList<OrderedNodeInfo> LoadOrderedNodes(string[] folders)
         {
-            var files = _syncFileService.GetFiles(folder, $"*.{_uSyncConfig.Settings.DefaultExtension}", true);
             var nodes = new List<OrderedNodeInfo>();
-            foreach (var file in files)
+
+            foreach (var folder in folders)
             {
-                nodes.Add(new OrderedNodeInfo(file, _syncFileService.LoadXElement(file)));
+                var files = _syncFileService.GetFiles(folder, $"*.{_uSyncConfig.Settings.DefaultExtension}", true);
+                foreach (var file in files)
+                {
+                    var xml = _syncFileService.LoadXElement(file);
+                    nodes.Add(new OrderedNodeInfo
+                    {
+                        Node = xml,
+                        Alias = xml.GetAlias(),
+                        Key = xml.GetKey(),
+                        Filename = file,
+                        IsRoot = false,
+                        Level = xml.GetLevel(),
+                        Path = file.Substring(folder.Length),
+                    });
+                }
             }
 
             return nodes
-                .OrderBy(x => (x.Node.GetLevel() * 1000) + x.Node.GetItemSortOrder())
+                .OrderBy(x => (x.Level * 1000) + x.Node.GetItemSortOrder())
                 .ToList();
         }
 
@@ -350,43 +381,18 @@ namespace uSync.BackOffice
         /// <remarks>
         ///  this makes ordered node loading faster, when we are processing multiple requests, because we don't have to calculate it each time
         /// </remarks>
+        [Obsolete("use handler and multiple folder method will be removed in v15")]
         public IList<OrderedNodeInfo> LoadOrderedNodes(ISyncHandler handler, string handlerFolder)
-        {
-            if (handler is not ISyncGraphableHandler graphableHandler)
-                return LoadOrderedNodes(handlerFolder);
+            => LoadOrderedNodes(handler, [handlerFolder]).ToList();
 
-            var files = _syncFileService.GetFiles(handlerFolder, $"*.{_uSyncConfig.Settings.DefaultExtension}", true);
-            var nodes = new Dictionary<Guid, OrderedNodeInfo>();
-            var graph = new List<GraphEdge<Guid>>();
-            
-            foreach (var file in files)
-            {
-                var node = _syncFileService.LoadXElement(file);
-                if (node == null) continue;
-
-                var key = node.GetKey();
-
-                nodes.Add(key, new OrderedNodeInfo(file, _syncFileService.LoadXElement(file)));
-
-                graph.AddRange(graphableHandler.GetGraphIds(node)
-                    .Select(x => GraphEdge.Create(key, x)));
-            }
-
-            var cleanGraph = graph.Where(x => x.Node != x.Edge).ToList();
-            var sortedList = nodes.Keys.TopologicalSort(cleanGraph);
-
-            if (sortedList == null)
-                return nodes.Values.OrderBy(x => x.Node.GetLevel()).ToList();
-
-            var results = new List<OrderedNodeInfo>();
-            foreach(var key in sortedList)
-            {
-                if (nodes.ContainsKey(key))
-                    results.Add(nodes[key]);
-            }
-            return results;
-
-        }
+        /// <summary>
+        ///  load up ordered nodes from a handler folder, 
+        /// </summary>
+        /// <remarks>
+        ///  this makes ordered node loading faster, when we are processing multiple requests, because we don't have to calculate it each time
+        /// </remarks>
+        public IList<OrderedNodeInfo> LoadOrderedNodes(ISyncHandler handler, string[] handlerFolders)
+            => handler.FetchAllNodes(handlerFolders).ToList();
 
         /// <summary>
         ///  calculate the percentage progress we are making between a range. 
@@ -397,37 +403,4 @@ namespace uSync.BackOffice
         private int CalculateProgress(int value, int total, int min, int max)
             => (int)(min + (((float)value / total) * (max - min)));
     }
-
-    /// <summary>
-    ///  detail for a usync file that can be ordered
-    /// </summary>
-    public class OrderedNodeInfo
-    {
-        /// <summary>
-        ///  constructor
-        /// </summary>
-        public OrderedNodeInfo(string filename, XElement node)
-        {
-            FileName = filename;
-            Node = node;
-            Key = node.GetKey();
-        }
-
-        /// <summary>
-        ///  xml element of the node
-        /// </summary>
-        public XElement Node { get; set; }
-
-        /// <summary>
-        ///  the Guid key for this item, so we can cache the list of keys 
-        /// </summary>
-        public Guid Key { get; set; }
-
-        /// <summary>
-        ///  path to the physical file 
-        /// </summary>
-        public string FileName { get; set; }
-    }
-
-
 }

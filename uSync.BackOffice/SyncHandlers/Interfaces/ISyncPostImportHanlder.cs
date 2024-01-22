@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 using uSync.BackOffice.Configuration;
 
@@ -22,10 +23,16 @@ namespace uSync.BackOffice.SyncHandlers
         ///  to be imported before doctypes, but then the post import step has to run so the datatype 
         ///  can refrence the doctypes that may not have been there first time around.
         /// </remarks>
-        /// <param name="folder">Folder to use for import</param>
         /// <param name="actions">List of actions containing items that require post import processing</param>
         /// <param name="config">Handler settings to use for processing</param>
         /// <returns>List of actions detailing post import changes</returns>
+        IEnumerable<uSyncAction> ProcessPostImport(IEnumerable<uSyncAction> actions, HandlerSettings config)
+            => ProcessPostImport(string.Empty, actions, config);
+
+        /// <summary>
+        ///  Process import of a folder. 
+        /// </summary>
+        [Obsolete("Folder is not required on post import will be removed in v15")]
         IEnumerable<uSyncAction> ProcessPostImport(string folder, IEnumerable<uSyncAction> actions, HandlerSettings config);
     }
 }
