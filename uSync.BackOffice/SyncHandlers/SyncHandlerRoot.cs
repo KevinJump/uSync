@@ -1688,6 +1688,9 @@ namespace uSync.BackOffice.SyncHandlers
         {
             if (!HasDependencyCheckers()) return Enumerable.Empty<uSyncDependency>();
 
+            if (!flags.HasFlag(DependencyFlags.IncludeChildren))
+                return Enumerable.Empty<uSyncDependency>();
+
             var dependencies = new List<uSyncDependency>();
 
             var containers = GetFolders(parent);
