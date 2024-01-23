@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Linq;
 
 using Microsoft.Extensions.Logging;
 
@@ -16,6 +17,7 @@ using Umbraco.Extensions;
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
 using uSync.Core;
+using uSync.Core.Models;
 using uSync.Core.Serialization;
 
 using static Umbraco.Cms.Core.Constants;
@@ -110,5 +112,51 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         /// </summary>
         protected override string GetItemFileName(IDataType item)
             => GetItemAlias(item).ToSafeAlias(shortStringHelper);
+
+        /// <inheritdoc />
+        protected override SyncAttempt<XElement> Export_DoExport(IDataType item, string filename, string[] folders, HandlerSettings config)
+        {
+            // all the possible files that there could be. 
+            var files = folders.Select(x => GetPath(x, item, config.GuidNames, config.UseFlatStructure)).ToArray();
+            var nodes = syncFileService.GetAllNodes(files[..^1]);
+
+            // with roots enabled - we attempt to merge doctypes ! 
+            // 
+            var attempt = SerializeItem(item, new Core.Serialization.SyncSerializerOptions(config.Settings));
+            if (attempt.Success)
+            {
+                if (ShouldExport(attempt.Item, config))
+                {
+                    if (nodes.Count > 0)
+                    {
+                        nodes.Add(attempt.Item);
+                        var difference = syncFileService.GetDifferences(nodes, trackers.FirstOrDefault());
+                        if (difference != null)
+                        {
+                            syncFileService.SaveXElement(difference, filename);
+                        }
+                        else
+                        {
+                            if (syncFileService.FileExists(filename))
+                                syncFileService.DeleteFile(filename);
+                        }
+
+                    }
+                    else
+                    {
+                        syncFileService.SaveXElement(attempt.Item, filename);
+                    }
+
+                    if (config.CreateClean && HasChildren(item))
+                        CreateCleanFile(GetItemKey(item), filename);
+                }
+                else
+                {
+                    return SyncAttempt<XElement>.Succeed(filename, ChangeType.NoChange, "Not Exported (Based on configuration)");
+                }
+            }
+
+            return attempt;
+        }
     }
 }

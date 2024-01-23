@@ -10,6 +10,7 @@ using uSync.Core.Cache;
 using uSync.Core.DataTypes;
 using uSync.Core.Dependency;
 using uSync.Core.Mapping;
+using uSync.Core.Roots.Configs;
 using uSync.Core.Serialization;
 using uSync.Core.Tracking;
 
@@ -52,6 +53,10 @@ namespace uSync.Core
             builder.WithCollectionBuilder<SyncSerializerCollectionBuilder>()
                 .Add(builder.TypeLoader.GetTypes<ISyncSerializerBase>());
 
+            // config mergers used in roots. 
+            builder.WithCollectionBuilder<SyncConfigMergerCollectionBuilder>()
+                .Add(builder.TypeLoader.GetTypes<ISyncConfigMerger>());
+
             // the trackers, allow us to be more nuanced in tracking changes.
             builder.WithCollectionBuilder<SyncTrackerCollectionBuilder>()
                 .Add(builder.TypeLoader.GetTypes<ISyncTrackerBase>());
@@ -62,6 +67,7 @@ namespace uSync.Core
 
             // the item factory lets us get to these collections from one place. 
             builder.Services.AddSingleton<ISyncItemFactory, SyncItemFactory>();
+
 
             return builder;
         }

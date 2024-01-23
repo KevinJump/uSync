@@ -88,7 +88,7 @@ namespace uSync.BackOffice.Notifications
             {
                 using (var reference = _umbracoContextFactory.EnsureUmbracoContext())
                 {
-                    if (IsExportAtStartupEnabled() || (IsExportOnSaveOn() && !_syncFileService.RootExists(_uSyncConfig.GetRootFolder())))
+                    if (IsExportAtStartupEnabled() || (IsExportOnSaveOn() && !HasSyncFolders()))
                     {
 
                         var options = new SyncHandlerOptions
@@ -130,6 +130,20 @@ namespace uSync.BackOffice.Notifications
                 _logger.LogInformation("uSync: Startup Complete {elapsed}ms", sw.ElapsedMilliseconds);
             }
 
+        }
+
+        /// <summary>
+        ///  checks if there are any of the sync folders (including root).
+        /// </summary>
+        /// <returns></returns>
+        private bool HasSyncFolders()
+        {
+            foreach (var folder in _uSyncConfig.GetFolders())
+            {
+                if (_syncFileService.DirectoryExists(folder)) return true;
+            }
+
+            return false;
         }
 
 
