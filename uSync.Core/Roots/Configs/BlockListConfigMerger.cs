@@ -8,7 +8,7 @@ namespace uSync.Core.Roots.Configs;
 /// <summary>
 ///  merges blocklist configs. 
 /// </summary>
-internal class BlockListConfigMerger : BlockListConfigBaseMerger, ISyncConfigMerger
+internal class BlockListConfigMerger : SyncConfigMergerBase, ISyncConfigMerger
 {
     public virtual string[] Editors => [
         Constants.PropertyEditors.Aliases.BlockList
@@ -43,4 +43,5 @@ internal class BlockListConfigMerger : BlockListConfigBaseMerger, ISyncConfigMer
 
         return targetConfig;
     }
+   
 }

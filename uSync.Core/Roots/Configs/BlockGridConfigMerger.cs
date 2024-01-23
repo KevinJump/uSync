@@ -5,7 +5,7 @@ using Umbraco.Cms.Core.PropertyEditors;
 
 namespace uSync.Core.Roots.Configs;
 
-internal class BlockGridConfigMerger : BlockListConfigBaseMerger, ISyncConfigMerger
+internal class BlockGridConfigMerger : SyncConfigMergerBase, ISyncConfigMerger
 {
     public string[] Editors => [
         Constants.PropertyEditors.Aliases.BlockGrid
