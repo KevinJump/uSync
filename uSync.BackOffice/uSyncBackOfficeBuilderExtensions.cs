@@ -157,6 +157,45 @@ namespace uSync.BackOffice
             builder.AddNotificationHandler<TemplateSavedNotification, TemplateHandler>();
             builder.AddNotificationHandler<TemplateDeletedNotification, TemplateHandler>();
 
+            // roots - pre-notifications for stopping things
+            builder
+                .AddNotificationHandler<ContentTypeSavingNotification, ContentTypeHandler>()
+                .AddNotificationHandler<ContentTypeDeletingNotification, ContentTypeHandler>()
+                .AddNotificationHandler<ContentTypeMovingNotification, ContentTypeHandler>()
+
+                .AddNotificationHandler<MediaTypeSavingNotification, MediaTypeHandler>()
+                .AddNotificationHandler<MediaTypeDeletingNotification, MediaTypeHandler>()
+                .AddNotificationHandler<MediaTypeMovingNotification, MediaTypeHandler>()
+
+                .AddNotificationHandler<MemberTypeSavingNotification, MemberTypeHandler>()
+                .AddNotificationHandler<MemberTypeDeletingNotification, MemberTypeHandler>()
+                .AddNotificationHandler<MemberTypeMovingNotification, MemberTypeHandler>()
+
+                .AddNotificationHandler<DataTypeSavingNotification, DataTypeHandler>()
+                .AddNotificationHandler<DataTypeDeletingNotification, DataTypeHandler>()
+                .AddNotificationHandler<DataTypeMovingNotification, DataTypeHandler>()
+
+                .AddNotificationHandler<ContentSavingNotification, ContentHandler>()
+                .AddNotificationHandler<ContentDeletingNotification, ContentHandler>()
+                .AddNotificationHandler<ContentMovingNotification, ContentHandler>()
+
+                .AddNotificationHandler<MediaSavingNotification, MediaHandler>()
+                .AddNotificationHandler<MediaDeletingNotification, MediaHandler>()
+                .AddNotificationHandler<MediaMovingNotification, MediaHandler>()
+
+                .AddNotificationHandler<DictionaryItemSavingNotification, DictionaryHandler>()
+                .AddNotificationHandler<DictionaryItemDeletingNotification, DictionaryHandler>()
+
+                .AddNotificationHandler<RelationTypeSavingNotification, RelationTypeHandler>()
+                .AddNotificationHandler<RelationTypeDeletingNotification, RelationTypeHandler>()
+
+                .AddNotificationHandler<MacroSavingNotification, MacroHandler>()
+                .AddNotificationHandler<MacroDeletingNotification, MacroHandler>()
+
+                .AddNotificationHandler<TemplateSavingNotification, TemplateHandler>()
+                .AddNotificationHandler<TemplateDeletingNotification, TemplateHandler>();
+
+
             // content ones
             builder.AddNotificationHandler<ContentSavedNotification, ContentHandler>();
             builder.AddNotificationHandler<ContentDeletedNotification, ContentHandler>();
@@ -180,7 +219,7 @@ namespace uSync.BackOffice
             builder.AddNotificationHandler<ContentSavedBlueprintNotification, ContentTemplateHandler>();
             builder.AddNotificationHandler<ContentDeletedBlueprintNotification, ContentTemplateHandler>();
 
-            // cache lifecylce manager
+            // cache lifecycle manager
             builder.
                 AddNotificationHandler<uSyncImportStartingNotification, CacheLifecycleManager>().
                 AddNotificationHandler<uSyncReportStartingNotification, CacheLifecycleManager>().

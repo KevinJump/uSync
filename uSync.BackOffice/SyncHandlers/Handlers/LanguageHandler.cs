@@ -32,7 +32,8 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
     public class LanguageHandler : SyncHandlerBase<ILanguage, ILocalizationService>, ISyncHandler,
         INotificationHandler<SavingNotification<ILanguage>>,
         INotificationHandler<SavedNotification<ILanguage>>,
-        INotificationHandler<DeletedNotification<ILanguage>>
+        INotificationHandler<DeletedNotification<ILanguage>>,
+        INotificationHandler<DeletingNotification<ILanguage>>
     {
         private readonly ILocalizationService localizationService;
 
@@ -154,9 +155,16 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         private static ConcurrentDictionary<string, string> newLanguages = new ConcurrentDictionary<string, string>();
 
         /// <inheritdoc/>
-        public void Handle(SavingNotification<ILanguage> notification)
+        public override void Handle(SavingNotification<ILanguage> notification)
         {
             if (_mutexService.IsPaused) return;
+            
+            if (ShouldBlockRootChanges(notification.SavedEntities))
+            {
+                notification.Cancel = true;
+                notification.Messages.Add(GetCancelMessageForRoots());
+                return;
+            }
 
             foreach (var item in notification.SavedEntities)
             {

@@ -37,7 +37,7 @@ namespace uSync.BackOffice.Configuration
         /// <summary>
         /// when locked you can't make changes to anything that is in the root
         /// </summary>
-        public bool LockRoot { get; set; } = false;
+        public bool LockRoot { get; set; } = true;
 
         /// <summary>
         ///  lock specific types at root so they can't be changed in child sites. 

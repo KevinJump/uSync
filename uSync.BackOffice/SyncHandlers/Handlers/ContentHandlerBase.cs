@@ -206,6 +206,14 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             HandleMove(notification.MoveInfoCollection);
         }
 
+        public void Handle(MovingToRecycleBinNotification<TObject> notification)
+        {
+            if (ShouldBlockRootChanges(notification.MoveInfoCollection.Select(x => x.Entity)))
+            {
+                notification.Cancel = true;
+                notification.Messages.Add(GetCancelMessageForRoots());
+            }
+        }
 
         /// <summary>
         ///  Clean up any files on disk, that might be left over when an item moves

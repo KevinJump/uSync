@@ -35,8 +35,8 @@ namespace uSync.BackOffice.Configuration
             => Settings.IsRootSite
                 ? [Settings.Folders[0].TrimStart('/')]
                 : Settings.Folders.Select(x => x.TrimStart('/')).ToArray();
-
-
+        
+        
         /// <summary>
         /// Constructor for config service
         /// </summary>

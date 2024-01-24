@@ -559,6 +559,19 @@ namespace uSync.BackOffice.Services
             return nodes;
         }
 
+        /// <summary>
+        /// checks a list of folders to see if any of them exists
+        /// </summary>
+        /// <returns>true if any but the last folder exists</returns>
+        public bool AnyFolderExists(string[] folders)
+        {
+            foreach(var folder in folders)
+            {
+                if (DirectoryExists(folder)) return true;
+            }
+
+            return false;
+        }
 
         private string[] GetFilePaths(string folder, string extension)
             => Directory.GetFiles(folder, $"*.{extension}", SearchOption.AllDirectories);

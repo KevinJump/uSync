@@ -29,7 +29,11 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         INotificationHandler<DeletedNotification<IContentType>>,
         INotificationHandler<MovedNotification<IContentType>>,
         INotificationHandler<EntityContainerSavedNotification>,
-        INotificationHandler<EntityContainerRenamedNotification>
+        INotificationHandler<EntityContainerRenamedNotification>,
+        INotificationHandler<SavingNotification<IContentType>>,
+        INotificationHandler<MovingNotification<IContentType>>,
+        INotificationHandler<DeletingNotification<IContentType>>
+
     {
         private readonly IContentTypeService contentTypeService;
 

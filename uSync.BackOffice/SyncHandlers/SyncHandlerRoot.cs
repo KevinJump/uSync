@@ -2067,5 +2067,85 @@ namespace uSync.BackOffice.SyncHandlers
                 cachedSerializer.DisposeCache();
 
         }
+
+        #region roots notifications 
+
+        /// <summary>
+        ///  handle when things are saving. 
+        /// </summary>
+        /// <remarks>
+        ///  used to block saves when using roots. 
+        /// </remarks>
+        public virtual void Handle(SavingNotification<TObject> notification)
+        {
+            if (ShouldBlockRootChanges(notification.SavedEntities))
+            {
+                notification.Cancel = true;
+                notification.Messages.Add(GetCancelMessageForRoots());
+            }
+        }
+
+        public virtual void Handle(MovingNotification<TObject> notification)
+        {
+            if (ShouldBlockRootChanges(notification.MoveInfoCollection.Select(x => x.Entity)))
+            {
+                notification.Cancel = true;
+                notification.Messages.Add(GetCancelMessageForRoots());
+            }
+        }
+
+        public virtual void Handle(DeletingNotification<TObject> notification)
+        {
+            if (ShouldBlockRootChanges(notification.DeletedEntities))
+            {
+                notification.Cancel = true;
+                notification.Messages.Add(GetCancelMessageForRoots());
+            }
+        }
+
+        protected bool ShouldBlockRootChanges(IEnumerable<TObject> items)
+        {
+            if (!ShouldProcessEvent()) return false;
+
+            if (uSyncConfig.Settings.LockRoot == false) return false;
+
+            if (!HasRootFolders()) return false;
+
+            foreach (var item in items)
+            {
+                if (RootItemExists(item))
+                    return true;
+            }
+
+            return false;
+        }
+
+        protected EventMessage GetCancelMessageForRoots()
+            => new EventMessage("Blocked", "You cannot make this change, root level items are locked", EventMessageType.Error);
+
+
+        private bool HasRootFolders()
+            => syncFileService.AnyFolderExists(uSyncConfig.GetFolders()[..^1]);
+
+        private bool RootItemExists(TObject item)
+        {
+            foreach (var folder in uSyncConfig.GetFolders()[..^1])
+            {
+                var filename = GetPath(
+                    Path.Combine(folder, DefaultFolder),
+                    item,
+                    DefaultConfig.GuidNames,
+                    DefaultConfig.UseFlatStructure)
+                    .ToAppSafeFileName();
+
+                if (syncFileService.FileExists(filename))
+                    return true;
+
+            }
+
+            return false;
+        }
+
+        #endregion
     }
 }

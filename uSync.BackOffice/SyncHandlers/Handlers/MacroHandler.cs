@@ -27,7 +27,9 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         Icon = "icon-settings-alt", EntityType = UdiEntityType.Macro)]
     public class MacroHandler : SyncHandlerBase<IMacro, IMacroService>, ISyncHandler,
         INotificationHandler<SavedNotification<IMacro>>,
-        INotificationHandler<DeletedNotification<IMacro>>
+        INotificationHandler<DeletedNotification<IMacro>>,
+        INotificationHandler<SavingNotification<IMacro>>,
+        INotificationHandler<DeletingNotification<IMacro>>
     {
         private readonly IMacroService macroService;
 
