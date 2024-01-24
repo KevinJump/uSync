@@ -206,6 +206,10 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             HandleMove(notification.MoveInfoCollection);
         }
 
+        /// <summary>
+        ///  Check that roots isn't stopping an item from being recycled.
+        /// </summary>
+        /// <param name="notification"></param>
         public void Handle(MovingToRecycleBinNotification<TObject> notification)
         {
             if (ShouldBlockRootChanges(notification.MoveInfoCollection.Select(x => x.Entity)))

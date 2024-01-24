@@ -2071,11 +2071,8 @@ namespace uSync.BackOffice.SyncHandlers
         #region roots notifications 
 
         /// <summary>
-        ///  handle when things are saving. 
+        ///  check roots isn't blocking the save
         /// </summary>
-        /// <remarks>
-        ///  used to block saves when using roots. 
-        /// </remarks>
         public virtual void Handle(SavingNotification<TObject> notification)
         {
             if (ShouldBlockRootChanges(notification.SavedEntities))
@@ -2085,6 +2082,9 @@ namespace uSync.BackOffice.SyncHandlers
             }
         }
 
+        /// <summary>
+        ///  check roots isn't blocking the move
+        /// </summary>
         public virtual void Handle(MovingNotification<TObject> notification)
         {
             if (ShouldBlockRootChanges(notification.MoveInfoCollection.Select(x => x.Entity)))
@@ -2094,6 +2094,9 @@ namespace uSync.BackOffice.SyncHandlers
             }
         }
 
+        /// <summary>
+        ///  check roots isn't blocking the delete
+        /// </summary>
         public virtual void Handle(DeletingNotification<TObject> notification)
         {
             if (ShouldBlockRootChanges(notification.DeletedEntities))
@@ -2103,6 +2106,9 @@ namespace uSync.BackOffice.SyncHandlers
             }
         }
 
+        /// <summary>
+        ///  should we block this event based on the existance or root objects.
+        /// </summary>
         protected bool ShouldBlockRootChanges(IEnumerable<TObject> items)
         {
             if (!ShouldProcessEvent()) return false;
@@ -2120,6 +2126,9 @@ namespace uSync.BackOffice.SyncHandlers
             return false;
         }
 
+        /// <summary>
+        ///  get the message we use for cancellations
+        /// </summary>
         protected EventMessage GetCancelMessageForRoots()
             => new EventMessage("Blocked", "You cannot make this change, root level items are locked", EventMessageType.Error);
 

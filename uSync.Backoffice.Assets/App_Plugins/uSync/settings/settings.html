@@ -78,11 +78,33 @@
                 <umb-box-content>
                     <div class="umb-permission usync-setting-value">
                         <div class="umb-permission__content">
-                            <div>Root folder</div>
-                            <div class="umb-permission__description">Default location uSync files are saved and loaded from</div>
+                            <div>Root site</div>
+                            <div class="umb-permission__description">Is this site a root for other sites.</div>
                         </div>
                         <div class="umb-permission__value">
-                            {{vm.settings.rootFolder}}
+                            <div ng-if="vm.settings.isRootSite"><i class="icon icon-check color-green"></i></div>
+                            <div ng-if="!vm.settings.isRootSite"><i class="icon icon-wrong color-red"></i></div>
+                        </div>
+                    </div>
+                    <div class="umb-permission usync-setting-value">
+                        <div class="umb-permission__content">
+                            <div>Root locked</div>
+                            <div class="umb-permission__description">Are changes for items that are from the root site locked?</div>
+                        </div>
+                        <div class="umb-permission__value">
+                            <div ng-if="vm.settings.lockRoot"><i class="icon icon-check color-green"></i></div>
+                            <div ng-if="!vm.settings.lockRoot"><i class="icon icon-wrong color-red"></i></div>
+                        </div>
+                    </div>                   
+                    <div class="umb-permission usync-setting-value">
+                        <div class="umb-permission__content">
+                            <div>Folders</div>
+                            <div class="umb-permission__description">Default locations uSync files are saved and loaded from</div>
+                        </div>
+                        <div class="umb-permission__value">
+                            <div ng-repeat="folder in vm.settings.folders">
+                                {{folder}}
+                            </div>
                         </div>
                     </div>
                 </umb-box-content>
