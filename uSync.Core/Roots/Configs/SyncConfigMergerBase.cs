@@ -28,21 +28,24 @@ internal class SyncConfigMergerBase
     protected static TObject[] MergeObjects<TObject, TKey>(TObject[] rootObject, TObject[] targetObject, Func<TObject, TKey> keySelector, Predicate<TObject> predicate)
     {
         var targetObjectKeys = targetObject.Select(keySelector);
-        var rootObjects = rootObject?.Where(x => !targetObjectKeys.Contains(keySelector(x))).ToList()
-            ?? [];
 
-        if (rootObjects.Count > 0)
+        if (targetObjectKeys is IEnumerable<string> targetStrings)
         {
-            var mergedObject = targetObject
-                .Concat(rootObjects)
-                .ToList();
-
-            mergedObject.RemoveAll(predicate);
-
-            return mergedObject.ToArray();
+            targetObjectKeys = (IEnumerable<TKey>)targetStrings.Select(x => x.Replace($"{_removedLabel}:", ""));
         }
 
-        return targetObject;
+        var validRootObjects = rootObject?.Where(x => !targetObjectKeys.Contains(keySelector(x))).ToList()
+            ?? [];
+
+        var mergedObject = targetObject.ToList();
+
+        if (validRootObjects.Count > 0)
+        {
+            mergedObject.AddRange(validRootObjects);
+        }
+
+        var x = mergedObject.RemoveAll(predicate);
+        return mergedObject.ToArray();
     }
 
     protected TObject[] GetObjectDifferences<TObject, TKey>(TObject[] rootObject, TObject[] targetObject, Func<TObject, TKey> keySelector, Action<TObject, string> setMarker)
