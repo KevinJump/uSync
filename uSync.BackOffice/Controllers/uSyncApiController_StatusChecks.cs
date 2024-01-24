@@ -240,7 +240,7 @@ namespace uSync.BackOffice.Controllers
 
             var message = new uSyncWarningMessage();
 
-            if (this._uSyncConfig.Settings.ShowVersionCheckWarning && !_uSyncService.CheckVersionFile(this._uSyncConfig.GetRootFolder()))
+            if (this._uSyncConfig.Settings.ShowVersionCheckWarning && !_uSyncService.CheckVersionFile(this._uSyncConfig.GetFolders()))
             {
                 message.Type = "info";
                 message.Message = _textService.Localize("usync", "oldformat");

@@ -408,6 +408,21 @@ namespace uSync.BackOffice
             return Export(folder, handlers, callbacks);
         }
 
+
+        /// <summary>
+        ///  checks all the possible folders for the version file
+        /// </summary>
+        public bool CheckVersionFile(string[] folders)
+        {
+            foreach(var folder in folders.Reverse())
+            {
+                if (CheckVersionFile(folder))
+                    return true;
+            }
+
+            return false;
+        }
+
         /// <summary>
         ///  Check the uSync version file (in the root) to see if we are importing up to date files
         /// </summary>
