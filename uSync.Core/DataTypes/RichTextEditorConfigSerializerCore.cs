@@ -40,15 +40,18 @@ internal class RichTextEditorConfigSerializerCore : ConfigurationSerializerBase,
         if (!editorAttempt.Success)
             return base.SerializeConfig(configuration);
 
-        var toolbarAttempt = editorAttempt.Result.Value<JArray>("toolbar");
 
-        if (toolbarAttempt.Contains("styleselect"))
+        if (editorAttempt.Result.ContainsKey("toolbar") is false)
+            return base.SerializeConfig(configuration);
+
+        var toolbar = editorAttempt.Result.Value<JArray>("toolbar");
+        if (toolbar.Contains("styleselect"))
         {
-            toolbarAttempt.Remove("styleselect");
-            toolbarAttempt.Add("styles");
+            toolbar.Remove("styleselect");
+            toolbar.Add("styles");
         }
 
-        editorAttempt.Result["toolbar"] = toolbarAttempt;
+        editorAttempt.Result["toolbar"] = toolbar;
 
         return JsonConvert.SerializeObject(richTextConfiguration, Formatting.Indented, _jsonSettings);
     }
