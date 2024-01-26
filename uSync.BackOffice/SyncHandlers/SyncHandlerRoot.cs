@@ -321,7 +321,7 @@ namespace uSync.BackOffice.SyncHandlers
             }
 
             CleanCaches(cacheKey);
-            options.Callbacks.Update?.Invoke("Done", 3, 3);
+            options.Callbacks?.Update?.Invoke("Done", 3, 3);
 
             return actions;
         }
