@@ -34,9 +34,15 @@
 		<None Remove="Commands\**" />
 	</ItemGroup>
 
-
 	<ItemGroup>
 		<None Include="readme.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+			<_Parameter1>$(AssemblyName).Assets</_Parameter1>
+			<!-- We use the value of AssemblyName to declare the value of the attribute -->
+		</AssemblyAttribute>
 	</ItemGroup>
 
 

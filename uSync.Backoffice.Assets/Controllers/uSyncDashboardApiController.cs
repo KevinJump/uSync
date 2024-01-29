@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Mime;
-using System.Threading.Tasks;
+﻿using System.Net.Mime;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
@@ -29,10 +24,11 @@ using Umbraco.Extensions;
 using uSync.BackOffice.Authorization;
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Hubs;
+using uSync.BackOffice.Models;
 using uSync.BackOffice.Services;
 using uSync.BackOffice.SyncHandlers;
 
-namespace uSync.BackOffice.Controllers
+namespace uSync.BackOffice.Assets.Controllers
 {
     [PluginController("uSync")]
     // [Authorize(Policy = AuthorizationPolicies.SectionAccessSettings)]
@@ -76,8 +72,11 @@ namespace uSync.BackOffice.Controllers
             IHubContext<SyncHub> hubContext,
             uSyncConfigService uSyncConfig,
             SyncFileService syncFileService,
+            ISyncActionService syncActionService,
             IBackOfficeSecurityAccessor backOfficeSecurityAccessor)
         {
+            _syncActionService = syncActionService;
+
             _appCaches = appCaches;
             _hostEnvironment = hostEnvironment;
             _textService = textService;

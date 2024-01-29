@@ -14,6 +14,7 @@ using Umbraco.Cms.Core.Semver;
 using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;
+using uSync.BackOffice.Models;
 using uSync.BackOffice.Services;
 using uSync.BackOffice.SyncHandlers;
 using uSync.Core;

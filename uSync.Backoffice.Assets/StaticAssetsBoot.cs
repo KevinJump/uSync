@@ -5,8 +5,10 @@ using System.Reflection;
 using Umbraco.Cms.Core.Composing;
 using Umbraco.Cms.Core.DependencyInjection;
 using Umbraco.Cms.Core.Manifest;
+using Umbraco.Cms.Core.Notifications;
 
 using uSync.BackOffice;
+using uSync.BackOffice.Assets.Notifications;
 
 namespace uSync.Backoffice.Assets
 {
@@ -26,8 +28,12 @@ namespace uSync.Backoffice.Assets
             if (builder.ManifestFilters().Has<uSyncAssetManifestFilter>())
                 return builder;
 
-            // add the package manifest programatically. 
+            // add the package manifest programmatically. 
             builder.ManifestFilters().Append<uSyncAssetManifestFilter>();
+
+            // add the javascript variables 
+            builder.AddNotificationHandler<ServerVariablesParsingNotification, uSyncServerVariablesHandler>();
+
 
             return builder;
         }

@@ -76,7 +76,6 @@ namespace uSync.BackOffice
             builder.AdduSyncFirstBoot();
 
             // register for the notifications 
-            builder.AddNotificationHandler<ServerVariablesParsingNotification, uSyncServerVariablesHandler>();
             builder.AddNotificationHandler<UmbracoApplicationStartedNotification, uSyncApplicationStartingHandler>();
             builder.AddHandlerNotifications();
 
@@ -88,6 +87,8 @@ namespace uSync.BackOffice
 
             builder.WithCollectionBuilder<SyncTreeNodeCollectionBuilder>()
                 .Add(() => builder.TypeLoader.GetTypes<ISyncTreeNode>());
+
+            builder.Services.AddTransient<ISyncActionService, SyncActionService>();
 
             return builder;
         }

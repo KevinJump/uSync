@@ -6,7 +6,7 @@ using Newtonsoft.Json.Serialization;
 
 using uSync.BackOffice.SyncHandlers;
 
-namespace uSync.BackOffice
+namespace uSync.BackOffice.Models
 {
     /// <summary>
     ///  Progress summary - object that tells the UI to draw the handler icons while uSync works.
