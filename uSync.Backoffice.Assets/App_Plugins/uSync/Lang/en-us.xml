@@ -12,8 +12,12 @@
 		<key alias="name">uSync</key>
 		<key alias="intro">Database elements to and from disk</key>
 
+		<key alias="rootsite">
+			<![CDATA[This site is acting as a root site, changing elements here could have effects on sites inheriting from this site.]]></key>
+
 		<key alias="newer">There is a newer version of uSync available</key>
-		<key alias="noHandlers"><![CDATA[No Handlers have been loaded, so you can't sync anything - check your uSync8.config file it might be corrupt or missing 😢]]></key>
+		<key alias="noHandlers"><![CDATA[No Handlers have been loaded, so you can't sync anything - check your uSync8.config file it might be corrupt or missing 😢]]>
+		</key>
 
 		<key alias="import">Import</key>
 		<key alias="importforce">Full Import</key>

@@ -1,4 +1,7 @@
 ﻿
+using System;
+using System.Linq;
+
 using Microsoft.Extensions.Options;
 
 namespace uSync.BackOffice.Configuration
@@ -18,10 +21,22 @@ namespace uSync.BackOffice.Configuration
         /// <summary>
         ///  The unmapped root folder for uSync.
         /// </summary>
+        [Obsolete("we should be using the array of folders, will be removed in v15")]
         public string GetRootFolder()
-            => Settings.RootFolder.TrimStart('/');
+            => Settings.IsRootSite 
+                ? Settings.Folders[0].TrimStart('/')
+                : Settings.RootFolder.TrimStart('/');
 
-
+        /// <summary>
+        ///  Get the root folders that uSync is using. 
+        /// </summary>
+        /// <returns></returns>
+        public string[] GetFolders()
+            => Settings.IsRootSite
+                ? [Settings.Folders[0].TrimStart('/')]
+                : Settings.Folders.Select(x => x.TrimStart('/')).ToArray();
+        
+        
         /// <summary>
         /// Constructor for config service
         /// </summary>

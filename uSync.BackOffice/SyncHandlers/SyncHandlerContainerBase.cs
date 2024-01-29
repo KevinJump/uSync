@@ -1,15 +1,10 @@
-﻿using Microsoft.CodeAnalysis.Operations;
-using Microsoft.Extensions.Logging;
-
-using NPoco.RowMappers;
-
-using NUglify.JavaScript.Syntax;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
+
+using Microsoft.Extensions.Logging;
 
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Cache;
@@ -21,6 +16,7 @@ using Umbraco.Cms.Core.Strings;
 using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;
+using uSync.BackOffice.Models;
 using uSync.BackOffice.Services;
 using uSync.Core;
 using uSync.Core.Dependency;
@@ -29,7 +25,7 @@ using uSync.Core.Serialization;
 namespace uSync.BackOffice.SyncHandlers
 {
     /// <summary>
-    ///  Base hanlder for objects that have container based trees
+    ///  Base handler for objects that have container based trees
     /// </summary>
     /// <remarks>
     /// <para>
@@ -63,14 +59,21 @@ namespace uSync.BackOffice.SyncHandlers
         /// <summary>
         ///  Removes any empty 'containers' after import 
         /// </summary>
+        [Obsolete("We don't need to pass the folder. will be removed in v15")]
         protected IEnumerable<uSyncAction> CleanFolders(string folder, int parent)
+            => CleanFolders(parent);
+
+        /// <summary>
+        ///  Removes any empty 'containers' after import 
+        /// </summary>
+        protected IEnumerable<uSyncAction> CleanFolders(int parent)
         {
             var actions = new List<uSyncAction>();
             var folders = GetChildItems(parent, this.itemContainerType);
             foreach (var fdlr in folders)
             {
                 logger.LogDebug("Checking Container: {folder} for any childItems [{type}]", fdlr.Id, fdlr?.GetType()?.Name ?? "Unknown");
-                actions.AddRange(CleanFolders(folder, fdlr.Id));
+                actions.AddRange(CleanFolders(fdlr.Id));
 
                 if (!HasChildren(fdlr))
                 {
@@ -107,22 +110,31 @@ namespace uSync.BackOffice.SyncHandlers
         /// Handle events at the end of any import 
         /// </summary>
         public virtual IEnumerable<uSyncAction> ProcessPostImport(string folder, IEnumerable<uSyncAction> actions, HandlerSettings config)
+            => ProcessPostImport(actions, config);
+
+        /// <summary>
+        /// Handle events at the end of any import 
+        /// </summary>
+        public virtual IEnumerable<uSyncAction> ProcessPostImport(IEnumerable<uSyncAction> actions, HandlerSettings config)
         {
             if (actions == null || !actions.Any())
-                return null;
+                return Enumerable.Empty<uSyncAction>();
 
-            return CleanFolders(folder, -1);
+            return CleanFolders(-1);
         }
 
         /// <summary>
         ///  will resave everything in a folder (and beneath)
         ///  we need to this when it's renamed
         /// </summary>
-        /// <param name="folderId"></param>
-        /// <param name="folder"></param>
-        /// <param name="config"></param>
-        /// <returns></returns>
         protected IEnumerable<uSyncAction> UpdateFolder(int folderId, string folder, HandlerSettings config)
+            => UpdateFolder(folderId, [folder], config);
+
+        /// <summary>
+        ///  will resave everything in a folder (and beneath)
+        ///  we need to this when it's renamed
+        /// </summary>
+        protected IEnumerable<uSyncAction> UpdateFolder(int folderId, string[] folders, HandlerSettings config)
         {
             if (this.serializer is SyncContainerSerializerBase<TObject> containerSerializer)
             {
@@ -130,10 +142,10 @@ namespace uSync.BackOffice.SyncHandlers
             }
 
             var actions = new List<uSyncAction>();
-            var folders = GetChildItems(folderId, this.itemContainerType);
-            foreach (var fdlr in folders)
+            var itemFolders = GetChildItems(folderId, this.itemContainerType);
+            foreach (var item in itemFolders)
             {
-                actions.AddRange(UpdateFolder(fdlr.Id, folder, config));
+                actions.AddRange(UpdateFolder(item.Id, folders, config));
             }
 
             var items = GetChildItems(folderId, this.itemObjectType);
@@ -142,13 +154,13 @@ namespace uSync.BackOffice.SyncHandlers
                 var obj = GetFromService(item.Id);
                 if (obj != null)
                 {
-                    var attempts = Export(obj, folder, config);
+                    var attempts = Export(obj, folders, config);
                     foreach (var attempt in attempts.Where(x => x.Success))
                     {
                         // when its flat structure and use guidNames, we don't need to cleanup.
                         if (!(this.DefaultConfig.GuidNames && this.DefaultConfig.UseFlatStructure))
                         {
-                            CleanUp(obj, attempt.FileName, folder);
+                            CleanUp(obj, attempt.FileName, folders.Last());
                         }
 
                         actions.Add(attempt);
@@ -191,9 +203,12 @@ namespace uSync.BackOffice.SyncHandlers
             foreach (var folder in containers)
             {
                 logger.LogDebug("Processing container change : {name} [{id}]", folder.Name, folder.Id);
+                
+                var targetFolders = rootFolders.Select(x => Path.Combine(x, DefaultFolder)).ToArray();
+
                 if (folder.ContainedObjectType == this.itemObjectType.GetGuid())
                 {
-                    UpdateFolder(folder.Id, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
+                    UpdateFolder(folder.Id, targetFolders, DefaultConfig);
                 }
             }
         }
@@ -220,67 +235,39 @@ namespace uSync.BackOffice.SyncHandlers
         }
 
         /// <summary>
-        ///  for containers, we are building a dependency graph.
+        ///  Get merged items from a collection of folders. 
         /// </summary>
-        protected override IList<LeveledFile> GetLevelOrderedFiles(string folder, IList<uSyncAction> actions)
+        protected override IReadOnlyList<OrderedNodeInfo> GetMergedItems(string[] folders)
         {
-            var files = syncFileService.GetFiles(folder, $"*.{this.uSyncConfig.Settings.DefaultExtension}");
-
-            var nodes = new Dictionary<Guid, LeveledFile>();
+            var items = base.GetMergedItems(folders);
+            var nodes = items.ToDictionary(k => k.Key);
+            var renames = nodes.Where(x => x.Value.Node.IsEmptyItem()).Select(x => x.Value);
             var graph = new List<GraphEdge<Guid>>();
-            var renames = new List<LeveledFile>();
 
-            foreach (var file in files)
+            foreach(var item in items)
             {
-                var node = LoadNode(file);
-                if (node == null) continue;
-
-                var key = node.GetKey();
-
-                var leveledFile = new LeveledFile
-                {
-                    Alias = node.GetAlias(),
-                    File = file,
-                    Level = node.GetLevel(),
-                };
-
-                if (node.IsEmptyItem()) {
-                    renames.Add(leveledFile);
-                    continue;
-                }
-
-                if (nodes.TryAdd(key, leveledFile))
-                {
-                    graph.AddRange(GetCompositions(node).Select(x => GraphEdge.Create(key, x)));
-                }
-                else
-                {
-                    logger.LogWarning("Failed to add key when sorting, possible duplicate? {key} {alias} {file} old sort method will be used (may require additional pass)",
-                        key, node.GetAlias(), file);
-
-                    // fall back to the old way. 
-                    return base.GetLevelOrderedFiles(folder, actions);
-                }
+                graph.AddRange(GetCompositions(item.Node).Select(x => GraphEdge.Create(item.Key, x)));
             }
-
-            var cleanGraph = graph.Where(x => x.Node != x.Edge).ToList();
+         
+            var cleanGraph = graph.Where(x => x.Node == x.Edge).ToList();
             var sortedList = nodes.Keys.TopologicalSort(cleanGraph);
 
             if (sortedList == null)
-                return nodes.Values.OrderBy(x => x.Level).ToList();
+                return items.OrderBy(x => x.Level).ToList();
 
-            var result = new List<LeveledFile>();
-            foreach(var key in sortedList)
+            var results = new List<OrderedNodeInfo>();
+            foreach (var key in sortedList)
             {
-                if (nodes.ContainsKey(key))
-                    result.Add(nodes[key]);
+                if(nodes.TryGetValue(key, out OrderedNodeInfo value))
+                    results.Add(value);
             }
 
             if (renames.Any())
-                result.AddRange(renames);
+                results.AddRange(renames);
 
-            return result;
+            return results;
         }
+        
 
         /// <summary>
         ///  get the Guid values of any compositions so they can be graphed
@@ -289,16 +276,7 @@ namespace uSync.BackOffice.SyncHandlers
         {
             return GetCompositions(node);
         }
-
-        private IEnumerable<Guid> GetStructure(XElement node)
-        {
-
-            var structure = node.Element("Structure");
-            if (structure == null) return Enumerable.Empty<Guid>();
-
-            return GetKeys(structure);
-        }
-
+    
         private IEnumerable<Guid> GetCompositions(XElement node)
         {
             var compositionNode = node.Element("Info")?.Element("Compositions");

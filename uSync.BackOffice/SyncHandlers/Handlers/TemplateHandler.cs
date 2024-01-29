@@ -28,7 +28,10 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
     public class TemplateHandler : SyncHandlerLevelBase<ITemplate, IFileService>, ISyncHandler,
         INotificationHandler<SavedNotification<ITemplate>>,
         INotificationHandler<DeletedNotification<ITemplate>>,
-        INotificationHandler<MovedNotification<ITemplate>>
+        INotificationHandler<MovedNotification<ITemplate>>,
+        INotificationHandler<SavingNotification<ITemplate>>,
+        INotificationHandler<DeletingNotification<ITemplate>>,
+        INotificationHandler<MovingNotification<ITemplate>>
     {
         private readonly IFileService fileService;
 

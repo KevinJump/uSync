@@ -28,7 +28,12 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         INotificationHandler<SavedNotification<IContent>>,
         INotificationHandler<DeletedNotification<IContent>>,
         INotificationHandler<MovedNotification<IContent>>,
-        INotificationHandler<MovedToRecycleBinNotification<IContent>>
+        INotificationHandler<MovedToRecycleBinNotification<IContent>>,
+        INotificationHandler<SavingNotification<IContent>>,
+        INotificationHandler<DeletingNotification<IContent>>,
+        INotificationHandler<MovingNotification<IContent>>,
+        INotificationHandler<MovingToRecycleBinNotification<IContent>>
+
     {
         /// <summary>
         ///  the default group for which events matter (content group)

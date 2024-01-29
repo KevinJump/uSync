@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Linq;
 
 using Microsoft.Extensions.Logging;
 
@@ -16,6 +17,7 @@ using Umbraco.Extensions;
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
 using uSync.Core;
+using uSync.Core.Models;
 using uSync.Core.Serialization;
 
 using static Umbraco.Cms.Core.Constants;
@@ -32,7 +34,10 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         INotificationHandler<MovedNotification<IDataType>>,
         INotificationHandler<DeletedNotification<IDataType>>,
         INotificationHandler<EntityContainerSavedNotification>,
-        INotificationHandler<EntityContainerRenamedNotification>
+        INotificationHandler<EntityContainerRenamedNotification>,
+        INotificationHandler<SavingNotification<IDataType>>,
+        INotificationHandler<MovingNotification<IDataType>>,
+        INotificationHandler<DeletingNotification<IDataType>>
     {
         private readonly IDataTypeService dataTypeService;
 
@@ -68,30 +73,21 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         /// HOWEVER: If we move deletes to the end , we still need to process them. 
         /// but deletes are always 'change' = 'Hidden', so we only process hidden changes
         /// </remarks>
-        public override IEnumerable<uSyncAction> ProcessPostImport(string folder, IEnumerable<uSyncAction> actions, HandlerSettings config)
+        public override IEnumerable<uSyncAction> ProcessPostImport(IEnumerable<uSyncAction> actions, HandlerSettings config)
         {
             if (actions == null || !actions.Any())
-                return null;
+                return Enumerable.Empty<uSyncAction>();
 
-            var results = new List<uSyncAction>(); 
-            
+            var results = new List<uSyncAction>();          
 
             // we only do deletes here. 
             foreach (var action in actions.Where(x => x.Change == ChangeType.Hidden))
             {
-                var result = Import(action.FileName, config, SerializerFlags.LastPass);
-                results.AddRange(result);
-
-                //foreach (var attempt in result)
-                //{
-                //    if (attempt.Success && attempt.Item is IDataType dataType)
-                //    {
-                //        ImportSecondPass(action.FileName, dataType, config, null);
-                //    }
-                //}
+                results.AddRange(
+                    Import(action.FileName, config, SerializerFlags.LastPass));
             }
 
-            results.AddRange(CleanFolders(folder, -1));
+            results.AddRange(CleanFolders(-1));
 
             return results;
         }
@@ -119,5 +115,51 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         /// </summary>
         protected override string GetItemFileName(IDataType item)
             => GetItemAlias(item).ToSafeAlias(shortStringHelper);
+
+        /// <inheritdoc />
+        protected override SyncAttempt<XElement> Export_DoExport(IDataType item, string filename, string[] folders, HandlerSettings config)
+        {
+            // all the possible files that there could be. 
+            var files = folders.Select(x => GetPath(x, item, config.GuidNames, config.UseFlatStructure)).ToArray();
+            var nodes = syncFileService.GetAllNodes(files[..^1]);
+
+            // with roots enabled - we attempt to merge doctypes ! 
+            // 
+            var attempt = SerializeItem(item, new Core.Serialization.SyncSerializerOptions(config.Settings));
+            if (attempt.Success)
+            {
+                if (ShouldExport(attempt.Item, config))
+                {
+                    if (nodes.Count > 0)
+                    {
+                        nodes.Add(attempt.Item);
+                        var difference = syncFileService.GetDifferences(nodes, trackers.FirstOrDefault());
+                        if (difference != null)
+                        {
+                            syncFileService.SaveXElement(difference, filename);
+                        }
+                        else
+                        {
+                            if (syncFileService.FileExists(filename))
+                                syncFileService.DeleteFile(filename);
+                        }
+
+                    }
+                    else
+                    {
+                        syncFileService.SaveXElement(attempt.Item, filename);
+                    }
+
+                    if (config.CreateClean && HasChildren(item))
+                        CreateCleanFile(GetItemKey(item), filename);
+                }
+                else
+                {
+                    return SyncAttempt<XElement>.Succeed(filename, ChangeType.NoChange, "Not Exported (Based on configuration)");
+                }
+            }
+
+            return attempt;
+        }
     }
 }

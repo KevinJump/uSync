@@ -270,7 +270,7 @@ namespace uSync.BackOffice.Controllers
         public IEnumerable<uSyncAction> Import(uSyncOptions options)
         {
             var hubClient = new HubClientService(_hubContext, options.ClientId);
-            return _uSyncService.Import(_uSyncConfig.GetRootFolder(), options.Force, new SyncHandlerOptions()
+            return _uSyncService.Import(_uSyncConfig.GetFolders(), options.Force, new SyncHandlerOptions()
             {
                 Group = options.Group
             },

@@ -24,13 +24,15 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
     /// </summary>
     [SyncHandler(uSyncConstants.Handlers.MediaTypeHandler, "Media Types", "MediaTypes", uSyncConstants.Priorites.MediaTypes,
         IsTwoPass = true, Icon = "icon-thumbnails", EntityType = UdiEntityType.MediaType)]
-    public class MediaTypeHandler : SyncHandlerContainerBase<IMediaType, IMediaTypeService>, ISyncHandler, ISyncGraphableHandler,
+    public class MediaTypeHandler : ContentTypeBaseHandler<IMediaType, IMediaTypeService>, ISyncHandler, ISyncGraphableHandler,
         INotificationHandler<SavedNotification<IMediaType>>,
         INotificationHandler<DeletedNotification<IMediaType>>,
         INotificationHandler<MovedNotification<IMediaType>>,
         INotificationHandler<EntityContainerSavedNotification>,        
-        INotificationHandler<EntityContainerRenamedNotification>
-    // INotificationHandler<MediaTypeSavedNotification>
+        INotificationHandler<EntityContainerRenamedNotification>,
+        INotificationHandler<SavingNotification<IMediaType>>,
+        INotificationHandler<DeletingNotification<IMediaType>>,
+        INotificationHandler<MovingNotification<IMediaType>>
     {
         private readonly IMediaTypeService mediaTypeService;
 

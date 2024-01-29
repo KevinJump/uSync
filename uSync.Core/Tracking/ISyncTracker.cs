@@ -6,7 +6,15 @@ using uSync.Core.Serialization;
 
 namespace uSync.Core.Tracking
 {
-    public interface ISyncTrackerBase { }
+    public interface ISyncTrackerBase {
+
+        XElement MergeFiles(XElement a, XElement b)
+            => b;
+
+        XElement GetDifferences(List<XElement> nodes)
+            => nodes.Count > 0 ? nodes[^1] : null;
+
+    }
 
     public interface ISyncTracker<TObject> : ISyncTrackerBase
     {

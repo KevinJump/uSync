@@ -28,7 +28,12 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         INotificationHandler<SavedNotification<IMedia>>,
         INotificationHandler<DeletedNotification<IMedia>>,
         INotificationHandler<MovedNotification<IMedia>>,
-        INotificationHandler<MovedToRecycleBinNotification<IMedia>>
+        INotificationHandler<MovedToRecycleBinNotification<IMedia>>,
+        INotificationHandler<SavingNotification<IMedia>>,
+        INotificationHandler<DeletingNotification<IMedia>>,
+        INotificationHandler<MovingNotification<IMedia>>,
+        INotificationHandler<MovingToRecycleBinNotification<IMedia>>
+
     {
         /// <inheritdoc/>
         public override string Group => uSyncConstants.Groups.Content;

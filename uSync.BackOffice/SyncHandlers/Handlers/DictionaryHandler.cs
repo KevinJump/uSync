@@ -30,7 +30,9 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         , Icon = "icon-book-alt usync-addon-icon", EntityType = UdiEntityType.DictionaryItem)]
     public class DictionaryHandler : SyncHandlerLevelBase<IDictionaryItem, ILocalizationService>, ISyncHandler,
         INotificationHandler<SavedNotification<IDictionaryItem>>,
-        INotificationHandler<DeletedNotification<IDictionaryItem>>
+        INotificationHandler<DeletedNotification<IDictionaryItem>>,
+        INotificationHandler<SavingNotification<IDictionaryItem>>,
+        INotificationHandler<DeletingNotification<IDictionaryItem>>
     {
         /// <summary>
         ///  Dictionary items belong to the content group by default

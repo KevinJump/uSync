@@ -29,7 +29,9 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             EntityType = UdiEntityType.RelationType, IsTwoPass = false)]
     public class RelationTypeHandler : SyncHandlerBase<IRelationType, IRelationService>, ISyncHandler,
         INotificationHandler<SavedNotification<IRelationType>>,
-        INotificationHandler<DeletedNotification<IRelationType>>        
+        INotificationHandler<DeletedNotification<IRelationType>>,
+        INotificationHandler<SavingNotification<IRelationType>>,
+        INotificationHandler<DeletingNotification<IRelationType>>
     {
         private readonly IRelationService relationService;
 

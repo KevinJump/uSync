@@ -73,6 +73,9 @@ namespace uSync.Core.Models
         public static SyncAttempt<TObject> Succeed(string name, ChangeType change)
             => new SyncAttempt<TObject>(true, name, default(TObject), typeof(TObject).Name, change, string.Empty, null, false);
 
+        public static SyncAttempt<TObject> Succeed(string name, ChangeType change, string message)
+            => new SyncAttempt<TObject>(true, name, default(TObject), typeof(TObject).Name, change, message, null, false);
+
         public static SyncAttempt<TObject> Succeed(string name, TObject item, ChangeType change, IList<uSyncChange> details)
         {
             var attempt = new SyncAttempt<TObject>(true, name, item, typeof(TObject).Name, change, string.Empty, null, false);

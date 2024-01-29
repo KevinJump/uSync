@@ -8,6 +8,7 @@ using Newtonsoft.Json.Serialization;
 using Umbraco.Cms.Core;
 
 using uSync.BackOffice.Configuration;
+using uSync.BackOffice.Models;
 using uSync.Core;
 using uSync.Core.Dependency;
 using uSync.Core.Models;
@@ -83,11 +84,13 @@ namespace uSync.BackOffice.SyncHandlers
         /// <summary>
         /// Export an item based on the int id value in umbraco
         /// </summary>
+        [Obsolete("pass array of folders so roots behavior can process will be removed in v15")]
         IEnumerable<uSyncAction> Export(int id, string folder, HandlerSettings settings);
 
         /// <summary>
         /// Export an item based on the Udi value of the item
         /// </summary>
+        [Obsolete("pass array of folders so roots behavior can process will be removed in v15")]
         IEnumerable<uSyncAction> Export(Udi udi, string folder, HandlerSettings settings);
 
         /// <summary>
@@ -95,9 +98,21 @@ namespace uSync.BackOffice.SyncHandlers
         /// </summary>
         /// <param name="folder">folder to use when exporting</param>
         /// <param name="settings">Handler settings to use for export</param>
-        /// <param name="callback">Callbacks to keep UI upto date</param>
+        /// <param name="callback">Callbacks to keep UI up to date</param>
         /// <returns>List of actions detailing changes</returns>
+        [Obsolete("Call method with folders for roots functionality will be removed in v15")]
         IEnumerable<uSyncAction> ExportAll(string folder, HandlerSettings settings, SyncUpdateCallback callback);
+
+        /// <summary>
+        ///  Export all items 
+        /// </summary>
+        /// <param name="folders">folders to use when exporting</param>
+        /// <param name="settings">Handler settings to use for export</param>
+        /// <param name="callback">Callbacks to keep UI up to date</param>
+        /// <returns>List of actions detailing changes</returns>
+        IEnumerable<uSyncAction> ExportAll(string[] folders, HandlerSettings settings, SyncUpdateCallback callback)
+            => ExportAll(folders[0], settings, callback); // default implementation stops breaking change
+
 
         /// <summary>
         /// Get any dependencies required to full import this item
@@ -126,7 +141,18 @@ namespace uSync.BackOffice.SyncHandlers
         /// <param name="force">Force the import even if the settings haven't changed</param>
         /// <param name="callback">Callbacks to keep UI upto date</param>
         /// <returns>List of actions detailing changes</returns>
+        [Obsolete("Call method with folders for roots functionality will be removed in v15")]
         IEnumerable<uSyncAction> ImportAll(string folder, HandlerSettings settings, bool force, SyncUpdateCallback callback);
+
+        /// <summary>
+        ///  Import All items 
+        /// </summary>
+        /// <param name="folders">folders to use when Importing</param>
+        /// <param name="settings">Handler settings to use for import</param>
+        /// <param name="options">Import options to use</param>
+        /// <returns>List of actions detailing changes</returns>
+        IEnumerable<uSyncAction> ImportAll(string[] folders, HandlerSettings settings, uSyncImportOptions options)
+            => ImportAll(folders[0], settings, options.Flags.HasFlag(Core.Serialization.SerializerFlags.Force), options.Callbacks?.Update);
 
         /// <summary>
         ///  Import from a single node. 
@@ -140,7 +166,18 @@ namespace uSync.BackOffice.SyncHandlers
         /// <param name="settings">Handler settings to use for report</param>
         /// <param name="callback">Callbacks to keep UI upto date</param>
         /// <returns>List of actions detailing changes</returns>
+        [Obsolete("Call method with folders for roots functionality will be removed in v15")]
         IEnumerable<uSyncAction> Report(string folder, HandlerSettings settings, SyncUpdateCallback callback);
+
+        /// <summary>
+        ///  Report All items 
+        /// </summary>
+        /// <param name="folders">folders to use when reporting</param>
+        /// <param name="settings">Handler settings to use for report</param>
+        /// <param name="callback">Callbacks to keep UI upto date</param>
+        /// <returns>List of actions detailing changes</returns>
+        IEnumerable<uSyncAction> Report(string[] folders, HandlerSettings settings, SyncUpdateCallback callback)
+            => Report(folders[0], settings, callback);
 
         /// <summary>
         /// Report a single item based on loaded uSync xml
@@ -170,5 +207,11 @@ namespace uSync.BackOffice.SyncHandlers
         /// <param name="folder"></param>
         /// <param name="keys"></param>
         void PreCacheFolderKeys(string folder, IList<Guid> keys) { }
+
+        /// <summary>
+        ///  fetch all the nodes that are needed for an report/import.
+        /// </summary>
+        public IReadOnlyList<OrderedNodeInfo> FetchAllNodes(string[] folders)
+            => new List<OrderedNodeInfo>();
     }
 }

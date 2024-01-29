@@ -11,7 +11,9 @@ using Microsoft.Extensions.Logging;
 
 using Umbraco.Cms.Core.Extensions;
 
+using uSync.BackOffice.Models;
 using uSync.Core;
+using uSync.Core.Tracking;
 
 namespace uSync.BackOffice.Services
 {
@@ -442,6 +444,159 @@ namespace uSync.BackOffice.Services
             => $"{Path.DirectorySeparatorChar}{Path.GetFileName(Path.GetDirectoryName(file))}" +
             $"{Path.DirectorySeparatorChar}{Path.GetFileName(file)}";
 
+        // roots 
+        #region roots
+
+        /// <summary>
+        ///  Merge a number of uSync folders into a single 'usync source'
+        /// </summary>
+        /// <remarks>
+        ///  this is the core of the "roots" functionality. folders are 
+        ///  merged upwards (so the last folder will win)
+        ///  
+        ///  custom merging can be achieved using additional methods on
+        ///  the change trackers. 
+        ///  
+        ///  the doctype tracker merges properties so you can have 
+        ///  property level root values for doctypes. 
+        /// </remarks>
+        public IEnumerable<OrderedNodeInfo> MergeFolders(string[] folders, string extension, ISyncTrackerBase trackerBase)
+        {
+            var elements = new Dictionary<string, OrderedNodeInfo>();
+
+            foreach (var folder in folders)
+            {
+                var absPath = GetAbsPath($"~/{folder}");
+
+                if (DirectoryExists(absPath) is false) continue;
+
+                var items = GetFolderItems(absPath, extension);
+
+                foreach (var item in items)
+                {
+                    if (elements.ContainsKey(item.Key))
+                    {
+                        // merge these files.
+                        item.Value.Node = trackerBase.MergeFiles(elements[item.Key].Node, item.Value.Node);
+                    }
+
+                    elements[item.Key] = item.Value;
+                }
+            }
+
+            return elements.Values;
+        }
+
+        private IEnumerable<KeyValuePair<string, OrderedNodeInfo>> GetFolderItems(string folder, string extension)
+        {
+            foreach (var file in GetFilePaths(folder, extension))
+            {
+                var element = LoadXElementSafe(file);
+                if (element != null)
+                {
+                    var path = file.Substring(folder.Length);
+
+                    yield return new KeyValuePair<string, OrderedNodeInfo>(
+                        key: path,
+                        value: new OrderedNodeInfo
+                        {
+                            Key = element.GetKey(),
+                            Alias = element.GetAlias(),
+                            Path = path,
+                            Filename = file,
+                            IsRoot = true,
+                            Level = (element.GetLevel() * 1000) + element.GetItemSortOrder(), 
+                            Node = element
+                        });
+                }
+            }
+        }
+
+        /// <summary>
+        ///  will load the most relevant version of a file. 
+        /// </summary>
+        public XElement GetNearestNode(string filePath, string[] folders)
+        {
+            foreach (var folder in folders.Reverse())
+            {
+                var path = Path.Combine(folder, filePath);
+                if (FileExists(path))
+                    return LoadXElementSafe(path);
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        ///  get a XML representation of the differences between two files
+        /// </summary>
+        /// <remarks>
+        ///  the default merger returns the whole xml as the difference. 
+        /// </remarks>
+        public XElement GetDifferences(List<XElement> nodes, ISyncTrackerBase trackerBase)
+        {
+            if (nodes?.Count == 0) return null;
+            if (nodes.Count == 1) return nodes[0];
+   
+            return trackerBase.GetDifferences(nodes);
+        }
+
+        /// <summary>
+        ///  get all xml elements that represent this item across
+        ///  all folders. 
+        /// </summary>
+        public List<XElement> GetAllNodes(string[] filePaths)
+        {
+            var nodes = new List<XElement>(filePaths.Length);   
+            foreach(var file in filePaths)
+            {
+                if (!FileExists(file)) continue;
+                var element = LoadXElementSafe(file);
+                if (element != null)
+                    nodes.Add(element);
+            }
+
+            return nodes;
+        }
+
+        /// <summary>
+        /// checks a list of folders to see if any of them exists
+        /// </summary>
+        /// <returns>true if any but the last folder exists</returns>
+        public bool AnyFolderExists(string[] folders)
+        {
+            foreach(var folder in folders)
+            {
+                if (DirectoryExists(folder)) return true;
+            }
+
+            return false;
+        }
+
+        private string[] GetFilePaths(string folder, string extension)
+            => Directory.GetFiles(folder, $"*.{extension}", SearchOption.AllDirectories);
+
+        private XElement LoadXElementSafe(string file)
+        {
+            var absPath = GetAbsPath(file);
+
+            if (FileExists(absPath) is false) return null;
+
+            try
+            {
+                return XElement.Load(absPath);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        #endregion
+
     }
+
+
+
 
 }
