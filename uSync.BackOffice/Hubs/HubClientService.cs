@@ -2,6 +2,8 @@
 
 using Microsoft.AspNetCore.SignalR;
 
+using uSync.BackOffice.Models;
+
 namespace uSync.BackOffice.Hubs
 {
     /// <summary>

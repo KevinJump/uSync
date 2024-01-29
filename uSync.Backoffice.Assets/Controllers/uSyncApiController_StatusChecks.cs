@@ -1,9 +1,4 @@
-﻿using System;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -20,7 +15,7 @@ using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Models;
 using uSync.BackOffice.SyncHandlers;
 
-namespace uSync.BackOffice.Controllers
+namespace uSync.BackOffice.Assets.Controllers
 {
     /// <summary>
     ///  Checking status, version numbers and setup 

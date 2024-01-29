@@ -6,7 +6,7 @@ using Newtonsoft.Json.Serialization;
 
 using uSync.Core.Serialization;
 
-namespace uSync.BackOffice
+namespace uSync.BackOffice.Models
 {
     /// <summary>
     ///  options passed to an import, report or export of an item.

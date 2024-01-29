@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-
-using Microsoft.AspNetCore.Routing;
+﻿using Microsoft.AspNetCore.Routing;
 
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Events;
@@ -9,11 +6,11 @@ using Umbraco.Cms.Core.Notifications;
 using Umbraco.Cms.Core.Security;
 using Umbraco.Extensions;
 
+using uSync.BackOffice.Assets.Controllers;
 using uSync.BackOffice.Configuration;
-using uSync.BackOffice.Controllers;
 using uSync.BackOffice.Hubs;
 
-namespace uSync.BackOffice.Notifications
+namespace uSync.BackOffice.Assets.Notifications
 {
     /// <summary>
     ///  Handles ServerVariablesParsing to inject the uSync variables into the Umbraco.Sys namespace in Javascript

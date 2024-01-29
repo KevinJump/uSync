@@ -7,6 +7,7 @@ using System.Linq;
 using Microsoft.Extensions.Logging;
 
 using uSync.BackOffice.Extensions;
+using uSync.BackOffice.Models;
 using uSync.BackOffice.SyncHandlers;
 
 namespace uSync.BackOffice
