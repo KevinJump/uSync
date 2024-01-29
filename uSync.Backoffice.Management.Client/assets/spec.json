@@ -1,0 +1,57 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+        "title": "uSync Api",
+        "description": "Api to access uSync operations",
+        "version": "Latest"
+    },
+    "paths": {
+        "/umbraco/management/api/v1/uSync/actions": {
+            "get": {
+                "tags": [
+                    "Actions"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {}
+                                }
+                            },
+                            "text/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {}
+                                }
+                            },
+                            "text/plain": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {}
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "Backoffice User": {
+                "type": "oauth2",
+                "description": "Umbraco Authentication",
+                "flows": {
+                    "authorizationCode": {
+                        "authorizationUrl": "/umbraco/management/api/v1/security/back-office/authorize",
+                        "tokenUrl": "/umbraco/management/api/v1/security/back-office/token",
+                        "scopes": {}
+                    }
+                }
+            }
+        }
+    }
+}

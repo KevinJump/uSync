@@ -39,6 +39,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.History", "uSync.Hist
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.Site", "uSync.Site\uSync.Site.csproj", "{CD8A40A1-E7A1-4B9F-B8AB-7BA901333614}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.Backoffice.Management.Client", "uSync.Backoffice.Management.Client\uSync.Backoffice.Management.Client.csproj", "{25F84953-F480-4A85-B479-CC4E9AA6337D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "uSync.Backoffice.Management.Api", "uSync.Backoffice.Management.Api\uSync.Backoffice.Management.Api.csproj", "{7701860C-52E5-4C0B-A020-CBC8FFD6CBEA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -93,6 +97,14 @@ Global
 		{CD8A40A1-E7A1-4B9F-B8AB-7BA901333614}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CD8A40A1-E7A1-4B9F-B8AB-7BA901333614}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CD8A40A1-E7A1-4B9F-B8AB-7BA901333614}.Release|Any CPU.Build.0 = Release|Any CPU
+		{25F84953-F480-4A85-B479-CC4E9AA6337D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{25F84953-F480-4A85-B479-CC4E9AA6337D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{25F84953-F480-4A85-B479-CC4E9AA6337D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{25F84953-F480-4A85-B479-CC4E9AA6337D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7701860C-52E5-4C0B-A020-CBC8FFD6CBEA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7701860C-52E5-4C0B-A020-CBC8FFD6CBEA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7701860C-52E5-4C0B-A020-CBC8FFD6CBEA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7701860C-52E5-4C0B-A020-CBC8FFD6CBEA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

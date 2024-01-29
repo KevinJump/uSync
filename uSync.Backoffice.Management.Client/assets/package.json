@@ -1,0 +1,22 @@
+{
+  "name": "assets",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "watch": "vite build --watch",
+    "generate": "openapi --input http://localhost:24831/umbraco/swagger/uSync/swagger.json --output src/api --useOptions --postfixServices Resource"
+  },
+  "dependencies": {
+    "lit": "^3.1.0"
+  },
+  "devDependencies": {
+    "@umbraco-cms/backoffice": "^14.0.0--preview004",
+    "openapi-typescript-codegen": "^0.25.0",
+    "typescript": "^5.2.2",
+    "vite": "^5.0.8"
+  }
+}
