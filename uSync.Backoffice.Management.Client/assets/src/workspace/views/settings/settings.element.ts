@@ -16,6 +16,8 @@ export class uSyncSettingsViewElement extends UmbElementMixin(LitElement) {
     }
 }
 
+export default uSyncSettingsViewElement;
+
 declare global {
     interface HTMLElementTagNameMap {
         'usync-settings-view' : uSyncSettingsViewElement

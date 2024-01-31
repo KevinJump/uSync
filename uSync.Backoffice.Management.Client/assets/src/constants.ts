@@ -11,6 +11,7 @@ const _constants = {
         name: 'uSync root workspace',
         rootElement: 'usync-root',
         elementName: 'usync-workspace-root',
+        contextAlias: 'usync.workspace.context',
 
         defaultView: {
             alias: 'usync.workspace.default',

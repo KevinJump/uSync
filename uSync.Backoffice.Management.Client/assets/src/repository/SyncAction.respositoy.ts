@@ -3,14 +3,11 @@ import { uSyncActionDataSource } from "./sources/SyncAction.source";
 import { UmbBaseController } from "@umbraco-cms/backoffice/class-api";
 
 export class uSyncActionRepository extends UmbBaseController {
-    #host: UmbControllerHost;
     #actionDataSource: uSyncActionDataSource;
 
     constructor(host: UmbControllerHost) {
         super(host);
-        this.#host = host;
         this.#actionDataSource = new uSyncActionDataSource(this);
-        console.log('respository init');
     }
 
     async getActions() {
@@ -19,5 +16,16 @@ export class uSyncActionRepository extends UmbBaseController {
 
     async getTime() {
         return this.#actionDataSource.getTime();
+    }
+
+    async performAction(id: string, group: string, action: string, step: number) {
+
+        return this.#actionDataSource.performAction({
+            requestId: id,
+            groupName: group,
+            actionName: action,
+            stepNumber: step
+        });
+
     }
 }

@@ -2,6 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { PerformActionRequestModel } from '../models/PerformActionRequestModel';
+import type { PerformActionResponse } from '../models/PerformActionResponse';
 import type { SyncActionGroup } from '../models/SyncActionGroup';
 
 import type { CancelablePromise } from '../core/CancelablePromise';
@@ -14,10 +16,27 @@ export class ActionsResource {
      * @returns any Success
      * @throws ApiError
      */
-    public static getUmbracoManagementApiV1USyncActions(): CancelablePromise<Array<SyncActionGroup>> {
+    public static getActions(): CancelablePromise<Array<SyncActionGroup>> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/umbraco/management/api/v1/uSync/actions',
+            url: '/umbraco/usync/api/v1/core/actions',
+        });
+    }
+
+    /**
+     * @returns any Success
+     * @throws ApiError
+     */
+    public static performAction({
+requestBody,
+}: {
+requestBody?: PerformActionRequestModel,
+}): CancelablePromise<PerformActionResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/umbraco/usync/api/v1/core/Perform',
+            body: requestBody,
+            mediaType: 'application/json',
         });
     }
 
@@ -25,10 +44,10 @@ export class ActionsResource {
      * @returns string Success
      * @throws ApiError
      */
-    public static getUmbracoManagementApiV1USyncTime(): CancelablePromise<string> {
+    public static getTime(): CancelablePromise<string> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/umbraco/management/api/v1/uSync/time',
+            url: '/umbraco/usync/api/v1/core/time',
         });
     }
 

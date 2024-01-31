@@ -2,10 +2,7 @@ import { UmbTextStyles } from '@umbraco-cms/backoffice/style';
 import { UmbElementMixin } from "@umbraco-cms/backoffice/element-api";
 import { LitElement, customElement, html } from "@umbraco-cms/backoffice/external/lit";
 
-import { USYNC_ACTION_CONTEXT_TOKEN, uSyncWorkspaceActionContext } from './context/action.context';
-
 import './views/default/default.element';
-import { UmbControllerHostElement } from '@umbraco-cms/backoffice/controller-api';
 
 @customElement('usync-workspace')
 export class uSyncWorkspaceRootElement extends UmbElementMixin(LitElement)

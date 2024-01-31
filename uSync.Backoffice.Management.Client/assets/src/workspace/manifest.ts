@@ -1,11 +1,20 @@
 import { 
     ManifestWorkspace, 
     ManifestWorkspaceAction, 
+    ManifestWorkspaceContext, 
     ManifestWorkspaceView 
 } from "@umbraco-cms/backoffice/extension-registry";
 import { uSyncConstants } from "../constants.js";
 
 const workspaceAlias = uSyncConstants.workspace.alias;
+
+const context: ManifestWorkspaceContext = {
+    type: 'workspaceContext',
+    alias: uSyncConstants.workspace.contextAlias,
+    name: 'uSync workspace context',
+    js: () => import('./workspace.context.js'),
+}
+
 
 const workspace: ManifestWorkspace = {
     type: 'workspace',
@@ -43,7 +52,7 @@ const workspaceViews: Array<ManifestWorkspaceView> = [
         type: 'workspaceView',
         alias: uSyncConstants.workspace.settingView.alias,
         name: uSyncConstants.workspace.settingView.name,
-        js: () => import('./views/settings/index.js'),
+        js: () => import('./views/settings/settings.element.js'),
         weight: 200,
         meta: {
             label: 'Settings',
@@ -61,4 +70,4 @@ const workspaceViews: Array<ManifestWorkspaceView> = [
 
 const workspaceActions: Array<ManifestWorkspaceAction> = [];
 
-export const manifests = [workspace, ...workspaceViews, ...workspaceActions];
+export const manifests = [context, workspace, ...workspaceViews, ...workspaceActions];
