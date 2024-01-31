@@ -25,7 +25,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
     /// </summary>
     [SyncHandler(uSyncConstants.Handlers.RelationTypeHandler, "Relations",
             "RelationTypes", uSyncConstants.Priorites.RelationTypes,
-            Icon = "icon-traffic usync-addon-icon",
+            Icon = "icon-traffic",
             EntityType = UdiEntityType.RelationType, IsTwoPass = false)]
     public class RelationTypeHandler : SyncHandlerBase<IRelationType, IRelationService>, ISyncHandler,
         INotificationHandler<SavedNotification<IRelationType>>,

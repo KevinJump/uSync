@@ -23,7 +23,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
     ///  Handler to manage content templates in uSync
     /// </summary>
     [SyncHandler(uSyncConstants.Handlers.ContentTemplateHandler, "Blueprints", "Blueprints", uSyncConstants.Priorites.ContentTemplate
-        , Icon = "icon-document-dashed-line usync-addon-icon", IsTwoPass = true, EntityType = UdiEntityType.DocumentBlueprint)]
+        , Icon = "icon-document-dashed-line", IsTwoPass = true, EntityType = UdiEntityType.DocumentBlueprint)]
     public class ContentTemplateHandler : ContentHandlerBase<IContent, IContentService>, ISyncHandler,
         INotificationHandler<ContentSavedBlueprintNotification>,
         INotificationHandler<ContentDeletedBlueprintNotification>
