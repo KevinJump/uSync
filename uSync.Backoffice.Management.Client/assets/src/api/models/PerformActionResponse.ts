@@ -3,10 +3,12 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { ActionInfo } from './ActionInfo';
+import type { SyncHandlerSummary } from './SyncHandlerSummary';
+import type { uSyncActionView } from './uSyncActionView';
 
 export type PerformActionResponse = {
     requestId: string;
-    completed: boolean;
-    actionInfo: Array<ActionInfo>;
+    status?: Array<SyncHandlerSummary> | null;
+    actions?: Array<uSyncActionView> | null;
+    complete: boolean;
 };

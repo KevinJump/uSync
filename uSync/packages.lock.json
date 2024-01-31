@@ -2409,7 +2409,8 @@
       "usync.backoffice.management.api": {
         "type": "Project",
         "dependencies": {
-          "Umbraco.Cms.Api.Management": "[14.0.0--preview004, )"
+          "Umbraco.Cms.Api.Management": "[14.0.0--preview004, )",
+          "uSync.BackOffice": "[13.0.0, )"
         }
       },
       "usync.backoffice.management.client": {

@@ -14,6 +14,7 @@ export class uSyncWorkspaceRootElement extends UmbElementMixin(LitElement)
     render() {
         return html`
             <umb-workspace-editor alias="usync.workspace" headline="uSync" .enforceNoFooter=${true}>
+                <div slot="header">v14.0.0-early</div>
                 <usync-default-view></usync-default-view>
 			</umb-workspace-editor>
         `;

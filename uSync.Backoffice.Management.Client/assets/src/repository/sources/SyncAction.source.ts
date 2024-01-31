@@ -1,8 +1,11 @@
 import { UmbControllerHost } from "@umbraco-cms/backoffice/controller-api";
 import { DataSourceResponse } from "@umbraco-cms/backoffice/repository";
 import { tryExecuteAndNotify } from '@umbraco-cms/backoffice/resources';
-import { ActionsResource, PerformActionRequestModel, PerformActionResponse, SyncActionGroup } from "../../api";
-
+import { 
+    ActionsResource, 
+    PerformActionRequest, 
+    PerformActionResponse, 
+    SyncActionGroup } from "../../api";
 
 export interface SyncActionDataSource {
     getActions() : Promise<DataSourceResponse<unknown>>;
@@ -20,11 +23,7 @@ export class uSyncActionDataSource implements SyncActionDataSource {
         return await tryExecuteAndNotify(this.#host, ActionsResource.getActions());
     }
 
-    async getTime(): Promise<DataSourceResponse<string>> {
-        return await tryExecuteAndNotify(this.#host, ActionsResource.getTime());
-    }
-
-    async performAction(request : PerformActionRequestModel): Promise<DataSourceResponse<PerformActionResponse>> {
+    async performAction(request : PerformActionRequest): Promise<DataSourceResponse<PerformActionResponse>> {
         return await tryExecuteAndNotify(this.#host, ActionsResource.performAction({
             requestBody: request
         }));

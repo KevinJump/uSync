@@ -2,7 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { PerformActionRequestModel } from '../models/PerformActionRequestModel';
+import type { PerformActionRequest } from '../models/PerformActionRequest';
 import type { PerformActionResponse } from '../models/PerformActionResponse';
 import type { SyncActionGroup } from '../models/SyncActionGroup';
 
@@ -19,7 +19,7 @@ export class ActionsResource {
     public static getActions(): CancelablePromise<Array<SyncActionGroup>> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/umbraco/usync/api/v1/core/actions',
+            url: '/umbraco/usync/api/v1/Actions',
         });
     }
 
@@ -30,24 +30,13 @@ export class ActionsResource {
     public static performAction({
 requestBody,
 }: {
-requestBody?: PerformActionRequestModel,
+requestBody?: PerformActionRequest,
 }): CancelablePromise<PerformActionResponse> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/umbraco/usync/api/v1/core/Perform',
+            url: '/umbraco/usync/api/v1/Perform',
             body: requestBody,
             mediaType: 'application/json',
-        });
-    }
-
-    /**
-     * @returns string Success
-     * @throws ApiError
-     */
-    public static getTime(): CancelablePromise<string> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/umbraco/usync/api/v1/core/time',
         });
     }
 

@@ -3,9 +3,11 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export type PerformActionRequestModel = {
+import type { uSyncOptions } from './uSyncOptions';
+
+export type PerformActionRequest = {
     requestId: string;
-    groupName: string;
-    actionName: string;
+    action: string;
     stepNumber: number;
+    options?: uSyncOptions | null;
 };

@@ -1,5 +1,5 @@
 import { customElement, LitElement, css, html, property, nothing } from "@umbraco-cms/backoffice/external/lit";
-import { ActionInfo } from "../api";
+import { HandlerStatus, SyncHandlerSummary } from "../api";
 
 /**
  * @class uSyncProcessBox
@@ -12,7 +12,7 @@ export class uSyncProcessBox extends LitElement {
     title: string = "";
 
     @property({type: Array})
-    actions? : Array<ActionInfo>;
+    actions? : Array<SyncHandlerSummary>;
 
     render() {
 
@@ -24,9 +24,10 @@ export class uSyncProcessBox extends LitElement {
 
             return html`
                 <div class="action 
-                    ${action.completed ? 'complete' : ''} ${action.working ? "working" : ''}">
-                    <uui-icon .name=${action.icon}></uui-icon>
-                    <h4>${action.actionName}</h4>
+                    ${action.status == HandlerStatus.COMPLETE ? 'complete' : ''} 
+                    ${action.status == HandlerStatus.PROCESSING ? "working" : ''}">
+                    <uui-icon .name=${action.icon ?? "icon-box"}></uui-icon>
+                    <h4>${action.name ?? "unknown"}</h4>
                 </div>
             `;
 
@@ -45,7 +46,7 @@ export class uSyncProcessBox extends LitElement {
     
     static styles = css`
         uui-box {
-            margin: var(--uui-size-layout-1);
+            margin: var(--uui-size-space-4);
         }
 
         h2 {

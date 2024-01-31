@@ -1,4 +1,4 @@
-import { o as n, a as c, u as p } from "./index-B75q-oTb.js";
+import { o as n, a as c, u as p } from "./index-L8LKBc63.js";
 import "@umbraco-cms/backoffice/resources";
 import "@umbraco-cms/backoffice/class-api";
 import "@umbraco-cms/backoffice/external/lit";

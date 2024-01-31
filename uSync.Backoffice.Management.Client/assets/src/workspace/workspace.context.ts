@@ -1,10 +1,10 @@
-import { UmbArrayState, UmbBooleanState, UmbObjectState } from "@umbraco-cms/backoffice/observable-api";
+import { UmbArrayState, UmbBooleanState } from "@umbraco-cms/backoffice/observable-api";
 import { UmbContextToken } from "@umbraco-cms/backoffice/context-api";
 
 import { uSyncActionRepository } from "..";
 import { UmbControllerHost } from "@umbraco-cms/backoffice/controller-api";
 import { UmbBaseController } from "@umbraco-cms/backoffice/class-api";
-import { ActionInfo, SyncActionGroup } from "../api";
+import { SyncActionGroup, SyncHandlerSummary, uSyncActionView } from "../api";
 
 import { OpenAPI } from "../api";
 import { UMB_AUTH_CONTEXT } from '@umbraco-cms/backoffice/auth'
@@ -38,7 +38,7 @@ export class uSyncWorkspaceContext extends UmbBaseController {
     #actions = new UmbArrayState<SyncActionGroup>([], (x) => x.key);
     public readonly actions = this.#actions.asObservable();
 
-    #workingActions = new UmbArrayState<ActionInfo>([], (x) => x.actionName);
+    #workingActions = new UmbArrayState<SyncHandlerSummary>([], (x) => x.name);
     public readonly currentAction = this.#workingActions.asObservable();
 
     #working = new UmbBooleanState(false);
@@ -46,6 +46,9 @@ export class uSyncWorkspaceContext extends UmbBaseController {
 
     #completed = new UmbBooleanState(false);
     public readonly completed = this.#completed.asObservable();
+
+    #results = new UmbArrayState<uSyncActionView>([], (x) => x.name);
+    public readonly results = this.#results.asObservable();
 
     async getActions() {
 
@@ -56,21 +59,13 @@ export class uSyncWorkspaceContext extends UmbBaseController {
         }
     }
 
-    async getTime() {
-        const {data} = await this.#repository.getTime();
-
-        if (data) {
-            console.log(data);
-        }
-    }
-
-
-    public async performAction(group: string, key: string) {
+    async performAction(group: string, key: string) {
 
         console.log("Perform Action:", group, key);
 
         this.#working.setValue(true);
         this.#completed.setValue(false);
+        this.#results.setValue([]);
 
         var complete = false; 
         var id = '';
@@ -86,17 +81,23 @@ export class uSyncWorkspaceContext extends UmbBaseController {
 
                 console.log(data);
 
+                let summary = data.status ?? [];
                 
-                this.#workingActions.setValue(data.actionInfo);
-
+                this.#workingActions.setValue(summary);
 
                 id = data.requestId;
-                complete = data.completed;
+                complete = data.complete;
+
+                if (complete) {
+                    this.#results.setValue(data?.actions ?? []);
+                }
 
             }
             else {
                 complete = true;
             }
+
+
 
         } while (!complete)
         

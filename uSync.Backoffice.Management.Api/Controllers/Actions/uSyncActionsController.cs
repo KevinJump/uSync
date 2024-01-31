@@ -3,6 +3,7 @@
 using Microsoft.AspNetCore.Mvc;
 
 using uSync.Backoffice.Management.Api.Models;
+using uSync.BackOffice.SyncHandlers;
 
 namespace uSync.Backoffice.Management.Api.Controllers.Actions;
 
@@ -10,12 +11,7 @@ namespace uSync.Backoffice.Management.Api.Controllers.Actions;
 [ApiExplorerSettings(GroupName = "Actions")]
 public class uSyncActionsController : uSyncControllerBase
 {
-    [HttpGet("time")]
-    [ProducesResponseType(typeof(string), 200)]
-    public string GetTime()
-        => DateTime.Now.ToString("s");
-
-    [HttpGet("actions")]
+    [HttpGet("Actions")]
     [MapToApiVersion("1.0")]
     [ProducesResponseType(typeof(List<SyncActionGroup>), 200)]
     public async Task<List<SyncActionGroup>> GetActions()
@@ -24,19 +20,19 @@ public class uSyncActionsController : uSyncControllerBase
         {
             new SyncActionButton
             {
-                Key = "report",
+                Key = HandlerActions.Report.ToString(),
                 Look = "secondary",
                 Color = "positive"
             },
             new SyncActionButton
             {
-                Key = "import",
+                Key = HandlerActions.Import.ToString(),
                 Look = "primary",
                 Color = "positive"
             },
             new SyncActionButton
             {
-                Key = "export",
+                Key = HandlerActions.Export.ToString(),
                 Look = "primary",
                 Color = "default"
             }
@@ -45,23 +41,23 @@ public class uSyncActionsController : uSyncControllerBase
         List<SyncActionGroup> actions = [
             new SyncActionGroup
             {
-                GroupName = "Settings !",
+                GroupName = "Settings",
                 Icon = "icon-settings-alt",
                 Key = "settings",
                 Buttons = defaultButtons
             },
             new SyncActionGroup
             {
-                GroupName = "Content !",
+                GroupName = "Content",
                 Icon = "icon-documents",
                 Key = "content",
                 Buttons = defaultButtons
             },
             new SyncActionGroup
             {
-                GroupName = "Everything !",
+                GroupName = "Everything",
                 Icon = "icon-paper-plane-alt",
-                Key = "everything",
+                Key = "all",
                 Buttons = defaultButtons
             }
         ];

@@ -14,18 +14,20 @@ export class uSyncActionRepository extends UmbBaseController {
         return this.#actionDataSource.getActions();
     }
 
-    async getTime() {
-        return this.#actionDataSource.getTime();
-    }
-
     async performAction(id: string, group: string, action: string, step: number) {
 
-        return this.#actionDataSource.performAction({
-            requestId: id,
-            groupName: group,
-            actionName: action,
-            stepNumber: step
-        });
+        return this.#actionDataSource.performAction(
+            {
+                requestId : id, 
+                action: action,
+                options: {
+                    group : group,
+                    force : true,
+                    clean : false,
+                },
+                stepNumber: step
+            }
+        );
 
     }
 }

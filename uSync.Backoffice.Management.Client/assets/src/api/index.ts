@@ -7,10 +7,20 @@ export { CancelablePromise, CancelError } from './core/CancelablePromise';
 export { OpenAPI } from './core/OpenAPI';
 export type { OpenAPIConfig } from './core/OpenAPI';
 
-export type { ActionInfo } from './models/ActionInfo';
-export type { PerformActionRequestModel } from './models/PerformActionRequestModel';
+export { ChangeDetailType } from './models/ChangeDetailType';
+export { ChangeType } from './models/ChangeType';
+export { HandlerStatus } from './models/HandlerStatus';
+export type { PerformActionRequest } from './models/PerformActionRequest';
 export type { PerformActionResponse } from './models/PerformActionResponse';
 export type { SyncActionButton } from './models/SyncActionButton';
 export type { SyncActionGroup } from './models/SyncActionGroup';
+export type { SyncHandlerSummary } from './models/SyncHandlerSummary';
+export type { uSyncActionView } from './models/uSyncActionView';
+export type { uSyncAddonInfo } from './models/uSyncAddonInfo';
+export type { uSyncAddonSplash } from './models/uSyncAddonSplash';
+export type { uSyncChange } from './models/uSyncChange';
+export type { uSyncOptions } from './models/uSyncOptions';
+export type { uSyncSettings } from './models/uSyncSettings';
 
 export { ActionsResource } from './services/ActionsResource';
+export { SettingsResource } from './services/SettingsResource';

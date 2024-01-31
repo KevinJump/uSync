@@ -2,7 +2,7 @@ import { UmbElementMixin } from "@umbraco-cms/backoffice/element-api"
 import { LitElement, css, customElement, html, nothing, property } from "@umbraco-cms/backoffice/external/lit";
 
 import { USYNC_CORE_CONTEXT_TOKEN, uSyncWorkspaceContext } from '../../workspace.context.js';
-import { ActionInfo, SyncActionGroup } from "../../../api/index.js";
+import { SyncActionGroup, SyncHandlerSummary, uSyncActionView } from "../../../api/index.js";
 
 @customElement('usync-default-view')
 export class uSyncDefaultViewElement extends UmbElementMixin(LitElement) {
@@ -17,7 +17,7 @@ export class uSyncDefaultViewElement extends UmbElementMixin(LitElement) {
     loaded: Boolean = false;
 
     @property({ type: Array  })
-    workingActions? : Array<ActionInfo>;
+    workingActions? : Array<SyncHandlerSummary>;
 
     @property({ type: Boolean})
     working: boolean = false; 
@@ -30,6 +30,9 @@ export class uSyncDefaultViewElement extends UmbElementMixin(LitElement) {
 
     @property({ type: String}) 
     group: string = "";
+
+    @property({ type: Array})
+    results: Array<uSyncActionView> = [];
 
     constructor() {
         super();
@@ -54,6 +57,10 @@ export class uSyncDefaultViewElement extends UmbElementMixin(LitElement) {
             this.observe(_instance.working, (_working) => {
                 this.working = _working;
             });
+
+            this.observe(_instance.results, (_results) => {
+                this.results = _results;
+            })
 
             this.observe(_instance.completed, (_completed) => {
                 this.completed = _completed;
@@ -135,7 +142,7 @@ export class uSyncDefaultViewElement extends UmbElementMixin(LitElement) {
 
         return html`
             <uui-box>
-                <h2>Report Here</h2>
+                <usync-results .results=${this.results}></usync-results>
             </uui-box>
         `
     }
@@ -143,7 +150,7 @@ export class uSyncDefaultViewElement extends UmbElementMixin(LitElement) {
     static styles = [
         css`
             usync-action-box, uui-box {
-               margin: var(--uui-size-layout-1);
+               margin: var(--uui-size-space-4);
             }
 
             .action-buttons-box {
