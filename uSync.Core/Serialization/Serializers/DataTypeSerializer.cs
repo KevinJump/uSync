@@ -16,6 +16,7 @@ using Umbraco.Cms.Core.Services;
 using Umbraco.Extensions;
 
 using uSync.Core.DataTypes;
+using uSync.Core.Extensions;
 using uSync.Core.Json;
 using uSync.Core.Models;
 
@@ -183,21 +184,21 @@ namespace uSync.Core.Serialization.Serializers
                 var serializer = this._configurationSerializers.GetSerializer(item.EditorAlias);
                 if (serializer == null)
                 {
-                    var configObject = JsonConvert.DeserializeObject(config, item.Configuration.GetType());
-                    if (!IsJsonEqual(item.Configuration, configObject, _jsonSettings))
+                    var configObject = JsonConvert.DeserializeObject(config, item.ConfigurationObject.GetType());
+                    if (!IsJsonEqual(item.ConfigurationObject, configObject, _jsonSettings))
                     {
-                        changes.AddUpdateJson("Config", item.Configuration, configObject, "Configuration");
-                        item.Configuration = configObject;
+                        changes.AddUpdateJson("Config", item.ConfigurationObject, configObject, "Configuration");
+                        item.ConfigurationData = configObject.ToKeyNameDictionary();
                     }
                 }
                 else
                 {
                     logger.LogTrace("Deserializing Config via {0}", serializer.Name);
-                    var configObject = serializer.DeserializeConfig(config, item.Configuration.GetType());
-                    if (!IsJsonEqual(item.Configuration, configObject, _jsonSettings))
+                    var configObject = serializer.DeserializeConfig(config, item.ConfigurationObject.GetType());
+                    if (!IsJsonEqual(item.ConfigurationObject, configObject, _jsonSettings))
                     {
-                        changes.AddUpdateJson("Config", item.Configuration, configObject, "Configuration");
-                        item.Configuration = configObject;
+                        changes.AddUpdateJson("Config", item.ConfigurationData, configObject, "Configuration");
+                        item.ConfigurationData = configObject.ToKeyNameDictionary();
                     }
                 }
 
@@ -254,19 +255,19 @@ namespace uSync.Core.Serialization.Serializers
 
         private XElement SerializeConfiguration(IDataType item)
         {
-            if (item.Configuration != null)
+            if (item.ConfigurationObject != null)
             {
                 var serializer = this._configurationSerializers.GetSerializer(item.EditorAlias);
 
                 string config;
                 if (serializer == null)
                 {
-                    config = JsonConvert.SerializeObject(item.Configuration, Formatting.Indented, _jsonSettings);
+                    config = JsonConvert.SerializeObject(item.ConfigurationObject, Formatting.Indented, _jsonSettings);
                 }
                 else
                 {
                     logger.LogDebug("Serializing Config via {0}", serializer.Name);
-                    config = serializer.SerializeConfig(item.Configuration);
+                    config = serializer.SerializeConfig(item.ConfigurationObject);
                 }
 
                 return new XElement("Config", new XCData(config));

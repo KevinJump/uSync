@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 using Umbraco.Cms.Core.Models.Membership;
 
@@ -34,5 +35,22 @@ internal static class DictionaryExtensions
             : findMethod(email)?.Id ?? -1;
 
         return emails[email];
+    }
+
+    // This method converts an object to a dictionary of string, object
+    public static IDictionary<string, object> ToKeyNameDictionary(this object obj)
+    {
+        // Get the public properties of the object
+        var properties = obj.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+        // Create a dictionary and populate it with the property names and values
+        var dictionary = new Dictionary<string, object>();
+        foreach (var property in properties)
+        {
+            dictionary.Add(property.Name, property.GetValue(obj));
+        }
+
+        // Return the dictionary
+        return dictionary;
     }
 }
