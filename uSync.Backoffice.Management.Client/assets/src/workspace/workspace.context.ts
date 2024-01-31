@@ -8,6 +8,7 @@ import { SyncActionGroup, SyncHandlerSummary, uSyncActionView } from "../api";
 
 import { OpenAPI } from "../api";
 import { UMB_AUTH_CONTEXT } from '@umbraco-cms/backoffice/auth'
+import uSyncSignalRContext, { USYNC_SIGNALR_CONTEXT_TOKEN } from "../signalr/signalr.context";
 
 /**
  * @exports 
@@ -17,6 +18,7 @@ import { UMB_AUTH_CONTEXT } from '@umbraco-cms/backoffice/auth'
 export class uSyncWorkspaceContext extends UmbBaseController {
 
     #repository: uSyncActionRepository;
+    #signalRContext: uSyncSignalRContext | null = null;
 
     constructor(host:UmbControllerHost) {
         super(host);
@@ -30,6 +32,13 @@ export class uSyncWorkspaceContext extends UmbBaseController {
             OpenAPI.WITH_CREDENTIALS = true;
             this.#loaded.setValue(true);
         });
+        
+        this.consumeContext(USYNC_SIGNALR_CONTEXT_TOKEN, (_signalr) => {
+            console.log('signalr', _signalr.getClientId());
+
+            this.#signalRContext = _signalr;
+        });
+
     }
 
     #loaded = new UmbBooleanState(false);
@@ -63,6 +72,8 @@ export class uSyncWorkspaceContext extends UmbBaseController {
 
         console.log("Perform Action:", group, key);
 
+        var clientId = this.#signalRContext?.getClientId() ?? '';
+
         this.#working.setValue(true);
         this.#completed.setValue(false);
         this.#results.setValue([]);
@@ -73,7 +84,7 @@ export class uSyncWorkspaceContext extends UmbBaseController {
 
         do {
 
-            const {data} = await this.#repository.performAction(id, group, key, step);
+            const {data} = await this.#repository.performAction(id, group, key, step, clientId);
 
             if (data) {
 

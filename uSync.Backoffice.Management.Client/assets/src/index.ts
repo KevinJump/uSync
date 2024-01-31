@@ -7,6 +7,8 @@ import { manifests as trees } from './tree/manifest';
 import { manifests as workspace } from './workspace/manifest';
 import { ManifestTypes } from '@umbraco-cms/backoffice/extension-registry';
 
+import { manifests as signalr } from './signalr/manifest';
+
 import "./components";
 
 const contexts: Array<ManifestTypes> = [
@@ -25,6 +27,7 @@ export const onInit: UmbEntryPointOnInit = (_host, extensionRegistry) => {
     // register them here. 
     extensionRegistry.registerMany(
         [
+            ...signalr,
             ...contexts,
             ...trees,
             ...workspace

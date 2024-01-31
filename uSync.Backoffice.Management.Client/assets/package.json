@@ -11,6 +11,7 @@
     "generate": "openapi --input http://localhost:24831/umbraco/swagger/uSync/swagger.json --output src/api --useOptions --postfixServices Resource"
   },
   "dependencies": {
+    "@microsoft/signalr": "^8.0.0",
     "lit": "^3.1.0"
   },
   "devDependencies": {
