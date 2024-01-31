@@ -1,12 +1,38 @@
 import { customElement, LitElement, css, html, property, nothing } from "@umbraco-cms/backoffice/external/lit";
 import { HandlerStatus, SyncHandlerSummary } from "../api";
+import { UmbElementMixin } from "@umbraco-cms/backoffice/element-api";
+import { ISyncUpdateMessage, USYNC_SIGNALR_CONTEXT_TOKEN } from "../signalr/signalr.context";
 
 /**
  * @class uSyncProcessBox
  * @description provides the progress box while things happen.
  */
 @customElement('usync-progress-box')
-export class uSyncProcessBox extends LitElement {
+export class uSyncProcessBox extends UmbElementMixin(LitElement) {
+
+
+    constructor() {
+        super();
+
+        this.consumeContext(USYNC_SIGNALR_CONTEXT_TOKEN, (_signalR) => {
+
+            this.observe(_signalR.update, (_update) => {
+                this.updateMsg = _update;
+            });
+
+            this.observe(_signalR.add, (_add) => {
+                this.addMsg = _add;
+            });
+
+        });
+    }
+
+    @property({type: Object})
+    updateMsg : ISyncUpdateMessage | null = null;
+
+    @property({type: Object})
+    addMsg : object = {};
+
 
     @property({type: String})
     title: string = "";
@@ -15,8 +41,6 @@ export class uSyncProcessBox extends LitElement {
     actions? : Array<SyncHandlerSummary>;
 
     render() {
-
-        console.log('progress box', this.actions?.length);
 
         if (!this.actions) return nothing; 
 
@@ -39,6 +63,9 @@ export class uSyncProcessBox extends LitElement {
                 <h2>${this.title}</h2>
                 <div class="action-list">
                     ${actionHtml}
+                </div>
+                <div class="update-box">
+                    ${this.updateMsg?.message}
                 </div>
             </uui-box>
         `;
@@ -75,6 +102,12 @@ export class uSyncProcessBox extends LitElement {
 
         .working {
             color: green;
+        }
+
+        .update-box {
+            font-weight: bold;
+            text-align: center;
+
         }
     `;
 

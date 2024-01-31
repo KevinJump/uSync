@@ -14,7 +14,8 @@ export class uSyncActionRepository extends UmbBaseController {
         return this.#actionDataSource.getActions();
     }
 
-    async performAction(id: string, group: string, action: string, step: number) {
+    async performAction(id: string, group: string, action: string, step: number,
+        clientId: string) {
 
         return this.#actionDataSource.performAction(
             {
@@ -24,6 +25,7 @@ export class uSyncActionRepository extends UmbBaseController {
                     group : group,
                     force : true,
                     clean : false,
+                    clientId : clientId
                 },
                 stepNumber: step
             }
