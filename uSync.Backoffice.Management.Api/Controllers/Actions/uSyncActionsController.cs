@@ -54,14 +54,14 @@ public class uSyncActionsController : uSyncControllerBase
             {
                 GroupName = "Content !",
                 Icon = "icon-documents",
-                Key = "settings",
+                Key = "content",
                 Buttons = defaultButtons
             },
             new SyncActionGroup
             {
                 GroupName = "Everything !",
                 Icon = "icon-paper-plane-alt",
-                Key = "settings",
+                Key = "everything",
                 Buttons = defaultButtons
             }
         ];
