@@ -17,23 +17,20 @@ export class uSyncSignalRContext extends UmbBaseController {
 
     constructor(host:UmbControllerHost) 
     {
-        console.log('signalR');
         super(host)
         this.provideContext(USYNC_SIGNALR_CONTEXT_TOKEN, this);
     }
 
     hostConnected(): void {
         super.hostConnected();
-        console.log('host-connected');
         this.#setupConnection('/umbraco/SyncHub')
     }
     
     hostDisconnected(): void {
         super.hostDisconnected();
-        console.log('host-disconnected');       
         this.#connection?.stop()
             .then(() => {
-                console.log('connection closed');
+                console.debug('connection closed');
             });
     }
 
@@ -65,7 +62,7 @@ export class uSyncSignalRContext extends UmbBaseController {
 
         this.#connection.start()
             .then(() => {
-                console.log('connection started');
+                console.debug('connection started');
             });
     }
 }

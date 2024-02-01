@@ -1,6 +1,5 @@
 import { ManifestGlobalContext } from "@umbraco-cms/backoffice/extension-registry";
 
-
 const manifest: ManifestGlobalContext = {
     type: 'globalContext',
     alias: 'usync-signalr',
