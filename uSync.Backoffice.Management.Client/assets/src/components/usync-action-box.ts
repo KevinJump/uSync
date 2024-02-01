@@ -1,17 +1,14 @@
 import { LitElement, customElement, html, css, property } from "@umbraco-cms/backoffice/external/lit";
 import { SyncActionButton, SyncActionGroup } from "../api";
+import { InterfaceColor, InterfaceLook } from "@umbraco-cms/backoffice/external/uui";
 
 /**
  * @exports
  * @class uSyncActionBox
+ * @fires perform-action - when the user clicks the buttons. 
  */
-
 @customElement('usync-action-box')
 export class uSyncActionBox extends LitElement {
-
-
-    @property({ type: String })
-    myName = ''; 
 
     /**
      * @type: {uSyncActionGroup}
@@ -22,10 +19,11 @@ export class uSyncActionBox extends LitElement {
     group! : SyncActionGroup ;
    
 
-    private _handleClick(groupKey: string | undefined, button: SyncActionButton) {
+    private _handleClick(group: SyncActionGroup, button: SyncActionButton) {
         this.dispatchEvent(new CustomEvent('perform-action', {
             detail: {
-                group: groupKey,
+                name: group.groupName,
+                group: group.key,
                 key: button.key
             }
         }));
@@ -33,34 +31,27 @@ export class uSyncActionBox extends LitElement {
 
     render() {
 
-        const groupKey = this.group?.key;
-
         const buttons = this.group?.buttons.map((i) => {
             return html`
                 <uui-button label=${i.key} 
-                    color=${i.color}
-                    look=${i.look}
+                    color=${<InterfaceColor>i.color}
+                    look=${<InterfaceLook>i.look}
                     style="font-size: 20px"
-                    @click=${() => this._handleClick(groupKey, i)}
+                    @click=${() => this._handleClick(this.group, i)}
                     ></uui-button>
             `;
         });
 
         return html`
-                <uui-box class='action-box'>
-
-                    <div class="box-content">
-
-                        <h2 class="box-heading">${this.group?.groupName}</h2>
-
-                        <uui-icon name=${this.group?.icon}></uui-icon>
-                    
-                        <div class="box-buttons">
-                            ${buttons}
-                        </div>
-                        
+            <uui-box class='action-box'>
+                <div class="box-content">
+                    <h2 class="box-heading">${this.group?.groupName}</h2>
+                    <uui-icon name=${this.group?.icon}></uui-icon>
+                    <div class="box-buttons">
+                        ${buttons}
                     </div>
-                </uui-box>
+                </div>
+            </uui-box>
         `;
     }
 

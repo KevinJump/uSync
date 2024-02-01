@@ -1,5 +1,5 @@
 import { UmbElementMixin } from "@umbraco-cms/backoffice/element-api"
-import { LitElement, css, customElement, html, nothing, property } from "@umbraco-cms/backoffice/external/lit";
+import { LitElement, css, customElement, html, nothing, state } from "@umbraco-cms/backoffice/external/lit";
 
 import { USYNC_CORE_CONTEXT_TOKEN, uSyncWorkspaceContext } from '../../workspace.context.js';
 import { SyncActionGroup, SyncHandlerSummary, uSyncActionView } from "../../../api/index.js";
@@ -10,60 +10,63 @@ export class uSyncDefaultViewElement extends UmbElementMixin(LitElement) {
     #actionContext? : uSyncWorkspaceContext;
     #contextLoaded: Boolean = false; 
 
-    @property({ type: Array })
-    actions?: Array<SyncActionGroup>
+    @state()
+    _actions?: Array<SyncActionGroup>
 
-    @property({ type: Boolean })
-    loaded: Boolean = false;
+    @state()
+    _workingActions? : Array<SyncHandlerSummary>;
 
-    @property({ type: Array  })
-    workingActions? : Array<SyncHandlerSummary>;
+    @state()
+    _loaded: Boolean = false;
 
-    @property({ type: Boolean})
-    working: boolean = false; 
+    @state()
+    _working: boolean = false; 
 
-    @property({ type: Boolean})
-    completed: boolean = false; 
+    @state()
+    _completed: boolean = false; 
 
-    @property({ type: Boolean}) 
-    showProgress: boolean = false;
+    @state() 
+    _showProgress: boolean = false;
 
-    @property({ type: String}) 
-    group: string = "";
+    @state()
+    _group: string = "";
 
-    @property({ type: Array})
-    results: Array<uSyncActionView> = [];
+    @state()
+    _results: Array<uSyncActionView> = [];
 
     constructor() {
         super();
-        console.log('element constructor');
+    }
+  
+    connectedCallback(): void {
+        super.connectedCallback();
+        this.#consumeContext();
     }
 
     #consumeContext() {
 
         this.consumeContext(USYNC_CORE_CONTEXT_TOKEN, (_instance) => {
-            console.log('consume context');
             this.#actionContext = _instance;
 
             this.observe(_instance.actions, (_actions) => {
-                this.actions = _actions;
-                this.loaded = this.actions !== null;
+                this._actions = _actions;
+                this._loaded = this._actions !== null;
             });
 
             this.observe(_instance.currentAction, (_currentAction) => {
-                this.workingActions = _currentAction;
+                this._workingActions = _currentAction;
             });
 
             this.observe(_instance.working, (_working) => {
-                this.working = _working;
+                this._working = _working;
             });
 
             this.observe(_instance.results, (_results) => {
-                this.results = _results;
+                this._results = _results;
             })
 
             this.observe(_instance.completed, (_completed) => {
-                this.completed = _completed;
+                this._completed = _completed;
             });
 
             this.observe(_instance.loaded, (_loaded) => {
@@ -74,38 +77,31 @@ export class uSyncDefaultViewElement extends UmbElementMixin(LitElement) {
             })
 
         });
-
-    }
-
-
-    connectedCallback(): void {
-        super.connectedCallback();
-        console.log('connected');
-        this.#consumeContext();
     }
 
     /**
-     * 
-     * @param event 
+     * @method performAction
+     * @param {CustomEventInit} event 
+     * @description do a thing, (report, import, export)
      */
     performAction(event: CustomEventInit) {
-        this.showProgress = true;
+        this._showProgress = true;
 
         console.log(event.detail);
-        this.group = event.detail.group;
+        this._group = event.detail.group;
         this.#actionContext?.performAction(event.detail.group, event.detail.key);
     }
 
     render() {
 
-        if (this.loaded == false) {
+        if (this._loaded == false) {
             return html`<uui-loader></uui-loader>`;
         }
         else {
 
-            console.log('element actions', this.actions?.length);
+            console.log('element actions', this._actions?.length);
 
-            var actions = this.actions?.map((group) => {
+            var actions = this._actions?.map((group) => {
                 return html`
                 <usync-action-box myName="fred"
                     .group="${group}"
@@ -127,22 +123,22 @@ export class uSyncDefaultViewElement extends UmbElementMixin(LitElement) {
     };
 
     #renderProcessBox() {
-        if (this.showProgress == false) return nothing;
+        if (this._showProgress == false) return nothing;
 
-        console.log('element working actions', this.workingActions?.length);
+        console.log('element working actions', this._workingActions?.length);
 
         return html`
-            <usync-progress-box .title=${this.group}
-                .actions=${this.workingActions}></usync-progress-box>
+            <usync-progress-box .title=${this._group}
+                .actions=${this._workingActions}></usync-progress-box>
         `;
     }
 
     #renderReport() {
-        if (this.completed == false) return nothing;
+        if (this._completed == false) return nothing;
 
         return html`
             <uui-box>
-                <usync-results .results=${this.results}></usync-results>
+                <usync-results .results=${this._results}></usync-results>
             </uui-box>
         `
     }

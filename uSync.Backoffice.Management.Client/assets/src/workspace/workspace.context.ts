@@ -20,6 +20,49 @@ export class uSyncWorkspaceContext extends UmbBaseController {
     #repository: uSyncActionRepository;
     #signalRContext: uSyncSignalRContext | null = null;
 
+    /**
+     * @type Boolean 
+     * @description true when the workspace context has loaded (bound to auth)
+     */
+    #loaded = new UmbBooleanState(false);
+    public readonly loaded = this.#loaded.asObservable();
+
+    /**
+     * @type Array<SyncActionGroup>
+     * @description list of actions that have been returned
+     */
+    #actions = new UmbArrayState<SyncActionGroup>([], (x) => x.key);
+    public readonly actions = this.#actions.asObservable();
+
+    /**
+     * @type Array<SyncHandlerSummary>
+     * @description the summary objects that show the handler boxes
+     */
+    #workingActions = new UmbArrayState<SyncHandlerSummary>([], (x) => x.name);
+    public readonly currentAction = this.#workingActions.asObservable();
+
+    /**
+     * @type Boolean
+     * @description flag to say if things are currently being processed
+     */
+    #working = new UmbBooleanState(false);
+    public readonly working = this.#working.asObservable();
+
+    /** 
+     * @type Boolean
+     * @description flat to say that the last run has been completed (so results will show)
+     */
+    #completed = new UmbBooleanState(false);
+    public readonly completed = this.#completed.asObservable();
+
+    /**
+     * @type Array<uSyncActionView>
+     * @description the results of a run.
+     */
+    #results = new UmbArrayState<uSyncActionView>([], (x) => x.name);
+    public readonly results = this.#results.asObservable();
+
+
     constructor(host:UmbControllerHost) {
         super(host);
 
@@ -41,24 +84,6 @@ export class uSyncWorkspaceContext extends UmbBaseController {
 
     }
 
-    #loaded = new UmbBooleanState(false);
-    public readonly loaded = this.#loaded.asObservable();
-
-    #actions = new UmbArrayState<SyncActionGroup>([], (x) => x.key);
-    public readonly actions = this.#actions.asObservable();
-
-    #workingActions = new UmbArrayState<SyncHandlerSummary>([], (x) => x.name);
-    public readonly currentAction = this.#workingActions.asObservable();
-
-    #working = new UmbBooleanState(false);
-    public readonly working = this.#working.asObservable();
-
-    #completed = new UmbBooleanState(false);
-    public readonly completed = this.#completed.asObservable();
-
-    #results = new UmbArrayState<uSyncActionView>([], (x) => x.name);
-    public readonly results = this.#results.asObservable();
-
     async getActions() {
 
         const { data } = await this.#repository.getActions();
@@ -69,9 +94,6 @@ export class uSyncWorkspaceContext extends UmbBaseController {
     }
 
     async performAction(group: string, key: string) {
-
-        console.log("Perform Action:", group, key);
-
         var clientId = this.#signalRContext?.getClientId() ?? '';
 
         this.#working.setValue(true);

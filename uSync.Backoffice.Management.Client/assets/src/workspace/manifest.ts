@@ -19,7 +19,7 @@ const context: ManifestWorkspaceContext = {
 const workspace: ManifestWorkspace = {
     type: 'workspace',
     alias: workspaceAlias,
-    name: uSyncConstants.workspace.name,
+    name: 'uSync core workspace',
     js: () => import('./workspace.element.js'),
     meta: {
         entityType: uSyncConstants.workspace.rootElement,
@@ -33,13 +33,13 @@ const workspaceViews: Array<ManifestWorkspaceView> = [
     {
         type: 'workspaceView',
         alias: uSyncConstants.workspace.defaultView.alias,
-        name: uSyncConstants.workspace.defaultView.name,
+        name: 'uSync workspace default view',
         js: () => import('./views/default/default.element.js'),
         weight: 300,
         meta: {
             label: 'Default',
             pathname: 'default',
-            icon: 'icon-box',
+            icon: 'icon-infinity',
         },
         conditions: [
             {
@@ -51,13 +51,13 @@ const workspaceViews: Array<ManifestWorkspaceView> = [
     {
         type: 'workspaceView',
         alias: uSyncConstants.workspace.settingView.alias,
-        name: uSyncConstants.workspace.settingView.name,
+        name: 'uSync workspace settings view',
         js: () => import('./views/settings/settings.element.js'),
         weight: 200,
         meta: {
             label: 'Settings',
             pathname: 'settings',
-            icon: 'icon-box'
+            icon: 'icon-settings'
         },
         conditions: [
             {
