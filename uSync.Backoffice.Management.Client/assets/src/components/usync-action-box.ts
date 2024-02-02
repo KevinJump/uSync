@@ -22,8 +22,7 @@ export class uSyncActionBox extends LitElement {
     private _handleClick(group: SyncActionGroup, button: SyncActionButton) {
         this.dispatchEvent(new CustomEvent('perform-action', {
             detail: {
-                name: group.groupName,
-                group: group.key,
+                group: group,
                 key: button.key
             }
         }));

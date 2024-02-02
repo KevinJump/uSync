@@ -8,13 +8,6 @@ import { uSyncConstants } from "../constants.js";
 
 const workspaceAlias = uSyncConstants.workspace.alias;
 
-const context: ManifestWorkspaceContext = {
-    type: 'workspaceContext',
-    alias: uSyncConstants.workspace.contextAlias,
-    name: 'uSync workspace context',
-    js: () => import('./workspace.context.js'),
-}
-
 
 const workspace: ManifestWorkspace = {
     type: 'workspace',
@@ -25,6 +18,15 @@ const workspace: ManifestWorkspace = {
         entityType: uSyncConstants.workspace.rootElement,
     }
 };
+
+const context: ManifestWorkspaceContext = {
+    type: 'workspaceContext',
+    alias: uSyncConstants.workspace.contextAlias,
+    name: 'uSync workspace context',
+    js: () => import('./workspace.context.js'),
+}
+
+
 
 /**
  * this isn't working, don't know why :( - going to go hardwired for now
@@ -70,4 +72,8 @@ const workspaceViews: Array<ManifestWorkspaceView> = [
 
 const workspaceActions: Array<ManifestWorkspaceAction> = [];
 
-export const manifests = [context, workspace, ...workspaceViews, ...workspaceActions];
+export const manifests = [
+    context, 
+    workspace, 
+    ...workspaceViews,
+    ...workspaceActions];

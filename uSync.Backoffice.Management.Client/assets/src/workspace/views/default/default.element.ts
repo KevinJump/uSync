@@ -29,7 +29,7 @@ export class uSyncDefaultViewElement extends UmbElementMixin(LitElement) {
     _showProgress: boolean = false;
 
     @state()
-    _group: string = "";
+    _group?: SyncActionGroup 
 
     @state()
     _results: Array<uSyncActionView> = [];
@@ -86,8 +86,6 @@ export class uSyncDefaultViewElement extends UmbElementMixin(LitElement) {
      */
     performAction(event: CustomEventInit) {
         this._showProgress = true;
-
-        console.log(event.detail);
         this._group = event.detail.group;
         this.#actionContext?.performAction(event.detail.group, event.detail.key);
     }
@@ -125,10 +123,8 @@ export class uSyncDefaultViewElement extends UmbElementMixin(LitElement) {
     #renderProcessBox() {
         if (this._showProgress == false) return nothing;
 
-        console.log('element working actions', this._workingActions?.length);
-
         return html`
-            <usync-progress-box .title=${this._group}
+            <usync-progress-box .title=${this._group?.groupName ?? 'doh!'}
                 .actions=${this._workingActions}></usync-progress-box>
         `;
     }

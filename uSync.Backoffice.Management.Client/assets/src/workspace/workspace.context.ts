@@ -9,13 +9,25 @@ import { SyncActionGroup, SyncHandlerSummary, uSyncActionView } from "../api";
 import { OpenAPI } from "../api";
 import { UMB_AUTH_CONTEXT } from '@umbraco-cms/backoffice/auth'
 import uSyncSignalRContext, { USYNC_SIGNALR_CONTEXT_TOKEN } from "../signalr/signalr.context";
+import { UMB_WORKSPACE_CONTEXT, type UmbWorkspaceContextInterface } from "@umbraco-cms/backoffice/workspace";
+import { uSyncConstants } from "../constants";
 
 /**
  * @exports 
  * @class uSyncWorkspaceActionContext
  * @description context for getting and seting up actions.
  */
-export class uSyncWorkspaceContext extends UmbBaseController {
+export class uSyncWorkspaceContext extends UmbBaseController
+    implements UmbWorkspaceContextInterface {
+    public readonly workspaceAlias: string = uSyncConstants.workspace.alias;
+
+    getEntityType(): string {
+        return uSyncConstants.workspace.rootElement;
+    }
+    getEntityId(): string | undefined {
+        return undefined;
+    }
+
 
     #repository: uSyncActionRepository;
     #signalRContext: uSyncSignalRContext | null = null;
@@ -63,10 +75,11 @@ export class uSyncWorkspaceContext extends UmbBaseController {
     public readonly results = this.#results.asObservable();
 
 
-    constructor(host:UmbControllerHost) {
+    constructor(host: UmbControllerHost) {
         super(host);
 
         this.provideContext(USYNC_CORE_CONTEXT_TOKEN, this);
+        this.provideContext(UMB_WORKSPACE_CONTEXT, this);
 
         this.#repository = new uSyncActionRepository(this);
 
@@ -75,12 +88,12 @@ export class uSyncWorkspaceContext extends UmbBaseController {
             OpenAPI.WITH_CREDENTIALS = true;
             this.#loaded.setValue(true);
         });
-        
+
         this.consumeContext(USYNC_SIGNALR_CONTEXT_TOKEN, (_signalr) => {
             console.log('signalr', _signalr.getClientId());
-
             this.#signalRContext = _signalr;
         });
+
 
     }
 
@@ -88,34 +101,32 @@ export class uSyncWorkspaceContext extends UmbBaseController {
 
         const { data } = await this.#repository.getActions();
 
-        if (data) {           
+        if (data) {
             this.#actions.setValue(data);
         }
     }
 
-    async performAction(group: string, key: string) {
+    async performAction(group: SyncActionGroup, key: string) {
         var clientId = this.#signalRContext?.getClientId() ?? '';
 
         this.#working.setValue(true);
         this.#completed.setValue(false);
         this.#results.setValue([]);
 
-        var complete = false; 
+        var complete = false;
         var id = '';
         var step: number = 0;
 
         do {
 
-            const {data} = await this.#repository.performAction(id, group, key, step, clientId);
+            const { data } = await this.#repository.performAction(id, group.key, key, step, clientId);
 
             if (data) {
 
                 step++;
 
-                console.log(data);
-
                 let summary = data.status ?? [];
-                
+
                 this.#workingActions.setValue(summary);
 
                 id = data.requestId;
@@ -133,7 +144,7 @@ export class uSyncWorkspaceContext extends UmbBaseController {
 
 
         } while (!complete)
-        
+
 
         this.#completed.setValue(true);
         this.#working.setValue(false);
@@ -143,5 +154,5 @@ export class uSyncWorkspaceContext extends UmbBaseController {
 
 export default uSyncWorkspaceContext;
 
-export const USYNC_CORE_CONTEXT_TOKEN = 
+export const USYNC_CORE_CONTEXT_TOKEN =
     new UmbContextToken<uSyncWorkspaceContext>(uSyncWorkspaceContext.name);
