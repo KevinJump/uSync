@@ -96,29 +96,47 @@ export class uSyncDefaultViewElement extends UmbElementMixin(LitElement) {
             return html`<uui-loader></uui-loader>`;
         }
         else {
+            return html`
+                <umb-body-layout>
+                    ${this.#renderActions()}
+                    ${this.#renderBanner()}
+                    ${this.#renderProcessBox()}
+                    ${this.#renderReport()}
+                </umb-body-layout>
+            `;
+        }
+    };
 
-            console.log('element actions', this._actions?.length);
-
-            var actions = this._actions?.map((group) => {
-                return html`
+    #renderActions() {
+        var actions = this._actions?.map((group) => {
+            return html`
                 <usync-action-box myName="fred"
                     .group="${group}"
                     @perform-action=${this.performAction}>
                 </usync-action-box>
             `;
-            })
+        })
 
-            return html`
-                <div class="action-buttons-box">
-                    ${actions}
-                </div>
+        return html`
+            <div class="action-buttons-box">
+                ${actions}
+            </div>
+        `;
+    }
 
-                ${this.#renderProcessBox()}
+    #renderBanner() {
+        if (this._showProgress === true) return nothing;
 
-                ${this.#renderReport()}
-            `;
-        }
-    };
+        return html`
+            <umb-empty-state>
+                <h2>
+                    <uui-icon name="icon-infinity"></uui-icon>
+                    <umb-localize key="uSync_banner"></umb-localize>
+                </h2>
+    
+            </umb-empty-state>
+        `;
+    }
 
     #renderProcessBox() {
         if (this._showProgress == false) return nothing;
@@ -149,6 +167,26 @@ export class uSyncDefaultViewElement extends UmbElementMixin(LitElement) {
                display: grid;
                grid-template-columns: 1fr 1fr 1fr;
             }        
+
+            umb-empty-state {
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+                left: 0;
+                right: 0;
+                margin: 0 auto;
+                text-align: center;
+                color: #ddd;
+            }
+
+            umb-empty-state h2 {
+                font-size: 34pt;
+            }
+
+            umb-empty-state uui-icon {
+                position: relative;
+                top: 13px;
+            }
         `
     ]
 }

@@ -14,12 +14,14 @@ const _constants = {
 
         defaultView: {
             alias: 'usync.workspace.default',
-            path: 'usync.workspace.default'
         },
 
         settingView: {
             alias: 'usync.workspace.settings',
-            path: 'usync.workspace.settings'
+        },
+
+        addOnView: {
+            alias: 'usync.workspace.addons',
         }
     }
 };

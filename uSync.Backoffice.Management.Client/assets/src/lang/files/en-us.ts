@@ -1,6 +1,7 @@
 export default {
     uSync: {
-        name: 'uSync'
+        name: 'uSync',
+        banner: 'uSync all the things'
     },
     uSyncSettings: {
         settings: 'uSync Settings',

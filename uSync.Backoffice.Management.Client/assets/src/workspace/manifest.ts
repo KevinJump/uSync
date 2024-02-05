@@ -67,6 +67,24 @@ const workspaceViews: Array<ManifestWorkspaceView> = [
                 match: workspaceAlias,
             }
         ]       
+    },
+    {
+        type: 'workspaceView',
+        alias: uSyncConstants.workspace.addOnView.alias,
+        name: 'uSync addons',
+        js: ()=> import('./views/addons/addons.element.js'),
+        weight: 100,
+        meta: {
+            label: 'AddOns',
+            pathname: 'addons',
+            icon: 'icon-box'
+        },
+        conditions: [
+            {
+                alias: 'Umb.Condition.WorkspaceAlias',
+                match: workspaceAlias,
+            }
+        ]
     }
 ];
 
