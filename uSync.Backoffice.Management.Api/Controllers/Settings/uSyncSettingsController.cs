@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Asp.Versioning;
+﻿using Asp.Versioning;
 
 using Microsoft.AspNetCore.Mvc;
 
@@ -28,5 +22,8 @@ public class uSyncSettingsController : uSyncControllerBase
     public uSyncSettings GetSettings()
         => _configService.Settings;
 
-
+    [HttpGet("HandlerSettings")]
+    [ProducesResponseType(typeof(uSyncHandlerSetSettings), 200)]
+    public uSyncHandlerSetSettings GetHandlerSetSettings(string id)
+        => _configService.GetSetSettings(id);
 }

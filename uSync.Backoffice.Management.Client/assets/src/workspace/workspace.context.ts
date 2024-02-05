@@ -1,10 +1,10 @@
-import { UmbArrayState, UmbBooleanState } from "@umbraco-cms/backoffice/observable-api";
+import { UmbArrayState, UmbBooleanState, UmbObjectState } from "@umbraco-cms/backoffice/observable-api";
 import { UmbContextToken } from "@umbraco-cms/backoffice/context-api";
 
 import { uSyncActionRepository } from "..";
 import { UmbControllerHost } from "@umbraco-cms/backoffice/controller-api";
 import { UmbBaseController } from "@umbraco-cms/backoffice/class-api";
-import { SyncActionGroup, SyncHandlerSummary, uSyncActionView } from "../api";
+import { SyncActionGroup, SyncHandlerSummary, uSyncActionView, uSyncHandlerSetSettings, uSyncSettings } from "../api";
 
 import { OpenAPI } from "../api";
 import { UMB_AUTH_CONTEXT } from '@umbraco-cms/backoffice/auth'
@@ -74,6 +74,15 @@ export class uSyncWorkspaceContext extends UmbBaseController
     #results = new UmbArrayState<uSyncActionView>([], (x) => x.name);
     public readonly results = this.#results.asObservable();
 
+    /**
+     * @type uSyncSettings
+     * @description current settings for uSync
+     */
+    #settings = new UmbObjectState<uSyncSettings | undefined>(undefined);
+    public readonly settings = this.#settings?.asObservable();
+
+    #handlerSettings = new UmbObjectState<uSyncHandlerSetSettings | undefined>(undefined);
+    public readonly handlerSettings = this.#handlerSettings?.asObservable();
 
     constructor(host: UmbControllerHost) {
         super(host);
@@ -98,11 +107,26 @@ export class uSyncWorkspaceContext extends UmbBaseController
     }
 
     async getActions() {
-
         const { data } = await this.#repository.getActions();
 
         if (data) {
             this.#actions.setValue(data);
+        }
+    }
+
+    async getSettings() {
+        const {data} = await this.#repository.getSettings();
+
+        if (data) {
+            this.#settings.setValue(data);
+        }
+    }
+
+    async getDefaultHandlerSetSettings() {
+        const {data} = await this.#repository.getHandlerSettings("default");
+
+        if (data) {
+            this.#handlerSettings.setValue(data);
         }
     }
 

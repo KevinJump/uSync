@@ -4,6 +4,7 @@
 /* eslint-disable */
 import type { uSyncAddonInfo } from '../models/uSyncAddonInfo';
 import type { uSyncAddonSplash } from '../models/uSyncAddonSplash';
+import type { uSyncHandlerSetSettings } from '../models/uSyncHandlerSetSettings';
 import type { uSyncSettings } from '../models/uSyncSettings';
 
 import type { CancelablePromise } from '../core/CancelablePromise';
@@ -31,6 +32,24 @@ export class SettingsResource {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/umbraco/usync/api/v1/AddOnSplash',
+        });
+    }
+
+    /**
+     * @returns any Success
+     * @throws ApiError
+     */
+    public static getHandlerSetSettings({
+id,
+}: {
+id?: string,
+}): CancelablePromise<uSyncHandlerSetSettings> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/umbraco/usync/api/v1/HandlerSettings',
+            query: {
+                'id': id,
+            },
         });
     }
 

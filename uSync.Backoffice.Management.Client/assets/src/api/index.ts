@@ -9,6 +9,7 @@ export type { OpenAPIConfig } from './core/OpenAPI';
 
 export { ChangeDetailType } from './models/ChangeDetailType';
 export { ChangeType } from './models/ChangeType';
+export type { HandlerSettings } from './models/HandlerSettings';
 export { HandlerStatus } from './models/HandlerStatus';
 export type { PerformActionRequest } from './models/PerformActionRequest';
 export type { PerformActionResponse } from './models/PerformActionResponse';
@@ -19,6 +20,7 @@ export type { uSyncActionView } from './models/uSyncActionView';
 export type { uSyncAddonInfo } from './models/uSyncAddonInfo';
 export type { uSyncAddonSplash } from './models/uSyncAddonSplash';
 export type { uSyncChange } from './models/uSyncChange';
+export type { uSyncHandlerSetSettings } from './models/uSyncHandlerSetSettings';
 export type { uSyncOptions } from './models/uSyncOptions';
 export type { uSyncSettings } from './models/uSyncSettings';
 

@@ -1,26 +1,26 @@
-import { ManifestMenu, ManifestMenuItem, ManifestTree, ManifestTypes } from "@umbraco-cms/backoffice/extension-registry";
+import { ManifestMenu, ManifestMenuItem, ManifestTypes } from "@umbraco-cms/backoffice/extension-registry";
 import { uSyncConstants } from "../constants";
 
 const sectionAlias = 'Umb.Section.Settings';
 
 const menu : ManifestMenu = {
     type: 'menu',
-    alias: uSyncConstants.menu.alias,
-    name: uSyncConstants.menu.name,
+    alias: 'usync.menu',
+    name: 'uSync Menu',
     meta: {
-        label: uSyncConstants.menu.label
+        label: 'Syncronisation'
     }
 }
 
 const menuSidebarApp: ManifestTypes = {
     type: 'sectionSidebarApp',
     kind: 'menu',
-    alias: uSyncConstants.menu.sidebar,
+    alias: 'usync.sidebarapp',
     name: 'uSync section sidebar menu',
     weight: 150,
     meta: {
-        label: uSyncConstants.menu.label,
-        menu: uSyncConstants.menu.alias,
+        label: 'Syncronisation',
+        menu: menu.alias,
     },
     conditions: [
         {
@@ -30,25 +30,16 @@ const menuSidebarApp: ManifestTypes = {
     ],
 }
 
-const tree : ManifestTree = {
-    type: "tree",
-    alias: uSyncConstants.tree.alias,
-    name: uSyncConstants.tree.name,
-    meta: {
-        repositoryAlias: uSyncConstants.tree.respository
-    }
-};
-
 const menuItem : ManifestMenuItem = {
     type: "menuItem",
-    alias: uSyncConstants.menu.item.alias,
-    name: uSyncConstants.menu.item.name,
+    alias: 'usync.menu.item',
+    name: 'uSync core menu item',
     meta: {
         label: uSyncConstants.name,
         icon: uSyncConstants.icon,
         entityType: uSyncConstants.workspace.rootElement,
-        menus: [uSyncConstants.menu.alias]
+        menus: [menu.alias]
     }
 }
 
-export const manifests = [menu, menuSidebarApp, menuItem, tree];
+export const manifests = [menu, menuSidebarApp, menuItem];

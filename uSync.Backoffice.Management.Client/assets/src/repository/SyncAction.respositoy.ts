@@ -1,6 +1,7 @@
 import { UmbControllerHost } from "@umbraco-cms/backoffice/controller-api";
 import { uSyncActionDataSource } from "./sources/SyncAction.source";
 import { UmbBaseController } from "@umbraco-cms/backoffice/class-api";
+import { uSyncSettingsDataSource } from "./sources/SyncSettings.source";
 
 /**
  * @export
@@ -9,10 +10,12 @@ import { UmbBaseController } from "@umbraco-cms/backoffice/class-api";
  */
 export class uSyncActionRepository extends UmbBaseController {
     #actionDataSource: uSyncActionDataSource;
+    #settingsDataSource: uSyncSettingsDataSource;
 
     constructor(host: UmbControllerHost) {
         super(host);
         this.#actionDataSource = new uSyncActionDataSource(this);
+        this.#settingsDataSource = new uSyncSettingsDataSource(this);
     }
 
     /**
@@ -50,5 +53,23 @@ export class uSyncActionRepository extends UmbBaseController {
             }
         );
 
+    }
+
+    /**
+     * @method GetSettings
+     * @description retreives the current uSync settings
+     * @returns the current uSync settings
+     */
+    async getSettings() {
+        return this.#settingsDataSource.getSettings();
+    }
+
+    /**
+     * @method GetHandlerSetSettings
+     * @param setName name of the handler set in the configuration
+     * @returns the settings for the named handler set.
+     */
+    async getHandlerSettings(setName : string) {
+        return this.#settingsDataSource.getHandlerSettings(setName);
     }
 }

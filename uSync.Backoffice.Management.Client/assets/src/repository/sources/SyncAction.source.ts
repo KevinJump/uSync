@@ -4,11 +4,13 @@ import { tryExecuteAndNotify } from '@umbraco-cms/backoffice/resources';
 import { 
     ActionsResource, 
     PerformActionRequest, 
-    PerformActionResponse, 
-    SyncActionGroup } from "../../api";
+    PerformActionResponse,  
+    SyncActionGroup, 
+} from "../../api";
 
 export interface SyncActionDataSource {
     getActions() : Promise<DataSourceResponse<unknown>>;
+    performAction(request : PerformActionRequest): Promise<DataSourceResponse<PerformActionResponse>>;
 }
 
 export class uSyncActionDataSource implements SyncActionDataSource {
