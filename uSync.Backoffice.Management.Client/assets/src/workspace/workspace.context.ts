@@ -11,6 +11,7 @@ import { UMB_AUTH_CONTEXT } from '@umbraco-cms/backoffice/auth'
 import uSyncSignalRContext, { USYNC_SIGNALR_CONTEXT_TOKEN } from "../signalr/signalr.context";
 import { UMB_WORKSPACE_CONTEXT, type UmbWorkspaceContextInterface } from "@umbraco-cms/backoffice/workspace";
 import { uSyncConstants } from "../constants";
+import { uSyncIconRegistry } from "../icons";
 
 /**
  * @exports 
@@ -30,6 +31,7 @@ export class uSyncWorkspaceContext extends UmbBaseController
 
 
     #repository: uSyncActionRepository;
+    #uSyncIconRegistry: uSyncIconRegistry;
     #signalRContext: uSyncSignalRContext | null = null;
 
     /**
@@ -91,6 +93,8 @@ export class uSyncWorkspaceContext extends UmbBaseController
         this.provideContext(UMB_WORKSPACE_CONTEXT, this);
 
         this.#repository = new uSyncActionRepository(this);
+        this.#uSyncIconRegistry = new uSyncIconRegistry();
+        this.#uSyncIconRegistry.attach(this);
 
         this.consumeContext(UMB_AUTH_CONTEXT, (_auth) => {
             OpenAPI.TOKEN = () => _auth.getLatestToken();

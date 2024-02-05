@@ -130,7 +130,9 @@ export class uSyncDefaultViewElement extends UmbElementMixin(LitElement) {
         return html`
             <umb-empty-state>
                 <h2>
-                    <uui-icon name="icon-infinity"></uui-icon>
+                    <usync-icon-registry>
+                        <uui-icon name="usync-logo"></uui-icon>
+                    </usync-icon-registry>
                     <umb-localize key="uSync_banner"></umb-localize>
                 </h2>
     
