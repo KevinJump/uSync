@@ -1,22 +1,15 @@
 {
   "name": "usync",
-  "version": "1.0.0",
-  "description": "",
+  "version": "14.0.0",
+  "description": "placeholder package.json",
   "private": "true",
-  "main": "gulpfile.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1", 
+    "watch-client": "cd ./uSync.Backoffice.Management.Client/Assets && npm run watch",
+    "build-client": "cd ./uSync.Backoffice.Management.Client/Assets && npm run build",
+    "generate-api": "cd ./uSync.Backoffice.Management.Client/Assets && npm run generate"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "del": "^6.0.0",
-    "gulp": "^4.0.2",
-    "gulp-clean-css": "^4.3.0",
-    "gulp-concat": "^2.6.1",
-    "gulp-sourcemaps": "^3.0.0",
-    "gulp-uglify": "^3.0.2",
-    "through2": "^4.0.2"
-  }
+  "license": "ISC"
 }
