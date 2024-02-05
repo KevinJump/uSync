@@ -177,6 +177,7 @@ export class uSyncDefaultViewElement extends UmbElementMixin(LitElement) {
                 margin: 0 auto;
                 text-align: center;
                 color: #ddd;
+                z-index: 0;
             }
 
             umb-empty-state h2 {

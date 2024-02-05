@@ -44,6 +44,12 @@ export class uSyncResultsView extends LitElement {
     }
 
     static styles = css`
+
+        uui-table {
+            position: relative;
+            z-index: 100;
+        }
+
         .result-header {
             display: flex;
             justify-content: flex-end;
