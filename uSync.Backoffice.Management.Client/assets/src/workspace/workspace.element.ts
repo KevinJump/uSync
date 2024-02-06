@@ -7,7 +7,17 @@ import uSyncWorkspaceContext from './workspace.context';
 
 @customElement('usync-workspace-root')
 export class uSyncWorkspaceRootElement extends UmbElementMixin(LitElement) {
-    #workspaceContext = new uSyncWorkspaceContext(this);
+    #workspaceContext: uSyncWorkspaceContext;
+
+    constructor() {
+        super();
+
+        this.#workspaceContext = new uSyncWorkspaceContext(this);
+
+        this.observe(this.#workspaceContext.loaded, (_loaded) => {
+
+        });
+    }
 
     render() {
         return html`

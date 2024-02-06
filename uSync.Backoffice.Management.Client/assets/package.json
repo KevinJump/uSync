@@ -1,21 +1,39 @@
 {
-  "name": "assets",
-  "private": true,
-  "version": "0.0.0",
+  "name": "@jumoo/usync-assets",
+  "license": "MPL-2.0",
   "type": "module",
+  "version": "14.0.0-build.20240206.3",
+  "exports": {
+    ".": null,
+    "./components":  "./src/components",
+    "./workspace": "./src/workspace"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/KevinJump/uSync.git"
+  },
+  "bugs": {
+    "url": "https://github.com/kevinjump/usync/issues"
+  },
+  "author": {
+    "name": "Jumoo Ltd",
+    "email": "info@jumoo.co.uk",
+    "url": "https://jumoo.co.uk"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "watch": "vite build --watch",
-    "generate": "openapi --input http://localhost:24831/umbraco/swagger/uSync/swagger.json --output src/api --useOptions --postfixServices Resource"
+    "generate": "openapi --input http://localhost:24831/umbraco/swagger/uSync/swagger.json --output src/api --useOptions --postfixServices Resource",
+    "pack": "node ./build/copy-to-dist.js"
   },
   "dependencies": {
     "@microsoft/signalr": "^8.0.0",
-    "lit": "^3.1.0"
+    "lit": "^3.1.0",
+    "@umbraco-cms/backoffice": "^14.0.0--preview004"
   },
   "devDependencies": {
-    "@umbraco-cms/backoffice": "^14.0.0--preview004",
     "openapi-typescript-codegen": "^0.25.0",
     "typescript": "^5.2.2",
     "vite": "^5.0.8",
