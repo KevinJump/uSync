@@ -358,7 +358,11 @@ namespace uSync.BackOffice.SyncHandlers
                 else
                 {
                     // nothing to delete, we report this as a no change 
-                    actions.Add(uSyncAction.SetAction(true, $"Folder {Path.GetFileName(item.filePath)}", change: ChangeType.NoChange, filename: item.filePath));
+                    actions.Add(uSyncAction.SetAction(
+                        success: true,
+                        name: $"Folder {Path.GetFileName(item.filePath)}", 
+                        change: ChangeType.NoChange, 
+                        filename: syncFileService.GetSiteRelativePath(item.filePath)));
                 }
             }
             // remove the actual cleans (they will have been replaced by the deletes
@@ -435,7 +439,12 @@ namespace uSync.BackOffice.SyncHandlers
                     else
                     {
                         // nothing to delete, we report this as a no change 
-                        actions.Add(uSyncAction.SetAction(true, $"Folder {Path.GetFileName(item.filePath)}", change: ChangeType.NoChange, filename: item.filePath));
+                        actions.Add(uSyncAction.SetAction(
+                                success: true,
+                                name: $"Folder {Path.GetFileName(item.filePath)}",
+                                change: ChangeType.NoChange, filename: syncFileService.GetSiteRelativePath(item.filePath)
+                            )
+                        );
                     }
                 }
                 // remove the actual cleans (they will have been replaced by the deletes
@@ -604,12 +613,12 @@ namespace uSync.BackOffice.SyncHandlers
 
             try
             {
-                var file = action.FileName;
+                var fileName = action.FileName;
 
-                if (!syncFileService.FileExists(file))
+                if (!syncFileService.FileExists(fileName))
                     return Enumerable.Empty<uSyncAction>();
 
-                var node = syncFileService.LoadXElement(file);
+                var node = syncFileService.LoadXElement(fileName);
                 var item = GetFromService(node.GetKey());
                 if (item == null) return Enumerable.Empty<uSyncAction>();
 
@@ -620,7 +629,7 @@ namespace uSync.BackOffice.SyncHandlers
                 // do the second pass on this item
                 var result = DeserializeItemSecondPass(item, node, serializerOptions);
 
-                return uSyncActionHelper<TObject>.SetAction(result, file, node.GetKey(), this.Alias).AsEnumerableOfOne();
+                return uSyncActionHelper<TObject>.SetAction(result, syncFileService.GetSiteRelativePath(fileName), node.GetKey(), this.Alias).AsEnumerableOfOne();
             }
             catch (Exception ex)
             {
@@ -683,7 +692,7 @@ namespace uSync.BackOffice.SyncHandlers
         protected virtual IEnumerable<uSyncAction> CleanFolder(string cleanFile, bool reportOnly, bool flat)
         {
             var folder = Path.GetDirectoryName(cleanFile);
-            if (!Directory.Exists(folder)) return Enumerable.Empty<uSyncAction>();
+            if (!syncFileService.DirectoryExists(folder)) return Enumerable.Empty<uSyncAction>();
 
 
             // get the keys for every item in this folder. 
@@ -1006,7 +1015,7 @@ namespace uSync.BackOffice.SyncHandlers
             {
                 // if we have lock roots on, then this item will not export 
                 // because exporting would mean the root was no longer used.
-                return uSyncAction.SetAction(true, filename,
+                return uSyncAction.SetAction(true, syncFileService.GetSiteRelativePath(filename),
                     type: typeof(TObject).ToString(),
                     change: ChangeType.NoChange,
                     message: "Not exported (would overwrite root value)",
@@ -1019,7 +1028,7 @@ namespace uSync.BackOffice.SyncHandlers
             if (attempt.Change > ChangeType.NoChange)
                 _mutexService.FireItemCompletedEvent(new uSyncExportedItemNotification(attempt.Item, ChangeType.Export));
 
-            return uSyncActionHelper<XElement>.SetAction(attempt, filename, GetItemKey(item), this.Alias).AsEnumerableOfOne();
+            return uSyncActionHelper<XElement>.SetAction(attempt, syncFileService.GetSiteRelativePath(filename), GetItemKey(item), this.Alias).AsEnumerableOfOne();
         }
 
         /// <summary>
@@ -1045,7 +1054,7 @@ namespace uSync.BackOffice.SyncHandlers
                 }
                 else
                 {
-                    return SyncAttempt<XElement>.Succeed(filename, ChangeType.NoChange, "Not Exported (Based on configuration)");
+                    return SyncAttempt<XElement>.Succeed(Path.GetFileName(filename), ChangeType.NoChange, "Not Exported (Based on configuration)");
                 }
             }
 
@@ -1127,7 +1136,7 @@ namespace uSync.BackOffice.SyncHandlers
 
             var cacheKey = PrepCaches();
 
-            callback?.Invoke("Checking Actions", 1, 3);
+            callback?.Invoke("Organising import structure", 1, 3);
 
             var items = GetMergedItems(folders);
 
@@ -1157,7 +1166,7 @@ namespace uSync.BackOffice.SyncHandlers
             // adds new actions - for delete clashes.
             validationActions.AddRange(ReportDeleteCheck(folder, validationActions));
 
-            return validationActions.ToList();
+            return validationActions;
         }
 
         /// <summary>
@@ -1413,7 +1422,7 @@ namespace uSync.BackOffice.SyncHandlers
                 }
                 else
                 {
-                    return uSyncActionHelper<TObject>.ReportAction(ChangeType.NoChange, node.GetAlias(), node.GetPath(), file, node.GetKey(),
+                    return uSyncActionHelper<TObject>.ReportAction(ChangeType.NoChange, node.GetAlias(), node.GetPath(), syncFileService.GetSiteRelativePath(file), node.GetKey(),
                         this.Alias, "Will not be imported (Based on configuration)")
                         .AsEnumerableOfOne<uSyncAction>();
                 }
@@ -1954,7 +1963,6 @@ namespace uSync.BackOffice.SyncHandlers
                 }
             }
 
-
             return dependencies.SafeDistinctBy(x => x.Udi.ToString()).OrderByDescending(x => x.Order);
         }
 
@@ -2036,7 +2044,10 @@ namespace uSync.BackOffice.SyncHandlers
         #endregion
 
         private string GetNameFromFileOrNode(string filename, XElement node)
-            => !string.IsNullOrWhiteSpace(filename) ? filename : node.GetAlias();
+        {
+            if (string.IsNullOrWhiteSpace(filename) is true) return node.GetAlias();
+            return syncFileService.GetSiteRelativePath(filename);
+        }
 
 
         /// <summary>

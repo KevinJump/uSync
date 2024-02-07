@@ -89,6 +89,12 @@ namespace uSync.BackOffice
             return _syncFileService.DirectoryExists(rootFolder + "Content");
         }
 
+        /// <summary>
+        ///  check to see if any of the uSync folders have content files.
+        /// </summary>
+        public bool HasContentFiles(string[] folders)
+            => folders.Any(x => HasContentFiles(x));
+
 
         #region Reporting 
 

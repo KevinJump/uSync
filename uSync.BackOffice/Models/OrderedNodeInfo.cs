@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Xml.Linq;
 
-namespace uSync.BackOffice.Models
+namespace uSync.BackOffice
 {
     /// <summary>
     ///  object representing a file and its level
