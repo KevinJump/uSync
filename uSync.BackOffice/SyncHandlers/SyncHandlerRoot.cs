@@ -1496,6 +1496,8 @@ namespace uSync.BackOffice.SyncHandlers
         public virtual void Handle(SavedNotification<TObject> notification)
         {
             if (!ShouldProcessEvent()) return;
+            if (notification.State.TryGetValue(uSync.EventPausedKey, out var paused) && paused is true)
+                return;
 
             var handlerFolders = GetDefaultHandlerFolders();
 

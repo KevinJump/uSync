@@ -11,6 +11,7 @@ using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Events;
 using Umbraco.Cms.Core.Scoping;
 using Umbraco.Cms.Core.Semver;
+using Umbraco.Cms.Infrastructure.HostedServices;
 using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;
@@ -48,6 +49,8 @@ namespace uSync.BackOffice
 
         private readonly ICoreScopeProvider _scopeProvider;
 
+        private readonly IBackgroundTaskQueue _backgroundTaskQueue;
+
         private readonly IAppCache _appCache;
 
         /// <summary>
@@ -62,7 +65,8 @@ namespace uSync.BackOffice
             uSyncEventService mutexService,
             AppCaches appCaches,
             ICoreScopeProvider scopeProvider,
-            ILoggerFactory loggerFactory)
+            ILoggerFactory loggerFactory,
+            IBackgroundTaskQueue backgroundTaskQueue)
         {
             this._logger = logger;
 
@@ -79,6 +83,7 @@ namespace uSync.BackOffice
             uSyncTriggers.DoImport += USyncTriggers_DoImport;
             _scopeProvider = scopeProvider;
             _loggerFactory = loggerFactory;
+            _backgroundTaskQueue = backgroundTaskQueue;
         }
 
         /// <summary>
@@ -94,6 +99,12 @@ namespace uSync.BackOffice
         /// </summary>
         public bool HasContentFiles(string[] folders)
             => folders.Any(x => HasContentFiles(x));
+
+        /// <summary>
+        ///  check if there are any root files on disk. 
+        /// </summary>
+        public bool HasRootFiles(string[] folders)
+            => folders[..^1].Any(x => _syncFileService.DirectoryHasChildren(x));
 
 
         #region Reporting 

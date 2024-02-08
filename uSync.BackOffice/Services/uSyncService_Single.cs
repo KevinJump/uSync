@@ -123,7 +123,13 @@ namespace uSync.BackOffice
 
                     var index = options.PageNumber * options.PageSize;
 
-                    using var scope = _scopeProvider.CreateNotificationScope(_eventAggregator, _loggerFactory, options.Callbacks?.Update);
+                    using var scope = _scopeProvider.CreateNotificationScope(
+                        eventAggregator: _eventAggregator,
+                        loggerFactory: _loggerFactory, 
+                        syncConfigService: _uSyncConfig,
+                        syncEventService: _mutexService,
+                        backgroundTaskQueue: _backgroundTaskQueue,
+                        options.Callbacks?.Update);
                     {
                         try
                         {
@@ -196,7 +202,13 @@ namespace uSync.BackOffice
 
                     var index = options.PageNumber * options.PageSize;
 
-                    using var scope = _scopeProvider.CreateNotificationScope(_eventAggregator, _loggerFactory, options.Callbacks?.Update);
+                    using (var scope = _scopeProvider.CreateNotificationScope(
+                        eventAggregator: _eventAggregator,
+                        loggerFactory: _loggerFactory,
+                        syncConfigService: _uSyncConfig,
+                        syncEventService: _mutexService,
+                        backgroundTaskQueue: _backgroundTaskQueue,
+                        options.Callbacks?.Update))
                     {
                         try
                         {

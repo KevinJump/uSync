@@ -113,4 +113,11 @@
     <Right>lib/net8.0/uSync.BackOffice.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:uSync.BackOffice.uSyncService.#ctor(Microsoft.Extensions.Logging.ILogger{uSync.BackOffice.uSyncService},Umbraco.Cms.Core.Events.IEventAggregator,uSync.BackOffice.Configuration.uSyncConfigService,uSync.BackOffice.SyncHandlers.SyncHandlerFactory,uSync.BackOffice.Services.SyncFileService,uSync.BackOffice.Services.uSyncEventService,Umbraco.Cms.Core.Cache.AppCaches,Umbraco.Cms.Core.Scoping.ICoreScopeProvider,Microsoft.Extensions.Logging.ILoggerFactory)</Target>
+    <Left>lib/net8.0/uSync.BackOffice.dll</Left>
+    <Right>lib/net8.0/uSync.BackOffice.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
 </Suppressions>

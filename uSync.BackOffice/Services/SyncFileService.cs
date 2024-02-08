@@ -90,6 +90,19 @@ namespace uSync.BackOffice.Services
             => Directory.Exists(GetAbsPath(path));
 
         /// <summary>
+        ///  checks and tells you if a folder exists and has sub folders.
+        /// </summary>
+        /// <remarks>
+        ///  we use this to confirm that a uSync folder has something init.
+        /// </remarks>
+        public bool DirectoryHasChildren(string path)
+        {
+            var fullPath = GetAbsPath(path);
+            if (Directory.Exists(fullPath) is false) return false;
+            return Directory.GetDirectories(fullPath).Length > 0;
+        }
+
+        /// <summary>
         ///  dies the root path exist. 
         /// </summary>
         /// <param name="path"></param>

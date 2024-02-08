@@ -188,7 +188,26 @@ namespace uSync.BackOffice.Configuration
         ///  disabled by default so all notification messages fire.
         /// </remarks>
         [DefaultValue("false")]
-        public bool DisableNotificationSuppression { get; set; } = true; 
+        public bool DisableNotificationSuppression { get; set; } = true;
+
+        /// <summary>
+        /// experimental settings, use with caution, no guarantees
+        /// </summary>
+        [DefaultValue(null)]
+        public uSyncExperimentalSettings Experiments { get; set; } = new();
+    }
+
+    /// <summary>
+    ///  experimental settings, that might change/not work.
+    /// </summary>
+    [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
+    public class uSyncExperimentalSettings
+    {
+        /// <summary>
+        ///  process the notifications for updates in the background.
+        /// </summary>
+        [DefaultValue(false)]
+        public bool ThreadedNotifications { get; set; } = false; 
 
     }
 
