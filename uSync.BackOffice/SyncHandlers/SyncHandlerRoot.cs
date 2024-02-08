@@ -265,7 +265,11 @@ namespace uSync.BackOffice.SyncHandlers
             var cacheKey = PrepCaches();
             runtimeCache.ClearByKey(cacheKey);
 
+            options.Callbacks?.Update?.Invoke("Calculating import order", 1, 9);
+
             var items = GetMergedItems(folders);
+
+            options.Callbacks?.Update?.Invoke($"Processing {items.Count} items", 2, 9);
 
             // create the update list with items.count space. this is the max size we need this list. 
             List<uSyncAction> actions = new List<uSyncAction>(items.Count);
