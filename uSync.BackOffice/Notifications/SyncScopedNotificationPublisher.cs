@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
@@ -61,7 +62,15 @@ internal class SyncScopedNotificationPublisher
             {
                 _logger.LogDebug("Pushed {count} notifications into background queue", items.Count());
                 _backgroundTaskQueue.QueueBackgroundWorkItem(
-                    cancellationToken => Task.Run(() => _eventAggregator.PublishAsync(items), cancellationToken));
+                    cancellationToken =>
+                    {
+                        using (ExecutionContext.SuppressFlow())
+                        {
+                            Task.Run(() => _eventAggregator.PublishAsync(items, cancellationToken));
+                            return Task.CompletedTask;
+                        }
+                    }); 
+                   
             }
             else
             {
