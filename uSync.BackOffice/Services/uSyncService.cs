@@ -54,8 +54,9 @@ namespace uSync.BackOffice
         private readonly IAppCache _appCache;
 
         /// <summary>
-        ///  Create a new uSyncService (done via DI)
+        ///  Create uSync Service 
         /// </summary>
+        [Obsolete("Use method with background service will be removed in v15")]
         public uSyncService(
             ILogger<uSyncService> logger,
             IEventAggregator eventAggregator,
@@ -65,8 +66,7 @@ namespace uSync.BackOffice
             uSyncEventService mutexService,
             AppCaches appCaches,
             ICoreScopeProvider scopeProvider,
-            ILoggerFactory loggerFactory,
-            IBackgroundTaskQueue backgroundTaskQueue)
+            ILoggerFactory loggerFactory)
         {
             this._logger = logger;
 
@@ -83,6 +83,26 @@ namespace uSync.BackOffice
             uSyncTriggers.DoImport += USyncTriggers_DoImport;
             _scopeProvider = scopeProvider;
             _loggerFactory = loggerFactory;
+        }
+
+        /// <summary>
+        ///  Create a new uSyncService (done via DI)
+        /// </summary>
+        public uSyncService(
+            ILogger<uSyncService> logger,
+            IEventAggregator eventAggregator,
+            uSyncConfigService uSyncConfigService,
+            SyncHandlerFactory handlerFactory,
+            SyncFileService syncFileService,
+            uSyncEventService mutexService,
+            AppCaches appCaches,
+            ICoreScopeProvider scopeProvider,
+            ILoggerFactory loggerFactory,
+            IBackgroundTaskQueue backgroundTaskQueue)
+            : this(logger, eventAggregator, uSyncConfigService,
+                  handlerFactory, syncFileService, mutexService,
+                  appCaches, scopeProvider, loggerFactory)
+        {
             _backgroundTaskQueue = backgroundTaskQueue;
         }
 

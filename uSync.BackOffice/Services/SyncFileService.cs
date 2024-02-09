@@ -531,7 +531,7 @@ namespace uSync.BackOffice.Services
                             Key = element.GetKey(),
                             Alias = element.GetAlias(),
                             Path = path,
-                            Filename = file,
+                            FileName = file,
                             IsRoot = true,
                             Level = (element.GetLevel() * 1000) + element.GetItemSortOrder(), 
                             Node = element

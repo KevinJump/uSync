@@ -1150,7 +1150,7 @@ namespace uSync.BackOffice.SyncHandlers
             {
                 count++;
                 callback?.Invoke(Path.GetFileNameWithoutExtension(item.Path), count, items.Count);
-                actions.AddRange(ReportElement(item.Node, item.Filename, config));
+                actions.AddRange(ReportElement(item.Node, item.FileName, config));
             }
 
             callback?.Invoke("Validating Report", 2, 3);
@@ -1568,6 +1568,15 @@ namespace uSync.BackOffice.SyncHandlers
                 }
             }
         }
+
+        /// <summary>
+        /// Export any deletes items to disk 
+        /// </summary>
+        /// <remarks>
+        /// Deleted items get 'empty' files on disk so we know they where deleted
+        /// </remarks>
+        protected virtual void ExportDeletedItem(TObject item, string folder, HandlerSettings config)
+            => ExportDeletedItem(item, [folder], config);
 
         /// <summary>
         /// Export any deletes items to disk 

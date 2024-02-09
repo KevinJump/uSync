@@ -58,7 +58,7 @@ internal class SyncScopedNotificationPublisher
 
         foreach (var items in groupedNotifications)
         {
-            if (_uSyncConfig.Settings.BackgroundNotifications is true)
+            if (_uSyncConfig.Settings.BackgroundNotifications is true && _backgroundTaskQueue != null)
             {
                 _logger.LogDebug("Pushed {count} notifications into background queue", items.Count());
                 _backgroundTaskQueue.QueueBackgroundWorkItem(
