@@ -58,7 +58,7 @@ internal class SyncScopedNotificationPublisher
 
         foreach (var items in groupedNotifications)
         {
-            if (_uSyncConfig.Settings.Experiments?.ThreadedNotifications == true)
+            if (_uSyncConfig.Settings.BackgroundNotifications is true)
             {
                 _logger.LogDebug("Pushed {count} notifications into background queue", items.Count());
                 _backgroundTaskQueue.QueueBackgroundWorkItem(
@@ -66,7 +66,7 @@ internal class SyncScopedNotificationPublisher
                     {
                         using (ExecutionContext.SuppressFlow())
                         {
-                            Task.Run(() => _eventAggregator.PublishAsync(items, cancellationToken));
+                            Task.Run(() => _eventAggregator.PublishAsync(items, cancellationToken), cancellationToken);
                             return Task.CompletedTask;
                         }
                     }); 

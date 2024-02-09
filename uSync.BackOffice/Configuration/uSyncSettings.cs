@@ -191,24 +191,14 @@ namespace uSync.BackOffice.Configuration
         public bool DisableNotificationSuppression { get; set; } = true;
 
         /// <summary>
-        /// experimental settings, use with caution, no guarantees
+        ///  trigger all the notifications in a background thread, 
         /// </summary>
-        [DefaultValue(null)]
-        public uSyncExperimentalSettings Experiments { get; set; } = new();
-    }
-
-    /// <summary>
-    ///  experimental settings, that might change/not work.
-    /// </summary>
-    [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
-    public class uSyncExperimentalSettings
-    {
-        /// <summary>
-        ///  process the notifications for updates in the background.
-        /// </summary>
+        /// <remarks>
+        ///  uSync will process imports faster, but any notification events will
+        ///  fire off afterward in the background.
+        /// </remarks>
         [DefaultValue(false)]
-        public bool ThreadedNotifications { get; set; } = false; 
-
+        public bool BackgroundNotifications { get; set; } = false;
     }
 
 }
