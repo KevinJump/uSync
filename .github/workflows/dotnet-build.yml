@@ -2,9 +2,9 @@ name: Package up.
 
 on:
   push:
-    branches: [ "v12/main" ]
+    branches: "*"
   pull_request:
-    branches: [ "v12/main" ]
+    branches: "*"
     
 jobs:
 
