@@ -26,6 +26,8 @@ namespace uSync.BackOffice.Services
         private readonly ILogger<SyncFileService> logger;
         private readonly IHostEnvironment _hostEnvironment;
 
+        private static char[] _trimChars = [ ' ', Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar ]; 
+
         /// <summary>
         /// Constructor for File service (via DI)
         /// </summary>
@@ -44,7 +46,20 @@ namespace uSync.BackOffice.Services
         public string GetAbsPath(string path)
         {
             if (Path.IsPathFullyQualified(path)) return CleanLocalPath(path);
-            return CleanLocalPath(_hostEnvironment.MapPathContentRoot(path.TrimStart('/')));
+            return CleanLocalPath(_hostEnvironment.MapPathContentRoot(path.TrimStart(_trimChars)));
+        }
+
+        /// <summary>
+        ///  Works out the relative path of a file to the site. 
+        /// </summary>
+        /// <remarks>
+        ///  if the path is outside of the site root, then we return the whole path.
+        /// </remarks>
+        public string GetSiteRelativePath(string path)
+        {
+            if (Path.IsPathFullyQualified(path)) 
+                return path.Substring(_hostEnvironment.ContentRootPath.Length).TrimStart(_trimChars);
+            return path;
         }
 
         /// <summary>
@@ -73,6 +88,19 @@ namespace uSync.BackOffice.Services
         /// <returns></returns>
         public bool DirectoryExists(string path)
             => Directory.Exists(GetAbsPath(path));
+
+        /// <summary>
+        ///  checks and tells you if a folder exists and has sub folders.
+        /// </summary>
+        /// <remarks>
+        ///  we use this to confirm that a uSync folder has something init.
+        /// </remarks>
+        public bool DirectoryHasChildren(string path)
+        {
+            var fullPath = GetAbsPath(path);
+            if (Directory.Exists(fullPath) is false) return false;
+            return Directory.GetDirectories(fullPath).Length > 0;
+        }
 
         /// <summary>
         ///  dies the root path exist. 
@@ -236,7 +264,7 @@ namespace uSync.BackOffice.Services
         /// </summary>
         public void SaveFile(string filename, Stream stream)
         {
-            logger.LogDebug("Saving File: {0}", filename);
+            logger.LogDebug("Saving File: {file}", filename);
 
             using (Stream fileStream = OpenWrite(filename))
             {
@@ -252,7 +280,7 @@ namespace uSync.BackOffice.Services
         public void SaveFile(string filename, string content)
         {
             var localFile = GetAbsPath(filename);
-            logger.LogDebug("Saving File: {0} [{1}]", localFile, content.Length);
+            logger.LogDebug("Saving File: {local} [{length}]", localFile, content.Length);
 
             using (Stream stream = OpenWrite(localFile))
             {
@@ -503,7 +531,7 @@ namespace uSync.BackOffice.Services
                             Key = element.GetKey(),
                             Alias = element.GetAlias(),
                             Path = path,
-                            Filename = file,
+                            FileName = file,
                             IsRoot = true,
                             Level = (element.GetLevel() * 1000) + element.GetItemSortOrder(), 
                             Node = element

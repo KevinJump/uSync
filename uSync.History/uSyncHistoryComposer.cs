@@ -1,14 +1,14 @@
 ﻿using Microsoft.AspNetCore.Routing;
+
 using Umbraco.Cms.Core.Composing;
 using Umbraco.Cms.Core.DependencyInjection;
 using Umbraco.Cms.Core.Events;
 using Umbraco.Cms.Core.Notifications;
 using Umbraco.Cms.Core.Security;
-using Umbraco.Cms.Infrastructure.WebAssets;
 using Umbraco.Extensions;
+
 using uSync.BackOffice;
 using uSync.BackOffice.Configuration;
-using uSync.BackOffice.Controllers;
 using uSync.BackOffice.Hubs;
 using uSync.History.Controllers;
 

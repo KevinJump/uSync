@@ -3,9 +3,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
-using uSync.BackOffice.Models;
-
-namespace uSync.BackOffice.Controllers
+namespace uSync.BackOffice.Models
 {
     /// <summary>
     /// Information about uSync AddOns (displayed in version string)

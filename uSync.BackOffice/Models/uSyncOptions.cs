@@ -3,7 +3,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
-namespace uSync.BackOffice.Controllers
+namespace uSync.BackOffice.Models
 {
     /// <summary>
     /// Options passed to Import/Export methods by JS calls

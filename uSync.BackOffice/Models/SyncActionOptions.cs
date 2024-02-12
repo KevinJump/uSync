@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
-namespace uSync.BackOffice.Controllers
+namespace uSync.BackOffice.Models
 {
     /// <summary>
     /// Options to tell uSync how to process an action

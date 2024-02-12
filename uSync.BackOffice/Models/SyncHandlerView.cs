@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
-namespace uSync.BackOffice.Controllers
+namespace uSync.BackOffice.Models
 {
     /// <summary>
     ///  view model of a handler, sent to the UI to draw the handler boxes.

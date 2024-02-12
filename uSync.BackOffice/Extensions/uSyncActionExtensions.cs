@@ -25,7 +25,7 @@ namespace uSync.BackOffice
             => actions.Count(x => x.Change > Core.ChangeType.NoChange && x.Change < Core.ChangeType.Hidden);
 
         /// <summary>
-        ///  checks to see if the reuqested action is valid for the configured list of actions.
+        ///  checks to see if the requested action is valid for the configured list of actions.
         /// </summary>
         public static bool IsValidAction(this HandlerActions requestedAction, IEnumerable<string> actions)
             => requestedAction == HandlerActions.None ||
@@ -44,8 +44,13 @@ namespace uSync.BackOffice
             {
                 var fails = items.Where(x => !x.Success).ToList();
 
-                summary.Add(uSyncAction.SetAction(true, items.Key, items.Key, Core.ChangeType.Information,
-                    $"({items.CountChanges()}/{items.Count()} Changes) ({fails.Count} failures)"));              
+                summary.Add(uSyncAction.SetAction(
+                    success: true, 
+                    name: items.Key, 
+                    type: items.Key, 
+                    change: Core.ChangeType.Information,
+                    message: $"({items.CountChanges()}/{items.Count()} Changes) ({fails.Count} failures)")
+                );              
 
                 if (!strict) summary.AddRange(fails);
                

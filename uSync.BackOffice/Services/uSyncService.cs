@@ -11,9 +11,11 @@ using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Events;
 using Umbraco.Cms.Core.Scoping;
 using Umbraco.Cms.Core.Semver;
+using Umbraco.Cms.Infrastructure.HostedServices;
 using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;
+using uSync.BackOffice.Models;
 using uSync.BackOffice.Services;
 using uSync.BackOffice.SyncHandlers;
 using uSync.Core;
@@ -47,11 +49,14 @@ namespace uSync.BackOffice
 
         private readonly ICoreScopeProvider _scopeProvider;
 
+        private readonly IBackgroundTaskQueue _backgroundTaskQueue;
+
         private readonly IAppCache _appCache;
 
         /// <summary>
-        ///  Create a new uSyncService (done via DI)
+        ///  Create uSync Service 
         /// </summary>
+        [Obsolete("Use method with background service will be removed in v15")]
         public uSyncService(
             ILogger<uSyncService> logger,
             IEventAggregator eventAggregator,
@@ -81,12 +86,45 @@ namespace uSync.BackOffice
         }
 
         /// <summary>
+        ///  Create a new uSyncService (done via DI)
+        /// </summary>
+        public uSyncService(
+            ILogger<uSyncService> logger,
+            IEventAggregator eventAggregator,
+            uSyncConfigService uSyncConfigService,
+            SyncHandlerFactory handlerFactory,
+            SyncFileService syncFileService,
+            uSyncEventService mutexService,
+            AppCaches appCaches,
+            ICoreScopeProvider scopeProvider,
+            ILoggerFactory loggerFactory,
+            IBackgroundTaskQueue backgroundTaskQueue)
+            : this(logger, eventAggregator, uSyncConfigService,
+                  handlerFactory, syncFileService, mutexService,
+                  appCaches, scopeProvider, loggerFactory)
+        {
+            _backgroundTaskQueue = backgroundTaskQueue;
+        }
+
+        /// <summary>
         ///  Does the given folder contain and uSync files for Content
         /// </summary>
         public bool HasContentFiles(string rootFolder)
         {
             return _syncFileService.DirectoryExists(rootFolder + "Content");
         }
+
+        /// <summary>
+        ///  check to see if any of the uSync folders have content files.
+        /// </summary>
+        public bool HasContentFiles(string[] folders)
+            => folders.Any(x => HasContentFiles(x));
+
+        /// <summary>
+        ///  check if there are any root files on disk. 
+        /// </summary>
+        public bool HasRootFiles(string[] folders)
+            => folders[..^1].Any(x => _syncFileService.DirectoryHasChildren(x));
 
 
         #region Reporting 

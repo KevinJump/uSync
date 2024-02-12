@@ -1,13 +1,31 @@
 ﻿using System;
 using System.Xml.Linq;
 
-namespace uSync.BackOffice.Models
+using uSync.Core;
+
+namespace uSync.BackOffice
 {
     /// <summary>
     ///  object representing a file and its level
     /// </summary>
     public class OrderedNodeInfo
     {
+        /// <summary>
+        ///  construct an OrderedNode
+        /// </summary>
+        public OrderedNodeInfo() { }
+
+        /// <summary>
+        ///  construct an OrderedNode
+        /// </summary>
+        [Obsolete("Should be no need to call constructor - removed v15")]
+        public OrderedNodeInfo(string filename, XElement node)
+        {
+            FileName = filename;
+            Node = node;
+            Key = node.GetKey();
+        }
+
         /// <summary>
         ///  the key for the item.
         /// </summary>
@@ -31,7 +49,7 @@ namespace uSync.BackOffice.Models
         /// <summary>
         ///  path to the actual file.
         /// </summary>
-        public string Filename { get; set; }
+        public string FileName { get; set; }
 
         /// <summary>
         ///  the xml for this item.

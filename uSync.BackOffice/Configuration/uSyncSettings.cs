@@ -188,8 +188,17 @@ namespace uSync.BackOffice.Configuration
         ///  disabled by default so all notification messages fire.
         /// </remarks>
         [DefaultValue("false")]
-        public bool DisableNotificationSuppression { get; set; } = true; 
+        public bool DisableNotificationSuppression { get; set; } = true;
 
+        /// <summary>
+        ///  trigger all the notifications in a background thread, 
+        /// </summary>
+        /// <remarks>
+        ///  uSync will process imports faster, but any notification events will
+        ///  fire off afterward in the background.
+        /// </remarks>
+        [DefaultValue(false)]
+        public bool BackgroundNotifications { get; set; } = false;
     }
 
 }
