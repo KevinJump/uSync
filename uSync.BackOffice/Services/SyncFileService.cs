@@ -505,7 +505,7 @@ namespace uSync.BackOffice.Services
                     if (elements.ContainsKey(item.Key))
                     {
                         // merge these files.
-                        item.Value.Node = trackerBase.MergeFiles(elements[item.Key].Node, item.Value.Node);
+                        item.Value.SetNode(trackerBase.MergeFiles(elements[item.Key].Node, item.Value.Node));
                     }
 
                     elements[item.Key] = item.Value;
@@ -526,16 +526,12 @@ namespace uSync.BackOffice.Services
 
                     yield return new KeyValuePair<string, OrderedNodeInfo>(
                         key: path,
-                        value: new OrderedNodeInfo
-                        {
-                            Key = element.GetKey(),
-                            Alias = element.GetAlias(),
-                            Path = path,
-                            FileName = file,
-                            IsRoot = true,
-                            Level = (element.GetLevel() * 1000) + element.GetItemSortOrder(), 
-                            Node = element
-                        });
+                        value: new OrderedNodeInfo(
+                            filename: file,
+                            node: element,
+                            level: (element.GetLevel() * 1000) + element.GetItemSortOrder(),
+                            path: path,
+                            isRoot: true));
                 }
             }
         }
@@ -592,14 +588,7 @@ namespace uSync.BackOffice.Services
         /// </summary>
         /// <returns>true if any but the last folder exists</returns>
         public bool AnyFolderExists(string[] folders)
-        {
-            foreach(var folder in folders)
-            {
-                if (DirectoryExists(folder)) return true;
-            }
-
-            return false;
-        }
+            => folders.Any(DirectoryExists);
 
         private string[] GetFilePaths(string folder, string extension)
             => Directory.GetFiles(folder, $"*.{extension}", SearchOption.AllDirectories);

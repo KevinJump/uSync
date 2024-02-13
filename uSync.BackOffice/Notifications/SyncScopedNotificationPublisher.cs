@@ -66,16 +66,17 @@ internal class SyncScopedNotificationPublisher
                     {
                         using (ExecutionContext.SuppressFlow())
                         {
-                            Task.Run(() => _eventAggregator.PublishAsync(items, cancellationToken), cancellationToken);
+                            Task.Run(() => _eventAggregator.Publish(items), cancellationToken);
+                            _logger.LogDebug("Background Events Processed");
                             return Task.CompletedTask;
                         }
-                    }); 
-                   
+                    });
+
             }
             else
             {
                 _updateCallback?.Invoke($"Processing {items.Key}s ({items.Count()})", 90, 100);
-                Task.Run(() => _eventAggregator.PublishAsync(items));
+                _eventAggregator.Publish(items);
             }
         }
 
@@ -88,7 +89,7 @@ internal class SyncScopedNotificationPublisher
 
     private void SetNotificationStates(IList<INotification> notifications)
     {
-        foreach(var notification in notifications)
+        foreach (var notification in notifications)
         {
             if (notification is StatefulNotification stateful)
             {

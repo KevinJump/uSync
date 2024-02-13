@@ -105,6 +105,12 @@ namespace uSync.BackOffice.Configuration
         public bool FailOnMissingParent { get; set; } = false;
 
         /// <summary>
+        ///  fail if a duplicate file of same type and key is detected during the import process.
+        /// </summary>
+        [DefaultValue(false)]
+        public bool FailOnDuplicates { get; set; } = false;
+
+        /// <summary>
         /// Should folder keys be cached (for speed)
         /// </summary>
         [DefaultValue(true)]
@@ -188,7 +194,7 @@ namespace uSync.BackOffice.Configuration
         ///  disabled by default so all notification messages fire.
         /// </remarks>
         [DefaultValue("false")]
-        public bool DisableNotificationSuppression { get; set; } = true;
+        public bool DisableNotificationSuppression { get; set; } = false;
 
         /// <summary>
         ///  trigger all the notifications in a background thread, 
@@ -200,5 +206,4 @@ namespace uSync.BackOffice.Configuration
         [DefaultValue(false)]
         public bool BackgroundNotifications { get; set; } = false;
     }
-
 }

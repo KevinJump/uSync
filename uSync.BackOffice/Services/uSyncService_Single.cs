@@ -135,10 +135,9 @@ namespace uSync.BackOffice
                         {
                             foreach (var item in orderedNodes.Skip(options.PageNumber * options.PageSize).Take(options.PageSize))
                             {
-                                if (item.Node == null) 
-                                    item.Node = XElement.Load(item.FileName);
+                                var node = item.Node ?? XElement.Load(item.FileName);
 
-                                var itemType = item.Node.GetItemType();
+                                var itemType = node.GetItemType();
                                 if (!itemType.InvariantEquals(lastType))
                                 {
                                     lastType = itemType;
@@ -146,7 +145,7 @@ namespace uSync.BackOffice
 
                                     // special case, blueprints looks like IContent items, except they are slightly different
                                     // so we check for them specifically and get the handler for the entity rather than the object type.
-                                    if (item.Node.IsContent() && item.Node.IsBlueprint())
+                                    if (node.IsContent() && node.IsBlueprint())
                                     {
                                         lastType = UdiEntityType.DocumentBlueprint;
                                         handlerPair = _handlerFactory.GetValidHandlerByEntityType(UdiEntityType.DocumentBlueprint);
@@ -159,12 +158,12 @@ namespace uSync.BackOffice
                                     continue;
                                 }
 
-                                options.Callbacks?.Update?.Invoke(item.Node.GetAlias(),
+                                options.Callbacks?.Update?.Invoke(node.GetAlias(),
                                     CalculateProgress(index, total, options.ProgressMin, options.ProgressMax), 100);
 
                                 if (handlerPair != null)
                                 {
-                                    actions.AddRange(handlerPair.Handler.ImportElement(item.Node, item.FileName, handlerPair.Settings, options));
+                                    actions.AddRange(handlerPair.Handler.ImportElement(node, item.FileName, handlerPair.Settings, options));
                                 }
 
                                 index++;
@@ -369,16 +368,13 @@ namespace uSync.BackOffice
                 foreach (var file in files)
                 {
                     var xml = _syncFileService.LoadXElement(file);
-                    nodes.Add(new OrderedNodeInfo
-                    {
-                        Node = xml,
-                        Alias = xml.GetAlias(),
-                        Key = xml.GetKey(),
-                        FileName = file,
-                        IsRoot = false,
-                        Level = xml.GetLevel(),
-                        Path = file.Substring(folder.Length),
-                    });
+                    nodes.Add(new OrderedNodeInfo(
+                        filename: file, 
+                        node: xml,                       
+                        level: xml.GetLevel(), 
+                        path: file.Substring(folder.Length),
+                        isRoot: false));
+                    
                 }
             }
 
