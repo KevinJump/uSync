@@ -42,7 +42,12 @@ namespace uSync.BackOffice
         /// <summary>
         ///  the key for the item.
         /// </summary>
-        public Guid Key { get; }
+        public Guid Key
+        {
+            get;
+            [Obsolete("Setter will be removed v15")]
+            set;
+        }
 
         /// <summary>
         ///  umbraco alias of the item
@@ -62,12 +67,22 @@ namespace uSync.BackOffice
         /// <summary>
         ///  path to the actual file.
         /// </summary>
-        public string FileName { get; }
+        public string FileName
+        {
+            get;
+            [Obsolete("Setter will be removed v15")]
+            set;
+        }
 
         /// <summary>
         ///  the xml for this item.
         /// </summary>
-        public XElement Node { get; private set; }
+        public XElement Node
+        {
+            get;
+            [Obsolete("Setter will be private from v15")]
+            set;
+        }
 
         /// <summary>
         ///  overwrites the node value for this ordered node element.
