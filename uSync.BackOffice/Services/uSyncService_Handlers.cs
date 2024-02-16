@@ -54,7 +54,14 @@ namespace uSync.BackOffice
                     var folders = GetHandlerFolders(options.Folders, handlerPair.Handler);
 
                     _logger.LogDebug("> Import Handler {handler}", handlerAlias);
-                    using var scope = _scopeProvider.CreateNotificationScope(_eventAggregator, _loggerFactory, options.Callbacks?.Update);
+                    
+                    using var scope = _scopeProvider.CreateNotificationScope(
+                        eventAggregator: _eventAggregator,
+                        loggerFactory: _loggerFactory,
+                        syncConfigService: _uSyncConfig,
+                        syncEventService: _mutexService,
+                        backgroundTaskQueue: _backgroundTaskQueue,
+                        options.Callbacks?.Update);
 
                     var results = handlerPair.Handler.ImportAll(folders, handlerPair.Settings, options);
                     

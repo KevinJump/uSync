@@ -106,7 +106,7 @@
 
         function getTypeName(typeName) {
             if (typeName !== undefined) {
-                return typeName.substring(1);
+                return typeName;
             }
             return "??";
         }

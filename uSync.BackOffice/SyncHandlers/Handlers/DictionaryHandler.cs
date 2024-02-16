@@ -175,7 +175,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
                 if (item != null)
                 {
                     return uSyncActionHelper<IDictionaryItem>
-                        .ReportAction(ChangeType.NoChange, item.ItemKey, node.GetPath(), filename, item.Key, this.Alias, "Existing Item will not be overwritten")
+                        .ReportAction(ChangeType.NoChange, item.ItemKey, node.GetPath(), syncFileService.GetSiteRelativePath(filename), item.Key, this.Alias, "Existing Item will not be overwritten")
                         .AsEnumerableOfOne<uSyncAction>();
                 }
             }

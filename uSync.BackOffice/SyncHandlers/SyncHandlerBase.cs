@@ -62,7 +62,7 @@ namespace uSync.BackOffice.SyncHandlers
         protected override IEnumerable<uSyncAction> CleanFolder(string cleanFile, bool reportOnly, bool flat)
         {
             var folder = Path.GetDirectoryName(cleanFile);
-            if (!Directory.Exists(folder)) return Enumerable.Empty<uSyncAction>();
+            if (!syncFileService.DirectoryExists(folder)) return Enumerable.Empty<uSyncAction>();
 
 
             // get the keys for every item in this folder. 
@@ -98,7 +98,7 @@ namespace uSync.BackOffice.SyncHandlers
 
         private int GetCleanParentId(string cleanFile)
         {
-            var node = XElement.Load(cleanFile);
+            var node = syncFileService.LoadXElement(cleanFile);
             var id = node.Attribute("Id").ValueOrDefault(0);
             if (id != 0) return id;
             return GetCleanParent(cleanFile)?.Id ?? 0;

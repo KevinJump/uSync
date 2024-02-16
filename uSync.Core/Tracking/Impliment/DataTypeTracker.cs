@@ -13,20 +13,21 @@ namespace uSync.Core.Tracking.Impliment
 {
     public class DataTypeTracker : SyncXmlTracker<IDataType>, ISyncTracker<IDataType>
     {
-        private readonly JsonSerializerSettings _jsonSettings;
+        private readonly JsonSerializerSettings _jsonSettings = new JsonSerializerSettings()
+        {
+            ContractResolver = new uSyncContractResolver()
+        };
         private readonly SyncConfigMergerCollection _configMergers;
 
+        public DataTypeTracker(SyncSerializerCollection serializers)
+            : base(serializers) { }
+
         public DataTypeTracker(
-            SyncSerializerCollection serializers, 
+            SyncSerializerCollection serializers,
             SyncConfigMergerCollection configMergers)
             : base(serializers)
         {
             _configMergers = configMergers;
-
-            _jsonSettings = new JsonSerializerSettings()
-            {
-                ContractResolver = new uSyncContractResolver()
-            };
         }
 
         public override List<TrackingItem> TrackingItems => new List<TrackingItem>()
@@ -104,7 +105,7 @@ namespace uSync.Core.Tracking.Impliment
 
 
         private ISyncConfigMerger GetConfigMerger(string editorAlias)
-            => _configMergers.GetConfigMerger(editorAlias) ?? null;
+            => _configMergers?.GetConfigMerger(editorAlias) ?? null;
 
         private string SerializeConfig(object config)
             => JsonConvert.SerializeObject(config, Formatting.Indented, _jsonSettings);

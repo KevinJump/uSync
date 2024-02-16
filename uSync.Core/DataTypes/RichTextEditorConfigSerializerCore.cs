@@ -35,6 +35,9 @@ internal class RichTextEditorConfigSerializerCore : ConfigurationSerializerBase,
         if (!(configuration is RichTextConfiguration richTextConfiguration))
             return base.SerializeConfig(configuration);
 
+        if (richTextConfiguration?.Editor == null)
+            return base.SerializeConfig(configuration);
+
         var editorAttempt = richTextConfiguration.Editor.TryConvertTo<JObject>();
 
         if (!editorAttempt.Success)

@@ -10,6 +10,16 @@
         /// </summary>
         internal const string Name = "uSync";
 
+        /// <summary>
+        ///  a key we set on notifications, so you can tell if uSync processed them,
+        /// </summary>
+        public const string EventStateKey = "uSync.ProcessState";
+
+        /// <summary>
+        ///  a key set on a notification to say uSync was paused while processing the item.
+        /// </summary>
+        public const string EventPausedKey = "uSync.PausedKey";
+
         internal class Trees
         {
             internal const string uSync = "usync";

@@ -52,7 +52,7 @@
 
 	<!-- Package Validation -->
 	<PropertyGroup>
-		<!-- 
+		<!--
 		<GenerateCompatibilitySuppressionFile>true</GenerateCompatibilitySuppressionFile>
 		-->
 		<!--
