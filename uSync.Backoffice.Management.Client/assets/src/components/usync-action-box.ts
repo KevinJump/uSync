@@ -1,6 +1,6 @@
 import { LitElement, customElement, html, css, property } from "@umbraco-cms/backoffice/external/lit";
 import { SyncActionButton, SyncActionGroup } from "../api";
-import { InterfaceColor, InterfaceLook } from "@umbraco-cms/backoffice/external/uui";
+import { UUIInterfaceColor, UUIInterfaceLook } from "@umbraco-cms/backoffice/external/uui";
 
 /**
  * @exports
@@ -33,8 +33,8 @@ export class uSyncActionBox extends LitElement {
         const buttons = this.group?.buttons.map((i) => {
             return html`
                 <uui-button label=${i.key} 
-                    color=${<InterfaceColor>i.color}
-                    look=${<InterfaceLook>i.look}
+                    color=${<UUIInterfaceColor>i.color}
+                    look=${<UUIInterfaceLook>i.look}
                     style="font-size: 20px"
                     @click=${() => this._handleClick(this.group, i)}
                     ></uui-button>

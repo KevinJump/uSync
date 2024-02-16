@@ -13,7 +13,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Umbraco.Cms.Api.Management" Version="14.0.0--preview004" />
+		<PackageReference Include="Umbraco.Cms.Api.Management" Version="14.0.0--preview006" />
 	</ItemGroup>
 
 	<ItemGroup>

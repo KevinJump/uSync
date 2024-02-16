@@ -5,7 +5,7 @@
   "version": "14.0.0-build.20240206.3",
   "exports": {
     ".": null,
-    "./components":  "./src/components",
+    "./components": "./src/components",
     "./workspace": "./src/workspace"
   },
   "repository": {
@@ -30,10 +30,10 @@
   },
   "dependencies": {
     "@microsoft/signalr": "^8.0.0",
-    "lit": "^3.1.0",
-    "@umbraco-cms/backoffice": "^14.0.0--preview004"
+    "lit": "^3.1.0"
   },
   "devDependencies": {
+    "@umbraco-cms/backoffice": "^14.0.0--preview006",
     "openapi-typescript-codegen": "^0.25.0",
     "typescript": "^5.2.2",
     "vite": "^5.0.8",

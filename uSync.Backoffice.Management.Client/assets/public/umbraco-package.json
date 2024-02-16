@@ -9,7 +9,7 @@
       "name": "mypackage.entrypoint",
       "alias": "mypackage.EntryPoint",
       "type": "entryPoint",
-      "js": "/App_Plugins/uSync/assets.js"
+      "js": "/App_Plugins/uSync/usync-assets.js"
     }
   ]
 }

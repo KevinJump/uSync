@@ -1,14 +1,8 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-
-using System;
+﻿using System;
 using System.IO;
-using System.Linq;
 
-using uSync.BackOffice.Configuration;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 
 namespace uSync
 {
@@ -52,58 +46,6 @@ namespace uSync
             {
                 config.AdduSyncConfigs(hostingContext, filename);
             });
-        }
-
-        /// <summary>
-        ///  returns values from a object that are not set to the default values from another object.
-        /// </summary>
-        /// <remarks>
-        ///  this extension method gives us a way to see which values have been changed from the 
-        ///  default values by comparing to objects. and returning a JToken value that only
-        ///  contains the changed values - we use this to show users what has changed in their 
-        ///  configuration.
-        /// </remarks>
-        public static JToken GetNonDefaultValues<T>(this T source, T defaults)
-        {
-            try
-            {
-                var sourceJson = JObject.FromObject(source);
-                if (defaults == null) return sourceJson;
-
-                var defaultJson = JObject.FromObject(defaults);
-
-                var changes = new JObject();
-
-                foreach (var key in sourceJson.Properties().Select(x => x.Name))
-                {
-                    var sourceObject = sourceJson[key];
-
-                    if (sourceObject is JObject)
-                    {
-                        changes.Add(key, sourceObject.GetNonDefaultValues(defaultJson[key]));
-                    }
-                    else
-                    {
-
-                        var sourceValue = JsonConvert.SerializeObject(sourceJson[key]);
-                        var defaultValue = JsonConvert.SerializeObject(defaultJson[key]);
-
-                        if (!sourceValue.Equals(defaultValue))
-                        {
-                            changes.Add(key, sourceJson[key]);
-                        }
-                    }
-                }
-
-                return changes;
-
-            }
-            catch(Exception ex)
-            {
-                var x = ex;
-            }
-
-            return null;
-        }
+        }        
     }
 }
