@@ -1,20 +1,23 @@
-﻿using System;
+﻿using uSync.Core.Extensions;
 
-using Newtonsoft.Json;
+namespace uSync.Core.DataTypes;
 
-namespace uSync.Core.DataTypes
+public abstract class ConfigurationSerializerBase
 {
-    public abstract class ConfigurationSerializerBase
+    public virtual object? DeserializeConfig(string config, Type configType)
     {
-        public virtual object DeserializeConfig(string config, Type configType)
-        {
-            return JsonConvert.DeserializeObject(config, configType);
-        }
+        if (config.TryDeserialize(configType, out var result))
+            return result;
 
-        public virtual string SerializeConfig(object configuration)
-        {
-            return JsonConvert.SerializeObject(configuration, Formatting.Indented);
-        }
-
+        return default;
     }
+
+    public virtual string? SerializeConfig(object configuration)
+    {
+        if (configuration.TrySerialize(out var result))
+            return result;
+
+        return default;
+    }
+
 }

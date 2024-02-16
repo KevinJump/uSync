@@ -19,7 +19,7 @@ internal class ImageCropperConfigMerger : SyncConfigMergerBase, ISyncConfigMerge
             x => x.Alias,
             x => x.Alias?.StartsWith(_removedLabel) == true);
 
-        return targetConfig; 
+        return targetConfig;
     }
 
     public object GetDifferenceConfig(string root, string target)

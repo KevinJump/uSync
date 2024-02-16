@@ -1,7 +1,7 @@
-﻿using Newtonsoft.Json;
-
-using Umbraco.Cms.Core;
+﻿using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.PropertyEditors;
+
+using uSync.Core.Extensions;
 
 namespace uSync.Core.Roots.Configs;
 
@@ -17,8 +17,8 @@ internal class BlockListConfigMerger : SyncConfigMergerBase, ISyncConfigMerger
 
     public virtual object GetMergedConfig(string root, string target)
     {
-        var rootConfig = JsonConvert.DeserializeObject<BlockListConfiguration>(root);
-        var targetConfig = JsonConvert.DeserializeObject<BlockListConfiguration>(target);
+        var rootConfig = root.Deserialize<BlockListConfiguration>();
+        var targetConfig = target.Deserialize<BlockListConfiguration>();
 
         targetConfig.Blocks = MergeObjects(
             rootConfig.Blocks,
@@ -31,17 +31,17 @@ internal class BlockListConfigMerger : SyncConfigMergerBase, ISyncConfigMerger
 
     public virtual object GetDifferenceConfig(string root, string target)
     {
-        var rootConfig = JsonConvert.DeserializeObject<BlockListConfiguration>(root);
-        var targetConfig = JsonConvert.DeserializeObject<BlockListConfiguration>(target);
+        var rootConfig = root.Deserialize<BlockListConfiguration>();
+        var targetConfig = target.Deserialize<BlockListConfiguration>();
 
 
         targetConfig.Blocks = GetObjectDifferences(
-            rootConfig.Blocks, 
+            rootConfig.Blocks,
             targetConfig.Blocks,
             x => x.ContentElementTypeKey,
             (x, label) => x.Label = $"{_removedLabel}:{x.Label}");
 
         return targetConfig;
     }
-   
+
 }

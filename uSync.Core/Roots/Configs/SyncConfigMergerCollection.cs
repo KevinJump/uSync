@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-using Umbraco.Cms.Core.Composing;
+﻿using Umbraco.Cms.Core.Composing;
 using Umbraco.Extensions;
 
 namespace uSync.Core.Roots.Configs;
 public class SyncConfigMergerCollection
     : BuilderCollectionBase<ISyncConfigMerger>
 {
-    public SyncConfigMergerCollection(Func<IEnumerable<ISyncConfigMerger>> items) 
+    public SyncConfigMergerCollection(Func<IEnumerable<ISyncConfigMerger>> items)
         : base(items)
     { }
 

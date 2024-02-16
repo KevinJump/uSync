@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Nodes;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -10,6 +11,7 @@ using Umbraco.Cms.Core.Services;
 
 using uSync.Core;
 using uSync.Core.Dependency;
+using uSync.Core.Extensions;
 using uSync.Core.Mapping;
 
 namespace uSync.Community.Contrib.Mappers
@@ -30,25 +32,22 @@ namespace uSync.Community.Contrib.Mappers
             "Umbraco.Community.Contentment.ContentBlocks"
         };
 
-        protected override string ProcessValues(JToken jsonValue, string editorAlias, Func<JObject, IContentType, JObject> GetPropertiesMethod)
+        protected override string ProcessValues(JsonObject jsonValue, string editorAlias, Func<JsonObject, IContentType, JsonObject> GetPropertiesMethod)
         {
+            var elements = jsonValue.AsArray();
 
-            if (jsonValue is JArray elements)
+            foreach (var item in elements.AsListOfJsonObjects())
             {
-                foreach (var item in elements.Cast<JObject>())
-                {
-                    var itemValue = item.Value<JObject>("value");
-                    if (itemValue == null) continue;
+                var itemValue = item.GetPropertyAsObject("value");
+                if (itemValue == null) continue;
 
-                    var doctype = GetDocTypeByKey(item, "elementType");
-                    if (doctype == null) continue;
+                var doctype = GetDocTypeByKey(item, "elementType");
+                if (doctype == null) continue;
 
-                    GetImportProperties(itemValue, doctype);
-                }
-                return JsonConvert.SerializeObject(elements);
+                GetImportProperties(itemValue, doctype);
             }
 
-            return JsonConvert.SerializeObject(jsonValue);
+            return elements.SerializeJsonNode(false);
 
         }
 
@@ -56,7 +55,7 @@ namespace uSync.Community.Contrib.Mappers
         {
             var stringValue = GetValueAs<string>(value);
 
-            if (stringValue.TryParseValidJsonString(out JArray elements) is false)
+            if (stringValue.TryParseToJsonArray(out JsonArray elements) is false || elements is null)
                 return Enumerable.Empty<uSyncDependency>();
 
             if (elements == null || !elements.Any())
@@ -64,9 +63,9 @@ namespace uSync.Community.Contrib.Mappers
 
             var dependencies = new List<uSyncDependency>();
 
-            foreach(var item in elements.Cast<JObject>())
+            foreach (var item in elements.AsListOfJsonObjects())
             {
-                var itemValue = item.Value<JObject>("value");
+                var itemValue = item.GetPropertyAsObject("value");
                 if (itemValue == null) continue;
 
                 var doctype = GetDocTypeByKey(item, "elementType");

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Nodes;
 
 using Microsoft.Extensions.Logging;
 
@@ -12,6 +13,7 @@ using Umbraco.Cms.Core.Services;
 
 using uSync.Core;
 using uSync.Core.Dependency;
+using uSync.Core.Extensions;
 using uSync.Core.Mapping;
 
 namespace uSync8.Community.Contrib.Mappers
@@ -77,7 +79,7 @@ namespace uSync8.Community.Contrib.Mappers
             if (docType == null) return value.ToString();
 
             // jarray of values 
-            var docValue = jsonValue.Value<JObject>("value");
+            var docValue = jsonValue.GetPropertyAsObject("value");
             if (docValue == null) return value.ToString();
 
             // the doctypegrid editor wants the values in "real" json
@@ -86,20 +88,20 @@ namespace uSync8.Community.Contrib.Mappers
             // then a nested content, but not by much.
             GetExportJsonValues(docValue, docType);
 
-            return JsonConvert.SerializeObject(jsonValue.ExpandAllJsonInToken(true), Formatting.Indented);
+            return JsonConvert.SerializeObject(jsonValue.ExpandAllJsonInToken(), Formatting.Indented);
         }
 
-        private JObject GetExportJsonValues(JObject item, IContentType docType)
+        private JsonObject GetExportJsonValues(JsonObject item, IContentType docType)
         {
             foreach (var property in docType.CompositionPropertyTypes)
             {
                 if (item.ContainsKey(property.Alias))
                 {
                     var value = item[property.Alias];
-                    if (value != null && value.HasValues)
+                    if (value != null)
                     {
                         var mappedVal = mapperCollection.Value.GetExportValue(value, property.PropertyEditorAlias).ToString();
-                        item[property.Alias] = mappedVal.GetJsonTokenValue().ExpandAllJsonInToken();
+                        item[property.Alias] = mappedVal.ConvertToJsonNode().ExpandAllJsonInToken();
                     }
                 }
             }
@@ -121,7 +123,7 @@ namespace uSync8.Community.Contrib.Mappers
                 if (docType == null) return value.ToString();
 
                 // jarray of values 
-                var docValue = jsonValue.Value<JObject>("value");
+                var docValue = jsonValue.GetPropertyAsObject("value");
                 if (docValue == null) return value.ToString();
 
                 // the doctypegrid editor wants the values in "real" json
@@ -130,7 +132,7 @@ namespace uSync8.Community.Contrib.Mappers
                 // then a nested content, but not by much.
                 GetImportJsonValue(docValue, docType);
 
-                return JsonConvert.SerializeObject(jsonValue.ExpandAllJsonInToken(true), Formatting.Indented);
+                return JsonConvert.SerializeObject(jsonValue.ExpandAllJsonInToken(), Formatting.Indented);
             }
             catch (Exception ex)
             {
@@ -142,17 +144,17 @@ namespace uSync8.Community.Contrib.Mappers
             }
         }
 
-        private JObject GetImportJsonValue(JObject item, IContentType docType)
+        private JsonObject GetImportJsonValue(JsonObject item, IContentType docType)
         {
             foreach (var property in docType.CompositionPropertyTypes)
             {
                 if (item.ContainsKey(property.Alias))
                 {
                     var value = item[property.Alias];
-                    if (value != null && value.HasValues)
+                    if (value != null)
                     {
                         var mappedVal = mapperCollection.Value.GetImportValue(value.ToString(), property.PropertyEditorAlias).ToString();
-                        item[property.Alias] = mappedVal.GetJsonTokenValue().ExpandAllJsonInToken();
+                        item[property.Alias] = mappedVal.ConvertToJsonNode().ExpandAllJsonInToken();
                     }
                 }
             }
@@ -165,8 +167,8 @@ namespace uSync8.Community.Contrib.Mappers
             var jsonValue = GetJsonValue(value);
             if (value == null || jsonValue == null) return Enumerable.Empty<uSyncDependency>();
 
-            var docValue = jsonValue.Value<JObject>("value");
-            var docTypeAlias = jsonValue.Value<string>(this.docTypeAliasValue);
+            var docValue = jsonValue.GetPropertyAsObject("value");
+            var docTypeAlias = jsonValue.GetPropertyAsString(this.docTypeAliasValue);
             if (docValue == null || docTypeAlias == null) return Enumerable.Empty<uSyncDependency>();
 
             var docType = GetDocType(docTypeAlias);

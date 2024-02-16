@@ -3,12 +3,11 @@ using Umbraco.Cms.Core.Models;
 
 using uSync.Core.Serialization;
 
-namespace uSync.Core.Tracking.Impliment
+namespace uSync.Core.Tracking.Impliment;
+
+public class MemberTypeTracker : ContentTypeBaseTracker<IMemberType>, ISyncTracker<IMemberType>
 {
-    public class MemberTypeTracker : ContentTypeBaseTracker<IMemberType>, ISyncTracker<IMemberType>
-    {
-        public MemberTypeTracker(SyncSerializerCollection serializers)
-            : base(serializers)
-        { }
-    }
+    public MemberTypeTracker(SyncSerializerCollection serializers)
+        : base(serializers)
+    { }
 }

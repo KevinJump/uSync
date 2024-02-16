@@ -1,64 +1,62 @@
 ﻿using System.Runtime.Serialization;
 
-namespace uSync.Core
+namespace uSync.Core;
+
+/// <summary>
+///  Type of change performed
+/// </summary>
+public enum ChangeType : int
 {
+    [EnumMember(Value = "Clean")]
+    Clean = -2,
+
+    [EnumMember(Value = "Removed")]
+    Removed = -1,
+
+    [EnumMember(Value = "NoChange")]
+    NoChange = 0,
+
+    [EnumMember(Value = "Create")]
+    Create,
+
+    [EnumMember(Value = "Import")]
+    Import,
+
+    [EnumMember(Value = "Export")]
+    Export,
+
+    [EnumMember(Value = "Update")]
+    Update,
+
+    [EnumMember(Value = "Delete")]
+    Delete,
+
+    [EnumMember(Value = "WillChange")]
+    WillChange,
+
+    [EnumMember(Value = "Information")]
+    Information,
+
+    [EnumMember(Value = "Rolledback")]
+    Rolledback,
+
+    [EnumMember(Value = "Fail")]
+    Fail = 11,
+
+    [EnumMember(Value = "ImportFail")]
+    ImportFail,
+
+    [EnumMember(Value = "Mismatch")]
+    Mismatch,
+
+    [EnumMember(Value = "ParentMissing")]
+    ParentMissing,
+
     /// <summary>
-    ///  Type of change performed
+    ///  Hidden changes, don't show up in the UI
+    ///  but they are processed like changes, so 
+    ///  get passed to second and last pass attempts
     /// </summary>
-    public enum ChangeType : int
-    {
-        [EnumMember(Value = "Clean")]
-        Clean = -2,
-
-        [EnumMember(Value = "Removed")]
-        Removed = -1,
-
-        [EnumMember(Value = "NoChange")]
-        NoChange = 0,
-
-        [EnumMember(Value = "Create")]
-        Create,
-
-        [EnumMember(Value = "Import")]
-        Import,
-
-        [EnumMember(Value = "Export")]
-        Export,
-
-        [EnumMember(Value = "Update")]
-        Update,
-
-        [EnumMember(Value = "Delete")]
-        Delete,
-
-        [EnumMember(Value = "WillChange")]
-        WillChange,
-
-        [EnumMember(Value = "Information")]
-        Information,
-
-        [EnumMember(Value = "Rolledback")]
-        Rolledback,
-
-        [EnumMember(Value = "Fail")]
-        Fail = 11,
-
-        [EnumMember(Value = "ImportFail")]
-        ImportFail,
-
-        [EnumMember(Value = "Mismatch")]
-        Mismatch,
-
-        [EnumMember(Value = "ParentMissing")]
-        ParentMissing,
-
-        /// <summary>
-        ///  Hidden changes, don't show up in the UI
-        ///  but they are processed like changes, so 
-        ///  get passed to second and last pass attempts
-        /// </summary>
-        [EnumMember(Value = "Hidden")]
-        Hidden = 101
-    }
-
+    [EnumMember(Value = "Hidden")]
+    Hidden = 101
 }

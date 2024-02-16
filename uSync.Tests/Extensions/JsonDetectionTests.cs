@@ -1,10 +1,9 @@
-﻿using Lucene.Net.Documents;
+﻿using System.Text.Json.Nodes;
 
-using Newtonsoft.Json.Linq;
 
 using NUnit.Framework;
 
-using uSync.Core;
+using uSync.Core.Extensions;
 
 namespace uSync.Tests.Extensions;
 
@@ -55,17 +54,17 @@ internal class JsonDetectionTests
     [TestCase("[\"one\",\"two\",\"three\"]")]
     public void CanBeCastToJToken(object value)
     {
-        var result = value.GetJTokenFromObject();
+        value.TryConvertToJsonNode(out var result);
 
         Assert.IsNotNull(result);
-        Assert.IsInstanceOf<JToken>(result);
+        Assert.IsInstanceOf<JsonNode>(result);
     }
 
     [TestCase("[SQUARE]")]
     [TestCase("{\"One\", \"Two\"}")]
     public void BadJsonReturnsNull(object value)
     {
-        var result = value.GetJTokenFromObject();
+        value.TryParseToJsonNode(out var result);
         Assert.IsNull(result);
     }
 
@@ -76,10 +75,10 @@ internal class JsonDetectionTests
     [TestCase("[\"one\",\"two\",\"three\"]")]
     public void JTokenValuesCanBeParsed(string value)
     {
-        var result = value.TryParseValidJsonString(out JToken token);
+        var result = value.TryParseToJsonNode(out JsonNode node);
 
         Assert.IsTrue(result);
-        Assert.IsInstanceOf<JToken>(token);
+        Assert.IsInstanceOf<JsonNode>(node);
     }
 
     [TestCase("Hello")]
@@ -91,10 +90,10 @@ internal class JsonDetectionTests
     [TestCase(null)]
     public void StringIsNotParsed(string value)
     {
-        var result = value.TryParseValidJsonString(out JToken token);
+        var result = value.TryParseToJsonNode(out JsonNode node);
 
         Assert.IsFalse(result);
-        Assert.IsNull(token);
+        Assert.IsNull(node);
     }
 
     [TestCase("[]", 0)]
@@ -102,10 +101,10 @@ internal class JsonDetectionTests
     [TestCase("[\"one\",\"two\",\"three\"]", 3)]
     public void JArrayValuesCanBeParsed(string value, int expectedLength)
     {
-        var result = value.TryParseValidJsonString<JArray>(out JArray array);
+        var result = value.TryParseToJsonArray(out JsonArray array);
 
         Assert.IsTrue(result);
-        Assert.IsInstanceOf<JArray>(array);
+        Assert.IsInstanceOf<JsonArray>(array);
         Assert.AreEqual(array.Count, expectedLength);
     }
 
@@ -115,10 +114,10 @@ internal class JsonDetectionTests
     [TestCase("{\"middlename\":null}\r\n")]
     public void JObjectValuesCanBeParsed(string value)
     {
-        var result = value.TryParseValidJsonString<JObject>(out JObject obj);
+        var result = value.TryParseToJsonObject(out JsonObject obj);
 
         Assert.IsTrue(result);
-        Assert.IsInstanceOf<JObject>(obj);
+        Assert.IsInstanceOf<JsonObject>(obj);
     }
 
 }

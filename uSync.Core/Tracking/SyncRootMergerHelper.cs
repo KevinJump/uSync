@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Xml.Linq;
+﻿using System.Xml.Linq;
 using System.Xml.XPath;
 
 namespace uSync.Core.Tracking;
@@ -119,7 +116,7 @@ public class SyncRootMergerHelper
     private static (XElement combined, XElement diffrence) GetMultipleChanges(TrackingItem item, XElement source, XElement target)
     {
         var path = item.Path.Substring(0, item.Path.LastIndexOf('/'));
-        var element = item.Path.Substring(item.Path.LastIndexOf("/")+1);
+        var element = item.Path.Substring(item.Path.LastIndexOf("/") + 1);
 
         var sourceCollection = source.XPathSelectElement(path);
         var targetCollection = target.XPathSelectElement(path);
@@ -130,7 +127,7 @@ public class SyncRootMergerHelper
         var differenceCollection = XElement.Parse(targetCollection.ToString());
         var combinedCollection = XElement.Parse(sourceCollection.ToString());
 
-        
+
 
         foreach (var sourceElement in sourceCollection.Elements(element))
         {
