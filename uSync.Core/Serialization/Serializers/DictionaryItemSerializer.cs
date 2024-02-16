@@ -113,7 +113,7 @@ namespace uSync.Core.Serialization.Serializers
                 // only deserialize the active cultures passed to us (blank = all) 
                 if (!activeCultures.IsValid(language)) continue;
 
-                var itemTranslation = item.Translations.FirstOrDefault(x => x.Language.IsoCode == language);
+                var itemTranslation = item.Translations.FirstOrDefault(x => x.LanguageIsoCode == language);
                 if (itemTranslation != null && itemTranslation.Value != translation.Value)
                 {
                     changes.AddUpdate(language, itemTranslation.Value, translation.Value, $"{item.ItemKey}/{language}");
@@ -131,7 +131,7 @@ namespace uSync.Core.Serialization.Serializers
                 }
             }
 
-            var translations = currentTranslations.SafeDistinctBy(x => x.Language.IsoCode).ToList();
+            var translations = currentTranslations.SafeDistinctBy(x => x.LanguageIsoCode).ToList();
 
             // if we are syncing all cultures we do a delete, but when only syncing some, we 
             // don't remove missing cultures from the list.
@@ -180,13 +180,13 @@ namespace uSync.Core.Serialization.Serializers
             var translationsNode = new XElement("Translations");
 
             foreach (var translation in item.Translations
-                .SafeDistinctBy(x => x.Language.IsoCode)
-                .OrderBy(x => x.Language.IsoCode))
+                .SafeDistinctBy(x => x.LanguageIsoCode)
+                .OrderBy(x => x.LanguageIsoCode))
             {
-                if (activeCultures.IsValid(translation.Language.IsoCode))
+                if (activeCultures.IsValid(translation.LanguageIsoCode))
                 {
                     translationsNode.Add(new XElement("Translation", translation.Value,
-                        new XAttribute("Language", translation.Language.IsoCode)));
+                        new XAttribute("Language", translation.LanguageIsoCode)));
                 }
             }
 

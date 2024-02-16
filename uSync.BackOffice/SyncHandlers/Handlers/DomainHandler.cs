@@ -22,7 +22,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
     ///  Handler to mange Domain settings for uSync
     /// </summary>
     [SyncHandler(uSyncConstants.Handlers.DomainHandler, "Domains", "Domains", uSyncConstants.Priorites.DomainSettings
-        , Icon = "icon-home usync-addon-icon", EntityType = "domain")]
+        , Icon = "icon-home", EntityType = "domain")]
     public class DomainHandler : SyncHandlerBase<IDomain, IDomainService>, ISyncHandler,
         INotificationHandler<SavedNotification<IDomain>>,
         INotificationHandler<DeletedNotification<IDomain>>

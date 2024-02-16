@@ -1549,7 +1549,7 @@ namespace uSync.BackOffice.SyncHandlers
         /// This has been separated out, because we also call this code when a handler supports
         /// recycle bin events 
         /// </remarks>
-        protected void HandleMove(IEnumerable<MoveEventInfo<TObject>> moveInfoCollection)
+        protected void HandleMove(IEnumerable<MoveEventInfoBase<TObject>> moveInfoCollection)
         {
             foreach (var item in moveInfoCollection)
             {

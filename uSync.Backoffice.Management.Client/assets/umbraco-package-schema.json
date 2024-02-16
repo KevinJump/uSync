@@ -1,0 +1,3575 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+        "CollectionAliasConditionConfig": {
+            "allOf": [
+                {
+                    "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.CollectionAlias\">"
+                },
+                {
+                    "properties": {
+                        "match": {
+                            "description": "The collection that this extension should be available in",
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "match"
+                    ],
+                    "type": "object"
+                }
+            ]
+        },
+        "ConditionTypes": {
+            "anyOf": [
+                {
+                    "$ref": "#/definitions/SwitchConditionConfig"
+                },
+                {
+                    "$ref": "#/definitions/CollectionAliasConditionConfig"
+                },
+                {
+                    "$ref": "#/definitions/SectionAliasConditionConfig"
+                },
+                {
+                    "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                },
+                {
+                    "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                },
+                {
+                    "$ref": "#/definitions/UserPermissionConditionConfig"
+                },
+                {
+                    "$ref": "#/definitions/UmbConditionConfigBase<string>_1"
+                }
+            ]
+        },
+        "ConditionsDashboardCollection": {
+            "description": "The conditions for when the dashboard should be available",
+            "properties": {
+                "entityType": {
+                    "description": "The entity type that the dashboard collection should be available for",
+                    "examples": [
+                        "media"
+                    ],
+                    "type": "string"
+                },
+                "sections": {
+                    "description": "An array of section aliases that the dashboard collection should be available in",
+                    "examples": [
+                        "Umb.Section.Content",
+                        "Umb.Section.Settings"
+                    ],
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array",
+                    "uniqueItems": true
+                }
+            },
+            "required": [
+                "entityType",
+                "sections"
+            ],
+            "type": "object"
+        },
+        "ManifestBase": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestBundle<ManifestTypes>": {
+            "description": "This type of extension takes a JS module and registers all exported manifests from the pointed JS file.",
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "type": {
+                    "const": "bundle",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestCollection": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "api": {
+                    "description": "The file location of the api javascript file to load",
+                    "type": "string"
+                },
+                "conditions": {
+                    "description": "Set the conditions for when the extension should be loaded",
+                    "items": {
+                        "$ref": "#/definitions/ConditionTypes"
+                    },
+                    "type": "array"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaCollection"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "overwrites": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Define one or more extension aliases that this extension should overwrite."
+                },
+                "type": {
+                    "const": "collection",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestCollectionAction": {
+            "description": "An action to perform on an entity\nFor example for content you may wish to create a new document etc",
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "api": {
+                    "description": "The file location of the api javascript file to load",
+                    "type": "string"
+                },
+                "conditions": {
+                    "description": "Set the conditions for when the extension should be loaded",
+                    "items": {
+                        "$ref": "#/definitions/ConditionTypes"
+                    },
+                    "type": "array"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaCollectionAction"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "overwrites": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Define one or more extension aliases that this extension should overwrite."
+                },
+                "type": {
+                    "const": "collectionAction",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestCollectionView": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "conditions": {
+                    "description": "Set the conditions for when the extension should be loaded",
+                    "items": {
+                        "$ref": "#/definitions/ConditionTypes"
+                    },
+                    "type": "array"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaCollectionView",
+                    "description": "This contains properties specific to the type of extension"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "overwrites": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Define one or more extension aliases that this extension should overwrite."
+                },
+                "type": {
+                    "const": "collectionView",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestCondition": {
+            "description": "This type of extension takes a JS module and registers all exported manifests from the pointed JS file.",
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "api": {
+                    "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "type": {
+                    "const": "condition",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestDashboard": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "conditions": {
+                    "description": "Set the conditions for when the extension should be loaded",
+                    "items": {
+                        "$ref": "#/definitions/ConditionTypes"
+                    },
+                    "type": "array"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaDashboard",
+                    "description": "This contains properties specific to the type of extension"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "overwrites": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Define one or more extension aliases that this extension should overwrite."
+                },
+                "type": {
+                    "const": "dashboard",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestDashboardCollection": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "conditions": {
+                    "$ref": "#/definitions/ConditionsDashboardCollection"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaDashboardCollection"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "type": {
+                    "const": "dashboardCollection",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "conditions",
+                "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestEntityAction": {
+            "description": "An action to perform on an entity\nFor example for content you may wish to create a new document etc",
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "api": {
+                    "description": "The file location of the api javascript file to load",
+                    "type": "string"
+                },
+                "conditions": {
+                    "description": "Set the conditions for when the extension should be loaded",
+                    "items": {
+                        "$ref": "#/definitions/UmbConditionConfigBase<string>_2"
+                    },
+                    "type": "array"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaEntityAction"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "overwrites": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Define one or more extension aliases that this extension should overwrite."
+                },
+                "type": {
+                    "const": "entityAction",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestEntityBulkAction": {
+            "description": "An action to perform on multiple entities\nFor example for content you may wish to move one or more documents in bulk",
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "api": {
+                    "description": "The file location of the api javascript file to load",
+                    "type": "string"
+                },
+                "conditions": {
+                    "description": "Set the conditions for when the extension should be loaded",
+                    "items": {
+                        "$ref": "#/definitions/ConditionTypes"
+                    },
+                    "type": "array"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaEntityBulkAction"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "overwrites": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Define one or more extension aliases that this extension should overwrite."
+                },
+                "type": {
+                    "const": "entityBulkAction",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestEntryPoint": {
+            "description": "This type of extension gives full control and will simply load the specified JS file\nYou could have custom logic to decide which extensions to load/register by using extensionRegistry",
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "type": {
+                    "const": "entryPoint",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestExternalLoginProvider": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaExternalLoginProvider",
+                    "description": "This contains properties specific to the type of extension"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "type": {
+                    "const": "externalLoginProvider",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestGlobalContext": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "api": {
+                    "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "type": {
+                    "const": "globalContext",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestHeaderApp": {
+            "description": "Header apps are displayed in the top right corner of the backoffice\nThe two provided header apps are the search and the user menu",
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "meta": {
+                    "description": "This contains properties specific to the type of extension"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "type": {
+                    "const": "headerApp",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestHeaderAppButtonKind": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "const": "button",
+                    "description": "The kind of the extension, used to group extensions together",
+                    "type": "string"
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaHeaderAppButtonKind",
+                    "description": "This contains properties specific to the type of extension"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "type": {
+                    "const": "headerApp",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "kind",
+                "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestHealthCheck": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaHealthCheck",
+                    "description": "This contains properties specific to the type of extension"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "type": {
+                    "const": "healthCheck",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestItemStore": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "api": {
+                    "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "type": {
+                    "const": "itemStore",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestLocalization": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaLocalization"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "type": {
+                    "const": "localization",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestMenu": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "meta": {
+                    "description": "This contains properties specific to the type of extension"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "type": {
+                    "const": "menu",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestMenuItem": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaMenuItem",
+                    "description": "This contains properties specific to the type of extension"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "type": {
+                    "const": "menuItem",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestMenuItemTreeKind": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "const": "tree",
+                    "description": "The kind of the extension, used to group extensions together",
+                    "type": "string"
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaMenuItemTreeKind",
+                    "description": "This contains properties specific to the type of extension"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "type": {
+                    "const": "menuItem",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "kind",
+                "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestModal": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "meta": {
+                    "description": "This contains properties specific to the type of extension"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "type": {
+                    "const": "modal",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestPackageView": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaPackageView",
+                    "description": "This contains properties specific to the type of extension"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "type": {
+                    "const": "packageView",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestPropertyAction": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "conditions": {
+                    "description": "Set the conditions for when the extension should be loaded",
+                    "items": {
+                        "$ref": "#/definitions/ConditionTypes"
+                    },
+                    "type": "array"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaPropertyAction",
+                    "description": "This contains properties specific to the type of extension"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "overwrites": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Define one or more extension aliases that this extension should overwrite."
+                },
+                "type": {
+                    "const": "propertyAction",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestPropertyEditorSchema": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaPropertyEditorSchema"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "type": {
+                    "const": "propertyEditorSchema",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestPropertyEditorUi": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaPropertyEditorUi",
+                    "description": "This contains properties specific to the type of extension"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "type": {
+                    "const": "propertyEditorUi",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestRepository<UmbApi>": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "api": {
+                    "type": "string"
+                },
+                "conditions": {
+                    "description": "Set the conditions for when the extension should be loaded",
+                    "items": {
+                        "$ref": "#/definitions/ConditionTypes"
+                    },
+                    "type": "array"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "overwrites": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Define one or more extension aliases that this extension should overwrite."
+                },
+                "type": {
+                    "const": "repository",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestSection": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "conditions": {
+                    "description": "Set the conditions for when the extension should be loaded",
+                    "items": {
+                        "$ref": "#/definitions/UmbConditionConfigBase<string>_2"
+                    },
+                    "type": "array"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaSection",
+                    "description": "This contains properties specific to the type of extension"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "overwrites": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Define one or more extension aliases that this extension should overwrite."
+                },
+                "type": {
+                    "const": "section",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestSectionSidebarApp": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "conditions": {
+                    "description": "Set the conditions for when the extension should be loaded",
+                    "items": {
+                        "$ref": "#/definitions/ConditionTypes"
+                    },
+                    "type": "array"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "meta": {
+                    "description": "This contains properties specific to the type of extension"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "overwrites": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Define one or more extension aliases that this extension should overwrite."
+                },
+                "type": {
+                    "const": "sectionSidebarApp",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestSectionSidebarAppMenuKind": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "conditions": {
+                    "description": "Set the conditions for when the extension should be loaded",
+                    "items": {
+                        "$ref": "#/definitions/ConditionTypes"
+                    },
+                    "type": "array"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "const": "menu",
+                    "description": "The kind of the extension, used to group extensions together",
+                    "type": "string"
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaSectionSidebarAppMenuKind",
+                    "description": "This contains properties specific to the type of extension"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "overwrites": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Define one or more extension aliases that this extension should overwrite."
+                },
+                "type": {
+                    "const": "sectionSidebarApp",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "kind",
+                "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestSectionView": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "conditions": {
+                    "description": "Set the conditions for when the extension should be loaded",
+                    "items": {
+                        "$ref": "#/definitions/ConditionTypes"
+                    },
+                    "type": "array"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaSectionView",
+                    "description": "This contains properties specific to the type of extension"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "overwrites": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Define one or more extension aliases that this extension should overwrite."
+                },
+                "type": {
+                    "const": "sectionView",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestStore": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "api": {
+                    "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "type": {
+                    "const": "store",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestTheme": {
+            "description": "Theme manifest for styling the backoffice of Umbraco such as dark, high contrast etc",
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "css": {
+                    "description": "The file location of the stylesheet file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "type": {
+                    "const": "theme",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestTinyMcePlugin": {
+            "description": "The manifest for a TinyMCE plugin.\nThe plugin will be loaded into the TinyMCE editor.\nA plugin can add things like buttons, menu items, context menu items, etc. through the TinyMCE API.\nA plugin can also add custom commands to the editor.\nA plugin can also modify the behavior of the editor.",
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "api": {
+                    "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaTinyMcePlugin"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "type": {
+                    "const": "tinyMcePlugin",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestTree": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaTree"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "type": {
+                    "const": "tree",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestTreeItem": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaTreeItem",
+                    "description": "This contains properties specific to the type of extension"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "type": {
+                    "const": "treeItem",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestTreeStore": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "api": {
+                    "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "type": {
+                    "const": "treeStore",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestTypes": {
+            "anyOf": [
+                {
+                    "$ref": "#/definitions/ManifestBase"
+                },
+                {
+                    "$ref": "#/definitions/ManifestCondition"
+                },
+                {
+                    "$ref": "#/definitions/ManifestEntryPoint"
+                },
+                {
+                    "$ref": "#/definitions/ManifestSectionSidebarAppMenuKind"
+                },
+                {
+                    "$ref": "#/definitions/ManifestSectionSidebarApp"
+                },
+                {
+                    "$ref": "#/definitions/ManifestModal"
+                },
+                {
+                    "$ref": "#/definitions/ManifestCollection"
+                },
+                {
+                    "$ref": "#/definitions/ManifestBundle<ManifestTypes>"
+                },
+                {
+                    "$ref": "#/definitions/ManifestCollectionView"
+                },
+                {
+                    "$ref": "#/definitions/ManifestCollectionAction"
+                },
+                {
+                    "$ref": "#/definitions/ManifestDashboard"
+                },
+                {
+                    "$ref": "#/definitions/ManifestDashboardCollection"
+                },
+                {
+                    "$ref": "#/definitions/ManifestEntityAction"
+                },
+                {
+                    "$ref": "#/definitions/ManifestEntityBulkAction"
+                },
+                {
+                    "$ref": "#/definitions/ManifestExternalLoginProvider"
+                },
+                {
+                    "$ref": "#/definitions/ManifestGlobalContext"
+                },
+                {
+                    "$ref": "#/definitions/ManifestHeaderApp"
+                },
+                {
+                    "$ref": "#/definitions/ManifestHeaderAppButtonKind"
+                },
+                {
+                    "$ref": "#/definitions/ManifestHealthCheck"
+                },
+                {
+                    "$ref": "#/definitions/ManifestItemStore"
+                },
+                {
+                    "$ref": "#/definitions/ManifestMenu"
+                },
+                {
+                    "$ref": "#/definitions/ManifestMenuItem"
+                },
+                {
+                    "$ref": "#/definitions/ManifestMenuItemTreeKind"
+                },
+                {
+                    "$ref": "#/definitions/ManifestPackageView"
+                },
+                {
+                    "$ref": "#/definitions/ManifestPropertyAction"
+                },
+                {
+                    "$ref": "#/definitions/ManifestPropertyEditorSchema"
+                },
+                {
+                    "$ref": "#/definitions/ManifestPropertyEditorUi"
+                },
+                {
+                    "$ref": "#/definitions/ManifestRepository<UmbApi>"
+                },
+                {
+                    "$ref": "#/definitions/ManifestSection"
+                },
+                {
+                    "$ref": "#/definitions/ManifestSectionView"
+                },
+                {
+                    "$ref": "#/definitions/ManifestStore"
+                },
+                {
+                    "$ref": "#/definitions/ManifestTheme"
+                },
+                {
+                    "$ref": "#/definitions/ManifestTinyMcePlugin"
+                },
+                {
+                    "$ref": "#/definitions/ManifestLocalization"
+                },
+                {
+                    "$ref": "#/definitions/ManifestTree"
+                },
+                {
+                    "$ref": "#/definitions/ManifestTreeItem"
+                },
+                {
+                    "$ref": "#/definitions/ManifestTreeStore"
+                },
+                {
+                    "$ref": "#/definitions/ManifestUserProfileApp"
+                },
+                {
+                    "$ref": "#/definitions/ManifestWorkspace"
+                },
+                {
+                    "$ref": "#/definitions/ManifestWorkspaceAction"
+                },
+                {
+                    "$ref": "#/definitions/ManifestWorkspaceContext"
+                },
+                {
+                    "$ref": "#/definitions/ManifestWorkspaceView"
+                },
+                {
+                    "$ref": "#/definitions/ManifestWorkspaceViewCollection"
+                },
+                {
+                    "$ref": "#/definitions/ManifestUserPermission"
+                },
+                {
+                    "$ref": "#/definitions/ManifestUserGranularPermission"
+                }
+            ]
+        },
+        "ManifestUserGranularPermission": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaUserGranularPermission",
+                    "description": "This contains properties specific to the type of extension"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "type": {
+                    "const": "userGranularPermission",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestUserPermission": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaUserPermission"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "type": {
+                    "const": "userPermission",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestUserProfileApp": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaUserProfileApp",
+                    "description": "This contains properties specific to the type of extension"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "type": {
+                    "const": "userProfileApp",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestWorkspace": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "api": {
+                    "description": "The file location of the api javascript file to load",
+                    "type": "string"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaWorkspace"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "type": {
+                    "const": "workspace",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestWorkspaceAction": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "api": {
+                    "description": "The file location of the api javascript file to load",
+                    "type": "string"
+                },
+                "conditions": {
+                    "description": "Set the conditions for when the extension should be loaded",
+                    "items": {
+                        "$ref": "#/definitions/ConditionTypes"
+                    },
+                    "type": "array"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaWorkspaceAction"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "overwrites": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Define one or more extension aliases that this extension should overwrite."
+                },
+                "type": {
+                    "const": "workspaceAction",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestWorkspaceContext": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "api": {
+                    "type": "string"
+                },
+                "conditions": {
+                    "description": "Set the conditions for when the extension should be loaded",
+                    "items": {
+                        "$ref": "#/definitions/ConditionTypes"
+                    },
+                    "type": "array"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "overwrites": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Define one or more extension aliases that this extension should overwrite."
+                },
+                "type": {
+                    "const": "workspaceContext",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestWorkspaceView": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "conditions": {
+                    "description": "Set the conditions for when the extension should be loaded",
+                    "items": {
+                        "$ref": "#/definitions/ConditionTypes"
+                    },
+                    "type": "array"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaManifestWithView",
+                    "description": "This contains properties specific to the type of extension"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "overwrites": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Define one or more extension aliases that this extension should overwrite."
+                },
+                "type": {
+                    "const": "workspaceView",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestWorkspaceViewCollection": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "conditions": {
+                    "description": "Set the conditions for when the extension should be loaded",
+                    "items": {
+                        "$ref": "#/definitions/ConditionTypes"
+                    },
+                    "type": "array"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaEditorViewCollection",
+                    "description": "This contains properties specific to the type of extension"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "overwrites": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Define one or more extension aliases that this extension should overwrite."
+                },
+                "type": {
+                    "const": "workspaceViewCollection",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "MetaCollection": {
+            "properties": {
+                "repositoryAlias": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "repositoryAlias"
+            ],
+            "type": "object"
+        },
+        "MetaCollectionAction": {
+            "properties": {
+                "href": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "label"
+            ],
+            "type": "object"
+        },
+        "MetaCollectionView": {
+            "properties": {
+                "icon": {
+                    "description": "An icon to represent the collection view",
+                    "examples": [
+                        "icon-box",
+                        "icon-grid"
+                    ],
+                    "type": "string"
+                },
+                "label": {
+                    "description": "The friendly name of the collection view",
+                    "type": "string"
+                },
+                "pathName": {
+                    "description": "The URL pathname for this collection view that can be deep linked to by sharing the url",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "icon",
+                "label",
+                "pathName"
+            ],
+            "type": "object"
+        },
+        "MetaDashboard": {
+            "properties": {
+                "label": {
+                    "description": "The displayed name (label) in the navigation.",
+                    "type": "string"
+                },
+                "pathname": {
+                    "description": "This is the URL path part for this view. This is used for navigating or deep linking directly to the dashboard\nhttps://yoursite.com/section/settings/dashboard/my-dashboard-path",
+                    "examples": [
+                        "my-dashboard-path"
+                    ],
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "MetaDashboardCollection": {
+            "properties": {
+                "label": {
+                    "description": "Optional string to display as the label for the dashboard collection",
+                    "type": "string"
+                },
+                "pathname": {
+                    "description": "The URL path for the dashboard which is used for navigating or deep linking directly to the dashboard",
+                    "examples": [
+                        "media-management-dashboard",
+                        "my-awesome-dashboard"
+                    ],
+                    "type": "string"
+                },
+                "repositoryAlias": {
+                    "description": "The alias of the repository that the dashboard collection is for",
+                    "examples": [
+                        "Umb.Repository.Media"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "pathname",
+                "repositoryAlias"
+            ],
+            "type": "object"
+        },
+        "MetaEditorViewCollection": {
+            "properties": {
+                "entityType": {
+                    "description": "The entity type that this view collection should be available in",
+                    "examples": [
+                        "media"
+                    ],
+                    "type": "string"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "pathname": {
+                    "type": "string"
+                },
+                "repositoryAlias": {
+                    "description": "The repository alias that this view collection should be available in",
+                    "examples": [
+                        "Umb.Repository.Media"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "entityType",
+                "icon",
+                "label",
+                "pathname",
+                "repositoryAlias"
+            ],
+            "type": "object"
+        },
+        "MetaEntityAction": {
+            "properties": {
+                "entityTypes": {
+                    "description": "The entity types that this action can be performed on",
+                    "examples": [
+                        "data-type",
+                        "data-type-folder",
+                        "document",
+                        "document-root",
+                        "document-type",
+                        "dictionary-item",
+                        "language",
+                        "language-root",
+                        "member",
+                        "member-group",
+                        "member-type",
+                        "template",
+                        "template-root",
+                        "partial-view"
+                    ],
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "icon": {
+                    "description": "An icon to represent the action to be performed",
+                    "examples": [
+                        "icon-box",
+                        "icon-grid"
+                    ],
+                    "type": "string"
+                },
+                "label": {
+                    "description": "The friendly name of the action to perform",
+                    "examples": [
+                        "Create",
+                        "Create Content Template"
+                    ],
+                    "type": "string"
+                },
+                "repositoryAlias": {
+                    "description": "The alias for the repository of the entity type this action is for\nsuch as 'Umb.Repository.Documents'",
+                    "examples": [
+                        "Umb.Repository.Documents"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "entityTypes",
+                "label",
+                "repositoryAlias"
+            ],
+            "type": "object"
+        },
+        "MetaEntityBulkAction": {
+            "properties": {
+                "label": {
+                    "description": "A friendly label for the action",
+                    "type": "string"
+                },
+                "repositoryAlias": {
+                    "description": "The alias for the repsoitory of the entity type this action is for\nsuch as 'Umb.Repository.Documents'",
+                    "examples": [
+                        "Umb.Repository.Documents"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "label",
+                "repositoryAlias"
+            ],
+            "type": "object"
+        },
+        "MetaExternalLoginProvider": {
+            "properties": {
+                "label": {
+                    "type": "string"
+                },
+                "pathname": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "label",
+                "pathname"
+            ],
+            "type": "object"
+        },
+        "MetaHeaderAppButtonKind": {
+            "properties": {
+                "href": {
+                    "type": "string"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "href",
+                "icon",
+                "label"
+            ],
+            "type": "object"
+        },
+        "MetaHealthCheck": {
+            "properties": {
+                "api": {},
+                "label": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "api",
+                "label"
+            ],
+            "type": "object"
+        },
+        "MetaLocalization": {
+            "properties": {
+                "culture": {
+                    "description": "The culture is a combination of a language and a country. The language is represented by an ISO 639-1 code and the country is represented by an ISO 3166-1 alpha-2 code.\nThe language and country are separated by a dash.\nThe value is used to describe the language of the translations according to the extension system\nand it will be set as the `lang` attribute on the `<html>` element.",
+                    "examples": [
+                        "en-us",
+                        "en-gb",
+                        "da-dk"
+                    ],
+                    "type": "string"
+                },
+                "direction": {
+                    "default": "ltr",
+                    "description": "The value is used to describe the direction of the translations according to the extension system\nand it will be set as the `dir` attribute on the `<html>` element. It defaults to `ltr`.",
+                    "enum": [
+                        "ltr",
+                        "rtl"
+                    ],
+                    "examples": [
+                        "ltr"
+                    ],
+                    "type": "string"
+                },
+                "localizations": {
+                    "$ref": "#/definitions/UmbLocalizationDictionary",
+                    "description": "The localizations."
+                }
+            },
+            "required": [
+                "culture"
+            ],
+            "type": "object"
+        },
+        "MetaManifestWithView": {
+            "properties": {
+                "icon": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "pathname": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "icon",
+                "label",
+                "pathname"
+            ],
+            "type": "object"
+        },
+        "MetaMenuItem": {
+            "properties": {
+                "entityType": {
+                    "type": "string"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "menus": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                }
+            },
+            "required": [
+                "icon",
+                "label",
+                "menus"
+            ],
+            "type": "object"
+        },
+        "MetaMenuItemTreeKind": {
+            "properties": {
+                "entityType": {
+                    "type": "string"
+                },
+                "hideTreeRoot": {
+                    "type": "boolean"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "menus": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "treeAlias": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "icon",
+                "label",
+                "menus",
+                "treeAlias"
+            ],
+            "type": "object"
+        },
+        "MetaPackageView": {
+            "properties": {
+                "packageName": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "packageName"
+            ],
+            "type": "object"
+        },
+        "MetaPropertyAction": {
+            "properties": {
+                "propertyEditors": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                }
+            },
+            "required": [
+                "propertyEditors"
+            ],
+            "type": "object"
+        },
+        "MetaPropertyEditorSchema": {
+            "properties": {
+                "defaultPropertyEditorUiAlias": {
+                    "type": "string"
+                },
+                "settings": {
+                    "$ref": "#/definitions/PropertyEditorSettings"
+                }
+            },
+            "required": [
+                "defaultPropertyEditorUiAlias"
+            ],
+            "type": "object"
+        },
+        "MetaPropertyEditorUi": {
+            "properties": {
+                "group": {
+                    "default": "Common",
+                    "description": "The group that this property editor UI belongs to, which will be used to group the property editor UIs in the property editor picker.\nIf not specified, the property editor UI will be grouped under \"Common\".",
+                    "examples": [
+                        "Common",
+                        "Content",
+                        "Media"
+                    ],
+                    "type": "string"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "propertyEditorSchemaAlias": {
+                    "description": "The alias of the property editor schema that this property editor UI is for.\nIf not specified, the property editor UI can only be used to configure other property editors.",
+                    "examples": [
+                        "Umbraco.TextBox",
+                        "Umbraco.TextArea",
+                        "Umbraco.Label"
+                    ],
+                    "type": "string"
+                },
+                "settings": {
+                    "$ref": "#/definitions/PropertyEditorSettings"
+                },
+                "supportsReadOnly": {
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "group",
+                "icon",
+                "label"
+            ],
+            "type": "object"
+        },
+        "MetaSection": {
+            "properties": {
+                "label": {
+                    "type": "string"
+                },
+                "pathname": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "label",
+                "pathname"
+            ],
+            "type": "object"
+        },
+        "MetaSectionSidebarAppMenuKind": {
+            "properties": {
+                "label": {
+                    "type": "string"
+                },
+                "menu": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "label",
+                "menu"
+            ],
+            "type": "object"
+        },
+        "MetaSectionView": {
+            "properties": {
+                "icon": {
+                    "description": "The icon displayed for this view in the navigation.",
+                    "examples": [
+                        "box"
+                    ],
+                    "type": "string"
+                },
+                "label": {
+                    "description": "The displayed name (label) in the navigation.",
+                    "type": "string"
+                },
+                "pathname": {
+                    "description": "This is the URL path part for this view. This is used for navigating or deep linking directly to the view\nhttps://yoursite.com/section/settings/view/my-view-path",
+                    "examples": [
+                        "my-view-path"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "icon"
+            ],
+            "type": "object"
+        },
+        "MetaTinyMcePlugin": {
+            "properties": {
+                "toolbar": {
+                    "description": "If the plugin adds toolbar buttons, this property can be used to configure the buttons.\nThis configuration will be used on the Rich Text Editor configuration page.",
+                    "items": {
+                        "properties": {
+                            "alias": {
+                                "description": "The alias of the toolbar button that will be configured in the TinyMCE editor.",
+                                "type": "string"
+                            },
+                            "icon": {
+                                "description": "The icon shown on the Rich Text Editor configuration page. The icon has to be a part of TinyMCE's icon set.",
+                                "type": "string"
+                            },
+                            "label": {
+                                "description": "The label of the option shown on the Rich Text Editor configuration page.",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "alias",
+                            "label"
+                        ],
+                        "type": "object"
+                    },
+                    "type": "array"
+                }
+            },
+            "type": "object"
+        },
+        "MetaTree": {
+            "properties": {
+                "repositoryAlias": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "repositoryAlias"
+            ],
+            "type": "object"
+        },
+        "MetaTreeItem": {
+            "properties": {
+                "entityTypes": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                }
+            },
+            "required": [
+                "entityTypes"
+            ],
+            "type": "object"
+        },
+        "MetaUserGranularPermission": {
+            "properties": {
+                "entityType": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "entityType"
+            ],
+            "type": "object"
+        },
+        "MetaUserPermission": {
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "descriptionKey": {
+                    "type": "string"
+                },
+                "entityType": {
+                    "type": "string"
+                },
+                "group": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "labelKey": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "entityType"
+            ],
+            "type": "object"
+        },
+        "MetaUserProfileApp": {
+            "properties": {
+                "label": {
+                    "type": "string"
+                },
+                "pathname": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "label",
+                "pathname"
+            ],
+            "type": "object"
+        },
+        "MetaWorkspace": {
+            "properties": {
+                "entityType": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "entityType"
+            ],
+            "type": "object"
+        },
+        "MetaWorkspaceAction": {
+            "properties": {
+                "color": {
+                    "enum": [
+                        "",
+                        "danger",
+                        "default",
+                        "positive",
+                        "warning"
+                    ],
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "look": {
+                    "enum": [
+                        "",
+                        "default",
+                        "outline",
+                        "placeholder",
+                        "primary",
+                        "secondary"
+                    ],
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "PropertyEditorConfigDefaultData": {
+            "properties": {
+                "alias": {
+                    "type": "string"
+                },
+                "value": {}
+            },
+            "required": [
+                "alias",
+                "value"
+            ],
+            "type": "object"
+        },
+        "PropertyEditorConfigProperty": {
+            "properties": {
+                "alias": {
+                    "type": "string"
+                },
+                "config": {
+                    "items": {
+                        "properties": {
+                            "alias": {
+                                "type": "string"
+                            },
+                            "value": {}
+                        },
+                        "required": [
+                            "alias"
+                        ],
+                        "type": "object"
+                    },
+                    "type": "array"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "propertyEditorUiAlias": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "alias",
+                "label",
+                "propertyEditorUiAlias"
+            ],
+            "type": "object"
+        },
+        "PropertyEditorSettings": {
+            "properties": {
+                "defaultData": {
+                    "items": {
+                        "$ref": "#/definitions/PropertyEditorConfigDefaultData"
+                    },
+                    "type": "array"
+                },
+                "properties": {
+                    "items": {
+                        "$ref": "#/definitions/PropertyEditorConfigProperty"
+                    },
+                    "type": "array"
+                }
+            },
+            "required": [
+                "properties"
+            ],
+            "type": "object"
+        },
+        "SectionAliasConditionConfig": {
+            "allOf": [
+                {
+                    "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.SectionAlias\">"
+                },
+                {
+                    "properties": {
+                        "match": {
+                            "description": "Define the section that this extension should be available in",
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "match"
+                    ],
+                    "type": "object"
+                }
+            ]
+        },
+        "SwitchConditionConfig": {
+            "allOf": [
+                {
+                    "$ref": "#/definitions/UmbConditionConfigBase<string>"
+                },
+                {
+                    "properties": {
+                        "frequency": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "frequency"
+                    ],
+                    "type": "object"
+                }
+            ]
+        },
+        "UmbConditionConfigBase<\"Umb.Condition.CollectionAlias\">": {
+            "properties": {
+                "alias": {
+                    "const": "Umb.Condition.CollectionAlias",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "alias"
+            ],
+            "type": "object"
+        },
+        "UmbConditionConfigBase<\"Umb.Condition.SectionAlias\">": {
+            "properties": {
+                "alias": {
+                    "const": "Umb.Condition.SectionAlias",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "alias"
+            ],
+            "type": "object"
+        },
+        "UmbConditionConfigBase<\"Umb.Condition.UserPermission\">": {
+            "properties": {
+                "alias": {
+                    "const": "Umb.Condition.UserPermission",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "alias"
+            ],
+            "type": "object"
+        },
+        "UmbConditionConfigBase<\"Umb.Condition.WorkspaceAlias\">": {
+            "properties": {
+                "alias": {
+                    "const": "Umb.Condition.WorkspaceAlias",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "alias"
+            ],
+            "type": "object"
+        },
+        "UmbConditionConfigBase<\"Umb.Condition.WorkspaceEntityType\">": {
+            "properties": {
+                "alias": {
+                    "const": "Umb.Condition.WorkspaceEntityType",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "alias"
+            ],
+            "type": "object"
+        },
+        "UmbConditionConfigBase<string>": {
+            "properties": {
+                "alias": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "alias"
+            ],
+            "type": "object"
+        },
+        "UmbConditionConfigBase<string>_1": {
+            "properties": {
+                "alias": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "alias"
+            ],
+            "type": "object"
+        },
+        "UmbConditionConfigBase<string>_2": {
+            "properties": {
+                "alias": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "alias"
+            ],
+            "type": "object"
+        },
+        "UmbLocalizationDictionary": {
+            "type": "object"
+        },
+        "UserPermissionConditionConfig": {
+            "allOf": [
+                {
+                    "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.UserPermission\">"
+                },
+                {
+                    "properties": {
+                        "match": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "match"
+                    ],
+                    "type": "object"
+                }
+            ]
+        },
+        "WorkspaceAliasConditionConfig": {
+            "allOf": [
+                {
+                    "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.WorkspaceAlias\">"
+                },
+                {
+                    "properties": {
+                        "match": {
+                            "description": "Define the workspace that this extension should be available in",
+                            "type": "string"
+                        },
+                        "oneOf": {
+                            "description": "Define one or more workspaces that this extension should be available in",
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        }
+                    },
+                    "type": "object"
+                }
+            ]
+        },
+        "WorkspaceEntityTypeConditionConfig": {
+            "allOf": [
+                {
+                    "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.WorkspaceEntityType\">"
+                },
+                {
+                    "properties": {
+                        "match": {
+                            "description": "Define the workspace that this extension should be available in",
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "match"
+                    ],
+                    "type": "object"
+                }
+            ]
+        }
+    },
+    "description": "Umbraco package manifest JSON",
+    "properties": {
+        "allowTelemetry": {
+            "default": true,
+            "title": "Decides if the package sends telemetry data for collection",
+            "type": "boolean"
+        },
+        "extensions": {
+            "items": {
+                "$ref": "#/definitions/ManifestTypes"
+            },
+            "title": "An array of Umbraco package manifest types that will be installed",
+            "type": "array"
+        },
+        "id": {
+            "title": "The unique identifier of the Umbraco package",
+            "type": "string"
+        },
+        "name": {
+            "title": "The name of the Umbraco package",
+            "type": "string"
+        },
+        "version": {
+            "examples": [
+                "0.1.0"
+            ],
+            "title": "The version of the Umbraco package in the style of semver",
+            "type": "string"
+        }
+    },
+    "required": [
+        "extensions",
+        "name"
+    ],
+    "type": "object"
+}
+

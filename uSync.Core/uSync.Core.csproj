@@ -17,8 +17,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="13.0.0" />
-		<PackageReference Include="Umbraco.Cms.Web.Website" Version="13.0.0" />
+		<PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="14.0.0--preview006" />
+		<PackageReference Include="Umbraco.Cms.Web.Website" Version="14.0.0--preview006" />
 		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" /> 
 	</ItemGroup>
 
@@ -27,11 +27,12 @@
 	</ItemGroup>
 
 	<!-- Package Validation -->
+	<!--
 	<PropertyGroup>
-		<!-- <GenerateCompatibilitySuppressionFile>true</GenerateCompatibilitySuppressionFile> -->
 		<EnablePackageValidation>true</EnablePackageValidation>
-		<PackageValidationBaselineVersion>13.0.1</PackageValidationBaselineVersion>
+		<PackageValidationBaselineVersion>14.0.0</PackageValidationBaselineVersion>
 		<EnableStrictModeForCompatibleFrameworksInPackage>true</EnableStrictModeForCompatibleFrameworksInPackage>
 		<EnableStrictModeForCompatibleTfms>true</EnableStrictModeForCompatibleTfms>
 	</PropertyGroup>
+	-->
 </Project>

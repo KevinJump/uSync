@@ -18,14 +18,13 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="13.0.0" />
-		<PackageReference Include="Umbraco.Cms.Web.Website" Version="13.0.0" />
+		<PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="14.0.0--preview006" />
+		<PackageReference Include="Umbraco.Cms.Web.Website" Version="14.0.0--preview006" />
 		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="uSync.BackOffice" Version="10.0.0" />
-		<!-- <ProjectReference Include="..\uSync.BackOffice\uSync.BackOffice.csproj" /> -->
+		<ProjectReference Include="..\uSync.BackOffice\uSync.BackOffice.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

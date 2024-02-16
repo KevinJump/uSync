@@ -102,11 +102,11 @@ namespace uSync.Core.Serialization.Serializers
                 item.IsDefault = isDefault;
             }
 
-            var fallbackId = GetFallbackLanguageId(item, node);
-            if (fallbackId > 0 && item.FallbackLanguageId != fallbackId)
+            var fallbackIsoCode = GetFallbackLanguageIsoCode(item, node);
+            if (!string.IsNullOrEmpty(fallbackIsoCode) && item.FallbackIsoCode != fallbackIsoCode)
             {
-                details.AddUpdate("FallbackId", item.FallbackLanguageId, fallbackId);
-                item.FallbackLanguageId = fallbackId;
+                details.AddUpdate("FallbackIsoCode", item.FallbackIsoCode, fallbackIsoCode);
+                item.FallbackIsoCode = fallbackIsoCode;
             }
 
             // logger.Debug<ILanguage>("Saving Language");
@@ -131,11 +131,11 @@ namespace uSync.Core.Serialization.Serializers
                 item.IsDefault = isDefault;
             }
 
-            var fallbackId = GetFallbackLanguageId(item, node);
-            if (fallbackId > 0 && item.FallbackLanguageId != fallbackId)
+            var fallbackIsoCode = GetFallbackLanguageIsoCode(item, node);
+            if (!string.IsNullOrWhiteSpace(fallbackIsoCode) && item.FallbackIsoCode != fallbackIsoCode)
             {
-                details.AddUpdate("FallbackId", item.FallbackLanguageId, fallbackId);
-                item.FallbackLanguageId = fallbackId;
+                details.AddUpdate("FallbackIsoCode", item.FallbackIsoCode, fallbackIsoCode);
+                item.FallbackIsoCode = fallbackIsoCode;
             }
 
             if (!options.Flags.HasFlag(SerializerFlags.DoNotSave) && item.IsDirty())
@@ -144,30 +144,8 @@ namespace uSync.Core.Serialization.Serializers
             return SyncAttempt<ILanguage>.Succeed(item.CultureName, item, ChangeType.Import, details);
         }
 
-        private int GetFallbackLanguageId(ILanguage item, XElement node)
-        {
-            var fallbackIso = node.Element("Fallback").ValueOrDefault(string.Empty);
-            if (!string.IsNullOrWhiteSpace(fallbackIso))
-            {
-                if (int.TryParse(fallbackIso, NumberStyles.Integer, CultureInfo.InvariantCulture, out int fallbackId))
-                {
-                    // legacy, the fallback value is an int :( 
-                    return fallbackId;
-                }
-                else
-                {
-                    // 8.5+ we store the iso in the fallback value, its more reliable.
-                    var fallback = _localizationService.GetLanguageByIsoCode(fallbackIso);
-                    if (fallback != null)
-                    {
-                        return fallback.Id;
-                    }
-                }
-            }
-
-            return 0;
-
-        }
+        private string GetFallbackLanguageIsoCode(ILanguage item, XElement node)
+            => node.Element("Fallback").ValueOrDefault(string.Empty);
 
         protected override XElement InitializeBaseNode(ILanguage item, string alias, int level = 0)
         {
@@ -198,9 +176,9 @@ namespace uSync.Core.Serialization.Serializers
             node.Add(new XElement("IsMandatory", item.IsMandatory));
             node.Add(new XElement("IsDefault", item.IsDefault));
 
-            if (item.FallbackLanguageId != null)
+            if (string.IsNullOrEmpty(item.FallbackIsoCode) is false)
             {
-                var fallback = _localizationService.GetLanguageById(item.FallbackLanguageId.Value);
+                var fallback = _localizationService.GetLanguageByIsoCode(item.FallbackIsoCode);
                 if (fallback != null)
                 {
                     node.Add(new XElement("Fallback", fallback.IsoCode));

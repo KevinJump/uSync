@@ -27,7 +27,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
     ///  Handler to manage Dictionary items via uSync 
     /// </summary>
     [SyncHandler(uSyncConstants.Handlers.DictionaryHandler, "Dictionary", "Dictionary", uSyncConstants.Priorites.DictionaryItems
-        , Icon = "icon-book-alt usync-addon-icon", EntityType = UdiEntityType.DictionaryItem)]
+        , Icon = "icon-book-alt", EntityType = UdiEntityType.DictionaryItem)]
     public class DictionaryHandler : SyncHandlerLevelBase<IDictionaryItem, ILocalizationService>, ISyncHandler,
         INotificationHandler<SavedNotification<IDictionaryItem>>,
         INotificationHandler<DeletedNotification<IDictionaryItem>>,
