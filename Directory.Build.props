@@ -15,7 +15,9 @@
 
 		<PackageIcon>usync-logo.png</PackageIcon>
 
+		<!--
 		<TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+		-->
 
 		<NoWarn>CS0618</NoWarn>
 
