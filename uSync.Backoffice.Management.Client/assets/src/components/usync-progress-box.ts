@@ -81,18 +81,21 @@ export class uSyncProcessBox extends UmbElementMixin(LitElement) {
         }
 
         .action-list {
+            padding: var(--uui-size-space-4);
             display: flex;
-            justify-content: space-around;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
         .action {
             display: flex;
             flex-direction: column;
             align-items: center;
+            min-width: 95px;
         }
 
         .action uui-icon {
-            font-size: 30pt;
+            font-size: 25pt;
         }
         
         .complete {
