@@ -39,7 +39,7 @@ namespace uSync.BackOffice
         public string Message { get; set; }
 
         /// <summary>
-        ///  exception encounted during action
+        ///  exception encountered during action
         /// </summary>
         public Exception Exception { get; set; }
 

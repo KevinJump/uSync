@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Xml.Linq;
-
-using uSync.Core;
 
 namespace uSync.BackOffice;
 
@@ -20,21 +16,20 @@ public partial class uSyncService
     {
         var fullPath = _syncFileService.GetAbsPath(folder);
 
-        if (!Directory.Exists(fullPath))
+        if (!_syncFileService.DirectoryExists(fullPath))
             throw new DirectoryNotFoundException(fullPath);
 
-        var directoryInfo = new DirectoryInfo(fullPath);
-        var files = directoryInfo.GetFiles("*.*", SearchOption.AllDirectories);
+        var files = _syncFileService.GetFiles(fullPath, "*.*", true);
 
         var stream = new MemoryStream();
         using (var archive = new ZipArchive(stream, ZipArchiveMode.Create, true))
         {
             foreach (var file in files)
             {
-                var relativePath = GetRelativePath(fullPath, file.FullName)
+                var relativePath = GetRelativePath(fullPath, file)
                     .Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
 
-                archive.CreateEntryFromFile(file.FullName, relativePath);
+                archive.CreateEntryFromFile(file, relativePath);
             }
         }
 
@@ -50,7 +45,7 @@ public partial class uSyncService
         if (string.IsNullOrWhiteSpace(target))
             throw new ArgumentException("No path");
 
-        if (zipArchive == null || !File.Exists(zipArchive))
+        if (zipArchive == null || !_syncFileService.FileExists(zipArchive))
             throw new ArgumentException("missing zip");
 
         var resolvedTarget = _syncFileService.GetAbsPath(target);
@@ -65,8 +60,8 @@ public partial class uSyncService
                 // things that might be folders. 
                 if (entry.Length == 0) continue;
 
-                var filepath = GetOSDependentPath(entry.FullName);
-                var destination = Path.Combine(resolvedTarget, filepath);
+                var filePath = GetOSDependentPath(entry.FullName);
+                var destination = Path.Combine(resolvedTarget, filePath);
 
                 var destinationFolder = Path.GetDirectoryName(destination);
 

@@ -4,9 +4,11 @@ using Microsoft.Extensions.Logging;
 
 using Umbraco.Cms.Core.Events;
 using Umbraco.Cms.Core.Scoping;
+using Umbraco.Cms.Infrastructure.HostedServices;
 
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Notifications;
+using uSync.BackOffice.Services;
 using uSync.BackOffice.SyncHandlers;
 
 namespace uSync.BackOffice.Extensions;
@@ -22,11 +24,19 @@ internal static class ScopeExtensions
         this ICoreScopeProvider scopeProvider,
         IEventAggregator eventAggregator,
         ILoggerFactory loggerFactory,
+        uSyncConfigService syncConfigService,
+        uSyncEventService syncEventService,
+        IBackgroundTaskQueue backgroundTaskQueue,
         SyncUpdateCallback callback)
     {
         
         var notificationPublisher = new SyncScopedNotificationPublisher(
-            eventAggregator, loggerFactory.CreateLogger<SyncScopedNotificationPublisher>(), callback);
+            eventAggregator,
+            loggerFactory.CreateLogger<SyncScopedNotificationPublisher>(),
+            callback, 
+            syncConfigService,
+            backgroundTaskQueue,
+            syncEventService);
 
         return scopeProvider.CreateCoreScope(
             scopedNotificationPublisher: notificationPublisher, 

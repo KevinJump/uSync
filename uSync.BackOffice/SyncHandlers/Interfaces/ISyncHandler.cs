@@ -84,13 +84,19 @@ namespace uSync.BackOffice.SyncHandlers
         /// <summary>
         /// Export an item based on the int id value in umbraco
         /// </summary>
-        [Obsolete("pass array of folders so roots behavior can process will be removed in v15")]
+        /// <remarks>
+        /// these export methods do not obay roots, there are for use
+        /// only when exporting to a custom folder.
+        /// </remarks>
         IEnumerable<uSyncAction> Export(int id, string folder, HandlerSettings settings);
 
         /// <summary>
         /// Export an item based on the Udi value of the item
         /// </summary>
-        [Obsolete("pass array of folders so roots behavior can process will be removed in v15")]
+        /// <remarks>
+        /// these export methods do not obay roots, there are for use
+        /// only when exporting to a custom folder.
+        /// </remarks>
         IEnumerable<uSyncAction> Export(Udi udi, string folder, HandlerSettings settings);
 
         /// <summary>

@@ -240,7 +240,10 @@ namespace uSync.BackOffice.SyncHandlers
         protected override IReadOnlyList<OrderedNodeInfo> GetMergedItems(string[] folders)
         {
             var items = base.GetMergedItems(folders);
-            var nodes = items.ToDictionary(k => k.Key);
+            
+            CheckForDuplicates(items);
+
+            var nodes = items.DistinctBy(x => x.Key).ToDictionary(k => k.Key);
             var renames = nodes.Where(x => x.Value.Node.IsEmptyItem()).Select(x => x.Value);
             var graph = new List<GraphEdge<Guid>>();
 
@@ -248,7 +251,7 @@ namespace uSync.BackOffice.SyncHandlers
             {
                 graph.AddRange(GetCompositions(item.Node).Select(x => GraphEdge.Create(item.Key, x)));
             }
-         
+
             var cleanGraph = graph.Where(x => x.Node == x.Edge).ToList();
             var sortedList = nodes.Keys.TopologicalSort(cleanGraph);
 
@@ -267,7 +270,23 @@ namespace uSync.BackOffice.SyncHandlers
 
             return results;
         }
-        
+
+        private void CheckForDuplicates(IReadOnlyList<OrderedNodeInfo> items)
+        {
+            var duplicates = items.GroupBy(x => x.Key).Where(x => x.Skip(1).Any()).ToArray();
+
+            if (duplicates.Length > 0)
+            {
+                var dups = string.Join(" \n ", duplicates.SelectMany(x => x.Select(x => $"[{x.Path}]").ToArray()));
+                logger.LogWarning("Duplicates: one or more items of the same type and key exist on disk [{duplicates}] the item to be imported cannot be guaranteed", dups);
+
+                if (uSyncConfig.Settings.FailOnDuplicates)
+                {
+                    throw new InvalidOperationException($"Duplicate files detected. Check the disk. {dups}");
+                }
+            }
+        }
+
 
         /// <summary>
         ///  get the Guid values of any compositions so they can be graphed

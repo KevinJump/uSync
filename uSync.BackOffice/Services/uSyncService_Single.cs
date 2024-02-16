@@ -51,7 +51,7 @@ namespace uSync.BackOffice
             var actions = new List<uSyncAction>();
             var lastType = string.Empty;
 
-            var folder = Path.GetDirectoryName(orderedNodes.FirstOrDefault()?.Filename ?? options.Folders?.FirstOrDefault() ?? _uSyncConfig.GetRootFolder());
+            var folder = Path.GetDirectoryName(orderedNodes.FirstOrDefault()?.FileName ?? options.Folders?.FirstOrDefault() ?? _uSyncConfig.GetRootFolder());
 
             SyncHandlerOptions syncHandlerOptions = HandlerOptionsFromPaged(options);
 
@@ -81,7 +81,7 @@ namespace uSync.BackOffice
 
                 if (handlerPair != null)
                 {
-                    actions.AddRange(handlerPair.Handler.ReportElement(item.Node, item.Filename, handlerPair.Settings, options));
+                    actions.AddRange(handlerPair.Handler.ReportElement(item.Node, item.FileName, handlerPair.Settings, options));
                 }
 
                 index++;
@@ -123,16 +123,21 @@ namespace uSync.BackOffice
 
                     var index = options.PageNumber * options.PageSize;
 
-                    using var scope = _scopeProvider.CreateNotificationScope(_eventAggregator, _loggerFactory, options.Callbacks?.Update);
+                    using var scope = _scopeProvider.CreateNotificationScope(
+                        eventAggregator: _eventAggregator,
+                        loggerFactory: _loggerFactory, 
+                        syncConfigService: _uSyncConfig,
+                        syncEventService: _mutexService,
+                        backgroundTaskQueue: _backgroundTaskQueue,
+                        options.Callbacks?.Update);
                     {
                         try
                         {
                             foreach (var item in orderedNodes.Skip(options.PageNumber * options.PageSize).Take(options.PageSize))
                             {
-                                if (item.Node == null) 
-                                    item.Node = XElement.Load(item.Filename);
+                                var node = item.Node ?? XElement.Load(item.FileName);
 
-                                var itemType = item.Node.GetItemType();
+                                var itemType = node.GetItemType();
                                 if (!itemType.InvariantEquals(lastType))
                                 {
                                     lastType = itemType;
@@ -140,7 +145,7 @@ namespace uSync.BackOffice
 
                                     // special case, blueprints looks like IContent items, except they are slightly different
                                     // so we check for them specifically and get the handler for the entity rather than the object type.
-                                    if (item.Node.IsContent() && item.Node.IsBlueprint())
+                                    if (node.IsContent() && node.IsBlueprint())
                                     {
                                         lastType = UdiEntityType.DocumentBlueprint;
                                         handlerPair = _handlerFactory.GetValidHandlerByEntityType(UdiEntityType.DocumentBlueprint);
@@ -153,12 +158,12 @@ namespace uSync.BackOffice
                                     continue;
                                 }
 
-                                options.Callbacks?.Update?.Invoke(item.Node.GetAlias(),
+                                options.Callbacks?.Update?.Invoke(node.GetAlias(),
                                     CalculateProgress(index, total, options.ProgressMin, options.ProgressMax), 100);
 
                                 if (handlerPair != null)
                                 {
-                                    actions.AddRange(handlerPair.Handler.ImportElement(item.Node, item.Filename, handlerPair.Settings, options));
+                                    actions.AddRange(handlerPair.Handler.ImportElement(node, item.FileName, handlerPair.Settings, options));
                                 }
 
                                 index++;
@@ -196,7 +201,13 @@ namespace uSync.BackOffice
 
                     var index = options.PageNumber * options.PageSize;
 
-                    using var scope = _scopeProvider.CreateNotificationScope(_eventAggregator, _loggerFactory, options.Callbacks?.Update);
+                    using (var scope = _scopeProvider.CreateNotificationScope(
+                        eventAggregator: _eventAggregator,
+                        loggerFactory: _loggerFactory,
+                        syncConfigService: _uSyncConfig,
+                        syncEventService: _mutexService,
+                        backgroundTaskQueue: _backgroundTaskQueue,
+                        options.Callbacks?.Update))
                     {
                         try
                         {
@@ -357,16 +368,13 @@ namespace uSync.BackOffice
                 foreach (var file in files)
                 {
                     var xml = _syncFileService.LoadXElement(file);
-                    nodes.Add(new OrderedNodeInfo
-                    {
-                        Node = xml,
-                        Alias = xml.GetAlias(),
-                        Key = xml.GetKey(),
-                        Filename = file,
-                        IsRoot = false,
-                        Level = xml.GetLevel(),
-                        Path = file.Substring(folder.Length),
-                    });
+                    nodes.Add(new OrderedNodeInfo(
+                        filename: file, 
+                        node: xml,                       
+                        level: xml.GetLevel(), 
+                        path: file.Substring(folder.Length),
+                        isRoot: false));
+                    
                 }
             }
 
