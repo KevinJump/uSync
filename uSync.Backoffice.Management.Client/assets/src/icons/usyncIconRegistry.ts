@@ -1,5 +1,5 @@
 import { UUIIconRegistry, UUIIconRegistryElement } from "@umbraco-cms/backoffice/external/uui";
-import { customElement } from "lit/decorators.js";
+import { customElement } from  "@umbraco-cms/backoffice/external/lit";
 
 const icons = [
     {

@@ -1,13 +1,13 @@
 {
   "$schema": "../umbraco-package-schema.json",
-  "name": "mypackage",
-  "id": "mypackage",
-  "version": "0.1.0",
+  "name": "uSync",
+  "id": "usync",
+  "version": "14.0.0-early001",
   "allowTelemetry": true,
   "extensions": [
     {
-      "name": "mypackage.entrypoint",
-      "alias": "mypackage.EntryPoint",
+      "name": "usync.entrypoint",
+      "alias": "uSync.EntryPoint",
       "type": "entryPoint",
       "js": "/App_Plugins/uSync/usync-assets.js"
     }
