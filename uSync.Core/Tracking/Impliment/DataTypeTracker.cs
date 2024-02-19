@@ -103,7 +103,7 @@ public class DataTypeTracker : SyncXmlTracker<IDataType>, ISyncTracker<IDataType
         => _configMergers?.GetConfigMerger(editorAlias) ?? null;
 
     private string SerializeConfig(object config)
-        => config.Serialize();
+        => config.SerializeJsonString();
 
 
 }

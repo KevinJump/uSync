@@ -12,7 +12,7 @@ internal class SyncConfigMergerBase
     {
         try
         {
-            return value.Deserialize<TConfig>();
+            return value.DeserializeJson<TConfig>();
         }
         catch
         {

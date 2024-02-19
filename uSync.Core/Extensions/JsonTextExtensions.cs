@@ -11,9 +11,16 @@ namespace uSync.Core.Extensions;
 /// </summary>
 public static class JsonTextExtensions
 {
-    private static JsonSerializerOptions _defaultOptions = new()
+    private static readonly JsonSerializerOptions _defaultOptions = new()
     {
         WriteIndented = true,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        PropertyNameCaseInsensitive = true,
+    };
+
+    private static readonly JsonSerializerOptions _flatOptions = new()
+    {
+        WriteIndented = false,
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         PropertyNameCaseInsensitive = true,
     };
@@ -45,7 +52,7 @@ public static class JsonTextExtensions
         try
         {
             node = JsonNode.Parse(value, _nodeOptions);
-            return true;
+            return node is not null;
         }
         catch
         {
@@ -264,7 +271,7 @@ public static class JsonTextExtensions
     /// </summary>
     public static JsonNode? ConvertStringToExpandedJson(this string value)
     {
-        // try parse this into json (if its a string we make a string jsonnode)
+        // try parse this into json (if its a string we make a string jsonNode)
         if (value.TryConvertToJsonNode(out var jsonNode) is false || jsonNode == null)
             return default;
 
@@ -323,13 +330,13 @@ public static class JsonTextExtensions
         }
     }
 
-    public static object? Deserialize(this string value, Type type)
+    public static object? DeserializeJson(this string value, Type type)
         => JsonSerializer.Deserialize(value, type, _defaultOptions);
 
-    public static TObject? Deserialize<TObject>(this string value)
+    public static TObject? DeserializeJson<TObject>(this string value)
         => JsonSerializer.Deserialize<TObject>(value, _defaultOptions);
 
-    public static bool TrySerialize(this object value, [MaybeNull] out string result)
+    public static bool TrySerializeJsonString(this object value, [MaybeNull] out string result)
     {
         try
         {
@@ -343,12 +350,8 @@ public static class JsonTextExtensions
         }
     }
 
-    public static string Serialize(this object value, bool indent = true)
-        => JsonSerializer.Serialize(value, new JsonSerializerOptions
-        {
-            WriteIndented = indent,
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        });
+    public static string SerializeJsonString(this object value, bool indent = true)
+        => JsonSerializer.Serialize(value, indent ? _defaultOptions : _flatOptions);
 
     private static bool TryGetValueAs<TObject>(this object value, [MaybeNullWhen(false)] out TObject result)
     {
@@ -420,7 +423,7 @@ public static class JsonTextExtensions
         if (obj.TryGetPropertyAsArray(propertyName, out var value))
             return value;
 
-        return new JsonArray();
+        return [];
     }
 
     public static JsonObject? GetPropertyAsObject(this JsonObject obj, string propertyName)

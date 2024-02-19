@@ -33,8 +33,8 @@ public static class ChangeListExtensions
 
     public static void AddUpdateJson(this List<uSyncChange> changes, string name, object oldValue, object newValue, string path, bool success)
     {
-        var oldJson = oldValue.Serialize();
-        var newJson = newValue.Serialize();
+        var oldJson = oldValue.SerializeJsonString();
+        var newJson = newValue.SerializeJsonString();
 
         AddUpdate(changes, name, oldJson, newJson, path, success);
     }

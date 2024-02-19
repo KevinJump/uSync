@@ -14,7 +14,7 @@ public abstract class ConfigurationSerializerBase
 
     public virtual string? SerializeConfig(object configuration)
     {
-        if (configuration.TrySerialize(out var result))
+        if (configuration.TrySerializeJsonString(out var result))
             return result;
 
         return default;

@@ -13,8 +13,8 @@ internal class BlockGridConfigMerger : SyncConfigMergerBase, ISyncConfigMerger
 
     public virtual object GetMergedConfig(string root, string target)
     {
-        var rootConfig = root.Deserialize<BlockGridConfiguration>();
-        var targetConfig = target.Deserialize<BlockGridConfiguration>();
+        var rootConfig = root.DeserializeJson<BlockGridConfiguration>();
+        var targetConfig = target.DeserializeJson<BlockGridConfiguration>();
 
         targetConfig.Blocks = MergeObjects(
             rootConfig.Blocks,
@@ -34,8 +34,8 @@ internal class BlockGridConfigMerger : SyncConfigMergerBase, ISyncConfigMerger
 
     public virtual object GetDifferenceConfig(string root, string target)
     {
-        var rootConfig = root.Deserialize<BlockGridConfiguration>();
-        var targetConfig = target.Deserialize<BlockGridConfiguration>();
+        var rootConfig = root.DeserializeJson<BlockGridConfiguration>();
+        var targetConfig = target.DeserializeJson<BlockGridConfiguration>();
 
         targetConfig.Blocks = GetObjectDifferences(
             rootConfig.Blocks,

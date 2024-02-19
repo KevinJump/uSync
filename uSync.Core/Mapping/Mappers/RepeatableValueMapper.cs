@@ -24,7 +24,7 @@ public class RepeatableValueMapper : SyncValueMapperBase, ISyncMapper
     {
         if (value.TryParseToJsonNode(out var json) && json != null) 
         {
-            if (json.TrySerialize(out var result) && result != null)
+            if (json.TrySerializeJsonString(out var result) && result != null)
             {
                 return result;
             }

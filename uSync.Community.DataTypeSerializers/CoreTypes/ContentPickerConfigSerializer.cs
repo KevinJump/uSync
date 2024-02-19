@@ -46,7 +46,7 @@ namespace uSync8.Community.DataTypeSerializers.CoreTypes
         {
             if (configType == typeof(ContentPickerConfiguration))
             {
-                var mappedConfig =   config.Deserialize<MappedPathConfigBase<ContentPickerConfiguration>>();
+                var mappedConfig =   config.DeserializeJson<MappedPathConfigBase<ContentPickerConfiguration>>();
 
                 if (!string.IsNullOrWhiteSpace(mappedConfig.MappedPath))
                 {

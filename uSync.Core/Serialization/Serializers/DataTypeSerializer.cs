@@ -171,7 +171,7 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
             var serializer = this._configurationSerializers.GetSerializer(item.EditorAlias);
             if (serializer == null)
             {
-                var configObject = config.Deserialize(item.ConfigurationObject?.GetType());
+                var configObject = config.DeserializeJson(item.ConfigurationObject?.GetType());
                 if (!IsJsonEqual(item.ConfigurationObject, configObject))
                 {
                     changes.AddUpdateJson("Config", item.ConfigurationObject, configObject, "Configuration");
@@ -181,7 +181,7 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
             else
             {
                 logger.LogTrace("Deserializing Config via {0}", serializer.Name);
-                var configObject = config.Deserialize(item.ConfigurationObject.GetType());
+                var configObject = config.DeserializeJson(item.ConfigurationObject.GetType());
                 if (!IsJsonEqual(item.ConfigurationObject, configObject))
                 {
                     changes.AddUpdateJson("Config", item.ConfigurationData, configObject, "Configuration");
@@ -202,8 +202,8 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
     /// </summary>
     private bool IsJsonEqual(object currentObject, object newObject)
     {
-        var currentString = currentObject.Serialize(false);
-        var newString = newObject.Serialize(false);
+        var currentString = currentObject.SerializeJsonString(false);
+        var newString = newObject.SerializeJsonString(false);
         return currentString == newString;
     }
 
@@ -248,7 +248,7 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
             string config;
             if (serializer == null)
             {
-                config =  item.ConfigurationObject.Serialize();
+                config =  item.ConfigurationObject.SerializeJsonString();
             }
             else
             {

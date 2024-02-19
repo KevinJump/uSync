@@ -84,7 +84,7 @@ namespace uSync8.Community.Contrib.Mappers
             // then a nested content, but not by much.
             GetExportJsonValues(docValue, docType);
 
-            return jsonValue.Serialize(true);
+            return jsonValue.SerializeJsonString(true);
         }
 
         private JsonObject GetExportJsonValues(JsonObject item, IContentType docType)
@@ -128,7 +128,7 @@ namespace uSync8.Community.Contrib.Mappers
                 // then a nested content, but not by much.
                 GetImportJsonValue(docValue, docType);
 
-                return jsonValue.ExpandAllJsonInToken().Serialize(true);
+                return jsonValue.ExpandAllJsonInToken().SerializeJsonString(true);
             }
             catch (Exception ex)
             {

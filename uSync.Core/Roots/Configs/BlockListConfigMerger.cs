@@ -17,8 +17,8 @@ internal class BlockListConfigMerger : SyncConfigMergerBase, ISyncConfigMerger
 
     public virtual object GetMergedConfig(string root, string target)
     {
-        var rootConfig = root.Deserialize<BlockListConfiguration>();
-        var targetConfig = target.Deserialize<BlockListConfiguration>();
+        var rootConfig = root.DeserializeJson<BlockListConfiguration>();
+        var targetConfig = target.DeserializeJson<BlockListConfiguration>();
 
         targetConfig.Blocks = MergeObjects(
             rootConfig.Blocks,
@@ -31,8 +31,8 @@ internal class BlockListConfigMerger : SyncConfigMergerBase, ISyncConfigMerger
 
     public virtual object GetDifferenceConfig(string root, string target)
     {
-        var rootConfig = root.Deserialize<BlockListConfiguration>();
-        var targetConfig = target.Deserialize<BlockListConfiguration>();
+        var rootConfig = root.DeserializeJson<BlockListConfiguration>();
+        var targetConfig = target.DeserializeJson<BlockListConfiguration>();
 
 
         targetConfig.Blocks = GetObjectDifferences(

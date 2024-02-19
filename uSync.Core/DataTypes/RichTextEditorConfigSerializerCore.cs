@@ -43,6 +43,6 @@ internal class RichTextEditorConfigSerializerCore : ConfigurationSerializerBase,
 
         richTextConfiguration.Editor = jsonObject.TryConvertTo<object>();
 
-        return richTextConfiguration.Serialize();
+        return richTextConfiguration.SerializeJsonString();
     }
 }

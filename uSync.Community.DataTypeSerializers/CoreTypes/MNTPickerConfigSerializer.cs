@@ -56,7 +56,7 @@ namespace uSync8.Community.DataTypeSerializers.CoreTypes
         {
             if (configType == typeof(MultiNodePickerConfiguration))
             {
-                var mappedConfig = config.Deserialize<MappedPathConfigBase<MultiNodePickerConfiguration>>();
+                var mappedConfig = config.DeserializeJson<MappedPathConfigBase<MultiNodePickerConfiguration>>();
 
                 if (!string.IsNullOrWhiteSpace(mappedConfig.MappedPath))
                 {
