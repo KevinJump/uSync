@@ -21,7 +21,7 @@ jobs:
     - name: Setup dotnet
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: "8.0.x"
+        dotnet-version: "8.x"
     
     - name: Install GitVersion
       uses: gittools/actions/gitversion/setup@v0.9.7
@@ -43,7 +43,7 @@ jobs:
     - name: Restore npm
       uses: actions/setup-node@v3
       with: 
-        node-version: 20
+        node-version: '20.x'
         cache: 'npm'
     - run: npm install
 
@@ -60,7 +60,15 @@ jobs:
 # ------------------------
 # actual builds / packages 
 # ------------------------
-    - name: Restore
+
+    - uses: actions/cache@v3
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashfiles('**/*.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget
+
+    - name: Restore Dependencies
       run: dotnet restore ./uSync/uSync.csproj 
 
     - name: tests
@@ -88,7 +96,7 @@ jobs:
       run: dotnet pack ./uSync.BackOffice.Management.Client/uSync.BackOffice.Management.Client.csproj --no-restore -c ${{env.CONFIG}} --output ${{env.OUT_FOLDER}} /p:version=${{steps.gitversion.outputs.fullSemVer}}
 
     - name: Build uSync.BackOfficeTargets
-      run: dotnet pack ./uSync.BackOffice.Targets/uSync.BackOffice.Targets.csproj --no-restore -c ${{env.CONFIG}} --output ${{env.OUT_FOLDER}} /p:version=${{steps.gitversion.outputs.fullSemVer}}
+      run: dotnet pack ./uSync.BackOffice.Targets/uSync.BackOffice.Targets.csproj -c ${{env.CONFIG}} --output ${{env.OUT_FOLDER}} /p:version=${{steps.gitversion.outputs.fullSemVer}}
 
     - name: Build uSync
       run: dotnet pack ./uSync/uSync.csproj --no-restore -c ${{env.CONFIG}} --output ${{env.OUT_FOLDER}} /p:version=${{steps.gitversion.outputs.fullSemVer}}
