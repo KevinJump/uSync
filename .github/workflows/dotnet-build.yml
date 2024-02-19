@@ -43,9 +43,12 @@ jobs:
     - name: Restore npm
       uses: actions/setup-node@v3
       with: 
-        node-version: 18
+        node-version: 20
         cache: 'npm'
     - run: npm install
+
+    - name: Build Management client
+      run: npm build-client
 
     - name: Display GitVersion SemVer
       run: |
@@ -75,8 +78,11 @@ jobs:
     - name: Build uSync.BackOffice
       run: dotnet pack ./uSync.BackOffice/uSync.BackOffice.csproj --no-restore -c ${{env.CONFIG}} --output ${{env.OUT_FOLDER}} /p:version=${{steps.gitversion.outputs.fullSemVer}}
 
-    - name: Build uSync.BackOfficeAssets
-      run: dotnet pack ./uSync.BackOffice.Assets/uSync.BackOffice.Assets.csproj --no-restore -c ${{env.CONFIG}} --output ${{env.OUT_FOLDER}} /p:version=${{steps.gitversion.outputs.fullSemVer}}
+    - name: Build uSync.Backoffice.Management.Api
+      run: dotnet pack ./uSync.BackOffice.Management.Api/uSync.BackOffice.Management.Api.csproj --no-restore -c ${{env.CONFIG}} --output ${{env.OUT_FOLDER}} /p:version=${{steps.gitversion.outputs.fullSemVer}}
+      
+    - name: Build uSync.Backoffice.Management.Client
+      run: dotnet pack ./uSync.BackOffice.Management.Client/uSync.BackOffice.Management.Client.csproj --no-restore -c ${{env.CONFIG}} --output ${{env.OUT_FOLDER}} /p:version=${{steps.gitversion.outputs.fullSemVer}}
 
     - name: Build uSync.BackOfficeTargets
       run: dotnet pack ./uSync.BackOffice.Targets/uSync.BackOffice.Targets.csproj --no-restore -c ${{env.CONFIG}} --output ${{env.OUT_FOLDER}} /p:version=${{steps.gitversion.outputs.fullSemVer}}
@@ -97,7 +103,8 @@ jobs:
         dotnet nuget push ./build.out/uSync.${{steps.gitversion.outputs.fullSemVer}}.nupkg --skip-duplicate --source https://nuget.pkg.github.com/kevinjump/index.json --api-key ${{ github.token }}
         dotnet nuget push ./build.out/uSync.Core.${{steps.gitversion.outputs.fullSemVer}}.nupkg --skip-duplicate --source https://nuget.pkg.github.com/kevinjump/index.json --api-key ${{ github.token }}
         dotnet nuget push ./build.out/uSync.BackOffice.${{steps.gitversion.outputs.fullSemVer}}.nupkg --skip-duplicate --source https://nuget.pkg.github.com/kevinjump/index.json --api-key ${{ github.token }}
-        dotnet nuget push ./build.out/uSync.BackOffice.Assets.${{steps.gitversion.outputs.fullSemVer}}.nupkg --skip-duplicate --source https://nuget.pkg.github.com/kevinjump/index.json --api-key ${{ github.token }}
+        dotnet nuget push ./build.out/uSync.BackOffice.Management.Api.${{steps.gitversion.outputs.fullSemVer}}.nupkg --skip-duplicate --source https://nuget.pkg.github.com/kevinjump/index.json --api-key ${{ github.token }}
+        dotnet nuget push ./build.out/uSync.BackOffice.Management.Client.${{steps.gitversion.outputs.fullSemVer}}.nupkg --skip-duplicate --source https://nuget.pkg.github.com/kevinjump/index.json --api-key ${{ github.token }}
         dotnet nuget push ./build.out/uSync.BackOffice.Targets.${{steps.gitversion.outputs.fullSemVer}}.nupkg --skip-duplicate --source https://nuget.pkg.github.com/kevinjump/index.json --api-key ${{ github.token }}
         dotnet nuget push ./build.out/uSync.Community.Contrib.${{steps.gitversion.outputs.fullSemVer}}.nupkg --skip-duplicate --source https://nuget.pkg.github.com/kevinjump/index.json --api-key ${{ github.token }}
         dotnet nuget push ./build.out/uSync.Community.DataTypeSerializers.${{steps.gitversion.outputs.fullSemVer}}.nupkg --skip-duplicate --source https://nuget.pkg.github.com/kevinjump/index.json --api-key ${{ github.token }}
