@@ -5,6 +5,7 @@
   "private": "true",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1", 
+    "install-client": "cd ./uSync.Backoffice.Management.Client/Assets && npm install",
     "watch-client": "cd ./uSync.Backoffice.Management.Client/Assets && npm run watch",
     "build-client": "cd ./uSync.Backoffice.Management.Client/Assets && npm run build",
     "generate-api": "cd ./uSync.Backoffice.Management.Client/Assets && npm run generate"

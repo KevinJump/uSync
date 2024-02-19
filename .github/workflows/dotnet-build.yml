@@ -48,7 +48,9 @@ jobs:
     - run: npm install
 
     - name: Build Management client
-      run: npm run build-client
+      run: | 
+        npm run install-client
+        npm run build-client 
 
     - name: Display GitVersion SemVer
       run: |
