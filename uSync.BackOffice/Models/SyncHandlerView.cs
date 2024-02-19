@@ -1,13 +1,8 @@
-﻿
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-
-namespace uSync.BackOffice.Models
+﻿namespace uSync.BackOffice.Models
 {
     /// <summary>
     ///  view model of a handler, sent to the UI to draw the handler boxes.
     /// </summary>
-    [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public class SyncHandlerView
     {
         /// <summary>

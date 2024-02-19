@@ -1,13 +1,9 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-
-namespace uSync.BackOffice.Models
+﻿namespace uSync.BackOffice.Models
 {
     /// <summary>
     ///  An add on to uSync, which allows you to inject a view onto the uSync page
     ///  just like a content app. 
     /// </summary>
-    [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public interface ISyncAddOn
     {
         /// <summary>

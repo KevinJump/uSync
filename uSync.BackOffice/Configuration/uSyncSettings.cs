@@ -2,15 +2,11 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-
 namespace uSync.BackOffice.Configuration
 {
     /// <summary>
     /// uSync Settings
     /// </summary>
-    [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public class uSyncSettings
     {
         /// <summary>

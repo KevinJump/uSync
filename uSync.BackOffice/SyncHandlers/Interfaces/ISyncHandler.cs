@@ -2,9 +2,6 @@
 using System.Collections.Generic;
 using System.Xml.Linq;
 
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-
 using Umbraco.Cms.Core;
 
 using uSync.BackOffice.Configuration;
@@ -23,7 +20,6 @@ namespace uSync.BackOffice.SyncHandlers
     /// <summary>
     ///  Handler interface for anything that wants to process elements via uSync
     /// </summary>
-    [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public interface ISyncHandler
     {
         /// <summary>

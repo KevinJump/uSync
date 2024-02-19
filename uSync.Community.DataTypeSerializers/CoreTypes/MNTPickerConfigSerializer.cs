@@ -1,11 +1,10 @@
 ﻿using System;
 
-using Newtonsoft.Json;
-
-using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.PropertyEditors;
+using Umbraco.Cms.Core.Services;
 
 using uSync.Core.DataTypes;
+using uSync.Core.Extensions;
 
 namespace uSync8.Community.DataTypeSerializers.CoreTypes
 {
@@ -57,7 +56,7 @@ namespace uSync8.Community.DataTypeSerializers.CoreTypes
         {
             if (configType == typeof(MultiNodePickerConfiguration))
             {
-                var mappedConfig = JsonConvert.DeserializeObject<MappedPathConfigBase<MultiNodePickerConfiguration>>(config);
+                var mappedConfig = config.Deserialize<MappedPathConfigBase<MultiNodePickerConfiguration>>();
 
                 if (!string.IsNullOrWhiteSpace(mappedConfig.MappedPath))
                 {

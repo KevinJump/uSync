@@ -3,10 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
 
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-using Newtonsoft.Json.Serialization;
-
 using uSync.Core;
 using uSync.Core.Models;
 
@@ -15,7 +11,6 @@ namespace uSync.BackOffice
     /// <summary>
     ///  A uSyncAction details what just happed when an Handler did something to an item
     /// </summary>
-    [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public struct uSyncAction
     {
         /// <summary>
@@ -46,7 +41,6 @@ namespace uSync.BackOffice
         /// <summary>
         ///  type of change performed 
         /// </summary>
-        [Newtonsoft.Json.JsonConverter(typeof(StringEnumConverter))]
         [System.Text.Json.Serialization.JsonConverter(typeof(JsonStringEnumConverter))]
         public ChangeType Change { get; set; }
 

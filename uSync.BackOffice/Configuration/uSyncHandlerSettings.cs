@@ -2,9 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-
 using Umbraco.Extensions;
 
 namespace uSync.BackOffice.Configuration
@@ -12,7 +9,6 @@ namespace uSync.BackOffice.Configuration
     /// <summary>
     /// Settings to control who a handler works
     /// </summary>
-    [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public class HandlerSettings
     {
         /// <summary>

@@ -5,13 +5,9 @@ using System.Text.Json.Nodes;
 
 using Microsoft.Extensions.Logging;
 
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Services;
 
-using uSync.Core;
 using uSync.Core.Dependency;
 using uSync.Core.Extensions;
 using uSync.Core.Mapping;
@@ -88,7 +84,7 @@ namespace uSync8.Community.Contrib.Mappers
             // then a nested content, but not by much.
             GetExportJsonValues(docValue, docType);
 
-            return JsonConvert.SerializeObject(jsonValue.ExpandAllJsonInToken(), Formatting.Indented);
+            return jsonValue.Serialize(true);
         }
 
         private JsonObject GetExportJsonValues(JsonObject item, IContentType docType)
@@ -132,7 +128,7 @@ namespace uSync8.Community.Contrib.Mappers
                 // then a nested content, but not by much.
                 GetImportJsonValue(docValue, docType);
 
-                return JsonConvert.SerializeObject(jsonValue.ExpandAllJsonInToken(), Formatting.Indented);
+                return jsonValue.ExpandAllJsonInToken().Serialize(true);
             }
             catch (Exception ex)
             {

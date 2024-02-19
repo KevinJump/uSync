@@ -3,13 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Nodes;
 
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Services;
 
-using uSync.Core;
 using uSync.Core.Dependency;
 using uSync.Core.Extensions;
 using uSync.Core.Mapping;

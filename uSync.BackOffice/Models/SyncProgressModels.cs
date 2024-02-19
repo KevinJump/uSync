@@ -1,9 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-
 using uSync.BackOffice.SyncHandlers;
 
 namespace uSync.BackOffice.Models
@@ -11,7 +8,6 @@ namespace uSync.BackOffice.Models
     /// <summary>
     ///  Progress summary - object that tells the UI to draw the handler icons while uSync works.
     /// </summary>
-    [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public class SyncProgressSummary
     {
         /// <summary>
@@ -138,7 +134,6 @@ namespace uSync.BackOffice.Models
     /// <summary>
     ///  Summary object used to display a summary of progress via the UI
     /// </summary>
-    [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public class SyncHandlerSummary
     {
         /// <summary>

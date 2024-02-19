@@ -1,15 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-
 namespace uSync.BackOffice.Models
 {
     /// <summary>
     /// Options to tell uSync how to process an action
     /// </summary>
-    [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public class SyncActionOptions
     {
         /// <summary>
