@@ -14,7 +14,7 @@ export class uSyncChangeView extends UmbElementMixin(LitElement)  {
     }
 
     @property({type: Object})
-    item : uSyncActionView | null = null;
+    item : uSyncActionView | null | undefined = null;
 
     render() {
 
@@ -58,7 +58,7 @@ export class uSyncChangeView extends UmbElementMixin(LitElement)  {
             const newValue = this._getJsonOrString(detail.newValue);
             const changes = Diff.diffWords(oldValue, newValue);
 
-            const changeHtml = changes.map((change) => {
+            const changeHtml = changes.map((change : any) => {
 
                 console.log(change);
 

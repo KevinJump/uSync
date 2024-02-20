@@ -30,10 +30,11 @@
   },
   "dependencies": {
     "@microsoft/signalr": "^8.0.0",
-    "lit": "^3.1.0",
-    "diff": "^5.2.0"
+    "diff": "^5.2.0",
+    "lit": "^3.1.0"
   },
   "devDependencies": {
+    "@types/diff": "^5.0.9",
     "@umbraco-cms/backoffice": "^14.0.0--preview006",
     "openapi-typescript-codegen": "^0.25.0",
     "typescript": "^5.2.2",
