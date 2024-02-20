@@ -1,13 +1,8 @@
-﻿using System;
-
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-
-using Umbraco.Cms.Core;
+﻿using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.PropertyEditors;
 using Umbraco.Extensions;
 
-using uSync.Core.Json;
+using uSync.Core.Extensions;
 
 namespace uSync.Core.DataTypes;
 
@@ -18,19 +13,14 @@ namespace uSync.Core.DataTypes;
 /// </summary>
 internal class RichTextEditorConfigSerializerCore : ConfigurationSerializerBase, IConfigurationSerializer
 {
-    private static JsonSerializerSettings _jsonSettings = new JsonSerializerSettings()
-    {
-        ContractResolver = new uSyncContractResolver()
-    };
-
     public string Name => "RichTextEditorSerializer";
 
     public string[] Editors => [Constants.PropertyEditors.Aliases.TinyMce];
 
-    public override object DeserializeConfig(string config, Type configType)
+    public override object? DeserializeConfig(string config, Type configType)
         => base.DeserializeConfig(config, configType);
 
-    public override string SerializeConfig(object configuration)
+    public override string? SerializeConfig(object configuration)
     {
         if (!(configuration is RichTextConfiguration richTextConfiguration))
             return base.SerializeConfig(configuration);
@@ -38,24 +28,21 @@ internal class RichTextEditorConfigSerializerCore : ConfigurationSerializerBase,
         if (richTextConfiguration?.Editor == null)
             return base.SerializeConfig(configuration);
 
-        var editorAttempt = richTextConfiguration.Editor.TryConvertTo<JObject>();
-
-        if (!editorAttempt.Success)
+        if (richTextConfiguration.Editor.TryConvertToJsonObject(out var jsonObject) is false || jsonObject is null)
             return base.SerializeConfig(configuration);
 
 
-        if (editorAttempt.Result.ContainsKey("toolbar") is false)
-            return base.SerializeConfig(configuration);
-
-        var toolbar = editorAttempt.Result.Value<JArray>("toolbar");
-        if (toolbar.Contains("styleselect"))
+        var toolbar = jsonObject.GetPropertyAsArray("toolbar");
+        if (toolbar.Contains("styleselect") is true)
         {
             toolbar.Remove("styleselect");
             toolbar.Add("styles");
         }
 
-        editorAttempt.Result["toolbar"] = toolbar;
+        jsonObject["toolbar"] = toolbar;
 
-        return JsonConvert.SerializeObject(richTextConfiguration, Formatting.Indented, _jsonSettings);
+        richTextConfiguration.Editor = jsonObject.TryConvertTo<object>();
+
+        return richTextConfiguration.SerializeJsonString();
     }
 }

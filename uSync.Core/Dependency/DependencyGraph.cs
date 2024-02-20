@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace uSync.Core.Dependency;
+﻿namespace uSync.Core.Dependency;
 
 /// <summary>
 ///  builds a graph of dependencies, so things can be installed in order. 
@@ -26,7 +22,7 @@ public static class DependencyGraph
             sortedList.Add(next);
 
             // look for any edges for this queue. 
-            foreach(var edge in edges.Where(e => e.Edge.Equals(next)).ToList())
+            foreach (var edge in edges.Where(e => e.Edge.Equals(next)).ToList())
             {
                 var dependency = edge.Node;
                 edges.Remove(edge);
@@ -56,7 +52,7 @@ public class GraphEdge<T>
 
 }
 
-public class GraphEdge 
+public class GraphEdge
 {
     public static GraphEdge<T> Create<T>(T node, T edge) where T : IEquatable<T>
         => new GraphEdge<T> { Node = node, Edge = edge };

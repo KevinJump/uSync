@@ -1,14 +1,11 @@
-﻿using System;
+﻿namespace uSync.Core.DataTypes;
 
-namespace uSync.Core.DataTypes
+public interface IConfigurationSerializer
 {
-    public interface IConfigurationSerializer
-    {
-        string Name { get; }
-        string[] Editors { get; }
+    string Name { get; }
+    string[] Editors { get; }
 
-        object DeserializeConfig(string config, Type configType);
+    object? DeserializeConfig(string config, Type configType);
 
-        string SerializeConfig(object configuration);
-    }
+    string? SerializeConfig(object configuration);
 }

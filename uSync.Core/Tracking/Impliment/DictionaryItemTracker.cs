@@ -1,21 +1,18 @@
-﻿using System.Collections.Generic;
-
-using Umbraco.Cms.Core.Models;
+﻿using Umbraco.Cms.Core.Models;
 
 using uSync.Core.Serialization;
 
-namespace uSync.Core.Tracking.Impliment
-{
-    public class DictionaryItemTracker : SyncXmlTracker<IDictionaryItem>, ISyncTracker<IDictionaryItem>
-    {
-        public DictionaryItemTracker(SyncSerializerCollection serializers)
-            : base(serializers)
-        { }
+namespace uSync.Core.Tracking.Impliment;
 
-        public override List<TrackingItem> TrackingItems => new List<TrackingItem>()
-        {
-            TrackingItem.Single("Parent", "/Info/Parent"),
-            TrackingItem.Many("Translation", "/Translations/Translation", "@Language")
-        };
-    }
+public class DictionaryItemTracker : SyncXmlTracker<IDictionaryItem>, ISyncTracker<IDictionaryItem>
+{
+    public DictionaryItemTracker(SyncSerializerCollection serializers)
+        : base(serializers)
+    { }
+
+    public override List<TrackingItem> TrackingItems => new List<TrackingItem>()
+    {
+        TrackingItem.Single("Parent", "/Info/Parent"),
+        TrackingItem.Many("Translation", "/Translations/Translation", "@Language")
+    };
 }

@@ -1,61 +1,54 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
+﻿using Umbraco.Cms.Core;
 
-using Umbraco.Cms.Core;
+namespace uSync.Core.Dependency;
 
-namespace uSync.Core.Dependency
+public delegate void uSyncDependencyUpdate(DependencyMessageArgs e);
+
+public class DependencyMessageArgs
 {
-    public delegate void uSyncDependencyUpdate(DependencyMessageArgs e);
+    public string Message { get; set; }
+    public int Count { get; set; }
+    public int Total { get; set; }
+}
 
-    public class DependencyMessageArgs
+public class uSyncDependency
+{
+
+    /// <summary>
+    ///  name to display to user (not critical for deployment of a dependency)
+    /// </summary>
+    public string Name { get; set; }
+
+    public Udi Udi { get; set; }
+    public int Order { get; set; }
+
+    public int Level { get; set; }
+
+    public DependencyMode Mode { get; set; }
+
+    public DependencyFlags Flags { get; set; }
+
+
+    public static event uSyncDependencyUpdate DependencyUpdate;
+
+    public static void FireUpdate(string message)
     {
-        public string Message { get; set; }
-        public int Count { get; set; }
-        public int Total { get; set; }
+        FireUpdate(message, 1, 2);
     }
 
-
-    [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
-    public class uSyncDependency
+    public static void FireUpdate(string message, int count, int total)
     {
-
-        /// <summary>
-        ///  name to display to user (not critical for deployment of a dependency)
-        /// </summary>
-        public string Name { get; set; }
-
-        public Udi Udi { get; set; }
-        public int Order { get; set; }
-
-        public int Level { get; set; }
-
-        public DependencyMode Mode { get; set; }
-
-        public DependencyFlags Flags { get; set; }
-
-
-        public static event uSyncDependencyUpdate DependencyUpdate;
-
-        public static void FireUpdate(string message)
+        DependencyUpdate?.Invoke(new DependencyMessageArgs
         {
-            FireUpdate(message, 1, 2);
-        }
-
-        public static void FireUpdate(string message, int count, int total)
-        {
-            DependencyUpdate?.Invoke(new DependencyMessageArgs
-            {
-                Message = message,
-                Count = count,
-                Total = total
-            });
-        }
+            Message = message,
+            Count = count,
+            Total = total
+        });
     }
+}
 
-    public enum DependencyMode
-    {
-        MustMatch,
-        MustExist
-    }
-
+public enum DependencyMode
+{
+    MustMatch,
+    MustExist
 }

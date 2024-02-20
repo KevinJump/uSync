@@ -1,7 +1,6 @@
-﻿namespace uSync.Core.Serialization
+﻿namespace uSync.Core.Serialization;
+
+public interface ISyncContentSerializer<TObject>
 {
-    public interface ISyncContentSerializer<TObject>
-    {
-        string GetItemPath(TObject item);
-    }
+    string GetItemPath(TObject item);
 }

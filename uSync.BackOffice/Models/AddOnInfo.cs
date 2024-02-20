@@ -1,14 +1,10 @@
 ﻿using System.Collections.Generic;
 
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-
 namespace uSync.BackOffice.Models
 {
     /// <summary>
     /// Information about uSync AddOns (displayed in version string)
     /// </summary>
-    [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public class AddOnInfo
     {
         /// <summary>

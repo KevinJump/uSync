@@ -1,13 +1,8 @@
-﻿
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-
-namespace uSync.BackOffice.SyncHandlers
+﻿namespace uSync.BackOffice.SyncHandlers
 {
     /// <summary>
     ///  options that define how we define a handler 
     /// </summary>
-    [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public class SyncHandlerOptions
     {
         /// <summary>

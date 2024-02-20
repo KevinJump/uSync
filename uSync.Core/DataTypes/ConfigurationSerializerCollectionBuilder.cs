@@ -1,30 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-using Umbraco.Cms.Core.Composing;
+﻿using Umbraco.Cms.Core.Composing;
 using Umbraco.Extensions;
 
-namespace uSync.Core.DataTypes
+namespace uSync.Core.DataTypes;
+
+public class ConfigurationSerializerCollectionBuilder
+    : LazyCollectionBuilderBase<ConfigurationSerializerCollectionBuilder, ConfigurationSerializerCollection, IConfigurationSerializer>
 {
-    public class ConfigurationSerializerCollectionBuilder
-        : LazyCollectionBuilderBase<ConfigurationSerializerCollectionBuilder, ConfigurationSerializerCollection, IConfigurationSerializer>
+    protected override ConfigurationSerializerCollectionBuilder This => this;
+}
+
+
+public class ConfigurationSerializerCollection :
+    BuilderCollectionBase<IConfigurationSerializer>
+{
+    public ConfigurationSerializerCollection(Func<IEnumerable<IConfigurationSerializer>> items)
+        : base(items)
     {
-        protected override ConfigurationSerializerCollectionBuilder This => this;
     }
 
-
-    public class ConfigurationSerializerCollection :
-        BuilderCollectionBase<IConfigurationSerializer>
+    public IConfigurationSerializer? GetSerializer(string editorAlias)
     {
-        public ConfigurationSerializerCollection(Func<IEnumerable<IConfigurationSerializer>> items)
-            : base(items)
-        {
-        }
-
-        public IConfigurationSerializer GetSerializer(string editorAlias)
-        {
-            return this.FirstOrDefault(x => x.Editors.InvariantContains(editorAlias));
-        }
+        return this.FirstOrDefault(x => x.Editors.InvariantContains(editorAlias));
     }
 }

@@ -1,7 +1,4 @@
-﻿using Newtonsoft.Json.Serialization;
-using Newtonsoft.Json;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 
@@ -10,7 +7,6 @@ namespace uSync.BackOffice.Configuration
     /// <summary>
     /// Settings for a handler set (group of handlers)
     /// </summary>
-    [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public class uSyncHandlerSetSettings
     {
         /// <summary>

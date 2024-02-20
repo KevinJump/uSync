@@ -1,21 +1,18 @@
-﻿using System.Linq;
+﻿using Umbraco.Cms.Core.Events;
 
-using Umbraco.Cms.Core.Events;
+namespace uSync.Core;
 
-namespace uSync.Core
+public static class EventMessageExtensions
 {
-    public static class EventMessageExtensions
+    public static string FormatMessages(this EventMessages eventMessages, string seprerator = " : ")
     {
-        public static string FormatMessages(this EventMessages eventMessages, string seprerator = " : ")
+        if (eventMessages != null)
         {
-            if (eventMessages != null)
-            {
-                return string.Join(seprerator,
-                    eventMessages.GetAll()
-                        .Select(x => $"{x.Category} {x.Message}"));
-            }
-
-            return string.Empty;
+            return string.Join(seprerator,
+                eventMessages.GetAll()
+                    .Select(x => $"{x.Category} {x.Message}"));
         }
+
+        return string.Empty;
     }
 }

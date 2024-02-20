@@ -1,9 +1,8 @@
-﻿namespace uSync.Core
+﻿namespace uSync.Core;
+
+/// <summary>
+///  Placeholder.
+/// </summary>
+public class uSyncCore
 {
-    /// <summary>
-    ///  Placeholder.
-    /// </summary>
-    public class uSyncCore
-    {
-    }
 }

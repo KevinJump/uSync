@@ -1,97 +1,87 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+﻿using System.Text.Json.Nodes;
 
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Extensions;
 
 using uSync.Core.Dependency;
+using uSync.Core.Extensions;
 
 using static Umbraco.Cms.Core.Constants;
 
-namespace uSync.Core.Mapping.Mappers
+namespace uSync.Core.Mapping.Mappers;
+
+public class MediaPicker3Mapper : SyncValueMapperBase, ISyncMapper
 {
-    public class MediaPicker3Mapper : SyncValueMapperBase, ISyncMapper
+    public MediaPicker3Mapper(IEntityService entityService) : base(entityService)
+    { }
+
+    public override string Name => "MediaPicker3 Mapper";
+
+    public override string[] Editors => [Constants.PropertyEditors.Aliases.MediaPicker3];
+
+    public override string? GetExportValue(object value, string editorAlias)
     {
-        public MediaPicker3Mapper(IEntityService entityService) : base(entityService)
-        { }
+        var stringValue = value?.ToString();
+        if (string.IsNullOrEmpty(stringValue) is true) return null;
 
-        public override string Name => "MediaPicker3 Mapper";
+        if (stringValue.TryParseToJsonArray(out var jsonArray) is false || jsonArray is null)
+            return stringValue;
 
-        public override string[] Editors => new string[]
+        // re-formatting the json in the picker.
+        // 
+        // we do this because sometimes (and with the starter kit especially)
+        // the json might have extra spaces in it, so compared with a server 
+        // where this has been imported vs created it can be different but the same.
+
+        // by reading in the json and then spitting it out again, we remove any
+        // rouge spacing - so our compare fires through as if nothing has changed.
+
+        if (jsonArray.TrySerializeJsonNode(out string? result))
+            return result;
+
+        return stringValue;
+    }
+
+
+    public override IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)
+    {
+        // validate string 
+        var stringValue = value?.ToString();
+
+        if (stringValue.TryParseToJsonArray(out var images) is false || images == null || images.Count == 0)
+            return Enumerable.Empty<uSyncDependency>();
+
+        var dependencies = new List<uSyncDependency>();
+
+        foreach (var image in images.AsListOfJsonObjects())
         {
-            Constants.PropertyEditors.Aliases.MediaPicker3
-        };
+            if (image == null) continue;
 
-        public override string GetExportValue(object value, string editorAlias)
-        {
-            var stringValue = value?.ToString();
-            if (string.IsNullOrEmpty(stringValue) is true) return null;
+            var key = GetGuidValue(image, "mediaKey");
 
-            if (stringValue.TryParseValidJsonString(out JArray json) is false)
-                return stringValue;
+            if (key == Guid.Empty) continue;
 
-            // re-formatting the json in the picker.
-            // 
-            // we do this because sometimes (and with the starter kit especially)
-            // the json might have extra spaces in it, so compared with a server 
-            // where this has been imported vs created it can be different but the same.
+            var udi = GuidUdi.Create(UdiEntityType.Media, key);
+            if (udi is null) continue;
 
-            // by reading in the json and then spitting it out again, we remove any
-            // rouge spacing - so our compare fires through as if nothing has changed.
-
-            try
-            {
-                return JsonConvert.SerializeObject(json, Formatting.Indented);
-            }
-            catch
-            {
-                return stringValue;
-            }
-        }
-            
-
-        public override IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)
-        {
-            // validate string 
-            var stringValue = value?.ToString();
-            if (stringValue.TryParseValidJsonString(out JArray images) is false)
-                return Enumerable.Empty<uSyncDependency>();
-
-            if (images == null || !images.Any())
-                return Enumerable.Empty<uSyncDependency>();
-
-            var dependencies = new List<uSyncDependency>();
-
-            foreach (var image in images.Cast<JObject>())
-            {
-                var key = GetGuidValue(image, "mediaKey");
-
-                if (key != Guid.Empty)
-                {
-                    var udi = GuidUdi.Create(UdiEntityType.Media, key);
-                    dependencies.Add(CreateDependency(udi as GuidUdi, flags));
-                }
-            }
-
-            return dependencies;
+            var dependency = CreateDependency(udi as GuidUdi, flags);
+            if (dependency is not null) dependencies.Add(dependency);
         }
 
-        private Guid GetGuidValue(JObject obj, string key)
+        return dependencies;
+    }
+
+    private static Guid GetGuidValue(JsonObject obj, string key)
+    {
+        if (obj != null && obj.ContainsKey(key))
         {
-            if (obj != null && obj.ContainsKey(key))
-            {
-                var attempt = obj[key].TryConvertTo<Guid>();
-                if (attempt.Success)
-                    return attempt.Result;
-            }
-
-            return Guid.Empty;
-
+            var attempt = obj[key].TryConvertTo<Guid>();
+            if (attempt.Success)
+                return attempt.Result;
         }
+
+        return Guid.Empty;
+
     }
 }

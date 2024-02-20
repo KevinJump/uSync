@@ -1,9 +1,8 @@
-﻿namespace uSync.Core.Serialization
-{
-    public interface ISyncCachedSerializer
-    {
-        void InitializeCache();
+﻿namespace uSync.Core.Serialization;
 
-        void DisposeCache();
-    }
+public interface ISyncCachedSerializer
+{
+    void InitializeCache();
+
+    void DisposeCache();
 }

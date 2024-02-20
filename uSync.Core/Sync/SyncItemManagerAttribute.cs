@@ -1,35 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace uSync.Core.Sync;
 
-namespace uSync.Core.Sync
+/// <summary>
+///  Setup your sync item manager (single tree/single entity)
+/// </summary>
+public class SyncItemManagerAttribute : Attribute
 {
     /// <summary>
-    ///  Setup your sync item manager (single tree/single entity)
+    ///  the base entity type that this item works for.
     /// </summary>
-    public class SyncItemManagerAttribute : Attribute
+    public string EntityType { get; private set; }
+
+    /// <summary>
+    ///  the alias of the tree in the UI
+    /// </summary>
+    public string TreeAlias { get; private set; }
+
+    public SyncItemManagerAttribute(string entityType)
     {
-        /// <summary>
-        ///  the base entity type that this item works for.
-        /// </summary>
-        public string EntityType { get; private set; }
+        EntityType = entityType;
+    }
 
-        /// <summary>
-        ///  the alias of the tree in the UI
-        /// </summary>
-        public string TreeAlias { get; private set; }
-
-        public SyncItemManagerAttribute(string entityType)
-        {
-            EntityType = entityType;
-        }
-
-        public SyncItemManagerAttribute(string entityType, string treeAlias)
-        {
-            EntityType = entityType;
-            TreeAlias = treeAlias;
-        }
+    public SyncItemManagerAttribute(string entityType, string treeAlias)
+    {
+        EntityType = entityType;
+        TreeAlias = treeAlias;
     }
 }

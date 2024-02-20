@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-
 using uSync.Core.Serialization;
 
 namespace uSync.BackOffice.Models
@@ -11,7 +8,6 @@ namespace uSync.BackOffice.Models
     /// <summary>
     ///  options passed to an import, report or export of an item.
     /// </summary>
-    [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public class uSyncImportOptions
     {
         /// <summary>
@@ -70,7 +66,6 @@ namespace uSync.BackOffice.Models
     /// <summary>
     ///  Import options when paging any import operations 
     /// </summary>
-    [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
     public class uSyncPagedImportOptions : uSyncImportOptions
     {
         /// <summary>

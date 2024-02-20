@@ -1,11 +1,10 @@
 ﻿using System;
 
-using Newtonsoft.Json;
-
 using Umbraco.Cms.Core.PropertyEditors;
 using Umbraco.Cms.Core.Services;
 
 using uSync.Core.DataTypes;
+using uSync.Core.Extensions;
 
 namespace uSync8.Community.DataTypeSerializers.CoreTypes
 {
@@ -49,7 +48,7 @@ namespace uSync8.Community.DataTypeSerializers.CoreTypes
         {
             if (configType == typeof(MediaPicker3Configuration))
             {
-                var mappedConfig = JsonConvert.DeserializeObject<MappedPathConfigBase<MediaPicker3Configuration>>(config);
+                var mappedConfig = config.DeserializeJson<MappedPathConfigBase<MediaPicker3Configuration>>();
 
                 if (!string.IsNullOrWhiteSpace(mappedConfig.MappedPath))
                 {
