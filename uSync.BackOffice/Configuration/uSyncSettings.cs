@@ -18,11 +18,8 @@ namespace uSync.BackOffice.Configuration
         /// <summary>
         ///  collection of folders uSync looks in when performing imports.
         /// </summary>
-        [DefaultValue("uSync/Root/, uSync/v14")]
-        public string[] Folders { get; set; } = [
-            "uSync/Root/",
-            "uSync/v14/"
-        ];
+        [DefaultValue("uSync/Root/, uSync/v14/")]
+        public string[] Folders { get; set; } = [ ];
 
         /// <summary>
         ///  folder that has old things in. 
