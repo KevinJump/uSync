@@ -90,6 +90,14 @@ namespace uSync.BackOffice
 
             builder.Services.AddTransient<ISyncActionService, SyncActionService>();
 
+            _ = builder.Services.PostConfigure<uSyncSettings>(options =>
+            {
+                if (options.Folders == null || options.Folders.Length == 0)
+                {
+                    options.Folders = ["uSync/Root/", "uSync/v9/"];
+                }
+            });
+
             return builder;
         }
 

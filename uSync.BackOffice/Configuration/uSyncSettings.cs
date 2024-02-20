@@ -23,10 +23,7 @@ namespace uSync.BackOffice.Configuration
         ///  collection of folders uSync looks in when performing imports.
         /// </summary>
         [DefaultValue("uSync/Root/, uSync/v9")]
-        public string[] Folders { get; set; } = [
-            "uSync/Root/",
-            "uSync/v9/"
-        ];
+        public string[] Folders { get; set; } = [ ];
 
         /// <summary>
         ///  Sets this site to be the root site (so it will save into "uSync/root/")
