@@ -12,17 +12,23 @@ namespace uSync.BackOffice.Configuration
         /// <summary>
         /// Location where all uSync files are saved by default
         /// </summary>
-        [DefaultValue("uSync/v9/")]
-        public string RootFolder { get; set; } = "uSync/v9/";
+        [DefaultValue("uSync/v14/")]
+        public string RootFolder { get; set; } = "uSync/v14/";
 
         /// <summary>
         ///  collection of folders uSync looks in when performing imports.
         /// </summary>
-        [DefaultValue("uSync/Root/, uSync/v9")]
+        [DefaultValue("uSync/Root/, uSync/v14")]
         public string[] Folders { get; set; } = [
             "uSync/Root/",
-            "uSync/v9/"
+            "uSync/v14/"
         ];
+
+        /// <summary>
+        ///  folder that has old things in. 
+        /// </summary>
+        [DefaultValue("uSync/v9")]
+        public string LegacyFolder { get; set; } = "uSync/v9";
 
         /// <summary>
         ///  Sets this site to be the root site (so it will save into "uSync/root/")
@@ -33,6 +39,7 @@ namespace uSync.BackOffice.Configuration
         /// <summary>
         /// when locked you can't make changes to anything that is in the root
         /// </summary>
+        [DefaultValue (true)]
         public bool LockRoot { get; set; } = true;
 
         /// <summary>
