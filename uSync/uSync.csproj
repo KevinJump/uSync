@@ -36,10 +36,7 @@
 		<ProjectReference Include="..\uSync.BackOffice\uSync.BackOffice.csproj" />
 		<ProjectReference Include="..\uSync.Backoffice.Management.Api\uSync.Backoffice.Management.Api.csproj" />
 		<ProjectReference Include="..\uSync.Backoffice.Management.Client\uSync.Backoffice.Management.Client.csproj" />
-		<!-- 
-		<ProjectReference Include="..\uSync.Backoffice.Assets\uSync.BackOffice.Assets.csproj" />
-		<ProjectReference Include="..\uSync.History\uSync.History.csproj" />
-		-->
+		<ProjectReference Include="..\uSync.BackOffice.Targets\uSync.BackOffice.Targets.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

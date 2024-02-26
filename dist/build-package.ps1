@@ -51,7 +51,7 @@ Write-Host "Config   :" $env
 Write-Host "Folder   :" $outFolder
 "----------------------------------"; ""
 
-$sln_name = "..\uSync_13.sln";
+$sln_name = "..\uSync.sln";
 
 ""; "##### Restoring project"; "--------------------------------"; ""
 dotnet restore ..
@@ -63,25 +63,37 @@ dotnet build $sln_name -c $env -p:Version=$fullVersion -p:ContinuousIntegrationB
 dotnet run -c $env --project ..\uSync.SchemaGenerator\uSync.SchemaGenerator.csproj --no-build
 
 ""; "##### Packaging"; "----------------------------------" ; ""
-
-dotnet pack ..\uSync.Core\uSync.Core.csproj --no-restore --no-build -c $env -o $outFolder -p:Version=$fullVersion -p:ContinuousIntegrationBuild=true
-dotnet pack ..\uSync.Community.Contrib\uSync.Community.Contrib.csproj  --no-build  --no-restore -c $env -o $outFolder -p:Version=$fullVersion -p:ContinuousIntegrationBuild=true
-dotnet pack ..\uSync.Community.DataTypeSerializers\uSync.Community.DataTypeSerializers.csproj  --no-build  --no-restore -c $env -o $outFolder  -p:Version=$fullVersion -p:ContinuousIntegrationBuild=true
-dotnet pack ..\uSync.BackOffice\uSync.BackOffice.csproj  --no-build  --no-restore -c $env -o $outFolder  -p:Version=$fullVersion -p:ContinuousIntegrationBuild=true
-dotnet pack ..\uSync.History\uSync.History.csproj  --no-build  --no-restore -c $env -o $outFolder  -p:Version=$fullVersion -p:ContinuousIntegrationBuild=true
-
-dotnet pack ..\uSync.AutoTemplates\uSync.AutoTemplates.csproj --no-build --no-restore -c $env -o $outFolder  -p:Version=$fullVersion -p:ContinuousIntegrationBuild=true
-
-dotnet pack ..\uSync.BackOffice.Targets\uSync.BackOffice.Targets.csproj --no-build --no-restore -c $env -o $outFolder  -p:Version=$fullVersion -p:ContinuousIntegrationBuild=true
-
-dotnet pack ..\uSync\uSync.csproj  --no-build  --no-restore -c $env -o $outFolder  -p:Version=$fullVersion -p:ContinuousIntegrationBuild=true
-# .\nuget pack "..\uSync\uSync.nuspec" -version $fullVersion -OutputDirectory $outFolder
+$projects = "uSync.Core", 
+    "uSync.Community.Contrib",
+    "uSync.Community.DataTypeSerializers",
+    "uSync.BackOffice",
+    "uSync.Backoffice.Management.Api", 
+    "uSync.Backoffice.Management.Client",
+    "uSync";
 
 
-#Get-ChildItem -Path ..\uSync.BackOffice.Assets\wwwroot -Include * -File -Recurse | foreach { $_.Delete()}
-#&gulp minify --release $version
+foreach($project in $projects) {
+    Write-Host "Packing $project : ";
+    dotnet pack "..\$project\$project.csproj" --no-restore --no-build -c $env -o $outFolder -p:Version=$fullVersion -p:ContinuousIntegrationBuild=true
+}
 
-dotnet pack ..\uSync.BackOffice.Assets\uSync.BackOffice.Assets.csproj --no-restore -c $env -o $outFolder  -p:Version=$fullVersion -p:ContinuousIntegrationBuild=true
+""; "##### Generating NPM Client Package"; "----------------------------------" ; ""
+Set-Location ..\uSync.Backoffice.Management.Client\assets\
+
+npm version $fullVersion 
+npm run dist
+
+"Linking locally (for testing)"
+npm link
+
+if ($push) {
+    "Publishing to Azure nightly"
+    npm publish
+}
+
+# todo, publish the package to a repo? 
+
+Set-Location ..\..\dist
 
 ""; "##### Copying to LocalGit folder"; "----------------------------------" ; ""
 XCOPY "$outFolder\*.nupkg" "C:\Source\localgit" /Q /Y 

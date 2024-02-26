@@ -31,17 +31,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.Tests", "uSync.Tests\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.SchemaGenerator", "uSync.SchemaGenerator\uSync.SchemaGenerator.csproj", "{1E5B64E5-E8A6-42F2-9079-FB71D6D237D6}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.BackOffice.Assets", "uSync.Backoffice.Assets\uSync.BackOffice.Assets.csproj", "{4ECC3DFD-5BCB-4095-8D06-DE482DF4C6A1}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.BackOffice.Targets", "uSync.BackOffice.Targets\uSync.BackOffice.Targets.csproj", "{B09F319A-7066-4B1B-B97D-F609B558C9F4}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.History", "uSync.History\uSync.History.csproj", "{E1C572B6-218E-4152-97D2-392B9CA60F39}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.Site", "uSync.Site\uSync.Site.csproj", "{CD8A40A1-E7A1-4B9F-B8AB-7BA901333614}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.Backoffice.Management.Client", "uSync.Backoffice.Management.Client\uSync.Backoffice.Management.Client.csproj", "{25F84953-F480-4A85-B479-CC4E9AA6337D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "uSync.Backoffice.Management.Api", "uSync.Backoffice.Management.Api\uSync.Backoffice.Management.Api.csproj", "{7701860C-52E5-4C0B-A020-CBC8FFD6CBEA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.Backoffice.Management.Api", "uSync.Backoffice.Management.Api\uSync.Backoffice.Management.Api.csproj", "{7701860C-52E5-4C0B-A020-CBC8FFD6CBEA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -81,18 +77,10 @@ Global
 		{1E5B64E5-E8A6-42F2-9079-FB71D6D237D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1E5B64E5-E8A6-42F2-9079-FB71D6D237D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1E5B64E5-E8A6-42F2-9079-FB71D6D237D6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4ECC3DFD-5BCB-4095-8D06-DE482DF4C6A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4ECC3DFD-5BCB-4095-8D06-DE482DF4C6A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4ECC3DFD-5BCB-4095-8D06-DE482DF4C6A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4ECC3DFD-5BCB-4095-8D06-DE482DF4C6A1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B09F319A-7066-4B1B-B97D-F609B558C9F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B09F319A-7066-4B1B-B97D-F609B558C9F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B09F319A-7066-4B1B-B97D-F609B558C9F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B09F319A-7066-4B1B-B97D-F609B558C9F4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E1C572B6-218E-4152-97D2-392B9CA60F39}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E1C572B6-218E-4152-97D2-392B9CA60F39}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E1C572B6-218E-4152-97D2-392B9CA60F39}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E1C572B6-218E-4152-97D2-392B9CA60F39}.Release|Any CPU.Build.0 = Release|Any CPU
 		{CD8A40A1-E7A1-4B9F-B8AB-7BA901333614}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{CD8A40A1-E7A1-4B9F-B8AB-7BA901333614}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CD8A40A1-E7A1-4B9F-B8AB-7BA901333614}.Release|Any CPU.ActiveCfg = Release|Any CPU

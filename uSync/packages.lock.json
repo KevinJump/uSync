@@ -2471,6 +2471,9 @@
       "usync.backoffice.management.client": {
         "type": "Project"
       },
+      "usync.backoffice.targets": {
+        "type": "Project"
+      },
       "usync.community.contrib": {
         "type": "Project",
         "dependencies": {
