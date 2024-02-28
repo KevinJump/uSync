@@ -573,15 +573,14 @@ namespace uSync.BackOffice.SyncHandlers
                     // if the second attempt has a message on it, add it to the first attempt.
                     if (!string.IsNullOrWhiteSpace(attempt.Message) || attempt.Details?.Any() == true)
                     {
-                        uSyncAction action = actions.FirstOrDefault(x => $"{x.key}_{x.HandlerAlias}" == $"{itemKey}_{this.Alias}", new uSyncAction { key = Guid.Empty });
-                        if (action.key != Guid.Empty)
+                        if (actions.TryFindAction(itemKey, this.Alias, out var action))
                         {
                             actions.Remove(action);
                             action.Message += attempt.Message ?? "";
 
                             if (attempt.Details?.Any() == true)
                             {
-                                var details = action.Details.ToList();
+                                var details = action.Details?.ToList() ?? [];
                                 details.AddRange(attempt.Details);
                                 action.Details = details;
                             }
@@ -595,8 +594,7 @@ namespace uSync.BackOffice.SyncHandlers
                 }
                 else
                 {
-                    uSyncAction action = actions.FirstOrDefault(x => $"{x.key}_{x.HandlerAlias}" == $"{itemKey}_{this.Alias}", new uSyncAction { key = Guid.Empty });
-                    if (action.key != Guid.Empty)
+                    if (actions.TryFindAction(itemKey, this.Alias, out var action))
                     {
                         actions.Remove(action);
                         action.Success = attempt.Success;
