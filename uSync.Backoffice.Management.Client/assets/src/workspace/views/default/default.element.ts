@@ -3,6 +3,7 @@ import { LitElement, css, customElement, html, nothing, state } from "@umbraco-c
 
 import { USYNC_CORE_CONTEXT_TOKEN, uSyncWorkspaceContext } from '../../workspace.context.js';
 import { SyncActionGroup, SyncHandlerSummary, uSyncActionView } from "../../../api/index.js";
+import { UUIButtonState } from "@umbraco-cms/backoffice/external/uui";
 
 @customElement('usync-default-view')
 export class uSyncDefaultViewElement extends UmbElementMixin(LitElement) {
@@ -18,6 +19,9 @@ export class uSyncDefaultViewElement extends UmbElementMixin(LitElement) {
 
     @state()
     _loaded: Boolean = false;
+
+    @state()
+    _buttonState: UUIButtonState;
 
     @state()
     _working: boolean = false; 
@@ -59,6 +63,10 @@ export class uSyncDefaultViewElement extends UmbElementMixin(LitElement) {
 
             this.observe(_instance.working, (_working) => {
                 this._working = _working;
+
+                if (this._working) {
+                    this._buttonState = 'waiting';
+                }
             });
 
             this.observe(_instance.results, (_results) => {
@@ -67,6 +75,9 @@ export class uSyncDefaultViewElement extends UmbElementMixin(LitElement) {
 
             this.observe(_instance.completed, (_completed) => {
                 this._completed = _completed;
+                if (this._completed) {
+                    this._buttonState = 'success';
+                }
             });
 
             this.observe(_instance.loaded, (_loaded) => {
@@ -112,6 +123,7 @@ export class uSyncDefaultViewElement extends UmbElementMixin(LitElement) {
             return html`
                 <usync-action-box myName="fred"
                     .group="${group}"
+                    .state=${this._buttonState}
                     @perform-action=${this.performAction}>
                 </usync-action-box>
             `;
