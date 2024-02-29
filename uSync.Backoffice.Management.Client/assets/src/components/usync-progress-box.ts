@@ -95,7 +95,7 @@ export class uSyncProcessBox extends UmbElementMixin(LitElement) {
         }
 
         .action uui-icon {
-            font-size: 25pt;
+            font-size: 20pt;
         }
         
         .complete {

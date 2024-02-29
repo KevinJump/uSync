@@ -1,6 +1,6 @@
-import { LitElement, customElement, html, css, property } from "@umbraco-cms/backoffice/external/lit";
+import { LitElement, customElement, html, css, property, ifDefined } from "@umbraco-cms/backoffice/external/lit";
 import { SyncActionButton, SyncActionGroup } from "../api";
-import { UUIInterfaceColor, UUIInterfaceLook } from "@umbraco-cms/backoffice/external/uui";
+import { UUIButtonState, UUIInterfaceColor, UUIInterfaceLook } from "@umbraco-cms/backoffice/external/uui";
 
 /**
  * @exports
@@ -17,7 +17,9 @@ export class uSyncActionBox extends LitElement {
      */
     @property({ type: Object })
     group! : SyncActionGroup ;
-   
+
+    @property({type: String})
+    state: UUIButtonState | undefined = undefined;
 
     private _handleClick(group: SyncActionGroup, button: SyncActionButton) {
         this.dispatchEvent(new CustomEvent('perform-action', {
@@ -35,7 +37,7 @@ export class uSyncActionBox extends LitElement {
                 <uui-button label=${i.key} 
                     color=${<UUIInterfaceColor>i.color}
                     look=${<UUIInterfaceLook>i.look}
-                    style="font-size: 20px"
+                    state=${ifDefined(this.state)}
                     @click=${() => this._handleClick(this.group, i)}
                     ></uui-button>
             `;
@@ -64,16 +66,17 @@ export class uSyncActionBox extends LitElement {
         }
 
         .box-heading {
-            font-size: 20pt;
+            font-size: 16pt;
         }
 
         uui-icon {
-            margin: 20px;
-            font-size: 40pt;
+            margin: 10px;
+            font-size: 30pt;
         }
 
         uui-button {
             margin: 0 5px;
+            font-size: 14pt;
         }
 
         .box-buttons {
