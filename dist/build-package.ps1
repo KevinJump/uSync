@@ -67,6 +67,7 @@ $projects = "uSync.Core",
     "uSync.Community.Contrib",
     "uSync.Community.DataTypeSerializers",
     "uSync.BackOffice",
+    "uSync.BackOffice.Targets",
     "uSync.Backoffice.Management.Api", 
     "uSync.Backoffice.Management.Client",
     "uSync";

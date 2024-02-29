@@ -2,14 +2,15 @@
   "name": "@jumoo/usync-assets",
   "license": "MPL-2.0",
   "type": "module",
-  "version": "14.0.0-alpha.20240226.4",
+  "version": "14.0.0-alpha.20240228.1",
   "main": "./dist/usync.js",
   "types": "./dist/index.d.ts",
   "module": "./dist/usync.js",
   "exports": {
-    ".": {
-      "import": "./dist/usync.js"
-    }
+    ".": "./dist/index.js",
+    "./components": "./dist/components/index.js",
+    "./constants": "./dist/constants.js",
+    "./tree": "./dist/tree/index.js"
   },
   "files": [
     "./dist"

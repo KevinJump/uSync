@@ -13,7 +13,7 @@ const localizations: Array<ManifestLocalization> = [
     },
     {
         type: 'localization',
-        alias: 'usync.lang.enus',
+        alias: 'usync.lang.engb',
         name: 'English (GB)',
         weight: 0,
         meta: {
