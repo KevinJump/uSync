@@ -61,9 +61,10 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
                         new XElement("Thumbnail", item.Thumbnail),
                         new XElement("Description", string.IsNullOrWhiteSpace(item.Description) ? "" : item.Description),
                         new XElement("AllowAtRoot", item.AllowedAsRoot.ToString()),
-                        new XElement("IsListView", item.IsContainer.ToString()),
+                        // new XElement("IsListView", item.IsContainer.ToString()),
+                        new XElement("ListView", item.ListView ?? Guid.Empty),
                         new XElement("Variations", item.Variations),
-                        new XElement("IsElement", item.IsElement));
+                        new XElement("IsElement", item.IsElement)); ;
     }
 
     protected XElement SerializeTabs(TObject item)
@@ -278,11 +279,17 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
             item.IsElement = isElement;
         }
 
-        var isContainer = info.Element("IsListView").ValueOrDefault(false);
-        if (item.IsContainer != isContainer)
+        //var isContainer = info.Element("IsListView").ValueOrDefault(false);
+        //if (item.IsContainer != isContainer)
+        //{
+        //    changes.AddUpdate("IsListView", item.IsContainer, isContainer, "");
+        //    item.IsContainer = isContainer;
+        //}
+
+        var listView = info.Element("ListView").ValueOrDefault(Guid.Empty);
+        if (listView != Guid.Empty && item.ListView != listView)
         {
-            changes.AddUpdate("IsListView", item.IsContainer, isContainer, "");
-            item.IsContainer = isContainer;
+            item.ListView= listView;
         }
 
         if (!SetMasterFromElement(item, info.Element(uSyncConstants.Xml.Parent)))

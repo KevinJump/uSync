@@ -3,7 +3,7 @@ import { UmbContextToken } from "@umbraco-cms/backoffice/context-api";
 
 import { uSyncActionRepository } from "..";
 import { UmbControllerHost } from "@umbraco-cms/backoffice/controller-api";
-import { UmbBaseController } from "@umbraco-cms/backoffice/class-api";
+import { UmbControllerBase } from "@umbraco-cms/backoffice/class-api";
 import { SyncActionGroup, SyncHandlerSummary, uSyncActionView, uSyncHandlerSetSettings, uSyncSettings } from "../api";
 
 import { OpenAPI } from "../api";
@@ -18,7 +18,7 @@ import { uSyncIconRegistry } from "../icons";
  * @class uSyncWorkspaceActionContext
  * @description context for getting and seting up actions.
  */
-export class uSyncWorkspaceContext extends UmbBaseController
+export class uSyncWorkspaceContext extends UmbControllerBase
     implements UmbWorkspaceContextInterface {
     public readonly workspaceAlias: string = uSyncConstants.workspace.alias;
 
@@ -29,6 +29,9 @@ export class uSyncWorkspaceContext extends UmbBaseController
         return undefined;
     }
 
+    getUnique(): string | undefined {
+        return undefined;
+    }
 
     #repository: uSyncActionRepository;
     #uSyncIconRegistry: uSyncIconRegistry;
@@ -89,6 +92,8 @@ export class uSyncWorkspaceContext extends UmbBaseController
     constructor(host: UmbControllerHost) {
         super(host);
 
+        console.log('workspace-context');
+
         this.provideContext(USYNC_CORE_CONTEXT_TOKEN, this);
         this.provideContext(UMB_WORKSPACE_CONTEXT, this);
 
@@ -109,6 +114,7 @@ export class uSyncWorkspaceContext extends UmbBaseController
 
 
     }
+    
 
     async getActions() {
         const { data } = await this.#repository.getActions();

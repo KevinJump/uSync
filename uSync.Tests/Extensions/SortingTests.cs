@@ -3,8 +3,6 @@ using System.Collections.Generic;
 
 using NUnit.Framework;
 
-using Umbraco.Cms.Core.WebAssets;
-
 using uSync.Core.Dependency;
 
 namespace uSync.Tests.Extensions;

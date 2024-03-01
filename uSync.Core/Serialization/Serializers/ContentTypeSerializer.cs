@@ -192,14 +192,20 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
 
         var changes = new List<uSyncChange>();
 
-        var isContainer = info.Element("IsListView").ValueOrDefault(false);
-        if (item.IsContainer != isContainer)
+        var listView = info.Element("ListView").ValueOrDefault(Guid.Empty);
+        if (listView != Guid.Empty && item.ListView != listView)
         {
-            changes.AddUpdate("IsListView", item.IsContainer, isContainer, "Info/IsListView");
-            item.IsContainer = isContainer;
+            changes.AddUpdate("ListView", item.ListView, listView, "Info/ListView");
+            item.ListView = listView;
         }
+        //var isContainer = info.Element("IsListView").ValueOrDefault(false);
+        //if (item.IsContainer != isContainer)
+        //{
+        //    changes.AddUpdate("IsListView", item.IsContainer, isContainer, "Info/IsListView");
+        //    item.IsContainer = isContainer;
+        //}
 
-        var masterTemplate = info.Element("DefaultTemplate").ValueOrDefault(string.Empty);
+        var masterTemplate = info?.Element("DefaultTemplate").ValueOrDefault(string.Empty) ?? string.Empty;
         if (!string.IsNullOrEmpty(masterTemplate))
         {
             var template = _fileService.GetTemplate(masterTemplate);
@@ -257,13 +263,17 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
             }
         }
 
-        var currentTemplates = string.Join(",", item.AllowedTemplates.Select(x => x.Alias).OrderBy(x => x));
+        var currentTemplates = string.Join(",", item.AllowedTemplates?.Select(x => x.Alias).OrderBy(x => x) ?? Enumerable.Empty<string>());
         var newTemplates = string.Join(",", allowedTemplates.Select(x => x.Alias).OrderBy(x => x));
 
         // New "KeepTemplates" Option, will merge uSync templates with existing ones (not a complete sync!)
         if (options.GetSetting<bool>("KeepTemplates", false))
         {
-            allowedTemplates = allowedTemplates.Concat(item.AllowedTemplates.Where(x => !newTemplates.InvariantContains(x.Alias))).ToList();
+            allowedTemplates =
+            [
+                .. allowedTemplates,
+                .. item.AllowedTemplates?.Where(x => !newTemplates.InvariantContains(x.Alias)) ?? Enumerable.Empty<ITemplate>(),
+            ];
             newTemplates = string.Join(",", allowedTemplates.Select(x => x.Alias).OrderBy(x => x));
         }
 

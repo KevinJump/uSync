@@ -1,6 +1,6 @@
 import { UmbControllerHost } from "@umbraco-cms/backoffice/controller-api";
 import { uSyncActionDataSource } from "./sources/SyncAction.source";
-import { UmbBaseController } from "@umbraco-cms/backoffice/class-api";
+import { UmbControllerBase } from "@umbraco-cms/backoffice/class-api";
 import { uSyncSettingsDataSource } from "./sources/SyncSettings.source";
 
 /**
@@ -8,7 +8,7 @@ import { uSyncSettingsDataSource } from "./sources/SyncSettings.source";
  * @class uSyncActionRepository
  * @description repository for all things actions.
  */
-export class uSyncActionRepository extends UmbBaseController {
+export class uSyncActionRepository extends UmbControllerBase {
     #actionDataSource: uSyncActionDataSource;
     #settingsDataSource: uSyncSettingsDataSource;
 

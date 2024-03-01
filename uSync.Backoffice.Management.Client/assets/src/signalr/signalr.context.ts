@@ -1,4 +1,4 @@
-import { UmbBaseController } from "@umbraco-cms/backoffice/class-api";
+import { UmbControllerBase } from "@umbraco-cms/backoffice/class-api";
 import { UmbControllerHost } from "@umbraco-cms/backoffice/controller-api";
 
 import * as signalR from "@microsoft/signalr"
@@ -11,7 +11,7 @@ export interface ISyncUpdateMessage {
     total: number;
 }
 
-export class uSyncSignalRContext extends UmbBaseController {
+export class uSyncSignalRContext extends UmbControllerBase {
 
     #connection : signalR.HubConnection | null = null;
 

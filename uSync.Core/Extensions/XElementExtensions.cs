@@ -1,4 +1,5 @@
-﻿using System.Xml.Linq;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Xml.Linq;
 
 using Umbraco.Extensions;
 
@@ -134,7 +135,7 @@ public static class XElementExtensions
     /// <summary>
     ///  Get the value of the XML Node or return a default value
     /// </summary>
-    public static string ValueOrDefault(this XElement node, string defaultValue)
+    public static string ValueOrDefault([AllowNull] this XElement node, string defaultValue)
     {
         if (node == null || string.IsNullOrEmpty(node.Value))
             return defaultValue;
@@ -294,7 +295,7 @@ public static class XElementExtensions
     /// <summary>
     ///  Get the Value from the attribute or return the default value if attribute is not set
     /// </summary>
-    public static TObject ValueOrDefault<TObject>(this XAttribute attribute, TObject defaultValue)
+    public static TObject ValueOrDefault<TObject>([AllowNull] this XAttribute attribute, TObject defaultValue)
     {
         var value = attribute.ValueOrDefault(string.Empty);
         if (value == string.Empty) return defaultValue;

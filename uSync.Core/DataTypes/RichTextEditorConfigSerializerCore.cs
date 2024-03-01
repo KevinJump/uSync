@@ -25,23 +25,22 @@ internal class RichTextEditorConfigSerializerCore : ConfigurationSerializerBase,
         if (!(configuration is RichTextConfiguration richTextConfiguration))
             return base.SerializeConfig(configuration);
 
-        if (richTextConfiguration?.Editor == null)
-            return base.SerializeConfig(configuration);
+        //if (richTextConfiguration?.Editor == null)
+        //    return base.SerializeConfig(configuration);
 
-        if (richTextConfiguration.Editor.TryConvertToJsonObject(out var jsonObject) is false || jsonObject is null)
-            return base.SerializeConfig(configuration);
+        //if (richTextConfiguration.Editor.TryConvertToJsonObject(out var jsonObject) is false || jsonObject is null)
+        //    return base.SerializeConfig(configuration);
 
+        //var toolbar = jsonObject.GetPropertyAsArray("toolbar");
+        //if (toolbar.Contains("styleselect") is true)
+        //{
+        //    toolbar.Remove("styleselect");
+        //    toolbar.Add("styles");
+        //}
 
-        var toolbar = jsonObject.GetPropertyAsArray("toolbar");
-        if (toolbar.Contains("styleselect") is true)
-        {
-            toolbar.Remove("styleselect");
-            toolbar.Add("styles");
-        }
+        //jsonObject["toolbar"] = toolbar;
 
-        jsonObject["toolbar"] = toolbar;
-
-        richTextConfiguration.Editor = jsonObject.TryConvertTo<object>();
+        //richTextConfiguration.Editor = jsonObject.TryConvertTo<object>();
 
         return richTextConfiguration.SerializeJsonString();
     }

@@ -28,12 +28,12 @@ namespace uSync8.Community.DataTypeSerializers.CoreTypes
                 contentPickerConfig.Config = new ContentPickerConfiguration()
                 {
                     IgnoreUserStartNodes = pickerConfig.IgnoreUserStartNodes,
-                    StartNodeId = null,
-                    ShowOpenButton = pickerConfig.ShowOpenButton
+                    //StartNodeId = null,
+                    //ShowOpenButton = pickerConfig.ShowOpenButton
                 };
 
-                if (pickerConfig.StartNodeId != null)
-                    contentPickerConfig.MappedPath = UdiToEntityPath(pickerConfig.StartNodeId);
+                //if (pickerConfig.StartNodeId != null)
+                //    contentPickerConfig.MappedPath = UdiToEntityPath(pickerConfig.StartNodeId);
 
                 return base.SerializeConfig(contentPickerConfig);
             }
@@ -48,10 +48,10 @@ namespace uSync8.Community.DataTypeSerializers.CoreTypes
             {
                 var mappedConfig =   config.DeserializeJson<MappedPathConfigBase<ContentPickerConfiguration>>();
 
-                if (!string.IsNullOrWhiteSpace(mappedConfig.MappedPath))
-                {
-                    mappedConfig.Config.StartNodeId = PathToUdi(mappedConfig.MappedPath);
-                }
+                //if (!string.IsNullOrWhiteSpace(mappedConfig.MappedPath))
+                //{
+                //    mappedConfig.Config.StartNodeId = PathToUdi(mappedConfig.MappedPath);
+                //}
 
                 return mappedConfig.Config;
             }

@@ -14,7 +14,7 @@ namespace uSync.Core.Mapping;
 public class NestedContentMapper : SyncNestedJsonValueMapperBase, ISyncMapper
 {
 
-    private readonly string docTypeAliasValue = NestedContentPropertyEditor.ContentTypeAliasPropertyKey;
+    private readonly string docTypeAliasValue = "ncContentTypeAlias";
 
     public NestedContentMapper(
         IEntityService entityService,

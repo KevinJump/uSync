@@ -30,7 +30,7 @@ public class UdiPickerMapper : SyncValueMapperBase, ISyncMapper
 
     public override string[] Editors => new string[] {
         Constants.PropertyEditors.Aliases.ContentPicker,
-        Constants.PropertyEditors.Aliases.MediaPicker,
+        // Constants.PropertyEditors.Aliases.MediaPicker,
         Constants.PropertyEditors.Aliases.MultiNodeTreePicker,
         Constants.PropertyEditors.Aliases.MemberPicker
     };

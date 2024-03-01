@@ -9,14 +9,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.DependencyInjection;
 using Umbraco.Cms.Core.Notifications;
-using Umbraco.Cms.Web.BackOffice.Authorization;
 using Umbraco.Cms.Web.Common.ApplicationBuilder;
 
-using uSync.BackOffice.Authorization;
 using uSync.BackOffice.Boot;
 using uSync.BackOffice.Cache;
 using uSync.BackOffice.Configuration;
-using uSync.BackOffice.Expansions;
 using uSync.BackOffice.Hubs;
 using uSync.BackOffice.Notifications;
 using uSync.BackOffice.Services;
@@ -85,8 +82,8 @@ namespace uSync.BackOffice
 
             builder.Services.AddAuthorization(o => CreatePolicies(o));
 
-            builder.WithCollectionBuilder<SyncTreeNodeCollectionBuilder>()
-                .Add(() => builder.TypeLoader.GetTypes<ISyncTreeNode>());
+            //builder.WithCollectionBuilder<SyncTreeNodeCollectionBuilder>()
+            //    .Add(() => builder.TypeLoader.GetTypes<ISyncTreeNode>());
 
             builder.Services.AddTransient<ISyncActionService, SyncActionService>();
 
@@ -160,8 +157,8 @@ namespace uSync.BackOffice
             builder.AddNotificationHandler<LanguageSavedNotification, LanguageHandler>();
             builder.AddNotificationHandler<LanguageDeletedNotification, LanguageHandler>();
 
-            builder.AddNotificationHandler<MacroSavedNotification, MacroHandler>();
-            builder.AddNotificationHandler<MacroDeletedNotification, MacroHandler>();
+            //builder.AddNotificationHandler<MacroSavedNotification, MacroHandler>();
+            //builder.AddNotificationHandler<MacroDeletedNotification, MacroHandler>();
 
             builder.AddNotificationHandler<TemplateSavedNotification, TemplateHandler>();
             builder.AddNotificationHandler<TemplateDeletedNotification, TemplateHandler>();
@@ -198,8 +195,8 @@ namespace uSync.BackOffice
                 .AddNotificationHandler<RelationTypeSavingNotification, RelationTypeHandler>()
                 .AddNotificationHandler<RelationTypeDeletingNotification, RelationTypeHandler>()
 
-                .AddNotificationHandler<MacroSavingNotification, MacroHandler>()
-                .AddNotificationHandler<MacroDeletingNotification, MacroHandler>()
+                //.AddNotificationHandler<MacroSavingNotification, MacroHandler>()
+                //.AddNotificationHandler<MacroDeletingNotification, MacroHandler>()
 
                 .AddNotificationHandler<TemplateSavingNotification, TemplateHandler>()
                 .AddNotificationHandler<TemplateDeletingNotification, TemplateHandler>();
@@ -224,7 +221,7 @@ namespace uSync.BackOffice
 
             builder.AddNotificationHandler<RelationTypeSavedNotification, RelationTypeHandler>();
             builder.AddNotificationHandler<RelationTypeDeletedNotification, RelationTypeHandler>();
-            
+
             builder.AddNotificationHandler<ContentSavedBlueprintNotification, ContentTemplateHandler>();
             builder.AddNotificationHandler<ContentDeletedBlueprintNotification, ContentTemplateHandler>();
 
@@ -248,11 +245,11 @@ namespace uSync.BackOffice
         private static void CreatePolicies(AuthorizationOptions options,
             string backofficeAuthenticationScheme = Constants.Security.BackOfficeAuthenticationType)
         {
-            options.AddPolicy(SyncAuthorizationPolicies.TreeAccessuSync, policy =>
-            {
-                policy.AuthenticationSchemes.Add(backofficeAuthenticationScheme);
-                policy.Requirements.Add(new TreeRequirement(uSync.Trees.uSync));
-            });
+            //options.AddPolicy(SyncAuthorizationPolicies.TreeAccessuSync, policy =>
+            //{
+            //    policy.AuthenticationSchemes.Add(backofficeAuthenticationScheme);
+            //    policy.Requirements.Add(new TreeRequirement(uSync.Trees.uSync));
+            //});
         }
     }
 }

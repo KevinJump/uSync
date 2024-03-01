@@ -12,16 +12,16 @@ export class uSyncWorkspaceRootElement extends UmbElementMixin(LitElement) {
     constructor() {
         super();
 
+        console.log('workspace-element');
+
         this.#workspaceContext = new uSyncWorkspaceContext(this);
 
-        this.observe(this.#workspaceContext.loaded, (_loaded) => {
-
-        });
+        console.log('workspace-loaded');
     }
 
     render() {
         return html`
-            <umb-workspace-editor alias="usync.workspace" headline="uSync" .enforceNoFooter=${true}>
+            <umb-workspace-editor headline="uSync" .enforceNoFooter=${true}>
                 <div slot="header">v14.0.0-early</div>
 			</umb-workspace-editor>
         `;

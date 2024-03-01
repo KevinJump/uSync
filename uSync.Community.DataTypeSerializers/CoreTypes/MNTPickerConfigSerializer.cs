@@ -27,10 +27,10 @@ namespace uSync8.Community.DataTypeSerializers.CoreTypes
                 MNTPMappedConfig.Config = new MultiNodePickerConfiguration()
                 {
                     IgnoreUserStartNodes = pickerConfig.IgnoreUserStartNodes,
-                    Filter = pickerConfig.Filter,
+                    // Filter = pickerConfig.Filter,
                     MaxNumber = pickerConfig.MaxNumber,
                     MinNumber = pickerConfig.MinNumber,
-                    ShowOpen = pickerConfig.ShowOpen,
+                    // ShowOpen = pickerConfig.ShowOpen,
                     TreeSource = new MultiNodePickerConfigurationTreeSource()
                     {
                         ObjectType = pickerConfig.TreeSource.ObjectType,
