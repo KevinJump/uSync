@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 
 using Umbraco.Cms.Core.Models.Membership;
 
@@ -36,13 +37,13 @@ internal static class DictionaryExtensions
     }
 
     // This method converts an object to a dictionary of string, object
-    public static IDictionary<string, object> ToKeyNameDictionary(this object obj)
+    public static IDictionary<string, object?> ToKeyNameDictionary(this object obj)
     {
         // Get the public properties of the object
         var properties = obj.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
         // Create a dictionary and populate it with the property names and values
-        var dictionary = new Dictionary<string, object>();
+        var dictionary = new Dictionary<string, object?>();
         foreach (var property in properties)
         {
             dictionary.Add(property.Name, property.GetValue(obj));
@@ -50,5 +51,50 @@ internal static class DictionaryExtensions
 
         // Return the dictionary
         return dictionary;
+    }
+
+    public static bool TryConvertToDictionary(this object obj, out IDictionary<string, object?> result)
+    {
+        result = new Dictionary<string, object?>();
+
+        if (obj == null) return false;  
+
+        try
+        {
+            var properties = obj.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+            var dictionary = new Dictionary<string, object?>();
+            foreach (var property in properties)
+            {
+                dictionary.Add(property.Name, property.GetValue(obj));
+            }
+
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+
+    }
+
+    /// <summary>
+    ///  merge two or more dictionaries together, throwing away duplicates!
+    /// </summary>
+    public static IDictionary<TKey, TValue> MergeIgnoreDuplicates<TKey, TValue>(this IDictionary<TKey, TValue>? source, params IDictionary<TKey, TValue?>[] dictionaries)
+        where TKey : notnull
+    {
+        var mergedDictionary = new Dictionary<TKey, TValue>(source?.ToDictionary() ?? []);
+
+        foreach (var dictionary in dictionaries.Where(x => x is not null))
+        {
+            foreach (var kvp in dictionary)
+            {
+                if (mergedDictionary.ContainsKey(kvp.Key) is true) continue;
+                mergedDictionary.Add(kvp.Key, kvp.Value);
+            }
+        }
+
+        return mergedDictionary;
     }
 }

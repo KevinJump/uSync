@@ -5,7 +5,7 @@ public static class ListExtensions
     /// <summary>
     /// Add item to list if the item is not null
     /// </summary>
-    public static void AddNotNull<TObject>(this List<TObject> list, TObject item)
+    public static void AddNotNull<TObject>(this List<TObject> list, TObject? item)
     {
         if (item == null) return;
         list.Add(item);

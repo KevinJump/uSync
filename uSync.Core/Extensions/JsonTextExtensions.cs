@@ -2,6 +2,8 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+
 using Umbraco.Extensions;
 
 namespace uSync.Core.Extensions;
@@ -351,7 +353,7 @@ public static class JsonTextExtensions
     }
 
     public static string SerializeJsonString(this object value, bool indent = true)
-        => JsonSerializer.Serialize(value, indent ? _defaultOptions : _flatOptions);
+        => value is null ? string.Empty : JsonSerializer.Serialize(value, indent ? _defaultOptions : _flatOptions);
 
     private static bool TryGetValueAs<TObject>(this object value, [MaybeNullWhen(false)] out TObject result)
     {
