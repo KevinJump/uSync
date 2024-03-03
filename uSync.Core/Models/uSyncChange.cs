@@ -12,22 +12,22 @@ public class uSyncChange
     /// <summary>
     ///  Name of item/property
     /// </summary>
-    public string Name { get; set; }
+    public string Name { get; set; } = string.Empty;
 
     /// <summary>
     ///  reference path to property
     /// </summary>
-    public string Path { get; set; }
+    public string Path { get; set; } = string.Empty;
 
     /// <summary>
     ///  old value (pre change)
     /// </summary>
-    public string OldValue { get; set; }
+    public string OldValue { get; set; } = string.Empty;
 
     /// <summary>
     ///  new value (after change)
     /// </summary>
-    public string NewValue { get; set; }
+    public string NewValue { get; set; } = string.Empty;
 
     /// <summary>
     ///  Change type
@@ -36,7 +36,7 @@ public class uSyncChange
     public ChangeDetailType Change { get; set; }
 
     public static uSyncChange Create(string path, string name, string newValue, bool useNew = true)
-        => new uSyncChange
+        => new()
         {
             Change = ChangeDetailType.Create,
             Path = path,
@@ -46,7 +46,7 @@ public class uSyncChange
         };
 
     public static uSyncChange Delete(string path, string name, string oldValue, bool useOld = true)
-        => new uSyncChange
+        => new()
         {
             Change = ChangeDetailType.Delete,
             Path = path,
@@ -56,7 +56,7 @@ public class uSyncChange
         };
 
     public static uSyncChange Update(string path, string name, string oldValue, string newValue, bool success)
-        => new uSyncChange
+        => new()
         {
             Success = success,
             Name = name,
@@ -70,10 +70,10 @@ public class uSyncChange
         => Update(path, name, string.Join(",", oldValues), string.Join(",", newValues));
 
     public static uSyncChange Update<TObject>(string path, string name, TObject oldValue, TObject newValue)
-        => Update(path, name, oldValue.ToString(), newValue.ToString(), true);
+        => Update(path, name, oldValue?.ToString() ?? string.Empty, newValue?.ToString() ?? string.Empty, true);
 
     public static uSyncChange NoChange(string path, string name)
-        => new uSyncChange
+        => new()
         {
             Name = name,
             Path = path,
@@ -81,7 +81,7 @@ public class uSyncChange
         };
 
     public static uSyncChange Error(string path, string name, string oldValue)
-        => new uSyncChange
+        => new()
         {
             Name = name,
             Path = path,
@@ -90,7 +90,7 @@ public class uSyncChange
         };
 
     public static uSyncChange Warning(string path, string name, string warning)
-        => new uSyncChange
+        => new()
         {
             Name = name,
             Path = path,

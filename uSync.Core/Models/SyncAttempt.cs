@@ -33,14 +33,14 @@ public struct SyncAttempt<TObject>
     public string Message { get; private set; }
 
     /// <summary>
-    ///  exception that might have occured
+    ///  exception that might have occurred
     /// </summary>
-    public Exception Exception { get; set; }
+    public Exception? Exception { get; set; }
 
     /// <summary>
     ///  Details of the changes that will/have happen(d)
     /// </summary>
-    public IEnumerable<uSyncChange> Details { get; set; }
+    public IEnumerable<uSyncChange>? Details { get; set; }
 
 
     /// <summary>
@@ -48,7 +48,7 @@ public struct SyncAttempt<TObject>
     /// </summary>
     public bool Saved { get; set; }
     private SyncAttempt(bool success, string name, TObject? item, string itemType, ChangeType change,
-        string message, Exception ex, bool saved)
+        string message, Exception? ex, bool saved)
         : this()
     {
         Success = success;
@@ -64,21 +64,20 @@ public struct SyncAttempt<TObject>
     // default object success (when we don't pass the item back)
 
     public static SyncAttempt<TObject> Succeed(string name, ChangeType change)
-        => new SyncAttempt<TObject>(true, name, default(TObject), typeof(TObject).Name, change, string.Empty, null, false);
+        => new(true, name, default, typeof(TObject).Name, change, string.Empty, null, false);
 
     public static SyncAttempt<TObject> Succeed(string name, ChangeType change, string message)
-        => new SyncAttempt<TObject>(true, name, default(TObject), typeof(TObject).Name, change, message, null, false);
+        => new(true, name, default, typeof(TObject).Name, change, message, null, false);
 
     public static SyncAttempt<TObject> Succeed(string name, TObject item, ChangeType change)
-    {
-        return new SyncAttempt<TObject>(true, name, item, typeof(TObject).Name, change, string.Empty, null, false);
-
-    }
+        => new(true, name, item, typeof(TObject).Name, change, string.Empty, null, false);
 
     public static SyncAttempt<TObject> Succeed(string name, TObject item, ChangeType change, IList<uSyncChange> details)
     {
-        var attempt = new SyncAttempt<TObject>(true, name, item, typeof(TObject).Name, change, string.Empty, null, false);
-        attempt.Details = details;
+        var attempt = new SyncAttempt<TObject>(true, name, item, typeof(TObject).Name, change, string.Empty, null, false)
+        {
+            Details = details
+        };
         return attempt;
     }
 
@@ -86,26 +85,26 @@ public struct SyncAttempt<TObject>
     public static SyncAttempt<TObject> Succeed(string name, TObject item, ChangeType change, string message, bool saved, IList<uSyncChange> details)
     {
         var attempt = new SyncAttempt<TObject>(true, name, item, typeof(TObject).Name, change, message, null, saved);
-        if (details != null) attempt.Details = details;
+        if (details is not null) attempt.Details = details;
         return attempt;
     }
 
-    public static SyncAttempt<TObject> Fail(string name, TObject item, ChangeType change, string message, Exception ex)
-        => new SyncAttempt<TObject>(false, name, item, typeof(TObject).Name, change, message, ex, false);
+    public static SyncAttempt<TObject> Fail(string name, TObject item, ChangeType change, string message, Exception? ex)
+        => new(false, name, item, typeof(TObject).Name, change, message, ex, false);
 
     public static SyncAttempt<TObject> Fail(string name, TObject item, ChangeType change, string message, IList<uSyncChange> changes, Exception ex)
-        => new SyncAttempt<TObject>(false, name, item, typeof(TObject).Name, change, message, ex, false)
+        => new(false, name, item, typeof(TObject).Name, change, message, ex, false)
         {
-            Details = changes ?? new List<uSyncChange>()
+            Details = changes ?? []
         };
 
     public static SyncAttempt<TObject> Fail(string name, ChangeType change, string message)
-        => new SyncAttempt<TObject>(false, name, default(TObject), typeof(TObject).Name, change, message, null, false);
+        => new(false, name, default, typeof(TObject).Name, change, message, null, false);
 
-    // xelement ones, pass type
+    // XElement ones, pass type
     public static SyncAttempt<TObject> Succeed(string name, TObject item, Type itemType, ChangeType change)
-        => new SyncAttempt<TObject>(true, name, item, itemType.Name, change, string.Empty, null, false);
+        => new(true, name, item, itemType.Name, change, string.Empty, null, false);
 
     public static SyncAttempt<TObject> SucceedIf(bool condition, string name, TObject? item, Type itemType, ChangeType change)
-        => new SyncAttempt<TObject>(condition, name, item, itemType.Name, change, string.Empty, null, false);
+        => new(condition, name, item, itemType.Name, change, string.Empty, null, false);
 }
