@@ -128,7 +128,7 @@ public class DictionaryItemSerializer : SyncSerializerBase<IDictionaryItem>, ISy
             }
         }
 
-        var translations = currentTranslations.SafeDistinctBy(x => x.LanguageIsoCode).ToList();
+        var translations = currentTranslations.DistinctBy(x => x.LanguageIsoCode).ToList();
 
         // if we are syncing all cultures we do a delete, but when only syncing some, we 
         // don't remove missing cultures from the list.
@@ -177,7 +177,7 @@ public class DictionaryItemSerializer : SyncSerializerBase<IDictionaryItem>, ISy
         var translationsNode = new XElement("Translations");
 
         foreach (var translation in item.Translations
-            .SafeDistinctBy(x => x.LanguageIsoCode)
+            .DistinctBy(x => x.LanguageIsoCode)
             .OrderBy(x => x.LanguageIsoCode))
         {
             if (activeCultures.IsValid(translation.LanguageIsoCode))

@@ -62,7 +62,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
     {
         var info = base.SerializeInfo(item, options);
 
-        info.Add(SerailizePublishedStatus(item, options));
+        info.Add(SerializePublishedStatus(item, options));
         info.Add(SerializeSchedule(item, options));
         info.Add(SerializeTemplate(item, options));
 
@@ -89,7 +89,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
         return new XElement(uSyncConstants.Xml.Template);
     }
 
-    private XElement SerailizePublishedStatus(IContent item, SyncSerializerOptions options)
+    private XElement SerializePublishedStatus(IContent item, SyncSerializerOptions options)
     {
         // get the list of cultures we are serializing from the configuration
         var activeCultures = options.GetCultures();
@@ -145,9 +145,9 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
         var userInfoNode = new XElement("UserInfo");
         var usernames = new Dictionary<int, string>();
 
-        userInfoNode.Add(new XElement("Writer", usernames.GetUsername(item.WriterId, userService.GetUserById)));
-        userInfoNode.Add(new XElement("Creator", usernames.GetUsername(item.CreatorId, userService.GetUserById)));
-        userInfoNode.Add(new XElement("Publisher", usernames.GetUsername(item.PublisherId, userService.GetUserById)));
+        userInfoNode.Add(new XElement("Writer", usernames.GetUsername(item.WriterId, userService.GetUserById!)));
+        userInfoNode.Add(new XElement("Creator", usernames.GetUsername(item.CreatorId, userService.GetUserById!)));
+        userInfoNode.Add(new XElement("Publisher", usernames.GetUsername(item.PublisherId, userService.GetUserById!)));
 
         return userInfoNode;
     }
@@ -167,10 +167,12 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
 
         details.AddRange(DeserializeBase(item, node, options));
 
-        if (node.Element("Info") != null)
+        var infoNode = node.Element(uSyncConstants.Xml.Info);
+
+        if (infoNode is not null)
         {
-            var trashed = node.Element("Info").Element("Trashed").ValueOrDefault(false);
-            var restoreParent = node.Element("Info").Element("Trashed").Attribute("Parent").ValueOrDefault(Guid.Empty);
+            var trashed = infoNode.Element("Trashed").ValueOrDefault(false);
+            var restoreParent = infoNode.Element("Trashed")?.Attribute("Parent").ValueOrDefault(Guid.Empty) ?? Guid.Empty;
             details.AddNotNull(HandleTrashedState(item, trashed, restoreParent));
         }
 
@@ -187,7 +189,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
         if (!options.GetSetting<bool>("IgnoreSortOrder", false))
         {
             // sort order
-            var sortOrder = node.Element("Info").Element("SortOrder").ValueOrDefault(-1);
+            var sortOrder = infoNode?.Element("SortOrder").ValueOrDefault(-1) ?? -1;
             details.AddNotNull(HandleSortOrder(item, sortOrder));
         }
 
@@ -238,7 +240,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
         }
     }
 
-    protected virtual uSyncChange DeserializeTemplate(IContent item, XElement node)
+    protected virtual uSyncChange? DeserializeTemplate(IContent item, XElement node)
     {
         var templateNode = node.Element("Info")?.Element("Template");
 
@@ -279,9 +281,9 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
 
         var emails = new Dictionary<string, int>();
 
-        item.CreatorId = emails.GetEmails(writerNode.Element("Creator").ValueOrDefault(string.Empty), userService.GetByEmail);
-        item.WriterId = emails.GetEmails(writerNode.Element("Writer").ValueOrDefault(string.Empty), userService.GetByEmail);
-        item.PublisherId = emails.GetEmails(writerNode.Element("Publisher").ValueOrDefault(string.Empty), userService.GetByEmail);
+        item.CreatorId = emails.GetEmails(writerNode.Element("Creator").ValueOrDefault(string.Empty), userService.GetByEmail!);
+        item.WriterId = emails.GetEmails(writerNode.Element("Writer").ValueOrDefault(string.Empty), userService.GetByEmail!);
+        item.PublisherId = emails.GetEmails(writerNode.Element("Publisher").ValueOrDefault(string.Empty), userService.GetByEmail!);
 
         return item.WriterId;
     }
@@ -300,7 +302,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
         if (changes.Any())
             return SyncAttempt<IContent>.Succeed(item.Name, item, ChangeType.Import, "", true, changes.ToList());
 
-        return SyncAttempt<IContent>.Succeed(item.Name, item, ChangeType.NoChange, null);
+        return SyncAttempt<IContent>.Succeed(item.Name, item, ChangeType.NoChange);
     }
 
     private IEnumerable<uSyncChange> DeserializeSchedules(IContent item, XElement node, SyncSerializerOptions options)
@@ -384,7 +386,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
         return new ContentSchedule(key, culture, date, action);
     }
 
-    private ContentSchedule FindSchedule(ContentScheduleCollection currentSchedules, ContentSchedule newSchedule)
+    private ContentSchedule? FindSchedule(ContentScheduleCollection currentSchedules, ContentSchedule newSchedule)
     {
         var schedule = currentSchedules.GetSchedule(newSchedule.Culture, newSchedule.Action);
         if (schedule != null && schedule.Any()) return schedule.FirstOrDefault();
@@ -393,7 +395,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
     }
 
 
-    protected override uSyncChange HandleTrashedState(IContent item, bool trashed, Guid restoreParentKey)
+    protected override uSyncChange? HandleTrashedState(IContent item, bool trashed, Guid restoreParentKey)
     {
         if (!trashed && item.Trashed)
         {
@@ -407,7 +409,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
             // clean out any relations for this item (some versions of Umbraco don't do this on a Move)
             CleanRelations(item, Constants.Conventions.RelationTypes.RelateParentDocumentOnDeleteAlias);
 
-            return uSyncChange.Update("Restored", item.Name, "Recycle Bin", restoreParentKey.ToString());
+            return uSyncChange.Update("Restored", item.Name ?? item.Id.ToString(), "Recycle Bin", restoreParentKey.ToString());
 
         }
         else if (trashed && !item.Trashed)
@@ -422,7 +424,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
                 contentService.MoveToRecycleBin(item);
             }
 
-            return uSyncChange.Update("Moved to Bin", item.Name, "", "Recycle Bin");
+            return uSyncChange.Update("Moved to Bin", item.Name ?? item.Id.ToString(), "", "Recycle Bin");
         }
 
         return null;
@@ -503,7 +505,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
     ///  work out what the current status of a given culture should be. 
     /// </summary>
 
-    private IList<ContentSchedule> GetSchedules(XElement schedulesNode)
+    private IList<ContentSchedule> GetSchedules(XElement? schedulesNode)
     {
         var schedules = new List<ContentSchedule>();
         if (schedulesNode != null && schedulesNode.HasElements)
@@ -524,8 +526,8 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
             var result = contentService.SaveAndPublish(item, userId: userId);
             if (!result.Success)
             {
-                var messages = result.EventMessages.FormatMessages(",");
-                logger.LogError("Failed to publish {result} [{messages}]", result.Result, messages);
+                var messages = result.EventMessages?.FormatMessages(",");
+                logger.LogError("Failed to publish {result} [{messages}]", result.Result, messages ?? "(none)");
                 if (result.InvalidProperties != null)
                 {
                     logger.LogError("Invalid Properties: {properties}", string.Join(", ", result.InvalidProperties.Select(x => x.Alias)));
@@ -573,8 +575,8 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
                 // if this fails, we return the result
                 if (!result.Success)
                 {
-                    var messages = result.EventMessages.FormatMessages(",");
-                    logger.LogError("Failed to publish {result} [{messages}]", result.Result, messages);
+                    var messages = result.EventMessages?.FormatMessages(",");
+                    logger.LogError("Failed to publish {result} [{messages}]", result.Result, messages ?? "(none)");
                     if (result.InvalidProperties != null)
                     {
                         logger.LogError("Invalid Properties: {properties}", string.Join(", ", result.InvalidProperties.Select(x => x.Alias)));
@@ -655,7 +657,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
 
     #endregion
 
-    protected override Attempt<IContent> CreateItem(string alias, ITreeEntity parent, string itemType)
+    protected override Attempt<IContent> CreateItem(string alias, ITreeEntity? parent, string itemType)
     {
         var parentId = parent != null ? parent.Id : -1;
         var item = contentService.Create(alias, parentId, itemType);
@@ -666,26 +668,26 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
     }
 
     #region Finders
-    public override IContent FindItem(int id)
+    public override IContent? FindItem(int id)
     {
         var item = contentService.GetById(id);
         if (item != null)
         {
-            AddToNameCache(id, item.Key, item.Name);
+            AddToNameCache(id, item.Key, item.Name ?? item.Id.ToString());
             return item;
         }
         return null;
     }
 
-    public override IContent FindItem(Guid key)
+    public override IContent? FindItem(Guid key)
         => contentService.GetById(key);
 
-    protected override IContent FindAtRoot(string alias)
+    protected override IContent? FindAtRoot(string alias)
     {
         var rootNodes = contentService.GetRootContent();
         if (rootNodes.Any())
         {
-            return rootNodes.FirstOrDefault(x => x.Name.ToSafeAlias(shortStringHelper).InvariantEquals(alias));
+            return rootNodes.FirstOrDefault(x => x.Name?.ToSafeAlias(shortStringHelper).InvariantEquals(alias) is true);
         }
 
         return null;

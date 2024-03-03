@@ -7,8 +7,7 @@ public static class ListExtensions
     /// </summary>
     public static void AddNotNull<TObject>(this List<TObject> list, TObject? item)
     {
-        if (item == null) return;
-        list.Add(item);
+        if (item is not null) list.Add(item);
     }
 
     /// <summary>
@@ -20,15 +19,4 @@ public static class ListExtensions
 
     public static bool IsValidOrBlank(this IList<string> list, string value)
         => string.IsNullOrWhiteSpace(value) || list.IsValid(value);
-
-
-    public static IEnumerable<TSource> SafeDistinctBy<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector)
-        where TKey : IEquatable<TKey>
-    {
-#if NET6_0_OR_GREATER
-        return source.DistinctBy(keySelector);
-#else
-        return Umbraco.Extensions.EnumerableExtensions.DistinctBy(source, keySelector);
-#endif
-    }
 }

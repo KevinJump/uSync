@@ -163,7 +163,7 @@ namespace uSync.BackOffice.SyncHandlers
             var handlers = GetValidHandlers(options);
 
             return handlers.Select(x => new { group = x.GetConfigGroup(), icon = x.GetGroupIcon() })
-                .SafeDistinctBy(x => x.group)
+                .DistinctBy(x => x.group)
                 .ToDictionary(k => k.group, v => v.icon);
         }
 

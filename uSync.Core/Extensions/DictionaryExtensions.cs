@@ -12,8 +12,6 @@ internal static class DictionaryExtensions
     /// <param name="usernames"></param>
     /// <param name="id"></param>
     /// <param name="findMethod"></param>
-    /// <returns></returns>
-
     public static string GetUsername(this Dictionary<int, string> usernames, int? id, Func<int, IUser> findMethod)
     {
         if (usernames == null || id == null) return "unknown";
@@ -29,8 +27,8 @@ internal static class DictionaryExtensions
     {
         if (emails == null || string.IsNullOrEmpty(email)) return -1;
 
-        emails[email] = emails.ContainsKey(email)
-            ? emails[email]
+        emails[email] = emails.TryGetValue(email, out int value) 
+            ? value 
             : findMethod(email)?.Id ?? -1;
 
         return emails[email];
@@ -81,10 +79,10 @@ internal static class DictionaryExtensions
     /// <summary>
     ///  merge two or more dictionaries together, throwing away duplicates!
     /// </summary>
-    public static IDictionary<TKey, TValue> MergeIgnoreDuplicates<TKey, TValue>(this IDictionary<TKey, TValue>? source, params IDictionary<TKey, TValue?>[] dictionaries)
+    public static IDictionary<TKey, TValue?> MergeIgnoreDuplicates<TKey, TValue>(this IDictionary<TKey, TValue?>? source, params IDictionary<TKey, TValue?>[] dictionaries)
         where TKey : notnull
     {
-        var mergedDictionary = new Dictionary<TKey, TValue>(source?.ToDictionary() ?? []);
+        var mergedDictionary = new Dictionary<TKey, TValue?>(source?.ToDictionary() ?? []);
 
         foreach (var dictionary in dictionaries.Where(x => x is not null))
         {

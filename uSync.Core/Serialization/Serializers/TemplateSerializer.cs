@@ -1,5 +1,6 @@
 ﻿using System.Xml.Linq;
 
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -20,20 +21,10 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
 {
     private readonly IFileService _fileService;
     private readonly IShortStringHelper _shortStringHelper;
-    private readonly IFileSystem _viewFileSystem;
+    private readonly IFileSystem? _viewFileSystem;
 
     private readonly uSyncCapabilityChecker _capabilityChecker;
     private readonly IConfiguration _configuration;
-
-    [Obsolete("call with compatibility checker - will remove in v11")]
-    public TemplateSerializer(
-        IEntityService entityService,
-        ILogger<TemplateSerializer> logger,
-        IShortStringHelper shortStringHelper,
-        IFileService fileService,
-        FileSystems fileSystems
-    ) : this(entityService, logger, shortStringHelper, fileService, fileSystems, null, null)
-    { }
 
     [ActivatorUtilitiesConstructor]
     public TemplateSerializer(
@@ -84,7 +75,7 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
                 logger.LogDebug("Loading template content from disk");
 
                 var templatePath = ViewPath(alias);
-                if (_viewFileSystem.FileExists(templatePath))
+                if (templatePath is not null && _viewFileSystem?.FileExists(templatePath) is true)
                 {
                     logger.LogDebug("Reading {path} contents", templatePath);
                     item.Content = GetContentFromFile(templatePath);
@@ -126,7 +117,7 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
 
         if (item.Name != name)
         {
-            details.AddUpdate(uSyncConstants.Xml.Name, item.Name, name);
+            details.AddUpdate(uSyncConstants.Xml.Name, item.Name ?? string.Empty, name);
             item.Name = name;
         }
 
@@ -141,7 +132,7 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
             var content = GetContentFromConfig(node);
             if (content != item.Content)
             {
-                details.AddUpdate("Content", item.Content, content);
+                details.AddUpdate("Content", item.Content ?? string.Empty, content);
                 item.Content = content;
             }
         }
@@ -200,8 +191,10 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
     public string GetContentFromFile(string templatePath)
     {
         var content = "";
-        using (var stream = _viewFileSystem.OpenFile(templatePath))
+        using (var stream = _viewFileSystem?.OpenFile(templatePath))
         {
+            if (stream is null) return content;
+                
             using (var sr = new StreamReader(stream))
             {
                 content = sr.ReadToEnd();
@@ -228,7 +221,7 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
             var masterItem = _fileService.GetTemplate(master);
             if (masterItem != null && item.MasterTemplateAlias != master)
             {
-                details.AddUpdate("Parent", item.MasterTemplateAlias, master);
+                details.AddUpdate("Parent", item.MasterTemplateAlias ?? string.Empty, master);
 
                 logger.LogDebug("Setting Master {alias}", masterItem.Alias);
                 item.SetMasterTemplate(masterItem);
@@ -242,7 +235,7 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
         {
             // using razor views - we delete the template file at the end (because its in a razor view). 
             var templatePath = ViewPath(item.Alias);
-            if (_viewFileSystem.FileExists(templatePath))
+            if (templatePath is not null && _viewFileSystem?.FileExists(templatePath) is true)
             {
                 var fullPath = _viewFileSystem.GetFullPath(templatePath);
 
@@ -255,13 +248,13 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
                         _viewFileSystem.DeleteFile(templatePath);
 
                         // we have to tell the handlers we saved it - or they will and write the file back 
-                        return SyncAttempt<ITemplate>.Succeed(item.Name, item, ChangeType.Import, "Razor view removed", true, details);
+                        return SyncAttempt<ITemplate>.Succeed(item.Name!, item, ChangeType.Import, "Razor view removed", true, details);
                     }
                 }
             }
         }
 
-        return SyncAttempt<ITemplate>.Succeed(item.Name, item, ChangeType.Import, "", saved, details);
+        return SyncAttempt<ITemplate>.Succeed(item.Name!, item, ChangeType.Import, "", saved, details);
     }
 
 
@@ -277,12 +270,12 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
             node.Add(SerializeContent(item));
         }
 
-        return SyncAttempt<XElement>.Succeed(item.Name, node, typeof(ITemplate), ChangeType.Export);
+        return SyncAttempt<XElement>.Succeed(item.Name!, node, typeof(ITemplate), ChangeType.Export);
     }
 
     private XElement SerializeContent(ITemplate item)
     {
-        return new XElement("Contents", new XCData(item.Content));
+        return new XElement("Contents", new XCData(item.Content ?? string.Empty));
     }
 
     private int CalculateLevel(ITemplate item)
@@ -303,13 +296,13 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
         return level;
     }
 
-    public override ITemplate FindItem(int id)
+    public override ITemplate? FindItem(int id)
         => _fileService.GetTemplate(id);
 
-    public override ITemplate FindItem(string alias)
+    public override ITemplate? FindItem(string alias)
         => _fileService.GetTemplate(alias);
 
-    public override ITemplate FindItem(Guid key)
+    public override ITemplate? FindItem(Guid key)
         => _fileService.GetTemplate(key);
 
     public override void SaveItem(ITemplate item)
@@ -337,8 +330,8 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
     }
 
 
-    private string ViewPath(string alias)
-        => _viewFileSystem.GetRelativePath(alias.Replace(" ", "") + ".cshtml");
+    private string? ViewPath(string alias)
+        => _viewFileSystem?.GetRelativePath(alias.Replace(" ", "") + ".cshtml");
 
     private bool ViewsAreCompiled(SyncSerializerOptions options)
         => _configuration.IsUmbracoRunningInProductionMode()

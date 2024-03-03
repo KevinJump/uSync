@@ -1978,7 +1978,7 @@ namespace uSync.BackOffice.SyncHandlers
                 }
             }
 
-            return dependencies.SafeDistinctBy(x => x.Udi.ToString()).OrderByDescending(x => x.Order);
+            return dependencies.DistinctBy(x => x.Udi.ToString()).OrderByDescending(x => x.Order);
         }
 
         #region Serializer Calls 

@@ -59,22 +59,22 @@ public interface ISyncSerializer<TObject> : ISyncSerializerBase
     /// </summary>
     /// <param name="node"></param>
     /// <returns></returns>
-    TObject FindItem(XElement node);
+    TObject? FindItem(XElement node);
 
     /// <summary>
     ///  find an item based in its internal id.
     /// </summary>
-    TObject FindItem(int id);
+    TObject? FindItem(int id);
 
     /// <summary>
     ///  find an item based on the guid value
     /// </summary>
-    TObject FindItem(Guid key);
+    TObject? FindItem(Guid key);
 
     /// <summary>
     ///  find an item based on the alias
     /// </summary>
-    TObject FindItem(string alias);
+    TObject? FindItem(string alias);
 
     /// <summary>
     ///  save an item back to umbraco

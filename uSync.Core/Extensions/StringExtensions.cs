@@ -8,25 +8,28 @@ public static class StringExtensions
     /// <summary>
     ///  things can't be called web.config or app.config it causes issues on build and publish 
     /// </summary>
-    private static readonly string[] BadNames = new[]
-    {
-        "app.config", "web.config"
-    };
+    private static readonly string[] _badNames = [
+        "app.config", 
+        "web.config"
+    ];
 
+    /// <summary>
+    ///  convert a file name to one that isn't going to cause us any downlevel problems.
+    /// </summary>
     public static string ToAppSafeFileName(this string value)
     {
         var filename = Path.GetFileName(value);
-        if (BadNames.InvariantContains(filename))
+        if (_badNames.InvariantContains(filename))
         {
             return Path.Combine(
-                Path.GetDirectoryName(value),
+                Path.GetDirectoryName(value) ?? string.Empty,
                 $"__{Path.GetFileNameWithoutExtension(value)}__{Path.GetExtension(value)}");
         }
         return value;
     }
 
 
-    private static readonly char[] Base32Table =
+    private static readonly char[] _base32Table =
     {
         'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p',
         'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5'
@@ -67,29 +70,29 @@ public static class StringExtensions
         while (i < 15)
         {
             if (j == length) break;
-            chars[j++] = Base32Table[(bytes[i] & 0b1111_1000) >> 3];
+            chars[j++] = _base32Table[(bytes[i] & 0b1111_1000) >> 3];
             if (j == length) break;
-            chars[j++] = Base32Table[((bytes[i] & 0b0000_0111) << 2) | ((bytes[i + 1] & 0b1100_0000) >> 6)];
+            chars[j++] = _base32Table[((bytes[i] & 0b0000_0111) << 2) | ((bytes[i + 1] & 0b1100_0000) >> 6)];
             if (j == length) break;
-            chars[j++] = Base32Table[(bytes[i + 1] & 0b0011_1110) >> 1];
+            chars[j++] = _base32Table[(bytes[i + 1] & 0b0011_1110) >> 1];
             if (j == length) break;
-            chars[j++] = Base32Table[(bytes[i + 1] & 0b0000_0001) | ((bytes[i + 2] & 0b1111_0000) >> 4)];
+            chars[j++] = _base32Table[(bytes[i + 1] & 0b0000_0001) | ((bytes[i + 2] & 0b1111_0000) >> 4)];
             if (j == length) break;
-            chars[j++] = Base32Table[((bytes[i + 2] & 0b0000_1111) << 1) | ((bytes[i + 3] & 0b1000_0000) >> 7)];
+            chars[j++] = _base32Table[((bytes[i + 2] & 0b0000_1111) << 1) | ((bytes[i + 3] & 0b1000_0000) >> 7)];
             if (j == length) break;
-            chars[j++] = Base32Table[(bytes[i + 3] & 0b0111_1100) >> 2];
+            chars[j++] = _base32Table[(bytes[i + 3] & 0b0111_1100) >> 2];
             if (j == length) break;
-            chars[j++] = Base32Table[((bytes[i + 3] & 0b0000_0011) << 3) | ((bytes[i + 4] & 0b1110_0000) >> 5)];
+            chars[j++] = _base32Table[((bytes[i + 3] & 0b0000_0011) << 3) | ((bytes[i + 4] & 0b1110_0000) >> 5)];
             if (j == length) break;
-            chars[j++] = Base32Table[bytes[i + 4] & 0b0001_1111];
+            chars[j++] = _base32Table[bytes[i + 4] & 0b0001_1111];
 
             i += 5;
         }
 
         if (j < length)
-            chars[j++] = Base32Table[(bytes[i] & 0b1111_1000) >> 3];
+            chars[j++] = _base32Table[(bytes[i] & 0b1111_1000) >> 3];
         if (j < length)
-            chars[j] = Base32Table[(bytes[i] & 0b0000_0111) << 2];
+            chars[j] = _base32Table[(bytes[i] & 0b0000_0111) << 2];
 
         return new string(chars);
     }

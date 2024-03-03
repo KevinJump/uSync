@@ -1376,13 +1376,13 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         if (_allTabs == null)
         {
             var compositions = item.CompositionPropertyGroups
-                .SafeDistinctBy(x => x.Alias)
+                .DistinctBy(x => x.Alias)
                 .ToDictionary(k => k.Alias, v => v.Type);
 
             var dependents = _baseService.GetAll()
                 .Where(x => x.CompositionIds().Contains(item.Id))
                 .SelectMany(x => x.PropertyGroups)
-                .SafeDistinctBy(x => x.Alias)
+                .DistinctBy(x => x.Alias)
                 .ToDictionary(k => k.Alias, v => v.Type);
 
             _allTabs = compositions

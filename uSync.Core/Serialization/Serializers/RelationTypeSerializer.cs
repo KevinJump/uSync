@@ -33,11 +33,11 @@ public class RelationTypeSerializer
 
         var info = node.Element("Info");
 
-        var name = info.Element("Name").ValueOrDefault(string.Empty);
-        var parentType = info.Element("ParentType").ValueOrDefault<Guid?>(null);
-        var childType = info.Element("ChildType").ValueOrDefault<Guid?>(null);
-        var bidirectional = info.Element("Bidirectional").ValueOrDefault(false);
-        var isDependency = info.Element("IsDependency").ValueOrDefault(true);
+        var name = info?.Element("Name").ValueOrDefault(string.Empty) ?? node.GetAlias();
+        var parentType = info?.Element("ParentType").ValueOrDefault<Guid?>(null);
+        var childType = info?.Element("ChildType").ValueOrDefault<Guid?>(null);
+        var bidirectional = info?.Element("Bidirectional").ValueOrDefault(false) ?? false;
+        var isDependency = info?.Element("IsDependency").ValueOrDefault(true) ?? true;
 
         var item = FindItem(node);
 
@@ -53,7 +53,7 @@ public class RelationTypeSerializer
 
         if (item.Name != name)
         {
-            details.AddUpdate(uSyncConstants.Xml.Name, item.Name, name);
+            details.AddUpdate(uSyncConstants.Xml.Name, item.Name ?? item.Alias, name);
             item.Name = name;
         }
 
@@ -100,18 +100,18 @@ public class RelationTypeSerializer
     /// <summary>
     ///  Deserialize the relations for a relation type.
     /// </summary>
-    private IEnumerable<uSyncChange> DeserializeRelations(XElement node, IRelationType relationType, SyncSerializerOptions options)
+    private List<uSyncChange> DeserializeRelations(XElement node, IRelationType relationType, SyncSerializerOptions options)
     {
         var changes = new List<uSyncChange>();
 
         var existing = _relationService
-            .GetAllRelationsByRelationType(relationType.Id)
-            .ToList();
+            .GetAllRelationsByRelationType(relationType.Id)?
+            .ToList() ?? [];
 
         var relations = node.Element("Relations");
 
         // do we do this, or do we remove them all!
-        if (relations == null) return Enumerable.Empty<uSyncChange>();
+        if (relations == null) return [];
 
         var newRelations = new List<string>();
 
@@ -131,7 +131,10 @@ public class RelationTypeSerializer
             {
                 // missing from the current list... add it.
                 _relationService.Save(new Relation(parentItem.Id, childItem.Id, relationType));
-                changes.Add(uSyncChange.Create(relationType.Alias, parentItem.Name, childItem.Name));
+                changes.Add(uSyncChange.Create(
+                    relationType.Alias, 
+                    parentItem.Name ?? parentItem.Id.ToString(), 
+                    childItem.Name ?? childItem.Id.ToString()));
             }
 
             newRelations.Add($"{parentItem.Id}_{childItem.Id}");
@@ -184,16 +187,16 @@ public class RelationTypeSerializer
 
         return SyncAttempt<XElement>.SucceedIf(
             node != null,
-            item.Name,
+            item.Name ?? item.Alias,
             node,
             typeof(IRelationType),
             ChangeType.Export);
     }
 
 
-    private RelationType CreateRelation(string name, string alias, bool isBidrectional, Guid? parent, Guid? child, bool isDependency)
+    private RelationType CreateRelation(string name, string alias, bool isBidirectional, Guid? parent, Guid? child, bool isDependency)
     {
-        return new RelationType(name, alias, isBidrectional, parent.Value, child.Value, isDependency);
+        return new RelationType(name, alias, isBidirectional, parent, child, isDependency);
     }
 
     /// <summary>
@@ -239,6 +242,7 @@ public class RelationTypeSerializer
         var relations = _relationService.GetAllRelationsByRelationType(item.Id);
 
         var node = new XElement("Relations");
+        if (relations is null) return node;
 
         foreach (var relation in relations.OrderBy(x => x.ChildId).OrderBy(x => x.ParentId))
         {
@@ -246,10 +250,10 @@ public class RelationTypeSerializer
 
             var entities = _relationService.GetEntitiesFromRelation(relation);
 
-            if (entities.Item1 != null)
+            if (entities?.Item1 is not null)
                 relationNode.Add(new XElement("Parent", entities.Item1.Key));
 
-            if (entities.Item2 != null)
+            if (entities?.Item2 is not null)
                 relationNode.Add(new XElement("Child", entities.Item2.Key));
 
             node.Add(relationNode);
@@ -265,13 +269,13 @@ public class RelationTypeSerializer
     public override void DeleteItem(IRelationType item)
         => _relationService.Delete(item);
 
-    public override IRelationType FindItem(int id)
+    public override IRelationType? FindItem(int id)
         => _relationService.GetRelationTypeById(id);
 
-    public override IRelationType FindItem(Guid key)
+    public override IRelationType? FindItem(Guid key)
         => _relationService.GetRelationTypeById(key); // ??
 
-    public override IRelationType FindItem(string alias)
+    public override IRelationType? FindItem(string alias)
         => _relationService.GetRelationTypeByAlias(alias);
 
     public override string ItemAlias(IRelationType item)

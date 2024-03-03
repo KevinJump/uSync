@@ -16,7 +16,7 @@ public abstract class SyncTreeSerializerBase<TObject> : SyncSerializerBase<TObje
     {
     }
 
-    protected abstract Attempt<TObject> CreateItem(string alias, ITreeEntity parent, string itemType);
+    protected abstract Attempt<TObject> CreateItem(string alias, ITreeEntity? parent, string itemType);
 
 
     #region Getters
@@ -62,7 +62,7 @@ public abstract class SyncTreeSerializerBase<TObject> : SyncSerializerBase<TObje
 
 
         // doing this check in isCurrent slows us down a lot, 
-        // we also do this check in derserizlie node, so removing it here
+        // we also do this check in de-serialize node, so removing it here
         // means reports might not show a missing parent warning but a full
         // import would show an error. 
         //
@@ -88,7 +88,7 @@ public abstract class SyncTreeSerializerBase<TObject> : SyncSerializerBase<TObje
     /// <summary>
     ///  calculates the Umbraco Path value for an item, based on the parent
     /// </summary>
-    protected string CalculateNodePath(TObject item, TObject parent)
+    protected string CalculateNodePath(TObject item, TObject? parent)
     {
         if (parent == null)
         {
@@ -103,7 +103,7 @@ public abstract class SyncTreeSerializerBase<TObject> : SyncSerializerBase<TObje
     /// <summary>
     ///  calculates the Level based on the parent.
     /// </summary>
-    protected int CalculateNodeLevel(TObject item, TObject parent)
+    protected int CalculateNodeLevel(TObject item, TObject? parent)
     {
         if (parent == null)
         {

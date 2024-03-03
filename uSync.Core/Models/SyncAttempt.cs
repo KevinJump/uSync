@@ -15,7 +15,7 @@ public struct SyncAttempt<TObject>
     /// <summary>
     ///  reference to the item
     /// </summary>
-    public TObject Item { get; private set; }
+    public TObject? Item { get; private set; }
 
     /// <summary>
     ///  object type for the item
@@ -47,7 +47,7 @@ public struct SyncAttempt<TObject>
     ///  was the item saved within the serializer (stops double saving).
     /// </summary>
     public bool Saved { get; set; }
-    private SyncAttempt(bool success, string name, TObject item, string itemType, ChangeType change,
+    private SyncAttempt(bool success, string name, TObject? item, string itemType, ChangeType change,
         string message, Exception ex, bool saved)
         : this()
     {
@@ -68,6 +68,12 @@ public struct SyncAttempt<TObject>
 
     public static SyncAttempt<TObject> Succeed(string name, ChangeType change, string message)
         => new SyncAttempt<TObject>(true, name, default(TObject), typeof(TObject).Name, change, message, null, false);
+
+    public static SyncAttempt<TObject> Succeed(string name, TObject item, ChangeType change)
+    {
+        return new SyncAttempt<TObject>(true, name, item, typeof(TObject).Name, change, string.Empty, null, false);
+
+    }
 
     public static SyncAttempt<TObject> Succeed(string name, TObject item, ChangeType change, IList<uSyncChange> details)
     {
@@ -100,6 +106,6 @@ public struct SyncAttempt<TObject>
     public static SyncAttempt<TObject> Succeed(string name, TObject item, Type itemType, ChangeType change)
         => new SyncAttempt<TObject>(true, name, item, itemType.Name, change, string.Empty, null, false);
 
-    public static SyncAttempt<TObject> SucceedIf(bool condition, string name, TObject item, Type itemType, ChangeType change)
+    public static SyncAttempt<TObject> SucceedIf(bool condition, string name, TObject? item, Type itemType, ChangeType change)
         => new SyncAttempt<TObject>(condition, name, item, itemType.Name, change, string.Empty, null, false);
 }

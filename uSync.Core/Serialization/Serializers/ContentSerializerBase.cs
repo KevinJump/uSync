@@ -30,7 +30,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
     protected ILocalizationService localizationService;
     protected IRelationService relationService;
 
-    protected string relationAlias;
+    protected string relationAlias = string.Empty;
 
     public ContentSerializerBase(
         IEntityService entityService,
@@ -58,19 +58,19 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
     {
         var node = new XElement(this.ItemType,
             new XAttribute(uSyncConstants.Xml.Key, item.Key),
-            new XAttribute(uSyncConstants.Xml.Alias, item.Name),
+            new XAttribute(uSyncConstants.Xml.Alias, item.Name ?? item.Id.ToString()),
             new XAttribute(uSyncConstants.Xml.Level, GetLevel(item)));
 
-        // are we only serizling some cultures ? 
+        // are we only serializing some cultures ? 
         var cultures = options.GetSetting(uSyncConstants.CultureKey, string.Empty);
-        if (IsPartialCultureElement(item, cultures))
+        if (ContentSerializerBase<TObject>.IsPartialCultureElement(item, cultures))
         {
             node.Add(new XAttribute(uSyncConstants.CultureKey, cultures));
         }
 
         // are we only serializing some segments ? 
         var segments = options.GetSetting(uSyncConstants.SegmentKey, string.Empty);
-        if (IsPartialSegmentElement(item, segments))
+        if (ContentSerializerBase<TObject>.IsPartialSegmentElement(item, segments))
         {
             node.Add(new XAttribute(uSyncConstants.SegmentKey, segments));
         }
@@ -78,7 +78,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         // are we including the default (not variant) values in the serialized result? 
         // we only worry about this when we are passing partial cultures or segments 
         // to the file, when we sync complete content items, this is redundant. 
-        if (options.GetSetting(uSyncConstants.DefaultsKey, true) && IsPartialElement(item, cultures, segments))
+        if (options.GetSetting(uSyncConstants.DefaultsKey, true) && ContentSerializerBase<TObject>.IsPartialElement(item, cultures, segments))
         {
             node.Add(new XAttribute(uSyncConstants.DefaultsKey, true));
         }
@@ -86,13 +86,13 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         return node;
     }
 
-    private bool IsPartialCultureElement(TObject item, string cultures)
+    private static bool IsPartialCultureElement(TObject item, string cultures)
         => !string.IsNullOrWhiteSpace(cultures) && item.ContentType.VariesByCulture();
 
-    private bool IsPartialSegmentElement(TObject item, string segments)
+    private static bool IsPartialSegmentElement(TObject item, string segments)
         => !string.IsNullOrWhiteSpace(segments) && item.ContentType.VariesBySegment();
 
-    private bool IsPartialElement(TObject item, string cultures, string segments)
+    private static bool IsPartialElement(TObject item, string cultures, string segments)
         => IsPartialCultureElement(item, cultures) || IsPartialSegmentElement(item, segments);
 
     /// <summary>
@@ -104,15 +104,14 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
     protected virtual int GetLevel(TObject item)
         => item.Trashed ? 100 + item.Level : item.Level;
 
-    private IEntitySlim GetTrashedParent(TObject item)
+    private IEntitySlim? GetTrashedParent(TObject item)
     {
         if (!item.Trashed || string.IsNullOrWhiteSpace(relationAlias)) return null;
 
         var parents = relationService.GetByChild(item, relationAlias);
         if (parents != null && parents.Any())
         {
-            return syncMappers.EntityCache.GetEntity(parents.FirstOrDefault().ParentId);
-            // return entityService.Get(parents.FirstOrDefault().ParentId);
+            return syncMappers.EntityCache.GetEntity(parents.FirstOrDefault()?.ParentId ?? 0);
         }
 
         return null;
@@ -155,7 +154,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
 
         var cultures = options.GetCultures();
 
-        var title = new XElement("NodeName", new XAttribute("Default", item.Name));
+        var title = new XElement("NodeName", new XAttribute("Default", item.Name ?? item.Id.ToString()));
         foreach (var culture in item.AvailableCultures.OrderBy(x => x))
         {
             if (cultures.IsValidOrBlank(culture))
@@ -194,7 +193,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
     /// <summary>
     ///  Things not to serialize (mediaSerializer overrides this, for Auto properties)
     /// </summary>
-    protected string[] dontSerialize = new string[] { };
+    protected string[] dontSerialize = [];
 
     /// <summary>
     ///  serialize all the properties for the item
@@ -222,6 +221,8 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
 
         foreach (var property in includedProperties.OrderBy(x => x.Alias))
         {
+            if (property?.Values is null) continue;
+
             var elements = new List<XElement>();
 
             // this can cause us false change readings
@@ -254,7 +255,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
 
                 if (validNode)
                 {
-                    valueNode.Add(new XCData(GetExportValue(GetPropertyValue(value), property.PropertyType, value.Culture, value.Segment)));
+                    valueNode.Add(new XCData(GetExportValue(GetPropertyValue(value), property.PropertyType, value.Culture!, value.Segment!)));
                     elements.Add(valueNode);
                 }
             }
@@ -300,7 +301,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
     }
 
     // allows us to switch between published / edited easier.
-    protected virtual object GetPropertyValue(IPropertyValue value)
+    protected virtual object? GetPropertyValue(IPropertyValue value)
         => value.EditedValue;
 
     protected override SyncAttempt<TObject> CanDeserialize(XElement node, SyncSerializerOptions options)
@@ -320,7 +321,10 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
     protected virtual IEnumerable<uSyncChange> DeserializeBase(TObject item, XElement node, SyncSerializerOptions options)
     {
         var info = node?.Element(uSyncConstants.Xml.Info);
-        if (info == null) return Enumerable.Empty<uSyncChange>();
+        if (node is null || info is null)
+        {
+            return Enumerable.Empty<uSyncChange>();
+        }
 
         var changes = new List<uSyncChange>();
 
@@ -332,8 +336,8 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
             // only try and set the path if the item isn't trashed. 
 
             var parentId = -1;
-            var nodeLevel = CalculateNodeLevel(item, default(TObject));
-            var nodePath = CalculateNodePath(item, default(TObject));
+            var nodeLevel = CalculateNodeLevel(item, default);
+            var nodePath = CalculateNodePath(item, default);
 
             var parentNode = info.Element(uSyncConstants.Xml.Parent);
             if (parentNode != null && parentNode.Attribute(uSyncConstants.Xml.Key).ValueOrDefault(Guid.Empty) != Guid.Empty)
@@ -433,7 +437,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
     {
         var nameNode = node.Element(uSyncConstants.Xml.Info)?.Element("NodeName");
         if (nameNode == null)
-            return Enumerable.Empty<uSyncChange>();
+            return [];
 
         var updated = false;
 
@@ -443,7 +447,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         var name = nameNode.Attribute("Default").ValueOrDefault(string.Empty);
         if (name != string.Empty && item.Name != name)
         {
-            changes.AddUpdate(uSyncConstants.Xml.Name, item.Name, name);
+            changes.AddUpdate(uSyncConstants.Xml.Name, item.Name ?? item.Id.ToString(), name);
             updated = true;
 
             item.Name = name;
@@ -463,7 +467,9 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
 
                     var cultureName = cultureNode.ValueOrDefault(string.Empty);
                     var currentCultureName = item.GetCultureName(culture);
-                    if (cultureName != string.Empty && cultureName != currentCultureName)
+                    if (string.IsNullOrEmpty(cultureName) is false
+                        && string.IsNullOrEmpty(currentCultureName) is false
+                        && cultureName != currentCultureName)
                     {
                         changes.AddUpdate($"Name ({culture})", currentCultureName, cultureName);
                         updated = true;
@@ -482,7 +488,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
     protected Attempt<List<uSyncChange>, string> DeserializeProperties(TObject item, XElement node, SyncSerializerOptions options)
     {
         string errors = "";
-        List<uSyncChange> changes = new List<uSyncChange>();
+        List<uSyncChange> changes = [];
 
         var activeCultures = options.GetDeserializedCultures(node);
 
@@ -496,8 +502,9 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
             if (item.HasProperty(alias))
             {
                 var current = item.Properties[alias];
+                if (current is null) continue;
 
-                logger.LogTrace("De-serialize Property {0} {1}", alias, current.PropertyType.PropertyEditorAlias);
+                logger.LogTrace("De-serialize Property {alias} {editorAlias}", alias, current.PropertyType.PropertyEditorAlias);
 
                 var values = property.Elements("Value").ToList();
 
@@ -564,9 +571,9 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
                         var itemValue = GetImportValue(propValue, current.PropertyType, culture, segment);
                         var currentValue = item.GetValue(alias, culture, segment);
 
-                        if (IsUpdatedValue(currentValue, itemValue))
+                        if (ContentSerializerBase<TObject>.IsUpdatedValue(currentValue, itemValue))
                         {
-                            changes.AddUpdateJson(alias, currentValue, itemValue, $"Property/{alias}");
+                            changes.AddUpdateJson(alias, currentValue ?? "(null)", itemValue ?? "(null)", $"Property/{alias}");
 
                             item.SetValue(alias, itemValue,
                                 string.IsNullOrEmpty(culture) ? null : culture,
@@ -606,7 +613,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
     ///   So we attempt to convert to the type stored in the current
     ///   value, and then compare that. which gets us a better check.
     /// </remarks>
-    private bool IsUpdatedValue(object current, object newValue)
+    private static bool IsUpdatedValue(object? current, object? newValue)
     {
         if (Object.Equals(current, newValue)) return false;
 
@@ -622,7 +629,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
     }
 
 
-    protected uSyncChange HandleSortOrder(TObject item, int sortOrder)
+    protected uSyncChange? HandleSortOrder(TObject item, int sortOrder)
     {
         if (sortOrder != -1 && item.SortOrder != sortOrder)
         {
@@ -638,15 +645,13 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         return null;
     }
 
-    [Obsolete("Pass in a restore guid for the parent - should relationships be missing")]
-    protected virtual uSyncChange HandleTrashedState(TObject item, bool trashed)
-        => uSyncChange.NoChange($"Member/{item.Name}", item.Name);
+    protected virtual uSyncChange? HandleTrashedState(TObject item, bool trashed, Guid restoreParent)
+        => uSyncChange.NoChange($"Member/{item.Name}", item.Name ?? item.Id.ToString());
 
-    protected virtual uSyncChange HandleTrashedState(TObject item, bool trashed, Guid restoreParent)
-        => uSyncChange.NoChange($"Member/{item.Name}", item.Name);
-
-    protected string GetExportValue(object value, IPropertyType propertyType, string culture, string segment)
+    protected string GetExportValue(object? value, IPropertyType propertyType, string culture, string segment)
     {
+        if (value is null) return string.Empty;
+
         // this is where the mapping magic will happen. 
         // at the moment there are no value mappers, but if we need
         // them they plug in as ISyncMapper things
@@ -665,7 +670,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         return exportValue;
     }
 
-    protected object GetImportValue(string value, IPropertyType propertyType, string culture, string segment)
+    protected object? GetImportValue(string value, IPropertyType propertyType, string culture, string segment)
     {
         // this is where the mapping magic will happen. 
         // at the moment there are no value mappers, but if we need
@@ -690,8 +695,9 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
     // that we cannot use for content/media trees.
     protected override Attempt<TObject> FindOrCreate(XElement node)
     {
-        TObject item = FindItem(node);
-        if (item != null) return Attempt.Succeed(item);
+        var item = FindItem(node);
+        if (item is not null) 
+            return Attempt.Succeed(item);
 
         var alias = node.GetAlias();
 
@@ -703,7 +709,8 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         if (parentKey != Guid.Empty)
         {
             item = FindItem(alias, parentKey);
-            if (item != null) return Attempt.Succeed(item);
+            if (item is not null)
+                return Attempt.Succeed(item);
         }
 
         // create
@@ -714,9 +721,8 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
             parent = FindItem(parentKey);
         }
 
-        var contentTypeAlias = node.Element(uSyncConstants.Xml.Info).Element("ContentType").ValueOrDefault(node.Name.LocalName);
-
-        // var contentTypeAlias = node.Name.LocalName;
+        var contentTypeAlias = node.Element(uSyncConstants.Xml.Info)?
+            .Element("ContentType").ValueOrDefault(node.Name.LocalName) ?? node.Name.LocalName;
 
         return CreateItem(alias, parent, contentTypeAlias);
     }
@@ -771,8 +777,9 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
             // var items = entityService.GetAll(this.umbracoObjectType, lookups.ToArray());
             foreach (var item in items)
             {
-                AddToNameCache(item.Id, item.Key, item.Name);
-                friendlyPath = friendlyPath.Replace($"[{item.Id}]", item.Name.ToSafeAlias(shortStringHelper));
+                AddToNameCache(item.Id, item.Key, item.Name ?? item.Id.ToString());
+                friendlyPath = friendlyPath.Replace($"[{item.Id}]", 
+                    (item.Name ?? item.Id.ToString()).ToSafeAlias(shortStringHelper));
             }
 
             return friendlyPath;
@@ -787,7 +794,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
     public override SyncAttempt<XElement> SerializeEmpty(TObject item, SyncActionType change, string alias)
     {
         var attempt = base.SerializeEmpty(item, change, alias);
-        if (attempt.Success)
+        if (attempt.Success && attempt.Item is not null)
         {
             attempt.Item.Add(new XAttribute(uSyncConstants.Xml.Level, GetLevel(item)));
         }
@@ -797,7 +804,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
     #region Finders 
     // Finders - used on importing, getting things that are already there (or maybe not)
 
-    public override TObject FindItem(XElement node)
+    public override TObject? FindItem(XElement node)
     {
         var (key, alias) = FindKeyAndAlias(node);
         if (key != Guid.Empty)
@@ -817,18 +824,18 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
 
         // if we get here, we could try for parent alias, alias ??
         // (really we would need full path e.g home/blog/2019/posts/)
-        return default(TObject);
+        return default;
     }
 
-    public override TObject FindItem(string alias)
+    public override TObject? FindItem(string alias)
     {
         // For content based items we can't reliably do this - because names can be the same
         // across the content tree. but we should have overridden all classes that call this 
         // function above.
-        return default(TObject);
+        return default;
     }
 
-    protected virtual TObject FindItem(string alias, Guid parentKey)
+    protected virtual TObject? FindItem(string alias, Guid parentKey)
     {
         var parentItem = FindItem(parentKey);
         if (parentItem != null)
@@ -843,12 +850,12 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         return default;
     }
 
-    protected virtual TObject FindItem(string alias, TObject parent)
+    protected virtual TObject? FindItem(string alias, TObject? parent)
     {
         if (parent != null)
         {
             var children = entityService.GetChildren(parent.Id, this.umbracoObjectType);
-            var child = children.FirstOrDefault(x => x.Name.ToSafeAlias(shortStringHelper).InvariantEquals(alias));
+            var child = children.FirstOrDefault(x => x.Name?.ToSafeAlias(shortStringHelper)?.InvariantEquals(alias) is true);
             if (child != null)
                 return FindItem(child.Id);
         }
@@ -857,19 +864,19 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
             return FindAtRoot(alias);
         }
 
-        return default(TObject);
+        return default;
     }
 
-    protected abstract TObject FindAtRoot(string alias);
+    protected abstract TObject? FindAtRoot(string alias);
 
     public override string ItemAlias(TObject item)
-        => item.Name;
+        => item.Name ?? item.Id.ToString();
 
-    protected TObject FindParent(XElement node, bool searchByAlias = false)
+    protected TObject? FindParent(XElement node, bool searchByAlias = false)
     {
         var item = default(TObject);
 
-        if (node == null) return default(TObject);
+        if (node == null) return default;
 
         var key = node.Attribute(uSyncConstants.Xml.Key).ValueOrDefault(Guid.Empty);
         if (key != Guid.Empty)
@@ -891,13 +898,13 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
 
         return item;
     }
-    protected TObject FindParentByPath(string path, bool failIfNotExact = false)
+    protected TObject? FindParentByPath(string path, bool failIfNotExact = false)
     {
         // logger.Debug(serializerType, "Looking for Parent by path {Path}", path);
         var folders = path.ToDelimitedList("/").ToList();
         return FindByPath(folders.Take(folders.Count - 1), failIfNotExact);
     }
-    protected TObject FindByPath(IEnumerable<string> folders, bool failIfNotExact)
+    protected TObject? FindByPath(IEnumerable<string> folders, bool failIfNotExact)
     {
         var item = default(TObject);
         foreach (var folder in folders)
@@ -951,7 +958,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         var parent = FindParent(parentNode, false);
         if (parent == null)
         {
-            var friendlyPath = info.Element(uSyncConstants.Xml.Path).ValueOrDefault(string.Empty);
+            var friendlyPath = info?.Element(uSyncConstants.Xml.Path).ValueOrDefault(string.Empty) ?? string.Empty;
             if (!string.IsNullOrWhiteSpace(friendlyPath))
             {
                 parent = FindParentByPath(friendlyPath, true);
@@ -1035,7 +1042,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         return exclude;
     }
 
-    private Regex GetExcludedPropertiesPattern(SyncSerializerOptions options)
+    private Regex? GetExcludedPropertiesPattern(SyncSerializerOptions options)
     {
         const string settingsKey = "DoNotSerializePattern";
 

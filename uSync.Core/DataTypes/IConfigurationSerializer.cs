@@ -1,22 +1,17 @@
-﻿using System.Runtime.InteropServices;
-
-using Microsoft.Extensions.Configuration;
-
-using uSync.Core.Extensions;
-
-namespace uSync.Core.DataTypes;
+﻿namespace uSync.Core.DataTypes;
 
 public interface IConfigurationSerializer
 {
+    /// <summary>
+    ///  Name of the serializer
+    /// </summary>
     string Name { get; }
+
+    /// <summary>
+    ///  array of editor aliases that this serializer works for.
+    /// </summary>
     string[] Editors { get; }
-
-    [Obsolete("These are getting removed at release")]
-    object? DeserializeConfig(string config, Type configType);
-
-    [Obsolete("These are getting removed at release")]
-    string? SerializeConfig(object configuration);
-
+   
     IDictionary<string, object> GetConfigurationExport(IDictionary<string, object> configuration)
         => configuration;
     

@@ -56,7 +56,7 @@ public class MediaTypeSerializer : ContentTypeBaseSerializer<IMediaType>, ISyncS
         node.Add(SerializeStructure(item));
         node.Add(SerializeTabs(item));
 
-        return SyncAttempt<XElement>.Succeed(item.Name, node, typeof(IMediaType), ChangeType.Export);
+        return SyncAttempt<XElement>.Succeed(item.Name ?? item.Alias, node, typeof(IMediaType), ChangeType.Export);
     }
 
     protected override SyncAttempt<IMediaType> DeserializeCore(XElement node, SyncSerializerOptions options)
@@ -67,15 +67,13 @@ public class MediaTypeSerializer : ContentTypeBaseSerializer<IMediaType>, ISyncS
         var details = new List<uSyncChange>();
 
         var attempt = FindOrCreate(node);
-        if (!attempt.Success) throw attempt.Exception;
+        if (!attempt.Success || attempt.Result is null)
+            throw attempt.Exception ?? new Exception($"Unknown error {node.GetAlias()}");
 
         var item = attempt.Result;
 
         details.AddRange(DeserializeBase(item, node));
         details.AddRange(DeserializeTabs(item, node));
-
-        // mediaTypeService.Save(item);
-
         details.AddRange(DeserializeProperties(item, node, options));
 
         CleanTabs(item, node, options);
@@ -99,7 +97,7 @@ public class MediaTypeSerializer : ContentTypeBaseSerializer<IMediaType>, ISyncS
         if (saveInSerializer && item.IsDirty())
             _mediaTypeService.Save(item);
 
-        return SyncAttempt<IMediaType>.Succeed(item.Name, item, ChangeType.Import, "", saveInSerializer, details);
+        return SyncAttempt<IMediaType>.Succeed(item.Name ?? item.Alias, item, ChangeType.Import, "", saveInSerializer, details);
     }
 
     protected override Attempt<IMediaType> CreateItem(string alias, ITreeEntity parent, string itemType)
@@ -121,6 +119,6 @@ public class MediaTypeSerializer : ContentTypeBaseSerializer<IMediaType>, ISyncS
 
         AddAlias(safeAlias);
 
-        return Attempt.Succeed((IMediaType)item);
+        return Attempt.Succeed(item as IMediaType);
     }
 }

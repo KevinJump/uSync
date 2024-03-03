@@ -21,10 +21,10 @@ public abstract class SyncSerializerRoot<TObject>
 
         // read the attribute
         serializerType = this.GetType();
-        var meta = serializerType.GetCustomAttribute<SyncSerializerAttribute>(false);
-        if (meta == null)
-            throw new InvalidOperationException($"the uSyncSerializer {serializerType} requires a {typeof(SyncSerializerAttribute)}");
-
+        
+        var meta = serializerType.GetCustomAttribute<SyncSerializerAttribute>(false)
+            ?? throw new InvalidOperationException($"the uSyncSerializer {serializerType} requires a {typeof(SyncSerializerAttribute)}");
+        
         Name = meta.Name;
         Id = meta.Id;
         ItemType = meta.ItemType;
@@ -67,7 +67,7 @@ public abstract class SyncSerializerRoot<TObject>
 
         if (options.Force || IsCurrent(node, options) > ChangeType.NoChange)
         {
-            // pre-deserilzation check. 
+            // pre-deserialization check. 
             var check = CanDeserialize(node, options);
             if (!check.Success) return check;
 
@@ -108,7 +108,7 @@ public abstract class SyncSerializerRoot<TObject>
 
     /// <summary>
     ///  all xml items now have the same top line, this makes 
-    ///  it eaiser for use to do lookups, get things like
+    ///  it easier for use to do lookups, get things like
     ///  keys and aliases for the basic checkers etc, 
     ///  makes the code simpler.
     /// </summary>
@@ -182,7 +182,7 @@ public abstract class SyncSerializerRoot<TObject>
 
     protected virtual SyncAttempt<TObject> ProcessDelete(Guid key, string alias, SerializerFlags flags)
     {
-        logger.LogDebug("Processing Delete {0} {1}", key, alias);
+        logger.LogDebug("Processing Delete {key} {alias}", key, alias);
 
         var item = this.FindItem(key);
         if (item == null && !string.IsNullOrWhiteSpace(alias))
@@ -191,17 +191,17 @@ public abstract class SyncSerializerRoot<TObject>
             // because if someone deletes something in one place and creates it 
             // somewhere else the alias will exist, so we don't want to delete 
             // it from over there - this needs to be done at save time 
-            // (bascially if a create happens) - turn any delete files into renames
+            // (basically if a create happens) - turn any delete files into renames
 
             // A Tree Based serializer will return null if you ask it to find 
-            // an item soley by alias, so this means we are only deleting by key 
+            // an item solely by alias, so this means we are only deleting by key 
             // on tree's (e.g media, content)
             item = this.FindItem(alias);
         }
 
         if (item != null)
         {
-            logger.LogDebug("Deleting Item : {0}", ItemAlias(item));
+            logger.LogDebug("Deleting Item : {alias}", ItemAlias(item));
             DeleteItem(item);
             return SyncAttempt<TObject>.Succeed(alias, ChangeType.Delete);
         }
@@ -218,7 +218,7 @@ public abstract class SyncSerializerRoot<TObject>
 
     public virtual ChangeType IsCurrent(XElement node, SyncSerializerOptions options)
     {
-        XElement current = null;
+        XElement current = new("");
         var item = FindItem(node);
         if (item != null)
         {
@@ -252,7 +252,7 @@ public abstract class SyncSerializerRoot<TObject>
             }
         }
 
-        if (node.IsEmptyItem()) return CalculateEmptyChange(node, current);
+        if (node.IsEmptyItem()) return SyncSerializerRoot<TObject>.CalculateEmptyChange(node, current);
 
         var newHash = MakeHash(node);
 
@@ -262,7 +262,7 @@ public abstract class SyncSerializerRoot<TObject>
         return currentHash == newHash ? ChangeType.NoChange : ChangeType.Update;
     }
 
-    private ChangeType CalculateEmptyChange(XElement node, XElement current)
+    private static ChangeType CalculateEmptyChange(XElement node, XElement current)
     {
         // this shouldn't happen, but check.
         if (current == null) return ChangeType.NoChange;
@@ -270,15 +270,12 @@ public abstract class SyncSerializerRoot<TObject>
         // simple logic, if it's a delete we say so, 
         // renames are picked up by the check on the new file
 
-        switch (node.GetEmptyAction())
+        return node.GetEmptyAction() switch
         {
-            case SyncActionType.Delete:
-                return ChangeType.Delete;
-            case SyncActionType.Clean:
-                return ChangeType.Clean;
-            default:
-                return ChangeType.NoChange;
-        }
+            SyncActionType.Delete => ChangeType.Delete,
+            SyncActionType.Clean => ChangeType.Clean,
+            _ => ChangeType.NoChange,
+        };
     }
 
     public virtual SyncAttempt<XElement> SerializeEmpty(TObject item, SyncActionType change, string alias)
@@ -290,7 +287,7 @@ public abstract class SyncSerializerRoot<TObject>
 
         var node = XElementExtensions.MakeEmpty(ItemKey(item), change, alias);
 
-        return SyncAttempt<XElement>.Succeed("Empty", node, ChangeType.Removed, null);
+        return SyncAttempt<XElement>.Succeed("Empty", node, ChangeType.Removed);
     }
 
 
@@ -299,9 +296,9 @@ public abstract class SyncSerializerRoot<TObject>
         if (node == null) return string.Empty;
         node = CleanseNode(node);
 
-        using (MemoryStream s = new MemoryStream())
+        using (MemoryStream s = new())
         {
-            // for consistancy across platforms we need to harmonize line endings.
+            // for consistency across platforms we need to harmonize line endings.
             using (var writer = XmlWriter.Create(s, new XmlWriterSettings { NewLineChars = "\r\n" }))
             {
                 node.Save(writer);
@@ -317,7 +314,7 @@ public abstract class SyncSerializerRoot<TObject>
 
     /// <summary>
     ///  cleans up the node, removing things that are not generic (like internal Ids)
-    ///  so that the comparisions are like for like.
+    ///  so that the comparisons are like for like.
     /// </summary>
     /// <param name="node"></param>
     /// <returns></returns>
@@ -338,10 +335,10 @@ public abstract class SyncSerializerRoot<TObject>
         return (key: Guid.Empty, alias: string.Empty);
     }
 
-    public abstract TObject FindItem(int id);
+    public abstract TObject? FindItem(int id);
 
-    public abstract TObject FindItem(Guid key);
-    public abstract TObject FindItem(string alias);
+    public abstract TObject? FindItem(Guid key);
+    public abstract TObject? FindItem(string alias);
 
     public abstract void SaveItem(TObject item);
 
@@ -364,7 +361,7 @@ public abstract class SyncSerializerRoot<TObject>
         }
     }
 
-    public virtual TObject FindItem(XElement node)
+    public virtual TObject? FindItem(XElement node)
     {
         var (key, alias) = FindKeyAndAlias(node);
 

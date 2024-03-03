@@ -26,8 +26,8 @@ public abstract class SyncContainerSerializerBase<TObject>
     protected override Attempt<TObject> FindOrCreate(XElement node)
     {
 
-        TObject item = FindItem(node);
-        if (item != null) return Attempt.Succeed(item);
+        TObject? item = FindItem(node);
+        if (item is null) return Attempt.Succeed<TObject>(item);
 
         logger.LogDebug("FindOrCreate: Creating");
 
@@ -37,8 +37,8 @@ public abstract class SyncContainerSerializerBase<TObject>
 
         var info = node.Element(uSyncConstants.Xml.Info);
 
-        var parentNode = info.Element(uSyncConstants.Xml.Parent);
-        if (parentNode != null)
+        var parentNode = info?.Element(uSyncConstants.Xml.Parent);
+        if (parentNode is not null)
         {
             logger.LogDebug("Finding Parent");
 
@@ -51,11 +51,11 @@ public abstract class SyncContainerSerializerBase<TObject>
             }
         }
 
-        if (parent == null)
+        if (parent is null)
         {
             // might be in a folder 
-            var folder = info.Element("Folder");
-            if (folder != null)
+            var folder = info?.Element("Folder");
+            if (folder is not null)
             {
 
                 var folderKey = folder.Attribute(uSyncConstants.Xml.Key).ValueOrDefault(Guid.Empty);
@@ -82,14 +82,16 @@ public abstract class SyncContainerSerializerBase<TObject>
             }
         }
 
-        var itemType = GetItemBaseType(node);
+        if (parent is null || treeItem is null)
+            return Attempt.Fail(item, new KeyNotFoundException("Unable to find parent location for item"));
 
+        var itemType = GetItemBaseType(node);
         var alias = node.GetAlias();
 
-        return CreateItem(alias, parent != null ? parent : treeItem, itemType);
+        return CreateItem(alias, parent ?? treeItem, itemType);
     }
 
-    private EntityContainer TryCreateContainer(string name, ITreeEntity parent)
+    private EntityContainer? TryCreateContainer(string name, ITreeEntity parent)
     {
         var children = entityService.GetChildren(parent.Id, containerType);
         if (children != null && children.Any(x => x.Name.InvariantEquals(name)))
@@ -101,7 +103,7 @@ public abstract class SyncContainerSerializerBase<TObject>
         // else create 
         var attempt = CreateContainer(parent.Id, name);
         if (attempt)
-            return attempt.Result.Entity;
+            return attempt.Result?.Entity;
 
         return null;
     }
@@ -110,40 +112,39 @@ public abstract class SyncContainerSerializerBase<TObject>
     #region Getters
     // Getters - get information we already know (either in the object or the XElement)
 
-    protected XElement GetFolderNode(TObject item)
+    protected XElement? GetFolderNode(TObject item)
     {
-        if (item.ParentId <= 0) return null;
+        if (item.ParentId <= 0) return default;
         // return GetFolderNode(GetContainers(item));
 
         if (!_folderCache.ContainsKey(item.ParentId))
         {
-            _folderCache[item.ParentId] = GetFolderNode(GetContainers(item));
+            var node = GetFolderNode(GetContainers(item));
+            if (node is not null) _folderCache[item.ParentId] = node;
         }
         return _folderCache[item.ParentId];
     }
 
     protected abstract IEnumerable<EntityContainer> GetContainers(TObject item);
 
-    protected XElement GetFolderNode(IEnumerable<EntityContainer> containers)
+    protected XElement? GetFolderNode(IEnumerable<EntityContainer> containers)
     {
         if (containers == null || !containers.Any())
-            return null;
+            return default;
 
         var containerList = containers; // .ToList();
-
-        var parentKey = containerList.OrderBy(x => x.Level).LastOrDefault().Key.ToString();
 
         var folders = containerList.OrderBy(x => x.Level)
             .Select(x => HttpUtility.UrlEncode(x.Name))
             .ToList();
 
-        if (folders.Any())
+        if (folders.Count != 0)
         {
             var path = string.Join("/", folders);
             return new XElement("Folder", path);
         }
 
-        return null;
+        return default;
 
     }
 
@@ -155,10 +156,10 @@ public abstract class SyncContainerSerializerBase<TObject>
     protected abstract IEnumerable<EntityContainer> FindContainers(string folder, int level);
     protected abstract Attempt<OperationResult<OperationResultType, EntityContainer>> CreateContainer(int parentId, string name);
 
-    protected virtual EntityContainer FindFolder(Guid key, string path)
+    protected virtual EntityContainer? FindFolder(Guid key, string path)
     {
         var container = FindContainer(key);
-        if (container != null) return container;
+        if (container is not null) return container;
 
         /// else - we have to parse it like a path ... 
         var bits = path.Split('/');
@@ -175,20 +176,20 @@ public abstract class SyncContainerSerializerBase<TObject>
                 return null;
             }
 
-            root = attempt.Result.Entity;
+            root = attempt.Result?.Entity;
         }
 
-        if (root != null)
+        if (root is not null)
         {
             var current = root;
             for (int i = 1; i < bits.Length; i++)
             {
                 var name = HttpUtility.UrlDecode(bits[i]);
                 current = TryCreateContainer(name, current);
-                if (current == null) break;
+                if (current is null) break;
             }
 
-            if (current != null)
+            if (current is not null)
             {
                 logger.LogDebug("Folder Found {name}", current.Name);
                 return current;
@@ -213,12 +214,10 @@ public abstract class SyncContainerSerializerBase<TObject>
     /// <remarks>
     ///  only used on serialization, allows us to only build the folder path for a set of containers once.
     /// </remarks>
-    private Dictionary<int, XElement> _folderCache = new();
+    private Dictionary<int, XElement> _folderCache = [];
 
-    private void ClearFolderCache()
-    {
-        _folderCache = new Dictionary<int, XElement>();
-    }
+    private void ClearFolderCache() 
+        => _folderCache = [];
 
     public void InitializeCache()
     {
