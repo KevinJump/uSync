@@ -15,9 +15,9 @@ public class GridImageMapper : SyncValueMapperBase, ISyncMapper
 
     public override string Name => "Grid Image Mapper";
 
-    public override string[] Editors => new string[] {
+    public override string[] Editors => [
         $"{Constants.PropertyEditors.Aliases.Grid}.media"
-    };
+    ];
 
     public override IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)
     {

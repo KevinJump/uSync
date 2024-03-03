@@ -27,13 +27,13 @@ namespace uSync.Core.Mapping;
 /// </remarks>
 public class ImagePathMapper : SyncValueMapperBase, ISyncMapper
 {
-    private const string s_genericMediaPath = "/media";
+    private const string _genericMediaPath = "/media";
 
-    private readonly string siteRoot;
+    private readonly string _siteRoot;
     private string _mediaFolder;
     private readonly ILogger<ImagePathMapper> _logger;
 
-    private readonly IConfiguration configuration;
+    private readonly IConfiguration _configuration;
 
     public ImagePathMapper(
         IConfiguration configuration,
@@ -41,11 +41,11 @@ public class ImagePathMapper : SyncValueMapperBase, ISyncMapper
         IEntityService entityService,
         ILogger<ImagePathMapper> logger) : base(entityService)
     {
-        this._logger = logger;
-        this.configuration = configuration;
+        _logger = logger;
+        _configuration = configuration;
 
         // todo: site root might need us to include extra NuGet.
-        siteRoot = "";
+        _siteRoot = "";
 
         _mediaFolder = GetMediaFolderSetting(_globalOptions.CurrentValue.UmbracoMediaPath.TrimStart('~'));
         _globalOptions.OnChange(x => _mediaFolder = GetMediaFolderSetting(x.UmbracoMediaPath.TrimStart('~')));
@@ -58,11 +58,10 @@ public class ImagePathMapper : SyncValueMapperBase, ISyncMapper
 
     public override string Name => "ImageCropper Mapper";
 
-    public override string[] Editors => new string[]
-    {
+    public override string[] Editors => [
         Constants.PropertyEditors.Aliases.ImageCropper,
         Constants.PropertyEditors.Aliases.UploadField
-    };
+    ];
 
     public override string? GetExportValue(object value, string editorAlias)
     {
@@ -91,19 +90,19 @@ public class ImagePathMapper : SyncValueMapperBase, ISyncMapper
     private string StripSitePath(string filePath)
     {
         var path = filePath;
-        if (siteRoot.Length > 0 && !string.IsNullOrWhiteSpace(filePath) && filePath.InvariantStartsWith(siteRoot))
-            path = filePath.Substring(siteRoot.Length);
+        if (_siteRoot.Length > 0 && !string.IsNullOrWhiteSpace(filePath) && filePath.InvariantStartsWith(_siteRoot))
+            path = filePath.Substring(_siteRoot.Length);
 
-        return ReplacePath(path, _mediaFolder, s_genericMediaPath);
+        return ReplacePath(path, _mediaFolder, _genericMediaPath);
     }
 
     private string PrePendSitePath(string filePath)
     {
         var path = filePath;
-        if (siteRoot.Length > 0 && !string.IsNullOrEmpty(filePath))
-            path = $"{siteRoot}{filePath}";
+        if (_siteRoot.Length > 0 && !string.IsNullOrEmpty(filePath))
+            path = $"{_siteRoot}{filePath}";
 
-        return ReplacePath(path, s_genericMediaPath, _mediaFolder);
+        return ReplacePath(path, _genericMediaPath, _mediaFolder);
     }
 
 
@@ -119,7 +118,7 @@ public class ImagePathMapper : SyncValueMapperBase, ISyncMapper
     ///  
     ///  assumes you have a app setting in the web.config 
     ///  
-    ///     <add key="uSync.mediaFolder">/somefolder</add>
+    ///     <add key="uSync.mediaFolder">/someFolder</add>
     ///
     /// </remarks>
     /// <returns></returns>
@@ -147,13 +146,13 @@ public class ImagePathMapper : SyncValueMapperBase, ISyncMapper
     ///  
     ///  <backoffice>
     ///     <media>
-    ///         <folder>/somefolder</folder>
+    ///         <folder>/someFolder</folder>
     ///     </media>
     ///  </backoffice>
     /// </remarks>
     private string GetMediaFolderSetting(string umbracoMediaPath)
     {
-        var folder = this.configuration.GetValue<string>("uSync:MediaFolder", string.Empty);
+        var folder = this._configuration.GetValue<string>("uSync:MediaFolder", string.Empty);
         if (!string.IsNullOrEmpty(folder)) return folder;
 
         return umbracoMediaPath;
@@ -189,7 +188,7 @@ public class ImagePathMapper : SyncValueMapperBase, ISyncMapper
     {
         var stringValue = value?.ToString();
         if (string.IsNullOrWhiteSpace(stringValue))
-            return Enumerable.Empty<uSyncDependency>();
+            return [];
 
         var stringPath = GetImagePath(stringValue).TrimStart('/').ToLower();
 
@@ -205,7 +204,7 @@ public class ImagePathMapper : SyncValueMapperBase, ISyncMapper
             }.AsEnumerableOfOne();
         }
 
-        return Enumerable.Empty<uSyncDependency>();
+        return [];
     }
 
     private string GetImagePath(string stringValue)

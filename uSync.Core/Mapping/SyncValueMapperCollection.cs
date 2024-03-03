@@ -21,7 +21,7 @@ public class SyncValueMapperCollection
         EntityCache = entityCache;
 
         // todo, load these from config. 
-        _customMappings = new Dictionary<string, string>();
+        _customMappings = [];
     }
 
     /// <summary>
@@ -38,18 +38,19 @@ public class SyncValueMapperCollection
     /// </summary>
     public string GetExportValue(object value, string editorAlias)
     {
-        if (value == null) return string.Empty;
+        if (value is null) return string.Empty;
 
         var mappers = GetSyncMappers(editorAlias);
         if (mappers.Any())
         {
-            var mappedValue = value.ToString() ?? "";
+            var mappedValue = value.ToString() ?? string.Empty;
+            
             foreach (var mapper in mappers)
             {
-                mappedValue = mapper.GetExportValue(mappedValue, editorAlias);
+                mappedValue = mapper.GetExportValue(mappedValue ?? string.Empty, editorAlias);
             }
 
-            return mappedValue;
+            return mappedValue ?? string.Empty;
         }
 
         return GetSafeValue(value);
@@ -68,10 +69,10 @@ public class SyncValueMapperCollection
             var mappedValue = value;
             foreach (var mapper in mappers)
             {
-                mappedValue = mapper.GetImportValue(mappedValue, editorAlias);
+                mappedValue = mapper.GetImportValue(mappedValue ?? string.Empty, editorAlias);
             }
 
-            return GetCleanFlatJson(mappedValue);
+            return GetCleanFlatJson(mappedValue ?? string.Empty);
         }
 
         return value;

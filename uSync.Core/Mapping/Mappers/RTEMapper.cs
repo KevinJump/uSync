@@ -6,6 +6,7 @@ using Umbraco.Cms.Core.Services;
 
 using uSync.Core.Dependency;
 using uSync.Core.Extensions;
+using System.Linq;
 
 namespace uSync.Core.Mapping;
 
@@ -19,17 +20,17 @@ namespace uSync.Core.Mapping;
 /// </remarks>
 public class RTEMapper : SyncValueMapperBase, ISyncMapper
 {
-    private readonly Lazy<SyncValueMapperCollection> mapperCollection;
+    private readonly Lazy<SyncValueMapperCollection> _mapperCollection;
 
     public RTEMapper(
         IEntityService entityService,
         Lazy<SyncValueMapperCollection> mappers)
         : base(entityService)
     {
-        this.mapperCollection = mappers;
+        _mapperCollection = mappers;
     }
 
-    // would prefere the link regex - less likely to get rouge ones 
+    // would preferer the link regex - less likely to get rouge ones 
     // private string linkRegEx = "((?&lt;=localLink:)([0-9]+)|(?&lt;=data-id=&quot;)([0-9]+))";
     private Regex UdiRegEx = new Regex(@"(umb:[/\\]+[a-zA-Z-]+[/\\][a-zA-Z0-9-]+)",
         RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace);
@@ -47,10 +48,10 @@ public class RTEMapper : SyncValueMapperBase, ISyncMapper
     public override IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)
     {
         // value null check. 
-        if (value == null) return Enumerable.Empty<uSyncDependency>();
+        if (value == null) return [];
 
         var stringValue = value.ToString();
-        if (string.IsNullOrWhiteSpace(stringValue)) return Enumerable.Empty<uSyncDependency>();
+        if (string.IsNullOrWhiteSpace(stringValue)) return [];
 
         if (stringValue.TryParseToJsonNode(out var jsonNode) && jsonNode is not null) 
         {
@@ -61,20 +62,19 @@ public class RTEMapper : SyncValueMapperBase, ISyncMapper
         return GetSimpleDependencies(stringValue, editorAlias, flags);
     }
 
-    private IEnumerable<uSyncDependency> GetBlockDependencies(JsonObject jObject, string editorAlias, DependencyFlags flags)
+    private List<uSyncDependency> GetBlockDependencies(JsonObject jObject, string editorAlias, DependencyFlags flags)
     {
         var dependencies = new List<uSyncDependency>();
 
-
-        if (jObject.TryGetPropertyValue("markup", out var markupNode) && markupNode != null)
+        if (jObject.TryGetPropertyValue("markup", out var markupNode) && markupNode is not null)
         {
             dependencies.AddRange(GetSimpleDependencies(markupNode.ToString(), editorAlias, flags));
         }
         
 
-        if (jObject.TryGetPropertyValue("blocks", out var blocks) && blocks != null)
+        if (jObject.TryGetPropertyValue("blocks", out var blocks) && blocks is not null)
         {
-            dependencies.AddRange(mapperCollection.Value.GetDependencies(blocks, Constants.PropertyEditors.Aliases.BlockList, flags));
+            dependencies.AddRange(_mapperCollection.Value.GetDependencies(blocks, Constants.PropertyEditors.Aliases.BlockList, flags));
         }
 
         return dependencies;
@@ -82,30 +82,27 @@ public class RTEMapper : SyncValueMapperBase, ISyncMapper
 
     private IEnumerable<uSyncDependency> GetSimpleDependencies(string stringValue, string editorAlias, DependencyFlags flags)
     {
-        if (string.IsNullOrWhiteSpace(stringValue)) return Enumerable.Empty<uSyncDependency>();
+        if (string.IsNullOrWhiteSpace(stringValue)) return [];
 
         var dependencies = new List<uSyncDependency>();
 
         foreach (Match m in UdiRegEx.Matches(stringValue))
         {
-            if (UdiParser.TryParse(m.Value, out GuidUdi? udi) && udi != null)
+            if (UdiParser.TryParse(m.Value, out GuidUdi? udi) && udi is not null)
             {
                 if (!dependencies.Any(x => x.Udi == udi))
-                    dependencies.Add(CreateDependency(udi, flags));
+                    dependencies.AddNotNull(CreateDependency(udi, flags));
             }
         }
 
         if (MacroRegEx.IsMatch(stringValue))
         {
-            var mappers = mapperCollection.Value.GetSyncMappers(editorAlias + ".macro");
+            var mappers = _mapperCollection.Value.GetSyncMappers(editorAlias + ".macro");
             if (mappers.Any())
             {
-                foreach (var macro in MacroRegEx.Matches(stringValue))
+                foreach (var mapper in MacroRegEx.Matches(stringValue).SelectMany(macro => mappers))
                 {
-                    foreach (var mapper in mappers)
-                    {
-                        dependencies.AddRange(mapper.GetDependencies(stringValue, editorAlias + ".macro", flags));
-                    }
+                    dependencies.AddRange(mapper.GetDependencies(stringValue, editorAlias + ".macro", flags));
                 }
             }
         }

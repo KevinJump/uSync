@@ -86,7 +86,7 @@ public class BlockListMapper : SyncNestedJsonValueMapperBase, ISyncMapper
     public override IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)
     {
         var jsonValue = GetJsonValue(value);
-        if (jsonValue == null) return Enumerable.Empty<uSyncDependency>();
+        if (jsonValue == null) return [];
 
 
         var dependencies = new List<uSyncDependency>();

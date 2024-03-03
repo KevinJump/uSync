@@ -3,7 +3,6 @@ using System.Text.Json.Nodes;
 
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Models;
-using Umbraco.Cms.Core.PropertyEditors;
 using Umbraco.Cms.Core.Services;
 
 using uSync.Core.Dependency;
@@ -13,8 +12,7 @@ namespace uSync.Core.Mapping;
 
 public class NestedContentMapper : SyncNestedJsonValueMapperBase, ISyncMapper
 {
-
-    private readonly string docTypeAliasValue = "ncContentTypeAlias";
+    private readonly string _docTypeAliasValue = "ncContentTypeAlias";
 
     public NestedContentMapper(
         IEntityService entityService,
@@ -30,7 +28,7 @@ public class NestedContentMapper : SyncNestedJsonValueMapperBase, ISyncMapper
 
     protected override string? ProcessValues(JsonObject jsonValue, string editorAlias, Func<JsonObject, IContentType, JsonObject> GetPropertiesMethod)
     {
-        if (jsonValue.GetValueKind() != System.Text.Json.JsonValueKind.Array)
+        if (jsonValue.GetValueKind() != JsonValueKind.Array)
         {
             jsonValue.TrySerializeJsonNode(out var baseResult, true);
             return baseResult;
@@ -41,7 +39,7 @@ public class NestedContentMapper : SyncNestedJsonValueMapperBase, ISyncMapper
         {
             if (item is null) continue;
 
-            var docType = GetDocType(item, this.docTypeAliasValue);
+            var docType = GetDocType(item, this._docTypeAliasValue);
             if (docType == null) continue;
 
             GetPropertiesMethod(item, docType);
@@ -54,23 +52,20 @@ public class NestedContentMapper : SyncNestedJsonValueMapperBase, ISyncMapper
     public override IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)
     {
         var stringValue = GetValueAs<string>(value);
-        if (stringValue == null || stringValue.TryConvertToJsonNode(out var json) is false || json is null)
-            return Enumerable.Empty<uSyncDependency>();
+        if (stringValue == null || stringValue.TryConvertToJsonNode(out var json) is false || json is null) return [];
 
-        if (json?.GetValueKind() != JsonValueKind.Array)
-            return Enumerable.Empty<uSyncDependency>();
+        if (json?.GetValueKind() != JsonValueKind.Array) return [];
 
         var jsonArray = json.AsArray();
-        if (jsonArray.Count == 0) 
-            return Enumerable.Empty<uSyncDependency>();
+        if (jsonArray.Count == 0) return [];
 
         var dependencies = new List<uSyncDependency>();
 
-        foreach (var item in jsonArray.Select(x => x.AsObject() ?? default))
+        foreach (var item in jsonArray.Select(x => x?.AsObject() ?? default))
         {
             if (item is null) continue;
 
-            if (item.TryGetPropertyValue(this.docTypeAliasValue, out var propertyNode) is false || propertyNode == null)
+            if (item.TryGetPropertyValue(this._docTypeAliasValue, out var propertyNode) is false || propertyNode == null)
                 continue;
 
             var docTypeAlias = propertyNode.GetValue<string>();

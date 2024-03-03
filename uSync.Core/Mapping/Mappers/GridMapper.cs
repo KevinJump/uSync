@@ -23,7 +23,7 @@ namespace uSync.Core.Mapping;
 ///  in the grid, we append Umbraco.Grid to control aliases, 
 ///  so the RTE becomes Umbraco.Grid.RTE 
 /// </remarks>
-public class GridMapper : SyncValueMapperBase, ISyncMapper
+public partial class GridMapper : SyncValueMapperBase, ISyncMapper
 {
     protected readonly IMediaService mediaService;
     protected readonly Lazy<SyncValueMapperCollection> mapperCollection;
@@ -41,10 +41,10 @@ public class GridMapper : SyncValueMapperBase, ISyncMapper
 
     public override IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)
     {
-        if (value == null) return Enumerable.Empty<uSyncDependency>();
+        if (value is null) return [];
 
         var stringValue = value.ToString();
-        if (string.IsNullOrWhiteSpace(stringValue)) return Enumerable.Empty<uSyncDependency>();
+        if (string.IsNullOrWhiteSpace(stringValue)) return [];
 
         return GetGridDependencies(stringValue, ProcessControl, flags);
     }
@@ -147,10 +147,10 @@ public class GridMapper : SyncValueMapperBase, ISyncMapper
         var editor =  control.GetPropertyAsObject("editor");
         var value = control["value"];
 
-        if (value == null) return Enumerable.Empty<uSyncDependency>();
+        if (value is null) return [];
 
         var (alias, mappers) = FindMappers(editor);
-        if (mappers == null || !mappers.Any()) return Enumerable.Empty<uSyncDependency>();
+        if (mappers == null || !mappers.Any()) return [];
 
         var dependencies = new List<uSyncDependency>();
 
@@ -161,7 +161,7 @@ public class GridMapper : SyncValueMapperBase, ISyncMapper
         return dependencies;
     }
 
-    private IEnumerable<uSyncDependency> GetGridDependencies(string gridContent,
+    private List<uSyncDependency> GetGridDependencies(string gridContent,
         Func<JsonObject, DependencyFlags, IEnumerable<uSyncDependency>> callback, DependencyFlags flags)
     {
         var items = new List<uSyncDependency>();
@@ -209,11 +209,11 @@ public class GridMapper : SyncValueMapperBase, ISyncMapper
     }
 
     /// <summary>
-    ///  Attempt to extact any media values out of the style sheet entries in the grid config.
+    ///  Attempt to extract any media values out of the style sheet entries in the grid config.
     /// </summary>
-    private IEnumerable<uSyncDependency> GetStyleDependencies(JsonObject style)
+    private List<uSyncDependency> GetStyleDependencies(JsonObject style)
     {
-        if (style == null) return Enumerable.Empty<uSyncDependency>();
+        if (style == null) return [];
 
         var dependencies = new List<uSyncDependency>();
 
@@ -234,16 +234,19 @@ public class GridMapper : SyncValueMapperBase, ISyncMapper
                 }
             }
         }
-        catch (Exception ex)
+        catch
         {
-            // ideally we want to deal with this, but failure of a dependcy check on a url in 
+            // ideally we want to deal with this, but failure of a dependency check on a url in 
             // a grid style element shouldn't stop a full export. 
         }
 
         return dependencies;
     }
 
-    private Regex UrlRegEx = new Regex(@"(?:url\s*[(]*\s*)(.+)(?:[)])", RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace);
+    private readonly Regex _urlRegEx = UrlRegularExpression();
+
+    [GeneratedRegex(@"(?:url\s*[(]*\s*)(.+)(?:[)])", RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace, "en-US")]
+    private static partial Regex UrlRegularExpression();
 
     /// <summary>
     ///  Process a URL() value and get the media dependency for the inner value (if there is one).
@@ -252,17 +255,17 @@ public class GridMapper : SyncValueMapperBase, ISyncMapper
     /// <returns></returns>
     private IEnumerable<uSyncDependency> ProcessStyleMedia(string urlValue)
     {
-        foreach (Match match in UrlRegEx.Matches(urlValue))
+        foreach (Match match in _urlRegEx.Matches(urlValue).Cast<Match>())
         {
-            if (match.Groups.Count > 1)
-            {
-                var mediaPath = match.Groups[1].Value.Trim(new char[] { '\'', '\"' });
-                var item = mediaService.GetMediaByPath(mediaPath);
-                if (item != null)
-                {
-                    yield return CreateDependency(item.GetUdi(), DependencyFlags.IncludeMedia);
-                }
-            }
+            if (match.Groups.Count <= 1) continue;
+
+            var mediaPath = match.Groups[1].Value.Trim(['\'', '\"']);
+            var item = mediaService.GetMediaByPath(mediaPath);
+            if (item is null) continue;
+
+            var dependency = CreateDependency(item.GetUdi(), DependencyFlags.IncludeMedia);
+            if (dependency is not null)
+                yield return dependency;
         }
     }
 
@@ -296,7 +299,7 @@ public class GridMapper : SyncValueMapperBase, ISyncMapper
 
         viewAlias = viewAlias.ToLower().TrimEnd(".html");
 
-        if (viewAlias.IndexOf('/') != -1)
+        if (viewAlias.Contains('/'))
             viewAlias = viewAlias.Substring(viewAlias.LastIndexOf('/') + 1);
 
         alias = $"{Constants.PropertyEditors.Aliases.Grid}.{viewAlias}";
