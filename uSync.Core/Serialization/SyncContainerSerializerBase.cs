@@ -27,7 +27,7 @@ public abstract class SyncContainerSerializerBase<TObject>
     {
 
         TObject? item = FindItem(node);
-        if (item is null) return Attempt.Succeed<TObject>(item);
+        if (item is null) return Attempt.Succeed(item);
 
         logger.LogDebug("FindOrCreate: Creating");
 
@@ -152,7 +152,7 @@ public abstract class SyncContainerSerializerBase<TObject>
 
     #region Finders
 
-    protected abstract EntityContainer FindContainer(Guid key);
+    protected abstract EntityContainer? FindContainer(Guid key);
     protected abstract IEnumerable<EntityContainer> FindContainers(string folder, int level);
     protected abstract Attempt<OperationResult<OperationResultType, EntityContainer>> CreateContainer(int parentId, string name);
 

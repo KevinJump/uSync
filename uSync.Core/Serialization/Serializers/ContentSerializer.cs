@@ -55,7 +55,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
         node.Add(info);
         node.Add(properties);
 
-        return SyncAttempt<XElement>.Succeed(item.Name, node, typeof(IContent), ChangeType.Export);
+        return SyncAttempt<XElement>.Succeed(item.Name ?? item.Id.ToString(), node, typeof(IContent), ChangeType.Export);
     }
 
     protected override XElement SerializeInfo(IContent item, SyncSerializerOptions options)
@@ -159,7 +159,8 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
     protected override SyncAttempt<IContent> DeserializeCore(XElement node, SyncSerializerOptions options)
     {
         var attempt = FindOrCreate(node);
-        if (!attempt.Success) throw attempt.Exception;
+        if (!attempt.Success || attempt.Result is null) 
+            throw attempt.Exception ?? new Exception($"Unknown error {node.GetAlias()}");
 
         var item = attempt.Result;
 
@@ -181,7 +182,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
         var propertiesAttempt = DeserializeProperties(item, node, options);
         if (!propertiesAttempt.Success)
         {
-            return SyncAttempt<IContent>.Fail(item.Name, item, ChangeType.ImportFail, "Failed to deserialize properties", attempt.Exception);
+            return SyncAttempt<IContent>.Fail(item.Name ?? item.Id.ToString(), item, ChangeType.ImportFail, "Failed to deserialize properties", attempt.Exception);
         }
 
         details.AddRange(propertiesAttempt.Result);
@@ -199,7 +200,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
         if (details.HasWarning() && options.FailOnWarnings())
         {
             // Fail on warning. means we don't save or publish because something is wrong ?
-            return SyncAttempt<IContent>.Fail(item.Name, item, ChangeType.ImportFail, "Failed with warnings", details,
+            return SyncAttempt<IContent>.Fail(item.Name ?? item.Id.ToString(), item, ChangeType.ImportFail, "Failed with warnings", details,
                 new Exception("Import failed because of warnings, and fail on warnings is true"));
         }
 
@@ -232,11 +233,11 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
 
             // we say no change back, this stops the core second pass function from saving 
             // this item (which we have just done with DoSaveOrPublish)
-            return SyncAttempt<IContent>.Succeed(item.Name, item, changeType, message, true, details);
+            return SyncAttempt<IContent>.Succeed(item.Name ?? item.Id.ToString(), item, changeType, message ?? string.Empty, true, details);
         }
         else
         {
-            return SyncAttempt<IContent>.Fail(item.Name, item, ChangeType.ImportFail, saveAttempt.Result, saveAttempt.Exception);
+            return SyncAttempt<IContent>.Fail(item.Name ?? item.Id.ToString(), item, ChangeType.ImportFail, saveAttempt.Result ?? string.Empty, saveAttempt.Exception);
         }
     }
 
@@ -300,9 +301,9 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
     {
         var changes = DeserializeSchedules(item, node, options);
         if (changes.Any())
-            return SyncAttempt<IContent>.Succeed(item.Name, item, ChangeType.Import, "", true, changes.ToList());
+            return SyncAttempt<IContent>.Succeed(item.Name ?? item.Id.ToString(), item, ChangeType.Import, "" ?? string.Empty, true, changes.ToList());
 
-        return SyncAttempt<IContent>.Succeed(item.Name, item, ChangeType.NoChange);
+        return SyncAttempt<IContent>.Succeed(item.Name ?? item.Id.ToString(), item, ChangeType.NoChange);
     }
 
     private IEnumerable<uSyncChange> DeserializeSchedules(IContent item, XElement node, SyncSerializerOptions options)

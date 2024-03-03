@@ -89,10 +89,10 @@ public struct SyncAttempt<TObject>
         return attempt;
     }
 
-    public static SyncAttempt<TObject> Fail(string name, TObject item, ChangeType change, string message, Exception? ex)
+    public static SyncAttempt<TObject> Fail(string name, TObject? item, ChangeType change, string message, Exception? ex)
         => new(false, name, item, typeof(TObject).Name, change, message, ex, false);
 
-    public static SyncAttempt<TObject> Fail(string name, TObject item, ChangeType change, string message, IList<uSyncChange> changes, Exception ex)
+    public static SyncAttempt<TObject> Fail(string name, TObject? item, ChangeType change, string message, IList<uSyncChange> changes, Exception ex)
         => new(false, name, item, typeof(TObject).Name, change, message, ex, false)
         {
             Details = changes ?? []

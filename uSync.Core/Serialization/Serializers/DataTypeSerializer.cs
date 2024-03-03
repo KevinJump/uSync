@@ -264,7 +264,7 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
         }
     }
 
-    protected override Attempt<IDataType> CreateItem(string alias, ITreeEntity parent, string itemType)
+    protected override Attempt<IDataType> CreateItem(string alias, ITreeEntity? parent, string itemType)
     {
         var editorType = FindDataEditor(itemType);
         if (editorType == null)
@@ -286,16 +286,16 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
     protected override string GetItemBaseType(XElement node)
         => node.Element(uSyncConstants.Xml.Info)?.Element("EditorAlias").ValueOrDefault(string.Empty) ?? string.Empty;
 
-    public override IDataType FindItem(int id)
+    public override IDataType? FindItem(int id)
         => _dataTypeService.GetDataType(id);
 
-    public override IDataType FindItem(Guid key)
+    public override IDataType? FindItem(Guid key)
         => _dataTypeService.GetDataType(key);
 
-    public override IDataType FindItem(string alias)
+    public override IDataType? FindItem(string alias)
         => _dataTypeService.GetDataType(alias);
 
-    protected override EntityContainer FindContainer(Guid key)
+    protected override EntityContainer? FindContainer(Guid key)
         => key == Guid.Empty ? null : _dataTypeService.GetContainer(key);
 
     protected override IEnumerable<EntityContainer> FindContainers(string folder, int level)

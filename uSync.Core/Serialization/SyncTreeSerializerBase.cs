@@ -31,7 +31,7 @@ public abstract class SyncTreeSerializerBase<TObject> : SyncSerializerBase<TObje
 
     protected abstract Attempt<TObject> FindOrCreate(XElement node);
 
-    protected TObject FindItem(Guid key, string alias)
+    protected TObject? FindItem(Guid key, string alias)
     {
         var item = FindItem(key);
         if (item != null) return item;

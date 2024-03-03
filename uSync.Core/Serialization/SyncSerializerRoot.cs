@@ -77,7 +77,7 @@ public abstract class SyncSerializerRoot<TObject>
             var result = DeserializeCore(node, options);
             logger.LogDebug(" << Deserialized result {alias} - {result}", alias, result.Success);
 
-            if (result.Success)
+            if (result.Success && result.Item is not null)
             {
                 if (!result.Saved && !options.Flags.HasFlag(SerializerFlags.DoNotSave))
                 {
@@ -223,7 +223,7 @@ public abstract class SyncSerializerRoot<TObject>
         if (item != null)
         {
             var attempt = this.Serialize(item, options);
-            if (attempt.Success)
+            if (attempt.Success && attempt.Item is not null)
                 current = attempt.Item;
         }
 

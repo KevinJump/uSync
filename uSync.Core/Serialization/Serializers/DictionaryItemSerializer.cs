@@ -32,7 +32,7 @@ public class DictionaryItemSerializer : SyncSerializerBase<IDictionaryItem>, ISy
         var details = new List<uSyncChange>();
 
         Guid? parentKey = null;
-        var parentItemKey = info.Element(uSyncConstants.Xml.Parent).ValueOrDefault(string.Empty);
+        var parentItemKey = info?.Element(uSyncConstants.Xml.Parent).ValueOrDefault(string.Empty) ?? string.Empty;
         if (parentItemKey != string.Empty)
         {
             var parent = _localizationService.GetDictionaryItemByKey(parentItemKey);
@@ -93,7 +93,7 @@ public class DictionaryItemSerializer : SyncSerializerBase<IDictionaryItem>, ISy
 
     private IEnumerable<uSyncChange> DeserializeTranslations(IDictionaryItem item, XElement node, SyncSerializerOptions options)
     {
-        var translationNode = node?.Element("Translations");
+        var translationNode = node.Element("Translations");
         if (translationNode == null) return Enumerable.Empty<uSyncChange>();
 
         var currentTranslations = item.Translations.ToList();
@@ -194,13 +194,13 @@ public class DictionaryItemSerializer : SyncSerializerBase<IDictionaryItem>, ISy
             item.ItemKey, node, typeof(IDictionaryItem), ChangeType.Export);
     }
 
-    public override IDictionaryItem FindItem(int id)
+    public override IDictionaryItem? FindItem(int id)
         => _localizationService.GetDictionaryItemById(id);
 
-    public override IDictionaryItem FindItem(Guid key)
+    public override IDictionaryItem? FindItem(Guid key)
         => _localizationService.GetDictionaryItemById(key);
 
-    public override IDictionaryItem FindItem(string alias)
+    public override IDictionaryItem? FindItem(string alias)
         => _localizationService.GetDictionaryItemByKey(alias);
 
     private int GetLevel(IDictionaryItem item, int level = 0)
@@ -208,7 +208,7 @@ public class DictionaryItemSerializer : SyncSerializerBase<IDictionaryItem>, ISy
         if (!item.ParentId.HasValue) return level;
 
         var parent = FindItem(item.ParentId.Value);
-        if (parent != null)
+        if (parent is not null)
             return GetLevel(parent, level + 1);
 
         return level;

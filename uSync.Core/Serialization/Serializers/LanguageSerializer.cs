@@ -103,7 +103,7 @@ public class LanguageSerializer : SyncSerializerBase<ILanguage>, ISyncSerializer
         var fallbackIsoCode = GetFallbackLanguageIsoCode(item, node);
         if (!string.IsNullOrEmpty(fallbackIsoCode) && item.FallbackIsoCode != fallbackIsoCode)
         {
-            details.AddUpdate("FallbackIsoCode", item.FallbackIsoCode, fallbackIsoCode);
+            details.AddUpdate("FallbackIsoCode", item.FallbackIsoCode ?? "(None)", fallbackIsoCode);
             item.FallbackIsoCode = fallbackIsoCode;
         }
 
@@ -132,7 +132,7 @@ public class LanguageSerializer : SyncSerializerBase<ILanguage>, ISyncSerializer
         var fallbackIsoCode = GetFallbackLanguageIsoCode(item, node);
         if (!string.IsNullOrWhiteSpace(fallbackIsoCode) && item.FallbackIsoCode != fallbackIsoCode)
         {
-            details.AddUpdate("FallbackIsoCode", item.FallbackIsoCode, fallbackIsoCode);
+            details.AddUpdate("FallbackIsoCode", item.FallbackIsoCode ?? "(None)", fallbackIsoCode);
             item.FallbackIsoCode = fallbackIsoCode;
         }
 
@@ -149,7 +149,7 @@ public class LanguageSerializer : SyncSerializerBase<ILanguage>, ISyncSerializer
     {
         // language guids change all the time ! we ignore them, but here we set them to the 'id' 
         // this means the file stays the same! 
-        var key = Int2Guid(item.CultureInfo.LCID);
+        var key = Int2Guid(item.CultureInfo?.LCID ?? 0);
 
         return new XElement(ItemType, new XAttribute(uSyncConstants.Xml.Key, key.ToString().ToLower()),
             new XAttribute(uSyncConstants.Xml.Alias, alias),
@@ -208,10 +208,11 @@ public class LanguageSerializer : SyncSerializerBase<ILanguage>, ISyncSerializer
         return item;
     }
 
-    public override ILanguage FindItem(int id)
+    public override ILanguage? FindItem(int id)
         => _localizationService.GetLanguageById(id);
 
-    public override ILanguage FindItem(Guid key) => default(ILanguage);
+    public override ILanguage? FindItem(Guid key)
+        => default;
 
     public override void SaveItem(ILanguage item)
         => _localizationService.Save(item);
@@ -222,9 +223,10 @@ public class LanguageSerializer : SyncSerializerBase<ILanguage>, ISyncSerializer
 
     protected override XElement CleanseNode(XElement node)
     {
-        if (node?.Attribute(uSyncConstants.Xml.Key) != null)
-            node.Attribute(uSyncConstants.Xml.Key).Value = "";
-        return node;
+        if (node?.Attribute(uSyncConstants.Xml.Key)?.Value is not null)
+            node.Attribute(uSyncConstants.Xml.Key)!.Value = "";
+        
+        return node!;
     }
 
     public override string ItemAlias(ILanguage item)

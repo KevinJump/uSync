@@ -206,7 +206,7 @@ public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncSerializer<IM
         return value;
     }
 
-    protected override Attempt<IMedia> CreateItem(string alias, ITreeEntity parent, string itemType)
+    protected override Attempt<IMedia> CreateItem(string alias, ITreeEntity? parent, string itemType)
     {
         var parentId = parent != null ? parent.Id : -1;
         var item = _mediaService.CreateMedia(alias, parentId, itemType);

@@ -70,7 +70,7 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
 
         info.Add(new XElement("DefaultTemplate", templateAlias));
 
-        var templates = SerailizeTemplates(item);
+        var templates = SerializeTemplates(item);
         if (templates != null)
             info.Add(templates);
 
@@ -79,7 +79,7 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
         node.Add(SerializeProperties(item));
         node.Add(SerializeTabs(item));
 
-        return SyncAttempt<XElement>.Succeed(item.Name, node, typeof(IContentType), ChangeType.Export);
+        return SyncAttempt<XElement>.Succeed(item.Name ?? item.Alias, node, typeof(IContentType), ChangeType.Export);
     }
 
     protected override void SerializeExtraProperties(XElement node, IContentType item, IPropertyType property)
@@ -87,7 +87,7 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
         node.Add(new XElement("Variations", property.Variations));
     }
 
-    private XElement SerailizeTemplates(IContentType item)
+    private XElement SerializeTemplates(IContentType item)
     {
         var node = new XElement("AllowedTemplates");
         if (item.AllowedTemplates != null && item.AllowedTemplates.Any())
@@ -105,7 +105,8 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
     protected override SyncAttempt<IContentType> DeserializeCore(XElement node, SyncSerializerOptions options)
     {
         var attempt = FindOrCreate(node);
-        if (!attempt.Success) throw attempt.Exception;
+        if (attempt.Success == false || attempt.Result is null)
+            throw attempt.Exception ?? new Exception($"Unknown error {node.GetAlias()}");
 
         var item = attempt.Result;
 
@@ -182,13 +183,13 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
 
         CleanFolder(item, node);
 
-        return SyncAttempt<IContentType>.Succeed(item.Name, item, ChangeType.Import, "", saveInSerializer, details);
+        return SyncAttempt<IContentType>.Succeed(item.Name ?? item.Alias, item, ChangeType.Import, "", saveInSerializer, details);
     }
 
-    private IEnumerable<uSyncChange> DeserializeContentTypeProperties(IContentType item, XElement node)
+    private List<uSyncChange> DeserializeContentTypeProperties(IContentType item, XElement node)
     {
         var info = node?.Element("Info");
-        if (info == null) return Enumerable.Empty<uSyncChange>();
+        if (info == null) return [];
 
         var changes = new List<uSyncChange>();
 
@@ -220,7 +221,7 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
             else
             {
                 // elements don't have a defaultTemplate, but it can be valid to have the old defaultTemplate in the db.
-                // (it would then re-appear if the user untoggles is element) See issue #203
+                // (it would then re-appear if the user un-toggles is element) See issue #203
                 //
                 // So we only log this as a problem if the default template is missing on a non-element doctype. 
                 if (!item.IsElement)
@@ -287,7 +288,7 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
     }
 
 
-    protected override Attempt<IContentType> CreateItem(string alias, ITreeEntity parent, string itemType)
+    protected override Attempt<IContentType> CreateItem(string alias, ITreeEntity? parent, string itemType)
     {
         var safeAlias = GetSafeItemAlias(alias);
 
@@ -327,7 +328,7 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
         "PreventCleanup", "KeepAllVersionsNewerThanDays", "KeepLatestVersionPerDayForDays"
     };
 
-    private XElement SerializeCleanupHistory(IContentType item)
+    private XElement? SerializeCleanupHistory(IContentType item)
     {
         if (!_capabilities.HasHistoryCleanup) return null;
 
@@ -416,14 +417,14 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
         // remove the history node when comparing, if this version doesn't support it but it is in the XML
         if (!_capabilities.HasHistoryCleanup && node.Element(uSyncConstants.Xml.Info)?.Element(_historyCleanupName) != null)
         {
-            node.Element(uSyncConstants.Xml.Info).Element(_historyCleanupName).Remove();
+            node.Element(uSyncConstants.Xml.Info)?.Element(_historyCleanupName)?.Remove();
         }
 
         return base.CleanseNode(node);
     }
 
 
-    protected TValue GetPropertyAs<TValue>(PropertyInfo info, object property)
+    protected TValue? GetPropertyAs<TValue>(PropertyInfo info, object property)
     {
         if (info == null) return default;
 

@@ -20,7 +20,7 @@ public interface ISyncSerializerBase
 public interface ISyncSerializer<TObject> : ISyncSerializerBase
 {
     /// <summary>
-    ///  Returns true if the peice of xml is valid for this serializer
+    ///  Returns true if the piece of xml is valid for this serializer
     /// </summary>
     bool IsValid(XElement node);
 

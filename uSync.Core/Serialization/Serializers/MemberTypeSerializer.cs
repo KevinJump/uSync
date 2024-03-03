@@ -179,7 +179,7 @@ public class MemberTypeSerializer : ContentTypeBaseSerializer<IMemberType>, ISyn
         return changes;
     }
 
-    protected override Attempt<IMemberType> CreateItem(string alias, ITreeEntity parent, string extra)
+    protected override Attempt<IMemberType> CreateItem(string alias, ITreeEntity? parent, string extra)
     {
         var safeAlias = GetSafeItemAlias(alias);
 
