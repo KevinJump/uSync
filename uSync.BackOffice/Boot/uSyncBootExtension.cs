@@ -18,17 +18,17 @@ namespace uSync.BackOffice.Boot
     /// </summary>
     internal static class uSyncBootExtension
     {
-        internal static string defaultNoNodesPath = "~/umbraco/UmbracoWebsite/NoNodes.cshtml";
-        internal static string noNodesPath = "~/App_Plugins/uSync/boot/NoNodes.cshtml";
+        internal static string _defaultNoNodesPath = "~/umbraco/UmbracoWebsite/NoNodes.cshtml";
+        internal static string _noNodesPath = "~/App_Plugins/uSync/boot/NoNodes.cshtml";
 
         public static IUmbracoBuilder AdduSyncFirstBoot(this IUmbracoBuilder builder)
         {
             builder.Services.PostConfigure<GlobalSettings>(settings =>
             {
-                if (settings.NoNodesViewPath.InvariantEquals(defaultNoNodesPath))
+                if (settings.NoNodesViewPath.InvariantEquals(_defaultNoNodesPath))
                 {
                     // if the default hasn't changed, put in the uSync version
-                    settings.NoNodesViewPath = noNodesPath;
+                    settings.NoNodesViewPath = _noNodesPath;
                 }
             });
 
