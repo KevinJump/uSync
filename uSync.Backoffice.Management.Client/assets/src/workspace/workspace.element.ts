@@ -12,11 +12,11 @@ export class uSyncWorkspaceRootElement extends UmbElementMixin(LitElement) {
     constructor() {
         super();
 
-        console.log('workspace-element');
-
         this.#workspaceContext = new uSyncWorkspaceContext(this);
 
-        console.log('workspace-loaded');
+        this.observe(this.#workspaceContext.completed, (_completed) => {
+            console.log('completed', _completed);
+        });
     }
 
     render() {
