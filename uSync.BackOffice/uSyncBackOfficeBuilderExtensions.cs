@@ -31,9 +31,9 @@ namespace uSync.BackOffice
         /// <summary>
         ///  Add uSync to the site. 
         /// </summary>
-        public static IUmbracoBuilder AdduSync(this IUmbracoBuilder builder, Action<uSyncSettings> defaultOptions = default)
+        public static IUmbracoBuilder AdduSync(this IUmbracoBuilder builder, Action<uSyncSettings>? defaultOptions = null)
         {
-            // if the uSyncConfig Service is registred then we assume this has been added before so we don't do it again. 
+            // if the uSyncConfig Service is registered then we assume this has been added before so we don't do it again. 
             if (builder.Services.FirstOrDefault(x => x.ServiceType == typeof(uSyncConfigService)) != null)
                 return builder;
 
@@ -49,7 +49,7 @@ namespace uSync.BackOffice
 
             // default handler options, other people can load their own names handler options and 
             // they can be used throughout uSync (so complete will do this). 
-            var handlerOptiosn = builder.Services.Configure<uSyncHandlerSetSettings>(uSync.Sets.DefaultSet,
+            var handlerOptions = builder.Services.Configure<uSyncHandlerSetSettings>(uSync.Sets.DefaultSet,
                 builder.Config.GetSection(uSync.Configuration.ConfigDefaultSet));
 
 
@@ -194,9 +194,6 @@ namespace uSync.BackOffice
 
                 .AddNotificationHandler<RelationTypeSavingNotification, RelationTypeHandler>()
                 .AddNotificationHandler<RelationTypeDeletingNotification, RelationTypeHandler>()
-
-                //.AddNotificationHandler<MacroSavingNotification, MacroHandler>()
-                //.AddNotificationHandler<MacroDeletingNotification, MacroHandler>()
 
                 .AddNotificationHandler<TemplateSavingNotification, TemplateHandler>()
                 .AddNotificationHandler<TemplateDeletingNotification, TemplateHandler>();

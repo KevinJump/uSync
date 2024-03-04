@@ -57,11 +57,11 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             => memberTypeService.DeleteContainer(id);
 
         /// <inheritdoc/>
-        protected override IEntity GetContainer(int id)
+        protected override IEntity? GetContainer(int id)
             => memberTypeService.GetContainer(id);
 
         /// <inheritdoc/>
-        protected override IEntity GetContainer(Guid key)
+        protected override IEntity? GetContainer(Guid key)
             => memberTypeService.GetContainer(key);
 
         /// <inheritdoc/>
@@ -74,7 +74,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
                 return memberType.Alias.ToSafeFileName(shortStringHelper);
             }
 
-            return item.Name.ToSafeFileName(shortStringHelper);
+            return item.Name?.ToSafeFileName(shortStringHelper) ?? item.Key.ToString();
         }
     }
 

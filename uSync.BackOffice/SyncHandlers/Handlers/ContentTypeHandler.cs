@@ -35,7 +35,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         INotificationHandler<DeletingNotification<IContentType>>
 
     {
-        private readonly IContentTypeService contentTypeService;
+        private readonly IContentTypeService _contentTypeService;
 
         /// <summary>
         ///  Constructor - loaded via DI
@@ -52,7 +52,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             ISyncItemFactory syncItemFactory)
             : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfig, syncItemFactory)
         {
-            this.contentTypeService = contentTypeService;
+            this._contentTypeService = contentTypeService;
         }
 
         /// <summary>
@@ -67,26 +67,26 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
                 return baseItem.Alias.ToSafeFileName(shortStringHelper);
             }
 
-            return item.Name.ToSafeFileName(shortStringHelper);
+            return item.Name?.ToSafeFileName(shortStringHelper) ?? item.Key.ToString();
         }
 
 
         /// <summary>
         ///  Fetch a ContentType container via the ContentTypeService
         /// </summary>
-        protected override IEntity GetContainer(int id)
-            => contentTypeService.GetContainer(id);
+        protected override IEntity? GetContainer(int id)
+            => _contentTypeService.GetContainer(id);
 
         /// <summary>
         ///  Fetch a ContentType container via the ContentTypeService
         /// </summary>
-        protected override IEntity GetContainer(Guid key)
-            => contentTypeService.GetContainer(key);
+        protected override IEntity? GetContainer(Guid key)
+            => _contentTypeService.GetContainer(key);
 
         /// <summary>
         ///  Delete a ContentType container via the ContentTypeService
         /// </summary>
         protected override void DeleteFolder(int id)
-            => contentTypeService.DeleteContainer(id);            
+            => _contentTypeService.DeleteContainer(id);            
     }
 }

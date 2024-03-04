@@ -28,7 +28,7 @@ namespace uSync.BackOffice.Models
         /// <summary>
         ///  Summary (icons, state) of the handlers 
         /// </summary>
-        public List<SyncHandlerSummary> Handlers { get; set; }
+        public List<SyncHandlerSummary> Handlers { get; set; } = [];
 
         private SyncProgressSummary(string message, int totalSteps)
         {
@@ -139,12 +139,12 @@ namespace uSync.BackOffice.Models
         /// <summary>
         ///  The icon the user sees for this handler.
         /// </summary>
-        public string Icon { get; set; }
+        public required string Icon { get; set; }
 
         /// <summary>
         ///  Name shown under the handler
         /// </summary>
-        public string Name { get; set; }
+        public required string Name { get; set; }
 
         /// <summary>
         ///  Current status of the handler

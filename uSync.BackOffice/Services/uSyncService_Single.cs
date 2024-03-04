@@ -51,11 +51,11 @@ namespace uSync.BackOffice
             var actions = new List<uSyncAction>();
             var lastType = string.Empty;
 
-            var folder = Path.GetDirectoryName(orderedNodes.FirstOrDefault()?.FileName ?? options.Folders?.FirstOrDefault() ?? _uSyncConfig.GetRootFolder());
+            var folder = Path.GetDirectoryName(orderedNodes.FirstOrDefault()?.FileName ?? options.Folders?.FirstOrDefault() ?? _uSyncConfig.GetRootFolder()) ?? string.Empty;
 
             SyncHandlerOptions syncHandlerOptions = HandlerOptionsFromPaged(options);
 
-            HandlerConfigPair handlerPair = null;
+            HandlerConfigPair? handlerPair = null;
 
             var index = options.PageNumber * options.PageSize;
 
@@ -76,7 +76,7 @@ namespace uSync.BackOffice
                     continue;
                 }
 
-                options.Callbacks?.Update.Invoke(item.Node.GetAlias(),
+                options.Callbacks?.Update?.Invoke(item.Node.GetAlias(),
                     CalculateProgress(index, total, options.ProgressMin, options.ProgressMax), 100);
 
                 if (handlerPair != null)
@@ -119,7 +119,7 @@ namespace uSync.BackOffice
 
                     SyncHandlerOptions syncHandlerOptions = HandlerOptionsFromPaged(options);
 
-                    HandlerConfigPair handlerPair = null;
+                    HandlerConfigPair? handlerPair = null;
 
                     var index = options.PageNumber * options.PageSize;
 
@@ -197,7 +197,7 @@ namespace uSync.BackOffice
                     var total = actions.Count();
 
                     var lastType = string.Empty;
-                    HandlerConfigPair handlerPair = null;
+                    HandlerConfigPair? handlerPair = null;
 
                     var index = options.PageNumber * options.PageSize;
 
@@ -213,6 +213,8 @@ namespace uSync.BackOffice
                         {
                             foreach (var action in actions.Skip(options.PageNumber * options.PageSize).Take(options.PageSize))
                             {
+                                if (action.HandlerAlias is null) continue;
+
                                 if (!action.HandlerAlias.InvariantEquals(lastType))
                                 {
                                     lastType = action.HandlerAlias;
@@ -273,6 +275,8 @@ namespace uSync.BackOffice
 
                     foreach (var actionItem in folders.SelectMany(actionGroup => actionGroup))
                     {
+                        if (actionItem.alias is null) continue;
+
                         var handlerPair = _handlerFactory.GetValidHandler(actionItem.alias, syncHandlerOptions);
 
                         if (handlerPair == null)
@@ -286,7 +290,7 @@ namespace uSync.BackOffice
                                 options.Callbacks?.Update?.Invoke(actionItem.alias, index, folders.Count);
 
                                 var handlerActions = actions.Where(x => x.HandlerAlias.InvariantEquals(handlerPair.Handler.Alias));
-                                results.AddRange(postImportHandler.ProcessPostImport(actionItem.folder, handlerActions, handlerPair.Settings));
+                                results.AddRange(postImportHandler.ProcessPostImport(actionItem.folder ?? string.Empty, handlerActions, handlerPair.Settings));
                             }
                         }
 
@@ -325,7 +329,11 @@ namespace uSync.BackOffice
 
                     foreach (var actionItem in cleans.SelectMany(actionGroup => actionGroup))
                     {
+                        if (actionItem.alias is null) continue;
+
                         var handlerPair = _handlerFactory.GetValidHandler(actionItem.alias, syncHandlerOptions);
+                        if (handlerPair is null) continue;
+
                         if (handlerPair.Handler is ISyncCleanEntryHandler cleanEntryHandler)
                         {
                             options.Callbacks?.Update?.Invoke(actionItem.alias, index, cleans.Count);

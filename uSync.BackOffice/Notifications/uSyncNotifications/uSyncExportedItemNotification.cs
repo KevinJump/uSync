@@ -9,7 +9,7 @@ namespace uSync.BackOffice
     /// </summary>
     public class uSyncExportedItemNotification : uSyncItemNotification<XElement> {
         /// <inheritdoc/>
-        public uSyncExportedItemNotification(XElement item, ChangeType change)
+        public uSyncExportedItemNotification(XElement? item, ChangeType change)
             : base(item, change) { }
     }
 

@@ -15,12 +15,12 @@ namespace uSync.BackOffice.SyncHandlers
         /// <summary>
         /// Sync handler 
         /// </summary>
-        public ISyncHandler Handler { get; set; }
+        public required ISyncHandler Handler { get; set; }
 
         /// <summary>
         /// Loaded configuration for a handler 
         /// </summary>
-        public HandlerSettings Settings { get; set; }
+        public required HandlerSettings Settings { get; set; }
     }
 
     /// <summary>

@@ -83,6 +83,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             // we only do deletes here. 
             foreach (var action in actions.Where(x => x.Change == ChangeType.Hidden))
             {
+                if (action.FileName is null) continue;
                 results.AddRange(
                     Import(action.FileName, config, SerializerFlags.LastPass));
             }
@@ -95,13 +96,13 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         /// <summary>
         ///  Fetch a DataType Container from the DataTypeService
         /// </summary>
-        protected override IEntity GetContainer(int id)
+        protected override IEntity? GetContainer(int id)
             => dataTypeService.GetContainer(id);
 
         /// <summary>
         ///  Fetch a DataType Container from the DataTypeService
         /// </summary>
-        protected override IEntity GetContainer(Guid key)
+        protected override IEntity? GetContainer(Guid key)
             => dataTypeService.GetContainer(key);
 
         /// <summary>
@@ -125,8 +126,8 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
 
             // with roots enabled - we attempt to merge doctypes ! 
             // 
-            var attempt = SerializeItem(item, new Core.Serialization.SyncSerializerOptions(config.Settings));
-            if (attempt.Success)
+            var attempt = SerializeItem(item, new SyncSerializerOptions(config.Settings));
+            if (attempt.Success && attempt.Item is not null)
             {
                 if (ShouldExport(attempt.Item, config))
                 {

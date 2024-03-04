@@ -34,7 +34,7 @@ public class SyncEntityCache
         _contentTypeService = contentTypeService;
         this._cacheEnabled = true;
     }
-    public CachedName GetName(int id)
+    public CachedName? GetName(int id)
     {
         if (!_cacheEnabled) return default;
         return cache.GetCacheItem<CachedName>(id.ToString());
@@ -49,7 +49,7 @@ public class SyncEntityCache
         });
     }
 
-    public IEntitySlim GetEntity(int id)
+    public IEntitySlim? GetEntity(int id)
     {
         if (!_cacheEnabled) return entityService.Get(id);
 
@@ -59,7 +59,7 @@ public class SyncEntityCache
         });
     }
 
-    public IEntitySlim GetEntity(int id, UmbracoObjectTypes objectType)
+    public IEntitySlim? GetEntity(int id, UmbracoObjectTypes objectType)
     {
         if (!_cacheEnabled) return entityService.Get(id, objectType);
 
@@ -69,18 +69,18 @@ public class SyncEntityCache
         });
     }
 
-    public IEntitySlim GetEntity(Guid id)
+    public IEntitySlim? GetEntity(Guid id)
     {
         if (!_cacheEnabled) return entityService.Get(id);
 
         // double cache lookup, we only store id's in the key cache,
         // that way we are not double storing all the entityIds in memory.
 
-        IEntitySlim entity = null;
+        IEntitySlim? entity = null;
         var intId = keyCache.GetCacheItem(id.ToString(), () =>
         {
             entity = entityService.Get(id);
-            if (entity != null) return entity.Id;
+            if (entity is not null) return entity.Id;
 
             return 0;
         });
@@ -89,11 +89,7 @@ public class SyncEntityCache
         {
             return cache.GetCacheItem(intId.ToString(), () =>
             {
-                if (entity != null)
-                {
-                    return entity;
-                }
-                return entityService.Get(intId);
+                return entity is not null ? entity : entityService.Get(intId);
             });
         }
         else
@@ -102,29 +98,22 @@ public class SyncEntityCache
             return null;
         }
     }
-    public IEntitySlim GetEntity(Guid id, UmbracoObjectTypes objectType)
+    public IEntitySlim? GetEntity(Guid id, UmbracoObjectTypes objectType)
     {
         if (!_cacheEnabled) return entityService.Get(id, objectType);
 
-        IEntitySlim entity = null;
+        IEntitySlim? entity = null;
         var intId = keyCache.GetCacheItem(id.ToString(), () =>
         {
             entity = entityService.Get(id, objectType);
-            if (entity != null) return entity.Id;
-
-            return 0;
+            return entity != null ? entity.Id : 0;
         });
 
         if (intId != 0)
         {
             return cache.GetCacheItem(intId.ToString(), () =>
             {
-                if (entity != null)
-                {
-                    return entity;
-                }
-
-                return entityService.Get(intId, objectType);
+                return entity is not null ? entity : entityService.Get(intId, objectType);
             });
         }
         else
@@ -138,7 +127,7 @@ public class SyncEntityCache
         if (!_cacheEnabled) return entityService.GetAll(objectType, ids);
 
         var items = new List<IEntitySlim>();
-        var uncachedIds = new List<int>();
+        var unCachedIds = new List<int>();
         foreach (var id in ids)
         {
             var cachedItem = cache.GetCacheItem<IEntitySlim>(id.ToString());
@@ -148,17 +137,17 @@ public class SyncEntityCache
             }
             else
             {
-                uncachedIds.Add(id);
+                unCachedIds.Add(id);
             }
         }
 
         // if you call this with blank you get everything! 
-        if (uncachedIds.Count > 0)
+        if (unCachedIds.Count > 0)
         {
-            var remaining = entityService.GetAll(objectType, uncachedIds.ToArray()).ToList();
+            var remaining = entityService.GetAll(objectType, unCachedIds.ToArray()).ToList();
             foreach (var item in remaining)
             {
-                items.Add(cache.GetCacheItem(item.Id.ToString(), () => { return item; }));
+                items.AddNotNull(cache.GetCacheItem(item.Id.ToString(), () => { return item; }));
             }
         }
 
@@ -166,14 +155,13 @@ public class SyncEntityCache
     }
 
 
-    public IContentType GetContentType(string alias)
+    public IContentType? GetContentType(string alias)
     {
         if (!_cacheEnabled) return _contentTypeService.Get(alias);
-
         return docTypeCache.GetCacheItem(alias, () => _contentTypeService.Get(alias));
     }
 
-    public IContentType GetContentType(Guid id)
+    public IContentType? GetContentType(Guid id)
     {
         if (!_cacheEnabled) return _contentTypeService.Get(id);
         return docTypeCache.GetCacheItem(id.ToString(), () => _contentTypeService.Get(id));

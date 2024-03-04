@@ -63,7 +63,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
                 return mediaType.Alias.ToSafeFileName(shortStringHelper);
             }
 
-            return item.Name.ToSafeFileName(shortStringHelper);
+            return item.Name?.ToSafeFileName(shortStringHelper) ?? item.Key.ToString();
         }
 
         /// <inheritdoc/>
@@ -71,11 +71,11 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             => mediaTypeService.DeleteContainer(id);
 
         /// <inheritdoc/>
-        protected override IEntity GetContainer(int id)
+        protected override IEntity? GetContainer(int id)
             => mediaTypeService.GetContainer(id);
 
         /// <inheritdoc/>
-        protected override IEntity GetContainer(Guid key)
+        protected override IEntity? GetContainer(Guid key)
             => mediaTypeService.GetContainer(key);
 
     }

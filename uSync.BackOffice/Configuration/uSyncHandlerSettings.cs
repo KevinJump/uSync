@@ -81,7 +81,7 @@ namespace uSync.BackOffice.Configuration
             if (settings.Settings != null && settings.Settings.ContainsKey(key))
             {
                 var attempt = settings.Settings[key].TryConvertTo<TResult>();
-                if (attempt) return attempt.Result;
+                if (attempt) return attempt.Result ?? defaultValue;
             }
 
             return defaultValue;
@@ -98,7 +98,7 @@ namespace uSync.BackOffice.Configuration
             if (settings.Settings == null)
                 settings.Settings = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
 
-            settings.Settings[key] = value.ToString();
+            settings.Settings.TryAdd(key, value?.ToString() ?? string.Empty);
         }
 
         /// <summary>

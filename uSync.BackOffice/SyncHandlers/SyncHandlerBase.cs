@@ -62,12 +62,12 @@ namespace uSync.BackOffice.SyncHandlers
         protected override IEnumerable<uSyncAction> CleanFolder(string cleanFile, bool reportOnly, bool flat)
         {
             var folder = Path.GetDirectoryName(cleanFile);
-            if (!syncFileService.DirectoryExists(folder)) return Enumerable.Empty<uSyncAction>();
+            if (folder is null || syncFileService.DirectoryExists(folder) is false) return [];
 
 
             // get the keys for every item in this folder. 
 
-            // this would works on the flat folder stucture too, 
+            // this would works on the flat folder structure too, 
             // there we are being super defensive, so if an item
             // is anywhere in the folder it won't get removed
             // even if the folder is wrong
@@ -107,8 +107,10 @@ namespace uSync.BackOffice.SyncHandlers
         /// <summary>
         ///  Process any cleanup actions that may have been loaded up
         /// </summary>
-        public virtual IEnumerable<uSyncAction> ProcessCleanActions(string folder, IEnumerable<uSyncAction> actions, HandlerSettings config)
+        public virtual IEnumerable<uSyncAction> ProcessCleanActions(string? folder, IEnumerable<uSyncAction> actions, HandlerSettings config)
         {
+            if (folder is null) return [];
+
             var cleans = actions.Where(x => x.Change == ChangeType.Clean && !string.IsNullOrWhiteSpace(x.FileName)).ToList();
             if (cleans.Count == 0) return Enumerable.Empty<uSyncAction>();
 
@@ -173,14 +175,14 @@ namespace uSync.BackOffice.SyncHandlers
         /// <summary>
         /// Export all items under a suppled parent id
         /// </summary>
-        virtual public IEnumerable<uSyncAction> ExportAll(int parentId, string folder, HandlerSettings config, SyncUpdateCallback callback)
+        virtual public IEnumerable<uSyncAction> ExportAll(int parentId, string folder, HandlerSettings config, SyncUpdateCallback? callback)
         {
             var parent = GetFromService(parentId);
             return ExportAll(parent, folder, config, callback);
         }
 
         /// <inheritdoc/>
-        protected override IEnumerable<IEntity> GetChildItems(IEntity parent)
+        protected override IEnumerable<IEntity> GetChildItems(IEntity? parent)
         {
             if (parent == null) return GetChildItems(-1);
             return GetChildItems(parent.Id);
@@ -213,7 +215,7 @@ namespace uSync.BackOffice.SyncHandlers
                     var guidType = ObjectTypes.GetGuid(objectType);
                     return entityService.GetChildren(parent).Where(x => x.NodeObjectType == guidType);
                 }
-            }, null);
+            }, null) ?? [];
 
         }
 
@@ -237,22 +239,22 @@ namespace uSync.BackOffice.SyncHandlers
             if (this.itemContainerType != UmbracoObjectTypes.Unknown)
                 return entityService.GetChildren(parent, this.itemContainerType);
 
-            return Enumerable.Empty<IEntity>();
+            return [];
         }
 
         /// <inheritdoc/>
-        protected override IEnumerable<IEntity> GetFolders(IEntity parent)
+        protected override IEnumerable<IEntity> GetFolders(IEntity? parent)
         {
-            if (parent == null) return GetFolders(-1);
+            if (parent is null) return GetFolders(-1);
             return GetFolders(parent.Id);
         }
 
         /// <inheritdoc/>
-        protected override TObject GetFromService(IEntity entity)
-            => GetFromService(entity.Id);
+        protected override TObject? GetFromService(IEntity? entity)
+            => entity is null ? default : GetFromService(entity.Id);
 
         /// <summary>
-        ///  for backwards compatability up the tree.
+        ///  for backwards compatibility up the tree.
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>

@@ -16,7 +16,7 @@ namespace uSync.BackOffice
         /// <summary>
         ///  Alias of the handler 
         /// </summary>
-        public string HandlerAlias { get; set; }
+        public string? HandlerAlias { get; set; }
 
         /// <summary>
         ///  Was the action a success
@@ -31,12 +31,12 @@ namespace uSync.BackOffice
         /// <summary>
         ///  message to display along with action
         /// </summary>
-        public string Message { get; set; }
+        public string? Message { get; set; }
 
         /// <summary>
         ///  exception encountered during action
         /// </summary>
-        public Exception Exception { get; set; }
+        public Exception? Exception { get; set; }
 
         /// <summary>
         ///  type of change performed 
@@ -47,7 +47,7 @@ namespace uSync.BackOffice
         /// <summary>
         ///  path name for the uSync file
         /// </summary>
-        public string FileName { get; set; }
+        public string? FileName { get; set; }
 
         /// <summary>
         ///  display name of the item
@@ -57,7 +57,7 @@ namespace uSync.BackOffice
         /// <summary>
         ///  9.2 a nice path for the thing (displayed).
         /// </summary>
-        public string Path { get; set; }
+        public string? Path { get; set; }
 
         /// <summary>
         ///  this action still requires some processing 
@@ -69,24 +69,24 @@ namespace uSync.BackOffice
         /// </summary>
         [Newtonsoft.Json.JsonIgnore]
         [System.Text.Json.Serialization.JsonIgnore]
-        public object Item { get; set; }
+        public object? Item { get; set; }
 
         /// <summary>
         ///  text that is shown on the details screen above any details. 
         /// </summary>
-        public string DetailMessage { get; set; }
+        public string? DetailMessage { get; set; }
 
         /// <summary>
         ///  list of detailed changes, so you can see what is changing.
         /// </summary>
-        public IEnumerable<uSyncChange> Details { get; set; }
+        public IEnumerable<uSyncChange>? Details { get; set; }
 
         /// <summary>
         ///  the GUID key value of the item 
         /// </summary>
         public Guid key { get; set; }
 
-        internal uSyncAction(bool success, string name, string type, ChangeType change, string message, Exception ex, string filename, string handlerAlias, bool postProcess = false) : this()
+        internal uSyncAction(bool success, string name, string type, ChangeType change, string? message, Exception? ex, string? filename, string? handlerAlias, bool postProcess = false) : this()
         {
             Success = success;
             Name = name;
@@ -102,7 +102,7 @@ namespace uSync.BackOffice
 
         }
 
-        internal uSyncAction(bool success, string name, string type, ChangeType change, string message, Exception ex, string filename, bool postProcess = false)
+        internal uSyncAction(bool success, string name, string type, ChangeType change, string? message, Exception? ex, string? filename, bool postProcess = false)
             : this(success, name, type, change, message, ex, filename, null, postProcess)
         { }
 
@@ -114,19 +114,12 @@ namespace uSync.BackOffice
             string name,
             string type = "",
             ChangeType change = ChangeType.NoChange,
-            string message = null,
-            Exception ex = null,
-            string filename = null)
+            string? message = null,
+            Exception? ex = null,
+            string? filename = null)
         {
             return new uSyncAction(success, name, type, change, message, ex, filename);
         }
-
-        /// <summary>
-        ///  create a fail uSyncAction object
-        /// </summary>
-        [Obsolete("Pass handler type with fail - Will remove in v13")]
-        public static uSyncAction Fail(string name, string type, ChangeType change, string message, Exception ex)
-            => new uSyncAction(false, name, type, change, message, ex, string.Empty);
 
         /// <summary>
         ///  create a fail uSyncAction object

@@ -65,7 +65,7 @@ public partial class uSyncService
 
                 var destinationFolder = Path.GetDirectoryName(destination);
 
-                if (!Directory.Exists(destinationFolder))
+                if (destinationFolder is not null && Directory.Exists(destinationFolder) is false)
                     Directory.CreateDirectory(destinationFolder);
 
                 entry.ExtractToFile(destination, true);

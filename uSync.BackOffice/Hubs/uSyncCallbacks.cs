@@ -12,17 +12,17 @@ namespace uSync.BackOffice
         /// <summary>
         ///  Add event callback
         /// </summary>
-        public SyncEventCallback Callback { get; private set; }
+        public SyncEventCallback? Callback { get; private set; }
 
         /// <summary>
         ///  Update event callback
         /// </summary>
-        public SyncUpdateCallback Update { get; private set; }
+        public SyncUpdateCallback? Update { get; private set; }
 
         /// <summary>
         ///  generate a new callback object 
         /// </summary>
-        public uSyncCallbacks(SyncEventCallback callback, SyncUpdateCallback update)
+        public uSyncCallbacks(SyncEventCallback? callback, SyncUpdateCallback? update)
         {
             this.Callback = callback;
             this.Update = update;

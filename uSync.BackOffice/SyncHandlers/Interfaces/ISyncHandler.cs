@@ -103,7 +103,7 @@ namespace uSync.BackOffice.SyncHandlers
         /// <param name="callback">Callbacks to keep UI up to date</param>
         /// <returns>List of actions detailing changes</returns>
         [Obsolete("Call method with folders for roots functionality will be removed in v15")]
-        IEnumerable<uSyncAction> ExportAll(string folder, HandlerSettings settings, SyncUpdateCallback callback);
+        IEnumerable<uSyncAction> ExportAll(string folder, HandlerSettings settings, SyncUpdateCallback? callback);
 
         /// <summary>
         ///  Export all items 
@@ -112,7 +112,7 @@ namespace uSync.BackOffice.SyncHandlers
         /// <param name="settings">Handler settings to use for export</param>
         /// <param name="callback">Callbacks to keep UI up to date</param>
         /// <returns>List of actions detailing changes</returns>
-        IEnumerable<uSyncAction> ExportAll(string[] folders, HandlerSettings settings, SyncUpdateCallback callback)
+        IEnumerable<uSyncAction> ExportAll(string[] folders, HandlerSettings settings, SyncUpdateCallback? callback)
             => ExportAll(folders[0], settings, callback); // default implementation stops breaking change
 
 
@@ -144,7 +144,7 @@ namespace uSync.BackOffice.SyncHandlers
         /// <param name="callback">Callbacks to keep UI upto date</param>
         /// <returns>List of actions detailing changes</returns>
         [Obsolete("Call method with folders for roots functionality will be removed in v15")]
-        IEnumerable<uSyncAction> ImportAll(string folder, HandlerSettings settings, bool force, SyncUpdateCallback callback);
+        IEnumerable<uSyncAction> ImportAll(string folder, HandlerSettings settings, bool force, SyncUpdateCallback? callback);
 
         /// <summary>
         ///  Import All items 
@@ -169,7 +169,7 @@ namespace uSync.BackOffice.SyncHandlers
         /// <param name="callback">Callbacks to keep UI upto date</param>
         /// <returns>List of actions detailing changes</returns>
         [Obsolete("Call method with folders for roots functionality will be removed in v15")]
-        IEnumerable<uSyncAction> Report(string folder, HandlerSettings settings, SyncUpdateCallback callback);
+        IEnumerable<uSyncAction> Report(string folder, HandlerSettings settings, SyncUpdateCallback? callback);
 
         /// <summary>
         ///  Report All items 
@@ -178,7 +178,7 @@ namespace uSync.BackOffice.SyncHandlers
         /// <param name="settings">Handler settings to use for report</param>
         /// <param name="callback">Callbacks to keep UI upto date</param>
         /// <returns>List of actions detailing changes</returns>
-        IEnumerable<uSyncAction> Report(string[] folders, HandlerSettings settings, SyncUpdateCallback callback)
+        IEnumerable<uSyncAction> Report(string[] folders, HandlerSettings settings, SyncUpdateCallback? callback)
             => Report(folders[0], settings, callback);
 
         /// <summary>
@@ -195,7 +195,7 @@ namespace uSync.BackOffice.SyncHandlers
         /// <summary>
         ///  default implementation, root handler does do this. 
         /// </summary>
-        Udi FindFromNode(XElement node) => null;
+        Udi? FindFromNode(XElement node) => null;
 
         /// <summary>
         ///  is this a current node (root handler can do this too)

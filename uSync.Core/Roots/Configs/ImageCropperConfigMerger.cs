@@ -8,10 +8,12 @@ internal class ImageCropperConfigMerger : SyncConfigMergerBase, ISyncConfigMerge
         Constants.PropertyEditors.Aliases.ImageCropper
     ];
 
-    public object GetMergedConfig(string root, string target)
+    public object? GetMergedConfig(string root, string target)
     {
         var rootConfig = TryGetConfiguration<ImageCropperConfiguration>(root);
         var targetConfig = TryGetConfiguration<ImageCropperConfiguration>(target);
+
+        if (targetConfig?.Crops is null || rootConfig?.Crops is null) return targetConfig;
 
         targetConfig.Crops = MergeObjects(
             rootConfig.Crops,
@@ -22,10 +24,12 @@ internal class ImageCropperConfigMerger : SyncConfigMergerBase, ISyncConfigMerge
         return targetConfig;
     }
 
-    public object GetDifferenceConfig(string root, string target)
+    public object? GetDifferenceConfig(string root, string target)
     {
         var rootConfig = TryGetConfiguration<ImageCropperConfiguration>(root);
         var targetConfig = TryGetConfiguration<ImageCropperConfiguration>(target);
+
+        if (targetConfig?.Crops is null || rootConfig?.Crops is null) return targetConfig;
 
         targetConfig.Crops = GetObjectDifferences(
             rootConfig.Crops,

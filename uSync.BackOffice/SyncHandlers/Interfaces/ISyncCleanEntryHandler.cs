@@ -12,6 +12,6 @@ namespace uSync.BackOffice.SyncHandlers.Interfaces
         /// <summary>
         /// process any clean actions that have been identified during the import 
         /// </summary>
-        IEnumerable<uSyncAction> ProcessCleanActions(string folder, IEnumerable<uSyncAction> actions, HandlerSettings config);
+        IEnumerable<uSyncAction> ProcessCleanActions(string? folder, IEnumerable<uSyncAction> actions, HandlerSettings config);
     }
 }

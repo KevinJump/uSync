@@ -10,6 +10,12 @@ public static class ListExtensions
         if (item is not null) list.Add(item);
     }
 
+    public static void AddRangeIfNotNull<TObject>(this List<TObject>? list, IEnumerable<TObject>? items)
+    {
+        if (items is null) return;
+        list?.AddRange(items);
+    }
+
     /// <summary>
     ///  Is the value valid for this list (if the list is empty, we treat it like a wildcard).
     /// </summary>

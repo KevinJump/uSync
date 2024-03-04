@@ -230,7 +230,7 @@ public abstract class SyncSerializerRoot<TObject>
         return IsCurrent(node, current, options);
     }
 
-    public virtual ChangeType IsCurrent(XElement node, XElement current, SyncSerializerOptions options)
+    public virtual ChangeType IsCurrent(XElement node, XElement? current, SyncSerializerOptions options)
     {
         if (node == null) return ChangeType.Update;
 

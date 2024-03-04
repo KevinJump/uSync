@@ -8,10 +8,10 @@
         /// <summary>
         /// string message to display
         /// </summary>
-        public string Message { get; set; }
+        public string Message { get; set; } = string.Empty;
 
         /// <summary>
-        ///  nubmer of items processed
+        ///  number of items processed
         /// </summary>
         public int Count { get; set; }
 

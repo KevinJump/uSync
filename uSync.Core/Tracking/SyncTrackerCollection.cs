@@ -1,6 +1,7 @@
 ﻿using System.Xml.Linq;
 
 using Umbraco.Cms.Core.Composing;
+using Umbraco.Extensions;
 
 using uSync.Core.Models;
 using uSync.Core.Serialization;
@@ -13,10 +14,10 @@ public class SyncTrackerCollection : BuilderCollectionBase<ISyncTrackerBase>
         : base(items)
     { }
 
-    public IEnumerable<ISyncTracker<TObject>?> GetTrackers<TObject>()
+    public IEnumerable<ISyncTracker<TObject>> GetTrackers<TObject>()
     {
         return this.Where(x => x is ISyncTracker<TObject> tracker)
-            .Select(x => x as ISyncTracker<TObject>);
+            .Select(x => x as ISyncTracker<TObject>).WhereNotNull();
     }
 
     public IEnumerable<uSyncChange> GetChanges<TObject>(XElement node, SyncSerializerOptions options)

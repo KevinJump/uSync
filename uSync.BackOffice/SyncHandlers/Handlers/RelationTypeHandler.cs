@@ -55,7 +55,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         }
 
         /// <inheritdoc/>
-        public override IEnumerable<uSyncAction> ExportAll(string folder, HandlerSettings config, SyncUpdateCallback callback)
+        public override IEnumerable<uSyncAction> ExportAll(string folder, HandlerSettings config, SyncUpdateCallback? callback)
         {
             var actions = new List<uSyncAction>();
 
@@ -63,7 +63,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
 
             foreach (var item in items.Select((relationType, index) => new { relationType, index }))
             {
-                callback?.Invoke(item.relationType.Name, item.index, items.Count);
+                callback?.Invoke(item.relationType.Name ?? item.relationType.Alias, item.index, items.Count);
                 actions.AddRange(Export(item.relationType, folder, config));
             }
 
@@ -97,7 +97,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
 
         /// <inheritdoc/>
         protected override string GetItemName(IRelationType item)
-            => item.Name;
+            => item.Name ?? item.Alias;
 
         /// <inheritdoc/>
         protected override string GetItemFileName(IRelationType item)

@@ -11,7 +11,7 @@ namespace uSync.BackOffice.Models
         ///  SignalR Hub client id
         /// </summary>
         [DataMember(Name = "clientId")]
-        public string ClientId { get; set; }
+        public string ClientId { get; set; } = string.Empty;
 
         /// <summary>
         /// Force the import (even if no changes detected)
@@ -29,12 +29,12 @@ namespace uSync.BackOffice.Models
         /// Name of the handler group to perfom the actions on
         /// </summary>
         [DataMember(Name = "group")]
-        public string Group { get; set; }
+        public string Group { get; set; } = string.Empty;
 
         /// <summary>
         /// The set in which the handler lives
         /// </summary>
         [DataMember(Name = "set")]
-        public string Set { get; set; }
+        public string Set { get; set; } = string.Empty;
     }
 }

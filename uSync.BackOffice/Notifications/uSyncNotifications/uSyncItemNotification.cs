@@ -11,19 +11,19 @@ namespace uSync.BackOffice
     public class uSyncItemNotification<TObject> : INotification
     {
         /// <inheritdoc/>
-        public uSyncItemNotification(TObject item)
+        public uSyncItemNotification(TObject? item)
         {
             this.Item = item;
         }
         /// <inheritdoc/>
-        public uSyncItemNotification(TObject item, ChangeType change)
+        public uSyncItemNotification(TObject? item, ChangeType change)
             : this(item)
         {
             this.Change = change;
         }
 
         /// <inheritdoc/>
-        public uSyncItemNotification(TObject item, ISyncHandler handler)
+        public uSyncItemNotification(TObject? item, ISyncHandler handler)
             : this(item)
         {
             this.Handler = handler;
@@ -32,16 +32,16 @@ namespace uSync.BackOffice
         /// <summary>
         ///  The type of Change being notified 
         /// </summary>
-        public ChangeType Change { get; set; }
+        public ChangeType Change { get; set; } = ChangeType.NoChange;
 
         /// <summary>
         ///  The item the notification is for
         /// </summary>
-        public TObject Item { get; set; }
+        public TObject? Item { get; set; }
 
         /// <summary>
         ///  The handler performing the notification
         /// </summary>
-        public ISyncHandler Handler { get; set; }
+        public ISyncHandler? Handler { get; set; }
     }
 }

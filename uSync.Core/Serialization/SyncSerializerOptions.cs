@@ -105,15 +105,18 @@ public class SyncSerializerOptions
     }
 
     public IList<string> GetSegments()
-        => GetSetting(uSyncConstants.SegmentKey, string.Empty).ToDelimitedList();   
+        => GetSetting(uSyncConstants.SegmentKey, string.Empty).ToDelimitedList();
 
     /// <summary>
     ///  merge any new settings into the settings collection.
     /// </summary>
-    public void MergeSettings(Dictionary<string, string> newSettings)
+    public void MergeSettings(Dictionary<string, string>? newSettings)
     {
-        if (Settings == null) Settings = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
-        if (newSettings != null)
+        if (Settings is null) { 
+            Settings = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
+        }
+
+        if (newSettings is not null)
         {
             foreach (var kvp in newSettings)
             {

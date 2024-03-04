@@ -52,7 +52,7 @@ public interface ISyncSerializer<TObject> : ISyncSerializerBase
     SyncAttempt<TObject> DeserializeSecondPass(TObject item, XElement node, SyncSerializerOptions options);
 
     ChangeType IsCurrent(XElement node, SyncSerializerOptions options);
-    ChangeType IsCurrent(XElement node, XElement current, SyncSerializerOptions options);
+    ChangeType IsCurrent(XElement node, XElement? current, SyncSerializerOptions options);
 
     /// <summary>
     ///  Find an Item based on the XML node representation

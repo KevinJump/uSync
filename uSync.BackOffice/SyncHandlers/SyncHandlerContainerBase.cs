@@ -11,6 +11,7 @@ using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Models.Entities;
 using Umbraco.Cms.Core.Notifications;
+using Umbraco.Cms.Core.PropertyEditors.ValueConverters;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Strings;
 using Umbraco.Extensions;
@@ -72,19 +73,21 @@ namespace uSync.BackOffice.SyncHandlers
             var folders = GetChildItems(parent, this.itemContainerType);
             foreach (var fdlr in folders)
             {
-                logger.LogDebug("Checking Container: {folder} for any childItems [{type}]", fdlr.Id, fdlr?.GetType()?.Name ?? "Unknown");
+                if (fdlr is null) continue;
+
+                logger.LogDebug("Checking Container: {folder} for any childItems [{type}]", fdlr.Id, fdlr.GetType()?.Name ?? "Unknown");
                 actions.AddRange(CleanFolders(fdlr.Id));
 
                 if (!HasChildren(fdlr))
                 {
                     // get the name (from the slim)
-                    var name = fdlr.Id.ToString();
+                    var name = fdlr.Id.ToString() ?? string.Empty;
                     if (fdlr is IEntitySlim slim)
                     {
                         // if this item isn't an container type, don't delete. 
                         if (ObjectTypes.GetUmbracoObjectType(slim.NodeObjectType) != this.itemContainerType) continue;
 
-                        name = slim.Name;
+                        name = slim.Name ?? name;
                         logger.LogDebug("Folder has no children {name} {type}", name, slim.NodeObjectType);
                     }
 
@@ -158,9 +161,12 @@ namespace uSync.BackOffice.SyncHandlers
                     foreach (var attempt in attempts.Where(x => x.Success))
                     {
                         // when its flat structure and use guidNames, we don't need to cleanup.
-                        if (!(this.DefaultConfig.GuidNames && this.DefaultConfig.UseFlatStructure))
+                        if ((this.DefaultConfig.GuidNames && this.DefaultConfig.UseFlatStructure) is false)
                         {
-                            CleanUp(obj, attempt.FileName, folders.Last());
+                            if (attempt.FileName is not null)
+                            {
+                                CleanUp(obj, attempt.FileName, folders.Last());
+                            }
                         }
 
                         actions.Add(attempt);
@@ -261,7 +267,7 @@ namespace uSync.BackOffice.SyncHandlers
             var results = new List<OrderedNodeInfo>();
             foreach (var key in sortedList)
             {
-                if(nodes.TryGetValue(key, out OrderedNodeInfo value))
+                if(nodes.TryGetValue(key, out OrderedNodeInfo? value) && value is not null)
                     results.Add(value);
             }
 

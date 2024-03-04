@@ -34,11 +34,11 @@ namespace uSync.Community.Contrib.Mappers
 
             foreach (var item in elements.AsListOfJsonObjects())
             {
-                var itemValue = item.GetPropertyAsObject("value");
-                if (itemValue == null) continue;
+                var itemValue = item?.GetPropertyAsObject("value");
+                if (itemValue is null) continue;
 
                 var doctype = GetDocTypeByKey(item, "elementType");
-                if (doctype == null) continue;
+                if (doctype is null) continue;
 
                 GetImportProperties(itemValue, doctype);
             }
@@ -51,7 +51,7 @@ namespace uSync.Community.Contrib.Mappers
         {
             var stringValue = GetValueAs<string>(value);
 
-            if (stringValue.TryParseToJsonArray(out JsonArray elements) is false || elements is null)
+            if (stringValue.TryParseToJsonArray(out JsonArray? elements) is false || elements is null)
                 return Enumerable.Empty<uSyncDependency>();
 
             if (elements == null || !elements.Any())
@@ -61,6 +61,8 @@ namespace uSync.Community.Contrib.Mappers
 
             foreach (var item in elements.AsListOfJsonObjects())
             {
+                if (item is null) continue;
+
                 var itemValue = item.GetPropertyAsObject("value");
                 if (itemValue == null) continue;
 

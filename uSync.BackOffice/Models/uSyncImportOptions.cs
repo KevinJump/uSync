@@ -18,7 +18,7 @@ namespace uSync.BackOffice.Models
         /// <summary>
         /// Handler set to load for operation
         /// </summary>
-        public string HandlerSet { get; set; }
+        public string HandlerSet { get; set; } = string.Empty;
 
         /// <summary>
         /// Flags to pass to the serializers 
@@ -28,23 +28,23 @@ namespace uSync.BackOffice.Models
         /// <summary>
         /// Additional settings on the handlers/serializers for this operation
         /// </summary>
-        public Dictionary<string, string> Settings { get; set; }
+        public Dictionary<string, string> Settings { get; set; } = [];
 
         /// <summary>
         /// SignalR callbacks to use for UI communication
         /// </summary>
-        public uSyncCallbacks Callbacks { get; set; }
+        public uSyncCallbacks? Callbacks { get; set; }
 
         /// <summary>
         /// Root folder for all uSync operations
         /// </summary>
         [Obsolete("Pass array of folders, will be removed in v15")]
-        public string RootFolder { get; set; }
+        public string RootFolder { get; set; } = string.Empty;
 
         /// <summary>
         ///  collection of root folders, that are merged for the action
         /// </summary>
-        public string[] Folders { get; set; }
+        public string[] Folders { get; set; } = [];
 
         /// <summary>
         /// (reserved for future use)

@@ -54,7 +54,8 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             this.contentService = contentService;
 
             // make sure we load up the template serializer - because we need that one, not the normal content one.
-            this.serializer = syncItemFactory.GetSerializer<IContent>("contentTemplateSerializer");
+            this.serializer = syncItemFactory.GetSerializer<IContent>("contentTemplateSerializer") ??
+                throw new NullReferenceException("Can not load the contentTemplateSerializer");
         }
 
         /// <summary>
@@ -66,19 +67,19 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         /// <summary>
         ///  Fetch a content template via the ContentService
         /// </summary>
-        protected override IContent GetFromService(int id)
+        protected override IContent? GetFromService(int id)
             => contentService.GetBlueprintById(id);
 
         /// <summary>
         ///  Fetch a content template via the ContentService
         /// </summary>
-        protected override IContent GetFromService(Guid key)
+        protected override IContent? GetFromService(Guid key)
             => contentService.GetBlueprintById(key);
 
         /// <summary>
         ///  Fetch a content template via the ContentService
         /// </summary>
-        protected override IContent GetFromService(string alias)
+        protected override IContent? GetFromService(string alias)
             => null;
 
         /// <summary>
@@ -95,6 +96,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
                 var attempts = Export(item, handlerFolders, DefaultConfig);
                 foreach (var attempt in attempts.Where(x => x.Success))
                 {
+                    if (attempt.FileName is null) continue;
                     this.CleanUp(item, attempt.FileName, handlerFolders.Last());
                 }
             }

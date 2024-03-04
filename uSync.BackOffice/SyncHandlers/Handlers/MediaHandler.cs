@@ -61,7 +61,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             => mediaService.HasChildren(item.Id);
 
         /// <inheritdoc/>
-        protected override IEnumerable<IEntity> GetChildItems(IEntity parent)
+        protected override IEnumerable<IEntity> GetChildItems(IEntity? parent)
         {
             if (parent != null)
             {

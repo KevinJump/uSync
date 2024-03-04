@@ -23,7 +23,7 @@ namespace uSync
         {
             var env = builderContext.HostingEnvironment;
             var fileRootName =
-                Path.Combine(Path.GetDirectoryName(filename), Path.GetFileNameWithoutExtension(filename));
+                Path.Combine(Path.GetDirectoryName(filename) ?? string.Empty, Path.GetFileNameWithoutExtension(filename));
 
             configurationBuilder.AddJsonFile($"{fileRootName}.json", optional: true, reloadOnChange: true);
             configurationBuilder.AddJsonFile($"{fileRootName}.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);

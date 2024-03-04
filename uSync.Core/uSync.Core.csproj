@@ -15,7 +15,6 @@
 		<PackageReadmeFile>readme.md</PackageReadmeFile>
 
 		<ImplicitUsings>enable</ImplicitUsings>
-		<Nullable>enable</Nullable>
 
 	</PropertyGroup>
 

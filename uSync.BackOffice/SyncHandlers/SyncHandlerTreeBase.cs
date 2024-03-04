@@ -39,7 +39,7 @@ namespace uSync.BackOffice.SyncHandlers
         { }
 
         /// <inheritdoc/>
-        protected override string GetItemName(TObject item) => item.Name;
+        protected override string GetItemName(TObject item) => item.Name ?? item.Id.ToString();
 
         /// <inheritdoc/>
         protected override bool DoItemsMatch(XElement node, TObject item)

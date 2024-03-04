@@ -1,5 +1,7 @@
 ﻿using System;
 
+using static Umbraco.Cms.Core.Constants;
+
 namespace uSync.BackOffice.SyncHandlers
 {
     /// <summary>
@@ -46,11 +48,11 @@ namespace uSync.BackOffice.SyncHandlers
         /// <summary>
         ///  icon for handler used in UI
         /// </summary>
-        public string Icon { get; set; }
+        public string Icon { get; set; } = "icon-bug";
 
         /// <summary>
         ///  Umbraco Entity type handler works with
         /// </summary>
-        public string EntityType { get; set; }
+        public string EntityType { get; set; } = UdiEntityType.Unknown;
     }
 }

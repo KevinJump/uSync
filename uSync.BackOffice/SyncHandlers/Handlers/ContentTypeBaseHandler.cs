@@ -50,7 +50,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             // with roots enabled - we attempt to merge doctypes ! 
             // 
             var attempt = SerializeItem(item, new Core.Serialization.SyncSerializerOptions(config.Settings));
-            if (attempt.Success)
+            if (attempt.Success && attempt.Item is not null)
             {
                 if (ShouldExport(attempt.Item, config))
                 {

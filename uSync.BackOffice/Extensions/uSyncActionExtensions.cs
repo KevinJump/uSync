@@ -42,6 +42,8 @@ namespace uSync.BackOffice
 
             foreach(var items in actions.GroupBy(x => x.HandlerAlias))
             {
+                if (items.Key is null) continue;
+
                 var fails = items.Where(x => !x.Success).ToList();
 
                 summary.Add(uSyncAction.SetAction(

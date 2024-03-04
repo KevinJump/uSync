@@ -49,7 +49,7 @@ namespace uSync.BackOffice
 
         private readonly ICoreScopeProvider _scopeProvider;
 
-        private readonly IBackgroundTaskQueue _backgroundTaskQueue;
+        private readonly IBackgroundTaskQueue? _backgroundTaskQueue;
 
         private readonly IAppCache _appCache;
 
@@ -136,7 +136,7 @@ namespace uSync.BackOffice
         /// <param name="handlerOptions">Options to use for the report - used to load the handlers.</param>
         /// <param name="callbacks">Callback functions to keep UI up to date</param>
         /// <returns>List of actions detailing what would and wouldn't change</returns>
-        public IEnumerable<uSyncAction> Report(string folder, SyncHandlerOptions handlerOptions, uSyncCallbacks callbacks = null)
+        public IEnumerable<uSyncAction> Report(string folder, SyncHandlerOptions handlerOptions, uSyncCallbacks? callbacks = null)
         {
             handlerOptions ??= new SyncHandlerOptions();
             handlerOptions.Action = HandlerActions.Report;
@@ -152,7 +152,7 @@ namespace uSync.BackOffice
         /// <param name="handlerAliases">List of Aliases for the sync handlers to use</param>
         /// <param name="callbacks">Callback functions to keep UI up to date</param>
         /// <returns>List of actions detailing what would and wouldn't change</returns>
-        public IEnumerable<uSyncAction> Report(string folder, IEnumerable<string> handlerAliases, uSyncCallbacks callbacks)
+        public IEnumerable<uSyncAction> Report(string folder, IEnumerable<string> handlerAliases, uSyncCallbacks? callbacks)
         {
             var handlers = _handlerFactory.GetDefaultHandlers(handlerAliases);
             return Report(folder, handlers, callbacks);
@@ -165,7 +165,7 @@ namespace uSync.BackOffice
         /// <param name="handlers">List of SyncHandlers to use for the report</param>
         /// <param name="callbacks">Callback functions to keep UI up to date</param>
         /// <returns>List of actions detailing what would and wouldn't change</returns>
-        public IEnumerable<uSyncAction> Report(string folder, IEnumerable<HandlerConfigPair> handlers, uSyncCallbacks callbacks)
+        public IEnumerable<uSyncAction> Report(string folder, IEnumerable<HandlerConfigPair> handlers, uSyncCallbacks? callbacks)
         {
 
             var sw = Stopwatch.StartNew();
@@ -228,13 +228,13 @@ namespace uSync.BackOffice
         /// <param name="callbacks">Callbacks to keep UI informed</param>
         /// <returns>List of actions detailing what did and didn't change</returns>
         [Obsolete("call import with the folder array to utilize root functionality.")]
-        public IEnumerable<uSyncAction> Import(string folder, bool force, SyncHandlerOptions handlerOptions, uSyncCallbacks callbacks = null)
+        public IEnumerable<uSyncAction> Import(string folder, bool force, SyncHandlerOptions handlerOptions, uSyncCallbacks? callbacks = null)
             => Import([folder], force, handlerOptions, callbacks);
 
         /// <summary>
         ///  Import items into Umbraco from a given set of folders
         /// </summary>
-        public IEnumerable<uSyncAction> Import(string[] folders, bool force, SyncHandlerOptions handlerOptions, uSyncCallbacks callbacks = null)
+        public IEnumerable<uSyncAction> Import(string[] folders, bool force, SyncHandlerOptions handlerOptions, uSyncCallbacks? callbacks = null)
         {
             handlerOptions ??= new SyncHandlerOptions();
             handlerOptions.Action = HandlerActions.Import;
@@ -252,7 +252,7 @@ namespace uSync.BackOffice
         /// <param name="callbacks">Callbacks to keep UI informed</param>
         /// <returns>List of actions detailing what did and didn't change</returns>
         [Obsolete("call import with the folder array to utilize root functionality.")]
-        public IEnumerable<uSyncAction> Import(string folder, bool force, IEnumerable<string> handlerAliases, uSyncCallbacks callbacks)
+        public IEnumerable<uSyncAction> Import(string folder, bool force, IEnumerable<string> handlerAliases, uSyncCallbacks? callbacks)
         {
             var handlers = _handlerFactory.GetDefaultHandlers(handlerAliases);
             return Import([folder], force, handlers, callbacks);
@@ -267,14 +267,14 @@ namespace uSync.BackOffice
         /// <param name="callbacks">Callbacks to keep UI informed</param>
         /// <returns>List of actions detailing what did and didn't change</returns>
         [Obsolete("we import multiple folders now, will be removed in v15")]
-        public IEnumerable<uSyncAction> Import(string folder, bool force, IEnumerable<HandlerConfigPair> handlers, uSyncCallbacks callbacks)
+        public IEnumerable<uSyncAction> Import(string folder, bool force, IEnumerable<HandlerConfigPair> handlers, uSyncCallbacks? callbacks)
             => Import([folder], force, handlers, callbacks);
 
         /// <summary>
         ///  Import items into Umbraco from a given set of folders
         /// </summary>
         /// <returns>List of actions detailing what did and didn't change</returns>
-        public IEnumerable<uSyncAction> Import(string[] folders, bool force, IEnumerable<HandlerConfigPair> handlers, uSyncCallbacks callbacks)
+        public IEnumerable<uSyncAction> Import(string[] folders, bool force, IEnumerable<HandlerConfigPair> handlers, uSyncCallbacks? callbacks)
         {
             // if its blank, we just throw it back empty. 
             if (handlers == null || !handlers.Any()) return Enumerable.Empty<uSyncAction>();
@@ -391,6 +391,8 @@ namespace uSync.BackOffice
         /// <returns>Action detailing change or not</returns>
         public uSyncAction ImportSingleAction(uSyncAction action)
         {
+            if (action.HandlerAlias is null || action.FileName is null) return new();
+
             var handlerConfig = _handlerFactory.GetValidHandler(action.HandlerAlias);
 
             if (handlerConfig != null)
@@ -401,7 +403,6 @@ namespace uSync.BackOffice
             }
 
             return new uSyncAction();
-
         }
 
         #endregion
@@ -434,7 +435,7 @@ namespace uSync.BackOffice
         /// <param name="handlerOptions">Handler options to use when loading handlers</param>
         /// <param name="callbacks">callback functions to update the UI</param>
         /// <returns>List of actions detailing what was exported</returns>
-        public IEnumerable<uSyncAction> Export(string folder, SyncHandlerOptions handlerOptions, uSyncCallbacks callbacks = null)
+        public IEnumerable<uSyncAction> Export(string folder, SyncHandlerOptions handlerOptions, uSyncCallbacks? callbacks = null)
         {
             handlerOptions ??= new SyncHandlerOptions();
             handlerOptions.Action = HandlerActions.Export;
@@ -481,7 +482,7 @@ namespace uSync.BackOffice
                     if (!format.InvariantEquals(Core.uSyncConstants.FormatVersion))
                     {
                         var expectedVersion = SemVersion.Parse(Core.uSyncConstants.FormatVersion);
-                        if (SemVersion.TryParse(format, out SemVersion current))
+                        if (SemVersion.TryParse(format, out SemVersion? current) && current is not null)
                         {
                             if (current.CompareTo(expectedVersion) >= 0) return true;
                         }
@@ -504,13 +505,12 @@ namespace uSync.BackOffice
             {
                 var versionFile = Path.Combine(_syncFileService.GetAbsPath(folder), $"usync.{_uSyncConfig.Settings.DefaultExtension}");
                 var versionNode = new XElement("uSync",
-                    new XAttribute("version", typeof(uSync).Assembly.GetName().Version.ToString()),
+                    new XAttribute("version", typeof(uSync).Assembly.GetName()?.Version?.ToString() ?? "14.0.0"),
                     new XAttribute("format", Core.uSyncConstants.FormatVersion));
                 // remove date, we don't really care, and it causes unnecessary git changes.
 
-                Directory.CreateDirectory(Path.GetDirectoryName(versionFile));
-
-                versionNode.Save(versionFile);
+                _syncFileService.CreateFoldersForFile(versionFile);
+                _syncFileService.SaveXElement(versionNode, versionFile);
             }
             catch (Exception ex)
             {
@@ -525,7 +525,7 @@ namespace uSync.BackOffice
         /// <param name="handlerAliases">aliases for the handlers to use while exporting</param>
         /// <param name="callbacks">callback functions to update the UI</param>
         /// <returns>List of actions detailing what was exported</returns>
-        public IEnumerable<uSyncAction> Export(string folder, IEnumerable<string> handlerAliases, uSyncCallbacks callbacks)
+        public IEnumerable<uSyncAction> Export(string folder, IEnumerable<string> handlerAliases, uSyncCallbacks? callbacks)
         {
             var handlers = _handlerFactory.GetDefaultHandlers(handlerAliases);
             return Export(folder, handlers, callbacks);
@@ -538,7 +538,7 @@ namespace uSync.BackOffice
         /// <param name="handlers">Handler config pairs</param>
         /// <param name="callbacks">callback functions to update the UI</param>
         /// <returns>List of actions detailing what was exported</returns>
-        public IEnumerable<uSyncAction> Export(string folder, IEnumerable<HandlerConfigPair> handlers, uSyncCallbacks callbacks)
+        public IEnumerable<uSyncAction> Export(string folder, IEnumerable<HandlerConfigPair> handlers, uSyncCallbacks? callbacks)
         {
             var sw = Stopwatch.StartNew();
 

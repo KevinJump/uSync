@@ -12,9 +12,6 @@ public class DataTypeTracker : SyncXmlTracker<IDataType>, ISyncTracker<IDataType
 {
     private readonly SyncConfigMergerCollection _configMergers;
 
-    public DataTypeTracker(SyncSerializerCollection serializers)
-        : base(serializers) { }
-
     public DataTypeTracker(
         SyncSerializerCollection serializers,
         SyncConfigMergerCollection configMergers)

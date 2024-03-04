@@ -12,8 +12,8 @@ namespace uSync.BackOffice
     /// </summary>
     internal class uSyncTriggers
     {
-        internal static event uSyncTriggerEventHandler DoExport;
-        internal static event uSyncTriggerEventHandler DoImport;
+        internal static event uSyncTriggerEventHandler? DoExport;
+        internal static event uSyncTriggerEventHandler? DoImport;
 
         /// <summary>
         ///  trigger an export of an item programatically.
@@ -24,7 +24,7 @@ namespace uSync.BackOffice
         public static void TriggerExport(string folder, IEnumerable<string> entityTypes, SyncHandlerOptions options)
             => TriggerExport([folder], entityTypes, options);
 
-        public static void TriggerExport(string[] folders, IEnumerable<string> entityTypes, SyncHandlerOptions options)
+        public static void TriggerExport(string[] folders, IEnumerable<string> entityTypes, SyncHandlerOptions? options)
         {
             DoExport?.Invoke(new uSyncTriggerArgs()
             {
@@ -34,7 +34,7 @@ namespace uSync.BackOffice
             });
         }
 
-        public static void TriggerImport(string folder, IEnumerable<string> entityTypes, SyncHandlerOptions options)
+        public static void TriggerImport(string folder, IEnumerable<string> entityTypes, SyncHandlerOptions? options)
         {
             DoImport?.Invoke(new uSyncTriggerArgs()
             {
@@ -49,11 +49,11 @@ namespace uSync.BackOffice
 
     internal class uSyncTriggerArgs
     {
-        public string Folder { get; set; }
+        public string Folder { get; set; } = string.Empty;
 
-        public IEnumerable<string> EntityTypes { get; set; }
+        public IEnumerable<string> EntityTypes { get; set; } = [];
 
-        public SyncHandlerOptions HandlerOptions { get; set; }
+        public SyncHandlerOptions? HandlerOptions { get; set; }
 
     }
 }

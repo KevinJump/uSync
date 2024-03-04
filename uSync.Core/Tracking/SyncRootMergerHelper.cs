@@ -127,7 +127,7 @@ public class SyncRootMergerHelper
         var differenceCollection = XElement.Parse(targetCollection.ToString());
         var combinedCollection = XElement.Parse(sourceCollection.ToString());
 
-
+        if (item.Keys is null) return (differenceCollection, combinedCollection);
 
         foreach (var sourceElement in sourceCollection.Elements(element))
         {
@@ -183,8 +183,10 @@ public class SyncRootMergerHelper
         return node;
     }
 
-    private static string GetKey(XElement collection, string keyName)
+    private static string GetKey(XElement collection, string? keyName)
     {
+        if (keyName is null) return string.Empty;
+
         if (keyName.StartsWith('@'))
         {
             return collection.Attribute(keyName.Substring(1))?.Value ?? string.Empty; ;

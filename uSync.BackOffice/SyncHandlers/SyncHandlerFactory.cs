@@ -24,7 +24,7 @@ namespace uSync.BackOffice.SyncHandlers
         private IOptionsMonitor<uSyncHandlerSetSettings> _handlerSetSettingsAccessor;
 
         /// <summary>
-        ///  Craete a new SyncHandlerFactory object
+        ///  Create a new SyncHandlerFactory object
         /// </summary>
         public SyncHandlerFactory(
             ILogger<SyncHandlerFactory> logger,
@@ -54,7 +54,7 @@ namespace uSync.BackOffice.SyncHandlers
         /// <summary>
         ///  Get a handler by alias 
         /// </summary>
-        public ISyncHandler GetHandler(string alias)
+        public ISyncHandler? GetHandler(string alias)
             => _syncHandlers.Handlers
                 .FirstOrDefault(x => x.Alias.InvariantEquals(alias));
 
@@ -98,14 +98,14 @@ namespace uSync.BackOffice.SyncHandlers
         /// <summary>
         ///  Get a valid handler (based on config) by alias and options
         /// </summary>
-        public HandlerConfigPair GetValidHandler(string alias, SyncHandlerOptions options = null)
+        public HandlerConfigPair? GetValidHandler(string alias, SyncHandlerOptions? options = null)
              => GetValidHandlers(options)
                  .FirstOrDefault(x => x.Handler.Alias.InvariantEquals(alias));
 
         /// <summary>
         ///  Get a valid handler (based on config) by ItemType and options
         /// </summary>
-        public HandlerConfigPair GetValidHandlerByTypeName(string itemType, SyncHandlerOptions options = null)
+        public HandlerConfigPair? GetValidHandlerByTypeName(string itemType, SyncHandlerOptions? options = null)
             => GetValidHandlers(options)
                 .Where(x => itemType.InvariantEquals(x.Handler.TypeName))
                 .FirstOrDefault();
@@ -113,15 +113,14 @@ namespace uSync.BackOffice.SyncHandlers
         /// <summary>
         ///  Get a valid handler (based on config) by Umbraco Entity Type and options
         /// </summary>
-        public HandlerConfigPair GetValidHandlerByEntityType(string entityType, SyncHandlerOptions options = null)
+        public HandlerConfigPair? GetValidHandlerByEntityType(string entityType, SyncHandlerOptions? options = null)
             => GetValidHandlers(options)
-                .Where(x => x.Handler.EntityType.InvariantEquals(entityType))
-                .FirstOrDefault();
+                .FirstOrDefault(x => x.Handler.EntityType.InvariantEquals(entityType) is true);
 
         /// <summary>
         ///  Get a valid handler (based on config) by options
         /// </summary>
-        public HandlerConfigPair GetValidHander<TObject>(SyncHandlerOptions options = null)
+        public HandlerConfigPair? GetValidHander<TObject>(SyncHandlerOptions? options = null)
             => GetValidHandlers(options)
                 .Where(x => x.Handler.ItemType == typeof(TObject).Name)
                 .FirstOrDefault();
@@ -130,7 +129,7 @@ namespace uSync.BackOffice.SyncHandlers
         /// <summary>
         ///  Get a all valid handlers (based on config) that can handle a given entityType
         /// </summary>
-        public IEnumerable<HandlerConfigPair> GetValidHandlersByEntityType(IEnumerable<string> entityTypes, SyncHandlerOptions options = null)
+        public IEnumerable<HandlerConfigPair> GetValidHandlersByEntityType(IEnumerable<string> entityTypes, SyncHandlerOptions? options = null)
             => GetValidHandlers(options)
                 .Where(x => entityTypes.InvariantContains(x.Handler.EntityType));
 
@@ -138,7 +137,7 @@ namespace uSync.BackOffice.SyncHandlers
         /// <summary>
         ///  Get the valid (by config) handler groups avalible to this setup
         /// </summary>
-        public IEnumerable<string> GetValidGroups(SyncHandlerOptions options = null)
+        public IEnumerable<string> GetValidGroups(SyncHandlerOptions? options = null)
         {
             var handlers = GetValidHandlers(options);
             var groups = handlers
@@ -158,7 +157,7 @@ namespace uSync.BackOffice.SyncHandlers
         ///  if we don't have a defined icon for a group, the icon from the first handler in the group
         ///  will be used. 
         /// </remarks>
-        public IDictionary<string, string> GetValidHandlerGroupsAndIcons(SyncHandlerOptions options = null)
+        public IDictionary<string, string> GetValidHandlerGroupsAndIcons(SyncHandlerOptions? options = null)
         {
             var handlers = GetValidHandlers(options);
 
@@ -170,7 +169,7 @@ namespace uSync.BackOffice.SyncHandlers
         /// <summary>
         ///  get a collection of valid handlers that match the list of aliases 
         /// </summary>
-        public IEnumerable<HandlerConfigPair> GetValidHandlers(string[] aliases, SyncHandlerOptions options = null)
+        public IEnumerable<HandlerConfigPair> GetValidHandlers(string[] aliases, SyncHandlerOptions? options = null)
             => GetValidHandlers(options)
                 .Where(x => aliases.InvariantContains(x.Handler.Alias));
 
@@ -193,7 +192,7 @@ namespace uSync.BackOffice.SyncHandlers
         /// <summary>
         /// Get all valid (by configuration) handlers that fufill the criteria set out in the passed SyncHandlerOptions 
         /// </summary>
-        public IEnumerable<HandlerConfigPair> GetValidHandlers(SyncHandlerOptions options = null)
+        public IEnumerable<HandlerConfigPair> GetValidHandlers(SyncHandlerOptions? options = null)
         {
             if (options == null) options = new SyncHandlerOptions();
 
@@ -203,6 +202,8 @@ namespace uSync.BackOffice.SyncHandlers
     
             foreach (var handler in _syncHandlers.Handlers.Where(x => options.IncludeDisabled || x.Enabled))
             {
+                if (handler is null) continue;
+
                 if (!options.IncludeDisabled && handlerSetSettings.DisabledHandlers.InvariantContains(handler.Alias))
                 {
                     _logger.LogTrace("Handler {handler} is in the disabled handler list", handler.Alias);
@@ -212,7 +213,7 @@ namespace uSync.BackOffice.SyncHandlers
                 var config = LoadHandlerConfig(handler, handlerSetSettings);
 
                 // check its valid for the passed group and action. 
-                if (handler != null && IsValidHandler(config, options.Action, options.Group))
+                if (IsValidHandler(config, options.Action, options.Group))
                 {
                     configs.Add(config);
                 }
@@ -220,7 +221,7 @@ namespace uSync.BackOffice.SyncHandlers
                 {
                     _logger.LogDebug("No Handler with {alias} has been loaded", handler.Alias);
                     // only log if we are doing the default 'everything' group 
-                    // because when foing groups we choose not to load things. 
+                    // because when doing groups we choose not to load things. 
                     if (string.IsNullOrWhiteSpace(options.Group))
                         _logger.LogWarning("No Handler with {alias} has been loaded", handler.Alias);
                 }

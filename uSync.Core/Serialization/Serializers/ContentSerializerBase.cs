@@ -765,7 +765,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
                 }
                 else
                 {
-                    friendlyPath += "/" + cachedItem.Name.ToSafeAlias(shortStringHelper);
+                    friendlyPath += "/" + cachedItem.Name?.ToSafeAlias(shortStringHelper) ?? "";
                 }
             }
 
@@ -970,7 +970,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         // nameCache.Remove(id);
     }
 
-    protected CachedName GetCachedName(int id)
+    protected CachedName? GetCachedName(int id)
               => syncMappers.EntityCache.GetName(id);
 
     protected void AddToNameCache(int id, Guid key, string name)

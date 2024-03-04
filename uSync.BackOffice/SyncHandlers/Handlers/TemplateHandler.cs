@@ -33,7 +33,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         INotificationHandler<DeletingNotification<ITemplate>>,
         INotificationHandler<MovingNotification<ITemplate>>
     {
-        private readonly IFileService fileService;
+        private readonly IFileService _fileService;
 
         /// <inheritdoc/>
         public TemplateHandler(
@@ -48,15 +48,15 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             ISyncItemFactory syncItemFactory)
             : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfig, syncItemFactory)
         {
-            this.fileService = fileService;
+            this._fileService = fileService;
         }
 
         /// <inheritdoc/>
-        protected override string GetItemName(ITemplate item) => item.Name;
+        protected override string GetItemName(ITemplate item) => item.Name ?? item.Alias;
 
         /// <inheritdoc/>
         protected override IEnumerable<IEntity> GetChildItems(int parent)
-            => fileService.GetTemplates(parent).Where(x => x is IEntity)
+            => _fileService.GetTemplates(parent).Where(x => x is IEntity)
             .Select(x => x as IEntity);
 
         /// <inheritdoc/>

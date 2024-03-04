@@ -71,26 +71,26 @@ namespace uSync.BackOffice.Expansions
         /// <summary>
         ///  Id for this tree node 
         /// </summary>
-        public string Id { get; set; }
+        public string? Id { get; set; } 
 
         /// <summary>
         ///  Alias of the tree item
         /// </summary>
-        public string Alias { get; set; }
+        public string? Alias { get; set; }
 
         /// <summary>
         ///  title (shown to user) for tree item
         /// </summary>
-        public string Title { get; set; }
+        public string? Title { get; set; }
 
         /// <summary>
         ///  Icon to display. 
         /// </summary>
-        public string Icon { get; set; }
+        public string? Icon { get; set; }
 
         /// <summary>
         ///  segment path to this item. 
         /// </summary>
-        public string Path { get; set; }
+        public string? Path { get; set; }
     }
 }

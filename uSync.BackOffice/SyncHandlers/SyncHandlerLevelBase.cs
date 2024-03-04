@@ -97,10 +97,10 @@ namespace uSync.BackOffice.SyncHandlers
         /// </summary>
         virtual protected string GetEntityTreeName(IUmbracoEntity item, bool useGuid)
         {
-            if (item != null)
+            if (item is not null)
             {
                 if (useGuid) return item.Key.ToString();
-                return item.Name.ToSafeFileName(shortStringHelper);
+                return item.Name?.ToSafeFileName(shortStringHelper) ?? Guid.NewGuid().ToString();
             }
 
             return Guid.NewGuid().ToString();
@@ -116,7 +116,7 @@ namespace uSync.BackOffice.SyncHandlers
             /// <summary>
             ///  umbraco alias of the item
             /// </summary>
-            public string Alias { get; set; }
+            public string? Alias { get; set; }
 
             /// <summary>
             ///  level (e.g 0 is root) of file
@@ -126,7 +126,7 @@ namespace uSync.BackOffice.SyncHandlers
             /// <summary>
             ///  path to the actual file.
             /// </summary>
-            public string File { get; set; }
+            public string? File { get; set; }
         }
 
         /// <summary>
@@ -139,6 +139,9 @@ namespace uSync.BackOffice.SyncHandlers
 
             using (var stream = syncFileService.OpenRead(path))
             {
+                if (stream is null)
+                    throw new FileNotFoundException($"Cannot read stream for {path}");
+
                 return XElement.Load(stream);
             }
         }

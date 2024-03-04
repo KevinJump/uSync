@@ -24,6 +24,6 @@ namespace uSync.BackOffice.Models
         /// <summary>
         /// List of actions performed by process
         /// </summary>
-        public IEnumerable<uSyncAction> Actions { get; set; }
+        public IEnumerable<uSyncAction> Actions { get; set; } = [];
     }
 }

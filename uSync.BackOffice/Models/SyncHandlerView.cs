@@ -18,26 +18,26 @@
         /// <summary>
         /// Display name of the handler 
         /// </summary>
-        public string Name { get; set; }
+        public required string Name { get; set; }
         
         /// <summary>
         /// Alias for the handler 
         /// </summary>
-        public string Alias { get; set; }
+        public required string Alias { get; set; }
 
         /// <summary>
         /// Icon to show for handler 
         /// </summary>
-        public string Icon { get; set; }
+        public string Icon { get; set; } = "icon-bug";
 
         /// <summary>
         /// Group handler belongs too
         /// </summary>
-        public string Group { get; set; }
+        public string Group { get; set; } = string.Empty;
 
         /// <summary>
         /// Set handler is currently in
         /// </summary>
-        public string Set { get; set; }
+        public string Set { get; set; } = string.Empty;
     }
 }

@@ -79,7 +79,7 @@ namespace uSync.BackOffice.Boot
                     var results = _uSyncService.Import(_uSyncConfig.GetFolders(), false, new SyncHandlerOptions
                     {
                         Group = _uSyncConfig.Settings.FirstBootGroup
-                    }, (uSyncCallbacks)null);
+                    }, null);
 
                     changes = results.CountChanges();
                 };

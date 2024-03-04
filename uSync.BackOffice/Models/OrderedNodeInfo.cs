@@ -15,17 +15,13 @@ namespace uSync.BackOffice
         /// <summary>
         ///  construct an OrderedNode
         /// </summary>
-        public OrderedNodeInfo() { }
-
-        /// <summary>
-        ///  construct an OrderedNode
-        /// </summary>
         public OrderedNodeInfo(string filename, XElement node)
         {
             FileName = filename;
             Node = node;
             Key = $"{node.Name.LocalName}_{node.GetKey()}".ToGuid();
             Alias = node.GetAlias();
+            Path = string.Empty;
         }
 
         /// <summary>

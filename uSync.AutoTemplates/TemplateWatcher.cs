@@ -31,7 +31,7 @@ namespace uSync.AutoTemplates
         private readonly IShortStringHelper _shortStringHelper;
         private readonly IHostEnvironment _hostEnvironment;
 
-        private readonly IFileSystem _templateFileSystem;
+        private readonly IFileSystem? _templateFileSystem;
 
         private readonly string _viewsFolder;
 
@@ -89,7 +89,7 @@ namespace uSync.AutoTemplates
 
         private void Watcher_Renamed(object sender, RenamedEventArgs e)
         {
-            if (!_enabled) return;
+            if (_enabled is false || e.OldName is null || e.Name is null) return;
             Thread.Sleep(_delay);
 
             var oldAlias = GetAliasFromFileName(e.OldName);
@@ -104,27 +104,28 @@ namespace uSync.AutoTemplates
 
         private void Watcher_FileDeleted(object sender, FileSystemEventArgs e)
         {
-            if (_enabled && _deleteMissing)
-            {
-                Thread.Sleep(_delay);
-                var alias = GetAliasFromFileName(e.Name);
-                SafeDeleteTemplate(alias);
-            }
+            if (_enabled is false || _deleteMissing is false || e.Name is null)
+                return;
+         
+            Thread.Sleep(_delay);
+            var alias = GetAliasFromFileName(e.Name);
+            SafeDeleteTemplate(alias);
+
         }
 
         private void Watcher_FileChanged(object sender, FileSystemEventArgs e)
         {
-            if (!_enabled) return;
-            Thread.Sleep(_delay);
+            if (_enabled is false || e.Name is null) return;
 
+            Thread.Sleep(_delay);
             CheckFile(e.Name);
         }
 
         public void CheckViewsFolder()
         {
-            if (!_enabled) return;
+            if (_enabled is false) return;
 
-            var views = _templateFileSystem.GetFiles(".", "*.cshtml");
+            var views = _templateFileSystem?.GetFiles(".", "*.cshtml") ?? [];
 
             foreach (var view in views)
             {
@@ -142,7 +143,7 @@ namespace uSync.AutoTemplates
             var templates = _fileService.GetTemplates();
             foreach (var template in templates)
             {
-                if (!_templateFileSystem.FileExists(template.Alias + ".cshtml"))
+                if (!_templateFileSystem?.FileExists(template.Alias + ".cshtml") is true)
                 {
                     SafeDeleteTemplate(template.Alias);
                 }
@@ -156,7 +157,7 @@ namespace uSync.AutoTemplates
         {
             try
             {
-                if (!_templateFileSystem.FileExists(filename)) return;
+                if (_templateFileSystem?.FileExists(filename) is false) return;
 
                 _logger.LogInformation("Checking {filename} template", filename);
 
@@ -205,11 +206,11 @@ namespace uSync.AutoTemplates
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Exeption while checking template file {filename}", filename);
+                _logger.LogWarning(ex, "Exception while checking template file {filename}", filename);
             }
         }
 
-        private ITemplate GetMasterTemplate(string alias)
+        private ITemplate? GetMasterTemplate(string alias)
         {
             if (alias == "null") return null;
             return _fileService.GetTemplate(alias);
@@ -223,7 +224,7 @@ namespace uSync.AutoTemplates
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Exeption while attempting to delete template {alias}", alias);
+                _logger.LogWarning(ex, "Exception while attempting to delete template {alias}", alias);
             }
         }
 
@@ -237,10 +238,15 @@ namespace uSync.AutoTemplates
 
         private string GetFileContents(string filename)
         {
-            using (Stream stream = _templateFileSystem.OpenFile(filename))
-            using (var reader = new StreamReader(stream, Encoding.UTF8, true))
+            using (Stream? stream = _templateFileSystem?.OpenFile(filename))
             {
-                return reader.ReadToEnd();
+
+                if (stream is null) return string.Empty;
+
+                using (var reader = new StreamReader(stream, Encoding.UTF8, true))
+                {
+                    return reader.ReadToEnd();
+                }
             }
         }
 

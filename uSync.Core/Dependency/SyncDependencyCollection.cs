@@ -1,4 +1,5 @@
 ﻿using Umbraco.Cms.Core.Composing;
+using Umbraco.Extensions;
 
 namespace uSync.Core.Dependency;
 
@@ -11,10 +12,10 @@ public class SyncDependencyCollection
     public SyncDependencyCollection(Func<IEnumerable<ISyncDependencyItem>> items)
         : base(items) { }
 
-    public IEnumerable<ISyncDependencyChecker<TObject>?> GetCheckers<TObject>()
+    public IEnumerable<ISyncDependencyChecker<TObject>> GetCheckers<TObject>()
     {
         return this.Where(x => x is ISyncDependencyChecker<TObject> checker)?
-            .Select(x => x as ISyncDependencyChecker<TObject>) ?? [];
+            .Select(x => x as ISyncDependencyChecker<TObject>).WhereNotNull() ?? [];
     }
 }
 

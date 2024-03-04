@@ -20,18 +20,18 @@ internal class SyncScopedNotificationPublisher
 {
     private readonly ILogger<SyncScopedNotificationPublisher> _logger;
     private readonly IEventAggregator _eventAggregator;
-    private readonly SyncUpdateCallback _updateCallback;
+    private readonly SyncUpdateCallback? _updateCallback;
     private readonly uSyncConfigService _uSyncConfig;
     private readonly uSyncEventService _uSyncEventService;
 
-    private readonly IBackgroundTaskQueue _backgroundTaskQueue;
+    private readonly IBackgroundTaskQueue? _backgroundTaskQueue;
 
     public SyncScopedNotificationPublisher(
         IEventAggregator eventAggregator,
         ILogger<SyncScopedNotificationPublisher> logger,
-        SyncUpdateCallback callback,
+        SyncUpdateCallback? callback,
         uSyncConfigService uSyncConfig,
-        IBackgroundTaskQueue backgroundTaskQueue,
+        IBackgroundTaskQueue? backgroundTaskQueue,
         uSyncEventService uSyncEventService)
         : base(eventAggregator, false)
     {

@@ -2,8 +2,9 @@
 
 	<PropertyGroup>
 		<TargetFramework>net8.0</TargetFramework>
-
 		<IsPackable>false</IsPackable>
+		<Nullable>disable</Nullable>
+
 	</PropertyGroup>
 
 	<ItemGroup>

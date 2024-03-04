@@ -26,8 +26,8 @@ internal static class ScopeExtensions
         ILoggerFactory loggerFactory,
         uSyncConfigService syncConfigService,
         uSyncEventService syncEventService,
-        IBackgroundTaskQueue backgroundTaskQueue,
-        SyncUpdateCallback callback)
+        IBackgroundTaskQueue? backgroundTaskQueue,
+        SyncUpdateCallback? callback)
     {
         
         var notificationPublisher = new SyncScopedNotificationPublisher(

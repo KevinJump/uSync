@@ -49,7 +49,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         }
 
         /// <inheritdoc/>
-        public override IEnumerable<uSyncAction> ExportAll(string folder, HandlerSettings config, SyncUpdateCallback callback)
+        public override IEnumerable<uSyncAction> ExportAll(string folder, HandlerSettings config, SyncUpdateCallback? callback)
         {
             var actions = new List<uSyncAction>();
 
@@ -75,8 +75,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
 
         /// <inheritdoc/>
         protected override string GetItemPath(IDomain item, bool useGuid, bool isFlat)
-            => $"{item.DomainName.ToSafeFileName(shortStringHelper)}_{item.LanguageIsoCode.ToSafeFileName(shortStringHelper)}";
-
+            => $"{item.DomainName.ToSafeFileName(shortStringHelper)}_{item.LanguageIsoCode?.ToSafeFileName(shortStringHelper)}";
 
         /// <inheritdoc/>
         protected override IEnumerable<IEntity> GetChildItems(int parent)

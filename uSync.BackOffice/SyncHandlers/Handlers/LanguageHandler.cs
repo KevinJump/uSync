@@ -131,7 +131,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
                         {
                             logger.LogDebug("Found Matching Lang File, cleaning");
                             var attempt = serializer.SerializeEmpty(item, SyncActionType.Rename, node.GetAlias());
-                            if (attempt.Success)
+                            if (attempt.Success && attempt.Item is not null)
                             {
                                 syncFileService.SaveXElement(attempt.Item, file);
                             }
@@ -143,7 +143,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
                         // language is no longer installed, make the file empty. 
                         logger.LogDebug("Language in file is not on the site, cleaning");
                         var attempt = serializer.SerializeEmpty(item, SyncActionType.Delete, node.GetAlias());
-                        if (attempt.Success)
+                        if (attempt.Success && attempt.Item is not null)
                         {
                             syncFileService.SaveXElement(attempt.Item, file);
                         }
@@ -189,7 +189,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
                 if (newLanguages.Count > 0 && newLanguages.ContainsKey(item.IsoCode))
                 {
                     newItem = true;
-                    newLanguages.TryRemove(item.IsoCode, out string name);
+                    newLanguages.TryRemove(item.IsoCode, out string? name);
                 }
 
                 var targetFolders = GetDefaultHandlerFolders();
@@ -215,6 +215,8 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
                 // we always clean up languages, because of the way they are stored. 
                 foreach (var attempt in attempts.Where(x => x.Success))
                 {
+                    if (attempt.FileName is null) continue;
+
                     this.CleanUp(item, attempt.FileName, targetFolders.Last());
                 }
 

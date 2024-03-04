@@ -39,13 +39,13 @@ internal class SyncActionService : ISyncActionService
         _logger = logger;
     }
 
-    public IEnumerable<SyncHandlerView> GetActionHandlers(HandlerActions action, uSyncOptions options)
+    public IEnumerable<SyncHandlerView> GetActionHandlers(HandlerActions action, uSyncOptions? options)
     {
-        var handlerGroup = string.IsNullOrWhiteSpace(options.Group)
+        var handlerGroup = string.IsNullOrWhiteSpace(options?.Group)
                        ? _uSyncConfig.Settings.UIEnabledGroups
                        : options.Group;
 
-        var handlerSet = string.IsNullOrWhiteSpace(options.Set)
+        var handlerSet = string.IsNullOrWhiteSpace(options?.Set)
             ? _uSyncConfig.Settings.DefaultSet
             : options.Set;
 
@@ -65,8 +65,10 @@ internal class SyncActionService : ISyncActionService
         });
     }
 
-    public SyncActionResult ReportHandler(SyncActionOptions options, uSyncCallbacks callbacks)
+    public SyncActionResult ReportHandler(SyncActionOptions options, uSyncCallbacks? callbacks)
     {
+        if (options.Handler is null) return new();
+
         var handlerSet = !string.IsNullOrWhiteSpace(options.Set)
                        ? options.Set : _uSyncConfig.Settings.DefaultSet;
 
@@ -87,8 +89,10 @@ internal class SyncActionService : ISyncActionService
     }
 
 
-    public SyncActionResult ImportHandler(SyncActionOptions options, uSyncCallbacks callbacks)
+    public SyncActionResult ImportHandler(SyncActionOptions options, uSyncCallbacks? callbacks)
     {
+        if (options.Handler is null) return new();
+
         var handlerSet = !string.IsNullOrWhiteSpace(options.Set)
                   ? options.Set : _uSyncConfig.Settings.DefaultSet;
 
@@ -109,7 +113,7 @@ internal class SyncActionService : ISyncActionService
         return new SyncActionResult(actions);
     }
 
-    public SyncActionResult ImportPost(SyncActionOptions options, uSyncCallbacks callbacks)
+    public SyncActionResult ImportPost(SyncActionOptions options, uSyncCallbacks? callbacks)
     {
 
         var handlerSet = !string.IsNullOrWhiteSpace(options.Set)
@@ -122,13 +126,15 @@ internal class SyncActionService : ISyncActionService
             handlerSet,
             options.Actions);
 
-        callbacks?.Update("Import Complete", 1, 1);
+        callbacks?.Update?.Invoke("Import Complete", 1, 1);
 
         return new SyncActionResult(actions);
     }
 
-    public SyncActionResult ExportHandler(SyncActionOptions options, uSyncCallbacks callbacks)
+    public SyncActionResult ExportHandler(SyncActionOptions options, uSyncCallbacks? callbacks)
     {
+        if (options.Handler is null) return new();
+
         var handlerSet = !string.IsNullOrWhiteSpace(options.Set)
             ? options.Set : _uSyncConfig.Settings.DefaultSet;
 
@@ -170,7 +176,7 @@ internal class SyncActionService : ISyncActionService
         var rootParent = Path.GetDirectoryName(fullRoot.TrimEnd(new char[] { '/', '\\' }));
         _logger.LogDebug("Import Folder: {fullPath} {rootPath} {fullRoot}", fullPath, rootParent, fullRoot);
 
-        if (fullPath.StartsWith(rootParent))
+        if (rootParent is not null && fullPath.StartsWith(rootParent))
         {
             _logger.LogDebug("Using Custom Folder: {fullPath}", folder);
             return folder;

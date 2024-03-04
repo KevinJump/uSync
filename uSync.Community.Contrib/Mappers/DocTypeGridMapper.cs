@@ -66,17 +66,17 @@ namespace uSync8.Community.Contrib.Mappers
         /// </remarks>
         public override string GetExportValue(object value, string editorAlias)
         {
-            if (value == null) return string.Empty;
+            if (value is null) return string.Empty;
 
             var jsonValue = GetJsonValue(value);
-            if (jsonValue == null) return value.ToString();
+            if (jsonValue == null) return value.ToString() ?? string.Empty;
 
             var docType = GetDocType(jsonValue, this.docTypeAliasValue);
-            if (docType == null) return value.ToString();
+            if (docType == null) return value.ToString() ?? string.Empty;
 
             // jarray of values 
             var docValue = jsonValue.GetPropertyAsObject("value");
-            if (docValue == null) return value.ToString();
+            if (docValue == null) return value.ToString() ?? string.Empty;
 
             // the doctypegrid editor wants the values in "real" json
             // as opposed to quite a few of these properties that 
@@ -97,7 +97,7 @@ namespace uSync8.Community.Contrib.Mappers
                     if (value != null)
                     {
                         var mappedVal = mapperCollection.Value.GetExportValue(value, property.PropertyEditorAlias).ToString();
-                        item[property.Alias] = mappedVal.ConvertToJsonNode().ExpandAllJsonInToken();
+                        item[property.Alias] = mappedVal.ConvertToJsonNode()?.ExpandAllJsonInToken();
                     }
                 }
             }
@@ -106,7 +106,7 @@ namespace uSync8.Community.Contrib.Mappers
         }
 
 
-        public override string GetImportValue(string value, string editorAlias)
+        public override string? GetImportValue(string value, string editorAlias)
         {
             try
             {
@@ -149,8 +149,12 @@ namespace uSync8.Community.Contrib.Mappers
                     var value = item[property.Alias];
                     if (value != null)
                     {
-                        var mappedVal = mapperCollection.Value.GetImportValue(value.ToString(), property.PropertyEditorAlias).ToString();
-                        item[property.Alias] = mappedVal.ConvertToJsonNode().ExpandAllJsonInToken();
+                        var mappedVal = mapperCollection.Value.GetImportValue(value.ToString(), property.PropertyEditorAlias)?.ToString();
+                        if (mappedVal is not null)
+                        {
+                            item[property.Alias] = mappedVal.ConvertToJsonNode()?.ExpandAllJsonInToken();
+                        }
+
                     }
                 }
             }

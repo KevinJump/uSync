@@ -133,7 +133,7 @@ namespace uSync.BackOffice.Services
         /// <summary>
         ///  open a file stream for reading a file 
         /// </summary>
-        public FileStream OpenRead(string path)
+        public FileStream? OpenRead(string path)
         {
             var localPath = GetAbsPath(path);
 
@@ -162,7 +162,12 @@ namespace uSync.BackOffice.Services
         {
             var absSource = GetAbsPath(source);
             var absTarget = GetAbsPath(target);
-            Directory.CreateDirectory(Path.GetDirectoryName(absTarget));
+
+            var directoryName = Path.GetDirectoryName(absTarget);
+            if (string.IsNullOrEmpty(directoryName))
+                throw new DirectoryNotFoundException($"Cannot find directory for {absTarget}");
+
+            Directory.CreateDirectory(directoryName);
             File.Copy(absSource, absTarget, true);
         }
 
@@ -173,7 +178,9 @@ namespace uSync.BackOffice.Services
         public void CreateFoldersForFile(string filePath)
         {
             var absPath = Path.GetDirectoryName(GetAbsPath(filePath));
-            if (!Directory.Exists(absPath))
+            if (string.IsNullOrEmpty(absPath)) return;
+
+            if (Directory.Exists(absPath) is false)
                 Directory.CreateDirectory(absPath);
         }
 
@@ -249,6 +256,9 @@ namespace uSync.BackOffice.Services
             {
                 using (var stream = OpenRead(file))
                 {
+                    if (stream is null) 
+                        throw new FileNotFoundException($"Cannot create stream for {file}"); ;
+
                     return XElement.Load(stream);
                 }
             }
@@ -308,18 +318,20 @@ namespace uSync.BackOffice.Services
         /// <summary>
         ///  Load an object from XML representation on disk.
         /// </summary>
-        public TObject LoadXml<TObject>(string file)
+        public TObject? LoadXml<TObject>(string file)
         {
             if (FileExists(file))
             {
                 XmlSerializer xmlSerializer = new XmlSerializer(typeof(TObject));
                 using (var stream = OpenRead(file))
                 {
-                    var item = (TObject)xmlSerializer.Deserialize(stream);
+                    if (stream is null) return default;
+
+                    TObject? item = (TObject?)xmlSerializer.Deserialize(stream);
                     return item;
                 }
             }
-            return default(TObject);
+            return default;
         }
 
         /// <summary>
@@ -488,7 +500,7 @@ namespace uSync.BackOffice.Services
         ///  the doctype tracker merges properties so you can have 
         ///  property level root values for doctypes. 
         /// </remarks>
-        public IEnumerable<OrderedNodeInfo> MergeFolders(string[] folders, string extension, ISyncTrackerBase trackerBase)
+        public IEnumerable<OrderedNodeInfo> MergeFolders(string[] folders, string extension, ISyncTrackerBase? trackerBase)
         {
             var elements = new Dictionary<string, OrderedNodeInfo>();
 
@@ -502,7 +514,7 @@ namespace uSync.BackOffice.Services
 
                 foreach (var item in items)
                 {
-                    if (elements.ContainsKey(item.Key))
+                    if (trackerBase is not null && elements.ContainsKey(item.Key))
                     {
                         // merge these files.
                         item.Value.SetNode(trackerBase.MergeFiles(elements[item.Key].Node, item.Value.Node));
@@ -539,7 +551,7 @@ namespace uSync.BackOffice.Services
         /// <summary>
         ///  will load the most relevant version of a file. 
         /// </summary>
-        public XElement GetNearestNode(string filePath, string[] folders)
+        public XElement? GetNearestNode(string filePath, string[] folders)
         {
             foreach (var folder in folders.Reverse())
             {
@@ -557,11 +569,12 @@ namespace uSync.BackOffice.Services
         /// <remarks>
         ///  the default merger returns the whole xml as the difference. 
         /// </remarks>
-        public XElement GetDifferences(List<XElement> nodes, ISyncTrackerBase trackerBase)
+        public XElement? GetDifferences(List<XElement> nodes, ISyncTrackerBase? trackerBase)
         {
-            if (nodes?.Count == 0) return null;
-            if (nodes.Count == 1) return nodes[0];
-   
+            if (nodes is null || nodes?.Count == 0) return null;
+            if (nodes!.Count == 1) return nodes[0];
+
+            if (trackerBase is null) return null;
             return trackerBase.GetDifferences(nodes);
         }
 
@@ -593,10 +606,9 @@ namespace uSync.BackOffice.Services
         private string[] GetFilePaths(string folder, string extension)
             => Directory.GetFiles(folder, $"*.{extension}", SearchOption.AllDirectories);
 
-        private XElement LoadXElementSafe(string file)
+        private XElement? LoadXElementSafe(string file)
         {
             var absPath = GetAbsPath(file);
-
             if (FileExists(absPath) is false) return null;
 
             try

@@ -60,7 +60,10 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             this.contentService = contentService;
 
             // make sure we get the default content serializer (not just the first one that loads)
-            this.serializer = syncItemFactory.GetSerializer<IContent>("ContentSerializer");
+            var s = syncItemFactory.GetSerializer<IContent>("ContentSerializer");
+            if (s is null)
+                throw new KeyNotFoundException("Cannot load content serializer");
+            this.serializer = s;
         }
 
         /// <inheritdoc />
@@ -75,7 +78,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         ///  the actual type for content and media, we save ourselves an extra lookup later on
         ///  and this speeds up the itteration by quite a bit (onle less db trip per item).
         /// </remarks>
-        protected override IEnumerable<IEntity> GetChildItems(IEntity parent)
+        protected override IEnumerable<IEntity> GetChildItems(IEntity? parent)
         {
             if (parent != null)
             {

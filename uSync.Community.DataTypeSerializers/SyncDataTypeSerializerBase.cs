@@ -48,7 +48,7 @@ namespace uSync8.Community.DataTypeSerializers
             return path + "/" + item.Name;
         }
 
-        protected virtual Udi PathToUdi(string entityPath)
+        protected virtual Udi? PathToUdi(string entityPath)
         {
             if (entityPath.IndexOf(':') == -1) return null;
 
@@ -59,7 +59,7 @@ namespace uSync8.Community.DataTypeSerializers
 
             int parentId = -1;
 
-            IEntitySlim next = null;
+            IEntitySlim? next = null;
 
             foreach (var name in names)
             {
@@ -76,7 +76,7 @@ namespace uSync8.Community.DataTypeSerializers
             return null;
         }
 
-        protected IEntitySlim FindItem(int parentId, string name, UmbracoObjectTypes objectType)
+        protected IEntitySlim? FindItem(int parentId, string name, UmbracoObjectTypes objectType)
         {
             var children = entityService.GetChildren(parentId, objectType);
             if (children.Any())
@@ -91,9 +91,9 @@ namespace uSync8.Community.DataTypeSerializers
 
     public class MappedPathConfigBase<TObject>
     {
-        public TObject Config { get; set; }
+        public TObject? Config { get; set; }
 
-        public string MappedPath { get; set; }
+        public string? MappedPath { get; set; }
     }
 
 }

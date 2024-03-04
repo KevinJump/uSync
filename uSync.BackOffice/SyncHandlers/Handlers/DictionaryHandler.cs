@@ -81,19 +81,22 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
 
         }
 
-        private IDictionaryItem GetExistingItem(string filePath)
+        private IDictionaryItem? GetExistingItem(string filePath)
         {
             syncFileService.EnsureFileExists(filePath);
 
             using (var stream = syncFileService.OpenRead(filePath))
             {
+                if (stream is null)
+                    throw new KeyNotFoundException($"Cannot load file {filePath}");
+
                 var node = XElement.Load(stream);
                 return serializer.FindItem(node);
             }
         }
 
         /// <inheritdoc/>
-        public override IEnumerable<uSyncAction> ExportAll(string folder, HandlerSettings config, SyncUpdateCallback callback)
+        public override IEnumerable<uSyncAction> ExportAll(string folder, HandlerSettings config, SyncUpdateCallback? callback)
         {
             syncFileService.CleanFolder(folder);
             return ExportAll(Guid.Empty, folder, config, callback);
@@ -106,7 +109,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         ///  You can't fetch dictionary items via the entity service so they require their own 
         ///  export method. 
         /// </remarks>
-        public IEnumerable<uSyncAction> ExportAll(Guid parent, string folder, HandlerSettings config, SyncUpdateCallback callback)
+        public IEnumerable<uSyncAction> ExportAll(Guid parent, string folder, HandlerSettings config, SyncUpdateCallback? callback)
         {
             var actions = new List<uSyncAction>();
 
@@ -166,7 +169,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             => item.ItemKey.ToSafeFileName(shortStringHelper);
 
         /// <inheritdoc/>
-        protected override IEnumerable<uSyncAction> ReportElement(XElement node, string filename, HandlerSettings config)
+        protected override IEnumerable<uSyncAction> ReportElement(XElement node, string filename, HandlerSettings? config)
         {
             if (config != null && IsOneWay(config))
             {
