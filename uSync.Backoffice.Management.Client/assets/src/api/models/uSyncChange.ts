@@ -7,9 +7,9 @@ import type { ChangeDetailType } from './ChangeDetailType';
 
 export type uSyncChange = {
     success: boolean;
-    name?: string | null;
-    path?: string | null;
-    oldValue?: string | null;
-    newValue?: string | null;
+    name: string;
+    path: string;
+    oldValue: string;
+    newValue: string;
     change: ChangeDetailType;
 };

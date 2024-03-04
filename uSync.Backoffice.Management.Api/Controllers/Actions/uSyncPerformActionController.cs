@@ -20,6 +20,6 @@ public class uSyncPerformActionController : uSyncControllerBase
 
     [HttpPost("Perform")]
     [ProducesResponseType(typeof(PerformActionResponse), 200)]
-    public object PerformAction(PerformActionRequest model)
+    public PerformActionResponse PerformAction(PerformActionRequest model)
         => _managementService.PerformAction(model);
 }

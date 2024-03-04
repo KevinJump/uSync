@@ -15,6 +15,7 @@ using uSync.BackOffice.Boot;
 using uSync.BackOffice.Cache;
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Hubs;
+using uSync.BackOffice.Legacy;
 using uSync.BackOffice.Notifications;
 using uSync.BackOffice.Services;
 using uSync.BackOffice.SyncHandlers;
@@ -80,10 +81,10 @@ public static class uSyncBackOfficeBuilderExtensions
         builder.Services.AddSignalR();
         builder.Services.AdduSyncSignalR();
 
-        builder.Services.AddAuthorization(o => CreatePolicies(o));
 
-        //builder.WithCollectionBuilder<SyncTreeNodeCollectionBuilder>()
-        //    .Add(() => builder.TypeLoader.GetTypes<ISyncTreeNode>());
+        builder.Services.AddTransient<ISyncLegacyService, SyncLegacyService>();
+
+        builder.Services.AddAuthorization(o => CreatePolicies(o));
 
         builder.Services.AddTransient<ISyncActionService, SyncActionService>();
 

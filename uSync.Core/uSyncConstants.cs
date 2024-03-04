@@ -118,3 +118,17 @@ public static partial class uSyncConstants
         public const string IncludeContent = "IncludeContent";
     }
 }
+
+/// <summary>
+///  legacy property editor names, 
+/// </summary>
+/// <remarks>
+///  saved for prosperity should they be removed from the core. 
+/// </remarks>
+public static class SyncLegacyTypes
+{
+    public const string NestedContent = "Umbraco.NestedContent";
+    public const string OurNestedContent = "Our.Umbraco.NestedContent";
+    public const string Grid = "Umbraco.Grid";
+    public const string MediaPicker = "Umbraco.MediaPicker";
+}

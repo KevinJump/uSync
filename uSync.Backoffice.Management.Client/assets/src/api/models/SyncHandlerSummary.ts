@@ -6,8 +6,8 @@
 import type { HandlerStatus } from './HandlerStatus';
 
 export type SyncHandlerSummary = {
-    icon?: string | null;
-    name?: string | null;
+    icon: string;
+    name: string;
     status: HandlerStatus;
     changes: number;
     inError: boolean;

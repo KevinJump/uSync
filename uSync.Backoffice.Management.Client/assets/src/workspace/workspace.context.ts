@@ -4,10 +4,8 @@ import { UmbContextToken } from "@umbraco-cms/backoffice/context-api";
 import { uSyncActionRepository } from "..";
 import { UmbControllerHost } from "@umbraco-cms/backoffice/controller-api";
 import { UmbControllerBase } from "@umbraco-cms/backoffice/class-api";
-import { SyncActionGroup, SyncHandlerSummary, uSyncActionView, uSyncHandlerSetSettings, uSyncSettings } from "../api";
+import { SyncActionGroup, SyncHandlerSummary, SyncLegacyCheckResponse, uSyncActionView, uSyncHandlerSetSettings, uSyncSettings } from "../api";
 
-import { OpenAPI } from "../api";
-import { UMB_AUTH_CONTEXT } from '@umbraco-cms/backoffice/auth'
 import uSyncSignalRContext, { USYNC_SIGNALR_CONTEXT_TOKEN } from "../signalr/signalr.context";
 import { UMB_WORKSPACE_CONTEXT, type UmbWorkspaceContextInterface } from "@umbraco-cms/backoffice/workspace";
 import { uSyncConstants } from "../constants";
@@ -36,13 +34,6 @@ export class uSyncWorkspaceContext extends UmbControllerBase
     #repository: uSyncActionRepository;
     #uSyncIconRegistry: uSyncIconRegistry;
     #signalRContext: uSyncSignalRContext | null = null;
-
-    /**
-     * @type Boolean 
-     * @description true when the workspace context has loaded (bound to auth)
-     */
-    #loaded = new UmbBooleanState(false);
-    public readonly loaded = this.#loaded.asObservable();
 
     /**
      * @type Array<SyncActionGroup>
@@ -86,13 +77,18 @@ export class uSyncWorkspaceContext extends UmbControllerBase
     #settings = new UmbObjectState<uSyncSettings | undefined>(undefined);
     public readonly settings = this.#settings?.asObservable();
 
+    /**
+     * @type uSyncHandlerSettings
+     * @description handler settings object
+     */
     #handlerSettings = new UmbObjectState<uSyncHandlerSetSettings | undefined>(undefined);
     public readonly handlerSettings = this.#handlerSettings?.asObservable();
 
+    #legacy = new UmbObjectState<SyncLegacyCheckResponse | undefined>(undefined);
+    public readonly legacy = this.#legacy?.asObservable();
+
     constructor(host: UmbControllerHost) {
         super(host);
-
-        console.log('workspace-context');
 
         this.provideContext(USYNC_CORE_CONTEXT_TOKEN, this);
         this.provideContext(UMB_WORKSPACE_CONTEXT, this);
@@ -100,12 +96,6 @@ export class uSyncWorkspaceContext extends UmbControllerBase
         this.#repository = new uSyncActionRepository(this);
         this.#uSyncIconRegistry = new uSyncIconRegistry();
         this.#uSyncIconRegistry.attach(this);
-
-        this.consumeContext(UMB_AUTH_CONTEXT, (_auth) => {
-            OpenAPI.TOKEN = () => _auth.getLatestToken();
-            OpenAPI.WITH_CREDENTIALS = true;
-            this.#loaded.setValue(true);
-        });
 
         this.consumeContext(USYNC_SIGNALR_CONTEXT_TOKEN, (_signalr) => {
             console.log('signalr', _signalr.getClientId());
@@ -129,6 +119,13 @@ export class uSyncWorkspaceContext extends UmbControllerBase
 
         if (data) {
             this.#settings.setValue(data);
+        }
+    }
+
+    async checkLegacy() {
+        const {data} = await this.#repository.checkLegacy();
+        if (data) {
+            this.#legacy.setValue(data);
         }
     }
 

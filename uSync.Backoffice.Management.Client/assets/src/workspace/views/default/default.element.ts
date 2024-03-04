@@ -1,15 +1,18 @@
 import { UmbElementMixin } from "@umbraco-cms/backoffice/element-api"
-import { LitElement, css, customElement, html, nothing, state } from "@umbraco-cms/backoffice/external/lit";
+import { LitElement, _$LE, css, customElement, html, nothing, state } from "@umbraco-cms/backoffice/external/lit";
 
 import { USYNC_CORE_CONTEXT_TOKEN, uSyncWorkspaceContext } from '../../workspace.context.js';
-import { SyncActionGroup, SyncHandlerSummary, uSyncActionView } from "../../../api/index.js";
+import { SyncActionGroup, SyncHandlerSummary, SyncLegacyCheckResponse, uSyncActionView } from "../../../api/index.js";
 import { UUIButtonState } from "@umbraco-cms/backoffice/external/uui";
+import { UMB_MODAL_MANAGER_CONTEXT, UmbModalManagerContext } from "@umbraco-cms/backoffice/modal";
+import { USYNC_LEGACY_MODAL } from "../../../dialogs/legacy-modal-element.js";
 
 @customElement('usync-default-view')
 export class uSyncDefaultViewElement extends UmbElementMixin(LitElement) {
 
     #actionContext? : uSyncWorkspaceContext;
     #contextLoaded: Boolean = false; 
+    #modalContext? : UmbModalManagerContext;
 
     @state()
     _actions?: Array<SyncActionGroup>
@@ -19,6 +22,9 @@ export class uSyncDefaultViewElement extends UmbElementMixin(LitElement) {
 
     @state()
     _loaded: Boolean = false;
+
+    @state()
+    _legacy?: SyncLegacyCheckResponse;
 
     @state()
     _buttonState: UUIButtonState;
@@ -40,14 +46,16 @@ export class uSyncDefaultViewElement extends UmbElementMixin(LitElement) {
 
     constructor() {
         super();
-    }
-  
-    connectedCallback(): void {
-        super.connectedCallback();
+
         this.#consumeContext();
     }
-
+  
     #consumeContext() {
+
+        this.consumeContext(UMB_MODAL_MANAGER_CONTEXT, (_modalContext) => {
+            this.#modalContext = _modalContext;
+        });
+
 
         this.consumeContext(USYNC_CORE_CONTEXT_TOKEN, (_instance) => {
             this.#actionContext = _instance;
@@ -80,15 +88,35 @@ export class uSyncDefaultViewElement extends UmbElementMixin(LitElement) {
                 }
             });
 
-            this.observe(_instance.loaded, (_loaded) => {
-                if (_loaded && this.#contextLoaded == false) {
-                    this.#actionContext?.getActions();
-                    this.#contextLoaded
+            this.observe(_instance.legacy, (_legacy) => {
+                this._legacy = _legacy;
+                console.log(this._legacy);
+
+                if (this._legacy?.hasLegacy) {
+                    this.openLegacyModal();
                 }
             })
 
+            if (this.#contextLoaded == false) {
+                this.#actionContext?.checkLegacy();
+                this.#actionContext?.getActions();
+                this.#contextLoaded
+            }
+
         });
     }
+
+    async openLegacyModal() {
+
+        const legacyModal = this.#modalContext?.open(USYNC_LEGACY_MODAL, {
+            data : this._legacy
+        });
+
+        const data = await legacyModal?.onSubmit();
+        if (!data) return;
+    }
+    
+    
 
     /**
      * @method performAction

@@ -4,34 +4,37 @@
 /* eslint-disable */
 
 export type uSyncSettings = {
-    rootFolder?: string | null;
-    folders?: Array<string> | null;
+    rootFolder: string;
+    folders: Array<string>;
+    legacyFolder: string;
     isRootSite: boolean;
     lockRoot: boolean;
-    lockRootTypes?: Array<string> | null;
-    defaultSet?: string | null;
-    importAtStartup?: string | null;
-    exportAtStartup?: string | null;
-    exportOnSave?: string | null;
-    uiEnabledGroups?: string | null;
+    lockRootTypes: Array<string>;
+    defaultSet: string;
+    importAtStartup: string;
+    exportAtStartup: string;
+    exportOnSave: string;
+    uiEnabledGroups: string;
     reportDebug: boolean;
     addOnPing: boolean;
     rebuildCacheOnCompletion: boolean;
     failOnMissingParent: boolean;
+    failOnDuplicates: boolean;
     cacheFolderKeys: boolean;
     showVersionCheckWarning: boolean;
-    customMappings?: Record<string, string> | null;
+    customMappings: Record<string, string>;
     /**
      * @deprecated
      */
-    signalRRoot?: string | null;
+    signalRRoot: string;
     enableHistory: boolean;
-    defaultExtension?: string | null;
+    defaultExtension: string;
     importOnFirstBoot: boolean;
-    firstBootGroup?: string | null;
+    firstBootGroup: string;
     disableDashboard: boolean;
     summaryDashboard: boolean;
     summaryLimit: number;
-    hideAddOns?: string | null;
+    hideAddOns: string;
     disableNotificationSuppression: boolean;
+    backgroundNotifications: boolean;
 };

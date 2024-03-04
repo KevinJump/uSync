@@ -3,10 +3,8 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export type uSyncOptions = {
-    clientId: string;
-    force: boolean;
-    clean: boolean;
-    group: string;
-    set: string;
+export type SyncLegacyCheckResponse = {
+    hasLegacy: boolean;
+    legacyFolder?: string | null;
+    legacyTypes: Array<string>;
 };

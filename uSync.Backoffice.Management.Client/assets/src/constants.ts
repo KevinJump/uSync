@@ -5,6 +5,7 @@ const _constants = {
     path: 'usync',
     icon: 'icon-infinity',
     menuName: 'Syncronisation',
+    version: "14.0.0-beta01",
 
     workspace: {
         alias: 'usync.workspace',

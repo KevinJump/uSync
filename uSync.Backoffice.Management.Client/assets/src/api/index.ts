@@ -9,13 +9,16 @@ export type { OpenAPIConfig } from './core/OpenAPI';
 
 export { ChangeDetailType } from './models/ChangeDetailType';
 export { ChangeType } from './models/ChangeType';
+export { EventMessageTypeModel } from './models/EventMessageTypeModel';
 export type { HandlerSettings } from './models/HandlerSettings';
 export { HandlerStatus } from './models/HandlerStatus';
+export type { NotificationHeaderModel } from './models/NotificationHeaderModel';
 export type { PerformActionRequest } from './models/PerformActionRequest';
 export type { PerformActionResponse } from './models/PerformActionResponse';
 export type { SyncActionButton } from './models/SyncActionButton';
 export type { SyncActionGroup } from './models/SyncActionGroup';
 export type { SyncHandlerSummary } from './models/SyncHandlerSummary';
+export type { SyncLegacyCheckResponse } from './models/SyncLegacyCheckResponse';
 export type { uSyncActionView } from './models/uSyncActionView';
 export type { uSyncAddonInfo } from './models/uSyncAddonInfo';
 export type { uSyncAddonSplash } from './models/uSyncAddonSplash';
@@ -25,4 +28,5 @@ export type { uSyncOptions } from './models/uSyncOptions';
 export type { uSyncSettings } from './models/uSyncSettings';
 
 export { ActionsResource } from './services/ActionsResource';
+export { MigrationsResource } from './services/MigrationsResource';
 export { SettingsResource } from './services/SettingsResource';
