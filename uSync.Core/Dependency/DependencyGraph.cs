@@ -34,7 +34,7 @@ public static class DependencyGraph
             }
         }
 
-        return edges.Count > 0 ? sortedList : null;
+        return edges.Count == 0 ? sortedList : null;
     }
 }
 
