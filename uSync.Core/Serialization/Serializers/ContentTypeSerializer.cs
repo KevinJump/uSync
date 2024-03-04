@@ -60,7 +60,7 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
         }
 
         // compositions ? 
-        info.Add(SerializeCompostions((ContentTypeCompositionBase)item));
+        info.Add(SerializeCompositions((ContentTypeCompositionBase)item));
 
         // templates
         var templateAlias =
@@ -87,7 +87,7 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
         node.Add(new XElement("Variations", property.Variations));
     }
 
-    private XElement SerializeTemplates(IContentType item)
+    private static XElement SerializeTemplates(IContentType item)
     {
         var node = new XElement("AllowedTemplates");
         if (item.AllowedTemplates != null && item.AllowedTemplates.Any())
@@ -140,12 +140,12 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
             return change.AsEnumerableOfOne();
         }
 
-        return Enumerable.Empty<uSyncChange>();
+        return [];
     }
 
     public override SyncAttempt<IContentType> DeserializeSecondPass(IContentType item, XElement node, SyncSerializerOptions options)
     {
-        logger.LogDebug("Deserialize Second Pass {0}", item.Alias);
+        logger.LogDebug("Deserialize Second Pass {alias}", item.Alias);
 
         var details = new List<uSyncChange>();
 
@@ -158,7 +158,7 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
 
         details.AddRange(DeserializeStructure(item, node));
 
-        // When doing this reflectiony - it doesn't set is dirty. 
+        // When doing this reflection-y - it doesn't set is dirty. 
         var historyChanges = DeserializeCleanupHistory(item, node);
         var historyUpdated = historyChanges.Any(x => x.Change > ChangeDetailType.NoChange);
         details.AddRange(historyChanges);
@@ -189,7 +189,7 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
     private List<uSyncChange> DeserializeContentTypeProperties(IContentType item, XElement node)
     {
         var info = node?.Element("Info");
-        if (info == null) return [];
+        if (info is null) return [];
 
         var changes = new List<uSyncChange>();
 
@@ -199,20 +199,15 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
             changes.AddUpdate("ListView", item.ListView, listView, "Info/ListView");
             item.ListView = listView;
         }
-        //var isContainer = info.Element("IsListView").ValueOrDefault(false);
-        //if (item.IsContainer != isContainer)
-        //{
-        //    changes.AddUpdate("IsListView", item.IsContainer, isContainer, "Info/IsListView");
-        //    item.IsContainer = isContainer;
-        //}
+
 
         var masterTemplate = info?.Element("DefaultTemplate").ValueOrDefault(string.Empty) ?? string.Empty;
         if (!string.IsNullOrEmpty(masterTemplate))
         {
             var template = _fileService.GetTemplate(masterTemplate);
-            if (template != null)
+            if (template is not null)
             {
-                if (item.DefaultTemplate == null || template.Alias != item.DefaultTemplate.Alias)
+                if (item.DefaultTemplate is null || template.Alias != item.DefaultTemplate.Alias)
                 {
                     changes.AddUpdate("DefaultTemplate", item.DefaultTemplate?.Alias ?? string.Empty, masterTemplate, "DefaultTemplate");
                     item.SetDefaultTemplate(template);
@@ -224,7 +219,7 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
                 // (it would then re-appear if the user un-toggles is element) See issue #203
                 //
                 // So we only log this as a problem if the default template is missing on a non-element doctype. 
-                if (!item.IsElement)
+                if (item.IsElement is false)
                 {
 
                     changes.AddUpdate("DefaultTemplate", item.DefaultTemplate?.Alias ?? string.Empty, "Cannot find Template", "DefaultTemplate", false);
@@ -235,10 +230,10 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
         return changes;
     }
 
-    private IEnumerable<uSyncChange> DeserializeTemplates(IContentType item, XElement node, SyncSerializerOptions options)
+    private List<uSyncChange> DeserializeTemplates(IContentType item, XElement node, SyncSerializerOptions options)
     {
         var templates = node?.Element(uSyncConstants.Xml.Info)?.Element("AllowedTemplates");
-        if (templates == null) return Enumerable.Empty<uSyncChange>();
+        if (templates is null) return [];
 
         var allowedTemplates = new List<ITemplate>();
         var changes = new List<uSyncChange>();
@@ -254,10 +249,9 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
             if (key != Guid.Empty)
                 templateItem = _fileService.GetTemplate(key);
 
-            if (templateItem == null)
-                templateItem = _fileService.GetTemplate(alias);
+            templateItem ??= _fileService.GetTemplate(alias);
 
-            if (templateItem != null)
+            if (templateItem is not null)
             {
                 logger.LogDebug("Adding Template: {alias}", templateItem.Alias);
                 allowedTemplates.Add(templateItem);
@@ -272,8 +266,8 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
         {
             allowedTemplates =
             [
-                .. allowedTemplates,
-                .. item.AllowedTemplates?.Where(x => !newTemplates.InvariantContains(x.Alias)) ?? Enumerable.Empty<ITemplate>(),
+                ..allowedTemplates,
+                ..item.AllowedTemplates?.Where(x => !newTemplates.InvariantContains(x.Alias)) ?? [],
             ];
             newTemplates = string.Join(",", allowedTemplates.Select(x => x.Alias).OrderBy(x => x));
         }
@@ -288,7 +282,7 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
     }
 
 
-    protected override Attempt<IContentType> CreateItem(string alias, ITreeEntity? parent, string itemType)
+    protected override Attempt<IContentType?> CreateItem(string alias, ITreeEntity? parent, string itemType)
     {
         var safeAlias = GetSafeItemAlias(alias);
 
@@ -297,7 +291,7 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
             Alias = alias
         };
 
-        if (parent != null)
+        if (parent is not null)
         {
             if (parent is IContentType parentContent)
             {
@@ -321,12 +315,12 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
 
     /// History Cleanup (added in v9.1) 
 
-
     private readonly string _historyCleanupName = "HistoryCleanup";
-    private readonly string[] _historyCleanupProperties = new string[]
-    {
-        "PreventCleanup", "KeepAllVersionsNewerThanDays", "KeepLatestVersionPerDayForDays"
-    };
+    private readonly string[] _historyCleanupProperties = [
+        "PreventCleanup", 
+        "KeepAllVersionsNewerThanDays", 
+        "KeepLatestVersionPerDayForDays"
+    ];
 
     private XElement? SerializeCleanupHistory(IContentType item)
     {
@@ -335,16 +329,16 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
         try
         {
             var historyCleanupInfo = item.GetType().GetProperty(_historyCleanupName);
-            if (historyCleanupInfo == null) return null;
+            if (historyCleanupInfo is null) return null;
 
             var historyCleanup = historyCleanupInfo.GetValue(item);
-            if (historyCleanup == null) return null;
+            if (historyCleanup is null) return null;
 
             var history = new XElement(_historyCleanupName);
             foreach (var propertyName in _historyCleanupProperties)
             {
                 var property = historyCleanup.GetType().GetProperty(propertyName);
-                if (property != null)
+                if (property is not null)
                 {
                     history.Add(new XElement(property.Name, GetPropertyAs<string>(property, historyCleanup) ?? ""));
                 }
@@ -362,23 +356,22 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
     }
 
 
-    private IEnumerable<uSyncChange> DeserializeCleanupHistory(IContentType item, XElement node)
+    private List<uSyncChange> DeserializeCleanupHistory(IContentType item, XElement node)
     {
-        var emtpy = Enumerable.Empty<uSyncChange>();
-        if (!_capabilities.HasHistoryCleanup || node == null) return emtpy;
+        if (!_capabilities.HasHistoryCleanup || node == null) return [];
 
         var cleanupNode = node.Element("Info")?.Element(_historyCleanupName);
-        if (cleanupNode == null) return emtpy;
+        if (cleanupNode is null) return [];
 
         try
         {
             // get the history cleanup property
             var historyCleanupInfo = item.GetType().GetProperty(_historyCleanupName);
-            if (historyCleanupInfo == null) return emtpy;
+            if (historyCleanupInfo is null) return [];
 
             // get the history cleanup value
             var historyCleanup = historyCleanupInfo.GetValue(item);
-            if (historyCleanup == null) return emtpy;
+            if (historyCleanup is null) return [];
 
             var changes = new List<uSyncChange>();
 
@@ -386,7 +379,7 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
             foreach (var element in cleanupNode.Elements())
             {
                 var property = historyCleanup.GetType().GetProperty(element.Name.LocalName);
-                if (property == null) continue;
+                if (property is null) continue;
 
                 var current = GetPropertyAs<string>(property, historyCleanup);
                 if (element.Value != current)
@@ -407,7 +400,7 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
         catch (Exception ex)
         {
             logger.LogWarning(ex, "Error trying to get the HistoryCleanup settings for this node.");
-            return emtpy;
+            return [];
         }
 
     }
@@ -424,12 +417,12 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
     }
 
 
-    protected TValue? GetPropertyAs<TValue>(PropertyInfo info, object property)
+    protected static TValue? GetPropertyAs<TValue>(PropertyInfo info, object property)
     {
-        if (info == null) return default;
+        if (info is null) return default;
 
         var value = info.GetValue(property);
-        if (value == null) return default;
+        if (value is null) return default;
 
         var result = value.TryConvertTo<TValue>();
         if (result.Success)

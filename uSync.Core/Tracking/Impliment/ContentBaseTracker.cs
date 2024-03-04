@@ -11,8 +11,8 @@ public abstract class ContentBaseTracker<TObject> : SyncXmlTracker<TObject>
         : base(serializers)
     { }
 
-    public override List<TrackingItem> TrackingItems => new List<TrackingItem>()
-    {
+    public override List<TrackingItem> TrackingItems =>
+    [
         TrackingItem.Single("Parent", "/Info/Parent"),
         TrackingItem.Single("Path", "/Info/Path"),
         TrackingItem.Single("Trashed", "/Info/Trashed"),
@@ -33,5 +33,5 @@ public abstract class ContentBaseTracker<TObject> : SyncXmlTracker<TObject>
         TrackingItem.Many("Property - *", "/Properties/*/Value", "@Culture"),
 
         TrackingItem.Many("GenericProperty", "/GenericProperties/GenericProperty", uSyncConstants.Xml.Key)
-    };
+    ];
 }

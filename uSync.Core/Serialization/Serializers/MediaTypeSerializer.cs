@@ -49,7 +49,7 @@ public class MediaTypeSerializer : ContentTypeBaseSerializer<IMediaType>, ISyncS
                 info.Add(folderNode);
         }
 
-        info.Add(SerializeCompostions((ContentTypeCompositionBase)item));
+        info.Add(SerializeCompositions((ContentTypeCompositionBase)item));
 
         node.Add(info);
         node.Add(SerializeProperties(item));
@@ -100,7 +100,7 @@ public class MediaTypeSerializer : ContentTypeBaseSerializer<IMediaType>, ISyncS
         return SyncAttempt<IMediaType>.Succeed(item.Name ?? item.Alias, item, ChangeType.Import, "", saveInSerializer, details);
     }
 
-    protected override Attempt<IMediaType> CreateItem(string alias, ITreeEntity? parent, string itemType)
+    protected override Attempt<IMediaType?> CreateItem(string alias, ITreeEntity? parent, string itemType)
     {
         var safeAlias = GetSafeItemAlias(alias);
 

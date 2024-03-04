@@ -39,7 +39,7 @@ public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncSerializer<IDo
         var info = node.Element(uSyncConstants.Xml.Info);
         if (info is null)
         {
-            return SyncAttempt<IDomain>.Fail(node.GetAlias(), default, ChangeType.Fail, "Missing info section in xml", new ArgumentNullException("Info", "Missing Info Section in XML"));
+            return SyncAttempt<IDomain>.Fail(node.GetAlias(), default, ChangeType.Fail, "Missing info section in xml", new KeyNotFoundException("Missing Info Section in XML"));
         }
 
         var isoCode = info.Element("Language").ValueOrDefault(string.Empty) ?? string.Empty;
@@ -140,12 +140,12 @@ public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncSerializer<IDo
     private const string _sortablePropertyName = "SortOrder";
 
     /// <summary>
-    ///  Retreive the SortOrder value for the item
+    ///  Retrieve the SortOrder value for the item
     /// </summary>
     /// <remarks>
     ///  11.3.0+ sortable value got added to the IDomain interface.
     /// </remarks>
-    private int GetSortableValue(IDomain item)
+    private static int GetSortableValue(IDomain item)
     {
         var property = item.GetType().GetProperty(_sortablePropertyName);
         if (property == null) return 0;
@@ -162,7 +162,7 @@ public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncSerializer<IDo
     /// <remarks>
     ///  11.3.0+ sortable value got added to the IDomain interface.
     /// </remarks>
-    private void SetSortableValue(IDomain item, int sortOrder)
+    private static void SetSortableValue(IDomain item, int sortOrder)
     {
         var property = item.GetType().GetProperty(_sortablePropertyName);
         if (property == null) return;

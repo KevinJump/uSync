@@ -12,18 +12,17 @@ public class SyncItem
     /// <summary>
     ///  Name (to display) of the item
     /// </summary>
-    public string Name { get; set; }
+    public string? Name { get; set; }
 
     /// <summary>
     ///  Umbraco UDI value to identify the item.
     /// </summary>
-    // [JsonConverter(typeof(UdiJsonConverter))]
-    public Udi Udi { get; set; }
+    public Udi? Udi { get; set; }
 
     /// <summary>
     ///  Flags controlling what is to be included when this item is exported
     /// </summary>
-    public DependencyFlags Flags { get; set; }
+    public DependencyFlags Flags { get; set; } = DependencyFlags.None;
 
     /// <summary>
     ///  Type of change to be performed (reserved)

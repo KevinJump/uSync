@@ -51,9 +51,9 @@ internal static class DictionaryExtensions
         return dictionary;
     }
 
-    public static bool TryConvertToDictionary(this object obj, out IDictionary<string, object?> result)
+    public static bool TryConvertToDictionary(this object obj, out IDictionary<string, object> result)
     {
-        result = new Dictionary<string, object?>();
+        result = new Dictionary<string, object>();
 
         if (obj == null) return false;  
 
@@ -79,10 +79,10 @@ internal static class DictionaryExtensions
     /// <summary>
     ///  merge two or more dictionaries together, throwing away duplicates!
     /// </summary>
-    public static IDictionary<TKey, TValue?> MergeIgnoreDuplicates<TKey, TValue>(this IDictionary<TKey, TValue?>? source, params IDictionary<TKey, TValue?>[] dictionaries)
+    public static IDictionary<TKey, TValue> MergeIgnoreDuplicates<TKey, TValue>(this IDictionary<TKey, TValue>? source, params IDictionary<TKey, TValue>[] dictionaries)
         where TKey : notnull
     {
-        var mergedDictionary = new Dictionary<TKey, TValue?>(source?.ToDictionary() ?? []);
+        var mergedDictionary = new Dictionary<TKey, TValue>(source?.ToDictionary() ?? []);
 
         foreach (var dictionary in dictionaries.Where(x => x is not null))
         {

@@ -11,11 +11,11 @@ public class RelationTypeTracker
         : base(serializers)
     { }
 
-    public override List<TrackingItem> TrackingItems => new List<TrackingItem>()
-    {
+    public override List<TrackingItem> TrackingItems =>
+    [
         TrackingItem.Single("Name", "/Info/Name"),
         TrackingItem.Single("ParentType", "/Info/ParentType"),
         TrackingItem.Single("ChildType", "/Info/ChildType"),
         TrackingItem.Single("Bidirectional", "/Info/Bidirectional")
-    };
+    ];
 }

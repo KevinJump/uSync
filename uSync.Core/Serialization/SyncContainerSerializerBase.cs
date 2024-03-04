@@ -23,7 +23,7 @@ public abstract class SyncContainerSerializerBase<TObject>
         this.containerType = containerType;
     }
 
-    protected override Attempt<TObject> FindOrCreate(XElement node)
+    protected override Attempt<TObject?> FindOrCreate(XElement node)
     {
 
         TObject? item = FindItem(node);
@@ -154,7 +154,7 @@ public abstract class SyncContainerSerializerBase<TObject>
 
     protected abstract EntityContainer? FindContainer(Guid key);
     protected abstract IEnumerable<EntityContainer> FindContainers(string folder, int level);
-    protected abstract Attempt<OperationResult<OperationResultType, EntityContainer>> CreateContainer(int parentId, string name);
+    protected abstract Attempt<OperationResult<OperationResultType, EntityContainer>?> CreateContainer(int parentId, string name);
 
     protected virtual EntityContainer? FindFolder(Guid key, string path)
     {

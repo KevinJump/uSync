@@ -16,7 +16,7 @@ namespace uSync.Core.Serialization.Serializers;
 public class RelationTypeSerializer
     : SyncSerializerBase<IRelationType>, ISyncSerializer<IRelationType>
 {
-    private IRelationService _relationService;
+    private readonly IRelationService _relationService;
 
     public RelationTypeSerializer(IEntityService entityService,
         IRelationService relationService,
@@ -194,10 +194,8 @@ public class RelationTypeSerializer
     }
 
 
-    private RelationType CreateRelation(string name, string alias, bool isBidirectional, Guid? parent, Guid? child, bool isDependency)
-    {
-        return new RelationType(name, alias, isBidirectional, parent, child, isDependency);
-    }
+    private static RelationType CreateRelation(string name, string alias, bool isBidirectional, Guid? parent, Guid? child, bool isDependency)
+        => new(name, alias, isBidirectional, parent, child, isDependency);
 
     /// <summary>
     ///  gets a value from the interface that might be GUID or GUID?
@@ -205,23 +203,20 @@ public class RelationTypeSerializer
     /// <remarks>
     ///  works around the interface changing v8.6 from GUID to GUID?
     /// </remarks>
-    private Guid? GetGuidValue(IRelationType item, string propertyName)
+    private static Guid? GetGuidValue(IRelationType item, string propertyName)
     {
         var propertyInfo = item.GetType().GetProperty(propertyName);
-        if (propertyInfo == null) return null;
+        if (propertyInfo is null) return null;
 
         var value = propertyInfo.GetValue(item);
-        if (value == null) return null;
-
-        if (value is Guid guid)
-        {
-            return guid;
-        }
+        if (value is null) return null;
+        if (value is Guid guid) return guid;
+        
 
         return null;
     }
 
-    private void SetGuidValue(object item, string propertyName, Guid? value)
+    private static void SetGuidValue(object item, string propertyName, Guid? value)
     {
         var propertyInfo = item.GetType().GetProperty(propertyName);
         if (propertyInfo == null) return;

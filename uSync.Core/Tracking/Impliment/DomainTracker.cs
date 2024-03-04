@@ -11,10 +11,10 @@ public class DomainTracker : SyncXmlTracker<IDomain>, ISyncTracker<IDomain>
     {
     }
 
-    public override List<TrackingItem> TrackingItems => new List<TrackingItem>()
-    {
+    public override List<TrackingItem> TrackingItems =>
+    [
         TrackingItem.Single("Domain > Wildcard", "/Info/IsWildcard"),
         TrackingItem.Single("Domain > Language", "/Info/Language"),
         TrackingItem.Single("Domain > Root", "/Info/Root")
-    };
+    ];
 }

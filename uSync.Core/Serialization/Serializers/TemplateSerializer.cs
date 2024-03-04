@@ -185,7 +185,7 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
         // && options.GetSetting(uSyncConstants.Conventions.IncludeContent, false);
     }
 
-    public string GetContentFromConfig(XElement node)
+    public static string GetContentFromConfig(XElement node)
         => node.Element("Contents").ValueOrDefault(string.Empty);
 
     public string GetContentFromFile(string templatePath)
@@ -273,10 +273,9 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
         return SyncAttempt<XElement>.Succeed(item.Name!, node, typeof(ITemplate), ChangeType.Export);
     }
 
-    private XElement SerializeContent(ITemplate item)
-    {
-        return new XElement("Contents", new XCData(item.Content ?? string.Empty));
-    }
+    private static XElement SerializeContent(ITemplate item)
+        => new("Contents", new XCData(item.Content ?? string.Empty));
+    
 
     private int CalculateLevel(ITemplate item)
     {
@@ -323,9 +322,7 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
     /// </summary>
     protected override XElement CleanseNode(XElement node)
     {
-        var contentNode = node.Element("Content");
-        if (contentNode != null) contentNode.Remove();
-
+        node.Element("Content")?.Remove();
         return base.CleanseNode(node);
     }
 

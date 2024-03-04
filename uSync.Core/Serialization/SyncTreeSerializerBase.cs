@@ -16,7 +16,7 @@ public abstract class SyncTreeSerializerBase<TObject> : SyncSerializerBase<TObje
     {
     }
 
-    protected abstract Attempt<TObject> CreateItem(string alias, ITreeEntity? parent, string itemType);
+    protected abstract Attempt<TObject?> CreateItem(string alias, ITreeEntity? parent, string itemType);
 
 
     #region Getters
@@ -29,7 +29,7 @@ public abstract class SyncTreeSerializerBase<TObject> : SyncSerializerBase<TObje
     #region Finders 
     // Finders - used on importing, getting things that are already there (or maybe not)
 
-    protected abstract Attempt<TObject> FindOrCreate(XElement node);
+    protected abstract Attempt<TObject?> FindOrCreate(XElement node);
 
     protected TObject? FindItem(Guid key, string alias)
     {

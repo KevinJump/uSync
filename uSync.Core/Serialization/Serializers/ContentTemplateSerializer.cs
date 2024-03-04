@@ -120,11 +120,11 @@ public class ContentTemplateSerializer : ContentSerializer, ISyncSerializer<ICon
     public override IContent? FindItem(int id)
         => contentService.GetBlueprintById(id);
 
-    protected override Attempt<IContent> CreateItem(string alias, ITreeEntity? parent, string itemType)
+    protected override Attempt<IContent?> CreateItem(string alias, ITreeEntity? parent, string itemType)
     {
         var contentType = _contentTypeService.Get(itemType);
         if (contentType == null) return
-                Attempt.Fail<IContent>(null, new ArgumentException($"Missing content Type {itemType}"));
+                Attempt.Fail<IContent?>(null, new ArgumentException($"Missing content Type {itemType}"));
 
         IContent item;
         if (parent != null)
@@ -139,10 +139,10 @@ public class ContentTemplateSerializer : ContentSerializer, ISyncSerializer<ICon
         return Attempt.Succeed(item);
     }
 
-    protected override Attempt<string> DoSaveOrPublish(IContent item, XElement node, SyncSerializerOptions options)
+    protected override Attempt<string?> DoSaveOrPublish(IContent item, XElement node, SyncSerializerOptions options)
     {
         contentService.SaveBlueprint(item, options.UserId);
-        return Attempt.Succeed<string>("blueprint saved");
+        return Attempt.Succeed("blueprint saved");
     }
 
     public override void SaveItem(IContent item)

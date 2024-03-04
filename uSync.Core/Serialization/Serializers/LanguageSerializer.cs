@@ -10,6 +10,7 @@ using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Extensions;
 
+using uSync.Core.Extensions;
 using uSync.Core.Models;
 
 namespace uSync.Core.Serialization.Serializers;
@@ -20,15 +21,6 @@ public class LanguageSerializer : SyncSerializerBase<ILanguage>, ISyncSerializer
 {
     private readonly ILocalizationService _localizationService;
 
-    [Obsolete("Will remove GlobalSettings in v11")]
-    public LanguageSerializer(IEntityService entityService,
-        ILogger<LanguageSerializer> logger,
-        ILocalizationService localizationService,
-        IOptions<GlobalSettings> options)
-        : this(entityService, logger, localizationService)
-    { }
-
-    [ActivatorUtilitiesConstructor]
     public LanguageSerializer(IEntityService entityService,
         ILogger<LanguageSerializer> logger,
         ILocalizationService localizationService)
@@ -38,20 +30,19 @@ public class LanguageSerializer : SyncSerializerBase<ILanguage>, ISyncSerializer
     }
 
 
-    private CultureInfo GetCulture(string isoCode)
-        => CultureInfo.GetCultureInfo(isoCode);
+    private static CultureInfo GetCulture(string isoCode) => CultureInfo.GetCultureInfo(isoCode);
 
     protected override SyncAttempt<ILanguage> DeserializeCore(XElement node, SyncSerializerOptions options)
     {
         var isoCode = node.Element("IsoCode").ValueOrDefault(string.Empty);
-        logger.LogDebug("Derserializing {isoCode}", isoCode);
+        logger.LogDebug("Deserializing {isoCode}", isoCode);
 
         var item = _localizationService.GetLanguageByIsoCode(isoCode);
         var culture = GetCulture(isoCode);
 
         var details = new List<uSyncChange>();
 
-        if (item == null)
+        if (item is null)
         {
             logger.LogDebug("Creating New Language: {isoCode}", isoCode);
             item = new Language(isoCode, culture.DisplayName);
@@ -142,26 +133,20 @@ public class LanguageSerializer : SyncSerializerBase<ILanguage>, ISyncSerializer
         return SyncAttempt<ILanguage>.Succeed(item.CultureName, item, ChangeType.Import, details);
     }
 
-    private string GetFallbackLanguageIsoCode(ILanguage item, XElement node)
+    private static string GetFallbackLanguageIsoCode(ILanguage item, XElement node)
         => node.Element("Fallback").ValueOrDefault(string.Empty);
 
     protected override XElement InitializeBaseNode(ILanguage item, string alias, int level = 0)
     {
         // language guids change all the time ! we ignore them, but here we set them to the 'id' 
         // this means the file stays the same! 
-        var key = Int2Guid(item.CultureInfo?.LCID ?? 0);
+        var key = item.CultureInfo?.LCID.ConvertToGuid() ?? Guid.Empty;
 
         return new XElement(ItemType, new XAttribute(uSyncConstants.Xml.Key, key.ToString().ToLower()),
             new XAttribute(uSyncConstants.Xml.Alias, alias),
             new XAttribute(uSyncConstants.Xml.Level, level));
     }
 
-    private Guid Int2Guid(int value)
-    {
-        byte[] bytes = new byte[16];
-        BitConverter.GetBytes(value).CopyTo(bytes, 0);
-        return new Guid(bytes);
-    }
 
     protected override SyncAttempt<XElement> SerializeCore(ILanguage item, SyncSerializerOptions options)
     {
@@ -196,7 +181,7 @@ public class LanguageSerializer : SyncSerializerBase<ILanguage>, ISyncSerializer
             && node.GetAlias() != string.Empty
             && node.Element("IsoCode") != null;
 
-    public override ILanguage FindItem(string alias)
+    public override ILanguage? FindItem(string alias)
     {
         // GetLanguageByIsoCode - doesn't only return the language of the code you specify
         // it will fallback to the primary one (e.g en-US might return en), 
@@ -204,7 +189,7 @@ public class LanguageSerializer : SyncSerializerBase<ILanguage>, ISyncSerializer
         // based on that we need to check that the language we get back actually has the 
         // code we asked for from the api.
         var item = _localizationService.GetLanguageByIsoCode(alias);
-        if (item == null || !item.CultureInfo.Name.InvariantEquals(alias)) return null;
+        if (item == null || item.CultureInfo?.Name.InvariantEquals(alias) is false) return null;
         return item;
     }
 

@@ -242,7 +242,7 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
         // there might be duplicates, but they will be of the same value. 
         var merged = configurationObject?.TryConvertToDictionary(out var objectDictionary) is true 
             ? item.ConfigurationData.MergeIgnoreDuplicates(objectDictionary)
-            : item.ConfigurationData.ToDictionary();
+            : item.ConfigurationData;
 
         var exportConfig = serializer == null ? merged : serializer.GetConfigurationExport(merged);
 
@@ -264,15 +264,16 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
         }
     }
 
-    protected override Attempt<IDataType> CreateItem(string alias, ITreeEntity? parent, string itemType)
+    protected override Attempt<IDataType?> CreateItem(string alias, ITreeEntity? parent, string itemType)
     {
         var editorType = FindDataEditor(itemType);
         if (editorType == null)
-            return Attempt.Fail<IDataType>(null, new ArgumentException($"(Missing Package?) DataEditor {itemType} is not installed"));
+            return Attempt.Fail<IDataType?>(default, new ArgumentException($"(Missing Package?) DataEditor {itemType} is not installed"));
 
-        var item = new DataType(editorType, _jsonSerializer, -1);
-
-        item.Name = alias;
+        var item = new DataType(editorType, _jsonSerializer, -1)
+        {
+            Name = alias
+        };
 
         if (parent != null)
             item.SetParent(parent);
@@ -301,7 +302,7 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
     protected override IEnumerable<EntityContainer> FindContainers(string folder, int level)
         => _dataTypeService.GetContainers(folder, level);
 
-    protected override Attempt<OperationResult<OperationResultType, EntityContainer>> CreateContainer(int parentId, string name)
+    protected override Attempt<OperationResult<OperationResultType, EntityContainer>?> CreateContainer(int parentId, string name)
         => _dataTypeService.CreateContainer(parentId, Guid.NewGuid(), name);
 
     public override void SaveItem(IDataType item)

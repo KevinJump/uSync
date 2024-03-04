@@ -47,7 +47,7 @@ public class SyncRootMergerHelper
     {
         foreach (var item in items)
         {
-            XElement node;
+            XElement? node;
 
             if (item.SingleItem is false)
             {
@@ -78,7 +78,7 @@ public class SyncRootMergerHelper
             else
             {
                 node = GetSingleChange(item, source, target);
-                if (node == null)
+                if (node is null)
                 {
                     target.XPathSelectElement(item.Path)?.Remove();
                 }
@@ -94,7 +94,7 @@ public class SyncRootMergerHelper
         return (source, target);
     }
 
-    private static XElement GetSingleChange(TrackingItem item, XElement source, XElement target)
+    private static XElement? GetSingleChange(TrackingItem item, XElement source, XElement target)
     {
         var sourceNode = source.XPathSelectElement(item.Path);
         var targetNode = target.XPathSelectElement(item.Path);
@@ -113,10 +113,10 @@ public class SyncRootMergerHelper
         return targetNode;
     }
 
-    private static (XElement combined, XElement diffrence) GetMultipleChanges(TrackingItem item, XElement source, XElement target)
+    private static (XElement? combined, XElement? diffrence) GetMultipleChanges(TrackingItem item, XElement source, XElement target)
     {
         var path = item.Path.Substring(0, item.Path.LastIndexOf('/'));
-        var element = item.Path.Substring(item.Path.LastIndexOf("/") + 1);
+        var element = item.Path.Substring(item.Path.LastIndexOf('/') + 1);
 
         var sourceCollection = source.XPathSelectElement(path);
         var targetCollection = target.XPathSelectElement(path);
@@ -144,7 +144,7 @@ public class SyncRootMergerHelper
             if (sourceElement.ToString() == targetElement.ToString())
             {
                 var removal = FindByKey(differenceCollection, element, item.Keys, key);
-                removal.Remove();
+                removal?.Remove();
             }
             else
             {
@@ -174,7 +174,7 @@ public class SyncRootMergerHelper
     private static XElement SortElement(XElement node, string elementName, string key)
     {
         var sorted = node.Elements(elementName)
-            .OrderBy(x => (string)x.Element(key) ?? "")
+            .OrderBy(x => x.Element(key)?.Value ?? "")
             .ToList();
 
         node.RemoveNodes();
@@ -192,7 +192,7 @@ public class SyncRootMergerHelper
         return collection.Element(keyName)?.Value ?? string.Empty;
     }
 
-    private static XElement FindByKey(XElement collection, string element, string keyName, string keyValue)
+    private static XElement? FindByKey(XElement collection, string element, string keyName, string keyValue)
         => collection.XPathSelectElement($"{element}[{keyName} = {EscapeXPathString(keyValue)}]");
 
     private static XElement MakeDeletedElement(string element, string keyName, string key)

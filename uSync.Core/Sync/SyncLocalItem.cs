@@ -5,40 +5,30 @@ namespace uSync.Core.Sync;
 
 /// <summary>
 ///  Representation of a local item, that can be used to kickoff the UI
-///  for publishings/exporting.
+///  for publishing/exporting.
 /// </summary>
 public class SyncLocalItem
 {
     /// <summary>
     ///  Internal ID for the item
     /// </summary>
-    public string Id { get; set; }
+    public string? Id { get; set; }
 
     /// <summary>
     ///  Display name for the item
     /// </summary>
-    public string Name { get; set; }
+    public string? Name { get; set; }
 
     /// <summary>
     ///  Umbraco UDI value that identifies the item.
     /// </summary>
     // [JsonConverter(typeof(UdiJsonConverter))]
-    public Udi Udi { get; set; }
+    public Udi? Udi { get; set; }
 
     /// <summary>
     ///  Umbraco/Custom EntityType name
     /// </summary>
-    public string EntityType { get; set; }
-
-    /// <summary>
-    ///  details of any language variants
-    /// </summary>
-    /// <remarks>
-    ///  when variants are present the user can be presented with 
-    ///  the option of what languages they want to sync.
-    /// </remarks>
-    [Obsolete("Use All Variants when returning variants so we know what is available.")]
-    public Dictionary<string, string> Variants { get; set; }
+    public string? EntityType { get; set; }
 
     /// <summary>
     ///  details of all variants, 
@@ -48,7 +38,7 @@ public class SyncLocalItem
     ///  the unpublished variants in the UI and more importantly tell if they 
     ///  exist. 
     /// </remarks>
-    public Dictionary<string, SyncVariantInfo> AllVariants { get; set; }
+    public Dictionary<string, SyncVariantInfo> AllVariants { get; set; } = [];
 
     /// <summary>
     ///  Syncing of this item requires that the files be synced. 
@@ -81,6 +71,6 @@ public class SyncLocalItem
 
 public class SyncVariantInfo
 {
-    public string Name { get; set; }
+    public string? Name { get; set; }
     public bool Published { get; set; }
 }

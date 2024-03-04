@@ -21,15 +21,16 @@ public abstract class SyncItemManagerBase
         if (meta != null)
         {
             if (!string.IsNullOrWhiteSpace(meta.EntityType))
-                EntityTypes = new[] { meta.EntityType };
+                EntityTypes = [meta.EntityType];
 
 
             if (!string.IsNullOrEmpty(meta.TreeAlias))
-                Trees = new[] { meta.TreeAlias };
+                Trees = [meta.TreeAlias];
         }
     }
 
-    public virtual string[] EntityTypes { get; }
+    public virtual string[] Trees { get; } = [];
+    public virtual string[] EntityTypes { get; } = [];
 
     protected string EntityType
     {
@@ -42,7 +43,6 @@ public abstract class SyncItemManagerBase
         }
     }
 
-    public virtual string[] Trees { get; }
 
     public virtual bool ShowTreeOptions { get; } = true; ///  show in the tree.
 
@@ -50,19 +50,19 @@ public abstract class SyncItemManagerBase
     public virtual SyncTreeType GetTreeType(SyncTreeItem treeItem) => SyncTreeType.Settings;
 
     /// <summary>
-    ///  Get the Root item for the tree (default implimentation uses first entity type)
+    ///  Get the Root item for the tree (default implementation uses first entity type)
     /// </summary>
     /// <param name="treeItem"></param>
     /// <returns></returns>
     protected virtual SyncLocalItem GetRootItem(SyncTreeItem treeItem)
-        => new SyncLocalItem(Constants.System.RootString)
+        => new(Constants.System.RootString)
         {
             EntityType = EntityType,
             Name = EntityType,
             Udi = Udi.Create(EntityType)
         };
 
-    protected abstract IEnumerable<SyncItem> GetDecendants(SyncItem item, DependencyFlags flags);
+    protected abstract IEnumerable<SyncItem> GetDescendants(SyncItem item, DependencyFlags flags);
 
     /// <summary>
     ///  standard use case, if IncludeChildren flag is set, return this item and all its children.
@@ -73,7 +73,7 @@ public abstract class SyncItemManagerBase
         if (item.Flags.HasFlag(DependencyFlags.IncludeChildren))
         {
             var items = new List<SyncItem> { item };
-            items.AddRange(GetDecendants(item, item.Flags & ~DependencyFlags.IncludeChildren));
+            items.AddRange(GetDescendants(item, item.Flags & ~DependencyFlags.IncludeChildren));
             return items;
         }
         else
@@ -83,31 +83,31 @@ public abstract class SyncItemManagerBase
     }
 
     /// <summary>
-    ///  get the sync infomation needed for an item to appear in uSync.Exporter.
+    ///  get the sync information needed for an item to appear in uSync.Exporter.
     /// </summary>
     /// <remarks>
     ///  override this if you have a picker that can be used to pick items for exporter.
     /// </remarks>
-    public virtual SyncEntityInfo GetSyncInfo(string entityType) => null;
+    public virtual SyncEntityInfo? GetSyncInfo(string entityType) => null;
 }
 
 /// <summary>
 ///  Base class for ISyncItemManager items where the ID for the entity is of Type TIndexType
 /// </summary>
 /// <remarks>
-///  saves you having to write the convertion code in your methods to conver the ID from
-///  a string to whatever type the enity uses. 
+///  saves you having to write the conversion code in your methods to convert the ID from
+///  a string to whatever type the entity uses. 
 /// </remarks>
 public abstract class SyncItemManagerIndexBase<TIndexType> : SyncItemManagerBase
 {
     protected abstract SyncLocalItem GetLocalEntity(TIndexType id);
 
-    public virtual SyncLocalItem GetEntity(SyncTreeItem treeItem)
+    public virtual SyncLocalItem? GetEntity(SyncTreeItem treeItem)
     {
         if (treeItem.IsRoot()) return GetRootItem(treeItem);
 
         var attempt = treeItem.Id.TryConvertTo<TIndexType>();
-        if (attempt.Success)
+        if (attempt.Success && attempt.Result is not null)
             return GetLocalEntity(attempt.Result);
 
         return null;

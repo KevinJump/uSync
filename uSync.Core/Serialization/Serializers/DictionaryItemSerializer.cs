@@ -10,7 +10,7 @@ using uSync.Core.Models;
 
 namespace uSync.Core.Serialization.Serializers;
 
-[SyncSerializer("4D18F4C3-6EBC-4AAD-8D20-6353BDBBD484", "Dicrionary Serializer", uSyncConstants.Serialization.Dictionary)]
+[SyncSerializer("4D18F4C3-6EBC-4AAD-8D20-6353BDBBD484", "Dictionary Serializer", uSyncConstants.Serialization.Dictionary)]
 public class DictionaryItemSerializer : SyncSerializerBase<IDictionaryItem>, ISyncSerializer<IDictionaryItem>
 {
     private readonly ILocalizationService _localizationService;
@@ -46,8 +46,10 @@ public class DictionaryItemSerializer : SyncSerializerBase<IDictionaryItem>, ISy
 
         if (item == null)
         {
-            item = new DictionaryItem(parentKey, alias);
-            item.Key = key;
+            item = new DictionaryItem(parentKey, alias)
+            {
+                Key = key
+            };
         }
         else
         {
@@ -62,7 +64,7 @@ public class DictionaryItemSerializer : SyncSerializerBase<IDictionaryItem>, ISy
 
         if (item.Key != key)
         {
-            // If the key is different we can't update it (DB Contraints in Umbraco)
+            // If the key is different we can't update it (DB Constraints in Umbraco)
             // so we just carry on, we no longer check the key when comparing
             // so if the keys mismatch then things will continue to work.
             // renaming of mismatched key values might result in duplicates.
@@ -74,7 +76,7 @@ public class DictionaryItemSerializer : SyncSerializerBase<IDictionaryItem>, ISy
 
             if (options.GetSetting<bool>("ForceKeySync", false))
             {
-                logger.LogDebug("Forcing key sync of dictionary item - if the keys are out of sync on existing items this can cause a SQL Contraint error");
+                logger.LogDebug("Forcing key sync of dictionary item - if the keys are out of sync on existing items this can cause a SQL Constraint error");
                 item.Key = key;
             }
         }
@@ -91,10 +93,10 @@ public class DictionaryItemSerializer : SyncSerializerBase<IDictionaryItem>, ISy
         return SyncAttempt<IDictionaryItem>.Succeed(item.ItemKey, item, ChangeType.Import, details);
     }
 
-    private IEnumerable<uSyncChange> DeserializeTranslations(IDictionaryItem item, XElement node, SyncSerializerOptions options)
+    private List<uSyncChange> DeserializeTranslations(IDictionaryItem item, XElement node, SyncSerializerOptions options)
     {
         var translationNode = node.Element("Translations");
-        if (translationNode == null) return Enumerable.Empty<uSyncChange>();
+        if (translationNode == null) return [];
 
         var currentTranslations = item.Translations.ToList();
 

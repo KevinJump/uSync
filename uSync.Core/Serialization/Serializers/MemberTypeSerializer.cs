@@ -50,7 +50,7 @@ public class MemberTypeSerializer : ContentTypeBaseSerializer<IMemberType>, ISyn
                 info.Add(folderNode);
         }
 
-        info.Add(SerializeCompostions((ContentTypeCompositionBase)item));
+        info.Add(SerializeCompositions((ContentTypeCompositionBase)item));
 
         node.Add(info);
         node.Add(SerializeProperties(item));
@@ -100,9 +100,9 @@ public class MemberTypeSerializer : ContentTypeBaseSerializer<IMemberType>, ISyn
         foreach (var property in node.Elements("GenericProperty"))
         {
             var alias = property.Element("Alias").ValueOrDefault(string.Empty);
-            if (!string.IsNullOrWhiteSpace(alias) && _builtInProperties.ContainsKey(alias))
+            if (!string.IsNullOrWhiteSpace(alias) && _builtInProperties.TryGetValue(alias, out string? value))
             {
-                var key = _builtInProperties[alias];
+                var key = value;
                 if (!item.Alias.InvariantEquals("Member"))
                 {
                     key = $"{item.Alias}{alias}".GetDeterministicHashCode().ToGuid().ToString();
@@ -179,7 +179,7 @@ public class MemberTypeSerializer : ContentTypeBaseSerializer<IMemberType>, ISyn
         return changes;
     }
 
-    protected override Attempt<IMemberType> CreateItem(string alias, ITreeEntity? parent, string extra)
+    protected override Attempt<IMemberType?> CreateItem(string alias, ITreeEntity? parent, string extra)
     {
         var safeAlias = GetSafeItemAlias(alias);
 

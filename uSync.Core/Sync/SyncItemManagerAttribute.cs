@@ -13,7 +13,7 @@ public class SyncItemManagerAttribute : Attribute
     /// <summary>
     ///  the alias of the tree in the UI
     /// </summary>
-    public string TreeAlias { get; private set; }
+    public string? TreeAlias { get; private set; }
 
     public SyncItemManagerAttribute(string entityType)
     {

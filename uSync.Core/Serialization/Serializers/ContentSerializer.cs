@@ -89,7 +89,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
         return new XElement(uSyncConstants.Xml.Template);
     }
 
-    private XElement SerializePublishedStatus(IContent item, SyncSerializerOptions options)
+    private static XElement SerializePublishedStatus(IContent item, SyncSerializerOptions options)
     {
         // get the list of cultures we are serializing from the configuration
         var activeCultures = options.GetCultures();
@@ -300,13 +300,13 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
     public override SyncAttempt<IContent> DeserializeSecondPass(IContent item, XElement node, SyncSerializerOptions options)
     {
         var changes = DeserializeSchedules(item, node, options);
-        if (changes.Any())
-            return SyncAttempt<IContent>.Succeed(item.Name ?? item.Id.ToString(), item, ChangeType.Import, "" ?? string.Empty, true, changes.ToList());
+        if (changes.Count != 0) 
+            return SyncAttempt<IContent>.Succeed(item.Name ?? item.Id.ToString(), item, ChangeType.Import, "" ?? string.Empty, true, changes);
 
         return SyncAttempt<IContent>.Succeed(item.Name ?? item.Id.ToString(), item, ChangeType.NoChange);
     }
 
-    private IEnumerable<uSyncChange> DeserializeSchedules(IContent item, XElement node, SyncSerializerOptions options)
+    private List<uSyncChange> DeserializeSchedules(IContent item, XElement node, SyncSerializerOptions options)
     {
 
         var changes = new List<uSyncChange>();
@@ -363,21 +363,21 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
                 }
             }
 
-            if (changes.Any())
+            if (changes.Count != 0)
             {
                 logger.LogDebug("Saving Schedule changes: {item}", item.Name);
                 contentService.PersistContentSchedule(item, currentSchedules);
                 return changes;
             }
 
-            return Enumerable.Empty<uSyncChange>();
+            return [];
         }
 
 
-        return Enumerable.Empty<uSyncChange>();
+        return [];
     }
 
-    private ContentSchedule GetContentScheduleFromNode(XElement scheduleNode)
+    private static ContentSchedule GetContentScheduleFromNode(XElement scheduleNode)
     {
         var key = Guid.Empty;
         var culture = scheduleNode.Element("Culture").ValueOrDefault(string.Empty);
@@ -387,7 +387,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
         return new ContentSchedule(key, culture, date, action);
     }
 
-    private ContentSchedule? FindSchedule(ContentScheduleCollection currentSchedules, ContentSchedule newSchedule)
+    private static ContentSchedule? FindSchedule(ContentScheduleCollection currentSchedules, ContentSchedule newSchedule)
     {
         var schedule = currentSchedules.GetSchedule(newSchedule.Culture, newSchedule.Action);
         if (schedule != null && schedule.Any()) return schedule.FirstOrDefault();
@@ -431,7 +431,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
         return null;
     }
 
-    protected virtual Attempt<string> DoSaveOrPublish(IContent item, XElement node, SyncSerializerOptions options)
+    protected virtual Attempt<string?> DoSaveOrPublish(IContent item, XElement node, SyncSerializerOptions options)
     {
         if (options.GetSetting(uSyncConstants.DefaultSettings.OnlyPublishDirty, uSyncConstants.DefaultSettings.OnlyPublishDirty_Default) && !item.IsDirty())
         {
@@ -506,7 +506,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
     ///  work out what the current status of a given culture should be. 
     /// </summary>
 
-    private IList<ContentSchedule> GetSchedules(XElement? schedulesNode)
+    private static List<ContentSchedule> GetSchedules(XElement? schedulesNode)
     {
         var schedules = new List<ContentSchedule>();
         if (schedulesNode != null && schedulesNode.HasElements)
@@ -519,7 +519,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
         return schedules;
     }
 
-    public Attempt<string> PublishItem(IContent item, int userId)
+    public Attempt<string?> PublishItem(IContent item, int userId)
     {
         try
         {
@@ -529,7 +529,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
             {
                 var messages = result.EventMessages?.FormatMessages(",");
                 logger.LogError("Failed to publish {result} [{messages}]", result.Result, messages ?? "(none)");
-                if (result.InvalidProperties != null)
+                if (result.InvalidProperties is not null)
                 {
                     logger.LogError("Invalid Properties: {properties}", string.Join(", ", result.InvalidProperties.Select(x => x.Alias)));
                 }
@@ -553,7 +553,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
     /// <param name="cultures"></param>
     /// <param name="unpublishMissing"></param>
     /// <returns></returns>
-    private Attempt<string> PublishItem(IContent item, IDictionary<string, uSyncContentState> cultures, bool unpublishMissing, int userId)
+    private Attempt<string?> PublishItem(IContent item, IDictionary<string, uSyncContentState> cultures, bool unpublishMissing, int userId)
     {
         if (cultures == null) return PublishItem(item, userId);
 
@@ -658,9 +658,10 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
 
     #endregion
 
-    protected override Attempt<IContent> CreateItem(string alias, ITreeEntity? parent, string itemType)
+    protected override Attempt<IContent?> CreateItem(string alias, ITreeEntity? parent, string itemType)
     {
-        var parentId = parent != null ? parent.Id : -1;
+        var parentId = parent?.Id ?? -1;
+
         var item = contentService.Create(alias, parentId, itemType);
         if (item == null)
             return Attempt.Fail(item, new ArgumentException($"Unable to create content item of type {itemType}"));

@@ -11,11 +11,11 @@ public class LanguageTracker : SyncXmlTracker<ILanguage>, ISyncTracker<ILanguage
     {
     }
 
-    public override List<TrackingItem> TrackingItems => new List<TrackingItem>()
-    {
+    public override List<TrackingItem> TrackingItems =>
+    [
         TrackingItem.Single("IsoCode", "/IsoCode"),
         TrackingItem.Single("Mandatory", "IsMandatory"),
         TrackingItem.Single("Default Language", "/IsDefault"),
         TrackingItem.Single("CultureName", "/CultureName")
-    };
+    ];
 }

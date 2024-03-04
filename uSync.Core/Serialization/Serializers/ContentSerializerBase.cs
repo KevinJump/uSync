@@ -321,13 +321,9 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
     protected virtual IEnumerable<uSyncChange> DeserializeBase(TObject item, XElement node, SyncSerializerOptions options)
     {
         var info = node?.Element(uSyncConstants.Xml.Info);
-        if (node is null || info is null)
-        {
-            return Enumerable.Empty<uSyncChange>();
-        }
+        if (node is null || info is null) return [];
 
         var changes = new List<uSyncChange>();
-
 
         var trashed = info.Element("Trashed").ValueOrDefault(false);
 
@@ -693,7 +689,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
 
     // these are the functions using the simple 'getItem(alias)' 
     // that we cannot use for content/media trees.
-    protected override Attempt<TObject> FindOrCreate(XElement node)
+    protected override Attempt<TObject?> FindOrCreate(XElement node)
     {
         var item = FindItem(node);
         if (item is not null) 
@@ -773,7 +769,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
                 }
             }
 
-            var items = syncMappers.EntityCache.GetAll(this.umbracoObjectType, lookups.ToArray());
+            var items = syncMappers.EntityCache.GetAll(this.umbracoObjectType, [..lookups]);
             // var items = entityService.GetAll(this.umbracoObjectType, lookups.ToArray());
             foreach (var item in items)
             {
