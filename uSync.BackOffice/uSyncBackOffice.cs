@@ -1,63 +1,62 @@
-﻿namespace uSync.BackOffice
+﻿namespace uSync.BackOffice;
+
+/// <summary>
+///  global values for uSync 
+/// </summary>
+public class uSync
 {
     /// <summary>
-    ///  global values for uSync 
+    ///  name of the app
     /// </summary>
-    public class uSync
+    internal const string Name = "uSync";
+
+    /// <summary>
+    ///  a key we set on notifications, so you can tell if uSync processed them,
+    /// </summary>
+    public const string EventStateKey = "uSync.ProcessState";
+
+    /// <summary>
+    ///  a key set on a notification to say uSync was paused while processing the item.
+    /// </summary>
+    public const string EventPausedKey = "uSync.PausedKey";
+
+    internal class Trees
     {
-        /// <summary>
-        ///  name of the app
-        /// </summary>
-        internal const string Name = "uSync";
+        internal const string uSync = "usync";
+        internal const string Group = "sync";
+    }
+
+    internal class Sets
+    {
+        internal const string DefaultSet = "Default";
+    }
+
+    /// <summary>
+    ///  configuration defaults 
+    /// </summary>
+    public class Configuration
+    {
+        private const string uSyncConfigPrefix = "uSync:";
 
         /// <summary>
-        ///  a key we set on notifications, so you can tell if uSync processed them,
+        ///  where the configuration settings live
         /// </summary>
-        public const string EventStateKey = "uSync.ProcessState";
+        public static string ConfigSettings = uSyncConfigPrefix + "Settings";
 
         /// <summary>
-        ///  a key set on a notification to say uSync was paused while processing the item.
+        /// path to the root of the default configuration sets 
         /// </summary>
-        public const string EventPausedKey = "uSync.PausedKey";
-
-        internal class Trees
-        {
-            internal const string uSync = "usync";
-            internal const string Group = "sync";
-        }
-
-        internal class Sets
-        {
-            internal const string DefaultSet = "Default";
-        }
+        public static string uSyncSetsConfig = uSyncConfigPrefix + "Sets";
 
         /// <summary>
-        ///  configuration defaults 
+        ///  prefix used for sets in the config 
         /// </summary>
-        public class Configuration
-        {
-            private const string uSyncConfigPrefix = "uSync:";
+        public static string uSyncSetsConfigPrefix = uSyncSetsConfig + ":";
 
-            /// <summary>
-            ///  where the configuration settings live
-            /// </summary>
-            public static string ConfigSettings = uSyncConfigPrefix + "Settings";
+        /// <summary>
+        /// names option for the default set. 
+        /// </summary>
+        public static string ConfigDefaultSet = uSyncSetsConfigPrefix + uSync.Sets.DefaultSet;
 
-            /// <summary>
-            /// path to the root of the default configuration sets 
-            /// </summary>
-            public static string uSyncSetsConfig = uSyncConfigPrefix + "Sets";
-
-            /// <summary>
-            ///  prefix used for sets in the config 
-            /// </summary>
-            public static string uSyncSetsConfigPrefix = uSyncSetsConfig + ":";
-
-            /// <summary>
-            /// names option for the default set. 
-            /// </summary>
-            public static string ConfigDefaultSet = uSyncSetsConfigPrefix + uSync.Sets.DefaultSet;
-
-        }
     }
 }

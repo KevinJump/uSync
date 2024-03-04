@@ -291,7 +291,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         var listView = info.Element("ListView").ValueOrDefault(Guid.Empty);
         if (listView != Guid.Empty && item.ListView != listView)
         {
-            item.ListView= listView;
+            item.ListView = listView;
         }
 
         if (!SetMasterFromElement(item, info.Element(uSyncConstants.Xml.Parent)))
@@ -404,7 +404,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         logger.LogDebug("De-serializing Properties");
 
         var propertiesNode = node?.Element("GenericProperties");
-        if (propertiesNode == null) return[];
+        if (propertiesNode == null) return [];
 
         /// there are something we can't do in the loop, 
         /// so we store them and do them once we've put 
@@ -758,7 +758,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
             Alias = alias;
         }
 
-        public string? Name { get; set; } 
+        public string? Name { get; set; }
         public string Alias { get; set; }
 
         public int SortOrder { get; set; }

@@ -11,10 +11,10 @@ public interface IConfigurationSerializer
     ///  array of editor aliases that this serializer works for.
     /// </summary>
     string[] Editors { get; }
-   
+
     IDictionary<string, object> GetConfigurationExport(IDictionary<string, object> configuration)
         => configuration;
-    
+
     IDictionary<string, object> GetConfigurationImport(IDictionary<string, object> configuration)
         => configuration;
 }

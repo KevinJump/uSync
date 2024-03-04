@@ -6,7 +6,6 @@ using Umbraco.Cms.Core.Services;
 
 using uSync.Core.Dependency;
 using uSync.Core.Extensions;
-using System.Linq;
 
 namespace uSync.Core.Mapping;
 
@@ -53,7 +52,7 @@ public class RTEMapper : SyncValueMapperBase, ISyncMapper
         var stringValue = value.ToString();
         if (string.IsNullOrWhiteSpace(stringValue)) return [];
 
-        if (stringValue.TryParseToJsonNode(out var jsonNode) && jsonNode is not null) 
+        if (stringValue.TryParseToJsonNode(out var jsonNode) && jsonNode is not null)
         {
             // if its json, it contains the new blocks way of sending shizzel. 
             return GetBlockDependencies(jsonNode.AsObject(), editorAlias, flags);
@@ -70,7 +69,7 @@ public class RTEMapper : SyncValueMapperBase, ISyncMapper
         {
             dependencies.AddRange(GetSimpleDependencies(markupNode.ToString(), editorAlias, flags));
         }
-        
+
 
         if (jObject.TryGetPropertyValue("blocks", out var blocks) && blocks is not null)
         {

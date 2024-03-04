@@ -1,7 +1,5 @@
 ﻿using Asp.Versioning;
 
-using MessagePack.Formatters;
-
 using Microsoft.AspNetCore.Mvc;
 
 using uSync.Backoffice.Management.Api.Models;

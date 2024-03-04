@@ -21,10 +21,10 @@ public abstract class SyncSerializerRoot<TObject>
 
         // read the attribute
         serializerType = this.GetType();
-        
+
         var meta = serializerType.GetCustomAttribute<SyncSerializerAttribute>(false)
             ?? throw new InvalidOperationException($"the uSyncSerializer {serializerType} requires a {typeof(SyncSerializerAttribute)}");
-        
+
         Name = meta.Name;
         Id = meta.Id;
         ItemType = meta.ItemType;

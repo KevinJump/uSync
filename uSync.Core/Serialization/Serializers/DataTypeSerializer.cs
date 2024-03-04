@@ -171,10 +171,11 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
 
         var changes = new List<uSyncChange>();
 
-        if (config.TryDeserialize(out IDictionary<string, object>? dictionaryData) is false || dictionaryData is null) {
+        if (config.TryDeserialize(out IDictionary<string, object>? dictionaryData) is false || dictionaryData is null)
+        {
             changes.AddWarning("Data", item.Name ?? item.Id.ToString(), "Failed to deserialize config for item");
             return changes;
-        }   
+        }
 
         var importData = serializer == null ? dictionaryData : serializer.GetConfigurationImport(dictionaryData);
 
@@ -240,7 +241,7 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
 
         // merge the configurationData and configurationObject into one dictionary
         // there might be duplicates, but they will be of the same value. 
-        var merged = configurationObject?.TryConvertToDictionary(out var objectDictionary) is true 
+        var merged = configurationObject?.TryConvertToDictionary(out var objectDictionary) is true
             ? item.ConfigurationData.MergeIgnoreDuplicates(objectDictionary)
             : item.ConfigurationData;
 

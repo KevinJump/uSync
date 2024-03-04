@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
+﻿using System.Reflection;
 
 using Umbraco.Cms.Core.Models.Membership;
 
@@ -27,8 +26,8 @@ internal static class DictionaryExtensions
     {
         if (emails == null || string.IsNullOrEmpty(email)) return -1;
 
-        emails[email] = emails.TryGetValue(email, out int value) 
-            ? value 
+        emails[email] = emails.TryGetValue(email, out int value)
+            ? value
             : findMethod(email)?.Id ?? -1;
 
         return emails[email];
@@ -55,7 +54,7 @@ internal static class DictionaryExtensions
     {
         result = new Dictionary<string, object>();
 
-        if (obj == null) return false;  
+        if (obj == null) return false;
 
         try
         {

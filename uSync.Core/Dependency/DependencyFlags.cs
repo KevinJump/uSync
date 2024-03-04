@@ -14,12 +14,12 @@ public enum DependencyFlags
     /// <summary>
     ///  include child items 
     /// </summary>
-    IncludeChildren = 2, 
+    IncludeChildren = 2,
 
     /// <summary>
     ///  include the parent items
     /// </summary>
-    IncludeAncestors = 4, 
+    IncludeAncestors = 4,
 
     /// <summary>
     ///  include system dependencies (doctypes, datatypes, etc)
@@ -29,12 +29,12 @@ public enum DependencyFlags
     /// <summary>
     ///  include the view files (template files)
     /// </summary>
-    IncludeViews = 16, 
+    IncludeViews = 16,
 
     /// <summary>
     ///  include any media linked to an item
     /// </summary>
-    IncludeMedia = 32, 
+    IncludeMedia = 32,
 
     /// <summary>
     ///  include any linked content
@@ -54,17 +54,17 @@ public enum DependencyFlags
     /// <summary>
     ///  only include directly adjacent items (don't recurse)
     /// </summary>
-    AdjacentOnly = 512, 
+    AdjacentOnly = 512,
 
     /// <summary>
     ///  calculate as part of a root tree (alters how ancestors are calculated)
     /// </summary>
-    RootSync = 1024, 
+    RootSync = 1024,
 
     /// <summary>
     ///  include the contents of any template, or view as part of the sync.
     /// </summary>
-    IncludeContents = 2048, 
+    IncludeContents = 2048,
 
     /// <summary>
     ///  dependencies should be checked against published values.

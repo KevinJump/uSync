@@ -112,7 +112,8 @@ public class SyncSerializerOptions
     /// </summary>
     public void MergeSettings(Dictionary<string, string>? newSettings)
     {
-        if (Settings is null) { 
+        if (Settings is null)
+        {
             Settings = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
         }
 

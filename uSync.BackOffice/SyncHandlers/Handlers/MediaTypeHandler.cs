@@ -1,6 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System;
 
-using System;
+using Microsoft.Extensions.Logging;
 
 using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Events;
@@ -17,66 +17,65 @@ using uSync.Core;
 
 using static Umbraco.Cms.Core.Constants;
 
-namespace uSync.BackOffice.SyncHandlers.Handlers
+namespace uSync.BackOffice.SyncHandlers.Handlers;
+
+/// <summary>
+///  Handler to mange Media Types in uSync
+/// </summary>
+[SyncHandler(uSyncConstants.Handlers.MediaTypeHandler, "Media Types", "MediaTypes", uSyncConstants.Priorites.MediaTypes,
+    IsTwoPass = true, Icon = "icon-thumbnails", EntityType = UdiEntityType.MediaType)]
+public class MediaTypeHandler : ContentTypeBaseHandler<IMediaType, IMediaTypeService>, ISyncHandler, ISyncGraphableHandler,
+    INotificationHandler<SavedNotification<IMediaType>>,
+    INotificationHandler<DeletedNotification<IMediaType>>,
+    INotificationHandler<MovedNotification<IMediaType>>,
+    INotificationHandler<EntityContainerSavedNotification>,
+    INotificationHandler<EntityContainerRenamedNotification>,
+    INotificationHandler<SavingNotification<IMediaType>>,
+    INotificationHandler<DeletingNotification<IMediaType>>,
+    INotificationHandler<MovingNotification<IMediaType>>
 {
-    /// <summary>
-    ///  Handler to mange Media Types in uSync
-    /// </summary>
-    [SyncHandler(uSyncConstants.Handlers.MediaTypeHandler, "Media Types", "MediaTypes", uSyncConstants.Priorites.MediaTypes,
-        IsTwoPass = true, Icon = "icon-thumbnails", EntityType = UdiEntityType.MediaType)]
-    public class MediaTypeHandler : ContentTypeBaseHandler<IMediaType, IMediaTypeService>, ISyncHandler, ISyncGraphableHandler,
-        INotificationHandler<SavedNotification<IMediaType>>,
-        INotificationHandler<DeletedNotification<IMediaType>>,
-        INotificationHandler<MovedNotification<IMediaType>>,
-        INotificationHandler<EntityContainerSavedNotification>,        
-        INotificationHandler<EntityContainerRenamedNotification>,
-        INotificationHandler<SavingNotification<IMediaType>>,
-        INotificationHandler<DeletingNotification<IMediaType>>,
-        INotificationHandler<MovingNotification<IMediaType>>
+    private readonly IMediaTypeService mediaTypeService;
+
+    /// <inheritdoc/>
+    public MediaTypeHandler(
+        ILogger<MediaTypeHandler> logger,
+        IEntityService entityService,
+        IMediaTypeService mediaTypeService,
+        AppCaches appCaches,
+        IShortStringHelper shortStringHelper,
+        SyncFileService syncFileService,
+        uSyncEventService mutexService,
+        uSyncConfigService uSyncConfig,
+        ISyncItemFactory syncItemFactory)
+        : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfig, syncItemFactory)
+
     {
-        private readonly IMediaTypeService mediaTypeService;
-
-        /// <inheritdoc/>
-        public MediaTypeHandler(
-            ILogger<MediaTypeHandler> logger,
-            IEntityService entityService,
-            IMediaTypeService mediaTypeService,
-            AppCaches appCaches,
-            IShortStringHelper shortStringHelper,
-            SyncFileService syncFileService,
-            uSyncEventService mutexService,
-            uSyncConfigService uSyncConfig,
-            ISyncItemFactory syncItemFactory)
-            : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfig, syncItemFactory)
-
-        {
-            this.mediaTypeService = mediaTypeService;
-        }
-
-        /// <inheritdoc/>
-        protected override string GetEntityTreeName(IUmbracoEntity item, bool useGuid)
-        {
-            if (useGuid) return item.Key.ToString();
-
-            if (item is IMediaType mediaType)
-            {
-                return mediaType.Alias.ToSafeFileName(shortStringHelper);
-            }
-
-            return item.Name?.ToSafeFileName(shortStringHelper) ?? item.Key.ToString();
-        }
-
-        /// <inheritdoc/>
-        protected override void DeleteFolder(int id)
-            => mediaTypeService.DeleteContainer(id);
-
-        /// <inheritdoc/>
-        protected override IEntity? GetContainer(int id)
-            => mediaTypeService.GetContainer(id);
-
-        /// <inheritdoc/>
-        protected override IEntity? GetContainer(Guid key)
-            => mediaTypeService.GetContainer(key);
-
+        this.mediaTypeService = mediaTypeService;
     }
+
+    /// <inheritdoc/>
+    protected override string GetEntityTreeName(IUmbracoEntity item, bool useGuid)
+    {
+        if (useGuid) return item.Key.ToString();
+
+        if (item is IMediaType mediaType)
+        {
+            return mediaType.Alias.ToSafeFileName(shortStringHelper);
+        }
+
+        return item.Name?.ToSafeFileName(shortStringHelper) ?? item.Key.ToString();
+    }
+
+    /// <inheritdoc/>
+    protected override void DeleteFolder(int id)
+        => mediaTypeService.DeleteContainer(id);
+
+    /// <inheritdoc/>
+    protected override IEntity? GetContainer(int id)
+        => mediaTypeService.GetContainer(id);
+
+    /// <inheritdoc/>
+    protected override IEntity? GetContainer(Guid key)
+        => mediaTypeService.GetContainer(key);
+
 }

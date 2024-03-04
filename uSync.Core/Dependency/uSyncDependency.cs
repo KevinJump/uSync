@@ -36,7 +36,7 @@ public class uSyncDependency
     /// <summary>
     ///  the Umbraco Unique Id for the dependency
     /// </summary>
-    public Udi? Udi { get; set; }  
+    public Udi? Udi { get; set; }
 
     /// <summary>
     ///  order in which dependency will be imported

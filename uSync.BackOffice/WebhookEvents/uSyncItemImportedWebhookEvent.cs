@@ -11,7 +11,7 @@ namespace uSync.BackOffice.WebhookEvents;
 ///  webhook event for when a single item has been imported
 /// </summary>
 [WebhookEvent("uSync item imported")]
-public class uSyncItemImportedWebhookEvent : 
+public class uSyncItemImportedWebhookEvent :
     WebhookEventBase<uSyncImportedItemNotification>
 {
     /// <inheritdoc/>
@@ -19,7 +19,7 @@ public class uSyncItemImportedWebhookEvent :
         IWebhookFiringService webhookFiringService,
         IWebhookService webhookService,
         IOptionsMonitor<WebhookSettings> webhookSettings,
-        IServerRoleAccessor serverRoleAccessor) 
+        IServerRoleAccessor serverRoleAccessor)
         : base(webhookFiringService, webhookService, webhookSettings, serverRoleAccessor)
     {
     }

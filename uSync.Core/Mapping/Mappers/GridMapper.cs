@@ -144,7 +144,7 @@ public partial class GridMapper : SyncValueMapperBase, ISyncMapper
 
     private IEnumerable<uSyncDependency> ProcessControl(JsonObject control, DependencyFlags flags)
     {
-        var editor =  control.GetPropertyAsObject("editor");
+        var editor = control.GetPropertyAsObject("editor");
         var value = control["value"];
 
         if (value is null) return [];
@@ -178,12 +178,12 @@ public partial class GridMapper : SyncValueMapperBase, ISyncMapper
             foreach (var row in rows.AsListOfJsonObjects())
             {
                 if (row is null) continue;
-                
+
                 var rowStyles = row.GetPropertyAsObject("styles");
                 if (rowStyles != null) items.AddRange(GetStyleDependencies(rowStyles));
 
                 var areas = row.GetPropertyAsArray("areas");
-                
+
                 foreach (var area in areas.AsListOfJsonObjects())
                 {
                     if (area is null) continue;

@@ -22,7 +22,7 @@ public class RepeatableValueMapper : SyncValueMapperBase, ISyncMapper
 
     public override string? GetImportValue(string value, string editorAlias)
     {
-        if (value.TryParseToJsonNode(out var json) && json != null) 
+        if (value.TryParseToJsonNode(out var json) && json != null)
         {
             if (json.TrySerializeJsonString(out var result) && result != null)
             {

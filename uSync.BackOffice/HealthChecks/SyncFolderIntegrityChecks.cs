@@ -2,11 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using System.Linq;
 using System.Xml.Linq;
 
 using Umbraco.Cms.Core.HealthChecks;
-using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
@@ -49,7 +47,7 @@ public class SyncFolderIntegrityChecks : HealthCheck
             CheckConfigFolderValidity()
         };
 
-        
+
 
         return Task.FromResult((IEnumerable<HealthCheckStatus>)items);
     }
@@ -95,13 +93,14 @@ public class SyncFolderIntegrityChecks : HealthCheck
 
         var files = Directory.GetFiles(folder, "*.*", SearchOption.AllDirectories);
 
-        foreach(var file in files)
+        foreach (var file in files)
         {
             try
             {
                 var node = XElement.Load(file);
 
-                if (!node.IsEmptyItem()) {
+                if (!node.IsEmptyItem())
+                {
                     var key = node.GetKey();
 
                     var folderName = Path.GetFileName(Path.GetDirectoryName(file));
@@ -143,13 +142,13 @@ public class SyncFolderIntegrityChecks : HealthCheck
 
         List<string> errors = new List<string>();
 
-        foreach(var file in Directory.GetFiles(root, "*.config", SearchOption.AllDirectories))
+        foreach (var file in Directory.GetFiles(root, "*.config", SearchOption.AllDirectories))
         {
             try
             {
                 var node = XElement.Load(file);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 errors.Add($"<li>{Path.GetFileName(Path.GetDirectoryName(file))}\\{Path.GetFileName(file)} is invalid {ex.Message}</li>");
             }

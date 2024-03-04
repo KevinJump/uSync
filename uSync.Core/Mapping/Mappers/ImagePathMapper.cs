@@ -77,7 +77,7 @@ public class ImagePathMapper : SyncValueMapperBase, ISyncMapper
         {
             var sourceString = source.GetValue<string>();
 
-            if (string.IsNullOrWhiteSpace (sourceString) is true)
+            if (string.IsNullOrWhiteSpace(sourceString) is true)
             {
                 json["src"] = StripSitePath(sourceString);
             }

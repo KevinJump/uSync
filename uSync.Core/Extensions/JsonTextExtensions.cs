@@ -2,8 +2,6 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
-using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
-
 using Umbraco.Extensions;
 
 namespace uSync.Core.Extensions;
@@ -165,7 +163,7 @@ public static class JsonTextExtensions
     }
 
     public static JsonObject? ToJsonObject(this string? value)
-        => value.TryParseToJsonObject(out var jsonObject) ? jsonObject : default;  
+        => value.TryParseToJsonObject(out var jsonObject) ? jsonObject : default;
 
     public static bool TryConvertToJsonObject(this object value, [MaybeNullWhen(false)] out JsonObject result)
     {
@@ -379,7 +377,8 @@ public static class JsonTextExtensions
         if (jsonObject.TryGetPropertyValue(propertyName, out var propertyNode) is false || propertyNode is null)
             return false;
 
-        try { 
+        try
+        {
             result = propertyNode.AsObject();
         }
         catch

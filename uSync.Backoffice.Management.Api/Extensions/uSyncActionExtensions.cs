@@ -6,7 +6,8 @@ namespace uSync.Backoffice.Management.Api.Extensions;
 public static class uSyncActionExtensions
 {
     public static uSyncActionView ToActionView(this uSyncAction action)
-        => new uSyncActionView { 
+        => new uSyncActionView
+        {
             Name = action.Name,
             ItemType = action.ItemType,
             Change = action.Change,

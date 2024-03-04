@@ -132,8 +132,8 @@ public class RelationTypeSerializer
                 // missing from the current list... add it.
                 _relationService.Save(new Relation(parentItem.Id, childItem.Id, relationType));
                 changes.Add(uSyncChange.Create(
-                    relationType.Alias, 
-                    parentItem.Name ?? parentItem.Id.ToString(), 
+                    relationType.Alias,
+                    parentItem.Name ?? parentItem.Id.ToString(),
                     childItem.Name ?? childItem.Id.ToString()));
             }
 
@@ -211,7 +211,7 @@ public class RelationTypeSerializer
         var value = propertyInfo.GetValue(item);
         if (value is null) return null;
         if (value is Guid guid) return guid;
-        
+
 
         return null;
     }

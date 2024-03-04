@@ -2,44 +2,43 @@
 using Umbraco.Cms.Core.Hosting;
 using Umbraco.Cms.Core.Notifications;
 
-namespace uSync.AutoTemplates
+namespace uSync.AutoTemplates;
+
+public class AutoTemplateNotificationHandler :
+    INotificationHandler<UmbracoApplicationStartingNotification>,
+    INotificationHandler<TemplateSavingNotification>
 {
-    public class AutoTemplateNotificationHandler :
-        INotificationHandler<UmbracoApplicationStartingNotification>,
-        INotificationHandler<TemplateSavingNotification>
+
+    private readonly IHostingEnvironment _hostingEnvironment;
+    private readonly TemplateWatcher _templateWatcher;
+
+    public AutoTemplateNotificationHandler(
+        IHostingEnvironment hostingEnvironment,
+        TemplateWatcher templateWatcher)
     {
+        _hostingEnvironment = hostingEnvironment;
+        _templateWatcher = templateWatcher;
+    }
 
-        private readonly IHostingEnvironment _hostingEnvironment;
-        private readonly TemplateWatcher _templateWatcher;
+    public void Handle(UmbracoApplicationStartingNotification notification)
+    {
+        // we only run in debug mode. 
+        if (!_hostingEnvironment.IsDebugMode) return;
 
-        public AutoTemplateNotificationHandler(
-            IHostingEnvironment hostingEnvironment,
-            TemplateWatcher templateWatcher)
+        // we only run when Umbraco is setup.
+        if (notification.RuntimeLevel == Umbraco.Cms.Core.RuntimeLevel.Run)
         {
-            _hostingEnvironment = hostingEnvironment;
-            _templateWatcher = templateWatcher;
+            _templateWatcher.CheckViewsFolder();
+            _templateWatcher.WatchViewsFolder();
         }
+    }
 
-        public void Handle(UmbracoApplicationStartingNotification notification)
+    public void Handle(TemplateSavingNotification notification)
+    {
+        foreach (var item in notification.SavedEntities)
         {
-            // we only run in debug mode. 
-            if (!_hostingEnvironment.IsDebugMode) return;
-
-            // we only run when Umbraco is setup.
-            if (notification.RuntimeLevel == Umbraco.Cms.Core.RuntimeLevel.Run)
-            {
-                _templateWatcher.CheckViewsFolder();
-                _templateWatcher.WatchViewsFolder();
-            }
-        }
-
-        public void Handle(TemplateSavingNotification notification)
-        {
-            foreach (var item in notification.SavedEntities)
-            {
-                // tells the watcher this has been saved in umbraco.
-                _templateWatcher.QueueChange(item.Alias);
-            }
+            // tells the watcher this has been saved in umbraco.
+            _templateWatcher.QueueChange(item.Alias);
         }
     }
 }

@@ -39,7 +39,7 @@ public class SyncTrackerCollection : BuilderCollectionBase<ISyncTrackerBase>
         var changes = new List<uSyncChange>();
         foreach (var tracker in GetTrackers<TObject>())
         {
-            if (tracker is null) continue;  
+            if (tracker is null) continue;
             changes.AddRange(tracker.GetChanges(node, currentNode, options));
         }
         return changes;

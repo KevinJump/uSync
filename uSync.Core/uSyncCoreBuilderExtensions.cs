@@ -2,7 +2,6 @@
 using Microsoft.Extensions.DependencyInjection;
 
 using Umbraco.Cms.Core.DependencyInjection;
-using Umbraco.Cms.Core.Services;
 
 using uSync.Core.Cache;
 using uSync.Core.DataTypes;
@@ -31,7 +30,7 @@ public static class uSyncCoreBuilderExtensions
         // TODO: Check this - in theory, if SyncEnityCache is already registered we don't run again.
         if (builder.Services.FirstOrDefault(x => x.ServiceType == typeof(SyncEntityCache)) != null)
             return builder;
-    
+
         builder.Services.AddSingleton<uSyncCapabilityChecker>();
 
         // cache for entity items, we use it to speed up lookups.

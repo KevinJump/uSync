@@ -25,7 +25,7 @@ public class GridImageMapper : SyncValueMapperBase, ISyncMapper
 
         if (value.ToString().TryParseToJsonObject(out var image) is false || image is null)
             return [];
-            
+
         var udiString = image.GetPropertyAsString("udi");
         if (!string.IsNullOrWhiteSpace(udiString))
         {

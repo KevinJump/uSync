@@ -317,8 +317,8 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
 
     private readonly string _historyCleanupName = "HistoryCleanup";
     private readonly string[] _historyCleanupProperties = [
-        "PreventCleanup", 
-        "KeepAllVersionsNewerThanDays", 
+        "PreventCleanup",
+        "KeepAllVersionsNewerThanDays",
         "KeepLatestVersionPerDayForDays"
     ];
 

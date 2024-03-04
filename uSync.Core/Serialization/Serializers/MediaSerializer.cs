@@ -40,9 +40,9 @@ public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncSerializer<IM
         // and they are auto calculated by umbraco anyway. 
         // & sometimes they just lead to false positives. 
         this.dontSerialize = [
-            "umbracoWidth", 
-            "umbracoHeight", 
-            "umbracoBytes", 
+            "umbracoWidth",
+            "umbracoHeight",
+            "umbracoBytes",
             "umbracoExtension"
         ];
     }
@@ -50,7 +50,7 @@ public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncSerializer<IM
     protected override SyncAttempt<IMedia> DeserializeCore(XElement node, SyncSerializerOptions options)
     {
         var attempt = FindOrCreate(node);
-        if (!attempt.Success || attempt.Result is null) 
+        if (!attempt.Success || attempt.Result is null)
             throw attempt.Exception ?? new Exception($"Unknown error {node.GetAlias()}");
 
         var item = attempt.Result;
@@ -69,7 +69,7 @@ public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncSerializer<IM
 
         var propertyAttempt = DeserializeProperties(item, node, options);
         if (!propertyAttempt.Success)
-            return SyncAttempt<IMedia>.Fail(item.Name ?? item.Id.ToString(), item, ChangeType.Fail, "Failed to save properties", 
+            return SyncAttempt<IMedia>.Fail(item.Name ?? item.Id.ToString(), item, ChangeType.Fail, "Failed to save properties",
                 propertyAttempt.Exception ?? new Exception($"Error with properties {item.Id}"));
 
         if (!options.GetSetting<bool>("IgnoreSortOrder", false))

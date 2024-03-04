@@ -1,6 +1,5 @@
 ﻿using System.Xml.Linq;
 
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -194,7 +193,7 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
         using (var stream = _viewFileSystem?.OpenFile(templatePath))
         {
             if (stream is null) return content;
-                
+
             using (var sr = new StreamReader(stream))
             {
                 content = sr.ReadToEnd();
@@ -275,7 +274,7 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
 
     private static XElement SerializeContent(ITemplate item)
         => new("Contents", new XCData(item.Content ?? string.Empty));
-    
+
 
     private int CalculateLevel(ITemplate item)
     {

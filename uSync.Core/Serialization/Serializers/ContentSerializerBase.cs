@@ -692,7 +692,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
     protected override Attempt<TObject?> FindOrCreate(XElement node)
     {
         var item = FindItem(node);
-        if (item is not null) 
+        if (item is not null)
             return Attempt.Succeed(item);
 
         var alias = node.GetAlias();
@@ -769,12 +769,12 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
                 }
             }
 
-            var items = syncMappers.EntityCache.GetAll(this.umbracoObjectType, [..lookups]);
+            var items = syncMappers.EntityCache.GetAll(this.umbracoObjectType, [.. lookups]);
             // var items = entityService.GetAll(this.umbracoObjectType, lookups.ToArray());
             foreach (var item in items)
             {
                 AddToNameCache(item.Id, item.Key, item.Name ?? item.Id.ToString());
-                friendlyPath = friendlyPath.Replace($"[{item.Id}]", 
+                friendlyPath = friendlyPath.Replace($"[{item.Id}]",
                     (item.Name ?? item.Id.ToString()).ToSafeAlias(shortStringHelper));
             }
 

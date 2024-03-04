@@ -9,7 +9,7 @@ public static class StringExtensions
     ///  things can't be called web.config or app.config it causes issues on build and publish 
     /// </summary>
     private static readonly string[] _badNames = [
-        "app.config", 
+        "app.config",
         "web.config"
     ];
 

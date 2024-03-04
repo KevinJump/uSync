@@ -45,7 +45,7 @@ public class GraphEdge<T>
     {
         Node = node;
         Edge = edge;
-    } 
+    }
 
     public T Node { get; set; }
     public T Edge { get; set; }
@@ -55,6 +55,6 @@ public class GraphEdge<T>
 public class GraphEdge
 {
     public static GraphEdge<T> Create<T>(T node, T edge) where T : IEquatable<T>
-        => new GraphEdge<T>(node,edge);
+        => new GraphEdge<T>(node, edge);
 }
 

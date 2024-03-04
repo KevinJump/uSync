@@ -159,7 +159,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
     protected override SyncAttempt<IContent> DeserializeCore(XElement node, SyncSerializerOptions options)
     {
         var attempt = FindOrCreate(node);
-        if (!attempt.Success || attempt.Result is null) 
+        if (!attempt.Success || attempt.Result is null)
             throw attempt.Exception ?? new Exception($"Unknown error {node.GetAlias()}");
 
         var item = attempt.Result;
@@ -300,7 +300,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
     public override SyncAttempt<IContent> DeserializeSecondPass(IContent item, XElement node, SyncSerializerOptions options)
     {
         var changes = DeserializeSchedules(item, node, options);
-        if (changes.Count != 0) 
+        if (changes.Count != 0)
             return SyncAttempt<IContent>.Succeed(item.Name ?? item.Id.ToString(), item, ChangeType.Import, "" ?? string.Empty, true, changes);
 
         return SyncAttempt<IContent>.Succeed(item.Name ?? item.Id.ToString(), item, ChangeType.NoChange);

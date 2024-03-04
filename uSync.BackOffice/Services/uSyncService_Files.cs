@@ -100,7 +100,7 @@ public partial class uSyncService
     private string GetOSDependentPath(string file)
         => file.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar)
             .Trim(Path.DirectorySeparatorChar);
-    
+
     private string CleanPathForZip(string path)
         => Path.GetFullPath(
             path.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar))

@@ -26,8 +26,8 @@ public static class SyncPropertyGroupHelpers
     ///  strip of any temp tab alias string from the tab name.
     /// </summary>
     public static string StripTempTabAlias(string alias)
-        => IsTempTabAlias(alias) 
-            ? alias.Substring(uSyncTmpTabAliasPrefix.Length) 
+        => IsTempTabAlias(alias)
+            ? alias.Substring(uSyncTmpTabAliasPrefix.Length)
             : alias;
 
     public static PropertyGroup? FindTab(this PropertyGroupCollection groups, string alias)

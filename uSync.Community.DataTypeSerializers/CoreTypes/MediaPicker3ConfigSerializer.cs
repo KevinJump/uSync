@@ -1,33 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-using Umbraco.Cms.Core.PropertyEditors;
 using Umbraco.Cms.Core.Services;
 
 using uSync.Core.DataTypes;
-using uSync.Core.Extensions;
 
-namespace uSync8.Community.DataTypeSerializers.CoreTypes
+namespace uSync8.Community.DataTypeSerializers.CoreTypes;
+
+public class MediaPicker3ConfigSerializer : SyncDataTypeSerializerBase, IConfigurationSerializer
 {
-    public class MediaPicker3ConfigSerializer : SyncDataTypeSerializerBase, IConfigurationSerializer
+    public MediaPicker3ConfigSerializer(IEntityService entityService)
+        : base(entityService)
+    { }
+
+    public string Name => "MediaPicker3NodeSerializer";
+
+    public string[] Editors => new string[] { "Umbraco.MediaPicker3" };
+
+    public override IDictionary<string, object> GetConfigurationImport(IDictionary<string, object> configuration)
     {
-        public MediaPicker3ConfigSerializer(IEntityService entityService)
-            : base(entityService)
-        { }
+        return base.GetConfigurationImport(configuration);
+    }
 
-        public string Name => "MediaPicker3NodeSerializer";
-
-        public string[] Editors => new string[] { "Umbraco.MediaPicker3" };
-
-        public override IDictionary<string, object> GetConfigurationImport(IDictionary<string, object> configuration)
-        {
-            return base.GetConfigurationImport(configuration);
-        }
-
-        public override IDictionary<string, object> GetConfigurationExport(IDictionary<string, object> configuration)
-        {
-            return base.GetConfigurationExport(configuration);
-        }
+    public override IDictionary<string, object> GetConfigurationExport(IDictionary<string, object> configuration)
+    {
+        return base.GetConfigurationExport(configuration);
+    }
 
     //    public override string SerializeConfig(object configuration)
     //    {
@@ -71,5 +68,4 @@ namespace uSync8.Community.DataTypeSerializers.CoreTypes
 
     //        return base.DeserializeConfig(config, configType);
     //    }
-    }
 }

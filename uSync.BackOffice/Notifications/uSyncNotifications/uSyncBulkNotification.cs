@@ -2,27 +2,24 @@
 
 using Umbraco.Cms.Core.Notifications;
 
-namespace uSync.BackOffice
+namespace uSync.BackOffice;
+
+/// <summary>
+///  Notifications of bulk (starting/completed) events 
+/// </summary>
+public class uSyncBulkNotification : INotification
 {
     /// <summary>
-    ///  Notifications of bulk (starting/completed) events 
+    ///  generate new BulkNotificationObject
     /// </summary>
-    public class uSyncBulkNotification : INotification
+    /// <param name="actions"></param>
+    public uSyncBulkNotification(IEnumerable<uSyncAction> actions)
     {
-        /// <summary>
-        ///  generate new BulkNotificationObject
-        /// </summary>
-        /// <param name="actions"></param>
-        public uSyncBulkNotification(IEnumerable<uSyncAction> actions)
-        {
-            this.Actions = actions;
-        }
-
-        /// <summary>
-        ///  actions that have occured during the bulk operation
-        /// </summary>
-        public IEnumerable<uSyncAction> Actions { get; set; }
+        this.Actions = actions;
     }
 
-
+    /// <summary>
+    ///  actions that have occured during the bulk operation
+    /// </summary>
+    public IEnumerable<uSyncAction> Actions { get; set; }
 }

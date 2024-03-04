@@ -257,7 +257,7 @@ public static class XElementExtensions
         ArgumentNullException.ThrowIfNull(node);
 
         var val = node.Element(name).ValueOrDefault(string.Empty);
-        
+
         if (val == string.Empty) throw new ArgumentNullException("Missing Value " + name);
 
         return val;
@@ -269,7 +269,7 @@ public static class XElementExtensions
     ///  Get the Value from the attribute or return the default value if attribute is not set
     /// </summary>
     public static string ValueOrDefault([AllowNull] this XAttribute? attribute, string defaultValue)
-       => string.IsNullOrEmpty(attribute?.Value) 
+       => string.IsNullOrEmpty(attribute?.Value)
             ? defaultValue
             : attribute.Value;
 

@@ -216,7 +216,7 @@ public abstract class SyncContainerSerializerBase<TObject>
     /// </remarks>
     private Dictionary<int, XElement> _folderCache = [];
 
-    private void ClearFolderCache() 
+    private void ClearFolderCache()
         => _folderCache = [];
 
     public void InitializeCache()

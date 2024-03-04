@@ -28,7 +28,7 @@ public class SortingTests
     public void GraphSortGuidNodes()
     {
         var graph = new List<GraphEdge<Guid>>();
-        
+
         graph.Add(GraphEdge.Create(_guidNodes[2], _guidNodes[1]));
         graph.Add(GraphEdge.Create(_guidNodes[2], _guidNodes[4]));
 

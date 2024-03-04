@@ -2,24 +2,23 @@
 
 using uSync.BackOffice.SyncHandlers;
 
-namespace uSync.BackOffice
+namespace uSync.BackOffice;
+
+/// <summary>
+///  Cancelable nofiration called before an item is imported 
+/// </summary>
+public class uSyncImportingItemNotification : CancelableuSyncItemNotification<XElement>
 {
     /// <summary>
-    ///  Cancelable nofiration called before an item is imported 
+    ///  generate a new uSyncImportingItemNotification object
     /// </summary>
-    public class uSyncImportingItemNotification : CancelableuSyncItemNotification<XElement> 
-    {
-        /// <summary>
-        ///  generate a new uSyncImportingItemNotification object
-        /// </summary>
-        public uSyncImportingItemNotification(XElement item)
-            : base(item) { }
+    public uSyncImportingItemNotification(XElement item)
+        : base(item) { }
 
-        /// <summary>
-        ///  generate a new uSyncImportingItemNotification object
-        /// </summary>
-        public uSyncImportingItemNotification(XElement item, ISyncHandler handler)
-            : base(item, handler) { }
+    /// <summary>
+    ///  generate a new uSyncImportingItemNotification object
+    /// </summary>
+    public uSyncImportingItemNotification(XElement item, ISyncHandler handler)
+        : base(item, handler) { }
 
-    }
 }
