@@ -14,7 +14,7 @@ export class uSyncLegacyModalElement extends
     render() {
 
         return html`
-            <umb-body-layout headline="Legacy folder detected">
+            <umb-body-layout headline="Legacy uSync folder detected">
                 <div class="content">
                     ${this.renderLegacyFolder(this.data?.legacyFolder)}
                     ${this.renderLegacyTypes(this.data?.legacyTypes)}
@@ -30,12 +30,8 @@ export class uSyncLegacyModalElement extends
     renderLegacyFolder(folder: string | null | undefined) {
         return folder === undefined || folder === null ? nothing 
         : html`
-            <uui-box headline="Legacy folder found at ${folder}">
-                <div>
-                    <p>uSync has found a legacy uSync folder at ${folder} <br/>
-                    Its likely that the content in it will need coverting in someway</p>
-                </div>
-            </uui-box>
+            <p>uSync has found a legacy uSync folder at <strong>${folder}</strong>. <br/>
+            Its likely that the content in it will need coverting in someway</p>
         `;
     }
 
@@ -48,37 +44,34 @@ export class uSyncLegacyModalElement extends
         });
 
         return html`
-            <uui-box headline="Legacy DataTypes">
                 <div>
-                    <p>uSync also found some legacy data types:</p>
+                    <h4>Obsolete DataTypes</h4>
                     <ul>
                         ${legacyTypeHtml}
                     </ul>
                     <p>
-                        You can convert these legacy types using <a href="https://github.com/Jumoo/uSyncMigrations" target="_blank">uSync.Migrations</a><br/>
-                        <em>(In the full uSync release, we want to do this conversion here.)</em>
+                        You can convert these DataTypes using <a href="https://github.com/Jumoo/uSyncMigrations" target="_blank">uSync.Migrations</a><br/>
+                        <em>(In the full uSync release conversion will happen here.)</em>
                     </p>
                 </div>
-            </uui-box>
         `;
 
     }
 
     renderCopy() {
         return html`
-            <uui-box headline="Move folder to v14">
-                <p>Meanwhile, you can copy your ${this.data?.legacyFolder} folder <br/>
-                to the uSync/v14 folder and run an import.</p>
-                <p><strong>Remove or rename the ${this.data?.legacyFolder} folder to remove this popup</strong></p>
-                <p>If nothing needs converting, then everything should import.<br/>
-                    but this is a beta, on a beta.</p>
-            </uui-box>
+            <h4>Copy to uSync/v14</h4>
+            <p>You can copy your ${this.data?.legacyFolder} folder to the ~/uSync/v14 folder<br/> and run an import.</p>
+            <p>If nothing needs converting, then everything should import.<br/>
+                but this is a beta release running on a beta release 🤞</p>
+            <p><strong>Remove or rename the ${this.data?.legacyFolder} folder to prevent this popup</strong></p>
         `
     };
 
     static styles = css`
-        uui-box {
-            margin-bottom: 10px;
+
+        .content {
+            margin: -10px 0;
         }
 
         em {

@@ -90,8 +90,6 @@ export class uSyncDefaultViewElement extends UmbElementMixin(LitElement) {
 
             this.observe(_instance.legacy, (_legacy) => {
                 this._legacy = _legacy;
-                console.log(this._legacy);
-
                 if (this._legacy?.hasLegacy) {
                     this.openLegacyModal();
                 }
