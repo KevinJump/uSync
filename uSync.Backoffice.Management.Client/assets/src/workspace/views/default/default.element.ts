@@ -104,14 +104,22 @@ export class uSyncDefaultViewElement extends UmbElementMixin(LitElement) {
         });
     }
 
+    _legacyDialogOpened : boolean = false;
+
     async openLegacyModal() {
+
+        if (this._legacyDialogOpened) return;
+        this._legacyDialogOpened = true;
 
         const legacyModal = this.#modalContext?.open(USYNC_LEGACY_MODAL, {
             data : this._legacy
         });
 
-        const data = await legacyModal?.onSubmit();
-        if (!data) return;
+        await legacyModal?.onSubmit().then(function(data) {
+            console.log('data', data);
+        });
+
+        return;
     }
     
     

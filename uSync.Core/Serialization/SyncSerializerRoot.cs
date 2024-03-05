@@ -218,7 +218,7 @@ public abstract class SyncSerializerRoot<TObject>
 
     public virtual ChangeType IsCurrent(XElement node, SyncSerializerOptions options)
     {
-        XElement current = new("");
+        XElement? current = default;
         var item = FindItem(node);
         if (item != null)
         {

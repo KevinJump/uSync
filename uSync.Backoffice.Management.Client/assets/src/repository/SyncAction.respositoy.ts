@@ -48,7 +48,7 @@ export class uSyncActionRepository extends UmbControllerBase {
                 action: action,
                 options: {
                     group : group,
-                    force : true,
+                    force : false,
                     clean : false,
                     clientId : clientId,
                     set: 'default'

@@ -166,7 +166,7 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
     {
         var serializer = _configurationSerializers.GetSerializer(item.EditorAlias);
 
-        var config = node.Element("Configuration").ValueOrDefault(string.Empty);
+        var config = node.Element("Config").ValueOrDefault(string.Empty);
         if (string.IsNullOrEmpty(config)) return [];
 
         var changes = new List<uSyncChange>();
@@ -176,6 +176,9 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
             changes.AddWarning("Data", item.Name ?? item.Id.ToString(), "Failed to deserialize config for item");
             return changes;
         }
+
+        // v8,9,etc configs the properties 
+        dictionaryData = dictionaryData.ConvertToCamelCase();
 
         var importData = serializer == null ? dictionaryData : serializer.GetConfigurationImport(dictionaryData);
 
@@ -247,8 +250,11 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
 
         var exportConfig = serializer == null ? merged : serializer.GetConfigurationExport(merged);
 
-        var json = exportConfig.SerializeJsonString() ?? string.Empty;
-        return new XElement("Configuration", new XCData(json));
+        var json = exportConfig
+            .OrderBy(x => x.Key)
+            .ToDictionary()
+            .SerializeJsonString() ?? string.Empty;
+        return new XElement("Config", new XCData(json));
     }
 
     private static object? TryGetConfigurationObject(IDataType item)

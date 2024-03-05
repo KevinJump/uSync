@@ -27,7 +27,7 @@ public abstract class SyncContainerSerializerBase<TObject>
     {
 
         TObject? item = FindItem(node);
-        if (item is null) return Attempt.Succeed(item);
+        if (item is not null) return Attempt.Succeed(item);
 
         logger.LogDebug("FindOrCreate: Creating");
 
@@ -81,9 +81,6 @@ public abstract class SyncContainerSerializerBase<TObject>
                 }
             }
         }
-
-        if (parent is null || treeItem is null)
-            return Attempt.Fail(item, new KeyNotFoundException("Unable to find parent location for item"));
 
         var itemType = GetItemBaseType(node);
         var alias = node.GetAlias();

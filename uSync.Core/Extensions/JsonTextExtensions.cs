@@ -4,6 +4,8 @@ using System.Text.Json.Nodes;
 
 using Umbraco.Extensions;
 
+using uSync.Core.Json;
+
 namespace uSync.Core.Extensions;
 
 /// <summary>
@@ -16,6 +18,7 @@ public static class JsonTextExtensions
         WriteIndented = true,
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         PropertyNameCaseInsensitive = true,
+        TypeInfoResolver = new OrderedPropertiesJsonResolver(),
     };
 
     private static readonly JsonSerializerOptions _flatOptions = new()
@@ -23,6 +26,7 @@ public static class JsonTextExtensions
         WriteIndented = false,
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         PropertyNameCaseInsensitive = true,
+        TypeInfoResolver = new OrderedPropertiesJsonResolver(),
     };
 
     private static JsonNodeOptions _nodeOptions = new()

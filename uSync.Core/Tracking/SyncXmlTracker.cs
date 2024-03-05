@@ -65,7 +65,7 @@ public class SyncXmlTracker<TObject>
         if (target.IsEmptyItem())
             return SyncXmlTracker<TObject>.GetEmptyFileChange(target, source).AsEnumerableOfOne();
 
-        if (GetSerializer(target)?.IsValid(target) is true)
+        if (GetSerializer(target)?.IsValid(target) is false)
             return uSyncChange.Error("", "Invalid File", target.Name.LocalName).AsEnumerableOfOne();
 
         var changeType = GetChangeType(target, source, options);
