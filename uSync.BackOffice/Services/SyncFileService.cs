@@ -57,7 +57,7 @@ namespace uSync.BackOffice.Services
         /// </remarks>
         public string GetSiteRelativePath(string path)
         {
-            if (Path.IsPathFullyQualified(path)) 
+            if (Path.IsPathFullyQualified(path) && path.StartsWith(_hostEnvironment.ContentRootPath))
                 return path.Substring(_hostEnvironment.ContentRootPath.Length).TrimStart(_trimChars);
             return path;
         }
