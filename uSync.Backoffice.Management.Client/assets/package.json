@@ -2,7 +2,7 @@
   "name": "@jumoo/usync-assets",
   "license": "MPL-2.0",
   "type": "module",
-  "version": "14.0.0-alpha.20240228.1",
+  "version": "14.0.0-build.20240307.8",
   "main": "./dist/usync.js",
   "types": "./dist/index.d.ts",
   "module": "./dist/usync.js",
@@ -27,9 +27,9 @@
     "email": "info@jumoo.co.uk",
     "url": "https://jumoo.co.uk"
   },
-  "config" : {
+  "config": {
     "server": "http://localhost:26907",
-    "swagger" : "umbraco/swagger/uSync/swagger.json"
+    "swagger": "umbraco/swagger/uSync/swagger.json"
   },
   "scripts": {
     "dev": "vite",
@@ -47,7 +47,7 @@
   "devDependencies": {
     "@types/diff": "^5.0.9",
     "@types/node": "^20.11.20",
-    "@umbraco-cms/backoffice": "^14.0.0--preview008",
+    "@umbraco-cms/backoffice": "^14.0.0-beta001",
     "openapi-typescript-codegen": "^0.25.0",
     "typescript": "^5.2.2",
     "vite": "^5.0.8",

@@ -1,14 +1,15 @@
-import { UmbElementMixin } from "@umbraco-cms/backoffice/element-api"
-import { LitElement, _$LE, css, customElement, html, nothing, state } from "@umbraco-cms/backoffice/external/lit";
+
+import {  _$LE, css, customElement, html, nothing, state } from "@umbraco-cms/backoffice/external/lit";
 
 import { USYNC_CORE_CONTEXT_TOKEN, uSyncWorkspaceContext } from '../../workspace.context.js';
 import { SyncActionGroup, SyncHandlerSummary, SyncLegacyCheckResponse, uSyncActionView } from "../../../api/index.js";
 import { UUIButtonState } from "@umbraco-cms/backoffice/external/uui";
 import { UMB_MODAL_MANAGER_CONTEXT, UmbModalManagerContext } from "@umbraco-cms/backoffice/modal";
 import { USYNC_LEGACY_MODAL } from "../../../dialogs/legacy-modal-element.js";
+import { UmbLitElement } from "@umbraco-cms/backoffice/lit-element";
 
 @customElement('usync-default-view')
-export class uSyncDefaultViewElement extends UmbElementMixin(LitElement) {
+export class uSyncDefaultViewElement extends UmbLitElement{
 
     #actionContext? : uSyncWorkspaceContext;
     #contextLoaded: Boolean = false; 
@@ -43,6 +44,10 @@ export class uSyncDefaultViewElement extends UmbElementMixin(LitElement) {
 
     @state()
     _results: Array<uSyncActionView> = [];
+
+    // addController(controller: unknown): void {
+        
+    // }
 
     constructor() {
         super();
@@ -111,7 +116,7 @@ export class uSyncDefaultViewElement extends UmbElementMixin(LitElement) {
         if (this._legacyDialogOpened) return;
         this._legacyDialogOpened = true;
 
-        const legacyModal = this.#modalContext?.open(USYNC_LEGACY_MODAL, {
+        const legacyModal = this.#modalContext?.open(this, USYNC_LEGACY_MODAL, {
             data : this._legacy
         });
 

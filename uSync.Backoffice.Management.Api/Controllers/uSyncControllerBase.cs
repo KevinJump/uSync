@@ -12,7 +12,7 @@ namespace uSync.Backoffice.Management.Api.Controllers;
 
 [ApiController]
 [uSyncVersionedRoute("")]
-[Authorize(Policy = "New" + AuthorizationPolicies.BackOfficeAccess)]
+[Authorize(Policy = AuthorizationPolicies.BackOfficeAccess)]
 [MapToApi(uSyncClient.Api.ApiName)]
 // [JsonOptionsName(uSyncClient.Api.ApiName)]
 [JsonOptionsName(Constants.JsonOptionsNames.BackOffice)]

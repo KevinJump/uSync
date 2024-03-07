@@ -6,14 +6,6 @@ import { customElement, html } from "@umbraco-cms/backoffice/external/lit";
 export class uSyncDetailsModalElement extends
     UmbModalBaseElement<uSyncDetailsModalData, uSyncDetailsModalValue> {
 
-    constructor() {
-        super();
-    }
-
-    connectedCallback(): void {
-        super.connectedCallback();
-    }
-
     handleClose() {
 		this.modalContext?.reject();
 	}
@@ -38,3 +30,9 @@ export class uSyncDetailsModalElement extends
 }
 
 export default uSyncDetailsModalElement;
+
+declare global {
+	interface HTMLElementTagNameMap {
+		'usync-details-modal': uSyncDetailsModalElement;
+	}
+}

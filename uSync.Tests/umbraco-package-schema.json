@@ -83,7 +83,7 @@
                     "$ref": "#/definitions/UserPermissionConditionConfig"
                 },
                 {
-                    "$ref": "#/definitions/UmbConditionConfigBase<string>_1"
+                    "$ref": "#/definitions/UmbConditionConfigBase<string>"
                 }
             ]
         },
@@ -681,7 +681,7 @@
             ],
             "type": "object"
         },
-        "ManifestEntityAction": {
+        "ManifestEntityAction<MetaEntityAction>": {
             "description": "An action to perform on an entity\nFor example for content you may wish to create a new document etc",
             "properties": {
                 "alias": {
@@ -695,7 +695,7 @@
                 "conditions": {
                     "description": "Set the conditions for when the extension should be loaded",
                     "items": {
-                        "$ref": "#/definitions/UmbConditionConfigBase<string>_2"
+                        "$ref": "#/definitions/UmbConditionConfigBase<string>_1"
                     },
                     "type": "array"
                 },
@@ -706,6 +706,12 @@
                 "elementName": {
                     "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
                     "type": "string"
+                },
+                "forEntityTypes": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 },
                 "js": {
                     "description": "The file location of the javascript file to load",
@@ -750,13 +756,824 @@
             },
             "required": [
                 "alias",
+                "forEntityTypes",
                 "meta",
                 "name",
                 "type"
             ],
             "type": "object"
         },
-        "ManifestEntityBulkAction": {
+        "ManifestEntityActionCreateFolderKind": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "api": {
+                    "description": "The file location of the api javascript file to load",
+                    "type": "string"
+                },
+                "conditions": {
+                    "description": "Set the conditions for when the extension should be loaded",
+                    "items": {
+                        "$ref": "#/definitions/UmbConditionConfigBase<string>_1"
+                    },
+                    "type": "array"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "forEntityTypes": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "const": "folderCreate",
+                    "description": "The kind of the extension, used to group extensions together",
+                    "type": "string"
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaEntityActionFolderKind"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "overwrites": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Define one or more extension aliases that this extension should overwrite."
+                },
+                "type": {
+                    "const": "entityAction",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "forEntityTypes",
+                "kind",
+                "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestEntityActionDefaultKind": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "api": {
+                    "description": "The file location of the api javascript file to load",
+                    "type": "string"
+                },
+                "conditions": {
+                    "description": "Set the conditions for when the extension should be loaded",
+                    "items": {
+                        "$ref": "#/definitions/UmbConditionConfigBase<string>_1"
+                    },
+                    "type": "array"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "forEntityTypes": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "const": "default",
+                    "description": "The kind of the extension, used to group extensions together",
+                    "type": "string"
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaEntityActionDefaultKind"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "overwrites": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Define one or more extension aliases that this extension should overwrite."
+                },
+                "type": {
+                    "const": "entityAction",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "forEntityTypes",
+                "kind",
+                "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestEntityActionDeleteFolderKind": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "api": {
+                    "description": "The file location of the api javascript file to load",
+                    "type": "string"
+                },
+                "conditions": {
+                    "description": "Set the conditions for when the extension should be loaded",
+                    "items": {
+                        "$ref": "#/definitions/UmbConditionConfigBase<string>_1"
+                    },
+                    "type": "array"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "forEntityTypes": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "const": "folderDelete",
+                    "description": "The kind of the extension, used to group extensions together",
+                    "type": "string"
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaEntityActionFolderKind"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "overwrites": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Define one or more extension aliases that this extension should overwrite."
+                },
+                "type": {
+                    "const": "entityAction",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "forEntityTypes",
+                "kind",
+                "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestEntityActionDeleteKind": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "api": {
+                    "description": "The file location of the api javascript file to load",
+                    "type": "string"
+                },
+                "conditions": {
+                    "description": "Set the conditions for when the extension should be loaded",
+                    "items": {
+                        "$ref": "#/definitions/UmbConditionConfigBase<string>_1"
+                    },
+                    "type": "array"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "forEntityTypes": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "const": "delete",
+                    "description": "The kind of the extension, used to group extensions together",
+                    "type": "string"
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaEntityActionDeleteKind"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "overwrites": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Define one or more extension aliases that this extension should overwrite."
+                },
+                "type": {
+                    "const": "entityAction",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "forEntityTypes",
+                "kind",
+                "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestEntityActionDuplicateKind": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "api": {
+                    "description": "The file location of the api javascript file to load",
+                    "type": "string"
+                },
+                "conditions": {
+                    "description": "Set the conditions for when the extension should be loaded",
+                    "items": {
+                        "$ref": "#/definitions/UmbConditionConfigBase<string>_1"
+                    },
+                    "type": "array"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "forEntityTypes": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "const": "duplicate",
+                    "description": "The kind of the extension, used to group extensions together",
+                    "type": "string"
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaEntityActionDuplicateKind"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "overwrites": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Define one or more extension aliases that this extension should overwrite."
+                },
+                "type": {
+                    "const": "entityAction",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "forEntityTypes",
+                "kind",
+                "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestEntityActionMoveKind": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "api": {
+                    "description": "The file location of the api javascript file to load",
+                    "type": "string"
+                },
+                "conditions": {
+                    "description": "Set the conditions for when the extension should be loaded",
+                    "items": {
+                        "$ref": "#/definitions/UmbConditionConfigBase<string>_1"
+                    },
+                    "type": "array"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "forEntityTypes": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "const": "move",
+                    "description": "The kind of the extension, used to group extensions together",
+                    "type": "string"
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaEntityActionMoveKind"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "overwrites": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Define one or more extension aliases that this extension should overwrite."
+                },
+                "type": {
+                    "const": "entityAction",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "forEntityTypes",
+                "kind",
+                "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestEntityActionReloadTreeItemChildrenKind": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "api": {
+                    "description": "The file location of the api javascript file to load",
+                    "type": "string"
+                },
+                "conditions": {
+                    "description": "Set the conditions for when the extension should be loaded",
+                    "items": {
+                        "$ref": "#/definitions/UmbConditionConfigBase<string>_1"
+                    },
+                    "type": "array"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "forEntityTypes": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "const": "reloadTreeItemChildren",
+                    "description": "The kind of the extension, used to group extensions together",
+                    "type": "string"
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaEntityActionRenameKind"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "overwrites": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Define one or more extension aliases that this extension should overwrite."
+                },
+                "type": {
+                    "const": "entityAction",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "forEntityTypes",
+                "kind",
+                "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestEntityActionRenameKind": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "api": {
+                    "description": "The file location of the api javascript file to load",
+                    "type": "string"
+                },
+                "conditions": {
+                    "description": "Set the conditions for when the extension should be loaded",
+                    "items": {
+                        "$ref": "#/definitions/UmbConditionConfigBase<string>_1"
+                    },
+                    "type": "array"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "forEntityTypes": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "const": "rename",
+                    "description": "The kind of the extension, used to group extensions together",
+                    "type": "string"
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaEntityActionRenameKind"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "overwrites": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Define one or more extension aliases that this extension should overwrite."
+                },
+                "type": {
+                    "const": "entityAction",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "forEntityTypes",
+                "kind",
+                "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestEntityActionTrashKind": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "api": {
+                    "description": "The file location of the api javascript file to load",
+                    "type": "string"
+                },
+                "conditions": {
+                    "description": "Set the conditions for when the extension should be loaded",
+                    "items": {
+                        "$ref": "#/definitions/UmbConditionConfigBase<string>_1"
+                    },
+                    "type": "array"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "forEntityTypes": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "const": "trash",
+                    "description": "The kind of the extension, used to group extensions together",
+                    "type": "string"
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaEntityActionTrashKind"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "overwrites": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Define one or more extension aliases that this extension should overwrite."
+                },
+                "type": {
+                    "const": "entityAction",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "forEntityTypes",
+                "kind",
+                "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestEntityActionUpdateFolderKind": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "api": {
+                    "description": "The file location of the api javascript file to load",
+                    "type": "string"
+                },
+                "conditions": {
+                    "description": "Set the conditions for when the extension should be loaded",
+                    "items": {
+                        "$ref": "#/definitions/UmbConditionConfigBase<string>_1"
+                    },
+                    "type": "array"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "forEntityTypes": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "const": "folderUpdate",
+                    "description": "The kind of the extension, used to group extensions together",
+                    "type": "string"
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaEntityActionFolderKind"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "overwrites": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Define one or more extension aliases that this extension should overwrite."
+                },
+                "type": {
+                    "const": "entityAction",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "forEntityTypes",
+                "kind",
+                "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestEntityBulkAction<MetaEntityBulkAction>": {
             "description": "An action to perform on multiple entities\nFor example for content you may wish to move one or more documents in bulk",
             "properties": {
                 "alias": {
@@ -781,6 +1598,12 @@
                 "elementName": {
                     "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
                     "type": "string"
+                },
+                "forEntityTypes": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 },
                 "js": {
                     "description": "The file location of the javascript file to load",
@@ -825,6 +1648,7 @@
             },
             "required": [
                 "alias",
+                "forEntityTypes",
                 "meta",
                 "name",
                 "type"
@@ -836,6 +1660,12 @@
                 "alias": {
                     "description": "The alias of the extension, ensure it is unique",
                     "type": "string"
+                },
+                "forEntityTypes": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 },
                 "kind": {
                     "description": "The kind of the extension, used to group extensions together",
@@ -862,6 +1692,7 @@
             },
             "required": [
                 "alias",
+                "forEntityTypes",
                 "meta",
                 "name",
                 "type"
@@ -1514,10 +2345,14 @@
             ],
             "type": "object"
         },
-        "ManifestPropertyAction": {
+        "ManifestPropertyAction<MetaPropertyAction>": {
             "properties": {
                 "alias": {
                     "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "api": {
+                    "description": "The file location of the api javascript file to load",
                     "type": "string"
                 },
                 "conditions": {
@@ -1535,6 +2370,12 @@
                     "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
                     "type": "string"
                 },
+                "forPropertyEditorUis": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
                 "js": {
                     "description": "The file location of the javascript file to load",
                     "type": "string"
@@ -1546,8 +2387,7 @@
                     ]
                 },
                 "meta": {
-                    "$ref": "#/definitions/MetaPropertyAction",
-                    "description": "This contains properties specific to the type of extension"
+                    "$ref": "#/definitions/MetaPropertyAction"
                 },
                 "name": {
                     "description": "The friendly name of the extension",
@@ -1579,6 +2419,88 @@
             },
             "required": [
                 "alias",
+                "forPropertyEditorUis",
+                "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestPropertyActionDefaultKind<MetaPropertyActionDefaultKind>": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "api": {
+                    "description": "The file location of the api javascript file to load",
+                    "type": "string"
+                },
+                "conditions": {
+                    "description": "Set the conditions for when the extension should be loaded",
+                    "items": {
+                        "$ref": "#/definitions/ConditionTypes"
+                    },
+                    "type": "array"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "forPropertyEditorUis": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "const": "default",
+                    "description": "The kind of the extension, used to group extensions together",
+                    "type": "string"
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaPropertyActionDefaultKind"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "overwrites": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Define one or more extension aliases that this extension should overwrite."
+                },
+                "type": {
+                    "const": "propertyAction",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "forPropertyEditorUis",
+                "kind",
                 "meta",
                 "name",
                 "type"
@@ -1742,7 +2664,7 @@
                 "conditions": {
                     "description": "Set the conditions for when the extension should be loaded",
                     "items": {
-                        "$ref": "#/definitions/UmbConditionConfigBase<string>_2"
+                        "$ref": "#/definitions/UmbConditionConfigBase<string>_1"
                     },
                     "type": "array"
                 },
@@ -2143,6 +3065,22 @@
                     "description": "The alias of the extension, ensure it is unique",
                     "type": "string"
                 },
+                "api": {
+                    "description": "The file location of the api javascript file to load",
+                    "type": "string"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
                 "kind": {
                     "description": "The kind of the extension, used to group extensions together",
                     "examples": [
@@ -2180,6 +3118,10 @@
                     "description": "The alias of the extension, ensure it is unique",
                     "type": "string"
                 },
+                "api": {
+                    "description": "The file location of the api javascript file to load",
+                    "type": "string"
+                },
                 "element": {
                     "description": "The file location of the element javascript file to load",
                     "type": "string"
@@ -2187,6 +3129,12 @@
                 "elementName": {
                     "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
                     "type": "string"
+                },
+                "forEntityTypes": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 },
                 "js": {
                     "description": "The file location of the javascript file to load",
@@ -2197,10 +3145,6 @@
                     "examples": [
                         "button"
                     ]
-                },
-                "meta": {
-                    "$ref": "#/definitions/MetaTreeItem",
-                    "description": "This contains properties specific to the type of extension"
                 },
                 "name": {
                     "description": "The friendly name of the extension",
@@ -2218,7 +3162,7 @@
             },
             "required": [
                 "alias",
-                "meta",
+                "forEntityTypes",
                 "name",
                 "type"
             ],
@@ -2267,6 +3211,15 @@
         "ManifestTypes": {
             "anyOf": [
                 {
+                    "$ref": "#/definitions/ManifestDashboard"
+                },
+                {
+                    "$ref": "#/definitions/ManifestExternalLoginProvider"
+                },
+                {
+                    "$ref": "#/definitions/ManifestMenuItem"
+                },
+                {
                     "$ref": "#/definitions/ManifestBase"
                 },
                 {
@@ -2285,22 +3238,25 @@
                     "$ref": "#/definitions/ManifestModal"
                 },
                 {
+                    "$ref": "#/definitions/ManifestTreeItem"
+                },
+                {
+                    "$ref": "#/definitions/ManifestTree"
+                },
+                {
+                    "$ref": "#/definitions/ManifestBundle<ManifestTypes>"
+                },
+                {
                     "$ref": "#/definitions/ManifestBlockEditorCustomView"
                 },
                 {
                     "$ref": "#/definitions/ManifestCollection"
                 },
                 {
-                    "$ref": "#/definitions/ManifestBundle<ManifestTypes>"
-                },
-                {
                     "$ref": "#/definitions/ManifestCollectionView"
                 },
                 {
                     "$ref": "#/definitions/ManifestCollectionAction"
-                },
-                {
-                    "$ref": "#/definitions/ManifestDashboard"
                 },
                 {
                     "$ref": "#/definitions/ManifestDashboardCollection"
@@ -2312,13 +3268,40 @@
                     "$ref": "#/definitions/ManifestDynamicRootQueryStep"
                 },
                 {
-                    "$ref": "#/definitions/ManifestEntityAction"
+                    "$ref": "#/definitions/ManifestEntityAction<MetaEntityAction>"
                 },
                 {
-                    "$ref": "#/definitions/ManifestEntityBulkAction"
+                    "$ref": "#/definitions/ManifestEntityActionDefaultKind"
                 },
                 {
-                    "$ref": "#/definitions/ManifestExternalLoginProvider"
+                    "$ref": "#/definitions/ManifestEntityActionDeleteKind"
+                },
+                {
+                    "$ref": "#/definitions/ManifestEntityActionRenameKind"
+                },
+                {
+                    "$ref": "#/definitions/ManifestEntityActionReloadTreeItemChildrenKind"
+                },
+                {
+                    "$ref": "#/definitions/ManifestEntityActionDuplicateKind"
+                },
+                {
+                    "$ref": "#/definitions/ManifestEntityActionMoveKind"
+                },
+                {
+                    "$ref": "#/definitions/ManifestEntityActionCreateFolderKind"
+                },
+                {
+                    "$ref": "#/definitions/ManifestEntityActionUpdateFolderKind"
+                },
+                {
+                    "$ref": "#/definitions/ManifestEntityActionDeleteFolderKind"
+                },
+                {
+                    "$ref": "#/definitions/ManifestEntityActionTrashKind"
+                },
+                {
+                    "$ref": "#/definitions/ManifestEntityBulkAction<MetaEntityBulkAction>"
                 },
                 {
                     "$ref": "#/definitions/ManifestGlobalContext"
@@ -2339,16 +3322,16 @@
                     "$ref": "#/definitions/ManifestMenu"
                 },
                 {
-                    "$ref": "#/definitions/ManifestMenuItem"
-                },
-                {
                     "$ref": "#/definitions/ManifestMenuItemTreeKind"
                 },
                 {
                     "$ref": "#/definitions/ManifestPackageView"
                 },
                 {
-                    "$ref": "#/definitions/ManifestPropertyAction"
+                    "$ref": "#/definitions/ManifestPropertyAction<MetaPropertyAction>"
+                },
+                {
+                    "$ref": "#/definitions/ManifestPropertyActionDefaultKind<MetaPropertyActionDefaultKind>"
                 },
                 {
                     "$ref": "#/definitions/ManifestPropertyEditorSchema"
@@ -2378,12 +3361,6 @@
                     "$ref": "#/definitions/ManifestLocalization"
                 },
                 {
-                    "$ref": "#/definitions/ManifestTree"
-                },
-                {
-                    "$ref": "#/definitions/ManifestTreeItem"
-                },
-                {
                     "$ref": "#/definitions/ManifestTreeStore"
                 },
                 {
@@ -2393,10 +3370,13 @@
                     "$ref": "#/definitions/ManifestWorkspace"
                 },
                 {
-                    "$ref": "#/definitions/ManifestWorkspaceAction"
+                    "$ref": "#/definitions/ManifestWorkspaceAction<MetaWorkspaceAction>"
                 },
                 {
-                    "$ref": "#/definitions/ManifestWorkspaceActionMenuItem"
+                    "$ref": "#/definitions/ManifestWorkspaceActionDefaultKind"
+                },
+                {
+                    "$ref": "#/definitions/ManifestWorkspaceActionMenuItem<MetaWorkspaceActionMenuItem>"
                 },
                 {
                     "$ref": "#/definitions/ManifestWorkspaceContext"
@@ -2518,7 +3498,7 @@
             ],
             "type": "object"
         },
-        "ManifestWorkspaceAction": {
+        "ManifestWorkspaceAction<MetaWorkspaceAction>": {
             "properties": {
                 "alias": {
                     "description": "The alias of the extension, ensure it is unique",
@@ -2592,7 +3572,7 @@
             ],
             "type": "object"
         },
-        "ManifestWorkspaceActionMenuItem": {
+        "ManifestWorkspaceActionDefaultKind": {
             "properties": {
                 "alias": {
                     "description": "The alias of the extension, ensure it is unique",
@@ -2616,6 +3596,95 @@
                 "elementName": {
                     "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
                     "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "const": "default",
+                    "description": "The kind of the extension, used to group extensions together",
+                    "type": "string"
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaWorkspaceActionDefaultKind"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "overwrites": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Define one or more extension aliases that this extension should overwrite."
+                },
+                "type": {
+                    "const": "workspaceAction",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "kind",
+                "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestWorkspaceActionMenuItem<MetaWorkspaceActionMenuItem>": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "api": {
+                    "description": "The file location of the api javascript file to load",
+                    "type": "string"
+                },
+                "conditions": {
+                    "description": "Set the conditions for when the extension should be loaded",
+                    "items": {
+                        "$ref": "#/definitions/ConditionTypes"
+                    },
+                    "type": "array"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "forWorkspaceActions": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Define which workspace actions this menu item should be shown for.",
+                    "examples": "[\n['Umb.WorkspaceAction.Document.Save', 'Umb.WorkspaceAction.Document.SaveAndPublish'],\n\"Umb.WorkspaceAction.Document.Save\"\n]"
                 },
                 "js": {
                     "description": "The file location of the javascript file to load",
@@ -2660,6 +3729,7 @@
             },
             "required": [
                 "alias",
+                "forWorkspaceActions",
                 "meta",
                 "name",
                 "type"
@@ -3004,29 +4074,114 @@
             "type": "object"
         },
         "MetaEntityAction": {
+            "type": "object"
+        },
+        "MetaEntityActionDefaultKind": {
             "properties": {
-                "entityTypes": {
-                    "description": "The entity types that this action can be performed on",
+                "icon": {
+                    "description": "An icon to represent the action to be performed",
                     "examples": [
-                        "data-type",
-                        "data-type-folder",
-                        "document",
-                        "document-root",
-                        "document-type",
-                        "dictionary-item",
-                        "language",
-                        "language-root",
-                        "member",
-                        "member-group",
-                        "member-type",
-                        "template",
-                        "template-root",
-                        "partial-view"
+                        "icon-box",
+                        "icon-grid"
                     ],
-                    "items": {
-                        "type": "string"
-                    },
-                    "type": "array"
+                    "type": "string"
+                },
+                "label": {
+                    "description": "The friendly name of the action to perform",
+                    "examples": [
+                        "Create",
+                        "Create Content Template"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "icon",
+                "label"
+            ],
+            "type": "object"
+        },
+        "MetaEntityActionDeleteKind": {
+            "properties": {
+                "detailRepositoryAlias": {
+                    "type": "string"
+                },
+                "icon": {
+                    "description": "An icon to represent the action to be performed",
+                    "examples": [
+                        "icon-box",
+                        "icon-grid"
+                    ],
+                    "type": "string"
+                },
+                "itemRepositoryAlias": {
+                    "type": "string"
+                },
+                "label": {
+                    "description": "The friendly name of the action to perform",
+                    "examples": [
+                        "Create",
+                        "Create Content Template"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "detailRepositoryAlias",
+                "icon",
+                "itemRepositoryAlias",
+                "label"
+            ],
+            "type": "object"
+        },
+        "MetaEntityActionDuplicateKind": {
+            "properties": {
+                "duplicateRepositoryAlias": {
+                    "type": "string"
+                },
+                "icon": {
+                    "description": "An icon to represent the action to be performed",
+                    "examples": [
+                        "icon-box",
+                        "icon-grid"
+                    ],
+                    "type": "string"
+                },
+                "itemRepositoryAlias": {
+                    "type": "string"
+                },
+                "label": {
+                    "description": "The friendly name of the action to perform",
+                    "examples": [
+                        "Create",
+                        "Create Content Template"
+                    ],
+                    "type": "string"
+                },
+                "pickerModal": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/UmbModalToken<object,unknown>"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "required": [
+                "duplicateRepositoryAlias",
+                "icon",
+                "itemRepositoryAlias",
+                "label",
+                "pickerModal"
+            ],
+            "type": "object"
+        },
+        "MetaEntityActionFolderKind": {
+            "properties": {
+                "folderRepositoryAlias": {
+                    "type": "string"
                 },
                 "icon": {
                     "description": "An icon to represent the action to be performed",
@@ -3043,40 +4198,136 @@
                         "Create Content Template"
                     ],
                     "type": "string"
-                },
-                "repositoryAlias": {
-                    "description": "The alias for the repository of the entity type this action is for\nsuch as 'Umb.Repository.Documents'",
+                }
+            },
+            "required": [
+                "folderRepositoryAlias",
+                "icon",
+                "label"
+            ],
+            "type": "object"
+        },
+        "MetaEntityActionMoveKind": {
+            "properties": {
+                "icon": {
+                    "description": "An icon to represent the action to be performed",
                     "examples": [
-                        "Umb.Repository.Documents"
+                        "icon-box",
+                        "icon-grid"
                     ],
+                    "type": "string"
+                },
+                "itemRepositoryAlias": {
+                    "type": "string"
+                },
+                "label": {
+                    "description": "The friendly name of the action to perform",
+                    "examples": [
+                        "Create",
+                        "Create Content Template"
+                    ],
+                    "type": "string"
+                },
+                "moveRepositoryAlias": {
+                    "type": "string"
+                },
+                "pickerModal": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/UmbModalToken<object,unknown>"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "required": [
+                "icon",
+                "itemRepositoryAlias",
+                "label",
+                "moveRepositoryAlias",
+                "pickerModal"
+            ],
+            "type": "object"
+        },
+        "MetaEntityActionRenameKind": {
+            "properties": {
+                "icon": {
+                    "description": "An icon to represent the action to be performed",
+                    "examples": [
+                        "icon-box",
+                        "icon-grid"
+                    ],
+                    "type": "string"
+                },
+                "itemRepositoryAlias": {
+                    "type": "string"
+                },
+                "label": {
+                    "description": "The friendly name of the action to perform",
+                    "examples": [
+                        "Create",
+                        "Create Content Template"
+                    ],
+                    "type": "string"
+                },
+                "renameRepositoryAlias": {
                     "type": "string"
                 }
             },
             "required": [
-                "entityTypes",
+                "icon",
+                "itemRepositoryAlias",
                 "label",
-                "repositoryAlias"
+                "renameRepositoryAlias"
+            ],
+            "type": "object"
+        },
+        "MetaEntityActionTrashKind": {
+            "properties": {
+                "icon": {
+                    "description": "An icon to represent the action to be performed",
+                    "examples": [
+                        "icon-box",
+                        "icon-grid"
+                    ],
+                    "type": "string"
+                },
+                "itemRepositoryAlias": {
+                    "type": "string"
+                },
+                "label": {
+                    "description": "The friendly name of the action to perform",
+                    "examples": [
+                        "Create",
+                        "Create Content Template"
+                    ],
+                    "type": "string"
+                },
+                "trashRepositoryAlias": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "icon",
+                "itemRepositoryAlias",
+                "label",
+                "trashRepositoryAlias"
             ],
             "type": "object"
         },
         "MetaEntityBulkAction": {
             "properties": {
                 "label": {
-                    "description": "A friendly label for the action",
-                    "type": "string"
-                },
-                "repositoryAlias": {
-                    "description": "The alias for the repsoitory of the entity type this action is for\nsuch as 'Umb.Repository.Documents'",
+                    "description": "The friendly name of the action to perform",
                     "examples": [
-                        "Umb.Repository.Documents"
+                        "Create",
+                        "Create Content Template"
                     ],
                     "type": "string"
                 }
             },
-            "required": [
-                "label",
-                "repositoryAlias"
-            ],
             "type": "object"
         },
         "MetaEntityUserPermission": {
@@ -3085,9 +4336,6 @@
                     "type": "string"
                 },
                 "descriptionKey": {
-                    "type": "string"
-                },
-                "entityType": {
                     "type": "string"
                 },
                 "group": {
@@ -3107,7 +4355,6 @@
                 }
             },
             "required": [
-                "entityType",
                 "verbs"
             ],
             "type": "object"
@@ -3299,16 +4546,30 @@
             "type": "object"
         },
         "MetaPropertyAction": {
+            "type": "object"
+        },
+        "MetaPropertyActionDefaultKind": {
             "properties": {
-                "propertyEditors": {
-                    "items": {
-                        "type": "string"
-                    },
-                    "type": "array"
+                "icon": {
+                    "description": "An icon to represent the action to be performed",
+                    "examples": [
+                        "icon-box",
+                        "icon-grid"
+                    ],
+                    "type": "string"
+                },
+                "label": {
+                    "description": "The friendly name of the action to perform",
+                    "examples": [
+                        "Create",
+                        "Create Content Template"
+                    ],
+                    "type": "string"
                 }
             },
             "required": [
-                "propertyEditors"
+                "icon",
+                "label"
             ],
             "type": "object"
         },
@@ -3464,20 +4725,6 @@
             ],
             "type": "object"
         },
-        "MetaTreeItem": {
-            "properties": {
-                "entityTypes": {
-                    "items": {
-                        "type": "string"
-                    },
-                    "type": "array"
-                }
-            },
-            "required": [
-                "entityTypes"
-            ],
-            "type": "object"
-        },
         "MetaUserProfileApp": {
             "properties": {
                 "label": {
@@ -3505,6 +4752,9 @@
             "type": "object"
         },
         "MetaWorkspaceAction": {
+            "type": "object"
+        },
+        "MetaWorkspaceActionDefaultKind": {
             "properties": {
                 "color": {
                     "enum": [
@@ -3534,75 +4784,6 @@
             "type": "object"
         },
         "MetaWorkspaceActionMenuItem": {
-            "properties": {
-                "entityTypes": {
-                    "description": "The entity types that this action can be performed on",
-                    "examples": [
-                        "data-type",
-                        "data-type-folder",
-                        "document",
-                        "document-root",
-                        "document-type",
-                        "dictionary-item",
-                        "language",
-                        "language-root",
-                        "member",
-                        "member-group",
-                        "member-type",
-                        "template",
-                        "template-root",
-                        "partial-view"
-                    ],
-                    "items": {
-                        "type": "string"
-                    },
-                    "type": "array"
-                },
-                "icon": {
-                    "description": "An icon to represent the action to be performed",
-                    "examples": [
-                        "icon-box",
-                        "icon-grid"
-                    ],
-                    "type": "string"
-                },
-                "label": {
-                    "description": "The friendly name of the action to perform",
-                    "examples": [
-                        "Create",
-                        "Create Content Template"
-                    ],
-                    "type": "string"
-                },
-                "repositoryAlias": {
-                    "description": "The alias for the repository of the entity type this action is for\nsuch as 'Umb.Repository.Documents'",
-                    "examples": [
-                        "Umb.Repository.Documents"
-                    ],
-                    "type": "string"
-                },
-                "workspaceActions": {
-                    "anyOf": [
-                        {
-                            "items": {
-                                "type": "string"
-                            },
-                            "type": "array"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ],
-                    "description": "Define which workspace actions this menu item should be shown for.",
-                    "examples": "[\n['Umb.WorkspaceAction.Document.Save', 'Umb.WorkspaceAction.Document.SaveAndPublish'],\n\"Umb.WorkspaceAction.Document.Save\"\n]"
-                }
-            },
-            "required": [
-                "entityTypes",
-                "label",
-                "repositoryAlias",
-                "workspaceActions"
-            ],
             "type": "object"
         },
         "PropertyEditorSettings": {
@@ -3697,7 +4878,7 @@
         "SwitchConditionConfig": {
             "allOf": [
                 {
-                    "$ref": "#/definitions/UmbConditionConfigBase<string>"
+                    "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.Switch\">"
                 },
                 {
                     "properties": {
@@ -3740,6 +4921,18 @@
             "properties": {
                 "alias": {
                     "const": "Umb.Condition.SectionAlias",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "alias"
+            ],
+            "type": "object"
+        },
+        "UmbConditionConfigBase<\"Umb.Condition.Switch\">": {
+            "properties": {
+                "alias": {
+                    "const": "Umb.Condition.Switch",
                     "type": "string"
                 }
             },
@@ -3806,18 +4999,69 @@
             ],
             "type": "object"
         },
-        "UmbConditionConfigBase<string>_2": {
+        "UmbLocalizationDictionary": {
+            "type": "object"
+        },
+        "UmbModalConfig": {
             "properties": {
-                "alias": {
+                "key": {
+                    "type": "string"
+                },
+                "size": {
+                    "enum": [
+                        "full",
+                        "large",
+                        "medium",
+                        "small"
+                    ],
+                    "type": "string"
+                },
+                "type": {
+                    "enum": [
+                        "dialog",
+                        "sidebar"
+                    ],
                     "type": "string"
                 }
             },
+            "type": "object"
+        },
+        "UmbModalToken<object,unknown>": {
+            "properties": {
+                "#alias": {
+                    "type": "string"
+                },
+                "#defaults": {
+                    "$ref": "#/definitions/UmbModalTokenDefaults<object,unknown>"
+                },
+                "DATA": {
+                    "description": "Get the data type of the token's data.",
+                    "type": "{ModalDataType}"
+                },
+                "VALUE": {
+                    "description": "Get the value type of the token",
+                    "type": "{ModalValueType}"
+                }
+            },
             "required": [
-                "alias"
+                "#alias",
+                "DATA",
+                "VALUE"
             ],
             "type": "object"
         },
-        "UmbLocalizationDictionary": {
+        "UmbModalTokenDefaults<object,unknown>": {
+            "properties": {
+                "data": {
+                    "additionalProperties": true,
+                    "properties": {},
+                    "type": "object"
+                },
+                "modal": {
+                    "$ref": "#/definitions/UmbModalConfig"
+                },
+                "value": {}
+            },
             "type": "object"
         },
         "UmbracoPackageImportmap": {

@@ -22,8 +22,8 @@ public class FirstBootMigrationPlan : MigrationPlan
         : base("uSync_FirstBoot")
     {
         From(string.Empty)
-                .To<FirstBootMigration>("FirstBoot-Migration")
-                .To<LogViewerMigration>("Logviewer-Migration");
+                .To<FirstBootMigration>("FirstBoot-Migration");
+                // .To<LogViewerMigration>("Logviewer-Migration");
     }
 }
 

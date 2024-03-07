@@ -7,6 +7,10 @@ export class uSyncLegacyModalElement extends
     UmbModalBaseElement<SyncLegacyCheckResponse, string> 
 {
 
+    // addController(controller: unknown): void {
+    //     console.log('dialog addhost');
+    // }
+
     #handleClose() {
         this.modalContext?.reject();
     }
