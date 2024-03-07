@@ -19,13 +19,6 @@ public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncSerializer<IDo
     private readonly ILocalizationService _localizationService;
     private readonly uSyncCapabilityChecker _capabilityChecker;
 
-    [Obsolete("Pass in the capablity checker (will be removed in v13)")]
-    public DomainSerializer(IEntityService entityService, ILogger<DomainSerializer> logger,
-        IDomainService domainService,
-        IContentService contentService,
-        ILocalizationService localizationService)
-        : this(entityService, logger, domainService, contentService, localizationService, null)
-    { }
     public DomainSerializer(IEntityService entityService, ILogger<DomainSerializer> logger,
         IDomainService domainService,
         IContentService contentService,
@@ -43,10 +36,10 @@ public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncSerializer<IDo
     {
         var item = FindOrCreate(node);
 
-        var info = node?.Element(uSyncConstants.Xml.Info);
-        if (info == null)
+        var info = node.Element(uSyncConstants.Xml.Info);
+        if (info is null)
         {
-            return SyncAttempt<IDomain>.Fail(node.GetAlias(), default(IDomain), ChangeType.Fail, "Missing info section in xml", new ArgumentNullException("Info", "Missing Info Section in XML"));
+            return SyncAttempt<IDomain>.Fail(node.GetAlias(), default, ChangeType.Fail, "Missing info section in xml", new KeyNotFoundException("Missing Info Section in XML"));
         }
 
         var isoCode = info.Element("Language").ValueOrDefault(string.Empty) ?? string.Empty;
@@ -147,12 +140,12 @@ public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncSerializer<IDo
     private const string _sortablePropertyName = "SortOrder";
 
     /// <summary>
-    ///  Retreive the SortOrder value for the item
+    ///  Retrieve the SortOrder value for the item
     /// </summary>
     /// <remarks>
     ///  11.3.0+ sortable value got added to the IDomain interface.
     /// </remarks>
-    private int GetSortableValue(IDomain item)
+    private static int GetSortableValue(IDomain item)
     {
         var property = item.GetType().GetProperty(_sortablePropertyName);
         if (property == null) return 0;
@@ -169,7 +162,7 @@ public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncSerializer<IDo
     /// <remarks>
     ///  11.3.0+ sortable value got added to the IDomain interface.
     /// </remarks>
-    private void SetSortableValue(IDomain item, int sortOrder)
+    private static void SetSortableValue(IDomain item, int sortOrder)
     {
         var property = item.GetType().GetProperty(_sortablePropertyName);
         if (property == null) return;
@@ -191,20 +184,20 @@ public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncSerializer<IDo
             && node.Element(uSyncConstants.Xml.Info)?.Element(_sortablePropertyName) != null)
         {
             // doesn't have sortable domains, remove the sortable value from the XML
-            // so we don't get a false posistive when down syncing.
-            node.Element(uSyncConstants.Xml.Info).Element(_sortablePropertyName).Remove();
+            // so we don't get a false positive when down syncing.
+            node.Element(uSyncConstants.Xml.Info)?.Element(_sortablePropertyName)?.Remove();
         }
 
         return base.CleanseNode(node);
     }
 
-    public override IDomain FindItem(int id)
+    public override IDomain? FindItem(int id)
         => _domainService.GetById(id);
 
-    public override IDomain FindItem(Guid key)
+    public override IDomain? FindItem(Guid key)
         => _domainService.GetAll(true).FirstOrDefault(x => x.Key == key);
 
-    public override IDomain FindItem(string alias)
+    public override IDomain? FindItem(string alias)
         => _domainService.GetByName(alias);
 
 
@@ -214,14 +207,18 @@ public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncSerializer<IDo
     ///  for our primary object type but for content.
     /// </summary>
 
-    protected virtual string GetItemPath(IContent item)
+    protected virtual string GetItemPath(IContent? item)
     {
+        if (item is null) return string.Empty;
+
         var entity = entityService.Get(item.Id);
-        return GetItemPath(entity);
+        return GetItemPath(entity) ?? string.Empty;
     }
 
-    private string GetItemPath(IEntitySlim item)
+    private string GetItemPath(IEntitySlim? item)
     {
+        if (item is null) return string.Empty;
+
         var path = "";
         if (item.ParentId != -1)
         {
@@ -233,7 +230,7 @@ public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncSerializer<IDo
         return path += "/" + item.Name;
     }
 
-    private IContent FindByPath(IEnumerable<string> folders)
+    private IContent? FindByPath(IEnumerable<string> folders)
     {
         var item = default(IContent);
         foreach (var folder in folders)
@@ -248,17 +245,16 @@ public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncSerializer<IDo
         return item;
     }
 
-    private IContent FindContentItem(string alias, IContent parent)
+    private IContent? FindContentItem(string alias, IContent? parent)
     {
-        if (parent != null)
-        {
-            var children = entityService.GetChildren(parent.Id, UmbracoObjectTypes.Document);
-            var child = children.FirstOrDefault(x => x.Name.InvariantEquals(alias));
-            if (child != null)
-                return _contentService.GetById(child.Id);
-        }
+        if (parent is null) return null;
 
-        return default(IContent);
+        var children = entityService.GetChildren(parent.Id, UmbracoObjectTypes.Document);
+        var child = children.FirstOrDefault(x => x.Name.InvariantEquals(alias));
+        if (child != null)
+            return _contentService.GetById(child.Id);
+
+        return null;
     }
 
 

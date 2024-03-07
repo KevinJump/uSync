@@ -45,7 +45,7 @@ public class ContentTemplateSerializer : ContentSerializer, ISyncSerializer<ICon
     protected override SyncAttempt<IContent> DeserializeCore(XElement node, SyncSerializerOptions options)
     {
         var attempt = FindOrCreate(node);
-        if (!attempt.Success) throw attempt.Exception;
+        if (!attempt.Success || attempt.Result is null) throw attempt.Exception ?? new Exception($"Unknown error {node.GetAlias()}");
 
         var item = attempt.Result;
 
@@ -54,7 +54,7 @@ public class ContentTemplateSerializer : ContentSerializer, ISyncSerializer<ICon
         var name = node.Name.LocalName;
         if (name != string.Empty)
         {
-            details.AddUpdate("Name", item.Name, name);
+            details.AddUpdate("Name", item.Name ?? item.Id.ToString(), name);
             item.Name = name;
         }
 
@@ -65,7 +65,7 @@ public class ContentTemplateSerializer : ContentSerializer, ISyncSerializer<ICon
         var propertiesAttempt = DeserializeProperties(item, node, options);
         if (!propertiesAttempt.Success)
         {
-            return SyncAttempt<IContent>.Fail(item.Name, item, ChangeType.ImportFail, "Failed to deserialized properties", attempt.Exception);
+            return SyncAttempt<IContent>.Fail(item.Name ?? item.Id.ToString(), item, ChangeType.ImportFail, "Failed to deserialized properties", attempt.Exception);
         }
 
         details.AddRange(propertiesAttempt.Result);
@@ -73,10 +73,10 @@ public class ContentTemplateSerializer : ContentSerializer, ISyncSerializer<ICon
 
         // contentService.SaveBlueprint(item);
 
-        return SyncAttempt<IContent>.Succeed(item.Name, item, ChangeType.Import, details);
+        return SyncAttempt<IContent>.Succeed(item.Name ?? item.Id.ToString(), item, ChangeType.Import, details);
     }
 
-    public override IContent FindItem(XElement node)
+    public override IContent? FindItem(XElement node)
     {
         var key = node.GetKey();
         if (key != Guid.Empty)
@@ -105,7 +105,7 @@ public class ContentTemplateSerializer : ContentSerializer, ISyncSerializer<ICon
 
     }
 
-    public override IContent FindItem(Guid key)
+    public override IContent? FindItem(Guid key)
     {
         // TODO: Umbraco 8 bug, the key is sometimes an old version
         var entity = entityService.Get(key);
@@ -117,14 +117,14 @@ public class ContentTemplateSerializer : ContentSerializer, ISyncSerializer<ICon
 
     // public override string GetItemPath(IContent item) => base.GetItemPath(item) + "/" + item.Name.ToSafeAlias(); 
 
-    public override IContent FindItem(int id)
+    public override IContent? FindItem(int id)
         => contentService.GetBlueprintById(id);
 
-    protected override Attempt<IContent> CreateItem(string alias, ITreeEntity parent, string itemType)
+    protected override Attempt<IContent?> CreateItem(string alias, ITreeEntity? parent, string itemType)
     {
         var contentType = _contentTypeService.Get(itemType);
         if (contentType == null) return
-                Attempt.Fail<IContent>(null, new ArgumentException($"Missing content Type {itemType}"));
+                Attempt.Fail<IContent?>(null, new ArgumentException($"Missing content Type {itemType}"));
 
         IContent item;
         if (parent != null)
@@ -139,10 +139,10 @@ public class ContentTemplateSerializer : ContentSerializer, ISyncSerializer<ICon
         return Attempt.Succeed(item);
     }
 
-    protected override Attempt<string> DoSaveOrPublish(IContent item, XElement node, SyncSerializerOptions options)
+    protected override Attempt<string?> DoSaveOrPublish(IContent item, XElement node, SyncSerializerOptions options)
     {
         contentService.SaveBlueprint(item, options.UserId);
-        return Attempt.Succeed<string>("blueprint saved");
+        return Attempt.Succeed("blueprint saved");
     }
 
     public override void SaveItem(IContent item)

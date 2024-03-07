@@ -9,7 +9,7 @@ public class SyncConfigMergerCollection
         : base(items)
     { }
 
-    public ISyncConfigMerger GetConfigMerger(string editorAlias)
+    public ISyncConfigMerger? GetConfigMerger(string editorAlias)
         => this.FirstOrDefault(x => x.Editors.InvariantContains(editorAlias));
 }
 

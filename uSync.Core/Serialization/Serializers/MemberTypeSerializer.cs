@@ -50,14 +50,14 @@ public class MemberTypeSerializer : ContentTypeBaseSerializer<IMemberType>, ISyn
                 info.Add(folderNode);
         }
 
-        info.Add(SerializeCompostions((ContentTypeCompositionBase)item));
+        info.Add(SerializeCompositions((ContentTypeCompositionBase)item));
 
         node.Add(info);
         node.Add(SerializeProperties(item));
         node.Add(SerializeStructure(item));
         node.Add(SerializeTabs(item));
 
-        return SyncAttempt<XElement>.Succeed(item.Name, node, typeof(IMediaType), ChangeType.Export);
+        return SyncAttempt<XElement>.Succeed(item.Name ?? item.Alias, node, typeof(IMediaType), ChangeType.Export);
 
     }
 
@@ -100,14 +100,17 @@ public class MemberTypeSerializer : ContentTypeBaseSerializer<IMemberType>, ISyn
         foreach (var property in node.Elements("GenericProperty"))
         {
             var alias = property.Element("Alias").ValueOrDefault(string.Empty);
-            if (!string.IsNullOrWhiteSpace(alias) && _builtInProperties.ContainsKey(alias))
+            if (!string.IsNullOrWhiteSpace(alias) && _builtInProperties.TryGetValue(alias, out string? value))
             {
-                var key = _builtInProperties[alias];
+                var key = value;
                 if (!item.Alias.InvariantEquals("Member"))
                 {
                     key = $"{item.Alias}{alias}".GetDeterministicHashCode().ToGuid().ToString();
                 }
-                property.Element(uSyncConstants.Xml.Key).Value = key;
+
+                var keyElement = property.Element(uSyncConstants.Xml.Key);
+                if (keyElement is not null)
+                    keyElement.Value = key;
             }
         }
         return node;
@@ -116,8 +119,8 @@ public class MemberTypeSerializer : ContentTypeBaseSerializer<IMemberType>, ISyn
     protected override SyncAttempt<IMemberType> DeserializeCore(XElement node, SyncSerializerOptions options)
     {
         var attempt = FindOrCreate(node);
-        if (!attempt.Success)
-            throw attempt.Exception;
+        if (!attempt.Success || attempt.Result is null)
+            throw attempt.Exception ?? new Exception($"Unknown error {node.GetAlias()}");
 
         var item = attempt.Result;
 
@@ -145,7 +148,7 @@ public class MemberTypeSerializer : ContentTypeBaseSerializer<IMemberType>, ISyn
         if (saveInSerializer && item.IsDirty())
             _memberTypeService.Save(item);
 
-        return SyncAttempt<IMemberType>.Succeed(item.Name, item, ChangeType.Import, string.Empty, saveInSerializer, details);
+        return SyncAttempt<IMemberType>.Succeed(item.Name ?? item.Alias, item, ChangeType.Import, string.Empty, saveInSerializer, details);
     }
 
     protected override IEnumerable<uSyncChange> DeserializeExtraProperties(IMemberType item, IPropertyType property, XElement node)
@@ -176,7 +179,7 @@ public class MemberTypeSerializer : ContentTypeBaseSerializer<IMemberType>, ISyn
         return changes;
     }
 
-    protected override Attempt<IMemberType> CreateItem(string alias, ITreeEntity parent, string extra)
+    protected override Attempt<IMemberType?> CreateItem(string alias, ITreeEntity? parent, string extra)
     {
         var safeAlias = GetSafeItemAlias(alias);
 
@@ -196,6 +199,6 @@ public class MemberTypeSerializer : ContentTypeBaseSerializer<IMemberType>, ISyn
         AddAlias(safeAlias);
 
 
-        return Attempt.Succeed((IMemberType)item);
+        return Attempt.Succeed(item as IMemberType);
     }
 }

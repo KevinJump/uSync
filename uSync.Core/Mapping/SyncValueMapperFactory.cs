@@ -9,7 +9,7 @@ public static class SyncValueMapperCollectionExtensions
         object value, string editorAlias, DependencyFlags flags)
     {
         var mappers = mapperCollection.GetSyncMappers(editorAlias);
-        if (!mappers.Any()) return Enumerable.Empty<uSyncDependency>();
+        if (!mappers.Any()) return [];
 
         var dependencies = new List<uSyncDependency>();
         foreach (var mapper in mappers)

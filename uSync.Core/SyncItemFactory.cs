@@ -35,7 +35,7 @@ public class SyncItemFactory : ISyncItemFactory
     public IEnumerable<ISyncSerializer<TObject>> GetSerializers<TObject>()
         => syncSerializers.GetSerializers<TObject>();
 
-    public ISyncSerializer<TObject> GetSerializer<TObject>(string name)
+    public ISyncSerializer<TObject>? GetSerializer<TObject>(string name)
         => syncSerializers.GetSerializer<TObject>(name);
 
 
@@ -61,7 +61,7 @@ public class SyncItemFactory : ISyncItemFactory
         var dependencies = new List<uSyncDependency>();
         foreach (var checker in syncCheckers.GetCheckers<TObject>())
         {
-            dependencies.AddRange(checker.GetDependencies(item, flags));
+            dependencies.AddRange(checker?.GetDependencies(item, flags) ?? []);
         }
         return dependencies;
     }

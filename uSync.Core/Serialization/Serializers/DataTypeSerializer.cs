@@ -81,18 +81,18 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
     protected override SyncAttempt<IDataType> DeserializeCore(XElement node, SyncSerializerOptions options)
     {
         var info = node.Element(uSyncConstants.Xml.Info);
-        var name = info.Element(uSyncConstants.Xml.Name).ValueOrDefault(string.Empty);
+        var name = info?.Element(uSyncConstants.Xml.Name).ValueOrDefault(string.Empty) ?? string.Empty;
         var key = node.GetKey();
 
         var attempt = FindOrCreate(node);
-        if (!attempt.Success)
-            throw attempt.Exception;
+        if (!attempt.Success || attempt.Result is null)
+            throw attempt.Exception ?? new Exception("Unknown serialization error");
 
         var details = new List<uSyncChange>();
         var item = attempt.Result;
 
         // basic
-        if (item.Name != name)
+        if (item.Name is not null && item.Name != name)
         {
             details.AddUpdate(uSyncConstants.Xml.Name, item.Name, name, uSyncConstants.Xml.Name);
             item.Name = name;
@@ -104,7 +104,7 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
             item.Key = key;
         }
 
-        var editorAlias = info.Element("EditorAlias").ValueOrDefault(string.Empty);
+        var editorAlias = info?.Element("EditorAlias").ValueOrDefault(string.Empty) ?? string.Empty;
         if (editorAlias != item.EditorAlias)
         {
             // change the editor type.....
@@ -122,7 +122,7 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
         // and can change based on minor things (so gives false out of sync results)
 
         // item.SortOrder = info.Element("SortOrder").ValueOrDefault(0);
-        var dbType = info.Element("DatabaseType").ValueOrDefault(ValueStorageType.Nvarchar);
+        var dbType = info?.Element("DatabaseType")?.ValueOrDefault(ValueStorageType.Nvarchar) ?? ValueStorageType.Nvarchar;
         if (item.DatabaseType != dbType)
         {
             details.AddUpdate("DatabaseType", item.DatabaseType, dbType, "DatabaseType");
@@ -130,19 +130,21 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
         }
 
         // config 
-        if (ShouldDeserilizeConfig(name, editorAlias, options))
+        if (ShouldDesterilizeConfig(name, editorAlias, options))
         {
             details.AddRange(DeserializeConfiguration(item, node));
         }
 
-        details.AddNotNull(SetFolderFromElement(item, info.Element("Folder")));
+        details!.AddNotNull(SetFolderFromElement(item, info?.Element("Folder")));
 
-        return SyncAttempt<IDataType>.Succeed(item.Name, item, ChangeType.Import, details);
+        return SyncAttempt<IDataType>.Succeed(item.Name ?? item.Id.ToString(), item, ChangeType.Import, details);
 
     }
 
-    private uSyncChange SetFolderFromElement(IDataType item, XElement folderNode)
+    private uSyncChange? SetFolderFromElement(IDataType item, XElement? folderNode)
     {
+        if (folderNode == null) return null;
+
         var folder = folderNode.ValueOrDefault(string.Empty);
         if (string.IsNullOrWhiteSpace(folder)) return null;
 
@@ -160,39 +162,34 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
     }
 
 
-    private IEnumerable<uSyncChange> DeserializeConfiguration(IDataType item, XElement node)
+    private List<uSyncChange> DeserializeConfiguration(IDataType item, XElement node)
     {
+        var serializer = _configurationSerializers.GetSerializer(item.EditorAlias);
+
         var config = node.Element("Config").ValueOrDefault(string.Empty);
+        if (string.IsNullOrEmpty(config)) return [];
 
-        if (!string.IsNullOrWhiteSpace(config))
+        var changes = new List<uSyncChange>();
+
+        if (config.TryDeserialize(out IDictionary<string, object>? dictionaryData) is false || dictionaryData is null)
         {
-            var changes = new List<uSyncChange>();
-
-            var serializer = this._configurationSerializers.GetSerializer(item.EditorAlias);
-            if (serializer == null)
-            {
-                var configObject = config.DeserializeJson(item.ConfigurationObject?.GetType());
-                if (!IsJsonEqual(item.ConfigurationObject, configObject))
-                {
-                    changes.AddUpdateJson("Config", item.ConfigurationObject, configObject, "Configuration");
-                    item.ConfigurationData = configObject.ToKeyNameDictionary();
-                }
-            }
-            else
-            {
-                logger.LogTrace("Deserializing Config via {0}", serializer.Name);
-                var configObject = config.DeserializeJson(item.ConfigurationObject.GetType());
-                if (!IsJsonEqual(item.ConfigurationObject, configObject))
-                {
-                    changes.AddUpdateJson("Config", item.ConfigurationData, configObject, "Configuration");
-                    item.ConfigurationData = configObject.ToKeyNameDictionary();
-                }
-            }
-
+            changes.AddWarning("Data", item.Name ?? item.Id.ToString(), "Failed to deserialize config for item");
             return changes;
         }
 
-        return Enumerable.Empty<uSyncChange>();
+        // v8,9,etc configs the properties 
+        dictionaryData = dictionaryData.ConvertToCamelCase();
+
+        var importData = serializer == null ? dictionaryData : serializer.GetConfigurationImport(dictionaryData);
+
+        if (IsJsonEqual(importData, item.ConfigurationData) is false)
+        {
+            changes.AddUpdateJson("Data", item.ConfigurationData, importData, "Configuration Data");
+            item.ConfigurationData = importData;
+        }
+        // else no change. 
+
+        return changes;
 
     }
 
@@ -200,7 +197,7 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
     ///  tells us if the json for an object is equal, helps when the config objects don't have their
     ///  own Equals functions
     /// </summary>
-    private bool IsJsonEqual(object currentObject, object newObject)
+    private static bool IsJsonEqual(object currentObject, object newObject)
     {
         var currentString = currentObject.SerializeJsonString(false);
         var newString = newObject.SerializeJsonString(false);
@@ -212,7 +209,7 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
 
     protected override SyncAttempt<XElement> SerializeCore(IDataType item, SyncSerializerOptions options)
     {
-        var node = InitializeBaseNode(item, item.Name, item.Level);
+        var node = InitializeBaseNode(item, item.Name ?? item.Id.ToString(), item.Level);
 
         var info = new XElement(uSyncConstants.Xml.Info,
             new XElement(uSyncConstants.Xml.Name, item.Name),
@@ -233,7 +230,7 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
         if (config != null)
             node.Add(config);
 
-        return SyncAttempt<XElement>.Succeed(item.Name, node, typeof(IDataType), ChangeType.Export);
+        return SyncAttempt<XElement>.Succeed(item.Name ?? item.Id.ToString(), node, typeof(IDataType), ChangeType.Export);
     }
 
     protected override IEnumerable<EntityContainer> GetContainers(IDataType item)
@@ -241,37 +238,49 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
 
     private XElement SerializeConfiguration(IDataType item)
     {
-        if (item.ConfigurationObject != null)
-        {
-            var serializer = this._configurationSerializers.GetSerializer(item.EditorAlias);
+        var serializer = _configurationSerializers.GetSerializer(item.EditorAlias);
 
-            string config;
-            if (serializer == null)
-            {
-                config =  item.ConfigurationObject.SerializeJsonString();
-            }
-            else
-            {
-                logger.LogDebug("Serializing Config via {0}", serializer.Name);
-                config = serializer.SerializeConfig(item.ConfigurationObject);
-            }
+        var configurationObject = TryGetConfigurationObject(item);
 
-            return new XElement("Config", new XCData(config));
-        }
+        // merge the configurationData and configurationObject into one dictionary
+        // there might be duplicates, but they will be of the same value. 
+        var merged = configurationObject?.TryConvertToDictionary(out var objectDictionary) is true
+            ? item.ConfigurationData.MergeIgnoreDuplicates(objectDictionary)
+            : item.ConfigurationData;
 
-        return null;
+        var exportConfig = serializer == null ? merged : serializer.GetConfigurationExport(merged);
+
+        var json = exportConfig
+            .OrderBy(x => x.Key)
+            .ToDictionary()
+            .SerializeJsonString() ?? string.Empty;
+        return new XElement("Config", new XCData(json));
     }
 
+    private static object? TryGetConfigurationObject(IDataType item)
+    {
+        // PREVIEW008 - ISSUE.
+        // getting the object can cause an exception if the inner data is badly formatted.
+        try
+        {
+            return item.ConfigurationObject;
+        }
+        catch
+        {
+            return null;
+        }
+    }
 
-    protected override Attempt<IDataType> CreateItem(string alias, ITreeEntity parent, string itemType)
+    protected override Attempt<IDataType?> CreateItem(string alias, ITreeEntity? parent, string itemType)
     {
         var editorType = FindDataEditor(itemType);
         if (editorType == null)
-            return Attempt.Fail<IDataType>(null, new ArgumentException($"(Missing Package?) DataEditor {itemType} is not installed"));
+            return Attempt.Fail<IDataType?>(default, new ArgumentException($"(Missing Package?) DataEditor {itemType} is not installed"));
 
-        var item = new DataType(editorType, _jsonSerializer, -1);
-
-        item.Name = alias;
+        var item = new DataType(editorType, _jsonSerializer, -1)
+        {
+            Name = alias
+        };
 
         if (parent != null)
             item.SetParent(parent);
@@ -279,28 +288,28 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
         return Attempt.Succeed((IDataType)item);
     }
 
-    private IDataEditor FindDataEditor(string alias)
+    private IDataEditor? FindDataEditor(string alias)
         => _propertyEditors.FirstOrDefault(x => x.Alias == alias);
 
     protected override string GetItemBaseType(XElement node)
-        => node.Element(uSyncConstants.Xml.Info).Element("EditorAlias").ValueOrDefault(string.Empty);
+        => node.Element(uSyncConstants.Xml.Info)?.Element("EditorAlias").ValueOrDefault(string.Empty) ?? string.Empty;
 
-    public override IDataType FindItem(int id)
+    public override IDataType? FindItem(int id)
         => _dataTypeService.GetDataType(id);
 
-    public override IDataType FindItem(Guid key)
+    public override IDataType? FindItem(Guid key)
         => _dataTypeService.GetDataType(key);
 
-    public override IDataType FindItem(string alias)
+    public override IDataType? FindItem(string alias)
         => _dataTypeService.GetDataType(alias);
 
-    protected override EntityContainer FindContainer(Guid key)
+    protected override EntityContainer? FindContainer(Guid key)
         => key == Guid.Empty ? null : _dataTypeService.GetContainer(key);
 
     protected override IEnumerable<EntityContainer> FindContainers(string folder, int level)
         => _dataTypeService.GetContainers(folder, level);
 
-    protected override Attempt<OperationResult<OperationResultType, EntityContainer>> CreateContainer(int parentId, string name)
+    protected override Attempt<OperationResult<OperationResultType, EntityContainer>?> CreateContainer(int parentId, string name)
         => _dataTypeService.CreateContainer(parentId, Guid.NewGuid(), name);
 
     public override void SaveItem(IDataType item)
@@ -323,7 +332,7 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
 
 
     public override string ItemAlias(IDataType item)
-        => item.Name;
+        => item.Name ?? item.Id.ToString();
 
 
 
@@ -343,7 +352,7 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
     ///     <Add Key="NoConfigNames" Value="Approved Colour,My Colour Picker" />
     ///   </code>
     /// </remarks>
-    private bool ShouldDeserilizeConfig(string itemName, string editorAlias, SyncSerializerOptions options)
+    private static bool ShouldDesterilizeConfig(string itemName, string editorAlias, SyncSerializerOptions options)
     {
         var noConfigEditors = options.GetSetting(
             uSyncConstants.DefaultSettings.NoConfigEditors,

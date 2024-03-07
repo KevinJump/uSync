@@ -11,8 +11,8 @@ public class ContentTypeBaseTracker<TObject> : SyncXmlTrackAndMerger<TObject>
         : base(serializers)
     { }
 
-    public override List<TrackingItem> TrackingItems => new List<TrackingItem>()
-    {
+    public override List<TrackingItem> TrackingItems =>
+    [
         TrackingItem.Single("Name", "/Info/Name"),
         TrackingItem.Single("Icon", "/Info/Icon"),
         TrackingItem.Single("Thumbnail", "/Info/Thumbnail"),
@@ -37,5 +37,5 @@ public class ContentTypeBaseTracker<TObject> : SyncXmlTrackAndMerger<TObject>
 
         TrackingItem.Many("Property", "/GenericProperties/GenericProperty", uSyncConstants.Xml.Key, "Name", "Alias"),
         TrackingItem.Many("Groups", "/Tabs/Tab", "Caption", "Caption")
-    };
+    ];
 }

@@ -18,27 +18,27 @@ public interface ISyncActionService
     /// <summary>
     ///  run an export based on the options provided
     /// </summary>
-    SyncActionResult ExportHandler(SyncActionOptions options, uSyncCallbacks callbacks);
+    SyncActionResult ExportHandler(SyncActionOptions options, uSyncCallbacks? callbacks);
 
     /// <summary>
     ///  get a list of the handlers for a given action
     /// </summary>
-    IEnumerable<SyncHandlerView> GetActionHandlers(HandlerActions action, uSyncOptions options);
+    IEnumerable<SyncHandlerView> GetActionHandlers(HandlerActions action, uSyncOptions? options);
 
     /// <summary>
     ///  run an import against a handler based on the options provided.
     /// </summary>
-    SyncActionResult ImportHandler(SyncActionOptions options, uSyncCallbacks callbacks);
+    SyncActionResult ImportHandler(SyncActionOptions options, uSyncCallbacks? callbacks);
 
     /// <summary>
     ///  run the post import step at the end of an import 
     /// </summary>
-    SyncActionResult ImportPost(SyncActionOptions options, uSyncCallbacks callbacks);
+    SyncActionResult ImportPost(SyncActionOptions options, uSyncCallbacks? callbacks);
 
     /// <summary>
     ///  run a report for a given handler based on the options provided.
     /// </summary>
-    SyncActionResult ReportHandler(SyncActionOptions options, uSyncCallbacks callbacks);
+    SyncActionResult ReportHandler(SyncActionOptions options, uSyncCallbacks? callbacks);
 
     /// <summary>
     ///  start the bulk process

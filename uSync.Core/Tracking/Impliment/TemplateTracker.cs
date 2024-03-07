@@ -10,10 +10,10 @@ public class TemplateTracker : SyncXmlTracker<ITemplate>, ISyncTracker<ITemplate
         : base(serializers)
     { }
 
-    public override List<TrackingItem> TrackingItems => new List<TrackingItem>()
-    {
+    public override List<TrackingItem> TrackingItems =>
+    [
         TrackingItem.Single("Name", "/Name"),
         TrackingItem.Single("Parent", "/Parent"),
         TrackingItem.Single("Contents", "/Contents")
-    };
+    ];
 }

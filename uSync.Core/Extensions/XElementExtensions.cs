@@ -1,4 +1,5 @@
-﻿using System.Xml.Linq;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Xml.Linq;
 
 using Umbraco.Extensions;
 
@@ -53,65 +54,53 @@ public static class XElementExtensions
             .Element(uSyncConstants.Xml.Parent)?
             .Attribute(uSyncConstants.Xml.Key).ValueOrDefault(Guid.Empty);
 
-        return result != null && result.HasValue
+        return result is not null && result.HasValue
             ? result.Value
             : Guid.Empty;
     }
 
     /// <summary>
-    ///  get the nice path name that is stored in the xml, gives us somethign to show
+    ///  get the nice path name that is stored in the xml, gives us something to show
     ///  the user in terms of location.
     /// </summary>
     /// <param name="node"></param>
     /// <returns></returns>
     public static string GetPath(this XElement node)
-    {
-        return node.Element(uSyncConstants.Xml.Info)?
+        => node.Element(uSyncConstants.Xml.Info)?
             .Element(uSyncConstants.Xml.Path).ValueOrDefault(string.Empty) ?? string.Empty;
-    }
 
     /// <summary>
     ///  does the xml represent an 'Empty' item (deleted/renamed/etc)
     /// </summary>
     public static bool IsEmptyItem(this XElement node)
-    {
-        return node.Name.LocalName == uSyncConstants.Serialization.Empty;
-    }
+        => node.Name.LocalName == uSyncConstants.Serialization.Empty;
 
     /// <summary>
     ///  makes an uSync empty file
     /// </summary>
     /// <remarks>
-    ///  When the changetype is Clean, the key should be the parent folder 
+    ///  When the change type is Clean, the key should be the parent folder 
     ///  you want to clean. 
     /// </remarks>
     /// <typeparam name="TObject">type of object (IEntity based)</typeparam>
     public static XElement MakeEmpty(Guid key, SyncActionType change, string alias)
-    {
-        return new XElement(uSyncConstants.Serialization.Empty,
+        => new XElement(uSyncConstants.Serialization.Empty,
             new XAttribute(uSyncConstants.Xml.Key, key),
             new XAttribute(uSyncConstants.Xml.Alias, alias),
             new XAttribute(uSyncConstants.Xml.Change, change));
-    }
 
     /// <summary>
     ///  return the uSyncActionType of the empty XML file.
     /// </summary>
     public static SyncActionType GetEmptyAction(this XElement node)
-    {
-        if (IsEmptyItem(node))
-            return node.Attribute(uSyncConstants.Xml.Change)
-                .ValueOrDefault<SyncActionType>(SyncActionType.None);
-
-        return SyncActionType.None;
-    }
+        => node.IsEmptyItem()
+            ? node.Attribute(uSyncConstants.Xml.Change).ValueOrDefault(SyncActionType.None)
+            : SyncActionType.None;
 
     public static string GetItemType(this XElement node)
-    {
-        if (node.IsEmptyItem())
-            return node.Attribute(uSyncConstants.Xml.ItemType).ValueOrDefault(string.Empty);
-        return node.Name.LocalName;
-    }
+        => node.IsEmptyItem()
+            ? node.Attribute(uSyncConstants.Xml.ItemType).ValueOrDefault(string.Empty)
+            : node.Name.LocalName;
 
     /// <summary>
     ///  helper - is the current node a content item.
@@ -128,31 +117,28 @@ public static class XElementExtensions
     ///  us work this out.
     /// </remarks>
     public static bool IsBlueprint(this XElement node)
-        => node.Element("Info")?.Element("IsBlueprint").ValueOrDefault(false) == true;
+        => node.Element("Info")?.Element("IsBlueprint").ValueOrDefault(false) is true;
 
 
     /// <summary>
     ///  Get the value of the XML Node or return a default value
     /// </summary>
-    public static string ValueOrDefault(this XElement node, string defaultValue)
-    {
-        if (node == null || string.IsNullOrEmpty(node.Value))
-            return defaultValue;
-
-        return node.Value;
-    }
+    public static string ValueOrDefault([AllowNull] this XElement? node, string defaultValue)
+        => string.IsNullOrEmpty(node?.Value)
+            ? defaultValue
+            : node.Value;
 
     /// <summary>
     ///  Get the value of the XML Node or return a default value
     /// </summary>
-    public static TObject ValueOrDefault<TObject>(this XElement node, TObject defaultValue)
+    public static TObject ValueOrDefault<TObject>([AllowNull] this XElement? node, TObject defaultValue)
     {
-        var value = ValueOrDefault(node, string.Empty);
+        var value = node.ValueOrDefault(string.Empty);
         if (value == string.Empty) return defaultValue;
 
         var attempt = value.TryConvertTo<TObject>();
         if (attempt)
-            return attempt.Result;
+            return attempt.Result ?? defaultValue;
 
         return defaultValue;
     }
@@ -161,12 +147,12 @@ public static class XElementExtensions
     /// <summary>
     ///  Find a node in the XML or create it if it doesn't exist
     /// </summary>
-    public static XElement FindOrCreate(this XElement node, string name)
+    public static XElement? FindOrCreate(this XElement node, string name)
     {
-        if (node == null) return null;
+        if (node is null) return null;
 
         var element = node.Element(name);
-        if (element == null)
+        if (element is null)
         {
             element = new XElement(name);
             node.Add(element);
@@ -180,7 +166,7 @@ public static class XElementExtensions
     public static XElement FindOrCreate(this XElement node, string name, string attributeName, string value)
     {
         var elements = node.Elements(name);
-        if (elements != null)
+        if (elements is not null)
         {
             var foundElement = elements
                 .Where(x => x.Attribute(attributeName)
@@ -203,10 +189,10 @@ public static class XElementExtensions
     /// </summary>
     public static void CreateOrSetElement(this XElement node, string name, string value)
     {
-        if (node == null) return;
+        if (node is null) return;
 
         var element = node.Element(name);
-        if (element == null)
+        if (element is null)
         {
             element = new XElement(name);
             node.Add(element);
@@ -219,19 +205,19 @@ public static class XElementExtensions
     /// </summary>
     public static void CreateOrSetElement<TObject>(this XElement node, string name, TObject value)
     {
-        if (node == null) return;
+        if (node is null) return;
 
         var attempt = value.TryConvertTo<string>();
         if (attempt.Success)
         {
             var element = node.Element(name);
-            if (element == null)
+            if (element is null)
             {
                 element = new XElement(name);
                 node.Add(element);
             }
 
-            element.Value = attempt.Result;
+            element.Value = attempt.Result ?? string.Empty;
         }
     }
 
@@ -258,7 +244,7 @@ public static class XElementExtensions
 
         if (changed)
         {
-            node.Parent.Add(stripped);
+            node.Parent?.Add(stripped);
             node.Remove();
         }
     }
@@ -268,12 +254,11 @@ public static class XElementExtensions
     /// </summary>
     public static string RequiredElement(this XElement node, string name)
     {
-        if (node == null)
-            throw new ArgumentNullException(nameof(node));
+        ArgumentNullException.ThrowIfNull(node);
 
         var val = node.Element(name).ValueOrDefault(string.Empty);
-        if (val == string.Empty)
-            throw new ArgumentNullException("Missing Value " + name);
+
+        if (val == string.Empty) throw new ArgumentNullException("Missing Value " + name);
 
         return val;
     }
@@ -283,25 +268,22 @@ public static class XElementExtensions
     /// <summary>
     ///  Get the Value from the attribute or return the default value if attribute is not set
     /// </summary>
-    public static string ValueOrDefault(this XAttribute attribute, string defaultValue)
-    {
-        if (attribute == null || string.IsNullOrEmpty(attribute.Value))
-            return defaultValue;
-
-        return attribute.Value;
-    }
+    public static string ValueOrDefault([AllowNull] this XAttribute? attribute, string defaultValue)
+       => string.IsNullOrEmpty(attribute?.Value)
+            ? defaultValue
+            : attribute.Value;
 
     /// <summary>
     ///  Get the Value from the attribute or return the default value if attribute is not set
     /// </summary>
-    public static TObject ValueOrDefault<TObject>(this XAttribute attribute, TObject defaultValue)
+    public static TObject ValueOrDefault<TObject>([AllowNull] this XAttribute attribute, TObject defaultValue)
     {
         var value = attribute.ValueOrDefault(string.Empty);
         if (value == string.Empty) return defaultValue;
 
         var attempt = value.TryConvertTo<TObject>();
         if (attempt)
-            return attempt.Result;
+            return attempt.Result ?? defaultValue;
 
         return defaultValue;
     }

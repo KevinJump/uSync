@@ -19,7 +19,5 @@ public class ConfigurationSerializerCollection :
     }
 
     public IConfigurationSerializer? GetSerializer(string editorAlias)
-    {
-        return this.FirstOrDefault(x => x.Editors.InvariantContains(editorAlias));
-    }
+        => this.FirstOrDefault(x => x.Editors.InvariantContains(editorAlias));
 }

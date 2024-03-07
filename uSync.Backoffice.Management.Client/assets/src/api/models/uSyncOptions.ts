@@ -4,9 +4,9 @@
 /* eslint-disable */
 
 export type uSyncOptions = {
-    clientId?: string | null;
+    clientId: string;
     force: boolean;
     clean: boolean;
-    group?: string | null;
-    set?: string | null;
+    group: string;
+    set: string;
 };

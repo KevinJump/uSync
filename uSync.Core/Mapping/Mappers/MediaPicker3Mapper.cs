@@ -50,7 +50,7 @@ public class MediaPicker3Mapper : SyncValueMapperBase, ISyncMapper
         var stringValue = value?.ToString();
 
         if (stringValue.TryParseToJsonArray(out var images) is false || images == null || images.Count == 0)
-            return Enumerable.Empty<uSyncDependency>();
+            return [];
 
         var dependencies = new List<uSyncDependency>();
 

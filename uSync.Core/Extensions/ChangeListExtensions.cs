@@ -17,7 +17,7 @@ public static class ChangeListExtensions
         => AddUpdate(changes, name, oldValue, newValue, path, true);
 
     public static void AddUpdate<TObject>(this List<uSyncChange> changes, string name, TObject oldValue, TObject newValue, string path, bool success)
-        => AddUpdate(changes, name, oldValue.ToString(), newValue.ToString(), path, success);
+        => AddUpdate(changes, name, oldValue?.ToString() ?? string.Empty, newValue?.ToString() ?? string.Empty, path, success);
 
     public static void AddUpdate(this List<uSyncChange> changes, string name, string oldValue, string newValue, string path = "")
         => AddUpdate(changes, name, oldValue, newValue, path, true);

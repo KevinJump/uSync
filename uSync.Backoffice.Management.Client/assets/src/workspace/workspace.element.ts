@@ -1,9 +1,10 @@
 import { UmbTextStyles } from '@umbraco-cms/backoffice/style';
 import { UmbElementMixin } from "@umbraco-cms/backoffice/element-api";
-import { LitElement, customElement, html } from "@umbraco-cms/backoffice/external/lit";
+import { LitElement, css, customElement, html } from "@umbraco-cms/backoffice/external/lit";
 
 import './views/default/default.element';
 import uSyncWorkspaceContext from './workspace.context';
+import { uSyncConstants } from '../constants';
 
 @customElement('usync-workspace-root')
 export class uSyncWorkspaceRootElement extends UmbElementMixin(LitElement) {
@@ -14,21 +15,38 @@ export class uSyncWorkspaceRootElement extends UmbElementMixin(LitElement) {
 
         this.#workspaceContext = new uSyncWorkspaceContext(this);
 
-        this.observe(this.#workspaceContext.loaded, (_loaded) => {
-
+        this.observe(this.#workspaceContext.completed, (_completed) => {
+            console.log('completed', _completed);
         });
     }
 
     render() {
         return html`
-            <umb-workspace-editor alias="usync.workspace" headline="uSync" .enforceNoFooter=${true}>
-                <div slot="header">v14.0.0-early</div>
+            <umb-workspace-editor .enforceNoFooter=${true}>
+                <div slot="header" class="header">
+                    <div><strong>uSync</strong><br/><em>(${uSyncConstants.version})</em></div>
+                </div>
 			</umb-workspace-editor>
         `;
     }   
 
     static styles = [
-		UmbTextStyles		
+		UmbTextStyles,
+        css`
+            umb-workspace-editor > div.header {
+                display: flex;
+                align-items: center;
+                align-content: center;
+            }
+
+            .header > div {
+                padding-right: 20px;
+            }
+
+            uui-icon {
+                font-size: 16pt;
+            }
+        `		
 	];
 }
 

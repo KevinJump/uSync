@@ -9,11 +9,11 @@ public static class uSyncRuntimeModeChecker
 {
     public static bool IsUmbracoRunningInProductionMode(this IConfiguration configuration)
     {
-        // we could do reflection, but relection of static extensions methods !
+        // we could do reflection, but reflection of static extensions methods !
         // there be dragons, so we are 'just' going to read the value from the 
         // config, and keep an eye on it should it ever move (that would be a breaking change!)
 
         var mode = configuration.GetValue<string>("Umbraco:Cms:Runtime:Mode", "BackofficeDevelopment");
-        return mode.Equals("Production", StringComparison.InvariantCultureIgnoreCase);
+        return mode?.Equals("Production", StringComparison.InvariantCultureIgnoreCase) is true;
     }
 }

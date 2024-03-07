@@ -20,7 +20,7 @@ public interface ISyncSerializerBase
 public interface ISyncSerializer<TObject> : ISyncSerializerBase
 {
     /// <summary>
-    ///  Returns true if the peice of xml is valid for this serializer
+    ///  Returns true if the piece of xml is valid for this serializer
     /// </summary>
     bool IsValid(XElement node);
 
@@ -52,29 +52,29 @@ public interface ISyncSerializer<TObject> : ISyncSerializerBase
     SyncAttempt<TObject> DeserializeSecondPass(TObject item, XElement node, SyncSerializerOptions options);
 
     ChangeType IsCurrent(XElement node, SyncSerializerOptions options);
-    ChangeType IsCurrent(XElement node, XElement current, SyncSerializerOptions options);
+    ChangeType IsCurrent(XElement node, XElement? current, SyncSerializerOptions options);
 
     /// <summary>
     ///  Find an Item based on the XML node representation
     /// </summary>
     /// <param name="node"></param>
     /// <returns></returns>
-    TObject FindItem(XElement node);
+    TObject? FindItem(XElement node);
 
     /// <summary>
     ///  find an item based in its internal id.
     /// </summary>
-    TObject FindItem(int id);
+    TObject? FindItem(int id);
 
     /// <summary>
     ///  find an item based on the guid value
     /// </summary>
-    TObject FindItem(Guid key);
+    TObject? FindItem(Guid key);
 
     /// <summary>
     ///  find an item based on the alias
     /// </summary>
-    TObject FindItem(string alias);
+    TObject? FindItem(string alias);
 
     /// <summary>
     ///  save an item back to umbraco

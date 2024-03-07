@@ -27,12 +27,9 @@ export class uSyncSettingsViewElement extends UmbElementMixin(LitElement) {
                 this.handlerSettings = _handlerSettings;
             })
 
-            this.observe(_instance.loaded, (_loaded) => {
+            _instance.getSettings();
+            _instance.getDefaultHandlerSetSettings();
 
-                _instance.getSettings();
-                _instance.getDefaultHandlerSetSettings();
-
-            });
         });
 
     }

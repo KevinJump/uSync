@@ -5,11 +5,11 @@
 
 export type HandlerSettings = {
     enabled: boolean;
-    actions?: Array<string> | null;
+    actions: Array<string>;
     useFlatStructure: boolean;
     guidNames: boolean;
     failOnMissingParent: boolean;
-    group?: string | null;
+    group: string;
     createClean: boolean;
-    settings?: Record<string, string | null> | null;
+    settings: Record<string, string>;
 };

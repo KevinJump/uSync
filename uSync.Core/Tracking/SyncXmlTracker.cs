@@ -11,56 +11,61 @@ using uSync.Core.Serialization;
 namespace uSync.Core.Tracking;
 
 /// <summary>
-///  tracks the diffrences in the xml between two items. 
+///  tracks the differences in the xml between two items. 
 /// </summary>
 public class SyncXmlTracker<TObject>
 {
-    protected ISyncSerializer<TObject> serializer;
+    protected ISyncSerializer<TObject>? serializer;
 
-    private const string seperator = "/";
+    private const string _separator = "/";
+    public IList<TrackingItem> Items { get; set; } = [];
+    public virtual List<TrackingItem> TrackingItems { get; protected set; } = [];
 
     public SyncXmlTracker(SyncSerializerCollection serializers)
     {
         serializer = serializers.GetSerializer<TObject>();
     }
 
-    protected virtual ISyncSerializer<TObject> GetSerializer(XElement target)
+    protected virtual ISyncSerializer<TObject>? GetSerializer(XElement target)
         => serializer;
 
-    protected virtual ISyncSerializer<TObject> GetSerializer(TObject item)
+    protected virtual ISyncSerializer<TObject>? GetSerializer(TObject item)
         => serializer;
 
-    public IList<TrackingItem> Items { get; set; }
 
     public IEnumerable<uSyncChange> GetChanges(XElement target)
         => GetChanges(target, new SyncSerializerOptions());
 
     public IEnumerable<uSyncChange> GetChanges(XElement target, SyncSerializerOptions options)
     {
-        var item = GetSerializer(target).FindItem(target);
-        if (item != null)
+        var s = GetSerializer(target);
+        if (s is not null)
         {
-            var attempt = SerializeItem(item, options);
-            if (attempt.Success)
-                return GetChanges(target, attempt.Item, options);
+            var item = s.FindItem(target);
+            if (item is not null)
+            {
+                var attempt = SerializeItem(item, options);
+                if (attempt.Success is true && attempt.Item is not null)
+                    return GetChanges(target, attempt.Item, options);
 
+            }
         }
 
         return GetChanges(target, XElement.Parse("<blank/>"), options);
     }
 
     private SyncAttempt<XElement> SerializeItem(TObject item, SyncSerializerOptions options)
-        => GetSerializer(item).Serialize(item, options);
+        => GetSerializer(item)?.Serialize(item, options) ?? SyncAttempt<XElement>.Fail("Unknown", ChangeType.Fail, "Failed to serialize");
 
     public IEnumerable<uSyncChange> GetChanges(XElement target, XElement source, SyncSerializerOptions options)
     {
         if (TrackingItems == null)
-            return Enumerable.Empty<uSyncChange>();
+            return [];
 
         if (target.IsEmptyItem())
-            return GetEmptyFileChange(target, source).AsEnumerableOfOne();
+            return SyncXmlTracker<TObject>.GetEmptyFileChange(target, source).AsEnumerableOfOne();
 
-        if (!GetSerializer(target).IsValid(target))
+        if (GetSerializer(target)?.IsValid(target) is false)
             return uSyncChange.Error("", "Invalid File", target.Name.LocalName).AsEnumerableOfOne();
 
         var changeType = GetChangeType(target, source, options);
@@ -70,7 +75,7 @@ public class SyncXmlTracker<TObject>
         return CalculateDiffrences(target, source);
     }
 
-    private uSyncChange GetEmptyFileChange(XElement target, XElement source)
+    private static uSyncChange GetEmptyFileChange(XElement target, XElement source)
     {
         if (source == null) return uSyncChange.NoChange("", target.GetAlias());
 
@@ -87,7 +92,7 @@ public class SyncXmlTracker<TObject>
     }
 
     private ChangeType GetChangeType(XElement target, XElement source, SyncSerializerOptions options)
-       => GetSerializer(target).IsCurrent(target, source, options);
+       => GetSerializer(target)?.IsCurrent(target, source, options) ?? ChangeType.NoChange;
 
     /// <summary>
     ///  actually kicks off here, if you have two xml files that are different. 
@@ -114,7 +119,7 @@ public class SyncXmlTracker<TObject>
         return changes;
     }
 
-    private uSyncChange TrackSingleItem(TrackingItem item, XElement target, XElement source, TrackingDirection direction)
+    private uSyncChange? TrackSingleItem(TrackingItem item, XElement target, XElement source, TrackingDirection direction)
     {
         var sourceNode = source.XPathSelectElement(item.Path);
         var targetNode = target.XPathSelectElement(item.Path);
@@ -124,22 +129,22 @@ public class SyncXmlTracker<TObject>
             if (targetNode == null)
             {
                 // value is missing, this is a delete or create depending on compare direction
-                return AddMissingChange(item.Path, item.Name, sourceNode.ValueOrDefault(string.Empty), direction);
+                return SyncXmlTracker<TObject>.AddMissingChange(item.Path, item.Name, sourceNode.ValueOrDefault(string.Empty), direction);
             }
 
             // only track updates when tracking target to source. 
             else if (direction == TrackingDirection.TargetToSource)
             {
 
-                if (item.HasAttributes())
+                if (item.HasAttributes() && item.AttributeKey is not null)
                 {
-                    return Compare(targetNode.Attribute(item.AttributeKey).ValueOrDefault(string.Empty),
+                    return SyncXmlTracker<TObject>.Compare(targetNode.Attribute(item.AttributeKey).ValueOrDefault(string.Empty),
                         sourceNode.Attribute(item.AttributeKey).ValueOrDefault(string.Empty),
                         item.Path, item.Name, item.MaskValue);
                 }
                 else
                 {
-                    return Compare(targetNode.ValueOrDefault(string.Empty),
+                    return SyncXmlTracker<TObject>.Compare(targetNode.ValueOrDefault(string.Empty),
                         sourceNode.ValueOrDefault(string.Empty),
                         item.Path, item.Name, item.MaskValue);
                 }
@@ -149,7 +154,7 @@ public class SyncXmlTracker<TObject>
         return null;
     }
 
-    private IEnumerable<uSyncChange> TrackMultipleKeyedItems(TrackingItem trackingItem, XElement target, XElement source, TrackingDirection direction)
+    private List<uSyncChange> TrackMultipleKeyedItems(TrackingItem trackingItem, XElement target, XElement source, TrackingDirection direction)
     {
         var changes = new List<uSyncChange>();
 
@@ -158,10 +163,10 @@ public class SyncXmlTracker<TObject>
         foreach (var sourceNode in sourceItems)
         {
             // make the selection path for this item.
-            var itemPath = trackingItem.Path.Replace("*", sourceNode.Parent.Name.LocalName) + MakeSelectionPath(sourceNode, trackingItem.Keys);
+            var itemPath = trackingItem.Path.Replace("*", sourceNode.Parent?.Name.LocalName) + MakeSelectionPath(sourceNode, trackingItem.Keys);
 
-            var itemName = trackingItem.Name.Replace("*", sourceNode.Parent.Name.LocalName) +
-                MakeSelectionName(sourceNode, String.IsNullOrWhiteSpace(trackingItem.ValueKey) ? trackingItem.Keys : trackingItem.ValueKey);
+            var itemName = trackingItem.Name.Replace("*", sourceNode.Parent?.Name.LocalName) +
+                MakeSelectionName(sourceNode, string.IsNullOrWhiteSpace(trackingItem.ValueKey) ? trackingItem.Keys : trackingItem.ValueKey);
 
             var targetNode = target.XPathSelectElement(itemPath);
 
@@ -169,10 +174,10 @@ public class SyncXmlTracker<TObject>
             {
                 var value = sourceNode.ValueOrDefault(string.Empty);
                 if (!string.IsNullOrEmpty(trackingItem.ValueKey))
-                    value = GetKeyValue(sourceNode, trackingItem.ValueKey);
+                    value = SyncXmlTracker<TObject>.GetKeyValue(sourceNode, trackingItem.ValueKey);
 
                 // missing, we add either a delete or create - depending on tracking direction
-                changes.AddNotNull(AddMissingChange(trackingItem.Path, itemName, value, direction));
+                changes.AddNotNull(SyncXmlTracker<TObject>.AddMissingChange(trackingItem.Path, itemName, value, direction));
             }
 
             // only track updates when tracking target to source. 
@@ -186,19 +191,21 @@ public class SyncXmlTracker<TObject>
         return changes;
     }
 
-    private string MakeSelectionPath(XElement node, string keys)
+    private string MakeSelectionPath(XElement node, string? keys)
     {
+        if (keys is null) return node.Name.LocalName;
         if (keys == "#") return node.Name.LocalName;
+
         var selectionPath = "";
 
         var keyList = keys.ToDelimitedList();
 
         foreach (var key in keyList)
         {
-            var value = GetKeyValue(node, key);
+            var value = SyncXmlTracker<TObject>.GetKeyValue(node, key);
             if (!string.IsNullOrWhiteSpace(value))
             {
-                selectionPath += $"[{key} = {EscapeXPathString(value)}]";
+                selectionPath += $"[{key} = {SyncXmlTracker<TObject>.EscapeXPathString(value)}]";
             }
 
         }
@@ -206,25 +213,27 @@ public class SyncXmlTracker<TObject>
         return selectionPath.Replace("][", " and ");
     }
 
-    private string EscapeXPathString(string value)
+    private static string EscapeXPathString(string value)
     {
-        if (!value.Contains("'"))
+        if (!value.Contains('\''))
             return '\'' + value + '\'';
 
-        if (!value.Contains("\""))
+        if (!value.Contains('\"'))
             return '"' + value + '"';
 
         return "concat('" + value.Replace("'", "',\"'\",'") + "')";
     }
 
 
-    private string MakeSelectionName(XElement node, string keys)
+    private string MakeSelectionName(XElement node, string? keys)
     {
+        if (keys is null) return string.Empty;
+
         var names = new List<string>();
         var keyList = keys.ToDelimitedList();
         foreach (var key in keyList)
         {
-            var value = GetKeyValue(node, key);
+            var value = SyncXmlTracker<TObject>.GetKeyValue(node, key);
             if (!string.IsNullOrWhiteSpace(value))
             {
                 names.Add(value);
@@ -232,17 +241,17 @@ public class SyncXmlTracker<TObject>
         }
 
         if (names.Count > 0) return $" ({string.Join(" ", names)})";
-        return "";
+        return string.Empty;
     }
 
-    private string GetKeyValue(XElement node, string key)
+    private static string GetKeyValue(XElement node, string key)
     {
         if (key == "#") return node.Name.LocalName;
-        if (key.StartsWith("@")) return node.Attribute(key.Substring(1)).ValueOrDefault(string.Empty);
+        if (key.StartsWith('@')) return node.Attribute(key.Substring(1)).ValueOrDefault(string.Empty);
         return node.Element(key).ValueOrDefault(string.Empty);
     }
 
-    private IEnumerable<uSyncChange> CompareNode(XElement target, XElement source, string path, string name, bool maskValue)
+    private List<uSyncChange> CompareNode(XElement target, XElement source, string path, string name, bool maskValue)
     {
         var changes = new List<uSyncChange>();
 
@@ -252,10 +261,10 @@ public class SyncXmlTracker<TObject>
             var sourceAttributeName = sourceAttribute.Name.LocalName;
 
             changes.AddNotNull(
-                Compare(
+                SyncXmlTracker<TObject>.Compare(
                     target.Attribute(sourceAttributeName).ValueOrDefault(string.Empty),
                     sourceAttribute.Value,
-                    path + $"{seperator}{sourceAttributeName}",
+                    path + $"{_separator}{sourceAttributeName}",
                     $"{name} > {sourceAttributeName}", maskValue));
         }
 
@@ -268,34 +277,34 @@ public class SyncXmlTracker<TObject>
                 var sourceElementName = sourceElement.Name.LocalName;
 
                 changes.AddNotNull(
-                    Compare(
+                    SyncXmlTracker<TObject>.Compare(
                         target.Element(sourceElementName).ValueOrDefault(string.Empty),
                         sourceElement.Value,
-                        path + $"{seperator}{sourceElementName}",
+                        path + $"{_separator}{sourceElementName}",
                         $"{name} > {sourceElementName}", maskValue));
 
             }
         }
         else
         {
-            changes.AddNotNull(Compare(target.ValueOrDefault(string.Empty), source.ValueOrDefault(string.Empty), path, name, maskValue));
+            changes.AddNotNull(SyncXmlTracker<TObject>.Compare(target.ValueOrDefault(string.Empty), source.ValueOrDefault(string.Empty), path, name, maskValue));
         }
 
         return changes;
     }
 
-    private uSyncChange Compare(string target, string source, string path, string name, bool maskValue)
+    private static uSyncChange? Compare(string target, string source, string path, string name, bool maskValue)
     {
         if (source.TryParseToJsonNode(out _) is true)
         {
-            return JsonChange(target, source, path, name, maskValue);
+            return SyncXmlTracker<TObject>.JsonChange(target, source, path, name, maskValue);
         }
         else
         {
-            return StringChange(target, source, path, name, maskValue);
+            return SyncXmlTracker<TObject>.StringChange(target, source, path, name, maskValue);
         }
     }
-    private uSyncChange? JsonChange(string target, string source, string path, string name, bool maskValue)
+    private static uSyncChange? JsonChange(string target, string source, string path, string name, bool maskValue)
     {
         try
         {
@@ -307,10 +316,10 @@ public class SyncXmlTracker<TObject>
         }
         catch
         {
-            return StringChange(target, source, path, name, maskValue);
+            return SyncXmlTracker<TObject>.StringChange(target, source, path, name, maskValue);
         }
     }
-    private uSyncChange? StringChange(string target, string source, string path, string name, bool maskValue)
+    private static uSyncChange? StringChange(string target, string source, string path, string name, bool maskValue)
     {
         if (source.Equals(target)) return null;
         return uSyncChange.Update(path, name, maskValue ? "*****" : source, maskValue ? "*****" : target);
@@ -320,23 +329,18 @@ public class SyncXmlTracker<TObject>
     ///  Adds a change when a value is missing
     /// </summary>
     /// <remarks>
-    ///  Depending on the direction of the comapre this will add a delete (when value is mising from target)
+    ///  Depending on the direction of the compare this will add a delete (when value is missing from target)
     ///  or a create (when value is missing from source).
     /// </remarks>
-    private uSyncChange? AddMissingChange(string path, string name, string value, TrackingDirection direction)
+    private static uSyncChange? AddMissingChange(string path, string name, string value, TrackingDirection direction)
     {
-        switch (direction)
+        return direction switch
         {
-            case TrackingDirection.TargetToSource:
-                return uSyncChange.Delete(path, name, value);
-            case TrackingDirection.SourceToTarget:
-                return uSyncChange.Create(path, name, value);
-        }
-
-        return null;
+            TrackingDirection.TargetToSource => uSyncChange.Delete(path, name, value),
+            TrackingDirection.SourceToTarget => uSyncChange.Create(path, name, value),
+            _ => null,
+        };
     }
-
-    public virtual List<TrackingItem> TrackingItems { get; }
 
     public virtual XElement MergeFiles(XElement a, XElement b) => b;
 
@@ -385,16 +389,16 @@ public class TrackingItem
     }
 
     // the key something is sorted by. 
-    public string SortingKey { get; set; }
 
     public bool SingleItem { get; set; }
     public string Path { get; set; }
     public string Name { get; set; }
 
-    public string ValueKey { get; set; }
+    public string? SortingKey { get; set; }
+    public string? ValueKey { get; set; }
 
-    public string AttributeKey { get; set; }
-    public string Keys { get; set; }
+    public string? AttributeKey { get; set; }
+    public string? Keys { get; set; }
 
     public bool MaskValue { get; set; }
 
@@ -403,7 +407,7 @@ public class TrackingItem
 
 public class TrackingKey
 {
-    public string Key { get; set; }
+    public string? Key { get; set; }
     public bool IsAttribute { get; set; }
 }
 

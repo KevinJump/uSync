@@ -22,7 +22,7 @@ public static class ContentScheduleExtensions
                     }
                     else
                     {
-                        // if a schedule publish hasn't happend yet,
+                        // if a schedule publish hasn't happened yet,
                         // if the whole culture is already 'published' we save it.
                         // but if its unpublished, then we keep that, so it will get 
                         // unpublished if it isn't 

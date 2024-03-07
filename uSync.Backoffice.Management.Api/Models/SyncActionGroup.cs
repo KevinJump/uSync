@@ -6,7 +6,7 @@ public class SyncActionGroup
     public string Icon { get; set; } = "icon-box";
     public string GroupName { get; set; } = "settings";
     public List<SyncActionButton> Buttons { get; set; } = [];
-    
+
 }
 
 public class SyncActionButton

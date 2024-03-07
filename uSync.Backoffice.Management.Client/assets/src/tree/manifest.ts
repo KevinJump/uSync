@@ -1,4 +1,4 @@
-import { ManifestMenu, ManifestTypes } from "@umbraco-cms/backoffice/extension-registry";
+import { ManifestMenu, ManifestMenuItem, ManifestTypes } from "@umbraco-cms/backoffice/extension-registry";
 import { uSyncConstants } from "../constants";
 // import { ManifestuSyncMenuItem } from "./types.js";
 
@@ -8,11 +8,23 @@ const menu : ManifestMenu = {
     type: 'menu',
     alias: 'usync.menu',
     name: 'uSync Menu',
-    element: () => import('./usync.menu-element.js'),
+    // element: () => import('./usync.menu-element.js'),
     meta: {
         label: uSyncConstants.name,
         icon: uSyncConstants.icon,
         entityType: uSyncConstants.workspace.rootElement
+    }
+}
+
+const menuItem : ManifestMenuItem = {
+    type: 'menuItem',
+    alias: 'usync.menu.item',
+    name: 'uSync menu item',
+    meta: {
+        label: 'uSync',
+        icon: 'icon-infinity',
+        entityType: 'usync-root',
+        menus: ['usync.menu']
     }
 }
 
@@ -51,5 +63,5 @@ const menuSidebarApp: ManifestTypes = {
 export const manifests = [
     menu, 
     menuSidebarApp, 
-    // menuItem
+    menuItem
 ];

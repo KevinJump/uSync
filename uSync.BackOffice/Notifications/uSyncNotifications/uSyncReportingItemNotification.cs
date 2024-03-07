@@ -1,14 +1,13 @@
 ﻿using System.Xml.Linq;
 
-namespace uSync.BackOffice
+namespace uSync.BackOffice;
+
+/// <summary>
+///  Notification object for when an item is about to be reported on
+/// </summary>
+public class uSyncReportingItemNotification : CancelableuSyncItemNotification<XElement>
 {
-    /// <summary>
-    ///  Notification object for when an item is about to be reported on
-    /// </summary>
-    public class uSyncReportingItemNotification : CancelableuSyncItemNotification<XElement> 
-    {
-        /// <inheritdoc/>
-        public uSyncReportingItemNotification(XElement item)
-            : base(item) { }
-    }
+    /// <inheritdoc/>
+    public uSyncReportingItemNotification(XElement item)
+        : base(item) { }
 }

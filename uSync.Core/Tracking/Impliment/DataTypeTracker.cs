@@ -12,9 +12,6 @@ public class DataTypeTracker : SyncXmlTracker<IDataType>, ISyncTracker<IDataType
 {
     private readonly SyncConfigMergerCollection _configMergers;
 
-    public DataTypeTracker(SyncSerializerCollection serializers)
-        : base(serializers) { }
-
     public DataTypeTracker(
         SyncSerializerCollection serializers,
         SyncConfigMergerCollection configMergers)
@@ -23,15 +20,15 @@ public class DataTypeTracker : SyncXmlTracker<IDataType>, ISyncTracker<IDataType
         _configMergers = configMergers;
     }
 
-    public override List<TrackingItem> TrackingItems => new List<TrackingItem>()
-    {
+    public override List<TrackingItem> TrackingItems =>
+    [
         TrackingItem.Single("Name", "/Info/Name"),
         TrackingItem.Single("EditorAlias", "/Info/EditorAlias"),
         TrackingItem.Single("Database Type", "/Info/DatabaseType"),
         TrackingItem.Single("Sort Order", "/Info/SortOrder"),
         TrackingItem.Single("Folder", "/Info/Folder"),
         TrackingItem.Single("Config", "/Config")
-    };
+    ];
 
     public override XElement MergeFiles(XElement a, XElement b)
     {
@@ -47,8 +44,7 @@ public class DataTypeTracker : SyncXmlTracker<IDataType>, ISyncTracker<IDataType
                 var mergedConfig = merger.GetMergedConfig(rootConfig, targetConfig);
                 if (mergedConfig != null)
                 {
-                    b.Element("Config")
-                        .ReplaceNodes(new XCData(SerializeConfig(mergedConfig)));
+                    b.Element("Config")?.ReplaceNodes(new XCData(SerializeConfig(mergedConfig)));
                 }
 
                 return b;
@@ -58,7 +54,7 @@ public class DataTypeTracker : SyncXmlTracker<IDataType>, ISyncTracker<IDataType
         return base.MergeFiles(a, b);
     }
 
-    public override XElement GetDifferences(List<XElement> nodes)
+    public override XElement? GetDifferences(List<XElement> nodes)
     {
         if (nodes.Count <= 1) return base.GetDifferences(nodes);
 
@@ -72,7 +68,7 @@ public class DataTypeTracker : SyncXmlTracker<IDataType>, ISyncTracker<IDataType
         return base.GetDifferences(nodes);
     }
 
-    public XElement GetDifferences(XElement root, XElement target, ISyncConfigMerger merger)
+    public XElement? GetDifferences(XElement root, XElement target, ISyncConfigMerger merger)
     {
 
         var rootConfig = root.Element("Config").ValueOrDefault(string.Empty);
@@ -84,8 +80,7 @@ public class DataTypeTracker : SyncXmlTracker<IDataType>, ISyncTracker<IDataType
             var difference = merger.GetDifferenceConfig(rootConfig, targetConfig);
             if (difference != null)
             {
-                root.Element("Config")
-                        .ReplaceNodes(new XCData(SerializeConfig(difference)));
+                root.Element("Config")?.ReplaceNodes(new XCData(SerializeConfig(difference)));
 
                 return root;
             }
@@ -96,13 +91,13 @@ public class DataTypeTracker : SyncXmlTracker<IDataType>, ISyncTracker<IDataType
     }
 
     private string GetEditorAlias(XElement node)
-        => node.Element("Info")?.Element("EditorAlias").ValueOrDefault(string.Empty);
+        => node.Element("Info")?.Element("EditorAlias").ValueOrDefault(string.Empty) ?? string.Empty;
 
 
-    private ISyncConfigMerger GetConfigMerger(string editorAlias)
+    private ISyncConfigMerger? GetConfigMerger(string editorAlias)
         => _configMergers?.GetConfigMerger(editorAlias) ?? null;
 
-    private string SerializeConfig(object config)
+    private static string SerializeConfig(object config)
         => config.SerializeJsonString();
 
 

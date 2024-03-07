@@ -25,7 +25,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
     private readonly IAppCache _appCache;
     private readonly IContentTypeService _contentTypeService;
 
-    private List<string> aliasCache { get; set; }
+    private List<string>? aliasCache { get; set; }
 
     protected ContentTypeBaseSerializer(
         IEntityService entityService,
@@ -61,9 +61,10 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
                         new XElement("Thumbnail", item.Thumbnail),
                         new XElement("Description", string.IsNullOrWhiteSpace(item.Description) ? "" : item.Description),
                         new XElement("AllowAtRoot", item.AllowedAsRoot.ToString()),
-                        new XElement("IsListView", item.IsContainer.ToString()),
+                        // new XElement("IsListView", item.IsContainer.ToString()),
+                        new XElement("ListView", item.ListView ?? Guid.Empty),
                         new XElement("Variations", item.Variations),
-                        new XElement("IsElement", item.IsElement));
+                        new XElement("IsElement", item.IsElement)); ;
     }
 
     protected XElement SerializeTabs(TObject item)
@@ -116,7 +117,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
             propNode.Add(new XElement("SortOrder", property.SortOrder));
 
             // cross version compatibility, before v8.17 - tabs are by name. 
-            var tab = item.PropertyGroups.FirstOrDefault(x => x.PropertyTypes.Contains(property));
+            var tab = item.PropertyGroups.FirstOrDefault(x => x.PropertyTypes?.Contains(property) is true);
             var tabNode = new XElement("Tab", tab != null ? tab.Name : "");
             if (tab != null) tabNode.Add(new XAttribute("Alias", tab.Alias));
             propNode.Add(tabNode);
@@ -175,9 +176,11 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
     protected XElement SerializeStructure(TObject item)
     {
         var node = new XElement("Structure");
-        List<KeyValuePair<string, string>> items = new List<KeyValuePair<string, string>>();
 
-        foreach (var allowedType in item.AllowedContentTypes.OrderBy(x => x.SortOrder))
+        var allowedTypeOrdered = item.AllowedContentTypes?.OrderBy(x => x.SortOrder);
+        if (allowedTypeOrdered is null) return node;
+
+        foreach (var allowedType in allowedTypeOrdered)
         {
             var allowedItem = FindItem(allowedType.Key);
             if (allowedItem != null)
@@ -190,7 +193,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         return node;
     }
 
-    protected XElement SerializeCompostions(ContentTypeCompositionBase item)
+    protected XElement SerializeCompositions(ContentTypeCompositionBase item)
     {
         var compNode = new XElement("Compositions");
         var compositions = item.ContentTypeComposition;
@@ -212,12 +215,12 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
     {
         logger.LogDebug("De-serializing Base");
 
-        if (node == null) return Enumerable.Empty<uSyncChange>();
+        if (node == null) return [];
 
         var info = node.Element(uSyncConstants.Xml.Info);
-        if (info == null) return Enumerable.Empty<uSyncChange>();
+        if (info is null) return [];
 
-        List<uSyncChange> changes = new List<uSyncChange>();
+        List<uSyncChange> changes = [];
 
         var key = node.GetKey();
         if (item.Key != key)
@@ -232,28 +235,28 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         var name = info.Element(uSyncConstants.Xml.Name).ValueOrDefault(string.Empty);
         if (!string.IsNullOrEmpty(name) && item.Name != name)
         {
-            changes.AddUpdate(uSyncConstants.Xml.Name, item.Name, name, "");
+            changes.AddUpdate(uSyncConstants.Xml.Name, item.Name ?? "(None)", name, "");
             item.Name = name;
         }
 
         var icon = info.Element("Icon").ValueOrDefault(string.Empty);
         if (item.Icon != icon)
         {
-            changes.AddUpdate("Icon", item.Icon, icon, "");
+            changes.AddUpdate("Icon", item.Icon ?? "(None)", icon, "");
             item.Icon = icon;
         }
 
         var thumbnail = info.Element("Thumbnail").ValueOrDefault(string.Empty);
         if (item.Thumbnail != thumbnail)
         {
-            changes.AddUpdate("Icon", item.Thumbnail, thumbnail, "");
+            changes.AddUpdate("Icon", item.Thumbnail ?? "(None)", thumbnail, "");
             item.Thumbnail = thumbnail;
         }
 
-        var description = info.Element("Description").ValueOrDefault(null);
+        var description = info.Element("Description").ValueOrDefault(string.Empty);
         if (item.Description != description)
         {
-            changes.AddUpdate("Description", item.Description, description, "");
+            changes.AddUpdate("Description", item.Description ?? "(None)", description, "");
             item.Description = description;
         }
 
@@ -278,11 +281,17 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
             item.IsElement = isElement;
         }
 
-        var isContainer = info.Element("IsListView").ValueOrDefault(false);
-        if (item.IsContainer != isContainer)
+        //var isContainer = info.Element("IsListView").ValueOrDefault(false);
+        //if (item.IsContainer != isContainer)
+        //{
+        //    changes.AddUpdate("IsListView", item.IsContainer, isContainer, "");
+        //    item.IsContainer = isContainer;
+        //}
+
+        var listView = info.Element("ListView").ValueOrDefault(Guid.Empty);
+        if (listView != Guid.Empty && item.ListView != listView)
         {
-            changes.AddUpdate("IsListView", item.IsContainer, isContainer, "");
-            item.IsContainer = isContainer;
+            item.ListView = listView;
         }
 
         if (!SetMasterFromElement(item, info.Element(uSyncConstants.Xml.Parent)))
@@ -302,7 +311,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
             if (options.FailOnWarnings())
             {
                 // Fail on warning. means we don't save or publish because something is wrong ?
-                return SyncAttempt<TObject>.Fail(item.Name, item, ChangeType.ImportFail, "Failed with warnings", details,
+                return SyncAttempt<TObject>.Fail(item.Name ?? item.Alias, item, ChangeType.ImportFail, "Failed with warnings", details,
                     new Exception("Import failed because of warnings, and fail on warnings is true"));
             }
             else
@@ -311,7 +320,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
             }
         }
 
-        return SyncAttempt<TObject>.Succeed(item.Name, item, ChangeType.Import, message, false, details);
+        return SyncAttempt<TObject>.Succeed(item.Name ?? item.Alias, item, ChangeType.Import, message, false, details);
 
     }
 
@@ -321,11 +330,11 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         logger.LogDebug("De-serializing Structure");
 
         var structure = node.Element("Structure");
-        if (structure == null) return Enumerable.Empty<uSyncChange>();
+        if (structure == null) return [];
 
-        var changes = new List<uSyncChange>();
+        List<uSyncChange> changes = [];
+        List<ContentTypeSort> allowed = [];
 
-        List<ContentTypeSort> allowed = new List<ContentTypeSort>();
         int sortOrder = 0;
 
         foreach (var baseNode in structure.Elements(ItemType))
@@ -339,7 +348,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
             var itemSortOrder = baseNode.Attribute(uSyncConstants.Xml.SortOrder).ValueOrDefault(sortOrder);
             logger.LogDebug("Sort Order: {sortOrder}", itemSortOrder);
 
-            IContentTypeBase baseItem = default(IContentTypeBase);
+            IContentTypeBase? baseItem = default;
 
             if (key != Guid.Empty)
             {
@@ -365,20 +374,25 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
 
         logger.LogDebug("Structure: {count} items", allowed.Count);
 
-        // compare the two lists (the equality compare fails because the id value is lazy)
-        var currentHash =
-            string.Join(":", item.AllowedContentTypes.Select(x => $"{x.Key}-{x.SortOrder}").OrderBy(x => x));
 
-        var newHash =
-            string.Join(":", allowed.Select(x => $"{x.Key}-{x.SortOrder}").OrderBy(x => x));
-
-        if (!currentHash.Equals(newHash))
+        if (item.AllowedContentTypes is not null)
         {
-            changes.AddUpdate("Allowed",
-                string.Join(",", item.AllowedContentTypes.Select(x => x.Alias) ?? Enumerable.Empty<string>()),
-                string.Join(",", allowed.Select(x => x.Alias) ?? Enumerable.Empty<string>()), "/Structure");
+            // compare the two lists (the equality compare fails because the id value is lazy)
+            var currentHash = string.Join(":", item.AllowedContentTypes.Select(x => $"{x.Key}-{x.SortOrder}").OrderBy(x => x));
+            var newHash = string.Join(":", allowed.Select(x => $"{x.Key}-{x.SortOrder}").OrderBy(x => x));
 
-            logger.LogDebug("Updating allowed content types {old}, {new}", currentHash, newHash);
+            if (!currentHash.Equals(newHash))
+            {
+                changes.AddUpdate("Allowed",
+                    string.Join(",", item.AllowedContentTypes.Select(x => x.Alias) ?? []),
+                    string.Join(",", allowed.Select(x => x.Alias) ?? []), "/Structure");
+
+                logger.LogDebug("Updating allowed content types {old}, {new}", currentHash, newHash);
+                item.AllowedContentTypes = allowed;
+            }
+        }
+        else
+        {
             item.AllowedContentTypes = allowed;
         }
 
@@ -390,17 +404,15 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         logger.LogDebug("De-serializing Properties");
 
         var propertiesNode = node?.Element("GenericProperties");
-        if (propertiesNode == null) return Enumerable.Empty<uSyncChange>();
+        if (propertiesNode == null) return [];
 
         /// there are something we can't do in the loop, 
         /// so we store them and do them once we've put 
         /// things in. 
-        List<string> propertiesToRemove = new List<string>();
-        Dictionary<string, string> propertiesToMove = new Dictionary<string, string>();
+        List<uSyncChange> changes = [];
+        Dictionary<string, string> propertiesToMove = [];
 
-        List<uSyncChange> changes = new List<uSyncChange>();
-
-        List<string> compositeProperties = default;
+        List<string>? compositeProperties = default;
 
         foreach (var propertyNode in propertiesNode.Elements("GenericProperty"))
         {
@@ -413,9 +425,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
 
             logger.LogDebug(" > Property: {alias} {key} {definitionKey} {editorAlias}", alias, key, definitionKey, propertyEditorAlias);
 
-            bool IsNew = false;
-
-            var property = GetOrCreateProperty(item, key, alias, definitionKey, propertyEditorAlias, compositeProperties, out IsNew);
+            var property = GetOrCreateProperty(item, key, alias, definitionKey, propertyEditorAlias, compositeProperties, out bool IsNew);
             if (property == null)
             {
                 changes.AddWarning($"Property/{alias}", alias, $"Property '{alias}' cannot be created (missing DataType?)");
@@ -444,7 +454,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
             var description = propertyNode.Element("Description").ValueOrDefault(string.Empty);
             if (property.Description != description)
             {
-                changes.AddUpdate("Description", property.Description, description, $"{alias}/Description");
+                changes.AddUpdate("Description", property.Description ?? "(None)", description, $"{alias}/Description");
                 property.Description = description;
             }
 
@@ -458,7 +468,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
             var regEx = propertyNode.Element("Validation").ValueOrDefault(string.Empty);
             if (property.ValidationRegExp != regEx)
             {
-                changes.AddUpdate("Validation", property.ValidationRegExp, regEx, $"{alias}/RegEx");
+                changes.AddUpdate("Validation", property.ValidationRegExp ?? "(None)", regEx, $"{alias}/RegEx");
                 property.ValidationRegExp = propertyNode.Element("Validation").ValueOrDefault(string.Empty);
             }
 
@@ -472,14 +482,14 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
             var mandatoryMessage = propertyNode.Element("MandatoryMessage").ValueOrDefault(string.Empty);
             if (property.MandatoryMessage != mandatoryMessage)
             {
-                changes.AddUpdate("MandatoryMessage", property.MandatoryMessage, mandatoryMessage, $"{alias}/MandatoryMessage");
+                changes.AddUpdate("MandatoryMessage", property.MandatoryMessage ?? "(None)", mandatoryMessage, $"{alias}/MandatoryMessage");
                 property.MandatoryMessage = mandatoryMessage;
             }
 
             var validationRegExMessage = propertyNode.Element("ValidationRegExpMessage").ValueOrDefault(string.Empty);
             if (property.ValidationRegExpMessage != validationRegExMessage)
             {
-                changes.AddUpdate("ValidationRegExpMessage", property.ValidationRegExpMessage, validationRegExMessage, $"{alias}/ValidationRegExpMessage");
+                changes.AddUpdate("ValidationRegExpMessage", property.ValidationRegExpMessage ?? "(None)", validationRegExMessage, $"{alias}/ValidationRegExpMessage");
                 property.ValidationRegExpMessage = validationRegExMessage;
             }
 
@@ -527,7 +537,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
                     var tabGroup = item.PropertyGroups.FindTab(tabAlias);
                     if (tabGroup != null)
                     {
-                        if (!tabGroup.PropertyTypes.Contains(property.Alias))
+                        if (!tabGroup.PropertyTypes?.Contains(property.Alias) is true)
                         {
                             // this property is not currently in this tab.
                             // add to our move list.
@@ -544,7 +554,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         }
 
         // move things between tabs. 
-        changes.AddRange(MoveProperties(item, propertiesToMove));
+        changes.AddRange(ContentTypeBaseSerializer<TObject>.MoveProperties(item, propertiesToMove));
 
         if (options.DeleteItems())
         {
@@ -566,7 +576,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
     /// <remarks>
     ///  gives us some backwards compatibility with 8.17 or older sites, which didn't have tabs.
     /// </remarks>
-    private string GetTabAlias(TObject item, XElement tabNode)
+    private string GetTabAlias(TObject item, XElement? tabNode)
     {
         if (tabNode == null) return string.Empty;
 
@@ -628,7 +638,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         // if its null we get a new list
         EnsureAliasCache();
 
-        if (aliasCache.Contains(alias))
+        if (aliasCache?.Contains(alias) is true)
         {
             logger.LogDebug("Alias clash {alias} already exists", alias);
             return $"{alias}_{Guid.NewGuid().ToShortKeyString(8)}";
@@ -678,11 +688,11 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
     {
         EnsureAliasCache();
 
-        if (!aliasCache.Contains(alias))
-            aliasCache.Add(alias);
+        if (!aliasCache?.Contains(alias) is true)
+            aliasCache?.Add(alias);
 
         RefreshAliasCache();
-        logger.LogDebug("Add [{aliaS}] - {cache}", alias, string.Join(",", aliasCache));
+        logger.LogDebug("Add [{aliaS}] - {cache}", alias, string.Join(",", aliasCache ?? []));
     }
 
 
@@ -694,7 +704,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
     ///  using reflection to find properties that might have been added in later versions of umbraco.
     ///  doing it this way means we can maintain backwards compatibility.
     /// </remarks>
-    protected uSyncChange DeserializeNewProperty<TValue>(IPropertyType property, XElement node, string propertyName)
+    protected uSyncChange? DeserializeNewProperty<TValue>(IPropertyType property, XElement node, string propertyName)
     {
         var propertyInfo = property?.GetType()?.GetProperty(propertyName);
         if (propertyInfo != null)
@@ -703,7 +713,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
             var attempt = value.TryConvertTo<TValue>();
             if (attempt.Success)
             {
-                var current = GetPropertyAs<TValue>(propertyInfo, property);
+                var current = ContentTypeBaseSerializer<TObject>.GetPropertyAs<TValue>(propertyInfo, property);
 
                 if (current == null || !current.Equals(attempt.Result))
                 {
@@ -712,7 +722,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
                     return uSyncChange.Update($"property/{propertyName}",
                         propertyName,
                         current?.ToString() ?? "(Blank)",
-                        attempt.Result.ToString());
+                        attempt.Result?.ToString());
                 }
             }
         }
@@ -720,7 +730,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         return null;
     }
 
-    private TValue GetPropertyAs<TValue>(PropertyInfo info, IPropertyType property)
+    private static TValue? GetPropertyAs<TValue>(PropertyInfo info, IPropertyType? property)
     {
         if (info == null) return default;
 
@@ -738,13 +748,17 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
 
     virtual protected IEnumerable<uSyncChange> DeserializeExtraProperties(TObject item, IPropertyType property, XElement node)
     {
-        // nothing.
-        return Enumerable.Empty<uSyncChange>();
+        return [];
     }
 
     private class TabInfo
     {
-        public string Name { get; set; }
+        public TabInfo(string alias)
+        {
+            Alias = alias;
+        }
+
+        public string? Name { get; set; }
         public string Alias { get; set; }
 
         public int SortOrder { get; set; }
@@ -753,7 +767,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         public int Depth { get; set; }
     }
 
-    private IList<TabInfo> LoadTabInfo(XElement node)
+    private static List<TabInfo>? LoadTabInfo(XElement node)
     {
         var tabNode = node.Element("Tabs");
         if (tabNode == null) return null;
@@ -761,14 +775,13 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         var tabs = new List<TabInfo>();
 
         var defaultSort = 0;
-        var defaultType = GetDefaultTabType(tabNode);
+        var defaultType = ContentTypeBaseSerializer<TObject>.GetDefaultTabType(tabNode);
 
         foreach (var tab in tabNode.Elements("Tab"))
         {
-            var tabInfo = new TabInfo
+            var tabInfo = new TabInfo(tab.Element(uSyncConstants.Xml.Alias).ValueOrDefault(string.Empty))
             {
                 Name = tab.Element("Caption").ValueOrDefault(string.Empty),
-                Alias = tab.Element(uSyncConstants.Xml.Alias).ValueOrDefault(string.Empty),
                 SortOrder = tab.Element(uSyncConstants.Xml.SortOrder).ValueOrDefault(defaultSort),
                 Type = tab.Element("Type").ValueOrDefault(defaultType),
                 Key = tab.Element(uSyncConstants.Xml.Key).ValueOrDefault(Guid.Empty)
@@ -788,8 +801,8 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
     {
         logger.LogDebug("De-serializing Tabs");
 
-        var tabs = LoadTabInfo(node);
-        if (tabs == null) return Enumerable.Empty<uSyncChange>();
+        var tabs = ContentTypeBaseSerializer<TObject>.LoadTabInfo(node);
+        if (tabs is null) return [];
 
         var changes = new List<uSyncChange>();
 
@@ -797,7 +810,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         {
             logger.LogDebug("> Tab {name} {alias} {sortOrder} {depth}", tab.Name, tab.Alias, tab.SortOrder, tab.Depth);
 
-            var existing = FindTab(item, tab.Alias, tab.Name, tab.Key);
+            var existing = ContentTypeBaseSerializer<TObject>.FindTab(item, tab.Alias, tab.Name, tab.Key);
             if (existing != null)
             {
                 if (existing.Alias != tab.Alias)
@@ -808,7 +821,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
 
                 if (existing.Name != tab.Name)
                 {
-                    changes.AddUpdate(uSyncConstants.Xml.Name, existing.Name, tab.Name, $"Tabs/{tab.Name}/Name");
+                    changes.AddUpdate(uSyncConstants.Xml.Name, existing.Name ?? "(None)", tab.Name ?? "(None)", $"Tabs/{tab.Name}/Name");
                     existing.Name = tab.Name;
                 }
 
@@ -840,7 +853,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
             {
                 // if the alias is blank, we make it up.
                 if (string.IsNullOrWhiteSpace(tab.Alias))
-                    tab.Alias = tab.Name.ToSafeAlias(shortStringHelper, true);
+                    tab.Alias = tab.Name?.ToSafeAlias(shortStringHelper, true) ?? "Unknown Tab";
 
                 // if the alias & type would clash with something already in the tree
                 // *e.g this is a group with `name` when tab with `name` already being used
@@ -849,12 +862,12 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
                     tab.Alias = SyncPropertyGroupHelpers.GetTempTabAlias(tab.Alias);
 
                 // create the tab
-                item.AddPropertyGroup(tab.Alias, tab.Name);
+                item.AddPropertyGroup(tab.Alias, tab.Name ?? tab.Alias);
                 var propertyGroup = item.PropertyGroups[tab.Alias];
 
-                changes.AddNew(tab.Name, tab.Name, $"Tabs/{tab.Name}");
+                changes.AddNew(tab.Name ?? tab.Alias, tab.Name ?? tab.Alias, $"Tabs/{tab.Name}");
                 var newTab = item.PropertyGroups.FirstOrDefault(x => x.Alias.InvariantEquals(tab.Alias));
-                if (newTab != null)
+                if (newTab is not null)
                 {
                     newTab.SortOrder = tab.SortOrder;
                     newTab.Type = tab.Type;
@@ -868,7 +881,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         return changes;
     }
 
-    private PropertyGroup FindTab(TObject item, string alias, string name, Guid key)
+    private static PropertyGroup? FindTab(TObject item, string alias, string? name, Guid key)
     {
         if (key != Guid.Empty)
         {
@@ -892,7 +905,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
     ///  by default they are probably groups, but if the DocType already has tabs they need
     ///  to be treated as new tabs or they don't appear.
     /// </remarks>
-    private PropertyGroupType GetDefaultTabType(XElement node)
+    private static PropertyGroupType GetDefaultTabType(XElement node)
     {
         // if we have tabs then when we don't know the type of a group, its a tab.
         if (node.Elements("Tab").Any(x => x.Element("Type").ValueOrDefault(PropertyGroupType.Group) == PropertyGroupType.Tab))
@@ -939,13 +952,13 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         if (options.DeleteItems())
         {
             var tabNode = node?.Element("Tabs");
-            if (tabNode == null) return Enumerable.Empty<uSyncChange>();
+            if (tabNode == null) return [];
 
             var newTabs = tabNode.Elements("Tab")
                 .Select(x => GetTabAliasFromTabGroup(x))
                 .ToList();
 
-            List<PropertyGroup> removals = new List<PropertyGroup>();
+            List<PropertyGroup> removals = [];
             foreach (var tab in item.PropertyGroups)
             {
                 if (!newTabs.InvariantContains(tab.Alias))
@@ -960,7 +973,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
 
                 foreach (var tab in removals)
                 {
-                    if (tab.PropertyTypes.Count > 0)
+                    if (tab.PropertyTypes?.Count > 0)
                     {
                         logger.LogWarning("Not removing {tab} as it still has properties {properties}", tab.Alias,
                             String.Join(",", tab.PropertyTypes.Select(x => x.Name)));
@@ -977,26 +990,25 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
             }
         }
 
-        return Enumerable.Empty<uSyncChange>();
+        return [];
     }
 
     protected void CleanFolder(TObject item, XElement node)
     {
-        var folderNode = node.Element(uSyncConstants.Xml.Info).Element("Folder");
-        if (folderNode != null)
-        {
-            var key = folderNode.Attribute(uSyncConstants.Xml.Key).ValueOrDefault(Guid.Empty);
-            if (key != Guid.Empty)
-            {
-                logger.LogDebug("Folder Key {key}", key.ToString());
-                var folder = FindContainer(key);
-                if (folder == null)
-                {
-                    logger.LogDebug("Clean folder - Key doesn't not match");
-                    FindFolder(key, folderNode.Value);
-                }
-            }
-        }
+        var folderNode = node.Element(uSyncConstants.Xml.Info)?.Element("Folder");
+        if (folderNode is null) return;
+
+        var key = folderNode.Attribute(uSyncConstants.Xml.Key).ValueOrDefault(Guid.Empty);
+        if (key == Guid.Empty) return;
+
+
+        logger.LogDebug("Folder Key {key}", key.ToString());
+
+        var folder = FindContainer(key);
+        if (folder is not null) return;
+
+        logger.LogDebug("Clean folder - Key doesn't not match");
+        FindFolder(key, folderNode.Value);
     }
 
     protected IEnumerable<uSyncChange> DeserializeCompositions(TObject item, XElement node)
@@ -1004,9 +1016,9 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         logger.LogDebug("{alias} De-serializing Compositions", item.Alias);
 
         var comps = node?.Element(uSyncConstants.Xml.Info)?.Element("Compositions");
-        if (comps == null) return Enumerable.Empty<uSyncChange>();
+        if (comps == null) return [];
 
-        List<IContentTypeComposition> compositions = new List<IContentTypeComposition>();
+        List<IContentTypeComposition> compositions = [];
 
         foreach (var compositionNode in comps.Elements("Composition"))
         {
@@ -1032,12 +1044,14 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
             return change.AsEnumerableOfOne();
         }
 
-        return Enumerable.Empty<uSyncChange>();
+        return [];
     }
 
 
-    private void SetFolderFromElement(IContentTypeBase item, XElement folderNode)
+    private void SetFolderFromElement(IContentTypeBase item, XElement? folderNode)
     {
+        if (folderNode is null) return;
+
         var folder = folderNode.ValueOrDefault(string.Empty);
         if (string.IsNullOrWhiteSpace(folder))
         {
@@ -1057,11 +1071,9 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
     }
 
 
-    private bool SetMasterFromElement(IContentTypeBase item, XElement masterNode)
+    private bool SetMasterFromElement(IContentTypeBase item, XElement? masterNode)
     {
-        logger.LogDebug("SetMasterFromElement");
-
-        if (masterNode == null) return false;
+        if (masterNode is null) return false;
 
         var key = masterNode.Attribute(uSyncConstants.Xml.Key).ValueOrDefault(Guid.Empty);
         if (key != Guid.Empty)
@@ -1080,19 +1092,19 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         return false;
     }
 
-    private IPropertyType GetOrCreateProperty(TObject item,
+    private IPropertyType? GetOrCreateProperty(TObject item,
         Guid key,
         string alias,
         Guid definitionKey,
         string propertyEditorAlias,
-        List<string> compositeProperties,
+        List<string>? compositeProperties,
         out bool IsNew)
     {
         logger.LogDebug("GetOrCreateProperty {key} [{alias}]", key, alias);
 
         IsNew = false;
 
-        IPropertyType property = default(PropertyType);
+        IPropertyType? property = default;
 
         if (key != Guid.Empty)
         {
@@ -1101,27 +1113,23 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
             property = item.PropertyTypes.SingleOrDefault(x => x.Key == key);
         }
 
-        if (property == null)
-        {
-            // we should really say if we don't have the key! 
-            // but lets lookup by alias. 
-            property = item.PropertyTypes.SingleOrDefault(x => x.Alias == alias);
-        }
+        // Should we say if we don't have the key? but lets lookup by alias. 
+        property ??= item.PropertyTypes.SingleOrDefault(x => x.Alias == alias);
 
         var editorAlias = propertyEditorAlias;
 
-        IDataType dataType = default(IDataType);
+        IDataType? dataType = default;
         if (definitionKey != Guid.Empty)
         {
             dataType = _dataTypeService.GetDataType(definitionKey);
         }
 
-        if (dataType == null && !string.IsNullOrEmpty(propertyEditorAlias))
+        if (dataType is null && !string.IsNullOrEmpty(propertyEditorAlias))
         {
             dataType = _dataTypeService.GetDataType(propertyEditorAlias);
         }
 
-        if (dataType == null)
+        if (dataType is null)
         {
             logger.LogWarning("Cannot find underling DataType {key} {alias} for {property} - Either your datatypes are out of sync or you are missing a package?", definitionKey, propertyEditorAlias, alias);
             return null;
@@ -1132,7 +1140,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         editorAlias = dataType.EditorAlias;
 
         // if it's null then it doesn't exist (so it's new)
-        if (property == null)
+        if (property is null)
         {
 
             if (PropertyExistsOnComposite(item, alias, compositeProperties))
@@ -1166,23 +1174,18 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
     }
 
 
-    private IEnumerable<uSyncChange> MoveProperties(IContentTypeBase item, IDictionary<string, string> moves)
+    private static IEnumerable<uSyncChange> MoveProperties(IContentTypeBase item, IDictionary<string, string> moves)
     {
-        logger.LogDebug("MoveProperties");
-
         foreach (var move in moves)
         {
             item.MovePropertyType(move.Key, move.Value);
-
             yield return uSyncChange.Update($"{move.Key}/Tab/{move.Value}", move.Key, "", move.Value);
         }
     }
 
-    private IEnumerable<uSyncChange> RemoveProperties(IContentTypeBase item, XElement properties)
+    private List<uSyncChange> RemoveProperties(IContentTypeBase item, XElement properties)
     {
-        logger.LogDebug("RemoveProperties");
-
-        List<string> removals = new List<string>();
+        List<string> removals = [];
 
         var nodes = properties.Elements("GenericProperty")
             .Select(x =>
@@ -1201,7 +1204,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
             removals.Add(property.Alias);
         }
 
-        if (removals.Any())
+        if (removals.Count != 0)
         {
             var changes = new List<uSyncChange>();
 
@@ -1219,7 +1222,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
             return changes;
         }
 
-        return Enumerable.Empty<uSyncChange>();
+        return [];
     }
 
     #endregion
@@ -1274,7 +1277,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
     /// <summary>
     ///  does this property alias exist further down the composition tree ? 
     /// </summary>
-    protected virtual bool PropertyExistsOnComposite(TObject item, string alias, List<string> compositeProperties)
+    protected virtual bool PropertyExistsOnComposite(TObject item, string alias, List<string>? compositeProperties)
     {
         if (compositeProperties == default)
         {
@@ -1283,7 +1286,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
             // should improve the speed of first time syncs.
 
             // properties that are on the compositions this item is using. 
-            compositeProperties = item.ContentTypeComposition?.SelectMany(x => x.PropertyTypes.Select(y => y.Alias)).ToList() ?? new List<string>();
+            compositeProperties = item.ContentTypeComposition?.SelectMany(x => x.PropertyTypes.Select(y => y.Alias)).ToList() ?? [];
         }
 
         return compositeProperties.Any(existing => existing == alias);
@@ -1292,23 +1295,23 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
 
     #region Finders
 
-    public override TObject FindItem(int id)
+    public override TObject? FindItem(int id)
         => _baseService.Get(id);
 
-    public override TObject FindItem(Guid key)
+    public override TObject? FindItem(Guid key)
         => _baseService.Get(key);
 
-    public override TObject FindItem(string alias)
+    public override TObject? FindItem(string alias)
         => _baseService.Get(alias);
 
 
-    override protected EntityContainer FindContainer(Guid key)
+    override protected EntityContainer? FindContainer(Guid key)
         => _baseService.GetContainer(key);
 
     override protected IEnumerable<EntityContainer> FindContainers(string folder, int level)
         => _baseService.GetContainers(folder, level);
 
-    override protected Attempt<OperationResult<OperationResultType, EntityContainer>> CreateContainer(int parentId, string name)
+    override protected Attempt<OperationResult<OperationResultType, EntityContainer>?> CreateContainer(int parentId, string name)
         => _baseService.CreateContainer(parentId, Guid.NewGuid(), name);
 
     public override void SaveItem(TObject item)
@@ -1356,12 +1359,12 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
     // to ensure it doesn't become out of sync.
     // 
 
-    private Dictionary<string, PropertyGroupType> _allTabs;
+    private Dictionary<string, PropertyGroupType>? _allTabs;
 
     public bool TabClashesWithExisting(TObject item, string alias, PropertyGroupType tabType)
     {
         EnsureAllTabsCacheLoaded(item);
-        return _allTabs.ContainsKey(alias) && _allTabs[alias] != tabType;
+        return _allTabs?.ContainsKey(alias) is true && _allTabs?[alias] != tabType;
     }
 
     public void EnsureAllTabsCacheLoaded(TObject item)
@@ -1369,13 +1372,13 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         if (_allTabs == null)
         {
             var compositions = item.CompositionPropertyGroups
-                .SafeDistinctBy(x => x.Alias)
+                .DistinctBy(x => x.Alias)
                 .ToDictionary(k => k.Alias, v => v.Type);
 
             var dependents = _baseService.GetAll()
                 .Where(x => x.CompositionIds().Contains(item.Id))
                 .SelectMany(x => x.PropertyGroups)
-                .SafeDistinctBy(x => x.Alias)
+                .DistinctBy(x => x.Alias)
                 .ToDictionary(k => k.Alias, v => v.Type);
 
             _allTabs = compositions

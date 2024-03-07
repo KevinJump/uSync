@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
 
 using Asp.Versioning;
 
 using Microsoft.AspNetCore.Mvc;
+
 using Umbraco.Cms.Core.Semver;
 
 using Umbraco.Extensions;
@@ -57,4 +53,4 @@ public class uSyncAddonInfo
 public class uSyncAddonSplash
 {
 
-} 
+}

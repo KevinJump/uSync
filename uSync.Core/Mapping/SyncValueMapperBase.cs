@@ -31,7 +31,7 @@ public abstract class SyncValueMapperBase
         => Editors.InvariantContains(propertyType.PropertyEditorAlias);
 
     public virtual IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)
-        => Enumerable.Empty<uSyncDependency>();
+        => [];
 
     public virtual string? GetExportValue(object value, string editorAlias)
     {

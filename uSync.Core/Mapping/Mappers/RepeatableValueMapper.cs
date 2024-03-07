@@ -16,13 +16,13 @@ public class RepeatableValueMapper : SyncValueMapperBase, ISyncMapper
 
     public override string Name => "Repeatable Text Mapper";
 
-    public override string[] Editors => new string[] {
+    public override string[] Editors => [
         Constants.PropertyEditors.Aliases.MultipleTextstring
-    };
+    ];
 
     public override string? GetImportValue(string value, string editorAlias)
     {
-        if (value.TryParseToJsonNode(out var json) && json != null) 
+        if (value.TryParseToJsonNode(out var json) && json != null)
         {
             if (json.TrySerializeJsonString(out var result) && result != null)
             {

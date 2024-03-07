@@ -11,7 +11,7 @@ public interface ISyncTrackerBase
     XElement MergeFiles(XElement a, XElement b)
         => b;
 
-    XElement GetDifferences(List<XElement> nodes)
+    XElement? GetDifferences(List<XElement> nodes)
         => nodes.Count > 0 ? nodes[^1] : null;
 
 }

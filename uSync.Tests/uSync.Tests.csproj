@@ -2,8 +2,9 @@
 
 	<PropertyGroup>
 		<TargetFramework>net8.0</TargetFramework>
-
 		<IsPackable>false</IsPackable>
+		<Nullable>disable</Nullable>
+
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -15,8 +16,8 @@
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 
-		<PackageReference Include="Umbraco.Cms.Tests" Version="13.0.0" />
-		<PackageReference Include="Umbraco.Cms.Tests.Integration" Version="13.0.0" />
+		<PackageReference Include="Umbraco.Cms.Tests" Version="14.0.0-beta001" />
+		<PackageReference Include="Umbraco.Cms.Tests.Integration" Version="14.0.0-beta001" />
 
 	</ItemGroup>
 

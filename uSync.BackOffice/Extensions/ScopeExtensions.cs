@@ -26,20 +26,20 @@ internal static class ScopeExtensions
         ILoggerFactory loggerFactory,
         uSyncConfigService syncConfigService,
         uSyncEventService syncEventService,
-        IBackgroundTaskQueue backgroundTaskQueue,
-        SyncUpdateCallback callback)
+        IBackgroundTaskQueue? backgroundTaskQueue,
+        SyncUpdateCallback? callback)
     {
-        
+
         var notificationPublisher = new SyncScopedNotificationPublisher(
             eventAggregator,
             loggerFactory.CreateLogger<SyncScopedNotificationPublisher>(),
-            callback, 
+            callback,
             syncConfigService,
             backgroundTaskQueue,
             syncEventService);
 
         return scopeProvider.CreateCoreScope(
-            scopedNotificationPublisher: notificationPublisher, 
+            scopedNotificationPublisher: notificationPublisher,
             autoComplete: true);
     }
 }

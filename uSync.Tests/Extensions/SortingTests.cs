@@ -3,8 +3,6 @@ using System.Collections.Generic;
 
 using NUnit.Framework;
 
-using Umbraco.Cms.Core.WebAssets;
-
 using uSync.Core.Dependency;
 
 namespace uSync.Tests.Extensions;
@@ -30,7 +28,7 @@ public class SortingTests
     public void GraphSortGuidNodes()
     {
         var graph = new List<GraphEdge<Guid>>();
-        
+
         graph.Add(GraphEdge.Create(_guidNodes[2], _guidNodes[1]));
         graph.Add(GraphEdge.Create(_guidNodes[2], _guidNodes[4]));
 

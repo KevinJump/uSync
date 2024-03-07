@@ -1,21 +1,24 @@
 import { UmbControllerHost } from "@umbraco-cms/backoffice/controller-api";
 import { uSyncActionDataSource } from "./sources/SyncAction.source";
-import { UmbBaseController } from "@umbraco-cms/backoffice/class-api";
+import { UmbControllerBase } from "@umbraco-cms/backoffice/class-api";
 import { uSyncSettingsDataSource } from "./sources/SyncSettings.source";
+import { uSyncMigrationDataSource } from "./sources/SyncMigration.source";
 
 /**
  * @export
  * @class uSyncActionRepository
  * @description repository for all things actions.
  */
-export class uSyncActionRepository extends UmbBaseController {
+export class uSyncActionRepository extends UmbControllerBase {
     #actionDataSource: uSyncActionDataSource;
     #settingsDataSource: uSyncSettingsDataSource;
+    #migrartionDataSource: uSyncMigrationDataSource;
 
     constructor(host: UmbControllerHost) {
         super(host);
         this.#actionDataSource = new uSyncActionDataSource(this);
         this.#settingsDataSource = new uSyncSettingsDataSource(this);
+        this.#migrartionDataSource = new uSyncMigrationDataSource(this);
     }
 
     /**
@@ -28,7 +31,7 @@ export class uSyncActionRepository extends UmbBaseController {
     }
 
     /**
-     * 
+     * @method performAction
      * @param id - id for this run (each run has its own unquie id)
      * @param group - the group (e.g settings, content, all)
      * @param action - the action ('report', 'import', 'export')
@@ -45,9 +48,10 @@ export class uSyncActionRepository extends UmbBaseController {
                 action: action,
                 options: {
                     group : group,
-                    force : true,
+                    force : false,
                     clean : false,
-                    clientId : clientId
+                    clientId : clientId,
+                    set: 'default'
                 },
                 stepNumber: step
             }
@@ -56,20 +60,29 @@ export class uSyncActionRepository extends UmbBaseController {
     }
 
     /**
-     * @method GetSettings
+     * @method getSettings
      * @description retreives the current uSync settings
      * @returns the current uSync settings
      */
     async getSettings() {
-        return this.#settingsDataSource.getSettings();
+        return await this.#settingsDataSource.getSettings();
     }
 
     /**
-     * @method GetHandlerSetSettings
+     * @method getHandlerSetSettings
      * @param setName name of the handler set in the configuration
      * @returns the settings for the named handler set.
      */
     async getHandlerSettings(setName : string) {
-        return this.#settingsDataSource.getHandlerSettings(setName);
+        return await this.#settingsDataSource.getHandlerSettings(setName);
+    }
+
+    /**
+     * @method checkLegacy
+     * @description checks to see if there are legacy datatypes on disk.
+     * @returns results of a check for legacy files
+     */
+    async checkLegacy() {
+        return await this.#migrartionDataSource.checkLegacy();
     }
 }

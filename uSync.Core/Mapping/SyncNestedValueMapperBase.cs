@@ -129,9 +129,7 @@ public abstract class SyncNestedValueMapperBase : SyncValueMapperBase
     protected IEnumerable<uSyncDependency> GetPropertyDependencies(
         IDictionary<string, object> properties, DependencyFlags flags)
     {
-
-        if (!properties.Any())
-            return Enumerable.Empty<uSyncDependency>();
+        if (!properties.Any()) return [];
 
         var dependencies = new List<uSyncDependency>();
         foreach (var property in properties)

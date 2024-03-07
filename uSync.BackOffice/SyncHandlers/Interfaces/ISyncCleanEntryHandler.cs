@@ -2,16 +2,15 @@
 
 using uSync.BackOffice.Configuration;
 
-namespace uSync.BackOffice.SyncHandlers.Interfaces
+namespace uSync.BackOffice.SyncHandlers.Interfaces;
+
+/// <summary>
+/// Interface for handlers that can process cleaning the folder with _clean files 
+/// </summary>
+public interface ISyncCleanEntryHandler
 {
     /// <summary>
-    /// Interface for handlers that can process cleaning the folder with _clean files 
+    /// process any clean actions that have been identified during the import 
     /// </summary>
-    public interface ISyncCleanEntryHandler
-    {
-        /// <summary>
-        /// process any clean actions that have been identified during the import 
-        /// </summary>
-        IEnumerable<uSyncAction> ProcessCleanActions(string folder, IEnumerable<uSyncAction> actions, HandlerSettings config);
-    }
+    IEnumerable<uSyncAction> ProcessCleanActions(string? folder, IEnumerable<uSyncAction> actions, HandlerSettings config);
 }

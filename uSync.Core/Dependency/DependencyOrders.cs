@@ -26,8 +26,6 @@ public static class DependencyOrders
     public static int MediaTypes = 600;
     public static int MemberTypes = 700;
 
-    public static int Macros = 800;
-
     public static int Media = 900;
     public static int Content = 1000;
 
@@ -56,8 +54,6 @@ public static class DependencyOrders
                 return DictionaryItems;
             case UdiEntityType.Template:
                 return Templates;
-            case UdiEntityType.Macro:
-                return Macros;
             case UdiEntityType.Language:
                 return Languages;
             default:

@@ -36,19 +36,22 @@ public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncSerializer<IM
         this.relationAlias = Constants.Conventions.RelationTypes.RelateParentMediaFolderOnDeleteAlias;
 
         // we don't serialize the media properties, 
-        // you can't set them on an node in the backoffice,
+        // you can't set them on an node in the Backoffice,
         // and they are auto calculated by umbraco anyway. 
-        // & sometimes they just lead to false postives. 
-        this.dontSerialize = new string[]
-        {
-            "umbracoWidth", "umbracoHeight", "umbracoBytes", "umbracoExtension"
-        };
+        // & sometimes they just lead to false positives. 
+        this.dontSerialize = [
+            "umbracoWidth",
+            "umbracoHeight",
+            "umbracoBytes",
+            "umbracoExtension"
+        ];
     }
 
     protected override SyncAttempt<IMedia> DeserializeCore(XElement node, SyncSerializerOptions options)
     {
         var attempt = FindOrCreate(node);
-        if (!attempt.Success) throw attempt.Exception;
+        if (!attempt.Success || attempt.Result is null)
+            throw attempt.Exception ?? new Exception($"Unknown error {node.GetAlias()}");
 
         var item = attempt.Result;
 
@@ -56,22 +59,22 @@ public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncSerializer<IM
 
         details.AddRange(DeserializeBase(item, node, options));
 
-        if (node.Element("Info") != null)
+        var info = node.Element(uSyncConstants.Xml.Info);
+        if (info is not null)
         {
-            var trashed = node.Element("Info").Element("Trashed").ValueOrDefault(false);
-            var restoreParent = node.Element("Info").Element("Trashed").Attribute("Parent").ValueOrDefault(Guid.Empty);
+            var trashed = info.Element("Trashed").ValueOrDefault(false);
+            var restoreParent = info.Element("Trashed")?.Attribute("Parent").ValueOrDefault(Guid.Empty) ?? Guid.Empty;
             details.AddNotNull(HandleTrashedState(item, trashed, restoreParent));
         }
 
         var propertyAttempt = DeserializeProperties(item, node, options);
         if (!propertyAttempt.Success)
-            return SyncAttempt<IMedia>.Fail(item.Name, item, ChangeType.Fail, "Failed to save properties", propertyAttempt.Exception);
-
-        var info = node.Element("Info");
+            return SyncAttempt<IMedia>.Fail(item.Name ?? item.Id.ToString(), item, ChangeType.Fail, "Failed to save properties",
+                propertyAttempt.Exception ?? new Exception($"Error with properties {item.Id}"));
 
         if (!options.GetSetting<bool>("IgnoreSortOrder", false))
         {
-            var sortOrder = info.Element("SortOrder").ValueOrDefault(-1);
+            var sortOrder = info?.Element("SortOrder").ValueOrDefault(-1) ?? -1;
             HandleSortOrder(item, sortOrder);
         }
 
@@ -79,7 +82,7 @@ public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncSerializer<IM
         if (details.HasWarning() && options.FailOnWarnings())
         {
             // Fail on warning. means we don't save or publish because something is wrong ?
-            return SyncAttempt<IMedia>.Fail(item.Name, item, ChangeType.ImportFail, "Failed with warnings", details,
+            return SyncAttempt<IMedia>.Fail(item.Name ?? item.Id.ToString(), item, ChangeType.ImportFail, "Failed with warnings", details,
                 new Exception("Import failed because of warnings, and fail on warnings is true"));
         }
 
@@ -87,7 +90,8 @@ public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncSerializer<IM
         if (!saveAttempt.Success)
         {
             var errors = saveAttempt.Result?.EventMessages?.FormatMessages() ?? "";
-            return SyncAttempt<IMedia>.Fail(item.Name, item, ChangeType.Fail, errors, saveAttempt.Exception);
+            return SyncAttempt<IMedia>.Fail(item.Name ?? item.Id.ToString(), item, ChangeType.Fail, errors,
+                saveAttempt.Exception ?? new Exception($"Error with item {item.Id}"));
         }
 
         // add warning messages if things are missing
@@ -96,10 +100,10 @@ public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncSerializer<IM
             message += $" with warning(s)";
 
         // setting the saved flag on the attempt to true, stops base classes from saving the item.
-        return SyncAttempt<IMedia>.Succeed(item.Name, item, ChangeType.Import, "", true, propertyAttempt.Result);
+        return SyncAttempt<IMedia>.Succeed(item.Name ?? item.Id.ToString(), item, ChangeType.Import, "", true, propertyAttempt.Result);
     }
 
-    protected override uSyncChange HandleTrashedState(IMedia item, bool trashed, Guid restoreParentKey)
+    protected override uSyncChange? HandleTrashedState(IMedia item, bool trashed, Guid restoreParentKey)
     {
         if (!trashed && item.Trashed)
         {
@@ -111,7 +115,7 @@ public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncSerializer<IM
 
             CleanRelations(item, Constants.Conventions.RelationTypes.RelateParentMediaFolderOnDeleteAlias);
 
-            return uSyncChange.Update("Restored", item.Name, "Recycle Bin", item.ParentId.ToString());
+            return uSyncChange.Update("Restored", item.Name ?? item.Id.ToString(), "Recycle Bin", item.ParentId.ToString());
         }
         else if (trashed && !item.Trashed)
         {
@@ -120,7 +124,7 @@ public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncSerializer<IM
 
             // move to the recycle bin
             _mediaService.MoveToRecycleBin(item);
-            return uSyncChange.Update("Moved to Bin", item.Name, "", "Recycle Bin");
+            return uSyncChange.Update("Moved to Bin", item.Name ?? item.Id.ToString(), "", "Recycle Bin");
         }
 
         return null;
@@ -144,7 +148,7 @@ public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncSerializer<IM
             info.Add(SerializeFileHash(item));
 
         return SyncAttempt<XElement>.Succeed(
-            item.Name,
+            item.Name ?? item.Id.ToString(),
             node,
             typeof(IMedia),
             ChangeType.Export);
@@ -187,9 +191,10 @@ public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncSerializer<IM
 
     }
 
-    private static string GetFilePath(string value)
+    private static string GetFilePath(string? value)
     {
-        if (value.TryParseToJsonNode(out var jsonNode) is false)
+        if (value is null) return string.Empty;
+        if (value.TryParseToJsonNode(out _) is false)
             return value;
 
 
@@ -201,34 +206,34 @@ public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncSerializer<IM
         return value;
     }
 
-    protected override Attempt<IMedia> CreateItem(string alias, ITreeEntity parent, string itemType)
+    protected override Attempt<IMedia?> CreateItem(string alias, ITreeEntity? parent, string itemType)
     {
         var parentId = parent != null ? parent.Id : -1;
         var item = _mediaService.CreateMedia(alias, parentId, itemType);
         return Attempt.Succeed((IMedia)item);
     }
 
-    public override IMedia FindItem(int id)
+    public override IMedia? FindItem(int id)
     {
         var item = _mediaService.GetById(id);
         if (item != null)
         {
-            AddToNameCache(id, item.Key, item.Name);
+            AddToNameCache(id, item.Key, item.Name ?? item.Id.ToString());
             return item;
         }
         return null;
     }
 
 
-    public override IMedia FindItem(Guid key)
+    public override IMedia? FindItem(Guid key)
         => _mediaService.GetById(key);
 
-    protected override IMedia FindAtRoot(string alias)
+    protected override IMedia? FindAtRoot(string alias)
     {
         var rootNodes = _mediaService.GetRootMedia();
         if (rootNodes.Any())
         {
-            return rootNodes.FirstOrDefault(x => x.Name.ToSafeAlias(shortStringHelper).InvariantEquals(alias));
+            return rootNodes.FirstOrDefault(x => x.Name?.ToSafeAlias(shortStringHelper)?.InvariantEquals(alias) is true);
         }
 
         return null;

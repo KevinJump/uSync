@@ -1,4 +1,4 @@
-import { LitElement, html, customElement, property, nothing, css } from "@umbraco-cms/backoffice/external/lit";
+import { LitElement, html, customElement, property, nothing, css, state } from "@umbraco-cms/backoffice/external/lit";
 import { uSyncActionView } from "../api";
 import { UmbElementMixin } from "@umbraco-cms/backoffice/element-api";
 import { UMB_MODAL_MANAGER_CONTEXT, UmbModalManagerContext } from "@umbraco-cms/backoffice/modal";
@@ -21,9 +21,19 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
     @property({type: Array})
     results : Array<uSyncActionView> = [];
 
+    @state()
+    _showAll : boolean = false;
+
+    @state()
+    _changeCount  = 0;
+
+    _toggleShowAll() {
+        this._showAll = !this._showAll;
+    }
+
     async _openDetailsView(result: uSyncActionView) {
 
-        const detailsModal = this._modalContext?.open(USYNC_DETAILS_MODAL, {
+        const detailsModal = this._modalContext?.open(this, USYNC_DETAILS_MODAL, {
             data : {
                 item: result
             }
@@ -35,7 +45,16 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
 
     render() {
 
+        this._changeCount = 0;
+
         var rowsHtml = this.results.map((result) => {
+
+            if (this._showAll == false && result.change == 'NoChange') {
+                return nothing;
+            }
+
+            this._changeCount++; 
+
             return html`
                 <uui-table-row>
                     <uui-table-cell><uui-icon .name=${result.success ? 'icon-check' : 'icon-wrong'}></uui-icon></uui-table-cell>
@@ -47,12 +66,13 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
             `;
         });
 
-        return html`
-
-            <div class="result-header">
-                ${this.results.length} items
-            </div>
-
+        return this._changeCount == 0 
+            ? html`
+                ${this.renderResultBar(this.results.length)}
+                <div class="empty">Nothing has changed</div>
+                `
+            : html`
+            ${this.renderResultBar(this.results.length)}
             <uui-table>
                 <uui-table-head>
                     <uui-table-head-cell>Success</uui-table-head-cell>
@@ -66,6 +86,16 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
 
             </uui-table>
         `;
+    }
+
+    renderResultBar(count: number) {
+        return html`
+        <div class="result-header">
+            <uui-toggle label="Show All" 
+                ?checked=${this._showAll}
+                @change=${this._toggleShowAll}></uui-toggle>
+            ${count} items
+        </div>`;
     }
 
     renderDetailsButton(result: uSyncActionView) {
@@ -84,7 +114,13 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
 
         .result-header {
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between;
+        }
+
+        .empty {
+            padding: 40px;
+            text-align:center;
+            font-weight:900;
         }
     `
 }

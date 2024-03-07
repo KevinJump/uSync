@@ -16,7 +16,7 @@ public interface ISyncItemFactory
     // serializers
     IEnumerable<ISyncSerializer<TObject>> GetSerializers<TObject>();
 
-    ISyncSerializer<TObject> GetSerializer<TObject>(string name);
+    ISyncSerializer<TObject>? GetSerializer<TObject>(string name);
 
     // tracking items
     IEnumerable<ISyncTracker<TObject>> GetTrackers<TObject>();

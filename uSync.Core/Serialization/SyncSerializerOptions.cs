@@ -43,7 +43,7 @@ public class SyncSerializerOptions
     public bool CreateOnly { get; set; }
 
     /// <summary>
-    ///  Serializer flags, turn things like DontSave, FailWhenParent is missing on
+    ///  Serializer flags, turn things like Don't Save, FailWhenParent is missing on
     /// </summary>
     /// <remarks>
     ///  this is now private - we might phase it out for the options instead.
@@ -53,7 +53,7 @@ public class SyncSerializerOptions
     /// <summary>
     ///  Parameterized options, custom for each handler
     /// </summary>
-    public Dictionary<string, string> Settings { get; internal set; }
+    public Dictionary<string, string> Settings { get; internal set; } = [];
 
     /// <summary>
     ///  flag properties, we can move this away from flags if we want to.
@@ -71,7 +71,7 @@ public class SyncSerializerOptions
         if (this.Settings != null && this.Settings.ContainsKey(key))
         {
             var attempt = this.Settings[key].TryConvertTo<TResult>();
-            if (attempt.Success)
+            if (attempt.Success && attempt.Result is not null)
                 return attempt.Result;
         }
 
@@ -107,28 +107,17 @@ public class SyncSerializerOptions
     public IList<string> GetSegments()
         => GetSetting(uSyncConstants.SegmentKey, string.Empty).ToDelimitedList();
 
-    public string SwapValue(string key, string newValue)
-    {
-        string oldValue = null;
-
-        if (!this.Settings.ContainsKey(key))
-            oldValue = this.Settings[key];
-
-        if (newValue == null)
-            this.Settings.Remove(key);
-        else
-            this.Settings[key] = newValue;
-
-        return oldValue;
-    }
-
     /// <summary>
     ///  merge any new settings into the settings collection.
     /// </summary>
-    public void MergeSettings(Dictionary<string, string> newSettings)
+    public void MergeSettings(Dictionary<string, string>? newSettings)
     {
-        if (Settings == null) Settings = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
-        if (newSettings != null)
+        if (Settings is null)
+        {
+            Settings = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
+        }
+
+        if (newSettings is not null)
         {
             foreach (var kvp in newSettings)
             {

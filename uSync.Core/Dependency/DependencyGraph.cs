@@ -5,7 +5,7 @@
 /// </summary>
 public static class DependencyGraph
 {
-    public static List<T> TopologicalSort<T>(this ICollection<T> nodes, ICollection<GraphEdge<T>> edges)
+    public static List<T>? TopologicalSort<T>(this ICollection<T> nodes, ICollection<GraphEdge<T>> edges)
         where T : IEquatable<T>
     {
         var sortedList = new List<T>();
@@ -34,19 +34,19 @@ public static class DependencyGraph
             }
         }
 
-        if (edges.Any())
-        {
-            return null;
-        }
-
-        return sortedList;
-
+        return edges.Count == 0 ? sortedList : null;
     }
 }
 
 public class GraphEdge<T>
     where T : IEquatable<T>
 {
+    public GraphEdge(T node, T edge)
+    {
+        Node = node;
+        Edge = edge;
+    }
+
     public T Node { get; set; }
     public T Edge { get; set; }
 
@@ -55,6 +55,6 @@ public class GraphEdge<T>
 public class GraphEdge
 {
     public static GraphEdge<T> Create<T>(T node, T edge) where T : IEquatable<T>
-        => new GraphEdge<T> { Node = node, Edge = edge };
+        => new GraphEdge<T>(node, edge);
 }
 

@@ -32,7 +32,7 @@ public abstract class SyncNestedJsonValueMapperBase : SyncNestedValueMapperBase
         if (value.IsObjectNullOrEmptyString()) return null;
         if (value.TryConvertToJsonNode(out var jsonValue) is false) return null;
         if (jsonValue == null) return value.ToString();
-        
+
         return ProcessValues(jsonValue.AsObject(), editorAlias, GetImportProperties);
     }
 

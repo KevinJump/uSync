@@ -10,9 +10,9 @@ public class DictionaryItemTracker : SyncXmlTracker<IDictionaryItem>, ISyncTrack
         : base(serializers)
     { }
 
-    public override List<TrackingItem> TrackingItems => new List<TrackingItem>()
-    {
+    public override List<TrackingItem> TrackingItems =>
+    [
         TrackingItem.Single("Parent", "/Info/Parent"),
         TrackingItem.Many("Translation", "/Translations/Translation", "@Language")
-    };
+    ];
 }

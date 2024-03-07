@@ -17,17 +17,19 @@ public class MultiUrlMapper : SyncValueMapperBase, ISyncMapper
 
     public override string Name => "MultiUrl Mapper";
 
-    public override string[] Editors => new string[] {
+    public override string[] Editors => [
         Constants.PropertyEditors.Aliases.MultiUrlPicker
-    };
+    ];
 
     public override IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)
     {
         if (value.ToString().TryDeserialize<List<LinkDto>>(out var links) is false || links is null || links.Count == 0)
-                return Enumerable.Empty<uSyncDependency>();
+            return [];
 
         return links.Where(x => x.Udi != null)
-            .Select(link => CreateDependency(link.Udi, flags));
+            .Select(link => CreateDependency(link.Udi, flags))
+            .Where(x => x != null)
+            .Select(x => x!) ?? [];
     }
 
     // taken from umbraco source - this is how it's stored 
@@ -37,18 +39,18 @@ public class MultiUrlMapper : SyncValueMapperBase, ISyncMapper
     internal class LinkDto
     {
         [DataMember(Name = "name")]
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         [DataMember(Name = "target")]
-        public string Target { get; set; }
+        public string? Target { get; set; }
 
         [DataMember(Name = "udi")]
-        public GuidUdi Udi { get; set; }
+        public GuidUdi? Udi { get; set; }
 
         [DataMember(Name = "url")]
-        public string Url { get; set; }
+        public string? Url { get; set; }
 
         [DataMember(Name = "queryString")]
-        public string QueryString { get; set; }
+        public string? QueryString { get; set; }
     }
 }

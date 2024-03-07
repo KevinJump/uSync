@@ -17,15 +17,15 @@ public class SyncSerializerCollection : BuilderCollectionBase<ISyncSerializerBas
     { }
 
     public IEnumerable<ISyncSerializer<TObject>> GetSerializers<TObject>()
-        => this.Where(x => x is ISyncSerializer<TObject> tracker)
-            .Select(x => x as ISyncSerializer<TObject>);
+        => this.Where(x => x is ISyncSerializer<TObject> tracker && x is not null)
+             .Select(x => x as ISyncSerializer<TObject>).WhereNotNull();
 
-    public ISyncSerializer<TObject> GetSerializer<TObject>()
+    public ISyncSerializer<TObject>? GetSerializer<TObject>()
         => this.Where(x => x is ISyncSerializer<TObject> tracker)
             .Select(x => x as ISyncSerializer<TObject>)
             .FirstOrDefault();
 
-    public ISyncSerializer<TObject> GetSerializer<TObject>(string name)
+    public ISyncSerializer<TObject>? GetSerializer<TObject>(string name)
         => this.Where(x => x is ISyncSerializer<TObject> tracker && x.Name.InvariantEquals(name))
             .Select(x => x as ISyncSerializer<TObject>)
             .FirstOrDefault();

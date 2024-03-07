@@ -65,7 +65,7 @@ public partial class uSyncService
 
                 var destinationFolder = Path.GetDirectoryName(destination);
 
-                if (!Directory.Exists(destinationFolder))
+                if (destinationFolder is not null && Directory.Exists(destinationFolder) is false)
                     Directory.CreateDirectory(destinationFolder);
 
                 entry.ExtractToFile(destination, true);
@@ -100,7 +100,7 @@ public partial class uSyncService
     private string GetOSDependentPath(string file)
         => file.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar)
             .Trim(Path.DirectorySeparatorChar);
-    
+
     private string CleanPathForZip(string path)
         => Path.GetFullPath(
             path.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar))

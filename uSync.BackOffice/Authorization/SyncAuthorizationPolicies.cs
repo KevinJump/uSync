@@ -1,13 +1,12 @@
-﻿namespace uSync.BackOffice.Authorization
+﻿namespace uSync.BackOffice.Authorization;
+
+/// <summary>
+/// Security policy constants used in Umbraco by uSync
+/// </summary>
+public static class SyncAuthorizationPolicies
 {
     /// <summary>
-    /// Security policy constants used in Umbraco by uSync
+    ///  name of the uSyncTreeAccess policy.
     /// </summary>
-    public static class SyncAuthorizationPolicies
-    {
-        /// <summary>
-        ///  name of the uSyncTreeAccess policy.
-        /// </summary>
-        public const string TreeAccessuSync = nameof(TreeAccessuSync);
-    }
+    public const string TreeAccessuSync = nameof(TreeAccessuSync);
 }
