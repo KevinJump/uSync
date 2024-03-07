@@ -51,6 +51,12 @@ Write-Host "Config   :" $env
 Write-Host "Folder   :" $outFolder
 "----------------------------------"; ""
 
+"Stamp version in umbraco-package.json"
+$umbracoPackagePath = '../uSync.BackOffice.Management.Client/assets/public/umbraco-package.json'
+$packageJson = Get-Content $umbracoPackagePath -Raw | ConvertFrom-Json
+$packageJson.Version = $fullVersion
+$packageJson | ConvertTo-Json -Depth 32 | Set-Content $umbracoPackagePath
+
 $sln_name = "..\uSync.sln";
 
 ""; "##### Restoring project"; "--------------------------------"; ""
