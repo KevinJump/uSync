@@ -285,7 +285,8 @@ namespace uSync.BackOffice.SyncHandlers
 
                 options.Callbacks?.Update?.Invoke($"Importing {Path.GetFileNameWithoutExtension(item.Path)}", count, total);
 
-                var result = ImportElement(item.Node, item.Path, config, options);
+                var result = ImportElement(item.Node, item.FileName, config, options).ToList();
+
                 foreach (var attempt in result)
                 {
                     if (attempt.Success)
@@ -516,11 +517,13 @@ namespace uSync.BackOffice.SyncHandlers
                     .AsEnumerableOfOne();
             }
 
+            var shortFilename = Path.GetFileNameWithoutExtension(filename);
+
             if (_mutexService.FireItemStartingEvent(new uSyncImportingItemNotification(node, (ISyncHandler)this)))
             {
                 // blocked
                 return uSyncActionHelper<TObject>
-                    .ReportAction(ChangeType.NoChange, node.GetAlias(), node.GetPath(), GetNameFromFileOrNode(filename, node), node.GetKey(), this.Alias, "Change stopped by delegate event")
+                    .ReportAction(ChangeType.NoChange, node.GetAlias(), node.GetPath(), GetNameFromFileOrNode(shortFilename, node), node.GetKey(), this.Alias, "Change stopped by delegate event")
                     .AsEnumerableOfOne();
             }
 
@@ -532,13 +535,15 @@ namespace uSync.BackOffice.SyncHandlers
 
                 // get the item.
                 var attempt = DeserializeItem(node, serializerOptions);
-                var action = uSyncActionHelper<TObject>.SetAction(attempt, GetNameFromFileOrNode(filename, node), node.GetKey(), this.Alias, IsTwoPass);
+                var action = uSyncActionHelper<TObject>.SetAction(attempt, GetNameFromFileOrNode(shortFilename, node), node.GetKey(), this.Alias, IsTwoPass);
 
                 // add item if we have it.
                 if (attempt.Item != null) action.Item = attempt.Item;
 
                 // add details if we have them
                 if (attempt.Details != null && attempt.Details.Any()) action.Details = attempt.Details;
+
+                action.Path = GetRootFolder(filename.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
 
                 // this might not be the place to do this because, two pass items are imported at another point too.
                 _mutexService.FireItemCompletedEvent(new uSyncImportedItemNotification(node, attempt.Change));
@@ -553,7 +558,19 @@ namespace uSync.BackOffice.SyncHandlers
                     $"{this.Alias} Import Fail: {ex.Message}", new Exception(ex.Message))
                     .AsEnumerableOfOne();
             }
+        }
 
+        private string GetRootFolder(string path)
+        {
+            if (path.StartsWith(uSyncConstants.MergedFolderName))
+                return Path.GetDirectoryName(path);
+
+            foreach(var folder in this.uSyncConfig.GetFolders())
+            {
+                if (path.Contains(folder) is true) return Path.GetFileName(folder.TrimEnd('/'));
+            }
+
+            return path;
         }
 
 
@@ -1361,7 +1378,7 @@ namespace uSync.BackOffice.SyncHandlers
                 var action = uSyncActionHelper<TObject>
                         .ReportAction(change.Change, node.GetAlias(), node.GetPath(), GetNameFromFileOrNode(filename, node), node.GetKey(), this.Alias, "");
 
-
+                action.Path = GetRootFolder(filename.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
 
                 action.Message = "";
 

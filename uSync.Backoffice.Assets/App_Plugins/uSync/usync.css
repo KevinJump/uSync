@@ -634,3 +634,26 @@ ul.usync-action-list {
 .usync-summary-expand.active .icon {
     transform: rotateX(180deg);
 }
+
+.usync-path-source-summary {
+    margin: 5px 0;
+    font-style: italic;
+    border: 1px solid #eee;
+    border-left: 4px solid #ddd;
+    padding: 5px 10px;
+}
+
+.usync-path-name {
+    padding: 3px 5px;
+    border-radius: 4px;
+}
+
+    .usync-path-name.Combined {
+        background-color: #FF7043;
+        color: white;
+    }
+
+    .usync-path-name.Root {
+        background-color: #27b171;
+        color: white;
+    }
