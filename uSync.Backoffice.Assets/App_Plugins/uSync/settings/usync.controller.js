@@ -442,7 +442,7 @@
                     editorService.close();
                     console.log(action);
 
-                    if (action == 'import ') {
+                    if (action == 'import') {
                         importItems(false, group);
                     }
                     else {
