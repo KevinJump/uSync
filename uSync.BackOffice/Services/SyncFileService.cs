@@ -506,6 +506,7 @@ namespace uSync.BackOffice.Services
                     {
                         // merge these files.
                         item.Value.SetNode(trackerBase.MergeFiles(elements[item.Key].Node, item.Value.Node));
+                        item.Value.FileName = $"{uSyncConstants.MergedFolderName}/{Path.GetFileName(item.Value.FileName)}";
                     }
 
                     elements[item.Key] = item.Value;

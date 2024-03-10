@@ -20,6 +20,12 @@
                 </umb-box-header>
                 <umb-box-container>
                     <umb-box-content>
+                        <div ng-if="vm.item.path != 'Combined'" class="usync-path-source-summary">
+                            Update file from the <strong>{{vm.item.path}}</strong> folder.
+                        </div>
+                        <div ng-if="vm.item.path == 'Combined'" class="usync-path-source-summary">
+                            Update is the result of combining two or more files from disk.
+                        </div>
                         <div ng-if="vm.item.detailMessage.length > 0" class="usync-item-detail-message">
                             <div ng-bind-html="vm.item.detailMessage"></div>
                         </div>

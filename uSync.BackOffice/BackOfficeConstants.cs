@@ -30,6 +30,11 @@ namespace uSync.BackOffice
         public const string ReleaseSuffix = "";
 
         /// <summary>
+        ///  folder we say things are in when we have merged them.
+        /// </summary>
+        public const string MergedFolderName = "Combined";
+
+        /// <summary>
         ///  ordering of the handler items (what gets done when)
         /// </summary>
         public static class Priorites
