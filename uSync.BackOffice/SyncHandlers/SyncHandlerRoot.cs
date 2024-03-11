@@ -17,6 +17,7 @@ using Umbraco.Cms.Core.Strings;
 using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;
+using uSync.BackOffice.Extensions;
 using uSync.BackOffice.Models;
 using uSync.BackOffice.Services;
 using uSync.BackOffice.SyncHandlers.Models;
@@ -570,7 +571,7 @@ namespace uSync.BackOffice.SyncHandlers
                 if (path.Contains(folder) is true) return Path.GetFileName(folder.TrimEnd('/'));
             }
 
-            return path;
+            return path.TruncatePath(3, false);
         }
 
 

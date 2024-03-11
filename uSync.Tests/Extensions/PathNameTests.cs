@@ -1,5 +1,8 @@
 ﻿using NUnit.Framework;
 
+using Umbraco.Extensions;
+
+using uSync.BackOffice.Extensions;
 using uSync.Core;
 
 namespace uSync.Tests.Extensions
@@ -26,6 +29,36 @@ namespace uSync.Tests.Extensions
             var value = filename.ToAppSafeFileName();
 
             Assert.AreEqual(expected, value);
+        }
+
+        [TestCase("C:\\Source\\OpenSource\\v13\\uSync\\README.md", "\\OpenSource\\v13\\uSync")]
+        [TestCase("C:\\Source\\OpenSource\\v13\\README.md", "\\Source\\OpenSource\\v13")]
+        [TestCase("C:\\Source\\OpenSource\\README.md", "\\Source\\OpenSource")]
+        [TestCase("C:\\Source\\README.md", "\\Source")]
+        [TestCase("C:\\Source/OpenSource\\v13\\uSync\\README.md", "\\OpenSource\\v13\\uSync")]
+        [TestCase("C:\\Source/OpenSource\\v13\\README.md", "\\Source\\OpenSource\\v13")]
+        [TestCase("C:\\Source/OpenSource/README.md", "\\Source\\OpenSource")]
+        [TestCase("C:/Source\\README.md", "\\Source")]
+        [TestCase("README.md", "")]
+        [TestCase("", "")]
+        public void TruncatedPathsWithoutFileName(string filename, string expected)
+        {
+            var result = filename.TruncatePath(3, false);
+
+            Assert.AreEqual(expected, result);
+        }
+
+        [TestCase("C:\\Source\\OpenSource\\v13\\uSync\\README.md", "\\v13\\uSync\\README.md")]
+        [TestCase("C:\\Source\\OpenSource\\v13\\README.md", "\\OpenSource\\v13\\README.md")]
+        [TestCase("C:\\Source\\OpenSource\\README.md", "\\Source\\OpenSource\\README.md")]
+        [TestCase("C:\\Source\\README.md", "\\Source\\README.md")]
+        [TestCase("README.md", "\\README.md")]
+        [TestCase("", "")]
+        public void TruncatedPathsWithFileName(string filename, string expected)
+        {
+            var result = filename.TruncatePath(3, true);
+
+            Assert.AreEqual(expected, result);
         }
     }
 }
