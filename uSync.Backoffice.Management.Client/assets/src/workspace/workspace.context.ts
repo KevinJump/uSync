@@ -130,7 +130,7 @@ export class uSyncWorkspaceContext extends UmbControllerBase
     }
 
     async getDefaultHandlerSetSettings() {
-        const {data} = await this.#repository.getHandlerSettings("default");
+        const {data} = await this.#repository.getHandlerSettings("Default");
 
         if (data) {
             this.#handlerSettings.setValue(data);

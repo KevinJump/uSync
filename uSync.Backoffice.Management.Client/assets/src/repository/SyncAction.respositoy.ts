@@ -51,7 +51,7 @@ export class uSyncActionRepository extends UmbControllerBase {
                     force : false,
                     clean : false,
                     clientId : clientId,
-                    set: 'default'
+                    set: 'Default'
                 },
                 stepNumber: step
             }
