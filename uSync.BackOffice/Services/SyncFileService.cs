@@ -494,7 +494,7 @@ namespace uSync.BackOffice.Services
 
             foreach (var folder in folders)
             {
-                var absPath = GetAbsPath($"~/{folder}");
+                var absPath = GetAbsPath(folder);
 
                 if (DirectoryExists(absPath) is false) continue;
 
