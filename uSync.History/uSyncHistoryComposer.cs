@@ -57,6 +57,7 @@ namespace uSync.History
         {
             notification.ServerVariables.Add("uSyncHistory", new Dictionary<string, object>
             {
+                { "Enabled", _uSyncConfig.Settings.EnableHistory },
                 { "Service", _linkGenerator.GetUmbracoApiServiceBaseUrl<uSyncHistoryController>(controller => controller.GetApi()) },
             });
         }

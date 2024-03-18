@@ -10,5 +10,6 @@
 		<key alias="empty">u have not Synced anything.</key>
 		<key alias="clearTitle">Are you sure?</key>
 		<key alias="clearMessage">All history files will be permanently deleted.</key>
+		<key alias="disabled">History has been disabled.</key>
 	</area>
 </language>

@@ -7,6 +7,7 @@
         vm.loadHistory = loadHistory;
         vm.actions = {};
         vm.clearHistory = clearHistory;
+        vm.enabled = Umbraco.Sys.ServerVariables.uSyncHistory.Enabled;
 
         vm.$onInit = function () {  
             evts.push(
