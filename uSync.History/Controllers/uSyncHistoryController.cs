@@ -12,65 +12,34 @@ namespace uSync.History.Controllers
     [PluginController("uSync")]
     public class uSyncHistoryController : UmbracoAuthorizedApiController
     {
-        private readonly IHostingEnvironment _hostingEnvironment;
-        private readonly SyncFileService _syncFileService;
 
-        public uSyncHistoryController(SyncFileService syncFileService, IHostingEnvironment hostingEnvironment)
+        public readonly uSyncHistoryService _historyService;
+
+        public uSyncHistoryController(uSyncHistoryService historyService)
         {
-            _syncFileService = syncFileService;
-            _hostingEnvironment = hostingEnvironment;
+            _historyService = historyService;
         }
 
         public bool GetApi() => true;
 
         public IEnumerable<HistoryInfo> GetHistory()
         {
-            string historyFolder = GetHistoryFolder();
-            var files = _syncFileService.GetFiles(historyFolder, "*.json")
-                .Select(x => x.Substring(historyFolder.Length + 1));
-
-            var list = new List<HistoryInfo>();
-            foreach (var file in files)
-            {
-                list.Add(LoadHistory(file));
-            }
-
-            return list.OrderByDescending(x => x.Date);
+            return _historyService.GetHistory();
         }
 
         private string GetHistoryFolder()
         {
-            var rootFolder = _syncFileService.GetAbsPath(_hostingEnvironment.LocalTempPath);
-            var historyFolder = Path.GetFullPath(Path.Combine(rootFolder, "uSync", "history"));
-            return historyFolder;
+            return _historyService.GetHistoryFolder();
         }
 
         public bool ClearHistory()
         {
-            // 1. get history folder
-            string historyFolder = GetHistoryFolder();
-            // 2. get history files
-            var files = _syncFileService.GetFiles(historyFolder, "*.json");
-            // 3. delet this
-            foreach (var file in files)
-            {
-                _syncFileService.DeleteFile(file);
-            }
-            // 4. truth
-            return true;
+            return _historyService.ClearHistory();
         }
 
         public HistoryInfo LoadHistory(string filePath)
         {
-            string historyFolder = GetHistoryFolder();
-            var fullPath = Path.Combine(historyFolder, filePath);
-            string contents = _syncFileService.LoadContent(fullPath);
-
-            var actions = JsonConvert.DeserializeObject<HistoryInfo>(contents);
-
-            actions.FilePath = filePath;
-
-            return actions;
+            return _historyService.LoadHistory(filePath);
         }
     }
 }

@@ -23,7 +23,7 @@ namespace uSync.BackOffice.Configuration
         ///  collection of folders uSync looks in when performing imports.
         /// </summary>
         [DefaultValue("uSync/Root/, uSync/v9")]
-        public string[] Folders { get; set; } = [ ];
+        public string[] Folders { get; set; } = [];
 
         /// <summary>
         ///  Sets this site to be the root site (so it will save into "uSync/root/")
@@ -45,7 +45,7 @@ namespace uSync.BackOffice.Configuration
         ///  forms-prevalue, forms-datasource, language
         /// </remarks>
         public string[] LockRootTypes { get; set; } = [];
-        
+
         /// <summary>
         /// The default handler set to use on all notification triggered events
         /// </summary>
@@ -139,6 +139,11 @@ namespace uSync.BackOffice.Configuration
         public bool EnableHistory { get; set; } = true;
 
         /// <summary>
+        /// Location of the history folder.
+        /// </summary>
+        public string HistoryFolder { get; set; } = string.Empty;
+
+        /// <summary>
         /// Default file extension for the uSync files. 
         /// </summary>
         [DefaultValue("config")]
@@ -148,7 +153,7 @@ namespace uSync.BackOffice.Configuration
         /// Import the uSync folder on the first boot. 
         /// </summary>
         [DefaultValue(false)]
-        public bool ImportOnFirstBoot { get; set; } = false ;
+        public bool ImportOnFirstBoot { get; set; } = false;
 
         /// <summary>
         /// Handler group(s) to run on first boot, default is All (so full import)

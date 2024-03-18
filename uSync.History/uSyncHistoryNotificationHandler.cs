@@ -13,25 +13,23 @@ namespace uSync.History
         : INotificationHandler<uSyncImportCompletedNotification>,
         INotificationHandler<uSyncExportCompletedNotification>
     {
-        private readonly IHostingEnvironment _hostingEnvironment;
-        private readonly SyncFileService _syncFileService;
         private readonly IBackOfficeSecurityAccessor _backOfficeSecurityAccessor;
         private readonly ILogger<uSyncHistoryNotificationHandler> _logger;
+        private readonly uSyncHistoryService _historyService;
 
         public uSyncHistoryNotificationHandler(
-            SyncFileService syncFileService,
             IBackOfficeSecurityAccessor backOfficeSecurityAccessor,
-            IHostingEnvironment hostingEnvironment,
-            ILogger<uSyncHistoryNotificationHandler> logger)
+            ILogger<uSyncHistoryNotificationHandler> logger,
+            uSyncHistoryService historyService)
         {
-            _syncFileService = syncFileService;
             _backOfficeSecurityAccessor = backOfficeSecurityAccessor;
-            _hostingEnvironment = hostingEnvironment;
             _logger = logger;
+            _historyService = historyService;
         }
 
         public void Handle(uSyncImportCompletedNotification notification)
         {
+            if (_historyService.IsHistoryEnabled() == false) return;
             var changeActions = notification.Actions
                 .Where(x => x.Change > Core.ChangeType.NoChange && x.Change < Core.ChangeType.Hidden)
                 .ToList();
@@ -44,6 +42,7 @@ namespace uSync.History
 
         public void Handle(uSyncExportCompletedNotification notification)
         {
+            if (_historyService.IsHistoryEnabled() == false) return;
             var changeActions = notification.Actions
                 .Where(x => x.Change > Core.ChangeType.NoChange && x.Change < Core.ChangeType.Hidden)
                 .ToList();
@@ -70,12 +69,7 @@ namespace uSync.History
 
                 var historyJson = JsonConvert.SerializeObject(historyInfo, Formatting.Indented);
 
-                var rootFolder = _syncFileService.GetAbsPath(_hostingEnvironment.LocalTempPath);
-                var historyFile = Path.Combine(rootFolder, "uSync", "history", DateTime.Now.ToString("dd_MM_yyyy_HH_mm_ss") + ".json");
-
-                _syncFileService.CreateFoldersForFile(historyFile);
-
-                _syncFileService.SaveFile(historyFile, historyJson);
+                _historyService.SaveHistoryFile(historyJson);
             }
             catch(Exception ex)
             {

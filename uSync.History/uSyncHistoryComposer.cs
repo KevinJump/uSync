@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Routing;
-
+using Microsoft.Extensions.DependencyInjection;
 using Umbraco.Cms.Core.Composing;
 using Umbraco.Cms.Core.DependencyInjection;
 using Umbraco.Cms.Core.Events;
@@ -18,8 +18,9 @@ namespace uSync.History
     {
         public void Compose(IUmbracoBuilder builder)
         {
-            builder.AddNotificationHandler<ServerVariablesParsingNotification, uSyncHistoryServerVariablesHandler>();
+            builder.Services.AddSingleton<uSyncHistoryService>();
 
+            builder.AddNotificationHandler<ServerVariablesParsingNotification, uSyncHistoryServerVariablesHandler>();
             builder.AddNotificationHandler<uSyncImportCompletedNotification, uSyncHistoryNotificationHandler>();
             builder.AddNotificationHandler<uSyncExportCompletedNotification, uSyncHistoryNotificationHandler>();
             // don't add if the filter is already there .
