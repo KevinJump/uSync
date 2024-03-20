@@ -94,7 +94,7 @@ namespace uSync.BackOffice
             {
                 if (options.Folders == null || options.Folders.Length == 0)
                 {
-                    options.Folders = ["uSync/Root/", "uSync/v9/"];
+                    options.Folders = ["uSync/Root/", options.RootFolder];
                 }
             });
 
