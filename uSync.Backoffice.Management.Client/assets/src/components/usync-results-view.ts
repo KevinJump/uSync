@@ -19,7 +19,7 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
     }
 
     @property({type: Array})
-    results : Array<uSyncActionView> = [];
+    results : Array<uSyncActionView> | undefined = [];
 
     @state()
     _showAll : boolean = false;
@@ -44,10 +44,9 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
     }
 
     render() {
-
         this._changeCount = 0;
 
-        var rowsHtml = this.results.map((result) => {
+        var rowsHtml = this.results?.map((result) => {
 
             if (this._showAll == false && result.change == 'NoChange') {
                 return nothing;
@@ -68,11 +67,11 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
 
         return this._changeCount == 0 
             ? html`
-                ${this.renderResultBar(this.results.length)}
+                ${this.renderResultBar(this.results?.length || 0)}
                 <div class="empty">Nothing has changed</div>
                 `
             : html`
-            ${this.renderResultBar(this.results.length)}
+            ${this.renderResultBar(this.results?.length || 0)}
             <uui-table>
                 <uui-table-head>
                     <uui-table-head-cell>Success</uui-table-head-cell>

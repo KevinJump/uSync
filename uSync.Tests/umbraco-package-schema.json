@@ -83,6 +83,9 @@
                     "$ref": "#/definitions/UserPermissionConditionConfig"
                 },
                 {
+                    "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                },
+                {
                     "$ref": "#/definitions/UmbConditionConfigBase<string>"
                 }
             ]
@@ -2664,7 +2667,7 @@
                 "conditions": {
                     "description": "Set the conditions for when the extension should be loaded",
                     "items": {
-                        "$ref": "#/definitions/UmbConditionConfigBase<string>_1"
+                        "$ref": "#/definitions/ConditionTypes"
                     },
                     "type": "array"
                 },
@@ -3385,7 +3388,10 @@
                     "$ref": "#/definitions/ManifestWorkspaceFooterApp"
                 },
                 {
-                    "$ref": "#/definitions/ManifestWorkspaceView"
+                    "$ref": "#/definitions/ManifestWorkspaceView<MetaWorkspaceView>"
+                },
+                {
+                    "$ref": "#/definitions/ManifestWorkspaceViewContentTypeDesignEditorKind"
                 },
                 {
                     "$ref": "#/definitions/ManifestEntityUserPermission"
@@ -3867,7 +3873,7 @@
             ],
             "type": "object"
         },
-        "ManifestWorkspaceView": {
+        "ManifestWorkspaceView<MetaWorkspaceView>": {
             "properties": {
                 "alias": {
                     "description": "The alias of the extension, ensure it is unique",
@@ -3899,7 +3905,7 @@
                     ]
                 },
                 "meta": {
-                    "$ref": "#/definitions/MetaManifestWithView",
+                    "$ref": "#/definitions/MetaWorkspaceView",
                     "description": "This contains properties specific to the type of extension"
                 },
                 "name": {
@@ -3932,6 +3938,77 @@
             },
             "required": [
                 "alias",
+                "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestWorkspaceViewContentTypeDesignEditorKind": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "conditions": {
+                    "description": "Set the conditions for when the extension should be loaded",
+                    "items": {
+                        "$ref": "#/definitions/ConditionTypes"
+                    },
+                    "type": "array"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "const": "contentTypeDesignEditor",
+                    "description": "The kind of the extension, used to group extensions together",
+                    "type": "string"
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaWorkspaceViewContentTypeDesignEditorKind",
+                    "description": "This contains properties specific to the type of extension"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "overwrites": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Define one or more extension aliases that this extension should overwrite."
+                },
+                "type": {
+                    "const": "workspaceView",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "kind",
                 "meta",
                 "name",
                 "type"
@@ -4460,25 +4537,6 @@
             ],
             "type": "object"
         },
-        "MetaManifestWithView": {
-            "properties": {
-                "icon": {
-                    "type": "string"
-                },
-                "label": {
-                    "type": "string"
-                },
-                "pathname": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "icon",
-                "label",
-                "pathname"
-            ],
-            "type": "object"
-        },
         "MetaMenuItem": {
             "properties": {
                 "entityType": {
@@ -4786,6 +4844,47 @@
         "MetaWorkspaceActionMenuItem": {
             "type": "object"
         },
+        "MetaWorkspaceView": {
+            "properties": {
+                "icon": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "pathname": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "icon",
+                "label",
+                "pathname"
+            ],
+            "type": "object"
+        },
+        "MetaWorkspaceViewContentTypeDesignEditorKind": {
+            "properties": {
+                "compositionRepositoryAlias": {
+                    "type": "string"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "pathname": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "icon",
+                "label",
+                "pathname"
+            ],
+            "type": "object"
+        },
         "PropertyEditorSettings": {
             "properties": {
                 "defaultData": {
@@ -4929,6 +5028,18 @@
             ],
             "type": "object"
         },
+        "UmbConditionConfigBase<\"Umb.Condition.SectionUserPermission\">": {
+            "properties": {
+                "alias": {
+                    "const": "Umb.Condition.SectionUserPermission",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "alias"
+            ],
+            "type": "object"
+        },
         "UmbConditionConfigBase<\"Umb.Condition.Switch\">": {
             "properties": {
                 "alias": {
@@ -5063,6 +5174,24 @@
                 "value": {}
             },
             "type": "object"
+        },
+        "UmbSectionUserPermissionConditionConfig": {
+            "allOf": [
+                {
+                    "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.SectionUserPermission\">"
+                },
+                {
+                    "properties": {
+                        "match": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "match"
+                    ],
+                    "type": "object"
+                }
+            ]
         },
         "UmbracoPackageImportmap": {
             "properties": {

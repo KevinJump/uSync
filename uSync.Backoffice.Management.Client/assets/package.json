@@ -2,7 +2,7 @@
   "name": "@jumoo/usync-assets",
   "license": "MPL-2.0",
   "type": "module",
-  "version": "14.0.0-beta001",
+  "version": "14.0.0-beta002",
   "main": "./dist/usync.js",
   "types": "./dist/index.d.ts",
   "module": "./dist/usync.js",
@@ -47,7 +47,7 @@
   "devDependencies": {
     "@types/diff": "^5.0.9",
     "@types/node": "^20.11.20",
-    "@umbraco-cms/backoffice": "^14.0.0-beta001",
+    "@umbraco-cms/backoffice": "^14.0.0-beta002",
     "openapi-typescript-codegen": "^0.25.0",
     "typescript": "^5.2.2",
     "vite": "^5.0.8",

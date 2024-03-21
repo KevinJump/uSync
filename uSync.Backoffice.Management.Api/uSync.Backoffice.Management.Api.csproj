@@ -9,11 +9,11 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.3" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Umbraco.Cms.Api.Management" Version="14.0.0-beta001" />
+		<PackageReference Include="Umbraco.Cms.Api.Management" Version="14.0.0-beta002" />
 	</ItemGroup>
 
 	<ItemGroup>
