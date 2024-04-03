@@ -61,6 +61,7 @@ export class uSyncActionBox extends LitElement {
 
         :host {
             min-width: 360px;
+            flex-grow: 1;
         }
 
         .box-content {

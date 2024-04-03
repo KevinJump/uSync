@@ -1,5 +1,5 @@
 
-import {  _$LE, css, customElement, html, nothing, state } from "@umbraco-cms/backoffice/external/lit";
+import { _$LE, css, customElement, html, nothing, state } from "@umbraco-cms/backoffice/external/lit";
 
 import { USYNC_CORE_CONTEXT_TOKEN, uSyncWorkspaceContext } from '../../workspace.context.js';
 import { SyncActionGroup, SyncHandlerSummary, SyncLegacyCheckResponse, uSyncActionView } from "../../../api/index.js";
@@ -9,17 +9,17 @@ import { USYNC_LEGACY_MODAL } from "../../../dialogs/legacy-modal-element.js";
 import { UmbLitElement } from "@umbraco-cms/backoffice/lit-element";
 
 @customElement('usync-default-view')
-export class uSyncDefaultViewElement extends UmbLitElement{
+export class uSyncDefaultViewElement extends UmbLitElement {
 
-    #actionContext? : uSyncWorkspaceContext;
-    #contextLoaded: Boolean = false; 
-    #modalContext? : UmbModalManagerContext;
+    #actionContext?: uSyncWorkspaceContext;
+    #contextLoaded: Boolean = false;
+    #modalContext?: UmbModalManagerContext;
 
     @state()
     _actions?: Array<SyncActionGroup>
 
     @state()
-    _workingActions? : Array<SyncHandlerSummary>;
+    _workingActions?: Array<SyncHandlerSummary>;
 
     @state()
     _loaded: Boolean = false;
@@ -31,22 +31,22 @@ export class uSyncDefaultViewElement extends UmbLitElement{
     _buttonState: UUIButtonState;
 
     @state()
-    _working: boolean = false; 
+    _working: boolean = false;
 
     @state()
-    _completed: boolean = false; 
+    _completed: boolean = false;
 
-    @state() 
+    @state()
     _showProgress: boolean = false;
 
     @state()
-    _group?: SyncActionGroup 
+    _group?: SyncActionGroup
 
     @state()
     _results: Array<uSyncActionView> = [];
 
     // addController(controller: unknown): void {
-        
+
     // }
 
     constructor() {
@@ -54,7 +54,7 @@ export class uSyncDefaultViewElement extends UmbLitElement{
 
         this.#consumeContext();
     }
-  
+
     #consumeContext() {
 
         this.consumeContext(UMB_MODAL_MANAGER_CONTEXT, (_modalContext) => {
@@ -109,7 +109,7 @@ export class uSyncDefaultViewElement extends UmbLitElement{
         });
     }
 
-    _legacyDialogOpened : boolean = false;
+    _legacyDialogOpened: boolean = false;
 
     async openLegacyModal() {
 
@@ -117,17 +117,17 @@ export class uSyncDefaultViewElement extends UmbLitElement{
         this._legacyDialogOpened = true;
 
         const legacyModal = this.#modalContext?.open(this, USYNC_LEGACY_MODAL, {
-            data : this._legacy
+            data: this._legacy
         });
 
-        await legacyModal?.onSubmit().then(function(data) {
+        await legacyModal?.onSubmit().then(function (data) {
             console.log('data', data);
         });
 
         return;
     }
-    
-    
+
+
 
     /**
      * @method performAction
@@ -217,9 +217,10 @@ export class uSyncDefaultViewElement extends UmbLitElement{
 
             .action-buttons-box {
                 position: relative;
-               display: flex;
-               flex-wrap: wrap;
-               z-index: 100;
+                display: flex;
+                flex-wrap: wrap;
+                align-content: stretch;
+                z-index: 100;
             }        
 
             umb-empty-state {
