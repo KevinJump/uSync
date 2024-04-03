@@ -7,4 +7,6 @@ internal interface ISyncManagementCache
     List<uSyncAction> GetCachedActions(Guid id);
     Guid GetNewCacheId();
     bool IsValid(Guid id);
+
+    void Clear(Guid id);
 }

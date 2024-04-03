@@ -46,6 +46,10 @@ internal class uSyncManagementService : ISyncManagementService
         if (actionRequest.StepNumber >= handlers.Count)
         {
             var finalActions = _syncManagementCache.GetCachedActions(requestId);
+
+            // when complete we clean out our action cache.
+            _syncManagementCache.Clear(requestId);
+
             // finished. 
             return new PerformActionResponse
             {

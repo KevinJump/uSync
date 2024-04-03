@@ -40,4 +40,8 @@ internal class uSyncManagementCache : ISyncManagementCache
         _actionCache.TryAdd(id, existing);
     }
 
+    public void Clear(Guid id)
+    {
+        _actionCache.TryRemove(id, out _);  
+    }
 }
