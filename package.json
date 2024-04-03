@@ -5,10 +5,10 @@
   "private": "true",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1", 
-    "install-client": "cd ./uSync.Backoffice.Management.Client/Assets && npm install --force",
-    "watch-client": "cd ./uSync.Backoffice.Management.Client/Assets && npm run watch",
-    "build-client": "cd ./uSync.Backoffice.Management.Client/Assets && npm run build",
-    "generate-api": "cd ./uSync.Backoffice.Management.Client/Assets && npm run generate"
+    "install-client": "cd ./uSync.Backoffice.Management.Client/usync-assets && npm install --force",
+    "watch-client": "cd ./uSync.Backoffice.Management.Client/usync-assets && npm run watch",
+    "build-client": "cd ./uSync.Backoffice.Management.Client/usync-assets && npm run build",
+    "generate-api": "cd ./uSync.Backoffice.Management.Client/usync-assets && npm run generate"
   },
   "keywords": [],
   "author": "",

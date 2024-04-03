@@ -160,7 +160,7 @@ export class uSyncDefaultViewElement extends UmbLitElement{
     #renderActions() {
         var actions = this._actions?.map((group) => {
             return html`
-                <usync-action-box myName="fred"
+                <usync-action-box
                     .group="${group}"
                     .state=${this._buttonState}
                     @perform-action=${this.performAction}>
@@ -186,7 +186,6 @@ export class uSyncDefaultViewElement extends UmbLitElement{
                     </usync-icon-registry>
                     <umb-localize key="uSync_banner"></umb-localize>
                 </h2>
-    
             </umb-empty-state>
         `;
     }
@@ -217,8 +216,10 @@ export class uSyncDefaultViewElement extends UmbLitElement{
             }
 
             .action-buttons-box {
-               display: grid;
-               grid-template-columns: 1fr 1fr 1fr;
+                position: relative;
+               display: flex;
+               flex-wrap: wrap;
+               z-index: 100;
             }        
 
             umb-empty-state {
