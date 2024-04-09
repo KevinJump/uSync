@@ -500,8 +500,17 @@ namespace uSync.BackOffice.Services
 
                 var items = GetFolderItems(absPath, extension);
 
+                var localKeys = new List<Guid>();
+
                 foreach (var item in items)
                 {
+                    var itemKey = item.Value.Node.GetKey();
+                    if (localKeys.Contains(itemKey)) { 
+                        throw new Exception($"Duplicate: Item key {itemKey} already exists for {item.Key} - run uSync Health check for more info.");
+                    }
+
+                    localKeys.Add(itemKey);
+
                     if (elements.ContainsKey(item.Key))
                     {
                         // merge these files.
