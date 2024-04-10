@@ -193,7 +193,7 @@ namespace uSync.BackOffice.Configuration
         ///  use this if you are comfortable with the risks
         /// </remarks>
         [DefaultValue("false")]
-        public bool DisableNotificationSuppression { get; set; } = false;
+        public bool EnableNotificationSuppression { get; set; } = false;
 
         /// <summary>
         ///  trigger all the notifications in a background thread, 
