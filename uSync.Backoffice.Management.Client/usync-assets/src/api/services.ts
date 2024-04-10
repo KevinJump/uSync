@@ -3,7 +3,7 @@ import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
 import type { ActionsData, MigrationsData, SettingsData } from './models';
 
-export class ActionsResource {
+export class ActionsService {
 
 	/**
 	 * @returns unknown Success
@@ -36,7 +36,7 @@ export class ActionsResource {
 
 }
 
-export class MigrationsResource {
+export class MigrationsService {
 
 	/**
 	 * @returns unknown Success
@@ -52,7 +52,7 @@ export class MigrationsResource {
 
 }
 
-export class SettingsResource {
+export class SettingsService {
 
 	/**
 	 * @returns unknown Success

@@ -36,7 +36,7 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "watch": "vite build --watch",
-    "generate": "openapi-ts --input %npm_package_config_server%/%npm_package_config_swagger% --output src/api --debug true --enums typescript --lint true --postfixServices Resource --schemas false",
+    "generate": "openapi-ts --input %npm_package_config_server%/%npm_package_config_swagger% --output src/api --debug true --enums typescript --lint true --schemas false",
     "dist": "tsc && vite build --config ./vite.dist.config.ts && npm pack --pack-destination ./pack "
   },
   "dependencies": {
