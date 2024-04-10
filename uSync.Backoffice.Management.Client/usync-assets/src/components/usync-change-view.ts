@@ -9,10 +9,6 @@ import * as Diff from 'diff';
 @customElement('usync-change-view')
 export class uSyncChangeView extends UmbElementMixin(LitElement)  {
 
-    constructor() {
-        super();
-    }
-
     @property({type: Object})
     item : uSyncActionView | null | undefined = null;
 

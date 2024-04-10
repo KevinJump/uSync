@@ -1,7 +1,8 @@
-import { customElement, LitElement, css, html, property, nothing } from "@umbraco-cms/backoffice/external/lit";
+import { customElement, LitElement, css, html, property, nothing, state } from "@umbraco-cms/backoffice/external/lit";
 import { HandlerStatus, SyncHandlerSummary } from "../api";
 import { UmbElementMixin } from "@umbraco-cms/backoffice/element-api";
-import { ISyncUpdateMessage, USYNC_SIGNALR_CONTEXT_TOKEN } from "../signalr/signalr.context";
+import { USYNC_SIGNALR_CONTEXT_TOKEN } from "../signalr/signalr.context.token";
+import { ISyncUpdateMessage } from "../signalr/types";
 
 /**
  * @class uSyncProcessBox
@@ -9,7 +10,6 @@ import { ISyncUpdateMessage, USYNC_SIGNALR_CONTEXT_TOKEN } from "../signalr/sign
  */
 @customElement('usync-progress-box')
 export class uSyncProcessBox extends UmbElementMixin(LitElement) {
-
 
     constructor() {
         super();
@@ -27,10 +27,10 @@ export class uSyncProcessBox extends UmbElementMixin(LitElement) {
         });
     }
 
-    @property({type: Object})
+    @state()
     updateMsg : ISyncUpdateMessage | null = null;
 
-    @property({type: Object})
+    @state()
     addMsg : object = {};
 
 

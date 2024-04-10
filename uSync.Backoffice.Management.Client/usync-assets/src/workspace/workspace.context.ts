@@ -6,7 +6,7 @@ import { UmbControllerHost } from "@umbraco-cms/backoffice/controller-api";
 import { UmbControllerBase } from "@umbraco-cms/backoffice/class-api";
 import { SyncActionGroup, SyncHandlerSummary, SyncLegacyCheckResponse, uSyncActionView, uSyncHandlerSetSettings, uSyncSettings } from "../api";
 
-import uSyncSignalRContext, { USYNC_SIGNALR_CONTEXT_TOKEN } from "../signalr/signalr.context";
+import uSyncSignalRContext from "../signalr/signalr.context";
 import { UMB_WORKSPACE_CONTEXT, type UmbWorkspaceContextInterface } from "@umbraco-cms/backoffice/workspace";
 import { uSyncConstants } from "../constants";
 import { uSyncIconRegistry } from "../icons";
@@ -98,8 +98,7 @@ export class uSyncWorkspaceContext extends UmbControllerBase
         this.#uSyncIconRegistry.attach(this);
 
         this.#signalRContext = new uSyncSignalRContext(this);
-    }
-    
+    }    
 
     async getActions() {
         const { data } = await this.#repository.getActions();

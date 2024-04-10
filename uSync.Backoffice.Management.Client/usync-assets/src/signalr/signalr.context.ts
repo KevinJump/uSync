@@ -2,14 +2,10 @@ import { UmbControllerBase } from "@umbraco-cms/backoffice/class-api";
 import { UmbControllerHost } from "@umbraco-cms/backoffice/controller-api";
 
 import * as signalR from "@microsoft/signalr"
-import { UmbContextToken } from "@umbraco-cms/backoffice/context-api";
-import { UmbObjectState } from "@umbraco-cms/backoffice/observable-api";
 
-export interface ISyncUpdateMessage {
-    message: string;
-    count: number;
-    total: number;
-}
+import { UmbObjectState } from "@umbraco-cms/backoffice/observable-api";
+import { USYNC_SIGNALR_CONTEXT_TOKEN } from "./signalr.context.token";
+import { ISyncUpdateMessage } from "./types";
 
 export class uSyncSignalRContext extends UmbControllerBase {
 
@@ -68,6 +64,3 @@ export class uSyncSignalRContext extends UmbControllerBase {
 }
 
 export default uSyncSignalRContext;
-
-export const USYNC_SIGNALR_CONTEXT_TOKEN = 
-    new UmbContextToken<uSyncSignalRContext>(uSyncSignalRContext.name);

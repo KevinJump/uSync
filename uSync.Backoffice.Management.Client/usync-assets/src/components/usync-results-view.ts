@@ -27,11 +27,11 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
     @state()
     _changeCount  = 0;
 
-    _toggleShowAll() {
+    #toggleShowAll() {
         this._showAll = !this._showAll;
     }
 
-    async _openDetailsView(result: uSyncActionView) {
+    async #openDetailsView(result: uSyncActionView) {
 
         const detailsModal = this.#modalContext?.open(this, USYNC_DETAILS_MODAL, {
             data : {
@@ -92,7 +92,7 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
         <div class="result-header">
             <uui-toggle label="Show All" 
                 ?checked=${this._showAll}
-                @change=${this._toggleShowAll}></uui-toggle>
+                @change=${this.#toggleShowAll}></uui-toggle>
             ${count} items
         </div>`;
     }
@@ -100,7 +100,7 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
     renderDetailsButton(result: uSyncActionView) {
         return html`
             <uui-button look='default' color='positive' label='show details'
-                @click=${() => this._openDetailsView(result)}></uui-button>
+                @click=${() => this.#openDetailsView(result)}></uui-button>
         `;
     }
 
