@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 
 using Microsoft.Extensions.Logging;
-using Umbraco.Extensions;
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Models;
 using uSync.BackOffice.SyncHandlers;
@@ -92,7 +91,7 @@ internal class SyncActionService : ISyncActionService
             return options.Folders;
 
         if (!string.IsNullOrEmpty(options.Folder))
-            return options.Folder.AsEnumerableOfOne().ToArray();
+            return [options.Folder];
 
         return _uSyncConfig.GetFolders();
     }
