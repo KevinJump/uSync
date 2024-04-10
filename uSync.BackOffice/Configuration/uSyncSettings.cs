@@ -186,14 +186,11 @@ namespace uSync.BackOffice.Configuration
 
         /// <summary>
         ///  turns of use of the Notifications.Supress method, so notifications
-        ///  fire after every item is imported.
+        ///  are suppressed during the import
         /// </summary>
         /// <remarks>
-        ///  I am not sure this does what i think it does, it doesn't suppress
-        ///  then fire at the end , it just suppresses them all. 
-        ///  
-        ///  until we have had time to look at this , we will leave this as 
-        ///  disabled by default so all notification messages fire.
+        ///  this will result in no notifications being fired througout the import,
+        ///  use this if you are comfortable with the risks
         /// </remarks>
         [DefaultValue("false")]
         public bool DisableNotificationSuppression { get; set; } = false;
