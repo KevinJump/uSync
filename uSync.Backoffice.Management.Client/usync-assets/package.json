@@ -36,7 +36,7 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "watch": "vite build --watch",
-    "generate": "openapi --input %npm_package_config_server%/%npm_package_config_swagger% --output src/api --useOptions --postfixServices Resource",
+    "generate": "openapi-ts --input %npm_package_config_server%/%npm_package_config_swagger% --output src/api --debug true --enums typescript --lint true --postfixServices Resource --schemas false",
     "dist": "tsc && vite build --config ./vite.dist.config.ts && npm pack --pack-destination ./pack "
   },
   "dependencies": {
@@ -45,10 +45,10 @@
     "lit": "^3.1.0"
   },
   "devDependencies": {
+    "@hey-api/openapi-ts": "^0.37.3",
     "@types/diff": "^5.0.9",
     "@types/node": "^20.11.20",
     "@umbraco-cms/backoffice": "^14.0.0-beta002",
-    "openapi-typescript-codegen": "^0.25.0",
     "typescript": "^5.2.2",
     "vite": "^5.0.8",
     "vite-plugin-dts": "^3.7.3",
