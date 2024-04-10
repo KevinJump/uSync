@@ -180,4 +180,4 @@ export class uSyncWorkspaceContext extends UmbControllerBase
 export default uSyncWorkspaceContext;
 
 export const USYNC_CORE_CONTEXT_TOKEN =
-    new UmbContextToken<uSyncWorkspaceContext>(uSyncWorkspaceContext.name);
+    new UmbContextToken<uSyncWorkspaceContext>('uSyncWorkspaceContext');
