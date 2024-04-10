@@ -77,7 +77,7 @@ public partial class uSyncService
             }
 
             options.Callbacks?.Update?.Invoke(item.Node.GetAlias(),
-                CalculateProgress(index, total, options.ProgressMin, options.ProgressMax), 100);
+				CalculateProgress(index, total, options.ProgressMin, options.ProgressMax), 100);
 
             if (handlerPair != null)
             {
@@ -159,7 +159,7 @@ public partial class uSyncService
                             }
 
                             options.Callbacks?.Update?.Invoke(node.GetAlias(),
-                                CalculateProgress(index, total, options.ProgressMin, options.ProgressMax), 100);
+								CalculateProgress(index, total, options.ProgressMin, options.ProgressMax), 100);
 
                             if (handlerPair != null)
                             {
@@ -228,7 +228,7 @@ public partial class uSyncService
                             }
 
                             options.Callbacks?.Update?.Invoke($"Second Pass: {action.Name}",
-                                CalculateProgress(index, total, options.ProgressMin, options.ProgressMax), 100);
+								CalculateProgress(index, total, options.ProgressMin, options.ProgressMax), 100);
 
                             secondPassActions.AddRange(handlerPair.Handler.ImportSecondPass(action, handlerPair.Settings, options));
 
@@ -251,7 +251,7 @@ public partial class uSyncService
     /// </summary>
     public IEnumerable<uSyncAction> ImportPartialPostImport(IEnumerable<uSyncAction> actions, uSyncPagedImportOptions options)
     {
-        if (actions == null || !actions.Any()) return Enumerable.Empty<uSyncAction>();
+        if (actions == null || !actions.Any()) return [];
 
         lock (_importLock)
         {
@@ -307,7 +307,7 @@ public partial class uSyncService
     /// </summary>
     public IEnumerable<uSyncAction> ImportPostCleanFiles(IEnumerable<uSyncAction> actions, uSyncPagedImportOptions options)
     {
-        if (actions == null) return Enumerable.Empty<uSyncAction>();
+        if (actions == null) return [];
 
         lock (_importLock)
         {
@@ -349,8 +349,8 @@ public partial class uSyncService
         }
     }
 
-    private SyncHandlerOptions HandlerOptionsFromPaged(uSyncPagedImportOptions options)
-        => new SyncHandlerOptions(options.HandlerSet, options.UserId)
+    private static SyncHandlerOptions HandlerOptionsFromPaged(uSyncPagedImportOptions options)
+        => new(options.HandlerSet, options.UserId)
         {
             IncludeDisabled = options.IncludeDisabledHandlers
         };
@@ -360,7 +360,7 @@ public partial class uSyncService
     /// </summary>
     [Obsolete("use handler and multiple folder method will be removed in v15")]
     public IList<OrderedNodeInfo> LoadOrderedNodes(string folder)
-        => LoadOrderedNodes([folder]).ToList();
+        => LoadOrderedNodes([folder]);
 
     /// <summary>
     ///  Load the xml in a folder in level order so we process the higher level items first.
@@ -399,7 +399,7 @@ public partial class uSyncService
     /// </remarks>
     [Obsolete("use handler and multiple folder method will be removed in v15")]
     public IList<OrderedNodeInfo> LoadOrderedNodes(ISyncHandler handler, string handlerFolder)
-        => LoadOrderedNodes(handler, [handlerFolder]).ToList();
+        => LoadOrderedNodes(handler, [handlerFolder]);
 
     /// <summary>
     ///  load up ordered nodes from a handler folder, 
@@ -416,6 +416,6 @@ public partial class uSyncService
     /// <remarks>
     ///  for partial imports this allows the calling progress to smooth out the progress bar.
     /// </remarks>
-    private int CalculateProgress(int value, int total, int min, int max)
+    private static int CalculateProgress(int value, int total, int min, int max)
         => (int)(min + (((float)value / total) * (max - min)));
 }

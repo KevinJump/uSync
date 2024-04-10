@@ -85,9 +85,8 @@ public partial class uSyncService
     }
 
 
-    private string GetRelativePath(string root, string file)
+    private static string GetRelativePath(string root, string file)
     {
-
         var cleanRoot = CleanPathForZip(root);
         var cleanFile = CleanPathForZip(file);
 
@@ -97,11 +96,11 @@ public partial class uSyncService
         return cleanFile.Substring(cleanRoot.Length).TrimStart(Path.DirectorySeparatorChar);
     }
 
-    private string GetOSDependentPath(string file)
+    private static string GetOSDependentPath(string file)
         => file.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar)
             .Trim(Path.DirectorySeparatorChar);
 
-    private string CleanPathForZip(string path)
+    private static string CleanPathForZip(string path)
         => Path.GetFullPath(
             path.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar))
             .TrimEnd(Path.DirectorySeparatorChar);

@@ -217,7 +217,7 @@ public partial class uSyncService
     #endregion
 
     #region Importing
-    private static object _importLock = new object();
+    private static object _importLock = new();
 
     /// <summary>
     ///  Import items into Umbraco from a given folder
@@ -277,7 +277,7 @@ public partial class uSyncService
     public IEnumerable<uSyncAction> Import(string[] folders, bool force, IEnumerable<HandlerConfigPair> handlers, uSyncCallbacks? callbacks)
     {
         // if its blank, we just throw it back empty. 
-        if (handlers == null || !handlers.Any()) return Enumerable.Empty<uSyncAction>();
+        if (handlers == null || !handlers.Any()) return[];
 
         lock (_importLock)
         {
@@ -358,10 +358,10 @@ public partial class uSyncService
         }
     }
 
-    private static IEnumerable<uSyncAction> PerformPostImport(IEnumerable<HandlerConfigPair> handlers, IEnumerable<uSyncAction> actions)
+    private static List<uSyncAction> PerformPostImport(IEnumerable<HandlerConfigPair> handlers, IEnumerable<uSyncAction> actions)
     {
         var postImportActions = actions.Where(x => x.Success && x.Change > Core.ChangeType.NoChange && x.RequiresPostProcessing).ToList();
-        if (postImportActions.Count == 0) return Enumerable.Empty<uSyncAction>();
+        if (postImportActions.Count == 0) return [];
 
         var results = new List<uSyncAction>();
 

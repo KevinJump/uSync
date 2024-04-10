@@ -29,7 +29,7 @@ public partial class uSyncService
             Action = HandlerActions.Report
         });
 
-        if (handlerPair == null) return Enumerable.Empty<uSyncAction>();
+        if (handlerPair == null) return [];
         var folders = GetHandlerFolders(options.Folders, handlerPair.Handler);
 
         return handlerPair.Handler.Report(folders, handlerPair.Settings, options.Callbacks?.Update);
@@ -50,7 +50,7 @@ public partial class uSyncService
                     Action = HandlerActions.Import
                 });
 
-                if (handlerPair == null) return Enumerable.Empty<uSyncAction>();
+                if (handlerPair == null) return [];
                 var folders = GetHandlerFolders(options.Folders, handlerPair.Handler);
 
                 _logger.LogDebug("> Import Handler {handler}", handlerAlias);
@@ -107,7 +107,7 @@ public partial class uSyncService
             Action = HandlerActions.Export
         });
 
-        if (handlerPair == null) return Enumerable.Empty<uSyncAction>();
+        if (handlerPair == null) return [];
         var folders = GetHandlerFolders(options.Folders, handlerPair.Handler);
         return handlerPair.Handler.ExportAll(folders, handlerPair.Settings, options.Callbacks?.Update);
     }

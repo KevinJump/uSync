@@ -22,10 +22,10 @@ namespace uSync.BackOffice.Services;
 /// </summary>
 public class SyncFileService
 {
-    private readonly ILogger<SyncFileService> logger;
+    private readonly ILogger<SyncFileService> _logger;
     private readonly IHostEnvironment _hostEnvironment;
 
-    private static char[] _trimChars = [' ', Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar];
+    private static readonly char[] _trimChars = [' ', Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar];
 
     /// <summary>
     /// Constructor for File service (via DI)
@@ -35,7 +35,7 @@ public class SyncFileService
     public SyncFileService(ILogger<SyncFileService> logger,
                            IHostEnvironment hostEnvironment)
     {
-        this.logger = logger;
+        _logger = logger;
         _hostEnvironment = hostEnvironment;
     }
 
@@ -64,7 +64,7 @@ public class SyncFileService
     /// <summary>
     ///  clean up the local path, and full expand any short file names
     /// </summary>
-    private string CleanLocalPath(string path)
+    private static string CleanLocalPath(string path)
         => Path.GetFullPath(path.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar));
 
     /// <summary>
@@ -190,8 +190,8 @@ public class SyncFileService
     public void CreateFolder(string folder)
     {
         var absPath = GetAbsPath(folder);
-        if (!Directory.Exists(folder))
-            Directory.CreateDirectory(folder);
+        if (!Directory.Exists(absPath))
+            Directory.CreateDirectory(absPath);
     }
 
     /// <summary>
@@ -216,18 +216,15 @@ public class SyncFileService
     /// </summary>
     /// <param name="folder">path to the folder</param>
     /// <param name="extensions">list of extensions (filter)</param>
-    /// <param name="allFolders">get all files in all decentant folders</param>
+    /// <param name="allFolders">get all files in all descendant folders</param>
     /// <returns></returns>
     public IEnumerable<string> GetFiles(string folder, string extensions, bool allFolders)
     {
         var localPath = GetAbsPath(folder);
-        if (DirectoryExists(localPath))
-        {
-            return Directory.GetFiles(localPath, extensions, allFolders ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
-        }
 
-        return Enumerable.Empty<string>();
+        if (!DirectoryExists(localPath)) return [];
 
+        return Directory.GetFiles(localPath, extensions, allFolders ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
     }
 
     /// <summary>
@@ -236,12 +233,10 @@ public class SyncFileService
     public IEnumerable<string> GetDirectories(string folder)
     {
         var localPath = GetAbsPath(folder);
-        if (DirectoryExists(localPath))
-        {
-            return Directory.GetDirectories(localPath);
-        }
-
-        return Enumerable.Empty<string>();
+        if (!DirectoryExists(localPath)) return [];
+        
+        return Directory.GetDirectories(localPath);
+       
     }
 
     /// <summary>
@@ -263,7 +258,7 @@ public class SyncFileService
         }
         catch (Exception ex)
         {
-            logger.LogWarning("Error while reading in {file} {message}", file, ex.Message);
+            _logger.LogWarning("Error while reading in {file} {message}", file, ex.Message);
             throw new Exception($"Error while reading in {file}", ex);
         }
     }
@@ -273,7 +268,7 @@ public class SyncFileService
     /// </summary>
     public void SaveFile(string filename, Stream stream)
     {
-        logger.LogDebug("Saving File: {file}", filename);
+        _logger.LogDebug("Saving File: {file}", filename);
 
         using (Stream fileStream = OpenWrite(filename))
         {
@@ -289,7 +284,7 @@ public class SyncFileService
     public void SaveFile(string filename, string content)
     {
         var localFile = GetAbsPath(filename);
-        logger.LogDebug("Saving File: {local} [{length}]", localFile, content.Length);
+        _logger.LogDebug("Saving File: {local} [{length}]", localFile, content.Length);
 
         using (Stream stream = OpenWrite(localFile))
         {
@@ -361,7 +356,7 @@ public class SyncFileService
         catch (Exception ex)
         {
             // can happen when its locked, question is - do you care?
-            logger.LogWarning(ex, "Failed to remove directory {folder}", folder);
+            _logger.LogWarning(ex, "Failed to remove directory {folder}", folder);
             if (!safe) throw;
         }
     }
@@ -396,12 +391,10 @@ public class SyncFileService
     }
 
 
-    // TODO: this doesn't need to be public? 
-
     /// <summary>
     ///  Locking item for saves. 
     /// </summary>
-    public static object _saveLock = new object();
+    private static object _saveLock = new();
 
     /// <summary>
     ///  save an object to an XML file representing it.
@@ -460,13 +453,13 @@ public class SyncFileService
                     var filename = Path.GetFileName(file);
                     var filePath = GetShortFileName(file);
 
-                    if (!keys.ContainsKey(key))
+                    if (keys.TryGetValue(key, out string? value))
                     {
-                        keys[key] = filePath;
-                    }
+						errors.Add($"Clash {filePath} shares an id with {value}");
+					}
                     else
                     {
-                        errors.Add($"Clash {filePath} shares an id with {keys[key]}");
+						keys[key] = filePath;
                     }
                 }
             }
@@ -479,7 +472,7 @@ public class SyncFileService
         return errors;
     }
 
-    string GetShortFileName(string file)
+	static string GetShortFileName(string file)
         => $"{Path.DirectorySeparatorChar}{Path.GetFileName(Path.GetDirectoryName(file))}" +
         $"{Path.DirectorySeparatorChar}{Path.GetFileName(file)}";
 
@@ -513,10 +506,10 @@ public class SyncFileService
 
             foreach (var item in items)
             {
-                if (trackerBase is not null && elements.ContainsKey(item.Key))
+                if (trackerBase is not null && elements.TryGetValue(item.Key, out var value))
                 {
                     // merge these files.
-                    item.Value.SetNode(trackerBase.MergeFiles(elements[item.Key].Node, item.Value.Node));
+                    item.Value.SetNode(trackerBase.MergeFiles(value.Node, item.Value.Node));
                 }
 
                 elements[item.Key] = item.Value;
@@ -602,7 +595,7 @@ public class SyncFileService
     public bool AnyFolderExists(string[] folders)
         => folders.Any(DirectoryExists);
 
-    private string[] GetFilePaths(string folder, string extension)
+    private static string[] GetFilePaths(string folder, string extension)
         => Directory.GetFiles(folder, $"*.{extension}", SearchOption.AllDirectories);
 
     private XElement? LoadXElementSafe(string file)

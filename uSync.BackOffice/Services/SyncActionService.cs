@@ -173,7 +173,8 @@ internal class SyncActionService : ISyncActionService
         var fullPath = _syncFileService.GetAbsPath(folder);
         var fullRoot = _syncFileService.GetAbsPath(_uSyncConfig.GetRootFolder());
 
-        var rootParent = Path.GetDirectoryName(fullRoot.TrimEnd(new char[] { '/', '\\' }));
+        var rootParent = Path.GetDirectoryName(fullRoot.TrimEnd(['/', '\\']));
+        
         _logger.LogDebug("Import Folder: {fullPath} {rootPath} {fullRoot}", fullPath, rootParent, fullRoot);
 
         if (rootParent is not null && fullPath.StartsWith(rootParent))
