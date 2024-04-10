@@ -10,7 +10,7 @@ namespace uSync.Backoffice.Management.Api.Controllers.Migrations;
 [ApiExplorerSettings(GroupName = "Migrations")]
 public class uSyncMigrationController : uSyncControllerBase
 {
-    private ISyncLegacyService _legacyService;
+    private readonly ISyncLegacyService _legacyService;
 
     public uSyncMigrationController(ISyncLegacyService legacyService)
     {

@@ -23,10 +23,9 @@ public class ContentmentContentBlocks : SyncNestedJsonValueMapperBase, ISyncMapp
 
     public override string Name => "Contentment content block mapper";
 
-    public override string[] Editors => new string[]
-    {
+    public override string[] Editors => [
         "Umbraco.Community.Contentment.ContentBlocks"
-    };
+    ];
 
     protected override string ProcessValues(JsonObject jsonValue, string editorAlias, Func<JsonObject, IContentType, JsonObject> GetPropertiesMethod)
     {
@@ -51,11 +50,8 @@ public class ContentmentContentBlocks : SyncNestedJsonValueMapperBase, ISyncMapp
     {
         var stringValue = GetValueAs<string>(value);
 
-        if (stringValue.TryParseToJsonArray(out JsonArray? elements) is false || elements is null)
-            return Enumerable.Empty<uSyncDependency>();
-
-        if (elements == null || !elements.Any())
-            return Enumerable.Empty<uSyncDependency>();
+        if (stringValue.TryParseToJsonArray(out JsonArray? elements) is false || elements is null) return [];
+        if (elements == null || elements.Count == 0) return [];
 
         var dependencies = new List<uSyncDependency>();
 

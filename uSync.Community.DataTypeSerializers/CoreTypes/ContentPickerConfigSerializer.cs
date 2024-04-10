@@ -14,7 +14,7 @@ public class ContentPickerConfigSerializer : SyncDataTypeSerializerBase, IConfig
 
     public string Name => "ContentPickerNodeSerializer";
 
-    public string[] Editors => new string[] { "Umbraco.ContentPicker" };
+    public string[] Editors => [ "Umbraco.ContentPicker" ];
 
     public override IDictionary<string, object> GetConfigurationExport(IDictionary<string, object> configuration)
     {

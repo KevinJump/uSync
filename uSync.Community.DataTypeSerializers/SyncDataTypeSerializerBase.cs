@@ -48,7 +48,7 @@ public abstract class SyncDataTypeSerializerBase : ConfigurationSerializerBase
 
     protected virtual Udi? PathToUdi(string entityPath)
     {
-        if (entityPath.IndexOf(':') == -1) return null;
+        if (!entityPath.Contains(':')) return null;
 
         var entityType = entityPath.Substring(0, entityPath.IndexOf(':'));
         var objectType = UdiEntityTypeHelper.ToUmbracoObjectType(entityType);

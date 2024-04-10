@@ -18,20 +18,17 @@ public class uSyncActionsController : uSyncControllerBase
     {
         var defaultButtons = new List<SyncActionButton>
         {
-            new SyncActionButton
-            {
+            new() {
                 Key = HandlerActions.Report.ToString(),
                 Look = "secondary",
                 Color = "positive"
             },
-            new SyncActionButton
-            {
+            new() {
                 Key = HandlerActions.Import.ToString(),
                 Look = "primary",
                 Color = "positive"
             },
-            new SyncActionButton
-            {
+            new() {
                 Key = HandlerActions.Export.ToString(),
                 Look = "primary",
                 Color = "default"

@@ -19,11 +19,11 @@ namespace uSync8.Community.Contrib.Mappers;
 /// </summary>
 /// <remarks>
 ///  <para>
-///   In genral for Umbraco 8 we don't need Value mappers, because
+///   In general for Umbraco 8 we don't need Value mappers, because
 ///   everything is Guid based
 ///  </para>
 ///  <para>
-///   More relavent are the dependency finding functions, as these
+///   More relevant are the dependency finding functions, as these
 ///   will help uSync.Publisher / Exporter find out what linked
 ///   media/content and doctypes are needed to render your DTGE 
 ///   in another site. 
@@ -40,7 +40,7 @@ public class DocTypeGridMapper : SyncNestedValueMapperBase, ISyncMapper
 {
     private readonly string docTypeAliasValue = "dtgeContentTypeAlias";
 
-    private readonly ILogger<DocTypeGridMapper> logger;
+    private readonly ILogger<DocTypeGridMapper> _logger;
 
     public DocTypeGridMapper(IEntityService entityService,
         Lazy<SyncValueMapperCollection> mapperCollection,
@@ -49,12 +49,12 @@ public class DocTypeGridMapper : SyncNestedValueMapperBase, ISyncMapper
         ILogger<DocTypeGridMapper> logger)
         : base(entityService, mapperCollection, contentTypeService, dataTypeService)
     {
-        this.logger = logger;
+        this._logger = logger;
     }
 
     public override string Name => "DocType Grid Mapper";
 
-    public override string[] Editors => new string[] { "Umbraco.Grid.docType", "Umbraco.Grid.doctypegrideditor" };
+    public override string[] Editors => [ "Umbraco.Grid.docType", "Umbraco.Grid.doctypegrideditor" ];
 
     /// <summary>
     ///  Get any formatted export values. 
@@ -74,11 +74,11 @@ public class DocTypeGridMapper : SyncNestedValueMapperBase, ISyncMapper
         var docType = GetDocType(jsonValue, this.docTypeAliasValue);
         if (docType == null) return value.ToString() ?? string.Empty;
 
-        // jarray of values 
+        // JArray of values 
         var docValue = jsonValue.GetPropertyAsObject("value");
         if (docValue == null) return value.ToString() ?? string.Empty;
 
-        // the doctypegrid editor wants the values in "real" json
+        // the docTypeGrid editor wants the values in "real" json
         // as opposed to quite a few of these properties that 
         // have it in 'escaped' json. so slightly different 
         // then a nested content, but not by much.
@@ -118,11 +118,11 @@ public class DocTypeGridMapper : SyncNestedValueMapperBase, ISyncMapper
             var docType = GetDocType(jsonValue, this.docTypeAliasValue);
             if (docType == null) return value.ToString();
 
-            // jarray of values 
+            // JArray of values 
             var docValue = jsonValue.GetPropertyAsObject("value");
             if (docValue == null) return value.ToString();
 
-            // the doctypegrid editor wants the values in "real" json
+            // the docTypeGridEditor wants the values in "real" json
             // as opposed to quite a few of these properties that 
             // have it in 'escaped' json. so slightly different 
             // then a nested content, but not by much.
@@ -133,8 +133,8 @@ public class DocTypeGridMapper : SyncNestedValueMapperBase, ISyncMapper
         catch (Exception ex)
         {
             // we want to be quite non-destructive on an import, 
-            logger.LogWarning(ex, "Failed to sanitize the import value for property (turn on debugging for full property value)");
-            logger.LogDebug("Failed DocTypeValue: {value}", value ?? String.Empty);
+            _logger.LogWarning(ex, "Failed to sanitize the import value for property (turn on debugging for full property value)");
+            _logger.LogDebug("Failed DocTypeValue: {value}", value ?? String.Empty);
 
             return value;
         }
@@ -165,16 +165,16 @@ public class DocTypeGridMapper : SyncNestedValueMapperBase, ISyncMapper
     public override IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)
     {
         var jsonValue = GetJsonValue(value);
-        if (value == null || jsonValue == null) return Enumerable.Empty<uSyncDependency>();
+        if (value == null || jsonValue == null) return [];
 
         var docValue = jsonValue.GetPropertyAsObject("value");
         var docTypeAlias = jsonValue.GetPropertyAsString(this.docTypeAliasValue);
-        if (docValue == null || docTypeAlias == null) return Enumerable.Empty<uSyncDependency>();
+        if (docValue == null || docTypeAlias == null) return [];
 
         var docType = GetDocType(docTypeAlias);
-        if (docType == null) return Enumerable.Empty<uSyncDependency>();
+        if (docType == null) return [];
 
-        List<uSyncDependency> dependencies = new List<uSyncDependency>();
+        List<uSyncDependency> dependencies = [];
 
         if (flags.HasFlag(DependencyFlags.IncludeDependencies))
         {

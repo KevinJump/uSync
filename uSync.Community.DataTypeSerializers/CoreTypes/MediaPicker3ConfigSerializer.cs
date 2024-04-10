@@ -14,7 +14,7 @@ public class MediaPicker3ConfigSerializer : SyncDataTypeSerializerBase, IConfigu
 
     public string Name => "MediaPicker3NodeSerializer";
 
-    public string[] Editors => new string[] { "Umbraco.MediaPicker3" };
+    public string[] Editors => ["Umbraco.MediaPicker3" ];
 
     public override IDictionary<string, object> GetConfigurationImport(IDictionary<string, object> configuration)
     {
