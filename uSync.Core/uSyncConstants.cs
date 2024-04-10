@@ -53,6 +53,8 @@
 
             public const string RelationType = "RelationType";
             public const string Relation = "Relation";
+
+            public const string Webhook = "Webhook";
         }
 
         /// <summary>

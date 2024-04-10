@@ -166,6 +166,9 @@ namespace uSync.BackOffice
             builder.AddNotificationHandler<TemplateSavedNotification, TemplateHandler>();
             builder.AddNotificationHandler<TemplateDeletedNotification, TemplateHandler>();
 
+            builder.AddNotificationHandler<WebhookSavedNotification, WebhookHandler>();
+            builder.AddNotificationHandler<WebhookDeletedNotification, WebhookHandler>();
+
             // roots - pre-notifications for stopping things
             builder
                 .AddNotificationHandler<ContentTypeSavingNotification, ContentTypeHandler>()
@@ -202,7 +205,10 @@ namespace uSync.BackOffice
                 .AddNotificationHandler<MacroDeletingNotification, MacroHandler>()
 
                 .AddNotificationHandler<TemplateSavingNotification, TemplateHandler>()
-                .AddNotificationHandler<TemplateDeletingNotification, TemplateHandler>();
+                .AddNotificationHandler<TemplateDeletingNotification, TemplateHandler>()
+                
+                .AddNotificationHandler<WebhookSavingNotification, WebhookHandler>()
+                .AddNotificationHandler<WebhookDeletingNotification, WebhookHandler>();
 
 
             // content ones
