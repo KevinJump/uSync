@@ -96,7 +96,7 @@ export class uSyncDefaultViewElement extends UmbLitElement {
             this.observe(_instance.legacy, (_legacy) => {
                 this._legacy = _legacy;
                 if (this._legacy?.hasLegacy) {
-                    this.openLegacyModal();
+                    this.#openLegacyModal();
                 }
             })
 
@@ -111,7 +111,7 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 
     _legacyDialogOpened: boolean = false;
 
-    async openLegacyModal() {
+    async #openLegacyModal() {
 
         if (this._legacyDialogOpened) return;
         this._legacyDialogOpened = true;
@@ -134,7 +134,7 @@ export class uSyncDefaultViewElement extends UmbLitElement {
      * @param {CustomEventInit} event 
      * @description do a thing, (report, import, export)
      */
-    performAction(event: CustomEventInit) {
+    #performAction(event: CustomEventInit) {
         this._showProgress = true;
         this._group = event.detail.group;
         this.#actionContext?.performAction(event.detail.group, event.detail.key);
@@ -163,7 +163,7 @@ export class uSyncDefaultViewElement extends UmbLitElement {
                 <usync-action-box
                     .group="${group}"
                     .state=${this._buttonState}
-                    @perform-action=${this.performAction}>
+                    @perform-action=${this.#performAction}>
                 </usync-action-box>
             `;
         })

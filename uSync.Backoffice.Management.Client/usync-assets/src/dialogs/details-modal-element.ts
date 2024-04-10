@@ -6,7 +6,7 @@ import { customElement, html } from "@umbraco-cms/backoffice/external/lit";
 export class uSyncDetailsModalElement extends
     UmbModalBaseElement<uSyncDetailsModalData, uSyncDetailsModalValue> {
 
-    handleClose() {
+    #onClose() {
 		this.modalContext?.reject();
 	}
 
@@ -19,11 +19,12 @@ export class uSyncDetailsModalElement extends
                     <usync-change-view .item=${this.data?.item}></usync-change-view>
                 </uui-box>
                 <div slot="actions">
-                        <uui-button 
-                            id="cancel"
-                            label="Close"
-                            @click="${this.handleClose}">Close</uui-button>
-                    </div>
+                    <uui-button 
+                        id="cancel"
+                        label="Close"
+                        @click="${this.#onClose}"
+                    >Close</uui-button>
+                </div>
             </umb-body-layout>
         `;
     }

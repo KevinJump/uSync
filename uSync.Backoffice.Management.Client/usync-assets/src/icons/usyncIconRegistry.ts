@@ -12,8 +12,6 @@ export class uSyncIconRegistry extends UUIIconRegistry {
 
     protected acceptIcon(iconName: string): boolean {
 
-        console.log('icon-registry', icons, iconName);
-
         const iconManifest = icons.find((i) => i.name === iconName);
         if (!iconManifest) return false;
 

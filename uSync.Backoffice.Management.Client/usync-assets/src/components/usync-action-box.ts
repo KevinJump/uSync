@@ -21,7 +21,7 @@ export class uSyncActionBox extends LitElement {
     @property({type: String})
     state: UUIButtonState | undefined = undefined;
 
-    private _handleClick(group: SyncActionGroup, button: SyncActionButton) {
+    #onClick(group: SyncActionGroup, button: SyncActionButton) {
         this.dispatchEvent(new CustomEvent('perform-action', {
             detail: {
                 group: group,
@@ -38,7 +38,7 @@ export class uSyncActionBox extends LitElement {
                     color=${<UUIInterfaceColor>i.color}
                     look=${<UUIInterfaceLook>i.look}
                     state=${ifDefined(this.state)}
-                    @click=${() => this._handleClick(this.group, i)}
+                    @click=${() => this.#onClick(this.group, i)}
                     ></uui-button>
             `;
         });

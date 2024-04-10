@@ -16,7 +16,7 @@ export class uSyncWorkspaceRootElement extends UmbElementMixin(LitElement) {
         this.#workspaceContext = new uSyncWorkspaceContext(this);
 
         this.observe(this.#workspaceContext.completed, (_completed) => {
-            console.log('completed', _completed);
+            // console.log('completed', _completed);
         });
     }
 

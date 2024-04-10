@@ -97,12 +97,7 @@ export class uSyncWorkspaceContext extends UmbControllerBase
         this.#uSyncIconRegistry = new uSyncIconRegistry();
         this.#uSyncIconRegistry.attach(this);
 
-        this.consumeContext(USYNC_SIGNALR_CONTEXT_TOKEN, (_signalr) => {
-            console.log('signalr', _signalr.getClientId());
-            this.#signalRContext = _signalr;
-        });
-
-
+        this.#signalRContext = new uSyncSignalRContext(this);
     }
     
 

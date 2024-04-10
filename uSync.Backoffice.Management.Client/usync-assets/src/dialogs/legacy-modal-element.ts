@@ -11,7 +11,7 @@ export class uSyncLegacyModalElement extends
     //     console.log('dialog addhost');
     // }
 
-    #handleClose() {
+    #onClose() {
         this.modalContext?.reject();
     }
 
@@ -25,7 +25,7 @@ export class uSyncLegacyModalElement extends
                     ${this.renderCopy()}
                 </div>
                 <div slot="actions">
-                    <uui-button id="cancel" label="close" @click=${this.#handleClose}>Close</uui-button>
+                    <uui-button id="cancel" label="close" @click=${this.#onClose}>Close</uui-button>
                 </div>
             </umb-body-layout>
         `;

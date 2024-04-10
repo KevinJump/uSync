@@ -8,13 +8,13 @@ import { USYNC_DETAILS_MODAL } from "../dialogs/details-modal-token";
 @customElement('usync-results')
 export class uSyncResultsView extends UmbElementMixin(LitElement) {
 
-    private _modalContext? : UmbModalManagerContext;
+    #modalContext? : UmbModalManagerContext;
 
     constructor() {
         super();
 
         this.consumeContext(UMB_MODAL_MANAGER_CONTEXT, (_instance) => {
-            this._modalContext = _instance;
+            this.#modalContext = _instance;
         });
     }
 
@@ -33,7 +33,7 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
 
     async _openDetailsView(result: uSyncActionView) {
 
-        const detailsModal = this._modalContext?.open(this, USYNC_DETAILS_MODAL, {
+        const detailsModal = this.#modalContext?.open(this, USYNC_DETAILS_MODAL, {
             data : {
                 item: result
             }

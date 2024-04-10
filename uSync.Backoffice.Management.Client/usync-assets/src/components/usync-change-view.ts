@@ -40,7 +40,7 @@ export class uSyncChangeView extends UmbElementMixin(LitElement)  {
         `;
     }
 
-    _getJsonOrString(value: string | null | undefined) {
+    #getJsonOrString(value: string | null | undefined) {
 
         try { 
             return JSON.stringify(JSON.parse(value ?? ''), null, 1);
@@ -54,8 +54,8 @@ export class uSyncChangeView extends UmbElementMixin(LitElement)  {
         
         var changesHtml = this.item?.details.map((detail) => {
 
-            const oldValue = this._getJsonOrString(detail.oldValue);
-            const newValue = this._getJsonOrString(detail.newValue);
+            const oldValue = this.#getJsonOrString(detail.oldValue);
+            const newValue = this.#getJsonOrString(detail.newValue);
             const changes = Diff.diffWords(oldValue, newValue);
 
             const changeHtml = changes.map((change : any) => {
