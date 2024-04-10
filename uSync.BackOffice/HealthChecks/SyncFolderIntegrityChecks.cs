@@ -68,7 +68,7 @@ public class SyncFolderIntegrityChecks : HealthCheck
 
         if (clashes.Count > 0)
         {
-            return new HealthCheckStatus($"There are {clashes.Count} clashe(s) where files share the same keys")
+            return new HealthCheckStatus($"There are {clashes.Count} clash(es) where files share the same keys")
             {
                 Description = "<p>There are multiple clashes where items of the same type share the same keys.</p>" +
                 $"<ul>{string.Join("", clashes)}</ul>" +
@@ -85,7 +85,7 @@ public class SyncFolderIntegrityChecks : HealthCheck
         }
     }
 
-    private List<string> CheckFolder(string folder)
+    private static List<string> CheckFolder(string folder)
     {
         var _keys = new Dictionary<Guid, string>();
 
@@ -106,15 +106,15 @@ public class SyncFolderIntegrityChecks : HealthCheck
                     var folderName = Path.GetFileName(Path.GetDirectoryName(file));
                     var fileName = Path.GetFileName(file);
 
-                    var filepath = $"\\{folderName}\\{fileName}";
+                    var filePath = $"\\{folderName}\\{fileName}";
 
-                    if (!_keys.ContainsKey(key))
+                    if (_keys.TryGetValue(key, out string? value))
                     {
-                        _keys[key] = filepath;
-                    }
-                    else
+						clashes.Add($"<li>Clash [{filePath}] shares an id with [{value}]</li>");
+					}
+					else
                     {
-                        clashes.Add($"<li>Clash [{filepath}] shares an id with [{_keys[key]}]</li>");
+						_keys[key] = filePath;
                     }
                 }
             }
@@ -140,7 +140,7 @@ public class SyncFolderIntegrityChecks : HealthCheck
             };
         }
 
-        List<string> errors = new List<string>();
+        List<string> errors = [];
 
         foreach (var file in Directory.GetFiles(root, "*.config", SearchOption.AllDirectories))
         {
@@ -158,7 +158,7 @@ public class SyncFolderIntegrityChecks : HealthCheck
         {
             return new HealthCheckStatus($"There are {errors.Count} Invalid .config files in the uSync folder")
             {
-                Description = "<p>Some .config files are not valid xml, and will likey cause problems for a sync</p>" +
+                Description = "<p>Some .config files are not valid xml, and will likely cause problems for a sync</p>" +
                 $"<ul>{string.Join("", errors)}</ul>",
                 ResultType = StatusResultType.Error
             };

@@ -22,7 +22,7 @@ public class SyncHub : Hub<ISyncHub>
 }
 
 /// <summary>
-///  Iterface for the ISyncHub
+///  Interface for the ISyncHub
 /// </summary>
 public interface ISyncHub
 {
@@ -31,5 +31,5 @@ public interface ISyncHub
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
-    Task refreshed(int id);
+    Task Refreshed(int id);
 }

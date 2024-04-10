@@ -129,13 +129,6 @@ public class uSyncSettings
     public IDictionary<string, string> CustomMappings { get; set; } = new Dictionary<string, string>();
 
     /// <summary>
-    /// location of SignalR hub script
-    /// </summary>
-    [DefaultValue("")]
-    [Obsolete("Will remove the option to move the route in v13")]
-    public string SignalRRoot { get; set; } = string.Empty;
-
-    /// <summary>
     /// Should the history view be on of off ? 
     /// </summary>
     [DefaultValue(true)]
@@ -160,13 +153,13 @@ public class uSyncSettings
     public string FirstBootGroup { get; set; } = "All";
 
     /// <summary>
-    /// Disable the default dashboard (so people can't accedently press the buttons).
+    /// Disable the default dashboard (so people can't accidently press the buttons).
     /// </summary>
     [DefaultValue("false")]
     public bool DisableDashboard { get; set; } = false;
 
     /// <summary>
-    ///  summerize results (for when there are loads and loads of items)
+    ///  summarize results (for when there are loads and loads of items)
     /// </summary>
     [DefaultValue("false")]
     public bool SummaryDashboard { get; set; } = false;

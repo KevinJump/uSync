@@ -11,7 +11,7 @@ namespace uSync.BackOffice.Models;
 public class SyncProgressSummary
 {
     /// <summary>
-    ///  current count (progress) of where we are upto.
+    ///  current count (progress) of where we are up to.
     /// </summary>
     public int Count { get; set; }
 
@@ -55,7 +55,11 @@ public class SyncProgressSummary
         int totalSteps)
         : this(message, totalSteps)
     {
-        if (handlers != null)
+        if (handlers == null)
+        {
+            this.Handlers = [];
+        }
+        else
         {
             this.Handlers = handlers.Select(x => new SyncHandlerSummary()
             {
@@ -63,10 +67,6 @@ public class SyncProgressSummary
                 Name = x.Name,
                 Status = HandlerStatus.Pending
             }).ToList();
-        }
-        else
-        {
-            this.Handlers = new List<SyncHandlerSummary>();
         }
     }
 

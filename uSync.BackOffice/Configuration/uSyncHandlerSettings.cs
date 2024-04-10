@@ -20,7 +20,7 @@ public class HandlerSettings
     /// <summary>
     /// List of actions the handler is configured for. 
     /// </summary>
-    public string[] Actions { get; set; } = Array.Empty<string>();
+    public string[] Actions { get; set; } = [];
 
     /// <summary>
     /// Should use a flat folder structure when exporting items
@@ -35,7 +35,7 @@ public class HandlerSettings
     public bool GuidNames { get; set; } = false;
 
     /// <summary>
-    /// Imports should fail if the parent item is missing (if false, item be importated go a close as possible to location)
+    /// Imports should fail if the parent item is missing (if false, item be imported go a close as possible to location)
     /// </summary>
     [DefaultValue(false)]
     public bool FailOnMissingParent { get; set; } = false;
@@ -60,7 +60,8 @@ public class HandlerSettings
 
     // TODO: v13 - change this to string, object settings collection. 
     //             makes for better intellisense from schema.
-    public Dictionary<string, string> Settings { get; set; } = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
+    public Dictionary<string, string> Settings { get; set; } 
+        = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
 }
 
 /// <summary>
@@ -78,9 +79,9 @@ public static class HandlerSettingsExtensions
     /// <returns></returns>
     public static TResult GetSetting<TResult>(this HandlerSettings settings, string key, TResult defaultValue)
     {
-        if (settings.Settings != null && settings.Settings.ContainsKey(key))
+        if (settings.Settings != null && settings.Settings.TryGetValue(key, out string? value))
         {
-            var attempt = settings.Settings[key].TryConvertTo<TResult>();
+            var attempt = value.TryConvertTo<TResult>();
             if (attempt) return attempt.Result ?? defaultValue;
         }
 
@@ -95,8 +96,7 @@ public static class HandlerSettingsExtensions
     /// <param name="value"></param>
     public static void AddSetting<TObject>(this HandlerSettings settings, string key, TObject value)
     {
-        if (settings.Settings == null)
-            settings.Settings = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
+        settings.Settings ??= new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
 
         settings.Settings.TryAdd(key, value?.ToString() ?? string.Empty);
     }

@@ -11,16 +11,16 @@ namespace uSync.BackOffice.Hubs;
 /// </summary>
 public class HubClientService
 {
-    private readonly IHubContext<SyncHub> hubContext;
-    private readonly string clientId;
+    private readonly IHubContext<SyncHub> _hubContext;
+    private readonly string _clientId;
 
     /// <summary>
     /// Construct an new HubClientService (via DI)
     /// </summary>
     public HubClientService(IHubContext<SyncHub> hubContext, string clientId)
     {
-        this.hubContext = hubContext;
-        this.clientId = clientId;
+        this._hubContext = hubContext;
+        this._clientId = clientId;
     }
 
     /// <summary>
@@ -28,16 +28,16 @@ public class HubClientService
     /// </summary>
     public void SendMessage<TObject>(TObject item)
     {
-        if (hubContext != null && !string.IsNullOrWhiteSpace(clientId))
+        if (_hubContext != null && !string.IsNullOrWhiteSpace(_clientId))
         {
-            var client = hubContext.Clients.Client(clientId);
+            var client = _hubContext.Clients.Client(_clientId);
             if (client != null)
             {
                 client.SendAsync("Add", item).Wait();
                 return;
             }
 
-            hubContext.Clients.All.SendAsync("Add", item).Wait();
+            _hubContext.Clients.All.SendAsync("Add", item).Wait();
         }
     }
 
@@ -46,16 +46,13 @@ public class HubClientService
     /// </summary>
     public void SendUpdate(Object message)
     {
-        if (hubContext != null && !string.IsNullOrWhiteSpace(clientId))
-        {
-            var client = hubContext.Clients.Client(clientId);
-            if (client != null)
-            {
-                client.SendAsync("Update", message).Wait();
-                return;
-            }
-            hubContext.Clients.All.SendAsync("Update", message).Wait();
-        }
+        if (_hubContext == null || string.IsNullOrWhiteSpace(_clientId)) return;
+
+        var client = _hubContext.Clients.Client(_clientId);
+        if (client == null) return;
+        
+        client.SendAsync("Update", message).Wait();
+        return;       
     }
 
     /// <summary>
@@ -83,6 +80,5 @@ public class HubClientService
     ///  get the uSync callbacks for this connection
     /// </summary>
     /// <returns></returns>
-    public uSyncCallbacks Callbacks() =>
-        new uSyncCallbacks(this.PostSummary, this.PostUpdate);
+    public uSyncCallbacks Callbacks() => new(this.PostSummary, this.PostUpdate);
 }

@@ -22,8 +22,8 @@ public class FirstBootMigrationPlan : MigrationPlan
         : base("uSync_FirstBoot")
     {
         From(string.Empty)
-                .To<FirstBootMigration>("FirstBoot-Migration");
-                // .To<LogViewerMigration>("Logviewer-Migration");
+                .To<FirstBootMigration>("FirstBoot-Migration")
+                .To<LogViewerMigration>("LogViewer-Migration");                
     }
 }
 
@@ -54,43 +54,46 @@ public class FirstBootMigration : MigrationBase
     /// <inheritdoc/>
     protected override void Migrate()
     {
+        // TODO: doesn't work in the betas. might need a new migration to add it.
+        return;
+
         // first boot migration. 
-        try
-        {
+        //try
+        //{
 
-            if (!_uSyncConfig.Settings.ImportOnFirstBoot)
-                return;
+        //    if (!_uSyncConfig.Settings.ImportOnFirstBoot)
+        //        return;
 
-            var sw = Stopwatch.StartNew();
-            var changes = 0;
+        //    var sw = Stopwatch.StartNew();
+        //    var changes = 0;
 
-            _logger.LogInformation("Import on First-boot Set - will import {group} handler groups",
-                _uSyncConfig.Settings.FirstBootGroup);
+        //    _logger.LogInformation("Import on First-boot Set - will import {group} handler groups",
+        //        _uSyncConfig.Settings.FirstBootGroup);
 
-            // if config service is set to import on first boot then this 
-            // will let uSync do a first boot import 
+        //    // if config service is set to import on first boot then this 
+        //    // will let uSync do a first boot import 
 
-            // not sure about context on migrations so will need to test
-            // or maybe we fire something into a notification (or use a static)
+        //    // not sure about context on migrations so will need to test
+        //    // or maybe we fire something into a notification (or use a static)
 
-            using (var reference = _umbracoContextFactory.EnsureUmbracoContext())
-            {
-                var results = _uSyncService.Import(_uSyncConfig.GetFolders(), false, new SyncHandlerOptions
-                {
-                    Group = _uSyncConfig.Settings.FirstBootGroup
-                }, null);
+        //    using (var reference = _umbracoContextFactory.EnsureUmbracoContext())
+        //    {
+        //        var results = _uSyncService.Import(_uSyncConfig.GetFolders(), false, new SyncHandlerOptions
+        //        {
+        //            Group = _uSyncConfig.Settings.FirstBootGroup
+        //        }, null);
 
-                changes = results.CountChanges();
-            };
+        //        changes = results.CountChanges();
+        //    };
 
-            sw.Stop();
-            _logger.LogInformation("uSync First boot complete {changes} changes in ({time}ms)",
-                changes, sw.ElapsedMilliseconds);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "uSync First boot failed {message}", ex.Message);
-            throw;
-        }
+        //    sw.Stop();
+        //    _logger.LogInformation("uSync First boot complete {changes} changes in ({time}ms)",
+        //        changes, sw.ElapsedMilliseconds);
+        //}
+        //catch (Exception ex)
+        //{
+        //    _logger.LogError(ex, "uSync First boot failed {message}", ex.Message);
+        //    throw;
+        //}
     }
 }

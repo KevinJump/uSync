@@ -13,7 +13,7 @@ namespace uSync.BackOffice.Legacy;
 /// </summary>
 internal class SyncLegacyService : ISyncLegacyService
 {
-    private static string[] _legacyFolders = [
+    private static readonly string[] _legacyFolders = [
         "~/uSync/v13",
         "~/uSync/v12",
         "~/uSync/v11",
@@ -21,7 +21,7 @@ internal class SyncLegacyService : ISyncLegacyService
         "~/uSync/v9"
     ];
 
-    private static Dictionary<string, string> _legacyTypes = new(StringComparer.OrdinalIgnoreCase)
+    private static readonly Dictionary<string, string> _legacyTypes = new(StringComparer.OrdinalIgnoreCase)
     {
         { SyncLegacyTypes.NestedContent, "Nested Content" },
         { SyncLegacyTypes.OurNestedContent, "Nested Content (Community version)" },
@@ -72,9 +72,9 @@ internal class SyncLegacyService : ISyncLegacyService
                     ?.Element("EditorAlias").ValueOrDefault(string.Empty);
             if (string.IsNullOrEmpty(type)) continue;
 
-            if (_legacyTypes.ContainsKey(type))
+            if (_legacyTypes.TryGetValue(type, out string? value))
             {
-                discoveredLegacyTypes.Add(_legacyTypes[type]);
+                discoveredLegacyTypes.Add(value);
             }
         }
 

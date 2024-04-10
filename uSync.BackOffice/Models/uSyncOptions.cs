@@ -26,7 +26,7 @@ public class uSyncOptions
     public bool Clean { get; set; }
 
     /// <summary>
-    /// Name of the handler group to perfom the actions on
+    /// Name of the handler group to perform the actions on
     /// </summary>
     [DataMember(Name = "group")]
     public string Group { get; set; } = string.Empty;

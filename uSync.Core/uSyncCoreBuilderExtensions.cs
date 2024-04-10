@@ -19,15 +19,15 @@ public static class uSyncCoreBuilderExtensions
     ///  Adds uSyncCore to project. 
     /// </summary>
     /// <remarks>
-    ///  uSyncCore does not usally need to be registerd seperatly from 
-    ///  uSync. unless you are using core features but not backoffice (files, handler) features
+    ///  uSyncCore does not usually need to be registered separately from 
+    ///  uSync. unless you are using core features but not Backoffice (files, handler) features
     /// </remarks>
     /// <param name="builder"></param>
     /// <returns></returns>
 
     public static IUmbracoBuilder AdduSyncCore(this IUmbracoBuilder builder)
     {
-        // TODO: Check this - in theory, if SyncEnityCache is already registered we don't run again.
+        // TODO: Check this - in theory, if SyncEntityCache is already registered we don't run again.
         if (builder.Services.FirstOrDefault(x => x.ServiceType == typeof(SyncEntityCache)) != null)
             return builder;
 
@@ -46,7 +46,7 @@ public static class uSyncCoreBuilderExtensions
         builder.WithCollectionBuilder<SyncValueMapperCollectionBuilder>()
             .Add(() => builder.TypeLoader.GetTypes<ISyncMapper>());
 
-        // serializers - turn umbraco objects into / from xml in memeory. 
+        // serializers - turn umbraco objects into / from xml in memory. 
         builder.WithCollectionBuilder<SyncSerializerCollectionBuilder>()
             .Add(builder.TypeLoader.GetTypes<ISyncSerializerBase>());
 

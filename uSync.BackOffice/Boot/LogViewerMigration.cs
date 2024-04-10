@@ -7,7 +7,7 @@ using Umbraco.Cms.Infrastructure.Migrations;
 namespace uSync.BackOffice.Boot;
 internal class LogViewerMigration : MigrationBase
 {
-    private static string uSyncLogQuery = "StartsWith(SourceContext, 'uSync')";
+    private static string _uSyncLogQuery = "StartsWith(SourceContext, 'uSync')";
 
     private readonly ILogViewerConfig _logViewerConfig;
 
@@ -21,11 +21,11 @@ internal class LogViewerMigration : MigrationBase
     protected override void Migrate()
     {
         var existing = _logViewerConfig.GetSavedSearches()
-            .FirstOrDefault(x => x.Query.StartsWith(uSyncLogQuery, StringComparison.OrdinalIgnoreCase));
+            .FirstOrDefault(x => x.Query.StartsWith(_uSyncLogQuery, StringComparison.OrdinalIgnoreCase));
 
-        if (existing == null)
-        {
-            _logViewerConfig.AddSavedSearch("Find all uSync Log Entries", uSyncLogQuery);
-        }
+        if (existing != null) return;
+        
+        _logViewerConfig.AddSavedSearch("Find all uSync Log Entries", _uSyncLogQuery);
+        
     }
 }

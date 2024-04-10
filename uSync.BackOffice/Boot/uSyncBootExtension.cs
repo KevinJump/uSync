@@ -18,67 +18,68 @@ namespace uSync.BackOffice.Boot;
 /// </summary>
 internal static class uSyncBootExtension
 {
-    internal static string _defaultNoNodesPath = "~/umbraco/UmbracoWebsite/NoNodes.cshtml";
-    internal static string _noNodesPath = "~/App_Plugins/uSync/boot/NoNodes.cshtml";
+	internal static string _defaultNoNodesPath = "~/umbraco/UmbracoWebsite/NoNodes.cshtml";
+	internal static string _noNodesPath = "~/App_Plugins/uSync/boot/NoNodes.cshtml";
 
-    public static IUmbracoBuilder AdduSyncFirstBoot(this IUmbracoBuilder builder)
-    {
-        builder.Services.PostConfigure<GlobalSettings>(settings =>
-        {
-            if (settings.NoNodesViewPath.InvariantEquals(_defaultNoNodesPath))
-            {
-                // if the default hasn't changed, put in the uSync version
-                settings.NoNodesViewPath = _noNodesPath;
-            }
-        });
+	/// <summary>
+	///  Add uSync FirstBoot methods to Umbraco
+	/// </summary>
+	public static IUmbracoBuilder AdduSyncFirstBoot(this IUmbracoBuilder builder)
+	{
+		builder.Services.PostConfigure<GlobalSettings>(settings =>
+		{
+			if (settings.NoNodesViewPath.InvariantEquals(_defaultNoNodesPath))
+			{
+				// if the default hasn't changed, put in the uSync version
+				settings.NoNodesViewPath = _noNodesPath;
+			}
+		});
 
-        // add notification handler to do the actual first boot run. 
-        builder.AddNotificationHandler<UmbracoApplicationStartedNotification, FirstBootAppStartingHandler>();
+		// add notification handler to do the actual first boot run. 
+		builder.AddNotificationHandler<UmbracoApplicationStartedNotification, FirstBootAppStartingHandler>();
 
-        return builder;
-    }
+		return builder;
+	}
 }
 
 /// <summary>
 ///  Handler to mange app starting for first boot migrations 
 /// </summary>
 internal class FirstBootAppStartingHandler
-    : INotificationHandler<UmbracoApplicationStartedNotification>
+	: INotificationHandler<UmbracoApplicationStartedNotification>
 {
 
-    private readonly ICoreScopeProvider _scopeProvider;
-    private readonly IKeyValueService _keyValueService;
-    private readonly IMigrationPlanExecutor _migrationPlanExecutor;
-    private readonly IRuntimeState _runtimeState;
+	private readonly ICoreScopeProvider _scopeProvider;
+	private readonly IKeyValueService _keyValueService;
+	private readonly IMigrationPlanExecutor _migrationPlanExecutor;
+	private readonly IRuntimeState _runtimeState;
 
-    /// <inheritdoc/>
-    public FirstBootAppStartingHandler(
-        ICoreScopeProvider scopeProvider,
-        IKeyValueService keyValueService,
-        IMigrationPlanExecutor migrationPlanExecutor,
-        IRuntimeState runtimeState)
-    {
-        _scopeProvider = scopeProvider;
-        _keyValueService = keyValueService;
-        _migrationPlanExecutor = migrationPlanExecutor;
-        _runtimeState = runtimeState;
-    }
+	/// <inheritdoc/>
+	public FirstBootAppStartingHandler(
+		ICoreScopeProvider scopeProvider,
+		IKeyValueService keyValueService,
+		IMigrationPlanExecutor migrationPlanExecutor,
+		IRuntimeState runtimeState)
+	{
+		_scopeProvider = scopeProvider;
+		_keyValueService = keyValueService;
+		_migrationPlanExecutor = migrationPlanExecutor;
+		_runtimeState = runtimeState;
+	}
 
 
-    /// <inheritdoc/>
-    public void Handle(UmbracoApplicationStartedNotification notification)
-    {
-        if (_runtimeState.Level == Umbraco.Cms.Core.RuntimeLevel.Run)
-        {
-            var firstBootMigration = new FirstBootMigrationPlan();
-            var upgrader = new Upgrader(firstBootMigration);
+	/// <inheritdoc/>
+	public void Handle(UmbracoApplicationStartedNotification notification)
+	{
+		if (_runtimeState.Level != Umbraco.Cms.Core.RuntimeLevel.Run) return;
 
-            // this bit is done inside the upgrader.Execute method too, 
-            // but we don't want the extra three log messages during startup,
-            // so we also check before we start
-            var currentState = _keyValueService.GetValue(upgrader.StateValueKey);
-            if (currentState == null || currentState != firstBootMigration.FinalState)
-                upgrader.Execute(_migrationPlanExecutor, _scopeProvider, _keyValueService);
-        }
-    }
+		var firstBootMigration = new FirstBootMigrationPlan();
+		var upgrader = new Upgrader(firstBootMigration);
+
+		// This bit is done inside the upgrader.Execute method too 
+		// but we don't want the extra three log messages during startup.
+		var currentState = _keyValueService.GetValue(upgrader.StateValueKey);
+		if (currentState == null || currentState != firstBootMigration.FinalState)
+			upgrader.Execute(_migrationPlanExecutor, _scopeProvider, _keyValueService);
+	}
 }
