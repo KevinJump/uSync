@@ -55,7 +55,7 @@ namespace uSync.Core.Mapping
                     mappedValue = mapper.GetExportValue(mappedValue, editorAlias);
                 }
 
-                return mappedValue;
+                return mappedValue ?? string.Empty;
             }
 
             return GetSafeValue(value);
