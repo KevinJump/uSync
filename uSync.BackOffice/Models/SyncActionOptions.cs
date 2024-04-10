@@ -46,7 +46,6 @@ namespace uSync.BackOffice.Models
         /// <summary>
         ///  array of usync folders you want to import - files will be merged as part of the process.
         /// </summary>
-        public string[] Folders { get; set; }
-
+        public string[] Folders { get; set; } = [];
     }
 }
