@@ -76,8 +76,12 @@ complete: boolean
 
 export type SyncActionButton = {
         key: string
+label: string
 look: string
 color: string
+force: boolean
+clean: boolean
+children: Array<SyncActionButton>
     };
 
 export type SyncActionGroup = {

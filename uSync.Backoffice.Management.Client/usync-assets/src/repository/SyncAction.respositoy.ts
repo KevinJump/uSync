@@ -4,6 +4,18 @@ import { UmbControllerBase } from "@umbraco-cms/backoffice/class-api";
 import { uSyncSettingsDataSource } from "./sources/SyncSettings.source";
 import { uSyncMigrationDataSource } from "./sources/SyncMigration.source";
 
+
+export type SyncPerformRequest = {
+    id: string, 
+    group: string, 
+    action: string, 
+    step: number, 
+    force?: boolean,
+    clean?: boolean,
+    set?: string,
+    clientId: string
+}
+
 /**
  * @export
  * @class uSyncActionRepository
@@ -32,31 +44,23 @@ export class uSyncActionRepository extends UmbControllerBase {
 
     /**
      * @method performAction
-     * @param id - id for this run (each run has its own unquie id)
-     * @param group - the group (e.g settings, content, all)
-     * @param action - the action ('report', 'import', 'export')
-     * @param step - the step number (this increments each call)
-     * @param clientId  - the signalR client id, so we can send updates.
-     * @returns PeformActionResponse
+     * @param request request of the action to perform
+     * @returns PerformActionResponse.
      */
-    async performAction(id: string, group: string, action: string, step: number,
-        clientId: string) {
+    async performAction(request: SyncPerformRequest) {
 
-        return this.#actionDataSource.performAction(
-            {
-                requestId : id, 
-                action: action,
-                options: {
-                    group : group,
-                    force : false,
-                    clean : false,
-                    clientId : clientId,
-                    set: 'Default'
-                },
-                stepNumber: step
-            }
-        );
-
+        return this.#actionDataSource.performAction({
+            requestId: request.id,
+            action: request.action,
+            options: {
+                group: request.group,
+                force: request.force ?? false,
+                clean: request.clean ?? false,
+                clientId: request.clientId,
+                set: request.set ?? 'default'
+            },
+            stepNumber: request.step
+        });
     }
 
     /**

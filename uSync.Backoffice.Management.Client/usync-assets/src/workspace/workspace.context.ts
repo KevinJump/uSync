@@ -10,6 +10,7 @@ import uSyncSignalRContext from "../signalr/signalr.context";
 import { UMB_WORKSPACE_CONTEXT, type UmbWorkspaceContextInterface } from "@umbraco-cms/backoffice/workspace";
 import { uSyncConstants } from "../constants";
 import { uSyncIconRegistry } from "../icons";
+import { SyncPerformActionOptions } from "./types";
 
 /**
  * @exports 
@@ -131,7 +132,7 @@ export class uSyncWorkspaceContext extends UmbControllerBase
         }
     }
 
-    async performAction(group: SyncActionGroup, key: string) {
+    async performAction(options: SyncPerformActionOptions) {
         var clientId = this.#signalRContext?.getClientId() ?? '';
 
         this.#working.setValue(true);
@@ -144,7 +145,15 @@ export class uSyncWorkspaceContext extends UmbControllerBase
 
         do {
 
-            const { data } = await this.#repository.performAction(id, group.key, key, step, clientId);
+            const { data } = await this.#repository.performAction( {
+                id: id,
+                action: options.action,
+                group: options.group.key,
+                force: options.force,
+                clean: options.clean,
+                step: step,
+                clientId: clientId
+            });
 
             if (data) {
 

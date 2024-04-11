@@ -22,13 +22,13 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
     results : Array<uSyncActionView> | undefined = [];
 
     @state()
-    _showAll : boolean = false;
+    showAll : boolean = false;
 
     @state()
-    _changeCount  = 0;
+    changeCount  = 0;
 
     #toggleShowAll() {
-        this._showAll = !this._showAll;
+        this.showAll = !this.showAll;
     }
 
     async #openDetailsView(result: uSyncActionView) {
@@ -44,15 +44,15 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
     }
 
     render() {
-        this._changeCount = 0;
+        this.changeCount = 0;
 
         var rowsHtml = this.results?.map((result) => {
 
-            if (this._showAll == false && result.change == 'NoChange') {
+            if (this.showAll == false && result.change == 'NoChange') {
                 return nothing;
             }
 
-            this._changeCount++; 
+            this.changeCount++; 
 
             return html`
                 <uui-table-row>
@@ -65,7 +65,7 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
             `;
         });
 
-        return this._changeCount == 0 
+        return this.changeCount == 0 
             ? html`
                 ${this.renderResultBar(this.results?.length || 0)}
                 <div class="empty">Nothing has changed</div>
@@ -91,7 +91,7 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
         return html`
         <div class="result-header">
             <uui-toggle label="Show All" 
-                ?checked=${this._showAll}
+                ?checked=${this.showAll}
                 @change=${this.#toggleShowAll}></uui-toggle>
             ${count} items
         </div>`;
@@ -106,6 +106,11 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
 
     static styles = css`
 
+        :host {
+            display: block;
+            margin: var(--uui-size-space-4) 0;
+        }
+
         uui-table {
             position: relative;
             z-index: 100;
@@ -114,12 +119,14 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
         .result-header {
             display: flex;
             justify-content: space-between;
+            margin-top: calc(var(--uui-size-space-4)*-1);
         }
 
         .empty {
-            padding: 40px;
-            text-align:center;
-            font-weight:900;
+            padding: var(--uui-size-20);
+            font-size: var(--uui-type-h5-size);
+            text-align : center;
+            font-weight : 900;
         }
     `
 }

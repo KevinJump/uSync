@@ -24,8 +24,8 @@ export class uSyncMenuElement extends UmbElementMixin(LitElement) {
     render() {
         return html`
             <umb-menu-item-layout
-                label=${this.manifest.meta.label || this.manifest.name}
-                icon-name=${this.manifest.meta.icon || 'icon-bug'}
+                label=${this.manifest.meta.label ?? this.manifest.name}
+                icon-name=${this.manifest.meta.icon ?? 'icon-bug'}
                 entity-type=${ifDefined(this.manifest.meta.entityType)}
                 ?has-Children=${this.hasChildren}>${this.renderChildren()}</umb-menu-item-layout>`;
 	}

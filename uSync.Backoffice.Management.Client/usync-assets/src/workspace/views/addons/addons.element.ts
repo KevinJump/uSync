@@ -63,7 +63,8 @@ export class uSyncAddOnsElement extends UmbElementMixin(LitElement) {
     static styles = css`
 
         umb-body-layout {
-            background: linear-gradient(#e3e3f1,#f6f4f4);
+            // background: linear-gradient(#e3e3f1,#f6f4f4);
+            background: linear-gradient(var(--uui-color-background),var(--uui-color-border));
         }
 
         .addon-view {
@@ -81,29 +82,29 @@ export class uSyncAddOnsElement extends UmbElementMixin(LitElement) {
 
         .header {
             font-size: larger;
-            margin-bottom: 20px;
+            margin-bottom: var(--uui-size-space-6);
         }
 
         .logos {
             display: flex;
             justify-content: space-between;
-            font-size: 20pt;
+            font-size: var(--uui-type-h3-size);
         }
 
         .logo {
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin: 10px 30px;
-            color: #555;
+            margin: var(--uui-size-space-2) var(--uui-size-space-6);
+            color: var(--uui-color-text-alt);
         }
 
         .cta {
-            margin-bottom: 40px;
+            margin-bottom: var(--uui-size-space-6);
         }
 
         uui-button {
-            font-size: 15pt;
+            font-size: var(--uui-type-h4-size);
         }
     `;
 }

@@ -1,6 +1,6 @@
 import { LitElement, customElement, html, css, property, ifDefined } from "@umbraco-cms/backoffice/external/lit";
-import { SyncActionButton, SyncActionGroup } from "../api";
-import { UUIButtonState, UUIInterfaceColor, UUIInterfaceLook } from "@umbraco-cms/backoffice/external/uui";
+import { SyncActionGroup } from "../api";
+import { UUIButtonState } from "@umbraco-cms/backoffice/external/uui";
 
 /**
  * @exports
@@ -19,29 +19,33 @@ export class uSyncActionBox extends LitElement {
     group! : SyncActionGroup ;
 
     @property({type: String})
-    state: UUIButtonState | undefined = undefined;
+    state?: UUIButtonState;
 
-    #onClick(group: SyncActionGroup, button: SyncActionButton) {
+    #onAction(e: CustomEvent, group: SyncActionGroup) {
+
+        if (!e.detail?.button) return;
+
         this.dispatchEvent(new CustomEvent('perform-action', {
             detail: {
                 group: group,
-                key: button.key
+                key: e.detail.button.key,
+                force: e.detail.button.force,
+                clean: e.detail.button.clean
             }
         }));
+        
     }
 
     render() {
 
-        const buttons = this.group?.buttons.map((i) => {
+        const dropdownButtons = this.group.buttons.map((b) => {
             return html`
-                <uui-button label=${i.key} 
-                    color=${<UUIInterfaceColor>i.color}
-                    look=${<UUIInterfaceLook>i.look}
+                <usync-action-button 
+                    .button=${b}
                     state=${ifDefined(this.state)}
-                    @click=${() => this.#onClick(this.group, i)}
-                    ></uui-button>
-            `;
-        });
+                    @usync-action-click=${(e : CustomEvent) => this.#onAction(e, this.group)}></usync-action-button>
+            `
+        })
 
         return html`
             <uui-box class='action-box'>
@@ -49,7 +53,7 @@ export class uSyncActionBox extends LitElement {
                     <h2 class="box-heading">${this.group?.groupName}</h2>
                     <uui-icon name=${this.group?.icon}></uui-icon>
                     <div class="box-buttons">
-                        ${buttons}
+                        ${dropdownButtons}
                     </div>
                 </div>
             </uui-box>
@@ -62,6 +66,7 @@ export class uSyncActionBox extends LitElement {
         :host {
             min-width: 360px;
             flex-grow: 1;
+            margin: 0 var(--uui-size-space-2);
         }
 
         .box-content {
@@ -71,21 +76,23 @@ export class uSyncActionBox extends LitElement {
         }
 
         .box-heading {
-            font-size: 16pt;
+            font-size: var(--uui-size-7);
+            margin: 0;
         }
 
         uui-icon {
-            margin: 10px;
-            font-size: 30pt;
+            margin: var(--uui-size-space-6);
+            font-size: var(--uui-type-h2-size);
+            color: var(--uui-color-text-alt);
         }
 
         uui-button {
-            margin: 0 5px;
-            font-size: 14pt;
+            margin: 0 var(--uui-size-space-2);
+            font-size: var(--uui-size-6);
         }
 
         .box-buttons {
-            margin-top: 10px;
+            margin: var(--uui-size-space-2) 0;
         }
         `;
 }

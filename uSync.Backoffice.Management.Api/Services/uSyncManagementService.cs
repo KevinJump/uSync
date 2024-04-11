@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using System.Reflection.Emit;
+
+using Microsoft.AspNetCore.SignalR;
 
 using uSync.Backoffice.Management.Api.Extensions;
 using uSync.Backoffice.Management.Api.Models;
@@ -33,7 +35,91 @@ internal class uSyncManagementService : ISyncManagementService
         _hubContext = hubContext;
     }
 
-    public PerformActionResponse PerformAction(PerformActionRequest actionRequest)
+    /// <summary>
+    ///  Gets the list of available actions
+    /// </summary>
+    public List<SyncActionGroup> GetActions()
+    {
+        var defaultReport = new SyncActionButton()
+        {
+            Key = HandlerActions.Report.ToString(),
+            Label = HandlerActions.Report.ToString(),
+            Look = "secondary",
+            Color = "positive"
+        };
+
+		var defaultImport = new SyncActionButton()
+        {
+            Key = HandlerActions.Import.ToString(),
+            Label = HandlerActions.Import.ToString(),
+            Look = "primary",
+            Color = "positive",
+            Children = [
+                    new() {
+                        Key = $"{HandlerActions.Import}",
+                        Label= $"{HandlerActions.Import}Force",
+                        Force = true
+                    }
+                ]
+        };
+
+		var defaultExport = new SyncActionButton()
+		{
+			Key = HandlerActions.Export.ToString(),
+			Label = HandlerActions.Export.ToString(),
+			Look = "primary",
+			Color = "default"
+		};
+
+        var everythingExport = new SyncActionButton()
+        {
+            Key = HandlerActions.Export.ToString(),
+            Label = HandlerActions.Export.ToString(),
+            Look = "primary",
+            Color = "default",
+            Children = [
+                    new () {
+                        Key = HandlerActions.Export.ToString(),
+                        Label = $"{HandlerActions.Export}Clean",
+                        Clean = true
+                    }
+                ]
+        };
+
+		// TODO: we need to load in additional action groups as needed from plugins.
+		List<SyncActionButton> defaultButtons = [defaultReport, defaultImport, defaultExport];
+        List<SyncActionButton> everythingButtons = [defaultReport, defaultImport, everythingExport];
+
+		List<SyncActionGroup> actions = [
+			new SyncActionGroup
+			{
+				GroupName = "Settings",
+				Icon = "icon-settings-alt",
+				Key = "settings",
+				Buttons = defaultButtons
+			},
+			new SyncActionGroup
+			{
+				GroupName = "Content",
+				Icon = "icon-documents",
+				Key = "content",
+				Buttons = defaultButtons
+			},
+			new SyncActionGroup
+			{
+				GroupName = "Everything",
+				Icon = "icon-paper-plane-alt",
+				Key = "all",
+				Buttons = everythingButtons
+			}
+		];
+
+        return actions;
+
+	}
+
+
+	public PerformActionResponse PerformAction(PerformActionRequest actionRequest)
     {
         if (Enum.TryParse(actionRequest.Action, out HandlerActions action) is false)
             throw new ArgumentException($"Invalid action {actionRequest.Action}");

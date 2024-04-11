@@ -1,7 +1,14 @@
 export default {
     uSync: {
         name: 'uSync',
-        banner: 'uSync all the things'
+        banner: 'uSync all the things',
+
+        Report: 'Report',
+        Import: 'Import',
+        Export: 'Export',
+        ImportForce: 'Import (Force)',
+        ExportClean: 'Export (Clean)'
+
     },
     uSyncSettings: {
         settings: 'uSync Settings',

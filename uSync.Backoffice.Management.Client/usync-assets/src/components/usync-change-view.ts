@@ -7,10 +7,10 @@ import * as Diff from 'diff';
  * shows the change details for an item. 
  */
 @customElement('usync-change-view')
-export class uSyncChangeView extends UmbElementMixin(LitElement)  {
+export class uSyncChangeView extends UmbElementMixin(LitElement) {
 
-    @property({type: Object})
-    item : uSyncActionView | null | undefined = null;
+    @property({ type: Object })
+    item?: uSyncActionView;
 
     render() {
 
@@ -38,7 +38,7 @@ export class uSyncChangeView extends UmbElementMixin(LitElement)  {
 
     #getJsonOrString(value: string | null | undefined) {
 
-        try { 
+        try {
             return JSON.stringify(JSON.parse(value ?? ''), null, 1);
         }
         catch {
@@ -47,14 +47,14 @@ export class uSyncChangeView extends UmbElementMixin(LitElement)  {
     }
 
     render_details() {
-        
+
         var changesHtml = this.item?.details.map((detail) => {
 
             const oldValue = this.#getJsonOrString(detail.oldValue);
             const newValue = this.#getJsonOrString(detail.newValue);
             const changes = Diff.diffWords(oldValue, newValue);
 
-            const changeHtml = changes.map((change : any) => {
+            const changeHtml = changes.map((change: any) => {
 
                 console.log(change);
 
@@ -90,6 +90,11 @@ export class uSyncChangeView extends UmbElementMixin(LitElement)  {
 
     static styles = css`
 
+        :host {
+            display: block;
+            margin: var(--uui-size-space-4) 0;
+        }
+
         uui-table-cell {
             vertical-align: top;
         }
@@ -100,11 +105,11 @@ export class uSyncChangeView extends UmbElementMixin(LitElement)  {
         }
 
         pre ins {
-            color: green;
+            color: var(--uui-color-positive);
         }
 
         pre del {
-            color: red;
+            color: var(--uui-color-danger);
         }
 
     `;

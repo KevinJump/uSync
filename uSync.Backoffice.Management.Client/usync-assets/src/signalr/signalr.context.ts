@@ -5,11 +5,11 @@ import * as signalR from "@microsoft/signalr"
 
 import { UmbObjectState } from "@umbraco-cms/backoffice/observable-api";
 import { USYNC_SIGNALR_CONTEXT_TOKEN } from "./signalr.context.token";
-import { ISyncUpdateMessage } from "./types";
+import type { SyncUpdateMessage } from "./types";
 
 export class uSyncSignalRContext extends UmbControllerBase {
 
-    #connection : signalR.HubConnection | null = null;
+    #connection? : signalR.HubConnection;
 
     constructor(host:UmbControllerHost) 
     {
@@ -35,7 +35,7 @@ export class uSyncSignalRContext extends UmbControllerBase {
         return this.#connection?.connectionId ?? null;
     }
 
-    #update = new UmbObjectState<ISyncUpdateMessage | null>(null);
+    #update = new UmbObjectState<SyncUpdateMessage | undefined>(undefined);
     public readonly update = this.#update.asObservable();
 
     #add = new UmbObjectState({});

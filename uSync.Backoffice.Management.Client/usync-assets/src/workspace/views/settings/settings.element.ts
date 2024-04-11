@@ -36,6 +36,7 @@ export class uSyncSettingsViewElement extends UmbElementMixin(LitElement) {
 
     render() {
         return html`
+        <umb-body-layout>
             <div class="usync-settings-layout">
                 <div>
                     <uui-box headline=${this.localize.term('uSyncSettings_settings')}>
@@ -121,20 +122,21 @@ export class uSyncSettingsViewElement extends UmbElementMixin(LitElement) {
             <div class="setting-link">
                     <umb-localize key="uSyncSettings_help"></umb-localize>
             </div>
+        </umb-body-layout>
         `
     }
 
     static styles = css`
         :host {
             display: block;
-            margin: var(--uui-size-layout-1);
+            margin: calc(var(--uui-size-space-4) * -1) 0;
         }
 
         .usync-settings-layout {
             display: grid;
             grid-template-columns: 5fr 5fr;
             grid-template-rows: auto auto;
-            gap: 20px 20px;
+            gap: var(--uui-size-space-4) var(--uui-size-space-4);
             grid-auto-flow: row;
             grid-template-areas:
                 'settings info',
@@ -146,7 +148,7 @@ export class uSyncSettingsViewElement extends UmbElementMixin(LitElement) {
         }
 
         uui-box {
-            margin-bottom: var(--uui-size-layout-1);
+            margin: var(--uui-size-space-4) 0;
         }
     `
 }

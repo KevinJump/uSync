@@ -6,6 +6,7 @@ using uSync.BackOffice.SyncHandlers;
 namespace uSync.Backoffice.Management.Api.Services;
 public interface ISyncManagementService
 {
-    Func<SyncActionOptions, uSyncCallbacks, SyncActionResult> GetHandlerMethod(HandlerActions action);
+	List<SyncActionGroup> GetActions();
+	Func<SyncActionOptions, uSyncCallbacks, SyncActionResult> GetHandlerMethod(HandlerActions action);
     PerformActionResponse PerformAction(PerformActionRequest actionRequest);
 }

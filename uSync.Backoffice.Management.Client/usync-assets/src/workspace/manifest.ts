@@ -4,10 +4,12 @@ import {
     ManifestWorkspaceContext, 
     ManifestWorkspaceView 
 } from "@umbraco-cms/backoffice/extension-registry";
+
+import "./components";
+
 import { uSyncConstants } from "../constants.js";
 
 const workspaceAlias = uSyncConstants.workspace.alias;
-
 
 const workspace: ManifestWorkspace = {
     type: 'workspace',

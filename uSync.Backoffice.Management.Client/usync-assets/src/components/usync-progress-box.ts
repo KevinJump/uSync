@@ -2,7 +2,7 @@ import { customElement, LitElement, css, html, property, nothing, state } from "
 import { HandlerStatus, SyncHandlerSummary } from "../api";
 import { UmbElementMixin } from "@umbraco-cms/backoffice/element-api";
 import { USYNC_SIGNALR_CONTEXT_TOKEN } from "../signalr/signalr.context.token";
-import { ISyncUpdateMessage } from "../signalr/types";
+import type { SyncUpdateMessage } from "../signalr/types";
 
 /**
  * @class uSyncProcessBox
@@ -28,7 +28,7 @@ export class uSyncProcessBox extends UmbElementMixin(LitElement) {
     }
 
     @state()
-    updateMsg : ISyncUpdateMessage | null = null;
+    updateMsg? : SyncUpdateMessage;
 
     @state()
     addMsg : object = {};
@@ -72,16 +72,20 @@ export class uSyncProcessBox extends UmbElementMixin(LitElement) {
     }
     
     static styles = css`
-        uui-box {
-            margin: var(--uui-size-space-4);
+
+        :host {
+            display: block;
+            margin: var(--uui-size-space-4) 0;
         }
 
         h2 {
             text-align: center;
+            margin: 0;
         }
 
         .action-list {
-            padding: var(--uui-size-space-4);
+            margin-top: var(--uui-size-space-4);
+            padding: var(--uui-size-space-4) 0;
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
@@ -91,20 +95,19 @@ export class uSyncProcessBox extends UmbElementMixin(LitElement) {
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-width: 95px;
+            min-width: var(--uui-size-32);
         }
 
         .action uui-icon {
-            font-size: 20pt;
+            font-size: var(--uui-size-9);
         }
         
         .complete {
-            color: blue;
-            opacity: 0.5;
+            color: var(--uui-color-default-emphasis);
         }
 
         .working {
-            color: green;
+            color: var(--uui-color-positive);
         }
 
         .update-box {

@@ -45,22 +45,13 @@ export class uSyncDefaultViewElement extends UmbLitElement {
     @state()
     _results: Array<uSyncActionView> = [];
 
-    // addController(controller: unknown): void {
-
-    // }
 
     constructor() {
         super();
 
-        this.#consumeContext();
-    }
-
-    #consumeContext() {
-
         this.consumeContext(UMB_MODAL_MANAGER_CONTEXT, (_modalContext) => {
             this.#modalContext = _modalContext;
         });
-
 
         this.consumeContext(USYNC_CORE_CONTEXT_TOKEN, (_instance) => {
             this.#actionContext = _instance;
@@ -68,6 +59,8 @@ export class uSyncDefaultViewElement extends UmbLitElement {
             this.observe(_instance.actions, (_actions) => {
                 this._actions = _actions;
                 this._loaded = this._actions !== null;
+
+                console.log(this._actions);
             });
 
             this.observe(_instance.currentAction, (_currentAction) => {
@@ -105,7 +98,6 @@ export class uSyncDefaultViewElement extends UmbLitElement {
                 this.#actionContext?.getActions();
                 this.#contextLoaded
             }
-
         });
     }
 
@@ -127,8 +119,6 @@ export class uSyncDefaultViewElement extends UmbLitElement {
         return;
     }
 
-
-
     /**
      * @method performAction
      * @param {CustomEventInit} event 
@@ -137,7 +127,12 @@ export class uSyncDefaultViewElement extends UmbLitElement {
     #performAction(event: CustomEventInit) {
         this._showProgress = true;
         this._group = event.detail.group;
-        this.#actionContext?.performAction(event.detail.group, event.detail.key);
+        this.#actionContext?.performAction({
+            group: event.detail.group,
+            action: event.detail.key,
+            force: event.detail.force,
+            clean: event.detail.clean
+        });
     }
 
     render() {
@@ -200,10 +195,10 @@ export class uSyncDefaultViewElement extends UmbLitElement {
     }
 
     #renderReport() {
-        if (this._completed == false) return nothing;
+        if (!this._completed) return nothing;
 
         return html`
-            <uui-box>
+            <uui-box class="results-box">
                 <usync-results .results=${this._results}></usync-results>
             </uui-box>
         `
@@ -211,8 +206,14 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 
     static styles = [
         css`
-            usync-action-box, uui-box {
-               margin: var(--uui-size-space-4);
+
+            :host {
+                display: block;
+                margin-top: calc(var(--uui-size-space-4) * -1);
+            }
+
+            .results-box {
+                margin: var(--uui-size-space-4) 0;
             }
 
             .action-buttons-box {
@@ -221,6 +222,7 @@ export class uSyncDefaultViewElement extends UmbLitElement {
                 flex-wrap: wrap;
                 align-content: stretch;
                 z-index: 100;
+                margin: var(--uui-size-space-4) calc(var(--uui-size-space-2) * -1);
             }        
 
             umb-empty-state {
@@ -231,17 +233,17 @@ export class uSyncDefaultViewElement extends UmbLitElement {
                 right: 0;
                 margin: 0 auto;
                 text-align: center;
-                color: #ddd;
+                color: var(--uui-color-border);
                 z-index: 0;
             }
 
             umb-empty-state h2 {
-                font-size: 34pt;
+                font-size: var(--uui-type-h2-size);
             }
 
             umb-empty-state uui-icon {
                 position: relative;
-                top: 13px;
+                top: var(--uui-size-4);
             }
         `
     ]
