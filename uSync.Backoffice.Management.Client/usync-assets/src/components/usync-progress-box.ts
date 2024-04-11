@@ -96,6 +96,7 @@ export class uSyncProcessBox extends UmbElementMixin(LitElement) {
             flex-direction: column;
             align-items: center;
             min-width: var(--uui-size-32);
+            color: var(--uui-color-text-alt);
         }
 
         .action uui-icon {
