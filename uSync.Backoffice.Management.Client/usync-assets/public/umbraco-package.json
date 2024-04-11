@@ -2,7 +2,7 @@
   "$schema": "../umbraco-package-schema.json",
   "name": "uSync",
   "id": "usync",
-  "version": "14.0.0-beta002",
+  "version": "14.0.0-beta003",
   "allowTelemetry": true,
   "extensions": [
     {

@@ -52,7 +52,7 @@ Write-Host "Folder   :" $outFolder
 "----------------------------------"; ""
 
 "Stamp version in umbraco-package.json"
-$umbracoPackagePath = '../uSync.BackOffice.Management.Client/assets/public/umbraco-package.json'
+$umbracoPackagePath = '../uSync.BackOffice.Management.Client/usync-assets/public/umbraco-package.json'
 $packageJson = Get-Content $umbracoPackagePath -Raw | ConvertFrom-Json
 $packageJson.Version = $fullVersion
 $packageJson | ConvertTo-Json -Depth 32 | Set-Content $umbracoPackagePath
@@ -85,7 +85,7 @@ foreach($project in $projects) {
 }
 
 ""; "##### Generating NPM Client Package"; "----------------------------------" ; ""
-Set-Location ..\uSync.Backoffice.Management.Client\assets\
+Set-Location ..\uSync.Backoffice.Management.Client\usync-assets\
 
 npm version $fullVersion 
 npm run dist
