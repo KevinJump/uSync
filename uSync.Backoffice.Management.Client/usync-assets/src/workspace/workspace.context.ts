@@ -7,7 +7,7 @@ import { UmbControllerBase } from "@umbraco-cms/backoffice/class-api";
 import { SyncActionGroup, SyncHandlerSummary, SyncLegacyCheckResponse, uSyncActionView, uSyncHandlerSetSettings, uSyncSettings } from "../api";
 
 import uSyncSignalRContext from "../signalr/signalr.context";
-import { UMB_WORKSPACE_CONTEXT, type UmbWorkspaceContextInterface } from "@umbraco-cms/backoffice/workspace";
+import { UMB_WORKSPACE_CONTEXT, UmbWorkspaceContext } from "@umbraco-cms/backoffice/workspace";
 import { uSyncConstants } from "../constants";
 import { uSyncIconRegistry } from "../icons";
 import { SyncPerformActionOptions } from "./types";
@@ -18,18 +18,11 @@ import { SyncPerformActionOptions } from "./types";
  * @description context for getting and seting up actions.
  */
 export class uSyncWorkspaceContext extends UmbControllerBase
-    implements UmbWorkspaceContextInterface {
+    implements UmbWorkspaceContext {
     public readonly workspaceAlias: string = uSyncConstants.workspace.alias;
 
     getEntityType(): string {
         return uSyncConstants.workspace.rootElement;
-    }
-    getEntityId(): string | undefined {
-        return undefined;
-    }
-
-    getUnique(): string | undefined {
-        return undefined;
     }
 
     #repository: uSyncActionRepository;

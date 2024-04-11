@@ -16,8 +16,8 @@
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 
-		<PackageReference Include="Umbraco.Cms.Tests" Version="14.0.0-beta002" />
-		<PackageReference Include="Umbraco.Cms.Tests.Integration" Version="14.0.0-beta002" />
+		<PackageReference Include="Umbraco.Cms.Tests" Version="14.0.0-beta003" />
+		<PackageReference Include="Umbraco.Cms.Tests.Integration" Version="14.0.0-beta003" />
 
 	</ItemGroup>
 

@@ -1,5 +1,5 @@
 
-import { _$LE, css, customElement, html, nothing, state } from "@umbraco-cms/backoffice/external/lit";
+import { css, customElement, html, nothing, state } from "@umbraco-cms/backoffice/external/lit";
 
 import { USYNC_CORE_CONTEXT_TOKEN, uSyncWorkspaceContext } from '../../workspace.context.js';
 import { SyncActionGroup, SyncHandlerSummary, SyncLegacyCheckResponse, uSyncActionView } from "../../../api/index.js";

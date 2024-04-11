@@ -104,14 +104,10 @@ public static class uSyncBackOfficeBuilderExtensions
     /// </summary>
     public static IServiceCollection AdduSyncSignalR(this IServiceCollection services)
     {
-
         services.Configure<UmbracoPipelineOptions>(options =>
         {
             options.AddFilter(new UmbracoPipelineFilter(
-                "uSync",
-                applicationBuilder => { },
-                applicationBuilder => { },
-                applicationBuilder =>
+                "uSync", endpoints: applicationBuilder =>
                 {
                     applicationBuilder.UseEndpoints(e =>
                     {

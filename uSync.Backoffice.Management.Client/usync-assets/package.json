@@ -48,9 +48,9 @@
     "@hey-api/openapi-ts": "^0.37.3",
     "@types/diff": "^5.0.9",
     "@types/node": "^20.11.20",
-    "@umbraco-cms/backoffice": "^14.0.0-beta002",
+    "@umbraco-cms/backoffice": "^14.0.0-beta003",
     "typescript": "^5.2.2",
-    "vite": "^5.0.8",
+    "vite": "^5.1.7",
     "vite-plugin-dts": "^3.7.3",
     "vite-plugin-static-copy": "^1.0.1"
   }
