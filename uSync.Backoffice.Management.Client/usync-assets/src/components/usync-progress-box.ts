@@ -13,8 +13,7 @@ import { USYNC_SIGNALR_CONTEXT_TOKEN } from '../signalr/signalr.context.token'
 import type { SyncUpdateMessage } from '../signalr/types'
 
 /**
- * @class uSyncProcessBox
- * @description provides the progress box while things happen.
+ * Provides the progress box while things happen.
  */
 @customElement('usync-progress-box')
 export class uSyncProcessBox extends UmbElementMixin(LitElement) {

@@ -27,9 +27,7 @@ import { uSyncIconRegistry } from '../icons'
 import { SyncPerformActionOptions } from './types'
 
 /**
- * @exports
- * @class uSyncWorkspaceActionContext
- * @description context for getting and seting up actions.
+ * Context for getting and seting up actions.
  */
 export class uSyncWorkspaceContext
     extends UmbControllerBase
@@ -46,50 +44,43 @@ export class uSyncWorkspaceContext
     #signalRContext: uSyncSignalRContext | null = null
 
     /**
-     * @type Array<SyncActionGroup>
-     * @description list of actions that have been returned
+     * list of actions that have been returned from the process
      */
     #actions = new UmbArrayState<SyncActionGroup>([], (x) => x.key)
     public readonly actions = this.#actions.asObservable()
 
     /**
-     * @type Array<SyncHandlerSummary>
-     * @description the summary objects that show the handler boxes
+     * The summary objects that show the handler boxes
      */
     #workingActions = new UmbArrayState<SyncHandlerSummary>([], (x) => x.name)
     public readonly currentAction = this.#workingActions.asObservable()
 
     /**
-     * @type Boolean
-     * @description flag to say if things are currently being processed
+     * Flag to say if things are currently being processed
      */
     #working = new UmbBooleanState(false)
     public readonly working = this.#working.asObservable()
 
     /**
-     * @type Boolean
-     * @description flat to say that the last run has been completed (so results will show)
+     * Flag to say that the last run has been completed (so results will show)
      */
     #completed = new UmbBooleanState(false)
     public readonly completed = this.#completed.asObservable()
 
     /**
-     * @type Array<uSyncActionView>
-     * @description the results of a run.
+     * The results of a run.
      */
     #results = new UmbArrayState<uSyncActionView>([], (x) => x.name)
     public readonly results = this.#results.asObservable()
 
     /**
-     * @type uSyncSettings
-     * @description current settings for uSync
+     * Current settings for uSync
      */
     #settings = new UmbObjectState<uSyncSettings | undefined>(undefined)
     public readonly settings = this.#settings?.asObservable()
 
     /**
-     * @type uSyncHandlerSettings
-     * @description handler settings object
+     * Handler settings object
      */
     #handlerSettings = new UmbObjectState<uSyncHandlerSetSettings | undefined>(
         undefined,
@@ -112,6 +103,9 @@ export class uSyncWorkspaceContext
         this.#signalRContext = new uSyncSignalRContext(this)
     }
 
+    /**
+     * Return the current actions from the repository
+     */
     async getActions() {
         const { data } = await this.#repository.getActions()
 
@@ -120,6 +114,9 @@ export class uSyncWorkspaceContext
         }
     }
 
+    /**
+     * Get the current uSync settings
+     */
     async getSettings() {
         const { data } = await this.#repository.getSettings()
 
@@ -128,6 +125,9 @@ export class uSyncWorkspaceContext
         }
     }
 
+    /**
+     * Check to see if there is a legacy uSync folder on disk.
+     */
     async checkLegacy() {
         const { data } = await this.#repository.checkLegacy()
         if (data) {
@@ -135,6 +135,9 @@ export class uSyncWorkspaceContext
         }
     }
 
+    /**
+     * Get handler defaults.
+     */
     async getDefaultHandlerSetSettings() {
         const { data } = await this.#repository.getHandlerSettings('Default')
 
@@ -143,6 +146,10 @@ export class uSyncWorkspaceContext
         }
     }
 
+    /**
+     * Perform an action (e.g import, export, etc) with options
+     * @param options options for the action
+     */
     async performAction(options: SyncPerformActionOptions) {
         var clientId = this.#signalRContext?.getClientId() ?? ''
 

@@ -5,7 +5,7 @@ import {
 } from '@umbraco-cms/backoffice/extension-registry'
 
 /**
- * @description defines a sub menu item extension for the uSync menu
+ * Defines a sub menu item extension for the uSync menu
  */
 export interface ManifestuSyncMenuItem
     extends ManifestElement<UmbMenuItemElement> {

@@ -28,9 +28,6 @@ const context: ManifestWorkspaceContext = {
     js: () => import('./workspace.context.js'),
 }
 
-/**
- * this isn't working, don't know why :( - going to go hardwired for now
- */
 const workspaceViews: Array<ManifestWorkspaceView> = [
     {
         type: 'workspaceView',

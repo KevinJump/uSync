@@ -10,20 +10,19 @@ import { SyncActionGroup } from '../api'
 import { UUIButtonState } from '@umbraco-cms/backoffice/external/uui'
 
 /**
- * @exports
- * @class uSyncActionBox
- * @fires perform-action - when the user clicks the buttons.
+ * displays the action buttons for a given group
  */
 @customElement('usync-action-box')
 export class uSyncActionBox extends LitElement {
     /**
-     * @type: {uSyncActionGroup}
-     * @memberof uSyncActionBox
-     * @description collection of buttons to display.
+     * Collection of buttons to display.
      */
     @property({ type: Object })
     group!: SyncActionGroup
 
+    /**
+     * state to display on buttons
+     */
     @property({ type: String })
     state?: UUIButtonState
 

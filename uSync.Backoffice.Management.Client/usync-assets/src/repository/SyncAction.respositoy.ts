@@ -4,21 +4,37 @@ import { UmbControllerBase } from '@umbraco-cms/backoffice/class-api'
 import { uSyncSettingsDataSource } from './sources/SyncSettings.source'
 import { uSyncMigrationDataSource } from './sources/SyncMigration.source'
 
+/**
+ * Request object when peforming an action.
+ */
 export type SyncPerformRequest = {
+    /** Id of the request */
     id: string
+
+    /** group (e.g settings, content) */
     group: string
+
+    /** action (report, export, etc) */
     action: string
+
+    /** current step number */
     step: number
+
+    /** force (import) */
     force?: boolean
+
+    /** clean disk first (export) */
     clean?: boolean
+
+    /** name of the set to use */
     set?: string
+
+    /** signalR client id */
     clientId: string
 }
 
 /**
- * @export
- * @class uSyncActionRepository
- * @description repository for all things actions.
+ * Repository for all things actions.
  */
 export class uSyncActionRepository extends UmbControllerBase {
     #actionDataSource: uSyncActionDataSource
@@ -33,8 +49,7 @@ export class uSyncActionRepository extends UmbControllerBase {
     }
 
     /**
-     * @method getActions
-     * @description get the list of possible actions from the server
+     * Get the list of possible actions from the server
      * @returns Promise
      */
     async getActions() {
@@ -42,8 +57,7 @@ export class uSyncActionRepository extends UmbControllerBase {
     }
 
     /**
-     * @method performAction
-     * @param request request of the action to perform
+     * Request of the action to perform
      * @returns PerformActionResponse.
      */
     async performAction(request: SyncPerformRequest) {
@@ -62,8 +76,7 @@ export class uSyncActionRepository extends UmbControllerBase {
     }
 
     /**
-     * @method getSettings
-     * @description retreives the current uSync settings
+     * Retreives the current uSync settings
      * @returns the current uSync settings
      */
     async getSettings() {
@@ -71,7 +84,7 @@ export class uSyncActionRepository extends UmbControllerBase {
     }
 
     /**
-     * @method getHandlerSetSettings
+     * Get the handler settings based on the set.
      * @param setName name of the handler set in the configuration
      * @returns the settings for the named handler set.
      */
@@ -80,8 +93,7 @@ export class uSyncActionRepository extends UmbControllerBase {
     }
 
     /**
-     * @method checkLegacy
-     * @description checks to see if there are legacy datatypes on disk.
+     * Checks to see if there are legacy datatypes on disk.
      * @returns results of a check for legacy files
      */
     async checkLegacy() {
