@@ -1,5 +1,5 @@
 // component exports.
-export * from './usync-action-box'
-export * from './usync-progress-box'
-export * from './usync-results-view'
-export * from './usync-change-view'
+export * from './usync-action-box';
+export * from './usync-progress-box';
+export * from './usync-results-view';
+export * from './usync-change-view';

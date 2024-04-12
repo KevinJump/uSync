@@ -1,20 +1,20 @@
-import { UmbModalToken } from '@umbraco-cms/backoffice/modal'
-import { uSyncActionView } from '../api'
+import { UmbModalToken } from '@umbraco-cms/backoffice/modal';
+import { uSyncActionView } from '../api';
 
 export interface uSyncDetailsModalData {
-    item: uSyncActionView
+	item: uSyncActionView;
 }
 
 export interface uSyncDetailsModalValue {
-    result: boolean
+	result: boolean;
 }
 
-export const USYNC_DETAILS_MODAL = new UmbModalToken<
-    uSyncDetailsModalData,
-    uSyncDetailsModalValue
->('usync.details.modal', {
-    modal: {
-        type: 'sidebar',
-        size: 'large',
-    },
-})
+export const USYNC_DETAILS_MODAL = new UmbModalToken<uSyncDetailsModalData, uSyncDetailsModalValue>(
+	'usync.details.modal',
+	{
+		modal: {
+			type: 'sidebar',
+			size: 'large',
+		},
+	},
+);

@@ -1,54 +1,50 @@
-import {
-    ManifestMenu,
-    ManifestMenuItem,
-    ManifestTypes,
-} from '@umbraco-cms/backoffice/extension-registry'
-import { uSyncConstants } from '../constants'
-import uSyncMenuElement from './usync.menu-element.js'
+import { ManifestMenu, ManifestMenuItem, ManifestTypes } from '@umbraco-cms/backoffice/extension-registry';
+import { uSyncConstants } from '../constants';
+import uSyncMenuElement from './usync.menu-element.js';
 
-const sectionAlias = 'Umb.Section.Settings'
+const sectionAlias = 'Umb.Section.Settings';
 
 const menu: ManifestMenu = {
-    type: 'menu',
-    alias: uSyncConstants.menuAlias,
-    name: 'uSync Menu',
-    meta: {
-        label: uSyncConstants.name,
-        icon: uSyncConstants.icon,
-        entityType: uSyncConstants.workspace.rootElement,
-    },
-}
+	type: 'menu',
+	alias: uSyncConstants.menuAlias,
+	name: 'uSync Menu',
+	meta: {
+		label: uSyncConstants.name,
+		icon: uSyncConstants.icon,
+		entityType: uSyncConstants.workspace.rootElement,
+	},
+};
 
 const menuItem: ManifestMenuItem = {
-    type: 'menuItem',
-    alias: 'usync.menu.item',
-    name: 'uSync menu item',
-    element: uSyncMenuElement,
-    meta: {
-        label: 'uSync',
-        icon: 'icon-infinity',
-        entityType: 'usync-root',
-        menus: [uSyncConstants.menuAlias],
-    },
-}
+	type: 'menuItem',
+	alias: 'usync.menu.item',
+	name: 'uSync menu item',
+	element: uSyncMenuElement,
+	meta: {
+		label: 'uSync',
+		icon: 'icon-infinity',
+		entityType: 'usync-root',
+		menus: [uSyncConstants.menuAlias],
+	},
+};
 
 const menuSidebarApp: ManifestTypes = {
-    type: 'sectionSidebarApp',
-    kind: 'menu',
-    alias: 'usync.sidebarapp',
-    name: 'uSync section sidebar menu',
-    weight: 150,
-    meta: {
-        label: 'Syncronisation',
-        menu: menu.alias,
-    },
-    conditions: [
-        {
-            alias: 'Umb.Condition.SectionAlias',
-            match: sectionAlias,
-        },
-    ],
-}
+	type: 'sectionSidebarApp',
+	kind: 'menu',
+	alias: 'usync.sidebarapp',
+	name: 'uSync section sidebar menu',
+	weight: 150,
+	meta: {
+		label: 'Syncronisation',
+		menu: menu.alias,
+	},
+	conditions: [
+		{
+			alias: 'Umb.Condition.SectionAlias',
+			match: sectionAlias,
+		},
+	],
+};
 
 /// example of how to extend uSync menus.
 
@@ -65,8 +61,8 @@ const menuSidebarApp: ManifestTypes = {
 // }
 
 export const manifests = [
-    menu,
-    menuSidebarApp,
-    menuItem,
-    // subMenuItem
-]
+	menu,
+	menuSidebarApp,
+	menuItem,
+	// subMenuItem
+];

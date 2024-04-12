@@ -1,158 +1,128 @@
-import {
-    LitElement,
-    html,
-    customElement,
-    property,
-    nothing,
-    css,
-    state,
-} from '@umbraco-cms/backoffice/external/lit'
-import { uSyncActionView } from '../api'
-import { UmbElementMixin } from '@umbraco-cms/backoffice/element-api'
-import {
-    UMB_MODAL_MANAGER_CONTEXT,
-    UmbModalManagerContext,
-} from '@umbraco-cms/backoffice/modal'
-import { USYNC_DETAILS_MODAL } from '../dialogs/details-modal-token'
+import { LitElement, html, customElement, property, nothing, css, state } from '@umbraco-cms/backoffice/external/lit';
+import { uSyncActionView } from '../api';
+import { UmbElementMixin } from '@umbraco-cms/backoffice/element-api';
+import { UMB_MODAL_MANAGER_CONTEXT, UmbModalManagerContext } from '@umbraco-cms/backoffice/modal';
+import { USYNC_DETAILS_MODAL } from '../dialogs/details-modal-token';
 
 @customElement('usync-results')
 export class uSyncResultsView extends UmbElementMixin(LitElement) {
-    #modalContext?: UmbModalManagerContext
+	#modalContext?: UmbModalManagerContext;
 
-    constructor() {
-        super()
+	constructor() {
+		super();
 
-        this.consumeContext(UMB_MODAL_MANAGER_CONTEXT, (_instance) => {
-            this.#modalContext = _instance
-        })
-    }
+		this.consumeContext(UMB_MODAL_MANAGER_CONTEXT, (_instance) => {
+			this.#modalContext = _instance;
+		});
+	}
 
-    @property({ type: Array })
-    results: Array<uSyncActionView> | undefined = []
+	@property({ type: Array })
+	results: Array<uSyncActionView> | undefined = [];
 
-    @state()
-    showAll: boolean = false
+	@state()
+	showAll: boolean = false;
 
-    @state()
-    changeCount = 0
+	@state()
+	changeCount = 0;
 
-    #toggleShowAll() {
-        this.showAll = !this.showAll
-    }
+	#toggleShowAll() {
+		this.showAll = !this.showAll;
+	}
 
-    async #openDetailsView(result: uSyncActionView) {
-        const detailsModal = this.#modalContext?.open(
-            this,
-            USYNC_DETAILS_MODAL,
-            {
-                data: {
-                    item: result,
-                },
-            },
-        )
+	async #openDetailsView(result: uSyncActionView) {
+		const detailsModal = this.#modalContext?.open(this, USYNC_DETAILS_MODAL, {
+			data: {
+				item: result,
+			},
+		});
 
-        const data = await detailsModal?.onSubmit()
-        if (!data) return
-    }
+		const data = await detailsModal?.onSubmit();
+		if (!data) return;
+	}
 
-    render() {
-        this.changeCount = 0
+	render() {
+		this.changeCount = 0;
 
-        var rowsHtml = this.results?.map((result) => {
-            if (this.showAll == false && result.change == 'NoChange') {
-                return nothing
-            }
+		var rowsHtml = this.results?.map((result) => {
+			if (this.showAll == false && result.change == 'NoChange') {
+				return nothing;
+			}
 
-            this.changeCount++
+			this.changeCount++;
 
-            return html`
-                <uui-table-row>
-                    <uui-table-cell
-                        ><uui-icon
-                            .name=${result.success
-                                ? 'icon-check'
-                                : 'icon-wrong'}
-                        ></uui-icon
-                    ></uui-table-cell>
-                    <uui-table-cell>${result.change}</uui-table-cell>
-                    <uui-table-cell>${result.itemType}</uui-table-cell>
-                    <uui-table-cell>${result.name}</uui-table-cell>
-                    <uui-table-cell
-                        >${result.details.length > 0
-                            ? this.renderDetailsButton(result)
-                            : nothing}</uui-table-cell
-                    >
-                </uui-table-row>
-            `
-        })
+			return html`
+				<uui-table-row>
+					<uui-table-cell><uui-icon .name=${result.success ? 'icon-check' : 'icon-wrong'}></uui-icon></uui-table-cell>
+					<uui-table-cell>${result.change}</uui-table-cell>
+					<uui-table-cell>${result.itemType}</uui-table-cell>
+					<uui-table-cell>${result.name}</uui-table-cell>
+					<uui-table-cell>${result.details.length > 0 ? this.renderDetailsButton(result) : nothing}</uui-table-cell>
+				</uui-table-row>
+			`;
+		});
 
-        return this.changeCount == 0
-            ? html`
-                  ${this.renderResultBar(this.results?.length || 0)}
-                  <div class="empty">Nothing has changed</div>
-              `
-            : html`
-                  ${this.renderResultBar(this.results?.length || 0)}
-                  <uui-table>
-                      <uui-table-head>
-                          <uui-table-head-cell>Success</uui-table-head-cell>
-                          <uui-table-head-cell>Change</uui-table-head-cell>
-                          <uui-table-head-cell>Type</uui-table-head-cell>
-                          <uui-table-head-cell>Name</uui-table-head-cell>
-                          <uui-table-head-cell>Details</uui-table-head-cell>
-                      </uui-table-head>
+		return this.changeCount == 0
+			? html`
+					${this.renderResultBar(this.results?.length || 0)}
+					<div class="empty">Nothing has changed</div>
+				`
+			: html`
+					${this.renderResultBar(this.results?.length || 0)}
+					<uui-table>
+						<uui-table-head>
+							<uui-table-head-cell>Success</uui-table-head-cell>
+							<uui-table-head-cell>Change</uui-table-head-cell>
+							<uui-table-head-cell>Type</uui-table-head-cell>
+							<uui-table-head-cell>Name</uui-table-head-cell>
+							<uui-table-head-cell>Details</uui-table-head-cell>
+						</uui-table-head>
 
-                      ${rowsHtml}
-                  </uui-table>
-              `
-    }
+						${rowsHtml}
+					</uui-table>
+				`;
+	}
 
-    renderResultBar(count: number) {
-        return html` <div class="result-header">
-            <uui-toggle
-                label="Show All"
-                ?checked=${this.showAll}
-                @change=${this.#toggleShowAll}
-            ></uui-toggle>
-            ${count} items
-        </div>`
-    }
+	renderResultBar(count: number) {
+		return html` <div class="result-header">
+			<uui-toggle label="Show All" ?checked=${this.showAll} @change=${this.#toggleShowAll}></uui-toggle>
+			${count} items
+		</div>`;
+	}
 
-    renderDetailsButton(result: uSyncActionView) {
-        return html`
-            <uui-button
-                look="default"
-                color="positive"
-                label="show details"
-                @click=${() => this.#openDetailsView(result)}
-            ></uui-button>
-        `
-    }
+	renderDetailsButton(result: uSyncActionView) {
+		return html`
+			<uui-button
+				look="default"
+				color="positive"
+				label="show details"
+				@click=${() => this.#openDetailsView(result)}></uui-button>
+		`;
+	}
 
-    static styles = css`
-        :host {
-            display: block;
-            margin: var(--uui-size-space-4) 0;
-        }
+	static styles = css`
+		:host {
+			display: block;
+			margin: var(--uui-size-space-4) 0;
+		}
 
-        uui-table {
-            position: relative;
-            z-index: 100;
-        }
+		uui-table {
+			position: relative;
+			z-index: 100;
+		}
 
-        .result-header {
-            display: flex;
-            justify-content: space-between;
-            margin-top: calc(var(--uui-size-space-4) * -1);
-        }
+		.result-header {
+			display: flex;
+			justify-content: space-between;
+			margin-top: calc(var(--uui-size-space-4) * -1);
+		}
 
-        .empty {
-            padding: var(--uui-size-20);
-            font-size: var(--uui-type-h5-size);
-            text-align: center;
-            font-weight: 900;
-        }
-    `
+		.empty {
+			padding: var(--uui-size-20);
+			font-size: var(--uui-type-h5-size);
+			text-align: center;
+			font-weight: 900;
+		}
+	`;
 }
 
-export default uSyncResultsView
+export default uSyncResultsView;

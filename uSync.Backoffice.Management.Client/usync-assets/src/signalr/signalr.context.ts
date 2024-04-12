@@ -1,59 +1,57 @@
-import { UmbControllerBase } from '@umbraco-cms/backoffice/class-api'
-import { UmbControllerHost } from '@umbraco-cms/backoffice/controller-api'
+import { UmbControllerBase } from '@umbraco-cms/backoffice/class-api';
+import { UmbControllerHost } from '@umbraco-cms/backoffice/controller-api';
 
-import * as signalR from '@microsoft/signalr'
+import * as signalR from '@microsoft/signalr';
 
-import { UmbObjectState } from '@umbraco-cms/backoffice/observable-api'
-import { USYNC_SIGNALR_CONTEXT_TOKEN } from './signalr.context.token'
-import type { SyncUpdateMessage } from './types'
+import { UmbObjectState } from '@umbraco-cms/backoffice/observable-api';
+import { USYNC_SIGNALR_CONTEXT_TOKEN } from './signalr.context.token';
+import type { SyncUpdateMessage } from './types';
 
 export class uSyncSignalRContext extends UmbControllerBase {
-    #connection?: signalR.HubConnection
+	#connection?: signalR.HubConnection;
 
-    constructor(host: UmbControllerHost) {
-        super(host)
-        this.provideContext(USYNC_SIGNALR_CONTEXT_TOKEN, this)
-    }
+	constructor(host: UmbControllerHost) {
+		super(host);
+		this.provideContext(USYNC_SIGNALR_CONTEXT_TOKEN, this);
+	}
 
-    hostConnected(): void {
-        super.hostConnected()
-        this.#setupConnection('/umbraco/SyncHub')
-    }
+	hostConnected(): void {
+		super.hostConnected();
+		this.#setupConnection('/umbraco/SyncHub');
+	}
 
-    hostDisconnected(): void {
-        super.hostDisconnected()
-        this.#connection?.stop().then(() => {
-            console.debug('connection closed')
-        })
-    }
+	hostDisconnected(): void {
+		super.hostDisconnected();
+		this.#connection?.stop().then(() => {
+			console.debug('connection closed');
+		});
+	}
 
-    getClientId(): string | null {
-        return this.#connection?.connectionId ?? null
-    }
+	getClientId(): string | null {
+		return this.#connection?.connectionId ?? null;
+	}
 
-    #update = new UmbObjectState<SyncUpdateMessage | undefined>(undefined)
-    public readonly update = this.#update.asObservable()
+	#update = new UmbObjectState<SyncUpdateMessage | undefined>(undefined);
+	public readonly update = this.#update.asObservable();
 
-    #add = new UmbObjectState({})
-    public readonly add = this.#add.asObservable()
+	#add = new UmbObjectState({});
+	public readonly add = this.#add.asObservable();
 
-    #setupConnection(url: string) {
-        this.#connection = new signalR.HubConnectionBuilder()
-            .withUrl(url)
-            .build()
+	#setupConnection(url: string) {
+		this.#connection = new signalR.HubConnectionBuilder().withUrl(url).build();
 
-        this.#connection.on('add', (data) => {
-            this.#add.setValue(data)
-        })
+		this.#connection.on('add', (data) => {
+			this.#add.setValue(data);
+		});
 
-        this.#connection.on('update', (data) => {
-            this.#update.setValue(data)
-        })
+		this.#connection.on('update', (data) => {
+			this.#update.setValue(data);
+		});
 
-        this.#connection.start().then(() => {
-            console.debug('connection started')
-        })
-    }
+		this.#connection.start().then(() => {
+			console.debug('connection started');
+		});
+	}
 }
 
-export default uSyncSignalRContext
+export default uSyncSignalRContext;
