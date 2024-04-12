@@ -69,7 +69,7 @@ export class uSyncActionRepository extends UmbControllerBase {
 				force: request.force ?? false,
 				clean: request.clean ?? false,
 				clientId: request.clientId,
-				set: request.set ?? 'default',
+				set: request.set ?? 'Default',
 			},
 			stepNumber: request.step,
 		});
