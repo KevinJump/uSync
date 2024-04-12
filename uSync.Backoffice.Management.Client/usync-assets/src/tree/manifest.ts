@@ -1,31 +1,35 @@
-import { ManifestMenu, ManifestMenuItem, ManifestTypes } from "@umbraco-cms/backoffice/extension-registry";
-import { uSyncConstants } from "../constants";
-// import { ManifestuSyncMenuItem } from "./types.js";
+import {
+    ManifestMenu,
+    ManifestMenuItem,
+    ManifestTypes,
+} from '@umbraco-cms/backoffice/extension-registry'
+import { uSyncConstants } from '../constants'
+import uSyncMenuElement from './usync.menu-element.js'
 
-const sectionAlias = 'Umb.Section.Settings';
+const sectionAlias = 'Umb.Section.Settings'
 
-const menu : ManifestMenu = {
+const menu: ManifestMenu = {
     type: 'menu',
-    alias: 'usync.menu',
+    alias: uSyncConstants.menuAlias,
     name: 'uSync Menu',
-    // element: () => import('./usync.menu-element.js'),
     meta: {
         label: uSyncConstants.name,
         icon: uSyncConstants.icon,
-        entityType: uSyncConstants.workspace.rootElement
-    }
+        entityType: uSyncConstants.workspace.rootElement,
+    },
 }
 
-const menuItem : ManifestMenuItem = {
+const menuItem: ManifestMenuItem = {
     type: 'menuItem',
     alias: 'usync.menu.item',
     name: 'uSync menu item',
+    element: uSyncMenuElement,
     meta: {
         label: 'uSync',
         icon: 'icon-infinity',
         entityType: 'usync-root',
-        menus: ['usync.menu']
-    }
+        menus: [uSyncConstants.menuAlias],
+    },
 }
 
 const menuSidebarApp: ManifestTypes = {
@@ -42,26 +46,27 @@ const menuSidebarApp: ManifestTypes = {
         {
             alias: 'Umb.Condition.SectionAlias',
             match: sectionAlias,
-        }
+        },
     ],
 }
 
 /// example of how to extend uSync menus.
 
-// const menuItem : ManifestuSyncMenuItem = {
-//     type: "usync-menuItem",
-//     alias: 'usync.menu.item',
+// const subMenuItem : ManifestuSyncMenuItem = {
+//     type: 'usync-menuItem',
+//     alias: 'usync.menu.sub.item',
 //     name: 'uSync core menu item',
 //     meta: {
 //         label: 'uSync Extension',
 //         icon: 'icon-brick',
-//         entityType: uSyncConstants.workspace.rootElement,
-//         menus: [menu.alias]
+//         entityType: 'usync-root',
+//         menus: [uSyncConstants.menuAlias],
 //     }
 // }
 
 export const manifests = [
-    menu, 
-    menuSidebarApp, 
-    menuItem
-];
+    menu,
+    menuSidebarApp,
+    menuItem,
+    // subMenuItem
+]

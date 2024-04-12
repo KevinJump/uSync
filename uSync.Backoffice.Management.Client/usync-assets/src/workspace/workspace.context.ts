@@ -1,185 +1,194 @@
-import { UmbArrayState, UmbBooleanState, UmbObjectState } from "@umbraco-cms/backoffice/observable-api";
-import { UmbContextToken } from "@umbraco-cms/backoffice/context-api";
+import {
+    UmbArrayState,
+    UmbBooleanState,
+    UmbObjectState,
+} from '@umbraco-cms/backoffice/observable-api'
+import { UmbContextToken } from '@umbraco-cms/backoffice/context-api'
 
-import { uSyncActionRepository } from "..";
-import { UmbControllerHost } from "@umbraco-cms/backoffice/controller-api";
-import { UmbControllerBase } from "@umbraco-cms/backoffice/class-api";
-import { SyncActionGroup, SyncHandlerSummary, SyncLegacyCheckResponse, uSyncActionView, uSyncHandlerSetSettings, uSyncSettings } from "../api";
+import { uSyncActionRepository } from '..'
+import { UmbControllerHost } from '@umbraco-cms/backoffice/controller-api'
+import { UmbControllerBase } from '@umbraco-cms/backoffice/class-api'
+import {
+    SyncActionGroup,
+    SyncHandlerSummary,
+    SyncLegacyCheckResponse,
+    uSyncActionView,
+    uSyncHandlerSetSettings,
+    uSyncSettings,
+} from '../api'
 
-import uSyncSignalRContext from "../signalr/signalr.context";
-import { UMB_WORKSPACE_CONTEXT, UmbWorkspaceContext } from "@umbraco-cms/backoffice/workspace";
-import { uSyncConstants } from "../constants";
-import { uSyncIconRegistry } from "../icons";
-import { SyncPerformActionOptions } from "./types";
+import uSyncSignalRContext from '../signalr/signalr.context'
+import {
+    UMB_WORKSPACE_CONTEXT,
+    UmbWorkspaceContext,
+} from '@umbraco-cms/backoffice/workspace'
+import { uSyncConstants } from '../constants'
+import { uSyncIconRegistry } from '../icons'
+import { SyncPerformActionOptions } from './types'
 
 /**
- * @exports 
+ * @exports
  * @class uSyncWorkspaceActionContext
  * @description context for getting and seting up actions.
  */
-export class uSyncWorkspaceContext extends UmbControllerBase
-    implements UmbWorkspaceContext {
-    public readonly workspaceAlias: string = uSyncConstants.workspace.alias;
+export class uSyncWorkspaceContext
+    extends UmbControllerBase
+    implements UmbWorkspaceContext
+{
+    public readonly workspaceAlias: string = uSyncConstants.workspace.alias
 
     getEntityType(): string {
-        return uSyncConstants.workspace.rootElement;
+        return uSyncConstants.workspace.rootElement
     }
 
-    #repository: uSyncActionRepository;
-    #uSyncIconRegistry: uSyncIconRegistry;
-    #signalRContext: uSyncSignalRContext | null = null;
+    #repository: uSyncActionRepository
+    #uSyncIconRegistry: uSyncIconRegistry
+    #signalRContext: uSyncSignalRContext | null = null
 
     /**
      * @type Array<SyncActionGroup>
      * @description list of actions that have been returned
      */
-    #actions = new UmbArrayState<SyncActionGroup>([], (x) => x.key);
-    public readonly actions = this.#actions.asObservable();
+    #actions = new UmbArrayState<SyncActionGroup>([], (x) => x.key)
+    public readonly actions = this.#actions.asObservable()
 
     /**
      * @type Array<SyncHandlerSummary>
      * @description the summary objects that show the handler boxes
      */
-    #workingActions = new UmbArrayState<SyncHandlerSummary>([], (x) => x.name);
-    public readonly currentAction = this.#workingActions.asObservable();
+    #workingActions = new UmbArrayState<SyncHandlerSummary>([], (x) => x.name)
+    public readonly currentAction = this.#workingActions.asObservable()
 
     /**
      * @type Boolean
      * @description flag to say if things are currently being processed
      */
-    #working = new UmbBooleanState(false);
-    public readonly working = this.#working.asObservable();
+    #working = new UmbBooleanState(false)
+    public readonly working = this.#working.asObservable()
 
-    /** 
+    /**
      * @type Boolean
      * @description flat to say that the last run has been completed (so results will show)
      */
-    #completed = new UmbBooleanState(false);
-    public readonly completed = this.#completed.asObservable();
+    #completed = new UmbBooleanState(false)
+    public readonly completed = this.#completed.asObservable()
 
     /**
      * @type Array<uSyncActionView>
      * @description the results of a run.
      */
-    #results = new UmbArrayState<uSyncActionView>([], (x) => x.name);
-    public readonly results = this.#results.asObservable();
+    #results = new UmbArrayState<uSyncActionView>([], (x) => x.name)
+    public readonly results = this.#results.asObservable()
 
     /**
      * @type uSyncSettings
      * @description current settings for uSync
      */
-    #settings = new UmbObjectState<uSyncSettings | undefined>(undefined);
-    public readonly settings = this.#settings?.asObservable();
+    #settings = new UmbObjectState<uSyncSettings | undefined>(undefined)
+    public readonly settings = this.#settings?.asObservable()
 
     /**
      * @type uSyncHandlerSettings
      * @description handler settings object
      */
-    #handlerSettings = new UmbObjectState<uSyncHandlerSetSettings | undefined>(undefined);
-    public readonly handlerSettings = this.#handlerSettings?.asObservable();
+    #handlerSettings = new UmbObjectState<uSyncHandlerSetSettings | undefined>(
+        undefined,
+    )
+    public readonly handlerSettings = this.#handlerSettings?.asObservable()
 
-    #legacy = new UmbObjectState<SyncLegacyCheckResponse | undefined>(undefined);
-    public readonly legacy = this.#legacy?.asObservable();
+    #legacy = new UmbObjectState<SyncLegacyCheckResponse | undefined>(undefined)
+    public readonly legacy = this.#legacy?.asObservable()
 
     constructor(host: UmbControllerHost) {
-        super(host);
+        super(host)
 
-        this.provideContext(USYNC_CORE_CONTEXT_TOKEN, this);
-        this.provideContext(UMB_WORKSPACE_CONTEXT, this);
+        this.provideContext(USYNC_CORE_CONTEXT_TOKEN, this)
+        this.provideContext(UMB_WORKSPACE_CONTEXT, this)
 
-        this.#repository = new uSyncActionRepository(this);
-        this.#uSyncIconRegistry = new uSyncIconRegistry();
-        this.#uSyncIconRegistry.attach(this);
+        this.#repository = new uSyncActionRepository(this)
+        this.#uSyncIconRegistry = new uSyncIconRegistry()
+        this.#uSyncIconRegistry.attach(this)
 
-        this.#signalRContext = new uSyncSignalRContext(this);
-    }    
+        this.#signalRContext = new uSyncSignalRContext(this)
+    }
 
     async getActions() {
-        const { data } = await this.#repository.getActions();
+        const { data } = await this.#repository.getActions()
 
         if (data) {
-            this.#actions.setValue(data);
+            this.#actions.setValue(data)
         }
     }
 
     async getSettings() {
-        const {data} = await this.#repository.getSettings();
+        const { data } = await this.#repository.getSettings()
 
         if (data) {
-            this.#settings.setValue(data);
+            this.#settings.setValue(data)
         }
     }
 
     async checkLegacy() {
-        const {data} = await this.#repository.checkLegacy();
+        const { data } = await this.#repository.checkLegacy()
         if (data) {
-            this.#legacy.setValue(data);
+            this.#legacy.setValue(data)
         }
     }
 
     async getDefaultHandlerSetSettings() {
-        const {data} = await this.#repository.getHandlerSettings("Default");
+        const { data } = await this.#repository.getHandlerSettings('Default')
 
         if (data) {
-            this.#handlerSettings.setValue(data);
+            this.#handlerSettings.setValue(data)
         }
     }
 
     async performAction(options: SyncPerformActionOptions) {
-        var clientId = this.#signalRContext?.getClientId() ?? '';
+        var clientId = this.#signalRContext?.getClientId() ?? ''
 
-        this.#working.setValue(true);
-        this.#completed.setValue(false);
-        this.#results.setValue([]);
+        this.#working.setValue(true)
+        this.#completed.setValue(false)
+        this.#results.setValue([])
 
-        var complete = false;
-        var id = '';
-        var step: number = 0;
+        var complete = false
+        var id = ''
+        var step: number = 0
 
         do {
-
-            const { data } = await this.#repository.performAction( {
+            const { data } = await this.#repository.performAction({
                 id: id,
                 action: options.action,
                 group: options.group.key,
                 force: options.force,
                 clean: options.clean,
                 step: step,
-                clientId: clientId
-            });
+                clientId: clientId,
+            })
 
             if (data) {
+                step++
 
-                step++;
+                let summary = data.status ?? []
 
-                let summary = data.status ?? [];
+                this.#workingActions.setValue(summary)
 
-                this.#workingActions.setValue(summary);
-
-                id = data.requestId;
-                complete = data.complete;
+                id = data.requestId
+                complete = data.complete
 
                 if (complete) {
-                    this.#results.setValue(data?.actions ?? []);
+                    this.#results.setValue(data?.actions ?? [])
                 }
-
+            } else {
+                complete = true
             }
-            else {
-                complete = true;
-            }
-
-
-
         } while (!complete)
 
-
-        this.#completed.setValue(true);
-        this.#working.setValue(false);
-
+        this.#completed.setValue(true)
+        this.#working.setValue(false)
     }
 }
 
-export default uSyncWorkspaceContext;
+export default uSyncWorkspaceContext
 
 export const USYNC_CORE_CONTEXT_TOKEN =
-    new UmbContextToken<uSyncWorkspaceContext>('uSyncWorkspaceContext');
+    new UmbContextToken<uSyncWorkspaceContext>('uSyncWorkspaceContext')

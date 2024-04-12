@@ -1,57 +1,59 @@
 {
-  "name": "@jumoo/usync-assets",
-  "license": "MPL-2.0",
-  "type": "module",
-  "version": "14.0.0-beta003",
-  "main": "./dist/usync.js",
-  "types": "./dist/index.d.ts",
-  "module": "./dist/usync.js",
-  "exports": {
-    ".": "./dist/index.js",
-    "./components": "./dist/components/index.js",
-    "./constants": "./dist/constants.js",
-    "./tree": "./dist/tree/index.js"
-  },
-  "files": [
-    "./dist"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/KevinJump/uSync.git"
-  },
-  "bugs": {
-    "url": "https://github.com/kevinjump/usync/issues"
-  },
-  "author": {
-    "name": "Jumoo Ltd",
-    "email": "info@jumoo.co.uk",
-    "url": "https://jumoo.co.uk"
-  },
-  "config": {
-    "server": "http://localhost:26907",
-    "swagger": "umbraco/swagger/uSync/swagger.json"
-  },
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
-    "watch": "vite build --watch",
-    "generate": "openapi-ts --input %npm_package_config_server%/%npm_package_config_swagger% --output src/api --debug true --enums typescript --lint true --schemas false",
-    "dist": "tsc && vite build --config ./vite.dist.config.ts && npm pack --pack-destination ./pack "
-  },
-  "dependencies": {
-    "@microsoft/signalr": "^8.0.0",
-    "diff": "^5.2.0",
-    "lit": "^3.1.0"
-  },
-  "devDependencies": {
-    "@hey-api/openapi-ts": "^0.37.3",
-    "@types/diff": "^5.0.9",
-    "@types/node": "^20.11.20",
-    "@umbraco-cms/backoffice": "^14.0.0-beta003",
-    "typescript": "^5.2.2",
-    "vite": "^5.1.7",
-    "vite-plugin-dts": "^3.7.3",
-    "vite-plugin-static-copy": "^1.0.1"
-  }
+    "name": "@jumoo/usync-assets",
+    "license": "MPL-2.0",
+    "type": "module",
+    "version": "14.0.0-beta003",
+    "main": "./dist/usync.js",
+    "types": "./dist/index.d.ts",
+    "module": "./dist/usync.js",
+    "exports": {
+        ".": "./dist/index.js",
+        "./components": "./dist/components/index.js",
+        "./constants": "./dist/constants.js",
+        "./tree": "./dist/tree/index.js"
+    },
+    "files": [
+        "./dist"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/KevinJump/uSync.git"
+    },
+    "bugs": {
+        "url": "https://github.com/kevinjump/usync/issues"
+    },
+    "author": {
+        "name": "Jumoo Ltd",
+        "email": "info@jumoo.co.uk",
+        "url": "https://jumoo.co.uk"
+    },
+    "config": {
+        "server": "http://localhost:16855",
+        "swagger": "umbraco/swagger/uSync/swagger.json"
+    },
+    "scripts": {
+        "dev": "vite",
+        "build": "tsc && vite build",
+        "preview": "vite preview",
+        "watch": "vite build --watch",
+        "generate": "openapi-ts --input %npm_package_config_server%/%npm_package_config_swagger% --output src/api --debug true --enums typescript --lint true --schemas false",
+        "dist": "tsc && vite build --config ./vite.dist.config.ts && npm pack --pack-destination ./pack ",
+        "pretty": "prettier --write \"./**/*.{js,jsx,mjs,cjs,ts,tsx,json}\""
+    },
+    "dependencies": {
+        "@microsoft/signalr": "^8.0.0",
+        "diff": "^5.2.0",
+        "lit": "^3.1.0"
+    },
+    "devDependencies": {
+        "@hey-api/openapi-ts": "^0.37.3",
+        "@types/diff": "^5.0.9",
+        "@types/node": "^20.11.20",
+        "@umbraco-cms/backoffice": "^14.0.0-beta003",
+        "prettier": "^3.2.5",
+        "typescript": "^5.2.2",
+        "vite": "^5.1.7",
+        "vite-plugin-dts": "^3.7.3",
+        "vite-plugin-static-copy": "^1.0.1"
+    }
 }

@@ -1,4 +1,4 @@
-import { ManifestLocalization } from "@umbraco-cms/backoffice/extension-registry";
+import { ManifestLocalization } from '@umbraco-cms/backoffice/extension-registry'
 
 const localizations: Array<ManifestLocalization> = [
     {
@@ -7,9 +7,9 @@ const localizations: Array<ManifestLocalization> = [
         name: 'English (US)',
         weight: 0,
         meta: {
-            culture: 'en-us'
+            culture: 'en-us',
         },
-        js: () => import('./files/en-us')
+        js: () => import('./files/en-us'),
     },
     {
         type: 'localization',
@@ -17,11 +17,10 @@ const localizations: Array<ManifestLocalization> = [
         name: 'English (GB)',
         weight: 0,
         meta: {
-            culture: 'en-gb'
+            culture: 'en-gb',
         },
-        js: () => import('./files/en-us')
-    }
-
+        js: () => import('./files/en-us'),
+    },
 ]
 
-export const manifests = [...localizations];
+export const manifests = [...localizations]

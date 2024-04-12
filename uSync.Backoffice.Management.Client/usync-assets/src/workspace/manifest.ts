@@ -1,15 +1,15 @@
-import { 
-    ManifestWorkspace, 
-    ManifestWorkspaceAction, 
-    ManifestWorkspaceContext, 
-    ManifestWorkspaceView 
-} from "@umbraco-cms/backoffice/extension-registry";
+import {
+    ManifestWorkspace,
+    ManifestWorkspaceAction,
+    ManifestWorkspaceContext,
+    ManifestWorkspaceView,
+} from '@umbraco-cms/backoffice/extension-registry'
 
-import "./components";
+import './components'
 
-import { uSyncConstants } from "../constants.js";
+import { uSyncConstants } from '../constants.js'
 
-const workspaceAlias = uSyncConstants.workspace.alias;
+const workspaceAlias = uSyncConstants.workspace.alias
 
 const workspace: ManifestWorkspace = {
     type: 'workspace',
@@ -18,8 +18,8 @@ const workspace: ManifestWorkspace = {
     js: () => import('./workspace.element.js'),
     meta: {
         entityType: uSyncConstants.workspace.rootElement,
-    }
-};
+    },
+}
 
 const context: ManifestWorkspaceContext = {
     type: 'workspaceContext',
@@ -27,8 +27,6 @@ const context: ManifestWorkspaceContext = {
     name: 'uSync workspace context',
     js: () => import('./workspace.context.js'),
 }
-
-
 
 /**
  * this isn't working, don't know why :( - going to go hardwired for now
@@ -47,10 +45,10 @@ const workspaceViews: Array<ManifestWorkspaceView> = [
         },
         conditions: [
             {
-				alias: 'Umb.Condition.WorkspaceAlias',
-                match: workspaceAlias
-            }
-        ]
+                alias: 'Umb.Condition.WorkspaceAlias',
+                match: workspaceAlias,
+            },
+        ],
     },
     {
         type: 'workspaceView',
@@ -61,39 +59,40 @@ const workspaceViews: Array<ManifestWorkspaceView> = [
         meta: {
             label: 'Settings',
             pathname: 'settings',
-            icon: 'icon-settings'
-        },
-        conditions: [
-            {
-				alias: 'Umb.Condition.WorkspaceAlias',
-                match: workspaceAlias,
-            }
-        ]       
-    },
-    {
-        type: 'workspaceView',
-        alias: uSyncConstants.workspace.addOnView.alias,
-        name: 'uSync addons',
-        js: ()=> import('./views/addons/addons.element.js'),
-        weight: 100,
-        meta: {
-            label: 'AddOns',
-            pathname: 'addons',
-            icon: 'icon-box'
+            icon: 'icon-settings',
         },
         conditions: [
             {
                 alias: 'Umb.Condition.WorkspaceAlias',
                 match: workspaceAlias,
-            }
-        ]
-    }
-];
+            },
+        ],
+    },
+    {
+        type: 'workspaceView',
+        alias: uSyncConstants.workspace.addOnView.alias,
+        name: 'uSync addons',
+        js: () => import('./views/addons/addons.element.js'),
+        weight: 100,
+        meta: {
+            label: 'AddOns',
+            pathname: 'addons',
+            icon: 'icon-box',
+        },
+        conditions: [
+            {
+                alias: 'Umb.Condition.WorkspaceAlias',
+                match: workspaceAlias,
+            },
+        ],
+    },
+]
 
-const workspaceActions: Array<ManifestWorkspaceAction> = [];
+const workspaceActions: Array<ManifestWorkspaceAction> = []
 
 export const manifests = [
-    context, 
-    workspace, 
+    context,
+    workspace,
     ...workspaceViews,
-    ...workspaceActions];
+    ...workspaceActions,
+]

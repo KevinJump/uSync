@@ -1,39 +1,45 @@
-import { UmbModalBaseElement } from "@umbraco-cms/backoffice/modal";
-import { uSyncDetailsModalData, uSyncDetailsModalValue } from "./details-modal-token";
-import { customElement, html } from "@umbraco-cms/backoffice/external/lit";
+import { UmbModalBaseElement } from '@umbraco-cms/backoffice/modal'
+import {
+    uSyncDetailsModalData,
+    uSyncDetailsModalValue,
+} from './details-modal-token'
+import { customElement, html } from '@umbraco-cms/backoffice/external/lit'
 
 @customElement('usync-details-modal')
-export class uSyncDetailsModalElement extends
-    UmbModalBaseElement<uSyncDetailsModalData, uSyncDetailsModalValue> {
-
+export class uSyncDetailsModalElement extends UmbModalBaseElement<
+    uSyncDetailsModalData,
+    uSyncDetailsModalValue
+> {
     #onClose() {
-		this.modalContext?.reject();
-	}
+        this.modalContext?.reject()
+    }
 
     render() {
         return html`
             <umb-body-layout headline="Changes : ${this.data?.item.name ?? ''}">
-
                 <uui-box headline="Detected Changes">
                     <div slot="header">Things that are diffrent</div>
-                    <usync-change-view .item=${this.data?.item}></usync-change-view>
+                    <usync-change-view
+                        .item=${this.data?.item}
+                    ></usync-change-view>
                 </uui-box>
                 <div slot="actions">
-                    <uui-button 
+                    <uui-button
                         id="cancel"
                         label="Close"
                         @click="${this.#onClose}"
-                    >Close</uui-button>
+                        >Close</uui-button
+                    >
                 </div>
             </umb-body-layout>
-        `;
+        `
     }
 }
 
-export default uSyncDetailsModalElement;
+export default uSyncDetailsModalElement
 
 declare global {
-	interface HTMLElementTagNameMap {
-		'usync-details-modal': uSyncDetailsModalElement;
-	}
+    interface HTMLElementTagNameMap {
+        'usync-details-modal': uSyncDetailsModalElement
+    }
 }

@@ -1,11 +1,10 @@
-
 const _constants = {
-
     name: 'uSync',
     path: 'usync',
     icon: 'icon-infinity',
     menuName: 'Syncronisation',
-    version: "14.0.0-beta002",
+    menuAlias: 'usync.menu',
+    version: '14.0.0-beta003',
 
     workspace: {
         alias: 'usync.workspace',
@@ -23,9 +22,8 @@ const _constants = {
 
         addOnView: {
             alias: 'usync.workspace.addons',
-        }
-    }
-};
+        },
+    },
+}
 
-
-export const uSyncConstants = _constants;
+export const uSyncConstants = _constants

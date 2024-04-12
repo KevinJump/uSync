@@ -1,21 +1,26 @@
-import { UmbElementMixin } from "@umbraco-cms/backoffice/element-api";
-import { LitElement, css, customElement, html } from "@umbraco-cms/backoffice/external/lit";
+import { UmbElementMixin } from '@umbraco-cms/backoffice/element-api'
+import {
+    LitElement,
+    css,
+    customElement,
+    html,
+} from '@umbraco-cms/backoffice/external/lit'
 
-import logo from "../../../img/usync-complete.png";
+import logo from '../../../img/usync-complete.png'
 
 @customElement('usync-addons-view')
 export class uSyncAddOnsElement extends UmbElementMixin(LitElement) {
-
     render() {
         return html`
             <umb-body-layout>
                 <div class="addon-view">
                     <div>
                         <div class="header">
-                            <img src=${logo}>
+                            <img src=${logo} />
                             <h1>uSync Complete</h1>
                             <p>
-                                uSync Complete gives you total control over your Umbraco settings and content.
+                                uSync Complete gives you total control over your
+                                Umbraco settings and content.
                             </p>
                         </div>
 
@@ -47,24 +52,27 @@ export class uSyncAddOnsElement extends UmbElementMixin(LitElement) {
                         </div>
 
                         <div class="cta">
-                            <uui-button 
+                            <uui-button
                                 href="https://jumoo.co.uk/uSync/complete/"
                                 target="_blank"
-                                color="positive" 
-                                look="primary" 
-                                label="Find out more"></uui-button>
+                                color="positive"
+                                look="primary"
+                                label="Find out more"
+                            ></uui-button>
                         </div>
                     </div>
                 </div>
             </umb-body-layout>
-        `;
+        `
     }
 
     static styles = css`
-
         umb-body-layout {
             // background: linear-gradient(#e3e3f1,#f6f4f4);
-            background: linear-gradient(var(--uui-color-background),var(--uui-color-border));
+            background: linear-gradient(
+                var(--uui-color-background),
+                var(--uui-color-border)
+            );
         }
 
         .addon-view {
@@ -74,10 +82,11 @@ export class uSyncAddOnsElement extends UmbElementMixin(LitElement) {
             height: 100%;
         }
 
-        .header, .cta {
+        .header,
+        .cta {
             display: flex;
             flex-direction: column;
-            align-items: center;            
+            align-items: center;
         }
 
         .header {
@@ -106,7 +115,7 @@ export class uSyncAddOnsElement extends UmbElementMixin(LitElement) {
         uui-button {
             font-size: var(--uui-type-h4-size);
         }
-    `;
+    `
 }
 
-export default uSyncAddOnsElement;
+export default uSyncAddOnsElement

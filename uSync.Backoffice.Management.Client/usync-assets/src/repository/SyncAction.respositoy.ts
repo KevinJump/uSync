@@ -1,18 +1,17 @@
-import { UmbControllerHost } from "@umbraco-cms/backoffice/controller-api";
-import { uSyncActionDataSource } from "./sources/SyncAction.source";
-import { UmbControllerBase } from "@umbraco-cms/backoffice/class-api";
-import { uSyncSettingsDataSource } from "./sources/SyncSettings.source";
-import { uSyncMigrationDataSource } from "./sources/SyncMigration.source";
-
+import { UmbControllerHost } from '@umbraco-cms/backoffice/controller-api'
+import { uSyncActionDataSource } from './sources/SyncAction.source'
+import { UmbControllerBase } from '@umbraco-cms/backoffice/class-api'
+import { uSyncSettingsDataSource } from './sources/SyncSettings.source'
+import { uSyncMigrationDataSource } from './sources/SyncMigration.source'
 
 export type SyncPerformRequest = {
-    id: string, 
-    group: string, 
-    action: string, 
-    step: number, 
-    force?: boolean,
-    clean?: boolean,
-    set?: string,
+    id: string
+    group: string
+    action: string
+    step: number
+    force?: boolean
+    clean?: boolean
+    set?: string
     clientId: string
 }
 
@@ -22,15 +21,15 @@ export type SyncPerformRequest = {
  * @description repository for all things actions.
  */
 export class uSyncActionRepository extends UmbControllerBase {
-    #actionDataSource: uSyncActionDataSource;
-    #settingsDataSource: uSyncSettingsDataSource;
-    #migrartionDataSource: uSyncMigrationDataSource;
+    #actionDataSource: uSyncActionDataSource
+    #settingsDataSource: uSyncSettingsDataSource
+    #migrartionDataSource: uSyncMigrationDataSource
 
     constructor(host: UmbControllerHost) {
-        super(host);
-        this.#actionDataSource = new uSyncActionDataSource(this);
-        this.#settingsDataSource = new uSyncSettingsDataSource(this);
-        this.#migrartionDataSource = new uSyncMigrationDataSource(this);
+        super(host)
+        this.#actionDataSource = new uSyncActionDataSource(this)
+        this.#settingsDataSource = new uSyncSettingsDataSource(this)
+        this.#migrartionDataSource = new uSyncMigrationDataSource(this)
     }
 
     /**
@@ -39,7 +38,7 @@ export class uSyncActionRepository extends UmbControllerBase {
      * @returns Promise
      */
     async getActions() {
-        return this.#actionDataSource.getActions();
+        return this.#actionDataSource.getActions()
     }
 
     /**
@@ -48,7 +47,6 @@ export class uSyncActionRepository extends UmbControllerBase {
      * @returns PerformActionResponse.
      */
     async performAction(request: SyncPerformRequest) {
-
         return this.#actionDataSource.performAction({
             requestId: request.id,
             action: request.action,
@@ -57,10 +55,10 @@ export class uSyncActionRepository extends UmbControllerBase {
                 force: request.force ?? false,
                 clean: request.clean ?? false,
                 clientId: request.clientId,
-                set: request.set ?? 'default'
+                set: request.set ?? 'default',
             },
-            stepNumber: request.step
-        });
+            stepNumber: request.step,
+        })
     }
 
     /**
@@ -69,7 +67,7 @@ export class uSyncActionRepository extends UmbControllerBase {
      * @returns the current uSync settings
      */
     async getSettings() {
-        return await this.#settingsDataSource.getSettings();
+        return await this.#settingsDataSource.getSettings()
     }
 
     /**
@@ -77,8 +75,8 @@ export class uSyncActionRepository extends UmbControllerBase {
      * @param setName name of the handler set in the configuration
      * @returns the settings for the named handler set.
      */
-    async getHandlerSettings(setName : string) {
-        return await this.#settingsDataSource.getHandlerSettings(setName);
+    async getHandlerSettings(setName: string) {
+        return await this.#settingsDataSource.getHandlerSettings(setName)
     }
 
     /**
@@ -87,6 +85,6 @@ export class uSyncActionRepository extends UmbControllerBase {
      * @returns results of a check for legacy files
      */
     async checkLegacy() {
-        return await this.#migrartionDataSource.checkLegacy();
+        return await this.#migrartionDataSource.checkLegacy()
     }
 }

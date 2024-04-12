@@ -1,1 +1,1 @@
-export * from './usyncIconRegistry';
+export * from './usyncIconRegistry'
