@@ -445,6 +445,15 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
         {
             var schedules = GetSchedules(node.Element("Info")?.Element("Schedule"));
 
+            ContentScheduleCollection scheduleCollection = new ContentScheduleCollection();
+            foreach(var schedule in schedules)
+            {
+                scheduleCollection.Add(schedule);
+            }
+
+            // v14 we always save now, as save and publish doesn't do that anymore...
+            contentService.Save(item, options.UserId, scheduleCollection);
+
             if (publishedNode.HasElements)
             {
                 // culture based publishing.
@@ -498,7 +507,6 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
             }
         }
 
-        this.SaveItem(item, options.UserId);
         return Attempt.Succeed("Saved");
     }
 
@@ -524,7 +532,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
         try
         {
             logger.LogDebug("Publishing: {item} as User:{user}", item.Name, userId);
-            var result = contentService.SaveAndPublish(item, userId: userId);
+            var result = contentService.Publish(item, cultures: [], userId: userId);
             if (!result.Success)
             {
                 var messages = result.EventMessages?.FormatMessages(",");
@@ -559,8 +567,6 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
 
         try
         {
-            var hasBeenSaved = false;
-
             var publishedCultures = cultures
                 .Where(x => x.Value == uSyncContentState.Published)
                 .Select(x => x.Key)
@@ -571,7 +577,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
                 logger.LogDebug("Publishing {item} as {user} for {cultures}", item.Name, userId,
                     string.Join(",", publishedCultures));
 
-                var result = contentService.SaveAndPublish(item, publishedCultures, userId);
+                var result = contentService.Publish(item, publishedCultures, userId);
 
                 // if this fails, we return the result
                 if (!result.Success)
@@ -585,9 +591,6 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
 
                     return result.ToAttempt();
                 }
-
-                // if its published here it's also saved, so we can skip the save below.
-                hasBeenSaved = true;
             }
 
             var unpublishedCultures = cultures
@@ -612,16 +615,8 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
                 }
             }
 
-
             if (unpublishMissing)
                 UnpublishMissingCultures(item, cultures.Select(x => x.Key).ToArray());
-
-            // if we get to this point and no save has been called, we should call it. 
-            if (!hasBeenSaved && item.IsDirty())
-            {
-                logger.LogDebug("Saving {item} because we didn't publish it", item.Name);
-                contentService.Save(item);
-            }
 
             return Attempt.Succeed("Done");
         }
