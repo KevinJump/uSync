@@ -5,7 +5,9 @@ import { SettingsService, uSyncHandlerSetSettings, uSyncSettings } from '../../a
 
 export interface SyncSettingsDataSource {
 	getSettings(): Promise<UmbDataSourceResponse<uSyncSettings>>;
-	getHandlerSettings(setName: string): Promise<UmbDataSourceResponse<uSyncHandlerSetSettings>>;
+	getHandlerSettings(
+		setName: string,
+	): Promise<UmbDataSourceResponse<uSyncHandlerSetSettings>>;
 }
 
 export class uSyncSettingsDataSource implements SyncSettingsDataSource {
@@ -19,7 +21,12 @@ export class uSyncSettingsDataSource implements SyncSettingsDataSource {
 		return await tryExecuteAndNotify(this.#host, SettingsService.getSettings());
 	}
 
-	async getHandlerSettings(setName: string): Promise<UmbDataSourceResponse<uSyncHandlerSetSettings>> {
-		return await tryExecuteAndNotify(this.#host, SettingsService.getHandlerSetSettings({ id: setName }));
+	async getHandlerSettings(
+		setName: string,
+	): Promise<UmbDataSourceResponse<uSyncHandlerSetSettings>> {
+		return await tryExecuteAndNotify(
+			this.#host,
+			SettingsService.getHandlerSetSettings({ id: setName }),
+		);
 	}
 }

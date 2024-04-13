@@ -1,7 +1,18 @@
-import { LitElement, html, customElement, property, nothing, css, state } from '@umbraco-cms/backoffice/external/lit';
+import {
+	LitElement,
+	html,
+	customElement,
+	property,
+	nothing,
+	css,
+	state,
+} from '@umbraco-cms/backoffice/external/lit';
 import { uSyncActionView } from '../api';
 import { UmbElementMixin } from '@umbraco-cms/backoffice/element-api';
-import { UMB_MODAL_MANAGER_CONTEXT, UmbModalManagerContext } from '@umbraco-cms/backoffice/modal';
+import {
+	UMB_MODAL_MANAGER_CONTEXT,
+	UmbModalManagerContext,
+} from '@umbraco-cms/backoffice/modal';
 import { USYNC_DETAILS_MODAL } from '../dialogs/details-modal-token';
 
 @customElement('usync-results')
@@ -52,11 +63,17 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
 
 			return html`
 				<uui-table-row>
-					<uui-table-cell><uui-icon .name=${result.success ? 'icon-check' : 'icon-wrong'}></uui-icon></uui-table-cell>
+					<uui-table-cell
+						><uui-icon .name=${result.success ? 'icon-check' : 'icon-wrong'}></uui-icon
+					></uui-table-cell>
 					<uui-table-cell>${result.change}</uui-table-cell>
 					<uui-table-cell>${result.itemType}</uui-table-cell>
 					<uui-table-cell>${result.name}</uui-table-cell>
-					<uui-table-cell>${result.details.length > 0 ? this.renderDetailsButton(result) : nothing}</uui-table-cell>
+					<uui-table-cell
+						>${result.details.length > 0
+							? this.renderDetailsButton(result)
+							: nothing}</uui-table-cell
+					>
 				</uui-table-row>
 			`;
 		});
@@ -64,7 +81,9 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
 		return this.changeCount == 0
 			? html`
 					${this.renderResultBar(this.results?.length || 0)}
-					<div class="empty"><umb-localize key="uSync_noChange"></umb-localize></div>
+					<div class="empty">
+						<umb-localize key="uSync_noChange"></umb-localize>
+					</div>
 				`
 			: html`
 					${this.renderResultBar(this.results?.length || 0)}

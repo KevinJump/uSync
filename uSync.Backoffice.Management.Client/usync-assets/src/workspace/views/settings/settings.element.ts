@@ -1,5 +1,11 @@
 import { UmbElementMixin } from '@umbraco-cms/backoffice/element-api';
-import { LitElement, css, customElement, html, state } from '@umbraco-cms/backoffice/external/lit';
+import {
+	LitElement,
+	css,
+	customElement,
+	html,
+	state,
+} from '@umbraco-cms/backoffice/external/lit';
 import { USYNC_CORE_CONTEXT_TOKEN } from '../../workspace.context.ts';
 import { uSyncHandlerSetSettings, uSyncSettings } from '../../../api/index.ts';
 
@@ -58,7 +64,9 @@ export class uSyncSettingsViewElement extends UmbElementMixin(LitElement) {
 
 							<usync-setting-item
 								.name=${this.localize.term('uSyncSettings_failOnMissingParent')}
-								.description=${this.localize.term('uSyncSettings_failOnMissingParentDesc')}
+								.description=${this.localize.term(
+									'uSyncSettings_failOnMissingParentDesc',
+								)}
 								.value=${this.settings?.failOnMissingParent}></usync-setting-item>
 						</uui-box>
 
@@ -85,22 +93,28 @@ export class uSyncSettingsViewElement extends UmbElementMixin(LitElement) {
 							<usync-setting-item
 								.name=${this.localize.term('uSyncSettings_flatStructure')}
 								.description=${this.localize.term('uSyncSettings_flatStructureDesc')}
-								.value=${this.handlerSettings?.handlerDefaults?.useFlatStructure}></usync-setting-item>
+								.value=${this.handlerSettings?.handlerDefaults
+									?.useFlatStructure}></usync-setting-item>
 
 							<usync-setting-item
 								.name=${this.localize.term('uSyncSettings_guidNames')}
 								.description=${this.localize.term('uSyncSettings_guidNamesDesc')}
-								.value=${this.handlerSettings?.handlerDefaults?.guidNames}></usync-setting-item>
+								.value=${this.handlerSettings?.handlerDefaults
+									?.guidNames}></usync-setting-item>
 
 							<usync-setting-item
 								.name=${this.localize.term('uSyncSettings_handlerGroups')}
 								.description=${this.localize.term('uSyncSettings_handlerGroupsDesc')}
-								.value=${this.handlerSettings?.handlerDefaults?.group}></usync-setting-item>
+								.value=${this.handlerSettings?.handlerDefaults
+									?.group}></usync-setting-item>
 
 							<usync-setting-item
 								.name=${this.localize.term('uSyncSettings_failOnMissingParent')}
-								.description=${this.localize.term('uSyncSettings_failOnMissingParentDesc')}
-								.value=${this.handlerSettings?.handlerDefaults?.failOnMissingParent}></usync-setting-item>
+								.description=${this.localize.term(
+									'uSyncSettings_failOnMissingParentDesc',
+								)}
+								.value=${this.handlerSettings?.handlerDefaults
+									?.failOnMissingParent}></usync-setting-item>
 
 							<usync-setting-item
 								.name=${this.localize.term('uSyncSettings_disabledHandlers')}

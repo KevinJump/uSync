@@ -60,7 +60,8 @@ export default {
 		disabledHandlersDesc: 'Handlers explicitly disabled for this handler set',
 
 		folders: 'Folders',
-		foldersDesc: 'Folders uSync will look for files, (items are normally saved into last folder in the list)',
+		foldersDesc:
+			'Folders uSync will look for files, (items are normally saved into last folder in the list)',
 
 		rootSite: 'Root Site',
 		rootSiteDesc: 'Is this site a root for other sites.',

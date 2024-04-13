@@ -1,6 +1,11 @@
 import { UmbTextStyles } from '@umbraco-cms/backoffice/style';
 import { UmbElementMixin } from '@umbraco-cms/backoffice/element-api';
-import { LitElement, css, customElement, html } from '@umbraco-cms/backoffice/external/lit';
+import {
+	LitElement,
+	css,
+	customElement,
+	html,
+} from '@umbraco-cms/backoffice/external/lit';
 
 import './views/default/default.element';
 import uSyncWorkspaceContext from './workspace.context';
@@ -25,7 +30,9 @@ export class uSyncWorkspaceRootElement extends UmbElementMixin(LitElement) {
 			<umb-workspace-editor .enforceNoFooter=${true}>
 				<div slot="header" class="header">
 					<div>
-						<strong><umb-localize key="uSync_name"></umb-localize></strong><br /><em>(${uSyncConstants.version})</em>
+						<strong><umb-localize key="uSync_name"></umb-localize></strong><br /><em
+							>(${uSyncConstants.version})</em
+						>
 					</div>
 				</div>
 			</umb-workspace-editor>

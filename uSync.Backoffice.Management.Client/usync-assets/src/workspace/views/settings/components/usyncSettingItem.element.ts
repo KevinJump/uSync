@@ -1,4 +1,11 @@
-import { LitElement, classMap, css, customElement, html, property } from '@umbraco-cms/backoffice/external/lit';
+import {
+	LitElement,
+	classMap,
+	css,
+	customElement,
+	html,
+	property,
+} from '@umbraco-cms/backoffice/external/lit';
 
 @customElement('usync-setting-item')
 export class uSyncSettingItemElement extends LitElement {
@@ -19,7 +26,11 @@ export class uSyncSettingItemElement extends LitElement {
 		if (typeof this.value == 'boolean') {
 			const classes = { _set: this.value };
 
-			return html` <uui-icon name=${this.value ? 'icon-check' : 'icon-wrong'} class=${classMap(classes)}></uui-icon> `;
+			return html`
+				<uui-icon
+					name=${this.value ? 'icon-check' : 'icon-wrong'}
+					class=${classMap(classes)}></uui-icon>
+			`;
 		} else {
 			if (Array.isArray(this.value)) {
 				console.log('Array', this.value);

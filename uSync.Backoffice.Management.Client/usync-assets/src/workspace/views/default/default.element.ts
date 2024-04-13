@@ -154,8 +154,8 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 		} else {
 			return html`
 				<umb-body-layout>
-					${this.#renderActions()} ${this.#renderBanner()}
-					${this.#renderProcessBox()} ${this.#renderReport()}
+					${this.#renderActions()} ${this.#renderBanner()} ${this.#renderProcessBox()}
+					${this.#renderReport()}
 				</umb-body-layout>
 			`;
 		}

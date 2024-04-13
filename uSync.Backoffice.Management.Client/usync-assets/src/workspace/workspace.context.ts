@@ -1,4 +1,8 @@
-import { UmbArrayState, UmbBooleanState, UmbObjectState } from '@umbraco-cms/backoffice/observable-api';
+import {
+	UmbArrayState,
+	UmbBooleanState,
+	UmbObjectState,
+} from '@umbraco-cms/backoffice/observable-api';
 import { UmbContextToken } from '@umbraco-cms/backoffice/context-api';
 
 import { uSyncActionRepository } from '..';
@@ -14,7 +18,10 @@ import {
 } from '../api';
 
 import uSyncSignalRContext from '../signalr/signalr.context';
-import { UMB_WORKSPACE_CONTEXT, UmbWorkspaceContext } from '@umbraco-cms/backoffice/workspace';
+import {
+	UMB_WORKSPACE_CONTEXT,
+	UmbWorkspaceContext,
+} from '@umbraco-cms/backoffice/workspace';
 import { uSyncConstants } from '../constants';
 import { uSyncIconRegistry } from '../icons';
 import { SyncPerformActionOptions } from './types';
@@ -22,7 +29,10 @@ import { SyncPerformActionOptions } from './types';
 /**
  * Context for getting and seting up actions.
  */
-export class uSyncWorkspaceContext extends UmbControllerBase implements UmbWorkspaceContext {
+export class uSyncWorkspaceContext
+	extends UmbControllerBase
+	implements UmbWorkspaceContext
+{
 	public readonly workspaceAlias: string = uSyncConstants.workspace.alias;
 
 	getEntityType(): string {
@@ -185,4 +195,6 @@ export class uSyncWorkspaceContext extends UmbControllerBase implements UmbWorks
 
 export default uSyncWorkspaceContext;
 
-export const USYNC_CORE_CONTEXT_TOKEN = new UmbContextToken<uSyncWorkspaceContext>('uSyncWorkspaceContext');
+export const USYNC_CORE_CONTEXT_TOKEN = new UmbContextToken<uSyncWorkspaceContext>(
+	'uSyncWorkspaceContext',
+);

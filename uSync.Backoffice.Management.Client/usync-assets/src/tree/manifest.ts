@@ -1,4 +1,8 @@
-import { ManifestMenu, ManifestMenuItem, ManifestTypes } from '@umbraco-cms/backoffice/extension-registry';
+import {
+	ManifestMenu,
+	ManifestMenuItem,
+	ManifestTypes,
+} from '@umbraco-cms/backoffice/extension-registry';
 import { uSyncConstants } from '../constants';
 import uSyncMenuElement from './usync.menu-element.js';
 

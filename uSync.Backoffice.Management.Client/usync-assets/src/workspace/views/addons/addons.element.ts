@@ -1,5 +1,10 @@
 import { UmbElementMixin } from '@umbraco-cms/backoffice/element-api';
-import { LitElement, css, customElement, html } from '@umbraco-cms/backoffice/external/lit';
+import {
+	LitElement,
+	css,
+	customElement,
+	html,
+} from '@umbraco-cms/backoffice/external/lit';
 
 import logo from '../../../img/usync-complete.png';
 
@@ -13,7 +18,10 @@ export class uSyncAddOnsElement extends UmbElementMixin(LitElement) {
 						<div class="header">
 							<img src=${logo} />
 							<h1>uSync Complete</h1>
-							<p>uSync Complete gives you total control over your Umbraco settings and content.</p>
+							<p>
+								uSync Complete gives you total control over your Umbraco settings and
+								content.
+							</p>
 						</div>
 
 						<div class="logos">

@@ -3,7 +3,10 @@ import { uSyncDetailsModalData, uSyncDetailsModalValue } from './details-modal-t
 import { customElement, html } from '@umbraco-cms/backoffice/external/lit';
 
 @customElement('usync-details-modal')
-export class uSyncDetailsModalElement extends UmbModalBaseElement<uSyncDetailsModalData, uSyncDetailsModalValue> {
+export class uSyncDetailsModalElement extends UmbModalBaseElement<
+	uSyncDetailsModalData,
+	uSyncDetailsModalValue
+> {
 	#onClose() {
 		this.modalContext?.reject();
 	}
@@ -18,7 +21,10 @@ export class uSyncDetailsModalElement extends UmbModalBaseElement<uSyncDetailsMo
 					<usync-change-view .item=${this.data?.item}></usync-change-view>
 				</uui-box>
 				<div slot="actions">
-					<uui-button id="cancel" .label=${this.localize.term('general_close')} @click="${this.#onClose}"></uui-button>
+					<uui-button
+						id="cancel"
+						.label=${this.localize.term('general_close')}
+						@click="${this.#onClose}"></uui-button>
 				</div>
 			</umb-body-layout>
 		`;

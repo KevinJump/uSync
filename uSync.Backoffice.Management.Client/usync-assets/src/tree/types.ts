@@ -1,5 +1,8 @@
 import { ManifestElement } from '@umbraco-cms/backoffice/extension-api';
-import { MetaMenuItem, UmbMenuItemElement } from '@umbraco-cms/backoffice/extension-registry';
+import {
+	MetaMenuItem,
+	UmbMenuItemElement,
+} from '@umbraco-cms/backoffice/extension-registry';
 
 /**
  * Defines a sub menu item extension for the uSync menu

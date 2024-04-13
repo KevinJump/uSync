@@ -1,6 +1,15 @@
 import { UmbElementMixin } from '@umbraco-cms/backoffice/element-api';
-import { ManifestMenuItem, umbExtensionsRegistry } from '@umbraco-cms/backoffice/extension-registry';
-import { LitElement, customElement, html, property, state } from '@umbraco-cms/backoffice/external/lit';
+import {
+	ManifestMenuItem,
+	umbExtensionsRegistry,
+} from '@umbraco-cms/backoffice/extension-registry';
+import {
+	LitElement,
+	customElement,
+	html,
+	property,
+	state,
+} from '@umbraco-cms/backoffice/external/lit';
 import { UMB_SECTION_CONTEXT } from '@umbraco-cms/backoffice/section';
 
 @customElement('usync-menu')

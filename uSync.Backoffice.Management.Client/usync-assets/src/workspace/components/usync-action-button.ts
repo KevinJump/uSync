@@ -1,7 +1,19 @@
-import { css, customElement, html, ifDefined, nothing, property, state } from '@umbraco-cms/backoffice/external/lit';
+import {
+	css,
+	customElement,
+	html,
+	ifDefined,
+	nothing,
+	property,
+	state,
+} from '@umbraco-cms/backoffice/external/lit';
 import { UmbLitElement } from '@umbraco-cms/backoffice/lit-element';
 import { SyncActionButton } from '../../api';
-import { UUIButtonState, UUIInterfaceColor, UUIInterfaceLook } from '@umbraco-cms/backoffice/external/uui';
+import {
+	UUIButtonState,
+	UUIInterfaceColor,
+	UUIInterfaceLook,
+} from '@umbraco-cms/backoffice/external/uui';
 
 @customElement('usync-action-button')
 export class SyncActionButtonElement extends UmbLitElement {
@@ -64,10 +76,16 @@ export class SyncActionButtonElement extends UmbLitElement {
 				color=${<UUIInterfaceColor>parent?.color}
 				look=${<UUIInterfaceLook>parent?.look}
 				compact>
-				<uui-symbol-expand class="expand-symbol" .open=${this._popoverOpen}></uui-symbol-expand>
+				<uui-symbol-expand
+					class="expand-symbol"
+					.open=${this._popoverOpen}></uui-symbol-expand>
 			</uui-button>
 
-			<uui-popover-container id=${popoverId} margin="6" placement="bottom-end" @toggle=${this.#onPopoverToggle}>
+			<uui-popover-container
+				id=${popoverId}
+				margin="6"
+				placement="bottom-end"
+				@toggle=${this.#onPopoverToggle}>
 				<umb-popover-layout>
 					<uui-scroll-container> ${buttons} </uui-scroll-container>
 				</umb-popover-layout>

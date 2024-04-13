@@ -3,7 +3,10 @@ import { UmbModalBaseElement, UmbModalToken } from '@umbraco-cms/backoffice/moda
 import { SyncLegacyCheckResponse } from '../api';
 
 @customElement('usync-legacy-modal')
-export class uSyncLegacyModalElement extends UmbModalBaseElement<SyncLegacyCheckResponse, string> {
+export class uSyncLegacyModalElement extends UmbModalBaseElement<
+	SyncLegacyCheckResponse,
+	string
+> {
 	#onClose() {
 		this.modalContext?.reject();
 	}
@@ -12,8 +15,8 @@ export class uSyncLegacyModalElement extends UmbModalBaseElement<SyncLegacyCheck
 		return html`
 			<umb-body-layout headline="Legacy uSync folder detected">
 				<div class="content">
-					${this.renderLegacyFolder(this.data?.legacyFolder)} ${this.renderLegacyTypes(this.data?.legacyTypes)}
-					${this.renderCopy()}
+					${this.renderLegacyFolder(this.data?.legacyFolder)}
+					${this.renderLegacyTypes(this.data?.legacyTypes)} ${this.renderCopy()}
 				</div>
 				<div slot="actions">
 					<uui-button id="cancel" label="close" @click=${this.#onClose}>Close</uui-button>
@@ -52,7 +55,9 @@ export class uSyncLegacyModalElement extends UmbModalBaseElement<SyncLegacyCheck
 				</ul>
 				<p>
 					You can convert these DataTypes using
-					<a href="https://github.com/Jumoo/uSyncMigrations" target="_blank">uSync.Migrations</a><br />
+					<a href="https://github.com/Jumoo/uSyncMigrations" target="_blank"
+						>uSync.Migrations</a
+					><br />
 					<em>(In the full uSync release conversion will happen here.)</em>
 				</p>
 			</div>
@@ -71,7 +76,10 @@ export class uSyncLegacyModalElement extends UmbModalBaseElement<SyncLegacyCheck
 				but this is a beta release running on a beta release 🤞
 			</p>
 			<p>
-				<strong>Remove or rename the ${this.data?.legacyFolder} folder to prevent this popup</strong>
+				<strong
+					>Remove or rename the ${this.data?.legacyFolder} folder to prevent this
+					popup</strong
+				>
 			</p>
 		`;
 	}
@@ -89,9 +97,12 @@ export class uSyncLegacyModalElement extends UmbModalBaseElement<SyncLegacyCheck
 
 export default uSyncLegacyModalElement;
 
-export const USYNC_LEGACY_MODAL = new UmbModalToken<SyncLegacyCheckResponse, string>('usync.legacy.modal', {
-	modal: {
-		type: 'dialog',
-		size: 'small',
+export const USYNC_LEGACY_MODAL = new UmbModalToken<SyncLegacyCheckResponse, string>(
+	'usync.legacy.modal',
+	{
+		modal: {
+			type: 'dialog',
+			size: 'small',
+		},
 	},
-});
+);

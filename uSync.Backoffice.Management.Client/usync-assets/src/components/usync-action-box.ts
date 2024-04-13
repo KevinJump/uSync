@@ -1,4 +1,11 @@
-import { LitElement, customElement, html, css, property, ifDefined } from '@umbraco-cms/backoffice/external/lit';
+import {
+	LitElement,
+	customElement,
+	html,
+	css,
+	property,
+	ifDefined,
+} from '@umbraco-cms/backoffice/external/lit';
 import { SyncActionGroup } from '../api';
 import { UUIButtonState } from '@umbraco-cms/backoffice/external/uui';
 
@@ -40,7 +47,8 @@ export class uSyncActionBox extends LitElement {
 				<usync-action-button
 					.button=${b}
 					state=${ifDefined(this.state)}
-					@usync-action-click=${(e: CustomEvent) => this.#onAction(e, this.group)}></usync-action-button>
+					@usync-action-click=${(e: CustomEvent) =>
+						this.#onAction(e, this.group)}></usync-action-button>
 			`;
 		});
 

@@ -1,5 +1,11 @@
 import { UmbElementMixin } from '@umbraco-cms/backoffice/element-api';
-import { LitElement, css, customElement, html, property } from '@umbraco-cms/backoffice/external/lit';
+import {
+	LitElement,
+	css,
+	customElement,
+	html,
+	property,
+} from '@umbraco-cms/backoffice/external/lit';
 import { ChangeType, uSyncActionView } from '../api';
 import * as Diff from 'diff';
 
