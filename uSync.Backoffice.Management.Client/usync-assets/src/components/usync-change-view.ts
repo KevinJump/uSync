@@ -19,9 +19,15 @@ export class uSyncChangeView extends UmbElementMixin(LitElement) {
 		return html`
 			<uui-table>
 				<uui-table-head>
-					<uui-table-head-cell>Action</uui-table-head-cell>
-					<uui-table-head-cell>Item</uui-table-head-cell>
-					<uui-table-head-cell>Diffrence</uui-table-head-cell>
+					<uui-table-head-cell>
+						<umb-localize key="uSync_changeAction">Action</umb-localize>
+					</uui-table-head-cell>
+					<uui-table-head-cell>
+						<umb-localize key="uSync_changeItem">Item</umb-localize>
+					</uui-table-head-cell>
+					<uui-table-head-cell>
+						<umb-localize key="uSync_changeDiffrence">Difference</umb-localize>
+					</uui-table-head-cell>
 				</uui-table-head>
 				${this.render_details()}
 			</uui-table>
@@ -29,7 +35,11 @@ export class uSyncChangeView extends UmbElementMixin(LitElement) {
 	}
 
 	render_create() {
-		return html` <h1>This item is being created</h1> `;
+		return html`
+			<h1>
+				<umb-localize key="uSync_changeCreate">This item is being created</umb-localize>
+			</h1>
+		`;
 	}
 
 	#getJsonOrString(value: string | null | undefined) {

@@ -24,7 +24,9 @@ export class uSyncWorkspaceRootElement extends UmbElementMixin(LitElement) {
 		return html`
 			<umb-workspace-editor .enforceNoFooter=${true}>
 				<div slot="header" class="header">
-					<div><strong>uSync</strong><br /><em>(${uSyncConstants.version})</em></div>
+					<div>
+						<strong><umb-localize key="uSync_name"></umb-localize></strong><br /><em>(${uSyncConstants.version})</em>
+					</div>
 				</div>
 			</umb-workspace-editor>
 		`;

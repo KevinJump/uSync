@@ -8,6 +8,24 @@ export default {
 		Export: 'Export',
 		ImportForce: 'Import (Force)',
 		ExportClean: 'Export (Clean)',
+
+		noChange: 'Nothing has changed',
+		showAll: 'Show all',
+
+		detailHeadline: 'Detected Changes',
+		detailHeader: 'Things that are different',
+
+		changeAction: 'Action',
+		changeItem: 'Item',
+		changeDiffrence: 'Difference',
+		changeCreate: 'This item is being created',
+
+		success: 'Success',
+		change: 'Change',
+		changeType: 'Type',
+		changeName: 'Name',
+		changeDetail: 'Detail',
+		changeCount: '{0} items',
 	},
 	uSyncSettings: {
 		settings: 'uSync Settings',

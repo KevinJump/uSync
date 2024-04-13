@@ -64,17 +64,27 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
 		return this.changeCount == 0
 			? html`
 					${this.renderResultBar(this.results?.length || 0)}
-					<div class="empty">Nothing has changed</div>
+					<div class="empty"><umb-localize key="uSync_noChange"></umb-localize></div>
 				`
 			: html`
 					${this.renderResultBar(this.results?.length || 0)}
 					<uui-table>
 						<uui-table-head>
-							<uui-table-head-cell>Success</uui-table-head-cell>
-							<uui-table-head-cell>Change</uui-table-head-cell>
-							<uui-table-head-cell>Type</uui-table-head-cell>
-							<uui-table-head-cell>Name</uui-table-head-cell>
-							<uui-table-head-cell>Details</uui-table-head-cell>
+							<uui-table-head-cell>
+								<umb-localize key="uSync_success">Success</umb-localize>
+							</uui-table-head-cell>
+							<uui-table-head-cell>
+								<umb-localize key="uSync_change">Change</umb-localize>
+							</uui-table-head-cell>
+							<uui-table-head-cell>
+								<umb-localzie key="uSync_changeType">Type</umb-localzie>
+							</uui-table-head-cell>
+							<uui-table-head-cell>
+								<umb-localize key="uSync_changeName">Name</umb-localize>
+							</uui-table-head-cell>
+							<uui-table-head-cell>
+								<umb-localize key="uSync_changeDetail">Detail</umb-localize>
+							</uui-table-head-cell>
 						</uui-table-head>
 
 						${rowsHtml}
@@ -84,8 +94,11 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
 
 	renderResultBar(count: number) {
 		return html` <div class="result-header">
-			<uui-toggle label="Show All" ?checked=${this.showAll} @change=${this.#toggleShowAll}></uui-toggle>
-			${count} items
+			<uui-toggle
+				.label=${this.localize.term('uSync_showAll')}
+				?checked=${this.showAll}
+				@change=${this.#toggleShowAll}></uui-toggle>
+			<umb-localize key="uSync_changeCount" .args=${[count]}>${count} items</umb-localize>
 		</div>`;
 	}
 
@@ -95,6 +108,7 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
 				look="default"
 				color="positive"
 				label="show details"
+				compact
 				@click=${() => this.#openDetailsView(result)}></uui-button>
 		`;
 	}

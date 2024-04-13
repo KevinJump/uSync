@@ -1,9 +1,26 @@
-import { css, customElement, html, nothing, state } from '@umbraco-cms/backoffice/external/lit';
+import {
+	css,
+	customElement,
+	html,
+	nothing,
+	state,
+} from '@umbraco-cms/backoffice/external/lit';
 
-import { USYNC_CORE_CONTEXT_TOKEN, uSyncWorkspaceContext } from '../../workspace.context.js';
-import { SyncActionGroup, SyncHandlerSummary, SyncLegacyCheckResponse, uSyncActionView } from '../../../api/index.js';
+import {
+	USYNC_CORE_CONTEXT_TOKEN,
+	uSyncWorkspaceContext,
+} from '../../workspace.context.js';
+import {
+	SyncActionGroup,
+	SyncHandlerSummary,
+	SyncLegacyCheckResponse,
+	uSyncActionView,
+} from '../../../api/index.js';
 import { UUIButtonState } from '@umbraco-cms/backoffice/external/uui';
-import { UMB_MODAL_MANAGER_CONTEXT, UmbModalManagerContext } from '@umbraco-cms/backoffice/modal';
+import {
+	UMB_MODAL_MANAGER_CONTEXT,
+	UmbModalManagerContext,
+} from '@umbraco-cms/backoffice/modal';
 import { USYNC_LEGACY_MODAL } from '../../../dialogs/legacy-modal-element.js';
 import { UmbLitElement } from '@umbraco-cms/backoffice/lit-element';
 
@@ -137,7 +154,8 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 		} else {
 			return html`
 				<umb-body-layout>
-					${this.#renderActions()} ${this.#renderBanner()} ${this.#renderProcessBox()} ${this.#renderReport()}
+					${this.#renderActions()} ${this.#renderBanner()}
+					${this.#renderProcessBox()} ${this.#renderReport()}
 				</umb-body-layout>
 			`;
 		}
@@ -146,7 +164,10 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 	#renderActions() {
 		var actions = this._actions?.map((group) => {
 			return html`
-				<usync-action-box .group="${group}" .state=${this._buttonState} @perform-action=${this.#performAction}>
+				<usync-action-box
+					.group="${group}"
+					.state=${this._buttonState}
+					@perform-action=${this.#performAction}>
 				</usync-action-box>
 			`;
 		});
