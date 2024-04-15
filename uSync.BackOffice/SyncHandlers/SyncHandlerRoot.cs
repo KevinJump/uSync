@@ -518,7 +518,7 @@ namespace uSync.BackOffice.SyncHandlers
                     .AsEnumerableOfOne();
             }
 
-            var shortFilename = Path.GetFileNameWithoutExtension(filename);
+            var shortFilename = filename;
 
             if (_mutexService.FireItemStartingEvent(new uSyncImportingItemNotification(node, (ISyncHandler)this)))
             {
