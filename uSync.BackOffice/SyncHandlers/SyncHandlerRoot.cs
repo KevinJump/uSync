@@ -263,6 +263,8 @@ namespace uSync.BackOffice.SyncHandlers
         /// </remarks>
         public IEnumerable<uSyncAction> ImportAll(string[] folders, HandlerSettings config, uSyncImportOptions options)
         {
+            logger.LogDebug("ImportAll: {handlerType} STARTING", handlerType);
+
             var cacheKey = PrepCaches();
             runtimeCache.ClearByKey(cacheKey);
 
@@ -280,6 +282,8 @@ namespace uSync.BackOffice.SyncHandlers
             int count = 0;
             int total = items.Count;
 
+            logger.LogDebug("ImportAll: {handlerType} {count} items", handlerType, total);
+
             foreach (var item in items)
             {
                 count++;
@@ -296,7 +300,7 @@ namespace uSync.BackOffice.SyncHandlers
                         {
                             cleanMarkers.Add(item.Path);
                         }
-                        else if (attempt.Item is not null && attempt.Item is TObject update)
+                        else if (attempt.Item is not null && attempt.Item is TObject update && attempt.Change != ChangeType.Hidden)
                         {
                             updates.Add(new ImportedItem<TObject>(item.Node,update));
                         }
@@ -318,14 +322,17 @@ namespace uSync.BackOffice.SyncHandlers
                     serializer.Save(updates.Select(x => x.Item));
                 }
 
+                logger.LogDebug("ImportAll: Second Pass: {handlerType} {updates}", handlerType, updates.Count);
                 PerformSecondPassImports(updates, actions, config, options.Callbacks?.Update);
             }
 
             if (actions.All(x => x.Success) && cleanMarkers.Count > 0)
             {
+                logger.LogDebug("ImportAll: Clean: {handlerType} {cleans}", handlerType, cleanMarkers.Count);
                 PerformImportClean(cleanMarkers, actions, config, options.Callbacks?.Update);
             }
 
+            logger.LogDebug("ImportAll: {handlerType} DONE", handlerType);
             CleanCaches(cacheKey);
             options.Callbacks?.Update?.Invoke("Done", 3, 3);
 
@@ -533,6 +540,8 @@ namespace uSync.BackOffice.SyncHandlers
                 // merge the options from the handler and any import options into our serializer options.
                 var serializerOptions = new SyncSerializerOptions(options.Flags, settings.Settings, options.UserId);
                 serializerOptions.MergeSettings(options.Settings);
+
+                logger.LogDebug("ImportElement: {alias} {path} {filename}", node.GetAlias(), node.GetPath(), shortFilename);
 
                 // get the item.
                 var attempt = DeserializeItem(node, serializerOptions);

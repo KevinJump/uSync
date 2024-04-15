@@ -266,7 +266,10 @@ namespace uSync.BackOffice.SyncHandlers
             }
 
             if (renames.Any())
-                results.AddRange(renames);
+            {
+                results.RemoveAll(x => renames.Any(r => r.Key == x.Key));
+				results.AddRange(renames);
+			}
 
             return results;
         }
