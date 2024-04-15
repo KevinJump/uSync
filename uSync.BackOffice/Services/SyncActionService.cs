@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 
 using Microsoft.Extensions.Logging;
-
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Models;
 using uSync.BackOffice.SyncHandlers;
@@ -70,7 +69,7 @@ internal class SyncActionService : ISyncActionService
         var handlerSet = !string.IsNullOrWhiteSpace(options.Set)
                        ? options.Set : _uSyncConfig.Settings.DefaultSet;
 
-        var folders = _uSyncConfig.GetFolders();
+        var folders = GetFolders(options);
 
         var actions = _uSyncService.ReportHandler(options.Handler,
             new uSyncImportOptions
@@ -86,13 +85,23 @@ internal class SyncActionService : ISyncActionService
         return new SyncActionResult(actions);
     }
 
+    private string[] GetFolders(SyncActionOptions options)
+    {
+        if (options.Folders.Length != 0)
+            return options.Folders;
 
+        if (!string.IsNullOrEmpty(options.Folder))
+            return [options.Folder];
+
+        return _uSyncConfig.GetFolders();
+    }
+    
     public SyncActionResult ImportHandler(SyncActionOptions options, uSyncCallbacks callbacks)
     {
         var handlerSet = !string.IsNullOrWhiteSpace(options.Set)
                   ? options.Set : _uSyncConfig.Settings.DefaultSet;
 
-        var folders = _uSyncConfig.GetFolders();
+        var folders = GetFolders(options);
 
         var actions = _uSyncService.ImportHandler(options.Handler, new uSyncImportOptions
         {
@@ -115,7 +124,7 @@ internal class SyncActionService : ISyncActionService
         var handlerSet = !string.IsNullOrWhiteSpace(options.Set)
             ? options.Set : _uSyncConfig.Settings.DefaultSet;
 
-        var folders = _uSyncConfig.GetFolders();
+        var folders = GetFolders(options);
 
         var actions = _uSyncService.PerformPostImport(
             folders,
@@ -132,7 +141,7 @@ internal class SyncActionService : ISyncActionService
         var handlerSet = !string.IsNullOrWhiteSpace(options.Set)
             ? options.Set : _uSyncConfig.Settings.DefaultSet;
 
-        var folders = _uSyncConfig.GetFolders();
+        var folders = GetFolders(options);
 
         var actions = _uSyncService.ExportHandler(options.Handler, new uSyncImportOptions
         {
@@ -175,8 +184,7 @@ internal class SyncActionService : ISyncActionService
             _logger.LogDebug("Using Custom Folder: {fullPath}", folder);
             return folder;
         }
-
-
+        
         return string.Empty;
     }
 
