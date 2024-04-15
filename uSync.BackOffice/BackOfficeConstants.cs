@@ -108,11 +108,16 @@ public static partial class uSyncConstants
         /// </summary>
         public const int DataTypeMappings = USYNC_RESERVED_LOWER + 220;
 
-        /// <summary>
-        /// RelationTypes priority
-        /// </summary>
-        public const int RelationTypes = USYNC_RESERVED_LOWER + 230;
-    }
+            /// <summary>
+            /// RelationTypes priority
+            /// </summary>
+            public const int RelationTypes = USYNC_RESERVED_LOWER + 230;
+
+            /// <summary>
+            ///  Webhooks priority.
+            /// </summary>
+            public const int Webhooks = USYNC_RESERVED_LOWER + 250;
+        }
 
     /// <summary>
     ///  Default group names 
@@ -237,6 +242,11 @@ public static partial class uSyncConstants
         /// TemplateHandler Name
         /// </summary>
         public const string TemplateHandler = "TemplateHandler";
+
+            /// <summary>
+            ///  WebhooksHandler name
+            /// </summary>
+            public const string WebhookHandler = "WebhookHandler";
 
 
     }

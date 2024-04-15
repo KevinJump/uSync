@@ -51,9 +51,11 @@ public static partial class uSyncConstants
 
         public const string Empty = "Empty";
 
-        public const string RelationType = "RelationType";
-        public const string Relation = "Relation";
-    }
+            public const string RelationType = "RelationType";
+            public const string Relation = "Relation";
+
+            public const string Webhook = "Webhook";
+        }
 
     /// <summary>
     ///  Key used in settings and xml to indicate only partial cultures are included in file
