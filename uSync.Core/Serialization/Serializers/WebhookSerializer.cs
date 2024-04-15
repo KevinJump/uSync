@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 
-using Lucene.Net.Queries.Function.ValueSources;
-
 using Microsoft.Extensions.Logging;
 
 using Umbraco.Cms.Core.Models;
@@ -14,6 +12,9 @@ using uSync.Core.Models;
 
 namespace uSync.Core.Serialization.Serializers;
 
+/// <summary>
+///  serializing webhook events
+/// </summary>
 [SyncSerializer("ED18C89D-A9FF-4217-9F8E-6898CA63ED81", "Webhook Serializer", uSyncConstants.Serialization.Webhook, IsTwoPass = false)]
 public class WebhookSerializer : SyncSerializerBase<IWebhook>, ISyncSerializer<IWebhook>
 {
@@ -28,16 +29,20 @@ public class WebhookSerializer : SyncSerializerBase<IWebhook>, ISyncSerializer<I
 		_webhookService = webhookService;
 	}
 
+	/// <inheritdoc/>
 	public override void DeleteItem(IWebhook item)
 	{
 		_webhookService.DeleteAsync(item.Key).Wait();
 	}
 
+	/// <inheritdoc/>
 	public override IWebhook FindItem(int id) => null;
 
+	/// <inheritdoc/>
 	public override IWebhook FindItem(Guid key)
 		=> _webhookService.GetAsync(key).Result;
 
+	/// <inheritdoc/>
 	public override IWebhook FindItem(string alias)
 	{
 		if (Guid.TryParse(alias, out Guid key))
@@ -46,9 +51,11 @@ public class WebhookSerializer : SyncSerializerBase<IWebhook>, ISyncSerializer<I
 		return null;
 	}
 
+	/// <inheritdoc/>
 	public override string ItemAlias(IWebhook item)
 		=> item.Key.ToString();
 
+	/// <inheritdoc/>
 	public override void SaveItem(IWebhook item)
 	{
 		if (item.Id > 0)
@@ -61,6 +68,7 @@ public class WebhookSerializer : SyncSerializerBase<IWebhook>, ISyncSerializer<I
 		}
 	}
 
+	/// <inheritdoc/>
 	protected override SyncAttempt<IWebhook> DeserializeCore(XElement node, SyncSerializerOptions options)
 	{
 		var key = node.GetKey();

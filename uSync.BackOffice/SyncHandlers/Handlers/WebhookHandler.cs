@@ -21,6 +21,9 @@ using static Umbraco.Cms.Core.Constants;
 
 namespace uSync.BackOffice.SyncHandlers.Handlers;
 
+/// <summary>
+///  handler for webhook events. 
+/// </summary>
 [SyncHandler(uSyncConstants.Handlers.WebhookHandler, "Webhooks", "Webhooks",
 	uSyncConstants.Priorites.Webhooks, 
 	Icon = "icon-filter-arrows", 
@@ -35,6 +38,9 @@ public class WebhookHandler : SyncHandlerRoot<IWebhook, IWebhook>, ISyncHandler,
 {
 	private readonly IWebhookService _webhookService;
 
+	/// <summary>
+	///  constructor
+	/// </summary>
 	public WebhookHandler(
 		ILogger<SyncHandlerRoot<IWebhook, IWebhook>> logger,
 		AppCaches appCaches,
@@ -49,11 +55,13 @@ public class WebhookHandler : SyncHandlerRoot<IWebhook, IWebhook>, ISyncHandler,
 		_webhookService = webhookService;
 	}
 
+	/// <inheritdoc/>
 	protected override IEnumerable<uSyncAction> DeleteMissingItems(IWebhook parent, IEnumerable<Guid> keysToKeep, bool reportOnly)
 	{
 		return [];
 	}
 
+	/// <inheritdoc/>
 	protected override IEnumerable<IWebhook> GetChildItems(IWebhook parent)
 	{
 		if (parent == null)
@@ -64,10 +72,13 @@ public class WebhookHandler : SyncHandlerRoot<IWebhook, IWebhook>, ISyncHandler,
 		return [];
 	}
 
+	/// <inheritdoc/>
 	protected override IEnumerable<IWebhook> GetFolders(IWebhook parent) => [];
 
+	/// <inheritdoc/>
 	protected override IWebhook GetFromService(IWebhook item)
 		=> _webhookService.GetAsync(item.Key).Result;
 
+	/// <inheritdoc/>
 	protected override string GetItemName(IWebhook item) => item.Key.ToString();
 }
