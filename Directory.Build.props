@@ -46,6 +46,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<InternalsVisibleTo Include="uSync.Tests" />
 		<None Include="../assets/usync-logo.png" Pack="true" PackagePath="\" Visible="false" />
 	</ItemGroup>
 </Project>

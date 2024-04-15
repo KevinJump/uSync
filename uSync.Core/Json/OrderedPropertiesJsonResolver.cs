@@ -18,17 +18,25 @@ internal class OrderedPropertiesJsonResolver : DefaultJsonTypeInfoResolver
 {
     public override JsonTypeInfo GetTypeInfo(Type type, JsonSerializerOptions options)
     {
-        var order = 0;
-
         JsonTypeInfo typeInfo = base.GetTypeInfo(type, options);
-        if (typeInfo.Kind != JsonTypeInfoKind.Object) return typeInfo;
 
-        foreach(var property in typeInfo.Properties.OrderBy(x => x.Name))
+        switch(typeInfo.Kind)
         {
-            property.Order = order++;
+            case JsonTypeInfoKind.Object: 
+                return SortObject(typeInfo);
+            default:
+                return typeInfo;
         }
-
-        return typeInfo;
     }
 
+    private JsonTypeInfo SortObject(JsonTypeInfo typeInfo)
+    {
+		var order = 0;
+		foreach (var property in typeInfo.Properties.OrderBy(x => x.Name))
+		{
+			property.Order = order++;
+		}
+
+		return typeInfo;
+	}
 }

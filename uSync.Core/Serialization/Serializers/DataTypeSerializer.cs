@@ -164,23 +164,28 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
 
     private List<uSyncChange> DeserializeConfiguration(IDataType item, XElement node)
     {
-        var serializer = _configurationSerializers.GetSerializer(item.EditorAlias);
+        // var serializer = _configurationSerializers.GetSerializer(item.EditorAlias);
 
         var config = node.Element("Config").ValueOrDefault(string.Empty);
         if (string.IsNullOrEmpty(config)) return [];
 
         var changes = new List<uSyncChange>();
 
-        if (config.TryDeserialize(out IDictionary<string, object>? dictionaryData) is false || dictionaryData is null)
+        if (config.TryDeserialize(out IDictionary<string, object>? importData) is false || importData is null)
         {
             changes.AddWarning("Data", item.Name ?? item.Id.ToString(), "Failed to deserialize config for item");
             return changes;
         }
 
         // v8,9,etc configs the properties 
-        dictionaryData = dictionaryData.ConvertToCamelCase();
+        importData = importData.ConvertToCamelCase();
 
-        var importData = serializer == null ? dictionaryData : serializer.GetConfigurationImport(dictionaryData);
+        // multiple serializers can run per property. 
+        var serializers = _configurationSerializers.GetSerializers(item.EditorAlias);
+        foreach(var serializer in serializers) {
+            logger.LogDebug("Running Configuration Serializer : {name} for {type}", serializer.Name, item.EditorAlias);
+            importData = serializer.GetConfigurationImport(importData);
+        }
 
         if (IsJsonEqual(importData, item.ConfigurationData) is false)
         {
@@ -239,7 +244,7 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
     private XElement SerializeConfiguration(IDataType item)
     {
         var serializer = _configurationSerializers.GetSerializer(item.EditorAlias);
-
+        
         var configurationObject = TryGetConfigurationObject(item);
 
         // merge the configurationData and configurationObject into one dictionary

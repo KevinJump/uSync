@@ -35,7 +35,7 @@ public static class uSyncCoreBuilderExtensions
 
         // cache for entity items, we use it to speed up lookups.
         builder.Services.AddSingleton<SyncEntityCache>();
-
+        
         // register *all* ConfigurationSerializers except those marked [HideFromTypeFinder]
         // has to happen before the DataTypeSerializer is loaded, because that is where
         // they are used

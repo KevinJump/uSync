@@ -2,6 +2,11 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+
+using Org.BouncyCastle.Bcpg.Sig;
+
+using Umbraco.Cms.Core.Security;
 using Umbraco.Extensions;
 
 using uSync.Core.Json;
@@ -13,7 +18,7 @@ namespace uSync.Core.Extensions;
 /// </summary>
 public static class JsonTextExtensions
 {
-    private static readonly JsonSerializerOptions _defaultOptions = new()
+    internal static readonly JsonSerializerOptions _defaultOptions = new()
     {
         WriteIndented = true,
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -21,7 +26,7 @@ public static class JsonTextExtensions
         TypeInfoResolver = new OrderedPropertiesJsonResolver(),
     };
 
-    private static readonly JsonSerializerOptions _flatOptions = new()
+    internal static readonly JsonSerializerOptions _flatOptions = new()
     {
         WriteIndented = false,
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -392,12 +397,37 @@ public static class JsonTextExtensions
         return result != default;
     }
 
+    /// <summary>
+    ///  Gets the json property as a string, or returns string.empty
+    /// </summary>
     public static string GetPropertyAsString(this JsonObject obj, string propertyName)
     {
         if (obj.TryGetPropertyValue(propertyName, out var value))
             return value?.ToString() ?? string.Empty;
 
         return string.Empty;
+    }
+
+    public static bool GetPropertyAsBool(this JsonObject obj, string propertyName, bool defaultValue)
+    {
+        if (obj.TryGetPropertyValue(propertyName, out var value))
+        {
+            if (bool.TryParse(value?.ToString() ?? string.Empty, out var result) is false)
+                return defaultValue;
+
+            return result;
+        }
+
+        return defaultValue;
+    }
+
+    public static TResult GetPropertyValueOrDefault<TResult>(this JsonObject obj, string propertyName, TResult defaultValue)
+    {
+        if (obj.TryGetPropertyValue(propertyName, out var value) is false || value is null)
+            return defaultValue;
+
+        var attempt = value.TryConvertTo<TResult>();
+        return attempt.ResultOr(defaultValue);
     }
 
     public static bool TryGetPropertyAsArray(this JsonObject jsonObject, string propertyName, [MaybeNullWhen(false)] out JsonArray result)

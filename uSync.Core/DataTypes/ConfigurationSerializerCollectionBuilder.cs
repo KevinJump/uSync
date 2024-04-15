@@ -20,4 +20,7 @@ public class ConfigurationSerializerCollection :
 
     public IConfigurationSerializer? GetSerializer(string editorAlias)
         => this.FirstOrDefault(x => x.Editors.InvariantContains(editorAlias));
+
+    public IEnumerable<IConfigurationSerializer> GetSerializers(string editorAlias)
+        => this.Where(x => x.Editors.InvariantContains(editorAlias));
 }

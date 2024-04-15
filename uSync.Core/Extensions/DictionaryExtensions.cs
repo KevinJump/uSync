@@ -97,7 +97,7 @@ internal static class DictionaryExtensions
 
     public static IDictionary<string, TValue> ConvertToCamelCase<TValue>(this IDictionary<string, TValue> originalDictionary)
         => originalDictionary
-            .ToDictionary(kvp => kvp.Key.ToCamelCase(), kvp => kvp.Value);
+            .ToDictionary(kvp => kvp.Key.ToCamelCase(), kvp => kvp.Value, StringComparer.OrdinalIgnoreCase);
 
     public static string ToCamelCase(this string s)
     {
