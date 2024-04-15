@@ -227,7 +227,7 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 				flex-wrap: wrap;
 				align-content: stretch;
 				z-index: 100;
-				margin: var(--uui-size-space-4) calc(var(--uui-size-space-2) * -1);
+				margin: calc(var(--uui-size-space-2) * -1);
 			}
 
 			umb-empty-state {

@@ -53,7 +53,7 @@ export class uSyncProcessBox extends UmbElementMixin(LitElement) {
                     ${action.status == HandlerStatus.COMPLETE ? 'complete' : ''} 
                     ${action.status == HandlerStatus.PROCESSING ? 'working' : ''}">
 					<uui-icon .name=${action.icon ?? 'icon-box'}></uui-icon>
-					<h4>${action.name ?? 'unknown'}</h4>
+					<h5>${action.name ?? 'unknown'}</h5>
 				</div>
 			`;
 		});
@@ -90,12 +90,13 @@ export class uSyncProcessBox extends UmbElementMixin(LitElement) {
 			display: flex;
 			flex-direction: column;
 			align-items: center;
-			min-width: var(--uui-size-32);
+			min-width: 90px;
 			color: var(--uui-color-text-alt);
+			opacity: 0.67;
 		}
 
 		.action uui-icon {
-			font-size: var(--uui-size-9);
+			font-size: var(--uui-type-h3-size);
 		}
 
 		.complete {
@@ -104,6 +105,7 @@ export class uSyncProcessBox extends UmbElementMixin(LitElement) {
 
 		.working {
 			color: var(--uui-color-positive);
+			opacity: 1;
 		}
 
 		.update-box {
