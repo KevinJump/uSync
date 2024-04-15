@@ -87,7 +87,7 @@ internal class SyncActionService : ISyncActionService
 
     private string[] GetFolders(SyncActionOptions options)
     {
-        if (options.Folders.Any())
+        if (options.Folders.Length != 0)
             return options.Folders;
 
         if (!string.IsNullOrEmpty(options.Folder))
@@ -124,7 +124,7 @@ internal class SyncActionService : ISyncActionService
         var handlerSet = !string.IsNullOrWhiteSpace(options.Set)
             ? options.Set : _uSyncConfig.Settings.DefaultSet;
 
-        var folders = _uSyncConfig.GetFolders();
+        var folders = GetFolders(options);
 
         var actions = _uSyncService.PerformPostImport(
             folders,
@@ -141,7 +141,7 @@ internal class SyncActionService : ISyncActionService
         var handlerSet = !string.IsNullOrWhiteSpace(options.Set)
             ? options.Set : _uSyncConfig.Settings.DefaultSet;
 
-        var folders = _uSyncConfig.GetFolders();
+        var folders = GetFolders(options);
 
         var actions = _uSyncService.ExportHandler(options.Handler, new uSyncImportOptions
         {
