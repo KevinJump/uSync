@@ -1614,7 +1614,8 @@ namespace uSync.BackOffice.SyncHandlers
                 // don't do anything this thing exists at a higher level. ! 
                 return;
             }
-            
+
+            if (ShouldExportDeletedFile(item, config) is false) return;
 
             var attempt = serializer.SerializeEmpty(item, SyncActionType.Delete, string.Empty);
             if (ShouldExport(attempt.Item, config))
@@ -1634,10 +1635,24 @@ namespace uSync.BackOffice.SyncHandlers
             }
         }
 
-        /// <summary>
-        ///  get all the possible folders for this handlers 
-        /// </summary>
-        protected string[] GetDefaultHandlerFolders()
+        private bool ShouldExportDeletedFile(TObject item, HandlerSettings config)
+        {
+			try
+			{
+				var deletingAttempt = serializer.Serialize(item, new SyncSerializerOptions(config.Settings));
+                return ShouldExport(deletingAttempt.Item, config);
+			}
+			catch (Exception ex)
+			{
+				logger.LogWarning(ex, "Failed to calculate if this item should be exported when deleted, the common option is yes, so we will");
+                return true;
+			}
+		}
+
+		/// <summary>
+		///  get all the possible folders for this handlers 
+		/// </summary>
+		protected string[] GetDefaultHandlerFolders()
             => rootFolders.Select(f => Path.Combine(f, DefaultFolder)).ToArray();
 
 
