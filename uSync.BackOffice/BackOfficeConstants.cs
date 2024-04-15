@@ -118,6 +118,11 @@ namespace uSync.BackOffice
             /// RelationTypes priority
             /// </summary>
             public const int RelationTypes = USYNC_RESERVED_LOWER + 230;
+
+            /// <summary>
+            ///  Webhooks priority.
+            /// </summary>
+            public const int Webhooks = USYNC_RESERVED_LOWER + 250;
         }
 
         /// <summary>
@@ -243,6 +248,11 @@ namespace uSync.BackOffice
             /// TemplateHandler Name
             /// </summary>
             public const string TemplateHandler = "TemplateHandler";
+
+            /// <summary>
+            ///  WebhooksHandler name
+            /// </summary>
+            public const string WebhookHandler = "WebhookHandler";
 
 
         }
