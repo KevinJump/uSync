@@ -264,8 +264,6 @@ namespace uSync.BackOffice.Services
         /// </summary>
         public void SaveFile(string filename, Stream stream)
         {
-            logger.LogDebug("Saving File: {file}", filename);
-
             using (Stream fileStream = OpenWrite(filename))
             {
                 stream.CopyTo(fileStream);
@@ -280,7 +278,6 @@ namespace uSync.BackOffice.Services
         public void SaveFile(string filename, string content)
         {
             var localFile = GetAbsPath(filename);
-            logger.LogDebug("Saving File: {local} [{length}]", localFile, content.Length);
 
             using (Stream stream = OpenWrite(localFile))
             {

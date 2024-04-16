@@ -159,10 +159,7 @@ namespace uSync.Core.Serialization
 
             var actionType = node.Attribute("Change").ValueOrDefault<SyncActionType>(SyncActionType.None);
 
-
             var (key, alias) = FindKeyAndAlias(node);
-
-            logger.LogDebug("Empty Node : Processing Action {actionType} ({key} {alias})", actionType, key, alias);
 
             switch (actionType)
             {
@@ -186,8 +183,6 @@ namespace uSync.Core.Serialization
 
         protected virtual SyncAttempt<TObject> ProcessDelete(Guid key, string alias, SerializerFlags flags)
         {
-            logger.LogDebug("Processing Delete {0} {1}", key, alias);
-
             var item = this.FindItem(key);
             if (item == null && !string.IsNullOrWhiteSpace(alias))
             {
@@ -195,10 +190,10 @@ namespace uSync.Core.Serialization
                 // because if someone deletes something in one place and creates it 
                 // somewhere else the alias will exist, so we don't want to delete 
                 // it from over there - this needs to be done at save time 
-                // (bascially if a create happens) - turn any delete files into renames
+                // (basically if a create happens) - turn any delete files into renames
 
                 // A Tree Based serializer will return null if you ask it to find 
-                // an item soley by alias, so this means we are only deleting by key 
+                // an item solely by alias, so this means we are only deleting by key 
                 // on tree's (e.g media, content)
                 item = this.FindItem(alias);
             }
@@ -210,13 +205,11 @@ namespace uSync.Core.Serialization
                 return SyncAttempt<TObject>.Succeed(alias, ChangeType.Delete);
             }
 
-            logger.LogDebug("Delete Item not found");
             return SyncAttempt<TObject>.Succeed(alias, ChangeType.NoChange);
         }
 
         protected virtual SyncAttempt<TObject> ProcessRename(Guid key, string alias, SerializerFlags flags)
         {
-            logger.LogDebug("Process Rename (no action)");
             return SyncAttempt<TObject>.Succeed(alias, ChangeType.NoChange);
         }
 
@@ -287,8 +280,6 @@ namespace uSync.Core.Serialization
 
         public virtual SyncAttempt<XElement> SerializeEmpty(TObject item, SyncActionType change, string alias)
         {
-            logger.LogDebug("Base: Serializing Empty Element {alias} {change}", alias, change);
-
             if (string.IsNullOrEmpty(alias))
                 alias = ItemAlias(item);
 
@@ -305,7 +296,7 @@ namespace uSync.Core.Serialization
 
             using (MemoryStream s = new MemoryStream())
             {
-                // for consistancy across platforms we need to harmonize line endings.
+                // for consistency across platforms we need to harmonize line endings.
                 using (var writer = XmlWriter.Create(s, new XmlWriterSettings { NewLineChars = "\r\n" }))
                 {
                     node.Save(writer);

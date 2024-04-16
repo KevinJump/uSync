@@ -52,9 +52,7 @@ namespace uSync.BackOffice
 
                     if (handlerPair == null) return Enumerable.Empty<uSyncAction>();
                     var folders = GetHandlerFolders(options.Folders, handlerPair.Handler);
-
-                    _logger.LogDebug("> Import Handler {handler}", handlerAlias);
-                    
+                   
                     using var scope = _scopeProvider.CreateNotificationScope(
                         eventAggregator: _eventAggregator,
                         loggerFactory: _loggerFactory,
@@ -64,8 +62,6 @@ namespace uSync.BackOffice
                         options.Callbacks?.Update);
 
                     var results = handlerPair.Handler.ImportAll(folders, handlerPair.Settings, options);
-                    
-                    _logger.LogDebug("< Import Handler {handler}", handlerAlias);
 
                     scope.Complete();
 
