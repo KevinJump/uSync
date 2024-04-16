@@ -269,7 +269,7 @@ namespace uSync.Core.Serialization.Serializers
                     config = serializer.SerializeConfig(item.Configuration);
                 }
 
-                return new XElement("Config", new XCData(config));
+                return new XElement("Config", new XCData(config ?? string.Empty));
             }
 
             return null;

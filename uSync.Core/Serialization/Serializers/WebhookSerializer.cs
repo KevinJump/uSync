@@ -250,7 +250,7 @@ public class WebhookSerializer : SyncSerializerBase<IWebhook>, ISyncSerializer<I
 		{
 			headerNode.Add(new XElement("Header",
 				 new XAttribute("Key", headerItem.Key),
-				 new XCData(headerItem.Value)));
+				 new XCData(headerItem.Value ?? string.Empty)));
 		}
 
 		return headerNode;
