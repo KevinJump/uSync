@@ -28,9 +28,17 @@ public class SyncRootMergerHelper
 
         foreach (var node in nodes[..^1])
         {
+            // if the later node is a delete/rename, it always wins
+            // there is nothing to merge
+            if (node.IsEmptyItem())
+                return (node, BlankNode(differences));
+
+            // if this node is the same as the differences we already have, 
+            // return it. 
             if (node.ToString() == differences.ToString())
                 return (combined, BlankNode(differences));
 
+            // workout any merged diffrences, 
             (combined, differences) = GetTrackedNodeDifferences(node, combined, trackedNodes);
         }
         return (combined, differences);
@@ -152,8 +160,13 @@ public class SyncRootMergerHelper
             else
             {
                 var replacement = FindByKey(combinedCollection, element, item.Keys, key);
-                replacement?.AddAfterSelf(targetElement);
-                replacement?.Remove();
+
+				// only add this if its not a delete
+				if (targetElement.Attribute("deleted").ValueOrDefault(false) is false)
+                {
+					replacement?.AddAfterSelf(targetElement);
+				}
+				replacement?.Remove();
             }
         }
 
