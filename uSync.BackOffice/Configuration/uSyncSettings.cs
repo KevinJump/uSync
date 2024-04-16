@@ -195,6 +195,18 @@ namespace uSync.BackOffice.Configuration
         [DefaultValue("false")]
         public bool EnableNotificationSuppression { get; set; } = false;
 
+		/// <summary>
+		///  suppress notifications by name 
+		/// </summary>
+		/// <remarks>
+		///  This will suppress notifications by name (e.g ContentTreeChangeNotification)
+        ///  These notifications will not fire during an uSync import. 
+        ///  
+        ///  You need to understand the consequences of notifications not firing on 
+        ///  other elements of Umbraco before setting this value. 
+		/// </remarks>
+		public string[] SuppressNamedNotifications { get; set; } = [];
+
         /// <summary>
         ///  trigger all the notifications in a background thread, 
         /// </summary>
