@@ -4,6 +4,8 @@ using System.Linq;
 using System.Xml.Linq;
 using System.Xml.XPath;
 
+using Serilog.Core;
+
 namespace uSync.Core.Tracking;
 
 public class SyncRootMergerHelper
@@ -26,11 +28,19 @@ public class SyncRootMergerHelper
         var differences = XElement.Parse(nodes[^1].ToString());
         var combined = XElement.Parse(nodes[^1].ToString());
 
+        // latest is a blank one, that is a delete so should 
+        // be marked as one.
+        if (combined.IsEmptyItem())
+            return (combined, BlankNode(differences));
+            
         foreach (var node in nodes[..^1])
         {
+            // if this node is the same as the differences we already have, 
+            // return it. 
             if (node.ToString() == differences.ToString())
                 return (combined, BlankNode(differences));
 
+            // workout any merged diffrences, 
             (combined, differences) = GetTrackedNodeDifferences(node, combined, trackedNodes);
         }
         return (combined, differences);
@@ -152,8 +162,13 @@ public class SyncRootMergerHelper
             else
             {
                 var replacement = FindByKey(combinedCollection, element, item.Keys, key);
-                replacement?.AddAfterSelf(targetElement);
-                replacement?.Remove();
+
+				// only add this if its not a delete
+				if (targetElement.Attribute("deleted").ValueOrDefault(false) is false)
+                {
+					replacement?.AddAfterSelf(targetElement);
+				}
+				replacement?.Remove();
             }
         }
 
