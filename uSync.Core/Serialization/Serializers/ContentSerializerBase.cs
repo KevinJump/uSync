@@ -665,8 +665,8 @@ namespace uSync.Core.Serialization.Serializers
             {
                 return JsonConvert.SerializeObject(tokenValue, Formatting.Indented);
             }
-            logger.LogTrace("Export Value {PropertyEditorAlias} {exportValue}", propertyType.PropertyEditorAlias, exportValue);
-            return exportValue;
+            logger.LogTrace("Export Value {PropertyEditorAlias} [{exportValue}]", propertyType.PropertyEditorAlias, exportValue ?? string.Empty);
+            return exportValue ?? string.Empty;
         }
 
         protected object GetImportValue(string value, IPropertyType propertyType, string culture, string segment)

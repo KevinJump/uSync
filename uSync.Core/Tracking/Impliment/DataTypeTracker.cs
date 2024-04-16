@@ -108,7 +108,7 @@ namespace uSync.Core.Tracking.Impliment
             => _configMergers?.GetConfigMerger(editorAlias) ?? null;
 
         private string SerializeConfig(object config)
-            => JsonConvert.SerializeObject(config, Formatting.Indented, _jsonSettings);
+            => JsonConvert.SerializeObject(config, Formatting.Indented, _jsonSettings) ?? string.Empty;
 
     
     }

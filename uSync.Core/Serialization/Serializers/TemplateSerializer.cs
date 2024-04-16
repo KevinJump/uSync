@@ -285,7 +285,7 @@ namespace uSync.Core.Serialization.Serializers
 
         private XElement SerializeContent(ITemplate item)
         {
-            return new XElement("Contents", new XCData(item.Content));
+            return new XElement("Contents", new XCData(item.Content ?? string.Empty));
         }
 
         private int CalculateLevel(ITemplate item)
