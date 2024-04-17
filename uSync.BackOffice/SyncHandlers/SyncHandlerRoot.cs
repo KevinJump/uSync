@@ -1646,6 +1646,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 		try
 		{
 			var deletingAttempt = serializer.Serialize(item, new SyncSerializerOptions(config.Settings));
+			if (deletingAttempt.Item is null) return true;
 			return ShouldExport(deletingAttempt.Item, config);
 		}
 		catch (Exception ex)
