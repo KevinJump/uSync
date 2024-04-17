@@ -92,7 +92,7 @@ public static class uSyncBackOfficeBuilderExtensions
         {
             if (options.Folders == null || options.Folders.Length == 0)
             {
-                options.Folders = ["uSync/Root/", "uSync/v14/"];
+                options.Folders = ["uSync/Root/", options.RootFolder];
             }
         });
 
