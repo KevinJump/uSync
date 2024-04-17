@@ -185,11 +185,11 @@ internal class SyncActionService : ISyncActionService
 
         var rootParent = Path.GetDirectoryName(fullRoot.TrimEnd(['/', '\\']));
         
-        _logger.LogDebug("Import Folder: {fullPath} {rootPath} {fullRoot}", fullPath, rootParent, fullRoot);
+        // _logger.LogDebug("Import Folder: {fullPath} {rootPath} {fullRoot}", fullPath, rootParent, fullRoot);
 
         if (rootParent is not null && fullPath.StartsWith(rootParent))
         {
-            _logger.LogDebug("Using Custom Folder: {fullPath}", folder);
+            // _logger.LogDebug("Using Custom Folder: {fullPath}", folder);
             return folder;
         }
 

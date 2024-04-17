@@ -53,7 +53,7 @@ public partial class uSyncService
                 if (handlerPair == null) return [];
                 var folders = GetHandlerFolders(options.Folders, handlerPair.Handler);
 
-                _logger.LogDebug("> Import Handler {handler}", handlerAlias);
+                // _logger.LogDebug("> Import Handler {handler}", handlerAlias);
 
                 using var scope = _scopeProvider.CreateNotificationScope(
                     eventAggregator: _eventAggregator,
@@ -65,7 +65,7 @@ public partial class uSyncService
 
                 var results = handlerPair.Handler.ImportAll(folders, handlerPair.Settings, options);
 
-                _logger.LogDebug("< Import Handler {handler}", handlerAlias);
+                // _logger.LogDebug("< Import Handler {handler}", handlerAlias);
 
                 scope.Complete();
 

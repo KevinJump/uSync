@@ -188,7 +188,6 @@ public abstract class SyncContainerSerializerBase<TObject>
 
             if (current is not null)
             {
-                logger.LogDebug("Folder Found {name}", current.Name);
                 return current;
             }
         }
