@@ -1294,7 +1294,7 @@
             ],
             "type": "object"
         },
-        "ManifestEntityActionDuplicateKind": {
+        "ManifestEntityActionDuplicateToKind": {
             "properties": {
                 "alias": {
                     "description": "The alias of the extension, ensure it is unique",
@@ -1330,12 +1330,12 @@
                     "type": "string"
                 },
                 "kind": {
-                    "const": "duplicate",
+                    "const": "duplicateTo",
                     "description": "The kind of the extension, used to group extensions together",
                     "type": "string"
                 },
                 "meta": {
-                    "$ref": "#/definitions/MetaEntityActionDuplicateKind"
+                    "$ref": "#/definitions/MetaEntityActionDuplicateToKind"
                 },
                 "name": {
                     "description": "The friendly name of the extension",
@@ -1456,7 +1456,7 @@
             ],
             "type": "object"
         },
-        "ManifestEntityActionMoveKind": {
+        "ManifestEntityActionMoveToKind": {
             "properties": {
                 "alias": {
                     "description": "The alias of the extension, ensure it is unique",
@@ -1492,12 +1492,12 @@
                     "type": "string"
                 },
                 "kind": {
-                    "const": "move",
+                    "const": "moveTo",
                     "description": "The kind of the extension, used to group extensions together",
                     "type": "string"
                 },
                 "meta": {
-                    "$ref": "#/definitions/MetaEntityActionMoveKind"
+                    "$ref": "#/definitions/MetaEntityActionMoveToKind"
                 },
                 "name": {
                     "description": "The friendly name of the extension",
@@ -3797,13 +3797,13 @@
                     "$ref": "#/definitions/ManifestEntityActionDeleteKind"
                 },
                 {
-                    "$ref": "#/definitions/ManifestEntityActionDuplicateKind"
+                    "$ref": "#/definitions/ManifestEntityActionDuplicateToKind"
                 },
                 {
                     "$ref": "#/definitions/ManifestEntityActionEmptyRecycleBinKind"
                 },
                 {
-                    "$ref": "#/definitions/ManifestEntityActionMoveKind"
+                    "$ref": "#/definitions/ManifestEntityActionMoveToKind"
                 },
                 {
                     "$ref": "#/definitions/ManifestEntityActionReloadTreeItemChildrenKind"
@@ -5061,7 +5061,7 @@
             ],
             "type": "object"
         },
-        "MetaEntityActionDuplicateKind": {
+        "MetaEntityActionDuplicateToKind": {
             "properties": {
                 "duplicateRepositoryAlias": {
                     "type": "string"
@@ -5074,9 +5074,6 @@
                     ],
                     "type": "string"
                 },
-                "itemRepositoryAlias": {
-                    "type": "string"
-                },
                 "label": {
                     "description": "The friendly name of the action to perform",
                     "examples": [
@@ -5085,23 +5082,19 @@
                     ],
                     "type": "string"
                 },
-                "pickerModal": {
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/UmbModalToken<object,unknown>"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
+                "treeAlias": {
+                    "type": "string"
+                },
+                "treeRepositoryAlias": {
+                    "type": "string"
                 }
             },
             "required": [
                 "duplicateRepositoryAlias",
                 "icon",
-                "itemRepositoryAlias",
                 "label",
-                "pickerModal"
+                "treeAlias",
+                "treeRepositoryAlias"
             ],
             "type": "object"
         },
@@ -5163,7 +5156,7 @@
             ],
             "type": "object"
         },
-        "MetaEntityActionMoveKind": {
+        "MetaEntityActionMoveToKind": {
             "properties": {
                 "icon": {
                     "description": "An icon to represent the action to be performed",
@@ -5171,9 +5164,6 @@
                         "icon-box",
                         "icon-grid"
                     ],
-                    "type": "string"
-                },
-                "itemRepositoryAlias": {
                     "type": "string"
                 },
                 "label": {
@@ -5187,23 +5177,19 @@
                 "moveRepositoryAlias": {
                     "type": "string"
                 },
-                "pickerModal": {
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/UmbModalToken<object,unknown>"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
+                "treeAlias": {
+                    "type": "string"
+                },
+                "treeRepositoryAlias": {
+                    "type": "string"
                 }
             },
             "required": [
                 "icon",
-                "itemRepositoryAlias",
                 "label",
                 "moveRepositoryAlias",
-                "pickerModal"
+                "treeAlias",
+                "treeRepositoryAlias"
             ],
             "type": "object"
         },
@@ -6149,30 +6135,6 @@
             ],
             "type": "object"
         },
-        "UmbModalToken<object,unknown>": {
-            "properties": {
-                "#alias": {
-                    "type": "string"
-                },
-                "#defaults": {
-                    "$ref": "#/definitions/UmbModalTokenDefaults<object,unknown>"
-                },
-                "DATA": {
-                    "description": "Get the data type of the token's data.",
-                    "type": "{ModalDataType}"
-                },
-                "VALUE": {
-                    "description": "Get the value type of the token",
-                    "type": "{ModalValueType}"
-                }
-            },
-            "required": [
-                "#alias",
-                "DATA",
-                "VALUE"
-            ],
-            "type": "object"
-        },
         "UmbModalTokenDefaults<UmbPickerModalData<any>,UmbPickerModalValue>": {
             "properties": {
                 "data": {
@@ -6184,20 +6146,6 @@
                 "value": {
                     "$ref": "#/definitions/UmbPickerModalValue"
                 }
-            },
-            "type": "object"
-        },
-        "UmbModalTokenDefaults<object,unknown>": {
-            "properties": {
-                "data": {
-                    "additionalProperties": true,
-                    "properties": {},
-                    "type": "object"
-                },
-                "modal": {
-                    "$ref": "#/definitions/UmbModalConfig"
-                },
-                "value": {}
             },
             "type": "object"
         },
