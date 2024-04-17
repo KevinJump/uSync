@@ -23,6 +23,11 @@ public class SyncRootMergerHelper
         var differences = XElement.Parse(nodes[^1].ToString());
         var combined = XElement.Parse(nodes[^1].ToString());
 
+		// latest is a blank one, that is a delete so should 
+		// be marked as one.
+		if (combined.IsEmptyItem())
+            return (combined, BlankNode(differences));
+
         foreach (var node in nodes[..^1])
         {
             if (node.ToString() == differences.ToString())
@@ -149,7 +154,12 @@ public class SyncRootMergerHelper
             else
             {
                 var replacement = FindByKey(combinedCollection, element, item.Keys, key);
-                replacement?.AddAfterSelf(targetElement);
+				
+                // only add this if its not a delete
+				if (targetElement.Attribute("deleted").ValueOrDefault(false) is false)
+                {
+                    replacement?.AddAfterSelf(targetElement);
+                }
                 replacement?.Remove();
             }
         }
