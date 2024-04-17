@@ -1,6 +1,5 @@
 ﻿using NUnit.Framework;
-
-using uSync.Core.Serialization.Serializers;
+using uSync.Core.DataTypes.DataTypeSerializers;
 
 namespace uSync.Tests.Migrations;
 
@@ -83,15 +82,7 @@ internal class RichTextMigrationTests: MigrationTestBase
   ""hideLabel"": false,
   ""ignoreUserStartNodes"": false,
   ""maxImageSize"": 500,
-  ""mediaParentId"": [
-    {
-      ""crops"": [],
-      ""focalPoint"": null,
-      ""key"": ""5f6d6564-6961-5f70-6172-656e745f756d"",
-      ""mediaKey"": ""71332aa7-8bea-44f1-9aa6-00de961b66e8"",
-      ""mediaTypeAlias"": """"
-    }
-  ],
+  ""mediaParentId"": ""71332aa7-8bea-44f1-9aa6-00de961b66e8"",
   ""mode"": ""classic"",
   ""overlaySize"": ""medium"",
   ""stylesheets"": [

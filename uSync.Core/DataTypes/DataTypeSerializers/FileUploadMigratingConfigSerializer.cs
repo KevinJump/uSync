@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 
 using Umbraco.Cms.Core;
@@ -21,8 +22,7 @@ internal class FileUploadMigratingConfigSerializer : ConfigurationSerializerBase
 		if (configuration.TryGetValue("fileExtensions", out var items) is false || items is null)
 			return configuration;
 
-		if (items is JsonElement element == false) return configuration;
-		if (element.ValueKind != JsonValueKind.Array) return configuration;
+		if (items is JsonArray element == false) return configuration;
 
 		if (element.ToString().TryDeserialize<List<IdValuePair>>(out var values) is false || values is null)
 			return configuration;

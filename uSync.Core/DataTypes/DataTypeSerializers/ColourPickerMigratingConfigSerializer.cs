@@ -2,6 +2,7 @@
 using System.Text.Json.Nodes;
 
 using Umbraco.Cms.Core;
+using Umbraco.Cms.Core.PropertyEditors;
 using Umbraco.Cms.Core.Strings;
 
 using uSync.Core.Extensions;
@@ -19,17 +20,14 @@ internal class ColourPickerMigratingConfigSerializer : ConfigurationSerializerBa
 		if (configuration.TryGetValue("items", out var items) is false || items is null)
 			return configuration;
 
-		if (items is JsonElement element == false) return configuration;
-		if (element.ValueKind != JsonValueKind.Array) return configuration;
+		if (items is JsonArray element == false) return configuration;
 
 		var convertedItems = new List<ColorPickerItem>();
 
-		var array = element.EnumerateArray().Select(x => x);
-		
-		foreach(var item in element.EnumerateArray())
+	
+		foreach(var item in element)
 		{
-			if (item.ValueKind != JsonValueKind.Object) continue;
-			var obj = JsonSerializer.Deserialize<JsonObject>(item.ToString());
+			var obj = item?.ConvertToJsonObject();
 			if (obj == null) continue;
 
 			var valueJson = obj.GetPropertyAsString("value");
@@ -45,8 +43,18 @@ internal class ColourPickerMigratingConfigSerializer : ConfigurationSerializerBa
 			});
 		}
 
-		configuration.Remove("items");
-		configuration.Add("items", convertedItems);
+		// Colour picker the labels are upper case in the value
+		// var json = JsonSerializer.Serialize(convertedItems);
+		var json = convertedItems.SerializeJsonString();
+		if (json != null)
+		{
+			var itemsValue = json.ToJsonNode();
+			if (itemsValue != null)
+			{
+				configuration.Remove("items");
+				configuration.Add("items", itemsValue);
+			}
+		}
 
 		return configuration;
 	}
