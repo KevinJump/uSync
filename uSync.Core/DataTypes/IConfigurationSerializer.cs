@@ -17,4 +17,6 @@ public interface IConfigurationSerializer
 
     IDictionary<string, object> GetConfigurationImport(IDictionary<string, object> configuration)
         => configuration;
+
+    string? GetEditorAlias() => null;
 }
