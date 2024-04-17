@@ -1,15 +1,15 @@
 {
-	"$schema": "../umbraco-package-schema.json",
-	"name": "uSync",
-	"id": "usync",
-	"version": "14.0.0-build.20240412.8",
-	"allowTelemetry": true,
-	"extensions": [
-		{
-			"name": "usync.entrypoint",
-			"alias": "uSync.EntryPoint",
-			"type": "entryPoint",
-			"js": "/App_Plugins/uSync/usync-assets.js"
-		}
-	]
+  "$schema": "../umbraco-package-schema.json",
+  "name": "uSync",
+  "id": "usync",
+  "version": "14.0.0-build.20240417.1",
+  "allowTelemetry": true,
+  "extensions": [
+    {
+      "name": "usync.entrypoint",
+      "alias": "uSync.EntryPoint",
+      "type": "entryPoint",
+      "js": "/App_Plugins/uSync/usync-assets.js"
+    }
+  ]
 }
