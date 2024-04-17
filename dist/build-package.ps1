@@ -59,8 +59,8 @@ $packageJson | ConvertTo-Json -Depth 32 | Set-Content $umbracoPackagePath
 
 $sln_name = "..\uSync.sln";
 
-""; "##### Restoring project"; "--------------------------------"; ""
-dotnet restore ..
+# ""; "##### Restoring project"; "--------------------------------"; ""
+# dotnet restore ..
 
 ""; "##### Building project"; "--------------------------------"; ""
 dotnet build $sln_name -c $env -p:Version=$fullVersion -p:ContinuousIntegrationBuild=true
@@ -118,5 +118,7 @@ Write-Host "uSync Packaged : $fullVersion"
 Remove-Item ".\last-build-*" 
 Out-File -FilePath ".\last-build-$fullVersion.txt" -InputObject $fullVersion
 
+Set-Clipboard -Value "dotnet add package uSync --version $fullVersion"
+Write-Host "Dotnet command in clipboard"
 ## beep means i can look away :) 
 [Console]::Beep(1056, 500)
