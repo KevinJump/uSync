@@ -451,10 +451,11 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
                 scheduleCollection.Add(schedule);
             }
 
-            // v14 we always save now, as save and publish doesn't do that anymore...
-            contentService.Save(item, options.UserId, scheduleCollection);
+			// v14 we always save now, as save and publish doesn't do that anymore...
+			logger.LogDebug("Performing Save: {id} {name} {user}", item.Id, item.Name, options.UserId);
+			contentService.Save(item, options.UserId, scheduleCollection);
 
-            if (publishedNode.HasElements)
+			if (publishedNode.HasElements)
             {
                 // culture based publishing.
                 var cultures = options.GetDeserializedCultures(node);
@@ -506,8 +507,15 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
                 }
             }
         }
+        else
+        {
+			// save?
+			logger.LogDebug("Performing Save (Not published): {id} {name} {user}", item.Id, item.Name, options.UserId);
+			contentService.Save(item, options.UserId);
 
-        return Attempt.Succeed("Saved");
+		}
+
+		return Attempt.Succeed("Saved");
     }
 
     /// <summary>
@@ -655,9 +663,8 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
 
     protected override Attempt<IContent?> CreateItem(string alias, ITreeEntity? parent, string itemType)
     {
-        var parentId = parent?.Id ?? -1;
-
-        var item = contentService.Create(alias, parentId, itemType);
+        logger.LogDebug("Create: {alias} {parent} {type}", alias, parent?.Id ?? -1, itemType);
+        var item = contentService.CreateAndSave(alias, parent?.Id ?? -1, itemType);
         if (item == null)
             return Attempt.Fail(item, new ArgumentException($"Unable to create content item of type {itemType}"));
 
