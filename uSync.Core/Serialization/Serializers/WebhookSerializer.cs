@@ -36,14 +36,14 @@ public class WebhookSerializer : SyncSerializerBase<IWebhook>, ISyncSerializer<I
 	}
 
 	/// <inheritdoc/>
-	public override IWebhook FindItem(int id) => null;
+	public override IWebhook? FindItem(int id) => null;
 
 	/// <inheritdoc/>
-	public override IWebhook FindItem(Guid key)
+	public override IWebhook? FindItem(Guid key)
 		=> _webhookService.GetAsync(key).Result;
 
 	/// <inheritdoc/>
-	public override IWebhook FindItem(string alias)
+	public override IWebhook? FindItem(string alias)
 	{
 		if (Guid.TryParse(alias, out Guid key))
 			return FindItem(key);

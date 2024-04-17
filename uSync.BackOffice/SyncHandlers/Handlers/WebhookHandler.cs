@@ -61,8 +61,9 @@ public class WebhookHandler : SyncHandlerRoot<IWebhook, IWebhook>, ISyncHandler,
 		return [];
 	}
 
+
 	/// <inheritdoc/>
-	protected override IEnumerable<IWebhook> GetChildItems(IWebhook parent)
+	protected override IEnumerable<IWebhook> GetChildItems(IWebhook? parent)
 	{
 		if (parent == null)
 		{
@@ -73,11 +74,11 @@ public class WebhookHandler : SyncHandlerRoot<IWebhook, IWebhook>, ISyncHandler,
 	}
 
 	/// <inheritdoc/>
-	protected override IEnumerable<IWebhook> GetFolders(IWebhook parent) => [];
+	protected override IEnumerable<IWebhook> GetFolders(IWebhook? parent) => [];
 
 	/// <inheritdoc/>
-	protected override IWebhook GetFromService(IWebhook item)
-		=> _webhookService.GetAsync(item.Key).Result;
+	protected override IWebhook? GetFromService(IWebhook? item)
+		=> item is null ? null : _webhookService.GetAsync(item.Key).Result;
 
 	/// <inheritdoc/>
 	protected override string GetItemName(IWebhook item) => item.Key.ToString();

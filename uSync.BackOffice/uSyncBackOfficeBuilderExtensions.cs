@@ -160,8 +160,8 @@ public static class uSyncBackOfficeBuilderExtensions
         builder.AddNotificationHandler<TemplateSavedNotification, TemplateHandler>();
         builder.AddNotificationHandler<TemplateDeletedNotification, TemplateHandler>();
 
-            builder.AddNotificationHandler<WebhookSavedNotification, WebhookHandler>();
-            builder.AddNotificationHandler<WebhookDeletedNotification, WebhookHandler>();
+        builder.AddNotificationHandler<WebhookSavedNotification, WebhookHandler>();
+        builder.AddNotificationHandler<WebhookDeletedNotification, WebhookHandler>();
 
             // roots - pre-notifications for stopping things
             builder
