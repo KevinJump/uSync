@@ -218,11 +218,11 @@ public class SyncHandlerFactory
             }
             else
             {
-                _logger.LogDebug("No Handler with {alias} has been loaded", handler.Alias);
+                // _logger.LogDebug("No Handler with {alias} has been loaded", handler.Alias);
                 // only log if we are doing the default 'everything' group 
                 // because when doing groups we choose not to load things. 
-                if (string.IsNullOrWhiteSpace(options.Group))
-                    _logger.LogWarning("No Handler with {alias} has been loaded", handler.Alias);
+                // if (string.IsNullOrWhiteSpace(options.Group))
+                   //  _logger.LogWarning("No Handler with {alias} has been loaded", handler.Alias);
             }
 
         }

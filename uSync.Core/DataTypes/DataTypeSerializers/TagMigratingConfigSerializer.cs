@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Nodes;
 
 using Umbraco.Cms.Core;
 
@@ -23,11 +24,9 @@ internal class TagMigratingConfigSerializer : ConfigurationSerializerBase, IConf
 		if (configuration.ContainsKey("delimiter"))
 			configuration.Remove("delimiter");
 
-		if (storageType is JsonElement element == false) return configuration;
-		if (element.ValueKind != JsonValueKind.Number) return configuration;
-		var storageNumber = element.GetValueAs<int>();
+		if (storageType is int storageInt is false) return configuration;
 
-        var typeString = storageNumber == 0 ? "csv" : "Json";
+        var typeString = storageInt == 0 ? "csv" : "Json";
 		// if storage type is a number.
 		configuration.Remove("StorageType");
 

@@ -65,11 +65,21 @@ public class LanguageHandler : SyncHandlerBase<ILanguage, ILocalizationService>,
     protected override string GetItemPath(ILanguage item, bool useGuid, bool isFlat)
         => item.IsoCode.ToSafeFileName(shortStringHelper);
 
+	/// <summary>
+	///  order the merged items, making sure the default language is first. 
+	/// </summary>
+	protected override IReadOnlyList<OrderedNodeInfo> GetMergedItems(string[] folders)
+		=> base.GetMergedItems(folders)
+			.OrderBy(x => x.Node.Element("IsDefault").ValueOrDefault(false) ? 0 : 1)
+			.ToList();
 
-    /// <summary>
-    ///  ensure we import the 'default' language first, so we don't get errors doing it. 
-    /// </summary>
-    protected override IEnumerable<string> GetImportFiles(string folder)
+	/// <summary>
+	///  ensure we import the 'default' language first, so we don't get errors doing it. 
+	/// </summary>
+	/// <remarks>
+	///  prost v13.1 this method isn't used to determain the order for all options.
+	/// </remarks>
+	protected override IEnumerable<string> GetImportFiles(string folder)
     {
         var files = base.GetImportFiles(folder);
 

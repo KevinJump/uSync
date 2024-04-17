@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Nodes;
 
 using Umbraco.Cms.Core;
 
@@ -20,8 +21,7 @@ internal class DataListMigratingConfigSerializer : ConfigurationSerializerBase, 
 		if (configuration.TryGetValue("items", out var items) is false || items is null)
 			return configuration;
 
-		if (items is JsonElement element == false) return configuration;
-		if (element.ValueKind != JsonValueKind.Array) return configuration;
+		if (items is JsonArray element is false) return configuration;
 
 		if (element.ToString().TryDeserialize<List<IdValuePair>>(out var values) is false || values is null)
 			return configuration;

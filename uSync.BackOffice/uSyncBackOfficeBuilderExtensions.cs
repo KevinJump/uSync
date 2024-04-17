@@ -92,7 +92,7 @@ public static class uSyncBackOfficeBuilderExtensions
         {
             if (options.Folders == null || options.Folders.Length == 0)
             {
-                options.Folders = ["uSync/Root/", "uSync/v14/"];
+                options.Folders = ["uSync/Root/", options.RootFolder];
             }
         });
 
@@ -160,11 +160,14 @@ public static class uSyncBackOfficeBuilderExtensions
         builder.AddNotificationHandler<TemplateSavedNotification, TemplateHandler>();
         builder.AddNotificationHandler<TemplateDeletedNotification, TemplateHandler>();
 
-        // roots - pre-notifications for stopping things
-        builder
-            .AddNotificationHandler<ContentTypeSavingNotification, ContentTypeHandler>()
-            .AddNotificationHandler<ContentTypeDeletingNotification, ContentTypeHandler>()
-            .AddNotificationHandler<ContentTypeMovingNotification, ContentTypeHandler>()
+        builder.AddNotificationHandler<WebhookSavedNotification, WebhookHandler>();
+        builder.AddNotificationHandler<WebhookDeletedNotification, WebhookHandler>();
+
+            // roots - pre-notifications for stopping things
+            builder
+                .AddNotificationHandler<ContentTypeSavingNotification, ContentTypeHandler>()
+                .AddNotificationHandler<ContentTypeDeletingNotification, ContentTypeHandler>()
+                .AddNotificationHandler<ContentTypeMovingNotification, ContentTypeHandler>()
 
             .AddNotificationHandler<MediaTypeSavingNotification, MediaTypeHandler>()
             .AddNotificationHandler<MediaTypeDeletingNotification, MediaTypeHandler>()
@@ -192,8 +195,12 @@ public static class uSyncBackOfficeBuilderExtensions
             .AddNotificationHandler<RelationTypeSavingNotification, RelationTypeHandler>()
             .AddNotificationHandler<RelationTypeDeletingNotification, RelationTypeHandler>()
 
-            .AddNotificationHandler<TemplateSavingNotification, TemplateHandler>()
-            .AddNotificationHandler<TemplateDeletingNotification, TemplateHandler>();
+
+                .AddNotificationHandler<TemplateSavingNotification, TemplateHandler>()
+                .AddNotificationHandler<TemplateDeletingNotification, TemplateHandler>()
+                
+                .AddNotificationHandler<WebhookSavingNotification, WebhookHandler>()
+                .AddNotificationHandler<WebhookDeletingNotification, WebhookHandler>();
 
 
         // content ones

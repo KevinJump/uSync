@@ -72,9 +72,9 @@ internal class SyncActionService : ISyncActionService
         var handlerSet = !string.IsNullOrWhiteSpace(options.Set)
                        ? options.Set : _uSyncConfig.Settings.DefaultSet;
 
-        var folders = _uSyncConfig.GetFolders();
+        var folders = GetFolders(options);
 
-        var actions = _uSyncService.ReportHandler(options.Handler,
+		var actions = _uSyncService.ReportHandler(options.Handler,
             new uSyncImportOptions
             {
                 Callbacks = callbacks,
@@ -88,17 +88,27 @@ internal class SyncActionService : ISyncActionService
         return new SyncActionResult(actions);
     }
 
+	private string[] GetFolders(SyncActionOptions options)
+	{
+		if (options.Folders.Length != 0)
+			return options.Folders;
 
-    public SyncActionResult ImportHandler(SyncActionOptions options, uSyncCallbacks? callbacks)
+		if (!string.IsNullOrEmpty(options.Folder))
+			return [options.Folder];
+
+		return _uSyncConfig.GetFolders();
+	}
+
+	public SyncActionResult ImportHandler(SyncActionOptions options, uSyncCallbacks? callbacks)
     {
         if (options.Handler is null) return new();
 
         var handlerSet = !string.IsNullOrWhiteSpace(options.Set)
                   ? options.Set : _uSyncConfig.Settings.DefaultSet;
 
-        var folders = _uSyncConfig.GetFolders();
+        var folders = GetFolders(options);
 
-        var actions = _uSyncService.ImportHandler(options.Handler, new uSyncImportOptions
+		var actions = _uSyncService.ImportHandler(options.Handler, new uSyncImportOptions
         {
             Callbacks = callbacks,
             HandlerSet = handlerSet,
@@ -119,9 +129,9 @@ internal class SyncActionService : ISyncActionService
         var handlerSet = !string.IsNullOrWhiteSpace(options.Set)
             ? options.Set : _uSyncConfig.Settings.DefaultSet;
 
-        var folders = _uSyncConfig.GetFolders();
+        var folders = GetFolders(options);
 
-        var actions = _uSyncService.PerformPostImport(
+		var actions = _uSyncService.PerformPostImport(
             folders,
             handlerSet,
             options.Actions);
@@ -138,9 +148,9 @@ internal class SyncActionService : ISyncActionService
         var handlerSet = !string.IsNullOrWhiteSpace(options.Set)
             ? options.Set : _uSyncConfig.Settings.DefaultSet;
 
-        var folders = _uSyncConfig.GetFolders();
+        var folders = GetFolders(options);
 
-        var actions = _uSyncService.ExportHandler(options.Handler, new uSyncImportOptions
+		var actions = _uSyncService.ExportHandler(options.Handler, new uSyncImportOptions
         {
             Callbacks = callbacks,
             HandlerSet = handlerSet,
@@ -175,11 +185,11 @@ internal class SyncActionService : ISyncActionService
 
         var rootParent = Path.GetDirectoryName(fullRoot.TrimEnd(['/', '\\']));
         
-        _logger.LogDebug("Import Folder: {fullPath} {rootPath} {fullRoot}", fullPath, rootParent, fullRoot);
+        // _logger.LogDebug("Import Folder: {fullPath} {rootPath} {fullRoot}", fullPath, rootParent, fullRoot);
 
         if (rootParent is not null && fullPath.StartsWith(rootParent))
         {
-            _logger.LogDebug("Using Custom Folder: {fullPath}", folder);
+            // _logger.LogDebug("Using Custom Folder: {fullPath}", folder);
             return folder;
         }
 

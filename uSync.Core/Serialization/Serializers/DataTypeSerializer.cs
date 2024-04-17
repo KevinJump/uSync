@@ -108,9 +108,7 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
         if (editorAlias != item.EditorAlias)
         {
             // change the editor type.....
-            var newEditor = _dataEditors.FirstOrDefault(x => x.Alias.InvariantEquals(editorAlias))
-                ?? _propertyEditors.FirstOrDefault(x => x.Alias.InvariantEquals(editorAlias));
-
+            var newEditor = FindDataEditor(editorAlias);
             if (newEditor != null)
             {
                 details.AddUpdate("EditorAlias", item.EditorAlias, editorAlias, "EditorAlias");
@@ -161,11 +159,8 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
         return null;
     }
 
-
-    private List<uSyncChange> DeserializeConfiguration(IDataType item, XElement node)
+	private List<uSyncChange> DeserializeConfiguration(IDataType item, XElement node)
     {
-        // var serializer = _configurationSerializers.GetSerializer(item.EditorAlias);
-
         var config = node.Element("Config").ValueOrDefault(string.Empty);
         if (string.IsNullOrEmpty(config)) return [];
 
@@ -177,11 +172,11 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
             return changes;
         }
 
-        // v8,9,etc configs the properties 
-        importData = importData.ConvertToCamelCase();
+		// v8,9,etc configs the properties 
+		importData = importData.ConvertToCamelCase();
 
-        // multiple serializers can run per property. 
-        var serializers = _configurationSerializers.GetSerializers(item.EditorAlias);
+		// multiple serializers can run per property. 
+		var serializers = _configurationSerializers.GetSerializers(item.EditorAlias);
         foreach(var serializer in serializers) {
             logger.LogDebug("Running Configuration Serializer : {name} for {type}", serializer.Name, item.EditorAlias);
             importData = serializer.GetConfigurationImport(importData);
@@ -190,6 +185,7 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
         if (IsJsonEqual(importData, item.ConfigurationData) is false)
         {
             changes.AddUpdateJson("Data", item.ConfigurationData, importData, "Configuration Data");
+            logger.LogDebug("Setting Config for {item} : {data}", item.Name, importData);
             item.ConfigurationData = importData;
         }
         // else no change. 
@@ -293,10 +289,37 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
         return Attempt.Succeed((IDataType)item);
     }
 
-    private IDataEditor? FindDataEditor(string alias)
-        => _propertyEditors.FirstOrDefault(x => x.Alias == alias);
+	private IDataEditor? FindDataEditor(string editorAlias)
+	{
+		var newEditor = _dataEditors.FirstOrDefault(x => x.Alias.InvariantEquals(editorAlias))
+			?? _propertyEditors.FirstOrDefault(x => x.Alias.InvariantEquals(editorAlias));
 
-    protected override string GetItemBaseType(XElement node)
+		if (newEditor is not null) return newEditor;
+
+		var serializers = _configurationSerializers.GetSerializers(editorAlias);
+		if (serializers is null) return null;
+
+		foreach (var serializer in serializers)
+		{
+			var newAlias = serializer.GetEditorAlias();
+			if (newAlias is not null)
+			{
+				newEditor = _dataEditors.FirstOrDefault(x => x.Alias.InvariantEquals(newAlias))
+					?? _propertyEditors.FirstOrDefault(x => x.Alias.InvariantEquals(newAlias));
+
+                if (newEditor is not null)
+                {
+                    logger.LogDebug("Editor replacement for {alias} found : {newAlias}", editorAlias, newAlias);
+                    return newEditor;
+                }
+			}
+		}
+
+		return null;
+
+
+	}
+	protected override string GetItemBaseType(XElement node)
         => node.Element(uSyncConstants.Xml.Info)?.Element("EditorAlias").ValueOrDefault(string.Empty) ?? string.Empty;
 
     public override IDataType? FindItem(int id)

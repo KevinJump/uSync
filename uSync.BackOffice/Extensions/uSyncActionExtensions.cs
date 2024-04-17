@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using Umbraco.Extensions;
@@ -60,5 +61,14 @@ public static class uSyncActionExtensions
 
         return summary;
     }
+
+	/// <summary>
+	///  try to find an action in the list based on key, and handler alias
+	/// </summary>
+	public static bool TryFindAction(this IEnumerable<uSyncAction> actions, Guid key, string handlerAlias, out uSyncAction action)
+	{
+		action = actions.FirstOrDefault(x => $"{x.key}_{x.HandlerAlias}" == $"{key}_{handlerAlias}", new uSyncAction { key = Guid.Empty });
+		return action.key != Guid.Empty;
+	}
 
 }

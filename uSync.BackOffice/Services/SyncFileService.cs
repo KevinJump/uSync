@@ -6,6 +6,8 @@ using System.Text;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 
+using Examine;
+
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -498,14 +500,24 @@ public class SyncFileService
 
         foreach (var folder in folders)
         {
-            var absPath = GetAbsPath($"~/{folder}");
+            var absPath = GetAbsPath(folder);
 
             if (DirectoryExists(absPath) is false) continue;
 
             var items = GetFolderItems(absPath, extension);
 
+            var localKeys = new List<Guid>();
+
             foreach (var item in items)
             {
+				var itemKey = item.Value.Node.GetKey();
+				if (localKeys.Contains(itemKey))
+				{
+					throw new Exception($"Duplicate: Item key {itemKey} already exists for {item.Key} - run uSync Health check for more info.");
+				}
+				
+                localKeys.Add(itemKey);
+
                 if (trackerBase is not null && elements.TryGetValue(item.Key, out var value))
                 {
                     // merge these files.

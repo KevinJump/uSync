@@ -1,12 +1,14 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
 
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using Org.BouncyCastle.Bcpg.Sig;
 
 using Umbraco.Cms.Core.Security;
+using Umbraco.Cms.Infrastructure.Serialization;
 using Umbraco.Extensions;
 
 using uSync.Core.Json;
@@ -21,18 +23,24 @@ public static class JsonTextExtensions
     internal static readonly JsonSerializerOptions _defaultOptions = new()
     {
         WriteIndented = true,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+		NumberHandling = JsonNumberHandling.AllowReadingFromString,
+		PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         PropertyNameCaseInsensitive = true,
         TypeInfoResolver = new OrderedPropertiesJsonResolver(),
-    };
+		Converters =
+		{
+			new JsonStringEnumConverter(),
+			new JsonObjectConverter(),
+			new JsonUdiConverter(),
+			new JsonUdiRangeConverter(),
+			new JsonBooleanConverter()
+		}
+	};
 
-    internal static readonly JsonSerializerOptions _flatOptions = new()
+    internal static readonly JsonSerializerOptions _flatOptions = new(_defaultOptions)
     {
         WriteIndented = false,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        PropertyNameCaseInsensitive = true,
-        TypeInfoResolver = new OrderedPropertiesJsonResolver(),
-    };
+	};
 
     private static JsonNodeOptions _nodeOptions = new()
     {

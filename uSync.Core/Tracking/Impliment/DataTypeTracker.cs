@@ -32,6 +32,8 @@ public class DataTypeTracker : SyncXmlTracker<IDataType>, ISyncTracker<IDataType
 
     public override XElement MergeFiles(XElement a, XElement b)
     {
+        if (b.IsEmptyItem()) return b;
+
         var editorAlias = GetEditorAlias(a);
         var merger = GetConfigMerger(editorAlias);
         if (!string.IsNullOrEmpty(editorAlias) && merger != null)
