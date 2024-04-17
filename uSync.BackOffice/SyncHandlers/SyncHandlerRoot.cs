@@ -1621,6 +1621,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 			return;
 		}
 
+		if (ShouldExportDeletedFile(item, config) is false) return;
 
 		var attempt = serializer.SerializeEmpty(item, SyncActionType.Delete, string.Empty);
 		if (attempt.Item is not null && ShouldExport(attempt.Item, config) is true)
@@ -1637,6 +1638,20 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 				if (!DefaultConfig.UseFlatStructure)
 					this.CleanUp(item, filename, Path.Combine(folders.Last(), this.DefaultFolder));
 			}
+		}
+	}
+
+	private bool ShouldExportDeletedFile(TObject item, HandlerSettings config)
+	{
+		try
+		{
+			var deletingAttempt = serializer.Serialize(item, new SyncSerializerOptions(config.Settings));
+			return ShouldExport(deletingAttempt.Item, config);
+		}
+		catch (Exception ex)
+		{
+			logger.LogWarning(ex, "Failed to calculate if this item should be exported when deleted, the common option is yes, so we will");
+			return true;
 		}
 	}
 
