@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
+using Umbraco.Cms.Api.Common.OpenApi;
 using Umbraco.Cms.Core.Composing;
 using Umbraco.Cms.Core.DependencyInjection;
 
@@ -14,6 +15,8 @@ public class ApiComposer : IComposer
 {
     public void Compose(IUmbracoBuilder builder)
     {
+        builder.Services.AddSingleton<IOperationIdHandler, uSyncCustomOperationHandler>();
+
         builder.Services.ConfigureOptions<ConfigSyncApiSwaggerGenOptions>();
         builder.Services.AddSingleton<ISyncManagementCache, uSyncManagementCache>();
         builder.Services.AddSingleton<ISyncManagementService, uSyncManagementService>();
