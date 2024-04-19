@@ -6,6 +6,10 @@
 	"main": "./dist/usync.js",
 	"types": "./dist/index.d.ts",
 	"module": "./dist/usync.js",
+	"publishConfig": {
+		"registry": "https://pkgs.dev.azure.com/jumoo/Public/_packaging/nightly/npm/registry/",
+		"access": "restricted"
+	},
 	"exports": {
 		".": "./dist/index.js",
 		"./components": "./dist/components/index.js",
@@ -38,7 +42,10 @@
 		"watch": "vite build --watch",
 		"generate": "openapi-ts --input %npm_package_config_server%/%npm_package_config_swagger% --output src/api --debug true --enums typescript --lint true --schemas false",
 		"dist": "tsc && vite build --config ./vite.dist.config.ts && npm pack --pack-destination ./pack ",
-		"format": "prettier --write \"./**/*.{js,jsx,mjs,cjs,ts,tsx,json}\""
+		"format": "prettier --write \"./**/*.{js,jsx,mjs,cjs,ts,tsx,json}\"",
+		"package:clean": "del-cli --force ./dist",
+		"package:build": "tsc --project ./src/tsconfig.dist.json",
+		"package:pack": "npm run pack --pack-destination ./pack"
 	},
 	"dependencies": {
 		"@microsoft/signalr": "^8.0.0",
@@ -50,6 +57,7 @@
 		"@types/diff": "^5.0.9",
 		"@types/node": "^20.11.20",
 		"@umbraco-cms/backoffice": "^14.0.0-rc1",
+		"del-cli": "^5.1.0",
 		"prettier": "^3.2.5",
 		"typescript": "^5.2.2",
 		"vite": "^5.1.7",
