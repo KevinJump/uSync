@@ -17,7 +17,5 @@ public class ConfigSyncApiSwaggerGenOptions : IConfigureOptions<SwaggerGenOption
               Version = "Latest",
               Description = "Api access uSync operations"
           });
-
-        options.CustomOperationIds(e => $"{e.ActionDescriptor.RouteValues["action"]}");
     }
 }
