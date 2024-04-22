@@ -276,7 +276,10 @@ namespace uSync.BackOffice.SyncHandlers
 
         private void CheckForDuplicates(IReadOnlyList<OrderedNodeInfo> items)
         {
-            var duplicates = items.GroupBy(x => x.Key).Where(x => x.Skip(1).Any()).ToArray();
+            var duplicates = items
+                .Where(x => x.Node?.IsEmptyItem() is false)
+                .GroupBy(x => x.Key)
+                .Where(x => x.Skip(1).Any()).ToArray();
 
             if (duplicates.Length > 0)
             {

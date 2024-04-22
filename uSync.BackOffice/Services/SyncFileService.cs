@@ -505,7 +505,7 @@ namespace uSync.BackOffice.Services
                 foreach (var item in items)
                 {
                     var itemKey = item.Value.Node.GetKey();
-                    if (localKeys.Contains(itemKey)) { 
+                    if (localKeys.Contains(itemKey) && item.Value.Node.IsEmptyItem() is false) { 
                         throw new Exception($"Duplicate: Item key {itemKey} already exists for {item.Key} - run uSync Health check for more info.");
                     }
 
