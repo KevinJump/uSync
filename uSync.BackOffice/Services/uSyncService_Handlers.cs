@@ -4,23 +4,20 @@ using System.Data;
 using System.IO;
 using System.Linq;
 
-using Microsoft.Extensions.Logging;
-
 using uSync.BackOffice.Extensions;
-using uSync.BackOffice.Models;
 using uSync.BackOffice.SyncHandlers;
 
 namespace uSync.BackOffice
 {
-    /// <summary>
-    ///  actions on individual handlers. 
-    /// </summary>
+	/// <summary>
+	///  actions on individual handlers. 
+	/// </summary>
 
-    public partial class uSyncService
+	public partial class uSyncService
     {
         private string[] GetFolderFromOptions(uSyncImportOptions options)
         {
-            if (options.Folders?.Any() is true)
+            if (options.Folders?.Length > 0 is true)
                 return options.Folders;
 
             if (string.IsNullOrWhiteSpace(options.RootFolder) is false)
