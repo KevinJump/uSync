@@ -191,10 +191,10 @@
         } 
 
         function getGroupName(name) {
-            if (name.startWith('I')) {
-                return key.substring(1) + 's';
+            if (name?.startsWith('I') == true) {
+                return name.substring(1) + 's';
             }
-            return key + "s";
+            return name + 's';
         }
 
         function getCounts(group, addItemInfo) {
