@@ -17,7 +17,7 @@
 
 		<TreatWarningsAsErrors>True</TreatWarningsAsErrors>
 
-		<NoWarn>CS0618</NoWarn>
+		<NoWarn>CS0618,NU1902</NoWarn>
 
 		<PackageReleaseNotes>
 	<![CDATA[9.0 : Dotnet core version
