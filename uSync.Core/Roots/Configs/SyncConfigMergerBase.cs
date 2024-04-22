@@ -48,17 +48,17 @@ internal class SyncConfigMergerBase
         return mergedObject.ToArray();
     }
 
-    protected TObject[] GetObjectDifferences<TObject, TKey>(TObject[] rootObject, TObject[] targetObject, Func<TObject, TKey> keySelector, Action<TObject, string> setMarker)
+    protected static TObject[] GetObjectDifferences<TObject, TKey>(TObject[] rootObject, TObject[] targetObject, Func<TObject, TKey> keySelector, Action<TObject, string> setMarker)
     {
-        var rootObjectKeys = rootObject?.Select(keySelector) ?? Enumerable.Empty<TKey>();
-        var targetObjectKeys = targetObject.Select(keySelector);
+        var rootObjectKeys = rootObject?.Select(keySelector) ?? [];
+        var targetObjectKeys = targetObject?.Select(keySelector) ?? [];
 
         var remaining =
-            targetObject.Where(x => !rootObjectKeys.Contains(keySelector(x)))
-            .ToList();
+            targetObject?.Where(x => !rootObjectKeys.Contains(keySelector(x)))
+            .ToList() ?? [];
 
         var removedKeys = rootObjectKeys.Except(targetObjectKeys);
-        var removals = rootObject?.Where(x => removedKeys.Contains(keySelector(x))) ?? Enumerable.Empty<TObject>();
+        var removals = rootObject?.Where(x => removedKeys.Contains(keySelector(x))) ?? [];
 
         foreach (var removedObject in removals )
         {
@@ -66,7 +66,7 @@ internal class SyncConfigMergerBase
             remaining.Add(removedObject);
         }
 
-        return remaining.ToArray();
+        return [.. remaining];
     }
 
 }
