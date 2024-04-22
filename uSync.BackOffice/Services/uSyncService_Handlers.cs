@@ -18,6 +18,18 @@ namespace uSync.BackOffice
 
     public partial class uSyncService
     {
+        private string[] GetFolderFromOptions(uSyncImportOptions options)
+        {
+            if (options.Folders?.Any() is true)
+                return options.Folders;
+
+            if (string.IsNullOrWhiteSpace(options.RootFolder) is false)
+                return [options.RootFolder];
+
+            // return the default. 
+            return _uSyncConfig.GetFolders();
+        }
+
         /// <summary>
         ///  Run a report for a given handler 
         /// </summary>
@@ -29,8 +41,8 @@ namespace uSync.BackOffice
                 Action = HandlerActions.Report
             });
 
-            if (handlerPair == null) return Enumerable.Empty<uSyncAction>();
-            var folders = GetHandlerFolders(options.Folders, handlerPair.Handler);
+            if (handlerPair == null) return [];
+            var folders = GetHandlerFolders(GetFolderFromOptions(options), handlerPair.Handler);
 
             return handlerPair.Handler.Report(folders, handlerPair.Settings, options.Callbacks?.Update);
         }
@@ -50,8 +62,8 @@ namespace uSync.BackOffice
                         Action = HandlerActions.Import
                     });
 
-                    if (handlerPair == null) return Enumerable.Empty<uSyncAction>();
-                    var folders = GetHandlerFolders(options.Folders, handlerPair.Handler);
+                    if (handlerPair == null) return [];
+                    var folders = GetHandlerFolders(GetFolderFromOptions(options), handlerPair.Handler);
                    
                     using var scope = _scopeProvider.CreateNotificationScope(
                         eventAggregator: _eventAggregator,
@@ -103,8 +115,9 @@ namespace uSync.BackOffice
                 Action = HandlerActions.Export
             });
 
-            if (handlerPair == null) return Enumerable.Empty<uSyncAction>();
-            var folders = GetHandlerFolders(options.Folders, handlerPair.Handler);
+            if (handlerPair == null) return [];
+
+            var folders = GetHandlerFolders(GetFolderFromOptions(options), handlerPair.Handler);
             return handlerPair.Handler.ExportAll(folders, handlerPair.Settings, options.Callbacks?.Update);
         }
 
