@@ -525,6 +525,9 @@ namespace uSync.BackOffice.Services
             return elements.Values;
         }
 
+        /// <summary>
+        ///  merge the files into a single XElement that can be imported as if it was on disk.
+        /// </summary>
         public XElement MergeFiles(string[] filenames, ISyncTrackerBase trackerBase)
         {
             if (filenames.Length == 0) return null;
