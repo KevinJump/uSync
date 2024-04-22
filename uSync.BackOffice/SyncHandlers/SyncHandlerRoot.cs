@@ -6,6 +6,8 @@ using System.Reflection;
 using System.Threading;
 using System.Xml.Linq;
 
+using J2N.Collections.ObjectModel;
+
 using Microsoft.Extensions.Logging;
 
 using Umbraco.Cms.Core;
@@ -348,7 +350,22 @@ namespace uSync.BackOffice.SyncHandlers
             return syncFileService.MergeFolders(folders, uSyncConfig.Settings.DefaultExtension, baseTracker).ToArray();
         }
 
-        private void PerformImportClean(List<string> cleanMarkers, List<uSyncAction> actions, HandlerSettings config, SyncUpdateCallback callback)
+        /// <summary>
+        ///  given a file path, will give you the merged values across all folders. 
+        /// </summary>
+        protected virtual XElement GetMergedNode(string filePath)
+        {
+			var allFiles = uSyncConfig.GetFolders()
+	            .Select(x => syncFileService.GetAbsPath($"{x}/{this.DefaultFolder}/{filePath}"))
+	            .ToArray();
+
+			var baseTracker = trackers.FirstOrDefault() as ISyncTrackerBase;
+			return syncFileService.MergeFiles(allFiles, baseTracker);
+		}
+
+
+
+		private void PerformImportClean(List<string> cleanMarkers, List<uSyncAction> actions, HandlerSettings config, SyncUpdateCallback callback)
         {
             foreach (var item in cleanMarkers.Select((filePath, Index) => new { filePath, Index }))
             {
@@ -466,7 +483,7 @@ namespace uSync.BackOffice.SyncHandlers
         {
             try
             {
-                syncFileService.EnsureFileExists(filePath);
+				syncFileService.EnsureFileExists(filePath);
                 var node = syncFileService.LoadXElement(filePath);
                 return Import(node, filePath, config, flags);
             }
@@ -499,6 +516,15 @@ namespace uSync.BackOffice.SyncHandlers
         {
             var flags = SerializerFlags.OnePass;
             if (force) flags |= SerializerFlags.Force;
+
+            if (file.InvariantStartsWith($"{uSyncConstants.MergedFolderName}/"))
+            {
+                var node = GetMergedNode(file.Substring(uSyncConstants.MergedFolderName.Length+1));
+                if (node is not null)
+                    return Import(node, file, config, flags);
+                else
+                    throw new Exception("Unable to merge files from root folder");
+            }
 
             return Import(file, config, flags);
         }

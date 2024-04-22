@@ -6,6 +6,8 @@ using System.Text;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 
+using MessagePack.Formatters;
+
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -521,6 +523,20 @@ namespace uSync.BackOffice.Services
             }
 
             return elements.Values;
+        }
+
+        public XElement MergeFiles(string[] filenames, ISyncTrackerBase trackerBase)
+        {
+            if (filenames.Length == 0) return null;
+            var latest = LoadXElementSafe(filenames[0]);
+			if (filenames.Length == 1) return latest;
+
+			for (var n = 1; n < filenames.Length; n++) {
+                var node = LoadXElementSafe(filenames[n]);
+                if (node is null) continue; 
+                latest = MergeNodes(latest, node, trackerBase);
+            }
+            return latest;
         }
 
         private XElement MergeNodes(XElement source, XElement target, ISyncTrackerBase trackerBase)
