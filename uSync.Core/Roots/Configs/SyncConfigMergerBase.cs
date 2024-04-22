@@ -27,7 +27,7 @@ internal class SyncConfigMergerBase
 
     protected static TObject[] MergeObjects<TObject, TKey>(TObject[] rootObject, TObject[] targetObject, Func<TObject, TKey> keySelector, Predicate<TObject> predicate)
     {
-        var targetObjectKeys = targetObject.Select(keySelector);
+        var targetObjectKeys = targetObject?.Select(keySelector) ?? [];
 
         if (targetObjectKeys is IEnumerable<string> targetStrings)
         {
@@ -37,7 +37,7 @@ internal class SyncConfigMergerBase
         var validRootObjects = rootObject?.Where(x => !targetObjectKeys.Contains(keySelector(x))).ToList()
             ?? [];
 
-        var mergedObject = targetObject.ToList();
+        var mergedObject = targetObject?.ToList() ?? [];
 
         if (validRootObjects.Count > 0)
         {
