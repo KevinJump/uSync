@@ -183,12 +183,19 @@
                     visible: false,
                     icon: getGroupIcon(group),
                     counts: getCounts(group),
-                    name: key.substring(1) + "s"
+                    name: getGroupName(key)
                 };
             });
 
             return grouped;
         } 
+
+        function getGroupName(name) {
+            if (name?.startsWith('I') == true) {
+                return name.substring(1) + 's';
+            }
+            return name + 's';
+        }
 
         function getCounts(group, addItemInfo) {
 

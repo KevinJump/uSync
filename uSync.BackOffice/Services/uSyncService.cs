@@ -391,16 +391,15 @@ namespace uSync.BackOffice
         /// <returns>Action detailing change or not</returns>
         public uSyncAction ImportSingleAction(uSyncAction action)
         {
-            var handlerConfig = _handlerFactory.GetValidHandler(action.HandlerAlias);
+            var folders = _uSyncConfig.Settings.Folders;
 
-            if (handlerConfig != null)
-            {
+            var handlerConfig = _handlerFactory.GetValidHandler(action.HandlerAlias);
+            if (handlerConfig is null) return new uSyncAction();
+
+           
                 return handlerConfig.Handler
                     .Import(action.FileName, handlerConfig.Settings, true)
                     .FirstOrDefault();
-            }
-
-            return new uSyncAction();
 
         }
 

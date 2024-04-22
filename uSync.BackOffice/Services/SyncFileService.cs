@@ -6,10 +6,13 @@ using System.Text;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 
+using MessagePack.Formatters;
+
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 using Umbraco.Cms.Core.Extensions;
+using Umbraco.Extensions;
 
 using uSync.BackOffice.Models;
 using uSync.Core;
@@ -511,7 +514,7 @@ namespace uSync.BackOffice.Services
                     if (elements.ContainsKey(item.Key))
                     {
                         // merge these files.
-                        item.Value.SetNode(trackerBase.MergeFiles(elements[item.Key].Node, item.Value.Node));
+                        item.Value.SetNode(MergeNodes(elements[item.Key].Node, item.Value.Node, trackerBase));
                         item.Value.FileName = $"{uSyncConstants.MergedFolderName}/{Path.GetFileName(item.Value.FileName)}";
                     }
 
@@ -522,7 +525,27 @@ namespace uSync.BackOffice.Services
             return elements.Values;
         }
 
-        private IEnumerable<KeyValuePair<string, OrderedNodeInfo>> GetFolderItems(string folder, string extension)
+        /// <summary>
+        ///  merge the files into a single XElement that can be imported as if it was on disk.
+        /// </summary>
+        public XElement MergeFiles(string[] filenames, ISyncTrackerBase trackerBase)
+        {
+            if (filenames.Length == 0) return null;
+            var latest = LoadXElementSafe(filenames[0]);
+			if (filenames.Length == 1) return latest;
+
+			for (var n = 1; n < filenames.Length; n++) {
+                var node = LoadXElementSafe(filenames[n]);
+                if (node is null) continue; 
+                latest = MergeNodes(latest, node, trackerBase);
+            }
+            return latest;
+        }
+
+        private XElement MergeNodes(XElement source, XElement target, ISyncTrackerBase trackerBase)
+            => trackerBase is null ? target : trackerBase.MergeFiles(source, target);
+
+		private IEnumerable<KeyValuePair<string, OrderedNodeInfo>> GetFolderItems(string folder, string extension)
         {
             foreach (var file in GetFilePaths(folder, extension))
             {
@@ -568,9 +591,12 @@ namespace uSync.BackOffice.Services
         {
             if (nodes?.Count == 0) return null;
             if (nodes.Count == 1) return nodes[0];
-   
-            return trackerBase.GetDifferences(nodes);
+            if (trackerBase is null) 
+                return SyncRootMergerHelper.GetDifferencesByFileContents(nodes);
+
+            return trackerBase?.GetDifferences(nodes);
         }
+
 
         /// <summary>
         ///  get all xml elements that represent this item across

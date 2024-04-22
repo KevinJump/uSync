@@ -29,6 +29,9 @@ internal class BlockGridConfigMerger : SyncConfigMergerBase, ISyncConfigMerger
             x => x.Name,
             x => x.Name?.StartsWith(_removedLabel) == true);
 
+        if (targetConfig.BlockGroups.Length == 0 && targetConfig.Blocks.Length == 0)
+            return null;
+
         return targetConfig;
     }
 
