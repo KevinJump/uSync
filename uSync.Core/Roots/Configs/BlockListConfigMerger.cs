@@ -41,6 +41,8 @@ internal class BlockListConfigMerger : SyncConfigMergerBase, ISyncConfigMerger
             x => x.ContentElementTypeKey,
             (x, label) => x.Label = $"{_removedLabel}:{x.Label}");
 
+        if (targetConfig.Blocks.Length == 0) return null;
+
         return targetConfig;
     }
    

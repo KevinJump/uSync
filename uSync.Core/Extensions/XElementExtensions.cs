@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Xml;
 using System.Xml.Linq;
 
 using Umbraco.Extensions;
@@ -309,5 +312,26 @@ namespace uSync.Core
             return defaultValue;
         }
         #endregion
+
+        /// <summary>
+        ///  gets a hash of the xml, in a platform agnostic way. 
+        /// </summary>
+        public static string MakePlatformSafeHash(this XElement node)
+        {
+			using (MemoryStream s = new MemoryStream())
+			{
+				// for consistency across platforms we need to harmonize line endings.
+				using (var writer = XmlWriter.Create(s, new XmlWriterSettings { NewLineChars = "\r\n" }))
+				{
+					node.Save(writer);
+					writer.Flush();
+					s.Position = 0;
+					using (HashAlgorithm hashAlgorithm = CryptoConfig.AllowOnlyFipsAlgorithms ? SHA1.Create() : MD5.Create())
+					{
+						return BitConverter.ToString(hashAlgorithm.ComputeHash(s)).Replace("-", "").ToLower();
+					}
+				}
+			}
+		}
     }
 }

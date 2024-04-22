@@ -6,7 +6,7 @@ using uSync.Core.Serialization;
 
 namespace uSync.Core.Tracking.Impliment
 {
-	public class WebhookTracker : SyncXmlTracker<IWebhook>, ISyncTracker<IWebhook>
+	public class WebhookTracker : SyncXmlTrackAndMerger<IWebhook>, ISyncTracker<IWebhook>
 	{
 		public WebhookTracker(SyncSerializerCollection serializers) : base(serializers)
 		{

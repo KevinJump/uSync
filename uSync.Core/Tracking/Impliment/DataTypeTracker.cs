@@ -11,7 +11,7 @@ using uSync.Core.Serialization;
 
 namespace uSync.Core.Tracking.Impliment
 {
-    public class DataTypeTracker : SyncXmlTracker<IDataType>, ISyncTracker<IDataType>
+    public class DataTypeTracker : SyncXmlTrackAndMerger<IDataType>, ISyncTracker<IDataType>
     {
         private readonly JsonSerializerSettings _jsonSettings = new JsonSerializerSettings()
         {
@@ -77,7 +77,7 @@ namespace uSync.Core.Tracking.Impliment
                 return GetDifferences(nodes[0], nodes[1], merger);
             }
 
-            return base.GetDifferences(nodes);
+            return SyncRootMergerHelper.GetDifferences(nodes, TrackingItems);
         }
 
         public XElement GetDifferences(XElement root, XElement target, ISyncConfigMerger merger) {
@@ -99,7 +99,7 @@ namespace uSync.Core.Tracking.Impliment
 
             }
 
-            return base.GetDifferences([root, target]);
+            return SyncRootMergerHelper.GetDifferences([root, target], TrackingItems);
         }
 
         private string GetEditorAlias(XElement node)

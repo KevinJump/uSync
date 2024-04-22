@@ -18,7 +18,6 @@ using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Extensions;
-using uSync.BackOffice.Models;
 using uSync.BackOffice.Services;
 using uSync.BackOffice.SyncHandlers.Models;
 using uSync.Core;
@@ -29,13 +28,13 @@ using uSync.Core.Tracking;
 
 namespace uSync.BackOffice.SyncHandlers
 {
-    /// <summary>
-    /// Root base class for all handlers 
-    /// </summary>
-    /// <remarks>
-    /// If the Handler manages something that Implements IEntity use SyncBaseHandler
-    /// </remarks>
-    public abstract class SyncHandlerRoot<TObject, TContainer>
+	/// <summary>
+	/// Root base class for all handlers 
+	/// </summary>
+	/// <remarks>
+	/// If the Handler manages something that Implements IEntity use SyncBaseHandler
+	/// </remarks>
+	public abstract class SyncHandlerRoot<TObject, TContainer>
     {
         /// <summary>
         /// Reference to the Logger
@@ -1064,8 +1063,32 @@ namespace uSync.BackOffice.SyncHandlers
             {
                 if (ShouldExport(attempt.Item, config))
                 {
-                    // only write the file to disk if it should be exported.
-                    syncFileService.SaveXElement(attempt.Item, filename);
+                    var files = folders.Select(x => GetPath(x, item, config.GuidNames, config.UseFlatStructure)).ToArray();
+                    var nodes = syncFileService.GetAllNodes(files[..^1]);
+                    if (nodes.Count > 0)
+                    {
+                        nodes.Add(attempt.Item);
+                        var differences = syncFileService.GetDifferences(nodes, trackers.FirstOrDefault());
+                        if (differences is not null && differences.HasElements)
+                        {
+							syncFileService.SaveXElement(attempt.Item, filename);
+						}
+                        else
+                        {
+
+                            if (syncFileService.FileExists(filename))
+							{
+								// we don't delete them - because in deployments they might then hang around
+                                // we mark them as reverted and then they don't get processed.
+								var emptyNode = XElementExtensions.MakeEmpty(attempt.Item.GetKey(), SyncActionType.None, "Reverted to root");
+                                syncFileService.SaveXElement(emptyNode, filename);
+                            }
+                        }
+					}
+                    else
+                    {
+                        syncFileService.SaveXElement(attempt.Item, filename);
+                    }
 
                     if (config.CreateClean && HasChildren(item))
                     {
@@ -1077,7 +1100,6 @@ namespace uSync.BackOffice.SyncHandlers
                     return SyncAttempt<XElement>.Succeed(Path.GetFileName(filename), ChangeType.NoChange, "Not Exported (Based on configuration)");
                 }
             }
-
             return attempt;
         }
 

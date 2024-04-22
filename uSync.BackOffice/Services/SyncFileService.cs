@@ -10,6 +10,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 using Umbraco.Cms.Core.Extensions;
+using Umbraco.Extensions;
 
 using uSync.BackOffice.Models;
 using uSync.Core;
@@ -571,9 +572,12 @@ namespace uSync.BackOffice.Services
         {
             if (nodes?.Count == 0) return null;
             if (nodes.Count == 1) return nodes[0];
-            if (trackerBase is null) return nodes[^1];
-			return trackerBase?.GetDifferences(nodes);
+            if (trackerBase is null) 
+                return SyncRootMergerHelper.GetDifferencesByFileContents(nodes);
+
+            return trackerBase?.GetDifferences(nodes);
         }
+
 
         /// <summary>
         ///  get all xml elements that represent this item across
