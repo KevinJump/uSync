@@ -511,7 +511,7 @@ namespace uSync.BackOffice.Services
                     if (elements.ContainsKey(item.Key))
                     {
                         // merge these files.
-                        item.Value.SetNode(trackerBase.MergeFiles(elements[item.Key].Node, item.Value.Node));
+                        item.Value.SetNode(MergeNodes(elements[item.Key].Node, item.Value.Node, trackerBase));
                         item.Value.FileName = $"{uSyncConstants.MergedFolderName}/{Path.GetFileName(item.Value.FileName)}";
                     }
 
@@ -522,7 +522,10 @@ namespace uSync.BackOffice.Services
             return elements.Values;
         }
 
-        private IEnumerable<KeyValuePair<string, OrderedNodeInfo>> GetFolderItems(string folder, string extension)
+        private XElement MergeNodes(XElement source, XElement target, ISyncTrackerBase trackerBase)
+            => trackerBase is null ? target : trackerBase.MergeFiles(source, target);
+
+		private IEnumerable<KeyValuePair<string, OrderedNodeInfo>> GetFolderItems(string folder, string extension)
         {
             foreach (var file in GetFilePaths(folder, extension))
             {
@@ -568,8 +571,8 @@ namespace uSync.BackOffice.Services
         {
             if (nodes?.Count == 0) return null;
             if (nodes.Count == 1) return nodes[0];
-   
-            return trackerBase.GetDifferences(nodes);
+            if (trackerBase is null) return nodes[^1];
+			return trackerBase?.GetDifferences(nodes);
         }
 
         /// <summary>
