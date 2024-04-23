@@ -15,7 +15,7 @@ export default defineConfig({
 			onwarn: () => {},
 		},
 	},
-	base: '/usync/',
+	base: '/App_Plugins/uSync/',
 	mode: 'production',
 	plugins: [
 		viteStaticCopy({

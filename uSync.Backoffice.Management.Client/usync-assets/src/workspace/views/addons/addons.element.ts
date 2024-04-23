@@ -6,7 +6,7 @@ import {
 	html,
 } from '@umbraco-cms/backoffice/external/lit';
 
-import logo from '../../../img/usync-complete.png';
+const logo = '/App_Plugins/uSync/img/usync-complete.png';
 
 @customElement('usync-addons-view')
 export class uSyncAddOnsElement extends UmbElementMixin(LitElement) {
