@@ -1,8 +1,8 @@
 import { UmbControllerHost } from '@umbraco-cms/backoffice/controller-api';
 import { UmbDataSourceResponse } from '@umbraco-cms/backoffice/repository';
-import { MigrationsService, SyncLegacyCheckResponse } from '../../api';
 import { tryExecuteAndNotify } from '@umbraco-cms/backoffice/resources';
 
+import { MigrationsService, SyncLegacyCheckResponse } from '../../api/index.js';
 export interface SyncMigrationDataSource {
 	checkLegacy(): Promise<UmbDataSourceResponse<SyncLegacyCheckResponse>>;
 }

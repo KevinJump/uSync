@@ -1,9 +1,9 @@
 import { UmbEntryPointOnInit } from '@umbraco-cms/backoffice/extension-api';
 import { UMB_AUTH_CONTEXT } from '@umbraco-cms/backoffice/auth';
-import { OpenAPI } from './api';
+import { OpenAPI } from './api/index.js';
 
 import { manifests } from './manifests.js';
-import './components';
+import './components/index.js';
 
 export * from './repository/index.js';
 

@@ -6,7 +6,7 @@ import {
 	PerformActionRequest,
 	PerformActionResponse,
 	SyncActionGroup,
-} from '../../api';
+} from '../../api/index.js';
 
 export interface SyncActionDataSource {
 	getActions(): Promise<UmbDataSourceResponse<unknown>>;

@@ -1,7 +1,11 @@
 import { UmbDataSourceResponse } from '@umbraco-cms/backoffice/repository';
 import { UmbControllerHost } from '@umbraco-cms/backoffice/controller-api';
 import { tryExecuteAndNotify } from '@umbraco-cms/backoffice/resources';
-import { SettingsService, uSyncHandlerSetSettings, uSyncSettings } from '../../api';
+import {
+	SettingsService,
+	uSyncHandlerSetSettings,
+	uSyncSettings,
+} from '../../api/index.js';
 
 export interface SyncSettingsDataSource {
 	getSettings(): Promise<UmbDataSourceResponse<uSyncSettings>>;

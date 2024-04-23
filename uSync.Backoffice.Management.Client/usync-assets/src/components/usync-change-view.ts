@@ -6,8 +6,8 @@ import {
 	html,
 	property,
 } from '@umbraco-cms/backoffice/external/lit';
-import { ChangeType, uSyncActionView } from '../api';
-import * as Diff from 'diff';
+import { ChangeType, uSyncActionView } from '../api/index.js';
+// import * as Diff from 'diff';
 
 /**
  * shows the change details for an item.
@@ -60,7 +60,7 @@ export class uSyncChangeView extends UmbElementMixin(LitElement) {
 		var changesHtml = this.item?.details.map((detail) => {
 			const oldValue = this.#getJsonOrString(detail.oldValue);
 			const newValue = this.#getJsonOrString(detail.newValue);
-			const changes = Diff.diffWords(oldValue, newValue);
+			const changes: any = []; // Diff.diffWords(oldValue, newValue);
 
 			const changeHtml = changes.map((change: any) => {
 				console.log(change);

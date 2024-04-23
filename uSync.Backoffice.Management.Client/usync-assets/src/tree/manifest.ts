@@ -3,7 +3,7 @@ import {
 	ManifestMenuItem,
 	ManifestTypes,
 } from '@umbraco-cms/backoffice/extension-registry';
-import { uSyncConstants } from '../constants';
+import { uSyncConstants } from '../constants.js';
 import uSyncMenuElement from './usync.menu-element.js';
 
 const sectionAlias = 'Umb.Section.Settings';

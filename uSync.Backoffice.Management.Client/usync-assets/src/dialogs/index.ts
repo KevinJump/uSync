@@ -1,2 +1,2 @@
-export * from './details-modal-element';
-export * from './details-modal-token';
+export * from './details-modal-element.js';
+export * from './details-modal-token.js';

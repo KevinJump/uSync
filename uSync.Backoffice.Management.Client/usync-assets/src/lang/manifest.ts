@@ -9,7 +9,7 @@ const localizations: Array<ManifestLocalization> = [
 		meta: {
 			culture: 'en-us',
 		},
-		js: () => import('./files/en-us'),
+		js: () => import('./files/en-us.js'),
 	},
 	{
 		type: 'localization',
@@ -19,7 +19,7 @@ const localizations: Array<ManifestLocalization> = [
 		meta: {
 			culture: 'en-gb',
 		},
-		js: () => import('./files/en-us'),
+		js: () => import('./files/en-us.js'),
 	},
 ];
 

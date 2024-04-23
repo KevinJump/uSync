@@ -6,10 +6,10 @@ import {
 	html,
 	state,
 } from '@umbraco-cms/backoffice/external/lit';
-import { USYNC_CORE_CONTEXT_TOKEN } from '../../workspace.context.ts';
-import { uSyncHandlerSetSettings, uSyncSettings } from '../../../api/index.ts';
+import { USYNC_CORE_CONTEXT_TOKEN } from '../../workspace.context.js';
+import { uSyncHandlerSetSettings, uSyncSettings } from '../../../api/index.js';
 
-export * from './components/usyncSettingItem.element.ts';
+export * from './components/usyncSettingItem.element.js';
 
 @customElement('usync-settings-view')
 export class uSyncSettingsViewElement extends UmbElementMixin(LitElement) {

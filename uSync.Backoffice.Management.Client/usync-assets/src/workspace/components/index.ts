@@ -1,1 +1,1 @@
-export * from './usync-action-button';
+export * from './usync-action-button.js';

@@ -6,8 +6,8 @@ import {
 	property,
 	ifDefined,
 } from '@umbraco-cms/backoffice/external/lit';
-import { SyncActionGroup } from '../api';
 import { UUIButtonState } from '@umbraco-cms/backoffice/external/uui';
+import { SyncActionGroup } from '../api/index.js';
 
 /**
  * displays the action buttons for a given group

@@ -1,7 +1,7 @@
-import type { CancelablePromise } from './core/CancelablePromise';
-import { OpenAPI } from './core/OpenAPI';
-import { request as __request } from './core/request';
-import type { ActionsData, MigrationsData, SettingsData } from './models';
+import type { CancelablePromise } from './core/CancelablePromise.js';
+import { OpenAPI } from './core/OpenAPI.js';
+import { request as __request } from './core/request.js';
+import type { ActionsData, MigrationsData, SettingsData } from './models.js';
 
 export class ActionsService {
 

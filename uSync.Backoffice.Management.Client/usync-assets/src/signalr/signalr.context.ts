@@ -4,8 +4,8 @@ import { UmbControllerHost } from '@umbraco-cms/backoffice/controller-api';
 import * as signalR from '@microsoft/signalr';
 
 import { UmbObjectState } from '@umbraco-cms/backoffice/observable-api';
-import { USYNC_SIGNALR_CONTEXT_TOKEN } from './signalr.context.token';
-import type { SyncUpdateMessage } from './types';
+import { USYNC_SIGNALR_CONTEXT_TOKEN } from './signalr.context.token.js';
+import type { SyncUpdateMessage } from './types.js';
 
 export class uSyncSignalRContext extends UmbControllerBase {
 	#connection?: signalR.HubConnection;

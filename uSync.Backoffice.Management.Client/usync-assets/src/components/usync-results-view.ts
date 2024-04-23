@@ -7,13 +7,13 @@ import {
 	css,
 	state,
 } from '@umbraco-cms/backoffice/external/lit';
-import { uSyncActionView } from '../api';
 import { UmbElementMixin } from '@umbraco-cms/backoffice/element-api';
 import {
 	UMB_MODAL_MANAGER_CONTEXT,
 	UmbModalManagerContext,
 } from '@umbraco-cms/backoffice/modal';
-import { USYNC_DETAILS_MODAL } from '../dialogs/details-modal-token';
+import { uSyncActionView } from '../api/index.js';
+import { USYNC_DETAILS_MODAL } from '../dialogs/details-modal-token.js';
 
 @customElement('usync-results')
 export class uSyncResultsView extends UmbElementMixin(LitElement) {

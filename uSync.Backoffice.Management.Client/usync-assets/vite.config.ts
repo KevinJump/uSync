@@ -6,6 +6,7 @@ export default defineConfig({
 		lib: {
 			entry: 'src/index.ts', // your web component source file
 			formats: ['es'],
+			fileName: 'index',
 		},
 		outDir: '../wwwroot/App_Plugins/uSync',
 		emptyOutDir: true,
@@ -15,7 +16,7 @@ export default defineConfig({
 			onwarn: () => {},
 		},
 	},
-	base: '/usync/',
+	base: '/App_Plugins/uSync/',
 	mode: 'production',
 	plugins: [
 		viteStaticCopy({

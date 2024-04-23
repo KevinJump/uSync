@@ -7,9 +7,9 @@ import {
 	html,
 } from '@umbraco-cms/backoffice/external/lit';
 
-import './views/default/default.element';
-import uSyncWorkspaceContext from './workspace.context';
-import { uSyncConstants } from '../constants';
+import './views/default/default.element.js';
+import uSyncWorkspaceContext from './workspace.context.js';
+import { uSyncConstants } from '../constants.js';
 
 @customElement('usync-workspace-root')
 export class uSyncWorkspaceRootElement extends UmbElementMixin(LitElement) {

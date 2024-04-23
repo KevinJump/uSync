@@ -5,7 +5,12 @@ import {
 	nothing,
 	state,
 } from '@umbraco-cms/backoffice/external/lit';
-
+import { UUIButtonState } from '@umbraco-cms/backoffice/external/uui';
+import {
+	UMB_MODAL_MANAGER_CONTEXT,
+	UmbModalManagerContext,
+} from '@umbraco-cms/backoffice/modal';
+import { UmbLitElement } from '@umbraco-cms/backoffice/lit-element';
 import {
 	USYNC_CORE_CONTEXT_TOKEN,
 	uSyncWorkspaceContext,
@@ -16,13 +21,7 @@ import {
 	SyncLegacyCheckResponse,
 	uSyncActionView,
 } from '../../../api/index.js';
-import { UUIButtonState } from '@umbraco-cms/backoffice/external/uui';
-import {
-	UMB_MODAL_MANAGER_CONTEXT,
-	UmbModalManagerContext,
-} from '@umbraco-cms/backoffice/modal';
 import { USYNC_LEGACY_MODAL } from '../../../dialogs/legacy-modal-element.js';
-import { UmbLitElement } from '@umbraco-cms/backoffice/lit-element';
 
 @customElement('usync-default-view')
 export class uSyncDefaultViewElement extends UmbLitElement {

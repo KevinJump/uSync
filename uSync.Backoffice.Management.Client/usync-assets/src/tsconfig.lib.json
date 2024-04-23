@@ -1,0 +1,14 @@
+{
+	"extends": "../tsconfig.json",
+	"compilerOptions": {
+		"allowJs": true,
+		"noEmit": false,
+		"outDir": "../lib-cms",
+		"rootDir": "./",
+		"composite": true,
+		"sourceMap": false,
+		"declaration": true,
+		"allowArbitraryExtensions": false
+	},
+	"include": ["./**/*.ts", "./**/*/js"]
+}

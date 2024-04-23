@@ -1,4 +1,4 @@
-import { SyncActionGroup } from '../api';
+import { SyncActionGroup } from '../api/index.js';
 
 /**
  * Options passed to the performAction method on the workspace context

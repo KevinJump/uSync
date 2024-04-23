@@ -5,7 +5,7 @@ import {
 	ManifestWorkspaceView,
 } from '@umbraco-cms/backoffice/extension-registry';
 
-import './components';
+import './components/index.js';
 
 import { uSyncConstants } from '../constants.js';
 

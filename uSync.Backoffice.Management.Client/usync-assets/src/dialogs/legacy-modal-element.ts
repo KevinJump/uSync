@@ -1,6 +1,6 @@
 import { css, customElement, html, nothing } from '@umbraco-cms/backoffice/external/lit';
 import { UmbModalBaseElement, UmbModalToken } from '@umbraco-cms/backoffice/modal';
-import { SyncLegacyCheckResponse } from '../api';
+import { SyncLegacyCheckResponse } from '../api/index.js';
 
 @customElement('usync-legacy-modal')
 export class uSyncLegacyModalElement extends UmbModalBaseElement<

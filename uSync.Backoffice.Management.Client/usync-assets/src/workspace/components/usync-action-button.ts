@@ -8,12 +8,12 @@ import {
 	state,
 } from '@umbraco-cms/backoffice/external/lit';
 import { UmbLitElement } from '@umbraco-cms/backoffice/lit-element';
-import { SyncActionButton } from '../../api';
 import {
 	UUIButtonState,
 	UUIInterfaceColor,
 	UUIInterfaceLook,
 } from '@umbraco-cms/backoffice/external/uui';
+import { SyncActionButton } from '../../api/index.js';
 
 @customElement('usync-action-button')
 export class SyncActionButtonElement extends UmbLitElement {

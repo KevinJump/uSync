@@ -1,6 +1,7 @@
 import { UmbModalBaseElement } from '@umbraco-cms/backoffice/modal';
-import { uSyncDetailsModalData, uSyncDetailsModalValue } from './details-modal-token';
 import { customElement, html } from '@umbraco-cms/backoffice/external/lit';
+
+import { uSyncDetailsModalData, uSyncDetailsModalValue } from './details-modal-token.js';
 
 @customElement('usync-details-modal')
 export class uSyncDetailsModalElement extends UmbModalBaseElement<
