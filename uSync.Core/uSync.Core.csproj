@@ -18,7 +18,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>		
-		<PackageReference Include="Umbraco.Cms.Web.Website" Version="14.0.0-rc1" />
+		<PackageReference Include="Umbraco.Cms.Web.Website" Version="14.0.0-rc2" />
 		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" /> 
 	</ItemGroup>
 

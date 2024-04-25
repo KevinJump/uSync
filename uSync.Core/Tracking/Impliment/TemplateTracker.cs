@@ -4,7 +4,7 @@ using uSync.Core.Serialization;
 
 namespace uSync.Core.Tracking.Impliment;
 
-public class TemplateTracker : SyncXmlTracker<ITemplate>, ISyncTracker<ITemplate>
+public class TemplateTracker : SyncXmlTrackAndMerger<ITemplate>, ISyncTracker<ITemplate>
 {
     public TemplateTracker(SyncSerializerCollection serializers)
         : base(serializers)

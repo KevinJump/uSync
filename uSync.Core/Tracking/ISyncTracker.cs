@@ -8,7 +8,7 @@ namespace uSync.Core.Tracking;
 public interface ISyncTrackerBase
 {
 
-    XElement MergeFiles(XElement a, XElement b)
+    XElement? MergeFiles(XElement a, XElement b)
         => b;
 
     XElement? GetDifferences(List<XElement> nodes)

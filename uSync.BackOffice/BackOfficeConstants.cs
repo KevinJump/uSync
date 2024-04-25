@@ -7,6 +7,8 @@ namespace uSync.BackOffice;
 /// </summary>
 public static partial class uSyncConstants
 {
+	public const string MergedFolderName = "Combined";
+
 	/// <summary>
 	/// Information about the package name/files
 	/// </summary>

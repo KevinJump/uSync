@@ -4,7 +4,7 @@ using uSync.Core.Serialization;
 
 namespace uSync.Core.Tracking.Impliment;
 
-public abstract class ContentBaseTracker<TObject> : SyncXmlTracker<TObject>
+public abstract class ContentBaseTracker<TObject> : SyncXmlTrackAndMerger<TObject>
     where TObject : IContentBase
 {
     public ContentBaseTracker(SyncSerializerCollection serializers)

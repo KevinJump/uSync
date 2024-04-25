@@ -119,6 +119,44 @@
             ],
             "type": "object"
         },
+        "ManifestAppEntryPoint": {
+            "description": "Manifest for an `appEntryPoint`, which is loaded up front when the app starts.\n\nThis type of extension gives full control and will simply load the specified JS file.\nYou could have custom logic to decide which extensions to load/register by using extensionRegistry.\nThis is useful for extensions that need to be loaded up front, like an `authProvider`.",
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "type": {
+                    "const": "appEntryPoint",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
         "ManifestAuthProvider": {
             "description": "Represents an authentication provider that can be used to authenticate users.\nThe provider needs to be registered in the API that the authorization request is sent to in order to be used.",
             "properties": {
@@ -170,6 +208,44 @@
             "required": [
                 "alias",
                 "forProviderName",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestBackofficeEntryPoint": {
+            "description": "Manifest for an `backofficeEntryPoint`, which is loaded after the Backoffice has been loaded and authentication has been done.\n\nThis type of extension gives full control and will simply load the specified JS file.\nYou could have custom logic to decide which extensions to load/register by using extensionRegistry.",
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "type": {
+                    "const": "backofficeEntryPoint",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
                 "name",
                 "type"
             ],
@@ -2150,7 +2226,7 @@
             "type": "object"
         },
         "ManifestEntryPoint": {
-            "description": "This type of extension gives full control and will simply load the specified JS file\nYou could have custom logic to decide which extensions to load/register by using extensionRegistry",
+            "description": "Manifest for an `entryPoint`, which is loaded after the Backoffice has been loaded and authentication has been done.\n\nThis type of extension gives full control and will simply load the specified JS file.\nYou could have custom logic to decide which extensions to load/register by using extensionRegistry.",
             "properties": {
                 "alias": {
                     "description": "The alias of the extension, ensure it is unique",
@@ -2463,6 +2539,43 @@
                 "alias",
                 "api",
                 "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestIcons": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "type": {
+                    "const": "icons",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
                 "name",
                 "type"
             ],
@@ -3722,9 +3835,6 @@
                     "$ref": "#/definitions/ManifestCondition"
                 },
                 {
-                    "$ref": "#/definitions/ManifestEntryPoint"
-                },
-                {
                     "$ref": "#/definitions/ManifestSectionSidebarAppMenuKind"
                 },
                 {
@@ -3740,13 +3850,13 @@
                     "$ref": "#/definitions/ManifestTree"
                 },
                 {
-                    "$ref": "#/definitions/ManifestDashboard"
+                    "$ref": "#/definitions/ManifestAppEntryPoint"
                 },
                 {
-                    "$ref": "#/definitions/ManifestExternalLoginProvider"
+                    "$ref": "#/definitions/ManifestBackofficeEntryPoint"
                 },
                 {
-                    "$ref": "#/definitions/ManifestMenuItem"
+                    "$ref": "#/definitions/ManifestEntryPoint"
                 },
                 {
                     "$ref": "#/definitions/ManifestAuthProvider"
@@ -3771,6 +3881,9 @@
                 },
                 {
                     "$ref": "#/definitions/ManifestCurrentUserActionDefaultKind<MetaCurrentUserActionDefaultKind>"
+                },
+                {
+                    "$ref": "#/definitions/ManifestDashboard"
                 },
                 {
                     "$ref": "#/definitions/ManifestDashboardCollection"
@@ -3827,6 +3940,9 @@
                     "$ref": "#/definitions/ManifestEntityBulkAction<MetaEntityBulkAction>"
                 },
                 {
+                    "$ref": "#/definitions/ManifestExternalLoginProvider"
+                },
+                {
                     "$ref": "#/definitions/ManifestGlobalContext"
                 },
                 {
@@ -3839,10 +3955,16 @@
                     "$ref": "#/definitions/ManifestHealthCheck"
                 },
                 {
+                    "$ref": "#/definitions/ManifestIcons"
+                },
+                {
                     "$ref": "#/definitions/ManifestItemStore"
                 },
                 {
                     "$ref": "#/definitions/ManifestMenu"
+                },
+                {
+                    "$ref": "#/definitions/ManifestMenuItem"
                 },
                 {
                     "$ref": "#/definitions/ManifestMenuItemTreeKind"

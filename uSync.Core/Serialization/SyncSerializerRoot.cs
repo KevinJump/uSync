@@ -295,30 +295,17 @@ public abstract class SyncSerializerRoot<TObject>
     {
         if (node == null) return string.Empty;
         node = CleanseNode(node);
+        
+        return node.MakePlatformSafeHash();
+	}
 
-        using (MemoryStream s = new())
-        {
-            // for consistency across platforms we need to harmonize line endings.
-            using (var writer = XmlWriter.Create(s, new XmlWriterSettings { NewLineChars = "\r\n" }))
-            {
-                node.Save(writer);
-                writer.Flush();
-                s.Position = 0;
-                using (HashAlgorithm hashAlgorithm = CryptoConfig.AllowOnlyFipsAlgorithms ? SHA1.Create() : MD5.Create())
-                {
-                    return BitConverter.ToString(hashAlgorithm.ComputeHash(s)).Replace("-", "").ToLower();
-                }
-            }
-        }
-    }
-
-    /// <summary>
-    ///  cleans up the node, removing things that are not generic (like internal Ids)
-    ///  so that the comparisons are like for like.
-    /// </summary>
-    /// <param name="node"></param>
-    /// <returns></returns>
-    protected virtual XElement CleanseNode(XElement node) => node;
+	/// <summary>
+	///  cleans up the node, removing things that are not generic (like internal Ids)
+	///  so that the comparisons are like for like.
+	/// </summary>
+	/// <param name="node"></param>
+	/// <returns></returns>
+	protected virtual XElement CleanseNode(XElement node) => node;
 
 
     #region Finders 

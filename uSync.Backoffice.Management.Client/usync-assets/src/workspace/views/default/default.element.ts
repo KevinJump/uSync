@@ -73,8 +73,6 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 			this.observe(_instance.actions, (_actions) => {
 				this._actions = _actions;
 				this._loaded = this._actions !== null;
-
-				console.log(this._actions);
 			});
 
 			this.observe(_instance.currentAction, (_currentAction) => {
@@ -125,8 +123,8 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 			data: this._legacy,
 		});
 
-		await legacyModal?.onSubmit().then(function (data) {
-			console.log('data', data);
+		await legacyModal?.onSubmit().then(function () {
+			// waiting, so it doesn't close.
 		});
 
 		return;

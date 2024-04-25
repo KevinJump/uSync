@@ -73,6 +73,7 @@ export class SyncActionButtonElement extends UmbLitElement {
 		return html`
 			<uui-button
 				popovertarget=${popoverId}
+				.label=${this.button.label}
 				color=${<UUIInterfaceColor>parent?.color}
 				look=${<UUIInterfaceLook>parent?.look}
 				compact>

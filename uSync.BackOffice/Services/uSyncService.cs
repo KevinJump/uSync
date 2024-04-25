@@ -391,18 +391,15 @@ public partial class uSyncService
     /// <returns>Action detailing change or not</returns>
     public uSyncAction ImportSingleAction(uSyncAction action)
     {
-        if (action.HandlerAlias is null || action.FileName is null) return new();
-
+		if (action.HandlerAlias is null || action.FileName is null) return new();
+		
+        var folders = _uSyncConfig.Settings.Folders;
         var handlerConfig = _handlerFactory.GetValidHandler(action.HandlerAlias);
+        if (handlerConfig is null) return new();
 
-        if (handlerConfig != null)
-        {
-            return handlerConfig.Handler
-                .Import(action.FileName, handlerConfig.Settings, true)
-                .FirstOrDefault();
-        }
-
-        return new uSyncAction();
+        return handlerConfig.Handler
+            .Import(action.FileName, handlerConfig.Settings, true)
+            .FirstOrDefault();
     }
 
     #endregion

@@ -2,7 +2,7 @@
 	"name": "@jumoo/usync-assets",
 	"license": "MPL-2.0",
 	"type": "module",
-	"version": "14.0.0-rc1",
+	"version": "14.0.0-rc1.20240425.1",
 	"main": "./dist/usync.js",
 	"types": "./dist/index.d.ts",
 	"module": "./dist/usync.js",
@@ -14,7 +14,8 @@
 		".": "./dist/index.js",
 		"./components": "./dist/components/index.js",
 		"./constants": "./dist/constants.js",
-		"./tree": "./dist/tree/index.js"
+		"./tree": "./dist/tree/index.js",
+		"./dialogs": "./dist/dialogs/index.js"
 	},
 	"files": [
 		"./dist"
@@ -56,7 +57,7 @@
 		"@hey-api/openapi-ts": "^0.37.3",
 		"@types/diff": "^5.0.9",
 		"@types/node": "^20.11.20",
-		"@umbraco-cms/backoffice": "^14.0.0-rc1",
+		"@umbraco-cms/backoffice": "^14.0.0-rc2",
 		"del-cli": "^5.1.0",
 		"prettier": "^3.2.5",
 		"typescript": "^5.2.2",

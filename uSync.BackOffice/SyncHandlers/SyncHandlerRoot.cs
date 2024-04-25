@@ -352,6 +352,20 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 		return syncFileService.MergeFolders(folders, uSyncConfig.Settings.DefaultExtension, baseTracker).ToArray();
 	}
 
+	/// <summary>
+	///  given a file path, will give you the merged values across all folders. 
+	/// </summary>
+	protected virtual XElement? GetMergedNode(string filePath)
+	{
+		var allFiles = uSyncConfig.GetFolders()
+			.Select(x => syncFileService.GetAbsPath($"{x}/{this.DefaultFolder}/{filePath}"))
+			.ToArray();
+
+		var baseTracker = trackers.FirstOrDefault() as ISyncTrackerBase;
+		return syncFileService.MergeFiles(allFiles, baseTracker);
+	}
+
+
 	private void PerformImportClean(List<string> cleanMarkers, List<uSyncAction> actions, HandlerSettings config, SyncUpdateCallback? callback)
 	{
 		foreach (var item in cleanMarkers.Select((filePath, Index) => new { filePath, Index }))
@@ -503,6 +517,15 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 	{
 		var flags = SerializerFlags.OnePass;
 		if (force) flags |= SerializerFlags.Force;
+
+		if (file.InvariantStartsWith($"{uSyncConstants.MergedFolderName}/"))
+		{
+			var node = GetMergedNode(file.Substring(uSyncConstants.MergedFolderName.Length + 1));
+			if (node is not null)
+				return Import(node, file, config, flags);
+			else
+				throw new Exception("Unable to merge files from root folder");
+		}
 
 		return Import(file, config, flags);
 	}
@@ -1063,8 +1086,32 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 		{
 			if (ShouldExport(attempt.Item, config))
 			{
-				// only write the file to disk if it should be exported.
-				syncFileService.SaveXElement(attempt.Item, filename);
+				var files = folders.Select(x => GetPath(x, item, config.GuidNames, config.UseFlatStructure)).ToArray();
+				var nodes = syncFileService.GetAllNodes(files[..^1]);
+				if (nodes.Count > 0)
+				{
+					nodes.Add(attempt.Item);
+					var differences = syncFileService.GetDifferences(nodes, trackers.FirstOrDefault());
+					if (differences is not null && differences.HasElements)
+					{
+						syncFileService.SaveXElement(attempt.Item, filename);
+					}
+					else
+					{
+
+						if (syncFileService.FileExists(filename))
+						{
+							// we don't delete them - because in deployments they might then hang around
+							// we mark them as reverted and then they don't get processed.
+							var emptyNode = XElementExtensions.MakeEmpty(attempt.Item.GetKey(), SyncActionType.None, "Reverted to root");
+							syncFileService.SaveXElement(emptyNode, filename);
+						}
+					}
+				}
+				else
+				{
+					syncFileService.SaveXElement(attempt.Item, filename);
+				}
 
 				if (config.CreateClean && HasChildren(item))
 				{
