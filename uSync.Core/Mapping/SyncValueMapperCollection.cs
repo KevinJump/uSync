@@ -78,18 +78,20 @@ public class SyncValueMapperCollection
         return value;
     }
 
-    /// <summary>
-    ///  cleans and flattens the JSON , so the stuff we import doesn't actually have all the spaces in it. 
-    /// </summary>
-    private static string GetCleanFlatJson(string stringValue)
+	static readonly char[] _trimChars = ['\"', '\''];
+
+	/// <summary>
+	///  cleans and flattens the JSON , so the stuff we import doesn't actually have all the spaces in it. 
+	/// </summary>
+	private static string GetCleanFlatJson(string stringValue)
     {
         if (stringValue.TryConvertToJsonNode(out var result) is false || result is null)
-            return stringValue;
+            return stringValue.Trim(_trimChars);
 
         if (result.TrySerializeJsonNode(out var jsonString, indent: false) is true)
-            return jsonString;
+            return jsonString.Trim(_trimChars);
 
-        return stringValue;
+        return stringValue.Trim(_trimChars);
     }
 
     /// <summary>

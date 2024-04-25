@@ -33,8 +33,6 @@ export class uSyncSettingItemElement extends LitElement {
 			`;
 		} else {
 			if (Array.isArray(this.value)) {
-				console.log('Array', this.value);
-
 				const list = this.value.map((v) => {
 					return html`<li>${v}</li>`;
 				});

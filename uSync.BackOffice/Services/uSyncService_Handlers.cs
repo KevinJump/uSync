@@ -4,8 +4,6 @@ using System.Data;
 using System.IO;
 using System.Linq;
 
-using Microsoft.Extensions.Logging;
-
 using uSync.BackOffice.Extensions;
 using uSync.BackOffice.Models;
 using uSync.BackOffice.SyncHandlers;
@@ -18,10 +16,23 @@ namespace uSync.BackOffice;
 
 public partial class uSyncService
 {
-    /// <summary>
-    ///  Run a report for a given handler 
-    /// </summary>
-    public IEnumerable<uSyncAction> ReportHandler(string handler, uSyncImportOptions options)
+	private string[] GetFolderFromOptions(uSyncImportOptions options)
+	{
+		if (options.Folders?.Length > 0 is true)
+			return options.Folders;
+
+		if (string.IsNullOrWhiteSpace(options.RootFolder) is false)
+			return [options.RootFolder];
+
+		// return the default. 
+		return _uSyncConfig.GetFolders();
+	}
+
+
+	/// <summary>
+	///  Run a report for a given handler 
+	/// </summary>
+	public IEnumerable<uSyncAction> ReportHandler(string handler, uSyncImportOptions options)
     {
         var handlerPair = _handlerFactory.GetValidHandler(handler, new SyncHandlerOptions
         {
@@ -30,9 +41,9 @@ public partial class uSyncService
         });
 
         if (handlerPair == null) return [];
-        var folders = GetHandlerFolders(options.Folders, handlerPair.Handler);
+		var folders = GetHandlerFolders(GetFolderFromOptions(options), handlerPair.Handler);
 
-        return handlerPair.Handler.Report(folders, handlerPair.Settings, options.Callbacks?.Update);
+		return handlerPair.Handler.Report(folders, handlerPair.Settings, options.Callbacks?.Update);
     }
 
     /// <summary>
@@ -51,11 +62,11 @@ public partial class uSyncService
                 });
 
                 if (handlerPair == null) return [];
-                var folders = GetHandlerFolders(options.Folders, handlerPair.Handler);
+				var folders = GetHandlerFolders(GetFolderFromOptions(options), handlerPair.Handler);
 
-                // _logger.LogDebug("> Import Handler {handler}", handlerAlias);
+				// _logger.LogDebug("> Import Handler {handler}", handlerAlias);
 
-                using var scope = _scopeProvider.CreateNotificationScope(
+				using var scope = _scopeProvider.CreateNotificationScope(
                     eventAggregator: _eventAggregator,
                     loggerFactory: _loggerFactory,
                     syncConfigService: _uSyncConfig,
@@ -108,8 +119,8 @@ public partial class uSyncService
         });
 
         if (handlerPair == null) return [];
-        var folders = GetHandlerFolders(options.Folders, handlerPair.Handler);
-        return handlerPair.Handler.ExportAll(folders, handlerPair.Settings, options.Callbacks?.Update);
+		var folders = GetHandlerFolders(GetFolderFromOptions(options), handlerPair.Handler);
+		return handlerPair.Handler.ExportAll(folders, handlerPair.Settings, options.Callbacks?.Update);
     }
 
     /// <summary>

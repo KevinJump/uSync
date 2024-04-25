@@ -5,7 +5,7 @@ using uSync.Core.Serialization;
 namespace uSync.Core.Tracking.Impliment;
 
 public class RelationTypeTracker
-    : SyncXmlTracker<IRelationType>, ISyncTracker<IRelationType>
+    : SyncXmlTrackAndMerger<IRelationType>, ISyncTracker<IRelationType>
 {
     public RelationTypeTracker(SyncSerializerCollection serializers)
         : base(serializers)

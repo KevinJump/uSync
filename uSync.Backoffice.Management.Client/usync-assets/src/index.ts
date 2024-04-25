@@ -4,6 +4,7 @@ import { OpenAPI } from './api';
 
 import { manifests } from './manifests.js';
 import './components';
+import './dialogs';
 
 export * from './repository/index.js';
 

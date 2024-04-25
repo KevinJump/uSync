@@ -342,7 +342,7 @@ public class SyncXmlTracker<TObject>
         };
     }
 
-    public virtual XElement MergeFiles(XElement a, XElement b) => b;
+    public virtual XElement? MergeFiles(XElement a, XElement b) => b;
 
     public virtual XElement? GetDifferences(List<XElement> nodes)
         => nodes?.Count > 0 ? nodes[^1] : null;

@@ -8,7 +8,7 @@ using uSync.Core.Serialization;
 
 namespace uSync.Core.Tracking.Impliment;
 
-public class DataTypeTracker : SyncXmlTracker<IDataType>, ISyncTracker<IDataType>
+public class DataTypeTracker : SyncXmlTrackAndMerger<IDataType>, ISyncTracker<IDataType>
 {
     private readonly SyncConfigMergerCollection _configMergers;
 
@@ -30,7 +30,7 @@ public class DataTypeTracker : SyncXmlTracker<IDataType>, ISyncTracker<IDataType
         TrackingItem.Single("Config", "/Config")
     ];
 
-    public override XElement MergeFiles(XElement a, XElement b)
+    public override XElement? MergeFiles(XElement a, XElement b)
     {
         if (b.IsEmptyItem()) return b;
 
@@ -67,10 +67,10 @@ public class DataTypeTracker : SyncXmlTracker<IDataType>, ISyncTracker<IDataType
             return GetDifferences(nodes[0], nodes[1], merger);
         }
 
-        return base.GetDifferences(nodes);
-    }
+		return SyncRootMergerHelper.GetDifferences(nodes, TrackingItems);
+	}
 
-    public XElement? GetDifferences(XElement root, XElement target, ISyncConfigMerger merger)
+	public XElement? GetDifferences(XElement root, XElement target, ISyncConfigMerger merger)
     {
 
         var rootConfig = root.Element("Config").ValueOrDefault(string.Empty);
@@ -89,7 +89,7 @@ public class DataTypeTracker : SyncXmlTracker<IDataType>, ISyncTracker<IDataType
 
         }
 
-        return base.GetDifferences([root, target]);
+        return SyncRootMergerHelper.GetDifferences([root, target], TrackingItems);
     }
 
     private string GetEditorAlias(XElement node)

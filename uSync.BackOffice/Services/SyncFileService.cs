@@ -511,7 +511,7 @@ public class SyncFileService
             foreach (var item in items)
             {
 				var itemKey = item.Value.Node.GetKey();
-				if (localKeys.Contains(itemKey))
+				if (localKeys.Contains(itemKey) && item.Value.Node.IsEmptyItem() is false)
 				{
 					throw new Exception($"Duplicate: Item key {itemKey} already exists for {item.Key} - run uSync Health check for more info.");
 				}
@@ -521,7 +521,7 @@ public class SyncFileService
                 if (trackerBase is not null && elements.TryGetValue(item.Key, out var value))
                 {
                     // merge these files.
-                    item.Value.SetNode(trackerBase.MergeFiles(value.Node, item.Value.Node));
+                    item.Value.SetNode(MergeNodes(value.Node, item.Value.Node, trackerBase));
                 }
 
                 elements[item.Key] = item.Value;
@@ -531,7 +531,29 @@ public class SyncFileService
         return elements.Values;
     }
 
-    private IEnumerable<KeyValuePair<string, OrderedNodeInfo>> GetFolderItems(string folder, string extension)
+	/// <summary>
+	///  merge the files into a single XElement that can be imported as if it was on disk.
+	/// </summary>
+	public XElement? MergeFiles(string[] filenames, ISyncTrackerBase? trackerBase)
+	{
+		if (filenames.Length == 0) return null;
+		var latest = LoadXElementSafe(filenames[0]);
+		if (filenames.Length == 1 || latest is null) return latest;
+
+		for (var n = 1; n < filenames.Length; n++)
+		{
+			var node = LoadXElementSafe(filenames[n]);
+			if (node is null) continue;
+			latest = MergeNodes(latest, node, trackerBase);
+		}
+		return latest;
+	}
+
+	private XElement MergeNodes(XElement source, XElement target, ISyncTrackerBase? trackerBase)
+		=> trackerBase is null ? target : trackerBase.MergeFiles(source, target) ?? target;
+
+
+	private IEnumerable<KeyValuePair<string, OrderedNodeInfo>> GetFolderItems(string folder, string extension)
     {
         foreach (var file in GetFilePaths(folder, extension))
         {
@@ -577,9 +599,10 @@ public class SyncFileService
     {
         if (nodes is null || nodes?.Count == 0) return null;
         if (nodes!.Count == 1) return nodes[0];
+        if (trackerBase is null)
+            return SyncRootMergerHelper.GetDifferencesByFileContents(nodes);
 
-        if (trackerBase is null) return null;
-        return trackerBase.GetDifferences(nodes);
+        return trackerBase?.GetDifferences(nodes);
     }
 
     /// <summary>
