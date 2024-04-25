@@ -35,7 +35,7 @@ public class UdiPickerMapper : SyncValueMapperBase, ISyncMapper
         Constants.PropertyEditors.Aliases.MemberPicker
     ];
 
-    public override IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)
+	public override IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)
     {
         if (value is not null)
         {
