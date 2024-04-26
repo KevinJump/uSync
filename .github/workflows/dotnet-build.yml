@@ -80,7 +80,7 @@ jobs:
           echo "Version: ${{ needs.version.outputs.version_string}}"
 
       - name: package ${{ matrix.package }}
-        run: dotnet pack ./${{ matrix.package }}/ ${{ matrix.package }}.csproj --no-restore -c ${{env.config}} --output ${{env.out_folder}} /p:version=${{ version.outputs.version_string }}
+        run: dotnet pack ./${{ matrix.package }}/ ${{ matrix.package }}.csproj --no-restore -c ${{env.config}} --output ${{env.out_folder}} /p:version=${{ needs.version.outputs.version_string }}
 
       - name: Upload nuget file as build artifact
         uses: actions/upload-artifact@v2
