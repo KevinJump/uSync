@@ -17,6 +17,11 @@ jobs:
       version_string: ${{ steps.gitversion.outputs.fullSemVer }}
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Install GitVersion
         uses: gittools/actions/gitversion/setup@v0.9.7
         with:
@@ -44,11 +49,6 @@ jobs:
       schema_gen_project: ./uSync.SchemaGenerator/uSync.SchemaGenerator.csproj
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0;
-
       - name: Install .Net core
         uses: actions/setup-dotnet@v4
         with:
