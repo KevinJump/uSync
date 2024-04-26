@@ -49,10 +49,11 @@ jobs:
         run: npm install -g typescript
 
       # install and run the packages for our assets folder.
-      - name: Build Management client
-        run: |
-          npm run install-client
-          npm run build-client
+      - name: install Management client
+        run: npm run install-client
+
+      - name: build management client
+        run: npm run build-client
 
       - name: Display GitVersion SemVer
         run: |
