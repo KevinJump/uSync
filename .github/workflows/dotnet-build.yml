@@ -6,13 +6,12 @@ on:
   pull_request:
     branches: [v14/dev]
 
-env: 
+env:
   config: Release
   out_folder: ./build-out/
 
 jobs:
-
-  version: 
+  version:
     runs-on: windows-latest
     outputs:
       version_string: ${{ steps.gitversion.outputs.fullSemVer }}
@@ -28,7 +27,6 @@ jobs:
       - name: Display version
         run: |
           echo "Full Version: ${{ steps.gitversion.outputs.fullSemVer }}"
-
 
   build-project:
     runs-on: windows-latest
@@ -61,14 +59,13 @@ jobs:
         run: dotnet run -c ${{env.Config}} --project ${{ env.schema_gen_project}}
 
   package-up:
-
-    runs-on: windows-latest 
+    runs-on: windows-latest
 
     needs: [build-project, version]
 
     strategy:
       matrix:
-        package: 
+        package:
           - uSync.Core
           - uSync.Backoffice
           - uSync.Backoffice.Management.Api
@@ -76,12 +73,11 @@ jobs:
           - uSync.Backoffice.Targets
           - uSync.Community.Contrib
           - uSync.Community.DataTypeSerializers
-    
-    steps: 
 
+    steps:
       - name: version
-        run: | 
-          echo "Version: ${{ version.outputs.version_string}}"
+        run: |
+          echo "Version: ${{ needs.version.outputs.version_string}}"
 
       - name: package ${{ matrix.package }}
         run: dotnet pack ./${{ matrix.package }}/ ${{ matrix.package }}.csproj --no-restore -c ${{env.config}} --output ${{env.out_folder}} /p:version=${{ version.outputs.version_string }}
@@ -91,5 +87,3 @@ jobs:
         with:
           name: Nuget Build Output
           path: ${{env.OUT_FOLDER}}
-
-
