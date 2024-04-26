@@ -26,7 +26,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers;
 /// </summary>
 [SyncHandler(uSyncConstants.Handlers.WebhookHandler, "Webhooks", "Webhooks",
 	uSyncConstants.Priorites.Webhooks, 
-	Icon = "icon-filter-arrows", 
+	Icon = "icon-webhook", 
 	EntityType = UdiEntityType.Webhook, 
 	IsTwoPass = false	
 )]
