@@ -57,7 +57,7 @@ export class uSyncActionBox extends LitElement {
 		});
 
 		return html`
-			<uui-box class="action-box">
+			<uui-box class="action-box ${this.disabled ? 'disabled' : ''}">
 				<div class="box-content">
 					<h2 class="box-heading">${this.group?.groupName}</h2>
 					<uui-icon name=${this.group?.icon}></uui-icon>
@@ -71,6 +71,10 @@ export class uSyncActionBox extends LitElement {
 		:host {
 			flex-grow: 1;
 			margin: var(--uui-size-space-2);
+		}
+
+		.action-box {
+			transition: opacity 0.2s ease-in-out;
 		}
 
 		.box-content {
@@ -97,6 +101,10 @@ export class uSyncActionBox extends LitElement {
 
 		.box-buttons {
 			margin: var(--uui-size-space-2) 0;
+		}
+
+		.disabled {
+			opacity: 0.4;
 		}
 	`;
 }
