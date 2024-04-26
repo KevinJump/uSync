@@ -17,6 +17,11 @@ jobs:
       version_string: ${{ steps.gitversion.outputs.fullSemVer }}
 
     steps:
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v0.9.7
+        with:
+          versionSpec: "5.x"
+
       - name: Determine Version with GitVersion (MSBuild in Proj will do this)
         id: gitversion
         uses: gittools/actions/gitversion/execute@v0.9.15
