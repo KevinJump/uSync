@@ -129,12 +129,21 @@ internal class uSyncManagementService : ISyncManagementService
 
         Guid requestId = GetRequestId(actionRequest);
 
-        if (actionRequest.StepNumber >= handlers.Count)
+		HubClientService? hubClient = default;
+		if (actionRequest.Options?.ClientId != null)
+		{
+			hubClient = new HubClientService(_hubContext, actionRequest.Options.ClientId);
+		}
+		uSyncCallbacks callbacks = hubClient?.Callbacks() ?? new uSyncCallbacks(null, null);
+
+		if (actionRequest.StepNumber >= handlers.Count)
         {
             var finalActions = _syncManagementCache.GetCachedActions(requestId);
 
             // when complete we clean out our action cache.
             _syncManagementCache.Clear(requestId);
+
+            callbacks?.Update?.Invoke("Finished", 1, 1);
 
             // finished. 
             return new PerformActionResponse
@@ -149,11 +158,6 @@ internal class uSyncManagementService : ISyncManagementService
         var currentHandler = handlers[actionRequest.StepNumber];
         var method = GetHandlerMethod(action);
 
-        HubClientService? hubClient = default;
-        if (actionRequest.Options?.ClientId != null)
-        {
-            hubClient = new HubClientService(_hubContext, actionRequest.Options.ClientId);
-        }
 
         var handlerOptions = new SyncActionOptions()
         {
@@ -163,8 +167,6 @@ internal class uSyncManagementService : ISyncManagementService
             Actions = new List<uSyncAction>(),
             Handler = currentHandler.Alias
         };
-
-        uSyncCallbacks callbacks = hubClient?.Callbacks() ?? new uSyncCallbacks(null, null);
 
         var results = method(handlerOptions, callbacks);
         _syncManagementCache.CacheItems(requestId, results.Actions, false);
