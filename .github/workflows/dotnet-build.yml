@@ -55,10 +55,13 @@ jobs:
           dotnet-version: 8.0.x
 
       - name: restore
-        run: dotnet restore
+        run: dotnet restore ${{ env.solution_name}}
 
       - name: build
         run: dotnet build ${{ env.solution_name }} -c ${{ env.config }} -p:ContinuousIntegrationBuild=true
+
+      - name: test
+        run: dotnet test ${{ env.solution_name }}
 
       - name: Generate AppSettings Schema
         run: dotnet run -c ${{env.Config}} --project ${{ env.schema_gen_project}}
