@@ -26,7 +26,8 @@ jobs:
           configFilePath: ./GitVersion.yml
 
       - name: Display version
-        run: echo "Full Version: ${{ steps.gitversion.outputs.fullSemVer }}"
+        run: |
+          echo "Full Version: ${{ steps.gitversion.outputs.fullSemVer }}"
 
 
   build-project:
@@ -79,7 +80,8 @@ jobs:
     steps: 
 
       - name: version
-        run: echo "Version: ${{ version.outputs.version_string}}"
+        run: | 
+          echo "Version: ${{ version.outputs.version_string}}"
 
       - name: package ${{ matrix.package }}
         run: dotnet pack ./${{ matrix.package }}/ ${{ matrix.package }}.csproj --no-restore -c ${{env.config}} --output ${{env.out_folder}} /p:version=${{ version.outputs.version_string }}
