@@ -4,7 +4,6 @@
   "description": "placeholder package.json",
   "private": "true",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "install-client": "cd ./uSync.Backoffice.Management.Client/usync-assets/ && npm install",
     "watch-client": "cd ./uSync.Backoffice.Management.Client/usync-assets/ && npm run watch",
     "build-client": "cd ./uSync.Backoffice.Management.Client/usync-assets/ && npm run build",
