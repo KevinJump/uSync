@@ -60,6 +60,9 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 	@state()
 	_results: Array<uSyncActionView> = [];
 
+	@state()
+	_disabled: boolean = false;
+
 	constructor() {
 		super();
 
@@ -84,7 +87,12 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 
 				if (this._working) {
 					this._buttonState = 'waiting';
+					this._disabled = true;
+				} else {
+					this._disabled = false;
 				}
+
+				console.log(this._disabled);
 			});
 
 			this.observe(_instance.results, (_results) => {
@@ -163,6 +171,7 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 		var actions = this._actions?.map((group) => {
 			return html`
 				<usync-action-box
+					.disabled=${this._disabled}
 					.group="${group}"
 					.state=${this._buttonState}
 					@perform-action=${this.#performAction}>

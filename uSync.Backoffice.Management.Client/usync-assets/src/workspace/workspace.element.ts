@@ -47,14 +47,6 @@ export class uSyncWorkspaceRootElement extends UmbElementMixin(LitElement) {
 				align-items: center;
 				align-content: center;
 			}
-
-			.header > div {
-				padding-right: 20px;
-			}
-
-			uui-icon {
-				font-size: 16pt;
-			}
 		`,
 	];
 }

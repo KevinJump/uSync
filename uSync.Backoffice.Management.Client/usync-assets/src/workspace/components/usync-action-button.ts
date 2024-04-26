@@ -23,6 +23,9 @@ export class SyncActionButtonElement extends UmbLitElement {
 	@property({ type: String })
 	state?: UUIButtonState;
 
+	@property({ type: Boolean })
+	disabled: boolean = false;
+
 	@state()
 	_popoverOpen: boolean = false;
 
@@ -42,6 +45,7 @@ export class SyncActionButtonElement extends UmbLitElement {
 		return html`
 			<uui-button-group>
 				<uui-button
+					.disabled=${this.disabled}
 					label=${this.localize.term(`uSync_${this.button?.label}`)}
 					color=${<UUIInterfaceColor>this.button?.color}
 					look=${<UUIInterfaceLook>this.button?.look}
@@ -62,6 +66,7 @@ export class SyncActionButtonElement extends UmbLitElement {
 
 		const buttons = this.button?.children.map((item: SyncActionButton) => {
 			return html` <uui-menu-item
+				.disabled=${this.disabled}
 				.label=${this.localize.term(`uSync_${item.label}`)}
 				@click-label=${() => this.#onClick(item)}></uui-menu-item>`;
 		});
@@ -72,6 +77,7 @@ export class SyncActionButtonElement extends UmbLitElement {
 
 		return html`
 			<uui-button
+				.disabled=${this.disabled}
 				popovertarget=${popoverId}
 				.label=${this.button.label}
 				color=${<UUIInterfaceColor>parent?.color}

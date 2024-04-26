@@ -26,6 +26,9 @@ export class uSyncActionBox extends LitElement {
 	@property({ type: String })
 	state?: UUIButtonState;
 
+	@property({ type: Boolean })
+	disabled: boolean = false;
+
 	#onAction(e: CustomEvent, group: SyncActionGroup) {
 		if (!e.detail?.button) return;
 
@@ -46,6 +49,7 @@ export class uSyncActionBox extends LitElement {
 			return html`
 				<usync-action-button
 					.button=${b}
+					.disabled=${this.disabled}
 					state=${ifDefined(this.state)}
 					@usync-action-click=${(e: CustomEvent) =>
 						this.#onAction(e, this.group)}></usync-action-button>
