@@ -505,16 +505,26 @@ namespace uSync.BackOffice.Services
                 foreach (var item in items)
                 {
                     var itemKey = item.Value.Node.GetKey();
-                    if (localKeys.Contains(itemKey) && item.Value.Node.IsEmptyItem() is false) { 
-                        throw new Exception($"Duplicate: Item key {itemKey} already exists for {item.Key} - run uSync Health check for more info.");
+                    if (item.Value.Node.IsEmptyItem() is false || item.Value.Node.GetEmptyAction() == SyncActionType.Delete)
+                    {
+                        if (localKeys.Contains(itemKey))
+                        {
+                            throw new Exception($"Duplicate: Item key {itemKey} already exists for {item.Key} - run uSync Health check for more info.");
+                        }
+
+                        localKeys.Add(itemKey);
+                    }
+                    else
+                    {
+                        // empty if its anything but a delete we ignore it. 
+                        // renames are just markers to make sure they don't leave things on disk.
+                        continue;
                     }
 
-                    localKeys.Add(itemKey);
-
-                    if (elements.ContainsKey(item.Key))
+                    if (elements.TryGetValue(item.Key, out var value))
                     {
                         // merge these files.
-                        item.Value.SetNode(MergeNodes(elements[item.Key].Node, item.Value.Node, trackerBase));
+                        item.Value.SetNode(MergeNodes(value.Node, item.Value.Node, trackerBase));
                         item.Value.FileName = $"{uSyncConstants.MergedFolderName}/{Path.GetFileName(item.Value.FileName)}";
                     }
 
