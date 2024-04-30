@@ -11,6 +11,8 @@ using MessagePack.Formatters;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
+using Org.BouncyCastle.Crypto.Engines;
+
 using Umbraco.Cms.Core.Extensions;
 using Umbraco.Extensions;
 
@@ -492,6 +494,8 @@ namespace uSync.BackOffice.Services
         {
             var elements = new Dictionary<string, OrderedNodeInfo>();
 
+            var cleanElements = new Dictionary<string, OrderedNodeInfo>();
+
             foreach (var folder in folders)
             {
                 var absPath = GetAbsPath(folder);
@@ -516,9 +520,18 @@ namespace uSync.BackOffice.Services
                     }
                     else
                     {
-                        // empty if its anything but a delete we ignore it. 
-                        // renames are just markers to make sure they don't leave things on disk.
-                        continue;
+                        if (item.Value.Node.GetEmptyAction() == SyncActionType.Clean)
+                        {
+                            // cleans are added, these run a clean up at the end, so if they exist 
+                            // we need to add them, but they can clash in terms of keys. 
+                            _ = cleanElements.TryAdd(item.Key, item.Value);
+                        }
+                        else
+                        {
+                            // empty if its anything but a delete we ignore it. 
+                            // renames are just markers to make sure they don't leave things on disk.
+                            continue;
+                        }
                     }
 
                     if (elements.TryGetValue(item.Key, out var value))
@@ -532,7 +545,7 @@ namespace uSync.BackOffice.Services
                 }
             }
 
-            return elements.Values;
+            return [..elements.Values, ..cleanElements.Values];
         }
 
         /// <summary>
