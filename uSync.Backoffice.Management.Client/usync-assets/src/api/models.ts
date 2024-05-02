@@ -106,7 +106,8 @@ legacyTypes: Array<string>
     };
 
 export type uSyncActionView = {
-        name: string
+        key: string
+name: string
 itemType: string
 change: ChangeType
 success: boolean

@@ -67,8 +67,8 @@ public static class uSyncActionExtensions
 	/// </summary>
 	public static bool TryFindAction(this IEnumerable<uSyncAction> actions, Guid key, string handlerAlias, out uSyncAction action)
 	{
-		action = actions.FirstOrDefault(x => $"{x.key}_{x.HandlerAlias}" == $"{key}_{handlerAlias}", new uSyncAction { key = Guid.Empty });
-		return action.key != Guid.Empty;
+		action = actions.FirstOrDefault(x => $"{x.Key}_{x.HandlerAlias}" == $"{key}_{handlerAlias}", new uSyncAction { Key = Guid.Empty });
+		return action.Key != Guid.Empty;
 	}
 
 }

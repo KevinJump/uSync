@@ -604,7 +604,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 					// uSyncAction action = actions.FirstOrDefault(x => $"{x.key}_{x.HandlerAlias}" == $"{itemKey}_{this.Alias}", new uSyncAction { key = Guid.Empty });
 					if (actions.TryFindAction(itemKey, this.Alias, out var action))
 					{
-						if (action.key != Guid.Empty)
+						if (action.Key != Guid.Empty)
 						{
 							actions.Remove(action);
 							action.Message += attempt.Message ?? "";
@@ -1300,7 +1300,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 	/// </remarks>
 	protected virtual bool DoActionsMatch(uSyncAction a, uSyncAction b)
 	{
-		if (a.key == b.key) return true;
+		if (a.Key == b.Key) return true;
 		if (a.Name.Equals(b.Name, StringComparison.InvariantCultureIgnoreCase)) return true;
 		return false;
 	}
@@ -1345,7 +1345,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 
 			if (guid != Guid.Empty)
 			{
-				if (actions.Any(x => x.key == guid && (x.Change < ChangeType.Fail || x.Change == ChangeType.ParentMissing)))
+				if (actions.Any(x => x.Key == guid && (x.Change < ChangeType.Fail || x.Change == ChangeType.ParentMissing)))
 				{
 					logger.LogDebug("Found existing key in actions {item}", actions[i].Name);
 					actions[i].Change = ChangeType.Create;

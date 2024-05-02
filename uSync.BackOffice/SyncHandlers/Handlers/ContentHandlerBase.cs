@@ -194,7 +194,7 @@ public abstract class ContentHandlerBase<TObject, TService> : SyncHandlerTreeBas
     /// Do the uSyncActions match by key (e.g are they the same item)
     /// </summary>
     protected override bool DoActionsMatch(uSyncAction a, uSyncAction b)
-        => a.key == b.key;
+        => a.Key == b.Key;
 
     /// <summary>
     ///  Handle the Umbraco Moved to recycle bin notification, (treated like a move)

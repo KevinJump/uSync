@@ -8,6 +8,7 @@ public static class uSyncActionExtensions
     public static uSyncActionView ToActionView(this uSyncAction action)
         => new uSyncActionView
         {
+            Key = action.Key,
             Name = action.Name,
             ItemType = action.ItemType,
             Change = action.Change,

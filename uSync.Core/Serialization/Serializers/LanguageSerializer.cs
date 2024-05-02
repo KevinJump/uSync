@@ -137,7 +137,7 @@ public class LanguageSerializer : SyncSerializerBase<ILanguage>, ISyncSerializer
     {
         // language guids change all the time ! we ignore them, but here we set them to the 'id' 
         // this means the file stays the same! 
-        var key = item.CultureInfo?.LCID.ConvertToGuid() ?? Guid.Empty;
+        var key = item.CultureInfo?.Name.GetDeterministicHashCode().ConvertToGuid() ?? item.Key;
 
         return new XElement(ItemType, new XAttribute(uSyncConstants.Xml.Key, key.ToString().ToLower()),
             new XAttribute(uSyncConstants.Xml.Alias, alias),
@@ -205,8 +205,10 @@ public class LanguageSerializer : SyncSerializerBase<ILanguage>, ISyncSerializer
 
     protected override XElement CleanseNode(XElement node)
     {
-        if (node?.Attribute(uSyncConstants.Xml.Key)?.Value is not null)
-            node.Attribute(uSyncConstants.Xml.Key)!.Value = "";
+        // v14 languages have keys now, and we want to use them if we can.
+
+        //if (node?.Attribute(uSyncConstants.Xml.Key)?.Value is not null)
+        //    node.Attribute(uSyncConstants.Xml.Key)!.Value = "";
 
         return node!;
     }

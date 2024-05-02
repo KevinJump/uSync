@@ -84,7 +84,7 @@ public struct uSyncAction
     /// <summary>
     ///  the GUID key value of the item 
     /// </summary>
-    public Guid key { get; set; }
+    public Guid Key { get; set; }
 
     internal uSyncAction(bool success, string name, string type, ChangeType change, string? message, Exception? ex, string? filename, string? handlerAlias, bool postProcess = false) : this()
     {
@@ -98,7 +98,7 @@ public struct uSyncAction
         RequiresPostProcessing = postProcess;
 
         HandlerAlias = handlerAlias;
-        key = Guid.Empty;
+        Key = Guid.Empty;
 
     }
 
@@ -141,7 +141,7 @@ public struct uSyncActionHelper<T>
     public static uSyncAction SetAction(SyncAttempt<T> attempt, string filename, Guid key, string handlerAlias, bool requirePostProcessing = true)
     {
         var action = new uSyncAction(attempt.Success, attempt.Name, attempt.ItemType, attempt.Change, attempt.Message, attempt.Exception, filename, handlerAlias, requirePostProcessing);
-        action.key = key;
+        action.Key = key;
         if (attempt.Details != null && attempt.Details.Any())
         {
             action.Details = attempt.Details;
@@ -157,7 +157,7 @@ public struct uSyncActionHelper<T>
     {
         return new uSyncAction(true, name, typeof(T).Name, changeType, message, null, file, handlerAlias)
         {
-            key = key
+            Key = key
         };
     }
 
@@ -168,7 +168,7 @@ public struct uSyncActionHelper<T>
     {
         return new uSyncAction(true, name, typeof(T).Name, changeType, message, null, file, handlerAlias)
         {
-            key = key,
+            Key = key,
             Path = path
         };
     }
