@@ -7,6 +7,18 @@
                 "object"
             ]
         },
+        "BlockEntryShowContentEditConditionConfig": {
+            "properties": {
+                "alias": {
+                    "const": "Umb.Condition.BlockEntryShowContentEdit",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "alias"
+            ],
+            "type": "object"
+        },
         "BlockWorkspaceHasSettingsConditionConfig": {
             "properties": {
                 "alias": {
@@ -60,6 +72,9 @@
             "anyOf": [
                 {
                     "$ref": "#/definitions/SwitchConditionConfig"
+                },
+                {
+                    "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
                 },
                 {
                     "$ref": "#/definitions/BlockWorkspaceHasSettingsConditionConfig"
@@ -3273,6 +3288,106 @@
             ],
             "type": "object"
         },
+        "ManifestSearchProvider": {
+            "description": "Represents an search provider that can be used to search.",
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "api": {
+                    "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaSearchProvider"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "type": {
+                    "const": "searchProvider",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestSearchResultItem": {
+            "description": "Represents a search result element.",
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "forEntityTypes": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "meta": {
+                    "description": "This contains properties specific to the type of extension"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "type": {
+                    "const": "searchResultItem",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "forEntityTypes",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
         "ManifestSection": {
             "properties": {
                 "alias": {
@@ -3853,28 +3968,25 @@
                     "$ref": "#/definitions/ManifestAppEntryPoint"
                 },
                 {
-                    "$ref": "#/definitions/ManifestBackofficeEntryPoint"
-                },
-                {
-                    "$ref": "#/definitions/ManifestEntryPoint"
-                },
-                {
                     "$ref": "#/definitions/ManifestAuthProvider"
                 },
                 {
-                    "$ref": "#/definitions/ManifestBundle<ManifestTypes>"
+                    "$ref": "#/definitions/ManifestBackofficeEntryPoint"
                 },
                 {
                     "$ref": "#/definitions/ManifestBlockEditorCustomView"
                 },
                 {
+                    "$ref": "#/definitions/ManifestBundle<ManifestTypes>"
+                },
+                {
                     "$ref": "#/definitions/ManifestCollection"
                 },
                 {
-                    "$ref": "#/definitions/ManifestCollectionView"
+                    "$ref": "#/definitions/ManifestCollectionAction"
                 },
                 {
-                    "$ref": "#/definitions/ManifestCollectionAction"
+                    "$ref": "#/definitions/ManifestCollectionView"
                 },
                 {
                     "$ref": "#/definitions/ManifestCurrentUserAction<MetaCurrentUserAction>"
@@ -3940,10 +4052,19 @@
                     "$ref": "#/definitions/ManifestEntityBulkAction<MetaEntityBulkAction>"
                 },
                 {
+                    "$ref": "#/definitions/ManifestEntityUserPermission"
+                },
+                {
+                    "$ref": "#/definitions/ManifestEntryPoint"
+                },
+                {
                     "$ref": "#/definitions/ManifestExternalLoginProvider"
                 },
                 {
                     "$ref": "#/definitions/ManifestGlobalContext"
+                },
+                {
+                    "$ref": "#/definitions/ManifestGranularUserPermission"
                 },
                 {
                     "$ref": "#/definitions/ManifestHeaderApp"
@@ -3959,6 +4080,9 @@
                 },
                 {
                     "$ref": "#/definitions/ManifestItemStore"
+                },
+                {
+                    "$ref": "#/definitions/ManifestLocalization"
                 },
                 {
                     "$ref": "#/definitions/ManifestMenu"
@@ -3991,6 +4115,12 @@
                     "$ref": "#/definitions/ManifestRepository<UmbApi>"
                 },
                 {
+                    "$ref": "#/definitions/ManifestSearchProvider"
+                },
+                {
+                    "$ref": "#/definitions/ManifestSearchResultItem"
+                },
+                {
                     "$ref": "#/definitions/ManifestSection"
                 },
                 {
@@ -4004,9 +4134,6 @@
                 },
                 {
                     "$ref": "#/definitions/ManifestTinyMcePlugin"
-                },
-                {
-                    "$ref": "#/definitions/ManifestLocalization"
                 },
                 {
                     "$ref": "#/definitions/ManifestTreeStore"
@@ -4046,12 +4173,6 @@
                 },
                 {
                     "$ref": "#/definitions/ManifestWorkspaceViewContentTypeDesignEditorKind"
-                },
-                {
-                    "$ref": "#/definitions/ManifestEntityUserPermission"
-                },
-                {
-                    "$ref": "#/definitions/ManifestGranularUserPermission"
                 }
             ]
         },
@@ -4872,10 +4993,15 @@
                             "description": "If true, the user will be redirected to the provider's login page immediately.",
                             "type": "boolean"
                         },
-                        "denyLocalLogin": {
-                            "default": false,
-                            "description": "If true, the Umbraco backoffice login will be disabled.",
-                            "type": "boolean"
+                        "popupFeatures": {
+                            "default": "'width=600,height=600,menubar=no,location=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'",
+                            "description": "The features of the popup that is opened when the user logs in.",
+                            "type": "string"
+                        },
+                        "popupTarget": {
+                            "default": "'umbracoAuthPopup'",
+                            "description": "The target of the popup that is opened when the user logs in.",
+                            "type": "string"
                         }
                     },
                     "type": "object"
@@ -5752,6 +5878,15 @@
             ],
             "type": "object"
         },
+        "MetaSearchProvider": {
+            "properties": {
+                "label": {
+                    "description": "The label of the provider that is shown to the user.",
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
         "MetaSection": {
             "properties": {
                 "label": {
@@ -6042,6 +6177,13 @@
                         "match": {
                             "description": "Define the section that this extension should be available in",
                             "type": "string"
+                        },
+                        "oneOf": {
+                            "description": "Define one or more workspaces that this extension should be available in",
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
                         }
                     },
                     "required": [
