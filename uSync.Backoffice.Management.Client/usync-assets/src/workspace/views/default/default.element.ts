@@ -225,6 +225,9 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 			}
 
 			.results-box {
+				position: relative;
+				display: block;
+				z-index: 1;
 				margin: var(--uui-size-space-4) 0;
 			}
 
@@ -233,7 +236,7 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 				display: flex;
 				flex-wrap: wrap;
 				align-content: stretch;
-				z-index: 100;
+				z-index: 1;
 				margin: calc(var(--uui-size-space-2) * -1);
 			}
 
