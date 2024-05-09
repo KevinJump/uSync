@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Xml.Linq;
+﻿using System.Xml.Linq;
 
 using Microsoft.Extensions.Logging;
 
@@ -29,54 +26,51 @@ public class WebhookSerializer : SyncSerializerBase<IWebhook>, ISyncSerializer<I
 		_webhookService = webhookService;
 	}
 
-	/// <inheritdoc/>
-	public override void DeleteItem(IWebhook item)
-	{
-		_webhookService.DeleteAsync(item.Key).Wait();
-	}
 
-	/// <inheritdoc/>
-	public override IWebhook? FindItem(int id) => null;
-
-	/// <inheritdoc/>
-	public override IWebhook? FindItem(Guid key)
-		=> _webhookService.GetAsync(key).Result;
-
-	/// <inheritdoc/>
-	public override IWebhook? FindItem(string alias)
+	public override async Task<IWebhook?> FindItemAsync(Guid key)
+		=> await _webhookService.GetAsync(key);
+	
+	public override async Task<IWebhook?> FindItemAsync(string alias)
 	{
 		if (Guid.TryParse(alias, out Guid key))
-			return FindItem(key);
+			return await FindItemAsync(key);
 
 		return null;
+	}
+
+	public override async Task SaveItemAsync(IWebhook? item, Guid userKey)
+	{
+		if (item is null) return;
+
+		if (item.Id == 0)
+		{
+			await _webhookService.CreateAsync(item);
+		}
+		else
+		{
+			await _webhookService.UpdateAsync(item);
+		}
+	}
+
+	public override async Task DeleteItemAsync(IWebhook? item, Guid userKey)
+	{
+		if (item is null) return;
+		await _webhookService.DeleteAsync(item.Key);
 	}
 
 	/// <inheritdoc/>
 	public override string ItemAlias(IWebhook item)
 		=> item.Key.ToString();
 
-	/// <inheritdoc/>
-	public override void SaveItem(IWebhook item)
+	protected override async Task<SyncAttempt<IWebhook>> DeserializeCoreAsync(XElement node, SyncSerializerOptions options)
 	{
-		if (item.Id > 0)
-		{
-			_webhookService.UpdateAsync(item).Wait();
-		}
-		else
-		{
-			_webhookService.CreateAsync(item).Wait();
-		}
-	}
 
-	/// <inheritdoc/>
-	protected override SyncAttempt<IWebhook> DeserializeCore(XElement node, SyncSerializerOptions options)
-	{
 		var key = node.GetKey();
 		var alias = node.GetAlias();
 
 		var details = new List<uSyncChange>();
 
-		var item = FindItem(key);	
+		var item = await FindItemAsync(key);	
 		if (item == null)
 		{
 			// try and find by url/etc???
@@ -207,8 +201,8 @@ public class WebhookSerializer : SyncSerializerBase<IWebhook>, ISyncSerializer<I
 
 
 
-	protected override SyncAttempt<XElement> SerializeCore(IWebhook item, SyncSerializerOptions options)
-	{
+	protected override Task<SyncAttempt<XElement>> SerializeCoreAsync(IWebhook item, SyncSerializerOptions options)
+	{ 
 		var node = InitializeBaseNode(item, item.Url);
 
 		node.Add(new XElement("Url", item.Url));
@@ -218,7 +212,7 @@ public class WebhookSerializer : SyncSerializerBase<IWebhook>, ISyncSerializer<I
 		node.Add(SerializeEvents(item));
 		node.Add(SerializeHeaders(item));
 
-		return SyncAttempt<XElement>.Succeed(item.Url, node, typeof(IWebhook), ChangeType.Export);
+		return Task.FromResult(SyncAttempt<XElement>.Succeed(item.Url, node, typeof(IWebhook), ChangeType.Export));
 		
 	}
 
@@ -255,4 +249,5 @@ public class WebhookSerializer : SyncSerializerBase<IWebhook>, ISyncSerializer<I
 
 		return headerNode;
 	}
+
 }

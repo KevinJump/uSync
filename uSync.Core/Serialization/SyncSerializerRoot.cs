@@ -1,6 +1,4 @@
 ﻿using System.Reflection;
-using System.Security.Cryptography;
-using System.Xml;
 using System.Xml.Linq;
 
 using Microsoft.Extensions.Logging;
@@ -41,72 +39,70 @@ public abstract class SyncSerializerRoot<TObject>
 
     public bool IsTwoPass { get; private set; }
 
-    public SyncAttempt<XElement> Serialize(TObject item, SyncSerializerOptions options)
-    {
-        return this.SerializeCore(item, options);
-    }
+    public async Task<SyncAttempt<XElement>> SerializeAsync(TObject item, SyncSerializerOptions options)
+        => await SerializeCoreAsync(item, options);
 
-    /// <summary>
-    ///  CanDeserialize based on the flags, used to check the model is good, for this import 
-    /// </summary>
-    protected virtual SyncAttempt<TObject> CanDeserialize(XElement node, SyncSerializerOptions options)
+	protected abstract Task<SyncAttempt<XElement>> SerializeCoreAsync(TObject item, SyncSerializerOptions options);
+
+	protected abstract Task<SyncAttempt<TObject>> DeserializeCoreAsync(XElement node, SyncSerializerOptions options);
+
+	/// <summary>
+	///  CanDeserialize based on the flags, used to check the model is good, for this import 
+	/// </summary>
+	protected virtual SyncAttempt<TObject> CanDeserialize(XElement node, SyncSerializerOptions options)
         => SyncAttempt<TObject>.Succeed("No Check", ChangeType.NoChange);
 
 
-    public SyncAttempt<TObject> Deserialize(XElement node, SyncSerializerOptions options)
+	public async Task<SyncAttempt<TObject>> DeserializeAsync(XElement node, SyncSerializerOptions options)
     {
-        if (node.IsEmptyItem())
-        {
-            // new behavior when a node is 'empty' that is a marker for a delete or rename
-            // so we process that action here, no more action file/folders
-            return ProcessAction(node, options);
-        }
 
-        if (!IsValid(node))
-            throw new FormatException($"XML Not valid for type {ItemType}");
+		if (node.IsEmptyItem())
+		{
+			// new behavior when a node is 'empty' that is a marker for a delete or rename
+			// so we process that action here, no more action file/folders
+			return await ProcessActionAsync(node, options);
+		}
 
-        if (options.Force || IsCurrent(node, options) > ChangeType.NoChange)
-        {
-            // pre-deserialization check. 
-            var check = CanDeserialize(node, options);
-            if (!check.Success) return check;
+		if (!IsValid(node))
+			throw new FormatException($"XML Not valid for type {ItemType}");
 
-            var alias = node.GetAlias();
+		if (options.Force || await IsCurrentAsync(node, options) > ChangeType.NoChange)
+		{
+			// pre-deserialization check. 
+			var check = CanDeserialize(node, options);
+			if (!check.Success) return check;
 
-            logger.LogDebug(" >> Deserializing {alias} - {type}", alias, ItemType);
-            var result = DeserializeCore(node, options);
-            logger.LogDebug(" << Deserialized result {alias} - {result}", alias, result.Success);
+			var alias = node.GetAlias();
 
-            if (result.Success && result.Item is not null)
-            {
-                if (!result.Saved && !options.Flags.HasFlag(SerializerFlags.DoNotSave))
-                {
-                    logger.LogDebug("Saving - {alias}", alias);
-                    SaveItem(result.Item);
-                }
+			logger.LogDebug(" >> Deserializing {alias} - {type}", alias, ItemType);
+			var result = await DeserializeCoreAsync(node, options);
+			logger.LogDebug(" << Deserialized result {alias} - {result}", alias, result.Success);
 
-                if (options.OnePass)
-                {
-                    logger.LogDebug("Deserialized {alias} - second pass", alias);
-                    return DeserializeSecondPass(result.Item, node, options);
-                }
-            }
+			if (result.Success && result.Item is not null)
+			{
+				if (!result.Saved && !options.Flags.HasFlag(SerializerFlags.DoNotSave))
+				{
+					logger.LogDebug("Saving - {alias}", alias);
+					await SaveItemAsync(result.Item, options.UserKey);
+				}
 
-            return result;
-        }
+				if (options.OnePass)
+				{
+					logger.LogDebug("Deserialized {alias} - second pass", alias);
+					return await DeserializeSecondPassAsync(result.Item, node, options);
+				}
+			}
 
-        return SyncAttempt<TObject>.Succeed(node.GetAlias(), ChangeType.NoChange);
-    }
+			return result;
+		}
 
-    public virtual SyncAttempt<TObject> DeserializeSecondPass(TObject item, XElement node, SyncSerializerOptions options)
-    {
-        return SyncAttempt<TObject>.Succeed(nameof(item), item, typeof(TObject), ChangeType.NoChange);
-    }
+		return SyncAttempt<TObject>.Succeed(node.GetAlias(), ChangeType.NoChange);
+	}
 
-    protected abstract SyncAttempt<XElement> SerializeCore(TObject item, SyncSerializerOptions options);
-    protected abstract SyncAttempt<TObject> DeserializeCore(XElement node, SyncSerializerOptions options);
+    public virtual async Task<SyncAttempt<TObject>> DeserializeSecondPassAsync(TObject item, XElement node, SyncSerializerOptions options)
+        => await Task.FromResult(SyncAttempt<TObject>.Succeed(nameof(item), item, typeof(TObject), ChangeType.NoChange));
 
-    /// <summary>
+	/// <summary>
     ///  all xml items now have the same top line, this makes 
     ///  it easier for use to do lookups, get things like
     ///  keys and aliases for the basic checkers etc, 
@@ -147,89 +143,122 @@ public abstract class SyncSerializerRoot<TObject>
     /// <param name="node">XML to process</param>
     /// <param name="flags">Serializer flags to control options</param>
     /// <returns>Sync attempt detailing changes</returns>
-    protected SyncAttempt<TObject> ProcessAction(XElement node, SyncSerializerOptions options)
-
+    /// 
+    protected async Task<SyncAttempt<TObject>> ProcessActionAsync(XElement node, SyncSerializerOptions options)
     {
-        if (!node.IsEmptyItem())
-            throw new ArgumentException("Cannot process actions on a non-empty node");
+		if (!node.IsEmptyItem())
+			throw new ArgumentException("Cannot process actions on a non-empty node");
 
-        var actionType = node.Attribute("Change").ValueOrDefault<SyncActionType>(SyncActionType.None);
-
-
-        var (key, alias) = FindKeyAndAlias(node);
-
-        logger.LogDebug("Empty Node : Processing Action {actionType} ({key} {alias})", actionType, key, alias);
-
-        switch (actionType)
-        {
-            case SyncActionType.Delete:
-                if (options.DeleteItems())
-                    return ProcessDelete(key, alias, options.Flags);
-
-                return SyncAttempt<TObject>.Succeed(alias, ChangeType.NoChange);
-            case SyncActionType.Rename:
-                return ProcessRename(key, alias, options.Flags);
-            case SyncActionType.Clean:
-                // we return a 'clean' success, but this is then picked up 
-                // in the handler, as something to clean, so the handler does it. 
-                return SyncAttempt<TObject>.Succeed(alias, ChangeType.Clean);
-            default:
-                return SyncAttempt<TObject>.Succeed(alias, ChangeType.NoChange);
-        }
+		var actionType = node.Attribute("Change").ValueOrDefault<SyncActionType>(SyncActionType.None);
 
 
-    }
+		var (key, alias) = FindKeyAndAlias(node);
 
-    protected virtual SyncAttempt<TObject> ProcessDelete(Guid key, string alias, SerializerFlags flags)
+		logger.LogDebug("Empty Node : Processing Action {actionType} ({key} {alias})", actionType, key, alias);
+
+		switch (actionType)
+		{
+			case SyncActionType.Delete:
+				if (options.DeleteItems())
+					return await ProcessDeleteAsync(key, alias, options.Flags, options.UserKey);
+
+				return SyncAttempt<TObject>.Succeed(alias, ChangeType.NoChange);
+			case SyncActionType.Rename:
+				return await ProcessRenameAsync(key, alias, options.Flags);
+			case SyncActionType.Clean:
+				// we return a 'clean' success, but this is then picked up 
+				// in the handler, as something to clean, so the handler does it. 
+				return SyncAttempt<TObject>.Succeed(alias, ChangeType.Clean);
+			default:
+				return SyncAttempt<TObject>.Succeed(alias, ChangeType.NoChange);
+		}
+
+	}
+
+
+	protected virtual async Task<SyncAttempt<TObject>> ProcessDeleteAsync(Guid key, string alias, SerializerFlags flags, Guid userKey)
     {
-        logger.LogDebug("Processing Delete {key} {alias}", key, alias);
+		logger.LogDebug("Processing Delete {key} {alias}", key, alias);
 
-        var item = this.FindItem(key);
-        if (item == null && !string.IsNullOrWhiteSpace(alias))
-        {
-            // we need to build in some awareness of alias matching in the folder
-            // because if someone deletes something in one place and creates it 
-            // somewhere else the alias will exist, so we don't want to delete 
-            // it from over there - this needs to be done at save time 
-            // (basically if a create happens) - turn any delete files into renames
+		var item = await this.FindItemAsync(key);
+		if (item == null && !string.IsNullOrWhiteSpace(alias))
+		{
+			// we need to build in some awareness of alias matching in the folder
+			// because if someone deletes something in one place and creates it 
+			// somewhere else the alias will exist, so we don't want to delete 
+			// it from over there - this needs to be done at save time 
+			// (basically if a create happens) - turn any delete files into renames
 
-            // A Tree Based serializer will return null if you ask it to find 
-            // an item solely by alias, so this means we are only deleting by key 
-            // on tree's (e.g media, content)
-            item = this.FindItem(alias);
-        }
+			// A Tree Based serializer will return null if you ask it to find 
+			// an item solely by alias, so this means we are only deleting by key 
+			// on tree's (e.g media, content)
+			item = await this.FindItemAsync(alias);
+		}
 
-        if (item != null)
-        {
-            logger.LogDebug("Deleting Item : {alias}", ItemAlias(item));
-            DeleteItem(item);
-            return SyncAttempt<TObject>.Succeed(alias, ChangeType.Delete);
-        }
+		if (item != null)
+		{
+			logger.LogDebug("Deleting Item : {alias}", ItemAlias(item));
+			await DeleteItemAsync(item, userKey);
+			return SyncAttempt<TObject>.Succeed(alias, ChangeType.Delete);
+		}
 
-        logger.LogDebug("Delete Item not found");
-        return SyncAttempt<TObject>.Succeed(alias, ChangeType.NoChange);
-    }
+		logger.LogDebug("Delete Item not found");
+		return SyncAttempt<TObject>.Succeed(alias, ChangeType.NoChange);
+	}
 
-    protected virtual SyncAttempt<TObject> ProcessRename(Guid key, string alias, SerializerFlags flags)
+	protected virtual async Task<SyncAttempt<TObject>> ProcessRenameAsync(Guid key, string alias, SerializerFlags flags)
+	{
+		logger.LogDebug("Process Rename (no action)");
+		return await Task.FromResult(SyncAttempt<TObject>.Succeed(alias, ChangeType.NoChange));
+	}
+
+	public virtual async Task<ChangeType> IsCurrentAsync(XElement node, SyncSerializerOptions options)
     {
-        logger.LogDebug("Process Rename (no action)");
-        return SyncAttempt<TObject>.Succeed(alias, ChangeType.NoChange);
-    }
+		XElement? current = default;
+		var item = await FindItemAsync(node);
+		if (item != null)
+		{
+			var attempt = await this.SerializeAsync(item, options);
+			if (attempt.Success && attempt.Item is not null)
+				current = attempt.Item;
+		}
 
-    public virtual ChangeType IsCurrent(XElement node, SyncSerializerOptions options)
-    {
-        XElement? current = default;
-        var item = FindItem(node);
-        if (item != null)
-        {
-            var attempt = this.Serialize(item, options);
-            if (attempt.Success && attempt.Item is not null)
-                current = attempt.Item;
-        }
+		return await IsCurrentAsync(node, current, options);
+	}
 
-        return IsCurrent(node, current, options);
-    }
+    public virtual async Task<ChangeType> IsCurrentAsync(XElement node, XElement? current, SyncSerializerOptions options)
+	{
+		if (node == null) return ChangeType.Update;
 
+		if (!IsValidOrEmpty(node)) throw new FormatException($"Invalid Xml File {node.Name.LocalName}");
+
+        if (current is null)
+		{
+			if (node.IsEmptyItem())
+			{
+				// we tell people it's a clean.
+				if (node.GetEmptyAction() == SyncActionType.Clean) return ChangeType.Clean;
+
+				// at this point its possible the file is for a rename or delete that has already happened
+				return ChangeType.NoChange;
+			}
+			else
+			{
+				return ChangeType.Create;
+			}
+		}   
+
+        if (node.IsEmptyItem())
+            return SyncSerializerRoot<TObject>.CalculateEmptyChange(node, current);
+
+        var newHash = await MakeHashAsync(node);
+        var currentHash = await MakeHashAsync(current);
+		if (string.IsNullOrEmpty(currentHash)) return ChangeType.Update;
+
+		return currentHash == newHash ? ChangeType.NoChange : ChangeType.Update;
+	}
+
+	[Obsolete("Use IsCurrentAsync instead, will be removed in v15")]
     public virtual ChangeType IsCurrent(XElement node, XElement? current, SyncSerializerOptions options)
     {
         if (node == null) return ChangeType.Update;
@@ -278,25 +307,24 @@ public abstract class SyncSerializerRoot<TObject>
         };
     }
 
-    public virtual SyncAttempt<XElement> SerializeEmpty(TObject item, SyncActionType change, string alias)
+    public virtual async Task<SyncAttempt<XElement>> SerializeEmptyAsync(TObject item, SyncActionType change, string alias)
     {
-        logger.LogDebug("Base: Serializing Empty Element {alias} {change}", alias, change);
+		logger.LogDebug("Base: Serializing Empty Element {alias} {change}", alias, change);
 
-        if (string.IsNullOrEmpty(alias))
-            alias = ItemAlias(item);
+		if (string.IsNullOrEmpty(alias))
+			alias = ItemAlias(item);
 
-        var node = XElementExtensions.MakeEmpty(ItemKey(item), change, alias);
+		var node = XElementExtensions.MakeEmpty(ItemKey(item), change, alias);
 
-        return SyncAttempt<XElement>.Succeed("Empty", node, ChangeType.Removed);
-    }
+		return await Task.FromResult(SyncAttempt<XElement>.Succeed("Empty", node, ChangeType.Removed));
+	}
 
-
-    private string MakeHash(XElement node)
+	private async Task<string> MakeHashAsync(XElement node)
     {
         if (node == null) return string.Empty;
         node = CleanseNode(node);
         
-        return node.MakePlatformSafeHash();
+        return await node.MakePlatformSafeHash();
 	}
 
 	/// <summary>
@@ -311,7 +339,13 @@ public abstract class SyncSerializerRoot<TObject>
     #region Finders 
     // Finders - used on importing, getting things that are already there (or maybe not)
 
-    protected (Guid key, string alias) FindKeyAndAlias(XElement node)
+    // public abstract Task<TObject?> FindItemAsync(int id);
+    public abstract Task<TObject?> FindItemAsync(Guid key);
+	public abstract Task<TObject?> FindItemAsync(string alias);
+	public abstract Task SaveItemAsync(TObject? item, Guid userKey);
+	public abstract Task DeleteItemAsync(TObject? item, Guid userKey);
+
+	protected (Guid key, string alias) FindKeyAndAlias(XElement node)
     {
         if (IsValidOrEmpty(node))
             return (
@@ -322,16 +356,7 @@ public abstract class SyncSerializerRoot<TObject>
         return (key: Guid.Empty, alias: string.Empty);
     }
 
-    public abstract TObject? FindItem(int id);
-
-    public abstract TObject? FindItem(Guid key);
-    public abstract TObject? FindItem(string alias);
-
-    public abstract void SaveItem(TObject item);
-
-    public abstract void DeleteItem(TObject item);
-
-    public abstract string ItemAlias(TObject item);
+	public abstract string ItemAlias(TObject item);
 
     public abstract Guid ItemKey(TObject item);
 
@@ -340,34 +365,106 @@ public abstract class SyncSerializerRoot<TObject>
     ///  for bulk saving, some services do this, it causes less cache hits and 
     ///  so should be faster. 
     /// </summary>
-    public virtual void Save(IEnumerable<TObject> items)
+    public virtual async Task SaveAsync(IEnumerable<TObject?> items, Guid userKey)
     {
-        foreach (var item in items)
+		foreach (var item in items)
         {
-            this.SaveItem(item);
-        }
-    }
+			await SaveItemAsync(item, userKey);
+		}
+	}
 
-    public virtual TObject? FindItem(XElement node)
+    public virtual async Task<TObject?> FindItemAsync(XElement node)
     {
         var (key, alias) = FindKeyAndAlias(node);
 
-        logger.LogTrace("Base: Find Item {key} [{alias}]", key, alias);
+        logger.LogTrace("Base: Find Item: {key} [{alias}]", key, alias);
 
         if (key != Guid.Empty)
         {
-            var item = FindItem(key);
-            if (item != null) return item;
-        }
+			var item = await FindItemAsync(key);
+			if (item is not null) return item;
+		}
 
-        if (!string.IsNullOrWhiteSpace(alias))
+        if (string.IsNullOrWhiteSpace(alias) is false)
         {
-            logger.LogTrace("Base: Lookup by Alias: {alias}", alias);
-            return FindItem(alias);
-        }
+			logger.LogTrace("Base: Lookup by Alias: {alias}", alias);
+			return await FindItemAsync(alias);
+		}
 
         return default;
-    }
-    #endregion
+	}
+	#endregion
+
+	#region Obsolete
+	[Obsolete("Use ProcessActionAsync instead, will be removed in v15")]
+	protected SyncAttempt<TObject> ProcessAction(XElement node, SyncSerializerOptions options)
+		=> ProcessActionAsync(node, options).Result;
+
+	[Obsolete("Use ProcessDeleteAsync instead, will be removed in v15")]
+	protected virtual SyncAttempt<TObject> ProcessDelete(Guid key, string alias, SerializerFlags flags)
+		=> ProcessDeleteAsync(key, alias, flags, Guid.Empty).Result;
+
+	[Obsolete("Use ProcessRenameAsync instead, will be removed in v15")]
+	protected virtual SyncAttempt<TObject> ProcessRename(Guid key, string alias, SerializerFlags flags)
+	{
+		logger.LogDebug("Process Rename (no action)");
+		return SyncAttempt<TObject>.Succeed(alias, ChangeType.NoChange);
+	}
+
+	[Obsolete("Use SaveAsync instead, will be removed in v15")]
+	public SyncAttempt<XElement> Serialize(TObject item, SyncSerializerOptions options) => this.SerializeCore(item, options);
+
+	[Obsolete("Use DeserializeCoreAsync instead, will be removed in v15")]
+	public SyncAttempt<TObject> Deserialize(XElement node, SyncSerializerOptions options)
+		=> DeserializeAsync(node, options).Result;
+
+	[Obsolete("Use DeserializeCoreAsync instead, will be removed in v15")]
+	public virtual SyncAttempt<TObject> DeserializeSecondPass(TObject item, XElement node, SyncSerializerOptions options)
+		=> DeserializeSecondPassAsync(item, node, options).Result;
+
+	[Obsolete("Use SerializeCoreAync instead, will be removed in v15")]
+	protected virtual SyncAttempt<XElement> SerializeCore(TObject item, SyncSerializerOptions options) => SerializeCoreAsync(item, options).Result;
+
+	[Obsolete("Use DeserializeCoreAsync instead, will be removed in v15")]
+	protected virtual SyncAttempt<TObject> DeserializeCore(XElement node, SyncSerializerOptions options) => DeserializeCoreAsync(node, options).Result;
+
+
+	[Obsolete("Use SerializeEmptyAsync instead, will be removed in v15")]
+	public virtual SyncAttempt<XElement> SerializeEmpty(TObject item, SyncActionType change, string alias)
+		=> SerializeEmptyAsync(item, change, alias).Result;
+
+
+	[Obsolete("Use IsCurrentAsync instead, will be removed in v15")]
+	public virtual ChangeType IsCurrent(XElement node, SyncSerializerOptions options)
+		=> IsCurrentAsync(node, options).Result;
+
+	[Obsolete("Use FindItemAsync instead, will be removed in v15")]
+	public virtual TObject? FindItem(int id) => FindItemAsync(id).Result;
+
+	[Obsolete("Use FindItemAsync instead, will be removed in v15")]
+	public virtual TObject? FindItem(Guid key) => FindItemAsync(key).Result;
+
+	[Obsolete("Use FindItemAsync instead, will be removed in v15")]
+	public virtual TObject? FindItem(string alias) => FindItemAsync(alias).Result;
+
+	[Obsolete("Use SaveItemAsync instead, will be removed in v15")]
+	public virtual void SaveItem(TObject item) => SaveItemAsync(item, Guid.Empty).Wait();
+
+	[Obsolete("Use DeleteItemAsync instead, will be removed in v15")]
+	public virtual void DeleteItem(TObject item) => DeleteItemAsync(item, Guid.Empty).Wait();
+
+	[Obsolete("Use SaveAsync instead, will be removed in v15")]
+	public virtual void Save(IEnumerable<TObject> items)
+		=> SaveAsync(items, Guid.Empty).Wait();
+	
+    [Obsolete("Use FindItemAsync instead, will be removed in v15")]
+	public virtual TObject? FindItem(XElement node)
+        => FindItemAsync(node).Result;
+
+	[Obsolete("Use MakeHash instead, will be removed in v15")]
+	private string MakeHash(XElement node)
+	=> MakeHashAsync(node).Result;
+
+	#endregion
 
 }

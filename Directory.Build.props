@@ -18,7 +18,6 @@
 		<TreatWarningsAsErrors>True</TreatWarningsAsErrors>
 		<SuppressNETCoreSdkPreviewMessage>true</SuppressNETCoreSdkPreviewMessage>
 
-		<NoWarn>CS0618</NoWarn>
 		<Nullable>enable</Nullable>
 
 

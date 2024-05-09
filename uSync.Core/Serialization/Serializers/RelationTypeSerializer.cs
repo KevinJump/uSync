@@ -2,6 +2,8 @@
 
 using Microsoft.Extensions.Logging;
 
+using Org.BouncyCastle.Crypto.Digests;
+
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Services;
 
@@ -26,8 +28,8 @@ public class RelationTypeSerializer
         this._relationService = relationService;
     }
 
-    protected override SyncAttempt<IRelationType> DeserializeCore(XElement node, SyncSerializerOptions options)
-    {
+	protected override async Task<SyncAttempt<IRelationType>> DeserializeCoreAsync(XElement node, SyncSerializerOptions options)
+	{
         var key = node.GetKey();
         var alias = node.GetAlias();
 
@@ -39,7 +41,7 @@ public class RelationTypeSerializer
         var bidirectional = info?.Element("Bidirectional").ValueOrDefault(false) ?? false;
         var isDependency = info?.Element("IsDependency").ValueOrDefault(true) ?? true;
 
-        var item = FindItem(node);
+        var item = await FindItemAsync(node);
 
         item ??= CreateRelation(name, alias, bidirectional, parentType, childType, isDependency);
 
@@ -88,7 +90,7 @@ public class RelationTypeSerializer
         if (options.GetSetting<bool>("IncludeRelations", false))
         {
             // we have to save before we can add the relations. 
-            this.SaveItem(item);
+            await this.SaveItemAsync(item, options.UserKey);
             hasBeenSaved = true;
             message = "Relation items included";
             details.AddRange(DeserializeRelations(node, item, options));
@@ -164,8 +166,8 @@ public class RelationTypeSerializer
         return base.IsValid(node);
     }
 
-    protected override SyncAttempt<XElement> SerializeCore(IRelationType item, SyncSerializerOptions options)
-    {
+	protected override async Task<SyncAttempt<XElement>> SerializeCoreAsync(IRelationType item, SyncSerializerOptions options)
+	{
         var node = this.InitializeBaseNode(item, item.Alias);
 
         var isDependency = false;
@@ -185,12 +187,12 @@ public class RelationTypeSerializer
             node.Add(SerializeRelations(item));
         }
 
-        return SyncAttempt<XElement>.SucceedIf(
+        return await Task.FromResult(SyncAttempt<XElement>.SucceedIf(
             node != null,
             item.Name ?? item.Alias,
             node,
             typeof(IRelationType),
-            ChangeType.Export);
+            ChangeType.Export));
     }
 
 
@@ -261,21 +263,29 @@ public class RelationTypeSerializer
 
     // control methods.
 
-    public override void DeleteItem(IRelationType item)
-        => _relationService.Delete(item);
+    public override Task DeleteItemAsync(IRelationType? item, Guid userKey)
+    {
+        if (item is not null)
+            _relationService.Delete(item);
 
-    public override IRelationType? FindItem(int id)
-        => _relationService.GetRelationTypeById(id);
+        return Task.CompletedTask;
+	}
 
-    public override IRelationType? FindItem(Guid key)
-        => _relationService.GetRelationTypeById(key); // ??
 
-    public override IRelationType? FindItem(string alias)
-        => _relationService.GetRelationTypeByAlias(alias);
+	public override Task<IRelationType?> FindItemAsync(Guid key)
+		=> Task.FromResult(_relationService.GetRelationTypeById(key));
+
+    public override Task<IRelationType?> FindItemAsync(string alias)
+        => Task.FromResult(_relationService.GetRelationTypeByAlias(alias));
 
     public override string ItemAlias(IRelationType item)
         => item.Alias;
 
-    public override void SaveItem(IRelationType item)
-        => _relationService.Save(item);
+	public override Task SaveItemAsync(IRelationType? item, Guid userKey)
+	{
+        if (item is not null)   
+			_relationService.Save(item);
+
+        return Task.CompletedTask;
+	}
 }

@@ -10,9 +10,12 @@ namespace uSync.Core.Serialization;
 public class SyncSerializerOptions
 {
     // the user who is doing the serialization 
+    [Obsolete("Use UserKey instead, will be removed in v15")]
     public int UserId = -1;
+    
+    public Guid UserKey = Guid.Empty;
 
-    public SyncSerializerOptions() { }
+	public SyncSerializerOptions() { }
 
     public SyncSerializerOptions(SerializerFlags flags)
     {

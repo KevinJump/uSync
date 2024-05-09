@@ -53,7 +53,7 @@ public class MediaTypeSerializer : ContentTypeBaseSerializer<IMediaType>, ISyncS
 
         node.Add(info);
         node.Add(SerializeProperties(item));
-        node.Add(SerializeStructure(item));
+        node.Add(SerializeStructureAsync(item));
         node.Add(SerializeTabs(item));
 
         return SyncAttempt<XElement>.Succeed(item.Name ?? item.Alias, node, typeof(IMediaType), ChangeType.Export);

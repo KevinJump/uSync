@@ -31,8 +31,8 @@ public class MemberTypeSerializer : ContentTypeBaseSerializer<IMemberType>, ISyn
         this._memberTypeService = memberTypeService;
     }
 
-    protected override SyncAttempt<XElement> SerializeCore(IMemberType item, SyncSerializerOptions options)
-    {
+	protected override async Task<SyncAttempt<XElement>> SerializeCoreAsync(IMemberType item, SyncSerializerOptions options)
+	{
         var node = SerializeBase(item);
         var info = SerializeInfo(item);
 
@@ -45,7 +45,7 @@ public class MemberTypeSerializer : ContentTypeBaseSerializer<IMemberType>, ISyn
         else if (item.Level != 1)
         {
             // in a folder
-            var folderNode = GetFolderNode(item); //TODO: Cache this call.
+            var folderNode = await GetFolderNodeAsync(item); //TODO: Cache this call.
             if (folderNode != null)
                 info.Add(folderNode);
         }
@@ -54,7 +54,7 @@ public class MemberTypeSerializer : ContentTypeBaseSerializer<IMemberType>, ISyn
 
         node.Add(info);
         node.Add(SerializeProperties(item));
-        node.Add(SerializeStructure(item));
+        node.Add(SerializeStructureAsync(item));
         node.Add(SerializeTabs(item));
 
         return SyncAttempt<XElement>.Succeed(item.Name ?? item.Alias, node, typeof(IMediaType), ChangeType.Export);
@@ -116,9 +116,9 @@ public class MemberTypeSerializer : ContentTypeBaseSerializer<IMemberType>, ISyn
         return node;
     }
 
-    protected override SyncAttempt<IMemberType> DeserializeCore(XElement node, SyncSerializerOptions options)
-    {
-        var attempt = FindOrCreate(node);
+	protected override async Task<SyncAttempt<IMemberType>> DeserializeCoreAsync(XElement node, SyncSerializerOptions options)
+	{
+        var attempt = await FindOrCreateAsync(node);
         if (!attempt.Success || attempt.Result is null)
             throw attempt.Exception ?? new Exception($"Unknown error {node.GetAlias()}");
 
@@ -137,8 +137,8 @@ public class MemberTypeSerializer : ContentTypeBaseSerializer<IMemberType>, ISyn
         return DeserializedResult(item, details, options);
     }
 
-    public override SyncAttempt<IMemberType> DeserializeSecondPass(IMemberType item, XElement node, SyncSerializerOptions options)
-    {
+	public override Task<SyncAttempt<IMemberType>> DeserializeSecondPassAsync(IMemberType item, XElement node, SyncSerializerOptions options)
+	{
         CleanTabAliases(item);
         var details = CleanTabs(item, node, options).ToList();
 
@@ -148,7 +148,7 @@ public class MemberTypeSerializer : ContentTypeBaseSerializer<IMemberType>, ISyn
         if (saveInSerializer && item.IsDirty())
             _memberTypeService.Save(item);
 
-        return SyncAttempt<IMemberType>.Succeed(item.Name ?? item.Alias, item, ChangeType.Import, string.Empty, saveInSerializer, details);
+        return Task.FromResult(SyncAttempt<IMemberType>.Succeed(item.Name ?? item.Alias, item, ChangeType.Import, string.Empty, saveInSerializer, details));
     }
 
     protected override IEnumerable<uSyncChange> DeserializeExtraProperties(IMemberType item, IPropertyType property, XElement node)
@@ -179,8 +179,9 @@ public class MemberTypeSerializer : ContentTypeBaseSerializer<IMemberType>, ISyn
         return changes;
     }
 
-    protected override Attempt<IMemberType?> CreateItem(string alias, ITreeEntity? parent, string extra)
-    {
+
+	protected override Task<Attempt<IMemberType?>> CreateItemAsync(string alias, ITreeEntity? parent, string itemType)
+	{
         var safeAlias = GetSafeItemAlias(alias);
 
         var item = new MemberType(shortStringHelper, -1)
@@ -199,6 +200,6 @@ public class MemberTypeSerializer : ContentTypeBaseSerializer<IMemberType>, ISyn
         AddAlias(safeAlias);
 
 
-        return Attempt.Succeed(item as IMemberType);
+        return Task.FromResult(Attempt.Succeed(item as IMemberType));
     }
 }

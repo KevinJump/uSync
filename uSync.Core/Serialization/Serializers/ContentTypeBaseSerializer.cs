@@ -2,6 +2,8 @@
 using System.Reflection;
 using System.Xml.Linq;
 
+using Lucene.Net.Search.Grouping;
+
 using Microsoft.Extensions.Logging;
 
 using Umbraco.Cms.Core;
@@ -85,7 +87,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         return tabs;
     }
 
-    protected virtual XElement SerializeProperties(TObject item)
+    protected virtual async Task<XElement> SerializeProperties(TObject item)
     {
         var node = new XElement("GenericProperties");
 
@@ -95,8 +97,8 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
                 new XElement(uSyncConstants.Xml.Key, property.Key),
                 new XElement(uSyncConstants.Xml.Name, property.Name),
                 new XElement(uSyncConstants.Xml.Alias, property.Alias));
-
-            var def = _dataTypeService.GetDataType(property.DataTypeId);
+          
+            var def = await _dataTypeService.GetByEditorAliasAsync(property.Alias);
             if (def != null)
             {
                 propNode.Add(new XElement("Definition", def.Key));
@@ -173,7 +175,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         // when something has extra properties that the others don't (memberTypes at the moment)
     }
 
-    protected XElement SerializeStructure(TObject item)
+    protected async Task<XElement> SerializeStructureAsync(TObject item)
     {
         var node = new XElement("Structure");
 
@@ -182,7 +184,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
 
         foreach (var allowedType in allowedTypeOrdered)
         {
-            var allowedItem = FindItem(allowedType.Key);
+            var allowedItem = await FindItemAsync(allowedType.Key);
             if (allowedItem != null)
             {
                 node.Add(new XElement(ItemType,
@@ -1225,16 +1227,15 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         return [];
     }
 
-    #endregion
+	#endregion
 
-
-    public override ChangeType IsCurrent(XElement node, SyncSerializerOptions options)
-    {
+	public override async Task<ChangeType> IsCurrentAsync(XElement node, SyncSerializerOptions options)
+	{
         if (node == null) return ChangeType.Update;
 
         AddStructureSort(node);
 
-        return base.IsCurrent(node, options);
+        return await base.IsCurrentAsync(node, options);
     }
 
     private void InsertMissingProperties(XElement node, string propertyName)
@@ -1295,15 +1296,11 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
 
     #region Finders
 
-    public override TObject? FindItem(int id)
-        => _baseService.Get(id);
+    public override async Task<TObject?> FindItemAsync(Guid key)
+        => await _baseService.GetAsync(key);
 
-    public override TObject? FindItem(Guid key)
-        => _baseService.Get(key);
-
-    public override TObject? FindItem(string alias)
-        => _baseService.Get(alias);
-
+	public override async Task<TObject?> FindItemAsync(string alias)
+        => await _baseService.GetAsync(alias);
 
     override protected EntityContainer? FindContainer(Guid key)
         => _baseService.GetContainer(key);
@@ -1314,29 +1311,32 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
     override protected Attempt<OperationResult<OperationResultType, EntityContainer>?> CreateContainer(int parentId, string name)
         => _baseService.CreateContainer(parentId, Guid.NewGuid(), name);
 
-    public override void SaveItem(TObject item)
+    public override async Task SaveItemAsync(TObject? item, Guid userKey)
     {
-        if (item.IsDirty()) _baseService.Save(item);
+        if (item?.IsDirty() is true) 
+            await _baseService.SaveAsync(item, userKey);
     }
 
 
-    public override void Save(IEnumerable<TObject> items)
-        => _baseService.Save(items);
-
-    protected override void SaveContainer(EntityContainer container)
+    protected override Task SaveContainerAsync(EntityContainer container, Guid userKey)
     {
-        logger.LogDebug("Saving Container: {key}", container.Key);
         _baseService.SaveContainer(container);
+        return Task.CompletedTask;
     }
 
-    public override void DeleteItem(TObject item)
-        => _baseService.Delete(item);
+    public override async Task DeleteItemAsync(TObject? item, Guid userKey)
+    {
+        if (item is null) return;
+        await _baseService.DeleteAsync(item.Key, userKey);
+    }
 
     public override string ItemAlias(TObject item)
         => item.Alias;
 
-    protected override IEnumerable<EntityContainer> GetContainers(TObject item)
-        => _baseService.GetContainers(item);
+    protected override Task<EntityContainer?> GetContainerAsync(TObject item)
+    {
+        return Task.FromResult(_baseService.GetContainers(item).FirstOrDefault());
+    }
 
     #endregion
 

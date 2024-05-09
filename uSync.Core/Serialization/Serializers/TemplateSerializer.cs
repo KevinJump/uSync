@@ -18,6 +18,8 @@ namespace uSync.Core.Serialization.Serializers;
 [SyncSerializer("D0E0769D-CCAE-47B4-AD34-4182C587B08A", "Template Serializer", uSyncConstants.Serialization.Template)]
 public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer<ITemplate>
 {
+    private readonly ITemplateService _templateService;
+
     private readonly IFileService _fileService;
     private readonly IShortStringHelper _shortStringHelper;
     private readonly IFileSystem? _viewFileSystem;
@@ -25,27 +27,29 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
     private readonly uSyncCapabilityChecker _capabilityChecker;
     private readonly IConfiguration _configuration;
 
-    [ActivatorUtilitiesConstructor]
-    public TemplateSerializer(
-        IEntityService entityService,
-        ILogger<TemplateSerializer> logger,
-        IShortStringHelper shortStringHelper,
-        IFileService fileService,
-        FileSystems fileSystems,
-        IConfiguration configuration,
-        uSyncCapabilityChecker capabilityChecker)
-        : base(entityService, logger)
-    {
-        this._fileService = fileService;
-        this._shortStringHelper = shortStringHelper;
+	[ActivatorUtilitiesConstructor]
+	public TemplateSerializer(
+		IEntityService entityService,
+		ILogger<TemplateSerializer> logger,
+		IShortStringHelper shortStringHelper,
+		IFileService fileService,
+		FileSystems fileSystems,
+		IConfiguration configuration,
+		uSyncCapabilityChecker capabilityChecker,
+		ITemplateService templateService)
+		: base(entityService, logger)
+	{
+		this._fileService = fileService;
+		this._shortStringHelper = shortStringHelper;
 
-        _viewFileSystem = fileSystems.MvcViewsFileSystem;
-        _configuration = configuration;
-        _capabilityChecker = capabilityChecker;
-    }
+		_viewFileSystem = fileSystems.MvcViewsFileSystem;
+		_configuration = configuration;
+		_capabilityChecker = capabilityChecker;
+		_templateService = templateService;
+	}
 
-    protected override SyncAttempt<ITemplate> DeserializeCore(XElement node, SyncSerializerOptions options)
-    {
+	protected override async Task<SyncAttempt<ITemplate>> DeserializeCoreAsync(XElement node, SyncSerializerOptions options)
+	{
         var key = node.GetKey();
         var alias = node.GetAlias();
 
@@ -54,12 +58,12 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
 
         var details = new List<uSyncChange>();
 
-        if (key != Guid.Empty)
-            item = _fileService.GetTemplate(key);
+        if (key != Guid.Empty) 
+            item = await _templateService.GetAsync(key);
 
-        item ??= _fileService.GetTemplate(alias);
+        item ??= await  _templateService.GetAsync(alias);
 
-        if (item == null)
+		if (item == null)
         {
             item = new Template(_shortStringHelper, name, alias);
             details.AddNew(alias, alias, "Template");
@@ -208,8 +212,8 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
         return content;
     }
 
-    public override SyncAttempt<ITemplate> DeserializeSecondPass(ITemplate item, XElement node, SyncSerializerOptions options)
-    {
+	public override async Task<SyncAttempt<ITemplate>> DeserializeSecondPassAsync(ITemplate item, XElement node, SyncSerializerOptions options)
+	{
         var details = new List<uSyncChange>();
         var saved = false;
 
@@ -217,15 +221,15 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
         if (master != string.Empty && item.MasterTemplateAlias != master)
         {
             logger.LogDebug("Looking for master {master}", master);
-            var masterItem = _fileService.GetTemplate(master);
+            var masterItem = await _templateService.GetAsync(master);
             if (masterItem != null && item.MasterTemplateAlias != master)
             {
                 details.AddUpdate("Parent", item.MasterTemplateAlias ?? string.Empty, master);
 
                 logger.LogDebug("Setting Master {alias}", masterItem.Alias);
-                item.SetMasterTemplate(masterItem);
+                // item.SetMasterTemplate(masterItem);
 
-                SaveItem(item);
+                await SaveItemAsync(item, options.UserKey);
                 saved = true;
             }
         }
@@ -256,10 +260,9 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
         return SyncAttempt<ITemplate>.Succeed(item.Name!, item, ChangeType.Import, "", saved, details);
     }
 
-
-    protected override SyncAttempt<XElement> SerializeCore(ITemplate item, SyncSerializerOptions options)
-    {
-        var node = this.InitializeBaseNode(item, item.Alias, this.CalculateLevel(item));
+	protected override async Task<SyncAttempt<XElement>> SerializeCoreAsync(ITemplate item, SyncSerializerOptions options)
+	{
+        var node = this.InitializeBaseNode(item, item.Alias, await this.CalculateLevelAsync(item));
 
         node.Add(new XElement("Name", item.Name));
         node.Add(new XElement("Parent", item.MasterTemplateAlias));
@@ -276,7 +279,7 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
         => new("Contents", new XCData(item.Content ?? string.Empty));
 
 
-    private int CalculateLevel(ITemplate item)
+    private async Task<int> CalculateLevelAsync(ITemplate item)
     {
         if (item.MasterTemplateAlias.IsNullOrWhiteSpace()) return 1;
 
@@ -285,7 +288,7 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
         while (!string.IsNullOrWhiteSpace(current.MasterTemplateAlias) && level < 20)
         {
             level++;
-            var parent = _fileService.GetTemplate(current.MasterTemplateAlias);
+            var parent = await _templateService.GetAsync(current.MasterTemplateAlias);
             if (parent == null) return level;
 
             current = parent;
@@ -293,24 +296,6 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
 
         return level;
     }
-
-    public override ITemplate? FindItem(int id)
-        => _fileService.GetTemplate(id);
-
-    public override ITemplate? FindItem(string alias)
-        => _fileService.GetTemplate(alias);
-
-    public override ITemplate? FindItem(Guid key)
-        => _fileService.GetTemplate(key);
-
-    public override void SaveItem(ITemplate item)
-        => _fileService.SaveTemplate(item);
-
-    public override void Save(IEnumerable<ITemplate> items)
-        => _fileService.SaveTemplate(items);
-
-    public override void DeleteItem(ITemplate item)
-        => _fileService.DeleteTemplate(item.Alias);
 
     public override string ItemAlias(ITemplate item)
         => item.Alias;
@@ -332,4 +317,30 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
     private bool ViewsAreCompiled(SyncSerializerOptions options)
         => _configuration.IsUmbracoRunningInProductionMode()
             || options.GetSetting("UsingRazorViews", false);
+
+	public override async Task<ITemplate?> FindItemAsync(Guid key)
+        => await _templateService.GetAsync(key);
+
+	public override async Task<ITemplate?> FindItemAsync(string alias)
+        => await _templateService.GetAsync(alias);
+
+	public override async Task SaveItemAsync(ITemplate? item, Guid userKey)
+	{
+        if (item is null) return;
+
+        if (item.Id == 0)
+        {
+            await _templateService.CreateAsync(item, userKey);
+        }
+        else
+        {
+            await _templateService.UpdateAsync(item, userKey);
+        }
+	}
+
+	public override async Task DeleteItemAsync(ITemplate? item, Guid userKey)
+	{
+        if (item is null) return;
+        await _templateService.DeleteAsync(item.Key, userKey);
+	}
 }

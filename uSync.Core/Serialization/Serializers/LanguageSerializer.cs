@@ -16,25 +16,26 @@ namespace uSync.Core.Serialization.Serializers;
     uSyncConstants.Serialization.Language, IsTwoPass = true)]
 public class LanguageSerializer : SyncSerializerBase<ILanguage>, ISyncSerializer<ILanguage>
 {
-    private readonly ILocalizationService _localizationService;
+    private readonly ILanguageService _languageService;
 
-    public LanguageSerializer(IEntityService entityService,
-        ILogger<LanguageSerializer> logger,
-        ILocalizationService localizationService)
-        : base(entityService, logger)
-    {
-        this._localizationService = localizationService;
-    }
+	public LanguageSerializer(IEntityService entityService,
+		ILogger<LanguageSerializer> logger,
+		ILanguageService languageService)
+		: base(entityService, logger)
+	{
+		_languageService = languageService;
+	}
 
 
-    private static CultureInfo GetCulture(string isoCode) => CultureInfo.GetCultureInfo(isoCode);
+	private static CultureInfo GetCulture(string isoCode) => CultureInfo.GetCultureInfo(isoCode);
 
-    protected override SyncAttempt<ILanguage> DeserializeCore(XElement node, SyncSerializerOptions options)
-    {
+	protected override async Task<SyncAttempt<ILanguage>> DeserializeCoreAsync(XElement node, SyncSerializerOptions options)
+	{
         var isoCode = node.Element("IsoCode").ValueOrDefault(string.Empty);
         logger.LogDebug("Deserializing {isoCode}", isoCode);
 
-        var item = _localizationService.GetLanguageByIsoCode(isoCode);
+		// TODO: we might want to cache this, as it means we are going to call it every time we import a language
+		var item = await FindByIsoCodeAsync(isoCode);
         var culture = GetCulture(isoCode);
 
         var details = new List<uSyncChange>();
@@ -101,11 +102,11 @@ public class LanguageSerializer : SyncSerializerBase<ILanguage>, ISyncSerializer
         return SyncAttempt<ILanguage>.Succeed(item.CultureName, item, ChangeType.Import, details);
     }
 
-    /// <summary>
-    ///  second pass we set the default language again (because you can't just set it)
-    /// </summary>
-    public override SyncAttempt<ILanguage> DeserializeSecondPass(ILanguage item, XElement node, SyncSerializerOptions options)
-    {
+	/// <summary>
+	///  second pass we set the default language again (because you can't just set it)
+	/// </summary>
+	public override async Task<SyncAttempt<ILanguage>> DeserializeSecondPassAsync(ILanguage item, XElement node, SyncSerializerOptions options)
+	{
         logger.LogDebug("Language Second Pass {IsoCode}", item.IsoCode);
 
         var details = new List<uSyncChange>();
@@ -125,9 +126,9 @@ public class LanguageSerializer : SyncSerializerBase<ILanguage>, ISyncSerializer
         }
 
         if (!options.Flags.HasFlag(SerializerFlags.DoNotSave) && item.IsDirty())
-            _localizationService.Save(item);
+            await SaveItemAsync(item, options.UserKey);
 
-        return SyncAttempt<ILanguage>.Succeed(item.CultureName, item, ChangeType.Import, details);
+		return SyncAttempt<ILanguage>.Succeed(item.CultureName, item, ChangeType.Import, details);
     }
 
     private static string GetFallbackLanguageIsoCode(ILanguage item, XElement node)
@@ -145,7 +146,7 @@ public class LanguageSerializer : SyncSerializerBase<ILanguage>, ISyncSerializer
     }
 
 
-    protected override SyncAttempt<XElement> SerializeCore(ILanguage item, SyncSerializerOptions options)
+    protected override async Task<SyncAttempt<XElement>> SerializeCoreAsync(ILanguage item, SyncSerializerOptions options)
     {
         var node = InitializeBaseNode(item, item.IsoCode);
 
@@ -158,7 +159,7 @@ public class LanguageSerializer : SyncSerializerBase<ILanguage>, ISyncSerializer
 
         if (string.IsNullOrEmpty(item.FallbackIsoCode) is false)
         {
-            var fallback = _localizationService.GetLanguageByIsoCode(item.FallbackIsoCode);
+            var fallback = await FindByIsoCodeAsync(item.FallbackIsoCode);
             if (fallback != null)
             {
                 node.Add(new XElement("Fallback", fallback.IsoCode));
@@ -178,30 +179,29 @@ public class LanguageSerializer : SyncSerializerBase<ILanguage>, ISyncSerializer
             && node.GetAlias() != string.Empty
             && node.Element("IsoCode") != null;
 
-    public override ILanguage? FindItem(string alias)
+    public override async Task<ILanguage?> FindItemAsync(string alias)
     {
         // GetLanguageByIsoCode - doesn't only return the language of the code you specify
         // it will fallback to the primary one (e.g en-US might return en), 
         //
         // based on that we need to check that the language we get back actually has the 
         // code we asked for from the api.
-        var item = _localizationService.GetLanguageByIsoCode(alias);
+        var item = await FindByIsoCodeAsync(alias);
         if (item == null || item.CultureInfo?.Name.InvariantEquals(alias) is false) return null;
         return item;
     }
 
-    public override ILanguage? FindItem(int id)
-        => _localizationService.GetLanguageById(id);
+    private async Task<ILanguage?> FindByIsoCodeAsync(string code)
+		=> await _languageService.GetAsync(code);
 
-    public override ILanguage? FindItem(Guid key)
-        => default;
+	public override async Task SaveAsync(IEnumerable<ILanguage?> items, Guid userKey)
+	{
+        foreach(var item in items)
+        {
+            await SaveItemAsync(item, userKey);
+        }
 
-    public override void SaveItem(ILanguage item)
-        => _localizationService.Save(item);
-
-    public override void DeleteItem(ILanguage item)
-        => _localizationService.Delete(item);
-
+	}
 
     protected override XElement CleanseNode(XElement node)
     {
@@ -216,4 +216,22 @@ public class LanguageSerializer : SyncSerializerBase<ILanguage>, ISyncSerializer
     public override string ItemAlias(ILanguage item)
         => item.IsoCode;
 
+	public override Task<ILanguage?> FindItemAsync(Guid key)
+        => _languageService.GetAllAsync().ContinueWith(x => x.Result.FirstOrDefault(l => l.Key == key));
+
+	public override async Task SaveItemAsync(ILanguage? item, Guid userKey)
+	{
+        if (item is null) return;
+
+        if (item.Id <= 0)
+			await _languageService.CreateAsync(item, userKey);
+		else
+			await _languageService.UpdateAsync(item, userKey);
+	}
+
+    public override async Task DeleteItemAsync(ILanguage? item, Guid userKey)
+    {
+        if (item is null) return;
+		await _languageService.DeleteAsync(item.IsoCode, userKey);
+    }
 }

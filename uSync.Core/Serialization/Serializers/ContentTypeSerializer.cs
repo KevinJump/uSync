@@ -38,8 +38,8 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
         _capabilities = uSyncCapabilityChecker;
     }
 
-    protected override SyncAttempt<XElement> SerializeCore(IContentType item, SyncSerializerOptions options)
-    {
+	protected override async Task<SyncAttempt<XElement>> SerializeCoreAsync(IContentType item, SyncSerializerOptions options)
+	{
         var node = SerializeBase(item);
         var info = SerializeInfo(item);
 
@@ -54,7 +54,7 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
         }
         else if (item.Level != 1)
         {
-            var folderNode = this.GetFolderNode(item);
+            var folderNode = await this.GetFolderNodeAsync(item);
             if (folderNode != null)
                 info.Add(folderNode);
         }
@@ -75,7 +75,7 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
             info.Add(templates);
 
         node.Add(info);
-        node.Add(SerializeStructure(item));
+        node.Add(await SerializeStructureAsync(item));
         node.Add(SerializeProperties(item));
         node.Add(SerializeTabs(item));
 
@@ -102,9 +102,9 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
         return node;
     }
 
-    protected override SyncAttempt<IContentType> DeserializeCore(XElement node, SyncSerializerOptions options)
-    {
-        var attempt = FindOrCreate(node);
+	protected override async Task<SyncAttempt<IContentType>> DeserializeCoreAsync(XElement node, SyncSerializerOptions options)
+	{
+        var attempt = await FindOrCreateAsync(node);
         if (attempt.Success == false || attempt.Result is null)
             throw attempt.Exception ?? new Exception($"Unknown error {node.GetAlias()}");
 
@@ -143,8 +143,8 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
         return [];
     }
 
-    public override SyncAttempt<IContentType> DeserializeSecondPass(IContentType item, XElement node, SyncSerializerOptions options)
-    {
+	public override async Task<SyncAttempt<IContentType>> DeserializeSecondPassAsync(IContentType item, XElement node, SyncSerializerOptions options)
+	{
         logger.LogDebug("Deserialize Second Pass {alias}", item.Alias);
 
         var details = new List<uSyncChange>();
@@ -183,7 +183,7 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
 
         CleanFolder(item, node);
 
-        return SyncAttempt<IContentType>.Succeed(item.Name ?? item.Alias, item, ChangeType.Import, "", saveInSerializer, details);
+        return await Task.FromResult(SyncAttempt<IContentType>.Succeed(item.Name ?? item.Alias, item, ChangeType.Import, "", saveInSerializer, details));
     }
 
     private List<uSyncChange> DeserializeContentTypeProperties(IContentType item, XElement node)

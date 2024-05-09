@@ -34,59 +34,91 @@ public interface ISyncSerializer<TObject> : ISyncSerializerBase
     /// </summary>
     string ItemType { get; }
 
-    /// <summary>
-    ///  save all the items in umbraco.
-    /// </summary>
-    /// <param name="items"></param>
+    Task<SyncAttempt<XElement>> SerializeEmptyAsync(TObject item, SyncActionType change, string alias);
+    Task<SyncAttempt<XElement>> SerializeAsync(TObject item, SyncSerializerOptions options);
+    Task<SyncAttempt<TObject>> DeserializeAsync(XElement node, SyncSerializerOptions options);
+    Task<SyncAttempt<TObject>> DeserializeSecondPassAsync(TObject item, XElement node, SyncSerializerOptions options);
 
-    void Save(IEnumerable<TObject> items);
+    Task<ChangeType> IsCurrentAsync(XElement node, SyncSerializerOptions options);
+	Task<ChangeType> IsCurrentAsync(XElement node, XElement? current, SyncSerializerOptions options);
 
-    /// <summary>
-    ///  Serialize an empty xml marker, with proposed action
-    /// </summary>
-    SyncAttempt<XElement> SerializeEmpty(TObject item, SyncActionType change, string alias);
+	Task<TObject?> FindItemAsync(XElement node);
 
-    SyncAttempt<XElement> Serialize(TObject item, SyncSerializerOptions options);
+	// we are going to not implement this and see what effect it has. 
+	// Task<TObject?> FindItemAsync(int id);
+	Task<TObject?> FindItemAsync(Guid key);
+	Task<TObject?> FindItemAsync(string alias);
+	Task SaveAsync(IEnumerable<TObject?> items, Guid userKey);
+	Task SaveItemAsync(TObject item, Guid userKey);
+	Task DeleteItemAsync(TObject item, Guid userKey);
 
-    SyncAttempt<TObject> Deserialize(XElement node, SyncSerializerOptions options);
-    SyncAttempt<TObject> DeserializeSecondPass(TObject item, XElement node, SyncSerializerOptions options);
+	/// <summary>
+	///  save all the items in umbraco.
+	/// </summary>
+	/// <param name="items"></param>
+	[Obsolete("Use SaveAsync instead, will be removed in v15")]
+	void Save(IEnumerable<TObject> items);
+	
+ //   /// <summary>
+	/////  Serialize an empty xml marker, with proposed action
+	///// </summary>
+	//[Obsolete("Use SerializeEmptyAsync instead, will be removed in v15")]
+	//SyncAttempt<XElement> SerializeEmpty(TObject item, SyncActionType change, string alias);
 
-    ChangeType IsCurrent(XElement node, SyncSerializerOptions options);
-    ChangeType IsCurrent(XElement node, XElement? current, SyncSerializerOptions options);
+ //   [Obsolete("Use SerializeAsync instead, will be removed in v15")]
+ //   SyncAttempt<XElement> Serialize(TObject item, SyncSerializerOptions options);
 
-    /// <summary>
-    ///  Find an Item based on the XML node representation
-    /// </summary>
-    /// <param name="node"></param>
-    /// <returns></returns>
-    TObject? FindItem(XElement node);
+ //   [Obsolete("Use DeserializeAsync instead, will be removed in v15")]
+ //   SyncAttempt<TObject> Deserialize(XElement node, SyncSerializerOptions options);
 
-    /// <summary>
-    ///  find an item based in its internal id.
-    /// </summary>
-    TObject? FindItem(int id);
+	//[Obsolete("Use DeserializeSecondPassAsync instead, will be removed in v15")]    
+	//SyncAttempt<TObject> DeserializeSecondPass(TObject item, XElement node, SyncSerializerOptions options);
 
-    /// <summary>
-    ///  find an item based on the guid value
-    /// </summary>
-    TObject? FindItem(Guid key);
+	//[Obsolete("Use IsCurrentAsync instead, will be removed in v15")]
+	//ChangeType IsCurrent(XElement node, SyncSerializerOptions options);
 
-    /// <summary>
-    ///  find an item based on the alias
-    /// </summary>
-    TObject? FindItem(string alias);
+	//[Obsolete("Use IsCurrentAsync instead, will be removed in v15")]
+	//ChangeType IsCurrent(XElement node, XElement? current, SyncSerializerOptions options);
 
-    /// <summary>
-    ///  save an item back to umbraco
-    /// </summary>
-    /// <param name="item"></param>
-    void SaveItem(TObject item);
+ //   /// <summary>
+ //   ///  Find an Item based on the XML node representation
+ //   /// </summary>
+ //   /// <param name="node"></param>
+ //   /// <returns></returns>
+ //   [Obsolete("Use FindItemAsync instead, will be removed in v15")] 
+ //   TObject? FindItem(XElement node);
 
-    /// <summary>
-    ///  delete an item from umbraco
-    /// </summary>
-    /// <param name="item"></param>
-    void DeleteItem(TObject item);
+ //   /// <summary>
+ //   ///  find an item based in its internal id.
+ //   /// </summary>
+ //   [Obsolete("Use FindItemAsync instead, will be removed in v15")]
+ //   TObject? FindItem(int id);
+
+ //   /// <summary>
+ //   ///  find an item based on the guid value
+ //   /// </summary>
+ //   [Obsolete("Use FindItemAsync instead, will be removed in v15")]
+ //   TObject? FindItem(Guid key);
+
+ //   /// <summary>
+ //   ///  find an item based on the alias
+ //   /// </summary>
+ //   [Obsolete("Use FindItemAsync instead, will be removed in v15")]
+ //   TObject? FindItem(string alias);
+
+ //   /// <summary>
+ //   ///  save an item back to umbraco
+ //   /// </summary>
+ //   /// <param name="item"></param>
+ //   [Obsolete("Use SaveItemAsync instead, will be removed in v15")]
+ //   void SaveItem(TObject item);
+
+ //   /// <summary>
+ //   ///  delete an item from umbraco
+ //   /// </summary>
+ //   /// <param name="item"></param>
+ //   [Obsolete("Use DeleteItemAsync instead, will be removed in v15")]
+ //   void DeleteItem(TObject item);
 
     /// <summary>
     ///  get the alias we use for any item

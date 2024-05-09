@@ -8,6 +8,7 @@ using Umbraco.Cms.Core.Models.Entities;
 using Umbraco.Cms.Core.PropertyEditors;
 using Umbraco.Cms.Core.Serialization;
 using Umbraco.Cms.Core.Services;
+using Umbraco.Cms.Core.Services.OperationStatus;
 using Umbraco.Extensions;
 
 using uSync.Core.DataTypes;
@@ -20,71 +21,74 @@ namespace uSync.Core.Serialization.Serializers;
 public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncSerializer<IDataType>
 {
     private readonly IDataTypeService _dataTypeService;
+    private readonly IDataTypeContainerService _dataTypeContainerService;
     private readonly DataEditorCollection _dataEditors;
     private readonly ConfigurationSerializerCollection _configurationSerializers;
     private readonly PropertyEditorCollection _propertyEditors;
     private readonly IConfigurationEditorJsonSerializer _jsonSerializer;
 
-    public DataTypeSerializer(IEntityService entityService, ILogger<DataTypeSerializer> logger,
-        IDataTypeService dataTypeService,
-        DataEditorCollection dataEditors,
-        ConfigurationSerializerCollection configurationSerializers,
-        PropertyEditorCollection propertyEditors,
-        IConfigurationEditorJsonSerializer jsonSerializer)
-        : base(entityService, logger, UmbracoObjectTypes.DataTypeContainer)
-    {
-        this._dataTypeService = dataTypeService;
-        this._dataEditors = dataEditors;
-        this._configurationSerializers = configurationSerializers;
-        this._propertyEditors = propertyEditors;
-        this._jsonSerializer = jsonSerializer;
-    }
+	public DataTypeSerializer(IEntityService entityService, ILogger<DataTypeSerializer> logger,
+		IDataTypeService dataTypeService,
+		IDataTypeContainerService dataTypeContainerService,
+		DataEditorCollection dataEditors,
+		ConfigurationSerializerCollection configurationSerializers,
+		PropertyEditorCollection propertyEditors,
+		IConfigurationEditorJsonSerializer jsonSerializer)
+		: base(entityService, logger, UmbracoObjectTypes.DataTypeContainer)
+	{
+		this._dataTypeService = dataTypeService;
+		this._dataEditors = dataEditors;
+		this._configurationSerializers = configurationSerializers;
+		this._propertyEditors = propertyEditors;
+		this._jsonSerializer = jsonSerializer;
+		_dataTypeContainerService = dataTypeContainerService;
+	}
 
-    /// <summary>
-    ///  Process deletes
-    /// </summary>
-    /// <remarks>
-    ///  datatypes are deleted late (in the last pass)
-    ///  this means they are actually deleted at the very
-    ///  end of the process. 
-    ///  
-    ///  In theory this should be fine, 
-    ///  
-    ///  any content types that may or may not use
-    ///  datatypes we are about to delete will have
-    ///  already been updated. 
-    /// 
-    ///  by moving the datatypes to the end we capture the 
-    ///  case where the datatype might have been replaced 
-    ///  in the content type, by not deleting first we 
-    ///  stop the triggering of any of Umbraco's delete
-    ///  processes.
-    ///  
-    ///  this only works because we are keeping the track of
-    ///  all the deletes and renames when they happen
-    ///  and we can only reliably do that for items
-    ///  that have ContainerTree's because they are not 
-    ///  real trees - but flat (each alias is unique)
-    /// </remarks>
-    protected override SyncAttempt<IDataType> ProcessDelete(Guid key, string alias, SerializerFlags flags)
-    {
+	/// <summary>
+	///  Process deletes
+	/// </summary>
+	/// <remarks>
+	///  datatypes are deleted late (in the last pass)
+	///  this means they are actually deleted at the very
+	///  end of the process. 
+	///  
+	///  In theory this should be fine, 
+	///  
+	///  any content types that may or may not use
+	///  datatypes we are about to delete will have
+	///  already been updated. 
+	/// 
+	///  by moving the datatypes to the end we capture the 
+	///  case where the datatype might have been replaced 
+	///  in the content type, by not deleting first we 
+	///  stop the triggering of any of Umbraco's delete
+	///  processes.
+	///  
+	///  this only works because we are keeping the track of
+	///  all the deletes and renames when they happen
+	///  and we can only reliably do that for items
+	///  that have ContainerTree's because they are not 
+	///  real trees - but flat (each alias is unique)
+	/// </remarks>
+	protected override async Task<SyncAttempt<IDataType>> ProcessDeleteAsync(Guid key, string alias, SerializerFlags flags, Guid userKey)
+	{
         if (flags.HasFlag(SerializerFlags.LastPass))
         {
             logger.LogDebug("Processing deletes as part of the last pass)");
-            return base.ProcessDelete(key, alias, flags);
+            return await base.ProcessDeleteAsync(key, alias, flags, userKey);
         }
 
         logger.LogDebug("Delete not processing as this is not the final pass");
         return SyncAttempt<IDataType>.Succeed(alias, ChangeType.Hidden);
     }
 
-    protected override SyncAttempt<IDataType> DeserializeCore(XElement node, SyncSerializerOptions options)
-    {
+	protected override async Task<SyncAttempt<IDataType>> DeserializeCoreAsync(XElement node, SyncSerializerOptions options)
+	{
         var info = node.Element(uSyncConstants.Xml.Info);
         var name = info?.Element(uSyncConstants.Xml.Name).ValueOrDefault(string.Empty) ?? string.Empty;
         var key = node.GetKey();
 
-        var attempt = FindOrCreate(node);
+        var attempt = await FindOrCreateAsync(node);
         if (!attempt.Success || attempt.Result is null)
             throw attempt.Exception ?? new Exception("Unknown serialization error");
 
@@ -133,20 +137,20 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
             details.AddRange(DeserializeConfiguration(item, node));
         }
 
-        details!.AddNotNull(SetFolderFromElement(item, info?.Element("Folder")));
+        details!.AddNotNull(await SetFolderFromElementAsync(item, info?.Element("Folder")));
 
         return SyncAttempt<IDataType>.Succeed(item.Name ?? item.Id.ToString(), item, ChangeType.Import, details);
 
     }
 
-    private uSyncChange? SetFolderFromElement(IDataType item, XElement? folderNode)
+    private async Task<uSyncChange?> SetFolderFromElementAsync(IDataType item, XElement? folderNode)
     {
         if (folderNode == null) return null;
 
         var folder = folderNode.ValueOrDefault(string.Empty);
         if (string.IsNullOrWhiteSpace(folder)) return null;
 
-        var container = FindFolder(folderNode.GetKey(), folder);
+        var container = await FindFolderAsync(folderNode.GetKey(), folder);
         if (container != null && container.Id != item.ParentId)
         {
             var change = uSyncChange.Update("", "Folder", container.Id, item.ParentId);
@@ -206,10 +210,10 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
     }
 
 
-    ///////////////////////
+	///////////////////////
 
-    protected override SyncAttempt<XElement> SerializeCore(IDataType item, SyncSerializerOptions options)
-    {
+	protected override async Task<SyncAttempt<XElement>> SerializeCoreAsync(IDataType item, SyncSerializerOptions options)
+	{
         var node = InitializeBaseNode(item, item.Name ?? item.Id.ToString(), item.Level);
 
         var info = new XElement(uSyncConstants.Xml.Info,
@@ -220,7 +224,7 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
 
         if (item.Level != 1)
         {
-            var folderNode = this.GetFolderNode(item); //TODO - CACHE THIS CALL. 
+            var folderNode = await this.GetFolderNodeAsync(item); //TODO - CACHE THIS CALL. 
             if (folderNode != null)
                 info.Add(folderNode);
         }
@@ -233,9 +237,6 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
 
         return SyncAttempt<XElement>.Succeed(item.Name ?? item.Id.ToString(), node, typeof(IDataType), ChangeType.Export);
     }
-
-    protected override IEnumerable<EntityContainer> GetContainers(IDataType item)
-        => _dataTypeService.GetContainers(item);
 
     private XElement SerializeConfiguration(IDataType item)
     {
@@ -322,46 +323,30 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
 	protected override string GetItemBaseType(XElement node)
         => node.Element(uSyncConstants.Xml.Info)?.Element("EditorAlias").ValueOrDefault(string.Empty) ?? string.Empty;
 
-    public override IDataType? FindItem(int id)
-        => _dataTypeService.GetDataType(id);
+	public override async Task<IDataType?> FindItemAsync(Guid key)
+        => await _dataTypeService.GetAsync(key);
 
-    public override IDataType? FindItem(Guid key)
-        => _dataTypeService.GetDataType(key);
+    public override async Task<IDataType?> FindItemAsync(string alias)
+        => await _dataTypeService.GetAsync(alias);
 
-    public override IDataType? FindItem(string alias)
-        => _dataTypeService.GetDataType(alias);
-
-    protected override EntityContainer? FindContainer(Guid key)
-        => key == Guid.Empty ? null : _dataTypeService.GetContainer(key);
-
-    protected override IEnumerable<EntityContainer> FindContainers(string folder, int level)
-        => _dataTypeService.GetContainers(folder, level);
-
-    protected override Attempt<OperationResult<OperationResultType, EntityContainer>?> CreateContainer(int parentId, string name)
-        => _dataTypeService.CreateContainer(parentId, Guid.NewGuid(), name);
-
-    public override void SaveItem(IDataType item)
+    public override async Task SaveItemAsync(IDataType? item, Guid userKey)
     {
-        if (item.IsDirty())
-            _dataTypeService.Save(item);
-    }
+        if (item is null) return;
 
-    public override void Save(IEnumerable<IDataType> items)
-    {
-        // if we don't trigger then the cache doesn't get updated :(
-        _dataTypeService.Save(items.Where(x => x.IsDirty()));
-    }
+		if (item.Id <= 0)
+			await _dataTypeService.CreateAsync(item, userKey);
+        else 
+            await _dataTypeService.UpdateAsync(item, userKey);
+	}
 
-    protected override void SaveContainer(EntityContainer container)
-        => _dataTypeService.SaveContainer(container);
-
-    public override void DeleteItem(IDataType item)
-        => _dataTypeService.Delete(item);
-
+	public override async Task DeleteItemAsync(IDataType? item, Guid userKey)
+	{
+        if (item is null) return;
+		await _dataTypeService.DeleteAsync(item.Key, userKey);
+	}
 
     public override string ItemAlias(IDataType item)
         => item.Name ?? item.Id.ToString();
-
 
 
     /// <summary>
@@ -398,4 +383,22 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
 
         return true;
     }
+
+
+	protected override async Task<Attempt<EntityContainer?, EntityContainerOperationStatus>> CreateContainerAsync(Guid key, string name, Guid parentKey, Guid userKey)
+        => await _dataTypeContainerService.CreateAsync(key, name, parentKey, userKey);
+
+    protected override async Task SaveContainerAsync(EntityContainer container, Guid userKey)
+    {
+        if (container.Id == 0) {
+			var parentGuid = container.ParentId == 0 ? Guid.Empty : (await _dataTypeContainerService.GetParentAsync(container))?.Key ?? Guid.Empty;
+			await _dataTypeContainerService.CreateAsync(container.Key, container.Name ?? "container", parentGuid, userKey);
+            return;
+        }
+
+        await _dataTypeContainerService.UpdateAsync(container.Key, container.Name ?? "container", userKey); 
+    }
+
+	protected override async Task<EntityContainer?> GetContainerAsync(IDataType item)
+        => await _dataTypeContainerService.GetParentAsync(item);
 }
