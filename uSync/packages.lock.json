@@ -2594,6 +2594,7 @@
       "usync.core": {
         "type": "Project",
         "dependencies": {
+          "Umbraco.Cms.Api.Management": "[14.0.0-rc3, )",
           "Umbraco.Cms.Web.Website": "[14.0.0-rc3, )"
         }
       }
