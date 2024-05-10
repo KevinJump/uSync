@@ -2,6 +2,7 @@
 
 using Microsoft.Extensions.Logging;
 
+using Umbraco.Cms.Api.Management.Factories;
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Models.Entities;
@@ -25,48 +26,48 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
     private readonly PropertyEditorCollection _propertyEditors;
     private readonly IConfigurationEditorJsonSerializer _jsonSerializer;
 
-    public DataTypeSerializer(IEntityService entityService, ILogger<DataTypeSerializer> logger,
-        IDataTypeService dataTypeService,
-        DataEditorCollection dataEditors,
-        ConfigurationSerializerCollection configurationSerializers,
-        PropertyEditorCollection propertyEditors,
-        IConfigurationEditorJsonSerializer jsonSerializer)
-        : base(entityService, logger, UmbracoObjectTypes.DataTypeContainer)
-    {
-        this._dataTypeService = dataTypeService;
-        this._dataEditors = dataEditors;
-        this._configurationSerializers = configurationSerializers;
-        this._propertyEditors = propertyEditors;
-        this._jsonSerializer = jsonSerializer;
-    }
+	public DataTypeSerializer(IEntityService entityService, ILogger<DataTypeSerializer> logger,
+		IDataTypeService dataTypeService,
+		DataEditorCollection dataEditors,
+		ConfigurationSerializerCollection configurationSerializers,
+		PropertyEditorCollection propertyEditors,
+		IConfigurationEditorJsonSerializer jsonSerializer)
+		: base(entityService, logger, UmbracoObjectTypes.DataTypeContainer)
+	{
+		this._dataTypeService = dataTypeService;
+		this._dataEditors = dataEditors;
+		this._configurationSerializers = configurationSerializers;
+		this._propertyEditors = propertyEditors;
+		this._jsonSerializer = jsonSerializer;
+	}
 
-    /// <summary>
-    ///  Process deletes
-    /// </summary>
-    /// <remarks>
-    ///  datatypes are deleted late (in the last pass)
-    ///  this means they are actually deleted at the very
-    ///  end of the process. 
-    ///  
-    ///  In theory this should be fine, 
-    ///  
-    ///  any content types that may or may not use
-    ///  datatypes we are about to delete will have
-    ///  already been updated. 
-    /// 
-    ///  by moving the datatypes to the end we capture the 
-    ///  case where the datatype might have been replaced 
-    ///  in the content type, by not deleting first we 
-    ///  stop the triggering of any of Umbraco's delete
-    ///  processes.
-    ///  
-    ///  this only works because we are keeping the track of
-    ///  all the deletes and renames when they happen
-    ///  and we can only reliably do that for items
-    ///  that have ContainerTree's because they are not 
-    ///  real trees - but flat (each alias is unique)
-    /// </remarks>
-    protected override SyncAttempt<IDataType> ProcessDelete(Guid key, string alias, SerializerFlags flags)
+	/// <summary>
+	///  Process deletes
+	/// </summary>
+	/// <remarks>
+	///  datatypes are deleted late (in the last pass)
+	///  this means they are actually deleted at the very
+	///  end of the process. 
+	///  
+	///  In theory this should be fine, 
+	///  
+	///  any content types that may or may not use
+	///  datatypes we are about to delete will have
+	///  already been updated. 
+	/// 
+	///  by moving the datatypes to the end we capture the 
+	///  case where the datatype might have been replaced 
+	///  in the content type, by not deleting first we 
+	///  stop the triggering of any of Umbraco's delete
+	///  processes.
+	///  
+	///  this only works because we are keeping the track of
+	///  all the deletes and renames when they happen
+	///  and we can only reliably do that for items
+	///  that have ContainerTree's because they are not 
+	///  real trees - but flat (each alias is unique)
+	/// </remarks>
+	protected override SyncAttempt<IDataType> ProcessDelete(Guid key, string alias, SerializerFlags flags)
     {
         if (flags.HasFlag(SerializerFlags.LastPass))
         {
@@ -105,30 +106,41 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
         }
 
         var editorAlias = info?.Element("EditorAlias").ValueOrDefault(string.Empty) ?? string.Empty;
+        var editor = FindDataEditor(editorAlias);
         if (editorAlias != item.EditorAlias)
         {
             // change the editor type.....
-            var newEditor = FindDataEditor(editorAlias);
-            if (newEditor != null)
+            if (editor is not null)
             {
                 details.AddUpdate("EditorAlias", item.EditorAlias, editorAlias, "EditorAlias");
-                item.Editor = newEditor;
+                item.Editor = editor;
             }
         }
 
-        // removing sort order - as its not used on datatypes, 
-        // and can change based on minor things (so gives false out of sync results)
-
-        // item.SortOrder = info.Element("SortOrder").ValueOrDefault(0);
-        var dbType = info?.Element("DatabaseType")?.ValueOrDefault(ValueStorageType.Nvarchar) ?? ValueStorageType.Nvarchar;
-        if (item.DatabaseType != dbType)
+        var dataBaseType = GetEditorValueStorageType(editor);
+        if (item.DatabaseType != dataBaseType)
         {
-            details.AddUpdate("DatabaseType", item.DatabaseType, dbType, "DatabaseType");
-            item.DatabaseType = dbType;
-        }
+			details.AddUpdate("DatabaseType", item.DatabaseType, dataBaseType, "DatabaseType");
+            item.DatabaseType = dataBaseType;
+		}
 
-        // config 
-        if (ShouldDesterilizeConfig(name, editorAlias, options))
+        var editorUiAlias = info?.Element("EditorUIAlias").ValueOrDefault(string.Empty) ?? string.Empty;
+
+        // migration thing if this is missing we guess it.
+        if (editorUiAlias.IsNullOrWhiteSpace())
+			editorUiAlias = ToPropertyEditorUiAlias(editorAlias) ?? string.Empty;
+
+        if (item.EditorUiAlias != editorUiAlias)
+        {
+			details.AddUpdate("EditorUIAlias", item.EditorUiAlias ?? "", editorUiAlias, "EditorUIAlias");
+			item.EditorUiAlias = editorUiAlias;
+		}
+
+		// we no longer read the db type value from the xml. 
+		// info?.Element("DatabaseType")?.ValueOrDefault(ValueStorageType.Nvarchar) ?? ValueStorageType.Nvarchar;
+
+		// config 
+		if (ShouldDesterilizeConfig(name, editorAlias, options))
         {
             details.AddRange(DeserializeConfiguration(item, node));
         }
@@ -136,7 +148,12 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
         details!.AddNotNull(SetFolderFromElement(item, info?.Element("Folder")));
 
         return SyncAttempt<IDataType>.Succeed(item.Name ?? item.Id.ToString(), item, ChangeType.Import, details);
+    }
 
+    private ValueStorageType GetEditorValueStorageType(IDataEditor? editor)
+    {
+        if (editor is null) return ValueStorageType.Ntext;
+        return ValueTypes.ToStorageType(editor.GetValueEditor().ValueType);
     }
 
     private uSyncChange? SetFolderFromElement(IDataType item, XElement? folderNode)
@@ -182,7 +199,7 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
             importData = serializer.GetConfigurationImport(importData);
         }
 
-        if (IsJsonEqual(importData, item.ConfigurationData) is false)
+        if (importData.IsJsonEqual(item.ConfigurationData) is false)
         {
             changes.AddUpdateJson("Data", item.ConfigurationData, importData, "Configuration Data");
             logger.LogDebug("Setting Config for {item} : {data}", item.Name, importData);
@@ -194,18 +211,6 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
 
     }
 
-    /// <summary>
-    ///  tells us if the json for an object is equal, helps when the config objects don't have their
-    ///  own Equals functions
-    /// </summary>
-    private static bool IsJsonEqual(object currentObject, object newObject)
-    {
-        var currentString = currentObject.SerializeJsonString(false);
-        var newString = newObject.SerializeJsonString(false);
-        return currentString == newString;
-    }
-
-
     ///////////////////////
 
     protected override SyncAttempt<XElement> SerializeCore(IDataType item, SyncSerializerOptions options)
@@ -215,7 +220,7 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
         var info = new XElement(uSyncConstants.Xml.Info,
             new XElement(uSyncConstants.Xml.Name, item.Name),
             new XElement("EditorAlias", item.EditorAlias),
-            new XElement("DatabaseType", item.DatabaseType));
+            new XElement("EditorUIAlias", item.EditorUiAlias));
         // new XElement("SortOrder", item.SortOrder));
 
         if (item.Level != 1)
@@ -398,4 +403,49 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
 
         return true;
     }
+
+    /// <summary>
+    ///  Convert an editor alias or an property editor ui alias
+    /// </summary>
+    /// <remarks>
+    ///  these values are taken from an Umbraco migration in v14.
+    /// </remarks>
+    private static string? ToPropertyEditorUiAlias(string editorAlias)
+    {
+		return editorAlias switch
+		{
+			Constants.PropertyEditors.Aliases.BlockList => "Umb.PropertyEditorUi.BlockList",
+			Constants.PropertyEditors.Aliases.BlockGrid => "Umb.PropertyEditorUi.BlockGrid",
+			Constants.PropertyEditors.Aliases.CheckBoxList => "Umb.PropertyEditorUi.CheckBoxList",
+			Constants.PropertyEditors.Aliases.ColorPicker => "Umb.PropertyEditorUi.ColorPicker",
+			Constants.PropertyEditors.Aliases.ColorPickerEyeDropper => "Umb.PropertyEditorUi.EyeDropper",
+			Constants.PropertyEditors.Aliases.ContentPicker => "Umb.PropertyEditorUi.DocumentPicker",
+			Constants.PropertyEditors.Aliases.DateTime => "Umb.PropertyEditorUi.DatePicker",
+			Constants.PropertyEditors.Aliases.DropDownListFlexible => "Umb.PropertyEditorUi.Dropdown",
+			Constants.PropertyEditors.Aliases.ImageCropper => "Umb.PropertyEditorUi.ImageCropper",
+			Constants.PropertyEditors.Aliases.Integer => "Umb.PropertyEditorUi.Integer",
+			Constants.PropertyEditors.Aliases.Decimal => "Umb.PropertyEditorUi.Decimal",
+			Constants.PropertyEditors.Aliases.ListView => "Umb.PropertyEditorUi.Collection",
+			Constants.PropertyEditors.Aliases.MediaPicker3 => "Umb.PropertyEditorUi.MediaPicker",
+			Constants.PropertyEditors.Aliases.MemberPicker => "Umb.PropertyEditorUi.MemberPicker",
+			Constants.PropertyEditors.Aliases.MemberGroupPicker => "Umb.PropertyEditorUi.MemberGroupPicker",
+			Constants.PropertyEditors.Aliases.MultiNodeTreePicker => "Umb.PropertyEditorUi.ContentPicker",
+			Constants.PropertyEditors.Aliases.MultipleTextstring => "Umb.PropertyEditorUi.MultipleTextString",
+			Constants.PropertyEditors.Aliases.Label => "Umb.PropertyEditorUi.Label",
+			Constants.PropertyEditors.Aliases.RadioButtonList => "Umb.PropertyEditorUi.RadioButtonList",
+			Constants.PropertyEditors.Aliases.Slider => "Umb.PropertyEditorUi.Slider",
+			Constants.PropertyEditors.Aliases.Tags => "Umb.PropertyEditorUi.Tags",
+			Constants.PropertyEditors.Aliases.TextBox => "Umb.PropertyEditorUi.TextBox",
+			Constants.PropertyEditors.Aliases.TextArea => "Umb.PropertyEditorUi.TextArea",
+			Constants.PropertyEditors.Aliases.RichText => "Umb.PropertyEditorUi.TinyMCE",
+			Constants.PropertyEditors.Aliases.TinyMce => "Umb.PropertyEditorUi.TinyMCE",
+			Constants.PropertyEditors.Aliases.Boolean => "Umb.PropertyEditorUi.Toggle",
+			Constants.PropertyEditors.Aliases.MarkdownEditor => "Umb.PropertyEditorUi.MarkdownEditor",
+			Constants.PropertyEditors.Aliases.UserPicker => "Umb.PropertyEditorUi.UserPicker",
+			Constants.PropertyEditors.Aliases.UploadField => "Umb.PropertyEditorUi.UploadField",
+			Constants.PropertyEditors.Aliases.EmailAddress => "Umb.PropertyEditorUi.EmailAddress",
+			Constants.PropertyEditors.Aliases.MultiUrlPicker => "Umb.PropertyEditorUi.MultiUrlPicker",
+			_ => null
+		};
+	}
 }

@@ -476,6 +476,22 @@ public static class JsonTextExtensions
 
         return default;
     }
-    #endregion
+	#endregion
+
+	#region Comparasions 
+
+
+	/// <summary>
+	///  tells us if the json for an object is equal, helps when the config objects don't have their
+	///  own Equals functions
+	/// </summary>
+	public static bool IsJsonEqual(this object currentObject, object newObject)
+	{
+		var currentString = currentObject.SerializeJsonString(false);
+		var newString = newObject.SerializeJsonString(false);
+		return currentString == newString;
+	}
+
+	#endregion
 
 }
