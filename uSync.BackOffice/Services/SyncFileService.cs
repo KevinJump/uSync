@@ -497,8 +497,9 @@ public class SyncFileService
     public IEnumerable<OrderedNodeInfo> MergeFolders(string[] folders, string extension, ISyncTrackerBase? trackerBase)
     {
         var elements = new Dictionary<string, OrderedNodeInfo>();
+		var cleanElements = new Dictionary<string, OrderedNodeInfo>();
 
-        foreach (var folder in folders)
+		foreach (var folder in folders)
         {
             var absPath = GetAbsPath(folder);
 
@@ -511,24 +512,43 @@ public class SyncFileService
             foreach (var item in items)
             {
 				var itemKey = item.Value.Node.GetKey();
-				if (localKeys.Contains(itemKey) && item.Value.Node.IsEmptyItem() is false)
+				if (item.Value.Node.IsEmptyItem() is false || item.Value.Node.GetEmptyAction() == SyncActionType.Delete)
 				{
-					throw new Exception($"Duplicate: Item key {itemKey} already exists for {item.Key} - run uSync Health check for more info.");
-				}
-				
-                localKeys.Add(itemKey);
+					if (localKeys.Contains(itemKey))
+					{
+						throw new Exception($"Duplicate: Item key {itemKey} already exists for {item.Key} - run uSync Health check for more info.");
+					}
 
-                if (trackerBase is not null && elements.TryGetValue(item.Key, out var value))
-                {
-                    // merge these files.
-                    item.Value.SetNode(MergeNodes(value.Node, item.Value.Node, trackerBase));
-                }
+					localKeys.Add(itemKey);
+				}
+				else
+				{
+					if (item.Value.Node.GetEmptyAction() == SyncActionType.Clean)
+					{
+						// cleans are added, these run a clean up at the end, so if they exist 
+						// we need to add them, but they can clash in terms of keys. 
+						_ = cleanElements.TryAdd(item.Key, item.Value);
+					}
+					else
+					{
+						// empty if its anything but a delete we ignore it. 
+						// renames are just markers to make sure they don't leave things on disk.
+						continue;
+					}
+				}
+
+				if (elements.TryGetValue(item.Key, out var value))
+				{
+					// merge these files.
+					item.Value.SetNode(MergeNodes(value.Node, item.Value.Node, trackerBase));
+					item.Value.FileName = $"{uSyncConstants.MergedFolderName}/{Path.GetFileName(item.Value.FileName)}";
+				}
 
                 elements[item.Key] = item.Value;
             }
         }
 
-        return elements.Values;
+        return [..elements.Values, ..cleanElements.Values];
     }
 
 	/// <summary>
