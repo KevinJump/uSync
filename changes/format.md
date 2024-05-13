@@ -12,6 +12,12 @@ When uSync performs a report/import it checks the version against a file in the 
 
 Our recommendation is to perform a new export when the format version changes
 
+## v14.0
+- Datatypes
+    - no longer store the database type in the datatype (this is driven by the property editor).
+    - now include the UIEditorAlias value (datatypes have two editor types a Backend EditorUI and a Frontend property editor ui)
+    - Config is not stored slightly diffrently as its split in Umbraco between frontend and backend values, this causes some things to be renamed/reordered.
+
 ## v10.1 
 
 ### Change to order of Json properties in datatypes. 
