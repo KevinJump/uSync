@@ -99,11 +99,12 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
         protected override string GetItemName(IRelationType item)
             => item.Name;
 
-        /// <inheritdoc/>
-        protected override string GetItemFileName(IRelationType item)
+		/// <inheritdoc/>
+		protected override string GetItemFileName(IRelationType item)
             => GetItemAlias(item).ToSafeAlias(shortStringHelper);
 
-        protected override IEnumerable<IEntity> GetChildItems(int parent)
+		/// <inheritdoc/>
+		protected override IEnumerable<IEntity> GetChildItems(int parent)
         {
             if (parent == -1)
                 return relationService.GetAllRelationTypes();
