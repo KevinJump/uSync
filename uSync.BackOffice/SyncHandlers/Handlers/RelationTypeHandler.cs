@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Events;
 using Umbraco.Cms.Core.Models;
+using Umbraco.Cms.Core.Models.Entities;
 using Umbraco.Cms.Core.Notifications;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Strings;
@@ -70,7 +71,6 @@ public class RelationTypeHandler : SyncHandlerBase<IRelationType, IRelationServi
         return actions;
     }
 
-
     /// <summary>
     ///  Relations that by default we exclude, if the exlude setting is used,then it will override these values
     ///  and they will be included if not explicity set;
@@ -103,67 +103,12 @@ public class RelationTypeHandler : SyncHandlerBase<IRelationType, IRelationServi
     protected override string GetItemFileName(IRelationType item)
         => GetItemAlias(item).ToSafeAlias(shortStringHelper);
 
-    //     private void RelationService_SavedRelation(IRelationService sender, Umbraco.Core.Events.SaveEventArgs<IRelation> e)
-    //     {
-    //         if (uSync8BackOffice.eventsPaused) return;
+    protected override IEnumerable<IEntity> GetChildItems(int parent)
+    {
+        if (parent == -1)
+            return relationService.GetAllRelationTypes();
 
-    //         lock (saveLock)
-    //         {
-    //             saveTimer.Stop();
-    //             saveTimer.Start();
+        return [];
+    }
 
-    //             // add each item to the save list (if we haven't already)
-    //             foreach (var item in e.SavedEntities)
-    //             {
-    //                 if (!pendingSaveIds.Contains(item.RelationTypeId))
-    //                     pendingSaveIds.Add(item.RelationTypeId);
-    //             }
-    //         }
-    //     }
-
-    //     private void SaveTimer_Elapsed(object sender, ElapsedEventArgs e)
-    //     {
-    //         lock (saveLock)
-    //         {
-    //             UpdateRelationTypes(pendingSaveIds);
-    //             pendingSaveIds.Clear();
-    //         }
-    //     }
-
-    //     private static Timer saveTimer;
-    //     private static List<int> pendingSaveIds;
-    //     private static object saveLock;
-
-    //     private void RelationService_DeletedRelation(IRelationService sender, Umbraco.Core.Events.DeleteEventArgs<IRelation> e)
-    //     {
-    //         if (uSync8BackOffice.eventsPaused) return;
-
-    //         var types = new List<int>();
-
-    //         foreach (var item in e.DeletedEntities)
-    //         {
-    //             if (!types.Contains(item.RelationTypeId))
-    //                 types.Add(item.RelationTypeId);
-    //         }
-
-    //         UpdateRelationTypes(types);
-    //     }
-
-    //     private void UpdateRelationTypes(IEnumerable<int> types)
-    //     {
-    //         foreach (var type in types)
-    //         {
-    //             var relationType = relationService.GetRelationTypeById(type);
-
-    //             var attempts = Export(relationType, Path.Combine(rootFolder, this.DefaultFolder), DefaultConfig);
-
-    //             if (!(this.DefaultConfig.GuidNames && this.DefaultConfig.UseFlatStructure))
-    //             {
-    //                 foreach (var attempt in attempts.Where(x => x.Success))
-    //                 {
-    //                     this.CleanUp(relationType, attempt.FileName, Path.Combine(rootFolder, this.DefaultFolder));
-    //                 }
-    //             }
-    //         }
-    //     }
 }
