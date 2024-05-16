@@ -99,14 +99,14 @@ public class RelationTypeHandler : SyncHandlerBase<IRelationType, IRelationServi
     protected override string GetItemName(IRelationType item)
         => item.Name ?? item.Alias;
 
-    /// <inheritdoc/>
-    protected override string GetItemFileName(IRelationType item)
-        => GetItemAlias(item).ToSafeAlias(shortStringHelper);
+		/// <inheritdoc/>
+		protected override string GetItemFileName(IRelationType item)
+            => GetItemAlias(item).ToSafeAlias(shortStringHelper);
 
-    protected override IEnumerable<IEntity> GetChildItems(int parent)
-    {
-        if (parent == -1)
-            return relationService.GetAllRelationTypes();
+        protected override IEnumerable<IEntity> GetChildItems(int parent)
+        {
+            if (parent == -1)
+                return relationService.GetAllRelationTypes();
 
         return [];
     }
