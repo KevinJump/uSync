@@ -26,7 +26,9 @@ internal class SyncLegacyService : ISyncLegacyService
         { SyncLegacyTypes.NestedContent, "Nested Content" },
         { SyncLegacyTypes.OurNestedContent, "Nested Content (Community version)" },
         { SyncLegacyTypes.Grid, "Grid" },
-        { SyncLegacyTypes.MediaPicker, "Media Picker" }
+        { SyncLegacyTypes.MediaPicker, "Media Picker (Legacy)" },
+        { SyncLegacyTypes.MediaPicker2, "Media Picker (2) (Legacy)" },
+        { SyncLegacyTypes.MultipleMediaPicker, "Multiple Media Picker (Legacy)" }
     };
 
     private readonly SyncFileService _syncFileService;

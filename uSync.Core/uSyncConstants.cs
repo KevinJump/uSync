@@ -133,4 +133,6 @@ public static class SyncLegacyTypes
 	public const string OurNestedContent = "Our.Umbraco.NestedContent";
 	public const string Grid = "Umbraco.Grid";
 	public const string MediaPicker = "Umbraco.MediaPicker";
+	public const string MediaPicker2 = "Umbraco.MediaPicker2";
+	public const string MultipleMediaPicker = "Umbraco.MultipleMediaPicker";
 }
