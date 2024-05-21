@@ -6,7 +6,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="13.0.0" />
+		<PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="13.3.1" />
 	</ItemGroup>
 
 
