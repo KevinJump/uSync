@@ -17,18 +17,12 @@ import {
 	uSyncActionView,
 } from '../../../api/index.js';
 import { UUIButtonState } from '@umbraco-cms/backoffice/external/uui';
-import {
-	UMB_MODAL_MANAGER_CONTEXT,
-	UmbModalManagerContext,
-} from '@umbraco-cms/backoffice/modal';
-import { USYNC_LEGACY_MODAL } from '../../../dialogs/legacy-modal-element.js';
 import { UmbLitElement } from '@umbraco-cms/backoffice/lit-element';
 
 @customElement('usync-default-view')
 export class uSyncDefaultViewElement extends UmbLitElement {
 	#actionContext?: uSyncWorkspaceContext;
 	#contextLoaded: Boolean = false;
-	#modalContext?: UmbModalManagerContext;
 
 	@state()
 	_actions?: Array<SyncActionGroup>;
@@ -66,10 +60,6 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 	constructor() {
 		super();
 
-		this.consumeContext(UMB_MODAL_MANAGER_CONTEXT, (_modalContext) => {
-			this.#modalContext = _modalContext;
-		});
-
 		this.consumeContext(USYNC_CORE_CONTEXT_TOKEN, (_instance) => {
 			this.#actionContext = _instance;
 
@@ -91,8 +81,6 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 				} else {
 					this._disabled = false;
 				}
-
-				console.log(this._disabled);
 			});
 
 			this.observe(_instance.results, (_results) => {
@@ -108,9 +96,6 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 
 			this.observe(_instance.legacy, (_legacy) => {
 				this._legacy = _legacy;
-				if (this._legacy?.hasLegacy) {
-					this.#openLegacyModal();
-				}
 			});
 
 			if (this.#contextLoaded == false) {
@@ -119,23 +104,6 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 				this.#contextLoaded;
 			}
 		});
-	}
-
-	_legacyDialogOpened: boolean = false;
-
-	async #openLegacyModal() {
-		if (this._legacyDialogOpened) return;
-		this._legacyDialogOpened = true;
-
-		const legacyModal = this.#modalContext?.open(this, USYNC_LEGACY_MODAL, {
-			data: this._legacy,
-		});
-
-		await legacyModal?.onSubmit().then(function () {
-			// waiting, so it doesn't close.
-		});
-
-		return;
 	}
 
 	/**
@@ -160,11 +128,22 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 		} else {
 			return html`
 				<umb-body-layout>
-					${this.#renderActions()} ${this.#renderBanner()} ${this.#renderProcessBox()}
-					${this.#renderReport()}
+					${this.#renderLegacyBanner()} ${this.#renderActions()} ${this.#renderBanner()}
+					${this.#renderProcessBox()} ${this.#renderReport()}
 				</umb-body-layout>
 			`;
 		}
+	}
+
+	#renderLegacyBanner() {
+		return !this._legacy?.hasLegacy
+			? nothing
+			: html`
+					<div class="legacy-banner">
+						<umb-icon name="icon-alert"></umb-icon>
+						${this.localize.term('uSync_legacyBanner')}
+					</div>
+				`;
 	}
 
 	#renderActions() {
@@ -222,6 +201,15 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 			:host {
 				display: block;
 				margin-top: calc(var(--uui-size-space-4) * -1);
+			}
+
+			.legacy-banner {
+				display: flex;
+				gap: var(--uui-size-space-2);
+				padding: var(--uui-size-space-4);
+				margin: var(--uui-size-space-4) 0;
+				background-color: var(--uui-color-warning);
+				color: var(--uui-color-warning-contrast);
 			}
 
 			.results-box {

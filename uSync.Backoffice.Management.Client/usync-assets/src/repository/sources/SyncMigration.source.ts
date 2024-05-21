@@ -17,4 +17,12 @@ export class uSyncMigrationDataSource {
 	async checkLegacy(): Promise<UmbDataSourceResponse<SyncLegacyCheckResponse>> {
 		return await tryExecuteAndNotify(this.#host, MigrationsService.checkLegacy());
 	}
+
+	async ignoreLegacy(): Promise<UmbDataSourceResponse<boolean>> {
+		return await tryExecuteAndNotify(this.#host, MigrationsService.ignoreLegacy());
+	}
+
+	async copyLegacy(): Promise<UmbDataSourceResponse<boolean>> {
+		return await tryExecuteAndNotify(this.#host, MigrationsService.copyLegacy());
+	}
 }

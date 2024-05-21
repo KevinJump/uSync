@@ -1,4 +1,6 @@
-﻿using Umbraco.Extensions;
+﻿using System.Text.Json.Nodes;
+
+using Umbraco.Extensions;
 
 using uSync.Core.Extensions;
 
@@ -19,7 +21,6 @@ internal class SyncConfigMergerBase
             return default;
         }
     }
-
 
     protected static TObject[] MergeObjects<TObject, TKey>(TObject[] rootObject, TObject[]? targetObject, Func<TObject, TKey> keySelector, Predicate<TObject> predicate)
     {
@@ -63,6 +64,79 @@ internal class SyncConfigMergerBase
         }
 
         return [.. remaining];
+    }
+
+    protected static JsonArray? GetJsonArrayDifferences(JsonArray? sourceArray, JsonArray? targetArray, string key, string removeProperty)
+    {
+		// if target is blank the difference is nothing?
+		if (targetArray is null) return [];
+
+        var sourceItems = sourceArray?
+            .Select(x => x as JsonObject)?
+            .WhereNotNull()
+            .ToDictionary(k => k.TryGetPropertyAsObject(key, out var sourceKey) ? sourceKey.ToString() : "", v => v) ?? [];
+
+        var targetItems = targetArray?
+            .Select(x => x as JsonObject)?
+            .WhereNotNull()
+            .ToDictionary(k => k.TryGetPropertyAsObject(key, out var targetKey) ? targetKey.ToString() : "", v => v) ?? [];
+
+        // things that are only in the target. 
+        var targetOnly = targetItems.Where(x => sourceItems.ContainsKey(x.Key) is false).Select(x => x.Value).ToList() ?? [];
+
+		// keys that are only in the source have been removed from the child, we need to mark them as removed. 
+		foreach(var removedItem in sourceItems.Where(x => targetItems.ContainsKey(x.Key) is false))
+        {
+            if (removedItem.Value.ContainsKey(removeProperty))
+                removedItem.Value[removeProperty] = _removedLabel;
+
+            targetOnly.Add(removedItem.Value);
+        }
+
+        return [.. targetOnly];
+	}
+
+    protected static JsonArray? MergeJsonArrays(JsonArray? sourceArray, JsonArray? targetArray, string key, string removeProperty)
+    {
+        // no source, we return target
+        if (sourceArray is null) return targetArray;
+
+        // no target we return source 
+        if (targetArray is null) return sourceArray;
+
+        // merge them. 
+		foreach (var sourceItem in sourceArray)
+        {
+            var sourceObject = sourceItem as JsonObject;
+            if (sourceObject is null) continue;
+            if (sourceObject.TryGetPropertyAsObject(key, out var sourceKey) is false) continue;
+
+            var targetObject = targetArray.FirstOrDefault(
+                x => (x as JsonObject)?.TryGetPropertyAsObject(key, out var targetKey) == true && targetKey == sourceKey) as JsonObject;
+
+            if (targetObject is null)
+            {
+                var clonedItem = sourceObject.SerializeJsonString().DeserializeJson<JsonObject>();
+                targetArray.Add(clonedItem);
+			}
+        }
+
+        // removals. 
+        foreach(var targetItem in targetArray)
+        {
+            var targetObject = targetItem as JsonObject;
+            if (targetObject is null) continue;
+
+            if (targetObject.ContainsKey(removeProperty) is false) continue;
+
+            if (targetObject[removeProperty]!.ToString().StartsWith(_removedLabel) is true)
+            {
+                // remove it. 
+                targetArray.Remove(targetItem);
+			}
+		}
+
+        return targetArray;
     }
 
 }

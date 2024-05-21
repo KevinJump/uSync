@@ -1,5 +1,6 @@
 ﻿using Asp.Versioning;
 
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 using uSync.BackOffice.Legacy;
@@ -35,6 +36,33 @@ public class uSyncMigrationController : uSyncControllerBase
             LegacyTypes = [.. types.Distinct()]
         };
     }
+
+    [HttpPost("IgnoreLegacy")]
+    [ProducesResponseType<bool>(StatusCodes.Status200OK)]
+    public bool IgnoreLegacy()
+	{
+		if (_legacyService.TryGetLatestLegacyFolder(out var folder) && folder is not null)
+		{
+			_legacyService.IgnoreLegacyFolder(folder, "folder will not showup as legacy.");
+			return true;
+		}
+
+		return false;
+	}
+
+    [HttpPost("CopyLegacy")]
+    [ProducesResponseType<bool>(StatusCodes.Status200OK)]
+    public bool CopyLegacy()
+	{
+		if (_legacyService.TryGetLatestLegacyFolder(out var folder) && folder is not null)
+		{
+			_legacyService.CopyLegacyFolder(folder);
+            _legacyService.IgnoreLegacyFolder(folder, "folder has been copied to v14 as latest");
+			return true;
+		}
+
+		return false;
+	}
 }
 
 public class SyncLegacyCheckResponse

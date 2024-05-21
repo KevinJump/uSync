@@ -8,6 +8,7 @@ import {
 import './components';
 
 import { uSyncConstants } from '../constants.js';
+import { SyncLegacyFilesConditionConfig } from '../conditions/legacy-files.condition.js';
 
 const workspaceAlias = uSyncConstants.workspace.alias;
 
@@ -81,6 +82,28 @@ const workspaceViews: Array<ManifestWorkspaceView> = [
 				alias: 'Umb.Condition.WorkspaceAlias',
 				match: workspaceAlias,
 			},
+		],
+	},
+	{
+		type: 'workspaceView',
+		alias: uSyncConstants.workspace.legacyView.alais,
+		name: 'uSync legacy',
+		js: () => import('./views/legacy/legacy.element.js'),
+		weight: 150,
+		meta: {
+			label: 'Legacy',
+			pathname: 'legacy',
+			icon: 'icon-dock-connector color-red',
+		},
+		conditions: [
+			{
+				alias: 'Umb.Condition.WorkspaceAlias',
+				match: workspaceAlias,
+			},
+			{
+				alias: uSyncConstants.conditions.legacy,
+				hasLegacyFiles: true,
+			} as SyncLegacyFilesConditionConfig,
 		],
 	},
 ];

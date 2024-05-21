@@ -201,6 +201,8 @@ export type MigrationsData = {
         
         responses: {
             CheckLegacy: SyncLegacyCheckResponse
+                ,CopyLegacy: boolean
+                ,IgnoreLegacy: boolean
                 
         }
         

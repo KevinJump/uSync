@@ -6,6 +6,10 @@ const _constants = {
 	menuAlias: 'usync.menu',
 	version: '14.0.0-rc3',
 
+	conditions: {
+		legacy: 'usync.legacy.condition',
+	},
+
 	workspace: {
 		alias: 'usync.workspace',
 		rootElement: 'usync-root',
@@ -22,6 +26,9 @@ const _constants = {
 
 		addOnView: {
 			alias: 'usync.workspace.addons',
+		},
+		legacyView: {
+			alais: 'usync.workspace.legacy',
 		},
 	},
 };

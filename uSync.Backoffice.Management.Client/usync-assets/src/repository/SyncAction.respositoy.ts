@@ -99,4 +99,20 @@ export class uSyncActionRepository extends UmbControllerBase {
 	async checkLegacy() {
 		return await this.#migrartionDataSource.checkLegacy();
 	}
+
+	/**
+	 * sets a .ignore folder in the legacy folder so we don't detect it next time.
+	 * @returns true if the legacy folder is ignored.
+	 */
+	async ignoreLegacy() {
+		return await this.#migrartionDataSource.ignoreLegacy();
+	}
+
+	/**
+	 * copies the legacy folder to the new v14 folder.
+	 * @returns true if the legacy folder is copied to the new folder.
+	 */
+	async copyLegacy() {
+		return await this.#migrartionDataSource.copyLegacy();
+	}
 }

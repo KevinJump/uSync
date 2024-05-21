@@ -133,6 +133,16 @@ export class uSyncWorkspaceContext
 		}
 	}
 
+	async ignoreLegacy() {
+		const { data } = await this.#repository.ignoreLegacy();
+		return data ?? false;
+	}
+
+	async copyLegacy() {
+		const { data } = await this.#repository.copyLegacy();
+		return data ?? false;
+	}
+
 	/**
 	 * Get handler defaults.
 	 */

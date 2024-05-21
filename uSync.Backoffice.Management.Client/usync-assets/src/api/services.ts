@@ -50,6 +50,30 @@ export class MigrationsService {
 		});
 	}
 
+	/**
+	 * @returns boolean Success
+	 * @throws ApiError
+	 */
+	public static copyLegacy(): CancelablePromise<MigrationsData['responses']['CopyLegacy']> {
+		
+		return __request(OpenAPI, {
+			method: 'POST',
+			url: '/umbraco/usync/api/v1/CopyLegacy',
+		});
+	}
+
+	/**
+	 * @returns boolean Success
+	 * @throws ApiError
+	 */
+	public static ignoreLegacy(): CancelablePromise<MigrationsData['responses']['IgnoreLegacy']> {
+		
+		return __request(OpenAPI, {
+			method: 'POST',
+			url: '/umbraco/usync/api/v1/IgnoreLegacy',
+		});
+	}
+
 }
 
 export class SettingsService {

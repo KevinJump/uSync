@@ -26,6 +26,17 @@ export default {
 		changeName: 'Name',
 		changeDetail: 'Detail',
 		changeCount: '{0} items',
+
+		legacyBanner:
+			'This site contains files from a previous version of uSync, view the details in the legacy tab.',
+
+		legacyCopyTitle: 'Overwrite uSync/v14 files',
+		legacyCopyContent:
+			'Are you sure you want to overwrite the contents of the v14 folder with the legacy uSync folder files?',
+
+		legacyIgnoreTitle: 'Ignore legacy files',
+		legacyIgnoreContent:
+			'Are you sure you want to ignore the files in the legacy uSync folder?',
 	},
 	uSyncSettings: {
 		settings: 'uSync Settings',

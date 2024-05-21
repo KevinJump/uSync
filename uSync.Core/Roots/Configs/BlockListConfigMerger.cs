@@ -1,47 +1,48 @@
-﻿//using Umbraco.Cms.Core;
-//using Umbraco.Cms.Core.PropertyEditors;
+﻿using System.Text.Json.Nodes;
 
-//using uSync.Core.Extensions;
+using Umbraco.Cms.Core;
 
-//namespace uSync.Core.Roots.Configs;
+using uSync.Core.Extensions;
 
-///// <summary>
-/////  merges blocklist configs. 
-///// </summary>
-//internal class BlockListConfigMerger : SyncConfigMergerBase, ISyncConfigMerger
-//{
-//    public virtual string[] Editors => [
-//        Constants.PropertyEditors.Aliases.BlockList
-//    ];
+namespace uSync.Core.Roots.Configs;
 
+/// <summary>
+///  merges blocklist configs. 
+/// </summary>
+/// <remarks>
+///  the back-office no longer has an object to represent everything 
+///  that might be stored in a block, so we have to merge based on the json
+/// </remarks>
+internal class BlockListConfigMerger : BlockListMergerBase, ISyncConfigMerger
+{
+	public virtual string[] Editors => [
+		Constants.PropertyEditors.Aliases.BlockList
+	];
 
-//    public virtual object GetMergedConfig(string root, string target)
-//    {
-//        var rootConfig = root.DeserializeJson<BlockListConfiguration>();
-//        var targetConfig = target.DeserializeJson<BlockListConfiguration>();
+	public virtual object GetMergedConfig(string root, string target)
+	{
+		var rootConfig = root.DeserializeJson<JsonObject>();
+		var targetConfig = target.DeserializeJson<JsonObject>();
 
-//        targetConfig.Blocks = MergeObjects(
-//            rootConfig.Blocks,
-//            targetConfig.Blocks,
-//            x => x.ContentElementTypeKey,
-//            x => x.Label?.StartsWith(_removedLabel) == true);
+		if (rootConfig is null) return target;
+		if (targetConfig is null) return root;
 
-//        return targetConfig;
-//    }
+		targetConfig["blocks"] = GetMergedBlocks(rootConfig, targetConfig);
 
-//    public virtual object GetDifferenceConfig(string root, string target)
-//    {
-//        var rootConfig = root.DeserializeJson<BlockListConfiguration>();
-//        var targetConfig = target.DeserializeJson<BlockListConfiguration>();
+		return targetConfig;
+	}
 
+	public virtual object GetDifferenceConfig(string root, string target)
+	{
+		var rootConfig = root.DeserializeJson<JsonObject>();
+		var targetConfig = target.DeserializeJson<JsonObject>();
 
-//        targetConfig.Blocks = GetObjectDifferences(
-//            rootConfig.Blocks,
-//            targetConfig.Blocks,
-//            x => x.ContentElementTypeKey,
-//            (x, label) => x.Label = $"{_removedLabel}:{x.Label}");
+		if (targetConfig is null) return target;
+		if (rootConfig is null) return target;
 
-//        return targetConfig;
-//    }
+        targetConfig["blocks"] = GetBlockDifferences(rootConfig, targetConfig);
 
-//}
+		return targetConfig; 
+	}
+
+}

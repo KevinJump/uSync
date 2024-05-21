@@ -1,55 +1,62 @@
-﻿//using Umbraco.Cms.Core;
-//using Umbraco.Cms.Core.PropertyEditors;
+﻿using System.Text.Json.Nodes;
 
-//using uSync.Core.Extensions;
+using Umbraco.Cms.Core;
 
-//namespace uSync.Core.Roots.Configs;
+using uSync.Core.Extensions;
 
-//internal class BlockGridConfigMerger : SyncConfigMergerBase, ISyncConfigMerger
-//{
-//    public string[] Editors => [
-//        Constants.PropertyEditors.Aliases.BlockGrid
-//    ];
+namespace uSync.Core.Roots.Configs;
 
-//    public virtual object GetMergedConfig(string root, string target)
-//    {
-//        var rootConfig = root.DeserializeJson<BlockGridConfiguration>();
-//        var targetConfig = target.DeserializeJson<BlockGridConfiguration>();
+/// <summary>
+///  merges the blocks and block groups in a BlockGrid datatype.
+/// </summary>
+/// <remarks>
+///  because the backend doesn't know all the properties in a block grid anymore
+///  we have to merge this based on the json values.
+/// </remarks>
+internal class BlockGridConfigMerger : BlockListMergerBase, ISyncConfigMerger
+{
+    public string[] Editors => [
+        Constants.PropertyEditors.Aliases.BlockGrid
+    ];
 
-//        targetConfig.Blocks = MergeObjects(
-//            rootConfig.Blocks,
-//            targetConfig.Blocks,
-//            x => x.ContentElementTypeKey,
-//            x => x.Label == _removedLabel);
+    public virtual object GetMergedConfig(string root, string target)
+    {
+        var rootConfig = root.DeserializeJson<JsonObject>();
+        var targetConfig = target.DeserializeJson<JsonObject>();
 
-//        //targetConfig.BlockGroups = MergeObjects
-//        //    (
-//        //    rootConfig.BlockGroups,
-//        //    targetConfig.BlockGroups,
-//        //    x => x.Name,
-//        //    x => x.Name?.StartsWith(_removedLabel) == true);
+        if (rootConfig is null) return target;
+        if (targetConfig is null) return root;
 
-//        return targetConfig;
-//    }
+        // merge blocks 
+        targetConfig["blocks"] = GetMergedBlocks(rootConfig, targetConfig);
 
-//    public virtual object GetDifferenceConfig(string root, string target)
-//    {
-//        var rootConfig = root.DeserializeJson<BlockGridConfiguration>();
-//        var targetConfig = target.DeserializeJson<BlockGridConfiguration>();
+        // merge block groups
+        rootConfig.TryGetPropertyAsArray("blockGroups", out var rootGroups);
+		targetConfig.TryGetPropertyAsArray("blockGroups", out var targetGroups);
+        targetConfig["blockGroups"] = MergeJsonArrays(rootGroups, targetGroups,
+            			"name", "name") ?? [];
 
-//        targetConfig.Blocks = GetObjectDifferences(
-//            rootConfig.Blocks,
-//            targetConfig.Blocks,
-//            x => x.ContentElementTypeKey,
-//            (x, label) => x.Label = _removedLabel);
+		return targetConfig;
+    }
 
+    public virtual object GetDifferenceConfig(string root, string target)
+    {
+        var rootConfig = root.DeserializeJson<JsonObject>();
+        var targetConfig = target.DeserializeJson<JsonObject>();
 
-//        //targetConfig.BlockGroups = GetObjectDifferences(
-//        //    rootConfig.BlockGroups,
-//        //    targetConfig.BlockGroups,
-//        //    x => x.Name,
-//        //    (x, name) => x.Name = $"{_removedLabel}:{x.Name}");
+        if (targetConfig is null) return target;
+        if (rootConfig is null) return target;
 
-//        return targetConfig;
-//    }
-//}
+        // differences in blocks
+        targetConfig["blocks"] = GetBlockDifferences(rootConfig, targetConfig);
+
+		// differences in block groups
+		rootConfig.TryGetPropertyAsArray("blockGroups", out var rootGroups);
+		targetConfig.TryGetPropertyAsArray("blockGroups", out var targetGroups);
+
+		targetConfig["blockGroups"] = GetJsonArrayDifferences(rootGroups, targetGroups,
+									"name", "name") ?? [];
+
+		return targetConfig;
+    }
+}
