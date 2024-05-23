@@ -127,6 +127,16 @@ internal class uSyncManagementService : ISyncManagementService
         var handlers = _syncActionService.GetActionHandlers(action, actionRequest.Options)
             .ToList();
 
+        if (action == HandlerActions.Export && string.IsNullOrWhiteSpace(actionRequest.RequestId))
+        { 
+            // first step in an export.
+            if (actionRequest.Options?.Clean is true)
+            {
+                // clean the export folder.  
+                _syncActionService.CleanExportFolder();
+			}
+        }
+
         Guid requestId = GetRequestId(actionRequest);
 
 		HubClientService? hubClient = default;
