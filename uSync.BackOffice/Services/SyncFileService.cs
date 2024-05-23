@@ -6,8 +6,6 @@ using System.Text;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 
-using Examine;
-
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -509,40 +507,43 @@ public class SyncFileService
 
             var localKeys = new List<Guid>();
 
-            foreach (var item in items)
-            {
-				var itemKey = item.Value.Node.GetKey();
-				if (item.Value.Node.IsEmptyItem() is false || item.Value.Node.GetEmptyAction() == SyncActionType.Delete)
-				{
-					if (localKeys.Contains(itemKey))
-					{
-						throw new Exception($"Duplicate: Item key {itemKey} already exists for {item.Key} - run uSync Health check for more info.");
-					}
+                foreach (var item in items)
+                {
+                    var itemKey = item.Value.Node.GetKey();
+                    if (item.Value.Node.IsEmptyItem() is false)
+                    {
+                        if (localKeys.Contains(itemKey))
+                        {
+                            throw new Exception($"Duplicate: Item key {itemKey} already exists for {item.Key} - run uSync Health check for more info.");
+                        }
+                        localKeys.Add(itemKey);
 
-					localKeys.Add(itemKey);
-				}
-				else
-				{
-					if (item.Value.Node.GetEmptyAction() == SyncActionType.Clean)
-					{
-						// cleans are added, these run a clean up at the end, so if they exist 
-						// we need to add them, but they can clash in terms of keys. 
-						_ = cleanElements.TryAdd(item.Key, item.Value);
+						if (elements.TryGetValue(item.Key, out var value))
+						{
+							// merge these files.
+							item.Value.SetNode(MergeNodes(value.Node, item.Value.Node, trackerBase));
+							item.Value.FileName = $"{uSyncConstants.MergedFolderName}/{Path.GetFileName(item.Value.FileName)}";
+						}
 					}
 					else
-					{
-						// empty if its anything but a delete we ignore it. 
-						// renames are just markers to make sure they don't leave things on disk.
-						continue;
-					}
-				}
-
-				if (elements.TryGetValue(item.Key, out var value))
-				{
-					// merge these files.
-					item.Value.SetNode(MergeNodes(value.Node, item.Value.Node, trackerBase));
-					item.Value.FileName = $"{uSyncConstants.MergedFolderName}/{Path.GetFileName(item.Value.FileName)}";
-				}
+                    {
+                        switch (item.Value.Node.GetEmptyAction())
+                        {
+							case SyncActionType.Delete:
+								// deletes get added, but there can be duplicate deletes, 
+								// we don't care, we just need one, (so we can add them multiple times).
+								break;
+							case SyncActionType.Clean:
+								// cleans are added, these run a clean up at the end, so if they exist 
+								// we need to add them, but they can clash in terms of keys. 
+								_ = cleanElements.TryAdd(item.Key, item.Value);
+                                continue;
+                            case SyncActionType.Rename: // renames are just markers to make sure they don't leave things on disk.
+							case SyncActionType.None: // none should never happen, we can ignore them..
+							default: 
+								continue;
+                        }
+                    }
 
                 elements[item.Key] = item.Value;
             }
