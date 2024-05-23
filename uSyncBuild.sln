@@ -7,8 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync", "uSync\uSync.csproj
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.BackOffice", "uSync.BackOffice\uSync.BackOffice.csproj", "{7025AB35-29A2-4C5D-994D-576C1B8A7C11}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.Backoffice.Assets", "uSync.Backoffice.Assets\uSync.Backoffice.Assets.csproj", "{04FE8C6C-E874-4EE3-AD96-7A09E13BA39F}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.Backoffice.Management.Api", "uSync.Backoffice.Management.Api\uSync.Backoffice.Management.Api.csproj", "{BF723169-759D-40EE-85C1-E4AF3BD206E9}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.Backoffice.Management.Client", "uSync.Backoffice.Management.Client\uSync.Backoffice.Management.Client.csproj", "{4D8D5366-27C0-41B4-ACCB-682755E854BC}"
@@ -37,10 +35,6 @@ Global
 		{7025AB35-29A2-4C5D-994D-576C1B8A7C11}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7025AB35-29A2-4C5D-994D-576C1B8A7C11}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7025AB35-29A2-4C5D-994D-576C1B8A7C11}.Release|Any CPU.Build.0 = Release|Any CPU
-		{04FE8C6C-E874-4EE3-AD96-7A09E13BA39F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{04FE8C6C-E874-4EE3-AD96-7A09E13BA39F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{04FE8C6C-E874-4EE3-AD96-7A09E13BA39F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{04FE8C6C-E874-4EE3-AD96-7A09E13BA39F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{BF723169-759D-40EE-85C1-E4AF3BD206E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BF723169-759D-40EE-85C1-E4AF3BD206E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BF723169-759D-40EE-85C1-E4AF3BD206E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
