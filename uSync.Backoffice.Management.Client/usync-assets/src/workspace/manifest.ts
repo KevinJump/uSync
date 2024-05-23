@@ -27,6 +27,12 @@ const context: ManifestWorkspaceContext = {
 	alias: uSyncConstants.workspace.contextAlias,
 	name: 'uSync workspace context',
 	js: () => import('./workspace.context.js'),
+	conditions: [
+		{
+			alias: 'Umb.Condition.WorkspaceAlias',
+			match: workspaceAlias,
+		},
+	],
 };
 
 const workspaceViews: Array<ManifestWorkspaceView> = [

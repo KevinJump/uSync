@@ -131,6 +131,8 @@ export class uSyncWorkspaceContext
 		if (data) {
 			this.#legacy.setValue(data);
 		}
+
+		return data;
 	}
 
 	async ignoreLegacy() {

@@ -4,15 +4,13 @@ import {
 	UmbConditionControllerArguments,
 } from '@umbraco-cms/backoffice/extension-api';
 import { UmbConditionBase } from '@umbraco-cms/backoffice/extension-registry';
-import { uSyncMigrationDataSource } from '../repository/sources/SyncMigration.source';
+import { USYNC_CORE_CONTEXT_TOKEN } from '../workspace/workspace.context';
 
 export type SyncLegacyFilesConditionConfig = UmbConditionConfigBase & {
 	hasLegacyFiles: boolean;
 };
 
 export class SyncLegacyFilesCondition extends UmbConditionBase<SyncLegacyFilesConditionConfig> {
-	#migrationDataSource: uSyncMigrationDataSource;
-
 	config: SyncLegacyFilesConditionConfig;
 
 	constructor(
@@ -22,10 +20,11 @@ export class SyncLegacyFilesCondition extends UmbConditionBase<SyncLegacyFilesCo
 		super(host, args);
 		this.config = args.config;
 
-		this.#migrationDataSource = new uSyncMigrationDataSource(host);
-		this.#migrationDataSource.checkLegacy().then((response) => {
-			console.log(response.data);
-			this.permitted = response.data?.hasLegacy ?? false;
+		this.consumeContext(USYNC_CORE_CONTEXT_TOKEN, (_instance) => {
+			// consuming the context means it only happens when the context exists.
+			_instance.checkLegacy().then((response) => {
+				this.permitted = response?.hasLegacy ?? false;
+			});
 		});
 	}
 }
