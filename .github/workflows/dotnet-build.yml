@@ -44,7 +44,7 @@ jobs:
     needs: version
 
     env:
-      solution_name: ./uSync.sln
+      solution_name: ./uSyncBuild.sln
       test_project: ./uSync.Tests/uSync.tests.csproj
       schema_gen_project: ./uSync.SchemaGenerator/uSync.SchemaGenerator.csproj
 

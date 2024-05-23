@@ -10,7 +10,7 @@ jobs:
 
     env:
       CONFIG: "Release"
-      SOLUTION_FILE: "./uSync.sln"
+      SOLUTION_FILE: "./uSyncBuild.sln"
       OUT_FOLDER: "./build.out/"
 
     steps:
