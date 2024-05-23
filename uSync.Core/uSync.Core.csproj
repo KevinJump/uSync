@@ -18,8 +18,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>		
-		<PackageReference Include="Umbraco.Cms.Web.Website" Version="14.0.0-rc3" />
-		<PackageReference Include="Umbraco.Cms.Api.Management" Version="14.0.0-rc3" />
+		<PackageReference Include="Umbraco.Cms.Web.Website" Version="14.0.0-rc4" />
+		<PackageReference Include="Umbraco.Cms.Api.Management" Version="14.0.0-rc4" />
 		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" /> 
 	</ItemGroup>
 

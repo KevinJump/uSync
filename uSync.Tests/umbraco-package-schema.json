@@ -2731,6 +2731,13 @@
                     "description": "The alias of the extension, ensure it is unique",
                     "type": "string"
                 },
+                "conditions": {
+                    "description": "Set the conditions for when the extension should be loaded",
+                    "items": {
+                        "$ref": "#/definitions/ConditionTypes"
+                    },
+                    "type": "array"
+                },
                 "element": {
                     "description": "The file location of the element javascript file to load",
                     "type": "string"
@@ -2757,6 +2764,20 @@
                     "description": "The friendly name of the extension",
                     "type": "string"
                 },
+                "overwrites": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Define one or more extension aliases that this extension should overwrite."
+                },
                 "type": {
                     "const": "menuItem",
                     "description": "The type of extension such as dashboard etc...",
@@ -2780,6 +2801,13 @@
                 "alias": {
                     "description": "The alias of the extension, ensure it is unique",
                     "type": "string"
+                },
+                "conditions": {
+                    "description": "Set the conditions for when the extension should be loaded",
+                    "items": {
+                        "$ref": "#/definitions/ConditionTypes"
+                    },
+                    "type": "array"
                 },
                 "element": {
                     "description": "The file location of the element javascript file to load",
@@ -2805,6 +2833,20 @@
                 "name": {
                     "description": "The friendly name of the extension",
                     "type": "string"
+                },
+                "overwrites": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Define one or more extension aliases that this extension should overwrite."
                 },
                 "type": {
                     "const": "menuItem",
@@ -2928,6 +2970,49 @@
             ],
             "type": "object"
         },
+        "ManifestMonacoMarkdownEditorAction": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "api": {
+                    "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaMonacoMarkdownEditorAction"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "type": {
+                    "const": "monacoMarkdownEditorAction",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
         "ManifestPackageView": {
             "properties": {
                 "alias": {
@@ -2973,6 +3058,55 @@
             "required": [
                 "alias",
                 "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestPreviewAppProvider": {
+            "description": "Preview apps are displayed in the menu of the preview window.",
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "meta": {
+                    "description": "This contains properties specific to the type of extension"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "type": {
+                    "const": "previewApp",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
                 "name",
                 "type"
             ],
@@ -3965,10 +4099,10 @@
                     "$ref": "#/definitions/ManifestTree"
                 },
                 {
-                    "$ref": "#/definitions/ManifestAppEntryPoint"
+                    "$ref": "#/definitions/ManifestAuthProvider"
                 },
                 {
-                    "$ref": "#/definitions/ManifestAuthProvider"
+                    "$ref": "#/definitions/ManifestAppEntryPoint"
                 },
                 {
                     "$ref": "#/definitions/ManifestBackofficeEntryPoint"
@@ -4097,7 +4231,13 @@
                     "$ref": "#/definitions/ManifestMfaLoginProvider"
                 },
                 {
+                    "$ref": "#/definitions/ManifestMonacoMarkdownEditorAction"
+                },
+                {
                     "$ref": "#/definitions/ManifestPackageView"
+                },
+                {
+                    "$ref": "#/definitions/ManifestPreviewAppProvider"
                 },
                 {
                     "$ref": "#/definitions/ManifestPropertyAction<MetaPropertyAction>"
@@ -5784,6 +5924,9 @@
             },
             "type": "object"
         },
+        "MetaMonacoMarkdownEditorAction": {
+            "type": "object"
+        },
         "MetaPackageView": {
             "properties": {
                 "packageName": {
@@ -6158,6 +6301,9 @@
                 },
                 "propertyEditorUiAlias": {
                     "type": "string"
+                },
+                "weight": {
+                    "type": "number"
                 }
             },
             "required": [
@@ -6417,9 +6563,6 @@
             "properties": {
                 "filter": {
                     "type": "object"
-                },
-                "hideTreeRoot": {
-                    "type": "boolean"
                 },
                 "multiple": {
                     "type": "boolean"
