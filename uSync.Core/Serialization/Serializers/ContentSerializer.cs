@@ -668,11 +668,19 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
     protected override Attempt<IContent?> CreateItem(string alias, ITreeEntity? parent, string itemType)
     {
         logger.LogDebug("Create: {alias} {parent} {type}", alias, parent?.Id ?? -1, itemType);
-        var item = contentService.CreateAndSave(alias, parent?.Id ?? -1, itemType);
-        if (item == null)
-            return Attempt.Fail(item, new ArgumentException($"Unable to create content item of type {itemType}"));
+        try
+        {
+            var item = contentService.Create(alias, parent?.Id ?? -1, itemType);
+            if (item == null)
+                return Attempt.Fail(item, new ArgumentException($"Unable to create content item of type {itemType}"));
 
-        return Attempt.Succeed(item);
+            return Attempt.Succeed(item);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Error on Create {alias}", alias);
+            return Attempt.Fail<IContent?>(null, ex);
+        }
     }
 
     #region Finders
