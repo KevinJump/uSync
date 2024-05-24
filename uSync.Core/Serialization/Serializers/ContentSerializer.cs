@@ -177,7 +177,11 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
             details.AddNotNull(HandleTrashedState(item, trashed, restoreParent));
         }
 
-        details.AddNotNull(DeserializeTemplate(item, node));
+		// cultures...
+		
+
+
+		details.AddNotNull(DeserializeTemplate(item, node));
 
         var propertiesAttempt = DeserializeProperties(item, node, options);
         if (!propertiesAttempt.Success)

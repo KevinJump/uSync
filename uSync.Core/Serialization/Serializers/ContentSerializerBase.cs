@@ -460,11 +460,15 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
 
                 if (activeCultures.IsValid(culture))
                 {
+                    // v14: if the culture is missing we need to add it
+                    if (item.CultureInfos?.TryGetValue(culture, out var cultureInfo) is false)
+                    {
+                        item.CultureInfos.Add(new ContentCultureInfos(culture));
+					}
 
-                    var cultureName = cultureNode.ValueOrDefault(string.Empty);
-                    var currentCultureName = item.GetCultureName(culture);
+					var cultureName = cultureNode.ValueOrDefault(string.Empty);
+                    var currentCultureName = item.GetCultureName(culture) ?? "";
                     if (string.IsNullOrEmpty(cultureName) is false
-                        && string.IsNullOrEmpty(currentCultureName) is false
                         && cultureName != currentCultureName)
                     {
                         changes.AddUpdate($"Name ({culture})", currentCultureName, cultureName);
