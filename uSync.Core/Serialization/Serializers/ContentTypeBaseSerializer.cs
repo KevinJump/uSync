@@ -863,31 +863,29 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
                 if (TabClashesWithExisting(item, tab.Alias, tab.Type))
                     tab.Alias = SyncPropertyGroupHelpers.GetTempTabAlias(tab.Alias);
 
+                logger.LogInformation("Explicit Tabs  : {list}", string.Join(",", item.PropertyGroups.Select(x => x.Alias)));
+                logger.LogInformation("Inherited Tabs : {list}", string.Join(",", item.CompositionPropertyGroups.Select(x => x.Alias)));
+
                 // v14: if the tab is a child (group) - then we might need to create a parent tab
                 if (tab.Depth > 0)
                 {
                     var tabRoot = tab.Alias.Split('/')[0];
                     if (item.PropertyGroups.Contains(tabRoot))
                     {
-                        logger.LogDebug("Parent Tab {tabRoot} already exists", tabRoot);
+                        logger.LogInformation("Parent Tab {tabRoot} already exists", tabRoot);
                     }
                     else
                     {
-                        logger.LogDebug("Parent Tab {tabRoot} doesn't exist, creating", tabRoot);
+                        logger.LogInformation("Parent Tab {tabRoot} doesn't exist, creating", tabRoot);
 
                         var compositionParent = item.CompositionPropertyGroups.FirstOrDefault(x => x.Alias.InvariantEquals(tabRoot));
                         if (compositionParent != null)
                         {
-                            logger.LogDebug("Creating parent tab from inherited tab data, {alias} {name}", compositionParent.Alias, compositionParent.Name ?? compositionParent.Alias); 
-                            var parentPropertyGroup = new PropertyGroup(supportsPublishing)
-                            {
-                                Alias = tabRoot,
-                                Name = compositionParent.Name ?? tabRoot,
-                                Type = compositionParent.Type,
-                                SortOrder = compositionParent.SortOrder,
-                            };
+                            logger.LogInformation("Creating parent tab from inherited tab data, {alias} {name}", compositionParent.Alias, compositionParent.Name ?? compositionParent.Alias); 
 
-                            item.PropertyGroups.Add(parentPropertyGroup);
+                            item.AddPropertyGroup(tabRoot, compositionParent.Name ?? tabRoot);
+                            item.PropertyGroups[tabRoot].Type = compositionParent.Type;
+                            item.PropertyGroups[tabRoot].SortOrder = compositionParent.SortOrder;
                         }
                     }
                 }
@@ -989,9 +987,14 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
                 .Select(x => GetTabAliasFromTabGroup(x))
                 .ToList();
 
+            var inheritedTabs =item.CompositionPropertyGroups.Select(x => x.Alias).ToList();
+
             List<PropertyGroup> removals = [];
             foreach (var tab in item.PropertyGroups)
             {
+                // don't remove the inherited tabs
+                if (inheritedTabs.Contains(tab.Alias)) continue;
+
                 if (!newTabs.InvariantContains(tab.Alias))
                 {
                     removals.Add(tab);
@@ -1011,7 +1014,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
                     }
                     else
                     {
-                        logger.LogDebug("Removing tab : {alias}", tab.Alias);
+                        logger.LogInformation("Removing tab : {alias}", tab.Alias);
                         changes.Add(uSyncChange.Delete($"Tabs/{tab.Alias}", tab.Alias, tab.Alias));
                         item.PropertyGroups.Remove(tab);
                     }
