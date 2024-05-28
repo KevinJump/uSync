@@ -113,7 +113,15 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
         var details = new List<uSyncChange>();
 
         details.AddRange(DeserializeBase(item, node));
+
+
+        // compositions
+        details.AddRange(DeserializeCompositions(item, node));
+
+        // tabs
         details.AddRange(DeserializeTabs(item, node));
+
+        // properties
         details.AddRange(DeserializeProperties(item, node, options));
 
         // content type only property stuff.
@@ -121,9 +129,6 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
 
         // templates 
         details.AddRange(DeserializeTemplates(item, node, options));
-
-        // compositions
-        details.AddRange(DeserializeCompositions(item, node));
 
         return DeserializedResult(item, details, options);
     }
