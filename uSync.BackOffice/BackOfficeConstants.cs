@@ -168,10 +168,10 @@ public static partial class uSyncConstants
 		/// Icons for the well known handler groups.
 		/// </summary>
 		public static Dictionary<string, string> Icons = new Dictionary<string, string> {
-			{ Settings, "icon-settings-alt color-blue" },
-			{ Content, "icon-documents color-purple" },
+			{ Settings, "icon-settings-alt" },
+			{ Content, "icon-documents" },
 			{ Members, "icon-users" },
-			{ Users, "icon-users color-green"},
+			{ Users, "icon-users"},
 			{ Default, "icon-settings" },
 			{ Forms, "icon-umb-contour" },
 			{ Files, "icon-script-alt" }

@@ -60,7 +60,7 @@ export class uSyncActionBox extends LitElement {
 			<uui-box class="action-box ${this.disabled ? 'disabled' : ''}">
 				<div class="box-content">
 					<h2 class="box-heading">${this.group?.groupName}</h2>
-					<uui-icon name=${this.group?.icon}></uui-icon>
+					<umb-icon name=${this.group?.icon}></umb-icon>
 					<div class="box-buttons">${dropdownButtons}</div>
 				</div>
 			</uui-box>
@@ -88,7 +88,7 @@ export class uSyncActionBox extends LitElement {
 			margin: 0;
 		}
 
-		uui-icon {
+		umb-icon {
 			margin: var(--uui-size-space-6);
 			font-size: var(--uui-type-h2-size);
 			color: var(--uui-color-text-alt);

@@ -2,6 +2,8 @@
 
 using Microsoft.AspNetCore.SignalR;
 
+using Umbraco.Extensions;
+
 using uSync.Backoffice.Management.Api.Extensions;
 using uSync.Backoffice.Management.Api.Models;
 using uSync.BackOffice;
@@ -23,16 +25,20 @@ internal class uSyncManagementService : ISyncManagementService
     private readonly IHubContext<SyncHub> _hubContext;
     private readonly uSyncConfigService _configService;
 
+    private readonly SyncHandlerFactory _handlerFactory;
+
     public uSyncManagementService(
         ISyncActionService syncActionService,
         uSyncConfigService configService,
         ISyncManagementCache syncManagementCache,
-        IHubContext<SyncHub> hubContext)
+        IHubContext<SyncHub> hubContext,
+        SyncHandlerFactory handlerFactory)
     {
         _syncActionService = syncActionService;
         _configService = configService;
         _syncManagementCache = syncManagementCache;
         _hubContext = hubContext;
+        _handlerFactory = handlerFactory;
     }
 
     /// <summary>
@@ -40,6 +46,8 @@ internal class uSyncManagementService : ISyncManagementService
     /// </summary>
     public List<SyncActionGroup> GetActions()
     {
+        // TODO: Load the actions based on the handlers, and the config, (so they can be turned on and off)
+
         var defaultReport = new SyncActionButton()
         {
             Key = HandlerActions.Report.ToString(),
@@ -90,31 +98,67 @@ internal class uSyncManagementService : ISyncManagementService
 		List<SyncActionButton> defaultButtons = [defaultReport, defaultImport, defaultExport];
         List<SyncActionButton> everythingButtons = [defaultReport, defaultImport, everythingExport];
 
-		List<SyncActionGroup> actions = [
-			new SyncActionGroup
-			{
-				GroupName = "Settings",
-				Icon = "icon-settings-alt",
-				Key = "settings",
-				Buttons = defaultButtons
-			},
-			new SyncActionGroup
-			{
-				GroupName = "Content",
-				Icon = "icon-documents",
-				Key = "content",
-				Buttons = defaultButtons
-			},
-			new SyncActionGroup
-			{
-				GroupName = "Everything",
-				Icon = "icon-paper-plane-alt",
-				Key = "all",
-				Buttons = everythingButtons
-			}
-		];
+        List<SyncActionGroup> actionGroups = [];
 
-        return actions;
+        var options = new SyncHandlerOptions(_configService.Settings.DefaultSet)
+        {
+            Group = _configService.Settings.UIEnabledGroups
+        };
+
+        var groups = _handlerFactory.GetValidHandlerGroupsAndIcons(options);
+
+        foreach(var group in groups)
+        {
+            actionGroups.Add(new SyncActionGroup
+            {
+                GroupName = $"{group.Key}",
+                Icon = group.Value,
+                Key = group.Key.ToLowerInvariant(),
+                Buttons = defaultButtons
+            });
+        }
+
+        if (string.IsNullOrWhiteSpace(_configService.Settings.UIEnabledGroups) ||
+            _configService.Settings.UIEnabledGroups.InvariantContains("all"))
+        {
+            actionGroups.Add(new SyncActionGroup
+            {
+                GroupName = "Everything",
+                Icon = "icon-paper-plane-alt",
+                Key = "all",
+                Buttons = everythingButtons
+            });
+        }
+
+        return actionGroups;
+
+
+
+  //      List<SyncActionGroup> actions = [
+		//	new SyncActionGroup
+		//	{
+		//		GroupName = "Settings",
+		//		Icon = "icon-settings-alt",
+		//		Key = "settings",
+		//		Buttons = defaultButtons
+		//	},
+		//	new SyncActionGroup
+		//	{
+		//		GroupName = "Content",
+		//		Icon = "icon-documents",
+		//		Key = "content",
+		//		Buttons = defaultButtons
+		//	},
+		//	new SyncActionGroup
+		//	{
+		//		GroupName = "Everything",
+		//		Icon = "icon-paper-plane-alt",
+		//		Key = "all",
+		//		Buttons = everythingButtons
+		//	}
+		//];
+
+  //      return actions;
 
 	}
 
