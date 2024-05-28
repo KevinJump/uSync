@@ -18,7 +18,11 @@ param (
 
     [Parameter()]
     [switch]
-    $push=$false #push to devops nightly feed
+    $push=$false, #push to devops nightly feed
+
+    [Parameter()]
+    [switch]
+    $skipClient=$false #do not do the client bit
 )
 
 if ($version.IndexOf('-') -ne -1) {
@@ -84,23 +88,29 @@ foreach($project in $projects) {
     dotnet pack "..\$project\$project.csproj" --no-restore --no-build -c $env -o $outFolder -p:Version=$fullVersion -p:ContinuousIntegrationBuild=true
 }
 
-""; "##### Generating NPM Client Package"; "----------------------------------" ; ""
-Set-Location ..\uSync.Backoffice.Management.Client\usync-assets\
+if ($skipClient) {
+    ""; "##### Skipping NPM Client Package"; "----------------------------------" ; ""
+} 
+else {
 
-npm version $fullVersion 
-npm run dist
+    ""; "##### Generating NPM Client Package"; "----------------------------------" ; ""
+    Set-Location ..\uSync.Backoffice.Management.Client\usync-assets\
 
-"Linking locally (for testing)"
-npm link
+    npm version $fullVersion 
+    npm run dist
 
-if ($push) {
-    "Publishing to Azure nightly"
-    npm publish
+    "Linking locally (for testing)"
+    npm link
+
+    if ($push) {
+        "Publishing to Azure nightly"
+        npm publish
+    }
+
+    # todo, publish the package to a repo? 
+
+    Set-Location ..\..\dist
 }
-
-# todo, publish the package to a repo? 
-
-Set-Location ..\..\dist
 
 ""; "##### Copying to LocalGit folder"; "----------------------------------" ; ""
 XCOPY "$outFolder\*.nupkg" "C:\Source\localgit" /Q /Y 
