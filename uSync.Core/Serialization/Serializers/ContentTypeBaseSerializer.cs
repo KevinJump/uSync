@@ -801,6 +801,8 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
     {
         logger.LogDebug("De-serializing Tabs");
 
+        bool supportsPublishing = item is ContentType;
+
         var tabs = ContentTypeBaseSerializer<TObject>.LoadTabInfo(node);
         if (tabs is null) return [];
 
@@ -876,14 +878,19 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
                         var compositionParent = item.CompositionPropertyGroups.FirstOrDefault(x => x.Alias.InvariantEquals(tabRoot));
                         if (compositionParent != null)
                         {
-                            item.AddPropertyGroup(tabRoot, compositionParent.Name ?? compositionParent.Alias);
-                            item.PropertyGroups[tabRoot].Type = compositionParent.Type;
+                            logger.LogDebug("Creating parent tab from inherited tab data, {alias} {name}", compositionParent.Alias, compositionParent.Name ?? compositionParent.Alias); 
+                            var parentPropertyGroup = new PropertyGroup(supportsPublishing)
+                            {
+                                Alias = tabRoot,
+                                Name = compositionParent.Name ?? tabRoot,
+                                Type = compositionParent.Type,
+                                SortOrder = compositionParent.SortOrder,
+                            };
+
+                            item.PropertyGroups.Add(parentPropertyGroup);
                         }
                     }
                 }
-
-                logger.LogDebug("Property Groups: {list}", string.Join(",", item.PropertyGroups.Select(x => x.Alias) ?? []));
-                logger.LogDebug("Composition Groups: {list}", string.Join(",", item.CompositionPropertyGroups.Select(x => x.Alias) ?? []));
 
                 // create the tab
                 item.AddPropertyGroup(tab.Alias, tab.Name ?? tab.Alias);
