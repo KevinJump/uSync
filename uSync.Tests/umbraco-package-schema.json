@@ -330,7 +330,7 @@
                     "type": "string"
                 },
                 "type": {
-                    "const": "bockEditorCustomView",
+                    "const": "blockEditorCustomView",
                     "description": "The type of extension such as dashboard etc...",
                     "type": "string"
                 },
@@ -3593,6 +3593,59 @@
             ],
             "type": "object"
         },
+        "ManifestSectionRoute": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "api": {
+                    "description": "The file location of the api javascript file to load",
+                    "type": "string"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaSectionRoute"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "type": {
+                    "const": "sectionRoute",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with lower numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
         "ManifestSectionSidebarApp": {
             "properties": {
                 "alias": {
@@ -3936,6 +3989,13 @@
                     "description": "The file location of the api javascript file to load",
                     "type": "string"
                 },
+                "conditions": {
+                    "description": "Set the conditions for when the extension should be loaded",
+                    "items": {
+                        "$ref": "#/definitions/ConditionTypes"
+                    },
+                    "type": "array"
+                },
                 "element": {
                     "description": "The file location of the element javascript file to load",
                     "type": "string"
@@ -3960,6 +4020,20 @@
                 "name": {
                     "description": "The friendly name of the extension",
                     "type": "string"
+                },
+                "overwrites": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Define one or more extension aliases that this extension should overwrite."
                 },
                 "type": {
                     "const": "tree",
@@ -4265,6 +4339,9 @@
                 },
                 {
                     "$ref": "#/definitions/ManifestSectionView"
+                },
+                {
+                    "$ref": "#/definitions/ManifestSectionRoute"
                 },
                 {
                     "$ref": "#/definitions/ManifestStore"
@@ -6043,6 +6120,14 @@
                 "label",
                 "pathname"
             ],
+            "type": "object"
+        },
+        "MetaSectionRoute": {
+            "properties": {
+                "path": {
+                    "type": "string"
+                }
+            },
             "type": "object"
         },
         "MetaSectionSidebarAppMenuKind": {
