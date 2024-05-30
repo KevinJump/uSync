@@ -33,8 +33,9 @@ public static class JsonTextExtensions
 			new JsonObjectConverter(),
 			new JsonUdiConverter(),
 			new JsonUdiRangeConverter(),
-			new JsonBooleanConverter()
-		}
+			new JsonBooleanConverter(),
+            new JsonXElementConverter(),
+        }
 	};
 
     internal static readonly JsonSerializerOptions _flatOptions = new(_defaultOptions)
