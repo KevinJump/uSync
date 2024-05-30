@@ -14,9 +14,9 @@
       },
       "Umbraco.Cms.Core": {
         "type": "Direct",
-        "requested": "[14.0.0-rc5, )",
-        "resolved": "14.0.0-rc5",
-        "contentHash": "5xS9o4y2jDi4p9Sz+tbkGxutVL4tHMjRThszxVhHLNY+IBlEMs4dzTjMTNnr4kIDLSxliRpiyAWNR+fWFaCYdg==",
+        "requested": "[14.0.0, )",
+        "resolved": "14.0.0",
+        "contentHash": "ubKqeWbFSHpwXlS7fsmbevlHTTuB+/Q7k2+RPLWhyzOmTe2amvVEmhjPkrSdyfs2ApxGmXG9Ly+Vt/z0BQxq4Q==",
         "dependencies": {
           "Microsoft.Extensions.Caching.Abstractions": "8.0.0",
           "Microsoft.Extensions.Caching.Memory": "8.0.0",
@@ -33,11 +33,11 @@
       },
       "Umbraco.Cms.Web.Website": {
         "type": "Direct",
-        "requested": "[14.0.0-rc5, )",
-        "resolved": "14.0.0-rc5",
-        "contentHash": "WmGdMT9UEcFFddDJaXoxcrY49OkeP2dl1OhYkN7GU7DSXRbCxXC547AZ3rGA4YOTFKELbVbR0RfYi73zQYMdSQ==",
+        "requested": "[14.0.0, )",
+        "resolved": "14.0.0",
+        "contentHash": "+NCvZ/x8HQe01YnXy8zGTNOaJOmZ50uINTXIT6PcelnY2YwSWSJ4eAH9H1DACzi0y1a4PB04aXUrViyEOZeLcQ==",
         "dependencies": {
-          "Umbraco.Cms.Web.Common": "[14.0.0-rc5, 15.0.0)"
+          "Umbraco.Cms.Web.Common": "[14.0.0, 15.0.0)"
         }
       },
       "Asp.Versioning.Abstractions": {
@@ -2419,43 +2419,43 @@
       },
       "Umbraco.Cms.Api.Common": {
         "type": "Transitive",
-        "resolved": "14.0.0-rc5",
-        "contentHash": "pKde17Qc6kgU1a6x0gImzxBL/zu+MUpNs4oPeGVI2KZ8LOCpfnZxQwNCSHfHMibD9FrybopSBzWbo/klr4Bj5Q==",
+        "resolved": "14.0.0",
+        "contentHash": "cbmDtSLNS27g/ISMgSlrOwf2luH4rHtZG7L4d2ArxFwyE3Fg35rYXkWeuL565Iy4caRumwCVYk3Keb2V/tuRCQ==",
         "dependencies": {
           "Asp.Versioning.Mvc": "8.1.0",
           "Asp.Versioning.Mvc.ApiExplorer": "8.1.0",
           "OpenIddict.Abstractions": "5.6.0",
           "OpenIddict.AspNetCore": "5.6.0",
           "Swashbuckle.AspNetCore": "6.6.2",
-          "Umbraco.Cms.Core": "[14.0.0-rc5, 15.0.0)",
-          "Umbraco.Cms.Web.Common": "[14.0.0-rc5, 15.0.0)"
+          "Umbraco.Cms.Core": "[14.0.0, 15.0.0)",
+          "Umbraco.Cms.Web.Common": "[14.0.0, 15.0.0)"
         }
       },
       "Umbraco.Cms.Api.Management": {
         "type": "Transitive",
-        "resolved": "14.0.0-rc5",
-        "contentHash": "VSSdN/Z7FeAuas2ISM6B8SLjWNRN3+/dMwLhWyqgmsGkbtmIm1rvq0a+N5+9dU5TLBVtTH0ps9SEYnjdMajHXw==",
+        "resolved": "14.0.0",
+        "contentHash": "hq0hZeRO4U2qi6Fq3hJnpoCzZ3CJepPX7DENdpF6D2p0vjgLQqR4rl8NwsRfjXkRkEdC4hxUQFZkMXUHainDeA==",
         "dependencies": {
           "JsonPatch.Net": "3.1.0",
           "Swashbuckle.AspNetCore": "6.6.2",
-          "Umbraco.Cms.Api.Common": "[14.0.0-rc5, 15.0.0)",
-          "Umbraco.Cms.Infrastructure": "[14.0.0-rc5, 15.0.0)"
+          "Umbraco.Cms.Api.Common": "[14.0.0, 15.0.0)",
+          "Umbraco.Cms.Infrastructure": "[14.0.0, 15.0.0)"
         }
       },
       "Umbraco.Cms.Examine.Lucene": {
         "type": "Transitive",
-        "resolved": "14.0.0-rc5",
-        "contentHash": "1VYWCPWv1XVkXoZW6aZ834rCvn/76fisoDzv56lyxR5vXy5VceeaKPwFa+tXhAdwYVRh07/h0umAM30r3mf2Jw==",
+        "resolved": "14.0.0",
+        "contentHash": "pdtAITJQGsBM3Ccubi/2i6B4bHjduZu0h1lSccD7N1Dcr7WVFiFamefvMQ5oOPBvYXH/9QVY3x+g1Mfi40aFPQ==",
         "dependencies": {
           "Examine": "3.2.0",
           "System.Security.Cryptography.Xml": "8.0.1",
-          "Umbraco.Cms.Infrastructure": "[14.0.0-rc5, 15.0.0)"
+          "Umbraco.Cms.Infrastructure": "[14.0.0, 15.0.0)"
         }
       },
       "Umbraco.Cms.Infrastructure": {
         "type": "Transitive",
-        "resolved": "14.0.0-rc5",
-        "contentHash": "Ccr9rNoc2fvqnfYoiJQtgErc6tBwwXe/T78hb9fwqrCOGGenlySS3zvcWsU63oRNDjmGCXI/fnJqGaQ3SntGOw==",
+        "resolved": "14.0.0",
+        "contentHash": "x4HecKoKc5p8Y3e4Bki66d+iERCDdLUetBv13lWdjRefhaK984nr1CDWtX3DogB3/GSvtHCTYcFUo/6mwklXdA==",
         "dependencies": {
           "Examine.Core": "3.2.0",
           "HtmlAgilityPack": "1.11.61",
@@ -2481,25 +2481,25 @@
           "Serilog.Sinks.Async": "1.5.0",
           "Serilog.Sinks.File": "5.0.0",
           "Serilog.Sinks.Map": "1.0.2",
-          "Umbraco.Cms.Core": "[14.0.0-rc5, 15.0.0)",
+          "Umbraco.Cms.Core": "[14.0.0, 15.0.0)",
           "ncrontab": "3.3.3"
         }
       },
       "Umbraco.Cms.PublishedCache.NuCache": {
         "type": "Transitive",
-        "resolved": "14.0.0-rc5",
-        "contentHash": "edY1VEQ2i5M80ayms+Y2o16ZP8pZEqXjETGxbqs+S6kxwTfPDWnM6iKvCFWhc/huvK1kaQWZ/bI2yNJuCHPT8A==",
+        "resolved": "14.0.0",
+        "contentHash": "MQ1kmguRN+THs6CREqffSNCZZ9pdr2rin7Aym7zPCOON/E4+4e1CvyrqQOAYSdXha9WkRQ2p7ueeG/cVKUBBLw==",
         "dependencies": {
           "K4os.Compression.LZ4": "1.3.8",
           "MessagePack": "2.5.140",
           "Umbraco.CSharpTest.Net.Collections": "15.0.0",
-          "Umbraco.Cms.Infrastructure": "[14.0.0-rc5, 15.0.0)"
+          "Umbraco.Cms.Infrastructure": "[14.0.0, 15.0.0)"
         }
       },
       "Umbraco.Cms.Web.Common": {
         "type": "Transitive",
-        "resolved": "14.0.0-rc5",
-        "contentHash": "oEFRGMMPYjQYmXZzgTxfcveYM23lWjfYCrfmdSm6yQQWEU2BlwGPiUFcz2cU96aun6oYuJscvEYa3vN6mCTAsg==",
+        "resolved": "14.0.0",
+        "contentHash": "QcdCFqdedhz55Nvf1dNZ8uvyfPy0fodZ1y3ixrVl11hTSGiqfFPB+1N9lGBYHGkbLaB4LZPdPZPNxa/L+ydLVg==",
         "dependencies": {
           "Asp.Versioning.Mvc": "8.1.0",
           "Asp.Versioning.Mvc.ApiExplorer": "8.1.0",
@@ -2509,8 +2509,8 @@
           "Serilog.AspNetCore": "8.0.1",
           "System.Net.Http": "4.3.4",
           "System.Text.RegularExpressions": "4.3.1",
-          "Umbraco.Cms.Examine.Lucene": "[14.0.0-rc5, 15.0.0)",
-          "Umbraco.Cms.PublishedCache.NuCache": "[14.0.0-rc5, 15.0.0)"
+          "Umbraco.Cms.Examine.Lucene": "[14.0.0, 15.0.0)",
+          "Umbraco.Cms.PublishedCache.NuCache": "[14.0.0, 15.0.0)"
         }
       },
       "Umbraco.CSharpTest.Net.Collections": {
@@ -2534,8 +2534,8 @@
       "usync.core": {
         "type": "Project",
         "dependencies": {
-          "Umbraco.Cms.Api.Management": "[14.0.0-rc5, )",
-          "Umbraco.Cms.Web.Website": "[14.0.0-rc5, )"
+          "Umbraco.Cms.Api.Management": "[14.0.0, )",
+          "Umbraco.Cms.Web.Website": "[14.0.0, )"
         }
       }
     }
