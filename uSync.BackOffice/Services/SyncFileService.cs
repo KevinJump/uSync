@@ -253,7 +253,7 @@ namespace uSync.BackOffice.Services
             }
             catch (Exception ex)
             {
-                logger.LogWarning("Error while reading in {file} {message}", file, ex.Message);
+                logger.LogWarning("Error while reading in file {message}", ex.Message);
                 throw new Exception($"Error while reading in {file}", ex);
             }
         }

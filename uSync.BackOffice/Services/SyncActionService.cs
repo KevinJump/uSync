@@ -181,7 +181,7 @@ internal class SyncActionService : ISyncActionService
 
         if (fullPath.StartsWith(rootParent))
         {
-            _logger.LogDebug("Using Custom Folder: {fullPath}", folder);
+            _logger.LogDebug("Using Custom Folder");
             return folder;
         }
         
@@ -197,8 +197,8 @@ internal class SyncActionService : ISyncActionService
     {
         _uSyncService.FinishBulkProcess(action, actions);
 
-        _logger.LogInformation("{user} finished {action} process ({changes} changes)",
-            username, action, actions.Count());
+        _logger.LogInformation("{user} finished process ({changes} changes)",
+            username, actions.Count());
     }
 
 }
