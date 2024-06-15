@@ -62,10 +62,9 @@ public partial class uSyncService
 
                 var filePath = GetOSDependentPath(entry.FullName);
 
-                // make sure the path is inside our target folder. 
-                EnsurePath(resolvedTarget, filePath);
-
-                var destination = Path.Combine(resolvedTarget, filePath);
+                var destination = Path.GetFullPath(Path.Combine(resolvedTarget, filePath));
+                if (destination.StartsWith(resolvedTarget) is false)
+                    throw new ArgumentException($"Path {destination} is not in {resolvedTarget}");
 
                 var destinationFolder = Path.GetDirectoryName(destination);
 
@@ -108,14 +107,4 @@ public partial class uSyncService
         => Path.GetFullPath(
             path.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar))
             .TrimEnd(Path.DirectorySeparatorChar);
-
-    private void EnsurePath(string root, string path)
-    {
-        var fullPath = Path.GetFullPath(path);
-
-        if (!fullPath.StartsWith(root))
-            throw new ArgumentException($"Path {path} is not in {root}");
-    }
-
-
 }
