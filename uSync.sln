@@ -31,7 +31,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.Tests", "uSync.Tests\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.SchemaGenerator", "uSync.SchemaGenerator\uSync.SchemaGenerator.csproj", "{1E5B64E5-E8A6-42F2-9079-FB71D6D237D6}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.BackOffice.Assets", "uSync.Backoffice.Assets\uSync.Backoffice.Assets.csproj", "{4ECC3DFD-5BCB-4095-8D06-DE482DF4C6A1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.BackOffice.Assets", "uSync.Backoffice.Assets\uSync.BackOffice.Assets.csproj", "{4ECC3DFD-5BCB-4095-8D06-DE482DF4C6A1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.BackOffice.Targets", "uSync.BackOffice.Targets\uSync.BackOffice.Targets.csproj", "{B09F319A-7066-4B1B-B97D-F609B558C9F4}"
 EndProject
