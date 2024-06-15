@@ -13,9 +13,9 @@ name: "CodeQL"
 
 on:
   push:
-    branches: ["v14/dev"]
+    branches: ["v14/dev", "v13/main", "v10/dev"]
   pull_request:
-    branches: ["v14/dev"]
+    branches: ["v14/dev", "v13/main", "v10/dev"]
 
 jobs:
   analyze:
