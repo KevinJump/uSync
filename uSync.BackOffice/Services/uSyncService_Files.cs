@@ -50,6 +50,8 @@ public partial class uSyncService
 
         var resolvedTarget = _syncFileService.GetAbsPath(target);
 
+        var fullTarget = Path.GetFullPath(resolvedTarget);
+
         using (var zip = ZipFile.OpenRead(zipArchive))
         {
             if (!zip.Entries.Any(x => x.FullName.EndsWith(_uSyncConfig.Settings.DefaultExtension)))
@@ -63,8 +65,8 @@ public partial class uSyncService
                 var filePath = GetOSDependentPath(entry.FullName);
 
                 var destination = Path.GetFullPath(Path.Combine(resolvedTarget, filePath));
-                if (destination.StartsWith(resolvedTarget) is false)
-                    throw new ArgumentException($"Path {destination} is not in {resolvedTarget}");
+                if (!destination.StartsWith(fullTarget))
+                    throw new InvalidOperationException("Invalid file path");
 
                 var destinationFolder = Path.GetDirectoryName(destination);
 
