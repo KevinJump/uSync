@@ -13,9 +13,9 @@ name: "CodeQL"
 
 on:
   push:
-    branches: [ "v14/dev", "v10/dev", "v13/main"]
+    branches: [ "v14/dev" ]
   pull_request:
-    branches: [ "v14/dev", "v10/dev", "v13/main"]
+    branches: [ "v14/dev" ]
 
 jobs:
   analyze:
@@ -43,7 +43,7 @@ jobs:
       matrix:
         include:
         - language: csharp
-          build-mode: manual
+          build-mode: automatic
         - language: javascript-typescript
           build-mode: none
         # CodeQL supports the following values keywords for 'language': 'c-cpp', 'csharp', 'go', 'java-kotlin', 'javascript-typescript', 'python', 'ruby', 'swift'
@@ -80,7 +80,7 @@ jobs:
     - if: matrix.build-mode == 'manual'
       shell: cmd
       run: |
-        "./build.cmd"
+        "build.cmd"
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
