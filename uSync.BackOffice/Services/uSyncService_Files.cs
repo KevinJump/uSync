@@ -65,7 +65,7 @@ public partial class uSyncService
                 var filePath = GetOSDependentPath(entry.FullName);
 
                 var destination = Path.GetFullPath(Path.Combine(resolvedTarget, filePath));
-                if (destination.StartsWith(fullTarget) is false)
+                if (!destination.StartsWith(fullTarget))
                     throw new InvalidOperationException("Invalid file path");
 
                 var destinationFolder = Path.GetDirectoryName(destination);
