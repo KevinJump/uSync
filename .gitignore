@@ -257,3 +257,6 @@ $RECYCLE.BIN/
 .idea
 /uSync.Backoffice.Management.Client/wwwroot/
 /uSync.Backoffice.Management.Client/wwwroot/App_Plugins/uSync/umbraco-package.json
+
+# local solution (has website in it)
+/uSync-local.sln

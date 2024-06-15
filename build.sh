@@ -1,1 +1,0 @@
-dotnet build ./uSyncBuild.sln -c Release
