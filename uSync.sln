@@ -37,8 +37,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.BackOffice.Targets", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.History", "uSync.History\uSync.History.csproj", "{E1C572B6-218E-4152-97D2-392B9CA60F39}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.Site", "uSync.Site\uSync.Site.csproj", "{CD8A40A1-E7A1-4B9F-B8AB-7BA901333614}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -89,10 +87,6 @@ Global
 		{E1C572B6-218E-4152-97D2-392B9CA60F39}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E1C572B6-218E-4152-97D2-392B9CA60F39}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E1C572B6-218E-4152-97D2-392B9CA60F39}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CD8A40A1-E7A1-4B9F-B8AB-7BA901333614}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CD8A40A1-E7A1-4B9F-B8AB-7BA901333614}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CD8A40A1-E7A1-4B9F-B8AB-7BA901333614}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CD8A40A1-E7A1-4B9F-B8AB-7BA901333614}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
