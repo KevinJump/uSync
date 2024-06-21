@@ -180,6 +180,8 @@ namespace uSync.Core.Serialization.Serializers
             var node = new XElement("Structure");
             List<KeyValuePair<string, string>> items = new List<KeyValuePair<string, string>>();
 
+            if (item.AllowedContentTypes is null) return node;
+
             foreach (var allowedType in item.AllowedContentTypes.OrderBy(x => x.SortOrder))
             {
                 var allowedItem = FindItem(allowedType.Id.Value);
