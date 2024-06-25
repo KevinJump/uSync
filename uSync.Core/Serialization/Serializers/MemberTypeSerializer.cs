@@ -130,6 +130,8 @@ namespace uSync.Core.Serialization.Serializers
             details.AddRange(DeserializeTabs(item, node));
             details.AddRange(DeserializeProperties(item, node, options));
 
+            details.AddRange(DeserializeCompositions(item, node));
+
             CleanTabs(item, node, options);
 
             // memberTypeService.Save(item);
