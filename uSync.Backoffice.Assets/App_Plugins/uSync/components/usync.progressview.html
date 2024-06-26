@@ -7,7 +7,7 @@
              class="text-center usync-handler-icon"
              ng-class="{'usync-pending' : handler.status == 0, 'usync-progress' : handler.status == 1, 'usync-complete' : handler.status == 2}"
              ng-click="vm.setFilter(handler.itemType)">
-            <i class="icon {{handler.icon}}"></i>
+            <umb-icon icon="{{handler.icon}}"></umb-icon>
             <div class="usync-handler-name">{{handler.name}}</div>
             <div ng-if="!vm.hideLabels">
                 <div class="handler-badge badge type-complete"

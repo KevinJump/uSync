@@ -109,7 +109,7 @@ ul.usync-action-list {
     position: relative;
 }
 
-    .usync-handler-icon i {
+    .usync-handler-icon i, .usync-handler-icon .umb-icon {
         font-size: 40px;
     }
 
