@@ -51,10 +51,10 @@ Write-Host "Config   :" $env
 Write-Host "Folder   :" $outFolder
 "----------------------------------"; ""
 
-$sln_name = "..\uSync_13.sln";
+$sln_name = "..\uSync.sln";
 
 ""; "##### Restoring project"; "--------------------------------"; ""
-dotnet restore ..
+dotnet restore $sln_name -noLogo
 
 ""; "##### Building project"; "--------------------------------"; ""
 dotnet build $sln_name -c $env -p:Version=$fullVersion -p:ContinuousIntegrationBuild=true

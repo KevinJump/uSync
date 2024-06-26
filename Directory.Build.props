@@ -19,6 +19,8 @@
 
 		<NoWarn>CS0618,NU1902</NoWarn>
 
+		<SuppressNETCoreSdkPreviewMessage>true</SuppressNETCoreSdkPreviewMessage>
+	
 		<PackageReleaseNotes>
 	<![CDATA[9.0 : Dotnet core version
  - 9.1 : Net 5/6 targets
@@ -30,7 +32,7 @@
  - 10.2 : Upload / Download Syncs
 11.0 : Umbraco v11 release
 12.0 : Umbraco v12 release
-13.o : Umbraco v13 release]]>
+13.0 : Umbraco v13 release]]>
 		</PackageReleaseNotes>
 
 		<EmbedUntrackedSources>true</EmbedUntrackedSources>
