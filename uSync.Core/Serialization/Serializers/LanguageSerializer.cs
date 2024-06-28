@@ -173,7 +173,12 @@ namespace uSync.Core.Serialization.Serializers
         {
             // language guids change all the time ! we ignore them, but here we set them to the 'id' 
             // this means the file stays the same! 
-            var key = Int2Guid(item.CultureInfo.LCID);
+
+            // for backwards compatibility, use the LCID unless its
+            // the 'unknown' value then use the iso-code turn that into a guid
+            var key = item.CultureInfo.LCID != 4096 
+                ? Int2Guid(item.CultureInfo.LCID) 
+                : item.IsoCode.ToGuid();
 
             return new XElement(ItemType, new XAttribute(uSyncConstants.Xml.Key, key.ToString().ToLower()),
                 new XAttribute(uSyncConstants.Xml.Alias, alias),
