@@ -101,7 +101,10 @@ namespace uSync.BackOffice.SyncHandlers
             var node = syncFileService.LoadXElement(cleanFile);
             var id = node.Attribute("Id").ValueOrDefault(0);
             if (id != 0) return id;
-            return GetCleanParent(cleanFile)?.Id ?? 0;
+
+            return GetCleanParent(cleanFile)?.Id ?? 
+                (node.GetKey() == Guid.Empty ? -1 : 0);
+
         }
 
         /// <summary>

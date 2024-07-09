@@ -813,7 +813,7 @@ namespace uSync.BackOffice.SyncHandlers
                 {
                     var node = XElement.Load(file);
                     var key = node.GetKey();
-                    if (key != Guid.Empty && !keys.Contains(key))
+                    if (!keys.Contains(key))
                     {
                         keys.Add(key);
                     }
@@ -1022,6 +1022,14 @@ namespace uSync.BackOffice.SyncHandlers
             if (item != null)
                 return Export(item, folders, settings);
 
+            if (udi.IsRoot && settings.CreateClean)
+            {
+                // for roots we still can create a clean
+                var targetFolder = folders.Last();
+                var filename = Path.Combine(targetFolder, $"{Guid.Empty}.{this.uSyncConfig.Settings.DefaultExtension}");
+                CreateCleanFile(Guid.Empty, filename);
+            }
+
             return uSyncAction.Fail(nameof(udi), this.handlerType, this.ItemType, ChangeType.Fail, $"Item not found {udi}",
                  new KeyNotFoundException(nameof(udi)))
                 .AsEnumerableOfOne();
@@ -1172,7 +1180,7 @@ namespace uSync.BackOffice.SyncHandlers
         /// </summary>
         protected void CreateCleanFile(Guid key, string filename)
         {
-            if (string.IsNullOrWhiteSpace(filename) || key == Guid.Empty)
+            if (string.IsNullOrWhiteSpace(filename))
                 return;
 
             var folder = Path.GetDirectoryName(filename);
