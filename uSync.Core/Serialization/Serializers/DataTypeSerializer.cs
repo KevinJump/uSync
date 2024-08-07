@@ -75,7 +75,7 @@ namespace uSync.Core.Serialization.Serializers
         ///  this only works because we are keeping the track of
         ///  all the deletes and renames when they happen
         ///  and we can only reliably do that for items
-        ///  that have ContainerTree's because they are not 
+        ///  that have ContainerTrees because they are not 
         ///  real trees - but flat (each alias is unique)
         /// </remarks>
         protected override SyncAttempt<IDataType> ProcessDelete(Guid key, string alias, SerializerFlags flags)
