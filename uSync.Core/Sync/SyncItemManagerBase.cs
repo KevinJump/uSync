@@ -54,7 +54,7 @@ public abstract class SyncItemManagerBase
     /// </summary>
     /// <param name="treeItem"></param>
     /// <returns></returns>
-    protected virtual SyncLocalItem GetRootItem(SyncTreeItem treeItem)
+    protected virtual SyncLocalItem? GetRootItem(SyncTreeItem treeItem)
         => new(Constants.System.RootString)
         {
             EntityType = EntityType,
@@ -62,18 +62,18 @@ public abstract class SyncItemManagerBase
             Udi = Udi.Create(EntityType)
         };
 
-    protected abstract IEnumerable<SyncItem> GetDescendants(SyncItem item, DependencyFlags flags);
+    protected abstract Task<IEnumerable<SyncItem>> GetDescendantsAsync(SyncItem item, DependencyFlags flags);
 
     /// <summary>
     ///  standard use case, if IncludeChildren flag is set, return this item and all its children.
     ///  if not just return this item. 
     /// </summary>
-    public virtual IEnumerable<SyncItem> GetItems(SyncItem item)
+    public virtual async Task<IEnumerable<SyncItem>> GetItemsAsync(SyncItem item)
     {
         if (item.Flags.HasFlag(DependencyFlags.IncludeChildren))
         {
             var items = new List<SyncItem> { item };
-            items.AddRange(GetDescendants(item, item.Flags & ~DependencyFlags.IncludeChildren));
+            items.AddRange(await GetDescendantsAsync(item, item.Flags & ~DependencyFlags.IncludeChildren));
             return items;
         }
         else
@@ -100,15 +100,16 @@ public abstract class SyncItemManagerBase
 /// </remarks>
 public abstract class SyncItemManagerIndexBase<TIndexType> : SyncItemManagerBase
 {
-    protected abstract SyncLocalItem GetLocalEntity(TIndexType id);
+    protected abstract Task<SyncLocalItem?> GetLocalEntityAsync(TIndexType id);
 
-    public virtual SyncLocalItem? GetEntity(SyncTreeItem treeItem)
+    /// <inheritdoc />
+    public virtual async Task<SyncLocalItem?> GetEntityAsync(SyncTreeItem treeItem)
     {
         if (treeItem.IsRoot()) return GetRootItem(treeItem);
 
         var attempt = treeItem.Id.TryConvertTo<TIndexType>();
         if (attempt.Success && attempt.Result is not null)
-            return GetLocalEntity(attempt.Result);
+            return await GetLocalEntityAsync(attempt.Result);
 
         return null;
     }

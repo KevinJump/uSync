@@ -13,7 +13,7 @@ public interface ISyncItemManager
     ///  Unless the item has some form of shared picker tree with the
     ///  core umbraco UI then answer is likely no (for now)
     /// </remarks>
-    SyncEntityInfo GetSyncInfo(string entityType);
+    SyncEntityInfo? GetSyncInfo(string entityType);
 
     /// <summary>
     ///   Which type of tree menu should be used. 
@@ -52,10 +52,18 @@ public interface ISyncItemManager
     ///  the process should as a bare minimum return the item it is passed, 
     ///  when the Include children flag is set - it should also return children. 
     /// </remarks>
-    IEnumerable<SyncItem> GetItems(SyncItem item);
+    Task<IEnumerable<SyncItem>> GetItemsAsync(SyncItem item);
 
     /// <summary>
     ///  Get the underling Local item for something that was picked from the tree.
     /// </summary>
-    SyncLocalItem GetEntity(SyncTreeItem treeItem);
+    Task<SyncLocalItem?> GetEntityAsync(SyncTreeItem treeItem);
+
+
+    /// <summary>
+    ///  for a given key find the sync entity. 
+    /// </summary>
+    /// <param name="key"></param>
+    /// <returns></returns>
+    Task<SyncEntity?> GetSyncEntityAsync(string key);
 }

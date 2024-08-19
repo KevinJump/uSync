@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.Json.Serialization;
 using System.Xml.Linq;
 
 using Umbraco.Extensions;
@@ -27,6 +28,7 @@ public class OrderedNodeInfo
     /// <summary>
     ///  set all the values of an ordered node. 
     /// </summary>
+    [JsonConstructor]
     public OrderedNodeInfo(string filename, XElement node, int level, string path, bool isRoot)
         : this(filename, node)
     {
@@ -48,7 +50,7 @@ public class OrderedNodeInfo
     /// <summary>
     ///  umbraco alias of the item
     /// </summary>
-    public string Alias { get; }
+    public string Alias { get;  }
 
     /// <summary>
     ///  relative path of the item (so same in all 'folders')

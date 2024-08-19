@@ -8,4 +8,8 @@
 		<StaticWebAssetBasePath>/</StaticWebAssetBasePath>
 	</PropertyGroup>
 
+	<ItemGroup>
+	  <Folder Include="usync-assets\pack\" />
+	</ItemGroup>
+
 </Project>
