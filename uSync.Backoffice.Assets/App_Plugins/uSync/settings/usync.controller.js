@@ -283,6 +283,11 @@
 
                     uSync8DashboardService.importPost(vm.results, options, getClientId())
                         .then(function (results) {
+
+                            if (results?.data?.actions) {
+                                vm.results = vm.results.concat(results.data.actions)
+                            }
+
                             vm.working = false;
                             vm.reported = true;
                             vm.perf = performance.now() - start;

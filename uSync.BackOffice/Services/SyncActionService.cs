@@ -133,7 +133,7 @@ internal class SyncActionService : ISyncActionService
 
         callbacks?.Update("Import Complete", 1, 1);
 
-        return new SyncActionResult(actions);
+        return new SyncActionResult(actions.Where(x => x.Change > Core.ChangeType.NoChange));
     }
 
     public SyncActionResult ExportHandler(SyncActionOptions options, uSyncCallbacks callbacks)
