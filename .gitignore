@@ -258,3 +258,4 @@ $RECYCLE.BIN/
 
 /usync/test
 .idea
+/uSync.Tests/appsettings-schema.**
