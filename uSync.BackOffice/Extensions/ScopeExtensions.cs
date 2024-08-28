@@ -15,9 +15,9 @@ namespace uSync.BackOffice.Extensions;
 internal static class ScopeExtensions
 {
     public static IDisposable SuppressScopeByConfig(this ICoreScope scope, uSyncConfigService configService)
-        => configService.Settings.DisableNotificationSuppression
-            ? new DummyDisposable()
-            : scope.Notifications.Suppress();
+        => configService.Settings.EnableNotificationSuppression
+            ? scope.Notifications.Suppress()
+            : new DummyDisposable();
 
 
     public static ICoreScope CreateNotificationScope(
