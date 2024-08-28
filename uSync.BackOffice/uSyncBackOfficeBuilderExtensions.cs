@@ -153,6 +153,7 @@ namespace uSync.BackOffice
             builder.AddNotificationHandler<MemberTypeSavedNotification, MemberTypeHandler>();
             builder.AddNotificationHandler<MemberTypeSavedNotification, MemberTypeHandler>();
             builder.AddNotificationHandler<MemberTypeMovedNotification, MemberTypeHandler>();
+            builder.AddNotificationHandler<MemberTypeDeletedNotification, MemberTypeHandler>();
             builder.AddNotificationHandler<EntityContainerSavedNotification, MemberTypeHandler>();
             builder.AddNotificationHandler<EntityContainerRenamedNotification, MemberTypeHandler>();
 
