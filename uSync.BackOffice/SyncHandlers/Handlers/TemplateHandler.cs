@@ -15,7 +15,7 @@ using Umbraco.Extensions;
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
 using uSync.Core;
-
+using uSync.Core.Serialization;
 using static Umbraco.Cms.Core.Constants;
 
 namespace uSync.BackOffice.SyncHandlers.Handlers
@@ -25,7 +25,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
     /// </summary>
     [SyncHandler(uSyncConstants.Handlers.TemplateHandler, "Templates", "Templates", uSyncConstants.Priorites.Templates,
         Icon = "icon-layout", EntityType = UdiEntityType.Template, IsTwoPass = true)]
-    public class TemplateHandler : SyncHandlerLevelBase<ITemplate, IFileService>, ISyncHandler,
+    public class TemplateHandler : SyncHandlerLevelBase<ITemplate, IFileService>, ISyncHandler, ISyncPostImportHandler,
         INotificationHandler<SavedNotification<ITemplate>>,
         INotificationHandler<DeletedNotification<ITemplate>>,
         INotificationHandler<MovedNotification<ITemplate>>,
@@ -49,6 +49,24 @@ namespace uSync.BackOffice.SyncHandlers.Handlers
             : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfig, syncItemFactory)
         {
             this.fileService = fileService;
+        }
+
+        /// <inheritdoc/>
+        public IEnumerable<uSyncAction> ProcessPostImport(string folder, IEnumerable<uSyncAction> actions, HandlerSettings config)
+        {
+            if (actions == null || !actions.Any())
+                return Enumerable.Empty<uSyncAction>();
+
+            var results = new List<uSyncAction>();
+
+            // we only do deletes here. 
+            foreach (var action in actions.Where(x => x.Change == ChangeType.Hidden))
+            {
+                results.AddRange(
+                    Import(action.FileName, config, SerializerFlags.LastPass));
+            }
+
+            return results;
         }
 
         /// <inheritdoc/>

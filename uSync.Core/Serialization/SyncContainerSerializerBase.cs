@@ -11,6 +11,7 @@ using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Models.Entities;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Extensions;
+using uSync.Core.Models;
 
 namespace uSync.Core.Serialization
 {
@@ -24,6 +25,18 @@ namespace uSync.Core.Serialization
             : base(entityService, logger)
         {
             this.containerType = containerType;
+        }
+
+        protected override SyncAttempt<TObject> ProcessDelete(Guid key, string alias, SerializerFlags flags)
+        {
+            if (flags.HasFlag(SerializerFlags.LastPass))
+            {
+                logger.LogDebug("Processing deletes as part of the last pass");
+                return base.ProcessDelete(key, alias, flags);
+            }
+
+            logger.LogDebug("Delete not processing as this is not the final pass");
+            return SyncAttempt<TObject>.Succeed(alias, ChangeType.Hidden);
         }
 
         protected override Attempt<TObject> FindOrCreate(XElement node)
