@@ -1,6 +1,6 @@
 import { UmbControllerHost } from '@umbraco-cms/backoffice/controller-api';
 import { UmbDataSourceResponse } from '@umbraco-cms/backoffice/repository';
-import { MigrationsService, SyncLegacyCheckResponse } from '../../api';
+import { MigrationsService, SyncLegacyCheckResponse } from '@jumoo/uSync';
 import { tryExecuteAndNotify } from '@umbraco-cms/backoffice/resources';
 
 export interface SyncMigrationDataSource {

@@ -2,7 +2,7 @@
   "$schema": "../umbraco-package-schema.json",
   "name": "uSync",
   "id": "uSync",
-  "version": "14.1.0-build.20240909.19",
+  "version": "14.2.0-build.20240909.2",
   "allowTelemetry": true,
   "extensions": [
     {
@@ -11,5 +11,10 @@
       "type": "entryPoint",
       "js": "/App_Plugins/uSync/usync-assets.js"
     }
-  ]
+  ],
+  "importmap": {
+    "imports": {
+      "@jumoo/uSync": "/App_Plugins/uSync/usync-assets.js"
+    }
+  }
 }

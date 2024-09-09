@@ -6,8 +6,11 @@ import {
 	html,
 	state,
 } from '@umbraco-cms/backoffice/external/lit';
-import { USYNC_CORE_CONTEXT_TOKEN } from '../../workspace.context.ts';
-import { uSyncHandlerSetSettings, uSyncSettings } from '../../../api/index.ts';
+import {
+	USYNC_CORE_CONTEXT_TOKEN,
+	uSyncHandlerSetSettings,
+	uSyncSettings,
+} from '@jumoo/uSync';
 
 export * from './components/usyncSettingItem.element.ts';
 

@@ -97,17 +97,7 @@ else {
     Set-Location ..\uSync.Backoffice.Management.Client\usync-assets\
 
     npm version $fullVersion 
-    npm run dist
-
-    "Linking locally (for testing)"
-    npm link
-
-    if ($push) {
-        "Publishing to Azure nightly"
-        npm publish
-    }
-
-    # todo, publish the package to a repo? 
+    npm run make
 
     Set-Location ..\..\dist
 }

@@ -1,4 +1,4 @@
-import { SyncActionGroup } from '../api';
+import { SyncActionGroup } from '@jumoo/uSync';
 
 /**
  * Options passed to the performAction method on the workspace context

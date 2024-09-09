@@ -4,11 +4,9 @@ import {
 	ManifestWorkspaceContext,
 	ManifestWorkspaceView,
 } from '@umbraco-cms/backoffice/extension-registry';
+import { uSyncConstants, SyncLegacyFilesConditionConfig } from '@jumoo/uSync';
 
-import './components';
-
-import { uSyncConstants } from '../constants.js';
-import { SyncLegacyFilesConditionConfig } from '../conditions/legacy-files.condition.js';
+import './components/index.js';
 
 const workspaceAlias = uSyncConstants.workspace.alias;
 

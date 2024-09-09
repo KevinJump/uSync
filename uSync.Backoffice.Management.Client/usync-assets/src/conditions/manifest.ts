@@ -1,6 +1,6 @@
 import { ManifestCondition } from '@umbraco-cms/backoffice/extension-api';
-import { SyncLegacyFilesCondition } from './legacy-files.condition';
-import { uSyncConstants } from '../constants';
+import { SyncLegacyFilesCondition } from '@jumoo/uSync';
+import { uSyncConstants } from '@jumoo/uSync';
 
 export const manifests: Array<ManifestCondition> = [
 	{

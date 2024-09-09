@@ -4,7 +4,7 @@ import {
 	UmbConditionControllerArguments,
 } from '@umbraco-cms/backoffice/extension-api';
 import { UmbConditionBase } from '@umbraco-cms/backoffice/extension-registry';
-import { USYNC_CORE_CONTEXT_TOKEN } from '../workspace/workspace.context';
+import { USYNC_CORE_CONTEXT_TOKEN } from '@jumoo/uSync';
 
 export type SyncLegacyFilesConditionConfig = UmbConditionConfigBase & {
 	hasLegacyFiles: boolean;

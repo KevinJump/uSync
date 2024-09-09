@@ -6,7 +6,7 @@ import {
 	html,
 	property,
 } from '@umbraco-cms/backoffice/external/lit';
-import { ChangeType, uSyncActionView } from '../api';
+import { ChangeType, uSyncActionView } from '@jumoo/uSync';
 import * as Diff from 'diff';
 
 /**
@@ -63,8 +63,6 @@ export class uSyncChangeView extends UmbElementMixin(LitElement) {
 			const changes = Diff.diffWords(oldValue, newValue);
 
 			const changeHtml = changes.map((change: any) => {
-				console.log(change);
-
 				if (change.added) {
 					return html`<ins>${change.value}</ins>`;
 				} else if (change.removed) {

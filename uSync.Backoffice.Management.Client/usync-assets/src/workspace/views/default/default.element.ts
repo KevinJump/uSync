@@ -5,19 +5,17 @@ import {
 	nothing,
 	state,
 } from '@umbraco-cms/backoffice/external/lit';
+import { UUIButtonState } from '@umbraco-cms/backoffice/external/uui';
+import { UmbLitElement } from '@umbraco-cms/backoffice/lit-element';
 
 import {
 	USYNC_CORE_CONTEXT_TOKEN,
 	uSyncWorkspaceContext,
-} from '../../workspace.context.js';
-import {
 	SyncActionGroup,
 	SyncHandlerSummary,
 	SyncLegacyCheckResponse,
 	uSyncActionView,
-} from '../../../api/index.js';
-import { UUIButtonState } from '@umbraco-cms/backoffice/external/uui';
-import { UmbLitElement } from '@umbraco-cms/backoffice/lit-element';
+} from '@jumoo/uSync';
 
 @customElement('usync-default-view')
 export class uSyncDefaultViewElement extends UmbLitElement {

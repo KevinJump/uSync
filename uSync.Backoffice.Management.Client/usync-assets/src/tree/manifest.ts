@@ -3,19 +3,25 @@ import {
 	ManifestMenuItem,
 	ManifestTypes,
 } from '@umbraco-cms/backoffice/extension-registry';
-import { uSyncConstants } from '../constants';
-import uSyncMenuElement from './usync.menu-element.js';
+import { uSyncMenuElement } from '@jumoo/uSync';
 
 const sectionAlias = 'Umb.Section.Settings';
 
+const menuConstants = {
+	alias: 'usync.menu',
+	name: 'uSync',
+	icon: 'icon-infinity',
+	rootElement: 'usync-root',
+};
+
 const menu: ManifestMenu = {
 	type: 'menu',
-	alias: uSyncConstants.menuAlias,
-	name: 'uSync Menu',
+	alias: menuConstants.alias,
+	name: menuConstants.name,
 	meta: {
-		label: uSyncConstants.name,
-		icon: uSyncConstants.icon,
-		entityType: uSyncConstants.workspace.rootElement,
+		label: menuConstants.name,
+		icon: menuConstants.icon,
+		entityType: menuConstants.rootElement,
 	},
 };
 
@@ -28,7 +34,7 @@ const menuItem: ManifestMenuItem = {
 		label: 'uSync',
 		icon: 'icon-infinity',
 		entityType: 'usync-root',
-		menus: [uSyncConstants.menuAlias],
+		menus: [menuConstants.alias],
 	},
 };
 

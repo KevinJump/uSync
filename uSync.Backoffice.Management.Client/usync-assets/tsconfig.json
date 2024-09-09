@@ -1,10 +1,13 @@
 {
 	"compilerOptions": {
 		"target": "ES2020",
-		"experimentalDecorators": true,
-		"useDefineForClassFields": false,
 		"module": "ESNext",
 		"lib": ["ES2020", "DOM", "DOM.Iterable"],
+
+		"allowSyntheticDefaultImports": true,
+		"experimentalDecorators": true,
+		"forceConsistentCasingInFileNames": true,
+		"useDefineForClassFields": false,
 		"skipLibCheck": true,
 
 		/* Bundler mode */
@@ -18,7 +21,12 @@
 		"strict": true,
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
-		"noFallthroughCasesInSwitch": true
+		"noFallthroughCasesInSwitch": true,
+
+		"paths": {
+			"@jumoo/uSync": ["./src/index.js"],
+			"@jumoo/uSync/external/signalr": ["./src/external/signalr/index.js"]
+		}
 	},
-	"include": ["src"]
+	"include": ["./src/**/*"]
 }

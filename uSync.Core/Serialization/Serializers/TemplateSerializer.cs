@@ -1,9 +1,10 @@
-﻿using System.Xml.Linq;
-
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
+using System.Xml.Linq;
+
+using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.IO;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Services;
@@ -18,9 +19,11 @@ namespace uSync.Core.Serialization.Serializers;
 [SyncSerializer("D0E0769D-CCAE-47B4-AD34-4182C587B08A", "Template Serializer", uSyncConstants.Serialization.Template)]
 public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer<ITemplate>
 {
-    private readonly IFileService _fileService;
     private readonly IShortStringHelper _shortStringHelper;
     private readonly IFileSystem? _viewFileSystem;
+
+    private readonly ITemplateService _templateService;
+    private readonly IUserIdKeyResolver _userIdKeyResolver;
 
     private readonly uSyncCapabilityChecker _capabilityChecker;
     private readonly IConfiguration _configuration;
@@ -30,18 +33,20 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
         IEntityService entityService,
         ILogger<TemplateSerializer> logger,
         IShortStringHelper shortStringHelper,
-        IFileService fileService,
         FileSystems fileSystems,
         IConfiguration configuration,
-        uSyncCapabilityChecker capabilityChecker)
+        uSyncCapabilityChecker capabilityChecker,
+        ITemplateService templateService,
+        IUserIdKeyResolver userIdKeyResolver)
         : base(entityService, logger)
     {
-        this._fileService = fileService;
-        this._shortStringHelper = shortStringHelper;
+        _shortStringHelper = shortStringHelper;
 
         _viewFileSystem = fileSystems.MvcViewsFileSystem;
         _configuration = configuration;
         _capabilityChecker = capabilityChecker;
+        _templateService = templateService;
+        _userIdKeyResolver = userIdKeyResolver;
     }
 
     protected override SyncAttempt<ITemplate> ProcessDelete(Guid key, string alias, SerializerFlags flags)
@@ -67,9 +72,9 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
         var details = new List<uSyncChange>();
 
         if (key != Guid.Empty)
-            item = _fileService.GetTemplate(key);
+            item = FindItem(key);
 
-        item ??= _fileService.GetTemplate(alias);
+        item ??= FindItem(alias);
 
         if (item == null)
         {
@@ -229,7 +234,7 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
         if (master != string.Empty && item.MasterTemplateAlias != master)
         {
             logger.LogDebug("Looking for master {master}", master);
-            var masterItem = _fileService.GetTemplate(master);
+            var masterItem = FindItem(master);
             if (masterItem != null && item.MasterTemplateAlias != master)
             {
                 details.AddUpdate("Parent", item.MasterTemplateAlias ?? string.Empty, master);
@@ -297,7 +302,7 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
         while (!string.IsNullOrWhiteSpace(current.MasterTemplateAlias) && level < 20)
         {
             level++;
-            var parent = _fileService.GetTemplate(current.MasterTemplateAlias);
+            var parent = FindItem(current.MasterTemplateAlias);
             if (parent == null) return level;
 
             current = parent;
@@ -307,22 +312,49 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
     }
 
     public override ITemplate? FindItem(int id)
-        => _fileService.GetTemplate(id);
+        => _templateService.GetAsync(id).Result;
 
     public override ITemplate? FindItem(string alias)
-        => _fileService.GetTemplate(alias);
+        => _templateService.GetAsync(alias).Result;
 
     public override ITemplate? FindItem(Guid key)
-        => _fileService.GetTemplate(key);
+        => _templateService.GetAsync(key).Result;
 
     public override void SaveItem(ITemplate item)
-        => _fileService.SaveTemplate(item);
+    {
+        var userKey = Constants.Security.SuperUserKey;
+
+        var existing = _templateService.GetAsync(item.Alias).Result;
+        if (existing is not null)
+        {
+            item.Key = existing.Key;
+            item.Id = existing.Id;
+            item.CreateDate = existing.CreateDate;
+            item.UpdateDate = existing.UpdateDate;
+        }
+
+        logger.LogDebug("Save Template {name} {alias} [{contentLength}] {userKey} {key}", item.Name, item.Alias, item.Content?.Length ?? 0, userKey, item.Key);
+
+        if (existing is null) {
+            var result = _templateService.CreateAsync(item.Name ?? item.Alias, item.Alias, item.Content, userKey, item.Key).Result;
+            logger.LogDebug("Create Template Result: [{key}] {result} {status}", result.Result.Key, result.Success, result.Status);
+        }
+        else
+        {
+            var result = _templateService.UpdateAsync(item, userKey).Result;
+            logger.LogDebug("Update Template Result: [{key}] {result} {status}", item.Key, result.Success, result.Status);
+        }
+
+        var templates = _templateService.GetAllAsync().Result;
+        logger.LogDebug("[Templates]: {count} {names}",
+               templates.Count(), string.Join(",", templates.Select(x => $"{x.Alias}-{x.Key}")));
+    }
 
     public override void Save(IEnumerable<ITemplate> items)
-        => _fileService.SaveTemplate(items);
+        => items.ToList().ForEach(SaveItem);
 
     public override void DeleteItem(ITemplate item)
-        => _fileService.DeleteTemplate(item.Alias);
+        => _templateService.DeleteAsync(item.Alias, Constants.Security.SuperUserKey).Wait();
 
     public override string ItemAlias(ITemplate item)
         => item.Alias;

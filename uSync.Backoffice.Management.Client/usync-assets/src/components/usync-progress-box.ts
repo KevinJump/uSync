@@ -7,10 +7,13 @@ import {
 	nothing,
 	state,
 } from '@umbraco-cms/backoffice/external/lit';
-import { HandlerStatus, SyncHandlerSummary } from '../api';
 import { UmbElementMixin } from '@umbraco-cms/backoffice/element-api';
-import { USYNC_SIGNALR_CONTEXT_TOKEN } from '../signalr/signalr.context.token';
-import type { SyncUpdateMessage } from '../signalr/types';
+import {
+	USYNC_SIGNALR_CONTEXT_TOKEN,
+	SyncUpdateMessage,
+	HandlerStatus,
+	SyncHandlerSummary,
+} from '@jumoo/uSync';
 
 /**
  * Provides the progress box while things happen.

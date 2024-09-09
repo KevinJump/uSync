@@ -6,7 +6,7 @@ import {
 	PerformActionRequest,
 	PerformActionResponse,
 	SyncActionGroup,
-} from '../../api';
+} from '@jumoo/uSync';
 
 export interface SyncActionDataSource {
 	getActions(): Promise<UmbDataSourceResponse<unknown>>;

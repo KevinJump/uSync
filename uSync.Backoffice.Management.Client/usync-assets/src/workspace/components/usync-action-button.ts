@@ -8,7 +8,7 @@ import {
 	state,
 } from '@umbraco-cms/backoffice/external/lit';
 import { UmbLitElement } from '@umbraco-cms/backoffice/lit-element';
-import { SyncActionButton } from '../../api';
+import { SyncActionButton } from '@jumoo/uSync';
 import {
 	UUIButtonState,
 	UUIInterfaceColor,

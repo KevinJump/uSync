@@ -4,8 +4,6 @@ import {
 	UmbObjectState,
 } from '@umbraco-cms/backoffice/observable-api';
 import { UmbContextToken } from '@umbraco-cms/backoffice/context-api';
-
-import { uSyncActionRepository } from '..';
 import { UmbControllerHost } from '@umbraco-cms/backoffice/controller-api';
 import { UmbControllerBase } from '@umbraco-cms/backoffice/class-api';
 import {
@@ -15,16 +13,16 @@ import {
 	uSyncActionView,
 	uSyncHandlerSetSettings,
 	uSyncSettings,
-} from '../api';
-
+	uSyncActionRepository,
+	uSyncConstants,
+	uSyncIconRegistry,
+	SyncPerformActionOptions,
+} from '@jumoo/uSync';
 import uSyncSignalRContext from '../signalr/signalr.context';
 import {
 	UMB_WORKSPACE_CONTEXT,
 	UmbWorkspaceContext,
 } from '@umbraco-cms/backoffice/workspace';
-import { uSyncConstants } from '../constants';
-import { uSyncIconRegistry } from '../icons';
-import { SyncPerformActionOptions } from './types';
 
 /**
  * Context for getting and seting up actions.

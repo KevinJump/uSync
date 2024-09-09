@@ -1,0 +1,17 @@
+{
+	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		"outDir": "./dist",
+		"rootDir": "./src",
+		"emitDeclarationOnly": true,
+		"useDefineForClassFields": false,
+		"moduleDetection": "force",
+		"allowJs": true,
+		"noEmit": false,
+		"composite": true,
+		"sourceMap": false,
+		"declaration": true,
+		"allowArbitraryExtensions": false
+	},
+	"include": ["src/**/*.ts", "src/**/*.js"]
+}

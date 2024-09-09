@@ -1,8 +1,10 @@
 import { UmbControllerHost } from '@umbraco-cms/backoffice/controller-api';
-import { uSyncActionDataSource } from './sources/SyncAction.source';
 import { UmbControllerBase } from '@umbraco-cms/backoffice/class-api';
-import { uSyncSettingsDataSource } from './sources/SyncSettings.source';
-import { uSyncMigrationDataSource } from './sources/SyncMigration.source';
+import {
+	uSyncActionDataSource,
+	uSyncSettingsDataSource,
+	uSyncMigrationDataSource,
+} from '@jumoo/uSync';
 
 /**
  * Request object when peforming an action.

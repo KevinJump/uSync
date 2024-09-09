@@ -6,7 +6,7 @@ import {
 	property,
 	ifDefined,
 } from '@umbraco-cms/backoffice/external/lit';
-import { SyncActionGroup } from '../api';
+import { SyncActionGroup } from '@jumoo/uSync';
 import { UUIButtonState } from '@umbraco-cms/backoffice/external/uui';
 
 /**

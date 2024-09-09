@@ -1,10 +1,13 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using Microsoft.Extensions.Logging;
 
-using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Events;
+using Umbraco.Cms.Core.IO;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Models.Entities;
 using Umbraco.Cms.Core.Notifications;
@@ -34,13 +37,19 @@ public class TemplateHandler : SyncHandlerLevelBase<ITemplate, IFileService>, IS
     INotificationHandler<DeletingNotification<ITemplate>>,
     INotificationHandler<MovingNotification<ITemplate>>
 {
-    private readonly IFileService _fileService;
+    private readonly IFileSystem? _viewFileSystem;
+    private readonly ITemplateService _templateService;
+
+    private readonly ITemplateContentParserService _templateContentParserService;
+
 
     /// <inheritdoc/>
     public TemplateHandler(
         ILogger<TemplateHandler> logger,
         IEntityService entityService,
-        IFileService fileService,
+        ITemplateService templateService,   
+        FileSystems fileSystems,
+        ITemplateContentParserService templateContentParserService,
         AppCaches appCaches,
         IShortStringHelper shortStringHelper,
         SyncFileService syncFileService,
@@ -49,9 +58,64 @@ public class TemplateHandler : SyncHandlerLevelBase<ITemplate, IFileService>, IS
         ISyncItemFactory syncItemFactory)
         : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfig, syncItemFactory)
     {
-        this._fileService = fileService;
+        _templateService = templateService;
+        _viewFileSystem = fileSystems.MvcViewsFileSystem;
+        _templateContentParserService = templateContentParserService;
     }
-    
+
+
+    protected override IReadOnlyList<OrderedNodeInfo> GetMergedItems(string[] folders)
+    {
+        var items = base.GetMergedItems(folders);
+        try
+        {
+            var results = new List<OrderedNodeInfo>();
+            foreach (var item in items)
+            {
+                if (item.Level > 1000)
+                {
+                    results.Add(item);
+                    continue;
+                }
+
+                // top level, lets check they aren't secretly lower down.
+                var templateContent = GetTemplateContent(item.Alias);
+                var masterAlias = _templateContentParserService.MasterTemplateAlias(templateContent);
+                if (string.IsNullOrWhiteSpace(masterAlias) || masterAlias == item.Alias || masterAlias.InvariantEquals("null"))
+                {
+                    results.Add(item);
+                    continue;
+                }
+
+                results.Add(new OrderedNodeInfo(item.FileName, item.Node, item.Level + 10, item.Path, item.IsRoot));
+            }
+
+            return [.. results.OrderBy(x => x.Level)];
+        }
+        catch(Exception ex)
+        {
+            logger.LogWarning(ex, "Error trying to sort the templates");
+            return items; 
+        }
+    }
+
+    private string GetTemplateContent(string alias)
+    {
+        if (_viewFileSystem is null) return string.Empty;
+
+        var templateFileName = _viewFileSystem.GetRelativePath(alias.Replace(" ", "") + ".cshtml");
+        if (templateFileName is null) return string.Empty;
+        if (_viewFileSystem.FileExists(templateFileName) is false) return string.Empty;
+
+        using (var stream = _viewFileSystem.OpenFile(templateFileName))
+        {
+            using (var reader = new StreamReader(stream))
+            {
+                return reader.ReadToEnd();
+            }
+        }
+    }
+
     /// <inheritdoc/>
     public IEnumerable<uSyncAction> ProcessPostImport(string folder, IEnumerable<uSyncAction> actions, HandlerSettings config)
     {
@@ -77,8 +141,7 @@ public class TemplateHandler : SyncHandlerLevelBase<ITemplate, IFileService>, IS
 
     /// <inheritdoc/>
     protected override IEnumerable<IEntity> GetChildItems(int parent)
-        => _fileService.GetTemplates(parent).Where(x => x is IEntity)
-        .Select(x => x as IEntity);
+        => _templateService.GetChildrenAsync(parent).Result;
 
     /// <inheritdoc/>
     protected override IEnumerable<IEntity> GetFolders(int parent)

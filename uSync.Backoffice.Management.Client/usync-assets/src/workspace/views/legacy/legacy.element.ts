@@ -6,12 +6,15 @@ import {
 	state,
 } from '@umbraco-cms/backoffice/external/lit';
 import { UmbLitElement } from '@umbraco-cms/backoffice/lit-element';
-import uSyncWorkspaceContext, { USYNC_CORE_CONTEXT_TOKEN } from '../../workspace.context';
-import { SyncLegacyCheckResponse } from '../../../api';
 import {
 	UMB_CONFIRM_MODAL,
 	UMB_MODAL_MANAGER_CONTEXT,
 } from '@umbraco-cms/backoffice/modal';
+import {
+	uSyncWorkspaceContext,
+	USYNC_CORE_CONTEXT_TOKEN,
+	SyncLegacyCheckResponse,
+} from '@jumoo/uSync';
 
 @customElement('usync-sync-legacy-files')
 export class SyncLegacyFilesElement extends UmbLitElement {

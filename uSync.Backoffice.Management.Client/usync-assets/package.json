@@ -2,7 +2,7 @@
 	"name": "@jumoo/usync-assets",
 	"license": "MPL-2.0",
 	"type": "module",
-	"version": "14.1.0-build.20240909.11",
+	"version": "14.2.0-build.20240909.2",
 	"main": "./dist/usync.js",
 	"types": "./dist/index.d.ts",
 	"module": "./dist/usync.js",
@@ -12,13 +12,15 @@
 	},
 	"exports": {
 		".": "./dist/index.js",
+		"./signalr": "./dist/signalr/index.js",
+		"./api": "./dist/api/index.js",
 		"./components": "./dist/components/index.js",
 		"./constants": "./dist/constants.js",
 		"./tree": "./dist/tree/index.js",
 		"./dialogs": "./dist/dialogs/index.js"
 	},
 	"files": [
-		"./dist"
+		"./dist/**/*"
 	],
 	"repository": {
 		"type": "git",
@@ -32,37 +34,32 @@
 		"email": "info@jumoo.co.uk",
 		"url": "https://jumoo.co.uk"
 	},
-	"config": {
-		"server": "http://localhost:16855",
-		"swagger": "umbraco/swagger/uSync/swagger.json"
-	},
 	"scripts": {
-		"dev": "vite",
+		"client:build": "tsc --project ./tsconfig.dist.json",
+		"client:pack": "npm pack --pack-destination ./pack",
+		"client:publish": "npm publish",
+		"client:make": "npm run client:build && npm run client:pack && npm run client:publish",
+		"client:link": "npm link",
+		"generate": "openapi-ts",
+		"format:fix": "npm run format -- --write",
+		"format": "prettier \"src/**/*.ts\" --check",
 		"build": "tsc && vite build",
-		"preview": "vite preview",
 		"watch": "vite build --watch",
-		"generate": "openapi-ts --input %npm_package_config_server%/%npm_package_config_swagger% --output src/api --debug true --enums typescript --lint true --schemas false",
-		"dist": "tsc && vite build --config ./vite.dist.config.ts && npm pack --pack-destination ./pack ",
-		"format": "prettier --write \"./**/*.{js,jsx,mjs,cjs,ts,tsx,json}\"",
-		"package:clean": "del-cli --force ./dist",
-		"package:build": "tsc --project ./src/tsconfig.dist.json",
-		"package:pack": "npm run pack --pack-destination ./pack"
-	},
-	"dependencies": {
-		"@microsoft/signalr": "^8.0.0",
-		"diff": "^5.2.0",
-		"lit": "^3.1.0"
+		"make": "npm run build && npm run client:make"
 	},
 	"devDependencies": {
-		"@hey-api/openapi-ts": "^0.37.3",
-		"@types/diff": "^5.0.9",
+		"@hey-api/openapi-ts": "^0.53.0",
+		"@microsoft/signalr": "^8.0.0",
+		"@types/diff": "^5.2.2",
 		"@types/node": "^20.11.20",
 		"@umbraco-cms/backoffice": "^14.0.0",
 		"del-cli": "^5.1.0",
-		"prettier": "^3.2.5",
-		"typescript": "^5.2.2",
-		"vite": "^5.1.7",
-		"vite-plugin-dts": "^3.7.3",
-		"vite-plugin-static-copy": "^1.0.1"
+		"diff": "^7.0.0",
+		"lit": "^3.2.0",
+		"prettier": "^3.3.3",
+		"typescript": "^5.5.4",
+		"vite": "^5.4.3",
+		"vite-plugin-dts": "^4.2.1",
+		"vite-plugin-static-copy": "^1.0.6"
 	}
 }
