@@ -26,11 +26,11 @@ internal class TagMigratingConfigSerializer : ConfigurationSerializerBase, IConf
 
 		if (storageType is int storageInt is false) return configuration;
 
-        var typeString = storageInt == 0 ? "csv" : "Json";
+        var typeString = storageInt == 0 ? "Csv" : "Json";
 		// if storage type is a number.
 		configuration.Remove("StorageType");
 
-		configuration.Add("storageType", new string[] { typeString });
+		configuration.Add("storageType", typeString );
 
 		return configuration;
 
