@@ -1019,7 +1019,16 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 		if (item != null)
 			return Export(item, folders, settings);
 
-		return uSyncAction.Fail(nameof(udi), this.handlerType, this.ItemType, ChangeType.Fail, $"Item not found {udi}",
+        if (udi.IsRoot && settings.CreateClean)
+        {
+            // for roots we still can create a clean
+            var targetFolder = folders.Last();
+            var filename = Path.Combine(targetFolder, $"{Guid.Empty}.{this.uSyncConfig.Settings.DefaultExtension}");
+            CreateCleanFile(Guid.Empty, filename);
+        }
+
+
+        return uSyncAction.Fail(nameof(udi), this.handlerType, this.ItemType, ChangeType.Fail, $"Item not found {udi}",
 			 new KeyNotFoundException(nameof(udi)))
 			.AsEnumerableOfOne();
 	}
@@ -1170,7 +1179,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 	/// </summary>
 	protected void CreateCleanFile(Guid key, string filename)
 	{
-		if (string.IsNullOrWhiteSpace(filename) || key == Guid.Empty)
+		if (string.IsNullOrWhiteSpace(filename))
 			return;
 
 		var folder = Path.GetDirectoryName(filename);

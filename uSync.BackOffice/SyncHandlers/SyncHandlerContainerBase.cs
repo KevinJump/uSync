@@ -121,7 +121,18 @@ public abstract class SyncHandlerContainerBase<TObject, TService>
         if (actions == null || !actions.Any())
             return Enumerable.Empty<uSyncAction>();
 
-        return CleanFolders(-1);
+        var results = new List<uSyncAction>();
+
+        // we only do deletes here. 
+        foreach (var action in actions.Where(x => x.Change == ChangeType.Hidden))
+        {
+            if (action.FileName is null) continue;
+            results.AddRange(Import(action.FileName, config, SerializerFlags.LastPass));
+        }
+
+        results.AddRange(CleanFolders(-1));
+
+        return results;
     }
 
     /// <summary>

@@ -163,11 +163,11 @@ public static class uSyncBackOfficeBuilderExtensions
         builder.AddNotificationHandler<WebhookSavedNotification, WebhookHandler>();
         builder.AddNotificationHandler<WebhookDeletedNotification, WebhookHandler>();
 
-            // roots - pre-notifications for stopping things
-            builder
-                .AddNotificationHandler<ContentTypeSavingNotification, ContentTypeHandler>()
-                .AddNotificationHandler<ContentTypeDeletingNotification, ContentTypeHandler>()
-                .AddNotificationHandler<ContentTypeMovingNotification, ContentTypeHandler>()
+        // roots - pre-notifications for stopping things
+        builder
+            .AddNotificationHandler<ContentTypeSavingNotification, ContentTypeHandler>()
+            .AddNotificationHandler<ContentTypeDeletingNotification, ContentTypeHandler>()
+            .AddNotificationHandler<ContentTypeMovingNotification, ContentTypeHandler>()
 
             .AddNotificationHandler<MediaTypeSavingNotification, MediaTypeHandler>()
             .AddNotificationHandler<MediaTypeDeletingNotification, MediaTypeHandler>()
@@ -196,11 +196,11 @@ public static class uSyncBackOfficeBuilderExtensions
             .AddNotificationHandler<RelationTypeDeletingNotification, RelationTypeHandler>()
 
 
-                .AddNotificationHandler<TemplateSavingNotification, TemplateHandler>()
-                .AddNotificationHandler<TemplateDeletingNotification, TemplateHandler>()
-                
-                .AddNotificationHandler<WebhookSavingNotification, WebhookHandler>()
-                .AddNotificationHandler<WebhookDeletingNotification, WebhookHandler>();
+            .AddNotificationHandler<TemplateSavingNotification, TemplateHandler>()
+            .AddNotificationHandler<TemplateDeletingNotification, TemplateHandler>()
+
+            .AddNotificationHandler<WebhookSavingNotification, WebhookHandler>()
+            .AddNotificationHandler<WebhookDeletingNotification, WebhookHandler>();
 
 
         // content ones

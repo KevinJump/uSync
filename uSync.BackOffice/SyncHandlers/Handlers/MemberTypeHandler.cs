@@ -24,7 +24,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers;
 /// </summary>
 [SyncHandler(uSyncConstants.Handlers.MemberTypeHandler, "Member Types", "MemberTypes", uSyncConstants.Priorites.MemberTypes,
     IsTwoPass = true, Icon = "icon-users", EntityType = UdiEntityType.MemberType)]
-public class MemberTypeHandler : ContentTypeBaseHandler<IMemberType, IMemberTypeService>, ISyncHandler, ISyncGraphableHandler,
+public class MemberTypeHandler : ContentTypeBaseHandler<IMemberType, IMemberTypeService>, ISyncHandler, ISyncPostImportHandler, ISyncGraphableHandler,
     INotificationHandler<SavedNotification<IMemberType>>,
     INotificationHandler<MovedNotification<IMemberType>>,
     INotificationHandler<DeletedNotification<IMemberType>>,

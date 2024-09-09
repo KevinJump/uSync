@@ -44,6 +44,18 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
         _capabilityChecker = capabilityChecker;
     }
 
+    protected override SyncAttempt<ITemplate> ProcessDelete(Guid key, string alias, SerializerFlags flags)
+    {
+        if (flags.HasFlag(SerializerFlags.LastPass))
+        {
+            logger.LogDebug("Processing deletes as part of the last pass");
+            return base.ProcessDelete(key, alias, flags);
+        }
+
+        logger.LogDebug("Delete not processing as this is not the final pass");
+        return SyncAttempt<ITemplate>.Succeed(alias, ChangeType.Hidden);
+    }
+
     protected override SyncAttempt<ITemplate> DeserializeCore(XElement node, SyncSerializerOptions options)
     {
         var key = node.GetKey();
