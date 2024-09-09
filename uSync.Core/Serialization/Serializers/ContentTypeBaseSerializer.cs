@@ -863,20 +863,17 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
                 if (TabClashesWithExisting(item, tab.Alias, tab.Type))
                     tab.Alias = SyncPropertyGroupHelpers.GetTempTabAlias(tab.Alias);
 
-                logger.LogInformation("Explicit Tabs  : {list}", string.Join(",", item.PropertyGroups.Select(x => x.Alias)));
-                logger.LogInformation("Inherited Tabs : {list}", string.Join(",", item.CompositionPropertyGroups.Select(x => x.Alias)));
-
                 // v14: if the tab is a child (group) - then we might need to create a parent tab
                 if (tab.Depth > 0)
                 {
                     var tabRoot = tab.Alias.Split('/')[0];
                     if (item.PropertyGroups.Contains(tabRoot))
                     {
-                        logger.LogInformation("Parent Tab {tabRoot} already exists", tabRoot);
+                        logger.LogDebug("Parent Tab {tabRoot} already exists", tabRoot);
                     }
                     else
                     {
-                        logger.LogInformation("Parent Tab {tabRoot} doesn't exist, creating", tabRoot);
+                        logger.LogDebug("Parent Tab {tabRoot} doesn't exist, creating", tabRoot);
 
                         var compositionParent = item.CompositionPropertyGroups.FirstOrDefault(x => x.Alias.InvariantEquals(tabRoot));
                         if (compositionParent != null)
