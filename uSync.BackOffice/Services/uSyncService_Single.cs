@@ -148,7 +148,7 @@ public partial class uSyncService
                                 if (node.IsContent() && node.IsBlueprint())
                                 {
                                     lastType = UdiEntityType.DocumentBlueprint;
-                                    handlerPair = _handlerFactory.GetValidHandlerByEntityType(UdiEntityType.DocumentBlueprint);
+                                    handlerPair = _handlerFactory.GetValidHandlerByEntityType(UdiEntityType.DocumentBlueprint, syncHandlerOptions);
                                 }
                             }
 
