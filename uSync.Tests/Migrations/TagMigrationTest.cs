@@ -16,9 +16,7 @@ internal class TagMigrationTest : MigrationTestBase
 }";
 	private static string Target = @"{
   ""group"": ""taggroup"",
-  ""storageType"": [
-    ""csv""
-  ]
+  ""storageType"": ""Csv""
 }";
 
 	[Test]
