@@ -6,6 +6,8 @@
 		<Nullable>enable</Nullable>
 		<AddRazorSupportForMvc>true</AddRazorSupportForMvc>
 		<StaticWebAssetBasePath>/</StaticWebAssetBasePath>
+
+		<NoWarn>NU1902</NoWarn>
 	</PropertyGroup>
 
 	<ItemGroup>

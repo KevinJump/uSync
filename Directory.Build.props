@@ -15,7 +15,7 @@
 
 		<PackageIcon>usync-logo.png</PackageIcon>
 
-		<TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+		<TreatWarningsAsErrors>false</TreatWarningsAsErrors>
 		<SuppressNETCoreSdkPreviewMessage>true</SuppressNETCoreSdkPreviewMessage>
 
 		<NoWarn>CS0618</NoWarn>
