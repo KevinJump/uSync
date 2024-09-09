@@ -76,6 +76,8 @@ public class MediaTypeSerializer : ContentTypeBaseSerializer<IMediaType>, ISyncS
         details.AddRange(DeserializeTabs(item, node));
         details.AddRange(DeserializeProperties(item, node, options));
 
+        details.AddRange(DeserializeCompositions(item, node));
+
         CleanTabs(item, node, options);
 
         return DeserializedResult(item, details, options);
