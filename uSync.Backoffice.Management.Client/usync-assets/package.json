@@ -1,8 +1,8 @@
 {
-	"name": "@jumoo/usync-assets",
+	"name": "@jumoo/usync",
 	"license": "MPL-2.0",
 	"type": "module",
-	"version": "14.2.0-build.20240909.2",
+	"version": "14.2.0-build.20240909.5",
 	"main": "./dist/usync.js",
 	"types": "./dist/index.d.ts",
 	"module": "./dist/usync.js",
