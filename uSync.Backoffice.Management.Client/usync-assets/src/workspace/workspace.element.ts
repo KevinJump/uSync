@@ -5,6 +5,7 @@ import {
 	css,
 	customElement,
 	html,
+	state,
 } from '@umbraco-cms/backoffice/external/lit';
 
 import { uSyncWorkspaceContext, uSyncConstants } from '@jumoo/uSync';
@@ -14,6 +15,9 @@ import './views/default/default.element.js';
 @customElement('usync-workspace-root')
 export class uSyncWorkspaceRootElement extends UmbElementMixin(LitElement) {
 	#workspaceContext: uSyncWorkspaceContext;
+
+	@state()
+	version: string = uSyncConstants.version;
 
 	constructor() {
 		super();
@@ -25,13 +29,19 @@ export class uSyncWorkspaceRootElement extends UmbElementMixin(LitElement) {
 		});
 	}
 
+	async connectedCallback() {
+		super.connectedCallback();
+		const addons = await this.#workspaceContext.getAddons();
+		this.version = `v${addons?.version ?? uSyncConstants.version}`;
+	}
+
 	render() {
 		return html`
 			<umb-workspace-editor .enforceNoFooter=${true}>
 				<div slot="header" class="header">
 					<div>
 						<strong><umb-localize key="uSync_name"></umb-localize></strong><br /><em
-							>(${uSyncConstants.version})</em
+							>${this.version}</em
 						>
 					</div>
 				</div>

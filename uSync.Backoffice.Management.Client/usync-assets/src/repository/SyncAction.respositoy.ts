@@ -85,6 +85,10 @@ export class uSyncActionRepository extends UmbControllerBase {
 		return await this.#settingsDataSource.getSettings();
 	}
 
+	async getAddons() {
+		return await this.#settingsDataSource.getAddons();
+	}
+
 	/**
 	 * Get the handler settings based on the set.
 	 * @param setName name of the handler set in the configuration

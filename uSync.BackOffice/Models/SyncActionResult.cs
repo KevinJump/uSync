@@ -16,7 +16,7 @@ public class SyncActionResult
     /// Construct a new SyncActionResult object
     /// </summary>
     /// <param name="actions">list of actions to include</param>
-    public SyncActionResult(IEnumerable<uSyncAction> actions)
+    public SyncActionResult(List<uSyncAction> actions)
     {
         this.Actions = actions;
     }
@@ -24,5 +24,5 @@ public class SyncActionResult
     /// <summary>
     /// List of actions performed by process
     /// </summary>
-    public IEnumerable<uSyncAction> Actions { get; set; } = [];
+    public List<uSyncAction> Actions { get; set; } = [];
 }

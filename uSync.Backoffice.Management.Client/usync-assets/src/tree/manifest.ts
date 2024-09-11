@@ -32,7 +32,7 @@ const menuItem: ManifestMenuItem = {
 	element: uSyncMenuElement,
 	meta: {
 		label: 'uSync',
-		icon: 'icon-infinity',
+		icon: 'usync-logo',
 		entityType: 'usync-root',
 		menus: [menuConstants.alias],
 	},

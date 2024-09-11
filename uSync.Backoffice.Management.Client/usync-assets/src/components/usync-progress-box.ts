@@ -14,6 +14,7 @@ import {
 	HandlerStatus,
 	SyncHandlerSummary,
 } from '@jumoo/uSync';
+import { UUIInterfaceColor } from '@umbraco-cms/backoffice/external/uui';
 
 /**
  * Provides the progress box while things happen.
@@ -46,16 +47,21 @@ export class uSyncProcessBox extends UmbElementMixin(LitElement) {
 	@property({ type: Array })
 	actions?: Array<SyncHandlerSummary>;
 
+	@property({ type: Boolean })
+	complete: boolean = false;
+
 	render() {
 		if (!this.actions) return nothing;
 
 		var actionHtml = this.actions?.map((action) => {
 			return html`
 				<div
+					style="position: relative;"
 					class="action 
                     ${action.status == HandlerStatus.COMPLETE ? 'complete' : ''} 
                     ${action.status == HandlerStatus.PROCESSING ? 'working' : ''}">
 					<uui-icon .name=${action.icon ?? 'icon-box'}></uui-icon>
+					${this.renderBadge(action)}
 					<h5>${action.name ?? 'unknown'}</h5>
 				</div>
 			`;
@@ -68,6 +74,26 @@ export class uSyncProcessBox extends UmbElementMixin(LitElement) {
 				<div class="update-box">${this.updateMsg?.message}</div>
 			</uui-box>
 		`;
+	}
+
+	renderBadge(action: SyncHandlerSummary) {
+		if (action.status == HandlerStatus.PENDING) return;
+		if (action.status == HandlerStatus.PROCESSING) {
+			return html`<uui-badge color="positive" look="default">
+				<uui-icon name="icon-sync"></uui-icon
+			></uui-badge>`;
+		}
+
+		const color: UUIInterfaceColor = action.inError ? 'warning' : 'positive';
+		const label = action.inError
+			? 'Some errors occured duing import'
+			: 'Changes imported successfully';
+
+		if (!this.complete || action.changes == 0)
+			return html`<uui-badge .color=${color} look="default" title=${label}
+				><uui-icon name="icon-check"></uui-icon
+			></uui-badge>`;
+		return html`<uui-badge .color=${color} title=${label}>${action.changes}</uui-badge>`;
 	}
 
 	static styles = css`
@@ -100,6 +126,10 @@ export class uSyncProcessBox extends UmbElementMixin(LitElement) {
 
 		.action uui-icon {
 			font-size: var(--uui-type-h3-size);
+		}
+
+		.action uui-badge uui-icon {
+			font-size: 16px;
 		}
 
 		.complete {

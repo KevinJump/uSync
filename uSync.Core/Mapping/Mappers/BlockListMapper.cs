@@ -26,7 +26,7 @@ public class BlockListMapper : SyncNestedJsonValueMapperBase, ISyncMapper
 
     public override string[] Editors => [
         Constants.PropertyEditors.Aliases.BlockList,
-        "Umbraco.BlockGrid"];
+        Constants.PropertyEditors.Aliases.BlockGrid];
 
     protected override JsonNode? GetImportProperty(object value)
     {
@@ -37,7 +37,6 @@ public class BlockListMapper : SyncNestedJsonValueMapperBase, ISyncMapper
 
         if (stringValue.TryParseToJsonNode(out var jsonNode) is false || jsonNode is null)
             return stringValue.ConvertToJsonNode() ?? default; ;
-
 
         // we have to get the json, the serialize the json,
         // this is to make sure we don't serialize any formatting

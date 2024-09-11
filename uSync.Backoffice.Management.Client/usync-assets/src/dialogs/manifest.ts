@@ -14,4 +14,11 @@ const legacyModal: ManifestModal = {
 	js: () => import('./legacy-modal-element.js'),
 };
 
-export const manifests = [modal, legacyModal];
+const errorModal: ManifestModal = {
+	type: 'modal',
+	alias: 'usync.error.modal',
+	name: 'uSync error modal',
+	js: () => import('./error-modal-element.js'),
+};
+
+export const manifests = [modal, legacyModal, errorModal];

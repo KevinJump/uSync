@@ -15,7 +15,6 @@ import {
 	uSyncSettings,
 	uSyncActionRepository,
 	uSyncConstants,
-	uSyncIconRegistry,
 	SyncPerformActionOptions,
 } from '@jumoo/uSync';
 import uSyncSignalRContext from '../signalr/signalr.context';
@@ -38,7 +37,6 @@ export class uSyncWorkspaceContext
 	}
 
 	#repository: uSyncActionRepository;
-	#uSyncIconRegistry: uSyncIconRegistry;
 	#signalRContext: uSyncSignalRContext | null = null;
 
 	/**
@@ -93,8 +91,6 @@ export class uSyncWorkspaceContext
 		this.provideContext(UMB_WORKSPACE_CONTEXT, this);
 
 		this.#repository = new uSyncActionRepository(this);
-		this.#uSyncIconRegistry = new uSyncIconRegistry();
-		this.#uSyncIconRegistry.attach(this);
 
 		this.#signalRContext = new uSyncSignalRContext(this);
 	}
@@ -119,6 +115,13 @@ export class uSyncWorkspaceContext
 		if (data) {
 			this.#settings.setValue(data);
 		}
+
+		return data;
+	}
+
+	async getAddons() {
+		const { data } = await this.#repository.getAddons();
+		return data;
 	}
 
 	/**

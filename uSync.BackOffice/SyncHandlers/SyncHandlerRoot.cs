@@ -579,7 +579,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 		catch (Exception ex)
 		{
 			logger.LogWarning("[{alias}] ImportElement Failed : {exception}", this.Alias, ex.ToString());
-			return uSyncAction.Fail(Path.GetFileName(filename), this.handlerType, this.ItemType, ChangeType.Fail,
+			return uSyncAction.Fail(Path.GetFileName(filename), this.Alias, this.ItemType, ChangeType.Fail,
 				$"{this.Alias} Import Fail: {ex.Message}", new Exception(ex.Message))
 				.AsEnumerableOfOne();
 		}
@@ -1233,7 +1233,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 		actions.AddRange(ReportDeleteCheck(uSyncConfig.GetRootFolder(), validationActions));
 
 		CleanCaches(cacheKey);
-		callback?.Invoke("Done", 3, 3);
+		callback?.Invoke($"Done ({this.ItemType})", 3, 3);
 		return actions;
 	}
 

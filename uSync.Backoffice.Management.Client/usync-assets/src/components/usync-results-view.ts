@@ -7,7 +7,7 @@ import {
 	css,
 	state,
 } from '@umbraco-cms/backoffice/external/lit';
-import { uSyncActionView } from '@jumoo/uSync';
+import { ChangeType, USYNC_ERROR_MODAL, uSyncActionView } from '@jumoo/uSync';
 import { UmbElementMixin } from '@umbraco-cms/backoffice/element-api';
 import {
 	UMB_MODAL_MANAGER_CONTEXT,
@@ -53,6 +53,20 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
 		if (!data) return;
 	}
 
+	async #viewError(result: uSyncActionView) {
+		const modal = this.#modalContext?.open(this, USYNC_ERROR_MODAL, {
+			data: {
+				action: result,
+			},
+		});
+
+		const data = await modal?.onSubmit().catch(() => {
+			return;
+		});
+
+		return data;
+	}
+
 	render() {
 		this.changeCount = 0;
 
@@ -63,8 +77,10 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
 
 			this.changeCount++;
 
+			const classes = result.success ? 'success' : 'error';
+
 			return html`
-				<uui-table-row>
+				<uui-table-row class=${classes}>
 					<uui-table-cell
 						><uui-icon .name=${result.success ? 'icon-check' : 'icon-wrong'}></uui-icon
 					></uui-table-cell>
@@ -74,7 +90,7 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
 					<uui-table-cell
 						>${result.details.length > 0
 							? this.renderDetailsButton(result)
-							: nothing}</uui-table-cell
+							: this.renderMessage(result)}</uui-table-cell
 					>
 				</uui-table-row>
 			`;
@@ -134,6 +150,19 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
 		`;
 	}
 
+	renderMessage(result: uSyncActionView) {
+		return (result.change != ChangeType.FAIL &&
+			result.change != ChangeType.IMPORT_FAIL) ||
+			!result.message
+			? nothing
+			: html` <uui-button
+					look="default"
+					color="warning"
+					label="View error"
+					compact
+					@click=${() => this.#viewError(result)}></uui-button>`;
+	}
+
 	static styles = css`
 		:host {
 			display: block;
@@ -156,6 +185,10 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
 			font-size: var(--uui-type-h5-size);
 			text-align: center;
 			font-weight: 900;
+		}
+
+		.error {
+			background-color: #fce4ec;
 		}
 	`;
 }

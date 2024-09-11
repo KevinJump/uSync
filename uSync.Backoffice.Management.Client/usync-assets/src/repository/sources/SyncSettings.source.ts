@@ -29,4 +29,8 @@ export class uSyncSettingsDataSource implements SyncSettingsDataSource {
 			SettingsService.getHandlerSetSettings({ id: setName }),
 		);
 	}
+
+	async getAddons() {
+		return await tryExecuteAndNotify(this.#host, SettingsService.getAddOns());
+	}
 }

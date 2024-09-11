@@ -205,7 +205,7 @@ internal class uSyncManagementService : ISyncManagementService
                 RequestId = requestId.ToString(),
                 Actions = finalActions.Select(x => x.ToActionView()),
                 Complete = true,
-                Status = GetSummaries(handlers, actionRequest.StepNumber)
+                Status = GetSummaries(handlers, actionRequest.StepNumber, finalActions)
             };
         }
 
@@ -229,7 +229,7 @@ internal class uSyncManagementService : ISyncManagementService
         {
             RequestId = requestId.ToString(),
             Actions = results.Actions.Select(x => x.ToActionView()),
-            Status = GetSummaries(handlers, actionRequest.StepNumber),
+            Status = GetSummaries(handlers, actionRequest.StepNumber, results.Actions.ToList() ),
             Complete = false
         };
     }
@@ -244,16 +244,21 @@ internal class uSyncManagementService : ISyncManagementService
         return requestId;
     }
 
-    private IEnumerable<SyncHandlerSummary> GetSummaries(List<SyncHandlerView> handlers, int step)
+    private IEnumerable<SyncHandlerSummary> GetSummaries(List<SyncHandlerView> handlers, int step, List<uSyncAction> actions)
     {
+        var nextStep = step + 1;
         for (int n = 0; n < handlers.Count; n++)
         {
+            var handlerActions = actions.Where(x => x.HandlerAlias?.Equals(handlers[n].Alias, StringComparison.OrdinalIgnoreCase) is true).ToList();
+
             yield return new SyncHandlerSummary
             {
                 Name = handlers[n].Name,
                 Icon = handlers[n].Icon,
-                Status = n < step ? HandlerStatus.Complete :
-                     n == step ? HandlerStatus.Processing : HandlerStatus.Pending
+                Status = n < nextStep ? HandlerStatus.Complete :
+                      n == nextStep ? HandlerStatus.Processing : HandlerStatus.Pending,
+                Changes = handlerActions.Count(x => x.Change > Core.ChangeType.NoChange),
+                InError = handlerActions.Any(x => x.Change >= Core.ChangeType.Fail)
             };
         }
     }

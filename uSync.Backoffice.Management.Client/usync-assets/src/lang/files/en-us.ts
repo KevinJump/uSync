@@ -37,6 +37,9 @@ export default {
 		legacyIgnoreTitle: 'Ignore legacy files',
 		legacyIgnoreContent:
 			'Are you sure you want to ignore the files in the legacy uSync folder?',
+
+		errorHeader:
+			'This item encountered an error during the process, the details are below:',
 	},
 	uSyncSettings: {
 		settings: 'uSync Settings',

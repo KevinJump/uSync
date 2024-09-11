@@ -43,7 +43,7 @@ const workspaceViews: Array<ManifestWorkspaceView> = [
 		meta: {
 			label: 'Default',
 			pathname: 'default',
-			icon: 'icon-infinity',
+			icon: 'usync-logo',
 		},
 		conditions: [
 			{

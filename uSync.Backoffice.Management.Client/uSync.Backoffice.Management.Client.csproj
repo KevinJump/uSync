@@ -12,4 +12,9 @@
 	  <Folder Include="usync-assets\pack\" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<PackageReference Include="Umbraco.Cms.Infrastructure" Version="14.2.0" />
+	</ItemGroup>
+
+
 </Project>

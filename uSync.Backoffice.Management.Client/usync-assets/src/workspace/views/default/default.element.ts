@@ -165,9 +165,7 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 		return html`
 			<umb-empty-state>
 				<h2>
-					<usync-icon-registry>
-						<uui-icon name="usync-logo"></uui-icon>
-					</usync-icon-registry>
+					<uui-icon name="usync-logo"></uui-icon>
 					<umb-localize key="uSync_banner"></umb-localize>
 				</h2>
 			</umb-empty-state>
@@ -180,7 +178,8 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 		return html`
 			<usync-progress-box
 				.title=${this._group?.groupName ?? 'doh!'}
-				.actions=${this._workingActions}></usync-progress-box>
+				.actions=${this._workingActions}
+				.complete=${this._completed}></usync-progress-box>
 		`;
 	}
 
