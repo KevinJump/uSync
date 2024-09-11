@@ -16,7 +16,7 @@
     var umbracoPath = Model.UmbracoPath ?? "/umbraco";
     var uSyncPath = umbracoPath + "/section/settings/workspace/usync-root/view/default";
 
-    var root = uSyncConfig.GetRootFolder();
+    var root = uSyncConfig.GetFolders().LastOrDefault() ?? "uSync/v14/";
     var hasSyncContent = uSyncService.HasContentFiles(root);
 }
 <!doctype html>
