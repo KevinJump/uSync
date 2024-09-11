@@ -171,7 +171,8 @@ public partial class uSyncService
                     }
                     finally
                     {
-                        scope.Complete();
+                        _logger.LogDebug("Imported {count} items", actions.Count);
+                        scope?.Complete();
                     }
 
                 }
@@ -237,7 +238,7 @@ public partial class uSyncService
                     }
                     finally
                     {
-                        scope.Complete();
+                        scope?.Complete();
                     }
                 }
 

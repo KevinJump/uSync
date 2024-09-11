@@ -185,9 +185,20 @@ public class uSyncSettings
     ///  
     ///  until we have had time to look at this , we will leave this as 
     ///  disabled by default so all notification messages fire.
+    ///  
+    ///  for v13 thius is fine, but for v14, grouping the notifications
+    ///  can causes issues if something fails. 
+    ///   
+    ///  So if a single content import fails then the whole batch doesn't 
+    ///  get published properly (so no content for you :( ) .
+    ///  
+    ///  there might be something downlever we can do, but it likey means
+    ///  lots of core investigation to find that, for now 'old' school
+    ///  non suppressed notifications should be fine (if a little slower).
+    /// 
     /// </remarks>
-    [DefaultValue("false")]
-    public bool DisableNotificationSuppression { get; set; } = false;
+    [DefaultValue("true")]
+    public bool DisableNotificationSuppression { get; set; } = true;
 
     /// <summary>
     ///  trigger all the notifications in a background thread, 

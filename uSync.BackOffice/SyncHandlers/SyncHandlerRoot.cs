@@ -332,7 +332,9 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 		CleanCaches(cacheKey);
 		options.Callbacks?.Update?.Invoke("Done", 3, 3);
 
-		return actions;
+		logger.LogDebug("ImportAll: {count} items imported", actions.Count);
+
+        return actions;
 	}
 
 	/// <summary>
@@ -495,7 +497,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 		}
 		catch (Exception ex)
 		{
-			logger.LogWarning("{alias}: Import Failed : {exception}", this.Alias, ex.ToString());
+			logger.LogWarning("[{alias}] Import Failed : {exception}", this.Alias, ex.ToString());
 			return uSyncAction.Fail(Path.GetFileName(filePath), this.handlerType, this.ItemType, ChangeType.Fail, $"Import Fail: {ex.Message}", new Exception(ex.Message, ex))
 				.AsEnumerableOfOne();
 		}
@@ -576,7 +578,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 		}
 		catch (Exception ex)
 		{
-			logger.LogWarning("{alias}: Import Failed : {exception}", this.Alias, ex.ToString());
+			logger.LogWarning("[{alias}] ImportElement Failed : {exception}", this.Alias, ex.ToString());
 			return uSyncAction.Fail(Path.GetFileName(filename), this.handlerType, this.ItemType, ChangeType.Fail,
 				$"{this.Alias} Import Fail: {ex.Message}", new Exception(ex.Message))
 				.AsEnumerableOfOne();

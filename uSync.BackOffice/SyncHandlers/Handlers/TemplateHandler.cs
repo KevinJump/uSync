@@ -63,7 +63,7 @@ public class TemplateHandler : SyncHandlerLevelBase<ITemplate, IFileService>, IS
         _templateContentParserService = templateContentParserService;
     }
 
-
+    /// <inheritdoc/>
     protected override IReadOnlyList<OrderedNodeInfo> GetMergedItems(string[] folders)
     {
         var items = base.GetMergedItems(folders);

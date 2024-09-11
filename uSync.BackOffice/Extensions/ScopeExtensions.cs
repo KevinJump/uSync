@@ -20,7 +20,7 @@ internal static class ScopeExtensions
             : scope.Notifications.Suppress();
 
 
-    public static ICoreScope CreateNotificationScope(
+    public static ICoreScope? CreateNotificationScope(
         this ICoreScopeProvider scopeProvider,
         IEventAggregator eventAggregator,
         ILoggerFactory loggerFactory,
@@ -29,6 +29,8 @@ internal static class ScopeExtensions
         IBackgroundTaskQueue? backgroundTaskQueue,
         SyncUpdateCallback? callback)
     {
+        if (syncConfigService.Settings.DisableNotificationSuppression)
+            return null;
 
         var notificationPublisher = new SyncScopedNotificationPublisher(
             eventAggregator,
