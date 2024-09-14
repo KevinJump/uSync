@@ -1,4 +1,6 @@
-﻿using System.Text.Json.Nodes;
+﻿using Microsoft.Extensions.Logging;
+
+using System.Text.Json.Nodes;
 
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Services;
@@ -13,8 +15,14 @@ namespace uSync.Core.Mapping.Mappers;
 
 public class MediaPicker3Mapper : SyncValueMapperBase, ISyncMapper
 {
-    public MediaPicker3Mapper(IEntityService entityService) : base(entityService)
-    { }
+    private readonly ILogger<MediaPicker3Mapper> _logger;
+
+    public MediaPicker3Mapper(
+        IEntityService entityService,
+        ILogger<MediaPicker3Mapper> logger) : base(entityService)
+    {
+        _logger = logger;
+    }
 
     public override string Name => "MediaPicker3 Mapper";
 
@@ -50,7 +58,10 @@ public class MediaPicker3Mapper : SyncValueMapperBase, ISyncMapper
         var stringValue = value?.ToString();
 
         if (stringValue.TryParseToJsonArray(out var images) is false || images == null || images.Count == 0)
+        {
+            _logger.LogWarning("no json images found for {value}", stringValue);
             return [];
+        }
 
         var dependencies = new List<uSyncDependency>();
 
@@ -59,12 +70,9 @@ public class MediaPicker3Mapper : SyncValueMapperBase, ISyncMapper
             if (image == null) continue;
 
             var key = GetGuidValue(image, "mediaKey");
-
             if (key == Guid.Empty) continue;
 
             var udi = GuidUdi.Create(UdiEntityType.Media, key);
-            if (udi is null) continue;
-
             var dependency = CreateDependency(udi as GuidUdi, flags);
             if (dependency is not null) dependencies.Add(dependency);
         }
@@ -76,12 +84,11 @@ public class MediaPicker3Mapper : SyncValueMapperBase, ISyncMapper
     {
         if (obj != null && obj.ContainsKey(key))
         {
-            var attempt = obj[key].TryConvertTo<Guid>();
-            if (attempt.Success)
-                return attempt.Result;
+            var attempt = obj[key]?.ToString().TryConvertTo<Guid>();
+            if (attempt?.Success is true)
+                return attempt?.Result ?? Guid.Empty;
         }
 
         return Guid.Empty;
-
     }
 }
