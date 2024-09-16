@@ -17,12 +17,7 @@ internal class uSyncManagementCache : ISyncManagementCache
         => Guid.NewGuid();
 
     public List<uSyncAction> GetCachedActions(Guid id)
-    {
-        if (_actionCache.TryGetValue(id, out var actions))
-            return actions;
-
-        return new List<uSyncAction>();
-    }
+        => _actionCache.TryGetValue(id, out var actions) ? actions : [];
 
     public bool IsValid(Guid id)
         => true;

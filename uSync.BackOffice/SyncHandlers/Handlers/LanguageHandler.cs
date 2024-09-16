@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Xml.Linq;
 
 using Microsoft.Extensions.Logging;
@@ -85,7 +86,7 @@ public class LanguageHandler : SyncHandlerBase<ILanguage, ILocalizationService>,
 
         try
         {
-            Dictionary<string, string> ordered = new Dictionary<string, string>();
+            Dictionary<string, string> ordered = [];
             foreach (var file in files)
             {
                 var node = XElement.Load(file);
@@ -181,7 +182,7 @@ public class LanguageHandler : SyncHandlerBase<ILanguage, ILocalizationService>,
             // 
             if (item.Id == 0)
             {
-                newLanguages[item.IsoCode] = item.CultureName;
+                newLanguages.TryAdd(item.IsoCode, item.CultureName);
                 // is new, we want to set this as a flag, so we don't do the full content save.n
                 // newLanguages.Add(item.IsoCode);
             }
@@ -196,10 +197,9 @@ public class LanguageHandler : SyncHandlerBase<ILanguage, ILocalizationService>,
         foreach (var item in notification.SavedEntities)
         {
             bool newItem = false;
-            if (newLanguages.Count > 0 && newLanguages.ContainsKey(item.IsoCode))
-            {
+
+            if (newLanguages.TryRemove(item.IsoCode, out var _)) {
                 newItem = true;
-                newLanguages.TryRemove(item.IsoCode, out string? name);
             }
 
             var targetFolders = GetDefaultHandlerFolders();

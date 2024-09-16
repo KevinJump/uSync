@@ -1,4 +1,5 @@
-﻿using System.Web;
+﻿using System.Collections.Concurrent;
+using System.Web;
 using System.Xml.Linq;
 
 using Microsoft.Extensions.Logging;
@@ -128,12 +129,17 @@ public abstract class SyncContainerSerializerBase<TObject>
         if (item.ParentId <= 0) return default;
         // return GetFolderNode(GetContainers(item));
 
-        if (!_folderCache.ContainsKey(item.ParentId))
+        if (_folderCache.TryGetValue(item.ParentId, out var folder) && folder is not null)
+            return folder;
+
+        var node = GetFolderNode(GetContainers(item));
+        if (node is not null)
         {
-            var node = GetFolderNode(GetContainers(item));
-            if (node is not null) _folderCache[item.ParentId] = node;
+            _folderCache.TryAdd(item.ParentId, node);
+            return folder;
         }
-        return _folderCache[item.ParentId];
+
+        return default;
     }
 
     protected abstract IEnumerable<EntityContainer> GetContainers(TObject item);
@@ -224,7 +230,7 @@ public abstract class SyncContainerSerializerBase<TObject>
     /// <remarks>
     ///  only used on serialization, allows us to only build the folder path for a set of containers once.
     /// </remarks>
-    private Dictionary<int, XElement> _folderCache = [];
+    private ConcurrentDictionary<int, XElement> _folderCache = [];
 
     private void ClearFolderCache()
         => _folderCache = [];

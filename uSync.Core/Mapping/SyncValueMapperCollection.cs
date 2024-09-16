@@ -1,4 +1,6 @@
-﻿using Umbraco.Cms.Core.Composing;
+﻿using System.Collections.Concurrent;
+
+using Umbraco.Cms.Core.Composing;
 using Umbraco.Extensions;
 
 using uSync.Core.Cache;
@@ -9,7 +11,7 @@ namespace uSync.Core.Mapping;
 public class SyncValueMapperCollection
         : BuilderCollectionBase<ISyncMapper>
 {
-    private readonly Dictionary<string, string> _customMappings;
+    private readonly ConcurrentDictionary<string, string> _customMappings;
 
     public SyncEntityCache EntityCache { get; private set; }
 
@@ -118,12 +120,7 @@ public class SyncValueMapperCollection
     ///  looks up the alias for a mapper (replacing it from settings if need be)
     /// </summary>
     private string GetMapperAlias(string alias)
-    {
-        if (_customMappings.ContainsKey(alias.ToLower()))
-            return _customMappings[alias.ToLower()];
-
-        return alias;
-    }
+        => _customMappings.TryGetValue(alias.ToLower(), out var mappedAlias) ? mappedAlias : alias;
 }
 
 public class SyncValueMapperCollectionBuilder
