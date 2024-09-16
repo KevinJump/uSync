@@ -2,7 +2,7 @@
 	"name": "@jumoo/usync",
 	"license": "MPL-2.0",
 	"type": "module",
-	"version": "14.2.1-build.20240914.1",
+	"version": "14.2.1",
 	"main": "./dist/usync.js",
 	"types": "./dist/index.d.ts",
 	"module": "./dist/usync.js",

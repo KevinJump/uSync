@@ -11,6 +11,7 @@ using Umbraco.Cms.Core.DependencyInjection;
 using Umbraco.Cms.Core.Notifications;
 using Umbraco.Cms.Web.Common.ApplicationBuilder;
 
+using uSync.BackOffice.Authorization;
 using uSync.BackOffice.Boot;
 using uSync.BackOffice.Cache;
 using uSync.BackOffice.Configuration;
@@ -84,6 +85,7 @@ public static class uSyncBackOfficeBuilderExtensions
 
         builder.Services.AddTransient<ISyncLegacyService, SyncLegacyService>();
 
+        builder.Services.AddSingleton<IAuthorizationHandler, uSyncAllowedApplicationHandler>();
         builder.Services.AddAuthorization(o => CreatePolicies(o));
 
         builder.Services.AddTransient<ISyncActionService, SyncActionService>();
@@ -246,10 +248,10 @@ public static class uSyncBackOfficeBuilderExtensions
     private static void CreatePolicies(AuthorizationOptions options,
         string backofficeAuthenticationScheme = Constants.Security.BackOfficeAuthenticationType)
     {
-        //options.AddPolicy(SyncAuthorizationPolicies.TreeAccessuSync, policy =>
-        //{
-        //    policy.AuthenticationSchemes.Add(backofficeAuthenticationScheme);
-        //    policy.Requirements.Add(new TreeRequirement(uSync.Trees.uSync));
-        //});
+        options.AddPolicy(SyncAuthorizationPolicies.TreeAccessuSync, policy =>
+        {
+            policy.AuthenticationSchemes.Add(backofficeAuthenticationScheme);
+            policy.Requirements.Add(new uSyncApplicationRequirement(Constants.Applications.Settings));
+        });
     }
 }
