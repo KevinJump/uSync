@@ -136,7 +136,7 @@ public abstract class SyncContainerSerializerBase<TObject>
         if (node is not null)
         {
             _folderCache.TryAdd(item.ParentId, node);
-            return folder;
+            return node;
         }
 
         return default;
