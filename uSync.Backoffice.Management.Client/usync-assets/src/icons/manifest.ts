@@ -1,6 +1,4 @@
-import { ManifestIcons } from '@umbraco-cms/backoffice/extension-registry';
-
-const icons: ManifestIcons = {
+const icons: UmbExtensionManifest = {
 	type: 'icons',
 	alias: 'usync.icons',
 	name: 'uSync Icons',

@@ -1,8 +1,3 @@
-import {
-	ManifestMenu,
-	ManifestMenuItem,
-	ManifestTypes,
-} from '@umbraco-cms/backoffice/extension-registry';
 import { uSyncMenuElement } from '@jumoo/uSync';
 
 const sectionAlias = 'Umb.Section.Settings';
@@ -14,7 +9,7 @@ const menuConstants = {
 	rootElement: 'usync-root',
 };
 
-const menu: ManifestMenu = {
+const menu: UmbExtensionManifest = {
 	type: 'menu',
 	alias: menuConstants.alias,
 	name: menuConstants.name,
@@ -25,7 +20,7 @@ const menu: ManifestMenu = {
 	},
 };
 
-const menuItem: ManifestMenuItem = {
+const menuItem: UmbExtensionManifest = {
 	type: 'menuItem',
 	alias: 'usync.menu.item',
 	name: 'uSync menu item',
@@ -38,7 +33,7 @@ const menuItem: ManifestMenuItem = {
 	},
 };
 
-const menuSidebarApp: ManifestTypes = {
+const menuSidebarApp: UmbExtensionManifest = {
 	type: 'sectionSidebarApp',
 	kind: 'menu',
 	alias: 'usync.sidebarapp',
