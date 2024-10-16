@@ -26,12 +26,6 @@ public interface ISyncPostImportHandler
     /// <param name="actions">List of actions containing items that require post import processing</param>
     /// <param name="config">Handler settings to use for processing</param>
     /// <returns>List of actions detailing post import changes</returns>
-    IEnumerable<uSyncAction> ProcessPostImport(IEnumerable<uSyncAction> actions, HandlerSettings config)
-        => ProcessPostImport(string.Empty, actions, config);
+    IEnumerable<uSyncAction> ProcessPostImport(IEnumerable<uSyncAction> actions, HandlerSettings config);
 
-    /// <summary>
-    ///  Process import of a folder. 
-    /// </summary>
-    [Obsolete("Folder is not required on post import will be removed in v15")]
-    IEnumerable<uSyncAction> ProcessPostImport(string folder, IEnumerable<uSyncAction> actions, HandlerSettings config);
 }

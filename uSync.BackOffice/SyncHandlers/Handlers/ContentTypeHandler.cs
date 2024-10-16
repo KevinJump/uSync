@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
+using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Events;
 using Umbraco.Cms.Core.Models;
@@ -24,7 +26,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers;
 /// </summary>
 [SyncHandler(uSyncConstants.Handlers.ContentTypeHandler, "DocTypes", "ContentTypes", uSyncConstants.Priorites.ContentTypes,
         IsTwoPass = true, Icon = "icon-item-arrangement", EntityType = UdiEntityType.DocumentType)]
-public class ContentTypeHandler : ContentTypeBaseHandler<IContentType, IContentTypeService>, ISyncHandler, ISyncPostImportHandler, ISyncGraphableHandler,
+public class ContentTypeHandler : ContentTypeBaseHandler<IContentType>, ISyncHandler, ISyncPostImportHandler, ISyncGraphableHandler,
     INotificationHandler<SavedNotification<IContentType>>,
     INotificationHandler<DeletedNotification<IContentType>>,
     INotificationHandler<MovedNotification<IContentType>>,
@@ -33,9 +35,8 @@ public class ContentTypeHandler : ContentTypeBaseHandler<IContentType, IContentT
     INotificationHandler<SavingNotification<IContentType>>,
     INotificationHandler<MovingNotification<IContentType>>,
     INotificationHandler<DeletingNotification<IContentType>>
-
 {
-    private readonly IContentTypeService _contentTypeService;
+    private readonly IContentTypeContainerService _contentTypeContainerService;
 
     /// <summary>
     ///  Constructor - loaded via DI
@@ -43,16 +44,16 @@ public class ContentTypeHandler : ContentTypeBaseHandler<IContentType, IContentT
     public ContentTypeHandler(
         ILogger<ContentTypeHandler> logger,
         IEntityService entityService,
-        IContentTypeService contentTypeService,
         AppCaches appCaches,
         IShortStringHelper shortStringHelper,
         SyncFileService syncFileService,
         uSyncEventService mutexService,
         uSyncConfigService uSyncConfig,
-        ISyncItemFactory syncItemFactory)
+        ISyncItemFactory syncItemFactory,
+        IContentTypeContainerService contentTypeContainerService)
         : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfig, syncItemFactory)
     {
-        this._contentTypeService = contentTypeService;
+        _contentTypeContainerService = contentTypeContainerService;
     }
 
     /// <summary>
@@ -70,22 +71,9 @@ public class ContentTypeHandler : ContentTypeBaseHandler<IContentType, IContentT
         return item.Name?.ToSafeFileName(shortStringHelper) ?? item.Key.ToString();
     }
 
+    protected override async Task<IEntity?> GetContainerAsync(Guid key)
+        => await _contentTypeContainerService.GetAsync(key);
 
-    /// <summary>
-    ///  Fetch a ContentType container via the ContentTypeService
-    /// </summary>
-    protected override IEntity? GetContainer(int id)
-        => _contentTypeService.GetContainer(id);
-
-    /// <summary>
-    ///  Fetch a ContentType container via the ContentTypeService
-    /// </summary>
-    protected override IEntity? GetContainer(Guid key)
-        => _contentTypeService.GetContainer(key);
-
-    /// <summary>
-    ///  Delete a ContentType container via the ContentTypeService
-    /// </summary>
-    protected override void DeleteFolder(int id)
-        => _contentTypeService.DeleteContainer(id);
+    protected override async Task DeleteFolderAsync(Guid key)
+        => await _contentTypeContainerService.DeleteAsync(key, Constants.Security.SuperUserKey);
 }

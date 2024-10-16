@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 
 using Microsoft.Extensions.Logging;
@@ -36,15 +37,14 @@ namespace uSync.BackOffice.SyncHandlers;
 /// alias in different containers. 
 /// </para>
 /// </remarks>
-public abstract class SyncHandlerContainerBase<TObject, TService>
-    : SyncHandlerTreeBase<TObject, TService>
+public abstract class SyncHandlerContainerBase<TObject>
+    : SyncHandlerTreeBase<TObject>
     where TObject : ITreeEntity
-    where TService : IService
 {
 
     /// <inheritdoc/>
     protected SyncHandlerContainerBase(
-        ILogger<SyncHandlerContainerBase<TObject, TService>> logger,
+        ILogger<SyncHandlerContainerBase<TObject>> logger,
         IEntityService entityService,
         AppCaches appCaches,
         IShortStringHelper shortStringHelper,
@@ -54,13 +54,6 @@ public abstract class SyncHandlerContainerBase<TObject, TService>
         ISyncItemFactory syncItemFactory)
         : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfig, syncItemFactory)
     { }
-
-    /// <summary>
-    ///  Removes any empty 'containers' after import 
-    /// </summary>
-    [Obsolete("We don't need to pass the folder. will be removed in v15")]
-    protected IEnumerable<uSyncAction> CleanFolders(string folder, int parent)
-        => CleanFolders(parent);
 
     /// <summary>
     ///  Removes any empty 'containers' after import 
@@ -105,8 +98,10 @@ public abstract class SyncHandlerContainerBase<TObject, TService>
     /// <summary>
     /// delete a container
     /// </summary>
-    abstract protected void DeleteFolder(int id);
+    [Obsolete("Delete by key - will be removed in v16")]
+    virtual protected void DeleteFolder(int id) { }
 
+    abstract protected Task DeleteFolderAsync(Guid key);
     /// <summary>
     /// Handle events at the end of any import 
     /// </summary>

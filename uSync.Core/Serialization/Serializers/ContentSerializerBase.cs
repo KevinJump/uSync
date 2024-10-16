@@ -27,14 +27,14 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
 
     protected readonly IShortStringHelper shortStringHelper;
 
-    protected ILocalizationService localizationService;
+    protected ILanguageService _languageService;
     protected IRelationService relationService;
 
     protected string relationAlias = string.Empty;
 
     public ContentSerializerBase(
         IEntityService entityService,
-        ILocalizationService localizationService,
+        ILanguageService languageService,
         IRelationService relationService,
         IShortStringHelper shortStringHelper,
         ILogger<ContentSerializerBase<TObject>> logger,
@@ -47,7 +47,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         this.umbracoObjectType = umbracoObjectType;
         this.syncMappers = syncMappers;
 
-        this.localizationService = localizationService;
+        _languageService = languageService;
         this.relationService = relationService;
     }
 
@@ -117,10 +117,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         return null;
     }
 
-    /// <summary>
-    ///  Serialize the Info - (Item Attributes) Node
-    /// </summary>
-    protected virtual XElement SerializeInfo(TObject item, SyncSerializerOptions options)
+    protected virtual async Task<XElement> SerializeInfoAsync(TObject item, SyncSerializerOptions options)
     {
         var info = new XElement(uSyncConstants.Xml.Info);
 
@@ -137,7 +134,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
             }
             else
             {
-                var parent = FindItem(item.ParentId);
+                var parent = await FindItemAsync(item.Key);
                 if (parent != null)
                 {
                     parentKey = parent.Key;
@@ -304,12 +301,12 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
     protected virtual object? GetPropertyValue(IPropertyValue value)
         => value.EditedValue;
 
-    protected override SyncAttempt<TObject> CanDeserialize(XElement node, SyncSerializerOptions options)
+    protected override async Task<SyncAttempt<TObject>> CanDeserializeAsync(XElement node, SyncSerializerOptions options)
     {
         if (options.FailOnMissingParent)
         {
             // check the parent exists. 
-            if (!this.HasParentItem(node))
+            if (!(await this.HasParentItemAsync(node)))
             {
                 return SyncAttempt<TObject>.Fail(node.GetAlias(), ChangeType.ParentMissing, $"The parent node for this item is missing, and configuration is set to not import when a parent is missing");
 
@@ -318,7 +315,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         return SyncAttempt<TObject>.Succeed("No check", ChangeType.NoChange);
     }
 
-    protected virtual IEnumerable<uSyncChange> DeserializeBase(TObject item, XElement node, SyncSerializerOptions options)
+    protected virtual async Task<IEnumerable<uSyncChange>> DeserializeBaseAsync(TObject item, XElement node, SyncSerializerOptions options)
     {
         var info = node?.Element(uSyncConstants.Xml.Info);
         if (node is null || info is null) return [];
@@ -344,14 +341,14 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
                 }
                 else
                 {
-                    var parent = FindParent(parentNode, false);
+                    var parent = await FindParentAsync(parentNode, false);
                     if (parent == null)
                     {
                         var friendlyPath = info.Element(uSyncConstants.Xml.Path).ValueOrDefault(string.Empty);
                         if (!string.IsNullOrWhiteSpace(friendlyPath))
                         {
                             logger.LogDebug("Find Parent failed, will search by path {FriendlyPath}", friendlyPath);
-                            parent = FindParentByPath(friendlyPath);
+                            parent = await FindParentByPathAsync(friendlyPath);
                         }
                     }
 
@@ -530,7 +527,8 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
                                 //
                                 // if the content config thinks it should vary by culture, but the document type doesn't
                                 // then we can check if this is default language, and use that to se the value
-                                if (!culture.InvariantEquals(localizationService.GetDefaultLanguageIsoCode()))
+                                
+                                if (!culture.InvariantEquals(_languageService.GetDefaultIsoCodeAsync().Result))
                                 {
                                     // this culture is not the default for the site, so don't use it to 
                                     // set the single language value.
@@ -556,7 +554,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
                                 if (values.Count == 1)
                                 {
                                     // there is only one value - so we should set the default variant with this for consistency?
-                                    culture = localizationService.GetDefaultLanguageIsoCode();
+                                    culture = _languageService.GetDefaultIsoCodeAsync().Result;
                                     logger.LogDebug("Property {Alias} contains a single value that has no culture setting default culture {Culture}", alias, culture);
                                 }
                                 else
@@ -693,9 +691,9 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
 
     // these are the functions using the simple 'getItem(alias)' 
     // that we cannot use for content/media trees.
-    protected override Attempt<TObject?> FindOrCreate(XElement node)
+    protected override async Task<Attempt<TObject?>> FindOrCreateAsync(XElement node)
     {
-        var item = FindItem(node);
+        var item = await FindItemAsync(node);
         if (item is not null)
             return Attempt.Succeed(item);
 
@@ -708,7 +706,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
 
         if (parentKey != Guid.Empty)
         {
-            item = FindItem(alias, parentKey);
+            item = await FindItemAsync(alias, parentKey);
             if (item is not null)
                 return Attempt.Succeed(item);
         }
@@ -718,13 +716,13 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
 
         if (parentKey != Guid.Empty)
         {
-            parent = FindItem(parentKey);
+            parent = await FindItemAsync(parentKey);
         }
 
         var contentTypeAlias = node.Element(uSyncConstants.Xml.Info)?
             .Element("ContentType").ValueOrDefault(node.Name.LocalName) ?? node.Name.LocalName;
 
-        return CreateItem(alias, parent, contentTypeAlias);
+        return await CreateItemAsync(alias, parent, contentTypeAlias);
     }
 
     protected override string GetItemBaseType(XElement node)
@@ -790,10 +788,9 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
             return path;
         }
     }
-
-    public override SyncAttempt<XElement> SerializeEmpty(TObject item, SyncActionType change, string alias)
+    public override async Task<SyncAttempt<XElement>> SerializeEmptyAsync(TObject item, SyncActionType change, string alias)
     {
-        var attempt = base.SerializeEmpty(item, change, alias);
+        var attempt = await base.SerializeEmptyAsync(item, change, alias);
         if (attempt.Success && attempt.Item is not null)
         {
             attempt.Item.Add(new XAttribute(uSyncConstants.Xml.Level, GetLevel(item)));
@@ -804,12 +801,12 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
     #region Finders 
     // Finders - used on importing, getting things that are already there (or maybe not)
 
-    public override TObject? FindItem(XElement node)
+    public override async Task<TObject?> FindItemAsync(XElement node)
     {
         var (key, alias) = FindKeyAndAlias(node);
         if (key != Guid.Empty)
         {
-            var item = FindItem(key);
+            var item = await FindItemAsync(key);
             if (item != null) return item;
         }
 
@@ -817,7 +814,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         var parentKey = node.Attribute(uSyncConstants.Xml.Parent).ValueOrDefault(Guid.Empty);
         if (parentKey != Guid.Empty)
         {
-            var item = FindItem(alias, parentKey);
+            var item = await FindItemAsync(alias, parentKey);
             if (item != null)
                 return item;
         }
@@ -827,52 +824,52 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         return default;
     }
 
-    public override TObject? FindItem(string alias)
+    public override Task<TObject?> FindItemAsync(string alias)
     {
         // For content based items we can't reliably do this - because names can be the same
         // across the content tree. but we should have overridden all classes that call this 
         // function above.
-        return default;
+        return Task.FromResult<TObject?>(default);
     }
 
-    protected virtual TObject? FindItem(string alias, Guid parentKey)
+    protected virtual async Task<TObject?> FindItemAsync(string alias, Guid parentKey)
     {
-        var parentItem = FindItem(parentKey);
+        var parentItem = await FindItemAsync(parentKey);
         if (parentItem != null)
         {
-            return FindItem(alias, parentItem);
+            return await FindItemAsync(alias, parentItem);
         }
         else if (parentKey == Guid.Empty)
         {
-            FindAtRoot(alias);
+            return FindAtRootAsync(alias).Result;
         }
 
         return default;
     }
 
-    protected virtual TObject? FindItem(string alias, TObject? parent)
+    protected virtual async Task<TObject?> FindItemAsync(string alias, TObject? parent)
     {
         if (parent != null)
         {
             var children = entityService.GetChildren(parent.Id, this.umbracoObjectType);
             var child = children.FirstOrDefault(x => x.Name?.ToSafeAlias(shortStringHelper)?.InvariantEquals(alias) is true);
             if (child != null)
-                return FindItem(child.Id);
+                return await FindItemAsync(child.Key);
         }
         else
         {
-            return FindAtRoot(alias);
+            return await FindAtRootAsync(alias);
         }
 
         return default;
     }
 
-    protected abstract TObject? FindAtRoot(string alias);
+    protected abstract Task<TObject?> FindAtRootAsync(string alias);
 
     public override string ItemAlias(TObject item)
         => item.Name ?? item.Id.ToString();
 
-    protected TObject? FindParent(XElement node, bool searchByAlias = false)
+    protected async Task<TObject?> FindParentAsync(XElement node, bool searchByAlias = false)
     {
         var item = default(TObject);
 
@@ -882,7 +879,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         if (key != Guid.Empty)
         {
             logger.LogTrace("Looking for Parent by Key {Key}", key);
-            item = FindItem(key);
+            item = await FindItemAsync(key);
             if (item != null) return item;
         }
 
@@ -892,25 +889,27 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
             logger.LogTrace("Looking for Parent by Alias {Alias}", alias);
             if (!string.IsNullOrEmpty(alias))
             {
-                item = FindItem(node.ValueOrDefault(alias));
+                item = await FindItemAsync(node.ValueOrDefault(alias));
             }
         }
 
         return item;
     }
-    protected TObject? FindParentByPath(string path, bool failIfNotExact = false)
+
+    protected async Task<TObject?> FindParentByPathAsync(string path, bool failIfNotExact = false)
     {
         // logger.Debug(serializerType, "Looking for Parent by path {Path}", path);
         var folders = path.ToDelimitedList("/").ToList();
-        return FindByPath(folders.Take(folders.Count - 1), failIfNotExact);
+        return await FindByPathAsync(folders.Take(folders.Count - 1), failIfNotExact);
     }
-    protected TObject? FindByPath(IEnumerable<string> folders, bool failIfNotExact)
+
+    protected async Task<TObject?> FindByPathAsync(IEnumerable<string> folders, bool failIfNotExact)
     {
         var item = default(TObject);
         foreach (var folder in folders)
         {
             logger.LogTrace("Looking for Item in folder {folder}", folder);
-            var next = FindItem(folder, item);
+            var next = await FindItemAsync(folder, item);
             if (next == null)
             {
                 // if we get lost 1/2 way we are returning that as the path? which would put us in an odd place?
@@ -947,7 +946,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
     ///  Will first look for the parent based on the key, if this fails
     ///  we look based on friendly path, which might help.
     /// </remarks>
-    protected override bool HasParentItem(XElement node)
+    protected override async Task<bool> HasParentItemAsync(XElement node)
     {
         var info = node.Element(uSyncConstants.Xml.Info);
         var parentNode = info?.Element(uSyncConstants.Xml.Parent);
@@ -955,13 +954,13 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
 
         if (parentNode.Attribute(uSyncConstants.Xml.Key).ValueOrDefault(Guid.Empty) == Guid.Empty) return true;
 
-        var parent = FindParent(parentNode, false);
+        var parent = await FindParentAsync(parentNode, false);
         if (parent == null)
         {
             var friendlyPath = info?.Element(uSyncConstants.Xml.Path).ValueOrDefault(string.Empty) ?? string.Empty;
             if (!string.IsNullOrWhiteSpace(friendlyPath))
             {
-                parent = FindParentByPath(friendlyPath, true);
+                parent = await FindParentByPathAsync(friendlyPath, true);
             }
         }
 
@@ -1063,5 +1062,35 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         }
     }
 
+
+    /// <summary>
+    ///  Serialize the Info - (Item Attributes) Node
+    /// </summary>
+    //[Obsolete("Use SerializeInfoAsync will be removed in v16")]
+    //protected virtual XElement SerializeInfo(TObject item, SyncSerializerOptions options)
+    //    => SerializeInfoAsync(item, options).Result;
+    //[Obsolete("Use FindItemAsync will be removed in v16")]
+    //protected virtual TObject? FindItem(string alias, Guid parentKey)
+    //    => FindItemAsync(alias, parentKey).Result;
+
+    //[Obsolete("Use FindItemAsync will be removed in v16")]
+    //protected virtual TObject? FindItem(string alias, TObject? parent)
+    //    => FindItemAsync(alias, parent).Result;
+    //[Obsolete("Use FindItemAsync will be removed in v16")]
+    //protected abstract TObject? FindAtRoot(string alias);
+
+    //[Obsolete("Use FindItemAsync will be removed in v16")]
+    //protected TObject? FindParent(XElement node, bool searchByAlias = false)
+    //    => FindParentAsync(node, searchByAlias).Result;
+    //[Obsolete("Use FindParentAsync will be removed in v16")]
+    //protected TObject? FindParentByPath(string path, bool failIfNotExact = false)
+    //    => FindParentByPathAsync(path, failIfNotExact).Result;
+
+    //[Obsolete("Use FindItemAsync will be removed in v16")]
+    //protected TObject? FindByPath(IEnumerable<string> folders, bool failIfNotExact)
+    //    => FindByPathAsync(folders, failIfNotExact).Result;
+    //[Obsolete("Use DeserializeBaseAsync will be removed in v16")]
+    //protected virtual IEnumerable<uSyncChange> DeserializeBase(TObject item, XElement node, SyncSerializerOptions options)
+    //    => DeserializeBaseAsync(item, node, options).Result;
 
 }

@@ -23,7 +23,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers;
 /// </summary>
 [SyncHandler(uSyncConstants.Handlers.ContentTemplateHandler, "Blueprints", "Blueprints", uSyncConstants.Priorites.ContentTemplate
     , Icon = "icon-blueprint", IsTwoPass = true, EntityType = UdiEntityType.DocumentBlueprint)]
-public class ContentTemplateHandler : ContentHandlerBase<IContent, IContentService>, ISyncHandler,
+public class ContentTemplateHandler : ContentHandlerBase<IContent>, ISyncHandler,
     INotificationHandler<ContentSavedBlueprintNotification>,
     INotificationHandler<ContentDeletedBlueprintNotification>
 {

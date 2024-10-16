@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
@@ -23,10 +24,9 @@ namespace uSync.BackOffice.SyncHandlers;
 /// <summary>
 ///  Base class for any Handlers that manage IEntity type objects
 /// </summary>
-public abstract class SyncHandlerBase<TObject, TService>
+public abstract class SyncHandlerBase<TObject>
     : SyncHandlerRoot<TObject, IEntity>, ISyncCleanEntryHandler
     where TObject : IEntity
-    where TService : IService
 {
 
     /// <summary>
@@ -37,7 +37,7 @@ public abstract class SyncHandlerBase<TObject, TService>
 
     /// <inheritdoc/>
     public SyncHandlerBase(
-        ILogger<SyncHandlerBase<TObject, TService>> logger,
+        ILogger<SyncHandlerBase<TObject>> logger,
         IEntityService entityService,
         AppCaches appCaches,
         IShortStringHelper shortStringHelper,
@@ -175,18 +175,15 @@ public abstract class SyncHandlerBase<TObject, TService>
     /// <summary>
     /// Export all items under a suppled parent id
     /// </summary>
+    [Obsolete("Will be removed in v15")]
     virtual public IEnumerable<uSyncAction> ExportAll(int parentId, string folder, HandlerSettings config, SyncUpdateCallback? callback)
     {
         var parent = GetFromService(parentId);
         return ExportAll(parent, folder, config, callback);
     }
 
-    /// <inheritdoc/>
-    protected override IEnumerable<IEntity> GetChildItems(IEntity? parent)
-    {
-        if (parent == null) return GetChildItems(-1);
-        return GetChildItems(parent.Id);
-    }
+    protected override async Task<IEnumerable<IEntity>> GetChildItemsAsync(IEntity? parent)
+        => await GetChildItemsAsync(parent?.Key ?? Guid.Empty);
 
     /// <summary>
     ///  Get all child items beneath a given item
@@ -195,6 +192,20 @@ public abstract class SyncHandlerBase<TObject, TService>
     ///  Almost everything does this - but languages can't so we need to 
     ///  let the language Handler override this. 
     /// </remarks>
+
+    /// <summary>
+    ///  Get all child items beneath a given item
+    /// </summary>
+    [Obsolete("use GetChildItemsAsync will be removed in v16")]
+    virtual protected IEnumerable<IEntity> GetChildItems(int parent)
+    {
+        var entity = entityService.Get(parent);
+        if (entity is null) return [];
+        
+        return GetChildItemsAsync(entity.Key).Result;
+    }
+
+    [Obsolete("use GetChildItemsAsync will be removed in v16")]
     virtual protected IEnumerable<IEntity> GetChildItems(int parent, UmbracoObjectTypes objectType)
     {
         var cacheKey = $"{GetCacheKeyBase()}_parent_{parent}_{objectType}";
@@ -219,21 +230,45 @@ public abstract class SyncHandlerBase<TObject, TService>
 
     }
 
-    /// <summary>
-    ///  Get all child items beneath a given item
-    /// </summary>
-    virtual protected IEnumerable<IEntity> GetChildItems(int parent)
+    virtual protected async Task<IEnumerable<IEntity>> GetChildItemsAsync(Guid key)
     {
         if (this.itemObjectType == UmbracoObjectTypes.Unknown)
             return Enumerable.Empty<IEntity>();
 
-        return GetChildItems(parent, this.itemObjectType);
+        return await GetChildItemsAsync(key, this.itemObjectType);
+    }
+
+    virtual protected async Task<IEnumerable<IEntity>> GetChildItemsAsync(Guid key, UmbracoObjectTypes objectType)
+    {
+        var cacheKey = $"{GetCacheKeyBase()}_parent_{key}_{objectType}";
+
+        return runtimeCache.GetCacheItem(cacheKey, () =>
+        {
+            // logger.LogDebug("Cache miss [{key}]", cacheKey);
+            if (key == Guid.Empty)
+            {
+                return entityService.GetChildren(key, objectType);
+            }
+            else
+            {
+                // If you ask for the type then you get more info, and there is extra db calls to 
+                // load it, so GetChildren without the object type is quicker. 
+
+                var item = entityService.Get(key);
+                if (item is null) return [];
+                // but we need to know that we only get our type so we then filter.
+                var guidType = ObjectTypes.GetGuid(objectType);
+                return entityService.GetChildren(item.Id).Where(x => x.NodeObjectType == guidType);
+            }
+        }, null) ?? [];
 
     }
+
 
     /// <summary>
     /// Get all 'folders' beneath a given item (usally these are Container items)
     /// </summary>
+    [Obsolete("Use GetFoldersAsync will be removed in v16")]
     virtual protected IEnumerable<IEntity> GetFolders(int parent)
     {
         if (this.itemContainerType != UmbracoObjectTypes.Unknown)
@@ -242,11 +277,26 @@ public abstract class SyncHandlerBase<TObject, TService>
         return [];
     }
 
+    virtual protected async Task<IEnumerable<IEntity>> GetFoldersAsync(Guid key)
+    {
+        if (this.itemContainerType == UmbracoObjectTypes.Unknown)
+            return await Task.FromResult(Enumerable.Empty<IEntity>());
+        
+        return await Task.FromResult<IEnumerable<IEntity>>(entityService.GetChildren(key, this.itemContainerType));
+    }
+
     /// <inheritdoc/>
+    [Obsolete("Use GetFoldersAsync will be removed in v16")]
     protected override IEnumerable<IEntity> GetFolders(IEntity? parent)
     {
         if (parent is null) return GetFolders(-1);
         return GetFolders(parent.Id);
+    }
+
+    protected override async Task<IEnumerable<IEntity>> GetFoldersAsync(IEntity? parent)
+    {
+        if (parent is null) return await GetFoldersAsync(Guid.Empty);
+        return await GetFoldersAsync(parent.Key);
     }
 
     /// <inheritdoc/>

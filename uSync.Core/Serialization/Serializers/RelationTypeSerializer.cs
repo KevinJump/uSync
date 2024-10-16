@@ -26,7 +26,7 @@ public class RelationTypeSerializer
         this._relationService = relationService;
     }
 
-    protected override SyncAttempt<IRelationType> DeserializeCore(XElement node, SyncSerializerOptions options)
+    protected override async Task<SyncAttempt<IRelationType>> DeserializeCoreAsync(XElement node, SyncSerializerOptions options)
     {
         var key = node.GetKey();
         var alias = node.GetAlias();
@@ -39,7 +39,7 @@ public class RelationTypeSerializer
         var bidirectional = info?.Element("Bidirectional").ValueOrDefault(false) ?? false;
         var isDependency = info?.Element("IsDependency").ValueOrDefault(true) ?? true;
 
-        var item = FindItem(node);
+        var item = await FindItemAsync(node);
 
         item ??= CreateRelation(name, alias, bidirectional, parentType, childType, isDependency);
 
@@ -88,7 +88,7 @@ public class RelationTypeSerializer
         if (options.GetSetting<bool>("IncludeRelations", false))
         {
             // we have to save before we can add the relations. 
-            this.SaveItem(item);
+            await this.SaveItemAsync(item);
             hasBeenSaved = true;
             message = "Relation items included";
             details.AddRange(DeserializeRelations(node, item, options));
@@ -164,7 +164,7 @@ public class RelationTypeSerializer
         return base.IsValid(node);
     }
 
-    protected override SyncAttempt<XElement> SerializeCore(IRelationType item, SyncSerializerOptions options)
+    protected override async Task<SyncAttempt<XElement>> SerializeCoreAsync(IRelationType item, SyncSerializerOptions options)
     {
         var node = this.InitializeBaseNode(item, item.Alias);
 
@@ -260,22 +260,19 @@ public class RelationTypeSerializer
 
 
     // control methods.
-
-    public override void DeleteItem(IRelationType item)
+    public override async Task DeleteItemAsync(IRelationType item)
         => _relationService.Delete(item);
 
-    public override IRelationType? FindItem(int id)
-        => _relationService.GetRelationTypeById(id);
-
-    public override IRelationType? FindItem(Guid key)
+    public override async Task<IRelationType?> FindItemAsync(Guid key)
         => _relationService.GetRelationTypeById(key); // ??
 
-    public override IRelationType? FindItem(string alias)
+    public override async Task<IRelationType?> FindItemAsync(string alias)
         => _relationService.GetRelationTypeByAlias(alias);
+
 
     public override string ItemAlias(IRelationType item)
         => item.Alias;
 
-    public override void SaveItem(IRelationType item)
+    public override async Task SaveItemAsync(IRelationType item)
         => _relationService.Save(item);
 }

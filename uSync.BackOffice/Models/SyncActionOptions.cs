@@ -34,12 +34,6 @@ public class SyncActionOptions
     public IEnumerable<uSyncAction> Actions { get; set; } = [];
 
     /// <summary>
-    ///  the folder (has to be in the uSync folder) you want to import
-    /// </summary>
-    [Obsolete("Pass array of folders for merging, will be removed in v15")]
-    public string? Folder { get; set; }
-
-    /// <summary>
     ///  array of usync folders you want to import - files will be merged as part of the process.
     /// </summary>
     public string[] Folders { get; set; } = [];

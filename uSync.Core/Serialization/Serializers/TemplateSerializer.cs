@@ -49,19 +49,19 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
         _userIdKeyResolver = userIdKeyResolver;
     }
 
-    protected override SyncAttempt<ITemplate> ProcessDelete(Guid key, string alias, SerializerFlags flags)
+    protected override async Task<SyncAttempt<ITemplate>> ProcessDeleteAsync(Guid key, string alias, SerializerFlags flags)
     {
         if (flags.HasFlag(SerializerFlags.LastPass))
         {
             logger.LogDebug("Processing deletes as part of the last pass");
-            return base.ProcessDelete(key, alias, flags);
+            return await base.ProcessDeleteAsync(key, alias, flags);
         }
 
         logger.LogDebug("Delete not processing as this is not the final pass");
         return SyncAttempt<ITemplate>.Succeed(alias, ChangeType.Hidden);
     }
 
-    protected override SyncAttempt<ITemplate> DeserializeCore(XElement node, SyncSerializerOptions options)
+    protected override async Task<SyncAttempt<ITemplate>> DeserializeCoreAsync(XElement node, SyncSerializerOptions options)
     {
         var key = node.GetKey();
         var alias = node.GetAlias();
@@ -72,9 +72,9 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
         var details = new List<uSyncChange>();
 
         if (key != Guid.Empty)
-            item = FindItem(key);
+            item = await FindItemAsync(key);
 
-        item ??= FindItem(alias);
+        item ??= await FindItemAsync(alias);
 
         if (item == null)
         {
@@ -225,7 +225,7 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
         return content;
     }
 
-    public override SyncAttempt<ITemplate> DeserializeSecondPass(ITemplate item, XElement node, SyncSerializerOptions options)
+    public override async Task<SyncAttempt<ITemplate>> DeserializeSecondPassAsync(ITemplate item, XElement node, SyncSerializerOptions options)
     {
         var details = new List<uSyncChange>();
         var saved = false;
@@ -234,7 +234,7 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
         if (master != string.Empty && item.MasterTemplateAlias != master)
         {
             logger.LogDebug("Looking for master {master}", master);
-            var masterItem = FindItem(master);
+            var masterItem = await FindItemAsync(master);
             if (masterItem != null && item.MasterTemplateAlias != master)
             {
                 details.AddUpdate("Parent", item.MasterTemplateAlias ?? string.Empty, master);
@@ -242,7 +242,7 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
                 logger.LogDebug("Setting Master {alias}", masterItem.Alias);
                 item.SetMasterTemplate(masterItem);
 
-                SaveItem(item);
+                await SaveItemAsync(item);
                 saved = true;
             }
         }
@@ -273,10 +273,9 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
         return SyncAttempt<ITemplate>.Succeed(item.Name!, item, ChangeType.Import, "", saved, details);
     }
 
-
-    protected override SyncAttempt<XElement> SerializeCore(ITemplate item, SyncSerializerOptions options)
+    protected override async Task<SyncAttempt<XElement>> SerializeCoreAsync(ITemplate item, SyncSerializerOptions options)
     {
-        var node = this.InitializeBaseNode(item, item.Alias, this.CalculateLevel(item));
+        var node = this.InitializeBaseNode(item, item.Alias, await this.CalculateLevelAsync(item));
 
         node.Add(new XElement("Name", item.Name));
         node.Add(new XElement("Parent", item.MasterTemplateAlias));
@@ -293,7 +292,7 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
         => new("Contents", new XCData(item.Content ?? string.Empty));
 
 
-    private int CalculateLevel(ITemplate item)
+    private async Task<int> CalculateLevelAsync(ITemplate item)
     {
         if (item.MasterTemplateAlias.IsNullOrWhiteSpace()) return 1;
 
@@ -302,7 +301,7 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
         while (!string.IsNullOrWhiteSpace(current.MasterTemplateAlias) && level < 20)
         {
             level++;
-            var parent = FindItem(current.MasterTemplateAlias);
+            var parent = await FindItemAsync(current.MasterTemplateAlias);
             if (parent == null) return level;
 
             current = parent;
@@ -311,16 +310,13 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
         return level;
     }
 
-    public override ITemplate? FindItem(int id)
-        => _templateService.GetAsync(id).Result;
+    public override async Task<ITemplate?> FindItemAsync(string alias)
+        => await _templateService.GetAsync(alias);
 
-    public override ITemplate? FindItem(string alias)
-        => _templateService.GetAsync(alias).Result;
+    public override async Task<ITemplate?> FindItemAsync(Guid key)
+        => await _templateService.GetAsync(key);
 
-    public override ITemplate? FindItem(Guid key)
-        => _templateService.GetAsync(key).Result;
-
-    public override void SaveItem(ITemplate item)
+    public override async Task SaveItemAsync(ITemplate item)
     {
         var userKey = Constants.Security.SuperUserKey;
 
@@ -336,25 +332,28 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
         logger.LogDebug("Save Template {name} {alias} [{contentLength}] {userKey} {key}", item.Name, item.Alias, item.Content?.Length ?? 0, userKey, item.Key);
 
         if (existing is null) {
-            var result = _templateService.CreateAsync(item.Name ?? item.Alias, item.Alias, item.Content, userKey, item.Key).Result;
+            var result = await _templateService.CreateAsync(item.Name ?? item.Alias, item.Alias, item.Content, userKey, item.Key);
             logger.LogDebug("Create Template Result: [{key}] {result} {status}", result.Result.Key, result.Success, result.Status);
         }
         else
         {
-            var result = _templateService.UpdateAsync(item, userKey).Result;
+            var result = await  _templateService.UpdateAsync(item, userKey);
             logger.LogDebug("Update Template Result: [{key}] {result} {status}", item.Key, result.Success, result.Status);
         }
 
-        var templates = _templateService.GetAllAsync().Result;
+        var templates = await _templateService.GetAllAsync();
         logger.LogDebug("[Templates]: {count} {names}",
                templates.Count(), string.Join(",", templates.Select(x => $"{x.Alias}-{x.Key}")));
     }
 
-    public override void Save(IEnumerable<ITemplate> items)
-        => items.ToList().ForEach(SaveItem);
+    public override async Task SaveAsync(IEnumerable<ITemplate> items)
+    {
+        foreach(var item in items)
+            await SaveItemAsync(item);
+    }
 
-    public override void DeleteItem(ITemplate item)
-        => _templateService.DeleteAsync(item.Alias, Constants.Security.SuperUserKey).Wait();
+    public override async Task DeleteItemAsync(ITemplate item)
+        => await _templateService.DeleteAsync(item.Alias, Constants.Security.SuperUserKey);
 
     public override string ItemAlias(ITemplate item)
         => item.Alias;

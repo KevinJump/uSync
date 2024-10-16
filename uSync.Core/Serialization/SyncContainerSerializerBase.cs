@@ -8,6 +8,7 @@ using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Models.Entities;
 using Umbraco.Cms.Core.Services;
+using Umbraco.Cms.Core.Services.OperationStatus;
 using Umbraco.Extensions;
 
 using uSync.Core.Models;
@@ -26,22 +27,21 @@ public abstract class SyncContainerSerializerBase<TObject>
         this.containerType = containerType;
     }
 
-    protected override SyncAttempt<TObject> ProcessDelete(Guid key, string alias, SerializerFlags flags)
+    protected override async Task<SyncAttempt<TObject>> ProcessDeleteAsync(Guid key, string alias, SerializerFlags flags)
     {
         if (flags.HasFlag(SerializerFlags.LastPass))
         {
             logger.LogDebug("Processing deletes as part of the last pass");
-            return base.ProcessDelete(key, alias, flags);
+            return await base.ProcessDeleteAsync(key, alias, flags);
         }
 
         logger.LogDebug("Delete not processing as this is not the final pass");
         return SyncAttempt<TObject>.Succeed(alias, ChangeType.Hidden);
     }
 
-    protected override Attempt<TObject?> FindOrCreate(XElement node)
+    protected override async Task<Attempt<TObject?>> FindOrCreateAsync(XElement node)
     {
-
-        TObject? item = FindItem(node);
+        TObject? item = await FindItemAsync(node);
         if (item is not null) return Attempt.Succeed(item);
 
         logger.LogDebug("FindOrCreate: Creating");
@@ -58,7 +58,7 @@ public abstract class SyncContainerSerializerBase<TObject>
             logger.LogDebug("Finding Parent");
 
             var parentKey = parentNode.Attribute(uSyncConstants.Xml.Key).ValueOrDefault(Guid.Empty);
-            parent = FindItem(parentKey, parentNode.Value);
+            parent = await FindItemAsync(parentKey, parentNode.Value);
             if (parent != null)
             {
                 logger.LogDebug("Parent Found {parentId}", parent.Id);
@@ -77,7 +77,7 @@ public abstract class SyncContainerSerializerBase<TObject>
 
                 logger.LogDebug("Searching for Parent by folder {folderKey} {folderValue}", folderKey, folder.Value);
 
-                var container = FindFolder(folderKey, folder.Value);
+                var container = await FindFolderAsync(folderKey, folder.Value);
                 if (container != null)
                 {
                     treeItem = container;
@@ -90,7 +90,7 @@ public abstract class SyncContainerSerializerBase<TObject>
                         {
                             logger.LogDebug("Folder Found: Key Different");
                             container.Key = folderKey;
-                            SaveContainer(container);
+                            await SaveContainerAsync(container);
                         }
                     }
                 }
@@ -100,22 +100,22 @@ public abstract class SyncContainerSerializerBase<TObject>
         var itemType = GetItemBaseType(node);
         var alias = node.GetAlias();
 
-        return CreateItem(alias, parent ?? treeItem, itemType);
+        return await CreateItemAsync(alias, parent ?? treeItem, itemType);
     }
 
-    private EntityContainer? TryCreateContainer(string name, ITreeEntity parent)
+    private async Task<EntityContainer?> TryCreateContainerAsync(string name, ITreeEntity parent)
     {
         var children = entityService.GetChildren(parent.Id, containerType);
         if (children != null && children.Any(x => x.Name.InvariantEquals(name)))
         {
             var item = children.Single(x => x.Name.InvariantEquals(name));
-            return FindContainer(item.Key);
+            return await FindContainerAsync(item.Key);
         }
 
         // else create 
-        var attempt = CreateContainer(parent.Id, name);
+        var attempt = await CreateContainerAsync(parent.Key, name);
         if (attempt)
-            return attempt.Result?.Entity;
+            return attempt.Result;
 
         return null;
     }
@@ -124,7 +124,11 @@ public abstract class SyncContainerSerializerBase<TObject>
     #region Getters
     // Getters - get information we already know (either in the object or the XElement)
 
-    protected XElement? GetFolderNode(TObject item)
+    [Obsolete("Use GetFolderNode will be removed in v16")]
+    protected XElement? GetFolderNode(TObject item) 
+        => GetFolderNodeAsync(item).Result;
+
+    protected async Task<XElement?> GetFolderNodeAsync(TObject item)
     {
         if (item.ParentId <= 0) return default;
         // return GetFolderNode(GetContainers(item));
@@ -132,7 +136,7 @@ public abstract class SyncContainerSerializerBase<TObject>
         if (_folderCache.TryGetValue(item.ParentId, out var folder) && folder is not null)
             return folder;
 
-        var node = GetFolderNode(GetContainers(item));
+        var node = GetFolderNode(await GetContainersAsync(item));
         if (node is not null)
         {
             _folderCache.TryAdd(item.ParentId, node);
@@ -142,7 +146,11 @@ public abstract class SyncContainerSerializerBase<TObject>
         return default;
     }
 
-    protected abstract IEnumerable<EntityContainer> GetContainers(TObject item);
+    [Obsolete("Use GetContainers will be removed in v16")]
+    protected virtual IEnumerable<EntityContainer> GetContainers(TObject item)
+        => GetContainersAsync(item).Result;
+
+    protected abstract Task<IEnumerable<EntityContainer>> GetContainersAsync(TObject item);
 
     protected XElement? GetFolderNode(IEnumerable<EntityContainer> containers)
     {
@@ -169,13 +177,15 @@ public abstract class SyncContainerSerializerBase<TObject>
 
     #region Finders
 
-    protected abstract EntityContainer? FindContainer(Guid key);
-    protected abstract IEnumerable<EntityContainer> FindContainers(string folder, int level);
-    protected abstract Attempt<OperationResult<OperationResultType, EntityContainer>?> CreateContainer(int parentId, string name);
+    protected abstract Task<EntityContainer?> FindContainerAsync(Guid key);
 
-    protected virtual EntityContainer? FindFolder(Guid key, string path)
+    protected abstract Task<IEnumerable<EntityContainer>> FindContainersAsync(string folder, int level);
+
+    protected abstract Task<Attempt<EntityContainer?, EntityContainerOperationStatus>> CreateContainerAsync(Guid parentKey, string name);
+
+    protected virtual async Task<EntityContainer?> FindFolderAsync(Guid key, string path)
     {
-        var container = FindContainer(key);
+        var container = await FindContainerAsync(key);
         if (container is not null) return container;
 
         /// else - we have to parse it like a path ... 
@@ -183,17 +193,17 @@ public abstract class SyncContainerSerializerBase<TObject>
 
         var rootFolder = HttpUtility.UrlDecode(bits[0]);
 
-        var root = FindContainers(rootFolder, 1)
+        var root = (await FindContainersAsync(rootFolder, 1))
             .FirstOrDefault();
         if (root == null)
         {
-            var attempt = CreateContainer(-1, rootFolder);
+            var attempt = await CreateContainerAsync(Guid.Empty, rootFolder);
             if (!attempt)
             {
                 return null;
             }
 
-            root = attempt.Result?.Entity;
+            root = attempt.Result;
         }
 
         if (root is not null)
@@ -202,7 +212,7 @@ public abstract class SyncContainerSerializerBase<TObject>
             for (int i = 1; i < bits.Length; i++)
             {
                 var name = HttpUtility.UrlDecode(bits[i]);
-                current = TryCreateContainer(name, current);
+                current = await TryCreateContainerAsync(name, current);
                 if (current is null) break;
             }
 
@@ -218,7 +228,8 @@ public abstract class SyncContainerSerializerBase<TObject>
     #endregion
 
     #region Container stuff
-    protected abstract void SaveContainer(EntityContainer container);
+    protected abstract Task SaveContainerAsync(EntityContainer container);
+
     #endregion
 
 
@@ -245,4 +256,18 @@ public abstract class SyncContainerSerializerBase<TObject>
         ClearFolderCache();
     }
     #endregion
+
+
+    //[Obsolete("Use FindItemAsync will be removed in v16")]
+    //protected virtual EntityContainer? FindFolder(Guid key, string path)
+    //    => FindFolderAsync(key, path).Result;
+    //[Obsolete("Use FindItemAsync will be removed in v16")]
+    //protected abstract EntityContainer? FindContainer(Guid key);
+    //[Obsolete("Use FindItemAsync will be removed in v16")]
+    //protected abstract IEnumerable<EntityContainer> FindContainers(string folder, int level);
+    //[Obsolete("Use FindItemAsync will be removed in v16")]
+    //protected abstract Attempt<OperationResult<OperationResultType, EntityContainer>?> CreateContainer(int parentId, string name);
+    //[Obsolete("Use SaveItemAsync will be removed in v16")]
+    //protected abstract void SaveContainer(EntityContainer container);
+
 }

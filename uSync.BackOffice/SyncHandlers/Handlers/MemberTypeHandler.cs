@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
@@ -24,7 +25,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers;
 /// </summary>
 [SyncHandler(uSyncConstants.Handlers.MemberTypeHandler, "Member Types", "MemberTypes", uSyncConstants.Priorites.MemberTypes,
     IsTwoPass = true, Icon = "icon-users", EntityType = UdiEntityType.MemberType)]
-public class MemberTypeHandler : ContentTypeBaseHandler<IMemberType, IMemberTypeService>, ISyncHandler, ISyncPostImportHandler, ISyncGraphableHandler,
+public class MemberTypeHandler : ContentTypeBaseHandler<IMemberType>, ISyncHandler, ISyncPostImportHandler, ISyncGraphableHandler,
     INotificationHandler<SavedNotification<IMemberType>>,
     INotificationHandler<MovedNotification<IMemberType>>,
     INotificationHandler<DeletedNotification<IMemberType>>,
@@ -52,17 +53,16 @@ public class MemberTypeHandler : ContentTypeBaseHandler<IMemberType, IMemberType
         this.memberTypeService = memberTypeService;
     }
 
-    /// <inheritdoc/>
-    protected override void DeleteFolder(int id)
-        => memberTypeService.DeleteContainer(id);
 
-    /// <inheritdoc/>
-    protected override IEntity? GetContainer(int id)
-        => memberTypeService.GetContainer(id);
+    protected override async Task DeleteFolderAsync(Guid key)
+    {
+        var container = await GetContainerAsync(key);
+        if (container is null) return;
+        memberTypeService.DeleteContainer(container.Id);
+    }
 
-    /// <inheritdoc/>
-    protected override IEntity? GetContainer(Guid key)
-        => memberTypeService.GetContainer(key);
+    protected override Task<IEntity?> GetContainerAsync(Guid key)
+        => Task.FromResult<IEntity?>(memberTypeService.GetContainer(key));
 
     /// <inheritdoc/>
     protected override string GetEntityTreeName(IUmbracoEntity item, bool useGuid)

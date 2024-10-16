@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Events;
@@ -29,7 +30,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers;
 /// </summary>
 [SyncHandler(uSyncConstants.Handlers.TemplateHandler, "Templates", "Templates", uSyncConstants.Priorites.Templates,
     Icon = "icon-layout", EntityType = UdiEntityType.Template, IsTwoPass = true)]
-public class TemplateHandler : SyncHandlerLevelBase<ITemplate, IFileService>, ISyncHandler, ISyncPostImportHandler,
+public class TemplateHandler : SyncHandlerLevelBase<ITemplate>, ISyncHandler, ISyncPostImportHandler,
     INotificationHandler<SavedNotification<ITemplate>>,
     INotificationHandler<DeletedNotification<ITemplate>>,
     INotificationHandler<MovedNotification<ITemplate>>,
@@ -117,7 +118,7 @@ public class TemplateHandler : SyncHandlerLevelBase<ITemplate, IFileService>, IS
     }
 
     /// <inheritdoc/>
-    public IEnumerable<uSyncAction> ProcessPostImport(string folder, IEnumerable<uSyncAction> actions, HandlerSettings config)
+    public IEnumerable<uSyncAction> ProcessPostImport(IEnumerable<uSyncAction> actions, HandlerSettings config)
     {
         if (actions == null || !actions.Any())
             return Enumerable.Empty<uSyncAction>();
@@ -135,19 +136,29 @@ public class TemplateHandler : SyncHandlerLevelBase<ITemplate, IFileService>, IS
 
         return results;
     }
-    
+
+
     /// <inheritdoc/>
     protected override string GetItemName(ITemplate item) => item.Name ?? item.Alias;
 
-    /// <inheritdoc/>
-    protected override IEnumerable<IEntity> GetChildItems(int parent)
-        => _templateService.GetChildrenAsync(parent).Result;
+    protected override async Task<IEnumerable<IEntity>> GetChildItemsAsync(Guid key)
+    {
+        var template = await _templateService.GetAsync(key);
+        if (template is null) return [];
+        return await _templateService.GetChildrenAsync(template.Id);
+    }
 
-    /// <inheritdoc/>
-    protected override IEnumerable<IEntity> GetFolders(int parent)
-        => GetChildItems(parent);
+
+    protected override async Task<IEnumerable<IEntity>> GetFoldersAsync(Guid key)
+        => await GetChildItemsAsync(key);
 
     /// <inheritdoc/>
     protected override string GetItemPath(ITemplate item, bool useGuid, bool isFlat)
         => useGuid ? item.Key.ToString() : item.Alias.ToSafeFileName(shortStringHelper);
+
+    protected override async Task<IEnumerable<IEntity>> GetFoldersAsync(IEntity? parent)
+    {
+        if (parent is null) return [];
+        return await _templateService.GetChildrenAsync(parent.Id);
+    }
 }

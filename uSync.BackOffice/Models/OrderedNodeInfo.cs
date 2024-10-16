@@ -40,47 +40,32 @@ public class OrderedNodeInfo
     /// <summary>
     ///  the key for the item.
     /// </summary>
-    public Guid Key
-    {
-        get;
-        [Obsolete("Setter will be removed v15")]
-        set;
-    }
+    public Guid Key { get; private set; }
 
     /// <summary>
     ///  umbraco alias of the item
     /// </summary>
-    public string Alias { get;  }
+    public string Alias { get; private set; }
 
     /// <summary>
     ///  relative path of the item (so same in all 'folders')
     /// </summary>
-    public string Path { get; }
+    public string Path { get; private set; }
 
     /// <summary>
     ///  level (e.g 0 is root) of file
     /// </summary>
-    public int Level { get; }
+    public int Level { get; private set; }
 
     /// <summary>
     ///  path to the actual file.
     /// </summary>
-    public string FileName
-    {
-        get;
-        [Obsolete("Setter will be removed v15")]
-        set;
-    }
+    public string FileName { get; private set; }
 
     /// <summary>
     ///  the xml for this item.
     /// </summary>
-    public XElement Node
-    {
-        get;
-        [Obsolete("Setter will be private from v15")]
-        set;
-    }
+    public XElement Node { get; private set; }
 
     /// <summary>
     ///  overwrites the node value for this ordered node element.
@@ -89,8 +74,11 @@ public class OrderedNodeInfo
     public void SetNode(XElement node)
         => Node = node;
 
+    public void SetFileName(string filename)
+        => FileName = filename;
+
     /// <summary>
     ///  is this element from a root folder ? 
     /// </summary>
-    public bool IsRoot { get; }
+    public bool IsRoot { get; private set; }
 }

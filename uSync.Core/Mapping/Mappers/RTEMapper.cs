@@ -40,7 +40,7 @@ public class RTEMapper : SyncValueMapperBase, ISyncMapper
     public override string Name => "TinyMCE RTE Mapper";
 
     public override string[] Editors => new string[] {
-        Constants.PropertyEditors.Aliases.TinyMce,
+        "Umbraco.TinyMCE",
         $"{Constants.PropertyEditors.Aliases.Grid}.rte"
     };
 

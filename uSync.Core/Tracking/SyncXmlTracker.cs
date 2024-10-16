@@ -36,28 +36,40 @@ public class SyncXmlTracker<TObject>
     public IEnumerable<uSyncChange> GetChanges(XElement target)
         => GetChanges(target, new SyncSerializerOptions());
 
-    public IEnumerable<uSyncChange> GetChanges(XElement target, SyncSerializerOptions options)
+    public IEnumerable<uSyncChange> GetChanges(XElement target, SyncSerializerOptions options) 
+        => GetChangesAsync(target, options).Result;
+
+    public async Task<IEnumerable<uSyncChange>> GetChangesAsync(XElement target, SyncSerializerOptions options)
     {
         var s = GetSerializer(target);
         if (s is not null)
         {
-            var item = s.FindItem(target);
+            var item = await s.FindItemAsync(target);
             if (item is not null)
             {
-                var attempt = SerializeItem(item, options);
+                var attempt = await SerializeItemAsync(item, options);
                 if (attempt.Success is true && attempt.Item is not null)
-                    return GetChanges(target, attempt.Item, options);
-
+                    return await GetChangesAsync(target, attempt.Item, options);
             }
         }
 
-        return GetChanges(target, XElement.Parse("<blank/>"), options);
+        return await GetChangesAsync(target, XElement.Parse("<blank/>"), options);
     }
 
-    private SyncAttempt<XElement> SerializeItem(TObject item, SyncSerializerOptions options)
-        => GetSerializer(item)?.Serialize(item, options) ?? SyncAttempt<XElement>.Fail("Unknown", ChangeType.Fail, "Failed to serialize");
+    private async Task<SyncAttempt<XElement>> SerializeItemAsync(TObject item, SyncSerializerOptions options)
+    {
+        var serializer = GetSerializer(item);
+        if (serializer is null)
+            return SyncAttempt<XElement>.Fail("Unknown", ChangeType.Fail, "Failed to serialize");
 
+        return await serializer.SerializeAsync(item, options);
+    }
+
+    [Obsolete("Use GetChangesAsync")]
     public IEnumerable<uSyncChange> GetChanges(XElement target, XElement source, SyncSerializerOptions options)
+        => GetChangesAsync(target, source, options).Result;
+
+    public async Task<IEnumerable<uSyncChange>> GetChangesAsync(XElement target, XElement source, SyncSerializerOptions options)
     {
         if (TrackingItems == null)
             return [];
@@ -68,11 +80,11 @@ public class SyncXmlTracker<TObject>
         if (GetSerializer(target)?.IsValid(target) is false)
             return uSyncChange.Error("", "Invalid File", target.Name.LocalName).AsEnumerableOfOne();
 
-        var changeType = GetChangeType(target, source, options);
+        var changeType = await GetChangeTypeAsync(target, source, options);
         if (changeType == ChangeType.NoChange)
             return uSyncChange.NoChange("", target.GetAlias()).AsEnumerableOfOne();
 
-        return CalculateDiffrences(target, source);
+        return CalculateDifferences(target, source);
     }
 
     private static uSyncChange GetEmptyFileChange(XElement target, XElement source)
@@ -91,14 +103,19 @@ public class SyncXmlTracker<TObject>
         }
     }
 
-    private ChangeType GetChangeType(XElement target, XElement source, SyncSerializerOptions options)
-       => GetSerializer(target)?.IsCurrent(target, source, options) ?? ChangeType.NoChange;
+    private async Task<ChangeType> GetChangeTypeAsync(XElement target, XElement source, SyncSerializerOptions options)
+    {
+        var s = GetSerializer(target);
+        if (s is null) return ChangeType.Fail;
+
+        return await s.IsCurrentAsync(target, source, options);
+    }
 
     /// <summary>
     ///  actually kicks off here, if you have two xml files that are different. 
     /// </summary>
 
-    private IEnumerable<uSyncChange> CalculateDiffrences(XElement target, XElement source)
+    private IEnumerable<uSyncChange> CalculateDifferences(XElement target, XElement source)
     {
         var changes = new List<uSyncChange>();
 

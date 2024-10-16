@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 
 using Microsoft.Extensions.Logging;
 
+using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Events;
 using Umbraco.Cms.Core.Models;
@@ -29,7 +31,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers;
 /// </summary>
 [SyncHandler(uSyncConstants.Handlers.DataTypeHandler, "Datatypes", "DataTypes", uSyncConstants.Priorites.DataTypes,
     Icon = "icon-autofill", IsTwoPass = true, EntityType = UdiEntityType.DataType)]
-public class DataTypeHandler : SyncHandlerContainerBase<IDataType, IDataTypeService>, ISyncHandler, ISyncPostImportHandler,
+public class DataTypeHandler : SyncHandlerContainerBase<IDataType>, ISyncHandler, ISyncPostImportHandler,
     INotificationHandler<SavedNotification<IDataType>>,
     INotificationHandler<MovedNotification<IDataType>>,
     INotificationHandler<DeletedNotification<IDataType>>,
@@ -39,7 +41,9 @@ public class DataTypeHandler : SyncHandlerContainerBase<IDataType, IDataTypeServ
     INotificationHandler<MovingNotification<IDataType>>,
     INotificationHandler<DeletingNotification<IDataType>>
 {
+ 
     private readonly IDataTypeService dataTypeService;
+    private readonly IDataTypeContainerService _dataTypeContainerService;
 
     /// <summary>
     /// Constructor called via DI
@@ -53,10 +57,12 @@ public class DataTypeHandler : SyncHandlerContainerBase<IDataType, IDataTypeServ
         SyncFileService syncFileService,
         uSyncEventService mutexService,
         uSyncConfigService uSyncConfig,
-        ISyncItemFactory syncItemFactory)
+        ISyncItemFactory syncItemFactory,
+        IDataTypeContainerService dataTypeContainerService)
         : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfig, syncItemFactory)
     {
         this.dataTypeService = dataTypeService;
+        _dataTypeContainerService = dataTypeContainerService;
     }
 
     /// <summary>
@@ -96,20 +102,17 @@ public class DataTypeHandler : SyncHandlerContainerBase<IDataType, IDataTypeServ
     /// <summary>
     ///  Fetch a DataType Container from the DataTypeService
     /// </summary>
-    protected override IEntity? GetContainer(int id)
-        => dataTypeService.GetContainer(id);
-
     /// <summary>
     ///  Fetch a DataType Container from the DataTypeService
     /// </summary>
-    protected override IEntity? GetContainer(Guid key)
-        => dataTypeService.GetContainer(key);
+    protected override async Task<IEntity?> GetContainerAsync(Guid key)
+        => await _dataTypeContainerService.GetAsync(key);
 
     /// <summary>
     ///  Delete a DataType Container from the DataTypeService
     /// </summary>
-    protected override void DeleteFolder(int id)
-        => dataTypeService.DeleteContainer(id);
+    protected override async Task DeleteFolderAsync(Guid key)
+        => await _dataTypeContainerService.DeleteAsync(key, Constants.Security.SuperUserKey);
 
     /// <summary>
     ///  Get the filename to use for a DataType when we save it

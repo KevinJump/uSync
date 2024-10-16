@@ -14,17 +14,15 @@ namespace uSync.BackOffice.SyncHandlers.Handlers;
 /// <summary>
 ///  handler base for all ContentTypeBase handlers
 /// </summary>
-public abstract class ContentTypeBaseHandler<TObject, TService> : SyncHandlerContainerBase<TObject, TService>
+public abstract class ContentTypeBaseHandler<TObject> : SyncHandlerContainerBase<TObject>
     where TObject : ITreeEntity
-    where TService : IService
-
 {
 
     /// <summary>
     /// Constructor.
     /// </summary>
     protected ContentTypeBaseHandler(
-        ILogger<SyncHandlerContainerBase<TObject, TService>> logger,
+        ILogger<SyncHandlerContainerBase<TObject>> logger,
         IEntityService entityService,
         AppCaches appCaches,
         IShortStringHelper shortStringHelper,

@@ -1,7 +1,9 @@
 ﻿using System.Xml.Linq;
 
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 
+using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Extensions;
@@ -13,18 +15,20 @@ namespace uSync.Core.Serialization.Serializers;
 [SyncSerializer("4D18F4C3-6EBC-4AAD-8D20-6353BDBBD484", "Dictionary Serializer", uSyncConstants.Serialization.Dictionary)]
 public class DictionaryItemSerializer : SyncSerializerBase<IDictionaryItem>, ISyncSerializer<IDictionaryItem>
 {
-    private readonly ILocalizationService _localizationService;
+    private readonly ILanguageService _languageService;
+    private readonly IDictionaryItemService _dictionaryItemService;
 
     public DictionaryItemSerializer(IEntityService entityService, ILogger<DictionaryItemSerializer> logger,
-        ILocalizationService localizationService)
+        IDictionaryItemService localizationService, ILanguageService languageService)
         : base(entityService, logger)
     {
-        this._localizationService = localizationService;
+        this._dictionaryItemService = localizationService;
+        _languageService = languageService;
     }
 
-    protected override SyncAttempt<IDictionaryItem> DeserializeCore(XElement node, SyncSerializerOptions options)
+    protected override async Task<SyncAttempt<IDictionaryItem>> DeserializeCoreAsync(XElement node, SyncSerializerOptions options)
     {
-        var item = FindItem(node);
+        var item = await FindItemAsync(node);
 
         var info = node.Element(uSyncConstants.Xml.Info);
         var alias = node.GetAlias();
@@ -35,7 +39,7 @@ public class DictionaryItemSerializer : SyncSerializerBase<IDictionaryItem>, ISy
         var parentItemKey = info?.Element(uSyncConstants.Xml.Parent).ValueOrDefault(string.Empty) ?? string.Empty;
         if (parentItemKey != string.Empty)
         {
-            var parent = _localizationService.GetDictionaryItemByKey(parentItemKey);
+            var parent = await _dictionaryItemService.GetAsync(parentItemKey);
             if (parent != null)
             {
                 parentKey = parent.Key;
@@ -84,7 +88,7 @@ public class DictionaryItemSerializer : SyncSerializerBase<IDictionaryItem>, ISy
         // key only translation, would not add the translation values. 
         if (!options.GetSetting("KeysOnly", false))
         {
-            details.AddRange(DeserializeTranslations(item, node, options));
+            details.AddRange(await DeserializeTranslationsAsync(item, node, options));
         }
 
         // this.SaveItem(item);
@@ -93,7 +97,7 @@ public class DictionaryItemSerializer : SyncSerializerBase<IDictionaryItem>, ISy
         return SyncAttempt<IDictionaryItem>.Succeed(item.ItemKey, item, ChangeType.Import, details);
     }
 
-    private List<uSyncChange> DeserializeTranslations(IDictionaryItem item, XElement node, SyncSerializerOptions options)
+    private async Task<List<uSyncChange>> DeserializeTranslationsAsync(IDictionaryItem item, XElement node, SyncSerializerOptions options)
     {
         var translationNode = node.Element("Translations");
         if (translationNode == null) return [];
@@ -121,7 +125,7 @@ public class DictionaryItemSerializer : SyncSerializerBase<IDictionaryItem>, ISy
             }
             else
             {
-                var lang = _localizationService.GetLanguageByIsoCode(language);
+                var lang = await _languageService.GetAsync(language);
                 if (lang != null)
                 {
                     changes.AddNew(language, translation.Value, $"{item.ItemKey}/{language}");
@@ -139,10 +143,10 @@ public class DictionaryItemSerializer : SyncSerializerBase<IDictionaryItem>, ISy
             // if the count is wrong, we delete the item (shortly before we save it again).
             if (item.Translations.Count() > translations.Count)
             {
-                var existing = FindItem(item.Key);
+                var existing = await FindItemAsync(item.Key);
                 if (existing != null)
                 {
-                    DeleteItem(existing);
+                    await DeleteItemAsync(existing);
                     item.Id = 0; // make this a new (so it will be inserted)
                 }
             }
@@ -154,9 +158,9 @@ public class DictionaryItemSerializer : SyncSerializerBase<IDictionaryItem>, ISy
         return changes;
     }
 
-    protected override SyncAttempt<XElement> SerializeCore(IDictionaryItem item, SyncSerializerOptions options)
+    protected override async Task<SyncAttempt<XElement>> SerializeCoreAsync(IDictionaryItem item, SyncSerializerOptions options)
     {
-        var node = InitializeBaseNode(item, item.ItemKey, GetLevel(item));
+        var node = InitializeBaseNode(item, item.ItemKey, await GetLevelAsync(item));
 
         // if we are serializing by culture, then add the culture attribute here. 
         var cultures = options.GetSetting(uSyncConstants.CultureKey, string.Empty);
@@ -167,7 +171,7 @@ public class DictionaryItemSerializer : SyncSerializerBase<IDictionaryItem>, ISy
 
         if (item.ParentId.HasValue)
         {
-            var parent = FindItem(item.ParentId.Value);
+            var parent = await FindItemAsync(item.ParentId.Value);
             if (parent != null)
             {
                 info.Add(new XElement(uSyncConstants.Xml.Parent, parent.ItemKey));
@@ -196,31 +200,30 @@ public class DictionaryItemSerializer : SyncSerializerBase<IDictionaryItem>, ISy
             item.ItemKey, node, typeof(IDictionaryItem), ChangeType.Export);
     }
 
-    public override IDictionaryItem? FindItem(int id)
-        => _localizationService.GetDictionaryItemById(id);
+    public override Task<IDictionaryItem?> FindItemAsync(Guid key)
+        => _dictionaryItemService.GetAsync(key);
 
-    public override IDictionaryItem? FindItem(Guid key)
-        => _localizationService.GetDictionaryItemById(key);
+    public override Task<IDictionaryItem?> FindItemAsync(string alias)
+        => _dictionaryItemService.GetAsync(alias);
 
-    public override IDictionaryItem? FindItem(string alias)
-        => _localizationService.GetDictionaryItemByKey(alias);
-
-    private int GetLevel(IDictionaryItem item, int level = 0)
+    private async Task<int> GetLevelAsync(IDictionaryItem item, int level = 0)
     {
         if (!item.ParentId.HasValue) return level;
 
-        var parent = FindItem(item.ParentId.Value);
+        var parent = await FindItemAsync(item.ParentId.Value);
         if (parent is not null)
-            return GetLevel(parent, level + 1);
+            return await GetLevelAsync(parent, level + 1);
 
         return level;
     }
 
-    public override void SaveItem(IDictionaryItem item)
-        => _localizationService.Save(item);
+    public override async Task SaveItemAsync(IDictionaryItem item)
+        => _ = item.HasIdentity 
+            ? await _dictionaryItemService.UpdateAsync(item, Constants.Security.SuperUserKey) 
+            : await _dictionaryItemService.CreateAsync(item, Constants.Security.SuperUserKey);
 
-    public override void DeleteItem(IDictionaryItem item)
-        => _localizationService.Delete(item);
+    public override Task DeleteItemAsync(IDictionaryItem item)
+        => _dictionaryItemService.DeleteAsync(item.Key, Constants.Security.SuperUserKey);
 
     public override string ItemAlias(IDictionaryItem item)
         => item.ItemKey;

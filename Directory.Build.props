@@ -18,9 +18,7 @@
 		<TreatWarningsAsErrors>false</TreatWarningsAsErrors>
 		<SuppressNETCoreSdkPreviewMessage>true</SuppressNETCoreSdkPreviewMessage>
 
-		<NoWarn>CS0618</NoWarn>
 		<Nullable>enable</Nullable>
-
 
 		<PackageReleaseNotes>
 	<![CDATA[9.0 : Dotnet core version

@@ -522,7 +522,7 @@ public class SyncFileService
 						{
 							// merge these files.
 							item.Value.SetNode(MergeNodes(value.Node, item.Value.Node, trackerBase));
-							item.Value.FileName = $"{uSyncConstants.MergedFolderName}/{Path.GetFileName(item.Value.FileName)}";
+							item.Value.SetFileName($"{uSyncConstants.MergedFolderName}/{Path.GetFileName(item.Value.FileName)}");
 						}
 					}
 					else

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
@@ -23,7 +24,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers;
 /// </summary>
 [SyncHandler(uSyncConstants.Handlers.ContentHandler, "Content", "Content", uSyncConstants.Priorites.Content
     , Icon = "icon-document", IsTwoPass = true, EntityType = UdiEntityType.Document)]
-public class ContentHandler : ContentHandlerBase<IContent, IContentService>, ISyncHandler,
+public class ContentHandler : ContentHandlerBase<IContent>, ISyncHandler,
     INotificationHandler<SavedNotification<IContent>>,
     INotificationHandler<DeletedNotification<IContent>>,
     INotificationHandler<MovedNotification<IContent>>,

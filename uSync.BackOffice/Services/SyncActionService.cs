@@ -93,9 +93,6 @@ internal class SyncActionService : ISyncActionService
 		if (options.Folders.Length != 0)
 			return options.Folders;
 
-		if (!string.IsNullOrEmpty(options.Folder))
-			return [options.Folder];
-
 		return _uSyncConfig.GetFolders();
 	}
 
@@ -167,7 +164,7 @@ internal class SyncActionService : ISyncActionService
     {
         try
         {
-            _uSyncService.CleanExportFolder(_uSyncConfig.GetRootFolder());
+            _uSyncService.CleanExportFolder(_uSyncConfig.GetWorkingFolder());
         }
         catch
         {
@@ -177,11 +174,11 @@ internal class SyncActionService : ISyncActionService
 
     private string MakeValidImportFolder(string folder)
     {
-        if (string.IsNullOrWhiteSpace(folder)) return _uSyncConfig.GetRootFolder();
+        if (string.IsNullOrWhiteSpace(folder)) return _uSyncConfig.GetWorkingFolder();
 
         // else check its a valid folder. 
         var fullPath = _syncFileService.GetAbsPath(folder);
-        var fullRoot = _syncFileService.GetAbsPath(_uSyncConfig.GetRootFolder());
+        var fullRoot = _syncFileService.GetAbsPath(_uSyncConfig.GetWorkingFolder());
 
         var rootParent = Path.GetDirectoryName(fullRoot.TrimEnd(['/', '\\']));
         

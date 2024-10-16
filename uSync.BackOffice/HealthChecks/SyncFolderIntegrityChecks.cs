@@ -54,7 +54,7 @@ public class SyncFolderIntegrityChecks : HealthCheck
 
     private HealthCheckStatus CheckuSyncFolder()
     {
-        var root = _fileService.GetAbsPath(_configService.GetRootFolder());
+        var root = _fileService.GetAbsPath(_configService.GetWorkingFolder());
 
         if (_fileService.DirectoryExists(root) is false)
         {
@@ -130,7 +130,7 @@ public class SyncFolderIntegrityChecks : HealthCheck
 
     private HealthCheckStatus CheckConfigFolderValidity()
     {
-        var root = _fileService.GetAbsPath(_configService.GetRootFolder());
+        var root = _fileService.GetAbsPath(_configService.GetWorkingFolder());
 
         if (_fileService.DirectoryExists(root) is false)
         {

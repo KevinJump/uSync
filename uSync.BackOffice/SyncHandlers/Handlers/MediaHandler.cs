@@ -24,7 +24,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers;
 /// </summary>
 [SyncHandler(uSyncConstants.Handlers.MediaHandler, "Media", "Media", uSyncConstants.Priorites.Media,
     Icon = "icon-picture", IsTwoPass = true, EntityType = UdiEntityType.Media)]
-public class MediaHandler : ContentHandlerBase<IMedia, IMediaService>, ISyncHandler, ISyncCleanEntryHandler,
+public class MediaHandler : ContentHandlerBase<IMedia>, ISyncHandler, ISyncCleanEntryHandler,
     INotificationHandler<SavedNotification<IMedia>>,
     INotificationHandler<DeletedNotification<IMedia>>,
     INotificationHandler<MovedNotification<IMedia>>,

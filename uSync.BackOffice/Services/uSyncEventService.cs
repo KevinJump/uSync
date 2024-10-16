@@ -44,13 +44,6 @@ public class uSyncEventService
     /// <summary>
     ///  get an import pause object (pauses the import until it is disposed)
     /// </summary>
-    [Obsolete("You should tell uSync if it needs to pause or not during the process (removed in v12)")]
-    public uSyncImportPause ImportPause()
-        => new uSyncImportPause(this);
-
-    /// <summary>
-    ///  get an import pause object (pauses the import until it is disposed)
-    /// </summary>
     /// <remarks>
     ///  you should wrap code that might trigger Umbraco events in using(var pause = _mutexService.ImportPause())
     ///  this will ensure that uSync doesn't then pickup the imports as new things and saves them to disk.

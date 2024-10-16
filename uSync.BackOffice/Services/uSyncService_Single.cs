@@ -25,23 +25,6 @@ namespace uSync.BackOffice;
 public partial class uSyncService
 {
     /// <summary>
-    ///  Perform a paged report against a given folder 
-    /// </summary>
-    [Obsolete("For better performance pass handler, will be removed in v15")]
-    public IEnumerable<uSyncAction> ReportPartial(string folder, uSyncPagedImportOptions options, out int total)
-        => ReportPartial([folder], options, out total);
-
-    /// <summary>
-    ///  Perform a paged report against a given folder 
-    /// </summary>
-    [Obsolete("For better performance pass handler, will be removed in v15")]
-    public IEnumerable<uSyncAction> ReportPartial(string[] folder, uSyncPagedImportOptions options, out int total)
-    {
-        var orderedNodes = LoadOrderedNodes(folder);
-        return ReportPartial(orderedNodes, options, out total);
-    }
-
-    /// <summary>
     ///  perform a paged report with the supplied ordered nodes
     /// </summary>
     public IEnumerable<uSyncAction> ReportPartial(IList<OrderedNodeInfo> orderedNodes, uSyncPagedImportOptions options, out int total)
@@ -51,7 +34,7 @@ public partial class uSyncService
         var actions = new List<uSyncAction>();
         var lastType = string.Empty;
 
-        var folder = Path.GetDirectoryName(orderedNodes.FirstOrDefault()?.FileName ?? options.Folders?.FirstOrDefault() ?? _uSyncConfig.GetRootFolder()) ?? string.Empty;
+        var folder = Path.GetDirectoryName(orderedNodes.FirstOrDefault()?.FileName ?? options.Folders?.FirstOrDefault() ?? _uSyncConfig.GetWorkingFolder()) ?? string.Empty;
 
         SyncHandlerOptions syncHandlerOptions = HandlerOptionsFromPaged(options);
 
@@ -88,16 +71,6 @@ public partial class uSyncService
         }
 
         return actions;
-    }
-
-    /// <summary>
-    ///  Perform a paged Import against a given folder 
-    /// </summary>
-    [Obsolete("For better performance pass handler, will be removed in v15")]
-    public IEnumerable<uSyncAction> ImportPartial(string folder, uSyncPagedImportOptions options, out int total)
-    {
-        var orderedNodes = LoadOrderedNodes(folder);
-        return ImportPartial(orderedNodes, options, out total);
     }
 
     /// <summary>
@@ -291,7 +264,7 @@ public partial class uSyncService
                             options.Callbacks?.Update?.Invoke(actionItem.alias, index, folders.Count);
 
                             var handlerActions = actions.Where(x => x.HandlerAlias.InvariantEquals(handlerPair.Handler.Alias));
-                            results.AddRange(postImportHandler.ProcessPostImport(actionItem.folder ?? string.Empty, handlerActions, handlerPair.Settings));
+                            results.AddRange(postImportHandler.ProcessPostImport(handlerActions, handlerPair.Settings));
                         }
                     }
 
@@ -356,51 +329,6 @@ public partial class uSyncService
             IncludeDisabled = options.IncludeDisabledHandlers
         };
 
-    /// <summary>
-    ///  Load the xml in a folder in level order so we process the higher level items first.
-    /// </summary>
-    [Obsolete("use handler and multiple folder method will be removed in v15")]
-    public IList<OrderedNodeInfo> LoadOrderedNodes(string folder)
-        => LoadOrderedNodes([folder]);
-
-    /// <summary>
-    ///  Load the xml in a folder in level order so we process the higher level items first.
-    /// </summary>
-    [Obsolete("use handler and multiple folder method will be removed in v15")]
-    public IList<OrderedNodeInfo> LoadOrderedNodes(string[] folders)
-    {
-        var nodes = new List<OrderedNodeInfo>();
-
-        foreach (var folder in folders)
-        {
-            var files = _syncFileService.GetFiles(folder, $"*.{_uSyncConfig.Settings.DefaultExtension}", true);
-            foreach (var file in files)
-            {
-                var xml = _syncFileService.LoadXElement(file);
-                nodes.Add(new OrderedNodeInfo(
-                    filename: file,
-                    node: xml,
-                    level: xml.GetLevel(),
-                    path: file.Substring(folder.Length),
-                    isRoot: false));
-
-            }
-        }
-
-        return nodes
-            .OrderBy(x => (x.Level * 1000) + x.Node.GetItemSortOrder())
-            .ToList();
-    }
-
-    /// <summary>
-    ///  load up ordered nodes from a handler folder, 
-    /// </summary>
-    /// <remarks>
-    ///  this makes ordered node loading faster, when we are processing multiple requests, because we don't have to calculate it each time
-    /// </remarks>
-    [Obsolete("use handler and multiple folder method will be removed in v15")]
-    public IList<OrderedNodeInfo> LoadOrderedNodes(ISyncHandler handler, string handlerFolder)
-        => LoadOrderedNodes(handler, [handlerFolder]);
 
     /// <summary>
     ///  load up ordered nodes from a handler folder, 

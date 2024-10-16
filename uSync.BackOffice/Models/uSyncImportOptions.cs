@@ -36,12 +36,6 @@ public class uSyncImportOptions
     public uSyncCallbacks? Callbacks { get; set; }
 
     /// <summary>
-    /// Root folder for all uSync operations
-    /// </summary>
-    [Obsolete("Pass array of folders, will be removed in v15")]
-    public string RootFolder { get; set; } = string.Empty;
-
-    /// <summary>
     ///  collection of root folders, that are merged for the action
     /// </summary>
     public string[] Folders { get; set; } = [];

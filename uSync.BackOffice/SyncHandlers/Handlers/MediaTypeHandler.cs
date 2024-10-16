@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
+using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Events;
 using Umbraco.Cms.Core.Models;
@@ -24,7 +26,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers;
 /// </summary>
 [SyncHandler(uSyncConstants.Handlers.MediaTypeHandler, "Media Types", "MediaTypes", uSyncConstants.Priorites.MediaTypes,
     IsTwoPass = true, Icon = "icon-thumbnails", EntityType = UdiEntityType.MediaType)]
-public class MediaTypeHandler : ContentTypeBaseHandler<IMediaType, IMediaTypeService>, ISyncHandler, ISyncPostImportHandler, ISyncGraphableHandler,
+public class MediaTypeHandler : ContentTypeBaseHandler<IMediaType>, ISyncHandler, ISyncPostImportHandler, ISyncGraphableHandler,
     INotificationHandler<SavedNotification<IMediaType>>,
     INotificationHandler<DeletedNotification<IMediaType>>,
     INotificationHandler<MovedNotification<IMediaType>>,
@@ -34,23 +36,22 @@ public class MediaTypeHandler : ContentTypeBaseHandler<IMediaType, IMediaTypeSer
     INotificationHandler<DeletingNotification<IMediaType>>,
     INotificationHandler<MovingNotification<IMediaType>>
 {
-    private readonly IMediaTypeService mediaTypeService;
+    private readonly IMediaTypeContainerService _mediaTypeContainerService;
 
     /// <inheritdoc/>
     public MediaTypeHandler(
         ILogger<MediaTypeHandler> logger,
         IEntityService entityService,
-        IMediaTypeService mediaTypeService,
         AppCaches appCaches,
         IShortStringHelper shortStringHelper,
         SyncFileService syncFileService,
         uSyncEventService mutexService,
         uSyncConfigService uSyncConfig,
-        ISyncItemFactory syncItemFactory)
+        ISyncItemFactory syncItemFactory,
+        IMediaTypeContainerService mediaTypeContainerService)
         : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfig, syncItemFactory)
-
     {
-        this.mediaTypeService = mediaTypeService;
+        _mediaTypeContainerService = mediaTypeContainerService;
     }
 
     /// <inheritdoc/>
@@ -66,16 +67,10 @@ public class MediaTypeHandler : ContentTypeBaseHandler<IMediaType, IMediaTypeSer
         return item.Name?.ToSafeFileName(shortStringHelper) ?? item.Key.ToString();
     }
 
-    /// <inheritdoc/>
-    protected override void DeleteFolder(int id)
-        => mediaTypeService.DeleteContainer(id);
+    protected override async Task DeleteFolderAsync(Guid key)
+        => await _mediaTypeContainerService.DeleteAsync(key, Constants.Security.SuperUserKey);
 
-    /// <inheritdoc/>
-    protected override IEntity? GetContainer(int id)
-        => mediaTypeService.GetContainer(id);
-
-    /// <inheritdoc/>
-    protected override IEntity? GetContainer(Guid key)
-        => mediaTypeService.GetContainer(key);
+    protected override async Task<IEntity?> GetContainerAsync(Guid key)
+        => await _mediaTypeContainerService.GetAsync(key);
 
 }

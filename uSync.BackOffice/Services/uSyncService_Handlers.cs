@@ -21,9 +21,6 @@ public partial class uSyncService
         if (options.Folders?.Length > 0 is true)
             return options.Folders;
 
-        if (string.IsNullOrWhiteSpace(options.RootFolder) is false)
-            return [options.RootFolder];
-
         // return the default. 
         return _uSyncConfig.GetFolders();
     }
@@ -88,13 +85,6 @@ public partial class uSyncService
     /// <summary>
     ///  perform the post import actions for a handler 
     /// </summary>
-    [Obsolete("Pass array of folders, will be removed in v15")]
-    public IEnumerable<uSyncAction> PerformPostImport(string rootFolder, string handlerSet, IEnumerable<uSyncAction> actions)
-        => PerformPostImport([rootFolder], handlerSet, actions);
-
-    /// <summary>
-    ///  perform the post import actions for a handler 
-    /// </summary>
     public IEnumerable<uSyncAction> PerformPostImport(string[] folders, string handlerSet, IEnumerable<uSyncAction> actions)
     {
         lock (_importLock)
@@ -153,7 +143,7 @@ public partial class uSyncService
         switch (action)
         {
             case HandlerActions.Export:
-                WriteVersionFile(_uSyncConfig.GetRootFolder());
+                WriteVersionFile(_uSyncConfig.GetWorkingFolder());
                 _mutexService.FireBulkComplete(new uSyncExportCompletedNotification(actions));
                 break;
             case HandlerActions.Import:

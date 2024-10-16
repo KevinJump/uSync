@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 
 using Microsoft.Extensions.Logging;
@@ -30,19 +31,19 @@ namespace uSync.BackOffice.SyncHandlers.Handlers;
 /// </summary>
 [SyncHandler(uSyncConstants.Handlers.LanguageHandler, "Languages", "Languages", uSyncConstants.Priorites.Languages,
     Icon = "icon-globe", EntityType = UdiEntityType.Language, IsTwoPass = true)]
-public class LanguageHandler : SyncHandlerBase<ILanguage, ILocalizationService>, ISyncHandler,
+public class LanguageHandler : SyncHandlerBase<ILanguage>, ISyncHandler,
     INotificationHandler<SavingNotification<ILanguage>>,
     INotificationHandler<SavedNotification<ILanguage>>,
     INotificationHandler<DeletedNotification<ILanguage>>,
     INotificationHandler<DeletingNotification<ILanguage>>
 {
-    private readonly ILocalizationService localizationService;
+    private readonly ILanguageService _languageService;
 
     /// <inheritdoc/>
     public LanguageHandler(
         ILogger<LanguageHandler> logger,
         IEntityService entityService,
-        ILocalizationService localizationService,
+        ILanguageService languageService,
         AppCaches appCaches,
         IShortStringHelper shortStringHelper,
         SyncFileService syncFileService,
@@ -51,12 +52,12 @@ public class LanguageHandler : SyncHandlerBase<ILanguage, ILocalizationService>,
         ISyncItemFactory syncItemFactory)
         : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfig, syncItemFactory)
     {
-        this.localizationService = localizationService;
+        _languageService = languageService;
     }
 
     /// <inheritdoc/>
-    // language guids are not consistant (at least in alpha)
-    // so we don't save by Guid we save by ISO name everytime.           
+    // language guids are not consistent (at least in alpha)
+    // so we don't save by Guid we save by ISO name every time.           
     protected override string GetPath(string folder, ILanguage item, bool GuidNames, bool isFlat)
     {
         return Path.Combine(folder, $"{this.GetItemPath(item, GuidNames, isFlat)}.{this.uSyncConfig.Settings.DefaultExtension}");
@@ -103,27 +104,24 @@ public class LanguageHandler : SyncHandlerBase<ILanguage, ILocalizationService>,
 
     }
 
-    /// <inheritdoc/>
-    protected override IEnumerable<IEntity> GetChildItems(int parent)
-    {
-        if (parent == -1)
-            return localizationService.GetAllLanguages();
 
-        return Enumerable.Empty<IEntity>();
-    }
+    protected override async Task<IEnumerable<IEntity>> GetChildItemsAsync(Guid key)
+        => key != Guid.Empty
+            ? await _languageService.GetAllAsync()
+            : Enumerable.Empty<IEntity>();
 
     /// <inheritdoc/>
     protected override string GetItemName(ILanguage item) => item.IsoCode;
 
     /// <inheritdoc/>
-    protected override void CleanUp(ILanguage item, string newFile, string folder)
+    protected override async void CleanUp(ILanguage item, string newFile, string folder)
     {
         base.CleanUp(item, newFile, folder);
 
         // for languages we also clean up by id. 
         // this happens when the language changes .
         var physicalFile = syncFileService.GetAbsPath(newFile);
-        var installedLanguages = localizationService.GetAllLanguages()
+        var installedLanguages = (await _languageService.GetAllAsync())
             .Select(x => x.IsoCode).ToList();
 
         var files = syncFileService.GetFiles(folder, $"*.{this.uSyncConfig.Settings.DefaultExtension}");

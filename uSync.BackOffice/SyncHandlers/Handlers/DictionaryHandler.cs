@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 
 using Microsoft.Extensions.Logging;
@@ -28,7 +29,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers;
 /// </summary>
 [SyncHandler(uSyncConstants.Handlers.DictionaryHandler, "Dictionary", "Dictionary", uSyncConstants.Priorites.DictionaryItems
     , Icon = "icon-book-alt", EntityType = UdiEntityType.DictionaryItem)]
-public class DictionaryHandler : SyncHandlerLevelBase<IDictionaryItem, ILocalizationService>, ISyncHandler,
+public class DictionaryHandler : SyncHandlerLevelBase<IDictionaryItem>, ISyncHandler,
     INotificationHandler<SavedNotification<IDictionaryItem>>,
     INotificationHandler<DeletedNotification<IDictionaryItem>>,
     INotificationHandler<SavingNotification<IDictionaryItem>>,
@@ -39,13 +40,13 @@ public class DictionaryHandler : SyncHandlerLevelBase<IDictionaryItem, ILocaliza
     /// </summary>
     public override string Group => uSyncConstants.Groups.Content;
 
-    private readonly ILocalizationService localizationService;
+    private readonly IDictionaryItemService _dictionaryItemService;
 
     /// <inheritdoc/>
     public DictionaryHandler(
         ILogger<DictionaryHandler> logger,
         IEntityService entityService,
-        ILocalizationService localizationService,
+        IDictionaryItemService dictionaryItemService,
         AppCaches appCaches,
         IShortStringHelper shortStringHelper,
         SyncFileService syncFileService,
@@ -54,7 +55,7 @@ public class DictionaryHandler : SyncHandlerLevelBase<IDictionaryItem, ILocaliza
         ISyncItemFactory syncItemFactory)
         : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfigService, syncItemFactory)
     {
-        this.localizationService = localizationService;
+        _dictionaryItemService = dictionaryItemService;
     }
 
     /// <inheritdoc/>
@@ -117,11 +118,11 @@ public class DictionaryHandler : SyncHandlerLevelBase<IDictionaryItem, ILocaliza
 
         if (parent == Guid.Empty)
         {
-            items = localizationService.GetRootDictionaryItems().ToList();
+            items = _dictionaryItemService.GetAtRootAsync().Result.ToList();
         }
         else
         {
-            items = localizationService.GetDictionaryItemChildren(parent).ToList();
+            items = _dictionaryItemService.GetDescendantsAsync(parent).Result.ToList();
         }
 
         int count = 0;
@@ -141,20 +142,20 @@ public class DictionaryHandler : SyncHandlerLevelBase<IDictionaryItem, ILocaliza
     protected override IEnumerable<IEntity> GetFolders(int parent)
         => GetChildItems(parent);
 
-    /// <inheritdoc/>
-    protected override IEnumerable<IEntity> GetChildItems(int parent)
+
+    protected override async Task<IEnumerable<IEntity>> GetChildItemsAsync(Guid key)
     {
-        if (parent == -1)
+        if (key == Guid.Empty)
         {
-            return localizationService.GetRootDictionaryItems()
+            return (await _dictionaryItemService.GetAtRootAsync())
                 .Where(x => x is IEntity)
                 .Select(x => x as IEntity);
         }
         else
         {
-            var item = localizationService.GetDictionaryItemById(parent);
+            var item = await _dictionaryItemService.GetAsync(key);
             if (item != null)
-                return localizationService.GetDictionaryItemChildren(item.Key);
+                return await _dictionaryItemService.GetChildrenAsync(item.Key);
         }
 
         return Enumerable.Empty<IEntity>();

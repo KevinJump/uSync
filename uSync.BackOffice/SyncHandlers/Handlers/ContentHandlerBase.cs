@@ -26,15 +26,14 @@ namespace uSync.BackOffice.SyncHandlers.Handlers;
 ///  places around the tree, so we have to check for file name
 ///  clashes. 
 /// </remarks>
-public abstract class ContentHandlerBase<TObject, TService> : SyncHandlerTreeBase<TObject, TService>
+public abstract class ContentHandlerBase<TObject> : SyncHandlerTreeBase<TObject>
     where TObject : IContentBase
-    where TService : IService
 {
     /// <summary>
     /// Base constructor, should never be called directly
     /// </summary>
     protected ContentHandlerBase(
-        ILogger<ContentHandlerBase<TObject, TService>> logger,
+        ILogger<ContentHandlerBase<TObject>> logger,
         IEntityService entityService,
         AppCaches appCaches,
         IShortStringHelper shortStringHelper,

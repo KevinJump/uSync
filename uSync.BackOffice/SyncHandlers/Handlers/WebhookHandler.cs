@@ -61,23 +61,22 @@ public class WebhookHandler : SyncHandlerRoot<IWebhook, IWebhook>, ISyncHandler,
 		return [];
 	}
 
-
-	/// <inheritdoc/>
-	protected override IEnumerable<IWebhook> GetChildItems(IWebhook? parent)
+	protected override async Task<IEnumerable<IWebhook>> GetChildItemsAsync(IWebhook? parent)
 	{
-		if (parent == null)
-		{
-			return _webhookService.GetAllAsync(0, 1000).Result.Items;
-		}
+		if (parent is null)
+			return [];
 
-		return [];
-	}
+		return (await _webhookService.GetAllAsync(0, 1000)).Items;
+    }
 
-	/// <inheritdoc/>
-	protected override IEnumerable<IWebhook> GetFolders(IWebhook? parent) => [];
+    protected override IEnumerable<IWebhook> GetFolders(IWebhook? parent)
+		=> GetFoldersAsync(parent).Result;
 
-	/// <inheritdoc/>
-	protected override IWebhook? GetFromService(IWebhook? item)
+    protected override Task<IEnumerable<IWebhook>> GetFoldersAsync(IWebhook? parent)
+		=> Task.FromResult(Enumerable.Empty<IWebhook>());
+
+    /// <inheritdoc/>
+    protected override IWebhook? GetFromService(IWebhook? item)
 		=> item is null ? null : _webhookService.GetAsync(item.Key).Result;
 
 	/// <inheritdoc/>

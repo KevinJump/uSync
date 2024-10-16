@@ -28,7 +28,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers;
         "RelationTypes", uSyncConstants.Priorites.RelationTypes,
         Icon = "icon-link",
         EntityType = UdiEntityType.RelationType, IsTwoPass = false)]
-public class RelationTypeHandler : SyncHandlerBase<IRelationType, IRelationService>, ISyncHandler,
+public class RelationTypeHandler : SyncHandlerBase<IRelationType>, ISyncHandler,
     INotificationHandler<SavedNotification<IRelationType>>,
     INotificationHandler<DeletedNotification<IRelationType>>,
     INotificationHandler<SavingNotification<IRelationType>>,
