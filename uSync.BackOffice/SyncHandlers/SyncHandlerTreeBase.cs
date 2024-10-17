@@ -21,13 +21,12 @@ namespace uSync.BackOffice.SyncHandlers;
 ///  they go in, but that is ok because all treeSerializers store the level in the 
 ///  top attribute. 
 /// </summary>
-public abstract class SyncHandlerTreeBase<TObject, TService> : SyncHandlerLevelBase<TObject, TService>
+public abstract class SyncHandlerTreeBase<TObject> : SyncHandlerLevelBase<TObject>
     where TObject : ITreeEntity
-    where TService : IService
 {
     /// <inheritdoc/>
     protected SyncHandlerTreeBase(
-        ILogger<SyncHandlerTreeBase<TObject, TService>> logger,
+        ILogger<SyncHandlerTreeBase<TObject>> logger,
         IEntityService entityService,
         AppCaches appCaches,
         IShortStringHelper shortStringHelper,

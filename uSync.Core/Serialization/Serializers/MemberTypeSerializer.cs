@@ -7,6 +7,7 @@ using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Models.Entities;
 using Umbraco.Cms.Core.Services;
+using Umbraco.Cms.Core.Services.OperationStatus;
 using Umbraco.Cms.Core.Strings;
 using Umbraco.Extensions;
 
@@ -24,14 +25,13 @@ public class MemberTypeSerializer : ContentTypeBaseSerializer<IMemberType>, ISyn
         IDataTypeService dataTypeService,
         IMemberTypeService memberTypeService,
         IShortStringHelper shortStringHelper,
-        AppCaches appCaches,
-        IContentTypeService contentTypeService)
-        : base(entityService, logger, dataTypeService, memberTypeService, UmbracoObjectTypes.Unknown, shortStringHelper, appCaches, contentTypeService)
+        AppCaches appCaches)
+        : base(entityService, logger, dataTypeService, memberTypeService, UmbracoObjectTypes.Unknown, shortStringHelper, appCaches)
     {
         this._memberTypeService = memberTypeService;
     }
 
-    protected override SyncAttempt<XElement> SerializeCore(IMemberType item, SyncSerializerOptions options)
+    protected override async Task<SyncAttempt<XElement>> SerializeCoreAsync(IMemberType item, SyncSerializerOptions options)
     {
         var node = SerializeBase(item);
         var info = SerializeInfo(item);
@@ -45,7 +45,7 @@ public class MemberTypeSerializer : ContentTypeBaseSerializer<IMemberType>, ISyn
         else if (item.Level != 1)
         {
             // in a folder
-            var folderNode = GetFolderNode(item); //TODO: Cache this call.
+            var folderNode = await GetFolderNodeAsync(item); //TODO: Cache this call.
             if (folderNode != null)
                 info.Add(folderNode);
         }
@@ -116,9 +116,9 @@ public class MemberTypeSerializer : ContentTypeBaseSerializer<IMemberType>, ISyn
         return node;
     }
 
-    protected override SyncAttempt<IMemberType> DeserializeCore(XElement node, SyncSerializerOptions options)
+    protected override async Task<SyncAttempt<IMemberType>> DeserializeCoreAsync(XElement node, SyncSerializerOptions options)
     {
-        var attempt = FindOrCreate(node);
+        var attempt = await FindOrCreateAsync(node);
         if (!attempt.Success || attempt.Result is null)
             throw attempt.Exception ?? new Exception($"Unknown error {node.GetAlias()}");
 
@@ -126,7 +126,7 @@ public class MemberTypeSerializer : ContentTypeBaseSerializer<IMemberType>, ISyn
 
         var details = new List<uSyncChange>();
 
-        details.AddRange(DeserializeBase(item, node));
+        details.AddRange(await DeserializeBaseAsync(item, node));
         details.AddRange(DeserializeTabs(item, node));
         details.AddRange(DeserializeProperties(item, node, options));
 
@@ -137,7 +137,7 @@ public class MemberTypeSerializer : ContentTypeBaseSerializer<IMemberType>, ISyn
         return DeserializedResult(item, details, options);
     }
 
-    public override SyncAttempt<IMemberType> DeserializeSecondPass(IMemberType item, XElement node, SyncSerializerOptions options)
+    public override async Task<SyncAttempt<IMemberType>> DeserializeSecondPassAsync(IMemberType item, XElement node, SyncSerializerOptions options)
     {
         CleanTabAliases(item);
         var details = CleanTabs(item, node, options).ToList();
@@ -146,7 +146,7 @@ public class MemberTypeSerializer : ContentTypeBaseSerializer<IMemberType>, ISyn
 
         bool saveInSerializer = !options.Flags.HasFlag(SerializerFlags.DoNotSave);
         if (saveInSerializer && item.IsDirty())
-            _memberTypeService.Save(item);
+            await SaveItemAsync(item);
 
         return SyncAttempt<IMemberType>.Succeed(item.Name ?? item.Alias, item, ChangeType.Import, string.Empty, saveInSerializer, details);
     }
@@ -179,7 +179,7 @@ public class MemberTypeSerializer : ContentTypeBaseSerializer<IMemberType>, ISyn
         return changes;
     }
 
-    protected override Attempt<IMemberType?> CreateItem(string alias, ITreeEntity? parent, string extra)
+    protected override async Task<Attempt<IMemberType?>> CreateItemAsync(string alias, ITreeEntity? parent, string itemType)
     {
         var safeAlias = GetSafeItemAlias(alias);
 
@@ -200,5 +200,20 @@ public class MemberTypeSerializer : ContentTypeBaseSerializer<IMemberType>, ISyn
 
 
         return Attempt.Succeed(item as IMemberType);
+    }
+
+
+    protected override async Task<Attempt<EntityContainer?, EntityContainerOperationStatus>> CreateContainerAsync(Guid parentKey, string name)
+    {
+        var parent = _memberTypeService.Get(parentKey);
+        if (parent is null) return Attempt<EntityContainer?, EntityContainerOperationStatus>.Fail(EntityContainerOperationStatus.ParentNotFound);
+
+        var result = _memberTypeService.CreateContainer(parent.Id, Guid.NewGuid(), name);
+        if (result)
+        {
+            return Attempt<EntityContainer?, EntityContainerOperationStatus>.Succeed(EntityContainerOperationStatus.Success, result.Result?.Entity);
+        }
+
+        return Attempt<EntityContainer?, EntityContainerOperationStatus>.Fail(EntityContainerOperationStatus.NotFound);
     }
 }

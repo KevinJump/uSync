@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
@@ -12,6 +14,8 @@ using Umbraco.Cms.Core.Strings;
 
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
+using uSync.BackOffice.SyncHandlers.Interfaces;
+using uSync.BackOffice.SyncHandlers.Models;
 using uSync.Core;
 
 using static Umbraco.Cms.Core.Constants;
@@ -23,9 +27,9 @@ namespace uSync.BackOffice.SyncHandlers.Handlers;
 /// </summary>
 [SyncHandler(uSyncConstants.Handlers.ContentTemplateHandler, "Blueprints", "Blueprints", uSyncConstants.Priorites.ContentTemplate
     , Icon = "icon-blueprint", IsTwoPass = true, EntityType = UdiEntityType.DocumentBlueprint)]
-public class ContentTemplateHandler : ContentHandlerBase<IContent, IContentService>, ISyncHandler,
-    INotificationHandler<ContentSavedBlueprintNotification>,
-    INotificationHandler<ContentDeletedBlueprintNotification>
+public class ContentTemplateHandler : ContentHandlerBase<IContent>, ISyncHandler,
+    INotificationAsyncHandler<ContentSavedBlueprintNotification>,
+    INotificationAsyncHandler<ContentDeletedBlueprintNotification>
 {
     /// <summary>
     /// ContentTypeHandler belongs to the Content group by default
@@ -35,7 +39,7 @@ public class ContentTemplateHandler : ContentHandlerBase<IContent, IContentServi
     private readonly IContentService contentService;
 
     /// <summary>
-    ///  Handler constrcutor Loaded via DI
+    ///  Handler constructor Loaded via DI
     /// </summary>
     public ContentTemplateHandler(
         ILogger<ContentTemplateHandler> logger,
@@ -60,31 +64,26 @@ public class ContentTemplateHandler : ContentHandlerBase<IContent, IContentServi
     /// <summary>
     ///  Delete a content template via the ContentService
     /// </summary>
-    protected override void DeleteViaService(IContent item)
-        => contentService.DeleteBlueprint(item);
+    /// 
+    protected override async Task DeleteViaServiceAsync(IContent item)
+        => await Task.Run(() => contentService.DeleteBlueprint(item));
 
     /// <summary>
     ///  Fetch a content template via the ContentService
     /// </summary>
-    protected override IContent? GetFromService(int id)
-        => contentService.GetBlueprintById(id);
+    protected override async Task<IContent?> GetFromServiceAsync(Guid key)
+        => await Task.FromResult(contentService.GetBlueprintById(key));
 
     /// <summary>
     ///  Fetch a content template via the ContentService
     /// </summary>
-    protected override IContent? GetFromService(Guid key)
-        => contentService.GetBlueprintById(key);
-
-    /// <summary>
-    ///  Fetch a content template via the ContentService
-    /// </summary>
-    protected override IContent? GetFromService(string alias)
-        => null;
+    protected override Task<IContent?> GetFromServiceAsync(string alias)
+        => Task.FromResult<IContent?>(default);
 
     /// <summary>
     ///  Manage the content blueprint saved notification
     /// </summary>
-    public void Handle(ContentSavedBlueprintNotification notification)
+    public async Task HandleAsync(ContentSavedBlueprintNotification notification, CancellationToken cancellationToken)
     {
         if (!ShouldProcessEvent()) return;
 
@@ -92,11 +91,11 @@ public class ContentTemplateHandler : ContentHandlerBase<IContent, IContentServi
         try
         {
             var handlerFolders = GetDefaultHandlerFolders();
-            var attempts = Export(item, handlerFolders, DefaultConfig);
+            var attempts = await ExportAsync(item, handlerFolders, DefaultConfig);
             foreach (var attempt in attempts.Where(x => x.Success))
             {
                 if (attempt.FileName is null) continue;
-                this.CleanUp(item, attempt.FileName, handlerFolders.Last());
+                await this.CleanUpAsync(item, attempt.FileName, handlerFolders.Last());
             }
         }
         catch (Exception ex)
@@ -109,7 +108,7 @@ public class ContentTemplateHandler : ContentHandlerBase<IContent, IContentServi
     /// <summary>
     ///  manage the notification when a blueprint is deleted
     /// </summary>
-    public void Handle(ContentDeletedBlueprintNotification notification)
+    public async Task HandleAsync(ContentDeletedBlueprintNotification notification, CancellationToken cancellationToken)
     {
         if (!ShouldProcessEvent()) return;
 
@@ -118,7 +117,7 @@ public class ContentTemplateHandler : ContentHandlerBase<IContent, IContentServi
             try
             {
                 var handlerFolders = GetDefaultHandlerFolders();
-                ExportDeletedItem(item, handlerFolders, DefaultConfig);
+                await ExportDeletedItemAsync(item, handlerFolders, DefaultConfig);
             }
             catch (Exception ex)
             {

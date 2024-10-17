@@ -152,18 +152,6 @@ public struct uSyncActionHelper<T>
     /// <summary>
     ///  Create a new report action
     /// </summary>
-    [Obsolete("Reporting with the Path gives better feedback to the user.")]
-    public static uSyncAction ReportAction(ChangeType changeType, string name, string file, Guid key, string handlerAlias, string message)
-    {
-        return new uSyncAction(true, name, typeof(T).Name, changeType, message, null, file, handlerAlias)
-        {
-            Key = key
-        };
-    }
-
-    /// <summary>
-    ///  Create a new report action
-    /// </summary>
     public static uSyncAction ReportAction(ChangeType changeType, string name, string path, string file, Guid key, string handlerAlias, string message)
     {
         return new uSyncAction(true, name, typeof(T).Name, changeType, message, null, file, handlerAlias)

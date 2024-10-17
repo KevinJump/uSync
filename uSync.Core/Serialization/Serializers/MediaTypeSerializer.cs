@@ -7,7 +7,9 @@ using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Models.Entities;
 using Umbraco.Cms.Core.Services;
+using Umbraco.Cms.Core.Services.OperationStatus;
 using Umbraco.Cms.Core.Strings;
+using Umbraco.Extensions;
 
 using uSync.Core.Models;
 
@@ -17,20 +19,21 @@ namespace uSync.Core.Serialization.Serializers;
 public class MediaTypeSerializer : ContentTypeBaseSerializer<IMediaType>, ISyncSerializer<IMediaType>
 {
     private readonly IMediaTypeService _mediaTypeService;
+    private readonly IMediaTypeContainerService _mediaTypeContainerService;
 
     public MediaTypeSerializer(
         IEntityService entityService, ILogger<MediaTypeSerializer> logger,
         IDataTypeService dataTypeService,
         IMediaTypeService mediaTypeService,
         IShortStringHelper shortStringHelper,
-        AppCaches appCaches,
-        IContentTypeService contentTypeService)
-        : base(entityService, logger, dataTypeService, mediaTypeService, UmbracoObjectTypes.MediaTypeContainer, shortStringHelper, appCaches, contentTypeService)
+        AppCaches appCaches, IMediaTypeContainerService mediaTypeContainerService)
+        : base(entityService, logger, dataTypeService, mediaTypeService, UmbracoObjectTypes.MediaTypeContainer, shortStringHelper, appCaches)
     {
         this._mediaTypeService = mediaTypeService;
+        _mediaTypeContainerService = mediaTypeContainerService;
     }
 
-    protected override SyncAttempt<XElement> SerializeCore(IMediaType item, SyncSerializerOptions options)
+    protected override async Task<SyncAttempt<XElement>> SerializeCoreAsync(IMediaType item, SyncSerializerOptions options)
     {
         var node = SerializeBase(item);
         var info = SerializeInfo(item);
@@ -44,7 +47,7 @@ public class MediaTypeSerializer : ContentTypeBaseSerializer<IMediaType>, ISyncS
         else if (item.Level != 1)
         {
             // in a folder
-            var folderNode = GetFolderNode(item); //TODO: Cache this call.
+            var folderNode = await GetFolderNodeAsync(item); //TODO: Cache this call.
             if (folderNode != null)
                 info.Add(folderNode);
         }
@@ -59,36 +62,36 @@ public class MediaTypeSerializer : ContentTypeBaseSerializer<IMediaType>, ISyncS
         return SyncAttempt<XElement>.Succeed(item.Name ?? item.Alias, node, typeof(IMediaType), ChangeType.Export);
     }
 
-    protected override SyncAttempt<IMediaType> DeserializeCore(XElement node, SyncSerializerOptions options)
+    protected override async Task<SyncAttempt<IMediaType>> DeserializeCoreAsync(XElement node, SyncSerializerOptions options)
     {
         if (!IsValid(node))
             throw new ArgumentException("Invalid XML Format");
 
         var details = new List<uSyncChange>();
 
-        var attempt = FindOrCreate(node);
+        var attempt = await FindOrCreateAsync(node);
         if (!attempt.Success || attempt.Result is null)
             throw attempt.Exception ?? new Exception($"Unknown error {node.GetAlias()}");
 
         var item = attempt.Result;
 
-        details.AddRange(DeserializeBase(item, node));
+        details.AddRange(await DeserializeBaseAsync(item, node));
         details.AddRange(DeserializeTabs(item, node));
         details.AddRange(DeserializeProperties(item, node, options));
 
-        details.AddRange(DeserializeCompositions(item, node));
+        details.AddRange(await DeserializeCompositionsAsync(item, node));
 
         CleanTabs(item, node, options);
 
         return DeserializedResult(item, details, options);
     }
 
-    public override SyncAttempt<IMediaType> DeserializeSecondPass(IMediaType item, XElement node, SyncSerializerOptions options)
+    public override async Task<SyncAttempt<IMediaType>> DeserializeSecondPassAsync(IMediaType item, XElement node, SyncSerializerOptions options)
     {
         var details = new List<uSyncChange>();
 
-        details.AddRange(DeserializeCompositions(item, node));
-        details.AddRange(DeserializeStructure(item, node));
+        details.AddRange(await DeserializeCompositionsAsync(item, node));
+        details.AddRange(await DeserializeStructureAsync(item, node));
 
         SetSafeAliasValue(item, node, false);
 
@@ -97,12 +100,12 @@ public class MediaTypeSerializer : ContentTypeBaseSerializer<IMediaType>, ISyncS
 
         bool saveInSerializer = !options.Flags.HasFlag(SerializerFlags.DoNotSave);
         if (saveInSerializer && item.IsDirty())
-            _mediaTypeService.Save(item);
+            await this.SaveItemAsync(item);
 
         return SyncAttempt<IMediaType>.Succeed(item.Name ?? item.Alias, item, ChangeType.Import, "", saveInSerializer, details);
     }
 
-    protected override Attempt<IMediaType?> CreateItem(string alias, ITreeEntity? parent, string itemType)
+    protected override async Task<Attempt<IMediaType?>> CreateItemAsync(string alias, ITreeEntity? parent, string itemType)
     {
         var safeAlias = GetSafeItemAlias(alias);
 
@@ -122,5 +125,23 @@ public class MediaTypeSerializer : ContentTypeBaseSerializer<IMediaType>, ISyncS
         AddAlias(safeAlias);
 
         return Attempt.Succeed(item as IMediaType);
+    }
+
+
+    protected override async Task<Attempt<EntityContainer?, EntityContainerOperationStatus>> CreateContainerAsync(Guid parentKey, string name)
+    {
+        var parent = await _mediaTypeContainerService.GetAsync(parentKey);
+        if (parent is null) return Attempt<EntityContainer?, EntityContainerOperationStatus>.Fail(EntityContainerOperationStatus.ParentNotFound);
+        if (parent.Name is null) return Attempt<EntityContainer?, EntityContainerOperationStatus>.Fail(EntityContainerOperationStatus.ParentNotFound);
+
+        var existing = (await _mediaTypeContainerService.GetAsync(parent.Name, parent.Level)).FirstOrDefault(x => x.Name.InvariantEquals(name));
+        if (existing is null)
+        {
+            return await _mediaTypeContainerService.CreateAsync(Guid.NewGuid(), name, parentKey, Constants.Security.SuperUserKey);
+        }
+        else
+        {
+            return await _mediaTypeContainerService.UpdateAsync(existing.Key, name, Constants.Security.SuperUserKey);
+        }
     }
 }

@@ -45,6 +45,7 @@
 		"format": "prettier \"src/**/*.ts\" --check",
 		"build": "tsc && vite build",
 		"watch": "vite build --watch",
+		"typescript:build": "tsc",
 		"make": "npm run build && npm run client:make"
 	},
 	"devDependencies": {
@@ -52,7 +53,7 @@
 		"@microsoft/signalr": "^8.0.0",
 		"@types/diff": "^5.2.2",
 		"@types/node": "^20.11.20",
-		"@umbraco-cms/backoffice": "^14.2.0",
+		"@umbraco-cms/backoffice": "^15.0.0-rc1",
 		"del-cli": "^5.1.0",
 		"diff": "^5.2.0",
 		"lit": "^3.2.0",

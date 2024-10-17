@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 
 using uSync.BackOffice.Models;
-using uSync.BackOffice.SyncHandlers;
+using uSync.BackOffice.SyncHandlers.Models;
 
 namespace uSync.BackOffice.Services;
 

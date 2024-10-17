@@ -113,7 +113,7 @@ public abstract class SyncNestedValueMapperBase : SyncValueMapperBase
             var propertyValue = value[propertyType.Alias];
             if (propertyValue == null) continue;
 
-            var dataType = dataTypeService.GetDataType(propertyType.DataTypeKey);
+            var dataType = dataTypeService.GetAsync(propertyType.DataTypeKey).Result;
             if (dataType == null) continue;
 
             dependencies.AddRange(mapperCollection.Value.GetDependencies(propertyValue, dataType.EditorAlias, flags));

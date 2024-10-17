@@ -1,4 +1,4 @@
-﻿namespace uSync.BackOffice.SyncHandlers;
+﻿namespace uSync.BackOffice.SyncHandlers.Models;
 
 /// <summary>
 ///  options that define how we define a handler 
@@ -41,7 +41,7 @@ public class SyncHandlerOptions
     public SyncHandlerOptions(string setName)
         : this()
     {
-        this.Set = setName;
+        Set = setName;
     }
 
     /// <summary>
@@ -50,7 +50,7 @@ public class SyncHandlerOptions
     public SyncHandlerOptions(string setName, int userId)
         : this(setName)
     {
-        this.UserId = userId;
+        UserId = userId;
     }
 
     /// <summary>
@@ -59,8 +59,8 @@ public class SyncHandlerOptions
     public SyncHandlerOptions(string setName, HandlerActions action)
         : this(setName)
     {
-        this.Set = setName;
-        this.Action = action;
+        Set = setName;
+        Action = action;
     }
 
     /// <summary>
@@ -69,6 +69,6 @@ public class SyncHandlerOptions
     public SyncHandlerOptions(string setName, HandlerActions action, int userId)
         : this(setName, action)
     {
-        this.UserId = userId;
+        UserId = userId;
     }
 }

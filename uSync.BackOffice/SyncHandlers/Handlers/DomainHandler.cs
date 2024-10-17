@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
@@ -14,6 +16,8 @@ using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
+using uSync.BackOffice.SyncHandlers.Interfaces;
+using uSync.BackOffice.SyncHandlers.Models;
 using uSync.Core;
 
 namespace uSync.BackOffice.SyncHandlers.Handlers;
@@ -23,9 +27,9 @@ namespace uSync.BackOffice.SyncHandlers.Handlers;
 /// </summary>
 [SyncHandler(uSyncConstants.Handlers.DomainHandler, "Domains", "Domains", uSyncConstants.Priorites.DomainSettings
     , Icon = "icon-home", EntityType = "domain")]
-public class DomainHandler : SyncHandlerBase<IDomain, IDomainService>, ISyncHandler,
-    INotificationHandler<SavedNotification<IDomain>>,
-    INotificationHandler<DeletedNotification<IDomain>>
+public class DomainHandler : SyncHandlerBase<IDomain>, ISyncHandler,
+    INotificationAsyncHandler<SavedNotification<IDomain>>,
+    INotificationAsyncHandler<DeletedNotification<IDomain>>
 {
     /// <inheritdoc/>
     public override string Group => uSyncConstants.Groups.Content;
@@ -49,27 +53,6 @@ public class DomainHandler : SyncHandlerBase<IDomain, IDomainService>, ISyncHand
     }
 
     /// <inheritdoc/>
-    public override IEnumerable<uSyncAction> ExportAll(string folder, HandlerSettings config, SyncUpdateCallback? callback)
-    {
-        var actions = new List<uSyncAction>();
-
-        var domains = domainService.GetAll(true).ToList();
-        int count = 0;
-        foreach (var domain in domains)
-        {
-            count++;
-            if (domain != null)
-            {
-                callback?.Invoke(domain.DomainName, count, domains.Count);
-                actions.AddRange(Export(domain, folder, config));
-            }
-        }
-
-        callback?.Invoke("done", 1, 1);
-        return actions;
-    }
-
-    /// <inheritdoc/>
     protected override string GetItemName(IDomain item)
         => item.DomainName;
 
@@ -78,14 +61,13 @@ public class DomainHandler : SyncHandlerBase<IDomain, IDomainService>, ISyncHand
         => $"{item.DomainName.ToSafeFileName(shortStringHelper)}_{item.LanguageIsoCode?.ToSafeFileName(shortStringHelper)}";
 
     /// <inheritdoc/>
-    protected override IEnumerable<IEntity> GetChildItems(int parent)
+    protected override async Task<IEnumerable<IEntity>> GetChildItemsAsync(Guid key)
     {
-        if (parent == -1)
-            return domainService.GetAll(true)
+        if (key == Guid.Empty) 
+            return (await domainService.GetAllAsync(true))
                 .Where(x => x is IEntity)
                 .Select(x => x as IEntity);
 
-        return base.GetChildItems(parent);
-
+        return await base.GetChildItemsAsync(key);
     }
 }

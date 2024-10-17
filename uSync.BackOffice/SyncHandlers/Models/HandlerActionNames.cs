@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace uSync.BackOffice.SyncHandlers;
+namespace uSync.BackOffice.SyncHandlers.Models;
 
 /// <summary>
 ///  Possible actions a handler can do (stored in config)
@@ -55,5 +55,5 @@ internal class SyncActionName : Attribute
     }
 
     public override string ToString()
-        => this.name;
+        => name;
 }

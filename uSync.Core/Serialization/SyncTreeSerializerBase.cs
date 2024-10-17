@@ -16,8 +16,7 @@ public abstract class SyncTreeSerializerBase<TObject> : SyncSerializerBase<TObje
     {
     }
 
-    protected abstract Attempt<TObject?> CreateItem(string alias, ITreeEntity? parent, string itemType);
-
+    protected abstract Task<Attempt<TObject?>> CreateItemAsync(string alias, ITreeEntity? parent, string itemType);
 
     #region Getters
     // Getters - get information we already know (either in the object or the XElement)
@@ -29,14 +28,15 @@ public abstract class SyncTreeSerializerBase<TObject> : SyncSerializerBase<TObje
     #region Finders 
     // Finders - used on importing, getting things that are already there (or maybe not)
 
-    protected abstract Attempt<TObject?> FindOrCreate(XElement node);
 
-    protected TObject? FindItem(Guid key, string alias)
+    protected abstract Task<Attempt<TObject?>> FindOrCreateAsync(XElement node);
+
+    protected async Task<TObject?> FindItemAsync(Guid key, string alias)
     {
-        var item = FindItem(key);
+        var item = await FindItemAsync(key);
         if (item != null) return item;
 
-        return FindItem(alias);
+        return await FindItemAsync(alias);
     }
 
     #endregion
@@ -56,10 +56,10 @@ public abstract class SyncTreeSerializerBase<TObject> : SyncSerializerBase<TObje
     ///  be imported into the nearest possible place (e.g one level up), but at 
     ///  report time we say - the parent is missing you know?
     /// </remarks>
-    public override ChangeType IsCurrent(XElement node, SyncSerializerOptions options)
+    /// 
+    public override async Task<ChangeType> IsCurrentAsync(XElement node, SyncSerializerOptions options)
     {
-        var change = base.IsCurrent(node, options);
-
+        var change = await base.IsCurrentAsync(node, options);
 
         // doing this check in isCurrent slows us down a lot, 
         // we also do this check in de-serialize node, so removing it here
@@ -82,8 +82,8 @@ public abstract class SyncTreeSerializerBase<TObject> : SyncSerializerBase<TObje
     /// <summary>
     ///  does the parent item (as defined in the xml) exist in umbraco for this item?
     /// </summary>
-    protected virtual bool HasParentItem(XElement node)
-        => true;
+    protected virtual Task<bool> HasParentItemAsync(XElement node)
+        => Task.FromResult(true);
 
     /// <summary>
     ///  calculates the Umbraco Path value for an item, based on the parent
@@ -115,5 +115,18 @@ public abstract class SyncTreeSerializerBase<TObject> : SyncSerializerBase<TObje
         }
     }
 
+
+    //[Obsolete("Use CreateItemAsync will be removed in v16")]
+    //protected abstract Attempt<TObject?> CreateItem(string alias, ITreeEntity? parent, string itemType);
+
+    //[Obsolete("Use FindItemAsync will be removed in v16")]
+    //protected virtual Attempt<TObject?> FindOrCreate(XElement node)
+    //    => FindOrCreateAsync(node).Result;
+    //[Obsolete("Use FindItemAsync will be removed in v16")]
+    //protected TObject? FindItem(Guid key, string alias)
+    //    => FindItemAsync(key, alias).Result;
+    //[Obsolete("Use HasParentItemAsync will be removed in v16")]
+    //protected virtual bool HasParentItem(XElement node)
+    //    => true;
 
 }

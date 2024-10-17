@@ -26,14 +26,13 @@ namespace uSync.BackOffice.SyncHandlers;
 /// ideally this would be in SyncHandlerTreeBase, but 
 /// Templates have levels but are not ITreeEntities 
 /// </summary>
-public abstract class SyncHandlerLevelBase<TObject, TService>
-    : SyncHandlerBase<TObject, TService>
+public abstract class SyncHandlerLevelBase<TObject>
+    : SyncHandlerBase<TObject>
     where TObject : IEntity
-    where TService : IService
 {
     /// <inheritdoc/>
     protected SyncHandlerLevelBase(
-        ILogger<SyncHandlerLevelBase<TObject, TService>> logger,
+        ILogger<SyncHandlerLevelBase<TObject>> logger,
         IEntityService entityService,
         AppCaches appCaches,
         IShortStringHelper shortStringHelper,
@@ -52,7 +51,7 @@ public abstract class SyncHandlerLevelBase<TObject, TService>
     ///  then cost us much to sort them when we have to.
     /// </remarks>
     protected override IReadOnlyList<OrderedNodeInfo> GetMergedItems(string[] folders)
-        => base.GetMergedItems(folders).OrderBy(x => x.Level).ToList();
+        => [.. base.GetMergedItems(folders).OrderBy(x => x.Level)];
 
 
     /// <inheritdoc/>
@@ -104,82 +103,4 @@ public abstract class SyncHandlerLevelBase<TObject, TService>
 
         return Guid.NewGuid().ToString();
     }
-
-
-    /// <summary>
-    ///  object representing a file and its level
-    /// </summary>
-    [Obsolete("Items Will not be loaded using this object, to be removed v15")]
-    protected class LeveledFile
-    {
-        /// <summary>
-        ///  umbraco alias of the item
-        /// </summary>
-        public string? Alias { get; set; }
-
-        /// <summary>
-        ///  level (e.g 0 is root) of file
-        /// </summary>
-        public int Level { get; set; }
-
-        /// <summary>
-        ///  path to the actual file.
-        /// </summary>
-        public string? File { get; set; }
-    }
-
-    /// <summary>
-    ///  Load a XElement node for a given path.
-    /// </summary>
-    [Obsolete("Items Will not be loaded using this object, to be removed v15")]
-    protected XElement LoadNode(string path)
-    {
-        syncFileService.EnsureFileExists(path);
-
-        using (var stream = syncFileService.OpenRead(path))
-        {
-            if (stream is null)
-                throw new FileNotFoundException($"Cannot read stream for {path}");
-
-            return XElement.Load(stream);
-        }
-    }
-
-    /// <summary>
-    ///  Get all the files in a folder and return them sorted by their level 
-    /// </summary>
-    [Obsolete("Items Will not be loaded using this object, to be removed v15")]
-    protected virtual IList<LeveledFile> GetLevelOrderedFiles(string folder, IList<uSyncAction> actions)
-    {
-        List<LeveledFile> nodes = new List<LeveledFile>();
-
-        var files = syncFileService.GetFiles(folder, $"*.{this.uSyncConfig.Settings.DefaultExtension}");
-        foreach (var file in files)
-        {
-            try
-            {
-                var node = LoadNode(file);
-                if (node != null)
-                {
-                    nodes.Add(new LeveledFile
-                    {
-                        Alias = node.GetAlias(),
-                        Level = (node.GetLevel() * 1000) + node.GetItemSortOrder(), // will hopefully let us put things in sort order in one go. 
-                        File = file
-                    });
-                }
-            }
-            catch (XmlException ex)
-            {
-                // one of the files is wrong. (do we stop or carry on)
-                logger.LogWarning($"Error loading file: {file} [{ex.Message}]");
-                actions.Add(uSyncActionHelper<TObject>.SetAction(
-                    SyncAttempt<TObject>.Fail(Path.GetFileName(file), ChangeType.Fail, $"Failed to Load: {ex.Message}"), file, Guid.Empty, this.Alias, false));
-            }
-        }
-
-        return nodes.OrderBy(x => x.Level).ToList();
-    }
-
-
 }

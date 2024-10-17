@@ -1,16 +1,10 @@
-import {
-	ManifestWorkspace,
-	ManifestWorkspaceAction,
-	ManifestWorkspaceContext,
-	ManifestWorkspaceView,
-} from '@umbraco-cms/backoffice/extension-registry';
 import { uSyncConstants, SyncLegacyFilesConditionConfig } from '@jumoo/uSync';
 
 import './components/index.js';
 
 const workspaceAlias = uSyncConstants.workspace.alias;
 
-const workspace: ManifestWorkspace = {
+const workspace: UmbExtensionManifest = {
 	type: 'workspace',
 	alias: workspaceAlias,
 	name: 'uSync core workspace',
@@ -20,7 +14,7 @@ const workspace: ManifestWorkspace = {
 	},
 };
 
-const context: ManifestWorkspaceContext = {
+const context: UmbExtensionManifest = {
 	type: 'workspaceContext',
 	alias: uSyncConstants.workspace.contextAlias,
 	name: 'uSync workspace context',
@@ -33,7 +27,7 @@ const context: ManifestWorkspaceContext = {
 	],
 };
 
-const workspaceViews: Array<ManifestWorkspaceView> = [
+const workspaceViews: Array<UmbExtensionManifest> = [
 	{
 		type: 'workspaceView',
 		alias: uSyncConstants.workspace.defaultView.alias,
@@ -112,6 +106,6 @@ const workspaceViews: Array<ManifestWorkspaceView> = [
 	},
 ];
 
-const workspaceActions: Array<ManifestWorkspaceAction> = [];
+const workspaceActions: Array<UmbExtensionManifest> = [];
 
 export const manifests = [context, workspace, ...workspaceViews, ...workspaceActions];

@@ -20,35 +20,36 @@ namespace uSync.Core.Serialization.Serializers;
 public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerializer<IContent>
 {
     protected readonly IContentService contentService;
-    protected readonly IFileService fileService;
     protected readonly IUserService userService;
+
+    protected readonly ITemplateService _templateService;
 
     public ContentSerializer(
         IEntityService entityService,
-        ILocalizationService localizationService,
+        ILanguageService languageService,
         IRelationService relationService,
         IShortStringHelper shortStringHelper,
         ILogger<ContentSerializer> logger,
         IContentService contentService,
-        IFileService fileService,
         SyncValueMapperCollection syncMappers,
-        IUserService userService)
-        : base(entityService, localizationService, relationService, shortStringHelper, logger, UmbracoObjectTypes.Document, syncMappers)
+        IUserService userService,
+        ITemplateService templateService)
+        : base(entityService, languageService, relationService, shortStringHelper, logger, UmbracoObjectTypes.Document, syncMappers)
     {
         this.contentService = contentService;
-        this.fileService = fileService;
 
         this.relationAlias = Constants.Conventions.RelationTypes.RelateParentDocumentOnDeleteAlias;
         this.userService = userService;
+        _templateService = templateService;
     }
 
     #region Serialization
 
-    protected override SyncAttempt<XElement> SerializeCore(IContent item, SyncSerializerOptions options)
+    protected override async Task<SyncAttempt<XElement>> SerializeCoreAsync(IContent item, SyncSerializerOptions options)
     {
         var node = InitializeNode(item, item.ContentType.Alias, options);
 
-        var info = SerializeInfo(item, options);
+        var info = await SerializeInfoAsync(item, options);
 
         var properties = SerializeProperties(item, options);
 
@@ -58,9 +59,9 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
         return SyncAttempt<XElement>.Succeed(item.Name ?? item.Id.ToString(), node, typeof(IContent), ChangeType.Export);
     }
 
-    protected override XElement SerializeInfo(IContent item, SyncSerializerOptions options)
+    protected override async Task<XElement> SerializeInfoAsync(IContent item, SyncSerializerOptions options)
     {
-        var info = base.SerializeInfo(item, options);
+        var info = await base.SerializeInfoAsync(item, options);
 
         info.Add(SerializePublishedStatus(item, options));
         info.Add(SerializeSchedule(item, options));
@@ -74,11 +75,11 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
         return info;
     }
 
-    protected virtual XElement SerializeTemplate(IContent item, SyncSerializerOptions options)
+    protected virtual async Task<XElement> SerializeTemplate(IContent item, SyncSerializerOptions options)
     {
         if (item.TemplateId != null && item.TemplateId.HasValue)
         {
-            var template = fileService.GetTemplate(item.TemplateId.Value);
+            var template = await _templateService.GetAsync(item.TemplateId.Value);
             if (template != null)
             {
                 return new XElement(uSyncConstants.Xml.Template,
@@ -156,9 +157,9 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
 
     #region De-serialization
 
-    protected override SyncAttempt<IContent> DeserializeCore(XElement node, SyncSerializerOptions options)
+    protected override async Task<SyncAttempt<IContent>> DeserializeCoreAsync(XElement node, SyncSerializerOptions options)
     {
-        var attempt = FindOrCreate(node);
+        var attempt = await FindOrCreateAsync(node);
         if (!attempt.Success || attempt.Result is null)
             throw attempt.Exception ?? new Exception($"Unknown error {node.GetAlias()}");
 
@@ -166,7 +167,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
 
         var details = new List<uSyncChange>();
 
-        details.AddRange(DeserializeBase(item, node, options));
+        details.AddRange(await DeserializeBaseAsync(item, node, options));
 
         var infoNode = node.Element(uSyncConstants.Xml.Info);
 
@@ -181,7 +182,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
 		
 
 
-		details.AddNotNull(DeserializeTemplate(item, node));
+		details.AddNotNull(await DeserializeTemplate(item, node));
 
         var propertiesAttempt = DeserializeProperties(item, node, options);
         if (!propertiesAttempt.Success)
@@ -245,7 +246,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
         }
     }
 
-    protected virtual uSyncChange? DeserializeTemplate(IContent item, XElement node)
+    protected virtual async Task<uSyncChange?> DeserializeTemplate(IContent item, XElement node)
     {
         var templateNode = node.Element("Info")?.Element("Template");
 
@@ -254,7 +255,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
             var alias = templateNode.ValueOrDefault(string.Empty);
             if (!string.IsNullOrWhiteSpace(alias))
             {
-                var template = fileService.GetTemplate(alias);
+                var template = await _templateService.GetAsync(alias);
                 if (template != null && template.Id != item.TemplateId)
                 {
                     var oldValue = item.TemplateId;
@@ -266,7 +267,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
             var key = templateNode.ValueOrDefault(Guid.Empty);
             if (key != Guid.Empty)
             {
-                var template = fileService.GetTemplate(key);
+                var template = await _templateService.GetAsync(key);
                 if (template != null && template.Id != item.TemplateId)
                 {
                     var oldValue = item.TemplateId;
@@ -301,18 +302,17 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
     ///  exist, we need to second pass schedules, only. 99% of the time this shouldn't
     ///  have any impact. 
     /// </remarks>
-    public override SyncAttempt<IContent> DeserializeSecondPass(IContent item, XElement node, SyncSerializerOptions options)
+    public override async Task<SyncAttempt<IContent>> DeserializeSecondPassAsync(IContent item, XElement node, SyncSerializerOptions options)
     {
-        var changes = DeserializeSchedules(item, node, options);
+        var changes = await DeserializeSchedulesAsync(item, node, options);
         if (changes.Count != 0)
             return SyncAttempt<IContent>.Succeed(item.Name ?? item.Id.ToString(), item, ChangeType.Import, "" ?? string.Empty, true, changes);
 
         return SyncAttempt<IContent>.Succeed(item.Name ?? item.Id.ToString(), item, ChangeType.NoChange);
     }
 
-    private List<uSyncChange> DeserializeSchedules(IContent item, XElement node, SyncSerializerOptions options)
+    private async Task<List<uSyncChange>> DeserializeSchedulesAsync(IContent item, XElement node, SyncSerializerOptions options)
     {
-
         var changes = new List<uSyncChange>();
         var nodeSchedules = new ContentScheduleCollection();
         var currentSchedules = contentService.GetContentScheduleByContentId(item.Id);
@@ -370,7 +370,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
             if (changes.Count != 0)
             {
                 logger.LogDebug("Saving Schedule changes: {item}", item.Name);
-                contentService.PersistContentSchedule(item, currentSchedules);
+                await Task.Run(() => contentService.PersistContentSchedule(item, currentSchedules));
                 return changes;
             }
 
@@ -665,7 +665,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
 
     #endregion
 
-    protected override Attempt<IContent?> CreateItem(string alias, ITreeEntity? parent, string itemType)
+    protected override async Task<Attempt<IContent?>> CreateItemAsync(string alias, ITreeEntity? parent, string itemType)
     {
         logger.LogDebug("Create: {alias} {parent} {type}", alias, parent?.Id ?? -1, itemType);
         try
@@ -684,21 +684,11 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
     }
 
     #region Finders
-    public override IContent? FindItem(int id)
-    {
-        var item = contentService.GetById(id);
-        if (item != null)
-        {
-            AddToNameCache(id, item.Key, item.Name ?? item.Id.ToString());
-            return item;
-        }
-        return null;
-    }
 
-    public override IContent? FindItem(Guid key)
-        => contentService.GetById(key);
+    public override Task<IContent?> FindItemAsync(Guid key)
+        => Task.FromResult(contentService.GetById(key));
 
-    protected override IContent? FindAtRoot(string alias)
+    protected override async Task<IContent?> FindAtRootAsync(string alias)
     {
         var rootNodes = contentService.GetRootContent();
         if (rootNodes.Any())
@@ -711,13 +701,13 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
 
     #endregion
 
-    public override void Save(IEnumerable<IContent> items)
-        => contentService.Save(items);
+    public override Task SaveAsync(IEnumerable<IContent> items)
+        => Task.FromResult(contentService.Save(items));
 
-    public override void SaveItem(IContent item)
-        => SaveItem(item, -1);
+    public override async Task SaveItemAsync(IContent item)
+        => await SaveItemAsync(item,-1);
 
-    public void SaveItem(IContent item, int userId)
+    public async Task SaveItemAsync(IContent item, int userId)
     {
         try
         {
@@ -731,7 +721,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
         }
     }
 
-    public override void DeleteItem(IContent item)
+    public override async Task DeleteItemAsync(IContent item)
     {
         try
         {

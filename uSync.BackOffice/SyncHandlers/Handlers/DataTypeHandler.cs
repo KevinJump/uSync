@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 
 using Microsoft.Extensions.Logging;
 
+using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Events;
 using Umbraco.Cms.Core.Models;
@@ -15,7 +17,10 @@ using Umbraco.Cms.Core.Strings;
 using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;
+using uSync.BackOffice.Models;
 using uSync.BackOffice.Services;
+using uSync.BackOffice.SyncHandlers.Interfaces;
+using uSync.BackOffice.SyncHandlers.Models;
 using uSync.Core;
 using uSync.Core.Models;
 using uSync.Core.Serialization;
@@ -29,17 +34,19 @@ namespace uSync.BackOffice.SyncHandlers.Handlers;
 /// </summary>
 [SyncHandler(uSyncConstants.Handlers.DataTypeHandler, "Datatypes", "DataTypes", uSyncConstants.Priorites.DataTypes,
     Icon = "icon-autofill", IsTwoPass = true, EntityType = UdiEntityType.DataType)]
-public class DataTypeHandler : SyncHandlerContainerBase<IDataType, IDataTypeService>, ISyncHandler, ISyncPostImportHandler,
-    INotificationHandler<SavedNotification<IDataType>>,
-    INotificationHandler<MovedNotification<IDataType>>,
-    INotificationHandler<DeletedNotification<IDataType>>,
-    INotificationHandler<EntityContainerSavedNotification>,
-    INotificationHandler<EntityContainerRenamedNotification>,
-    INotificationHandler<SavingNotification<IDataType>>,
-    INotificationHandler<MovingNotification<IDataType>>,
-    INotificationHandler<DeletingNotification<IDataType>>
+public class DataTypeHandler : SyncHandlerContainerBase<IDataType>, ISyncHandler, ISyncPostImportHandler,
+    INotificationAsyncHandler<SavedNotification<IDataType>>,
+    INotificationAsyncHandler<MovedNotification<IDataType>>,
+    INotificationAsyncHandler<DeletedNotification<IDataType>>,
+    INotificationAsyncHandler<EntityContainerSavedNotification>,
+    INotificationAsyncHandler<EntityContainerRenamedNotification>,
+    INotificationAsyncHandler<SavingNotification<IDataType>>,
+    INotificationAsyncHandler<MovingNotification<IDataType>>,
+    INotificationAsyncHandler<DeletingNotification<IDataType>>
 {
+ 
     private readonly IDataTypeService dataTypeService;
+    private readonly IDataTypeContainerService _dataTypeContainerService;
 
     /// <summary>
     /// Constructor called via DI
@@ -53,10 +60,12 @@ public class DataTypeHandler : SyncHandlerContainerBase<IDataType, IDataTypeServ
         SyncFileService syncFileService,
         uSyncEventService mutexService,
         uSyncConfigService uSyncConfig,
-        ISyncItemFactory syncItemFactory)
+        ISyncItemFactory syncItemFactory,
+        IDataTypeContainerService dataTypeContainerService)
         : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfig, syncItemFactory)
     {
         this.dataTypeService = dataTypeService;
+        _dataTypeContainerService = dataTypeContainerService;
     }
 
     /// <summary>
@@ -73,22 +82,22 @@ public class DataTypeHandler : SyncHandlerContainerBase<IDataType, IDataTypeServ
     /// HOWEVER: If we move deletes to the end , we still need to process them. 
     /// but deletes are always 'change' = 'Hidden', so we only process hidden changes
     /// </remarks>
-    public override IEnumerable<uSyncAction> ProcessPostImport(IEnumerable<uSyncAction> actions, HandlerSettings config)
+    public override async Task<IEnumerable<uSyncAction>> ProcessPostImportAsync(IEnumerable<uSyncAction> actions, HandlerSettings config)
     {
-        if (actions == null || !actions.Any())
-            return Enumerable.Empty<uSyncAction>();
+        if (actions == null || !actions.Any()) return [];
 
         var results = new List<uSyncAction>();
+        var options = new uSyncImportOptions {  Flags = SerializerFlags.LastPass };
 
         // we only do deletes here. 
         foreach (var action in actions.Where(x => x.Change == ChangeType.Hidden))
         {
             if (action.FileName is null) continue;
             results.AddRange(
-                Import(action.FileName, config, SerializerFlags.LastPass));
+                await ImportAsync(action.FileName, config, options));
         }
 
-        results.AddRange(CleanFolders(-1));
+        results.AddRange(await CleanFoldersAsync(Guid.Empty));
 
         return results;
     }
@@ -96,20 +105,17 @@ public class DataTypeHandler : SyncHandlerContainerBase<IDataType, IDataTypeServ
     /// <summary>
     ///  Fetch a DataType Container from the DataTypeService
     /// </summary>
-    protected override IEntity? GetContainer(int id)
-        => dataTypeService.GetContainer(id);
-
     /// <summary>
     ///  Fetch a DataType Container from the DataTypeService
     /// </summary>
-    protected override IEntity? GetContainer(Guid key)
-        => dataTypeService.GetContainer(key);
+    protected override async Task<IEntity?> GetContainerAsync(Guid key)
+        => await _dataTypeContainerService.GetAsync(key);
 
     /// <summary>
     ///  Delete a DataType Container from the DataTypeService
     /// </summary>
-    protected override void DeleteFolder(int id)
-        => dataTypeService.DeleteContainer(id);
+    protected override async Task DeleteFolderAsync(Guid key)
+        => await _dataTypeContainerService.DeleteAsync(key, Constants.Security.SuperUserKey);
 
     /// <summary>
     ///  Get the filename to use for a DataType when we save it

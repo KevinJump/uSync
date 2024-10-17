@@ -1,16 +1,21 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics;
+using System.Reflection;
 using System.Xml.Linq;
 
 using Microsoft.Extensions.Logging;
+
+using Org.BouncyCastle.Asn1.Cms;
 
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Models.Entities;
 using Umbraco.Cms.Core.Services;
+using Umbraco.Cms.Core.Services.OperationStatus;
 using Umbraco.Cms.Core.Strings;
 using Umbraco.Extensions;
 
+using uSync.Core.Extensions;
 using uSync.Core.Models;
 
 namespace uSync.Core.Serialization.Serializers;
@@ -19,7 +24,8 @@ namespace uSync.Core.Serialization.Serializers;
 public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, ISyncSerializer<IContentType>
 {
     private readonly IContentTypeService _contentTypeService;
-    private readonly IFileService _fileService;
+    private readonly IContentTypeContainerService _contentTypeContainerService;
+    private readonly ITemplateService _templateService;
 
     private readonly uSyncCapabilityChecker _capabilities;
 
@@ -27,18 +33,33 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
         IEntityService entityService, ILogger<ContentTypeSerializer> logger,
         IDataTypeService dataTypeService,
         IContentTypeService contentTypeService,
-        IFileService fileService,
+        IContentTypeContainerService contentTypeContainerService,
+        ITemplateService templateService,
         IShortStringHelper shortStringHelper,
         AppCaches appCaches,
         uSyncCapabilityChecker uSyncCapabilityChecker)
-        : base(entityService, logger, dataTypeService, contentTypeService, UmbracoObjectTypes.DocumentTypeContainer, shortStringHelper, appCaches, contentTypeService)
+        : base(entityService, logger, dataTypeService, contentTypeService, UmbracoObjectTypes.DocumentTypeContainer, shortStringHelper, appCaches)
     {
-        this._contentTypeService = contentTypeService;
-        this._fileService = fileService;
+        _contentTypeService = contentTypeService;
+        _contentTypeContainerService = contentTypeContainerService;
+        _templateService = templateService;
         _capabilities = uSyncCapabilityChecker;
     }
 
-    protected override SyncAttempt<XElement> SerializeCore(IContentType item, SyncSerializerOptions options)
+    protected override void EnsureAliasCache()
+    {
+        aliasCache = _appCache.GetCacheItem<List<string>>(
+            $"usync_{this.Id}", () =>
+            {
+                var sw = Stopwatch.StartNew();
+                var aliases = _contentTypeService.GetAllContentTypeAliases().ToList();
+                sw.Stop();
+                this.logger.LogDebug("Cache hit, 'usync_{id}' fetching all aliases {time}ms", this.Id, sw.ElapsedMilliseconds);
+                return aliases;
+            });
+    }
+
+    protected override async Task<SyncAttempt<XElement>> SerializeCoreAsync(IContentType item, SyncSerializerOptions options)
     {
         var node = SerializeBase(item);
         var info = SerializeInfo(item);
@@ -54,7 +75,7 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
         }
         else if (item.Level != 1)
         {
-            var folderNode = this.GetFolderNode(item);
+            var folderNode = await this.GetFolderNodeAsync(item);
             if (folderNode != null)
                 info.Add(folderNode);
         }
@@ -102,9 +123,9 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
         return node;
     }
 
-    protected override SyncAttempt<IContentType> DeserializeCore(XElement node, SyncSerializerOptions options)
-    {
-        var attempt = FindOrCreate(node);
+    protected override async Task<SyncAttempt<IContentType>> DeserializeCoreAsync(XElement node, SyncSerializerOptions options)
+    { 
+        var attempt = await FindOrCreateAsync(node);
         if (attempt.Success == false || attempt.Result is null)
             throw attempt.Exception ?? new Exception($"Unknown error {node.GetAlias()}");
 
@@ -112,11 +133,11 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
 
         var details = new List<uSyncChange>();
 
-        details.AddRange(DeserializeBase(item, node));
+        details.AddRange(await DeserializeBaseAsync(item, node));
 
 
         // compositions
-        details.AddRange(DeserializeCompositions(item, node));
+        details.AddRange(await DeserializeCompositionsAsync(item, node));
 
         // tabs
         details.AddRange(DeserializeTabs(item, node));
@@ -125,10 +146,10 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
         details.AddRange(DeserializeProperties(item, node, options));
 
         // content type only property stuff.
-        details.AddRange(DeserializeContentTypeProperties(item, node));
+        details.AddRange(await DeserializeContentTypePropertiesAsync(item, node));
 
         // templates 
-        details.AddRange(DeserializeTemplates(item, node, options));
+        details.AddRange(await DeserializeTemplatesAsync(item, node, options));
 
         return DeserializedResult(item, details, options);
     }
@@ -148,7 +169,7 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
         return [];
     }
 
-    public override SyncAttempt<IContentType> DeserializeSecondPass(IContentType item, XElement node, SyncSerializerOptions options)
+    public override async Task<SyncAttempt<IContentType>> DeserializeSecondPassAsync(IContentType item, XElement node, SyncSerializerOptions options)
     {
         logger.LogDebug("Deserialize Second Pass {alias}", item.Alias);
 
@@ -159,9 +180,9 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
         // we can do this here, hopefully its not needed 
         // as we graph sort at the start,
         // so it should say 'no changes' on a second pass.
-        details.AddRange(DeserializeCompositions(item, node));
+        details.AddRange(await DeserializeCompositionsAsync(item, node));
 
-        details.AddRange(DeserializeStructure(item, node));
+        details.AddRange(await DeserializeStructureAsync(item, node));
 
         // When doing this reflection-y - it doesn't set is dirty. 
         var historyChanges = DeserializeCleanupHistory(item, node);
@@ -183,15 +204,15 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
             dirty += historyUpdated ? " CleanupHistory" : "";
             logger.LogDebug("Saving in Serializer because item is dirty [{properties}]", dirty);
 
-            _contentTypeService.Save(item);
+            await _contentTypeService.UpdateAsync(item, Constants.Security.SuperUserKey);
         }
 
-        CleanFolder(item, node);
+        await CleanFolderAsync(item, node);
 
         return SyncAttempt<IContentType>.Succeed(item.Name ?? item.Alias, item, ChangeType.Import, "", saveInSerializer, details);
     }
 
-    private List<uSyncChange> DeserializeContentTypeProperties(IContentType item, XElement node)
+    private async Task<List<uSyncChange>> DeserializeContentTypePropertiesAsync(IContentType item, XElement node)
     {
         var info = node?.Element("Info");
         if (info is null) return [];
@@ -209,7 +230,7 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
         var masterTemplate = info?.Element("DefaultTemplate").ValueOrDefault(string.Empty) ?? string.Empty;
         if (!string.IsNullOrEmpty(masterTemplate))
         {
-            var template = _fileService.GetTemplate(masterTemplate);
+            var template = await _templateService.GetAsync(masterTemplate);
             if (template is not null)
             {
                 if (item.DefaultTemplate is null || template.Alias != item.DefaultTemplate.Alias)
@@ -235,7 +256,7 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
         return changes;
     }
 
-    private List<uSyncChange> DeserializeTemplates(IContentType item, XElement node, SyncSerializerOptions options)
+    private async Task<List<uSyncChange>> DeserializeTemplatesAsync(IContentType item, XElement node, SyncSerializerOptions options)
     {
         var templates = node?.Element(uSyncConstants.Xml.Info)?.Element("AllowedTemplates");
         if (templates is null) return [];
@@ -252,9 +273,9 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
             var templateItem = default(ITemplate);
 
             if (key != Guid.Empty)
-                templateItem = _fileService.GetTemplate(key);
+                templateItem = await _templateService.GetAsync(key);
 
-            templateItem ??= _fileService.GetTemplate(alias);
+            templateItem ??= await _templateService.GetAsync(alias);
 
             if (templateItem is not null)
             {
@@ -286,8 +307,7 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
         return changes;
     }
 
-
-    protected override Attempt<IContentType?> CreateItem(string alias, ITreeEntity? parent, string itemType)
+    protected override async Task<Attempt<IContentType?>> CreateItemAsync(string alias, ITreeEntity? parent, string itemType)
     {
         var safeAlias = GetSafeItemAlias(alias);
 
@@ -312,7 +332,7 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
         return Attempt.Succeed((IContentType)item);
     }
 
-    protected override void SaveContainer(EntityContainer container)
+    protected override async Task SaveContainerAsync(EntityContainer container)
     {
         logger.LogDebug("Saving Container (In main class) {key}", container.Key.ToString());
         _contentTypeService.SaveContainer(container);
@@ -435,5 +455,22 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
 
         return default;
 
+    }
+
+    protected override async Task<Attempt<EntityContainer?, EntityContainerOperationStatus>> CreateContainerAsync(Guid parentKey, string name)
+    {
+        var parent = await _contentTypeContainerService.GetAsync(parentKey);
+        if (parent is null) return Attempt<EntityContainer?, EntityContainerOperationStatus>.Fail(EntityContainerOperationStatus.ParentNotFound);
+        if (parent.Name is null) return Attempt<EntityContainer?, EntityContainerOperationStatus>.Fail(EntityContainerOperationStatus.ParentNotFound);
+
+        var existing = (await _contentTypeContainerService.GetAsync(parent.Name, parent.Level)).FirstOrDefault(x => x.Name.InvariantEquals(name));
+        if (existing is null)
+        {
+            return await _contentTypeContainerService.CreateAsync(Guid.NewGuid(), name, parentKey, Constants.Security.SuperUserKey);
+        }
+        else
+        {
+            return await _contentTypeContainerService.UpdateAsync(existing.Key, name, Constants.Security.SuperUserKey);
+        }
     }
 }

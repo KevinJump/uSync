@@ -48,7 +48,7 @@ public class SyncRootMergerHelper
 	public static XElement? GetDifferenceByContents(XElement source, XElement target)
 	{
 		// if the two files are identical there are no changes. 
-		if (source.MakePlatformSafeHash() != target.MakePlatformSafeHash()) return null;
+		if (source.MakePlatformSafeHashAsync().Result != target.MakePlatformSafeHashAsync().Result) return null;
 		return target;
 	}
 

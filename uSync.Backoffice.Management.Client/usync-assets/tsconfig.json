@@ -26,7 +26,12 @@
 		"paths": {
 			"@jumoo/uSync": ["./src/index.js"],
 			"@jumoo/uSync/external/signalr": ["./src/external/signalr/index.js"]
-		}
+		},
+		"types": [
+			"@umbraco-cms/backoffice/extension-registry",
+			"@umbraco-cms/backoffice/icon",
+			"@umbraco-cms/backoffice/localization"
+		]
 	},
 	"include": ["./src/**/*"]
 }

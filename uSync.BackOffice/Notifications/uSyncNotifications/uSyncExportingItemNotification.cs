@@ -1,4 +1,4 @@
-﻿using uSync.BackOffice.SyncHandlers;
+﻿using uSync.BackOffice.SyncHandlers.Interfaces;
 
 namespace uSync.BackOffice;
 

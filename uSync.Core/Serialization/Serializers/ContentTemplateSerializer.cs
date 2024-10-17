@@ -1,5 +1,6 @@
 ﻿using System.Xml.Linq;
 
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 
 using Umbraco.Cms.Core;
@@ -20,31 +21,31 @@ public class ContentTemplateSerializer : ContentSerializer, ISyncSerializer<ICon
 
     public ContentTemplateSerializer(
         IEntityService entityService,
-        ILocalizationService localizationService,
+        ILanguageService languageService,
         IRelationService relationService,
         IShortStringHelper shortStringHelper,
         ILogger<ContentTemplateSerializer> logger,
         IContentService contentService,
-        IFileService fileService,
         IContentTypeService contentTypeService,
         SyncValueMapperCollection syncMappers,
-        IUserService userService)
-        : base(entityService, localizationService, relationService, shortStringHelper, logger, contentService, fileService, syncMappers, userService)
+        IUserService userService,
+        ITemplateService templateService)
+        : base(entityService, languageService, relationService, shortStringHelper, logger, contentService, syncMappers, userService, templateService)
     {
         _contentTypeService = contentTypeService;
         this.umbracoObjectType = UmbracoObjectTypes.DocumentBlueprint;
     }
 
-    protected override XElement SerializeInfo(IContent item, SyncSerializerOptions options)
+    protected override async Task<XElement> SerializeInfoAsync(IContent item, SyncSerializerOptions options)
     {
-        var info = base.SerializeInfo(item, options);
+        var info = await base.SerializeInfoAsync(item, options);
         info.Add(new XElement("IsBlueprint", item.Blueprint));
         return info;
     }
 
-    protected override SyncAttempt<IContent> DeserializeCore(XElement node, SyncSerializerOptions options)
+    protected override async Task<SyncAttempt<IContent>> DeserializeCoreAsync(XElement node, SyncSerializerOptions options)
     {
-        var attempt = FindOrCreate(node);
+        var attempt = await FindOrCreateAsync(node);
         if (!attempt.Success || attempt.Result is null) throw attempt.Exception ?? new Exception($"Unknown error {node.GetAlias()}");
 
         var item = attempt.Result;
@@ -60,7 +61,7 @@ public class ContentTemplateSerializer : ContentSerializer, ISyncSerializer<ICon
 
         item.Blueprint = true;
 
-        details.AddRange(DeserializeBase(item, node, options));
+        details.AddRange(await DeserializeBaseAsync(item, node, options));
 
         var propertiesAttempt = DeserializeProperties(item, node, options);
         if (!propertiesAttempt.Success)
@@ -76,12 +77,12 @@ public class ContentTemplateSerializer : ContentSerializer, ISyncSerializer<ICon
         return SyncAttempt<IContent>.Succeed(item.Name ?? item.Id.ToString(), item, ChangeType.Import, details);
     }
 
-    public override IContent? FindItem(XElement node)
+    public override async Task<IContent?> FindItemAsync(XElement node)
     {
         var key = node.GetKey();
         if (key != Guid.Empty)
         {
-            var item = FindItem(key);
+            var item = await FindItemAsync(key);
             if (item != null) return item;
         }
 
@@ -105,7 +106,7 @@ public class ContentTemplateSerializer : ContentSerializer, ISyncSerializer<ICon
 
     }
 
-    public override IContent? FindItem(Guid key)
+    public override async Task<IContent?> FindItemAsync(Guid key)
     {
         // TODO: Umbraco 8 bug, the key is sometimes an old version
         var entity = entityService.Get(key);
@@ -115,12 +116,7 @@ public class ContentTemplateSerializer : ContentSerializer, ISyncSerializer<ICon
         return null;
     }
 
-    // public override string GetItemPath(IContent item) => base.GetItemPath(item) + "/" + item.Name.ToSafeAlias(); 
-
-    public override IContent? FindItem(int id)
-        => contentService.GetBlueprintById(id);
-
-    protected override Attempt<IContent?> CreateItem(string alias, ITreeEntity? parent, string itemType)
+    protected override async Task<Attempt<IContent?>> CreateItemAsync(string alias, ITreeEntity? parent, string itemType)
     {
         var contentType = _contentTypeService.Get(itemType);
         if (contentType == null) return
@@ -145,9 +141,9 @@ public class ContentTemplateSerializer : ContentSerializer, ISyncSerializer<ICon
         return Attempt.Succeed("blueprint saved");
     }
 
-    public override void SaveItem(IContent item)
+    public override async Task SaveItemAsync(IContent item)
         => contentService.SaveBlueprint(item);
 
-    public override void DeleteItem(IContent item)
+    public override async Task DeleteItemAsync(IContent item)
         => contentService.DeleteBlueprint(item);
 }

@@ -3,6 +3,7 @@
 using Microsoft.Extensions.Logging;
 
 using Umbraco.Cms.Core.Models;
+using Umbraco.Cms.Core.Models.ContentEditing;
 using Umbraco.Cms.Core.Models.Entities;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Extensions;
@@ -16,25 +17,26 @@ public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncSerializer<IDo
 {
     private readonly IDomainService _domainService;
     private readonly IContentService _contentService;
-    private readonly ILocalizationService _localizationService;
+    private readonly ILanguageService _languageService;
     private readonly uSyncCapabilityChecker _capabilityChecker;
 
     public DomainSerializer(IEntityService entityService, ILogger<DomainSerializer> logger,
         IDomainService domainService,
         IContentService contentService,
-        ILocalizationService localizationService,
+        ILanguageService localizationService,
         uSyncCapabilityChecker capabilityChecker)
         : base(entityService, logger)
     {
         this._domainService = domainService;
         this._contentService = contentService;
-        this._localizationService = localizationService;
+        this._languageService = localizationService;
         _capabilityChecker = capabilityChecker;
     }
 
-    protected override SyncAttempt<IDomain> DeserializeCore(XElement node, SyncSerializerOptions options)
-    {
-        var item = FindOrCreate(node);
+
+    protected override async Task<SyncAttempt<IDomain>> DeserializeCoreAsync(XElement node, SyncSerializerOptions options)
+    { 
+        var item = await FindOrCreateAsync(node);
 
         var info = node.Element(uSyncConstants.Xml.Info);
         if (info is null)
@@ -48,7 +50,7 @@ public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncSerializer<IDo
 
         if (!string.IsNullOrWhiteSpace(isoCode))
         {
-            var language = _localizationService.GetLanguageByIsoCode(isoCode);
+            var language = await _languageService.GetAsync(isoCode);
             if (language != null && item.LanguageId != language.Id)
             {
                 changes.AddUpdate("Id", item.LanguageId, language.Id);
@@ -94,16 +96,16 @@ public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncSerializer<IDo
 
     }
 
-    private IDomain FindOrCreate(XElement node)
+    private async Task<IDomain> FindOrCreateAsync(XElement node)
     {
-        var item = FindItem(node);
+        var item = await FindItemAsync(node);
         if (item != null) return item;
 
         return new UmbracoDomain(node.GetAlias());
 
     }
 
-    protected override SyncAttempt<XElement> SerializeCore(IDomain item, SyncSerializerOptions options)
+    protected override async Task<SyncAttempt<XElement>> SerializeCoreAsync(IDomain item, SyncSerializerOptions options)
     {
         var node = new XElement(ItemType,
             new XAttribute(uSyncConstants.Xml.Key, item.DomainName.GetDeterministicHashCode().ToGuid()),
@@ -191,15 +193,12 @@ public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncSerializer<IDo
         return base.CleanseNode(node);
     }
 
-    public override IDomain? FindItem(int id)
-        => _domainService.GetById(id);
 
-    public override IDomain? FindItem(Guid key)
-        => _domainService.GetAll(true).FirstOrDefault(x => x.Key == key);
+    public override async Task<IDomain?> FindItemAsync(Guid key)
+        => (await _domainService.GetAllAsync(true)).FirstOrDefault(x => x.Key == key);
 
-    public override IDomain? FindItem(string alias)
-        => _domainService.GetByName(alias);
-
+    public override async Task<IDomain?> FindItemAsync(string alias)
+        => (await _domainService.GetAllAsync(true)).FirstOrDefault(x => x.DomainName.InvariantEquals(alias));
 
     /// <summary>
     ///  these items do exist in the content serializer, 
@@ -257,12 +256,61 @@ public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncSerializer<IDo
         return null;
     }
 
+    /// <summary>
+    ///  saves the domains 
+    /// </summary>
+    /// <remarks>
+    ///  to be clear these new update model methods are bizarre, and match no other 
+    ///  pattern in the Umbraco services, hopefully not a sign of things to come? 
+    ///  
+    ///  as they are super database heavy on the lookups, and not super efficient.
+    ///  especially when you look inside and see they also do half the lookups 
+    ///  that we need to do - just to call them. 
+    ///  
+    ///  (why for example domains only contain their root content id as an ID, 
+    ///  but the domain methods only except the key, so we have to look up the key
+    ///  from the id to pass it, and then internally Umbraco uses the key to find the 
+    ///  content item - given that the id is stored, it should be the thing we pass
+    ///  or more likely the key should be stored agains the domain?) 
+    /// </remarks>
+    /// <param name="item"></param>
+    /// <returns></returns>
+    public override async Task SaveItemAsync(IDomain item)
+    {
+        if (item.LanguageIsoCode is null || item.RootContentId is null) return;
 
-    public override void SaveItem(IDomain item)
-        => _domainService.Save(item);
+        var contentKey = entityService.GetKey(item.RootContentId.Value, UmbracoObjectTypes.Document);
+        if (!contentKey.Success) return;
 
-    public override void DeleteItem(IDomain item)
-        => _domainService.Delete(item);
+        var existing = await _domainService.GetAssignedDomainsAsync(contentKey.Result, true);
+
+        List<IDomain> newDomains = [..existing, item];
+        var updateModel = new DomainsUpdateModel
+        {
+            Domains = newDomains
+                .DistinctBy(x => x.Key)
+                .Select(x => new DomainModel
+                {
+                    DomainName = x.DomainName,
+                    IsoCode = x.LanguageIsoCode!,
+                })
+        };
+        
+        await _domainService.UpdateDomainsAsync(contentKey.Result, updateModel);
+    }
+
+    public override async Task DeleteItemAsync(IDomain item)
+    {
+        if (item.RootContentId is null) return;
+        var contentKey = entityService.GetKey(item.RootContentId.Value, UmbracoObjectTypes.Document);
+        if (!contentKey.Success) return;
+
+        var existing = await _domainService.GetAssignedDomainsAsync(contentKey.Result, true);
+        var remaining = existing.Where(x => x.Key != item.Key).Select(x => new DomainModel { DomainName = x.DomainName, IsoCode = x.LanguageIsoCode! });
+
+        await _domainService.UpdateDomainsAsync(contentKey.Result, new DomainsUpdateModel { Domains = remaining });
+    }
+
 
     public override string ItemAlias(IDomain item)
         => item.DomainName;

@@ -19,13 +19,12 @@ public class uSyncConfigService
     public uSyncSettings Settings { get; set; }
 
     /// <summary>
-    ///  The unmapped root folder for uSync.
+    ///  the folder that startup operations will look in (export, locks etc).
     /// </summary>
-    [Obsolete("we should be using the array of folders, will be removed in v15")]
-    public string GetRootFolder()
-        => Settings.IsRootSite
+    public string GetWorkingFolder()
+        => Settings.IsRootSite 
             ? Settings.Folders[0].TrimStart('/')
-            : Settings.RootFolder.TrimStart('/');
+            : Settings.Folders.Last().TrimStart('/');
 
     /// <summary>
     ///  Get the root folders that uSync is using. 

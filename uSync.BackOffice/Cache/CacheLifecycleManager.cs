@@ -1,5 +1,7 @@
 ﻿
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
@@ -15,18 +17,18 @@ namespace uSync.BackOffice.Cache;
 ///  Cleans up the entity cache at start and end of the sync.
 /// </summary>
 public class CacheLifecycleManager :
-    INotificationHandler<uSyncImportStartingNotification>,
-    INotificationHandler<uSyncReportStartingNotification>,
-    INotificationHandler<uSyncExportStartingNotification>,
-    INotificationHandler<uSyncImportCompletedNotification>,
-    INotificationHandler<uSyncReportCompletedNotification>,
-    INotificationHandler<uSyncExportCompletedNotification>,
-    INotificationHandler<ContentSavingNotification>,
-    INotificationHandler<ContentDeletingNotification>,
-    INotificationHandler<ContentMovingNotification>,
-    INotificationHandler<MediaSavingNotification>,
-    INotificationHandler<MediaSavedNotification>,
-    INotificationHandler<MediaDeletedNotification>
+    INotificationAsyncHandler<uSyncImportStartingNotification>,
+    INotificationAsyncHandler<uSyncReportStartingNotification>,
+    INotificationAsyncHandler<uSyncExportStartingNotification>,
+    INotificationAsyncHandler<uSyncImportCompletedNotification>,
+    INotificationAsyncHandler<uSyncReportCompletedNotification>,
+    INotificationAsyncHandler<uSyncExportCompletedNotification>,
+    INotificationAsyncHandler<ContentSavingNotification>,
+    INotificationAsyncHandler<ContentDeletingNotification>,
+    INotificationAsyncHandler<ContentMovingNotification>,
+    INotificationAsyncHandler<MediaSavingNotification>,
+    INotificationAsyncHandler<MediaSavedNotification>,
+    INotificationAsyncHandler<MediaDeletedNotification>
 
 
 {
@@ -51,78 +53,81 @@ public class CacheLifecycleManager :
     /// <summary>
     ///  Handle the uSync import starting notification 
     /// </summary>
-    public void Handle(uSyncImportStartingNotification notification) => OnBulkActionComplete();
+    public Task HandleAsync(uSyncImportStartingNotification notification, CancellationToken c) => OnBulkActionComplete();
 
     /// <summary>
     ///  Handle the uSync uSync Export Completed Notification 
     /// </summary>
-    public void Handle(uSyncExportCompletedNotification notification) => OnBulkActionComplete();
+    public Task HandleAsync(uSyncExportCompletedNotification notification, CancellationToken c) => OnBulkActionComplete();
 
     /// <summary>
     ///  Handle the uSync uSync Import Completed Notification 
     /// </summary>
-    public void Handle(uSyncImportCompletedNotification notification) => OnBulkActionComplete();
+    public Task HandleAsync(uSyncImportCompletedNotification notification, CancellationToken c) => OnBulkActionComplete();
 
     /// <summary>
     ///  Handle the uSync uSync Export Starting Notification 
     /// </summary>
-    public void Handle(uSyncExportStartingNotification notification) => OnBulkActionComplete();
+    public Task HandleAsync(uSyncExportStartingNotification notification, CancellationToken c) => OnBulkActionComplete();
 
     /// <summary>
     ///  Handle the uSync uSync Report Completed Notification 
     /// </summary>
-    public void Handle(uSyncReportStartingNotification notification) => OnBulkActionComplete();
+    public Task HandleAsync(uSyncReportStartingNotification notification, CancellationToken c) => OnBulkActionComplete();
 
     /// <summary>
     ///  Handle the uSync uSync Report Completed Notification 
     /// </summary>
-    public void Handle(uSyncReportCompletedNotification notification) => OnBulkActionComplete();
+    public Task HandleAsync(uSyncReportCompletedNotification notification, CancellationToken c) => OnBulkActionComplete();
 
     /// <summary>
     ///  Clear the cache on the Umbraco Content Saving notification 
     /// </summary>
-    public void Handle(ContentSavingNotification notification) => ClearOnEvents();
+    public Task HandleAsync(ContentSavingNotification notification, CancellationToken c) => ClearOnEvents();
 
     /// <summary>
     ///  Clear the cache on the Umbraco Content Deleting notification 
     /// </summary>
-    public void Handle(ContentDeletingNotification notification) => ClearOnEvents();
+    public Task HandleAsync(ContentDeletingNotification notification, CancellationToken c) => ClearOnEvents();
 
     /// <summary>
     ///  Clear the cache on the Umbraco Content Moving notification 
     /// </summary>
-    public void Handle(ContentMovingNotification notification) => ClearOnEvents();
+    public Task HandleAsync(ContentMovingNotification notification, CancellationToken c) => ClearOnEvents();
 
     /// <summary>
     ///  Clear the cache on the Umbraco Media Saving notification 
     /// </summary>
-    public void Handle(MediaSavingNotification notification) => ClearOnEvents();
+    public Task HandleAsync(MediaSavingNotification notification, CancellationToken c) => ClearOnEvents();
 
     /// <summary>
     ///  Clear the cache on the Umbraco Media Saved notification 
     /// </summary>
-    public void Handle(MediaSavedNotification notification) => ClearOnEvents();
+    public Task HandleAsync(MediaSavedNotification notification, CancellationToken c) => ClearOnEvents();
 
     /// <summary>
     ///  Clear the cache on the Umbraco Media deleted notification 
     /// </summary>
-    public void Handle(MediaDeletedNotification notification) => ClearOnEvents();
+    public Task HandleAsync(MediaDeletedNotification notification, CancellationToken c) => ClearOnEvents();
 
-    private void OnBulkActionComplete()
+    private Task OnBulkActionComplete()
     {
         _entityCache.Clear();
+        return Task.CompletedTask;
     }
 
-    private void ClearOnEvents()
+    private Task ClearOnEvents()
     {
         try
         {
-            if (_eventService.IsPaused) return;
+            if (_eventService.IsPaused) return Task.CompletedTask;
             _entityCache.Clear();
         }
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Failed to clean the entity name cache");
         }
+
+        return Task.CompletedTask;
     }
 }

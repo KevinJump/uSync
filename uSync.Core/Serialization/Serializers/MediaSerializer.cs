@@ -24,13 +24,13 @@ public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncSerializer<IM
 
     public MediaSerializer(
         IEntityService entityService,
-        ILocalizationService localizationService,
+        ILanguageService languageService,
         IRelationService relationService,
         IShortStringHelper shortStringHelper,
         ILogger<MediaSerializer> logger,
         IMediaService mediaService,
         SyncValueMapperCollection syncMappers)
-        : base(entityService, localizationService, relationService, shortStringHelper, logger, UmbracoObjectTypes.Media, syncMappers)
+        : base(entityService, languageService, relationService, shortStringHelper, logger, UmbracoObjectTypes.Media, syncMappers)
     {
         this._mediaService = mediaService;
         this.relationAlias = Constants.Conventions.RelationTypes.RelateParentMediaFolderOnDeleteAlias;
@@ -47,9 +47,9 @@ public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncSerializer<IM
         ];
     }
 
-    protected override SyncAttempt<IMedia> DeserializeCore(XElement node, SyncSerializerOptions options)
+    protected override async Task<SyncAttempt<IMedia>> DeserializeCoreAsync(XElement node, SyncSerializerOptions options)
     {
-        var attempt = FindOrCreate(node);
+        var attempt = await FindOrCreateAsync(node);
         if (!attempt.Success || attempt.Result is null)
             throw attempt.Exception ?? new Exception($"Unknown error {node.GetAlias()}");
 
@@ -57,7 +57,7 @@ public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncSerializer<IM
 
         var details = new List<uSyncChange>();
 
-        details.AddRange(DeserializeBase(item, node, options));
+        details.AddRange(await DeserializeBaseAsync(item, node, options));
 
         var info = node.Element(uSyncConstants.Xml.Info);
         if (info is not null)
@@ -130,12 +130,11 @@ public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncSerializer<IM
         return null;
     }
 
-
-    protected override SyncAttempt<XElement> SerializeCore(IMedia item, SyncSerializerOptions options)
+    protected override async Task<SyncAttempt<XElement>> SerializeCoreAsync(IMedia item, SyncSerializerOptions options)
     {
         var node = InitializeNode(item, item.ContentType.Alias, options);
 
-        var info = SerializeInfo(item, options);
+        var info = await SerializeInfoAsync(item, options);
         var properties = SerializeProperties(item, options);
 
         node.Add(info);
@@ -206,29 +205,18 @@ public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncSerializer<IM
         return value;
     }
 
-    protected override Attempt<IMedia?> CreateItem(string alias, ITreeEntity? parent, string itemType)
+    protected override async Task<Attempt<IMedia?>> CreateItemAsync(string alias, ITreeEntity? parent, string itemType)
     {
         var parentId = parent != null ? parent.Id : -1;
         var item = _mediaService.CreateMedia(alias, parentId, itemType);
         return Attempt.Succeed((IMedia)item);
     }
 
-    public override IMedia? FindItem(int id)
-    {
-        var item = _mediaService.GetById(id);
-        if (item != null)
-        {
-            AddToNameCache(id, item.Key, item.Name ?? item.Id.ToString());
-            return item;
-        }
-        return null;
-    }
 
-
-    public override IMedia? FindItem(Guid key)
+    public override async Task<IMedia?> FindItemAsync(Guid key)
         => _mediaService.GetById(key);
 
-    protected override IMedia? FindAtRoot(string alias)
+    protected override async Task<IMedia?> FindAtRootAsync(string alias)
     {
         var rootNodes = _mediaService.GetRootMedia();
         if (rootNodes.Any())
@@ -239,13 +227,13 @@ public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncSerializer<IM
         return null;
     }
 
-    public override void Save(IEnumerable<IMedia> items)
+    public override async Task SaveAsync(IEnumerable<IMedia> items)
         => _mediaService.Save(items);
 
-    public override void SaveItem(IMedia item)
+    public override async Task SaveItemAsync(IMedia item)
         => _mediaService.Save(item);
 
-    public override void DeleteItem(IMedia item)
+    public override async Task DeleteItemAsync(IMedia item)
         => _mediaService.Delete(item);
 
 }

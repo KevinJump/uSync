@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 
 using Microsoft.Extensions.Logging;
@@ -15,7 +16,10 @@ using Umbraco.Cms.Core.Strings;
 using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;
+using uSync.BackOffice.Models;
 using uSync.BackOffice.Services;
+using uSync.BackOffice.SyncHandlers.Interfaces;
+using uSync.BackOffice.SyncHandlers.Models;
 using uSync.Core;
 using uSync.Core.Serialization;
 
@@ -28,24 +32,24 @@ namespace uSync.BackOffice.SyncHandlers.Handlers;
 /// </summary>
 [SyncHandler(uSyncConstants.Handlers.DictionaryHandler, "Dictionary", "Dictionary", uSyncConstants.Priorites.DictionaryItems
     , Icon = "icon-book-alt", EntityType = UdiEntityType.DictionaryItem)]
-public class DictionaryHandler : SyncHandlerLevelBase<IDictionaryItem, ILocalizationService>, ISyncHandler,
-    INotificationHandler<SavedNotification<IDictionaryItem>>,
-    INotificationHandler<DeletedNotification<IDictionaryItem>>,
-    INotificationHandler<SavingNotification<IDictionaryItem>>,
-    INotificationHandler<DeletingNotification<IDictionaryItem>>
+public class DictionaryHandler : SyncHandlerLevelBase<IDictionaryItem>, ISyncHandler,
+    INotificationAsyncHandler<SavedNotification<IDictionaryItem>>,
+    INotificationAsyncHandler<DeletedNotification<IDictionaryItem>>,
+    INotificationAsyncHandler<SavingNotification<IDictionaryItem>>,
+    INotificationAsyncHandler<DeletingNotification<IDictionaryItem>>
 {
     /// <summary>
     ///  Dictionary items belong to the content group by default
     /// </summary>
     public override string Group => uSyncConstants.Groups.Content;
 
-    private readonly ILocalizationService localizationService;
+    private readonly IDictionaryItemService _dictionaryItemService;
 
     /// <inheritdoc/>
     public DictionaryHandler(
         ILogger<DictionaryHandler> logger,
         IEntityService entityService,
-        ILocalizationService localizationService,
+        IDictionaryItemService dictionaryItemService,
         AppCaches appCaches,
         IShortStringHelper shortStringHelper,
         SyncFileService syncFileService,
@@ -54,12 +58,12 @@ public class DictionaryHandler : SyncHandlerLevelBase<IDictionaryItem, ILocaliza
         ISyncItemFactory syncItemFactory)
         : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfigService, syncItemFactory)
     {
-        this.localizationService = localizationService;
+        _dictionaryItemService = dictionaryItemService;
     }
 
     /// <inheritdoc/>
-    public override IEnumerable<uSyncAction> Import(string filePath, HandlerSettings config, SerializerFlags flags)
-    {
+    public override async Task<IEnumerable<uSyncAction>> ImportAsync(string file, HandlerSettings config, uSyncImportOptions options)
+    { 
         if (IsOneWay(config))
         {
             // only sync dictionary items if they are new
@@ -70,18 +74,18 @@ public class DictionaryHandler : SyncHandlerLevelBase<IDictionaryItem, ILocaliza
             //    <Add Key="OneWay" Value="true" />
             // </Handler>
             //
-            var item = GetExistingItem(filePath);
+            var item = await GetExistingItemAsync(file);
             if (item != null)
             {
                 return uSyncAction.SetAction(true, item.ItemKey, change: ChangeType.NoChange).AsEnumerableOfOne();
             }
         }
 
-        return base.Import(filePath, config, flags);
+        return await base.ImportAsync(file, config, options);
 
     }
 
-    private IDictionaryItem? GetExistingItem(string filePath)
+    private async Task<IDictionaryItem?> GetExistingItemAsync(string filePath)
     {
         syncFileService.EnsureFileExists(filePath);
 
@@ -91,70 +95,27 @@ public class DictionaryHandler : SyncHandlerLevelBase<IDictionaryItem, ILocaliza
                 throw new KeyNotFoundException($"Cannot load file {filePath}");
 
             var node = XElement.Load(stream);
-            return serializer.FindItem(node);
+            return await serializer.FindItemAsync(node);
         }
     }
 
     /// <inheritdoc/>
-    public override IEnumerable<uSyncAction> ExportAll(string folder, HandlerSettings config, SyncUpdateCallback? callback)
+    protected override async Task<IEnumerable<IEntity>> GetFoldersAsync(Guid key)
+        => await GetChildItemsAsync(key);
+
+    protected override async Task<IEnumerable<IEntity>> GetChildItemsAsync(Guid key)
     {
-        syncFileService.CleanFolder(folder);
-        return ExportAll(Guid.Empty, folder, config, callback);
-    }
-
-    /// <summary>
-    ///  Export all Dictionary items based on a parent GUID value
-    /// </summary>
-    /// <remarks>
-    ///  You can't fetch dictionary items via the entity service so they require their own 
-    ///  export method. 
-    /// </remarks>
-    public IEnumerable<uSyncAction> ExportAll(Guid parent, string folder, HandlerSettings config, SyncUpdateCallback? callback)
-    {
-        var actions = new List<uSyncAction>();
-
-        var items = new List<IDictionaryItem>();
-
-        if (parent == Guid.Empty)
+        if (key == Guid.Empty)
         {
-            items = localizationService.GetRootDictionaryItems().ToList();
-        }
-        else
-        {
-            items = localizationService.GetDictionaryItemChildren(parent).ToList();
-        }
-
-        int count = 0;
-        foreach (var item in items)
-        {
-            count++;
-            callback?.Invoke(item.ItemKey, count, items.Count);
-
-            actions.AddRange(Export(item, folder, config));
-            actions.AddRange(ExportAll(item.Key, folder, config, callback));
-        }
-
-        return actions;
-    }
-
-    /// <inheritdoc/>
-    protected override IEnumerable<IEntity> GetFolders(int parent)
-        => GetChildItems(parent);
-
-    /// <inheritdoc/>
-    protected override IEnumerable<IEntity> GetChildItems(int parent)
-    {
-        if (parent == -1)
-        {
-            return localizationService.GetRootDictionaryItems()
+            return (await _dictionaryItemService.GetAtRootAsync())
                 .Where(x => x is IEntity)
                 .Select(x => x as IEntity);
         }
         else
         {
-            var item = localizationService.GetDictionaryItemById(parent);
+            var item = await _dictionaryItemService.GetAsync(key);
             if (item != null)
-                return localizationService.GetDictionaryItemChildren(item.Key);
+                return await _dictionaryItemService.GetChildrenAsync(item.Key);
         }
 
         return Enumerable.Empty<IEntity>();
@@ -169,12 +130,13 @@ public class DictionaryHandler : SyncHandlerLevelBase<IDictionaryItem, ILocaliza
         => item.ItemKey.ToSafeFileName(shortStringHelper);
 
     /// <inheritdoc/>
-    protected override IEnumerable<uSyncAction> ReportElement(XElement node, string filename, HandlerSettings? config)
+    public override async Task<IEnumerable<uSyncAction>> ReportElementAsync(XElement node, string filename, HandlerSettings settings, uSyncImportOptions options)
     {
-        if (config != null && IsOneWay(config))
+        if (IsOneWay(settings))
         {
+            // we check if there is no change, we don't report it.
             // if we find it then there is no change. 
-            var item = GetExistingItem(filename);
+            var item = await GetExistingItemAsync(filename);
             if (item != null)
             {
                 return uSyncActionHelper<IDictionaryItem>
@@ -183,9 +145,9 @@ public class DictionaryHandler : SyncHandlerLevelBase<IDictionaryItem, ILocaliza
             }
         }
 
-        return base.ReportElement(node, filename, config);
+        return await base.ReportElementAsync(node, filename, settings, options);
     }
 
-    private bool IsOneWay(HandlerSettings config)
-        => config.GetSetting("OneWay", false);
+    private bool IsOneWay(HandlerSettings? config)
+        => config?.GetSetting("OneWay", false) == true;
 }

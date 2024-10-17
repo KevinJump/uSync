@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 
 using Microsoft.Extensions.Logging;
 
@@ -14,6 +15,7 @@ using Umbraco.Extensions;
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
 using uSync.BackOffice.SyncHandlers;
+using uSync.BackOffice.SyncHandlers.Models;
 
 namespace uSync.BackOffice.Notifications;
 
@@ -97,21 +99,23 @@ internal class uSyncApplicationStartingHandler : INotificationHandler<UmbracoApp
                     };
 
                     _logger.LogInformation("uSync: Running export at startup");
-                    _uSyncService.Export(_uSyncConfig.GetRootFolder(), options);
+
+                    
+                    _uSyncService.StartupExportAsync(_uSyncConfig.GetWorkingFolder(), options).Wait();
                 }
 
                 if (IsImportAtStartupEnabled())
                 {
                     _logger.LogInformation("uSync: Running Import at startup {group}", _uSyncConfig.Settings.ImportAtStartup);
 
-                    if (!HasStopFile(_uSyncConfig.GetRootFolder()))
+                    if (!HasStopFile(_uSyncConfig.GetWorkingFolder()))
                     {
-                        _uSyncService.Import(_uSyncConfig.GetFolders(), false, new SyncHandlerOptions
+                        _uSyncService.StartupImportAsync(_uSyncConfig.GetFolders(), false, new SyncHandlerOptions
                         {
                             Group = _uSyncConfig.Settings.ImportAtStartup
-                        });
+                        }).Wait();
 
-                        ProcessOnceFile(_uSyncConfig.GetRootFolder());
+                        ProcessOnceFile(_uSyncConfig.GetWorkingFolder());
                     }
                     else
                     {

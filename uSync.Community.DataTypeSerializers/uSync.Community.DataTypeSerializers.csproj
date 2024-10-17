@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net8.0</TargetFrameworks>
+		<TargetFrameworks>net9.0</TargetFrameworks>
 
 		<PackageId>uSync.Community.DataTypeSerializers</PackageId>
 
@@ -18,8 +18,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Umbraco.Cms.Web.Website" Version="14.2.0" />
-		<PackageReference Include="Umbraco.Cms.Core" Version="14.2.0" />
+		<PackageReference Include="Umbraco.Cms.Web.Website" Version="15.0.0-rc2" />
+		<PackageReference Include="Umbraco.Cms.Core" Version="15.0.0-rc2" />
 		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
 	</ItemGroup>
 

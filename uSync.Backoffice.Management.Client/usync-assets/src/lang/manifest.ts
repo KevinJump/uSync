@@ -1,23 +1,11 @@
-import { ManifestLocalization } from '@umbraco-cms/backoffice/extension-registry';
-
-const localizations: Array<ManifestLocalization> = [
+const localizations: Array<UmbExtensionManifest> = [
 	{
 		type: 'localization',
 		alias: 'usync.lang.enus',
-		name: 'English (US)',
+		name: 'English',
 		weight: 0,
 		meta: {
-			culture: 'en-us',
-		},
-		js: () => import('./files/en-us'),
-	},
-	{
-		type: 'localization',
-		alias: 'usync.lang.engb',
-		name: 'English (GB)',
-		weight: 0,
-		meta: {
-			culture: 'en-gb',
+			culture: 'en',
 		},
 		js: () => import('./files/en-us'),
 	},

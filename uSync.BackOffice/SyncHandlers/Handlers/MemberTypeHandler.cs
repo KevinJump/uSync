@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
@@ -13,6 +14,8 @@ using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
+using uSync.BackOffice.SyncHandlers.Interfaces;
+using uSync.BackOffice.SyncHandlers.Models;
 using uSync.Core;
 
 using static Umbraco.Cms.Core.Constants;
@@ -24,15 +27,15 @@ namespace uSync.BackOffice.SyncHandlers.Handlers;
 /// </summary>
 [SyncHandler(uSyncConstants.Handlers.MemberTypeHandler, "Member Types", "MemberTypes", uSyncConstants.Priorites.MemberTypes,
     IsTwoPass = true, Icon = "icon-users", EntityType = UdiEntityType.MemberType)]
-public class MemberTypeHandler : ContentTypeBaseHandler<IMemberType, IMemberTypeService>, ISyncHandler, ISyncPostImportHandler, ISyncGraphableHandler,
-    INotificationHandler<SavedNotification<IMemberType>>,
-    INotificationHandler<MovedNotification<IMemberType>>,
-    INotificationHandler<DeletedNotification<IMemberType>>,
-    INotificationHandler<EntityContainerSavedNotification>,
-    INotificationHandler<EntityContainerRenamedNotification>,
-    INotificationHandler<SavingNotification<IMemberType>>,
-    INotificationHandler<MovingNotification<IMemberType>>,
-    INotificationHandler<DeletingNotification<IMemberType>>
+public class MemberTypeHandler : ContentTypeBaseHandler<IMemberType>, ISyncHandler, ISyncPostImportHandler, ISyncGraphableHandler,
+    INotificationAsyncHandler<SavedNotification<IMemberType>>,
+    INotificationAsyncHandler<MovedNotification<IMemberType>>,
+    INotificationAsyncHandler<DeletedNotification<IMemberType>>,
+    INotificationAsyncHandler<EntityContainerSavedNotification>,
+    INotificationAsyncHandler<EntityContainerRenamedNotification>,
+    INotificationAsyncHandler<SavingNotification<IMemberType>>,
+    INotificationAsyncHandler<MovingNotification<IMemberType>>,
+    INotificationAsyncHandler<DeletingNotification<IMemberType>>
 {
     private readonly IMemberTypeService memberTypeService;
 
@@ -52,17 +55,16 @@ public class MemberTypeHandler : ContentTypeBaseHandler<IMemberType, IMemberType
         this.memberTypeService = memberTypeService;
     }
 
-    /// <inheritdoc/>
-    protected override void DeleteFolder(int id)
-        => memberTypeService.DeleteContainer(id);
 
-    /// <inheritdoc/>
-    protected override IEntity? GetContainer(int id)
-        => memberTypeService.GetContainer(id);
+    protected override async Task DeleteFolderAsync(Guid key)
+    {
+        var container = await GetContainerAsync(key);
+        if (container is null) return;
+        memberTypeService.DeleteContainer(container.Id);
+    }
 
-    /// <inheritdoc/>
-    protected override IEntity? GetContainer(Guid key)
-        => memberTypeService.GetContainer(key);
+    protected override Task<IEntity?> GetContainerAsync(Guid key)
+        => Task.FromResult<IEntity?>(memberTypeService.GetContainer(key));
 
     /// <inheritdoc/>
     protected override string GetEntityTreeName(IUmbracoEntity item, bool useGuid)

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 
 using Microsoft.Extensions.Logging;
@@ -26,15 +28,14 @@ namespace uSync.BackOffice.SyncHandlers.Handlers;
 ///  places around the tree, so we have to check for file name
 ///  clashes. 
 /// </remarks>
-public abstract class ContentHandlerBase<TObject, TService> : SyncHandlerTreeBase<TObject, TService>
+public abstract class ContentHandlerBase<TObject> : SyncHandlerTreeBase<TObject>
     where TObject : IContentBase
-    where TService : IService
 {
     /// <summary>
     /// Base constructor, should never be called directly
     /// </summary>
     protected ContentHandlerBase(
-        ILogger<ContentHandlerBase<TObject, TService>> logger,
+        ILogger<ContentHandlerBase<TObject>> logger,
         IEntityService entityService,
         AppCaches appCaches,
         IShortStringHelper shortStringHelper,
@@ -79,10 +80,10 @@ public abstract class ContentHandlerBase<TObject, TService> : SyncHandlerTreeBas
     /// <summary>
     /// Should this item be imported (will check rules)
     /// </summary>
-    protected override bool ShouldImport(XElement node, HandlerSettings config)
+    protected override async Task<bool> ShouldImportAsync(XElement node, HandlerSettings config)
     {
         // check base first - if it says no - then no point checking this. 
-        if (!base.ShouldImport(node, config)) return false;
+        if (!await base.ShouldImportAsync(node, config)) return false;
 
         if (!ImportTrashedItem(node, config)) return false;
 
@@ -169,9 +170,10 @@ public abstract class ContentHandlerBase<TObject, TService> : SyncHandlerTreeBas
     ///  In general we save everything to disk, even if we are not going to re-import it later
     ///  but you can stop this with RulesOnExport = true in the settings 
     /// </remarks>
-
-    protected override bool ShouldExport(XElement node, HandlerSettings config)
+    protected override async Task<bool> ShouldExportAsync(XElement node, HandlerSettings config)
     {
+        if (!await base.ShouldExportAsync(node, config)) return false;
+
         // We export trashed items by default, (but we don't import them by default)
         var trashed = node.Element("Info")?.Element("Trashed").ValueOrDefault(false);
         if (trashed.GetValueOrDefault(false) && !config.GetSetting<bool>("ExportTrashed", true)) return false;
@@ -201,9 +203,12 @@ public abstract class ContentHandlerBase<TObject, TService> : SyncHandlerTreeBas
     /// </summary>
     /// <param name="notification"></param>
     public void Handle(MovedToRecycleBinNotification<TObject> notification)
+        => HandleAsync(notification, CancellationToken.None).Wait();
+
+    public async Task HandleAsync(MovedToRecycleBinNotification<TObject> notification, CancellationToken cancellationToken)
     {
         if (!ShouldProcessEvent()) return;
-        HandleMove(notification.MoveInfoCollection);
+        await HandleMoveAsync(notification.MoveInfoCollection, cancellationToken);
     }
 
     /// <summary>
@@ -211,18 +216,23 @@ public abstract class ContentHandlerBase<TObject, TService> : SyncHandlerTreeBas
     /// </summary>
     /// <param name="notification"></param>
     public void Handle(MovingToRecycleBinNotification<TObject> notification)
+        => HandleAsync(notification, CancellationToken.None).Wait();
+
+    public Task HandleAsync(MovingToRecycleBinNotification<TObject> notification, CancellationToken cancellationToken)
     {
         if (ShouldBlockRootChanges(notification.MoveInfoCollection.Select(x => x.Entity)))
         {
             notification.Cancel = true;
             notification.Messages.Add(GetCancelMessageForRoots());
         }
+
+        return Task.CompletedTask;
     }
 
     /// <summary>
     ///  Clean up any files on disk, that might be left over when an item moves
     /// </summary>
-    protected override void CleanUp(TObject item, string newFile, string folder)
+    protected override async Task CleanUpAsync(TObject item, string newFile, string folder)
     {
         // for content this clean up check only catches when an item is moved from
         // one location to another, if the site is setup to useGuidNames and a flat 
@@ -241,7 +251,7 @@ public abstract class ContentHandlerBase<TObject, TService> : SyncHandlerTreeBas
         // check to see if we think this was a rename (so only do the clean up if we really have to)
         if (item.WasPropertyDirty(nameof(item.Name)) || item.WasPropertyDirty(nameof(item.ParentId)))
         {
-            base.CleanUp(item, newFile, folder);
+            await base.CleanUpAsync(item, newFile, folder);
         }
     }
 

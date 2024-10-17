@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Xml.Linq;
 
-namespace uSync.BackOffice.SyncHandlers;
+namespace uSync.BackOffice.SyncHandlers.Interfaces;
 
 /// <summary>
 ///  graphable handler - handler can use a Topological graph

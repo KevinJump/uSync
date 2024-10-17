@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using Umbraco.Cms.Core.Cache;
@@ -13,6 +15,7 @@ using Umbraco.Cms.Core.Strings;
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
 using uSync.BackOffice.SyncHandlers.Interfaces;
+using uSync.BackOffice.SyncHandlers.Models;
 using uSync.Core;
 
 using static Umbraco.Cms.Core.Constants;
@@ -24,15 +27,15 @@ namespace uSync.BackOffice.SyncHandlers.Handlers;
 /// </summary>
 [SyncHandler(uSyncConstants.Handlers.MediaHandler, "Media", "Media", uSyncConstants.Priorites.Media,
     Icon = "icon-picture", IsTwoPass = true, EntityType = UdiEntityType.Media)]
-public class MediaHandler : ContentHandlerBase<IMedia, IMediaService>, ISyncHandler, ISyncCleanEntryHandler,
-    INotificationHandler<SavedNotification<IMedia>>,
-    INotificationHandler<DeletedNotification<IMedia>>,
-    INotificationHandler<MovedNotification<IMedia>>,
-    INotificationHandler<MovedToRecycleBinNotification<IMedia>>,
-    INotificationHandler<SavingNotification<IMedia>>,
-    INotificationHandler<DeletingNotification<IMedia>>,
-    INotificationHandler<MovingNotification<IMedia>>,
-    INotificationHandler<MovingToRecycleBinNotification<IMedia>>
+public class MediaHandler : ContentHandlerBase<IMedia>, ISyncHandler, ISyncCleanEntryHandler,
+    INotificationAsyncHandler<SavedNotification<IMedia>>,
+    INotificationAsyncHandler<DeletedNotification<IMedia>>,
+    INotificationAsyncHandler<MovedNotification<IMedia>>,
+    INotificationAsyncHandler<MovedToRecycleBinNotification<IMedia>>,
+    INotificationAsyncHandler<SavingNotification<IMedia>>,
+    INotificationAsyncHandler<DeletingNotification<IMedia>>,
+    INotificationAsyncHandler<MovingNotification<IMedia>>,
+    INotificationAsyncHandler<MovingToRecycleBinNotification<IMedia>>
 
 {
     /// <inheritdoc/>
@@ -61,7 +64,7 @@ public class MediaHandler : ContentHandlerBase<IMedia, IMediaService>, ISyncHand
         => mediaService.HasChildren(item.Id);
 
     /// <inheritdoc/>
-    protected override IEnumerable<IEntity> GetChildItems(IEntity? parent)
+    protected override async Task<IEnumerable<IEntity>> GetChildItemsAsync(IEntity? parent)
     {
         if (parent != null)
         {
@@ -77,7 +80,7 @@ public class MediaHandler : ContentHandlerBase<IMedia, IMediaService>, ISyncHand
         }
         else
         {
-            return mediaService.GetRootMedia();
+            return await Task.FromResult(mediaService.GetRootMedia());
         }
     }
 }

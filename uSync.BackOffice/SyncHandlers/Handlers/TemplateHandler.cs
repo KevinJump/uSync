@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Events;
@@ -16,7 +17,10 @@ using Umbraco.Cms.Core.Strings;
 using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;
+using uSync.BackOffice.Models;
 using uSync.BackOffice.Services;
+using uSync.BackOffice.SyncHandlers.Interfaces;
+using uSync.BackOffice.SyncHandlers.Models;
 using uSync.Core;
 using uSync.Core.Serialization;
 
@@ -29,13 +33,13 @@ namespace uSync.BackOffice.SyncHandlers.Handlers;
 /// </summary>
 [SyncHandler(uSyncConstants.Handlers.TemplateHandler, "Templates", "Templates", uSyncConstants.Priorites.Templates,
     Icon = "icon-layout", EntityType = UdiEntityType.Template, IsTwoPass = true)]
-public class TemplateHandler : SyncHandlerLevelBase<ITemplate, IFileService>, ISyncHandler, ISyncPostImportHandler,
-    INotificationHandler<SavedNotification<ITemplate>>,
-    INotificationHandler<DeletedNotification<ITemplate>>,
-    INotificationHandler<MovedNotification<ITemplate>>,
-    INotificationHandler<SavingNotification<ITemplate>>,
-    INotificationHandler<DeletingNotification<ITemplate>>,
-    INotificationHandler<MovingNotification<ITemplate>>
+public class TemplateHandler : SyncHandlerLevelBase<ITemplate>, ISyncHandler, ISyncPostImportHandler,
+    INotificationAsyncHandler<SavedNotification<ITemplate>>,
+    INotificationAsyncHandler<DeletedNotification<ITemplate>>,
+    INotificationAsyncHandler<MovedNotification<ITemplate>>,
+    INotificationAsyncHandler<SavingNotification<ITemplate>>,
+    INotificationAsyncHandler<DeletingNotification<ITemplate>>,
+    INotificationAsyncHandler<MovingNotification<ITemplate>>
 {
     private readonly IFileSystem? _viewFileSystem;
     private readonly ITemplateService _templateService;
@@ -117,37 +121,49 @@ public class TemplateHandler : SyncHandlerLevelBase<ITemplate, IFileService>, IS
     }
 
     /// <inheritdoc/>
-    public IEnumerable<uSyncAction> ProcessPostImport(string folder, IEnumerable<uSyncAction> actions, HandlerSettings config)
+    [Obsolete("Use the async version - removed in v16")]
+    public IEnumerable<uSyncAction> ProcessPostImport(IEnumerable<uSyncAction> actions, HandlerSettings config)
+        => ProcessPostImportAsync(actions, config).Result;
+    public async Task<IEnumerable<uSyncAction>> ProcessPostImportAsync(IEnumerable<uSyncAction> actions, HandlerSettings config)
     {
-        if (actions == null || !actions.Any())
-            return Enumerable.Empty<uSyncAction>();
+        if (actions == null || !actions.Any()) return [];
 
         var results = new List<uSyncAction>();
+
+        var options = new uSyncImportOptions {  Flags = SerializerFlags.LastPass };
 
         // we only do deletes here. 
         foreach (var action in actions.Where(x => x.Change == ChangeType.Hidden))
         {
             if (action.FileName is null) continue;
-
-            results.AddRange(
-                Import(action.FileName, config, SerializerFlags.LastPass));
+            results.AddRange(await ImportAsync(action.FileName, config, options));
         }
 
         return results;
     }
-    
+
+
     /// <inheritdoc/>
     protected override string GetItemName(ITemplate item) => item.Name ?? item.Alias;
 
-    /// <inheritdoc/>
-    protected override IEnumerable<IEntity> GetChildItems(int parent)
-        => _templateService.GetChildrenAsync(parent).Result;
+    protected override async Task<IEnumerable<IEntity>> GetChildItemsAsync(Guid key)
+    {
+        var template = await _templateService.GetAsync(key);
+        if (template is null) return [];
+        return await _templateService.GetChildrenAsync(template.Id);
+    }
 
-    /// <inheritdoc/>
-    protected override IEnumerable<IEntity> GetFolders(int parent)
-        => GetChildItems(parent);
+
+    protected override async Task<IEnumerable<IEntity>> GetFoldersAsync(Guid key)
+        => await GetChildItemsAsync(key);
 
     /// <inheritdoc/>
     protected override string GetItemPath(ITemplate item, bool useGuid, bool isFlat)
         => useGuid ? item.Key.ToString() : item.Alias.ToSafeFileName(shortStringHelper);
+
+    protected override async Task<IEnumerable<IEntity>> GetFoldersAsync(IEntity? parent)
+    {
+        if (parent is null) return [];
+        return await _templateService.GetChildrenAsync(parent.Id);
+    }
 }

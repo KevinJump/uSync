@@ -2,11 +2,12 @@
 
 using static Umbraco.Cms.Core.Constants;
 
-namespace uSync.BackOffice.SyncHandlers;
+namespace uSync.BackOffice.SyncHandlers.Models;
 
 /// <summary>
 ///  Attribute used to markup a handler in code.
 /// </summary>
+[AttributeUsage(AttributeTargets.Class)]
 public class SyncHandlerAttribute : Attribute
 {
     /// <summary>
