@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
@@ -10,6 +11,7 @@ using Microsoft.Extensions.Logging;
 
 using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Events;
+using Umbraco.Cms.Core.Models.PublishedContent;
 using Umbraco.Cms.Core.Scoping;
 using Umbraco.Cms.Core.Semver;
 using Umbraco.Cms.Infrastructure.HostedServices;
@@ -19,6 +21,7 @@ using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Models;
 using uSync.BackOffice.Services;
 using uSync.BackOffice.SyncHandlers;
+using uSync.BackOffice.SyncHandlers.Models;
 using uSync.Core;
 using uSync.Core.Serialization;
 
@@ -203,7 +206,7 @@ public partial class uSyncService
     #endregion
 
     #region Importing
-    private static object _importLock = new();
+    static SemaphoreSlim _importSemaphoreLock = new SemaphoreSlim(1, 1);
 
     /// <summary>
     ///  Import items into Umbraco from a given set of folders
@@ -220,7 +223,7 @@ public partial class uSyncService
     ///  Import items into Umbraco from a given set of folders
     /// </summary>
     /// <returns>List of actions detailing what did and didn't change</returns>
-    [Obsolete("use ImportAsync instead, this will be removed in v16")]  
+    [Obsolete("use ImportAsync instead, this will be removed in v16")]
     public IEnumerable<uSyncAction> Import(string[] folders, bool force, IEnumerable<HandlerConfigPair> handlers, uSyncCallbacks? callbacks)
         => ImportAsync(folders, force, handlers, callbacks).Result;
 
@@ -229,86 +232,98 @@ public partial class uSyncService
         // if its blank, we just throw it back empty. 
         if (handlers == null || !handlers.Any()) return [];
 
-        lock (_importLock)
+        try
         {
-            var sw = Stopwatch.StartNew();
-
-            using (var pause = _mutexService.ImportPause(true))
-            {
-
-                // pre import event
-                _mutexService.FireBulkStarting(new uSyncImportStartingNotification());
-
-                var actions = new List<uSyncAction>();
-
-                var summary = new SyncProgressSummary(handlers.Select(x => x.Handler), "Importing", handlers.Count() + 1);
-                summary.Handlers.Add(new SyncHandlerSummary()
-                {
-                    Icon = "icon-defrag",
-                    Name = "Post Import",
-                    Status = HandlerStatus.Pending
-                });
-
-                var importOptions = new uSyncImportOptions
-                {
-                    Flags = force ? SerializerFlags.Force : SerializerFlags.None,
-                    Callbacks = callbacks
-                };
-
-                foreach (var configuredHandler in handlers)
-                {
-                    var handler = configuredHandler.Handler;
-                    var handlerSettings = configuredHandler.Settings;
-
-                    summary.Increment();
-
-                    summary.UpdateHandler(
-                        handler.Name, HandlerStatus.Processing, $"Importing {handler.Name}", 0);
-
-                    callbacks?.Callback?.Invoke(summary);
-
-                    var handlerFolders = folders.Select(x => $"{x}/{handler.DefaultFolder}").ToArray();
-                    var handlerActions = handler.ImportAll(handlerFolders, handlerSettings, importOptions);
-
-                    actions.AddRange(handlerActions);
-
-                    summary.UpdateHandler(handler.Name, HandlerStatus.Complete,
-                        handlerActions.CountChanges(),
-                        handlerActions.ContainsErrors());
-
-                }
-
-
-                // postImport things (mainly cleaning up folders)
-
-                summary.Increment();
-                summary.UpdateHandler("Post Import", HandlerStatus.Pending, "Post Import Actions", 0);
-
-                callbacks?.Callback?.Invoke(summary);
-
-                actions.AddRange(PerformPostImport(handlers, actions));
-
-                sw.Stop();
-                summary.UpdateHandler("Post Import", HandlerStatus.Complete, "Import Completed", 0);
-                callbacks?.Callback?.Invoke(summary);
-
-                // fire complete
-                _mutexService.FireBulkComplete(new uSyncImportCompletedNotification(actions));
-
-                _logger.LogInformation("uSync Import: {handlerCount} handlers, processed {itemCount} items, {changeCount} changes in {ElapsedMilliseconds}ms",
-                    handlers.Count(),
-                    actions.Count,
-                    actions.CountChanges(),
-                    sw.ElapsedMilliseconds);
-
-                callbacks?.Update?.Invoke($"Processed {actions.Count} items in {sw.ElapsedMilliseconds}ms", 1, 1);
-
-                return actions;
-            }
+            await _importSemaphoreLock.WaitAsync();
+            return await Do_ImportAsync(folders, force, handlers, callbacks);
+        }
+        finally
+        {
+            _importSemaphoreLock.Release();
         }
     }
 
-    private static List<uSyncAction> PerformPostImport(IEnumerable<HandlerConfigPair> handlers, IEnumerable<uSyncAction> actions)
+    private async Task<IEnumerable<uSyncAction>> Do_ImportAsync(string[] folders, bool force, IEnumerable<HandlerConfigPair> handlers, uSyncCallbacks? callbacks)
+    {
+        var sw = Stopwatch.StartNew();
+
+        using (var pause = _mutexService.ImportPause(true))
+        {
+
+            // pre import event
+            _mutexService.FireBulkStarting(new uSyncImportStartingNotification());
+
+            var actions = new List<uSyncAction>();
+
+            var summary = new SyncProgressSummary(handlers.Select(x => x.Handler), "Importing", handlers.Count() + 1);
+            summary.Handlers.Add(new SyncHandlerSummary()
+            {
+                Icon = "icon-defrag",
+                Name = "Post Import",
+                Status = HandlerStatus.Pending
+            });
+
+            var importOptions = new uSyncImportOptions
+            {
+                Flags = force ? SerializerFlags.Force : SerializerFlags.None,
+                Callbacks = callbacks
+            };
+
+            foreach (var configuredHandler in handlers)
+            {
+                var handler = configuredHandler.Handler;
+                var handlerSettings = configuredHandler.Settings;
+
+                summary.Increment();
+
+                summary.UpdateHandler(
+                    handler.Name, HandlerStatus.Processing, $"Importing {handler.Name}", 0);
+
+                callbacks?.Callback?.Invoke(summary);
+
+                var handlerFolders = folders.Select(x => $"{x}/{handler.DefaultFolder}").ToArray();
+                var handlerActions = await handler.ImportAllAsync(handlerFolders, handlerSettings, importOptions);
+                // handler.ImportAll(handlerFolders, handlerSettings, importOptions);
+
+                actions.AddRange(handlerActions);
+
+                summary.UpdateHandler(handler.Name, HandlerStatus.Complete,
+                    handlerActions.CountChanges(),
+                    handlerActions.ContainsErrors());
+
+            }
+
+
+            // postImport things (mainly cleaning up folders)
+
+            summary.Increment();
+            summary.UpdateHandler("Post Import", HandlerStatus.Pending, "Post Import Actions", 0);
+
+            callbacks?.Callback?.Invoke(summary);
+
+            actions.AddRange(await PerformPostImportAsync(handlers, actions));
+
+            sw.Stop();
+            summary.UpdateHandler("Post Import", HandlerStatus.Complete, "Import Completed", 0);
+            callbacks?.Callback?.Invoke(summary);
+
+            // fire complete
+            _mutexService.FireBulkComplete(new uSyncImportCompletedNotification(actions));
+
+            _logger.LogInformation("uSync Import: {handlerCount} handlers, processed {itemCount} items, {changeCount} changes in {ElapsedMilliseconds}ms",
+                handlers.Count(),
+                actions.Count,
+                actions.CountChanges(),
+            sw.ElapsedMilliseconds);
+
+            callbacks?.Update?.Invoke($"Processed {actions.Count} items in {sw.ElapsedMilliseconds}ms", 1, 1);
+
+            return actions;
+        }
+
+    }
+
+    private static async Task<List<uSyncAction>> PerformPostImportAsync(IEnumerable<HandlerConfigPair> handlers, IEnumerable<uSyncAction> actions)
     {
         var postImportActions = actions.Where(x => x.Success && x.Change > Core.ChangeType.NoChange && x.RequiresPostProcessing).ToList();
         if (postImportActions.Count == 0) return [];
@@ -322,7 +337,7 @@ public partial class uSyncService
                 var handlerActions = postImportActions.Where(x => x.ItemType == handlerPair.Handler.ItemType);
                 if (handlerActions.Any() == false) continue;
 
-                results.AddRange(postImportHandler.ProcessPostImport(handlerActions, handlerPair.Settings));
+                results.AddRange(await postImportHandler.ProcessPostImportAsync(handlerActions, handlerPair.Settings));
             }
         }
 
@@ -339,7 +354,11 @@ public partial class uSyncService
     /// </remarks>
     /// <param name="action">Action item, to use as basis for import</param>
     /// <returns>Action detailing change or not</returns>
+    [Obsolete("use ImportSingleActionAsync instead, this will be removed in v16")]
     public uSyncAction ImportSingleAction(uSyncAction action)
+        => ImportSingleActionAsync(action).Result;
+
+    public async Task<uSyncAction> ImportSingleActionAsync(uSyncAction action)
     {
         if (action.HandlerAlias is null || action.FileName is null) return new();
 
@@ -347,9 +366,7 @@ public partial class uSyncService
         var handlerConfig = _handlerFactory.GetValidHandler(action.HandlerAlias);
         if (handlerConfig is null) return new();
 
-        return handlerConfig.Handler
-            .Import(action.FileName, handlerConfig.Settings, true)
-            .FirstOrDefault();
+        return (await handlerConfig.Handler.ImportAsync(action.FileName, handlerConfig.Settings, true)).FirstOrDefault();
     }
 
     #endregion
@@ -489,7 +506,7 @@ public partial class uSyncService
     [Obsolete("Will be removed in v15")]
     public IEnumerable<uSyncAction> Export(string folder, IEnumerable<HandlerConfigPair> handlers, uSyncCallbacks? callbacks)
         => ExportAsync(folder, handlers, callbacks).Result;
-    
+
     public async Task<IEnumerable<uSyncAction>> ExportAsync(string folder, IEnumerable<HandlerConfigPair> handlers, uSyncCallbacks? callbacks)
     {
         var sw = Stopwatch.StartNew();
@@ -509,7 +526,7 @@ public partial class uSyncService
 
             callbacks?.Callback?.Invoke(summary);
 
-            var handlerActions = handler.ExportAll([$"{folder}/{handler.DefaultFolder}"], configuredHandler.Settings, callbacks?.Update);
+            var handlerActions = await handler.ExportAllAsync([$"{folder}/{handler.DefaultFolder}"], configuredHandler.Settings, callbacks?.Update);
 
             actions.AddRange(handlerActions);
 

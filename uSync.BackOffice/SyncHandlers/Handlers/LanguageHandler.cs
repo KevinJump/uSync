@@ -20,6 +20,8 @@ using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
+using uSync.BackOffice.SyncHandlers.Interfaces;
+using uSync.BackOffice.SyncHandlers.Models;
 using uSync.Core;
 
 using static Umbraco.Cms.Core.Constants;
@@ -32,10 +34,10 @@ namespace uSync.BackOffice.SyncHandlers.Handlers;
 [SyncHandler(uSyncConstants.Handlers.LanguageHandler, "Languages", "Languages", uSyncConstants.Priorites.Languages,
     Icon = "icon-globe", EntityType = UdiEntityType.Language, IsTwoPass = true)]
 public class LanguageHandler : SyncHandlerBase<ILanguage>, ISyncHandler,
-    INotificationHandler<SavingNotification<ILanguage>>,
-    INotificationHandler<SavedNotification<ILanguage>>,
-    INotificationHandler<DeletedNotification<ILanguage>>,
-    INotificationHandler<DeletingNotification<ILanguage>>
+    INotificationAsyncHandler<SavingNotification<ILanguage>>,
+    INotificationAsyncHandler<SavedNotification<ILanguage>>,
+    INotificationAsyncHandler<DeletedNotification<ILanguage>>,
+    INotificationAsyncHandler<DeletingNotification<ILanguage>>
 {
     private readonly ILanguageService _languageService;
 
@@ -114,9 +116,9 @@ public class LanguageHandler : SyncHandlerBase<ILanguage>, ISyncHandler,
     protected override string GetItemName(ILanguage item) => item.IsoCode;
 
     /// <inheritdoc/>
-    protected override async void CleanUp(ILanguage item, string newFile, string folder)
+    protected override async Task CleanUpAsync(ILanguage item, string newFile, string folder)
     {
-        base.CleanUp(item, newFile, folder);
+        await base.CleanUpAsync(item, newFile, folder);
 
         // for languages we also clean up by id. 
         // this happens when the language changes .
@@ -139,7 +141,7 @@ public class LanguageHandler : SyncHandlerBase<ILanguage>, ISyncHandler,
                     if (node.Element("IsoCode").ValueOrDefault(string.Empty) == item.IsoCode)
                     {
                         logger.LogDebug("Found Matching Lang File, cleaning");
-                        var attempt = serializer.SerializeEmpty(item, SyncActionType.Rename, node.GetAlias());
+                        var attempt = await serializer.SerializeEmptyAsync(item, SyncActionType.Rename, node.GetAlias());
                         if (attempt.Success && attempt.Item is not null)
                         {
                             syncFileService.SaveXElement(attempt.Item, file);
@@ -151,7 +153,7 @@ public class LanguageHandler : SyncHandlerBase<ILanguage>, ISyncHandler,
                 {
                     // language is no longer installed, make the file empty. 
                     logger.LogDebug("Language in file is not on the site, cleaning");
-                    var attempt = serializer.SerializeEmpty(item, SyncActionType.Delete, node.GetAlias());
+                    var attempt = await serializer.SerializeEmptyAsync(item, SyncActionType.Delete, node.GetAlias());
                     if (attempt.Success && attempt.Item is not null)
                     {
                         syncFileService.SaveXElement(attempt.Item, file);
@@ -161,18 +163,18 @@ public class LanguageHandler : SyncHandlerBase<ILanguage>, ISyncHandler,
         }
     }
 
-    private static ConcurrentDictionary<string, string> newLanguages = new ConcurrentDictionary<string, string>();
+    private static ConcurrentDictionary<string, string> newLanguages = new();
 
     /// <inheritdoc/>
-    public override void Handle(SavingNotification<ILanguage> notification)
+    public override Task HandleAsync(SavingNotification<ILanguage> notification, CancellationToken cancellationToken)
     {
-        if (_mutexService.IsPaused) return;
+        if (_mutexService.IsPaused) return Task.CompletedTask;
 
         if (ShouldBlockRootChanges(notification.SavedEntities))
         {
             notification.Cancel = true;
             notification.Messages.Add(GetCancelMessageForRoots());
-            return;
+            return Task.CompletedTask; ;
         }
 
         foreach (var item in notification.SavedEntities)
@@ -185,10 +187,12 @@ public class LanguageHandler : SyncHandlerBase<ILanguage>, ISyncHandler,
                 // newLanguages.Add(item.IsoCode);
             }
         }
+
+        return Task.CompletedTask;
     }
 
     /// <inheritdoc/>
-    public override void Handle(SavedNotification<ILanguage> notification)
+    public override async Task HandleAsync(SavedNotification<ILanguage> notification, CancellationToken cancellationToken)
     {
         if (_mutexService.IsPaused) return;
 
@@ -206,18 +210,18 @@ public class LanguageHandler : SyncHandlerBase<ILanguage>, ISyncHandler,
             {
                 // changing, this change doesn't trigger a save of the other languages.
                 // so we need to save all language files. 
-                this.ExportAll(targetFolders, DefaultConfig, null);
+                await this.ExportAllAsync(targetFolders, DefaultConfig, null);
             }
 
 
-            var attempts = Export(item, targetFolders, DefaultConfig);
+            var attempts = await ExportAsync(item, targetFolders, DefaultConfig);
 
             if (!newItem && item.WasPropertyDirty(nameof(ILanguage.IsoCode)))
             {
                 // The language code changed, this can mean we need to do a full content export. 
                 // + we should export the languages again!
-                uSyncTriggers.TriggerExport(targetFolders, new List<string>() {
-                    UdiEntityType.Document, UdiEntityType.Language }, null);
+                uSyncTriggers.TriggerExport(targetFolders, 
+                    [ UdiEntityType.Document, UdiEntityType.Language ], null);
             }
 
             // we always clean up languages, because of the way they are stored. 
@@ -225,16 +229,12 @@ public class LanguageHandler : SyncHandlerBase<ILanguage>, ISyncHandler,
             {
                 if (attempt.FileName is null) continue;
 
-                this.CleanUp(item, attempt.FileName, targetFolders.Last());
+                await this.CleanUpAsync(item, attempt.FileName, targetFolders.Last());
             }
 
         }
     }
 
-    /// <summary>
-    ///  we don't support language deletion (because the keys are unstable)
-    /// </summary>
-    protected override IEnumerable<uSyncAction> DeleteMissingItems(int parentId, IEnumerable<Guid> keys, bool reportOnly)
-        => Enumerable.Empty<uSyncAction>();
-
+    protected override Task<IEnumerable<uSyncAction>> DeleteMissingItemsAsync(ILanguage parent, IEnumerable<Guid> keysToKeep, bool reportOnly)
+        => Task.FromResult(Enumerable.Empty<uSyncAction>());
 }

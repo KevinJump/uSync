@@ -17,7 +17,10 @@ using Umbraco.Cms.Core.Strings;
 using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;
+using uSync.BackOffice.Models;
 using uSync.BackOffice.Services;
+using uSync.BackOffice.SyncHandlers.Interfaces;
+using uSync.BackOffice.SyncHandlers.Models;
 using uSync.Core;
 using uSync.Core.Serialization;
 
@@ -31,12 +34,12 @@ namespace uSync.BackOffice.SyncHandlers.Handlers;
 [SyncHandler(uSyncConstants.Handlers.TemplateHandler, "Templates", "Templates", uSyncConstants.Priorites.Templates,
     Icon = "icon-layout", EntityType = UdiEntityType.Template, IsTwoPass = true)]
 public class TemplateHandler : SyncHandlerLevelBase<ITemplate>, ISyncHandler, ISyncPostImportHandler,
-    INotificationHandler<SavedNotification<ITemplate>>,
-    INotificationHandler<DeletedNotification<ITemplate>>,
-    INotificationHandler<MovedNotification<ITemplate>>,
-    INotificationHandler<SavingNotification<ITemplate>>,
-    INotificationHandler<DeletingNotification<ITemplate>>,
-    INotificationHandler<MovingNotification<ITemplate>>
+    INotificationAsyncHandler<SavedNotification<ITemplate>>,
+    INotificationAsyncHandler<DeletedNotification<ITemplate>>,
+    INotificationAsyncHandler<MovedNotification<ITemplate>>,
+    INotificationAsyncHandler<SavingNotification<ITemplate>>,
+    INotificationAsyncHandler<DeletingNotification<ITemplate>>,
+    INotificationAsyncHandler<MovingNotification<ITemplate>>
 {
     private readonly IFileSystem? _viewFileSystem;
     private readonly ITemplateService _templateService;
@@ -118,20 +121,22 @@ public class TemplateHandler : SyncHandlerLevelBase<ITemplate>, ISyncHandler, IS
     }
 
     /// <inheritdoc/>
+    [Obsolete("Use the async version - removed in v16")]
     public IEnumerable<uSyncAction> ProcessPostImport(IEnumerable<uSyncAction> actions, HandlerSettings config)
+        => ProcessPostImportAsync(actions, config).Result;
+    public async Task<IEnumerable<uSyncAction>> ProcessPostImportAsync(IEnumerable<uSyncAction> actions, HandlerSettings config)
     {
-        if (actions == null || !actions.Any())
-            return Enumerable.Empty<uSyncAction>();
+        if (actions == null || !actions.Any()) return [];
 
         var results = new List<uSyncAction>();
+
+        var options = new uSyncImportOptions {  Flags = SerializerFlags.LastPass };
 
         // we only do deletes here. 
         foreach (var action in actions.Where(x => x.Change == ChangeType.Hidden))
         {
             if (action.FileName is null) continue;
-
-            results.AddRange(
-                Import(action.FileName, config, SerializerFlags.LastPass));
+            results.AddRange(await ImportAsync(action.FileName, config, options));
         }
 
         return results;

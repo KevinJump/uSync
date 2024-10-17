@@ -25,8 +25,7 @@ public class TemplateWatcher : IRegisteredObject
     private readonly IApplicationShutdownRegistry _hostingLifetime;
     private readonly FileSystemWatcher _watcher;
     private readonly ILogger<TemplateWatcher> _logger;
-
-    private readonly IFileService _fileService;
+    private readonly ITemplateService _templateService;
     private readonly IShortStringHelper _shortStringHelper;
     private readonly IHostEnvironment _hostEnvironment;
 
@@ -42,12 +41,11 @@ public class TemplateWatcher : IRegisteredObject
         IConfiguration configuration,
         IApplicationShutdownRegistry hostingLifetime,
         ILogger<TemplateWatcher> logger,
-        IFileService fileService,
         FileSystems fileSystems,
         IShortStringHelper shortStringHelper,
-        IHostEnvironment hostEnvironment)
+        IHostEnvironment hostEnvironment,
+        ITemplateService templateService)
     {
-        _fileService = fileService;
         _shortStringHelper = shortStringHelper;
         _hostEnvironment = hostEnvironment;
         _hostingLifetime = hostingLifetime;
@@ -79,6 +77,7 @@ public class TemplateWatcher : IRegisteredObject
         _watcher.Changed += Watcher_FileChanged;
         _watcher.Deleted += Watcher_FileDeleted;
         _watcher.Renamed += Watcher_Renamed;
+        _templateService = templateService;
     }
     public void WatchViewsFolder()
     {
@@ -92,12 +91,16 @@ public class TemplateWatcher : IRegisteredObject
         Thread.Sleep(_delay);
 
         var oldAlias = GetAliasFromFileName(e.OldName);
-        var template = _fileService.GetTemplate(oldAlias);
+        var template = _templateService.GetAsync(oldAlias).Result;
         if (template != null)
         {
             template.Alias = GetAliasFromFileName(e.Name);
             template.Name = Path.GetFileNameWithoutExtension(e.Name);
-            _fileService.SaveTemplate(template);
+
+            if (template.HasIdentity)
+                _templateService.UpdateAsync(template, Constants.Security.SuperUserKey).Wait();
+            else
+                _templateService.CreateAsync(template, Constants.Security.SuperUserKey).Wait();
         }
     }
 
@@ -139,7 +142,7 @@ public class TemplateWatcher : IRegisteredObject
 
     private void CheckTemplates()
     {
-        var templates = _fileService.GetTemplates();
+        var templates = _templateService.GetAllAsync().Result;
         foreach (var template in templates)
         {
             if (!_templateFileSystem?.FileExists(template.Alias + ".cshtml") is true)
@@ -179,14 +182,14 @@ public class TemplateWatcher : IRegisteredObject
 
                 var fileMasterAlias = GetAliasFromFileName(layoutFile);
 
-                var template = _fileService.GetTemplate(fileAlias);
+                var template = _templateService.GetAsync(fileAlias).Result;
 
                 if (template != null)
                 {
                     var currentMaster = string.IsNullOrWhiteSpace(template.MasterTemplateAlias) ? "null" : template.MasterTemplateAlias;
                     if (fileMasterAlias != currentMaster)
                     {
-                        template.SetMasterTemplate(GetMasterTemplate(fileMasterAlias));
+                        // template.SetMasterTemplate(GetMasterTemplate(fileMasterAlias));
                         SafeSaveTemplate(template);
                         return;
                     }
@@ -195,7 +198,7 @@ public class TemplateWatcher : IRegisteredObject
                 {
                     // doesn't exist 
                     template = new Template(_shortStringHelper, Path.GetFileNameWithoutExtension(filename), fileAlias);
-                    template.SetMasterTemplate(GetMasterTemplate(fileMasterAlias));
+                    // template.SetMasterTemplate(GetMasterTemplate(fileMasterAlias));
                     template.Content = text;
 
                     SafeSaveTemplate(template);
@@ -212,14 +215,14 @@ public class TemplateWatcher : IRegisteredObject
     private ITemplate? GetMasterTemplate(string alias)
     {
         if (alias == "null") return null;
-        return _fileService.GetTemplate(alias);
+        return _templateService.GetAsync(alias).Result;
     }
 
     private void SafeDeleteTemplate(string alias)
     {
         try
         {
-            _fileService.DeleteTemplate(alias);
+            _templateService.DeleteAsync(alias, Constants.Security.SuperUserKey).Wait();
         }
         catch (Exception ex)
         {
@@ -230,7 +233,11 @@ public class TemplateWatcher : IRegisteredObject
     private void SafeSaveTemplate(ITemplate template)
     {
         _watcher.EnableRaisingEvents = false;
-        _fileService.SaveTemplate(template);
+
+        if (template.HasIdentity)
+            _templateService.UpdateAsync(template, Constants.Security.SuperUserKey).Wait();
+        else
+            _templateService.CreateAsync(template, Constants.Security.SuperUserKey).Wait();
         _watcher.EnableRaisingEvents = true;
     }
 

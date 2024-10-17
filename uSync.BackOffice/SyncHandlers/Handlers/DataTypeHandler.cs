@@ -17,7 +17,10 @@ using Umbraco.Cms.Core.Strings;
 using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;
+using uSync.BackOffice.Models;
 using uSync.BackOffice.Services;
+using uSync.BackOffice.SyncHandlers.Interfaces;
+using uSync.BackOffice.SyncHandlers.Models;
 using uSync.Core;
 using uSync.Core.Models;
 using uSync.Core.Serialization;
@@ -32,14 +35,14 @@ namespace uSync.BackOffice.SyncHandlers.Handlers;
 [SyncHandler(uSyncConstants.Handlers.DataTypeHandler, "Datatypes", "DataTypes", uSyncConstants.Priorites.DataTypes,
     Icon = "icon-autofill", IsTwoPass = true, EntityType = UdiEntityType.DataType)]
 public class DataTypeHandler : SyncHandlerContainerBase<IDataType>, ISyncHandler, ISyncPostImportHandler,
-    INotificationHandler<SavedNotification<IDataType>>,
-    INotificationHandler<MovedNotification<IDataType>>,
-    INotificationHandler<DeletedNotification<IDataType>>,
-    INotificationHandler<EntityContainerSavedNotification>,
-    INotificationHandler<EntityContainerRenamedNotification>,
-    INotificationHandler<SavingNotification<IDataType>>,
-    INotificationHandler<MovingNotification<IDataType>>,
-    INotificationHandler<DeletingNotification<IDataType>>
+    INotificationAsyncHandler<SavedNotification<IDataType>>,
+    INotificationAsyncHandler<MovedNotification<IDataType>>,
+    INotificationAsyncHandler<DeletedNotification<IDataType>>,
+    INotificationAsyncHandler<EntityContainerSavedNotification>,
+    INotificationAsyncHandler<EntityContainerRenamedNotification>,
+    INotificationAsyncHandler<SavingNotification<IDataType>>,
+    INotificationAsyncHandler<MovingNotification<IDataType>>,
+    INotificationAsyncHandler<DeletingNotification<IDataType>>
 {
  
     private readonly IDataTypeService dataTypeService;
@@ -79,22 +82,22 @@ public class DataTypeHandler : SyncHandlerContainerBase<IDataType>, ISyncHandler
     /// HOWEVER: If we move deletes to the end , we still need to process them. 
     /// but deletes are always 'change' = 'Hidden', so we only process hidden changes
     /// </remarks>
-    public override IEnumerable<uSyncAction> ProcessPostImport(IEnumerable<uSyncAction> actions, HandlerSettings config)
+    public override async Task<IEnumerable<uSyncAction>> ProcessPostImportAsync(IEnumerable<uSyncAction> actions, HandlerSettings config)
     {
-        if (actions == null || !actions.Any())
-            return Enumerable.Empty<uSyncAction>();
+        if (actions == null || !actions.Any()) return [];
 
         var results = new List<uSyncAction>();
+        var options = new uSyncImportOptions {  Flags = SerializerFlags.LastPass };
 
         // we only do deletes here. 
         foreach (var action in actions.Where(x => x.Change == ChangeType.Hidden))
         {
             if (action.FileName is null) continue;
             results.AddRange(
-                Import(action.FileName, config, SerializerFlags.LastPass));
+                await ImportAsync(action.FileName, config, options));
         }
 
-        results.AddRange(CleanFolders(-1));
+        results.AddRange(await CleanFoldersAsync(Guid.Empty));
 
         return results;
     }

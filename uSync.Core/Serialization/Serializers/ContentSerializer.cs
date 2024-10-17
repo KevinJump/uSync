@@ -370,7 +370,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
             if (changes.Count != 0)
             {
                 logger.LogDebug("Saving Schedule changes: {item}", item.Name);
-                contentService.PersistContentSchedule(item, currentSchedules);
+                await Task.Run(() => contentService.PersistContentSchedule(item, currentSchedules));
                 return changes;
             }
 

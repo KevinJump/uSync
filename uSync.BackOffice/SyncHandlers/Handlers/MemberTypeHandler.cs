@@ -14,6 +14,8 @@ using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
+using uSync.BackOffice.SyncHandlers.Interfaces;
+using uSync.BackOffice.SyncHandlers.Models;
 using uSync.Core;
 
 using static Umbraco.Cms.Core.Constants;
@@ -26,14 +28,14 @@ namespace uSync.BackOffice.SyncHandlers.Handlers;
 [SyncHandler(uSyncConstants.Handlers.MemberTypeHandler, "Member Types", "MemberTypes", uSyncConstants.Priorites.MemberTypes,
     IsTwoPass = true, Icon = "icon-users", EntityType = UdiEntityType.MemberType)]
 public class MemberTypeHandler : ContentTypeBaseHandler<IMemberType>, ISyncHandler, ISyncPostImportHandler, ISyncGraphableHandler,
-    INotificationHandler<SavedNotification<IMemberType>>,
-    INotificationHandler<MovedNotification<IMemberType>>,
-    INotificationHandler<DeletedNotification<IMemberType>>,
-    INotificationHandler<EntityContainerSavedNotification>,
-    INotificationHandler<EntityContainerRenamedNotification>,
-    INotificationHandler<SavingNotification<IMemberType>>,
-    INotificationHandler<MovingNotification<IMemberType>>,
-    INotificationHandler<DeletingNotification<IMemberType>>
+    INotificationAsyncHandler<SavedNotification<IMemberType>>,
+    INotificationAsyncHandler<MovedNotification<IMemberType>>,
+    INotificationAsyncHandler<DeletedNotification<IMemberType>>,
+    INotificationAsyncHandler<EntityContainerSavedNotification>,
+    INotificationAsyncHandler<EntityContainerRenamedNotification>,
+    INotificationAsyncHandler<SavingNotification<IMemberType>>,
+    INotificationAsyncHandler<MovingNotification<IMemberType>>,
+    INotificationAsyncHandler<DeletingNotification<IMemberType>>
 {
     private readonly IMemberTypeService memberTypeService;
 

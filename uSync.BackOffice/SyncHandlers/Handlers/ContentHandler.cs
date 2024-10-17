@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
@@ -13,6 +14,8 @@ using Umbraco.Cms.Core.Strings;
 
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
+using uSync.BackOffice.SyncHandlers.Interfaces;
+using uSync.BackOffice.SyncHandlers.Models;
 using uSync.Core;
 
 using static Umbraco.Cms.Core.Constants;
@@ -25,14 +28,15 @@ namespace uSync.BackOffice.SyncHandlers.Handlers;
 [SyncHandler(uSyncConstants.Handlers.ContentHandler, "Content", "Content", uSyncConstants.Priorites.Content
     , Icon = "icon-document", IsTwoPass = true, EntityType = UdiEntityType.Document)]
 public class ContentHandler : ContentHandlerBase<IContent>, ISyncHandler,
-    INotificationHandler<SavedNotification<IContent>>,
-    INotificationHandler<DeletedNotification<IContent>>,
-    INotificationHandler<MovedNotification<IContent>>,
-    INotificationHandler<MovedToRecycleBinNotification<IContent>>,
-    INotificationHandler<SavingNotification<IContent>>,
-    INotificationHandler<DeletingNotification<IContent>>,
-    INotificationHandler<MovingNotification<IContent>>,
-    INotificationHandler<MovingToRecycleBinNotification<IContent>>
+
+    INotificationAsyncHandler<SavedNotification<IContent>>,
+    INotificationAsyncHandler<DeletedNotification<IContent>>,
+    INotificationAsyncHandler<MovedNotification<IContent>>,
+    INotificationAsyncHandler<MovedToRecycleBinNotification<IContent>>,
+    INotificationAsyncHandler<SavingNotification<IContent>>,
+    INotificationAsyncHandler<DeletingNotification<IContent>>,
+    INotificationAsyncHandler<MovingNotification<IContent>>,
+    INotificationAsyncHandler<MovingToRecycleBinNotification<IContent>>
 
 {
     /// <summary>
@@ -78,7 +82,7 @@ public class ContentHandler : ContentHandlerBase<IContent>, ISyncHandler,
     ///  the actual type for content and media, we save ourselves an extra lookup later on
     ///  and this speeds up the itteration by quite a bit (onle less db trip per item).
     /// </remarks>
-    protected override IEnumerable<IEntity> GetChildItems(IEntity? parent)
+    protected override async Task<IEnumerable<IEntity>> GetChildItemsAsync(IEntity? parent)
     {
         if (parent != null)
         {
@@ -94,7 +98,7 @@ public class ContentHandler : ContentHandlerBase<IContent>, ISyncHandler,
         }
         else
         {
-            return contentService.GetRootContent();
+            return await Task.FromResult(contentService.GetRootContent());
         }
     }
 }

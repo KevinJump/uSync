@@ -51,7 +51,7 @@ public abstract class SyncHandlerLevelBase<TObject>
     ///  then cost us much to sort them when we have to.
     /// </remarks>
     protected override IReadOnlyList<OrderedNodeInfo> GetMergedItems(string[] folders)
-        => base.GetMergedItems(folders).OrderBy(x => x.Level).ToList();
+        => [.. base.GetMergedItems(folders).OrderBy(x => x.Level)];
 
 
     /// <inheritdoc/>

@@ -21,6 +21,7 @@ using uSync.BackOffice.Notifications;
 using uSync.BackOffice.Services;
 using uSync.BackOffice.SyncHandlers;
 using uSync.BackOffice.SyncHandlers.Handlers;
+using uSync.BackOffice.SyncHandlers.Interfaces;
 using uSync.Core;
 
 namespace uSync.BackOffice;
@@ -127,130 +128,129 @@ public static class uSyncBackOfficeBuilderExtensions
     {
 
         // TODO: Would be nice if we could just register all the notifications in the handlers
+        builder.AddNotificationAsyncHandler<DataTypeSavedNotification, DataTypeHandler>();
+        builder.AddNotificationAsyncHandler<DataTypeDeletedNotification, DataTypeHandler>();
+        builder.AddNotificationAsyncHandler<DataTypeMovedNotification, DataTypeHandler>();
+        builder.AddNotificationAsyncHandler<EntityContainerSavedNotification, DataTypeHandler>();
+        builder.AddNotificationAsyncHandler<EntityContainerRenamedNotification, DataTypeHandler>();
 
-        builder.AddNotificationHandler<DataTypeSavedNotification, DataTypeHandler>();
-        builder.AddNotificationHandler<DataTypeDeletedNotification, DataTypeHandler>();
-        builder.AddNotificationHandler<DataTypeMovedNotification, DataTypeHandler>();
-        builder.AddNotificationHandler<EntityContainerSavedNotification, DataTypeHandler>();
-        builder.AddNotificationHandler<EntityContainerRenamedNotification, DataTypeHandler>();
+        builder.AddNotificationAsyncHandler<ContentTypeSavedNotification, ContentTypeHandler>();
+        builder.AddNotificationAsyncHandler<ContentTypeDeletedNotification, ContentTypeHandler>();
+        builder.AddNotificationAsyncHandler<ContentTypeMovedNotification, ContentTypeHandler>();
+        builder.AddNotificationAsyncHandler<EntityContainerSavedNotification, ContentTypeHandler>();
+        builder.AddNotificationAsyncHandler<EntityContainerRenamedNotification, ContentTypeHandler>();
 
-        builder.AddNotificationHandler<ContentTypeSavedNotification, ContentTypeHandler>();
-        builder.AddNotificationHandler<ContentTypeDeletedNotification, ContentTypeHandler>();
-        builder.AddNotificationHandler<ContentTypeMovedNotification, ContentTypeHandler>();
-        builder.AddNotificationHandler<EntityContainerSavedNotification, ContentTypeHandler>();
-        builder.AddNotificationHandler<EntityContainerRenamedNotification, ContentTypeHandler>();
+        builder.AddNotificationAsyncHandler<MediaTypeSavedNotification, MediaTypeHandler>();
+        builder.AddNotificationAsyncHandler<MediaTypeDeletedNotification, MediaTypeHandler>();
+        builder.AddNotificationAsyncHandler<MediaTypeMovedNotification, MediaTypeHandler>();
+        builder.AddNotificationAsyncHandler<EntityContainerSavedNotification, MediaTypeHandler>();
+        builder.AddNotificationAsyncHandler<EntityContainerRenamedNotification, MediaTypeHandler>();
 
-        builder.AddNotificationHandler<MediaTypeSavedNotification, MediaTypeHandler>();
-        builder.AddNotificationHandler<MediaTypeDeletedNotification, MediaTypeHandler>();
-        builder.AddNotificationHandler<MediaTypeMovedNotification, MediaTypeHandler>();
-        builder.AddNotificationHandler<EntityContainerSavedNotification, MediaTypeHandler>();
-        builder.AddNotificationHandler<EntityContainerRenamedNotification, MediaTypeHandler>();
+        builder.AddNotificationAsyncHandler<MemberTypeSavedNotification, MemberTypeHandler>();
+        builder.AddNotificationAsyncHandler<MemberTypeSavedNotification, MemberTypeHandler>();
+        builder.AddNotificationAsyncHandler<MemberTypeMovedNotification, MemberTypeHandler>();
+        builder.AddNotificationAsyncHandler<EntityContainerSavedNotification, MemberTypeHandler>();
+        builder.AddNotificationAsyncHandler<EntityContainerRenamedNotification, MemberTypeHandler>();
 
-        builder.AddNotificationHandler<MemberTypeSavedNotification, MemberTypeHandler>();
-        builder.AddNotificationHandler<MemberTypeSavedNotification, MemberTypeHandler>();
-        builder.AddNotificationHandler<MemberTypeMovedNotification, MemberTypeHandler>();
-        builder.AddNotificationHandler<EntityContainerSavedNotification, MemberTypeHandler>();
-        builder.AddNotificationHandler<EntityContainerRenamedNotification, MemberTypeHandler>();
+        builder.AddNotificationAsyncHandler<LanguageSavingNotification, LanguageHandler>();
+        builder.AddNotificationAsyncHandler<LanguageSavedNotification, LanguageHandler>();
+        builder.AddNotificationAsyncHandler<LanguageDeletedNotification, LanguageHandler>();
 
-        builder.AddNotificationHandler<LanguageSavingNotification, LanguageHandler>();
-        builder.AddNotificationHandler<LanguageSavedNotification, LanguageHandler>();
-        builder.AddNotificationHandler<LanguageDeletedNotification, LanguageHandler>();
+        //builder.AddNotificationAsyncHandler<MacroSavedNotification, MacroHandler>();
+        //builder.AddNotificationAsyncHandler<MacroDeletedNotification, MacroHandler>();
 
-        //builder.AddNotificationHandler<MacroSavedNotification, MacroHandler>();
-        //builder.AddNotificationHandler<MacroDeletedNotification, MacroHandler>();
+        builder.AddNotificationAsyncHandler<TemplateSavedNotification, TemplateHandler>();
+        builder.AddNotificationAsyncHandler<TemplateDeletedNotification, TemplateHandler>();
 
-        builder.AddNotificationHandler<TemplateSavedNotification, TemplateHandler>();
-        builder.AddNotificationHandler<TemplateDeletedNotification, TemplateHandler>();
-
-        builder.AddNotificationHandler<WebhookSavedNotification, WebhookHandler>();
-        builder.AddNotificationHandler<WebhookDeletedNotification, WebhookHandler>();
+        builder.AddNotificationAsyncHandler<WebhookSavedNotification, WebhookHandler>();
+        builder.AddNotificationAsyncHandler<WebhookDeletedNotification, WebhookHandler>();
 
         // roots - pre-notifications for stopping things
         builder
-            .AddNotificationHandler<ContentTypeSavingNotification, ContentTypeHandler>()
-            .AddNotificationHandler<ContentTypeDeletingNotification, ContentTypeHandler>()
-            .AddNotificationHandler<ContentTypeMovingNotification, ContentTypeHandler>()
+            .AddNotificationAsyncHandler<ContentTypeSavingNotification, ContentTypeHandler>()
+            .AddNotificationAsyncHandler<ContentTypeDeletingNotification, ContentTypeHandler>()
+            .AddNotificationAsyncHandler<ContentTypeMovingNotification, ContentTypeHandler>()
 
-            .AddNotificationHandler<MediaTypeSavingNotification, MediaTypeHandler>()
-            .AddNotificationHandler<MediaTypeDeletingNotification, MediaTypeHandler>()
-            .AddNotificationHandler<MediaTypeMovingNotification, MediaTypeHandler>()
+            .AddNotificationAsyncHandler<MediaTypeSavingNotification, MediaTypeHandler>()
+            .AddNotificationAsyncHandler<MediaTypeDeletingNotification, MediaTypeHandler>()
+            .AddNotificationAsyncHandler<MediaTypeMovingNotification, MediaTypeHandler>()
 
-            .AddNotificationHandler<MemberTypeSavingNotification, MemberTypeHandler>()
-            .AddNotificationHandler<MemberTypeDeletingNotification, MemberTypeHandler>()
-            .AddNotificationHandler<MemberTypeMovingNotification, MemberTypeHandler>()
+            .AddNotificationAsyncHandler<MemberTypeSavingNotification, MemberTypeHandler>()
+            .AddNotificationAsyncHandler<MemberTypeDeletingNotification, MemberTypeHandler>()
+            .AddNotificationAsyncHandler<MemberTypeMovingNotification, MemberTypeHandler>()
 
-            .AddNotificationHandler<DataTypeSavingNotification, DataTypeHandler>()
-            .AddNotificationHandler<DataTypeDeletingNotification, DataTypeHandler>()
-            .AddNotificationHandler<DataTypeMovingNotification, DataTypeHandler>()
+            .AddNotificationAsyncHandler<DataTypeSavingNotification, DataTypeHandler>()
+            .AddNotificationAsyncHandler<DataTypeDeletingNotification, DataTypeHandler>()
+            .AddNotificationAsyncHandler<DataTypeMovingNotification, DataTypeHandler>()
 
-            .AddNotificationHandler<ContentSavingNotification, ContentHandler>()
-            .AddNotificationHandler<ContentDeletingNotification, ContentHandler>()
-            .AddNotificationHandler<ContentMovingNotification, ContentHandler>()
+            .AddNotificationAsyncHandler<ContentSavingNotification, ContentHandler>()
+            .AddNotificationAsyncHandler<ContentDeletingNotification, ContentHandler>()
+            .AddNotificationAsyncHandler<ContentMovingNotification, ContentHandler>()
 
-            .AddNotificationHandler<MediaSavingNotification, MediaHandler>()
-            .AddNotificationHandler<MediaDeletingNotification, MediaHandler>()
-            .AddNotificationHandler<MediaMovingNotification, MediaHandler>()
+            .AddNotificationAsyncHandler<MediaSavingNotification, MediaHandler>()
+            .AddNotificationAsyncHandler<MediaDeletingNotification, MediaHandler>()
+            .AddNotificationAsyncHandler<MediaMovingNotification, MediaHandler>()
 
-            .AddNotificationHandler<DictionaryItemSavingNotification, DictionaryHandler>()
-            .AddNotificationHandler<DictionaryItemDeletingNotification, DictionaryHandler>()
+            .AddNotificationAsyncHandler<DictionaryItemSavingNotification, DictionaryHandler>()
+            .AddNotificationAsyncHandler<DictionaryItemDeletingNotification, DictionaryHandler>()
 
-            .AddNotificationHandler<RelationTypeSavingNotification, RelationTypeHandler>()
-            .AddNotificationHandler<RelationTypeDeletingNotification, RelationTypeHandler>()
+            .AddNotificationAsyncHandler<RelationTypeSavingNotification, RelationTypeHandler>()
+            .AddNotificationAsyncHandler<RelationTypeDeletingNotification, RelationTypeHandler>()
 
 
-            .AddNotificationHandler<TemplateSavingNotification, TemplateHandler>()
-            .AddNotificationHandler<TemplateDeletingNotification, TemplateHandler>()
+            .AddNotificationAsyncHandler<TemplateSavingNotification, TemplateHandler>()
+            .AddNotificationAsyncHandler<TemplateDeletingNotification, TemplateHandler>()
 
-            .AddNotificationHandler<WebhookSavingNotification, WebhookHandler>()
-            .AddNotificationHandler<WebhookDeletingNotification, WebhookHandler>();
+            .AddNotificationAsyncHandler<WebhookSavingNotification, WebhookHandler>()
+            .AddNotificationAsyncHandler<WebhookDeletingNotification, WebhookHandler>();
 
 
         // content ones
-        builder.AddNotificationHandler<ContentSavedNotification, ContentHandler>();
-        builder.AddNotificationHandler<ContentDeletedNotification, ContentHandler>();
-        builder.AddNotificationHandler<ContentMovedNotification, ContentHandler>();
-        builder.AddNotificationHandler<ContentMovedToRecycleBinNotification, ContentHandler>();
+        builder.AddNotificationAsyncHandler<ContentSavedNotification, ContentHandler>();
+        builder.AddNotificationAsyncHandler<ContentDeletedNotification, ContentHandler>();
+        builder.AddNotificationAsyncHandler<ContentMovedNotification, ContentHandler>();
+        builder.AddNotificationAsyncHandler<ContentMovedToRecycleBinNotification, ContentHandler>();
 
-        builder.AddNotificationHandler<MediaSavedNotification, MediaHandler>();
-        builder.AddNotificationHandler<MediaDeletedNotification, MediaHandler>();
-        builder.AddNotificationHandler<MediaMovedNotification, MediaHandler>();
-        builder.AddNotificationHandler<MediaMovedToRecycleBinNotification, MediaHandler>();
+        builder.AddNotificationAsyncHandler<MediaSavedNotification, MediaHandler>();
+        builder.AddNotificationAsyncHandler<MediaDeletedNotification, MediaHandler>();
+        builder.AddNotificationAsyncHandler<MediaMovedNotification, MediaHandler>();
+        builder.AddNotificationAsyncHandler<MediaMovedToRecycleBinNotification, MediaHandler>();
 
-        builder.AddNotificationHandler<DomainSavedNotification, DomainHandler>();
-        builder.AddNotificationHandler<DomainDeletedNotification, DomainHandler>();
+        builder.AddNotificationAsyncHandler<DomainSavedNotification, DomainHandler>();
+        builder.AddNotificationAsyncHandler<DomainDeletedNotification, DomainHandler>();
 
-        builder.AddNotificationHandler<DictionaryItemSavedNotification, DictionaryHandler>();
-        builder.AddNotificationHandler<DictionaryItemDeletedNotification, DictionaryHandler>();
+        builder.AddNotificationAsyncHandler<DictionaryItemSavedNotification, DictionaryHandler>();
+        builder.AddNotificationAsyncHandler<DictionaryItemDeletedNotification, DictionaryHandler>();
 
-        builder.AddNotificationHandler<RelationTypeSavedNotification, RelationTypeHandler>();
-        builder.AddNotificationHandler<RelationTypeDeletedNotification, RelationTypeHandler>();
+        builder.AddNotificationAsyncHandler<RelationTypeSavedNotification, RelationTypeHandler>();
+        builder.AddNotificationAsyncHandler<RelationTypeDeletedNotification, RelationTypeHandler>();
 
-        builder.AddNotificationHandler<ContentSavedBlueprintNotification, ContentTemplateHandler>();
-        builder.AddNotificationHandler<ContentDeletedBlueprintNotification, ContentTemplateHandler>();
+        builder.AddNotificationAsyncHandler<ContentSavedBlueprintNotification, ContentTemplateHandler>();
+        builder.AddNotificationAsyncHandler<ContentDeletedBlueprintNotification, ContentTemplateHandler>();
 
         // cache lifecycle manager
         builder.
-            AddNotificationHandler<uSyncImportStartingNotification, CacheLifecycleManager>().
-            AddNotificationHandler<uSyncReportStartingNotification, CacheLifecycleManager>().
-            AddNotificationHandler<uSyncExportStartingNotification, CacheLifecycleManager>().
-            AddNotificationHandler<uSyncImportCompletedNotification, CacheLifecycleManager>().
-            AddNotificationHandler<uSyncReportCompletedNotification, CacheLifecycleManager>().
-            AddNotificationHandler<uSyncExportCompletedNotification, CacheLifecycleManager>().
-            AddNotificationHandler<ContentSavingNotification, CacheLifecycleManager>().
-            AddNotificationHandler<ContentDeletingNotification, CacheLifecycleManager>().
-            AddNotificationHandler<ContentMovingNotification, CacheLifecycleManager>().
-            AddNotificationHandler<MediaSavingNotification, CacheLifecycleManager>().
-            AddNotificationHandler<MediaSavedNotification, CacheLifecycleManager>().
-            AddNotificationHandler<MediaDeletedNotification, CacheLifecycleManager>();
+            AddNotificationAsyncHandler<uSyncImportStartingNotification, CacheLifecycleManager>().
+            AddNotificationAsyncHandler<uSyncReportStartingNotification, CacheLifecycleManager>().
+            AddNotificationAsyncHandler<uSyncExportStartingNotification, CacheLifecycleManager>().
+            AddNotificationAsyncHandler<uSyncImportCompletedNotification, CacheLifecycleManager>().
+            AddNotificationAsyncHandler<uSyncReportCompletedNotification, CacheLifecycleManager>().
+            AddNotificationAsyncHandler<uSyncExportCompletedNotification, CacheLifecycleManager>().
+            AddNotificationAsyncHandler<ContentSavingNotification, CacheLifecycleManager>().
+            AddNotificationAsyncHandler<ContentDeletingNotification, CacheLifecycleManager>().
+            AddNotificationAsyncHandler<ContentMovingNotification, CacheLifecycleManager>().
+            AddNotificationAsyncHandler<MediaSavingNotification, CacheLifecycleManager>().
+            AddNotificationAsyncHandler<MediaSavedNotification, CacheLifecycleManager>().
+            AddNotificationAsyncHandler<MediaDeletedNotification, CacheLifecycleManager>();
     }
 
 
     private static void CreatePolicies(AuthorizationOptions options,
-        string backofficeAuthenticationScheme = Constants.Security.BackOfficeAuthenticationType)
+        string backOfficeAuthScheme = Constants.Security.BackOfficeAuthenticationType)
     {
         options.AddPolicy(SyncAuthorizationPolicies.TreeAccessuSync, policy =>
         {
-            policy.AuthenticationSchemes.Add(backofficeAuthenticationScheme);
+            policy.AuthenticationSchemes.Add(backOfficeAuthScheme);
             policy.Requirements.Add(new uSyncApplicationRequirement(Constants.Applications.Settings));
         });
     }

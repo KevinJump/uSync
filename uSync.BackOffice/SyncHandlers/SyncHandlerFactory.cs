@@ -8,6 +8,8 @@ using Microsoft.Extensions.Options;
 using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;
+using uSync.BackOffice.SyncHandlers.Interfaces;
+using uSync.BackOffice.SyncHandlers.Models;
 
 namespace uSync.BackOffice.SyncHandlers;
 
@@ -16,11 +18,11 @@ namespace uSync.BackOffice.SyncHandlers;
 /// </summary>
 public class SyncHandlerFactory
 {
-    private SyncHandlerCollection _syncHandlers;
-    private uSyncSettings _settings;
-    private ILogger<SyncHandlerFactory> _logger;
+    private readonly SyncHandlerCollection _syncHandlers;
+    private readonly uSyncSettings _settings;
+    private readonly ILogger<SyncHandlerFactory> _logger;
 
-    private IOptionsMonitor<uSyncHandlerSetSettings> _handlerSetSettingsAccessor;
+    private readonly IOptionsMonitor<uSyncHandlerSetSettings> _handlerSetSettingsAccessor;
 
     /// <summary>
     ///  Create a new SyncHandlerFactory object
@@ -134,7 +136,7 @@ public class SyncHandlerFactory
 
 
     /// <summary>
-    ///  Get the valid (by config) handler groups avalible to this setup
+    ///  Get the valid (by config) handler groups available to this setup
     /// </summary>
     public IEnumerable<string> GetValidGroups(SyncHandlerOptions? options = null)
     {
@@ -179,7 +181,7 @@ public class SyncHandlerFactory
     }
 
 
-    private HandlerConfigPair LoadHandlerConfig(ISyncHandler handler, uSyncHandlerSetSettings setSettings)
+    private static HandlerConfigPair LoadHandlerConfig(ISyncHandler handler, uSyncHandlerSetSettings setSettings)
     {
         return new HandlerConfigPair
         {
@@ -189,11 +191,11 @@ public class SyncHandlerFactory
     }
 
     /// <summary>
-    /// Get all valid (by configuration) handlers that fufill the criteria set out in the passed SyncHandlerOptions 
+    /// Get all valid (by configuration) handlers that fulfill the criteria set out in the passed SyncHandlerOptions 
     /// </summary>
     public IEnumerable<HandlerConfigPair> GetValidHandlers(SyncHandlerOptions? options = null)
     {
-        if (options == null) options = new SyncHandlerOptions();
+        options ??= new SyncHandlerOptions();
 
         var configs = new List<HandlerConfigPair>();
 
@@ -234,6 +236,6 @@ public class SyncHandlerFactory
     /// <summary>
     ///  is this config pair valid for the settings we have for it. 
     /// </summary>
-    private bool IsValidHandler(HandlerConfigPair handlerConfigPair, HandlerActions actions, string group)
+    private static bool IsValidHandler(HandlerConfigPair handlerConfigPair, HandlerActions actions, string group)
         => handlerConfigPair.IsEnabled() && handlerConfigPair.IsValidAction(actions) && handlerConfigPair.IsValidGroup(group);
 }

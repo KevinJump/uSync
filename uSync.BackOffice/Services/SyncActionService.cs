@@ -1,12 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Models;
 using uSync.BackOffice.SyncHandlers;
+using uSync.BackOffice.SyncHandlers.Models;
 
 namespace uSync.BackOffice.Services;
 
@@ -65,7 +68,11 @@ internal class SyncActionService : ISyncActionService
         });
     }
 
+    [Obsolete("use ReportHandlerAsync will be removed in v16")]
     public SyncActionResult ReportHandler(SyncActionOptions options, uSyncCallbacks? callbacks)
+        => ReportHandlerAsync(options, callbacks).Result;
+    
+    public async Task<SyncActionResult> ReportHandlerAsync(SyncActionOptions options, uSyncCallbacks? callbacks)
     {
         if (options.Handler is null) return new();
 
@@ -74,13 +81,13 @@ internal class SyncActionService : ISyncActionService
 
         var folders = GetFolders(options);
 
-		var actions = _uSyncService.ReportHandler(options.Handler,
+		var actions = (await _uSyncService.ReportHandlerAsync(options.Handler,
             new uSyncImportOptions
             {
                 Callbacks = callbacks,
                 HandlerSet = handlerSet,
                 Folders = folders.Select(MakeValidImportFolder).ToArray()
-            }).ToList();
+            })).ToList();
 
         if (_uSyncConfig.Settings.SummaryDashboard || actions.Count > _uSyncConfig.Settings.SummaryLimit)
             actions = actions.ConvertToSummary(_uSyncConfig.Settings.SummaryDashboard).ToList();
@@ -96,7 +103,11 @@ internal class SyncActionService : ISyncActionService
 		return _uSyncConfig.GetFolders();
 	}
 
-	public SyncActionResult ImportHandler(SyncActionOptions options, uSyncCallbacks? callbacks)
+    [Obsolete("use ImportHandlerAsync will be removed in v16")]
+    public SyncActionResult ImportHandler(SyncActionOptions options, uSyncCallbacks? callbacks)
+        => ImportHandlerAsync(options, callbacks).Result;
+
+    public async Task<SyncActionResult> ImportHandlerAsync(SyncActionOptions options, uSyncCallbacks? callbacks)
     {
         if (options.Handler is null) return new();
 
@@ -105,14 +116,14 @@ internal class SyncActionService : ISyncActionService
 
         var folders = GetFolders(options);
 
-		var actions = _uSyncService.ImportHandler(options.Handler, new uSyncImportOptions
+		var actions = (await _uSyncService.ImportHandlerAsync(options.Handler, new uSyncImportOptions
         {
             Callbacks = callbacks,
             HandlerSet = handlerSet,
             Folders = folders,
             PauseDuringImport = true,
             Flags = options.Force ? Core.Serialization.SerializerFlags.Force : Core.Serialization.SerializerFlags.None
-        }).ToList();
+        })).ToList();
 
         if (_uSyncConfig.Settings.SummaryDashboard || actions.Count > _uSyncConfig.Settings.SummaryLimit)
             actions = actions.ConvertToSummary(_uSyncConfig.Settings.SummaryDashboard).ToList();
@@ -120,15 +131,18 @@ internal class SyncActionService : ISyncActionService
         return new SyncActionResult(actions);
     }
 
+    [Obsolete("use ImportPostAsync will be removed in v16")]
     public SyncActionResult ImportPost(SyncActionOptions options, uSyncCallbacks? callbacks)
-    {
+        => ImportPostAsync(options, callbacks).Result;
 
+    public async Task<SyncActionResult> ImportPostAsync(SyncActionOptions options, uSyncCallbacks? callbacks)
+    {
         var handlerSet = !string.IsNullOrWhiteSpace(options.Set)
             ? options.Set : _uSyncConfig.Settings.DefaultSet;
 
         var folders = GetFolders(options);
 
-		var actions = _uSyncService.PerformPostImport(
+		var actions = await _uSyncService.PerformPostImportAsync(
             folders,
             handlerSet,
             options.Actions);

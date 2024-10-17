@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 using uSync.BackOffice.Configuration;
 
@@ -19,13 +20,16 @@ public interface ISyncPostImportHandler
     ///  Some handlers require that import actions are performed after all other handlers have been
     ///  processed.
     ///  
-    ///  the prime example for this is a datatype that refrences doctypes. Datatypes are required 
+    ///  the prime example for this is a datatype that references doctypes. Datatypes are required 
     ///  to be imported before doctypes, but then the post import step has to run so the datatype 
-    ///  can refrence the doctypes that may not have been there first time around.
+    ///  can reference the doctypes that may not have been there first time around.
     /// </remarks>
     /// <param name="actions">List of actions containing items that require post import processing</param>
     /// <param name="config">Handler settings to use for processing</param>
     /// <returns>List of actions detailing post import changes</returns>
+    [Obsolete("Use ProcessPostImportAsync instead")]
     IEnumerable<uSyncAction> ProcessPostImport(IEnumerable<uSyncAction> actions, HandlerSettings config);
+    
+    Task<IEnumerable<uSyncAction>> ProcessPostImportAsync(IEnumerable<uSyncAction> actions, HandlerSettings config);
 
 }

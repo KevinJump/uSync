@@ -12,7 +12,7 @@ using Umbraco.Cms.Infrastructure.HostedServices;
 
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
-using uSync.BackOffice.SyncHandlers;
+using uSync.BackOffice.SyncHandlers.Interfaces;
 
 namespace uSync.BackOffice.Notifications;
 internal class SyncScopedNotificationPublisher

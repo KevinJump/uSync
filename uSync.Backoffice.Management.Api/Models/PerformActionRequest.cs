@@ -1,5 +1,5 @@
 ﻿using uSync.BackOffice.Models;
-using uSync.BackOffice.SyncHandlers;
+using uSync.BackOffice.SyncHandlers.Models;
 
 namespace uSync.Backoffice.Management.Api.Models;
 

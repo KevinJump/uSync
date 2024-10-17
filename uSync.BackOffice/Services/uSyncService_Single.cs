@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 
 using Microsoft.Extensions.Logging;
@@ -12,6 +13,7 @@ using uSync.BackOffice.Extensions;
 using uSync.BackOffice.Models;
 using uSync.BackOffice.SyncHandlers;
 using uSync.BackOffice.SyncHandlers.Interfaces;
+using uSync.BackOffice.SyncHandlers.Models;
 using uSync.Core;
 
 using static Umbraco.Cms.Core.Constants;
@@ -27,9 +29,15 @@ public partial class uSyncService
     /// <summary>
     ///  perform a paged report with the supplied ordered nodes
     /// </summary>
+    [Obsolete("use ReportPartialAsync will be removed in v16")]
     public IEnumerable<uSyncAction> ReportPartial(IList<OrderedNodeInfo> orderedNodes, uSyncPagedImportOptions options, out int total)
     {
         total = orderedNodes.Count;
+        return ReportPartialAsync(orderedNodes, options).Result;
+    }
+    public async Task<IEnumerable<uSyncAction>> ReportPartialAsync(IList<OrderedNodeInfo> orderedNodes, uSyncPagedImportOptions options)
+    {
+        var total = orderedNodes.Count;
 
         var actions = new List<uSyncAction>();
         var lastType = string.Empty;
@@ -50,21 +58,20 @@ public partial class uSyncService
                 lastType = itemType;
                 handlerPair = _handlerFactory.GetValidHandlerByTypeName(itemType, syncHandlerOptions);
 
-                handlerPair?.Handler.PreCacheFolderKeys(folder, orderedNodes.Select(x => x.Key).ToList());
+                if (handlerPair is null)
+                    continue;
+
+                List<Guid> keys = [.. orderedNodes.Select(x => x.Key)];
+                await handlerPair.Handler.PreCacheFolderKeysAsync(folder, keys);
             }
 
-            if (handlerPair == null)
-            {
-                _logger.LogWarning("No handler for {itemType} {alias}", itemType, item.Node.GetAlias());
-                continue;
-            }
 
             options.Callbacks?.Update?.Invoke(item.Node.GetAlias(),
-				CalculateProgress(index, total, options.ProgressMin, options.ProgressMax), 100);
+                CalculateProgress(index, total, options.ProgressMin, options.ProgressMax), 100);
 
             if (handlerPair != null)
             {
-                actions.AddRange(handlerPair.Handler.ReportElement(item.Node, item.FileName, handlerPair.Settings, options));
+                actions.AddRange(await handlerPair.Handler.ReportElementAsync(item.Node, item.FileName, handlerPair.Settings, options));
             }
 
             index++;
@@ -76,15 +83,23 @@ public partial class uSyncService
     /// <summary>
     ///  perform an import of items from the suppled ordered node list. 
     /// </summary>
+    [Obsolete("use ImportPartialAsync will be removed in v16")]
     public IEnumerable<uSyncAction> ImportPartial(IList<OrderedNodeInfo> orderedNodes, uSyncPagedImportOptions options, out int total)
     {
-        lock (_importLock)
+        total = orderedNodes.Count;
+        return ImportPartialAsync(orderedNodes, options).Result;
+    }
+
+    public async Task<IEnumerable<uSyncAction>> ImportPartialAsync(IList<OrderedNodeInfo> orderedNodes, uSyncPagedImportOptions options)
+    {
+        try
         {
+            _importSemaphoreLock.Wait();
+
+            var total = orderedNodes.Count;
+
             using (var pause = _mutexService.ImportPause(options.PauseDuringImport))
             {
-
-                total = orderedNodes.Count;
-
                 var actions = new List<uSyncAction>();
                 var lastType = string.Empty;
 
@@ -132,11 +147,11 @@ public partial class uSyncService
                             }
 
                             options.Callbacks?.Update?.Invoke(node.GetAlias(),
-								CalculateProgress(index, total, options.ProgressMin, options.ProgressMax), 100);
+                                CalculateProgress(index, total, options.ProgressMin, options.ProgressMax), 100);
 
                             if (handlerPair != null)
                             {
-                                actions.AddRange(handlerPair.Handler.ImportElement(node, item.FileName, handlerPair.Settings, options));
+                                actions.AddRange(await handlerPair.Handler.ImportElementAsync(node, item.FileName, handlerPair.Settings, options));
                             }
 
                             index++;
@@ -153,15 +168,24 @@ public partial class uSyncService
                 return actions;
             }
         }
+        finally
+        {
+            _importSemaphoreLock.Release();
+        }
     }
 
     /// <summary>
     ///  Perform a paged Import second pass against a given folder 
     /// </summary>
     public IEnumerable<uSyncAction> ImportPartialSecondPass(IEnumerable<uSyncAction> actions, uSyncPagedImportOptions options)
+        => ImportPartialSecondPassAsync(actions, options).Result;
+
+    public async Task<IEnumerable<uSyncAction>> ImportPartialSecondPassAsync(IEnumerable<uSyncAction> actions, uSyncPagedImportOptions options)
     {
-        lock (_importLock)
+        try
         {
+            _importSemaphoreLock.Wait();
+
             using (var pause = _mutexService.ImportPause(options.PauseDuringImport))
             {
                 SyncHandlerOptions syncHandlerOptions = HandlerOptionsFromPaged(options);
@@ -202,9 +226,9 @@ public partial class uSyncService
                             }
 
                             options.Callbacks?.Update?.Invoke($"Second Pass: {action.Name}",
-								CalculateProgress(index, total, options.ProgressMin, options.ProgressMax), 100);
+                                CalculateProgress(index, total, options.ProgressMin, options.ProgressMax), 100);
 
-                            secondPassActions.AddRange(handlerPair.Handler.ImportSecondPass(action, handlerPair.Settings, options));
+                            secondPassActions.AddRange(await handlerPair.Handler.ImportSecondPassAsync(action, handlerPair.Settings, options));
 
                             index++;
                         }
@@ -218,17 +242,27 @@ public partial class uSyncService
                 return secondPassActions;
             }
         }
+        finally
+        {
+            _importSemaphoreLock.Release();
+        }
     }
 
     /// <summary>
     ///  Perform a paged Import post import against a given folder 
     /// </summary>
+    [Obsolete("use ImportPartialPostImportAsync will be removed in v16")]
     public IEnumerable<uSyncAction> ImportPartialPostImport(IEnumerable<uSyncAction> actions, uSyncPagedImportOptions options)
+        => ImportPartialPostImportAsync(actions, options).Result;
+
+    public async Task<IEnumerable<uSyncAction>> ImportPartialPostImportAsync(IEnumerable<uSyncAction> actions, uSyncPagedImportOptions options)
     {
         if (actions == null || !actions.Any()) return [];
 
-        lock (_importLock)
+        try
         {
+            _importSemaphoreLock.Wait();
+
             using (var pause = _mutexService.ImportPause(options.PauseDuringImport))
             {
 
@@ -264,7 +298,7 @@ public partial class uSyncService
                             options.Callbacks?.Update?.Invoke(actionItem.alias, index, folders.Count);
 
                             var handlerActions = actions.Where(x => x.HandlerAlias.InvariantEquals(handlerPair.Handler.Alias));
-                            results.AddRange(postImportHandler.ProcessPostImport(handlerActions, handlerPair.Settings));
+                            results.AddRange(await postImportHandler.ProcessPostImportAsync(handlerActions, handlerPair.Settings));
                         }
                     }
 
@@ -274,21 +308,30 @@ public partial class uSyncService
                 return results;
             }
         }
+        finally
+        {
+            _importSemaphoreLock.Release();
+        }
     }
 
     /// <summary>
     ///  Perform a paged Clean after import for a given folder 
     /// </summary>
+    [Obsolete("use ImportPostCleanFilesAsync will be removed in v16")]
     public IEnumerable<uSyncAction> ImportPostCleanFiles(IEnumerable<uSyncAction> actions, uSyncPagedImportOptions options)
+        => ImportPostCleanFilesAsync(actions, options).Result;
+
+    public async Task<IEnumerable<uSyncAction>> ImportPostCleanFilesAsync(IEnumerable<uSyncAction> actions, uSyncPagedImportOptions options)
     {
         if (actions == null) return [];
 
-        lock (_importLock)
+        try
         {
+            _importSemaphoreLock.Wait();
+
             using (var pause = _mutexService.ImportPause(options.PauseDuringImport))
             {
-                SyncHandlerOptions syncHandlerOptions = new SyncHandlerOptions(
-                    options.HandlerSet, options.UserId);
+                SyncHandlerOptions syncHandlerOptions = new(options.HandlerSet, options.UserId);
 
                 var cleans = actions
                     .Where(x => x.Change == ChangeType.Clean && !string.IsNullOrWhiteSpace(x.FileName))
@@ -313,13 +356,17 @@ public partial class uSyncService
                         options.Callbacks?.Update?.Invoke(actionItem.alias, index, cleans.Count);
 
                         var handlerActions = actions.Where(x => x.HandlerAlias.InvariantEquals(handlerPair.Handler.Alias));
-                        results.AddRange(cleanEntryHandler.ProcessCleanActions(actionItem.folder, handlerActions, handlerPair.Settings));
+                        results.AddRange(await cleanEntryHandler.ProcessCleanActionsAsync(actionItem.folder, handlerActions, handlerPair.Settings));
                     }
                     index++;
                 }
 
                 return results;
             }
+        }
+        finally
+        {
+            _importSemaphoreLock.Release();
         }
     }
 
@@ -336,8 +383,12 @@ public partial class uSyncService
     /// <remarks>
     ///  this makes ordered node loading faster, when we are processing multiple requests, because we don't have to calculate it each time
     /// </remarks>
+    [Obsolete("use LoadOrderedNodesAsync will be removed in v16")]
     public IList<OrderedNodeInfo> LoadOrderedNodes(ISyncHandler handler, string[] handlerFolders)
-        => handler.FetchAllNodes(handlerFolders).ToList();
+        => LoadOrderedNodesAsync(handler, handlerFolders).Result;
+
+    public async Task<IList<OrderedNodeInfo>> LoadOrderedNodesAsync(ISyncHandler handler, string[] handlerFolders)
+        => [.. (await handler.FetchAllNodesAsync(handlerFolders))];
 
     /// <summary>
     ///  calculate the percentage progress we are making between a range. 

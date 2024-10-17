@@ -15,6 +15,8 @@ using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
+using uSync.BackOffice.SyncHandlers.Interfaces;
+using uSync.BackOffice.SyncHandlers.Models;
 using uSync.Core;
 
 using static Umbraco.Cms.Core.Constants;
@@ -27,14 +29,14 @@ namespace uSync.BackOffice.SyncHandlers.Handlers;
 [SyncHandler(uSyncConstants.Handlers.MediaTypeHandler, "Media Types", "MediaTypes", uSyncConstants.Priorites.MediaTypes,
     IsTwoPass = true, Icon = "icon-thumbnails", EntityType = UdiEntityType.MediaType)]
 public class MediaTypeHandler : ContentTypeBaseHandler<IMediaType>, ISyncHandler, ISyncPostImportHandler, ISyncGraphableHandler,
-    INotificationHandler<SavedNotification<IMediaType>>,
-    INotificationHandler<DeletedNotification<IMediaType>>,
-    INotificationHandler<MovedNotification<IMediaType>>,
-    INotificationHandler<EntityContainerSavedNotification>,
-    INotificationHandler<EntityContainerRenamedNotification>,
-    INotificationHandler<SavingNotification<IMediaType>>,
-    INotificationHandler<DeletingNotification<IMediaType>>,
-    INotificationHandler<MovingNotification<IMediaType>>
+    INotificationAsyncHandler<SavedNotification<IMediaType>>,
+    INotificationAsyncHandler<DeletedNotification<IMediaType>>,
+    INotificationAsyncHandler<MovedNotification<IMediaType>>,
+    INotificationAsyncHandler<EntityContainerSavedNotification>,
+    INotificationAsyncHandler<EntityContainerRenamedNotification>,
+    INotificationAsyncHandler<SavingNotification<IMediaType>>,
+    INotificationAsyncHandler<DeletingNotification<IMediaType>>,
+    INotificationAsyncHandler<MovingNotification<IMediaType>>
 {
     private readonly IMediaTypeContainerService _mediaTypeContainerService;
 

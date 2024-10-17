@@ -3,6 +3,8 @@ using System.Collections.Generic;
 
 using Umbraco.Cms.Core.Composing;
 
+using uSync.BackOffice.SyncHandlers.Interfaces;
+
 namespace uSync.BackOffice.SyncHandlers;
 
 /// <summary>

@@ -15,6 +15,8 @@ using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
+using uSync.BackOffice.SyncHandlers.Interfaces;
+using uSync.BackOffice.SyncHandlers.Models;
 using uSync.Core;
 
 using static Umbraco.Cms.Core.Constants;
@@ -27,14 +29,14 @@ namespace uSync.BackOffice.SyncHandlers.Handlers;
 [SyncHandler(uSyncConstants.Handlers.ContentTypeHandler, "DocTypes", "ContentTypes", uSyncConstants.Priorites.ContentTypes,
         IsTwoPass = true, Icon = "icon-item-arrangement", EntityType = UdiEntityType.DocumentType)]
 public class ContentTypeHandler : ContentTypeBaseHandler<IContentType>, ISyncHandler, ISyncPostImportHandler, ISyncGraphableHandler,
-    INotificationHandler<SavedNotification<IContentType>>,
-    INotificationHandler<DeletedNotification<IContentType>>,
-    INotificationHandler<MovedNotification<IContentType>>,
-    INotificationHandler<EntityContainerSavedNotification>,
-    INotificationHandler<EntityContainerRenamedNotification>,
-    INotificationHandler<SavingNotification<IContentType>>,
-    INotificationHandler<MovingNotification<IContentType>>,
-    INotificationHandler<DeletingNotification<IContentType>>
+    INotificationAsyncHandler<SavedNotification<IContentType>>,
+    INotificationAsyncHandler<DeletedNotification<IContentType>>,
+    INotificationAsyncHandler<MovedNotification<IContentType>>,
+    INotificationAsyncHandler<EntityContainerSavedNotification>,
+    INotificationAsyncHandler<EntityContainerRenamedNotification>,
+    INotificationAsyncHandler<SavingNotification<IContentType>>,
+    INotificationAsyncHandler<MovingNotification<IContentType>>,
+    INotificationAsyncHandler<DeletingNotification<IContentType>>
 {
     private readonly IContentTypeContainerService _contentTypeContainerService;
 

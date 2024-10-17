@@ -1,6 +1,6 @@
 ﻿using Umbraco.Cms.Core.Notifications;
 
-using uSync.BackOffice.SyncHandlers;
+using uSync.BackOffice.SyncHandlers.Interfaces;
 using uSync.Core;
 
 namespace uSync.BackOffice;

@@ -1,11 +1,12 @@
 ﻿using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;
+using uSync.BackOffice.SyncHandlers.Interfaces;
 
-namespace uSync.BackOffice.SyncHandlers;
+namespace uSync.BackOffice.SyncHandlers.Models;
 
 /// <summary>
-/// A Hanlder and its configuration
+/// A Handler and its configuration
 /// </summary>
 public class HandlerConfigPair
 {
@@ -76,10 +77,10 @@ public static class HandlerConfigPairExtensions
     /// </summary>
     public static string GetGroupIcon(this HandlerConfigPair handlerConfigPair)
     {
-        var group = GetConfigGroup(handlerConfigPair);
+        var group = handlerConfigPair.GetConfigGroup();
 
-        if (uSyncConstants.Groups.Icons.ContainsKey(group))
-            return uSyncConstants.Groups.Icons[group];
+        if (uSyncConstants.Groups.Icons.TryGetValue(group, out string? value))
+            return value;
 
         return handlerConfigPair.Handler.Icon;
     }

@@ -4,7 +4,7 @@ using System.Linq;
 
 using Umbraco.Extensions;
 
-using uSync.BackOffice.SyncHandlers;
+using uSync.BackOffice.SyncHandlers.Models;
 
 namespace uSync.BackOffice;
 

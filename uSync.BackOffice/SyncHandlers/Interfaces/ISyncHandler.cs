@@ -11,7 +11,7 @@ using uSync.Core;
 using uSync.Core.Dependency;
 using uSync.Core.Models;
 
-namespace uSync.BackOffice.SyncHandlers;
+namespace uSync.BackOffice.SyncHandlers.Interfaces;
 
 /// <summary>
 ///  callback delegate for SignalR messaging 
@@ -69,7 +69,7 @@ public interface ISyncHandler
     string Group { get; }
 
     /// <summary>
-    /// Umbraco entity type manged by the handler 
+    /// Umbraco entity type managed by the handler 
     /// </summary>
     string EntityType { get; }
 
@@ -82,7 +82,7 @@ public interface ISyncHandler
     /// Export an item based on the int id value in umbraco
     /// </summary>
     /// <remarks>
-    /// these export methods do not obay roots, there are for use
+    /// these export methods do not obey roots, there are for use
     /// only when exporting to a custom folder.
     /// </remarks>
     [Obsolete("Export by Udi will be removed in v16")]
@@ -92,7 +92,7 @@ public interface ISyncHandler
     /// Export an item based on the Udi value of the item
     /// </summary>
     /// <remarks>
-    /// these export methods do not obay roots, there are for use
+    /// these export methods do not obey roots, there are for use
     /// only when exporting to a custom folder.
     /// </remarks>
     [Obsolete("Export by passing in folder array for root support - will be removed in v16")]
@@ -116,7 +116,7 @@ public interface ISyncHandler
     /// </summary>
     [Obsolete("use GetDependenciesAsync will be removed in v16")]
     IEnumerable<uSyncDependency> GetDependencies(int id, DependencyFlags flags);
-    
+
     /// <summary>
     /// Get any dependencies required to full import this item
     /// </summary>
@@ -156,7 +156,7 @@ public interface ISyncHandler
     /// </summary>
     /// <param name="folders">folders to use when reporting</param>
     /// <param name="settings">Handler settings to use for report</param>
-    /// <param name="callback">Callbacks to keep UI upto date</param>
+    /// <param name="callback">Callbacks to keep UI up to date</param>
     /// <returns>List of actions detailing changes</returns>
     [Obsolete("use ReportAsync will be removed in v16")]
     IEnumerable<uSyncAction> Report(string[] folders, HandlerSettings settings, SyncUpdateCallback? callback);
@@ -198,15 +198,15 @@ public interface ISyncHandler
     ///  fetch all the nodes that are needed for an report/import.
     /// </summary>
     [Obsolete("use FetchAllNodesAsync will be removed in v16")]
-    public IReadOnlyList<OrderedNodeInfo> FetchAllNodes(string[] folders)
-        => new List<OrderedNodeInfo>();
+    public IReadOnlyList<OrderedNodeInfo> FetchAllNodes(string[] folders) => [];
 
     // async all the things... 
 
     Task<IEnumerable<uSyncAction>> ExportAsync(Udi udi, string[] folders, HandlerSettings settings);
+    
     Task<IEnumerable<uSyncAction>> ExportAllAsync(string[] folders, HandlerSettings settings, SyncUpdateCallback? callback);
     Task<IEnumerable<uSyncDependency>> GetDependenciesAsync(Guid key, DependencyFlags flags);
-    Task<XElement> GetElementAsync(Udi udi);
+    Task<SyncAttempt<XElement>> GetElementAsync(Udi udi);
     Task<IEnumerable<uSyncAction>> ImportAsync(string file, HandlerSettings settings, bool force);
     Task<IEnumerable<uSyncAction>> ImportAllAsync(string[] folders, HandlerSettings settings, uSyncImportOptions options);
     Task<IEnumerable<uSyncAction>> ImportElementAsync(XElement node, string filename, HandlerSettings settings, uSyncImportOptions options);

@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 
 using Microsoft.Extensions.Logging;
@@ -15,6 +17,8 @@ using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
+using uSync.BackOffice.SyncHandlers.Interfaces;
+using uSync.BackOffice.SyncHandlers.Models;
 using uSync.Core;
 
 using static Umbraco.Cms.Core.Constants;
@@ -29,10 +33,10 @@ namespace uSync.BackOffice.SyncHandlers.Handlers;
         Icon = "icon-link",
         EntityType = UdiEntityType.RelationType, IsTwoPass = false)]
 public class RelationTypeHandler : SyncHandlerBase<IRelationType>, ISyncHandler,
-    INotificationHandler<SavedNotification<IRelationType>>,
-    INotificationHandler<DeletedNotification<IRelationType>>,
-    INotificationHandler<SavingNotification<IRelationType>>,
-    INotificationHandler<DeletingNotification<IRelationType>>
+    INotificationAsyncHandler<SavedNotification<IRelationType>>,
+    INotificationAsyncHandler<DeletedNotification<IRelationType>>,
+    INotificationAsyncHandler<SavingNotification<IRelationType>>,
+    INotificationAsyncHandler<DeletingNotification<IRelationType>>
 {
     private readonly IRelationService relationService;
 
@@ -55,44 +59,26 @@ public class RelationTypeHandler : SyncHandlerBase<IRelationType>, ISyncHandler,
         this.relationService = relationService;
     }
 
-    /// <inheritdoc/>
-    public override IEnumerable<uSyncAction> ExportAll(string folder, HandlerSettings config, SyncUpdateCallback? callback)
-    {
-        var actions = new List<uSyncAction>();
-
-        var items = relationService.GetAllRelationTypes().ToList();
-
-        foreach (var item in items.Select((relationType, index) => new { relationType, index }))
-        {
-            callback?.Invoke(item.relationType.Name ?? item.relationType.Alias, item.index, items.Count);
-            actions.AddRange(Export(item.relationType, folder, config));
-        }
-
-        return actions;
-    }
-
     /// <summary>
-    ///  Relations that by default we exclude, if the exlude setting is used,then it will override these values
-    ///  and they will be included if not explicity set;
+    ///  Relations that by default we exclude, if the exclude setting is used,then it will override these values
+    ///  and they will be included if not explicitly set;
     /// </summary>
     private const string defaultRelations = "relateParentDocumentOnDelete,relateParentMediaFolderOnDelete,relateDocumentOnCopy,umbMedia,umbDocument";
 
-    /// <summary>
-    ///  Workout if we are excluding this relationType from export/import
-    /// </summary>
-    protected override bool ShouldExport(XElement node, HandlerSettings config)
+    /// <inheritdoc/>
+    protected override Task<bool> ShouldExportAsync(XElement node, HandlerSettings config)
     {
         var exclude = config.GetSetting<string>("Exclude", defaultRelations);
 
         if (!string.IsNullOrWhiteSpace(exclude) && exclude.Contains(node.GetAlias()))
-            return false;
+            return Task.FromResult(false);
 
-        return true;
+        return Task.FromResult(true);
     }
 
     /// <inheritdoc/>
-    protected override bool ShouldImport(XElement node, HandlerSettings config)
-        => ShouldExport(node, config);
+    protected override Task<bool> ShouldImportAsync(XElement node, HandlerSettings config)
+        => ShouldExportAsync(node, config);
 
 
     /// <inheritdoc/>
@@ -103,11 +89,13 @@ public class RelationTypeHandler : SyncHandlerBase<IRelationType>, ISyncHandler,
     protected override string GetItemFileName(IRelationType item)
         => GetItemAlias(item).ToSafeAlias(shortStringHelper);
 
+
+
     /// <inheritdoc/>
-    protected override IEnumerable<IEntity> GetChildItems(int parent)
+    protected override async Task<IEnumerable<IEntity>> GetChildItemsAsync(Guid key)
     {
-        if (parent == -1)
-            return relationService.GetAllRelationTypes();
+        if (key == Guid.Empty)
+            return await Task.FromResult(relationService.GetAllRelationTypes());
 
         return [];
     }
