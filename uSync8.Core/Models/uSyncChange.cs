@@ -101,7 +101,8 @@ namespace uSync8.Core.Models
         Create,
         Update,
         Delete,
-        Error
+        Error,
+        Warning
     }
 
 }
