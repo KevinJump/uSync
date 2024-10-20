@@ -7,27 +7,17 @@
 
              Welcome to uSync 8 for Umbraco 8
 
- Thanks for installing uSync 8. All the bits of your 
- Umbraco settings will now be saved to disk. If you want 
- to also sync content and media, install uSync.ContentEdition.
+ *** Beyond end of support version ***
 
- Repo   : https://github.com/KevinJump/uSync  
- Docs   : https://docs.jumoo.co.uk/uSync/v8/
- Forums : https://our.umbraco.com/packages/developer-tools/usync/usync/
+ This release is an end of support version release, that means
+ it has been compiledand released beyond the end of support date
+ for uSync 8. 
 
- uSync and uSync.ContentEdition are FREE ✔ You can use them
- on any of your projects as many times as your like. 
- 
- 
- --- 
- uSync.Complete is our awesome add on package that lets you and
- your editors push and pull content, media and settings between
- umbraco installations.
- 
-            https://jumoo.co.uk/uSync/Complete
+ we recommend that most people use v8.11.8 as the latest release
+ of uSync 8. this releases contains some changes that while they 
+ will almost certainly not cause issues for most, will not be 
+ supported should they do that. 
 
- Its not free 💰, but the 60 day trial is - so you can have 
- a play around show it the 👨‍💼👩‍💼 with the 💳 and they will ❤ it.   
-
-
+ *** Beyond end of support version ***
+  
  - 🛴🛒🎄💻🧼😷🦕🚲 👋😷🛰 💉 ⏳ 🌊 🍂 🥳 🎂 - 
