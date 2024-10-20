@@ -186,7 +186,7 @@
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="8.0.0" />
     <PackageReference Include="MySql.Data" Version="6.10.7" />
-    <PackageReference Include="UmbracoCms.Web" Version="8.1.1" />
+    <PackageReference Include="UmbracoCms.Web" Version="8.18.14" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

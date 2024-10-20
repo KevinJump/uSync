@@ -29,8 +29,11 @@ Write-Host "Version   :" $versionString
 Write-Host "Output    :" $outfolder
 "------------------------------------------------"
 
+$buildPath = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.Component.MSBuild -find MSBuild\**\Bin\MSBuild.exe
+Write-Host "Using MSBuild: " $buildPath
+
 $buildArgs = @('..\uSync8.sln', '-t:Rebuild', "-p:Configuration=$config", "-clp:Verbosity=q;Summary", "-m")
-& MSBuild.exe $buildArgs
+& $buildPath $buildArgs
 
 if (!$?) { Write-Host "Build failed" $LASTEXITCODE; exit  }
 
@@ -55,9 +58,9 @@ foreach($spec in $specs) {
     if (!$?) { Write-Host "Packing $spec failed" $LASTEXITCODE; exit }
 }
 
-""; "##### Creating the Umbraco Packages"; "----------------------------------"
-.\createpackages.cmd $versionString $outfolder
-if (!$?) { Write-Host "Create Umbraco package failed" $LASTEXITCODE; exit  }
+#""; "##### Creating the Umbraco Packages"; "----------------------------------"
+#.\createpackages.cmd $versionString $outfolder
+#if (!$?) { Write-Host "Create Umbraco package failed" $LASTEXITCODE; exit  }
 
 # copy to local
 ""; "##### Copying to LocalGit folder"; "----------------------------------" 

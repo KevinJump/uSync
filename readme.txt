@@ -19,5 +19,10 @@
  supported should they do that. 
 
  *** Beyond end of support version ***
+
+ This version works with the latest version of Umbraco 8, has
+ not been tested with any other versions of Umbraco 8. 
+
+
   
  - 🛴🛒🎄💻🧼😷🦕🚲 👋😷🛰 💉 ⏳ 🌊 🍂 🥳 🎂 - 

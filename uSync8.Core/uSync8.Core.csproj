@@ -150,7 +150,7 @@
       <Version>6.10.7</Version>
     </PackageReference>
     <PackageReference Include="UmbracoCms.Core">
-      <Version>8.1.1</Version>
+      <Version>8.18.14</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

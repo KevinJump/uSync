@@ -70,20 +70,20 @@ namespace uSync8.BackOffice.Cache
 
         private void RefreshContentCache(DistributedCache dc)
         {
-            var payloads = new[] { new ContentCacheRefresher.JsonPayload(0, TreeChangeTypes.RefreshAll) };
-            dc.RefreshByPayload(ContentCacheRefresher.UniqueId, payloads);
+            //var payloads = new[] { new ContentCacheRefresher.JsonPayload(0, TreeChangeTypes.RefreshAll) };
+            //dc.RefreshByPayload(ContentCacheRefresher.UniqueId, payloads);
         }
 
         private void RefreshMediaCache(DistributedCache dc)
         {
-            var payloads = new[] { new MediaCacheRefresher.JsonPayload(0, TreeChangeTypes.RefreshAll) };
-            dc.RefreshByPayload(MediaCacheRefresher.UniqueId, payloads);
+            //var payloads = new[] { new MediaCacheRefresher.JsonPayload(0, TreeChangeTypes.RefreshAll) };
+            //dc.RefreshByPayload(MediaCacheRefresher.UniqueId, payloads);
         }
 
         public void RefreshAllDomainCache(DistributedCache dc)
         {
-            var payloads = new[] { new DomainCacheRefresher.JsonPayload(0, DomainChangeTypes.RefreshAll) };
-            dc.RefreshByPayload(DomainCacheRefresher.UniqueId, payloads);
+            //var payloads = new[] { new DomainCacheRefresher.JsonPayload(0, DomainChangeTypes.RefreshAll) };
+            //dc.RefreshByPayload(DomainCacheRefresher.UniqueId, payloads);
         }
 
 

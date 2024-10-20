@@ -64,7 +64,7 @@ namespace uSync8.Core.Serialization.Serializers
                             new XElement("Caption", tab.Name),
                             new XElement("SortOrder", tab.SortOrder));
 
-                if (PropertyGroupExtensions.SupportsTabs)
+                if (uSync8.Core.Extensions.PropertyGroupExtensions.SupportsTabs)
                 {
                     tabNode.Add(new XElement("Alias", tab.GetTabPropertyAsString("Alias")));
                     tabNode.Add(new XElement("Type", tab.GetTabPropertyAsString("Type")));
@@ -614,7 +614,7 @@ namespace uSync8.Core.Serialization.Serializers
                     {
                         logger.Debug(serializerType, "> Existing Tab : Name: {0} Alias: {1} Sort: {2} Type : [{3}]", tab.Name, tab.Alias, tab.SortOrder, tab.Type);
 
-                        if (PropertyGroupExtensions.SupportsTabs)
+                        if (uSync8.Core.Extensions.PropertyGroupExtensions.SupportsTabs)
                         {
                             // because we search case insensitive for alias name it might not 
                             // match exactly when we find it.
@@ -643,7 +643,7 @@ namespace uSync8.Core.Serialization.Serializers
                                 // v8.17 - you can't just swap from group to tab
                                 //   if the tab is used in other places this can cause a clash
                                 //   so we prefix the alias, and in the second step we clean it
-                                existing.SetGroupAlias(PropertyGroupExtensions.GetTempTabAlias(tab.Alias));
+                                existing.SetGroupAlias(uSync8.Core.Extensions.PropertyGroupExtensions.GetTempTabAlias(tab.Alias));
                             }
 
                             changes.AddUpdate("Type", existingType, tab.Type, $"Tabs/{tab.Alias}/Type");
@@ -657,11 +657,11 @@ namespace uSync8.Core.Serialization.Serializers
                         var safeAliasName = tab.Alias;
 
                         // only do the safe alias thing if we don't support tabs. 
-                        if (!PropertyGroupExtensions.SupportsTabs)
+                        if (!uSync8.Core.Extensions.PropertyGroupExtensions.SupportsTabs)
                             safeAliasName = tab.Alias.ToSafeAlias(true);
 
                         if (TabClashesWithExisting(item, safeAliasName, tab.Type))
-                            safeAliasName = PropertyGroupExtensions.GetTempTabAlias(safeAliasName);
+                            safeAliasName = uSync8.Core.Extensions.PropertyGroupExtensions.GetTempTabAlias(safeAliasName);
 
                         item.SafeAddPropertyGroup(safeAliasName, tab.Name);
 
@@ -693,14 +693,14 @@ namespace uSync8.Core.Serialization.Serializers
         /// <param name="item"></param>
         protected void CleanTabAliases(TObject item)
         {
-            if (PropertyGroupExtensions.SupportsTabs)
+            if (uSync8.Core.Extensions.PropertyGroupExtensions.SupportsTabs)
             {
                 foreach (var tab in item.PropertyGroups)
                 {
                     var alias = tab.GetTabAliasOrName();
-                    if (PropertyGroupExtensions.IsTempTabAlias(alias))
+                    if (uSync8.Core.Extensions.PropertyGroupExtensions.IsTempTabAlias(alias))
                     {
-                        tab.SetGroupAlias(PropertyGroupExtensions.StripTempTabAlias(alias));
+                        tab.SetGroupAlias(uSync8.Core.Extensions.PropertyGroupExtensions.StripTempTabAlias(alias));
                     }
                 }
             }
@@ -733,7 +733,7 @@ namespace uSync8.Core.Serialization.Serializers
                 List<int> removals = new List<int>();
                 foreach (var tab in item.PropertyGroups)
                 {
-                    if (PropertyGroupExtensions.SupportsTabs && tabAliases.Any())
+                    if (uSync8.Core.Extensions.PropertyGroupExtensions.SupportsTabs && tabAliases.Any())
                     {
                         // look by alias 
                         var tabAlias = tab.GetTabPropertyAsString("Alias");
@@ -1167,7 +1167,7 @@ namespace uSync8.Core.Serialization.Serializers
 
         public bool TabClashesWithExisting(TObject item, string alias, string tabType)
         {
-            if (PropertyGroupExtensions.SupportsTabs)
+            if (uSync8.Core.Extensions.PropertyGroupExtensions.SupportsTabs)
             {
                 EnsureAllTabsCacheLoaded(item);
                 return _allTabs.ContainsKey(alias) && _allTabs[alias] != tabType;

@@ -89,7 +89,7 @@
       <Version>8.0.0</Version>
     </PackageReference>
     <PackageReference Include="UmbracoCms.Web">
-      <Version>8.1.1</Version>
+      <Version>8.18.14</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
