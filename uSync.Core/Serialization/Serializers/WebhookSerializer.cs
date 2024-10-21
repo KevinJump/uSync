@@ -9,6 +9,7 @@ using Microsoft.OpenApi;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Services;
 
+using uSync.Core.Extensions;
 using uSync.Core.Models;
 
 namespace uSync.Core.Serialization.Serializers;
@@ -192,19 +193,22 @@ public class WebhookSerializer : SyncSerializerBase<IWebhook>, ISyncSerializer<I
 		return details;
 	}
 
-    protected override async Task<SyncAttempt<XElement>> SerializeCoreAsync(IWebhook item, SyncSerializerOptions options)
+    protected override Task<SyncAttempt<XElement>> SerializeCoreAsync(IWebhook item, SyncSerializerOptions options)
 	{
-		var node = InitializeBaseNode(item, item.Url);
+		return TaskHelper.FromResultOf(() =>
+		{
 
-		node.Add(new XElement("Url", item.Url));
-		node.Add(new XElement("Enabled", item.Enabled));
-		
-		node.Add(SerializeContentKeys(item));
-		node.Add(SerializeEvents(item));
-		node.Add(SerializeHeaders(item));
+			var node = InitializeBaseNode(item, item.Url);
 
-		return SyncAttempt<XElement>.Succeed(item.Url, node, typeof(IWebhook), ChangeType.Export);
-		
+			node.Add(new XElement("Url", item.Url));
+			node.Add(new XElement("Enabled", item.Enabled));
+
+			node.Add(SerializeContentKeys(item));
+			node.Add(SerializeEvents(item));
+			node.Add(SerializeHeaders(item));
+
+			return SyncAttempt<XElement>.Succeed(item.Url, node, typeof(IWebhook), ChangeType.Export);
+		});		
 	}
 
 	private static XElement SerializeContentKeys(IWebhook item)

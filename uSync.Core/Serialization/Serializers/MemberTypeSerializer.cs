@@ -11,6 +11,7 @@ using Umbraco.Cms.Core.Services.OperationStatus;
 using Umbraco.Cms.Core.Strings;
 using Umbraco.Extensions;
 
+using uSync.Core.Extensions;
 using uSync.Core.Models;
 
 namespace uSync.Core.Serialization.Serializers;
@@ -180,27 +181,30 @@ public class MemberTypeSerializer : ContentTypeBaseSerializer<IMemberType>, ISyn
         return changes;
     }
 
-    protected override async Task<Attempt<IMemberType?>> CreateItemAsync(string alias, ITreeEntity? parent, string itemType)
+    protected override Task<Attempt<IMemberType?>> CreateItemAsync(string alias, ITreeEntity? parent, string itemType)
     {
-        var safeAlias = GetSafeItemAlias(alias);
-
-        var item = new MemberType(shortStringHelper, -1)
+        return TaskHelper.FromResultOf(() =>
         {
-            Alias = safeAlias
-        };
+            var safeAlias = GetSafeItemAlias(alias);
 
-        if (parent != null)
-        {
-            if (parent is IMediaType mediaTypeParent)
-                item.AddContentType(mediaTypeParent);
+            var item = new MemberType(shortStringHelper, -1)
+            {
+                Alias = safeAlias
+            };
 
-            item.SetParent(parent);
-        }
+            if (parent != null)
+            {
+                if (parent is IMediaType mediaTypeParent)
+                    item.AddContentType(mediaTypeParent);
 
-        AddAlias(safeAlias);
+                item.SetParent(parent);
+            }
+
+            AddAlias(safeAlias);
 
 
-        return Attempt.Succeed(item as IMemberType);
+            return Attempt.Succeed(item as IMemberType);
+        });
     }
 
     // member type doesn't have its own container service (in v15)

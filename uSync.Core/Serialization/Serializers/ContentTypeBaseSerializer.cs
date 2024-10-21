@@ -12,6 +12,7 @@ using Umbraco.Cms.Core.Services.OperationStatus;
 using Umbraco.Cms.Core.Strings;
 using Umbraco.Extensions;
 
+using uSync.Core.Extensions;
 using uSync.Core.Models;
 
 namespace uSync.Core.Serialization.Serializers;
@@ -1330,8 +1331,10 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
     public override async Task<TObject?> FindItemAsync(Guid key)
         => await _baseService.GetAsync(key);
 
-    public override async Task<TObject?> FindItemAsync(string alias)
-        => _baseService.Get(alias);
+    public override Task<TObject?> FindItemAsync(string alias)
+        => TaskHelper.FromResultOf(() => {
+            return _baseService.Get(alias);
+        });
 
     public override async Task SaveItemAsync(TObject item) { 
         if (item.IsDirty() is false) return;

@@ -9,6 +9,7 @@ using Umbraco.Cms.Core.Models.Entities;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Strings;
 
+using uSync.Core.Extensions;
 using uSync.Core.Mapping;
 using uSync.Core.Models;
 
@@ -106,33 +107,39 @@ public class ContentTemplateSerializer : ContentSerializer, ISyncSerializer<ICon
 
     }
 
-    public override async Task<IContent?> FindItemAsync(Guid key)
+    public override Task<IContent?> FindItemAsync(Guid key)
     {
-        // TODO: Umbraco 8 bug, the key is sometimes an old version
-        var entity = entityService.Get(key);
-        if (entity != null)
-            return contentService.GetBlueprintById(entity.Id);
+        return TaskHelper.FromResultOf(() =>
+        {
+            // TODO: Umbraco 8 bug, the key is sometimes an old version
+            var entity = entityService.Get(key);
+            if (entity != null)
+                return contentService.GetBlueprintById(entity.Id);
 
-        return null;
+            return null;
+        });
     }
 
-    protected override async Task<Attempt<IContent?>> CreateItemAsync(string alias, ITreeEntity? parent, string itemType)
+    protected override Task<Attempt<IContent?>> CreateItemAsync(string alias, ITreeEntity? parent, string itemType)
     {
-        var contentType = _contentTypeService.Get(itemType);
-        if (contentType == null) return
-                Attempt.Fail<IContent?>(null, new ArgumentException($"Missing content Type {itemType}"));
-
-        IContent item;
-        if (parent != null)
+        return TaskHelper.FromResultOf(() =>
         {
-            item = new Content(alias, (IContent)parent, contentType);
-        }
-        else
-        {
-            item = new Content(alias, -1, contentType);
-        }
+            var contentType = _contentTypeService.Get(itemType);
+            if (contentType == null) return
+                    Attempt.Fail<IContent?>(null, new ArgumentException($"Missing content Type {itemType}"));
 
-        return Attempt.Succeed(item);
+            IContent item;
+            if (parent != null)
+            {
+                item = new Content(alias, (IContent)parent, contentType);
+            }
+            else
+            {
+                item = new Content(alias, -1, contentType);
+            }
+
+            return Attempt.Succeed(item);
+        });
     }
 
     protected override Attempt<string?> DoSaveOrPublish(IContent item, XElement node, SyncSerializerOptions options)
@@ -141,9 +148,13 @@ public class ContentTemplateSerializer : ContentSerializer, ISyncSerializer<ICon
         return Attempt.Succeed("blueprint saved");
     }
 
-    public override async Task SaveItemAsync(IContent item)
-        => contentService.SaveBlueprint(item);
+    public override Task SaveItemAsync(IContent item)
+        => TaskHelper.FromResultOf(() => {
+            contentService.SaveBlueprint(item);
+        });
 
-    public override async Task DeleteItemAsync(IContent item)
-        => contentService.DeleteBlueprint(item);
+    public override Task DeleteItemAsync(IContent item)
+        => TaskHelper.FromResultOf(() => {
+            contentService.DeleteBlueprint(item); 
+        });
 }

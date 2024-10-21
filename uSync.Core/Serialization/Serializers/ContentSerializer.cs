@@ -665,22 +665,25 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
 
     #endregion
 
-    protected override async Task<Attempt<IContent?>> CreateItemAsync(string alias, ITreeEntity? parent, string itemType)
+    protected override Task<Attempt<IContent?>> CreateItemAsync(string alias, ITreeEntity? parent, string itemType)
     {
-        logger.LogDebug("Create: {alias} {parent} {type}", alias, parent?.Id ?? -1, itemType);
-        try
+        return TaskHelper.FromResultOf(() =>
         {
-            var item = contentService.Create(alias, parent?.Id ?? -1, itemType);
-            if (item == null)
-                return Attempt.Fail(item, new ArgumentException($"Unable to create content item of type {itemType}"));
+            logger.LogDebug("Create: {alias} {parent} {type}", alias, parent?.Id ?? -1, itemType);
+            try
+            {
+                var item = contentService.Create(alias, parent?.Id ?? -1, itemType);
+                if (item == null)
+                    return Attempt.Fail(item, new ArgumentException($"Unable to create content item of type {itemType}"));
 
-            return Attempt.Succeed(item);
-        }
-        catch (Exception ex)
-        {
-            logger.LogWarning(ex, "Error on Create {alias}", alias);
-            return Attempt.Fail<IContent?>(null, ex);
-        }
+                return Attempt.Succeed(item);
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Error on Create {alias}", alias);
+                return Attempt.Fail<IContent?>(null, ex);
+            }
+        });
     }
 
     #region Finders
@@ -688,15 +691,18 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
     public override Task<IContent?> FindItemAsync(Guid key)
         => Task.FromResult(contentService.GetById(key));
 
-    protected override async Task<IContent?> FindAtRootAsync(string alias)
+    protected override Task<IContent?> FindAtRootAsync(string alias)
     {
-        var rootNodes = contentService.GetRootContent();
-        if (rootNodes.Any())
+        return TaskHelper.FromResultOf<IContent?>(() =>
         {
-            return rootNodes.FirstOrDefault(x => x.Name?.ToSafeAlias(shortStringHelper).InvariantEquals(alias) is true);
-        }
+            var rootNodes = contentService.GetRootContent();
+            if (rootNodes.Any())
+            {
+                return rootNodes.FirstOrDefault(x => x.Name?.ToSafeAlias(shortStringHelper).InvariantEquals(alias) is true);
+            }
 
-        return null;
+            return null;
+        });
     }
 
     #endregion
@@ -707,31 +713,37 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
     public override async Task SaveItemAsync(IContent item)
         => await SaveItemAsync(item,-1);
 
-    public async Task SaveItemAsync(IContent item, int userId)
+    public Task SaveItemAsync(IContent item, int userId)
     {
-        try
+        return TaskHelper.FromResultOf(() =>
         {
-            contentService.Save(item, userId);
-        }
-        catch (ArgumentNullException ex)
-        {
-            // we can get thrown a null argument exception by the notifier, 
-            // which is non critical! but we are ignoring this error. ! <= 8.1.5
-            if (!ex.Message.Contains("siteUri")) throw;
-        }
+            try
+            {
+                contentService.Save(item, userId);
+            }
+            catch (ArgumentNullException ex)
+            {
+                // we can get thrown a null argument exception by the notifier, 
+                // which is non critical! but we are ignoring this error. ! <= 8.1.5
+                if (!ex.Message.Contains("siteUri")) throw;
+            }
+        });
     }
 
-    public override async Task DeleteItemAsync(IContent item)
+    public override Task DeleteItemAsync(IContent item)
     {
-        try
+        return TaskHelper.FromResultOf(() =>
         {
-            contentService.Delete(item);
-        }
-        catch (ArgumentNullException ex)
-        {
-            // we can get thrown a null argument exception by the notifier, 
-            // which is non critical! but we are ignoring this error. ! <= 8.1.5
-            if (!ex.Message.Contains("siteUri")) throw;
-        }
+            try
+            {
+                contentService.Delete(item);
+            }
+            catch (ArgumentNullException ex)
+            {
+                // we can get thrown a null argument exception by the notifier, 
+                // which is non critical! but we are ignoring this error. ! <= 8.1.5
+                if (!ex.Message.Contains("siteUri")) throw;
+            }
+        });
     }
 }

@@ -279,21 +279,24 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
         }
     }
 
-    protected override async Task<Attempt<IDataType?>> CreateItemAsync(string alias, ITreeEntity? parent, string itemType)
+    protected override Task<Attempt<IDataType?>> CreateItemAsync(string alias, ITreeEntity? parent, string itemType)
     {
-        var editorType = FindDataEditor(itemType);
-        if (editorType == null)
-            return Attempt.Fail<IDataType?>(default, new ArgumentException($"(Missing Package?) DataEditor {itemType} is not installed"));
-
-        var item = new DataType(editorType, _jsonSerializer, -1)
+        return TaskHelper.FromResultOf(() =>
         {
-            Name = alias
-        };
+            var editorType = FindDataEditor(itemType);
+            if (editorType == null)
+                return Attempt.Fail<IDataType?>(default, new ArgumentException($"(Missing Package?) DataEditor {itemType} is not installed"));
 
-        if (parent != null)
-            item.SetParent(parent);
+            var item = new DataType(editorType, _jsonSerializer, -1)
+            {
+                Name = alias
+            };
 
-        return Attempt.Succeed((IDataType)item);
+            if (parent != null)
+                item.SetParent(parent);
+
+            return Attempt.Succeed((IDataType)item);
+        });
     }
 
 	private IDataEditor? FindDataEditor(string editorAlias)

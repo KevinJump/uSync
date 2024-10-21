@@ -39,71 +39,71 @@ public interface ISyncSerializer<TObject> : ISyncSerializerBase
     ///// </summary>
     ///// <param name="items"></param>
 
-    //[Obsolete("Use SaveAsync will be removed in v16")]
-    //void Save(IEnumerable<TObject> items);
+    [Obsolete("Use SaveAsync will be removed in v16")]
+    void Save(IEnumerable<TObject> items);
 
-    ///// <summary>
-    /////  Serialize an empty xml marker, with proposed action
-    ///// </summary>
-    //[Obsolete("Use SerializeEmptyAsync will be removed in v16")]
-    //SyncAttempt<XElement> SerializeEmpty(TObject item, SyncActionType change, string alias);
+    /// <summary>
+    ///  Serialize an empty xml marker, with proposed action
+    /// </summary>
+    [Obsolete("Use SerializeEmptyAsync will be removed in v16")]
+    SyncAttempt<XElement> SerializeEmpty(TObject item, SyncActionType change, string alias);
 
-    //[Obsolete("Use SerializeAsync will be removed in v16")]
-    //SyncAttempt<XElement> Serialize(TObject item, SyncSerializerOptions options);
+    [Obsolete("Use SerializeAsync will be removed in v16")]
+    SyncAttempt<XElement> Serialize(TObject item, SyncSerializerOptions options);
 
-    //[Obsolete("Use DeserializeAsync will be removed in v16")]
-    //SyncAttempt<TObject> Deserialize(XElement node, SyncSerializerOptions options);
+    [Obsolete("Use DeserializeAsync will be removed in v16")]
+    SyncAttempt<TObject> Deserialize(XElement node, SyncSerializerOptions options);
 
-    //[Obsolete("Use DeserializeSecondPassAsync will be removed in v16")]
-    //SyncAttempt<TObject> DeserializeSecondPass(TObject item, XElement node, SyncSerializerOptions options);
+    [Obsolete("Use DeserializeSecondPassAsync will be removed in v16")]
+    SyncAttempt<TObject> DeserializeSecondPass(TObject item, XElement node, SyncSerializerOptions options);
 
-    //[Obsolete("Use IsCurrentAsync will be removed in v16")]
-    //ChangeType IsCurrent(XElement node, SyncSerializerOptions options);
+    [Obsolete("Use IsCurrentAsync will be removed in v16")]
+    ChangeType IsCurrent(XElement node, SyncSerializerOptions options);
 
-    //[Obsolete("Use IsCurrentAsync will be removed in v16")]
-    //ChangeType IsCurrent(XElement node, XElement? current, SyncSerializerOptions options);
+    [Obsolete("Use IsCurrentAsync will be removed in v16")]
+    ChangeType IsCurrent(XElement node, XElement? current, SyncSerializerOptions options);
 
-    ///// <summary>
-    /////  Find an Item based on the XML node representation
-    ///// </summary>
-    ///// <param name="node"></param>
-    ///// <returns></returns>
-    //[Obsolete("Use FindItemAsync will be removed in v16")]
-    //TObject? FindItem(XElement node);
+    /// <summary>
+    ///  Find an Item based on the XML node representation
+    /// </summary>
+    /// <param name="node"></param>
+    /// <returns></returns>
+    [Obsolete("Use FindItemAsync will be removed in v16")]
+    TObject? FindItem(XElement node);
 
-    ///// <summary>
-    /////  find an item based in its internal id.
-    ///// </summary>
-    //[Obsolete("Use FindItemAsync will be removed in v16")]
-    //TObject? FindItem(int id);
+    /// <summary>
+    ///  find an item based in its internal id.
+    /// </summary>
+    [Obsolete("Use FindItemAsync will be removed in v16")]
+    TObject? FindItem(int id);
 
-    ///// <summary>
-    /////  find an item based on the guid value
-    ///// </summary>
-    //[Obsolete("Use FindItemAsync will be removed in v16")]
-    //TObject? FindItem(Guid key);
-
-
-    ///// <summary>
-    /////  find an item based on the alias
-    ///// </summary>
-    //[Obsolete("Use FindItemAsync will be removed in v16")]
-    //TObject? FindItem(string alias);
-
-    ///// <summary>
-    /////  save an item back to umbraco
-    ///// </summary>
-    ///// <param name="item"></param>
-    //[Obsolete("Use SaveItemAsync will be removed in v16")]
-    //void SaveItem(TObject item);
+    /// <summary>
+    ///  find an item based on the guid value
+    /// </summary>
+    [Obsolete("Use FindItemAsync will be removed in v16")]
+    TObject? FindItem(Guid key);
 
 
-    ///// <summary>
-    /////  delete an item from umbraco
-    ///// </summary>
-    ///// <param name="item"></param>
-    //[Obsolete("Use DeleteItemAsync will be removed in v16")]
-    //void DeleteItem(TObject item);
+    /// <summary>
+    ///  find an item based on the alias
+    /// </summary>
+    [Obsolete("Use FindItemAsync will be removed in v16")]
+    TObject? FindItem(string alias);
+
+    /// <summary>
+    ///  save an item back to umbraco
+    /// </summary>
+    /// <param name="item"></param>
+    [Obsolete("Use SaveItemAsync will be removed in v16")]
+    void SaveItem(TObject item);
+
+
+    /// <summary>
+    ///  delete an item from umbraco
+    /// </summary>
+    /// <param name="item"></param>
+    [Obsolete("Use DeleteItemAsync will be removed in v16")]
+    void DeleteItem(TObject item);
 
 
     /// <summary>

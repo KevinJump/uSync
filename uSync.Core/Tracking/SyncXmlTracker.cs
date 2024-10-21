@@ -33,9 +33,11 @@ public class SyncXmlTracker<TObject>
         => serializer;
 
 
+    [Obsolete("Use will be removed in v16")]
     public IEnumerable<uSyncChange> GetChanges(XElement target)
         => GetChanges(target, new SyncSerializerOptions());
 
+    [Obsolete("Use GetChangesAsync will be removed in v16")]
     public IEnumerable<uSyncChange> GetChanges(XElement target, SyncSerializerOptions options) 
         => GetChangesAsync(target, options).Result;
 
@@ -65,7 +67,7 @@ public class SyncXmlTracker<TObject>
         return await serializer.SerializeAsync(item, options);
     }
 
-    [Obsolete("Use GetChangesAsync")]
+    [Obsolete("Use GetChangesAsync will be removed in v16")]
     public IEnumerable<uSyncChange> GetChanges(XElement target, XElement source, SyncSerializerOptions options)
         => GetChangesAsync(target, source, options).Result;
 

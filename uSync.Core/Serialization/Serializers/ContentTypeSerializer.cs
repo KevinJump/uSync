@@ -306,29 +306,32 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
         return changes;
     }
 
-    protected override async Task<Attempt<IContentType?>> CreateItemAsync(string alias, ITreeEntity? parent, string itemType)
+    protected override Task<Attempt<IContentType?>> CreateItemAsync(string alias, ITreeEntity? parent, string itemType)
     {
-        var safeAlias = GetSafeItemAlias(alias);
-
-        var item = new ContentType(shortStringHelper, -1)
+        return TaskHelper.FromResultOf(() =>
         {
-            Alias = alias
-        };
+            var safeAlias = GetSafeItemAlias(alias);
 
-        if (parent is not null)
-        {
-            if (parent is IContentType parentContent)
+            var item = new ContentType(shortStringHelper, -1)
             {
-                item.AddContentType(parentContent);
+                Alias = alias
+            };
+
+            if (parent is not null)
+            {
+                if (parent is IContentType parentContent)
+                {
+                    item.AddContentType(parentContent);
+                }
+
+                item.SetParent(parent);
             }
 
-            item.SetParent(parent);
-        }
+            // adds this alias to the alias cache. 
+            AddAlias(safeAlias);
 
-        // adds this alias to the alias cache. 
-        AddAlias(safeAlias);
-
-        return Attempt.Succeed((IContentType)item);
+            return Attempt.Succeed((IContentType)item);
+        });
     }
 
     /// History Cleanup (added in v9.1) 

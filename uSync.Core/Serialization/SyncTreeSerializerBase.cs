@@ -116,17 +116,20 @@ public abstract class SyncTreeSerializerBase<TObject> : SyncSerializerBase<TObje
     }
 
 
-    //[Obsolete("Use CreateItemAsync will be removed in v16")]
-    //protected abstract Attempt<TObject?> CreateItem(string alias, ITreeEntity? parent, string itemType);
+    [Obsolete("Use CreateItemAsync will be removed in v16")]
+    protected virtual Attempt<TObject?> CreateItem(string alias, ITreeEntity? parent, string itemType)
+        => CreateItemAsync(alias, parent, itemType).Result;
 
-    //[Obsolete("Use FindItemAsync will be removed in v16")]
-    //protected virtual Attempt<TObject?> FindOrCreate(XElement node)
-    //    => FindOrCreateAsync(node).Result;
-    //[Obsolete("Use FindItemAsync will be removed in v16")]
-    //protected TObject? FindItem(Guid key, string alias)
-    //    => FindItemAsync(key, alias).Result;
-    //[Obsolete("Use HasParentItemAsync will be removed in v16")]
-    //protected virtual bool HasParentItem(XElement node)
-    //    => true;
+    [Obsolete("Use FindItemAsync will be removed in v16")]
+    protected virtual Attempt<TObject?> FindOrCreate(XElement node)
+        => FindOrCreateAsync(node).Result;
+    
+    [Obsolete("Use FindItemAsync will be removed in v16")]
+    protected TObject? FindItem(Guid key, string alias)
+        => FindItemAsync(key, alias).Result;
+    
+    [Obsolete("Use HasParentItemAsync will be removed in v16")]
+    protected virtual bool HasParentItem(XElement node)
+        => true;
 
 }

@@ -11,6 +11,7 @@ using Umbraco.Cms.Core.Services.OperationStatus;
 using Umbraco.Cms.Core.Strings;
 using Umbraco.Extensions;
 
+using uSync.Core.Extensions;
 using uSync.Core.Models;
 
 namespace uSync.Core.Serialization.Serializers;
@@ -105,26 +106,29 @@ public class MediaTypeSerializer : ContentTypeBaseSerializer<IMediaType>, ISyncS
         return SyncAttempt<IMediaType>.Succeed(item.Name ?? item.Alias, item, ChangeType.Import, "", saveInSerializer, details);
     }
 
-    protected override async Task<Attempt<IMediaType?>> CreateItemAsync(string alias, ITreeEntity? parent, string itemType)
+    protected override Task<Attempt<IMediaType?>> CreateItemAsync(string alias, ITreeEntity? parent, string itemType)
     {
-        var safeAlias = GetSafeItemAlias(alias);
-
-        var item = new MediaType(shortStringHelper, -1)
+        return TaskHelper.FromResultOf(() =>
         {
-            Alias = safeAlias
-        };
+            var safeAlias = GetSafeItemAlias(alias);
 
-        if (parent != null)
-        {
-            if (parent is IMediaType mediaParent)
-                item.AddContentType(mediaParent);
+            var item = new MediaType(shortStringHelper, -1)
+            {
+                Alias = safeAlias
+            };
 
-            item.SetParent(parent);
-        }
+            if (parent != null)
+            {
+                if (parent is IMediaType mediaParent)
+                    item.AddContentType(mediaParent);
 
-        AddAlias(safeAlias);
+                item.SetParent(parent);
+            }
 
-        return Attempt.Succeed(item as IMediaType);
+            AddAlias(safeAlias);
+
+            return Attempt.Succeed(item as IMediaType);
+        });
     }
 
 

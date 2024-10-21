@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Services;
 
+using uSync.Core.Extensions;
 using uSync.Core.Models;
 
 namespace uSync.Core.Serialization.Serializers;
@@ -164,33 +165,36 @@ public class RelationTypeSerializer
         return base.IsValid(node);
     }
 
-    protected override async Task<SyncAttempt<XElement>> SerializeCoreAsync(IRelationType item, SyncSerializerOptions options)
+    protected override Task<SyncAttempt<XElement>> SerializeCoreAsync(IRelationType item, SyncSerializerOptions options)
     {
-        var node = this.InitializeBaseNode(item, item.Alias);
-
-        var isDependency = false;
-        if (item is IRelationTypeWithIsDependency dependencyItem)
-            isDependency = dependencyItem.IsDependency;
-
-        node.Add(new XElement(uSyncConstants.Xml.Info,
-            new XElement(uSyncConstants.Xml.Name, item.Name),
-            new XElement("ParentType", GetGuidValue(item, nameof(item.ParentObjectType))),
-            new XElement("ChildType", GetGuidValue(item, nameof(item.ChildObjectType))),
-            new XElement("Bidirectional", item.IsBidirectional),
-            new XElement("IsDependency", isDependency)));
-
-
-        if (options.GetSetting<bool>("IncludeRelations", false))
+        return TaskHelper.FromResultOf(() =>
         {
-            node.Add(SerializeRelations(item));
-        }
+            var node = this.InitializeBaseNode(item, item.Alias);
 
-        return SyncAttempt<XElement>.SucceedIf(
-            node != null,
-            item.Name ?? item.Alias,
-            node,
-            typeof(IRelationType),
-            ChangeType.Export);
+            var isDependency = false;
+            if (item is IRelationTypeWithIsDependency dependencyItem)
+                isDependency = dependencyItem.IsDependency;
+
+            node.Add(new XElement(uSyncConstants.Xml.Info,
+                new XElement(uSyncConstants.Xml.Name, item.Name),
+                new XElement("ParentType", GetGuidValue(item, nameof(item.ParentObjectType))),
+                new XElement("ChildType", GetGuidValue(item, nameof(item.ChildObjectType))),
+                new XElement("Bidirectional", item.IsBidirectional),
+                new XElement("IsDependency", isDependency)));
+
+
+            if (options.GetSetting<bool>("IncludeRelations", false))
+            {
+                node.Add(SerializeRelations(item));
+            }
+
+            return SyncAttempt<XElement>.SucceedIf(
+                node != null,
+                item.Name ?? item.Alias,
+                node,
+                typeof(IRelationType),
+                ChangeType.Export);
+        });
     }
 
 
@@ -260,19 +264,19 @@ public class RelationTypeSerializer
 
 
     // control methods.
-    public override async Task DeleteItemAsync(IRelationType item)
-        => _relationService.Delete(item);
+    public override Task DeleteItemAsync(IRelationType item)
+        => TaskHelper.FromResultOf(() => _relationService.Delete(item));
 
-    public override async Task<IRelationType?> FindItemAsync(Guid key)
-        => _relationService.GetRelationTypeById(key); // ??
+    public override Task<IRelationType?> FindItemAsync(Guid key)
+        => TaskHelper.FromResultOf(() => _relationService.GetRelationTypeById(key));
 
-    public override async Task<IRelationType?> FindItemAsync(string alias)
-        => _relationService.GetRelationTypeByAlias(alias);
+    public override Task<IRelationType?> FindItemAsync(string alias)
+        => TaskHelper.FromResultOf(() => _relationService.GetRelationTypeByAlias(alias));
 
 
     public override string ItemAlias(IRelationType item)
         => item.Alias;
 
-    public override async Task SaveItemAsync(IRelationType item)
-        => _relationService.Save(item);
+    public override Task SaveItemAsync(IRelationType item)
+        => TaskHelper.FromResultOf(() => _relationService.Save(item));
 }

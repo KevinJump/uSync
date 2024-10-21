@@ -205,35 +205,45 @@ public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncSerializer<IM
         return value;
     }
 
-    protected override async Task<Attempt<IMedia?>> CreateItemAsync(string alias, ITreeEntity? parent, string itemType)
+    protected override Task<Attempt<IMedia?>> CreateItemAsync(string alias, ITreeEntity? parent, string itemType)
     {
-        var parentId = parent != null ? parent.Id : -1;
-        var item = _mediaService.CreateMedia(alias, parentId, itemType);
-        return Attempt.Succeed((IMedia)item);
-    }
-
-
-    public override async Task<IMedia?> FindItemAsync(Guid key)
-        => _mediaService.GetById(key);
-
-    protected override async Task<IMedia?> FindAtRootAsync(string alias)
-    {
-        var rootNodes = _mediaService.GetRootMedia();
-        if (rootNodes.Any())
+        return TaskHelper.FromResultOf(() =>
         {
-            return rootNodes.FirstOrDefault(x => x.Name?.ToSafeAlias(shortStringHelper)?.InvariantEquals(alias) is true);
-        }
+            var parentId = parent != null ? parent.Id : -1;
+            var item = _mediaService.CreateMedia(alias, parentId, itemType);
+            return Attempt.Succeed((IMedia)item);
 
-        return null;
+        });
     }
 
-    public override async Task SaveAsync(IEnumerable<IMedia> items)
-        => _mediaService.Save(items);
 
-    public override async Task SaveItemAsync(IMedia item)
-        => _mediaService.Save(item);
+    public override Task<IMedia?> FindItemAsync(Guid key)
+        => TaskHelper.FromResultOf(() =>
+        {
+            return _mediaService.GetById(key);
+        });
 
-    public override async Task DeleteItemAsync(IMedia item)
-        => _mediaService.Delete(item);
+    protected override Task<IMedia?> FindAtRootAsync(string alias)
+    {
+        return TaskHelper.FromResultOf(() =>
+        {
+            var rootNodes = _mediaService.GetRootMedia();
+            if (rootNodes.Any())
+            {
+                return rootNodes.FirstOrDefault(x => x.Name?.ToSafeAlias(shortStringHelper)?.InvariantEquals(alias) is true);
+            }
+
+            return null;
+        });
+    }
+
+    public override Task SaveAsync(IEnumerable<IMedia> items)
+        => TaskHelper.FromResultOf(() => { return _mediaService.Save(items); });
+
+    public override Task SaveItemAsync(IMedia item)
+        => TaskHelper.FromResultOf(() => { return _mediaService.Save(item); });
+
+    public override Task DeleteItemAsync(IMedia item)
+        => TaskHelper.FromResultOf(() => { return _mediaService.Delete(item); });
 
 }

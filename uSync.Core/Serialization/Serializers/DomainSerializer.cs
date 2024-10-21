@@ -8,6 +8,7 @@ using Umbraco.Cms.Core.Models.Entities;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Extensions;
 
+using uSync.Core.Extensions;
 using uSync.Core.Models;
 
 namespace uSync.Core.Serialization.Serializers;
@@ -105,38 +106,42 @@ public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncSerializer<IDo
 
     }
 
-    protected override async Task<SyncAttempt<XElement>> SerializeCoreAsync(IDomain item, SyncSerializerOptions options)
+    protected override Task<SyncAttempt<XElement>> SerializeCoreAsync(IDomain item, SyncSerializerOptions options)
     {
-        var node = new XElement(ItemType,
+        return TaskHelper.FromResultOf(() =>
+        {
+
+            var node = new XElement(ItemType,
             new XAttribute(uSyncConstants.Xml.Key, item.DomainName.GetDeterministicHashCode().ToGuid()),
             new XAttribute(uSyncConstants.Xml.Alias, item.DomainName));
 
-        var info = new XElement(uSyncConstants.Xml.Info,
-            new XElement("IsWildcard", item.IsWildcard),
-            new XElement("Language", item.LanguageIsoCode));
+            var info = new XElement(uSyncConstants.Xml.Info,
+                new XElement("IsWildcard", item.IsWildcard),
+                new XElement("Language", item.LanguageIsoCode));
 
 
-        if (item.RootContentId.HasValue)
-        {
-            var rootNode = _contentService.GetById(item.RootContentId.Value);
-
-            if (rootNode != null)
+            if (item.RootContentId.HasValue)
             {
-                info.Add(new XElement("Root", GetItemPath(rootNode),
-                    new XAttribute(uSyncConstants.Xml.Key, rootNode.Key)));
+                var rootNode = _contentService.GetById(item.RootContentId.Value);
+
+                if (rootNode != null)
+                {
+                    info.Add(new XElement("Root", GetItemPath(rootNode),
+                        new XAttribute(uSyncConstants.Xml.Key, rootNode.Key)));
+                }
             }
-        }
 
-        if (_capabilityChecker?.HasSortableDomains == true)
-        {
-            // domains can be sorted. we need to get the value via reflection.
-            info.Add(new XElement(_sortablePropertyName, GetSortableValue(item)));
-        }
+            if (_capabilityChecker?.HasSortableDomains == true)
+            {
+                // domains can be sorted. we need to get the value via reflection.
+                info.Add(new XElement(_sortablePropertyName, GetSortableValue(item)));
+            }
 
-        node.Add(info);
+            node.Add(info);
 
-        return SyncAttempt<XElement>.SucceedIf(
-            node != null, item.DomainName, node, typeof(IDomain), ChangeType.Export);
+            return SyncAttempt<XElement>.SucceedIf(
+                node != null, item.DomainName, node, typeof(IDomain), ChangeType.Export);
+        });
     }
 
     private const string _sortablePropertyName = "SortOrder";

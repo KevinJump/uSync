@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
 using Umbraco.Cms.Core;
@@ -145,7 +146,7 @@ public abstract class SyncHandlerContainerBase<TObject>
     ///  will resave everything in a folder (and beneath)
     ///  we need to this when it's renamed
     /// </summary>
-    [Obsolete("Use UpdateFolderAsync (and pass a guid")]
+    [Obsolete("Use UpdateFolderAsync (and pass a guid) will be removed in v16")]
     protected IEnumerable<uSyncAction> UpdateFolder(int folderId, string folder, HandlerSettings config)
         => UpdateFolder(folderId, [folder], config);
 
@@ -153,7 +154,7 @@ public abstract class SyncHandlerContainerBase<TObject>
     ///  will resave everything in a folder (and beneath)
     ///  we need to this when it's renamed
     /// </summary>
-    [Obsolete("Use UpdateFolderAsync (and pass a guid")]
+    [Obsolete("Use UpdateFolderAsync (and pass a guid) will be removed in v16")]
     protected IEnumerable<uSyncAction> UpdateFolder(int folderId, string[] folders, HandlerSettings config)
         => [];
     

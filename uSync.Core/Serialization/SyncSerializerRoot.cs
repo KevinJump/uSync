@@ -361,65 +361,72 @@ public abstract class SyncSerializerRoot<TObject>
 
 
 
-    //[Obsolete("use SerializeAsync, will be removed in uSync 16")]
-    //protected virtual SyncAttempt<XElement> SerializeCore(TObject item, SyncSerializerOptions options)
-    //    => SerializeCoreAsync(item, options).Result;
-    //[Obsolete("use DeserializeCoreAsync, will be removed in uSync 16")]
-    //protected virtual SyncAttempt<TObject> DeserializeCore(XElement node, SyncSerializerOptions options)
-    //    => DeserializeCoreAsync(node, options).Result;
+    [Obsolete("use SerializeAsync, will be removed in uSync 16")]
+    protected virtual SyncAttempt<XElement> SerializeCore(TObject item, SyncSerializerOptions options)
+        => SerializeCoreAsync(item, options).Result;
+    [Obsolete("use DeserializeCoreAsync, will be removed in uSync 16")]
+    protected virtual SyncAttempt<TObject> DeserializeCore(XElement node, SyncSerializerOptions options)
+        => DeserializeCoreAsync(node, options).Result;
 
-    //[Obsolete("use SerializeAsync, will be removed in uSync 16")]
-    //public SyncAttempt<XElement> Serialize(TObject item, SyncSerializerOptions options)
-    //    => SerializeAsync(item, options).Result;
+    [Obsolete("use SerializeAsync, will be removed in uSync 16")]
+    public SyncAttempt<XElement> Serialize(TObject item, SyncSerializerOptions options)
+        => SerializeAsync(item, options).Result;
 
-    //[Obsolete("use DeserializeSecondPassAsync, will be removed in uSync 16")]
-    //public virtual SyncAttempt<TObject> DeserializeSecondPass(TObject item, XElement node, SyncSerializerOptions options)
-    //    => DeserializeSecondPassAsync(item, node, options).Result;
+    [Obsolete("use DeserializeSecondPassAsync, will be removed in uSync 16")]
+    public virtual SyncAttempt<TObject> DeserializeSecondPass(TObject item, XElement node, SyncSerializerOptions options)
+        => DeserializeSecondPassAsync(item, node, options).Result;
 
-    //[Obsolete("use DeserializeAsync, will be removed in uSync 16")]
-    //public SyncAttempt<TObject> Deserialize(XElement node, SyncSerializerOptions options)
-    //    => DeserializeAsync(node, options).Result;
-    //[Obsolete("use ProcessActionAsync, will be removed in uSync 16")]
-    //protected SyncAttempt<TObject> ProcessAction(XElement node, SyncSerializerOptions options)
-    //    => ProcessActionAsync(node, options).Result;
+    [Obsolete("use DeserializeAsync, will be removed in uSync 16")]
+    public SyncAttempt<TObject> Deserialize(XElement node, SyncSerializerOptions options)
+        => DeserializeAsync(node, options).Result;
+    [Obsolete("use ProcessActionAsync, will be removed in uSync 16")]
+    protected SyncAttempt<TObject> ProcessAction(XElement node, SyncSerializerOptions options)
+        => ProcessActionAsync(node, options).Result;
 
-    //[Obsolete("use ProcessDeleteAsync, will be removed in uSync 16")]
-    //protected virtual SyncAttempt<TObject> ProcessDelete(Guid key, string alias, SerializerFlags flags)
-    //    => ProcessDeleteAsync(key, alias, flags).Result;
+    [Obsolete("use ProcessDeleteAsync, will be removed in uSync 16")]
+    protected virtual SyncAttempt<TObject> ProcessDelete(Guid key, string alias, SerializerFlags flags)
+        => ProcessDeleteAsync(key, alias, flags).Result;
 
-    //[Obsolete("use SerializeAsync, will be removed in uSync 16")]
-    //public virtual ChangeType IsCurrent(XElement node, SyncSerializerOptions options)
-    //    => IsCurrentAsync(node, options).Result;
-    //[Obsolete("use SerializeAsync, will be removed in uSync 16")]
-    //public virtual ChangeType IsCurrent(XElement node, XElement? current, SyncSerializerOptions options)
-    //    => IsCurrentAsync(node, current, options).Result;
+    [Obsolete("use SerializeAsync, will be removed in uSync 16")]
+    public virtual ChangeType IsCurrent(XElement node, SyncSerializerOptions options)
+        => IsCurrentAsync(node, options).Result;
+    [Obsolete("use SerializeAsync, will be removed in uSync 16")]
+    public virtual ChangeType IsCurrent(XElement node, XElement? current, SyncSerializerOptions options)
+        => IsCurrentAsync(node, current, options).Result;
 
-    //[Obsolete("use SerializeEmptyAsync, will be removed in uSync 16")]
-    //public virtual SyncAttempt<XElement> SerializeEmpty(TObject item, SyncActionType change, string alias)
-    //    => SerializeEmptyAsync(item, change, alias).Result;
-    //[Obsolete("Finding items by id will be removed in v16")]
-    //public abstract TObject? FindItem(int id);
+    [Obsolete("use SerializeEmptyAsync, will be removed in uSync 16")]
+    public virtual SyncAttempt<XElement> SerializeEmpty(TObject item, SyncActionType change, string alias)
+        => SerializeEmptyAsync(item, change, alias).Result;
+    [Obsolete("Finding items by id will be removed in v16")]
+    public virtual TObject? FindItem(int id)
+        => default;
 
-    //[Obsolete("use FindItemAsync, will be removed in uSync 16")]
-    //public abstract TObject? FindItem(Guid key);
+    [Obsolete("use FindItemAsync, will be removed in uSync 16")]
+    public virtual TObject? FindItem(Guid key)
+        => FindItemAsync(key).Result;
 
-    //[Obsolete("use FindItemAsync, will be removed in uSync 16")]
-    //public abstract TObject? FindItem(string alias);
+    [Obsolete("use FindItemAsync, will be removed in uSync 16")]
+    public virtual TObject? FindItem(string alias)
+        => FindItemAsync(alias).Result;
 
-    //[Obsolete("use SaveItemAsync, will be removed in uSync 16")]
-    //public abstract void SaveItem(TObject item);
-    //[Obsolete("use DeleteItemAsync, will be removed in uSync 16")]
-    //public abstract void DeleteItem(TObject item);
-    //[Obsolete("use SaveAsync, will be removed in uSync 16")]
-    //public virtual void Save(IEnumerable<TObject> items)
-    //    => SaveAsync(items).Wait();
+    [Obsolete("use SaveItemAsync, will be removed in uSync 16")]
+    public virtual void SaveItem(TObject item)
+        => SaveItemAsync(item).Wait();
 
-    //[Obsolete("use FindItemAsync, will be removed in uSync 16")]
-    //public virtual TObject? FindItem(XElement node)
-    //    => FindItemAsync(node).Result;
-    //[Obsolete("Use CanDeserializeAsync, will be removed in uSync 16")]
-    //protected virtual SyncAttempt<TObject> CanDeserialize(XElement node, SyncSerializerOptions options)
-    //=> SyncAttempt<TObject>.Succeed("No Check", ChangeType.NoChange);
+    [Obsolete("use DeleteItemAsync, will be removed in uSync 16")]
+    public virtual void DeleteItem(TObject item)
+        => DeleteItemAsync(item).Wait();
+
+    [Obsolete("use SaveAsync, will be removed in uSync 16")]
+    public virtual void Save(IEnumerable<TObject> items)
+        => SaveAsync(items).Wait();
+
+    [Obsolete("use FindItemAsync, will be removed in uSync 16")]
+    public virtual TObject? FindItem(XElement node)
+        => FindItemAsync(node).Result;
+    [Obsolete("Use CanDeserializeAsync, will be removed in uSync 16")]
+    protected virtual SyncAttempt<TObject> CanDeserialize(XElement node, SyncSerializerOptions options)
+    => SyncAttempt<TObject>.Succeed("No Check", ChangeType.NoChange);
 
 
 }

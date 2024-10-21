@@ -405,7 +405,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     public virtual IEnumerable<uSyncAction> Import(string filePath, HandlerSettings config, SerializerFlags flags)
         => ImportAsync(filePath, config, flags).Result;
 
-    [Obsolete("pass import options not flags.")]
+    [Obsolete("pass import options not flags. will be removed in v16")]
     public virtual async Task<IEnumerable<uSyncAction>> ImportAsync(string filePath, HandlerSettings config, SerializerFlags flags)
         => await ImportAsync(filePath, config, new uSyncImportOptions { Flags = flags });
 

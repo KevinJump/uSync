@@ -18,6 +18,13 @@ public interface ISyncTrackerBase
 
 public interface ISyncTracker<TObject> : ISyncTrackerBase
 {
+    [Obsolete("Use GetChangesAsync will be removed in v16")]
     IEnumerable<uSyncChange> GetChanges(XElement node, XElement current, SyncSerializerOptions options);
+
+    Task<IEnumerable<uSyncChange>> GetChangesAsync(XElement target, XElement source, SyncSerializerOptions options);
+
+    [Obsolete("Use GetChangesAsync will be removed in v16")]
     IEnumerable<uSyncChange> GetChanges(XElement node, SyncSerializerOptions options);
+
+    Task<IEnumerable<uSyncChange>> GetChangesAsync(XElement node, SyncSerializerOptions options);
 }

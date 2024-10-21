@@ -308,16 +308,25 @@ public abstract class SyncContainerSerializerBase<TObject>
     #endregion
 
 
-    //[Obsolete("Use FindItemAsync will be removed in v16")]
-    //protected virtual EntityContainer? FindFolder(Guid key, string path)
-    //    => FindFolderAsync(key, path).Result;
-    //[Obsolete("Use FindItemAsync will be removed in v16")]
-    //protected abstract EntityContainer? FindContainer(Guid key);
-    //[Obsolete("Use FindItemAsync will be removed in v16")]
-    //protected abstract IEnumerable<EntityContainer> FindContainers(string folder, int level);
-    //[Obsolete("Use FindItemAsync will be removed in v16")]
-    //protected abstract Attempt<OperationResult<OperationResultType, EntityContainer>?> CreateContainer(int parentId, string name);
-    //[Obsolete("Use SaveItemAsync will be removed in v16")]
-    //protected abstract void SaveContainer(EntityContainer container);
+    [Obsolete("Use FindItemAsync will be removed in v16")]
+    protected virtual EntityContainer? FindFolder(Guid key, string path)
+        => FindFolderAsync(key, path).Result;
+    [Obsolete("Use FindItemAsync will be removed in v16")]
+    protected virtual EntityContainer? FindContainer(Guid key)
+        => FindContainerAsync(key).Result;
+
+    [Obsolete("Use FindItemAsync will be removed in v16")]
+    protected virtual IEnumerable<EntityContainer> FindContainers(string folder, int level)
+        => FindContainersAsync(folder, level).Result;
+
+    [Obsolete("CreateContainer by ID will no longer work, will be removed in v16")]
+    protected virtual Attempt<OperationResult<OperationResultType, EntityContainer>?> CreateContainer(int parentId, string name)
+        => Attempt<OperationResult<OperationResultType, EntityContainer>?>.Fail(new Exception("Container by Id not supporting in v15"));
+
+    [Obsolete("Use SaveItemAsync will be removed in v16")]
+    protected virtual void SaveContainer(EntityContainer container)
+    {
+        // no op.
+    }
 
 }
