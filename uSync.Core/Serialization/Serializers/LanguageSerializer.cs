@@ -190,8 +190,11 @@ public class LanguageSerializer : SyncSerializerBase<ILanguage>, ISyncSerializer
         return item;
     }
 
-    public override async Task<ILanguage?> FindItemAsync(Guid key)
-        => default;
+    /// <summary>
+    ///  Keys for languages are not stable, the IsoCode is the best way to find a language. 
+    /// </summary>
+    public override Task<ILanguage?> FindItemAsync(Guid key)
+        => Task.FromResult(default(ILanguage));
 
     public override async Task SaveItemAsync(ILanguage item)
         => _ = item.HasIdentity
