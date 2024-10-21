@@ -148,6 +148,7 @@ public class TemplateHandler : SyncHandlerLevelBase<ITemplate>, ISyncHandler, IS
 
     protected override async Task<IEnumerable<IEntity>> GetChildItemsAsync(Guid key)
     {
+        if (key == Guid.Empty) return await _templateService.GetChildrenAsync(-1);
         var template = await _templateService.GetAsync(key);
         if (template is null) return [];
         return await _templateService.GetChildrenAsync(template.Id);

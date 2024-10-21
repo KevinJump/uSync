@@ -298,12 +298,17 @@ public static class XElementExtensions
     public static string MakePlatformSafeHash(this XElement node)
         => node.MakePlatformSafeHashAsync().Result;
 
-    public static async Task<string> MakePlatformSafeHashAsync(this XElement node)
+    private static XmlWriterSettings _xmlWriterSettings = new XmlWriterSettings {
+        NewLineChars = "\r\n",
+        Async = true
+    };
+
+public static async Task<string> MakePlatformSafeHashAsync(this XElement node)
     {
         using (MemoryStream s = new MemoryStream())
 		{
 			// for consistency across platforms we need to harmonize line endings.
-			using (var writer = XmlWriter.Create(s, new XmlWriterSettings { NewLineChars = "\r\n" }))
+			using (var writer = XmlWriter.Create(s, _xmlWriterSettings))
 			{
                 await node.SaveAsync(writer, CancellationToken.None);
                 await writer.FlushAsync();

@@ -24,13 +24,13 @@ namespace uSync.Core.Serialization.Serializers;
 public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, ISyncSerializer<IContentType>
 {
     private readonly IContentTypeService _contentTypeService;
-    private readonly IContentTypeContainerService _contentTypeContainerService;
     private readonly ITemplateService _templateService;
 
     private readonly uSyncCapabilityChecker _capabilities;
 
     public ContentTypeSerializer(
-        IEntityService entityService, ILogger<ContentTypeSerializer> logger,
+        IEntityService entityService,
+        ILogger<ContentTypeSerializer> logger,
         IDataTypeService dataTypeService,
         IContentTypeService contentTypeService,
         IContentTypeContainerService contentTypeContainerService,
@@ -38,10 +38,9 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
         IShortStringHelper shortStringHelper,
         AppCaches appCaches,
         uSyncCapabilityChecker uSyncCapabilityChecker)
-        : base(entityService, logger, dataTypeService, contentTypeService, UmbracoObjectTypes.DocumentTypeContainer, shortStringHelper, appCaches)
+        : base(entityService, contentTypeContainerService, logger, dataTypeService, contentTypeService, UmbracoObjectTypes.DocumentTypeContainer, shortStringHelper, appCaches)
     {
         _contentTypeService = contentTypeService;
-        _contentTypeContainerService = contentTypeContainerService;
         _templateService = templateService;
         _capabilities = uSyncCapabilityChecker;
     }
@@ -332,12 +331,6 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
         return Attempt.Succeed((IContentType)item);
     }
 
-    protected override async Task SaveContainerAsync(EntityContainer container)
-    {
-        logger.LogDebug("Saving Container (In main class) {key}", container.Key.ToString());
-        _contentTypeService.SaveContainer(container);
-    }
-
     /// History Cleanup (added in v9.1) 
 
     private readonly string _historyCleanupName = "HistoryCleanup";
@@ -455,22 +448,5 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
 
         return default;
 
-    }
-
-    protected override async Task<Attempt<EntityContainer?, EntityContainerOperationStatus>> CreateContainerAsync(Guid parentKey, string name)
-    {
-        var parent = await _contentTypeContainerService.GetAsync(parentKey);
-        if (parent is null) return Attempt<EntityContainer?, EntityContainerOperationStatus>.Fail(EntityContainerOperationStatus.ParentNotFound);
-        if (parent.Name is null) return Attempt<EntityContainer?, EntityContainerOperationStatus>.Fail(EntityContainerOperationStatus.ParentNotFound);
-
-        var existing = (await _contentTypeContainerService.GetAsync(parent.Name, parent.Level)).FirstOrDefault(x => x.Name.InvariantEquals(name));
-        if (existing is null)
-        {
-            return await _contentTypeContainerService.CreateAsync(Guid.NewGuid(), name, parentKey, Constants.Security.SuperUserKey);
-        }
-        else
-        {
-            return await _contentTypeContainerService.UpdateAsync(existing.Key, name, Constants.Security.SuperUserKey);
-        }
     }
 }

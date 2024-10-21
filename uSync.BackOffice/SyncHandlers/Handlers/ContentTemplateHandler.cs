@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Events;
 using Umbraco.Cms.Core.Models;
+using Umbraco.Cms.Core.Models.Entities;
 using Umbraco.Cms.Core.Notifications;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Strings;
@@ -59,6 +61,12 @@ public class ContentTemplateHandler : ContentHandlerBase<IContent>, ISyncHandler
         // make sure we load up the template serializer - because we need that one, not the normal content one.
         this.serializer = syncItemFactory.GetSerializer<IContent>("contentTemplateSerializer") ??
             throw new NullReferenceException("Can not load the contentTemplateSerializer");
+    }
+
+    protected override Task<IEnumerable<IEntity>> GetChildItemsAsync(Guid key) {
+        if (key != Guid.Empty) return Task.FromResult(Enumerable.Empty<IEntity>());
+        var blueprints = entityService.GetAll(UmbracoObjectTypes.DocumentBlueprint);
+        return Task.FromResult<IEnumerable<IEntity>>(blueprints);
     }
 
     /// <summary>

@@ -9061,7 +9061,7 @@
         },
         "FontFaceSet": {
             "properties": {
-                "__@toStringTag@1706": {
+                "__@toStringTag@1708": {
                     "type": "string"
                 },
                 "onloading": {
@@ -9093,7 +9093,7 @@
                 }
             },
             "required": [
-                "__@toStringTag@1706",
+                "__@toStringTag@1708",
                 "onloading",
                 "onloadingdone",
                 "onloadingerror",
@@ -47767,6 +47767,12 @@
                     "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
                     "type": "string"
                 },
+                "forExtensions": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
                 "js": {
                     "description": "The file location of the javascript file to load",
                     "type": "string"
@@ -47819,6 +47825,12 @@
                 "elementName": {
                     "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
                     "type": "string"
+                },
+                "forExtensions": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 },
                 "js": {
                     "description": "The file location of the javascript file to load",
@@ -53110,23 +53122,23 @@
         },
         "Promise<FontFaceSet>": {
             "properties": {
-                "__@toStringTag@1706": {
+                "__@toStringTag@1708": {
                     "type": "string"
                 }
             },
             "required": [
-                "__@toStringTag@1706"
+                "__@toStringTag@1708"
             ],
             "type": "object"
         },
         "Promise<ServiceWorkerRegistration>": {
             "properties": {
-                "__@toStringTag@1706": {
+                "__@toStringTag@1708": {
                     "type": "string"
                 }
             },
             "required": [
-                "__@toStringTag@1706"
+                "__@toStringTag@1708"
             ],
             "type": "object"
         },

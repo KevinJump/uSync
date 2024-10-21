@@ -21,12 +21,13 @@ public class MemberTypeSerializer : ContentTypeBaseSerializer<IMemberType>, ISyn
     private readonly IMemberTypeService _memberTypeService;
 
     public MemberTypeSerializer(
-        IEntityService entityService, ILogger<MemberTypeSerializer> logger,
+        IEntityService entityService, 
+        ILogger<MemberTypeSerializer> logger,
         IDataTypeService dataTypeService,
         IMemberTypeService memberTypeService,
         IShortStringHelper shortStringHelper,
         AppCaches appCaches)
-        : base(entityService, logger, dataTypeService, memberTypeService, UmbracoObjectTypes.Unknown, shortStringHelper, appCaches)
+        : base(entityService, null, logger, dataTypeService, memberTypeService, UmbracoObjectTypes.Unknown, shortStringHelper, appCaches)
     {
         this._memberTypeService = memberTypeService;
     }
@@ -202,10 +203,29 @@ public class MemberTypeSerializer : ContentTypeBaseSerializer<IMemberType>, ISyn
         return Attempt.Succeed(item as IMemberType);
     }
 
+    // member type doesn't have its own container service (in v15)
+
+    protected override Task<EntityContainer?> FindContainerAsync(Guid key) { 
+        return Task.FromResult(_memberTypeService.GetContainer(key));
+    }
+    protected override Task<IEnumerable<EntityContainer>> FindContainersAsync(string folder, int level)
+    {
+        return Task.FromResult(_memberTypeService.GetContainers(folder, level));
+    }
+    public override Task<IEnumerable<EntityContainer>> GetContainersAsync(IMemberType item)
+    {
+        return Task.FromResult(_memberTypeService.GetContainers(item));
+    }
+
+    public override Task SaveContainerAsync(Guid parent, EntityContainer container)
+    {
+        _memberTypeService.SaveContainer(container, -1);
+        return Task.CompletedTask;
+    }
 
     protected override async Task<Attempt<EntityContainer?, EntityContainerOperationStatus>> CreateContainerAsync(Guid parentKey, string name)
     {
-        var parent = _memberTypeService.Get(parentKey);
+        var parent = await _memberTypeService.GetAsync(parentKey);
         if (parent is null) return Attempt<EntityContainer?, EntityContainerOperationStatus>.Fail(EntityContainerOperationStatus.ParentNotFound);
 
         var result = _memberTypeService.CreateContainer(parent.Id, Guid.NewGuid(), name);

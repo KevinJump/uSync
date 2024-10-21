@@ -29,13 +29,14 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
 
     protected ContentTypeBaseSerializer(
         IEntityService entityService,
+        IEntityTypeContainerService<TObject>? entityTypeContainerService,
         ILogger<ContentTypeBaseSerializer<TObject>> logger,
         IDataTypeService dataTypeService,
         IContentTypeBaseService<TObject> baseService,
         UmbracoObjectTypes containerType,
         IShortStringHelper shortStringHelper,
         AppCaches appCaches)
-        : base(entityService, logger, containerType)
+        : base(entityService, entityTypeContainerService, logger, containerType)
     {
         _dataTypeService = dataTypeService;
         _baseService = baseService;
@@ -1332,12 +1333,6 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
     public override async Task<TObject?> FindItemAsync(string alias)
         => _baseService.Get(alias);
 
-    protected override async Task<EntityContainer?> FindContainerAsync(Guid key)
-        => _baseService.GetContainer(key);
-
-    protected override async Task<IEnumerable<EntityContainer>> FindContainersAsync(string folder, int level)
-        => _baseService.GetContainers(folder, level);
-
     public override async Task SaveItemAsync(TObject item) { 
         if (item.IsDirty() is false) return;
 
@@ -1356,21 +1351,11 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
             await this.SaveItemAsync(item);
     }
 
-
-    protected override async Task SaveContainerAsync(EntityContainer container) { 
-        logger.LogDebug("Saving Container: {key}", container.Key);
-        _baseService.SaveContainer(container);
-    }
-
     public override async Task DeleteItemAsync(TObject item)
         => await _baseService.DeleteAsync(item.Key, Constants.Security.SuperUserKey);
 
     public override string ItemAlias(TObject item)
         => item.Alias;
-
-    protected override async Task<IEnumerable<EntityContainer>> GetContainersAsync(TObject item)
-        => _baseService.GetContainers(item);
-
     #endregion
 
     #region Tab checks

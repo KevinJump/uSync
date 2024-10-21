@@ -24,10 +24,8 @@ internal sealed class uSyncManifestReader : IPackageManifestReader
 {
     public Task<IEnumerable<PackageManifest>> ReadPackageManifestsAsync()
     {
-        var entrypoint = JsonObject.Parse(@"{""name"": ""usync.entrypoint"",
-            ""alias"": ""uSync.EntryPoint"",
-            ""type"": ""entryPoint"",
-            ""js"": ""/App_Plugins/uSync/usync.js""}");
+        var version = GetuSyncVersion();
+        var script = $"/App_Plugins/uSync/usync.js?v={version}";
 
         List<PackageManifest> manifest = [
             new PackageManifest
@@ -36,13 +34,18 @@ internal sealed class uSyncManifestReader : IPackageManifestReader
                 Name = "uSync",
                 AllowTelemetry = true,
                 Version = GetuSyncVersion(),
-                Extensions = [ entrypoint!],
+                Extensions = [ new JsonObject {
+                    ["name"] = "usync.entrypoint",
+                    ["alias"] = "uSync EntryPoint",
+                    ["type"] = "entryPoint",
+                    ["js"] = script
+                }],
                 Importmap = new PackageManifestImportmap
                 {
                     Imports = new Dictionary<string, string>
                     {
-                        {  "@jumoo/uSync", "/App_Plugins/uSync/usync.js" },
-                        {  "@jumoo/uSync/external/signalr", "/App_Plugins/uSync/usync.js" }
+                        {  "@jumoo/uSync", script },
+                        {  "@jumoo/uSync/external/signalr", script }
                     }
                 }
             }
@@ -62,7 +65,7 @@ internal sealed class uSyncManifestReader : IPackageManifestReader
         }
         catch
         {
-            return assembly.GetName()?.Version?.ToString(3) ?? "14.0.0";
+            return assembly.GetName()?.Version?.ToString(3) ?? "15.0.0";
         }
     }
 }

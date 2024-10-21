@@ -20,11 +20,17 @@ public abstract class SyncContainerSerializerBase<TObject>
     where TObject : ITreeEntity
 {
     protected UmbracoObjectTypes containerType;
+    protected IEntityTypeContainerService<TObject>? entityTypeContainerTypeService;
 
-    public SyncContainerSerializerBase(IEntityService entityService, ILogger<SyncContainerSerializerBase<TObject>> logger, UmbracoObjectTypes containerType)
+
+    public SyncContainerSerializerBase(
+        IEntityService entityService,
+        IEntityTypeContainerService<TObject>? entityTypeContainerService,
+        ILogger<SyncContainerSerializerBase<TObject>> logger, UmbracoObjectTypes containerType)
         : base(entityService, logger)
     {
         this.containerType = containerType;
+        entityTypeContainerTypeService = entityTypeContainerService;
     }
 
     protected override async Task<SyncAttempt<TObject>> ProcessDeleteAsync(Guid key, string alias, SerializerFlags flags)
@@ -81,7 +87,7 @@ public abstract class SyncContainerSerializerBase<TObject>
                 if (container != null)
                 {
                     treeItem = container;
-                    logger.LogDebug("Parent is Folder {TreeItemId}", treeItem.Id);
+                    logger.LogDebug("Parent is Folder {TreeItemId}", treeItem.Key);
 
                     // update the container key if its different (because we don't serialize folders on their own)
                     if (container.Key != folderKey)
@@ -90,7 +96,7 @@ public abstract class SyncContainerSerializerBase<TObject>
                         {
                             logger.LogDebug("Folder Found: Key Different");
                             container.Key = folderKey;
-                            await SaveContainerAsync(container);
+                            await SaveContainerAsync(treeItem.Key, container);
                         }
                     }
                 }
@@ -150,7 +156,6 @@ public abstract class SyncContainerSerializerBase<TObject>
     protected virtual IEnumerable<EntityContainer> GetContainers(TObject item)
         => GetContainersAsync(item).Result;
 
-    protected abstract Task<IEnumerable<EntityContainer>> GetContainersAsync(TObject item);
 
     protected XElement? GetFolderNode(IEnumerable<EntityContainer> containers)
     {
@@ -177,11 +182,62 @@ public abstract class SyncContainerSerializerBase<TObject>
 
     #region Finders
 
-    protected abstract Task<EntityContainer?> FindContainerAsync(Guid key);
+    protected virtual async Task<EntityContainer?> FindContainerAsync(Guid key)
+       => entityTypeContainerTypeService is null || key == Guid.Empty
+            ? null 
+            : await entityTypeContainerTypeService.GetAsync(key);
 
-    protected abstract Task<IEnumerable<EntityContainer>> FindContainersAsync(string folder, int level);
+    protected virtual async Task<IEnumerable<EntityContainer>> FindContainersAsync(string folder, int level)
+        => entityTypeContainerTypeService is null 
+            ? [] 
+            : await entityTypeContainerTypeService.GetAsync(folder, level);
 
-    protected abstract Task<Attempt<EntityContainer?, EntityContainerOperationStatus>> CreateContainerAsync(Guid parentKey, string name);
+    public virtual async Task<IEnumerable<EntityContainer>> GetContainersAsync(TObject item)
+    { 
+        if (entityTypeContainerTypeService is null) return [];
+
+        var parent = await entityTypeContainerTypeService.GetParentAsync(item);
+        if (parent is null) return [];
+
+        var containers = new List<EntityContainer>() { parent };
+
+        while (parent is not null)
+        {
+            parent = await entityTypeContainerTypeService.GetParentAsync(parent);
+            if (parent is not null)
+                containers.Add(parent);
+        }
+
+        return containers;
+    }
+
+
+    public virtual async Task SaveContainerAsync(Guid parent, EntityContainer container)
+    {
+        if (entityTypeContainerTypeService is null ||
+            string.IsNullOrEmpty(container.Name)) return;
+
+        if (container.HasIdentity)
+            await entityTypeContainerTypeService.UpdateAsync(container.Key, container.Name, Constants.Security.SuperUserKey);
+        else
+            await entityTypeContainerTypeService.CreateAsync(container.Key, container.Name, parent, Constants.Security.SuperUserKey);
+
+    }
+
+    protected virtual async Task<Attempt<EntityContainer?, EntityContainerOperationStatus>> CreateContainerAsync(Guid parentKey, string name)
+    {
+        if (entityTypeContainerTypeService is null) return Attempt<EntityContainer?, EntityContainerOperationStatus>.Fail(EntityContainerOperationStatus.InvalidObjectType);
+
+        var parent = await entityTypeContainerTypeService.GetAsync(parentKey);
+        if (parent is null || parent.Name is null)
+            return Attempt<EntityContainer?, EntityContainerOperationStatus>.Fail(EntityContainerOperationStatus.ParentNotFound);
+
+        var existing = (await entityTypeContainerTypeService.GetAsync(name, parent.Level)).FirstOrDefault(x => x.Name.InvariantEquals(name));    
+        if (existing is null || existing.Name is null)
+            return await entityTypeContainerTypeService.CreateAsync(Guid.NewGuid(), name, parentKey, Constants.Security.SuperUserKey);
+        else 
+            return await entityTypeContainerTypeService.UpdateAsync(existing.Key, existing.Name, Constants.Security.SuperUserKey);
+    }
 
     protected virtual async Task<EntityContainer?> FindFolderAsync(Guid key, string path)
     {
@@ -226,12 +282,6 @@ public abstract class SyncContainerSerializerBase<TObject>
     }
 
     #endregion
-
-    #region Container stuff
-    protected abstract Task SaveContainerAsync(EntityContainer container);
-
-    #endregion
-
 
     #region container folder cache 
 

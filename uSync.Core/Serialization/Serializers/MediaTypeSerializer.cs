@@ -27,7 +27,7 @@ public class MediaTypeSerializer : ContentTypeBaseSerializer<IMediaType>, ISyncS
         IMediaTypeService mediaTypeService,
         IShortStringHelper shortStringHelper,
         AppCaches appCaches, IMediaTypeContainerService mediaTypeContainerService)
-        : base(entityService, logger, dataTypeService, mediaTypeService, UmbracoObjectTypes.MediaTypeContainer, shortStringHelper, appCaches)
+        : base(entityService, mediaTypeContainerService, logger, dataTypeService, mediaTypeService, UmbracoObjectTypes.MediaTypeContainer, shortStringHelper, appCaches)
     {
         this._mediaTypeService = mediaTypeService;
         _mediaTypeContainerService = mediaTypeContainerService;

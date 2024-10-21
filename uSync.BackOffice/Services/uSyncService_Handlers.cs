@@ -124,6 +124,7 @@ public partial class uSyncService
     /// <summary>
     ///  run an export for a given handler 
     /// </summary>
+    [Obsolete("use ExportHandlerAsync will be removed in v16")]
     public IEnumerable<uSyncAction> ExportHandler(string handler, uSyncImportOptions options)
         => ExportHandlerAsync(handler, options).Result;
 

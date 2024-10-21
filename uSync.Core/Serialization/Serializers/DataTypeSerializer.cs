@@ -35,7 +35,7 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
 		ConfigurationSerializerCollection configurationSerializers,
 		PropertyEditorCollection propertyEditors,
 		IConfigurationEditorJsonSerializer jsonSerializer)
-		: base(entityService, logger, UmbracoObjectTypes.DataTypeContainer)
+		: base(entityService,  dataTypeContainerService, logger, UmbracoObjectTypes.DataTypeContainer)
 	{
 		this._dataTypeService = dataTypeService;
         this._dataTypeContainerService = dataTypeContainerService;
@@ -244,9 +244,6 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
         return SyncAttempt<XElement>.Succeed(item.Name ?? item.Id.ToString(), node, typeof(IDataType), ChangeType.Export);
     }
 
-    protected override async Task<IEnumerable<EntityContainer>> GetContainersAsync(IDataType item)
-        => _dataTypeService.GetContainers(item);
-
     private XElement SerializeConfiguration(IDataType item)
     {
         var serializer = _configurationSerializers.GetSerializer(item.EditorAlias);
@@ -338,15 +335,6 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
     public override async Task<IDataType?> FindItemAsync(string alias)
         => await _dataTypeService.GetAsync(alias);
 
-    protected override async Task<EntityContainer?> FindContainerAsync(Guid key)
-        => key == Guid.Empty ? null : await _dataTypeContainerService.GetAsync(key);
-
-    protected override async Task<IEnumerable<EntityContainer>> FindContainersAsync(string folder, int level)
-        => await _dataTypeContainerService.GetAsync(folder, level);
-
-    protected override async Task<Attempt<EntityContainer?, EntityContainerOperationStatus>> CreateContainerAsync(Guid parentKey, string name)
-        => await _dataTypeContainerService.CreateAsync(Guid.NewGuid(), name, parentKey, Constants.Security.SuperUserKey);
-
     public override async Task SaveItemAsync(IDataType item)
     {
         if (item.IsDirty() is false) return;
@@ -362,9 +350,6 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
         foreach(var item in items)
             await SaveItemAsync(item);
     }
-
-    protected override async Task SaveContainerAsync(EntityContainer container)
-        => _dataTypeService.SaveContainer(container);
 
     public override Task DeleteItemAsync(IDataType item)
         => _dataTypeService.DeleteAsync(item.Key, Constants.Security.SuperUserKey);

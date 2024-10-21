@@ -243,7 +243,8 @@ public abstract class SyncHandlerBase<TObject>
         // logger.LogDebug("Cache miss [{key}]", cacheKey);
         if (key == Guid.Empty)
         {
-            return await Task.FromResult(entityService.GetChildren(key, objectType));
+            var result = await Task.FromResult(entityService.GetChildren(null, objectType));
+            return result;
         }
         else
         {
@@ -276,7 +277,7 @@ public abstract class SyncHandlerBase<TObject>
         if (this.ItemContainerType == UmbracoObjectTypes.Unknown)
             return await Task.FromResult(Enumerable.Empty<IEntity>());
         
-        return await Task.FromResult<IEnumerable<IEntity>>(entityService.GetChildren(key, this.ItemContainerType));
+        return await Task.FromResult<IEnumerable<IEntity>>(entityService.GetChildren(key != Guid.Empty ? key : null, this.ItemContainerType));
     }
 
     /// <inheritdoc/>

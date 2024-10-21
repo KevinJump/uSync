@@ -108,7 +108,7 @@ public class LanguageHandler : SyncHandlerBase<ILanguage>, ISyncHandler,
 
 
     protected override async Task<IEnumerable<IEntity>> GetChildItemsAsync(Guid key)
-        => key != Guid.Empty
+        => key == Guid.Empty
             ? await _languageService.GetAllAsync()
             : Enumerable.Empty<IEntity>();
 

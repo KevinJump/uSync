@@ -240,7 +240,7 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
                 details.AddUpdate("Parent", item.MasterTemplateAlias ?? string.Empty, master);
 
                 logger.LogDebug("Setting Master {alias}", masterItem.Alias);
-                item.SetMasterTemplate(masterItem);
+                // item.SetMasterTemplate(masterItem);
 
                 await SaveItemAsync(item);
                 saved = true;

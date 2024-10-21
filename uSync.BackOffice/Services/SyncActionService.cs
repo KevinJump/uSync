@@ -153,6 +153,9 @@ internal class SyncActionService : ISyncActionService
     }
 
     public SyncActionResult ExportHandler(SyncActionOptions options, uSyncCallbacks? callbacks)
+        => ExportHandlerAsync(options, callbacks).Result;
+
+    public async Task<SyncActionResult> ExportHandlerAsync(SyncActionOptions options, uSyncCallbacks? callbacks)
     {
         if (options.Handler is null) return new();
 
@@ -161,12 +164,12 @@ internal class SyncActionService : ISyncActionService
 
         var folders = GetFolders(options);
 
-		var actions = _uSyncService.ExportHandler(options.Handler, new uSyncImportOptions
+        var actions = (await _uSyncService.ExportHandlerAsync(options.Handler, new uSyncImportOptions
         {
             Callbacks = callbacks,
             HandlerSet = handlerSet,
             Folders = folders
-        }).ToList();
+        })).ToList();
 
         if (_uSyncConfig.Settings.SummaryDashboard || actions.Count > _uSyncConfig.Settings.SummaryLimit)
             actions = actions.ConvertToSummary(_uSyncConfig.Settings.SummaryDashboard).ToList();
