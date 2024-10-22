@@ -13,7 +13,7 @@ public class uSyncSettings
     /// Location where all uSync files are saved by default
     /// </summary>
     [DefaultValue("uSync/v14/")]
-    public string RootFolder { get; set; } = "uSync/v14/";
+    public string RootFolder { get; set; } = $"uSync/v{uSync.Version.Major}/";
 
     /// <summary>
     ///  collection of folders uSync looks in when performing imports.

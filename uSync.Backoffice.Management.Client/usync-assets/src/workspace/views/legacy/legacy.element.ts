@@ -40,8 +40,12 @@ export class SyncLegacyFilesElement extends UmbLitElement {
 
 		const confirmContext = modalContext?.open(this, UMB_CONFIRM_MODAL, {
 			data: {
-				headline: this.localize.term('uSync_legacyCopyTitle'),
-				content: html`${this.localize.term('uSync_legacyCopyContent')}`,
+				headline: this.localize.term('uSync_legacyCopyTitle', [
+					this._legacy?.latestVersion,
+				]),
+				content: html`${this.localize.term('uSync_legacyCopyContent', [
+					this._legacy?.latestFolder,
+				])}`,
 				color: 'danger',
 				confirmLabel: 'Copy',
 			},
@@ -111,7 +115,7 @@ export class SyncLegacyFilesElement extends UmbLitElement {
 				<h3>Obsolete DataTypes</h3>
 				<p>
 					The following DataTypes - found in the legacy folder - are no longer supported
-					in Umbraco 14 and will need to be converted.
+					in Umbraco 14+ and will need to be converted.
 				</p>
 				<ul>
 					${legacyTypeHtml}
@@ -136,9 +140,12 @@ export class SyncLegacyFilesElement extends UmbLitElement {
 							color="positive"
 							look="primary"
 							@click=${this.#onCopy}
-							>Overwrite v14 folder</uui-button
+							>Overwrite v${this._legacy?.latestVersion} folder</uui-button
 						>
-						<p>Copy the contents of the legacy folder to the new uSync/v14 folder</p>
+						<p>
+							Copy the contents of the legacy folder to the new
+							${this._legacy?.latestFolder} folder
+						</p>
 					</div>
 				</uui-box>
 

@@ -2,7 +2,7 @@ import { defineConfig } from '@hey-api/openapi-ts';
 
 export default defineConfig({
 	client: 'legacy/fetch',
-	input: 'http://localhost:29792/umbraco/swagger/uSync/swagger.json',
+	input: 'http://localhost:53015/umbraco/swagger/uSync/swagger.json',
 	output: {
 		format: 'prettier',
 		path: 'src/api',

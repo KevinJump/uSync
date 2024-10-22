@@ -3,6 +3,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
+using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Legacy;
 
 namespace uSync.Backoffice.Management.Api.Controllers.Migrations;
@@ -33,7 +34,7 @@ public class uSyncMigrationController : uSyncControllerBase
         {
             HasLegacy = folder != null,
             LegacyFolder = folder,
-            LegacyTypes = [.. types.Distinct()]
+            LegacyTypes = [.. types.Distinct()],
         };
     }
 
@@ -43,7 +44,7 @@ public class uSyncMigrationController : uSyncControllerBase
 	{
 		if (_legacyService.TryGetLatestLegacyFolder(out var folder) && folder is not null)
 		{
-			_legacyService.IgnoreLegacyFolder(folder, "folder will not showup as legacy.");
+			_legacyService.IgnoreLegacyFolder(folder, "folder will not show up as legacy.");
 			return true;
 		}
 
@@ -57,7 +58,7 @@ public class uSyncMigrationController : uSyncControllerBase
 		if (_legacyService.TryGetLatestLegacyFolder(out var folder) && folder is not null)
 		{
 			_legacyService.CopyLegacyFolder(folder);
-            _legacyService.IgnoreLegacyFolder(folder, "folder has been copied to v14 as latest");
+            _legacyService.IgnoreLegacyFolder(folder, $"folder has been copied to v{uSync.BackOffice.uSync.Version.Major} as latest");
 			return true;
 		}
 
@@ -72,4 +73,8 @@ public class SyncLegacyCheckResponse
     public string? LegacyFolder { get; set; }
 
     public string[] LegacyTypes { get; set; } = [];
+
+    public string LatestFolder { get; set; } = $"uSync/{uSync.BackOffice.uSync.Version.Major}";
+    public string LatestVersion { get; set; } = uSync.BackOffice.uSync.Version.Major.ToString();
+
 }

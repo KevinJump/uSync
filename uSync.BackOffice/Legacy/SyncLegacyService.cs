@@ -13,13 +13,7 @@ namespace uSync.BackOffice.Legacy;
 /// </summary>
 internal class SyncLegacyService : ISyncLegacyService
 {
-    private static readonly string[] _legacyFolders = [
-        "~/uSync/v13",
-        "~/uSync/v12",
-        "~/uSync/v11",
-        "~/uSync/v10",
-        "~/uSync/v9"
-    ];
+    private int _majorVersion = uSync.Version.Major;
 
     private static readonly Dictionary<string, string> _legacyTypes = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -43,8 +37,9 @@ internal class SyncLegacyService : ISyncLegacyService
     {
         folder = null;
 
-        foreach (var legacyFolder in _legacyFolders)
+        for(int n = _majorVersion-1; n > 8; n--)
         {
+            var legacyFolder = $"~/uSync/v{n}";
             if (_syncFileService.DirectoryExists(legacyFolder))
             {
                 if (_syncFileService.FileExists(Path.Combine(legacyFolder, ".ignore")) is true)
@@ -70,18 +65,21 @@ internal class SyncLegacyService : ISyncLegacyService
 
     public bool CopyLegacyFolder(string folder)
     {
+        var latestPath = $"~/uSync/v{_majorVersion}";
+        var backupPath = $"~/uSync/v{_majorVersion}-backup";
+
         if (_syncFileService.DirectoryExists(folder) is false)
 			return false;
 
-        if (_syncFileService.DirectoryExists("~/uSync/v14"))
+        if (_syncFileService.DirectoryExists(latestPath))
         {
-            _syncFileService.CopyFolder("~/uSync/v14", "~/uSync/v14-backup");
-            _syncFileService.DeleteFolder("~/uSync/v14");
+            _syncFileService.CopyFolder(latestPath, backupPath);
+            _syncFileService.DeleteFolder(latestPath);
 		}
 
-        _syncFileService.CreateFolder("~/uSync/v14");
+        _syncFileService.CreateFolder(latestPath);
 
-		_syncFileService.CopyFolder(folder, "~/uSync/v14");
+        _syncFileService.CopyFolder(folder, latestPath);
         return true;
     }
 

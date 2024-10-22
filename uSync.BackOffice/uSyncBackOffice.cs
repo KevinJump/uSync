@@ -1,10 +1,16 @@
-﻿namespace uSync.BackOffice;
+﻿using System;
+
+using Umbraco.Cms.Core.Semver;
+
+namespace uSync.BackOffice;
 
 /// <summary>
 ///  global values for uSync 
 /// </summary>
 public class uSync
 {
+    internal static Version Version => typeof(uSync).Assembly.GetName().Version ?? new Version(1, 0, 0);
+
     /// <summary>
     ///  name of the app
     /// </summary>

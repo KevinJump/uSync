@@ -30,9 +30,9 @@ export default {
 		legacyBanner:
 			'This site contains files from a previous version of uSync, view the details in the legacy tab.',
 
-		legacyCopyTitle: 'Overwrite uSync/v14 files',
+		legacyCopyTitle: 'Overwrite v%0% files',
 		legacyCopyContent:
-			'Are you sure you want to overwrite the contents of the v14 folder with the legacy uSync folder files?',
+			'Are you sure you want to overwrite the contents of the %0% folder with the legacy uSync folder files?',
 
 		legacyIgnoreTitle: 'Ignore legacy files',
 		legacyIgnoreContent:

@@ -113,6 +113,8 @@ export type SyncLegacyCheckResponse = {
     hasLegacy: boolean;
     legacyFolder?: (string) | null;
     legacyTypes: Array<(string)>;
+    latestFolder: string;
+    latestVersion: string;
 };
 
 export type uSyncActionView = {

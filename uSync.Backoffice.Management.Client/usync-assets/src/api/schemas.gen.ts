@@ -230,7 +230,7 @@ export const SyncHandlerSummarySchema = {
 } as const;
 
 export const SyncLegacyCheckResponseSchema = {
-    required: ['hasLegacy', 'legacyTypes'],
+    required: ['hasLegacy', 'latestFolder', 'latestVersion', 'legacyTypes'],
     type: 'object',
     properties: {
         hasLegacy: {
@@ -245,6 +245,12 @@ export const SyncLegacyCheckResponseSchema = {
             items: {
                 type: 'string'
             }
+        },
+        latestFolder: {
+            type: 'string'
+        },
+        latestVersion: {
+            type: 'string'
         }
     },
     additionalProperties: false
