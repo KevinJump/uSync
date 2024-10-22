@@ -14,8 +14,7 @@ public static class DependencyGraph
         var queue = new Queue<T>(
             nodes.Where(x => edges.All(e => e.Node.Equals(x) == false)));
 
-
-        while (queue.Any())
+        while (queue.Count != 0)
         {
             // remove this item add it to the queue.
             var next = queue.Dequeue();

@@ -64,18 +64,23 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
         var info = await base.SerializeInfoAsync(item, options);
 
         info.Add(SerializePublishedStatus(item, options));
-        info.Add(SerializeSchedule(item, options));
-        info.Add(SerializeTemplate(item, options));
+
+        info.Add(await SerializeScheduleAsync(item, options));
+        info.Add(await SerializeTemplateAsync(item, options));
 
         if (options.GetSetting<bool>("IncludeUserInfo", false))
         {
-            info.Add(SerializerWriterInfo(item, options));
+            info.Add(await SerializerWriterInfoAsync(item, options));
         }
 
         return info;
     }
 
-    protected virtual async Task<XElement> SerializeTemplate(IContent item, SyncSerializerOptions options)
+    [Obsolete("Use SerializeTemplateAsync will be removed in v16")]
+    protected virtual XElement SerializeTemplate(IContent item, SyncSerializerOptions options)
+        => SerializeTemplateAsync(item, options).Result;
+
+    protected virtual async Task<XElement> SerializeTemplateAsync(IContent item, SyncSerializerOptions options)
     {
         if (item.TemplateId != null && item.TemplateId.HasValue)
         {
@@ -112,45 +117,54 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
         return published;
     }
 
+    [Obsolete("Use SerializeScheduleAsync will be removed in v16")]
     protected virtual XElement SerializeSchedule(IContent item, SyncSerializerOptions options)
+        => SerializeScheduleAsync(item, options).Result;
+
+    protected virtual Task<XElement> SerializeScheduleAsync(IContent item, SyncSerializerOptions options)
     {
-        var node = new XElement("Schedule");
-        var schedules = contentService.GetContentScheduleByContentId(item.Id);
-
-        var cultures = options.GetCultures();
-
-        if (schedules != null)
+        return TaskHelper.FromResultOf(() =>
         {
-            foreach (var schedule in schedules.FullSchedule
-                .OrderBy(x => x.Action.ToString())
-                .ThenBy(x => x.Culture))
-            {
+            var node = new XElement("Schedule");
+            var schedules = contentService.GetContentScheduleByContentId(item.Id);
 
-                // only export if its a blank culture or one of the ones we have set. 
-                if (cultures.IsValidOrBlank(schedule.Culture))
+            var cultures = options.GetCultures();
+
+            if (schedules != null)
+            {
+                foreach (var schedule in schedules.FullSchedule
+                    .OrderBy(x => x.Action.ToString())
+                    .ThenBy(x => x.Culture))
                 {
-                    node.Add(new XElement("ContentSchedule",
-                        new XElement("Culture", schedule.Culture),
-                        new XElement("Action", schedule.Action),
-                        new XElement("Date", schedule.Date.ToString("s"))));
+
+                    // only export if its a blank culture or one of the ones we have set. 
+                    if (cultures.IsValidOrBlank(schedule.Culture))
+                    {
+                        node.Add(new XElement("ContentSchedule",
+                            new XElement("Culture", schedule.Culture),
+                            new XElement("Action", schedule.Action),
+                            new XElement("Date", schedule.Date.ToString("s"))));
+                    }
                 }
             }
-        }
 
-        return node;
+            return node;
+        });
     }
 
-
-    private XElement SerializerWriterInfo(IContent item, SyncSerializerOptions options)
+    private Task<XElement> SerializerWriterInfoAsync(IContent item, SyncSerializerOptions options)
     {
-        var userInfoNode = new XElement("UserInfo");
-        var usernames = new Dictionary<int, string>();
+        return TaskHelper.FromResultOf(() =>
+        {
+            var userInfoNode = new XElement("UserInfo");
+            var usernames = new Dictionary<int, string>();
 
-        userInfoNode.Add(new XElement("Writer", usernames.GetUsername(item.WriterId, userService.GetUserById!)));
-        userInfoNode.Add(new XElement("Creator", usernames.GetUsername(item.CreatorId, userService.GetUserById!)));
-        userInfoNode.Add(new XElement("Publisher", usernames.GetUsername(item.PublisherId, userService.GetUserById!)));
+            userInfoNode.Add(new XElement("Writer", usernames.GetUsername(item.WriterId, userService.GetUserById!)));
+            userInfoNode.Add(new XElement("Creator", usernames.GetUsername(item.CreatorId, userService.GetUserById!)));
+            userInfoNode.Add(new XElement("Publisher", usernames.GetUsername(item.PublisherId, userService.GetUserById!)));
 
-        return userInfoNode;
+            return userInfoNode;
+        });
     }
 
     #endregion
@@ -311,74 +325,77 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
         return SyncAttempt<IContent>.Succeed(item.Name ?? item.Id.ToString(), item, ChangeType.NoChange);
     }
 
-    private async Task<List<uSyncChange>> DeserializeSchedulesAsync(IContent item, XElement node, SyncSerializerOptions options)
+    private Task<List<uSyncChange>> DeserializeSchedulesAsync(IContent item, XElement node, SyncSerializerOptions options)
     {
-        var changes = new List<uSyncChange>();
-        var nodeSchedules = new ContentScheduleCollection();
-        var currentSchedules = contentService.GetContentScheduleByContentId(item.Id);
-        var cultures = options.GetDeserializedCultures(node);
-
-        var schedules = node.Element("Info")?.Element("Schedule");
-        if (schedules != null && schedules.HasElements)
+        return TaskHelper.FromResultOf(() =>
         {
-            logger.LogDebug("De-serialize Schedules {name}", item.Name);
+            var changes = new List<uSyncChange>();
+            var nodeSchedules = new ContentScheduleCollection();
+            var currentSchedules = contentService.GetContentScheduleByContentId(item.Id);
+            var cultures = options.GetDeserializedCultures(node);
 
-            foreach (var schedule in schedules.Elements("ContentSchedule"))
+            var schedules = node.Element("Info")?.Element("Schedule");
+            if (schedules != null && schedules.HasElements)
             {
-                var importSchedule = GetContentScheduleFromNode(schedule);
-                if (cultures.IsValidOrBlank(importSchedule.Culture))
+                logger.LogDebug("De-serialize Schedules {name}", item.Name);
+
+                foreach (var schedule in schedules.Elements("ContentSchedule"))
                 {
-                    if (importSchedule.Date < DateTime.Now)
-                        continue; // don't add schedules in the past
-
-                    logger.LogDebug("Adding {action} {culture} {date}", importSchedule.Action, importSchedule.Culture, importSchedule.Date);
-                    nodeSchedules.Add(importSchedule);
-
-                    var existing = FindSchedule(currentSchedules, importSchedule);
-                    if (existing != null)
+                    var importSchedule = GetContentScheduleFromNode(schedule);
+                    if (cultures.IsValidOrBlank(importSchedule.Culture))
                     {
-                        currentSchedules.Remove(existing);
+                        if (importSchedule.Date < DateTime.Now)
+                            continue; // don't add schedules in the past
+
+                        logger.LogDebug("Adding {action} {culture} {date}", importSchedule.Action, importSchedule.Culture, importSchedule.Date);
+                        nodeSchedules.Add(importSchedule);
+
+                        var existing = FindSchedule(currentSchedules, importSchedule);
+                        if (existing != null)
+                        {
+                            currentSchedules.Remove(existing);
+                        }
+                        currentSchedules.Add(importSchedule);
+                        changes.Add(uSyncChange.Update("Schedule", $"{importSchedule.Culture} {importSchedule.Action}", "", importSchedule.Date.ToString()));
                     }
-                    currentSchedules.Add(importSchedule);
-                    changes.Add(uSyncChange.Update("Schedule", $"{importSchedule.Culture} {importSchedule.Action}", "", importSchedule.Date.ToString()));
                 }
             }
-        }
 
-        if (currentSchedules != null)
-        {
-            // remove things that are in the current but not the import. 
-            var toRemove = currentSchedules.FullSchedule.Where(x => FindSchedule(nodeSchedules, x) == null)
-                .ToList();
-
-            if (toRemove.Count > 0)
-                logger.LogDebug("Removing Schedules {name} ({count} to remove)", item.Name, toRemove.Count);
-
-            foreach (var oldItem in toRemove)
+            if (currentSchedules != null)
             {
-                if (cultures.IsValidOrBlank(oldItem.Culture))
+                // remove things that are in the current but not the import. 
+                var toRemove = currentSchedules.FullSchedule.Where(x => FindSchedule(nodeSchedules, x) == null)
+                    .ToList();
+
+                if (toRemove.Count > 0)
+                    logger.LogDebug("Removing Schedules {name} ({count} to remove)", item.Name, toRemove.Count);
+
+                foreach (var oldItem in toRemove)
                 {
-                    logger.LogDebug("Removing Schedule : {culture} {action} {date}", oldItem.Culture, oldItem.Action, oldItem.Date);
-                    // only remove a culture if this serialization included it. 
-                    // we don't remove things we didn't serialize. 
-                    currentSchedules.Remove(oldItem);
+                    if (cultures.IsValidOrBlank(oldItem.Culture))
+                    {
+                        logger.LogDebug("Removing Schedule : {culture} {action} {date}", oldItem.Culture, oldItem.Action, oldItem.Date);
+                        // only remove a culture if this serialization included it. 
+                        // we don't remove things we didn't serialize. 
+                        currentSchedules.Remove(oldItem);
 
-                    changes.Add(uSyncChange.Delete("Schedule", $"{oldItem.Culture} - {oldItem.Action}", oldItem.Date.ToString()));
+                        changes.Add(uSyncChange.Delete("Schedule", $"{oldItem.Culture} - {oldItem.Action}", oldItem.Date.ToString()));
+                    }
                 }
+
+                if (changes.Count != 0)
+                {
+                    logger.LogDebug("Saving Schedule changes: {item}", item.Name);
+                    contentService.PersistContentSchedule(item, currentSchedules);
+                    return changes;
+                }
+
+                return [];
             }
 
-            if (changes.Count != 0)
-            {
-                logger.LogDebug("Saving Schedule changes: {item}", item.Name);
-                await Task.Run(() => contentService.PersistContentSchedule(item, currentSchedules));
-                return changes;
-            }
 
             return [];
-        }
-
-
-        return [];
+        });
     }
 
     private static ContentSchedule GetContentScheduleFromNode(XElement scheduleNode)
