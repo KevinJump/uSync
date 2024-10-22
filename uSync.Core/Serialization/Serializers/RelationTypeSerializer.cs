@@ -167,7 +167,7 @@ public class RelationTypeSerializer
 
     protected override Task<SyncAttempt<XElement>> SerializeCoreAsync(IRelationType item, SyncSerializerOptions options)
     {
-        return TaskHelper.FromResultOf(() =>
+        return uSyncTaskHelper.FromResultOf(() =>
         {
             var node = this.InitializeBaseNode(item, item.Alias);
 
@@ -265,18 +265,18 @@ public class RelationTypeSerializer
 
     // control methods.
     public override Task DeleteItemAsync(IRelationType item)
-        => TaskHelper.FromResultOf(() => _relationService.Delete(item));
+        => uSyncTaskHelper.FromResultOf(() => _relationService.Delete(item));
 
     public override Task<IRelationType?> FindItemAsync(Guid key)
-        => TaskHelper.FromResultOf(() => _relationService.GetRelationTypeById(key));
+        => uSyncTaskHelper.FromResultOf(() => _relationService.GetRelationTypeById(key));
 
     public override Task<IRelationType?> FindItemAsync(string alias)
-        => TaskHelper.FromResultOf(() => _relationService.GetRelationTypeByAlias(alias));
+        => uSyncTaskHelper.FromResultOf(() => _relationService.GetRelationTypeByAlias(alias));
 
 
     public override string ItemAlias(IRelationType item)
         => item.Alias;
 
     public override Task SaveItemAsync(IRelationType item)
-        => TaskHelper.FromResultOf(() => _relationService.Save(item));
+        => uSyncTaskHelper.FromResultOf(() => _relationService.Save(item));
 }

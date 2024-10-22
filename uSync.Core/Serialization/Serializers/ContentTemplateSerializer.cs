@@ -109,7 +109,7 @@ public class ContentTemplateSerializer : ContentSerializer, ISyncSerializer<ICon
 
     public override Task<IContent?> FindItemAsync(Guid key)
     {
-        return TaskHelper.FromResultOf(() =>
+        return uSyncTaskHelper.FromResultOf(() =>
         {
             // TODO: Umbraco 8 bug, the key is sometimes an old version
             var entity = entityService.Get(key);
@@ -122,7 +122,7 @@ public class ContentTemplateSerializer : ContentSerializer, ISyncSerializer<ICon
 
     protected override Task<Attempt<IContent?>> CreateItemAsync(string alias, ITreeEntity? parent, string itemType)
     {
-        return TaskHelper.FromResultOf(() =>
+        return uSyncTaskHelper.FromResultOf(() =>
         {
             var contentType = _contentTypeService.Get(itemType);
             if (contentType == null) return
@@ -149,12 +149,12 @@ public class ContentTemplateSerializer : ContentSerializer, ISyncSerializer<ICon
     }
 
     public override Task SaveItemAsync(IContent item)
-        => TaskHelper.FromResultOf(() => {
+        => uSyncTaskHelper.FromResultOf(() => {
             contentService.SaveBlueprint(item);
         });
 
     public override Task DeleteItemAsync(IContent item)
-        => TaskHelper.FromResultOf(() => {
+        => uSyncTaskHelper.FromResultOf(() => {
             contentService.DeleteBlueprint(item); 
         });
 }

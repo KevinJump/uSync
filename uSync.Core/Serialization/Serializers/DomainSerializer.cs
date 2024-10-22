@@ -108,7 +108,7 @@ public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncSerializer<IDo
 
     protected override Task<SyncAttempt<XElement>> SerializeCoreAsync(IDomain item, SyncSerializerOptions options)
     {
-        return TaskHelper.FromResultOf(() =>
+        return uSyncTaskHelper.FromResultOf(() =>
         {
 
             var node = new XElement(ItemType,

@@ -1332,7 +1332,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         => await _baseService.GetAsync(key);
 
     public override Task<TObject?> FindItemAsync(string alias)
-        => TaskHelper.FromResultOf(() => {
+        => uSyncTaskHelper.FromResultOf(() => {
             return _baseService.Get(alias);
         });
 

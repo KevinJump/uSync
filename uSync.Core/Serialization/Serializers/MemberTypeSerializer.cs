@@ -183,7 +183,7 @@ public class MemberTypeSerializer : ContentTypeBaseSerializer<IMemberType>, ISyn
 
     protected override Task<Attempt<IMemberType?>> CreateItemAsync(string alias, ITreeEntity? parent, string itemType)
     {
-        return TaskHelper.FromResultOf(() =>
+        return uSyncTaskHelper.FromResultOf(() =>
         {
             var safeAlias = GetSafeItemAlias(alias);
 

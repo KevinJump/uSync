@@ -9,7 +9,7 @@ namespace uSync.Core.Extensions;
 /// <summary>
 ///  wrappers for while we wait for some things to become async
 /// </summary>
-internal static class TaskHelper
+public static class uSyncTaskHelper
 {
     public static Task FromResultOf(Action action)
     {

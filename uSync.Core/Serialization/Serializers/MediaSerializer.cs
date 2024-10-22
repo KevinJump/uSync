@@ -207,7 +207,7 @@ public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncSerializer<IM
 
     protected override Task<Attempt<IMedia?>> CreateItemAsync(string alias, ITreeEntity? parent, string itemType)
     {
-        return TaskHelper.FromResultOf(() =>
+        return uSyncTaskHelper.FromResultOf(() =>
         {
             var parentId = parent != null ? parent.Id : -1;
             var item = _mediaService.CreateMedia(alias, parentId, itemType);
@@ -218,14 +218,14 @@ public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncSerializer<IM
 
 
     public override Task<IMedia?> FindItemAsync(Guid key)
-        => TaskHelper.FromResultOf(() =>
+        => uSyncTaskHelper.FromResultOf(() =>
         {
             return _mediaService.GetById(key);
         });
 
     protected override Task<IMedia?> FindAtRootAsync(string alias)
     {
-        return TaskHelper.FromResultOf(() =>
+        return uSyncTaskHelper.FromResultOf(() =>
         {
             var rootNodes = _mediaService.GetRootMedia();
             if (rootNodes.Any())
@@ -238,12 +238,12 @@ public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncSerializer<IM
     }
 
     public override Task SaveAsync(IEnumerable<IMedia> items)
-        => TaskHelper.FromResultOf(() => { return _mediaService.Save(items); });
+        => uSyncTaskHelper.FromResultOf(() => { return _mediaService.Save(items); });
 
     public override Task SaveItemAsync(IMedia item)
-        => TaskHelper.FromResultOf(() => { return _mediaService.Save(item); });
+        => uSyncTaskHelper.FromResultOf(() => { return _mediaService.Save(item); });
 
     public override Task DeleteItemAsync(IMedia item)
-        => TaskHelper.FromResultOf(() => { return _mediaService.Delete(item); });
+        => uSyncTaskHelper.FromResultOf(() => { return _mediaService.Delete(item); });
 
 }

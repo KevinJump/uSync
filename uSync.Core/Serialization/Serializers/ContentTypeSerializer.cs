@@ -308,7 +308,7 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
 
     protected override Task<Attempt<IContentType?>> CreateItemAsync(string alias, ITreeEntity? parent, string itemType)
     {
-        return TaskHelper.FromResultOf(() =>
+        return uSyncTaskHelper.FromResultOf(() =>
         {
             var safeAlias = GetSafeItemAlias(alias);
 

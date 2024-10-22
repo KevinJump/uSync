@@ -108,7 +108,7 @@ public class MediaTypeSerializer : ContentTypeBaseSerializer<IMediaType>, ISyncS
 
     protected override Task<Attempt<IMediaType?>> CreateItemAsync(string alias, ITreeEntity? parent, string itemType)
     {
-        return TaskHelper.FromResultOf(() =>
+        return uSyncTaskHelper.FromResultOf(() =>
         {
             var safeAlias = GetSafeItemAlias(alias);
 

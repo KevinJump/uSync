@@ -195,7 +195,7 @@ public class WebhookSerializer : SyncSerializerBase<IWebhook>, ISyncSerializer<I
 
     protected override Task<SyncAttempt<XElement>> SerializeCoreAsync(IWebhook item, SyncSerializerOptions options)
 	{
-		return TaskHelper.FromResultOf(() =>
+		return uSyncTaskHelper.FromResultOf(() =>
 		{
 
 			var node = InitializeBaseNode(item, item.Url);

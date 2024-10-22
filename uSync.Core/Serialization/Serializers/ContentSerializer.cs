@@ -123,7 +123,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
 
     protected virtual Task<XElement> SerializeScheduleAsync(IContent item, SyncSerializerOptions options)
     {
-        return TaskHelper.FromResultOf(() =>
+        return uSyncTaskHelper.FromResultOf(() =>
         {
             var node = new XElement("Schedule");
             var schedules = contentService.GetContentScheduleByContentId(item.Id);
@@ -154,7 +154,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
 
     private Task<XElement> SerializerWriterInfoAsync(IContent item, SyncSerializerOptions options)
     {
-        return TaskHelper.FromResultOf(() =>
+        return uSyncTaskHelper.FromResultOf(() =>
         {
             var userInfoNode = new XElement("UserInfo");
             var usernames = new Dictionary<int, string>();
@@ -327,7 +327,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
 
     private Task<List<uSyncChange>> DeserializeSchedulesAsync(IContent item, XElement node, SyncSerializerOptions options)
     {
-        return TaskHelper.FromResultOf(() =>
+        return uSyncTaskHelper.FromResultOf(() =>
         {
             var changes = new List<uSyncChange>();
             var nodeSchedules = new ContentScheduleCollection();
@@ -684,7 +684,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
 
     protected override Task<Attempt<IContent?>> CreateItemAsync(string alias, ITreeEntity? parent, string itemType)
     {
-        return TaskHelper.FromResultOf(() =>
+        return uSyncTaskHelper.FromResultOf(() =>
         {
             logger.LogDebug("Create: {alias} {parent} {type}", alias, parent?.Id ?? -1, itemType);
             try
@@ -710,7 +710,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
 
     protected override Task<IContent?> FindAtRootAsync(string alias)
     {
-        return TaskHelper.FromResultOf<IContent?>(() =>
+        return uSyncTaskHelper.FromResultOf<IContent?>(() =>
         {
             var rootNodes = contentService.GetRootContent();
             if (rootNodes.Any())
@@ -732,7 +732,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
 
     public Task SaveItemAsync(IContent item, int userId)
     {
-        return TaskHelper.FromResultOf(() =>
+        return uSyncTaskHelper.FromResultOf(() =>
         {
             try
             {
@@ -749,7 +749,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
 
     public override Task DeleteItemAsync(IContent item)
     {
-        return TaskHelper.FromResultOf(() =>
+        return uSyncTaskHelper.FromResultOf(() =>
         {
             try
             {

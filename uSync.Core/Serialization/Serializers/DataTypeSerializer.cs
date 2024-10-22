@@ -281,7 +281,7 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
 
     protected override Task<Attempt<IDataType?>> CreateItemAsync(string alias, ITreeEntity? parent, string itemType)
     {
-        return TaskHelper.FromResultOf(() =>
+        return uSyncTaskHelper.FromResultOf(() =>
         {
             var editorType = FindDataEditor(itemType);
             if (editorType == null)
