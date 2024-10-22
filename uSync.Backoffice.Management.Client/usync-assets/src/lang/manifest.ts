@@ -11,4 +11,4 @@ const localizations: Array<UmbExtensionManifest> = [
 	},
 ];
 
-export const manifests = [...localizations];
+export const manifests: UmbExtensionManifest[] = [...localizations];
