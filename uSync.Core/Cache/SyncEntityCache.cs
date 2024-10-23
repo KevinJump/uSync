@@ -4,6 +4,8 @@ using Umbraco.Cms.Core.Models.Entities;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Extensions;
 
+using uSync.Core.Extensions;
+
 namespace uSync.Core.Cache;
 
 /// <summary>
@@ -155,16 +157,22 @@ public class SyncEntityCache
     }
 
 
-    public IContentType? GetContentType(string alias)
+    public Task<IContentType?> GetContentType(string alias)
     {
-        if (!_cacheEnabled) return _contentTypeService.Get(alias);
-        return docTypeCache.GetCacheItem(alias, () => _contentTypeService.Get(alias));
+        return uSyncTaskHelper.FromResultOf(() =>
+        {
+            if (!_cacheEnabled) return _contentTypeService.Get(alias);
+            return docTypeCache.GetCacheItem(alias, () => _contentTypeService.Get(alias));
+        });
     }
 
-    public IContentType? GetContentType(Guid id)
+    public Task<IContentType?> GetContentType(Guid id)
     {
-        if (!_cacheEnabled) return _contentTypeService.Get(id);
-        return docTypeCache.GetCacheItem(id.ToString(), () => _contentTypeService.Get(id));
+        return uSyncTaskHelper.FromResultOf(() =>
+        {
+            if (!_cacheEnabled) return _contentTypeService.Get(id);
+            return docTypeCache.GetCacheItem(id.ToString(), () => _contentTypeService.Get(id));
+        });
     }
 
     public void Clear()

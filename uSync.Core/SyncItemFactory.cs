@@ -42,16 +42,8 @@ public class SyncItemFactory : ISyncItemFactory
     public IEnumerable<ISyncTracker<TObject>> GetTrackers<TObject>()
         => syncTrackers.GetTrackers<TObject>();
 
-    [Obsolete("use GetChangesAsync will be removed in v16")]
-    public IEnumerable<uSyncChange> GetChanges<TObject>(XElement node, SyncSerializerOptions options)
-        => syncTrackers.GetChanges<TObject>(node, options);
-
     public async Task<IEnumerable<uSyncChange>> GetChangesAsync<TObject>(XElement node, SyncSerializerOptions options)
         => await syncTrackers.GetChangesAsync<TObject>(node, options);
-
-    [Obsolete("use GetChangesAsync will be removed in v16")]
-    public IEnumerable<uSyncChange> GetChanges<TObject>(XElement node, XElement currentNode, SyncSerializerOptions options)
-        => GetChangesAsync<TObject>(node, currentNode, options).Result;
 
     public async Task<IEnumerable<uSyncChange>> GetChangesAsync<TObject>(XElement node, XElement currentNode, SyncSerializerOptions options)
     {
@@ -61,13 +53,9 @@ public class SyncItemFactory : ISyncItemFactory
             return await syncTrackers.GetChangesAsync<TObject>(node, currentNode, options);
     }
 
-
     public IEnumerable<ISyncDependencyChecker<TObject>> GetCheckers<TObject>()
         => syncCheckers.GetCheckers<TObject>();
 
-    [Obsolete("Use GetDependenciesAsync will be removed in v16")]
-    public IEnumerable<uSyncDependency> GetDependencies<TObject>(TObject item, DependencyFlags flags)
-        => GetDependenciesAsync(item, flags).Result;
     public async Task<IEnumerable<uSyncDependency>> GetDependenciesAsync<TObject>(TObject item, DependencyFlags flags)
     {
         var dependencies = new List<uSyncDependency>();

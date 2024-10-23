@@ -144,32 +144,35 @@ public abstract class SyncNestedValueMapperBase : SyncValueMapperBase
     /// <summary>
     ///  Gets the dependency item for a doctype. 
     /// </summary>
-    protected uSyncDependency? CreateDocTypeDependency(string alias, DependencyFlags flags)
+    protected async Task<uSyncDependency?> CreateDocTypeDependencyAsync(string alias, DependencyFlags flags)
     {
-        var item = GetDocType(alias);
+        var item = await GetDocType(alias);
         if (item != null)
         {
-            return CreateDocTypeDependency(item, flags);
+            return await CreateDocTypeDependencyAsync(item, flags);
         }
 
         return null;
     }
 
-    protected static uSyncDependency? CreateDocTypeDependency(IContentType item, DependencyFlags flags)
+    protected static Task<uSyncDependency?> CreateDocTypeDependencyAsync(IContentType item, DependencyFlags flags)
     {
-        if (item != null)
+        return uSyncTaskHelper.FromResultOf(() =>
         {
-            _ = new uSyncDependency
+            if (item != null)
             {
-                Name = item.Name ?? "",
-                Udi = item.GetUdi(),
-                Order = DependencyOrders.ContentTypes,
-                Flags = flags & ~DependencyFlags.IncludeAncestors,
-                Level = item.Level
-            };
-        }
+                return new uSyncDependency
+                {
+                    Name = item.Name ?? "",
+                    Udi = item.GetUdi(),
+                    Order = DependencyOrders.ContentTypes,
+                    Flags = flags & ~DependencyFlags.IncludeAncestors,
+                    Level = item.Level
+                };
+            }
 
-        return null;
+            return null;
+        });
     }
 
 
@@ -184,37 +187,44 @@ public abstract class SyncNestedValueMapperBase : SyncValueMapperBase
         return null;
     }
 
-    protected IContentType? GetDocType(JsonObject json, string alias)
+    protected async Task<IContentType?> GetDocTypeAsync(JsonObject json, string alias)
     {
         if (json.ContainsKey(alias))
         {
             var docTypeAlias = json.GetValueAsString(alias, string.Empty);
             if (string.IsNullOrWhiteSpace(docTypeAlias)) return default;
-            return GetDocType(docTypeAlias);
+            return await GetDocType(docTypeAlias);
         }
 
         return default;
     }
 
-    protected IContentType? GetDocTypeByKey(JsonObject? json, string keyAlias)
+    protected async Task<IContentType?> GetDocTypeByKeyAsync(JsonObject? json, string keyAlias)
     {
         if (json?.ContainsKey(keyAlias) is true)
         {
             var attempt = json[keyAlias].TryConvertTo<Guid>();
             if (attempt.Success)
             {
-                return mapperCollection.Value?.EntityCache.GetContentType(attempt.Result)
-                     ?? contentTypeService.Get(attempt.Result);
+                if (mapperCollection.Value is not null)
+                    return (await mapperCollection.Value.EntityCache.GetContentType(attempt.Result)) ?? contentTypeService.Get(attempt.Result);
+
+                return contentTypeService.Get(attempt.Result);  
             }
+
         }
 
         return default;
     }
 
-    protected IContentType? GetDocType(string alias)
+    protected async Task<IContentType?> GetDocType(string alias)
     {
         if (string.IsNullOrWhiteSpace(alias)) return default;
-        return mapperCollection.Value?.EntityCache.GetContentType(alias)
+
+        if (mapperCollection.Value is null)
+            return contentTypeService.Get(alias);
+
+        return (await mapperCollection.Value.EntityCache.GetContentType(alias))
             ?? contentTypeService.Get(alias);
     }
 

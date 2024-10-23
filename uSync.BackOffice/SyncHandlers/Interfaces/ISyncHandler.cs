@@ -96,10 +96,12 @@ public interface ISyncHandler
     /// only when exporting to a custom folder.
     /// </remarks>
     [Obsolete("Export by passing in folder array for root support - will be removed in v16")]
-    IEnumerable<uSyncAction> Export(Udi udi, string folder, HandlerSettings settings);
+    IEnumerable<uSyncAction> Export(Udi udi, string folder, HandlerSettings settings)
+        => ExportAsync(udi, new[] { folder }, settings).Result;
 
     [Obsolete("use ExportAsync will be removed in v16")]
-    IEnumerable<uSyncAction> Export(Udi udi, string[] folders, HandlerSettings settings);
+    IEnumerable<uSyncAction> Export(Udi udi, string[] folders, HandlerSettings settings)
+        => ExportAsync(udi, folders, settings).Result;
 
     /// <summary>
     ///  Export all items 
@@ -115,25 +117,30 @@ public interface ISyncHandler
     /// Get any dependencies required to full import this item
     /// </summary>
     [Obsolete("use GetDependenciesAsync will be removed in v16")]
-    IEnumerable<uSyncDependency> GetDependencies(int id, DependencyFlags flags);
+    IEnumerable<uSyncDependency> GetDependencies(int id, DependencyFlags flags) => [];
 
     /// <summary>
     /// Get any dependencies required to full import this item
     /// </summary>
     [Obsolete("use GetDependenciesAsync will be removed in v16")]
-    IEnumerable<uSyncDependency> GetDependencies(Guid key, DependencyFlags flags);
+    IEnumerable<uSyncDependency> GetDependencies(Guid key, DependencyFlags flags)
+        => GetDependenciesAsync(key, flags).Result;
+
 
     /// <summary>
     /// Get an XML representation of an item based on its UDI value 
     /// </summary>
     [Obsolete("use GetElementAsync will be removed in v16")]
-    SyncAttempt<XElement> GetElement(Udi udi);
+    SyncAttempt<XElement> GetElement(Udi udi)
+        => GetElementAsync(udi).Result;
+
 
     /// <summary>
     /// Import an item from disk defined by the file name 
     /// </summary>
     [Obsolete("use ImportAsync will be removed in v16")]
-    IEnumerable<uSyncAction> Import(string file, HandlerSettings settings, bool force);
+    IEnumerable<uSyncAction> Import(string file, HandlerSettings settings, bool force)
+        => ImportAsync(file, settings, force).Result;
 
     /// <summary>
     ///  Import All items 
@@ -143,13 +150,15 @@ public interface ISyncHandler
     /// <param name="options">Import options to use</param>
     /// <returns>List of actions detailing changes</returns>
     [Obsolete("use ImportAllAsync will be removed in v16")]
-    IEnumerable<uSyncAction> ImportAll(string[] folders, HandlerSettings settings, uSyncImportOptions options);
+    IEnumerable<uSyncAction> ImportAll(string[] folders, HandlerSettings settings, uSyncImportOptions options)
+        => ImportAllAsync(folders, settings, options).Result;
 
     /// <summary>
     ///  Import from a single node. 
     /// </summary>
     [Obsolete("use ImportElementAsync will be removed in v16")]
-    IEnumerable<uSyncAction> ImportElement(XElement node, string filename, HandlerSettings settings, uSyncImportOptions options);
+    IEnumerable<uSyncAction> ImportElement(XElement node, string filename, HandlerSettings settings, uSyncImportOptions options)
+        => ImportElementAsync(node, filename, settings, options).Result;
 
     /// <summary>
     ///  Report All items 
@@ -159,32 +168,35 @@ public interface ISyncHandler
     /// <param name="callback">Callbacks to keep UI up to date</param>
     /// <returns>List of actions detailing changes</returns>
     [Obsolete("use ReportAsync will be removed in v16")]
-    IEnumerable<uSyncAction> Report(string[] folders, HandlerSettings settings, SyncUpdateCallback? callback);
+    IEnumerable<uSyncAction> Report(string[] folders, HandlerSettings settings, SyncUpdateCallback? callback)
+        => ReportAsync(folders, settings, callback).Result;
 
     /// <summary>
     /// Report a single item based on loaded uSync xml
     /// </summary>
     [Obsolete("use ReportElementAsync will be removed in v16")]
-    IEnumerable<uSyncAction> ReportElement(XElement node, string filename, HandlerSettings settings, uSyncImportOptions options);
-
+    IEnumerable<uSyncAction> ReportElement(XElement node, string filename, HandlerSettings settings, uSyncImportOptions options)
+        => ReportElementAsync(node, filename, settings, options).Result;
 
     /// <summary>
     ///  Import the second pass of an item.
     /// </summary>
     [Obsolete("use ImportSecondPassAsync will be removed in v16")]
-    IEnumerable<uSyncAction> ImportSecondPass(uSyncAction action, HandlerSettings settings, uSyncImportOptions options);
+    IEnumerable<uSyncAction> ImportSecondPass(uSyncAction action, HandlerSettings settings, uSyncImportOptions options)
+        => ImportSecondPassAsync(action, settings, options).Result;
 
     /// <summary>
     ///  default implementation, root handler does do this. 
     /// </summary>
     [Obsolete("use FindFromNodeAsync will be removed in v16")]
-    Udi? FindFromNode(XElement node) => null;
+    Udi? FindFromNode(XElement node) 
+        => FindFromNodeAsync(node).Result;
 
     /// <summary>
     ///  is this a current node (root handler can do this too)
     /// </summary>
     [Obsolete("use GetItemStatusAsync will be removed in v16")]
-    ChangeType GetItemStatus(XElement node) => ChangeType.NoChange;
+    ChangeType GetItemStatus(XElement node);
 
     /// <summary>
     ///  precaches the keys of a folder
@@ -192,18 +204,21 @@ public interface ISyncHandler
     /// <param name="folder"></param>
     /// <param name="keys"></param>
     [Obsolete("use PreCacheFolderKeysAsync will be removed in v16")]
-    void PreCacheFolderKeys(string folder, IList<Guid> keys) { }
+    void PreCacheFolderKeys(string folder, IList<Guid> keys)
+        => PreCacheFolderKeysAsync(folder, keys).Wait();
+
 
     /// <summary>
     ///  fetch all the nodes that are needed for an report/import.
     /// </summary>
     [Obsolete("use FetchAllNodesAsync will be removed in v16")]
-    public IReadOnlyList<OrderedNodeInfo> FetchAllNodes(string[] folders) => [];
+    public IReadOnlyList<OrderedNodeInfo> FetchAllNodes(string[] folders)
+        => FetchAllNodesAsync(folders).Result;
+
 
     // async all the things... 
 
-    Task<IEnumerable<uSyncAction>> ExportAsync(Udi udi, string[] folders, HandlerSettings settings);
-    
+    Task<IEnumerable<uSyncAction>> ExportAsync(Udi udi, string[] folders, HandlerSettings settings);   
     Task<IEnumerable<uSyncAction>> ExportAllAsync(string[] folders, HandlerSettings settings, SyncUpdateCallback? callback);
     Task<IEnumerable<uSyncDependency>> GetDependenciesAsync(Guid key, DependencyFlags flags);
     Task<SyncAttempt<XElement>> GetElementAsync(Udi udi);

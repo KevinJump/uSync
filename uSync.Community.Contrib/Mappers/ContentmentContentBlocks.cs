@@ -37,7 +37,7 @@ public class ContentmentContentBlocks : SyncNestedJsonValueMapperBase, ISyncMapp
             var itemValue = item?.GetPropertyAsObject("value");
             if (itemValue is null) continue;
 
-            var doctype = GetDocTypeByKey(item, "elementType");
+            var doctype = await GetDocTypeByKeyAsync(item, "elementType");
             if (doctype is null) continue;
 
             await GetImportPropertiesAsync(itemValue, doctype);
@@ -63,12 +63,12 @@ public class ContentmentContentBlocks : SyncNestedJsonValueMapperBase, ISyncMapp
             var itemValue = item.GetPropertyAsObject("value");
             if (itemValue == null) continue;
 
-            var doctype = GetDocTypeByKey(item, "elementType");
+            var doctype = await GetDocTypeByKeyAsync(item, "elementType");
             if (doctype == null) continue;
 
             if (flags.HasFlag(DependencyFlags.IncludeDependencies))
             {
-                var doctypeDependency = CreateDocTypeDependency(doctype.Alias, flags);
+                var doctypeDependency = await CreateDocTypeDependencyAsync(doctype.Alias, flags);
                 if (doctypeDependency != null) dependencies.Add(doctypeDependency);
             }
 

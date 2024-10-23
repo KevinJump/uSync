@@ -72,7 +72,7 @@ public class DocTypeGridMapper : SyncNestedValueMapperBase, ISyncMapper
         var jsonValue = GetJsonValue(value);
         if (jsonValue == null) return value.ToString() ?? string.Empty;
 
-        var docType = GetDocType(jsonValue, this.docTypeAliasValue);
+        var docType =  await GetDocTypeAsync(jsonValue, this.docTypeAliasValue);
         if (docType == null) return value.ToString() ?? string.Empty;
 
         // JArray of values 
@@ -117,7 +117,7 @@ public class DocTypeGridMapper : SyncNestedValueMapperBase, ISyncMapper
             var jsonValue = GetJsonValue(value);
             if (jsonValue == null) return value.ToString();
 
-            var docType = GetDocType(jsonValue, this.docTypeAliasValue);
+            var docType = await GetDocTypeAsync(jsonValue, this.docTypeAliasValue);
             if (docType == null) return value.ToString();
 
             // JArray of values 
@@ -173,7 +173,7 @@ public class DocTypeGridMapper : SyncNestedValueMapperBase, ISyncMapper
         var docTypeAlias = jsonValue.GetPropertyAsString(this.docTypeAliasValue);
         if (docValue == null || docTypeAlias == null) return [];
 
-        var docType = GetDocType(docTypeAlias);
+        var docType = await GetDocType(docTypeAlias);
         if (docType == null) return [];
 
         List<uSyncDependency> dependencies = [];
@@ -184,7 +184,7 @@ public class DocTypeGridMapper : SyncNestedValueMapperBase, ISyncMapper
             // you only need to get the primary doctype, a subsequent check
             // will get the full dependency tree for this doctype if it
             // is needed. 
-            var docDependency = CreateDocTypeDependency(docTypeAlias, flags);
+            var docDependency = await CreateDocTypeDependencyAsync(docTypeAlias, flags);
             if (docDependency != null)
                 dependencies.Add(docDependency);
         }
@@ -197,5 +197,4 @@ public class DocTypeGridMapper : SyncNestedValueMapperBase, ISyncMapper
 
         return dependencies;
     }
-
 }

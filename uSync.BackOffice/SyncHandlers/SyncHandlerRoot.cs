@@ -245,26 +245,12 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     #region Importing 
 
     /// <summary>
-    ///  Import everything from a given folder, using the supplied configuration settings.
-    /// </summary>
-    [Obsolete("Use ImportAllAsync will be removed in v16")]
-    public IEnumerable<uSyncAction> ImportAll(string folder, HandlerSettings config, bool force, SyncUpdateCallback? callback = null)
-        => ImportAll([folder], config, new uSyncImportOptions
-        {
-            Flags = force ? SerializerFlags.Force : SerializerFlags.None,
-            Callbacks = new uSyncCallbacks(null, callback)
-        });
-
-    /// <summary>
     ///  import everything from a collection of folders, using the supplied config.
     /// </summary>
     /// <remarks>
     ///  allows us to 'merge' a collection of folders down and perform an import against them (without first having to actually merge the folders on disk)
     /// </remarks>
-    [Obsolete("Use ImportAllAsync will be removed in v16")]
-    public IEnumerable<uSyncAction> ImportAll(string[] folders, HandlerSettings config, uSyncImportOptions options)
-        => ImportAllAsync(folders, config, options).Result;
-
+   
     public async Task<IEnumerable<uSyncAction>> ImportAllAsync(string[] folders, HandlerSettings config, uSyncImportOptions options)
     {
         var cacheKey = PrepCaches();
@@ -342,10 +328,6 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// </summary>
     /// <param name="folders"></param>
     /// <returns></returns>
-    [Obsolete("use FetchAllNodesAsync will be removed in v16")]
-    public IReadOnlyList<OrderedNodeInfo> FetchAllNodes(string[] folders)
-        => GetMergedItemsAsync(folders).Result;
-
     public async Task<IReadOnlyList<OrderedNodeInfo>> FetchAllNodesAsync(string[] folders)
         => await GetMergedItemsAsync(folders);
 
@@ -438,16 +420,12 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     public virtual IEnumerable<uSyncAction> Import(XElement node, string filename, HandlerSettings config, SerializerFlags flags)
     {
         if (config.FailOnMissingParent) flags |= SerializerFlags.FailMissingParent;
-        return ImportElement(node, filename, config, new uSyncImportOptions { Flags = flags });
+        return ImportElementAsync(node, filename, config, new uSyncImportOptions { Flags = flags }).Result;
     }
 
     /// <summary>
     ///  Import a single item from a usync XML file
     /// </summary>
-    [Obsolete("Use ImportElementAsync will be removed in v16")]
-    virtual public IEnumerable<uSyncAction> Import(string file, HandlerSettings config, bool force)
-        => ImportAsync(file, config, force).Result;
-
     virtual public async Task<IEnumerable<uSyncAction>> ImportAsync(string file, HandlerSettings config, bool force)
     {
         var flags = SerializerFlags.OnePass;
@@ -476,10 +454,6 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// <remarks>
     ///  All Imports lead here
     /// </remarks>
-    [Obsolete("Use ImportElementAsync will be removed in v16")]
-    virtual public IEnumerable<uSyncAction> ImportElement(XElement node, string filename, HandlerSettings settings, uSyncImportOptions options)
-        => ImportElementAsync(node, filename, settings, options).Result;
-
     virtual public async Task<IEnumerable<uSyncAction>> ImportElementAsync(XElement node, string filename, HandlerSettings settings, uSyncImportOptions options)
     {
         if (!await ShouldImportAsync(node, settings))
@@ -584,10 +558,6 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// <summary>
     /// Perform a second pass import on an item
     /// </summary>
-    [Obsolete("will be removed in v16")]
-    virtual public IEnumerable<uSyncAction> ImportSecondPass(uSyncAction action, HandlerSettings settings, uSyncImportOptions options)
-        => ImportSecondPassAsync(action, settings, options).Result;
-
     virtual public async Task<IEnumerable<uSyncAction>> ImportSecondPassAsync(uSyncAction action, HandlerSettings settings, uSyncImportOptions options)
     {
         if (!IsTwoPass) return [];
@@ -694,9 +664,6 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     ///  this means if we are calling the process multiple times, 
     ///  we can optimize the key code and only load it once. 
     /// </remarks>
-    public void PreCacheFolderKeys(string folder, IList<Guid> folderKeys)
-        => PreCacheFolderKeysAsync(folder, folderKeys).Wait();
-
     public Task PreCacheFolderKeysAsync(string folder, IList<Guid> folderKeys)
     {
         var cacheKey = $"{GetCacheKeyBase()}_{folder.GetHashCode()}";
@@ -980,17 +947,6 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// <summary>
     /// Export an single item from a given UDI value
     /// </summary>
-    [Obsolete("Pass folder array, will be removed in v16")]
-    public IEnumerable<uSyncAction> Export(Udi udi, string folder, HandlerSettings settings)
-        => Export(udi, [folder], settings);
-
-    /// <summary>
-    /// Export an single item from a given UDI value
-    /// </summary>
-    [Obsolete("use ExportAsync will be removed in v16")]
-    public IEnumerable<uSyncAction> Export(Udi udi, string[] folders, HandlerSettings settings)
-        => ExportAsync(udi, folders, settings).Result;
-
     public async Task<IEnumerable<uSyncAction>> ExportAsync(Udi udi, string[] folders, HandlerSettings settings)
     {
         var item = await FindByUdiAsync(udi);
@@ -1189,20 +1145,6 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 
     #region Reporting 
 
-    /// <summary>
-    /// Run a report based on a given folder
-    /// </summary>
-    [Obsolete("Use ReportAsync will be removed in v16")]
-    public IEnumerable<uSyncAction> Report(string folder, HandlerSettings config, SyncUpdateCallback? callback)
-        => Report([folder], config, callback);
-
-    /// <summary>
-    /// Run a report based on a set of folders. 
-    /// </summary>
-    [Obsolete("Use ReportAsync will be removed in v16")]
-    public IEnumerable<uSyncAction> Report(string[] folders, HandlerSettings config, SyncUpdateCallback? callback)
-        => ReportAsync(folders, config, callback).Result;
-
     public async Task<IEnumerable<uSyncAction>> ReportAsync(string[] folders, HandlerSettings config, SyncUpdateCallback? callback)
     {
         List<uSyncAction> actions = [];
@@ -1362,7 +1304,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     public virtual IEnumerable<uSyncAction> ReportFolder(string folder, HandlerSettings config, SyncUpdateCallback? callback)
         => ReportFolderAsync(folder, config, callback).Result;
 
-    public virtual async Task<IEnumerable<uSyncAction>> ReportFolderAsync(string folder, HandlerSettings config, SyncUpdateCallback? callback)
+    protected virtual async Task<IEnumerable<uSyncAction>> ReportFolderAsync(string folder, HandlerSettings config, SyncUpdateCallback? callback)
     {
         List<uSyncAction> actions = [];
 
@@ -1393,15 +1335,8 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// </summary>
     [Obsolete("Use ReportElementAsync will be removed in v16")]
     protected virtual IEnumerable<uSyncAction> ReportElement(XElement node, string filename, HandlerSettings? config)
-        => ReportElement(node, filename, config ?? this.DefaultConfig, new uSyncImportOptions());
+        => ReportElementAsync(node, filename, config ?? this.DefaultConfig, new uSyncImportOptions()).Result;
 
-
-    /// <summary>
-    ///  Report an Element
-    /// </summary>
-    [Obsolete("Use ReportElementAsync will be removed in v16")]
-    public IEnumerable<uSyncAction> ReportElement(XElement node, string filename, HandlerSettings settings, uSyncImportOptions options)
-        => ReportElementAsync(node, filename, settings, options).Result;
 
     public virtual async Task<IEnumerable<uSyncAction>> ReportElementAsync(XElement node, string filename, HandlerSettings settings, uSyncImportOptions options)
     {
@@ -1442,7 +1377,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
             {
                 if (change.CurrentNode is not null)
                 {
-                    action.Details = GetChanges(node, change.CurrentNode, serializerOptions);
+                    action.Details = await GetChangesAsync(node, change.CurrentNode, serializerOptions);
                     if (action.Change != ChangeType.Create && (action.Details == null || !action.Details.Any()))
                     {
                         action.Message = "XML is different - but properties may not have changed";
@@ -1514,8 +1449,8 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     }
 
 
-    private IEnumerable<uSyncChange> GetChanges(XElement node, XElement currentNode, SyncSerializerOptions options)
-        => itemFactory.GetChanges<TObject>(node, currentNode, options);
+    private async Task<IEnumerable<uSyncChange>> GetChangesAsync(XElement node, XElement currentNode, SyncSerializerOptions options)
+        => await itemFactory.GetChangesAsync<TObject>(node, currentNode, options);
 
     #endregion
 
@@ -1963,10 +1898,6 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// <summary>
     /// Serialize an item to XML based on a given UDI value
     /// </summary>
-    [Obsolete("Use GetElementAsync will be removed in v16")]
-    public SyncAttempt<XElement> GetElement(Udi udi)
-        => GetElementAsync(udi).Result;
-
     public async Task<SyncAttempt<XElement>> GetElementAsync(Udi udi)
     {
         var element = await FindByUdiAsync(udi);
@@ -1994,10 +1925,6 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// uSync contains no dependency checkers by default - uSync.Complete will load checkers
     /// when installed. 
     /// </remarks>
-    [Obsolete("use GetDependenciesAsync will be removed in v16")]
-    public IEnumerable<uSyncDependency> GetDependencies(Guid key, DependencyFlags flags)
-        => GetDependenciesAsync(key, flags).Result;
-
     public async Task<IEnumerable<uSyncDependency>> GetDependenciesAsync(Guid key, DependencyFlags flags)
     {
         if (key == Guid.Empty)
@@ -2020,17 +1947,6 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
             return await GetDependenciesAsync(item, flags);
         }
     }
-
-    /// <summary>
-    /// Calculate any dependencies for any given item based on loaded dependency checkers 
-    /// </summary>
-    /// <remarks>
-    /// uSync contains no dependency checkers by default - uSync.Complete will load checkers
-    /// when installed. 
-    /// </remarks>
-    [Obsolete("Use GetDependenciesAsync will be removed in v16")]
-    public IEnumerable<uSyncDependency> GetDependencies(int id, DependencyFlags flags)
-        => [];
 
     private bool HasDependencyCheckers()
         => dependencyCheckers != null && dependencyCheckers.Count > 0;

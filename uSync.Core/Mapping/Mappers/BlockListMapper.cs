@@ -66,7 +66,7 @@ public class BlockListMapper : SyncNestedJsonValueMapperBase, ISyncMapper
                     {
                         if (item is null) continue;
 
-                        var doctype = GetDocTypeByKey(item, _docTypeKeyAlias);
+                        var doctype = await GetDocTypeByKeyAsync(item, _docTypeKeyAlias);
                         if (doctype == null) continue;
 
                         await GetPropertiesMethod(item, doctype);
@@ -102,10 +102,10 @@ public class BlockListMapper : SyncNestedJsonValueMapperBase, ISyncMapper
                     {
                         if (contentItem is null) continue;
 
-                        var contentType = GetDocTypeByKey(contentItem, this._docTypeKeyAlias);
+                        var contentType = await GetDocTypeByKeyAsync(contentItem, this._docTypeKeyAlias);
                         if (contentType != null)
                         {
-                            dependencies.AddNotNull(CreateDocTypeDependency(contentType, flags));
+                            dependencies.AddNotNull(await CreateDocTypeDependencyAsync(contentType, flags));
                             dependencies.AddRange(await this.GetPropertyDependenciesAsync(contentItem, contentType, flags));
                         }
                     }

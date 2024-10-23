@@ -39,7 +39,7 @@ public class NestedContentMapper : SyncNestedJsonValueMapperBase, ISyncMapper
         {
             if (item is null) continue;
 
-            var docType = GetDocType(item, this._docTypeAliasValue);
+            var docType = await GetDocTypeAsync(item, this._docTypeAliasValue);
             if (docType == null) continue;
 
             await GetPropertiesMethod(item, docType);
@@ -69,12 +69,12 @@ public class NestedContentMapper : SyncNestedJsonValueMapperBase, ISyncMapper
                 continue;
 
             var docTypeAlias = propertyNode.GetValue<string>();
-            var docType = GetDocType(docTypeAlias);
+            var docType = await GetDocType(docTypeAlias);
             if (docType == null) continue;
 
             if (flags.HasFlag(DependencyFlags.IncludeDependencies))
             {
-                var docTypeDep = CreateDocTypeDependency(docTypeAlias, flags);
+                var docTypeDep = await CreateDocTypeDependencyAsync(docTypeAlias, flags);
                 if (docTypeDep != null)
                     dependencies.Add(docTypeDep);
             }
