@@ -52,8 +52,8 @@ public abstract class SyncHandlerBase<TObject>
     }
 
     /// <inheritdoc />
-    protected override bool HasChildren(TObject item)
-        => entityService.GetChildren(item.Id).Any();
+    public override Task<bool> HasChildrenAsync(IEntity item)
+        => Task.FromResult(entityService.GetChildren(item.Id).Any());
 
     /// <summary>
     ///  given a folder we calculate what items we can remove, because they are 
@@ -106,10 +106,6 @@ public abstract class SyncHandlerBase<TObject>
     /// <summary>
     ///  Process any cleanup actions that may have been loaded up
     /// </summary>
-    [Obsolete("Use ProcessCleanActionsAsync will be removed in v16")]
-    public virtual IEnumerable<uSyncAction> ProcessCleanActions(string? folder, IEnumerable<uSyncAction> actions, HandlerSettings config)
-        => ProcessCleanActionsAsync(folder, actions, config).Result;
-
     public virtual async Task<IEnumerable<uSyncAction>> ProcessCleanActionsAsync(string? folder, IEnumerable<uSyncAction> actions, HandlerSettings config)
     {
         if (folder is null) return [];

@@ -121,9 +121,6 @@ public class TemplateHandler : SyncHandlerLevelBase<ITemplate>, ISyncHandler, IS
     }
 
     /// <inheritdoc/>
-    [Obsolete("Use the async version - removed in v16")]
-    public IEnumerable<uSyncAction> ProcessPostImport(IEnumerable<uSyncAction> actions, HandlerSettings config)
-        => ProcessPostImportAsync(actions, config).Result;
     public async Task<IEnumerable<uSyncAction>> ProcessPostImportAsync(IEnumerable<uSyncAction> actions, HandlerSettings config)
     {
         if (actions == null || !actions.Any()) return [];

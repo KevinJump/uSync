@@ -1,10 +1,9 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-
-using Microsoft.Extensions.Logging;
 
 using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Events;
@@ -80,7 +79,6 @@ public class RelationTypeHandler : SyncHandlerBase<IRelationType>, ISyncHandler,
     protected override Task<bool> ShouldImportAsync(XElement node, HandlerSettings config)
         => ShouldExportAsync(node, config);
 
-
     /// <inheritdoc/>
     protected override string GetItemName(IRelationType item)
         => item.Name ?? item.Alias;
@@ -89,15 +87,9 @@ public class RelationTypeHandler : SyncHandlerBase<IRelationType>, ISyncHandler,
     protected override string GetItemFileName(IRelationType item)
         => GetItemAlias(item).ToSafeAlias(shortStringHelper);
 
-
-
     /// <inheritdoc/>
     protected override async Task<IEnumerable<IEntity>> GetChildItemsAsync(Guid key)
-    {
-        if (key == Guid.Empty)
-            return await Task.FromResult(relationService.GetAllRelationTypes());
-
-        return [];
-    }
-
+        => key == Guid.Empty
+            ? await Task.FromResult(relationService.GetAllRelationTypes())
+            : [];
 }

@@ -386,11 +386,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// </summary>
     [Obsolete("Use ImportElementAsync will be removed in v16")]
     public virtual IEnumerable<uSyncAction> Import(string filePath, HandlerSettings config, SerializerFlags flags)
-        => ImportAsync(filePath, config, flags).Result;
-
-    [Obsolete("pass import options not flags. will be removed in v16")]
-    public virtual async Task<IEnumerable<uSyncAction>> ImportAsync(string filePath, HandlerSettings config, SerializerFlags flags)
-        => await ImportAsync(filePath, config, new uSyncImportOptions { Flags = flags });
+        => ImportAsync(filePath, config, new uSyncImportOptions { Flags = flags }).Result;
 
     public virtual async Task<IEnumerable<uSyncAction>> ImportAsync(string filePath, HandlerSettings config, uSyncImportOptions options)
     {
@@ -411,16 +407,6 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
             return uSyncAction.Fail(Path.GetFileName(filePath), this.handlerType, this.ItemType, ChangeType.Fail, $"Import Fail: {ex.Message}", new Exception(ex.Message, ex))
                 .AsEnumerableOfOne();
         }
-    }
-
-    /// <summary>
-    /// Import a single item based on already loaded XML
-    /// </summary>
-    [Obsolete("Use ImportElementAsync will be removed in v16")]
-    public virtual IEnumerable<uSyncAction> Import(XElement node, string filename, HandlerSettings config, SerializerFlags flags)
-    {
-        if (config.FailOnMissingParent) flags |= SerializerFlags.FailMissingParent;
-        return ImportElementAsync(node, filename, config, new uSyncImportOptions { Flags = flags }).Result;
     }
 
     /// <summary>
@@ -593,10 +579,6 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// <summary>
     ///  Perform a 'second pass' import on a single item.
     /// </summary>
-    [Obsolete("use ImportSecondPassAsync will be removed in v16")]
-    virtual public SyncAttempt<TObject> ImportSecondPass(XElement node, TObject item, HandlerSettings config, SyncUpdateCallback? callback)
-        => ImportSecondPassAsync(node, item, config, callback).Result;
-
     virtual public async Task<SyncAttempt<TObject>> ImportSecondPassAsync(XElement node, TObject item, HandlerSettings config, SyncUpdateCallback? callback)
     {
         if (IsTwoPass is false)
@@ -916,7 +898,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     public bool HasChildren(TContainer item)
         => GetFolders(item).Any() || GetChildItems(item).Any();
 
-    public async Task<bool> HasChildrenAsync(TContainer item)
+    public virtual async Task<bool> HasChildrenAsync(TContainer item)
         => (await GetFoldersAsync(item)).Any() || (await GetChildItemsAsync(item)).Any();
 
     /// <summary>
@@ -1069,7 +1051,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
                     await syncFileService.SaveXElementAsync(attempt.Item, filename);
                 }
 
-                if (config.CreateClean && HasChildren(item))
+                if (config.CreateClean && await HasChildrenAsync(item))
                 {
                     await CreateCleanFileAsync(GetItemKey(item), filename);
                 }
@@ -1118,8 +1100,12 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     ///  on items where we can check this (quickly) we can reduce the number of checks we might 
     ///  make on child items or cleaning up where we don't need to. 
     /// </remarks>
+    [Obsolete("use HasChildrenAsync will be removed in v16")]
     protected virtual bool HasChildren(TObject item)
-        => true;
+        => HasChildrenAsync(item).Result;
+
+    protected virtual Task<bool> HasChildrenAsync(TObject item)
+        => Task.FromResult(true);
 
     /// <summary>
     ///  create a clean file, which is used as a marker, when performing remote deletes.
@@ -1224,6 +1210,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         return duplicates;
     }
 
+
     /// <summary>
     ///  check to see if an action matches, another action. 
     /// </summary>
@@ -1235,6 +1222,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     ///  name (tree items, such as content or media), this function has 
     ///  to be overridden to remove the name check.
     /// </remarks>
+
     protected virtual bool DoActionsMatch(uSyncAction a, uSyncAction b)
     {
         if (a.Key == b.Key) return true;
@@ -1300,10 +1288,6 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// <summary>
     ///  Run a report on a given folder
     /// </summary>
-    [Obsolete("Use ReportFolderAsync will be removed in v16")]
-    public virtual IEnumerable<uSyncAction> ReportFolder(string folder, HandlerSettings config, SyncUpdateCallback? callback)
-        => ReportFolderAsync(folder, config, callback).Result;
-
     protected virtual async Task<IEnumerable<uSyncAction>> ReportFolderAsync(string folder, HandlerSettings config, SyncUpdateCallback? callback)
     {
         List<uSyncAction> actions = [];
@@ -1336,7 +1320,6 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     [Obsolete("Use ReportElementAsync will be removed in v16")]
     protected virtual IEnumerable<uSyncAction> ReportElement(XElement node, string filename, HandlerSettings? config)
         => ReportElementAsync(node, filename, config ?? this.DefaultConfig, new uSyncImportOptions()).Result;
-
 
     public virtual async Task<IEnumerable<uSyncAction>> ReportElementAsync(XElement node, string filename, HandlerSettings settings, uSyncImportOptions options)
     {
@@ -1482,10 +1465,6 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// <summary>
     /// Handle an Umbraco Delete notification
     /// </summary>
-    [Obsolete("Use HandleAsync will be removed in v16")]
-    public virtual void Handle(DeletedNotification<TObject> notification)
-        => HandleAsync(notification, CancellationToken.None).Wait();
-
     public virtual async Task HandleAsync(DeletedNotification<TObject> notification, CancellationToken cancellationToken)
     {
         if (!ShouldProcessEvent()) return;
@@ -1509,10 +1488,6 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// Handle the Umbraco Saved notification for items. 
     /// </summary>
     /// <param name="notification"></param>
-    [Obsolete("Use HandleAsync will be removed in v16")]
-    public virtual void Handle(SavedNotification<TObject> notification)
-        => HandleAsync(notification, CancellationToken.None).Wait();
-
     public virtual async Task HandleAsync(SavedNotification<TObject> notification, CancellationToken cancellationToken)
     {
         if (!ShouldProcessEvent()) return;
@@ -1544,10 +1519,6 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// Handle the Umbraco moved notification for items.
     /// </summary>
     /// <param name="notification"></param>
-    [Obsolete("Use HandleAsync will be removed in v16")]
-    public virtual void Handle(MovedNotification<TObject> notification)
-        => HandleAsync(notification, CancellationToken.None).Wait();
-
     public virtual async Task HandleAsync(MovedNotification<TObject> notification, CancellationToken cancellationToken)
     {
         try
@@ -1570,10 +1541,6 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// This has been separated out, because we also call this code when a handler supports
     /// recycle bin events 
     /// </remarks>
-    [Obsolete("Use HandleMoveAsync will be removed in v16")]
-    protected void HandleMove(IEnumerable<MoveEventInfoBase<TObject>> moveInfoCollection)
-        => HandleMoveAsync(moveInfoCollection, CancellationToken.None).Wait();
-
     protected async Task HandleMoveAsync(IEnumerable<MoveEventInfoBase<TObject>> moveInfoCollection, CancellationToken cancellationToken)
     {
         foreach (var item in moveInfoCollection)
@@ -1594,26 +1561,6 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
             }
         }
     }
-
-    /// <summary>
-    /// Export any deletes items to disk 
-    /// </summary>
-    /// <remarks>
-    /// Deleted items get 'empty' files on disk so we know they where deleted
-    /// </remarks>
-    [Obsolete("Use ExportDeletedItemAsync will be removed in v16")]
-    protected virtual void ExportDeletedItem(TObject item, string folder, HandlerSettings config)
-        => ExportDeletedItem(item, [folder], config);
-
-    /// <summary>
-    /// Export any deletes items to disk 
-    /// </summary>
-    /// <remarks>
-    /// Deleted items get 'empty' files on disk so we know they where deleted
-    /// </remarks>
-    [Obsolete("Use ExportDeletedItemAsync will be removed in v16")]
-    protected virtual void ExportDeletedItem(TObject item, string[] folders, HandlerSettings config)
-        => ExportDeletedItemAsync(item, folders, config).Wait();
 
     protected virtual async Task ExportDeletedItemAsync(TObject item, string[] folders, HandlerSettings config)
     {
@@ -2153,10 +2100,6 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// <summary>
     ///  check roots isn't blocking the save
     /// </summary>
-    [Obsolete("use HandleAsync will be removed in v16")]
-    public virtual void Handle(SavingNotification<TObject> notification)
-        => HandleAsync(notification, CancellationToken.None).Wait();
-
     public virtual async Task HandleAsync(SavingNotification<TObject> notification, CancellationToken cancellationToken)
     {
         if (await ShouldBlockRootChangesAsync(notification.SavedEntities))
@@ -2169,10 +2112,6 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// <summary>
     ///  check roots isn't blocking the move
     /// </summary>
-    [Obsolete("use HandleAsync will be removed in v16")]
-    public virtual void Handle(MovingNotification<TObject> notification)
-        => HandleAsync(notification, CancellationToken.None).Wait();
-
     public virtual async Task HandleAsync(MovingNotification<TObject> notification, CancellationToken cancellationToken)
     {
         if (await ShouldBlockRootChangesAsync(notification.MoveInfoCollection.Select(x => x.Entity)))
@@ -2185,10 +2124,6 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// <summary>
     ///  check roots isn't blocking the delete
     /// </summary>
-    [Obsolete("use HandleAsync will be removed in v16")]
-    public virtual void Handle(DeletingNotification<TObject> notification)
-        => HandleAsync(notification, CancellationToken.None).Wait();
-
     public virtual async Task HandleAsync(DeletingNotification<TObject> notification, CancellationToken cancellationToken)
     {
         if (await ShouldBlockRootChangesAsync(notification.DeletedEntities))

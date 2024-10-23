@@ -28,8 +28,9 @@ public interface ISyncPostImportHandler
     /// <param name="config">Handler settings to use for processing</param>
     /// <returns>List of actions detailing post import changes</returns>
     [Obsolete("Use ProcessPostImportAsync instead will be removed in v16")]
-    IEnumerable<uSyncAction> ProcessPostImport(IEnumerable<uSyncAction> actions, HandlerSettings config);
-    
+    IEnumerable<uSyncAction> ProcessPostImport(IEnumerable<uSyncAction> actions, HandlerSettings config)
+        => ProcessPostImportAsync(actions, config).Result;
+
     Task<IEnumerable<uSyncAction>> ProcessPostImportAsync(IEnumerable<uSyncAction> actions, HandlerSettings config);
 
 }

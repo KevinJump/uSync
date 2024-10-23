@@ -17,6 +17,7 @@ using uSync.BackOffice.Services;
 using uSync.BackOffice.SyncHandlers.Interfaces;
 using uSync.BackOffice.SyncHandlers.Models;
 using uSync.Core;
+using uSync.Core.Extensions;
 
 using static Umbraco.Cms.Core.Constants;
 
@@ -64,15 +65,13 @@ public class ContentHandler : ContentHandlerBase<IContent>, ISyncHandler,
         this.contentService = contentService;
 
         // make sure we get the default content serializer (not just the first one that loads)
-        var s = syncItemFactory.GetSerializer<IContent>("ContentSerializer");
-        if (s is null)
-            throw new KeyNotFoundException("Cannot load content serializer");
-        this.serializer = s;
+        this.serializer = syncItemFactory.GetSerializer<IContent>("ContentSerializer")
+            ?? throw new KeyNotFoundException("Cannot load content serializer");
     }
 
     /// <inheritdoc />
-    protected override bool HasChildren(IContent item)
-        => contentService.HasChildren(item.Id);
+    protected override Task<bool> HasChildrenAsync(IContent item)
+        => Task.FromResult(contentService.HasChildren(item.Id));
 
     /// <summary>
     ///  Get child items 
@@ -82,10 +81,12 @@ public class ContentHandler : ContentHandlerBase<IContent>, ISyncHandler,
     ///  the actual type for content and media, we save ourselves an extra lookup later on
     ///  and this speeds up the itteration by quite a bit (onle less db trip per item).
     /// </remarks>
-    protected override async Task<IEnumerable<IEntity>> GetChildItemsAsync(IEntity? parent)
+    protected override Task<IEnumerable<IEntity>> GetChildItemsAsync(IEntity? parent)
     {
-        if (parent != null)
+        return uSyncTaskHelper.FromResultOf<IEnumerable<IEntity>>(() =>
         {
+            if (parent is null) return contentService.GetRootContent();
+
             var items = new List<IContent>();
             const int pageSize = 5000;
             var page = 0;
@@ -95,10 +96,7 @@ public class ContentHandler : ContentHandlerBase<IContent>, ISyncHandler,
                 items.AddRange(contentService.GetPagedChildren(parent.Id, page++, pageSize, out total));
             }
             return items;
-        }
-        else
-        {
-            return await Task.FromResult(contentService.GetRootContent());
-        }
+
+        });
     }
 }

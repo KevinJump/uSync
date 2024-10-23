@@ -85,7 +85,7 @@ public abstract class ContentHandlerBase<TObject> : SyncHandlerTreeBase<TObject>
         // check base first - if it says no - then no point checking this. 
         if (!await base.ShouldImportAsync(node, config)) return false;
 
-        if (!ImportTrashedItem(node, config)) return false;
+        if (!ShouldImportTrashedItem(node, config)) return false;
 
         if (!ImportPaths(node, config)) return false;
 
@@ -100,7 +100,7 @@ public abstract class ContentHandlerBase<TObject> : SyncHandlerTreeBase<TObject>
     /// <remarks>
     /// Trashed items are only imported when the "ImportTrashed" setting is true on the handler
     /// </remarks>
-    private bool ImportTrashedItem(XElement node, HandlerSettings config)
+    private bool ShouldImportTrashedItem(XElement node, HandlerSettings config)
     {
         // unless the setting is explicit we don't import trashed items. 
         var trashed = node.Element("Info")?.Element("Trashed").ValueOrDefault(false);
@@ -181,7 +181,7 @@ public abstract class ContentHandlerBase<TObject> : SyncHandlerTreeBase<TObject>
         if (config.GetSetting("RulesOnExport", false))
         {
             // we run the import rules (but not the base rules as that would confuse.)
-            if (!ImportTrashedItem(node, config)) return false;
+            if (!ShouldImportTrashedItem(node, config)) return false;
             if (!ImportPaths(node, config)) return false;
             if (!ByDocTypeConfigCheck(node, config)) return false;
         }
@@ -202,9 +202,6 @@ public abstract class ContentHandlerBase<TObject> : SyncHandlerTreeBase<TObject>
     ///  Handle the Umbraco Moved to recycle bin notification, (treated like a move)
     /// </summary>
     /// <param name="notification"></param>
-    public void Handle(MovedToRecycleBinNotification<TObject> notification)
-        => HandleAsync(notification, CancellationToken.None).Wait();
-
     public async Task HandleAsync(MovedToRecycleBinNotification<TObject> notification, CancellationToken cancellationToken)
     {
         if (!ShouldProcessEvent()) return;
@@ -215,9 +212,6 @@ public abstract class ContentHandlerBase<TObject> : SyncHandlerTreeBase<TObject>
     ///  Check that roots isn't stopping an item from being recycled.
     /// </summary>
     /// <param name="notification"></param>
-    public void Handle(MovingToRecycleBinNotification<TObject> notification)
-        => HandleAsync(notification, CancellationToken.None).Wait();
-
     public async Task HandleAsync(MovingToRecycleBinNotification<TObject> notification, CancellationToken cancellationToken)
     {
         if (await ShouldBlockRootChangesAsync(notification.MoveInfoCollection.Select(x => x.Entity)))

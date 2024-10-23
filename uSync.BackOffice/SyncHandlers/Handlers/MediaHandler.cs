@@ -60,8 +60,8 @@ public class MediaHandler : ContentHandlerBase<IMedia>, ISyncHandler, ISyncClean
     }
 
     /// <inheritdoc />
-    protected override bool HasChildren(IMedia item)
-        => mediaService.HasChildren(item.Id);
+    protected override Task<bool> HasChildrenAsync(IMedia item)
+        => Task.FromResult(mediaService.HasChildren(item.Id));
 
     /// <inheritdoc/>
     protected override async Task<IEnumerable<IEntity>> GetChildItemsAsync(IEntity? parent)

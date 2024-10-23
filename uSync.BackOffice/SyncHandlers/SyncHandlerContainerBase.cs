@@ -108,20 +108,7 @@ public abstract class SyncHandlerContainerBase<TObject>
     [Obsolete("Delete by key - will be removed in v16")]
     virtual protected void DeleteFolder(int id) { }
 
-    abstract protected Task DeleteFolderAsync(Guid key);
-    /// <summary>
-    /// Handle events at the end of any import 
-    /// </summary>
-    [Obsolete("Use ProcessPostImportAsync will be removed in v16")]
-    public virtual IEnumerable<uSyncAction> ProcessPostImport(string folder, IEnumerable<uSyncAction> actions, HandlerSettings config)
-        => ProcessPostImport(actions, config);
-
-    /// <summary>
-    /// Handle events at the end of any import 
-    /// </summary>
-    [Obsolete("Use ProcessPostImportAsync will be removed in v16")]
-    public virtual IEnumerable<uSyncAction> ProcessPostImport(IEnumerable<uSyncAction> actions, HandlerSettings config)
-       => ProcessPostImportAsync(actions, config).Result;
+    abstract protected Task DeleteFolderAsync(Guid key);  
 
     public virtual async Task<IEnumerable<uSyncAction>> ProcessPostImportAsync(IEnumerable<uSyncAction> actions, HandlerSettings config)
     {
