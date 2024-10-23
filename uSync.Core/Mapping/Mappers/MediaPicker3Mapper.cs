@@ -28,56 +28,61 @@ public class MediaPicker3Mapper : SyncValueMapperBase, ISyncMapper
 
     public override string[] Editors => [Constants.PropertyEditors.Aliases.MediaPicker3];
 
-    public override string? GetExportValue(object value, string editorAlias)
+    public override Task<string?> GetExportValueAsync(object value, string editorAlias)
     {
-        var stringValue = value?.ToString();
-        if (string.IsNullOrEmpty(stringValue) is true) return null;
+        return uSyncTaskHelper.FromResultOf(() =>
+        {
+            var stringValue = value?.ToString();
+            if (string.IsNullOrEmpty(stringValue) is true) return null;
 
-        if (stringValue.TryParseToJsonArray(out var jsonArray) is false || jsonArray is null)
+            if (stringValue.TryParseToJsonArray(out var jsonArray) is false || jsonArray is null)
+                return stringValue;
+
+            // re-formatting the json in the picker.
+            // 
+            // we do this because sometimes (and with the starter kit especially)
+            // the json might have extra spaces in it, so compared with a server 
+            // where this has been imported vs created it can be different but the same.
+
+            // by reading in the json and then spitting it out again, we remove any
+            // rouge spacing - so our compare fires through as if nothing has changed.
+
+            if (jsonArray.TrySerializeJsonNode(out string? result))
+                return result;
+
             return stringValue;
-
-        // re-formatting the json in the picker.
-        // 
-        // we do this because sometimes (and with the starter kit especially)
-        // the json might have extra spaces in it, so compared with a server 
-        // where this has been imported vs created it can be different but the same.
-
-        // by reading in the json and then spitting it out again, we remove any
-        // rouge spacing - so our compare fires through as if nothing has changed.
-
-        if (jsonArray.TrySerializeJsonNode(out string? result))
-            return result;
-
-        return stringValue;
+        });
     }
 
-
-    public override IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)
+    public override Task<IEnumerable<uSyncDependency>> GetDependenciesAsync(object value, string editorAlias, DependencyFlags flags)
     {
-        // validate string 
-        var stringValue = value?.ToString();
-
-        if (stringValue.TryParseToJsonArray(out var images) is false || images == null || images.Count == 0)
+        return uSyncTaskHelper.FromResultOf<IEnumerable<uSyncDependency>>(() =>
         {
-            _logger.LogWarning("no json images found for {value}", stringValue);
-            return [];
-        }
+            // validate string 
+            var stringValue = value?.ToString();
 
-        var dependencies = new List<uSyncDependency>();
+            if (stringValue.TryParseToJsonArray(out var images) is false || images == null || images.Count == 0)
+            {
+                _logger.LogWarning("no json images found for {value}", stringValue);
+                return [];
+            }
 
-        foreach (var image in images.AsListOfJsonObjects())
-        {
-            if (image == null) continue;
+            var dependencies = new List<uSyncDependency>();
 
-            var key = GetGuidValue(image, "mediaKey");
-            if (key == Guid.Empty) continue;
+            foreach (var image in images.AsListOfJsonObjects())
+            {
+                if (image == null) continue;
 
-            var udi = GuidUdi.Create(UdiEntityType.Media, key);
-            var dependency = CreateDependency(udi as GuidUdi, flags);
-            if (dependency is not null) dependencies.Add(dependency);
-        }
+                var key = GetGuidValue(image, "mediaKey");
+                if (key == Guid.Empty) continue;
 
-        return dependencies;
+                var udi = GuidUdi.Create(UdiEntityType.Media, key);
+                var dependency = CreateDependency(udi as GuidUdi, flags);
+                if (dependency is not null) dependencies.Add(dependency);
+            }
+
+            return dependencies;
+        });
     }
 
     private static Guid GetGuidValue(JsonObject obj, string key)

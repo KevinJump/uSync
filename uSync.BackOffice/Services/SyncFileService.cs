@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 
@@ -72,7 +74,6 @@ public class SyncFileService
     /// </summary>
     public bool FileExists(string path)
         => File.Exists(GetAbsPath(path));
-
 
     /// <summary>
     ///  compare two file paths, and tell us if they match 
@@ -242,7 +243,7 @@ public class SyncFileService
     /// <summary>
     ///  load a file into a XElement object.
     /// </summary>
-    public XElement LoadXElement(string file)
+    public async Task<XElement> LoadXElementAsync(string file)
     {
         EnsureFileExists(file);
 
@@ -253,7 +254,7 @@ public class SyncFileService
                 if (stream is null)
                     throw new FileNotFoundException($"Cannot create stream for {file}"); ;
 
-                return XElement.Load(stream);
+                return await XElement.LoadAsync(stream, LoadOptions.PreserveWhitespace, CancellationToken.None);
             }
         }
         catch (Exception ex)
@@ -266,14 +267,14 @@ public class SyncFileService
     /// <summary>
     ///  save a stream to disk
     /// </summary>
-    public void SaveFile(string filename, Stream stream)
+    public async Task SaveFileAsync(string filename, Stream stream)
     {
         _logger.LogDebug("Saving File: {file}", filename);
 
         using (Stream fileStream = OpenWrite(filename))
         {
-            stream.CopyTo(fileStream);
-            fileStream.Flush();
+            await stream.CopyToAsync(fileStream);
+            await fileStream.FlushAsync();
             fileStream.Close();
         }
     }
@@ -281,7 +282,7 @@ public class SyncFileService
     /// <summary>
     ///  save a string to disk
     /// </summary>
-    public void SaveFile(string filename, string content)
+    public async Task SaveFileAsync(string filename, string content)
     {
         var localFile = GetAbsPath(filename);
         _logger.LogDebug("Saving File: {local} [{length}]", localFile, content.Length);
@@ -289,8 +290,8 @@ public class SyncFileService
         using (Stream stream = OpenWrite(localFile))
         {
             byte[] info = new UTF8Encoding(true).GetBytes(content);
-            stream.Write(info, 0, info.Length);
-            stream.Flush();
+            await stream.WriteAsync(info, 0, info.Length);
+            await stream.FlushAsync();
             stream.Dispose();
         }
     }
@@ -298,13 +299,13 @@ public class SyncFileService
     /// <summary>
     ///  Save an XML Element to disk
     /// </summary>
-    public void SaveXElement(XElement node, string filename)
+    public async Task SaveXElementAsync(XElement node, string filename)
     {
         var localPath = GetAbsPath(filename);
         using (var stream = OpenWrite(localPath))
         {
-            node.Save(stream);
-            stream.Flush();
+            await node.SaveAsync(stream, SaveOptions.None, CancellationToken.None);
+            await stream.FlushAsync();
             stream.Dispose();
         }
     }
@@ -331,12 +332,12 @@ public class SyncFileService
     /// <summary>
     ///  load the contents of a file into a string
     /// </summary>
-    public string LoadContent(string file)
+    public async Task<string> LoadContentAsync(string file)
     {
         if (FileExists(file))
         {
             var absPath = this.GetAbsPath(file);
-            return File.ReadAllText(absPath);
+            return await File.ReadAllTextAsync(absPath);
         }
 
         return string.Empty;
@@ -492,7 +493,7 @@ public class SyncFileService
     ///  the doctype tracker merges properties so you can have 
     ///  property level root values for doctypes. 
     /// </remarks>
-    public IEnumerable<OrderedNodeInfo> MergeFolders(string[] folders, string extension, ISyncTrackerBase? trackerBase)
+    public async Task<IEnumerable<OrderedNodeInfo>> MergeFoldersAsync(string[] folders, string extension, ISyncTrackerBase? trackerBase)
     {
         var elements = new Dictionary<string, OrderedNodeInfo>();
 		var cleanElements = new Dictionary<string, OrderedNodeInfo>();
@@ -503,7 +504,7 @@ public class SyncFileService
 
             if (DirectoryExists(absPath) is false) continue;
 
-            var items = GetFolderItems(absPath, extension);
+            var items = await GetFolderItemsAsync(absPath, extension);
 
             var localKeys = new List<Guid>();
 
@@ -555,15 +556,15 @@ public class SyncFileService
 	/// <summary>
 	///  merge the files into a single XElement that can be imported as if it was on disk.
 	/// </summary>
-	public XElement? MergeFiles(string[] filenames, ISyncTrackerBase? trackerBase)
+	public async Task<XElement?> MergeFilesAsync(string[] filenames, ISyncTrackerBase? trackerBase)
 	{
 		if (filenames.Length == 0) return null;
-		var latest = LoadXElementSafe(filenames[0]);
+		var latest = await LoadXElementSafeAsync(filenames[0]);
 		if (filenames.Length == 1 || latest is null) return latest;
 
 		for (var n = 1; n < filenames.Length; n++)
 		{
-			var node = LoadXElementSafe(filenames[n]);
+			var node = await LoadXElementSafeAsync(filenames[n]);
 			if (node is null) continue;
 			latest = MergeNodes(latest, node, trackerBase);
 		}
@@ -574,37 +575,41 @@ public class SyncFileService
 		=> trackerBase is null ? target : trackerBase.MergeFiles(source, target) ?? target;
 
 
-	private IEnumerable<KeyValuePair<string, OrderedNodeInfo>> GetFolderItems(string folder, string extension)
+	private async Task<IEnumerable<KeyValuePair<string, OrderedNodeInfo>>> GetFolderItemsAsync(string folder, string extension)
     {
+        var items = new List<KeyValuePair<string, OrderedNodeInfo>>();
+
         foreach (var file in GetFilePaths(folder, extension))
         {
-            var element = LoadXElementSafe(file);
+            var element = await LoadXElementSafeAsync(file);
             if (element != null)
             {
                 var path = file.Substring(folder.Length);
 
-                yield return new KeyValuePair<string, OrderedNodeInfo>(
+                items.Add(new KeyValuePair<string, OrderedNodeInfo>(
                     key: path,
                     value: new OrderedNodeInfo(
                         filename: file,
                         node: element,
                         level: (element.GetLevel() * 1000) + element.GetItemSortOrder(),
                         path: path,
-                        isRoot: true));
+                        isRoot: true)));
             }
         }
+
+        return items;
     }
 
     /// <summary>
     ///  will load the most relevant version of a file. 
     /// </summary>
-    public XElement? GetNearestNode(string filePath, string[] folders)
+    public async Task<XElement?> GetNearestNodeAsync(string filePath, string[] folders)
     {
         foreach (var folder in folders.Reverse())
         {
             var path = Path.Combine(folder, filePath);
             if (FileExists(path))
-                return LoadXElementSafe(path);
+                return await LoadXElementSafeAsync(path);
         }
 
         return null;
@@ -630,13 +635,13 @@ public class SyncFileService
     ///  get all xml elements that represent this item across
     ///  all folders. 
     /// </summary>
-    public List<XElement> GetAllNodes(string[] filePaths)
+    public async Task<List<XElement>> GetAllNodesAsync(string[] filePaths)
     {
         var nodes = new List<XElement>(filePaths.Length);
         foreach (var file in filePaths)
         {
             if (!FileExists(file)) continue;
-            var element = LoadXElementSafe(file);
+            var element = await LoadXElementSafeAsync(file);
             if (element != null)
                 nodes.Add(element);
         }
@@ -654,14 +659,14 @@ public class SyncFileService
     private static string[] GetFilePaths(string folder, string extension)
         => Directory.GetFiles(folder, $"*.{extension}", SearchOption.AllDirectories);
 
-    private XElement? LoadXElementSafe(string file)
+    private async Task<XElement?> LoadXElementSafeAsync(string file)
     {
         var absPath = GetAbsPath(file);
         if (FileExists(absPath) is false) return null;
 
         try
         {
-            return XElement.Load(absPath);
+            return await LoadXElementAsync(file);
         }
         catch
         {

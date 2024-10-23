@@ -64,7 +64,7 @@ public class ContentTemplateSerializer : ContentSerializer, ISyncSerializer<ICon
 
         details.AddRange(await DeserializeBaseAsync(item, node, options));
 
-        var propertiesAttempt = DeserializeProperties(item, node, options);
+        var propertiesAttempt = await DeserializePropertiesAsync(item, node, options);
         if (!propertiesAttempt.Success)
         {
             return SyncAttempt<IContent>.Fail(item.Name ?? item.Id.ToString(), item, ChangeType.ImportFail, "Failed to deserialized properties", attempt.Exception);

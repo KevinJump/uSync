@@ -144,21 +144,20 @@ public partial class uSyncService
     /// <summary>
     ///  Start a bulk run, fires events, and for exports writes the version file.
     /// </summary>
-    public void StartBulkProcess(HandlerActions action)
+    public async Task StartBulkProcessAsync(HandlerActions action)
     {
         switch (action)
         {
             case HandlerActions.Export:
-                _mutexService.FireBulkStarting(new uSyncExportStartingNotification());
+                await _mutexService.FireBulkStartingAsync(new uSyncExportStartingNotification());
                 break;
             case HandlerActions.Import:
                 // cleans any caches we might have set.
                 _appCache.ClearByKey("usync_");
-
-                _mutexService.FireBulkStarting(new uSyncImportStartingNotification());
+                await _mutexService.FireBulkStartingAsync(new uSyncImportStartingNotification());
                 break;
             case HandlerActions.Report:
-                _mutexService.FireBulkStarting(new uSyncReportStartingNotification());
+                await _mutexService.FireBulkStartingAsync(new uSyncReportStartingNotification());
                 break;
         }
     }
@@ -166,19 +165,19 @@ public partial class uSyncService
     /// <summary>
     ///  Complete a bulk run, fire the event so other things know we have done it.
     /// </summary>
-    public void FinishBulkProcess(HandlerActions action, IEnumerable<uSyncAction> actions)
+    public async Task FinishBulkProcessAsync(HandlerActions action, IEnumerable<uSyncAction> actions)
     {
         switch (action)
         {
             case HandlerActions.Export:
-                WriteVersionFile(_uSyncConfig.GetWorkingFolder());
-                _mutexService.FireBulkComplete(new uSyncExportCompletedNotification(actions));
+                await WriteVersionFileAsync(_uSyncConfig.GetWorkingFolder());
+                await _mutexService.FireBulkCompleteAsync(new uSyncExportCompletedNotification(actions));
                 break;
             case HandlerActions.Import:
-                _mutexService.FireBulkComplete(new uSyncImportCompletedNotification(actions));
+                await _mutexService.FireBulkCompleteAsync(new uSyncImportCompletedNotification(actions));
                 break;
             case HandlerActions.Report:
-                _mutexService.FireBulkComplete(new uSyncReportCompletedNotification(actions));
+                await _mutexService.FireBulkCompleteAsync(new uSyncReportCompletedNotification(actions));
                 break;
         }
     }

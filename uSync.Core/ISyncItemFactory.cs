@@ -26,7 +26,12 @@ public interface ISyncItemFactory
 
     // dependency checker items
     IEnumerable<ISyncDependencyChecker<TObject>> GetCheckers<TObject>();
+
+    [Obsolete("Use GetDependenciesAsync will be removed in v16")]
     IEnumerable<uSyncDependency> GetDependencies<TObject>(TObject item, DependencyFlags flags);
+    
+    Task<IEnumerable<uSyncDependency>> GetDependenciesAsync<TObject>(TObject item, DependencyFlags flags);
+    
     SyncEntityCache EntityCache { get; }
 
 }

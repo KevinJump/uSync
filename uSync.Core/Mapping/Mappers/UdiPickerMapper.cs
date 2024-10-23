@@ -3,6 +3,7 @@ using Umbraco.Cms.Core.Services;
 using Umbraco.Extensions;
 
 using uSync.Core.Dependency;
+using uSync.Core.Extensions;
 
 namespace uSync.Core.Mapping;
 
@@ -35,14 +36,17 @@ public class UdiPickerMapper : SyncValueMapperBase, ISyncMapper
         Constants.PropertyEditors.Aliases.MemberPicker
     ];
 
-	public override IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)
+    public override Task<IEnumerable<uSyncDependency>> GetDependenciesAsync(object value, string editorAlias, DependencyFlags flags)
     {
-        if (value is not null)
+        return uSyncTaskHelper.FromResultOf(() =>
         {
-            var udiStrings = value.ToString()?.ToDelimitedList() ?? [];
-            return CreateDependencies(udiStrings, flags);
-        }
+            if (value is not null)
+            {
+                var udiStrings = value.ToString()?.ToDelimitedList() ?? [];
+                return CreateDependencies(udiStrings, flags);
+            }
 
-        return [];
+            return [];
+        });
     }
 }

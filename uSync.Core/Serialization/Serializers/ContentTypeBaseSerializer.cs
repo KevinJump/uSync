@@ -10,6 +10,7 @@ using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Services.OperationStatus;
 using Umbraco.Cms.Core.Strings;
+using Umbraco.Cms.Infrastructure.Migrations.Upgrade.V_13_0_0;
 using Umbraco.Extensions;
 
 using uSync.Core.Extensions;
@@ -85,7 +86,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         return tabs;
     }
 
-    protected virtual XElement SerializeProperties(TObject item)
+    protected virtual async Task<XElement> SerializePropertiesAsync(TObject item)
     {
         var node = new XElement("GenericProperties");
 
@@ -96,7 +97,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
                 new XElement(uSyncConstants.Xml.Name, property.Name),
                 new XElement(uSyncConstants.Xml.Alias, property.Alias));
 
-            var def = _dataTypeService.GetAsync(property.DataTypeKey).Result;
+            var def = await _dataTypeService.GetAsync(property.DataTypeKey);
             // var def = _dataTypeService.GetDataType(property.DataTypeId);
             if (def != null)
             {
@@ -408,7 +409,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         return changes;
     }
 
-    protected IEnumerable<uSyncChange> DeserializeProperties(TObject item, XElement node, SyncSerializerOptions options)
+    protected async Task<IEnumerable<uSyncChange>> DeserializePropertiesAsync(TObject item, XElement node, SyncSerializerOptions options)
     {
         logger.LogDebug("De-serializing Properties");
 
@@ -434,86 +435,86 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
 
             logger.LogDebug(" > Property: {alias} {key} {definitionKey} {editorAlias}", alias, key, definitionKey, propertyEditorAlias);
 
-            var property = GetOrCreateProperty(item, key, alias, definitionKey, propertyEditorAlias, compositeProperties, out bool IsNew);
-            if (property == null)
+            var result = await GetOrCreatePropertyAsync(item, key, alias, definitionKey, propertyEditorAlias, compositeProperties);
+            if (result.Property == null)
             {
                 changes.AddWarning($"Property/{alias}", alias, $"Property '{alias}' cannot be created (missing DataType?)");
                 continue;
             }
 
-            if (key != Guid.Empty && property.Key != key)
+            if (key != Guid.Empty && result.Property.Key != key)
             {
-                changes.AddUpdate(uSyncConstants.Xml.Key, property.Key, key, $"{alias}/Key");
-                property.Key = key;
+                changes.AddUpdate(uSyncConstants.Xml.Key, result.Property.Key, key, $"{alias}/Key");
+                result.Property.Key = key;
             }
 
-            if (property.Alias != alias)
+            if (result.Property.Alias != alias)
             {
-                changes.AddUpdate(uSyncConstants.Xml.Alias, property.Alias, alias, $"{alias}/Alias");
-                property.Alias = alias;
+                changes.AddUpdate(uSyncConstants.Xml.Alias, result.Property.Alias, alias, $"{alias}/Alias");
+                result.Property.Alias = alias;
             }
 
             var name = propertyNode.Element(uSyncConstants.Xml.Name).ValueOrDefault(alias);
-            if (property.Name != name)
+            if (result.Property.Name != name)
             {
-                changes.AddUpdate(uSyncConstants.Xml.Name, property.Name, name, $"{alias}/Name");
-                property.Name = name;
+                changes.AddUpdate(uSyncConstants.Xml.Name, result.Property.Name, name, $"{alias}/Name");
+                result.Property.Name = name;
             }
 
             var description = propertyNode.Element("Description").ValueOrDefault(string.Empty);
-            if (property.Description != description)
+            if (result.Property.Description != description)
             {
-                changes.AddUpdate("Description", property.Description ?? "(None)", description, $"{alias}/Description");
-                property.Description = description;
+                changes.AddUpdate("Description", result.Property.Description ?? "(None)", description, $"{alias}/Description");
+                result.Property.Description = description;
             }
 
             var mandatory = propertyNode.Element("Mandatory").ValueOrDefault(false);
-            if (property.Mandatory != mandatory)
+            if (result.Property.Mandatory != mandatory)
             {
-                changes.AddUpdate("Mandatory", property.Mandatory, mandatory, $"{alias}/Mandatory");
-                property.Mandatory = mandatory;
+                changes.AddUpdate("Mandatory", result.Property.Mandatory, mandatory, $"{alias}/Mandatory");
+                result.Property.Mandatory = mandatory;
             }
 
             var regEx = propertyNode.Element("Validation").ValueOrDefault(string.Empty);
-            if (property.ValidationRegExp != regEx)
+            if (result.Property.ValidationRegExp != regEx)
             {
-                changes.AddUpdate("Validation", property.ValidationRegExp ?? "(None)", regEx, $"{alias}/RegEx");
-                property.ValidationRegExp = propertyNode.Element("Validation").ValueOrDefault(string.Empty);
+                changes.AddUpdate("Validation", result.Property.ValidationRegExp ?? "(None)", regEx, $"{alias}/RegEx");
+                result.Property.ValidationRegExp = propertyNode.Element("Validation").ValueOrDefault(string.Empty);
             }
 
             var sortOrder = propertyNode.Element("SortOrder").ValueOrDefault(0);
-            if (property.SortOrder != sortOrder)
+            if (result.Property.SortOrder != sortOrder)
             {
-                changes.AddUpdate("SortOrder", property.SortOrder, sortOrder, $"{alias}/SortOrder");
-                property.SortOrder = sortOrder;
+                changes.AddUpdate("SortOrder", result.Property.SortOrder, sortOrder, $"{alias}/SortOrder");
+                result.Property.SortOrder = sortOrder;
             }
 
             var mandatoryMessage = propertyNode.Element("MandatoryMessage").ValueOrDefault(string.Empty);
-            if (property.MandatoryMessage != mandatoryMessage)
+            if (result.Property.MandatoryMessage != mandatoryMessage)
             {
-                changes.AddUpdate("MandatoryMessage", property.MandatoryMessage ?? "(None)", mandatoryMessage, $"{alias}/MandatoryMessage");
-                property.MandatoryMessage = mandatoryMessage;
+                changes.AddUpdate("MandatoryMessage", result.Property.MandatoryMessage ?? "(None)", mandatoryMessage, $"{alias}/MandatoryMessage");
+                result.Property.MandatoryMessage = mandatoryMessage;
             }
 
             var validationRegExMessage = propertyNode.Element("ValidationRegExpMessage").ValueOrDefault(string.Empty);
-            if (property.ValidationRegExpMessage != validationRegExMessage)
+            if (result.Property.ValidationRegExpMessage != validationRegExMessage)
             {
-                changes.AddUpdate("ValidationRegExpMessage", property.ValidationRegExpMessage ?? "(None)", validationRegExMessage, $"{alias}/ValidationRegExpMessage");
-                property.ValidationRegExpMessage = validationRegExMessage;
+                changes.AddUpdate("ValidationRegExpMessage", result.Property.ValidationRegExpMessage ?? "(None)", validationRegExMessage, $"{alias}/ValidationRegExpMessage");
+                result.Property.ValidationRegExpMessage = validationRegExMessage;
             }
 
             var labelOnTop = propertyNode.Element("LabelOnTop").ValueOrDefault(false);
-            if (property.LabelOnTop != labelOnTop)
+            if (result.Property.LabelOnTop != labelOnTop)
             {
-                changes.AddUpdate("LabelOnTop", property.LabelOnTop, labelOnTop, $"{alias}/LabelOnTop");
-                property.LabelOnTop = labelOnTop;
+                changes.AddUpdate("LabelOnTop", result.Property.LabelOnTop, labelOnTop, $"{alias}/LabelOnTop");
+                result.Property.LabelOnTop = labelOnTop;
             }
 
-            changes.AddRange(DeserializeExtraProperties(item, property, propertyNode));
+            changes.AddRange(DeserializeExtraProperties(item, result.Property, propertyNode));
 
             var tabAlias = GetTabAlias(item, propertyNode.Element("Tab"));
 
-            if (IsNew)
+            if (result.IsNew)
             {
                 changes.AddNew(alias, name, alias);
                 logger.LogDebug("Property {alias} is new adding to tab. {tabAlias}", alias, tabAlias ?? "(No tab name)");
@@ -521,7 +522,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
                 if (string.IsNullOrWhiteSpace(tabAlias))
                 {
 
-                    item.AddPropertyType(property);
+                    item.AddPropertyType(result.Property);
                 }
                 else
                 {
@@ -533,7 +534,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
                     }
                     else
                     {
-                        item.AddPropertyType(property, tabGroup?.Alias ?? tabAlias);
+                        item.AddPropertyType(result.Property, tabGroup?.Alias ?? tabAlias);
                     }
                 }
             }
@@ -546,16 +547,16 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
                     var tabGroup = item.PropertyGroups.FindTab(tabAlias);
                     if (tabGroup != null)
                     {
-                        if (!tabGroup.PropertyTypes?.Contains(property.Alias) is true)
+                        if (!tabGroup.PropertyTypes?.Contains(result.Property.Alias) is true)
                         {
                             // this property is not currently in this tab.
                             // add to our move list.
-                            propertiesToMove[property.Alias] = tabAlias;
+                            propertiesToMove[result.Property.Alias] = tabAlias;
                         }
                     }
                     else
                     {
-                        logger.LogWarning("Cannot find tab {alias} to add {property} to", tabAlias, property.Alias);
+                        logger.LogWarning("Cannot find tab {alias} to add {property} to", tabAlias, result.Property.Alias);
                         changes.AddWarning(alias, name, $"Unable to find tab {tabAlias} to add property too");
                     }
                 }
@@ -1128,47 +1129,55 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         return false;
     }
 
-    private IPropertyType? GetOrCreateProperty(TObject item,
+    private class PropertyTypeResult
+    {
+        public bool IsNew { get; set; }
+        public IPropertyType? Property { get; set; }
+    }
+
+
+    private async Task<PropertyTypeResult> GetOrCreatePropertyAsync(TObject item,
         Guid key,
         string alias,
         Guid definitionKey,
         string propertyEditorAlias,
-        List<string>? compositeProperties,
-        out bool IsNew)
+        List<string>? compositeProperties)
     {
         logger.LogDebug("GetOrCreateProperty {key} [{alias}]", key, alias);
 
-        IsNew = false;
-
-        IPropertyType? property = default;
+        var result = new PropertyTypeResult
+        {
+            IsNew = false,
+            Property = default
+        };
 
         if (key != Guid.Empty)
         {
             // should we throw - not a valid sync file ?
             // or carry on with best endeavors ? 
-            property = item.PropertyTypes.SingleOrDefault(x => x.Key == key);
+            result.Property = item.PropertyTypes.SingleOrDefault(x => x.Key == key);
         }
 
         // Should we say if we don't have the key? but lets lookup by alias. 
-        property ??= item.PropertyTypes.SingleOrDefault(x => x.Alias == alias);
+        result.Property ??= item.PropertyTypes.SingleOrDefault(x => x.Alias == alias);
 
         var editorAlias = propertyEditorAlias;
 
         IDataType? dataType = default;
         if (definitionKey != Guid.Empty)
         {
-            dataType = _dataTypeService.GetAsync(definitionKey).Result;
+            dataType = await _dataTypeService.GetAsync(definitionKey);
         }
 
         if (dataType is null && !string.IsNullOrEmpty(propertyEditorAlias))
         {
-            dataType = _dataTypeService.GetAsync(propertyEditorAlias).Result;
+            dataType = await _dataTypeService.GetAsync(propertyEditorAlias);
         }
 
         if (dataType is null)
         {
             logger.LogWarning("Cannot find underling DataType {key} {alias} for {property} - Either your datatypes are out of sync or you are missing a package?", definitionKey, propertyEditorAlias, alias);
-            return null;
+            return new PropertyTypeResult();
         }
 
         // we set it here, this means if the file is in conflict (because its changed in the DataType), 
@@ -1176,19 +1185,19 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         editorAlias = dataType.EditorAlias;
 
         // if it's null then it doesn't exist (so it's new)
-        if (property is null)
+        if (result.Property is null)
         {
 
             if (PropertyExistsOnComposite(item, alias, compositeProperties))
             {
                 logger.LogDebug("Cannot create property here {name} as it exist on Composition", item.Name);
                 // can't create here, its on a composite
-                return null;
+                return new PropertyTypeResult();
             }
             else
             {
-                property = new PropertyType(shortStringHelper, dataType, alias);
-                IsNew = true;
+                result.Property = new PropertyType(shortStringHelper, dataType, alias);
+                result.IsNew = true;
             }
         }
 
@@ -1196,17 +1205,16 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         // thing that could break if they where blank. 
         // update, only set this if its not already set (because we don't want to break things!)
         // also update it if its not the same as the DataType, (because that has to match)
-        if (!property.PropertyEditorAlias.Equals(editorAlias))
+        if (!result.Property.PropertyEditorAlias.Equals(editorAlias))
         {
-            logger.LogDebug("Property Editor Alias mismatch {propertyEditorAlias} != {editorAlias} fixing...", property.PropertyEditorAlias, editorAlias);
-            property.PropertyEditorAlias = editorAlias;
+            logger.LogDebug("Property Editor Alias mismatch {propertyEditorAlias} != {editorAlias} fixing...", result.Property.PropertyEditorAlias, editorAlias);
+            result.Property.PropertyEditorAlias = editorAlias;
         }
 
-        if (property.DataTypeId != dataType.Id)
-            property.DataTypeId = dataType.Id;
+        if (result.Property.DataTypeId != dataType.Id)
+            result.Property.DataTypeId = dataType.Id;
 
-        return property;
-
+        return result;
     }
 
 

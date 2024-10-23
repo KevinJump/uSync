@@ -20,22 +20,24 @@ public class RepeatableValueMapper : SyncValueMapperBase, ISyncMapper
         Constants.PropertyEditors.Aliases.MultipleTextstring
     ];
 
-    public override string? GetImportValue(string value, string editorAlias)
+    public override Task<string?> GetImportValueAsync(string value, string editorAlias)
     {
-        if (value.TryParseToJsonNode(out var json) && json != null)
+        return uSyncTaskHelper.FromResultOf<string?>(() =>
         {
-            if (json.TrySerializeJsonString(out var result) && result != null)
+            if (value.TryParseToJsonNode(out var json) && json != null)
             {
-                return result;
+                if (json.TrySerializeJsonString(out var result) && result != null)
+                {
+                    return result;
+                }
             }
-        }
 
+            if (!value.Contains('\r'))
+            {
+                return value.Replace("\n", "\r\n");
+            }
 
-        if (!value.Contains('\r'))
-        {
-            return value.Replace("\n", "\r\n");
-        }
-
-        return value;
+            return value;
+        });
     }
 }

@@ -35,10 +35,14 @@ public class SyncValueMapperCollection
         return this.Where(x => x.Editors.InvariantContains(mappedAlias));
     }
 
+    [Obsolete("use GetExportValueAsync will be removed in v16")]
+    public string GetExportValue(object value, string editorAlias)
+        => GetExportValueAsync(value, editorAlias).Result;
+
     /// <summary>
     ///  Get the mapped export value
     /// </summary>
-    public string GetExportValue(object value, string editorAlias)
+    public async Task<string> GetExportValueAsync(object value, string editorAlias)
     {
         if (value is null) return string.Empty;
 
@@ -49,7 +53,7 @@ public class SyncValueMapperCollection
 
             foreach (var mapper in mappers)
             {
-                mappedValue = mapper.GetExportValue(mappedValue ?? string.Empty, editorAlias);
+                mappedValue = await mapper.GetExportValueAsync(mappedValue ?? string.Empty, editorAlias);
             }
 
             return mappedValue ?? string.Empty;
@@ -61,7 +65,11 @@ public class SyncValueMapperCollection
     /// <summary>
     ///  Get the mapped import value
     /// </summary>
+    [Obsolete("use GetImportValueAsync will be removed in v16")]
     public object? GetImportValue(string value, string editorAlias)
+        => GetImportValueAsync(value, editorAlias).Result;
+
+    public async Task<object?> GetImportValueAsync(string value, string editorAlias)
     {
         if (string.IsNullOrWhiteSpace(value)) return null;
 
@@ -71,7 +79,7 @@ public class SyncValueMapperCollection
             var mappedValue = value;
             foreach (var mapper in mappers)
             {
-                mappedValue = mapper.GetImportValue(mappedValue ?? string.Empty, editorAlias);
+                mappedValue = await mapper.GetImportValueAsync(mappedValue ?? string.Empty, editorAlias);
             }
 
             return GetCleanFlatJson(mappedValue ?? string.Empty);

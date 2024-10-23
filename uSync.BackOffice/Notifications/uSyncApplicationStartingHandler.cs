@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
@@ -22,7 +24,7 @@ namespace uSync.BackOffice.Notifications;
 /// <summary>
 ///  Run uSync tasks when the site has started up. 
 /// </summary>
-internal class uSyncApplicationStartingHandler : INotificationHandler<UmbracoApplicationStartedNotification>
+internal class uSyncApplicationStartingHandler : INotificationAsyncHandler<UmbracoApplicationStartedNotification>
 {
     private readonly ILogger<uSyncApplicationStartingHandler> _logger;
     private readonly IRuntimeState _runtimeState;
@@ -60,7 +62,7 @@ internal class uSyncApplicationStartingHandler : INotificationHandler<UmbracoApp
     /// <summary>
     ///  Handle the application starting notification event.
     /// </summary>
-    public void Handle(UmbracoApplicationStartedNotification notification)
+    public async Task HandleAsync(UmbracoApplicationStartedNotification notification, CancellationToken cancellationToken)
     {
         // we only run uSync when the site is running, and we 
         // are not running on a replica.
@@ -76,13 +78,13 @@ internal class uSyncApplicationStartingHandler : INotificationHandler<UmbracoApp
             return;
         }
 
-        InituSync();
+        await InituSyncAsync();
     }
 
     /// <summary>
     ///  Initialize uSync elements (run start up import etc).
     /// </summary>
-    private void InituSync()
+    private async Task InituSyncAsync()
     {
         var sw = Stopwatch.StartNew();
 
@@ -115,7 +117,7 @@ internal class uSyncApplicationStartingHandler : INotificationHandler<UmbracoApp
                             Group = _uSyncConfig.Settings.ImportAtStartup
                         }).Wait();
 
-                        ProcessOnceFile(_uSyncConfig.GetWorkingFolder());
+                        await ProcessOnceFileAsync(_uSyncConfig.GetWorkingFolder());
                     }
                     else
                     {
@@ -160,12 +162,12 @@ internal class uSyncApplicationStartingHandler : INotificationHandler<UmbracoApp
     /// <summary>
     ///  Process the once file (if it exists we rename it to usync.stop).
     /// </summary>
-    private void ProcessOnceFile(string folder)
+    private async Task ProcessOnceFileAsync(string folder)
     {
         if (_syncFileService.FileExists($"{folder}/usync.once"))
         {
             _syncFileService.DeleteFile($"{folder}/usync.once");
-            _syncFileService.SaveFile($"{folder}/usync.stop", "uSync Stop file, prevents startup import");
+            await _syncFileService.SaveFileAsync($"{folder}/usync.stop", "uSync Stop file, prevents startup import");
             _logger.LogInformation("usync.once file replaced by usync.stop file");
         }
     }
@@ -188,5 +190,4 @@ internal class uSyncApplicationStartingHandler : INotificationHandler<UmbracoApp
             && !value.InvariantEquals("none")
             && !value.InvariantEquals("off")
             && !value.InvariantEquals("false");
-
 }

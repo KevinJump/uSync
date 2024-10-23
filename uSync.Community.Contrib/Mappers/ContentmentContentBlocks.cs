@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Nodes;
+using System.Threading.Tasks;
 
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Services;
@@ -27,7 +28,7 @@ public class ContentmentContentBlocks : SyncNestedJsonValueMapperBase, ISyncMapp
         "Umbraco.Community.Contentment.ContentBlocks"
     ];
 
-    protected override string ProcessValues(JsonObject jsonValue, string editorAlias, Func<JsonObject, IContentType, JsonObject> GetPropertiesMethod)
+    protected override async Task<string?> ProcessValuesAsync(JsonObject jsonValue, string editorAlias, Func<JsonObject, IContentType, Task<JsonObject>> GetPropertiesMethod)
     {
         var elements = jsonValue.AsArray();
 
@@ -39,14 +40,14 @@ public class ContentmentContentBlocks : SyncNestedJsonValueMapperBase, ISyncMapp
             var doctype = GetDocTypeByKey(item, "elementType");
             if (doctype is null) continue;
 
-            GetImportProperties(itemValue, doctype);
+            await GetImportPropertiesAsync(itemValue, doctype);
         }
 
         return elements.SerializeJsonNode(false);
 
     }
 
-    public override IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)
+    public override async Task<IEnumerable<uSyncDependency>> GetDependenciesAsync(object value, string editorAlias, DependencyFlags flags)
     {
         var stringValue = GetValueAs<string>(value);
 
@@ -71,7 +72,7 @@ public class ContentmentContentBlocks : SyncNestedJsonValueMapperBase, ISyncMapp
                 if (doctypeDependency != null) dependencies.Add(doctypeDependency);
             }
 
-            dependencies.AddRange(GetPropertyDependencies(itemValue, doctype, flags));
+            dependencies.AddRange(await GetPropertyDependenciesAsync(itemValue, doctype, flags));
         }
 
         return dependencies;

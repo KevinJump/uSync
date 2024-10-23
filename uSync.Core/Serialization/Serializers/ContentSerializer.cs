@@ -51,7 +51,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
 
         var info = await SerializeInfoAsync(item, options);
 
-        var properties = SerializeProperties(item, options);
+        var properties = await SerializePropertiesAsync(item, options);
 
         node.Add(info);
         node.Add(properties);
@@ -198,7 +198,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
 
 		details.AddNotNull(await DeserializeTemplate(item, node));
 
-        var propertiesAttempt = DeserializeProperties(item, node, options);
+        var propertiesAttempt = await DeserializePropertiesAsync(item, node, options);
         if (!propertiesAttempt.Success)
         {
             return SyncAttempt<IContent>.Fail(item.Name ?? item.Id.ToString(), item, ChangeType.ImportFail, "Failed to deserialize properties", attempt.Exception);

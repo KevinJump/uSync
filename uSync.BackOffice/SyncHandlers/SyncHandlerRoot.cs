@@ -272,7 +272,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 
         options.Callbacks?.Update?.Invoke("Calculating import order", 1, 9);
 
-        var items = GetMergedItems(folders);
+        var items = await GetMergedItemsAsync(folders);
 
         options.Callbacks?.Update?.Invoke($"Processing {items.Count} items", 2, 9);
 
@@ -344,31 +344,32 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// <returns></returns>
     [Obsolete("use FetchAllNodesAsync will be removed in v16")]
     public IReadOnlyList<OrderedNodeInfo> FetchAllNodes(string[] folders)
-        => GetMergedItems(folders);
+        => GetMergedItemsAsync(folders).Result;
 
-    public Task<IReadOnlyList<OrderedNodeInfo>> FetchAllNodesAsync(string[] folders)
-        => Task.FromResult(GetMergedItems(folders));
+    public async Task<IReadOnlyList<OrderedNodeInfo>> FetchAllNodesAsync(string[] folders)
+        => await GetMergedItemsAsync(folders);
 
     /// <summary>
     ///  method to get the merged folders, handlers that care about orders should override this. 
     /// </summary>
-    protected virtual IReadOnlyList<OrderedNodeInfo> GetMergedItems(string[] folders)
+    protected virtual async Task<IReadOnlyList<OrderedNodeInfo>> GetMergedItemsAsync(string[] folders)
     {
         var baseTracker = trackers.FirstOrDefault() as ISyncTrackerBase;
-        return syncFileService.MergeFolders(folders, uSyncConfig.Settings.DefaultExtension, baseTracker).ToArray();
+        return (await syncFileService.MergeFoldersAsync(folders, uSyncConfig.Settings.DefaultExtension, baseTracker))
+            .ToArray();
     }
 
     /// <summary>
     ///  given a file path, will give you the merged values across all folders. 
     /// </summary>
-    protected virtual XElement? GetMergedNode(string filePath)
+    protected virtual async Task<XElement?> GetMergedNodeAsync(string filePath)
     {
         var allFiles = uSyncConfig.GetFolders()
             .Select(x => syncFileService.GetAbsPath($"{x}/{this.DefaultFolder}/{filePath}"))
             .ToArray();
 
         var baseTracker = trackers.FirstOrDefault() as ISyncTrackerBase;
-        return syncFileService.MergeFiles(allFiles, baseTracker);
+        return await syncFileService.MergeFilesAsync(allFiles, baseTracker);
     }
 
 
@@ -414,7 +415,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         try
         {
             syncFileService.EnsureFileExists(filePath);
-            var node = syncFileService.LoadXElement(filePath);
+            var node = await syncFileService.LoadXElementAsync(filePath);
             return await ImportElementAsync(node, filePath, config, options);
         }
         catch (FileNotFoundException notFoundException)
@@ -459,7 +460,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 
         if (file.InvariantStartsWith($"{uSyncConstants.MergedFolderName}/"))
         {
-            var node = GetMergedNode(file.Substring(uSyncConstants.MergedFolderName.Length + 1));
+            var node = await GetMergedNodeAsync(file.Substring(uSyncConstants.MergedFolderName.Length + 1));
             if (node is not null)
                 return await ImportElementAsync(node, file, config, options);
             else
@@ -487,7 +488,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
                 .AsEnumerableOfOne();
         }
 
-        if (_mutexService.FireItemStartingEvent(new uSyncImportingItemNotification(node, (ISyncHandler)this)))
+        if (await _mutexService.FireItemStartingEventAsync(new uSyncImportingItemNotification(node, (ISyncHandler)this)))
         {
             // blocked
             return uSyncActionHelper<TObject>
@@ -512,8 +513,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
             if (attempt.Details != null && attempt.Details.Any()) action.Details = attempt.Details;
 
             // this might not be the place to do this because, two pass items are imported at another point too.
-            _mutexService.FireItemCompletedEvent(new uSyncImportedItemNotification(node, attempt.Change));
-
+            await _mutexService.FireItemCompletedEventAsync(new uSyncImportedItemNotification(node, attempt.Change));
 
             return action.AsEnumerableOfOne();
         }
@@ -598,7 +598,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 
             if (fileName is null || syncFileService.FileExists(fileName) is false) return [];
 
-            var node = syncFileService.LoadXElement(fileName);
+            var node = await syncFileService.LoadXElementAsync(fileName);
             var item = await GetFromServiceAsync(node.GetKey());
             if (item is null) return [];
 
@@ -1002,7 +1002,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
             // for roots we still can create a clean
             var targetFolder = folders.Last();
             var filename = Path.Combine(targetFolder, $"{Guid.Empty}.{this.uSyncConfig.Settings.DefaultExtension}");
-            CreateCleanFile(Guid.Empty, filename);
+            await CreateCleanFileAsync(Guid.Empty, filename);
         }
 
 
@@ -1031,8 +1031,8 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
             return uSyncAction.Fail(nameof(item), this.handlerType, this.ItemType, ChangeType.Fail, "Item not set",
                 new ArgumentNullException(nameof(item))).AsEnumerableOfOne();
 
-        if (_mutexService.FireItemStartingEvent(new uSyncExportingItemNotification<TObject>(item, (ISyncHandler)this)))
-        {
+        if ( await _mutexService.FireItemStartingEventAsync(new uSyncExportingItemNotification<TObject>(item, (ISyncHandler)this)))
+        { 
             return uSyncActionHelper<TObject>
                 .ReportAction(ChangeType.NoChange, GetItemName(item), string.Empty, string.Empty, GetItemKey(item), this.Alias,
                                 "Change stopped by delegate event")
@@ -1041,7 +1041,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 
         var targetFolder = folders.Last();
 
-        var filename = GetPath(targetFolder, item, config.GuidNames, config.UseFlatStructure)
+        var filename = (await GetPathAsync(targetFolder, item, config.GuidNames, config.UseFlatStructure))
             .ToAppSafeFileName();
 
         // 
@@ -1060,7 +1060,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         var attempt = await Export_DoExportAsync(item, filename, folders, config);
 
         if (attempt.Change > ChangeType.NoChange)
-            _mutexService.FireItemCompletedEvent(new uSyncExportedItemNotification(attempt.Item, ChangeType.Export));
+            await _mutexService.FireItemCompletedEventAsync(new uSyncExportedItemNotification(attempt.Item, ChangeType.Export));
 
         return uSyncActionHelper<XElement>.SetAction(attempt, syncFileService.GetSiteRelativePath(filename), GetItemKey(item), this.Alias).AsEnumerableOfOne();
     }
@@ -1082,15 +1082,19 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         {
             if (await ShouldExportAsync(attempt.Item, config))
             {
-                var files = folders.Select(x => GetPath(x, item, config.GuidNames, config.UseFlatStructure)).ToArray();
-                var nodes = syncFileService.GetAllNodes(files[..^1]);
+                
+                var files = await Task.WhenAll(folders
+                    .Select(async x =>  await GetPathAsync(x, item, config.GuidNames, config.UseFlatStructure))
+                    .ToArray());
+
+                var nodes = await syncFileService.GetAllNodesAsync(files[..^1]);
                 if (nodes.Count > 0)
                 {
                     nodes.Add(attempt.Item);
                     var differences = syncFileService.GetDifferences(nodes, trackers.FirstOrDefault());
                     if (differences is not null && differences.HasElements)
                     {
-                        syncFileService.SaveXElement(attempt.Item, filename);
+                       await syncFileService.SaveXElementAsync(attempt.Item, filename);
                     }
                     else
                     {
@@ -1100,18 +1104,18 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
                             // we don't delete them - because in deployments they might then hang around
                             // we mark them as reverted and then they don't get processed.
                             var emptyNode = XElementExtensions.MakeEmpty(attempt.Item.GetKey(), SyncActionType.None, "Reverted to root");
-                            syncFileService.SaveXElement(emptyNode, filename);
+                            await syncFileService.SaveXElementAsync(emptyNode, filename);
                         }
                     }
                 }
                 else
                 {
-                    syncFileService.SaveXElement(attempt.Item, filename);
+                    await syncFileService.SaveXElementAsync(attempt.Item, filename);
                 }
 
                 if (config.CreateClean && HasChildren(item))
                 {
-                    CreateCleanFile(GetItemKey(item), filename);
+                    await CreateCleanFileAsync(GetItemKey(item), filename);
                 }
             }
             else
@@ -1164,7 +1168,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// <summary>
     ///  create a clean file, which is used as a marker, when performing remote deletes.
     /// </summary>
-    protected void CreateCleanFile(Guid key, string filename)
+    protected async Task CreateCleanFileAsync(Guid key, string filename)
     {
         if (string.IsNullOrWhiteSpace(filename))
             return;
@@ -1178,7 +1182,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 
         var node = XElementExtensions.MakeEmpty(key, SyncActionType.Clean, $"clean {name} children");
         node.Add(new XAttribute("itemType", serializer.ItemType));
-        syncFileService.SaveXElement(node, cleanPath);
+        await syncFileService.SaveXElementAsync(node, cleanPath);
     }
 
     #endregion
@@ -1207,7 +1211,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 
         callback?.Invoke("Organizing import structure", 1, 3);
 
-        var items = GetMergedItems(folders);
+        var items = await GetMergedItemsAsync(folders);
         var options = new uSyncImportOptions();
 
         int count = 0;
@@ -1406,7 +1410,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
             //  starting reporting notification
             //  this lets us intercept a report and 
             //  shortcut the checking (sometimes).
-            if (_mutexService.FireItemStartingEvent(new uSyncReportingItemNotification(node)))
+            if (await _mutexService.FireItemStartingEventAsync(new uSyncReportingItemNotification(node)))
             {
                 return uSyncActionHelper<TObject>
                     .ReportAction(ChangeType.NoChange, node.GetAlias(), node.GetPath(), GetNameFromFileOrNode(filename, node), node.GetKey(), this.Alias,
@@ -1457,7 +1461,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
             }
 
             // tell other things we have reported this item.
-            _mutexService.FireItemCompletedEvent(new uSyncReportedItemNotification(node, action.Change));
+            await _mutexService.FireItemCompletedEventAsync(new uSyncReportedItemNotification(node, action.Change));
 
             return actions;
         }
@@ -1487,7 +1491,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     {
         try
         {
-            var node = syncFileService.LoadXElement(file);
+            var node = await syncFileService.LoadXElementAsync(file);
 
             if (await ShouldImportAsync(node, config))
             {
@@ -1682,7 +1686,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 
         var targetFolder = folders.Last();
 
-        var filename = GetPath(targetFolder, item, config.GuidNames, config.UseFlatStructure)
+        var filename = (await GetPathAsync(targetFolder, item, config.GuidNames, config.UseFlatStructure))
             .ToAppSafeFileName();
 
         if (IsLockedAtRoot(folders, filename.Substring(targetFolder.Length + 1)))
@@ -1698,7 +1702,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         {
             if (attempt.Success && attempt.Change != ChangeType.NoChange)
             {
-                syncFileService.SaveXElement(attempt.Item, filename);
+                await syncFileService.SaveXElementAsync(attempt.Item, filename);
 
                 // so check - it shouldn't (under normal operation) 
                 // be possible for a clash to exist at delete, because nothing else 
@@ -1757,7 +1761,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
             {
                 try
                 {
-                    var node = syncFileService.LoadXElement(file);
+                    var node = await syncFileService.LoadXElementAsync(file);
 
                     // if this XML file matches the item we have just saved. 
 
@@ -1772,7 +1776,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
                             var attempt = await serializer.SerializeEmptyAsync(item, SyncActionType.Rename, node.GetAlias());
                             if (attempt.Success && attempt.Item is not null)
                             {
-                                syncFileService.SaveXElement(attempt.Item, file);
+                                await syncFileService.SaveXElementAsync(attempt.Item, file);
                             }
                         }
                     }
@@ -1881,13 +1885,13 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// <remarks>
     /// this is where a item is saved on disk in relation to the uSync folder 
     /// </remarks>
-    virtual protected string GetPath(string folder, TObject item, bool GuidNames, bool isFlat)
+    virtual protected async Task<string> GetPathAsync(string folder, TObject item, bool GuidNames, bool isFlat)
     {
         if (isFlat && GuidNames) return Path.Combine(folder, $"{GetItemKey(item)}.{this.uSyncConfig.Settings.DefaultExtension}");
         var path = Path.Combine(folder, $"{this.GetItemPath(item, GuidNames, isFlat)}.{this.uSyncConfig.Settings.DefaultExtension}");
 
         // if this is flat but not using GUID filenames, then we check for clashes.
-        if (isFlat && !GuidNames) return CheckAndFixFileClash(path, item);
+        if (isFlat && !GuidNames) return await CheckAndFixFileClashAsync(path, item);
         return path;
     }
 
@@ -1908,11 +1912,11 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     ///  
     ///  this can be completely sidestepped by using GUID filenames. 
     /// </remarks>
-    virtual protected string CheckAndFixFileClash(string path, TObject item)
+    virtual protected async Task<string> CheckAndFixFileClashAsync(string path, TObject item)
     {
         if (syncFileService.FileExists(path))
         {
-            var node = syncFileService.LoadXElement(path);
+            var node = await syncFileService.LoadXElementAsync(path);
 
             if (node == null) return path;
             if (GetItemKey(item) == node.GetKey()) return path;
@@ -2013,7 +2017,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
                 return [];
             }
 
-            return GetDependencies(item, flags);
+            return await GetDependenciesAsync(item, flags);
         }
     }
 
@@ -2039,14 +2043,18 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// uSync contains no dependency checkers by default - uSync.Complete will load checkers
     /// when installed. 
     /// </remarks>
+    [Obsolete("Use GetDependenciesAsync will be removed in v16")]
     protected IEnumerable<uSyncDependency> GetDependencies(TObject item, DependencyFlags flags)
+        => GetDependenciesAsync(item, flags).Result;
+
+    protected async Task<IEnumerable<uSyncDependency>> GetDependenciesAsync(TObject item, DependencyFlags flags)
     {
         if (item == null || !HasDependencyCheckers()) return [];
 
         var dependencies = new List<uSyncDependency>();
         foreach (var checker in dependencyCheckers)
         {
-            dependencies.AddRange(checker.GetDependencies(item, flags));
+            dependencies.AddRange(await checker.GetDependenciesAsync(item, flags));
         }
         return dependencies;
     }
@@ -2083,7 +2091,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
                 {
                     foreach (var checker in dependencyCheckers)
                     {
-                        dependencies.AddRange(checker.GetDependencies(childItem, flags));
+                        dependencies.AddRange(await checker.GetDependenciesAsync(childItem, flags));
                     }
                 }
             }
@@ -2233,15 +2241,13 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     public virtual void Handle(SavingNotification<TObject> notification)
         => HandleAsync(notification, CancellationToken.None).Wait();
 
-    public virtual Task HandleAsync(SavingNotification<TObject> notification, CancellationToken cancellationToken)
+    public virtual async Task HandleAsync(SavingNotification<TObject> notification, CancellationToken cancellationToken)
     {
-        if (ShouldBlockRootChanges(notification.SavedEntities))
+        if (await ShouldBlockRootChangesAsync(notification.SavedEntities))
         {
             notification.Cancel = true;
             notification.Messages.Add(GetCancelMessageForRoots());
         }
-
-        return Task.CompletedTask;
     }
 
     /// <summary>
@@ -2251,14 +2257,13 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     public virtual void Handle(MovingNotification<TObject> notification)
         => HandleAsync(notification, CancellationToken.None).Wait();
 
-    public virtual Task HandleAsync(MovingNotification<TObject> notification, CancellationToken cancellationToken)
+    public virtual async Task HandleAsync(MovingNotification<TObject> notification, CancellationToken cancellationToken)
     {
-        if (ShouldBlockRootChanges(notification.MoveInfoCollection.Select(x => x.Entity)))
+        if (await ShouldBlockRootChangesAsync(notification.MoveInfoCollection.Select(x => x.Entity)))
         {
             notification.Cancel = true;
             notification.Messages.Add(GetCancelMessageForRoots());
         }
-        return Task.CompletedTask;
     }
 
     /// <summary>
@@ -2268,20 +2273,19 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     public virtual void Handle(DeletingNotification<TObject> notification)
         => HandleAsync(notification, CancellationToken.None).Wait();
 
-    public virtual Task HandleAsync(DeletingNotification<TObject> notification, CancellationToken cancellationToken)
+    public virtual async Task HandleAsync(DeletingNotification<TObject> notification, CancellationToken cancellationToken)
     {
-        if (ShouldBlockRootChanges(notification.DeletedEntities))
+        if (await ShouldBlockRootChangesAsync(notification.DeletedEntities))
         {
             notification.Cancel = true;
             notification.Messages.Add(GetCancelMessageForRoots());
         }
-        return Task.CompletedTask;
     }
 
     /// <summary>
     ///  should we block this event based on the existence or root objects.
     /// </summary>
-    protected bool ShouldBlockRootChanges(IEnumerable<TObject> items)
+    protected async Task<bool> ShouldBlockRootChangesAsync(IEnumerable<TObject> items)
     {
         if (!ShouldProcessEvent()) return false;
 
@@ -2291,7 +2295,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 
         foreach (var item in items)
         {
-            if (RootItemExists(item))
+            if (await RootItemExistsAsync(item))
                 return true;
         }
 
@@ -2308,15 +2312,15 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     private bool HasRootFolders()
         => syncFileService.AnyFolderExists(uSyncConfig.GetFolders()[..^1]);
 
-    private bool RootItemExists(TObject item)
+    private async Task<bool> RootItemExistsAsync(TObject item)
     {
         foreach (var folder in uSyncConfig.GetFolders()[..^1])
         {
-            var filename = GetPath(
+            var filename = (await GetPathAsync(
                 Path.Combine(folder, DefaultFolder),
                 item,
                 DefaultConfig.GuidNames,
-                DefaultConfig.UseFlatStructure)
+                DefaultConfig.UseFlatStructure))
                 .ToAppSafeFileName();
 
             if (syncFileService.FileExists(filename))

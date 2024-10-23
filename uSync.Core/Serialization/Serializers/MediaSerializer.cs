@@ -67,7 +67,7 @@ public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncSerializer<IM
             details.AddNotNull(HandleTrashedState(item, trashed, restoreParent));
         }
 
-        var propertyAttempt = DeserializeProperties(item, node, options);
+        var propertyAttempt = await DeserializePropertiesAsync(item, node, options);
         if (!propertyAttempt.Success)
             return SyncAttempt<IMedia>.Fail(item.Name ?? item.Id.ToString(), item, ChangeType.Fail, "Failed to save properties",
                 propertyAttempt.Exception ?? new Exception($"Error with properties {item.Id}"));
@@ -135,7 +135,7 @@ public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncSerializer<IM
         var node = InitializeNode(item, item.ContentType.Alias, options);
 
         var info = await SerializeInfoAsync(item, options);
-        var properties = SerializeProperties(item, options);
+        var properties = await SerializePropertiesAsync(item, options);
 
         node.Add(info);
         node.Add(properties);

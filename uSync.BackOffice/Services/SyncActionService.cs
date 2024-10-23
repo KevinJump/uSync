@@ -68,10 +68,6 @@ internal class SyncActionService : ISyncActionService
         });
     }
 
-    [Obsolete("use ReportHandlerAsync will be removed in v16")]
-    public SyncActionResult ReportHandler(SyncActionOptions options, uSyncCallbacks? callbacks)
-        => ReportHandlerAsync(options, callbacks).Result;
-    
     public async Task<SyncActionResult> ReportHandlerAsync(SyncActionOptions options, uSyncCallbacks? callbacks)
     {
         if (options.Handler is null) return new();
@@ -103,10 +99,6 @@ internal class SyncActionService : ISyncActionService
 		return _uSyncConfig.GetFolders();
 	}
 
-    [Obsolete("use ImportHandlerAsync will be removed in v16")]
-    public SyncActionResult ImportHandler(SyncActionOptions options, uSyncCallbacks? callbacks)
-        => ImportHandlerAsync(options, callbacks).Result;
-
     public async Task<SyncActionResult> ImportHandlerAsync(SyncActionOptions options, uSyncCallbacks? callbacks)
     {
         if (options.Handler is null) return new();
@@ -131,10 +123,6 @@ internal class SyncActionService : ISyncActionService
         return new SyncActionResult(actions);
     }
 
-    [Obsolete("use ImportPostAsync will be removed in v16")]
-    public SyncActionResult ImportPost(SyncActionOptions options, uSyncCallbacks? callbacks)
-        => ImportPostAsync(options, callbacks).Result;
-
     public async Task<SyncActionResult> ImportPostAsync(SyncActionOptions options, uSyncCallbacks? callbacks)
     {
         var handlerSet = !string.IsNullOrWhiteSpace(options.Set)
@@ -151,9 +139,6 @@ internal class SyncActionService : ISyncActionService
 
         return new SyncActionResult(actions.Where(x => x.Change > Core.ChangeType.NoChange).ToList());
     }
-
-    public SyncActionResult ExportHandler(SyncActionOptions options, uSyncCallbacks? callbacks)
-        => ExportHandlerAsync(options, callbacks).Result;
 
     public async Task<SyncActionResult> ExportHandlerAsync(SyncActionOptions options, uSyncCallbacks? callbacks)
     {
@@ -212,13 +197,13 @@ internal class SyncActionService : ISyncActionService
     }
 
     /// <inheritdoc/>
-    public void StartProcess(HandlerActions action)
-        => _uSyncService.StartBulkProcess(action);
+    public async Task StartProcessAsync(HandlerActions action)
+        => await _uSyncService.StartBulkProcessAsync(action);
 
     /// <inheritdoc/>
-    public void FinishProcess(HandlerActions action, IEnumerable<uSyncAction> actions, string username)
+    public async Task FinishProcessAsync(HandlerActions action, IEnumerable<uSyncAction> actions, string username)
     {
-        _uSyncService.FinishBulkProcess(action, actions);
+        await _uSyncService.FinishBulkProcessAsync(action, actions);
 
         _logger.LogInformation("{user} finished {action} process ({changes} changes)",
             username, action, actions.Count());

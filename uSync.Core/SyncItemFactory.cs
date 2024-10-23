@@ -65,12 +65,16 @@ public class SyncItemFactory : ISyncItemFactory
     public IEnumerable<ISyncDependencyChecker<TObject>> GetCheckers<TObject>()
         => syncCheckers.GetCheckers<TObject>();
 
+    [Obsolete("Use GetDependenciesAsync will be removed in v16")]
     public IEnumerable<uSyncDependency> GetDependencies<TObject>(TObject item, DependencyFlags flags)
+        => GetDependenciesAsync(item, flags).Result;
+    public async Task<IEnumerable<uSyncDependency>> GetDependenciesAsync<TObject>(TObject item, DependencyFlags flags)
     {
         var dependencies = new List<uSyncDependency>();
         foreach (var checker in syncCheckers.GetCheckers<TObject>())
         {
-            dependencies.AddRange(checker?.GetDependencies(item, flags) ?? []);
+            if (checker is null) continue;
+            dependencies.AddRange(await checker.GetDependenciesAsync(item, flags) ?? []);
         }
         return dependencies;
     }

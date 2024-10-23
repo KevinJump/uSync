@@ -263,9 +263,9 @@ public abstract class SyncHandlerContainerBase<TObject>
     /// <summary>
     ///  Get merged items from a collection of folders. 
     /// </summary>
-    protected override IReadOnlyList<OrderedNodeInfo> GetMergedItems(string[] folders)
+    protected override async Task<IReadOnlyList<OrderedNodeInfo>> GetMergedItemsAsync(string[] folders)
     {
-        var items = base.GetMergedItems(folders);
+        var items = await base.GetMergedItemsAsync(folders);
 
         CheckForDuplicates(items);
 

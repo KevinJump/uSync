@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Nodes;
+using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
@@ -64,7 +65,7 @@ public class DocTypeGridMapper : SyncNestedValueMapperBase, ISyncMapper
     ///  potential internal values, but we do this on export because
     ///  we want to ensure we trigger formatting of Umbraco.DateTime values
     /// </remarks>
-    public override string GetExportValue(object value, string editorAlias)
+    public override async Task<string?> GetExportValueAsync(object value, string editorAlias)
     {
         if (value is null) return string.Empty;
 
@@ -82,12 +83,13 @@ public class DocTypeGridMapper : SyncNestedValueMapperBase, ISyncMapper
         // as opposed to quite a few of these properties that 
         // have it in 'escaped' json. so slightly different 
         // then a nested content, but not by much.
-        GetExportJsonValues(docValue, docType);
+        await GetExportJsonValuesAsync(docValue, docType);
 
         return jsonValue.SerializeJsonString(true);
     }
 
-    private JsonObject GetExportJsonValues(JsonObject item, IContentType docType)
+    
+    private async Task<JsonObject> GetExportJsonValuesAsync(JsonObject item, IContentType docType)
     {
         foreach (var property in docType.CompositionPropertyTypes)
         {
@@ -96,7 +98,7 @@ public class DocTypeGridMapper : SyncNestedValueMapperBase, ISyncMapper
                 var value = item[property.Alias];
                 if (value != null)
                 {
-                    var mappedVal = mapperCollection.Value.GetExportValue(value, property.PropertyEditorAlias).ToString();
+                    var mappedVal = (await mapperCollection.Value.GetExportValueAsync(value, property.PropertyEditorAlias)).ToString();
                     item[property.Alias] = mappedVal.ConvertToJsonNode()?.ExpandAllJsonInToken();
                 }
             }
@@ -106,7 +108,7 @@ public class DocTypeGridMapper : SyncNestedValueMapperBase, ISyncMapper
     }
 
 
-    public override string? GetImportValue(string value, string editorAlias)
+    public override async Task<string?> GetImportValueAsync(string value, string editorAlias)
     {
         try
         {
@@ -126,7 +128,7 @@ public class DocTypeGridMapper : SyncNestedValueMapperBase, ISyncMapper
             // as opposed to quite a few of these properties that 
             // have it in 'escaped' json. so slightly different 
             // then a nested content, but not by much.
-            GetImportJsonValue(docValue, docType);
+            await GetImportJsonValue(docValue, docType);
 
             return jsonValue.ExpandAllJsonInToken().SerializeJsonString(true);
         }
@@ -140,7 +142,7 @@ public class DocTypeGridMapper : SyncNestedValueMapperBase, ISyncMapper
         }
     }
 
-    private JsonObject GetImportJsonValue(JsonObject item, IContentType docType)
+    private async Task<JsonObject> GetImportJsonValue(JsonObject item, IContentType docType)
     {
         foreach (var property in docType.CompositionPropertyTypes)
         {
@@ -149,7 +151,7 @@ public class DocTypeGridMapper : SyncNestedValueMapperBase, ISyncMapper
                 var value = item[property.Alias];
                 if (value != null)
                 {
-                    var mappedVal = mapperCollection.Value.GetImportValue(value.ToString(), property.PropertyEditorAlias)?.ToString();
+                    var mappedVal = (await mapperCollection.Value.GetImportValueAsync(value.ToString(), property.PropertyEditorAlias))?.ToString();
                     if (mappedVal is not null)
                     {
                         item[property.Alias] = mappedVal.ConvertToJsonNode()?.ExpandAllJsonInToken();
@@ -162,7 +164,7 @@ public class DocTypeGridMapper : SyncNestedValueMapperBase, ISyncMapper
         return item;
     }
 
-    public override IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)
+    public override async Task<IEnumerable<uSyncDependency>> GetDependenciesAsync(object value, string editorAlias, DependencyFlags flags)
     {
         var jsonValue = GetJsonValue(value);
         if (value == null || jsonValue == null) return [];
@@ -191,7 +193,7 @@ public class DocTypeGridMapper : SyncNestedValueMapperBase, ISyncMapper
         // and call the mappers for each value, this gets us 
         // any internal dependencies (like media, etc) 
         // from within the content. 
-        dependencies.AddRange(GetPropertyDependencies(docValue, docType, flags));
+        dependencies.AddRange(await GetPropertyDependenciesAsync(docValue, docType, flags));
 
         return dependencies;
     }

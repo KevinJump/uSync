@@ -68,9 +68,9 @@ public class TemplateHandler : SyncHandlerLevelBase<ITemplate>, ISyncHandler, IS
     }
 
     /// <inheritdoc/>
-    protected override IReadOnlyList<OrderedNodeInfo> GetMergedItems(string[] folders)
+    protected override async Task<IReadOnlyList<OrderedNodeInfo>> GetMergedItemsAsync(string[] folders)
     {
-        var items = base.GetMergedItems(folders);
+        var items = await base.GetMergedItemsAsync(folders);
         try
         {
             var results = new List<OrderedNodeInfo>();
@@ -83,7 +83,7 @@ public class TemplateHandler : SyncHandlerLevelBase<ITemplate>, ISyncHandler, IS
                 }
 
                 // top level, lets check they aren't secretly lower down.
-                var templateContent = GetTemplateContent(item.Alias);
+                var templateContent = await GetTemplateContentAsync(item.Alias);
                 var masterAlias = _templateContentParserService.MasterTemplateAlias(templateContent);
                 if (string.IsNullOrWhiteSpace(masterAlias) || masterAlias == item.Alias || masterAlias.InvariantEquals("null"))
                 {
@@ -103,7 +103,7 @@ public class TemplateHandler : SyncHandlerLevelBase<ITemplate>, ISyncHandler, IS
         }
     }
 
-    private string GetTemplateContent(string alias)
+    private async Task<string> GetTemplateContentAsync(string alias)
     {
         if (_viewFileSystem is null) return string.Empty;
 
@@ -115,7 +115,7 @@ public class TemplateHandler : SyncHandlerLevelBase<ITemplate>, ISyncHandler, IS
         {
             using (var reader = new StreamReader(stream))
             {
-                return reader.ReadToEnd();
+                return await reader.ReadToEndAsync();
             }
         }
     }

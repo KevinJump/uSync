@@ -63,28 +63,30 @@ public class ImagePathMapper : SyncValueMapperBase, ISyncMapper
         Constants.PropertyEditors.Aliases.UploadField
     ];
 
-    public override string? GetExportValue(object value, string editorAlias)
+    public override Task<string?> GetExportValueAsync(object value, string editorAlias)
     {
-        var stringValue = value?.ToString();
-        if (string.IsNullOrWhiteSpace(stringValue)) return stringValue;
-
-
-        if (stringValue.TryParseToJsonObject(out var json) is false || json is null)
-            return StripSitePath(stringValue);
-
-
-        if (json.TryGetPropertyValue("src", out var source) is true && source is not null)
+        return uSyncTaskHelper.FromResultOf(() =>
         {
-            var sourceString = source.GetValue<string>();
+            var stringValue = value?.ToString();
+            if (string.IsNullOrWhiteSpace(stringValue)) return stringValue;
 
-            if (string.IsNullOrWhiteSpace(sourceString) is true)
+
+            if (stringValue.TryParseToJsonObject(out var json) is false || json is null)
+                return StripSitePath(stringValue);
+
+
+            if (json.TryGetPropertyValue("src", out var source) is true && source is not null)
             {
-                json["src"] = StripSitePath(sourceString);
+                var sourceString = source.GetValue<string>();
+
+                if (string.IsNullOrWhiteSpace(sourceString) is true)
+                {
+                    json["src"] = StripSitePath(sourceString);
+                }
             }
-        }
 
-        return json.SerializeJsonNode();
-
+            return json.SerializeJsonNode();
+        });
     }
 
     private string StripSitePath(string filePath)
@@ -159,52 +161,59 @@ public class ImagePathMapper : SyncValueMapperBase, ISyncMapper
     }
 
 
-    public override string? GetImportValue(string value, string editorAlias)
+    public override Task<string?> GetImportValueAsync(string value, string editorAlias)
     {
-        var stringValue = value?.ToString();
-        if (string.IsNullOrWhiteSpace(stringValue) is true) return stringValue;
-
-        if (stringValue.TryParseToJsonObject(out var json) is false || json is null)
-            return PrePendSitePath(stringValue);
-
-        if (json.TryGetPropertyValue("src", out var srcNode) is true)
+        return uSyncTaskHelper.FromResultOf(() =>
         {
-            var source = srcNode?.GetValue<string>() ?? string.Empty;
+            var stringValue = value?.ToString();
+            if (string.IsNullOrWhiteSpace(stringValue) is true) return stringValue;
 
-            if (string.IsNullOrWhiteSpace(source) is false)
+            if (stringValue.TryParseToJsonObject(out var json) is false || json is null)
+                return PrePendSitePath(stringValue);
+
+            if (json.TryGetPropertyValue("src", out var srcNode) is true)
             {
-                // strip any virtual directory stuff from it.
-                json["src"] = PrePendSitePath(source);
-            }
-        }
+                var source = srcNode?.GetValue<string>() ?? string.Empty;
 
-        return json.SerializeJsonNode(true);
+                if (string.IsNullOrWhiteSpace(source) is false)
+                {
+                    // strip any virtual directory stuff from it.
+                    json["src"] = PrePendSitePath(source);
+                }
+            }
+
+            return json.SerializeJsonNode(true);
+        });
     }
 
     /// <summary>
     ///  Get the actual media file as a dependency. 
     /// </summary>
-    public override IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)
+    public override Task<IEnumerable<uSyncDependency>> GetDependenciesAsync(object value, string editorAlias, DependencyFlags flags)
     {
-        var stringValue = value?.ToString();
-        if (string.IsNullOrWhiteSpace(stringValue))
-            return [];
-
-        var stringPath = GetImagePath(stringValue).TrimStart('/').ToLower();
-
-        if (!string.IsNullOrWhiteSpace(stringPath))
+        return uSyncTaskHelper.FromResultOf(() =>
         {
-            return new uSyncDependency()
-            {
-                Name = $"File: {Path.GetFileName(stringPath)}",
-                Udi = Udi.Create(Constants.UdiEntityType.MediaFile, stringPath),
-                Flags = flags,
-                Order = DependencyOrders.OrderFromEntityType(Constants.UdiEntityType.MediaFile),
-                Level = 0
-            }.AsEnumerableOfOne();
-        }
 
-        return [];
+            var stringValue = value?.ToString();
+            if (string.IsNullOrWhiteSpace(stringValue))
+                return [];
+
+            var stringPath = GetImagePath(stringValue).TrimStart('/').ToLower();
+
+            if (!string.IsNullOrWhiteSpace(stringPath))
+            {
+                return new uSyncDependency()
+                {
+                    Name = $"File: {Path.GetFileName(stringPath)}",
+                    Udi = Udi.Create(Constants.UdiEntityType.MediaFile, stringPath),
+                    Flags = flags,
+                    Order = DependencyOrders.OrderFromEntityType(Constants.UdiEntityType.MediaFile),
+                    Level = 0
+                }.AsEnumerableOfOne();
+            }
+
+            return [];
+        });
     }
 
     private string GetImagePath(string stringValue)

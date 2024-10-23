@@ -19,5 +19,9 @@ public interface ISyncDependencyChecker<TObject> : ISyncDependencyItem
     /// <summary>
     ///  calculate the dependencies for an item based on the passed flags.
     /// </summary>
-    IEnumerable<uSyncDependency> GetDependencies(TObject item, DependencyFlags flags);
+    [Obsolete("Use GetDependenciesAsync will be removed in v16")]
+    IEnumerable<uSyncDependency> GetDependencies(TObject item, DependencyFlags flags)
+        => GetDependenciesAsync(item, flags).Result;
+
+    Task<IEnumerable<uSyncDependency>> GetDependenciesAsync(TObject item, DependencyFlags flags);
 }

@@ -76,7 +76,7 @@ public static class uSyncBackOfficeBuilderExtensions
         builder.AdduSyncFirstBoot();
 
         // register for the notifications 
-        builder.AddNotificationHandler<UmbracoApplicationStartedNotification, uSyncApplicationStartingHandler>();
+        builder.AddNotificationAsyncHandler<UmbracoApplicationStartedNotification, uSyncApplicationStartingHandler>();
         builder.AddHandlerNotifications();
 
         builder.Services.AddSingleton<uSyncHubRoutes>();

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 
@@ -50,9 +51,8 @@ public abstract class SyncHandlerLevelBase<TObject>
     ///  as we are already loading everything to merge, it doesn't
     ///  then cost us much to sort them when we have to.
     /// </remarks>
-    protected override IReadOnlyList<OrderedNodeInfo> GetMergedItems(string[] folders)
-        => [.. base.GetMergedItems(folders).OrderBy(x => x.Level)];
-
+    protected override async Task<IReadOnlyList<OrderedNodeInfo>> GetMergedItemsAsync(string[] folders)
+        => [.. (await base.GetMergedItemsAsync(folders)).OrderBy(x => x.Level)];
 
     /// <inheritdoc/>
     override protected string GetItemPath(TObject item, bool useGuid, bool isFlat)

@@ -164,7 +164,7 @@ internal class uSyncManagementService : ISyncManagementService
 	}
 
 
-	public PerformActionResponse PerformAction(PerformActionRequest actionRequest)
+	public async Task<PerformActionResponse> PerformActionAsync(PerformActionRequest actionRequest)
     {
         if (Enum.TryParse(actionRequest.Action, out HandlerActions action) is false)
             throw new ArgumentException($"Invalid action {actionRequest.Action}");
@@ -211,7 +211,7 @@ internal class uSyncManagementService : ISyncManagementService
         }
 
         var currentHandler = handlers[actionRequest.StepNumber];
-        var method = GetHandlerMethod(action);
+        var method = GetHandlerMethodAsync(action);
 
 
         var handlerOptions = new SyncActionOptions()
@@ -223,7 +223,7 @@ internal class uSyncManagementService : ISyncManagementService
             Handler = currentHandler.Alias
         };
 
-        var results = method(handlerOptions, callbacks);
+        var results = await method(handlerOptions, callbacks);
         _syncManagementCache.CacheItems(requestId, results.Actions, false);
 
         return new PerformActionResponse
@@ -265,13 +265,13 @@ internal class uSyncManagementService : ISyncManagementService
     }
 
 
-    public Func<SyncActionOptions, uSyncCallbacks, SyncActionResult> GetHandlerMethod(HandlerActions action)
+    public Func<SyncActionOptions, uSyncCallbacks, Task<SyncActionResult>> GetHandlerMethodAsync(HandlerActions action)
     {
         return action switch
         {
-            HandlerActions.Import => _syncActionService.ImportHandler,
-            HandlerActions.Report => _syncActionService.ReportHandler,
-            HandlerActions.Export => _syncActionService.ExportHandler,
+            HandlerActions.Import => _syncActionService.ImportHandlerAsync,
+            HandlerActions.Report => _syncActionService.ReportHandlerAsync,
+            HandlerActions.Export => _syncActionService.ExportHandlerAsync,
             _ => throw new InvalidOperationException($"Unknown method {action}"),
         };
     }

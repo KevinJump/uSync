@@ -96,7 +96,7 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
 
         node.Add(info);
         node.Add(SerializeStructure(item));
-        node.Add(SerializeProperties(item));
+        node.Add(SerializePropertiesAsync(item));
         node.Add(SerializeTabs(item));
 
         return SyncAttempt<XElement>.Succeed(item.Name ?? item.Alias, node, typeof(IContentType), ChangeType.Export);
@@ -142,7 +142,7 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
         details.AddRange(DeserializeTabs(item, node));
 
         // properties
-        details.AddRange(DeserializeProperties(item, node, options));
+        details.AddRange(await DeserializePropertiesAsync(item, node, options));
 
         // content type only property stuff.
         details.AddRange(await DeserializeContentTypePropertiesAsync(item, node));

@@ -98,19 +98,16 @@ public abstract class SyncItemManagerBase
 ///  saves you having to write the conversion code in your methods to convert the ID from
 ///  a string to whatever type the entity uses. 
 /// </remarks>
+[Obsolete("No longer need to have an indexed based, use SyncItemManagerBase will be removed in v16")]
 public abstract class SyncItemManagerIndexBase<TIndexType> : SyncItemManagerBase
 {
-    protected abstract Task<SyncLocalItem?> GetLocalEntityAsync(TIndexType id);
+    [Obsolete("no longer used will be removed in v16")]
+    protected virtual Task<SyncLocalItem?> GetLocalEntityAsync(TIndexType id)
+        => Task.FromResult(default(SyncLocalItem));
+
 
     /// <inheritdoc />
-    public virtual async Task<SyncLocalItem?> GetEntityAsync(SyncTreeItem treeItem)
-    {
-        if (treeItem.IsRoot()) return GetRootItem(treeItem);
-
-        var attempt = treeItem.Id.TryConvertTo<TIndexType>();
-        if (attempt.Success && attempt.Result is not null)
-            return await GetLocalEntityAsync(attempt.Result);
-
-        return null;
-    }
+    [Obsolete("no longer used will be removed in v16")]
+    public virtual Task<SyncLocalItem?> GetEntityAsync(SyncTreeItem treeItem)
+        => Task.FromResult(default(SyncLocalItem));
 }

@@ -21,13 +21,13 @@ public class uSyncMigrationController : uSyncControllerBase
 
     [HttpGet("CheckLegacy")]
     [ProducesResponseType<SyncLegacyCheckResponse>(200)]
-    public SyncLegacyCheckResponse CheckLegacy()
+    public async Task<SyncLegacyCheckResponse> CheckLegacy()
     {
 
         List<string> types = [];
         if (_legacyService.TryGetLatestLegacyFolder(out var folder) && folder is not null)
         {
-            types = _legacyService.FindLegacyDataTypes(folder);
+            types = await _legacyService.FindLegacyDataTypesAsync(folder);
         }
 
         return new SyncLegacyCheckResponse
@@ -40,11 +40,11 @@ public class uSyncMigrationController : uSyncControllerBase
 
     [HttpPost("IgnoreLegacy")]
     [ProducesResponseType<bool>(StatusCodes.Status200OK)]
-    public bool IgnoreLegacy()
+    public async Task<bool> IgnoreLegacy()
 	{
 		if (_legacyService.TryGetLatestLegacyFolder(out var folder) && folder is not null)
 		{
-			_legacyService.IgnoreLegacyFolder(folder, "folder will not show up as legacy.");
+			await _legacyService.IgnoreLegacyFolderAsync(folder, "folder will not show up as legacy.");
 			return true;
 		}
 
@@ -53,12 +53,12 @@ public class uSyncMigrationController : uSyncControllerBase
 
     [HttpPost("CopyLegacy")]
     [ProducesResponseType<bool>(StatusCodes.Status200OK)]
-    public bool CopyLegacy()
+    public async Task<bool> CopyLegacy()
 	{
 		if (_legacyService.TryGetLatestLegacyFolder(out var folder) && folder is not null)
 		{
 			_legacyService.CopyLegacyFolder(folder);
-            _legacyService.IgnoreLegacyFolder(folder, $"folder has been copied to v{uSync.BackOffice.uSync.Version.Major} as latest");
+            await _legacyService.IgnoreLegacyFolderAsync(folder, $"folder has been copied to v{uSync.BackOffice.uSync.Version.Major} as latest");
 			return true;
 		}
 

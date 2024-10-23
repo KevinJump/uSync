@@ -55,7 +55,7 @@ public class MemberTypeSerializer : ContentTypeBaseSerializer<IMemberType>, ISyn
         info.Add(SerializeCompositions((ContentTypeCompositionBase)item));
 
         node.Add(info);
-        node.Add(SerializeProperties(item));
+        node.Add(SerializePropertiesAsync(item));
         node.Add(SerializeStructure(item));
         node.Add(SerializeTabs(item));
 
@@ -96,10 +96,10 @@ public class MemberTypeSerializer : ContentTypeBaseSerializer<IMemberType>, ISyn
         {  "umbracoMemberPasswordRetrievalQuestion", "e2d9286a-0000-0000-0000-000000000000" },
     };
 
-    protected override XElement SerializeProperties(IMemberType item)
+    protected override async Task<XElement> SerializePropertiesAsync(IMemberType item)
     {
-        var node = base.SerializeProperties(item);
-        foreach (var property in node.Elements("GenericProperty"))
+        var node = await base.SerializePropertiesAsync(item);
+        foreach (var property in node.Elements("GenericProperty") ?? [])
         {
             var alias = property.Element("Alias").ValueOrDefault(string.Empty);
             if (!string.IsNullOrWhiteSpace(alias) && _builtInProperties.TryGetValue(alias, out string? value))
@@ -130,7 +130,7 @@ public class MemberTypeSerializer : ContentTypeBaseSerializer<IMemberType>, ISyn
 
         details.AddRange(await DeserializeBaseAsync(item, node));
         details.AddRange(DeserializeTabs(item, node));
-        details.AddRange(DeserializeProperties(item, node, options));
+        details.AddRange(await DeserializePropertiesAsync(item, node, options));
 
         CleanTabs(item, node, options);
 

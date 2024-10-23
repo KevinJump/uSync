@@ -320,7 +320,7 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
     {
         var userKey = Constants.Security.SuperUserKey;
 
-        var existing = _templateService.GetAsync(item.Alias).Result;
+        var existing = await _templateService.GetAsync(item.Alias);
         if (existing is not null)
         {
             item.Key = existing.Key;

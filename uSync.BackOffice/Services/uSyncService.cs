@@ -159,7 +159,7 @@ public partial class uSyncService
 
         var sw = Stopwatch.StartNew();
 
-        _mutexService.FireBulkStarting(new uSyncReportStartingNotification());
+        _mutexService.FireBulkStartingAsync(new uSyncReportStartingNotification()).Wait();
 
         _logger.LogDebug("Reporting For [{handlers}]", string.Join(",", handlers.Select(x => x.Handler.Name)));
 
@@ -190,7 +190,7 @@ public partial class uSyncService
         callbacks?.Callback?.Invoke(summary);
 
 
-        _mutexService.FireBulkComplete(new uSyncReportCompletedNotification(actions));
+         _mutexService.FireBulkCompleteAsync(new uSyncReportCompletedNotification(actions)).Wait();
         sw.Stop();
 
         _logger.LogInformation("uSync Report: {handlerCount} handlers, processed {itemCount} items, {changeCount} changes in {ElapsedMilliseconds}ms",
@@ -251,7 +251,7 @@ public partial class uSyncService
         {
 
             // pre import event
-            _mutexService.FireBulkStarting(new uSyncImportStartingNotification());
+            await _mutexService.FireBulkStartingAsync(new uSyncImportStartingNotification());
 
             var actions = new List<uSyncAction>();
 
@@ -308,7 +308,7 @@ public partial class uSyncService
             callbacks?.Callback?.Invoke(summary);
 
             // fire complete
-            _mutexService.FireBulkComplete(new uSyncImportCompletedNotification(actions));
+            await _mutexService.FireBulkCompleteAsync(new uSyncImportCompletedNotification(actions));
 
             _logger.LogInformation("uSync Import: {handlerCount} handlers, processed {itemCount} items, {changeCount} changes in {ElapsedMilliseconds}ms",
                 handlers.Count(),
@@ -406,7 +406,7 @@ public partial class uSyncService
 
         var handlers = _handlerFactory.GetValidHandlers(handlerOptions);
 
-        WriteVersionFile(folder);
+        await WriteVersionFileAsync(folder);
 
         return await ExportAsync(folder, handlers, callbacks);
     }
@@ -415,11 +415,11 @@ public partial class uSyncService
     /// <summary>
     ///  checks all the possible folders for the version file
     /// </summary>
-    public bool CheckVersionFile(string[] folders)
+    public async Task<bool> CheckVersionFileAsync(string[] folders)
     {
         foreach (var folder in folders.Reverse())
         {
-            if (CheckVersionFile(folder))
+            if (await CheckVersionFileAsync(folder))
                 return true;
         }
 
@@ -429,7 +429,7 @@ public partial class uSyncService
     /// <summary>
     ///  Check the uSync version file (in the root) to see if we are importing up to date files
     /// </summary>
-    public bool CheckVersionFile(string folder)
+    public async Task<bool> CheckVersionFileAsync(string folder)
     {
         var versionFile = Path.Combine(_syncFileService.GetAbsPath(folder), $"usync.{_uSyncConfig.Settings.DefaultExtension}");
 
@@ -441,7 +441,7 @@ public partial class uSyncService
         {
             try
             {
-                var node = _syncFileService.LoadXElement(versionFile);
+                var node = await _syncFileService.LoadXElementAsync(versionFile);
                 var format = node.Attribute("format").ValueOrDefault("");
                 if (!format.InvariantEquals(Core.uSyncConstants.FormatVersion))
                 {
@@ -463,7 +463,7 @@ public partial class uSyncService
         return true;
     }
 
-    private void WriteVersionFile(string folder)
+    private async Task WriteVersionFileAsync(string folder)
     {
         try
         {
@@ -474,7 +474,7 @@ public partial class uSyncService
             // remove date, we don't really care, and it causes unnecessary git changes.
 
             _syncFileService.CreateFoldersForFile(versionFile);
-            _syncFileService.SaveXElement(versionNode, versionFile);
+            await _syncFileService.SaveXElementAsync(versionNode, versionFile);
         }
         catch (Exception ex)
         {
@@ -511,7 +511,7 @@ public partial class uSyncService
     {
         var sw = Stopwatch.StartNew();
 
-        _mutexService.FireBulkStarting(new uSyncExportStartingNotification());
+        await _mutexService.FireBulkStartingAsync(new uSyncExportStartingNotification());
 
         var actions = new List<uSyncAction>();
         var summary = new SyncProgressSummary(handlers.Select(x => x.Handler), "Exporting", handlers.Count());
@@ -539,7 +539,7 @@ public partial class uSyncService
         summary.UpdateMessage("Export Completed");
         callbacks?.Callback?.Invoke(summary);
 
-        _mutexService.FireBulkComplete(new uSyncExportCompletedNotification(actions));
+        await _mutexService.FireBulkCompleteAsync(new uSyncExportCompletedNotification(actions));
 
         sw.Stop();
 

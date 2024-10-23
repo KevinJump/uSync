@@ -45,7 +45,7 @@ public class RTEMapper : SyncValueMapperBase, ISyncMapper
         $"{Constants.PropertyEditors.Aliases.Grid}.rte"
     };
 
-    public override IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)
+    public override async Task<IEnumerable<uSyncDependency>> GetDependenciesAsync(object value, string editorAlias, DependencyFlags flags)
     {
         // value null check. 
         if (value == null) return [];
@@ -56,31 +56,31 @@ public class RTEMapper : SyncValueMapperBase, ISyncMapper
         if (stringValue.TryParseToJsonNode(out var jsonNode) && jsonNode is not null)
         {
             // if its json, it contains the new blocks way of sending shizzel. 
-            return GetBlockDependencies(jsonNode.AsObject(), editorAlias, flags);
+            return await GetBlockDependenciesAsync(jsonNode.AsObject(), editorAlias, flags);
         }
 
-        return GetSimpleDependencies(stringValue, editorAlias, flags);
+        return await GetSimpleDependenciesAsync(stringValue, editorAlias, flags);
     }
 
-    private List<uSyncDependency> GetBlockDependencies(JsonObject jObject, string editorAlias, DependencyFlags flags)
+    private async Task<List<uSyncDependency>> GetBlockDependenciesAsync(JsonObject jObject, string editorAlias, DependencyFlags flags)
     {
         var dependencies = new List<uSyncDependency>();
 
         if (jObject.TryGetPropertyValue("markup", out var markupNode) && markupNode is not null)
         {
-            dependencies.AddRange(GetSimpleDependencies(markupNode.ToString(), editorAlias, flags));
+            dependencies.AddRange(await GetSimpleDependenciesAsync(markupNode.ToString(), editorAlias, flags));
         }
 
 
         if (jObject.TryGetPropertyValue("blocks", out var blocks) && blocks is not null)
         {
-            dependencies.AddRange(_mapperCollection.Value.GetDependencies(blocks, Constants.PropertyEditors.Aliases.BlockList, flags));
+            dependencies.AddRange(await _mapperCollection.Value.GetDependenciesAsync(blocks, Constants.PropertyEditors.Aliases.BlockList, flags));
         }
 
         return dependencies;
     }
 
-    private IEnumerable<uSyncDependency> GetSimpleDependencies(string stringValue, string editorAlias, DependencyFlags flags)
+    private async Task<IEnumerable<uSyncDependency>> GetSimpleDependenciesAsync(string stringValue, string editorAlias, DependencyFlags flags)
     {
         if (string.IsNullOrWhiteSpace(stringValue)) return [];
 
@@ -102,7 +102,7 @@ public class RTEMapper : SyncValueMapperBase, ISyncMapper
             {
                 foreach (var mapper in MacroRegEx.Matches(stringValue).SelectMany(macro => mappers))
                 {
-                    dependencies.AddRange(mapper.GetDependencies(stringValue, editorAlias + ".macro", flags));
+                    dependencies.AddRange(await mapper.GetDependenciesAsync(stringValue, editorAlias + ".macro", flags));
                 }
             }
         }

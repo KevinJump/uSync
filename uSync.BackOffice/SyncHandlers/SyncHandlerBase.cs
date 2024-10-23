@@ -98,7 +98,7 @@ public abstract class SyncHandlerBase<TObject>
 
     private async Task<Guid?> GetCleanParentKeyAsync(string cleanFile)
     {
-        var node = syncFileService.LoadXElement(cleanFile);
+        var node = await syncFileService.LoadXElementAsync(cleanFile);
         if (node.GetKey() == Guid.Empty) return Guid.Empty;
         return (await GetCleanParentAsync(cleanFile))?.Key;
     }

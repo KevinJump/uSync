@@ -26,7 +26,7 @@ public class NestedContentMapper : SyncNestedJsonValueMapperBase, ISyncMapper
 
     public override string[] Editors => ["Our.Umbraco.NestedContent", Constants.PropertyEditors.Aliases.NestedContent];
 
-    protected override string? ProcessValues(JsonObject jsonValue, string editorAlias, Func<JsonObject, IContentType, JsonObject> GetPropertiesMethod)
+    protected override async Task<string?> ProcessValuesAsync(JsonObject jsonValue, string editorAlias, Func<JsonObject, IContentType, Task<JsonObject>> GetPropertiesMethod)
     {
         if (jsonValue.GetValueKind() != JsonValueKind.Array)
         {
@@ -42,14 +42,14 @@ public class NestedContentMapper : SyncNestedJsonValueMapperBase, ISyncMapper
             var docType = GetDocType(item, this._docTypeAliasValue);
             if (docType == null) continue;
 
-            GetPropertiesMethod(item, docType);
+            await GetPropertiesMethod(item, docType);
         }
 
         jsonValue.TrySerializeJsonNode(out var result);
         return result;
     }
 
-    public override IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)
+    public override async Task<IEnumerable<uSyncDependency>> GetDependenciesAsync(object value, string editorAlias, DependencyFlags flags)
     {
         var stringValue = GetValueAs<string>(value);
         if (stringValue == null || stringValue.TryConvertToJsonNode(out var json) is false || json is null) return [];
@@ -79,7 +79,7 @@ public class NestedContentMapper : SyncNestedJsonValueMapperBase, ISyncMapper
                     dependencies.Add(docTypeDep);
             }
 
-            dependencies.AddRange(GetPropertyDependencies(item, docType, flags));
+            dependencies.AddRange(await GetPropertyDependenciesAsync(item, docType, flags));
         }
 
         return dependencies;

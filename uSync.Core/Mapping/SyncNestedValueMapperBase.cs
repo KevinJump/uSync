@@ -61,7 +61,7 @@ public abstract class SyncNestedValueMapperBase : SyncValueMapperBase
     /// <summary>
     ///  Get the import value for properties used in the this JObject
     /// </summary>
-    protected JsonObject GetImportProperties(JsonObject item, IContentType docType)
+    protected async Task<JsonObject> GetImportPropertiesAsync(JsonObject item, IContentType docType)
     {
         foreach (var property in docType.CompositionPropertyTypes)
         {
@@ -70,7 +70,7 @@ public abstract class SyncNestedValueMapperBase : SyncValueMapperBase
                 var value = item[property.Alias];
                 if (value != null)
                 {
-                    var mappedVal = mapperCollection.Value.GetImportValue(GetStringValue(value), property.PropertyEditorAlias);
+                    var mappedVal = await mapperCollection.Value.GetImportValueAsync(GetStringValue(value), property.PropertyEditorAlias);
                     if (mappedVal != null)
                     {
                         item[property.Alias] = GetImportProperty(mappedVal);
@@ -85,7 +85,7 @@ public abstract class SyncNestedValueMapperBase : SyncValueMapperBase
     /// <summary>
     ///  get the export value for the properties used in this JObject
     /// </summary>
-    protected JsonObject GetExportProperties(JsonObject item, IContentType docType)
+    protected async Task<JsonObject> GetExportPropertiesAsync(JsonObject item, IContentType docType)
     {
         foreach (var property in docType.CompositionPropertyTypes)
         {
@@ -94,7 +94,7 @@ public abstract class SyncNestedValueMapperBase : SyncValueMapperBase
                 var value = item[property.Alias];
                 if (value != null)
                 {
-                    var mappedVal = mapperCollection.Value.GetExportValue(value, property.PropertyEditorAlias);
+                    var mappedVal = await mapperCollection.Value.GetExportValueAsync(value, property.PropertyEditorAlias);
                     item[property.Alias] = GetExportProperty(mappedVal);
                 }
             }
@@ -103,7 +103,7 @@ public abstract class SyncNestedValueMapperBase : SyncValueMapperBase
         return item;
     }
 
-    protected IEnumerable<uSyncDependency> GetPropertyDependencies(JsonObject value,
+    protected async Task<IEnumerable<uSyncDependency>> GetPropertyDependenciesAsync(JsonObject value,
         IContentType docType, DependencyFlags flags)
     {
         var dependencies = new List<uSyncDependency>();
@@ -113,10 +113,10 @@ public abstract class SyncNestedValueMapperBase : SyncValueMapperBase
             var propertyValue = value[propertyType.Alias];
             if (propertyValue == null) continue;
 
-            var dataType = dataTypeService.GetAsync(propertyType.DataTypeKey).Result;
+            var dataType = await dataTypeService.GetAsync(propertyType.DataTypeKey);
             if (dataType == null) continue;
 
-            dependencies.AddRange(mapperCollection.Value.GetDependencies(propertyValue, dataType.EditorAlias, flags));
+            dependencies.AddRange(await mapperCollection.Value.GetDependenciesAsync(propertyValue, dataType.EditorAlias, flags));
         }
 
         return dependencies;
@@ -126,7 +126,7 @@ public abstract class SyncNestedValueMapperBase : SyncValueMapperBase
     ///  get all the dependencies for a series of properties
     /// </summary>
     /// <param name="properties">Key, Value pair, of editorAlias, value</param>
-    protected IEnumerable<uSyncDependency> GetPropertyDependencies(
+    protected async Task<IEnumerable<uSyncDependency>> GetPropertyDependenciesAsync(
         IDictionary<string, object> properties, DependencyFlags flags)
     {
         if (!properties.Any()) return [];
@@ -134,7 +134,7 @@ public abstract class SyncNestedValueMapperBase : SyncValueMapperBase
         var dependencies = new List<uSyncDependency>();
         foreach (var property in properties)
         {
-            dependencies.AddRange(mapperCollection.Value.GetDependencies(property.Value, property.Key, flags));
+            dependencies.AddRange(await mapperCollection.Value.GetDependenciesAsync(property.Value, property.Key, flags));
         }
 
         return dependencies;

@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Threading.Tasks;
 
 using Umbraco.Cms.Core.Events;
 
@@ -56,26 +57,26 @@ public class uSyncEventService
     //// notification events. 
     ///
 
-    internal bool FireBulkStarting(CancelableuSyncBulkNotification bulkNotification)
+    internal async Task<bool> FireBulkStartingAsync(CancelableuSyncBulkNotification bulkNotification)
     {
-        _eventAggregator.PublishCancelable(bulkNotification);
+        await _eventAggregator.PublishCancelableAsync(bulkNotification);
         return bulkNotification.Cancel;
     }
 
-    internal void FireBulkComplete(uSyncBulkNotification notification)
+    internal async Task FireBulkCompleteAsync(uSyncBulkNotification notification)
     {
-        _eventAggregator.Publish(notification);
+        await _eventAggregator.PublishAsync(notification);
     }
 
-    internal bool FireItemStartingEvent<TObject>(CancelableuSyncItemNotification<TObject> notification)
+    internal async Task<bool> FireItemStartingEventAsync<TObject>(CancelableuSyncItemNotification<TObject> notification)
     {
-        _eventAggregator.PublishCancelable(notification);
+        await _eventAggregator.PublishCancelableAsync(notification);
         return notification.Cancel;
     }
 
-    internal void FireItemCompletedEvent<TObject>(uSyncItemNotification<TObject> notification)
+    internal async Task FireItemCompletedEventAsync<TObject>(uSyncItemNotification<TObject> notification)
     {
-        _eventAggregator.Publish(notification);
+        await _eventAggregator.PublishAsync(notification);
     }
 
 

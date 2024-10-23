@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Threading.Tasks;
 
 using uSync.BackOffice.Services;
 using uSync.Core;
@@ -53,12 +54,12 @@ internal class SyncLegacyService : ISyncLegacyService
         return false;
     }
 
-    public bool IgnoreLegacyFolder(string folder, string message)
+    public async Task<bool> IgnoreLegacyFolderAsync(string folder, string message)
 	{
 		if (_syncFileService.DirectoryExists(folder) is false)
 			return false;
 
-		_syncFileService.SaveFile(Path.Combine(folder, ".ignore"),
+		await _syncFileService.SaveFileAsync(Path.Combine(folder, ".ignore"),
             $"{message}\r\nDelete this file for this folder to be detected as legacy again");
 		return true;
 	}
@@ -83,7 +84,7 @@ internal class SyncLegacyService : ISyncLegacyService
         return true;
     }
 
-	public List<string> FindLegacyDataTypes(string folder)
+	public async Task<List<string>> FindLegacyDataTypesAsync(string folder)
     {
 
         var dataTypesFolder = Path.Combine(folder, "DataTypes");
@@ -94,7 +95,7 @@ internal class SyncLegacyService : ISyncLegacyService
 
         foreach (var file in _syncFileService.GetFiles(dataTypesFolder, "*.config"))
         {
-            var node = _syncFileService.LoadXElement(file);
+            var node = await _syncFileService.LoadXElementAsync(file);
             if (node.Name.LocalName.Equals(Core.uSyncConstants.Serialization.DataType) is false)
                 continue;
 

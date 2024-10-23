@@ -57,7 +57,9 @@ public interface ISyncItemManager
     /// <summary>
     ///  Get the underling Local item for something that was picked from the tree.
     /// </summary>
-    Task<SyncLocalItem?> GetEntityAsync(SyncTreeItem treeItem);
+    [Obsolete("no longer called - will be removed in v16")]
+    Task<SyncLocalItem?> GetEntityAsync(SyncTreeItem treeItem) =>
+        Task.FromResult(default(SyncLocalItem));
 
 
     /// <summary>

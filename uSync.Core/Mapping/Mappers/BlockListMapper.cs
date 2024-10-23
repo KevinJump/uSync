@@ -49,8 +49,7 @@ public class BlockListMapper : SyncNestedJsonValueMapperBase, ISyncMapper
     protected override JsonNode? GetExportProperty(string value)
         => value.TryConvertToJsonNode(out var node) ? node : default;
 
-    protected override string ProcessValues(JsonObject jsonValue, string editorAlias,
-        Func<JsonObject, IContentType, JsonObject> GetPropertiesMethod)
+    protected override async Task<string?> ProcessValuesAsync(JsonObject jsonValue, string editorAlias, Func<JsonObject, IContentType, Task<JsonObject>> GetPropertiesMethod)
     {
         if (jsonValue.GetValueKind() == JsonValueKind.Object)
         {
@@ -70,11 +69,10 @@ public class BlockListMapper : SyncNestedJsonValueMapperBase, ISyncMapper
                         var doctype = GetDocTypeByKey(item, _docTypeKeyAlias);
                         if (doctype == null) continue;
 
-                        GetPropertiesMethod(item, doctype);
+                        await GetPropertiesMethod(item, doctype);
                     }
                 }
             }
-
             return jsonObject.SerializeJsonNode();
         }
 
@@ -82,11 +80,10 @@ public class BlockListMapper : SyncNestedJsonValueMapperBase, ISyncMapper
     }
 
 
-    public override IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)
-    {
+    public override async Task<IEnumerable<uSyncDependency>> GetDependenciesAsync(object value, string editorAlias, DependencyFlags flags)
+    { 
         var jsonValue = GetJsonValue(value);
         if (jsonValue == null) return [];
-
 
         var dependencies = new List<uSyncDependency>();
 
@@ -109,7 +106,7 @@ public class BlockListMapper : SyncNestedJsonValueMapperBase, ISyncMapper
                         if (contentType != null)
                         {
                             dependencies.AddNotNull(CreateDocTypeDependency(contentType, flags));
-                            dependencies.AddRange(this.GetPropertyDependencies(contentItem, contentType, flags));
+                            dependencies.AddRange(await this.GetPropertyDependenciesAsync(contentItem, contentType, flags));
                         }
                     }
                 }

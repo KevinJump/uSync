@@ -21,15 +21,18 @@ public class MultiUrlMapper : SyncValueMapperBase, ISyncMapper
         Constants.PropertyEditors.Aliases.MultiUrlPicker
     ];
 
-    public override IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)
+    public override Task<IEnumerable<uSyncDependency>> GetDependenciesAsync(object value, string editorAlias, DependencyFlags flags)
     {
-        if (value.ToString().TryDeserialize<List<LinkDto>>(out var links) is false || links is null || links.Count == 0)
-            return [];
+        return uSyncTaskHelper.FromResultOf(() =>
+        {
+            if (value.ToString().TryDeserialize<List<LinkDto>>(out var links) is false || links is null || links.Count == 0)
+                return [];
 
-        return links.Where(x => x.Udi != null)
-            .Select(link => CreateDependency(link.Udi, flags))
-            .Where(x => x != null)
-            .Select(x => x!) ?? [];
+            return links.Where(x => x.Udi != null)
+                .Select(link => CreateDependency(link.Udi, flags))
+                .Where(x => x != null)
+                .Select(x => x!) ?? [];
+        });
     }
 
     // taken from umbraco source - this is how it's stored 

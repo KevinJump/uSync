@@ -218,15 +218,13 @@ public abstract class ContentHandlerBase<TObject> : SyncHandlerTreeBase<TObject>
     public void Handle(MovingToRecycleBinNotification<TObject> notification)
         => HandleAsync(notification, CancellationToken.None).Wait();
 
-    public Task HandleAsync(MovingToRecycleBinNotification<TObject> notification, CancellationToken cancellationToken)
+    public async Task HandleAsync(MovingToRecycleBinNotification<TObject> notification, CancellationToken cancellationToken)
     {
-        if (ShouldBlockRootChanges(notification.MoveInfoCollection.Select(x => x.Entity)))
+        if (await ShouldBlockRootChangesAsync(notification.MoveInfoCollection.Select(x => x.Entity)))
         {
             notification.Cancel = true;
             notification.Messages.Add(GetCancelMessageForRoots());
         }
-
-        return Task.CompletedTask;
     }
 
     /// <summary>

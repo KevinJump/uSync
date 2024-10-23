@@ -195,7 +195,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
     /// <summary>
     ///  serialize all the properties for the item
     /// </summary>
-    protected virtual XElement SerializeProperties(TObject item, SyncSerializerOptions options)
+    protected virtual async Task<XElement> SerializePropertiesAsync(TObject item, SyncSerializerOptions options)
     {
         var cultures = options.GetCultures();
         var segments = options.GetSegments();
@@ -252,7 +252,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
 
                 if (validNode)
                 {
-                    valueNode.Add(new XCData(GetExportValue(GetPropertyValue(value), property.PropertyType, value.Culture!, value.Segment!)));
+                    valueNode.Add(new XCData(await GetExportValueAsync(GetPropertyValue(value), property.PropertyType, value.Culture!, value.Segment!)));
                     elements.Add(valueNode);
                 }
             }
@@ -482,7 +482,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         return changes;
     }
 
-    protected Attempt<List<uSyncChange>, string> DeserializeProperties(TObject item, XElement node, SyncSerializerOptions options)
+    protected async Task<Attempt<List<uSyncChange>, string>> DeserializePropertiesAsync(TObject item, XElement node, SyncSerializerOptions options)
     {
         string errors = "";
         List<uSyncChange> changes = [];
@@ -504,6 +504,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
                 logger.LogTrace("De-serialize Property {alias} {editorAlias}", alias, current.PropertyType.PropertyEditorAlias);
 
                 var values = property.Elements("Value").ToList();
+                var defaultLanguageIsoCode = await _languageService.GetDefaultIsoCodeAsync();
 
                 foreach (var value in values)
                 {
@@ -528,7 +529,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
                                 // if the content config thinks it should vary by culture, but the document type doesn't
                                 // then we can check if this is default language, and use that to se the value
                                 
-                                if (!culture.InvariantEquals(_languageService.GetDefaultIsoCodeAsync().Result))
+                                if (!culture.InvariantEquals(defaultLanguageIsoCode))
                                 {
                                     // this culture is not the default for the site, so don't use it to 
                                     // set the single language value.
@@ -554,7 +555,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
                                 if (values.Count == 1)
                                 {
                                     // there is only one value - so we should set the default variant with this for consistency?
-                                    culture = _languageService.GetDefaultIsoCodeAsync().Result;
+                                    culture = defaultLanguageIsoCode;
                                     logger.LogDebug("Property {Alias} contains a single value that has no culture setting default culture {Culture}", alias, culture);
                                 }
                                 else
@@ -566,7 +567,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
                         }
 
                         // get here ... set the value
-                        var itemValue = GetImportValue(propValue, current.PropertyType, culture, segment);
+                        var itemValue = await GetImportValueAsync(propValue, current.PropertyType, culture, segment);
                         var currentValue = item.GetValue(alias, culture, segment);
 
                         if (ContentSerializerBase<TObject>.IsUpdatedValue(currentValue, itemValue))
@@ -646,7 +647,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
     protected virtual uSyncChange? HandleTrashedState(TObject item, bool trashed, Guid restoreParent)
         => uSyncChange.NoChange($"Member/{item.Name}", item.Name ?? item.Id.ToString());
 
-    protected string GetExportValue(object? value, IPropertyType propertyType, string culture, string segment)
+    protected async Task<string> GetExportValueAsync(object? value, IPropertyType propertyType, string culture, string segment)
     {
         if (value is null) return string.Empty;
 
@@ -655,7 +656,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         // them they plug in as ISyncMapper things
         logger.LogTrace("Getting ExportValue [{PropertyEditorAlias}]", propertyType.PropertyEditorAlias);
 
-        var exportValue = syncMappers.GetExportValue(value, propertyType.PropertyEditorAlias);
+        var exportValue = await syncMappers.GetExportValueAsync(value, propertyType.PropertyEditorAlias);
 
         // TODO: in a perfect world, this is the best answer, don't escape any buried JSON in anything
         // but there might be a couple of property value converters that don't like their nested JSON
@@ -668,14 +669,15 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         return exportValue ?? string.Empty;
     }
 
-    protected object? GetImportValue(string value, IPropertyType propertyType, string culture, string segment)
+
+    protected async Task<object?> GetImportValueAsync(string value, IPropertyType propertyType, string culture, string segment)
     {
         // this is where the mapping magic will happen. 
         // at the moment there are no value mappers, but if we need
         // them they plug in as ISyncMapper things
         logger.LogTrace("Getting ImportValue [{PropertyEditorAlias}]", propertyType.PropertyEditorAlias);
 
-        var importValue = syncMappers.GetImportValue(value, propertyType.PropertyEditorAlias);
+        var importValue = await syncMappers.GetImportValueAsync(value, propertyType.PropertyEditorAlias);
         logger.LogTrace("Import Value {PropertyEditorAlias} {importValue}", propertyType.PropertyEditorAlias, importValue);
         return importValue;
     }

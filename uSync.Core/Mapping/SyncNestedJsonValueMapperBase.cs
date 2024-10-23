@@ -27,13 +27,13 @@ public abstract class SyncNestedJsonValueMapperBase : SyncNestedValueMapperBase
     ///  gets the string value, null checks it, and returns a JToken element 
     ///  to the GetImportProperties method.
     /// </remarks>
-    public override string? GetImportValue(string value, string editorAlias)
+    public override async Task<string?> GetImportValueAsync(string value, string editorAlias)
     {
         if (value.IsObjectNullOrEmptyString()) return null;
         if (value.TryConvertToJsonNode(out var jsonValue) is false) return null;
         if (jsonValue == null) return value.ToString();
 
-        return ProcessValues(jsonValue.AsObject(), editorAlias, GetImportProperties);
+        return await ProcessValuesAsync(jsonValue.AsObject(), editorAlias, GetImportPropertiesAsync);
     }
 
     /// <summary>
@@ -43,19 +43,15 @@ public abstract class SyncNestedJsonValueMapperBase : SyncNestedValueMapperBase
     ///  get the current value, checks it and returns a JTOKEN element 
     ///  to the GetExportProperties method.
     /// </remarks>
-    public override string? GetExportValue(object value, string editorAlias)
+    public override async Task<string?> GetExportValueAsync(object value, string editorAlias)
     {
         if (value.IsObjectNullOrEmptyString()) return null;
         if (value.TryConvertToJsonNode(out var jsonValue) is false) return null;
         if (jsonValue == null) return value.ToString();
 
-        return ProcessValues(jsonValue.AsObject(), editorAlias, GetExportProperties);
+        return await ProcessValuesAsync(jsonValue.AsObject(), editorAlias, GetExportPropertiesAsync);
     }
 
-    /// <summary>
-    /// Process the values and pass on to the relevant GetPropertiesMethod
-    /// </summary>
-
-    protected abstract string? ProcessValues(JsonObject jsonValue, string editorAlias,
-        Func<JsonObject, IContentType, JsonObject> GetPropertiesMethod);
+    protected abstract Task<string?> ProcessValuesAsync(JsonObject jsonValue, string editorAlias,
+        Func<JsonObject, IContentType, Task<JsonObject>> GetPropertiesMethod);
 }

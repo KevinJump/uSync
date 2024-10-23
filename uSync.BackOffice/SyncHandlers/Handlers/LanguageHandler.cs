@@ -23,6 +23,7 @@ using uSync.BackOffice.Services;
 using uSync.BackOffice.SyncHandlers.Interfaces;
 using uSync.BackOffice.SyncHandlers.Models;
 using uSync.Core;
+using uSync.Core.Extensions;
 
 using static Umbraco.Cms.Core.Constants;
 
@@ -60,10 +61,9 @@ public class LanguageHandler : SyncHandlerBase<ILanguage>, ISyncHandler,
     /// <inheritdoc/>
     // language guids are not consistent (at least in alpha)
     // so we don't save by Guid we save by ISO name every time.           
-    protected override string GetPath(string folder, ILanguage item, bool GuidNames, bool isFlat)
-    {
-        return Path.Combine(folder, $"{this.GetItemPath(item, GuidNames, isFlat)}.{this.uSyncConfig.Settings.DefaultExtension}");
-    }
+    protected override Task<string> GetPathAsync(string folder, ILanguage item, bool GuidNames, bool isFlat)
+        => uSyncTaskHelper.FromResultOf(()
+            => Path.Combine(folder, $"{this.GetItemPath(item, GuidNames, isFlat)}.{this.uSyncConfig.Settings.DefaultExtension}"));
 
     /// <inheritdoc/>
     protected override string GetItemPath(ILanguage item, bool useGuid, bool isFlat)
@@ -72,8 +72,8 @@ public class LanguageHandler : SyncHandlerBase<ILanguage>, ISyncHandler,
 	/// <summary>
 	///  order the merged items, making sure the default language is first. 
 	/// </summary>
-	protected override IReadOnlyList<OrderedNodeInfo> GetMergedItems(string[] folders)
-		=> base.GetMergedItems(folders)
+	protected override async Task<IReadOnlyList<OrderedNodeInfo>> GetMergedItemsAsync(string[] folders)
+		=> (await base.GetMergedItemsAsync(folders))
 			.OrderBy(x => x.Node.Element("IsDefault").ValueOrDefault(false) ? 0 : 1)
 			.ToList();
 
@@ -81,7 +81,7 @@ public class LanguageHandler : SyncHandlerBase<ILanguage>, ISyncHandler,
 	///  ensure we import the 'default' language first, so we don't get errors doing it. 
 	/// </summary>
 	/// <remarks>
-	///  prost v13.1 this method isn't used to determain the order for all options.
+	///  prost v13.1 this method isn't used to determine the order for all options.
 	/// </remarks>
 	protected override IEnumerable<string> GetImportFiles(string folder)
     {
@@ -130,7 +130,7 @@ public class LanguageHandler : SyncHandlerBase<ILanguage>, ISyncHandler,
 
         foreach (string file in files)
         {
-            var node = syncFileService.LoadXElement(file);
+            var node = await syncFileService.LoadXElementAsync(file);
             var IsoCode = node.Element("IsoCode").ValueOrDefault(string.Empty);
 
             if (!String.IsNullOrWhiteSpace(IsoCode))
@@ -144,7 +144,7 @@ public class LanguageHandler : SyncHandlerBase<ILanguage>, ISyncHandler,
                         var attempt = await serializer.SerializeEmptyAsync(item, SyncActionType.Rename, node.GetAlias());
                         if (attempt.Success && attempt.Item is not null)
                         {
-                            syncFileService.SaveXElement(attempt.Item, file);
+                            await syncFileService.SaveXElementAsync(attempt.Item, file);
                         }
                     }
                 }
@@ -156,7 +156,7 @@ public class LanguageHandler : SyncHandlerBase<ILanguage>, ISyncHandler,
                     var attempt = await serializer.SerializeEmptyAsync(item, SyncActionType.Delete, node.GetAlias());
                     if (attempt.Success && attempt.Item is not null)
                     {
-                        syncFileService.SaveXElement(attempt.Item, file);
+                        await syncFileService.SaveXElementAsync(attempt.Item, file);
                     }
                 }
             }
@@ -166,15 +166,15 @@ public class LanguageHandler : SyncHandlerBase<ILanguage>, ISyncHandler,
     private static ConcurrentDictionary<string, string> newLanguages = new();
 
     /// <inheritdoc/>
-    public override Task HandleAsync(SavingNotification<ILanguage> notification, CancellationToken cancellationToken)
+    public override async Task HandleAsync(SavingNotification<ILanguage> notification, CancellationToken cancellationToken)
     {
-        if (_mutexService.IsPaused) return Task.CompletedTask;
+        if (_mutexService.IsPaused) return;
 
-        if (ShouldBlockRootChanges(notification.SavedEntities))
+        if (await ShouldBlockRootChangesAsync(notification.SavedEntities))
         {
             notification.Cancel = true;
             notification.Messages.Add(GetCancelMessageForRoots());
-            return Task.CompletedTask; ;
+            return;
         }
 
         foreach (var item in notification.SavedEntities)
@@ -188,7 +188,7 @@ public class LanguageHandler : SyncHandlerBase<ILanguage>, ISyncHandler,
             }
         }
 
-        return Task.CompletedTask;
+        return;
     }
 
     /// <inheritdoc/>

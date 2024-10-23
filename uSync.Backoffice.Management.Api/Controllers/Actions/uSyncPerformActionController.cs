@@ -20,6 +20,6 @@ public class uSyncPerformActionController : uSyncControllerBase
 
     [HttpPost("Perform")]
     [ProducesResponseType(typeof(PerformActionResponse), 200)]
-    public PerformActionResponse PerformAction(PerformActionRequest model)
-        => _managementService.PerformAction(model);
+    public async Task<PerformActionResponse> PerformAction(PerformActionRequest model)
+        => await _managementService.PerformActionAsync(model);
 }

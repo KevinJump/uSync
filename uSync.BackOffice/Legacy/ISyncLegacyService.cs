@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading.Tasks;
 
 namespace uSync.BackOffice.Legacy;
 
@@ -16,12 +17,12 @@ public interface ISyncLegacyService
 	/// <summary>
 	///  find any legacy data types in the uSync folder
 	/// </summary>
-	List<string> FindLegacyDataTypes(string folder);
+	Task<List<string>> FindLegacyDataTypesAsync(string folder);
 
 	/// <summary>
 	///  adds a .ignore file to the root of the folder, so we don't flag it as a legacy folder again.
 	/// </summary>
-	bool IgnoreLegacyFolder(string folder, string message);
+	Task<bool> IgnoreLegacyFolderAsync(string folder, string message);
 
 	/// <summary>
 	///  find the latest uSync legacy folder.
