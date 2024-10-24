@@ -43,7 +43,7 @@ public class DomainHandler : SyncHandlerBase<IDomain>, ISyncHandler,
         IDomainService domainService,
         AppCaches appCaches,
         IShortStringHelper shortStringHelper,
-        SyncFileService syncFileService,
+        ISyncFileService syncFileService,
         uSyncEventService mutexService,
         uSyncConfigService configService,
         ISyncItemFactory syncItemFactory)

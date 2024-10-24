@@ -26,9 +26,9 @@ internal class SyncLegacyService : ISyncLegacyService
         { SyncLegacyTypes.MultipleMediaPicker, "Multiple Media Picker (Legacy)" }
     };
 
-    private readonly SyncFileService _syncFileService;
+    private readonly ISyncFileService _syncFileService;
 
-    public SyncLegacyService(SyncFileService syncFileService)
+    public SyncLegacyService(ISyncFileService syncFileService)
     {
         _syncFileService = syncFileService;
     }

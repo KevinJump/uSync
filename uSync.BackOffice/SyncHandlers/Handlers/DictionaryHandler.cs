@@ -52,7 +52,7 @@ public class DictionaryHandler : SyncHandlerLevelBase<IDictionaryItem>, ISyncHan
         IDictionaryItemService dictionaryItemService,
         AppCaches appCaches,
         IShortStringHelper shortStringHelper,
-        SyncFileService syncFileService,
+        ISyncFileService syncFileService,
         uSyncEventService mutexService,
         uSyncConfigService uSyncConfigService,
         ISyncItemFactory syncItemFactory)
@@ -89,14 +89,8 @@ public class DictionaryHandler : SyncHandlerLevelBase<IDictionaryItem>, ISyncHan
     {
         syncFileService.EnsureFileExists(filePath);
 
-        using (var stream = syncFileService.OpenRead(filePath))
-        {
-            if (stream is null)
-                throw new KeyNotFoundException($"Cannot load file {filePath}");
-
-            var node = XElement.Load(stream);
-            return await serializer.FindItemAsync(node);
-        }
+        var node = await syncFileService.LoadXElementAsync(filePath);
+        return await serializer.FindItemAsync(node);
     }
 
     /// <inheritdoc/>

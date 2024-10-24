@@ -48,7 +48,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// <summary>
     /// Reference to the uSyncFileService
     /// </summary>
-    protected readonly SyncFileService syncFileService;
+    protected readonly ISyncFileService syncFileService;
 
     /// <summary>
     /// Reference to the Event service used to handle locking
@@ -177,7 +177,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
             ILogger<SyncHandlerRoot<TObject, TContainer>> logger,
             AppCaches appCaches,
             IShortStringHelper shortStringHelper,
-            SyncFileService syncFileService,
+            ISyncFileService syncFileService,
             uSyncEventService mutexService,
             uSyncConfigService uSyncConfig,
             ISyncItemFactory itemFactory)

@@ -49,7 +49,7 @@ public class LanguageHandler : SyncHandlerBase<ILanguage>, ISyncHandler,
         ILanguageService languageService,
         AppCaches appCaches,
         IShortStringHelper shortStringHelper,
-        SyncFileService syncFileService,
+        ISyncFileService syncFileService,
         uSyncEventService mutexService,
         uSyncConfigService uSyncConfig,
         ISyncItemFactory syncItemFactory)

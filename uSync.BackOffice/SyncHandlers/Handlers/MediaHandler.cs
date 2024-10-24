@@ -50,7 +50,7 @@ public class MediaHandler : ContentHandlerBase<IMedia>, ISyncHandler, ISyncClean
         IMediaService mediaService,
         AppCaches appCaches,
         IShortStringHelper shortStringHelper,
-        SyncFileService syncFileService,
+        ISyncFileService syncFileService,
         uSyncEventService mutexService,
         uSyncConfigService uSyncConfigService,
         ISyncItemFactory syncItemFactory)

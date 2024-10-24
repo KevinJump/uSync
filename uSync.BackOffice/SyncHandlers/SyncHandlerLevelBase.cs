@@ -37,7 +37,7 @@ public abstract class SyncHandlerLevelBase<TObject>
         IEntityService entityService,
         AppCaches appCaches,
         IShortStringHelper shortStringHelper,
-        SyncFileService syncFileService,
+        ISyncFileService syncFileService,
         uSyncEventService mutexService,
         uSyncConfigService uSyncConfig,
         ISyncItemFactory syncItemFactory)

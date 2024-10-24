@@ -56,7 +56,7 @@ public class ContentHandler : ContentHandlerBase<IContent>, ISyncHandler,
         IContentService contentService,
         AppCaches appCaches,
         IShortStringHelper shortStringHelper,
-        SyncFileService syncFileService,
+        ISyncFileService syncFileService,
         uSyncEventService mutexService,
         uSyncConfigService uSyncConfigService,
         ISyncItemFactory syncItemFactory)

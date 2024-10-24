@@ -46,7 +46,7 @@ public class MemberTypeHandler : ContentTypeBaseHandler<IMemberType>, ISyncHandl
         IMemberTypeService memberTypeService,
         AppCaches appCaches,
         IShortStringHelper shortStringHelper,
-        SyncFileService syncFileService,
+        ISyncFileService syncFileService,
         uSyncEventService mutexService,
         uSyncConfigService uSyncConfig,
         ISyncItemFactory syncItemFactory)

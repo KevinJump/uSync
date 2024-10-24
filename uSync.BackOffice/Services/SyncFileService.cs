@@ -22,7 +22,7 @@ namespace uSync.BackOffice.Services;
 ///  putting all file actions in a service, 
 ///  so if we want to abstract later we can.
 /// </summary>
-public class SyncFileService
+internal class SyncFileService : ISyncFileService
 {
     private readonly ILogger<SyncFileService> _logger;
     private readonly IHostEnvironment _hostEnvironment;
@@ -41,21 +41,14 @@ public class SyncFileService
         _hostEnvironment = hostEnvironment;
     }
 
-    /// <summary>
-    ///  return the absolute path for any given path. 
-    /// </summary>
+    /// <inheritdoc/>
     public string GetAbsPath(string path)
     {
         if (Path.IsPathFullyQualified(path)) return CleanLocalPath(path);
         return CleanLocalPath(_hostEnvironment.MapPathContentRoot(path.TrimStart(_trimChars)));
     }
 
-    /// <summary>
-    ///  Works out the relative path of a file to the site. 
-    /// </summary>
-    /// <remarks>
-    ///  if the path is outside of the site root, then we return the whole path.
-    /// </remarks>
+    /// <inheritdoc/>
     public string GetSiteRelativePath(string path)
     {
         if (Path.IsPathFullyQualified(path) && path.StartsWith(_hostEnvironment.ContentRootPath))
@@ -63,21 +56,15 @@ public class SyncFileService
         return path;
     }
 
-    /// <summary>
-    ///  clean up the local path, and full expand any short file names
-    /// </summary>
+    /// <inheritdoc/>
     private static string CleanLocalPath(string path)
         => Path.GetFullPath(path.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar));
 
-    /// <summary>
-    ///  does a file exist 
-    /// </summary>
+    /// <inheritdoc/>
     public bool FileExists(string path)
         => File.Exists(GetAbsPath(path));
 
-    /// <summary>
-    ///  compare two file paths, and tell us if they match 
-    /// </summary>
+    /// <inheritdoc/>
     public bool PathMatches(string a, string b)
         => GetAbsPath(a).Equals(GetAbsPath(b), StringComparison.InvariantCultureIgnoreCase);
 
@@ -89,12 +76,7 @@ public class SyncFileService
     public bool DirectoryExists(string path)
         => Directory.Exists(GetAbsPath(path));
 
-    /// <summary>
-    ///  checks and tells you if a folder exists and has sub folders.
-    /// </summary>
-    /// <remarks>
-    ///  we use this to confirm that a uSync folder has something init.
-    /// </remarks>
+    /// <inheritdoc/>
     public bool DirectoryHasChildren(string path)
     {
         var fullPath = GetAbsPath(path);
@@ -102,18 +84,7 @@ public class SyncFileService
         return Directory.GetDirectories(fullPath).Length > 0;
     }
 
-    /// <summary>
-    ///  dies the root path exist. 
-    /// </summary>
-    /// <param name="path"></param>
-    /// <returns></returns>
-    public bool RootExists(string path)
-        => DirectoryExists(path);
-
-    /// <summary>
-    ///  remove a file from disk.
-    /// </summary>
-    /// <param name="path"></param>
+    /// <inheritdoc/>
     public void DeleteFile(string path)
     {
         var localPath = GetAbsPath(path);
@@ -121,19 +92,15 @@ public class SyncFileService
             File.Delete(localPath);
     }
 
-    /// <summary>
-    ///  Check if a file exists throw an exception if it doesn't 
-    /// </summary>
+    /// <inheritdoc/>
     public void EnsureFileExists(string path)
     {
         if (!FileExists(path))
             throw new FileNotFoundException("Missing File", path);
     }
 
-    /// <summary>
-    ///  open a file stream for reading a file 
-    /// </summary>
-    public FileStream? OpenRead(string path)
+    /// <inheritdoc/>
+    private FileStream? OpenRead(string path)
     {
         var localPath = GetAbsPath(path);
 
@@ -141,10 +108,8 @@ public class SyncFileService
         return File.OpenRead(localPath);
     }
 
-    /// <summary>
-    ///  Open a file stream for writing a file
-    /// </summary>
-    public FileStream OpenWrite(string path)
+    /// <inheritdoc/>
+    private FileStream OpenWrite(string path)
     {
         var localPath = GetAbsPath(path);
 
@@ -155,9 +120,7 @@ public class SyncFileService
         return File.OpenWrite(localPath);
     }
 
-    /// <summary>
-    ///  copy a file from one location to another - creating the directory if it is missing
-    /// </summary>
+    /// <inheritdoc/>
     public void CopyFile(string source, string target)
     {
         var absSource = GetAbsPath(source);
@@ -171,10 +134,7 @@ public class SyncFileService
         File.Copy(absSource, absTarget, true);
     }
 
-    /// <summary>
-    ///  create the directory for a given file. 
-    /// </summary>
-    /// <param name="filePath"></param>
+    /// <inheritdoc/>
     public void CreateFoldersForFile(string filePath)
     {
         var absPath = Path.GetDirectoryName(GetAbsPath(filePath));
@@ -184,10 +144,7 @@ public class SyncFileService
             Directory.CreateDirectory(absPath);
     }
 
-    /// <summary>
-    ///  Create a directory.
-    /// </summary>
-    /// <param name="folder"></param>
+    /// <inheritdoc/>
     public void CreateFolder(string folder)
     {
         var absPath = GetAbsPath(folder);
@@ -195,9 +152,7 @@ public class SyncFileService
             Directory.CreateDirectory(absPath);
     }
 
-    /// <summary>
-    ///  remove a folder and all its contents
-    /// </summary>
+    /// <inheritdoc/>
     public void CleanFolder(string folder)
     {
         var absPath = GetAbsPath(folder);
@@ -206,19 +161,11 @@ public class SyncFileService
             Directory.Delete(absPath, true);
     }
 
-    /// <summary>
-    ///  Get a list of files from a folder. 
-    /// </summary>
+    /// <inheritdoc/>
     public IEnumerable<string> GetFiles(string folder, string extensions)
         => GetFiles(folder, extensions, false);
 
-    /// <summary>
-    ///  get all the files in a folder, 
-    /// </summary>
-    /// <param name="folder">path to the folder</param>
-    /// <param name="extensions">list of extensions (filter)</param>
-    /// <param name="allFolders">get all files in all descendant folders</param>
-    /// <returns></returns>
+    /// <inheritdoc/>
     public IEnumerable<string> GetFiles(string folder, string extensions, bool allFolders)
     {
         var localPath = GetAbsPath(folder);
@@ -228,21 +175,17 @@ public class SyncFileService
         return Directory.GetFiles(localPath, extensions, allFolders ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
     }
 
-    /// <summary>
-    ///  get a list of child folders in a folder 
-    /// </summary>
+    /// <inheritdoc/>
     public IEnumerable<string> GetDirectories(string folder)
     {
         var localPath = GetAbsPath(folder);
         if (!DirectoryExists(localPath)) return [];
-        
+
         return Directory.GetDirectories(localPath);
-       
+
     }
 
-    /// <summary>
-    ///  load a file into a XElement object.
-    /// </summary>
+    /// <inheritdoc/>
     public async Task<XElement> LoadXElementAsync(string file)
     {
         EnsureFileExists(file);
@@ -264,9 +207,7 @@ public class SyncFileService
         }
     }
 
-    /// <summary>
-    ///  save a stream to disk
-    /// </summary>
+    /// <inheritdoc/>
     public async Task SaveFileAsync(string filename, Stream stream)
     {
         _logger.LogDebug("Saving File: {file}", filename);
@@ -279,9 +220,7 @@ public class SyncFileService
         }
     }
 
-    /// <summary>
-    ///  save a string to disk
-    /// </summary>
+    /// <inheritdoc/>
     public async Task SaveFileAsync(string filename, string content)
     {
         var localFile = GetAbsPath(filename);
@@ -296,9 +235,7 @@ public class SyncFileService
         }
     }
 
-    /// <summary>
-    ///  Save an XML Element to disk
-    /// </summary>
+    /// <inheritdoc/>
     public async Task SaveXElementAsync(XElement node, string filename)
     {
         var localPath = GetAbsPath(filename);
@@ -310,28 +247,7 @@ public class SyncFileService
         }
     }
 
-    /// <summary>
-    ///  Load an object from XML representation on disk.
-    /// </summary>
-    public TObject? LoadXml<TObject>(string file)
-    {
-        if (FileExists(file))
-        {
-            XmlSerializer xmlSerializer = new XmlSerializer(typeof(TObject));
-            using (var stream = OpenRead(file))
-            {
-                if (stream is null) return default;
-
-                TObject? item = (TObject?)xmlSerializer.Deserialize(stream);
-                return item;
-            }
-        }
-        return default;
-    }
-
-    /// <summary>
-    ///  load the contents of a file into a string
-    /// </summary>
+    /// <inheritdoc/>
     public async Task<string> LoadContentAsync(string file)
     {
         if (FileExists(file))
@@ -343,9 +259,7 @@ public class SyncFileService
         return string.Empty;
     }
 
-    /// <summary>
-    /// Remove a folder from disk
-    /// </summary>
+    /// <inheritdoc/>
     public void DeleteFolder(string folder, bool safe = false)
     {
         try
@@ -362,9 +276,7 @@ public class SyncFileService
         }
     }
 
-    /// <summary>
-    ///  copy the contents of a folder 
-    /// </summary>
+    /// <inheritdoc/>
     public void CopyFolder(string source, string target)
     {
         var resolvedSource = GetAbsPath(source).TrimEnd(Path.DirectorySeparatorChar); ;
@@ -391,34 +303,7 @@ public class SyncFileService
 
     }
 
-
-    /// <summary>
-    ///  Locking item for saves. 
-    /// </summary>
-    private static object _saveLock = new();
-
-    /// <summary>
-    ///  save an object to an XML file representing it.
-    /// </summary>
-    public void SaveXml<TObject>(string file, TObject item)
-    {
-        lock (_saveLock)
-        {
-            if (FileExists(file))
-                DeleteFile(file);
-
-            var xmlSerializer = new XmlSerializer(typeof(TObject));
-            using (var stream = OpenWrite(file))
-            {
-                xmlSerializer.Serialize(stream, item);
-            }
-        }
-    }
-
-    /// <summary>
-    ///  run some basic sanity checks on a folder to see if it looks like a good 
-    ///  set of uSync files ? 
-    /// </summary>
+    /// <inheritdoc/>
     public List<string> VerifyFolder(string folder, string extension)
     {
         var resolvedFolder = GetAbsPath(folder);
@@ -456,11 +341,11 @@ public class SyncFileService
 
                     if (keys.TryGetValue(key, out string? value))
                     {
-						errors.Add($"Clash {filePath} shares an id with {value}");
-					}
+                        errors.Add($"Clash {filePath} shares an id with {value}");
+                    }
                     else
                     {
-						keys[key] = filePath;
+                        keys[key] = filePath;
                     }
                 }
             }
@@ -473,32 +358,20 @@ public class SyncFileService
         return errors;
     }
 
-	static string GetShortFileName(string file)
+    static string GetShortFileName(string file)
         => $"{Path.DirectorySeparatorChar}{Path.GetFileName(Path.GetDirectoryName(file))}" +
         $"{Path.DirectorySeparatorChar}{Path.GetFileName(file)}";
 
     // roots 
     #region roots
 
-    /// <summary>
-    ///  Merge a number of uSync folders into a single 'usync source'
-    /// </summary>
-    /// <remarks>
-    ///  this is the core of the "roots" functionality. folders are 
-    ///  merged upwards (so the last folder will win)
-    ///  
-    ///  custom merging can be achieved using additional methods on
-    ///  the change trackers. 
-    ///  
-    ///  the doctype tracker merges properties so you can have 
-    ///  property level root values for doctypes. 
-    /// </remarks>
+    /// <inheritdoc/>
     public async Task<IEnumerable<OrderedNodeInfo>> MergeFoldersAsync(string[] folders, string extension, ISyncTrackerBase? trackerBase)
     {
         var elements = new Dictionary<string, OrderedNodeInfo>();
-		var cleanElements = new Dictionary<string, OrderedNodeInfo>();
+        var cleanElements = new Dictionary<string, OrderedNodeInfo>();
 
-		foreach (var folder in folders)
+        foreach (var folder in folders)
         {
             var absPath = GetAbsPath(folder);
 
@@ -508,74 +381,72 @@ public class SyncFileService
 
             var localKeys = new List<Guid>();
 
-                foreach (var item in items)
+            foreach (var item in items)
+            {
+                var itemKey = item.Value.Node.GetKey();
+                if (item.Value.Node.IsEmptyItem() is false)
                 {
-                    var itemKey = item.Value.Node.GetKey();
-                    if (item.Value.Node.IsEmptyItem() is false)
+                    if (localKeys.Contains(itemKey))
                     {
-                        if (localKeys.Contains(itemKey))
-                        {
-                            throw new Exception($"Duplicate: Item key {itemKey} already exists for {item.Key} - run uSync Health check for more info.");
-                        }
-                        localKeys.Add(itemKey);
-
-						if (elements.TryGetValue(item.Key, out var value))
-						{
-							// merge these files.
-							item.Value.SetNode(MergeNodes(value.Node, item.Value.Node, trackerBase));
-							item.Value.SetFileName($"{uSyncConstants.MergedFolderName}/{Path.GetFileName(item.Value.FileName)}");
-						}
-					}
-					else
-                    {
-                        switch (item.Value.Node.GetEmptyAction())
-                        {
-							case SyncActionType.Delete:
-								// deletes get added, but there can be duplicate deletes, 
-								// we don't care, we just need one, (so we can add them multiple times).
-								break;
-							case SyncActionType.Clean:
-								// cleans are added, these run a clean up at the end, so if they exist 
-								// we need to add them, but they can clash in terms of keys. 
-								_ = cleanElements.TryAdd(item.Key, item.Value);
-                                continue;
-                            case SyncActionType.Rename: // renames are just markers to make sure they don't leave things on disk.
-							case SyncActionType.None: // none should never happen, we can ignore them..
-							default: 
-								continue;
-                        }
+                        throw new Exception($"Duplicate: Item key {itemKey} already exists for {item.Key} - run uSync Health check for more info.");
                     }
+                    localKeys.Add(itemKey);
+
+                    if (elements.TryGetValue(item.Key, out var value))
+                    {
+                        // merge these files.
+                        item.Value.SetNode(MergeNodes(value.Node, item.Value.Node, trackerBase));
+                        item.Value.SetFileName($"{uSyncConstants.MergedFolderName}/{Path.GetFileName(item.Value.FileName)}");
+                    }
+                }
+                else
+                {
+                    switch (item.Value.Node.GetEmptyAction())
+                    {
+                        case SyncActionType.Delete:
+                            // deletes get added, but there can be duplicate deletes, 
+                            // we don't care, we just need one, (so we can add them multiple times).
+                            break;
+                        case SyncActionType.Clean:
+                            // cleans are added, these run a clean up at the end, so if they exist 
+                            // we need to add them, but they can clash in terms of keys. 
+                            _ = cleanElements.TryAdd(item.Key, item.Value);
+                            continue;
+                        case SyncActionType.Rename: // renames are just markers to make sure they don't leave things on disk.
+                        case SyncActionType.None: // none should never happen, we can ignore them..
+                        default:
+                            continue;
+                    }
+                }
 
                 elements[item.Key] = item.Value;
             }
         }
 
-        return [..elements.Values, ..cleanElements.Values];
+        return [.. elements.Values, .. cleanElements.Values];
     }
 
-	/// <summary>
-	///  merge the files into a single XElement that can be imported as if it was on disk.
-	/// </summary>
-	public async Task<XElement?> MergeFilesAsync(string[] filenames, ISyncTrackerBase? trackerBase)
-	{
-		if (filenames.Length == 0) return null;
-		var latest = await LoadXElementSafeAsync(filenames[0]);
-		if (filenames.Length == 1 || latest is null) return latest;
+    /// <inheritdoc/>
+    public async Task<XElement?> MergeFilesAsync(string[] filenames, ISyncTrackerBase? trackerBase)
+    {
+        if (filenames.Length == 0) return null;
+        var latest = await LoadXElementSafeAsync(filenames[0]);
+        if (filenames.Length == 1 || latest is null) return latest;
 
-		for (var n = 1; n < filenames.Length; n++)
-		{
-			var node = await LoadXElementSafeAsync(filenames[n]);
-			if (node is null) continue;
-			latest = MergeNodes(latest, node, trackerBase);
-		}
-		return latest;
-	}
+        for (var n = 1; n < filenames.Length; n++)
+        {
+            var node = await LoadXElementSafeAsync(filenames[n]);
+            if (node is null) continue;
+            latest = MergeNodes(latest, node, trackerBase);
+        }
+        return latest;
+    }
 
-	private XElement MergeNodes(XElement source, XElement target, ISyncTrackerBase? trackerBase)
-		=> trackerBase is null ? target : trackerBase.MergeFiles(source, target) ?? target;
+    private XElement MergeNodes(XElement source, XElement target, ISyncTrackerBase? trackerBase)
+        => trackerBase is null ? target : trackerBase.MergeFiles(source, target) ?? target;
 
 
-	private async Task<IEnumerable<KeyValuePair<string, OrderedNodeInfo>>> GetFolderItemsAsync(string folder, string extension)
+    private async Task<IEnumerable<KeyValuePair<string, OrderedNodeInfo>>> GetFolderItemsAsync(string folder, string extension)
     {
         var items = new List<KeyValuePair<string, OrderedNodeInfo>>();
 
@@ -600,9 +471,7 @@ public class SyncFileService
         return items;
     }
 
-    /// <summary>
-    ///  will load the most relevant version of a file. 
-    /// </summary>
+    /// <inheritdoc/>
     public async Task<XElement?> GetNearestNodeAsync(string filePath, string[] folders)
     {
         foreach (var folder in folders.Reverse())
@@ -615,12 +484,7 @@ public class SyncFileService
         return null;
     }
 
-    /// <summary>
-    ///  get a XML representation of the differences between two files
-    /// </summary>
-    /// <remarks>
-    ///  the default merger returns the whole xml as the difference. 
-    /// </remarks>
+    /// <inheritdoc/>
     public XElement? GetDifferences(List<XElement> nodes, ISyncTrackerBase? trackerBase)
     {
         if (nodes is null || nodes?.Count == 0) return null;
@@ -631,10 +495,7 @@ public class SyncFileService
         return trackerBase?.GetDifferences(nodes);
     }
 
-    /// <summary>
-    ///  get all xml elements that represent this item across
-    ///  all folders. 
-    /// </summary>
+    /// <inheritdoc/>
     public async Task<List<XElement>> GetAllNodesAsync(string[] filePaths)
     {
         var nodes = new List<XElement>(filePaths.Length);
@@ -649,10 +510,7 @@ public class SyncFileService
         return nodes;
     }
 
-    /// <summary>
-    /// checks a list of folders to see if any of them exists
-    /// </summary>
-    /// <returns>true if any but the last folder exists</returns>
+    /// <inheritdoc/>
     public bool AnyFolderExists(string[] folders)
         => folders.Any(DirectoryExists);
 

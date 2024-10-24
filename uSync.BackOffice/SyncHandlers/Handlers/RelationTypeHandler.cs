@@ -49,7 +49,7 @@ public class RelationTypeHandler : SyncHandlerBase<IRelationType>, ISyncHandler,
         IRelationService relationService,
         AppCaches appCaches,
         IShortStringHelper shortStringHelper,
-        SyncFileService syncFileService,
+        ISyncFileService syncFileService,
         uSyncEventService mutexService,
         uSyncConfigService uSyncConfigService,
         ISyncItemFactory syncItemFactory)
