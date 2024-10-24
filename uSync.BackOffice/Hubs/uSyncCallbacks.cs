@@ -1,6 +1,6 @@
 ﻿using uSync.BackOffice.SyncHandlers.Interfaces;
 
-using static uSync.BackOffice.uSyncService;
+using static uSync.BackOffice.ISyncService;
 
 namespace uSync.BackOffice;
 

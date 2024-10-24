@@ -16,7 +16,7 @@ namespace uSync.BackOffice;
 ///  actions on individual handlers. 
 /// </summary>
 
-public partial class uSyncService
+public partial class SyncService
 {
     private string[] GetFolderFromOptions(uSyncImportOptions options)
     {
@@ -27,14 +27,6 @@ public partial class uSyncService
         return _uSyncConfig.GetFolders();
     }
 
-
-    /// <summary>
-    ///  Run a report for a given handler 
-    /// </summary>
-    [Obsolete("use ReportHandlerAsync will be removed in v16")]
-    public IEnumerable<uSyncAction> ReportHandler(string handler, uSyncImportOptions options)
-        => ReportHandlerAsync(handler, options).Result;
-    
     public async Task<IEnumerable<uSyncAction>> ReportHandlerAsync(string handler, uSyncImportOptions options)
     {
         var handlerPair = _handlerFactory.GetValidHandler(handler, new SyncHandlerOptions
@@ -48,13 +40,6 @@ public partial class uSyncService
 
         return await handlerPair.Handler.ReportAsync(folders, handlerPair.Settings, options.Callbacks?.Update);
     }
-
-    /// <summary>
-    ///  run an import for a given handler 
-    /// </summary>
-    [Obsolete("use ImportHandlerAsync will be removed in v16")]
-    public IEnumerable<uSyncAction> ImportHandler(string handlerAlias, uSyncImportOptions options)
-        => ImportHandlerAsync(handlerAlias, options).Result;
 
     public async Task<IEnumerable<uSyncAction>> ImportHandlerAsync(string handlerAlias, uSyncImportOptions options)
     {
@@ -97,13 +82,6 @@ public partial class uSyncService
         }
     }
 
-    /// <summary>
-    ///  perform the post import actions for a handler 
-    /// </summary>
-    [Obsolete("use PerformPostImportAsync will be removed in v16")]
-    public IEnumerable<uSyncAction> PerformPostImport(string[] folders, string handlerSet, IEnumerable<uSyncAction> actions)
-        => PerformPostImportAsync(folders, handlerSet, actions).GetAwaiter().GetResult();
-
     public async Task<IEnumerable<uSyncAction>> PerformPostImportAsync(string[] folders, string handlerSet, IEnumerable<uSyncAction> actions)
     {
         try
@@ -120,13 +98,6 @@ public partial class uSyncService
             _importSemaphoreLock.Release();
         }
     }
-
-    /// <summary>
-    ///  run an export for a given handler 
-    /// </summary>
-    [Obsolete("use ExportHandlerAsync will be removed in v16")]
-    public IEnumerable<uSyncAction> ExportHandler(string handler, uSyncImportOptions options)
-        => ExportHandlerAsync(handler, options).Result;
 
     public async Task<IEnumerable<uSyncAction>> ExportHandlerAsync(string handler, uSyncImportOptions options)
     {

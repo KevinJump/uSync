@@ -34,7 +34,7 @@ public class FirstBootMigration : MigrationBase
 {
     private readonly IUmbracoContextFactory _umbracoContextFactory;
     private readonly ISyncConfigService _uSyncConfig;
-    private readonly uSyncService _uSyncService;
+    private readonly ISyncService _uSyncService;
     private readonly ILogger<FirstBootMigration> _logger;
 
     /// <inheritdoc/>
@@ -42,7 +42,7 @@ public class FirstBootMigration : MigrationBase
         IMigrationContext context,
         IUmbracoContextFactory umbracoContextFactory,
         ISyncConfigService uSyncConfig,
-        uSyncService uSyncService,
+        ISyncService uSyncService,
         ILogger<FirstBootMigration> logger) : base(context)
     {
         _umbracoContextFactory = umbracoContextFactory;

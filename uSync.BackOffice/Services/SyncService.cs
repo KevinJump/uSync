@@ -29,19 +29,20 @@ namespace uSync.BackOffice;
 
 
 /// <summary>
+///  Callback event for SignalR hub
+/// </summary>
+public delegate void SyncEventCallback(SyncProgressSummary summary);
+
+/// <summary>
 ///  the service that does all the processing,
 ///  this forms the entry point as an API to 
 ///  uSync, it is where imports, exports and reports
 ///  are actually ran from. 
 /// </summary>
-public partial class uSyncService
+public partial class SyncService : ISyncService
 {
-    /// <summary>
-    ///  Callback event for SignalR hub
-    /// </summary>
-    public delegate void SyncEventCallback(SyncProgressSummary summary);
 
-    private readonly ILogger<uSyncService> _logger;
+    private readonly ILogger<SyncService> _logger;
     private readonly ILoggerFactory _loggerFactory;
 
     private readonly IEventAggregator _eventAggregator;
@@ -60,8 +61,8 @@ public partial class uSyncService
     /// <summary>
     ///  Create a new uSyncService (done via DI)
     /// </summary>
-    public uSyncService(
-        ILogger<uSyncService> logger,
+    public SyncService(
+        ILogger<SyncService> logger,
         IEventAggregator eventAggregator,
         ISyncConfigService uSyncConfigService,
         SyncHandlerFactory handlerFactory,
@@ -190,7 +191,7 @@ public partial class uSyncService
         callbacks?.Callback?.Invoke(summary);
 
 
-         _mutexService.FireBulkCompleteAsync(new uSyncReportCompletedNotification(actions)).Wait();
+        _mutexService.FireBulkCompleteAsync(new uSyncReportCompletedNotification(actions)).Wait();
         sw.Stop();
 
         _logger.LogInformation("uSync Report: {handlerCount} handlers, processed {itemCount} items, {changeCount} changes in {ElapsedMilliseconds}ms",
@@ -218,14 +219,6 @@ public partial class uSyncService
         var handlers = _handlerFactory.GetValidHandlers(handlerOptions);
         return await ImportAsync(folders, force, handlers, callbacks);
     }
-
-    /// <summary>
-    ///  Import items into Umbraco from a given set of folders
-    /// </summary>
-    /// <returns>List of actions detailing what did and didn't change</returns>
-    [Obsolete("use ImportAsync instead, this will be removed in v16")]
-    public IEnumerable<uSyncAction> Import(string[] folders, bool force, IEnumerable<HandlerConfigPair> handlers, uSyncCallbacks? callbacks)
-        => ImportAsync(folders, force, handlers, callbacks).Result;
 
     public async Task<IEnumerable<uSyncAction>> ImportAsync(string[] folders, bool force, IEnumerable<HandlerConfigPair> handlers, uSyncCallbacks? callbacks)
     {
@@ -343,20 +336,6 @@ public partial class uSyncService
 
         return results;
     }
-
-
-    /// <summary>
-    ///  Import a single item based on a uSyncAction item
-    /// </summary>
-    /// <remarks>
-    ///  Importing a single item based on an action, the action will
-    ///  detail what handler to use and the filename of the item to import
-    /// </remarks>
-    /// <param name="action">Action item, to use as basis for import</param>
-    /// <returns>Action detailing change or not</returns>
-    [Obsolete("use ImportSingleActionAsync instead, this will be removed in v16")]
-    public uSyncAction ImportSingleAction(uSyncAction action)
-        => ImportSingleActionAsync(action).Result;
 
     public async Task<uSyncAction> ImportSingleActionAsync(uSyncAction action)
     {

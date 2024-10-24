@@ -24,17 +24,8 @@ namespace uSync.BackOffice;
 /// <summary>
 /// Implementation of paged import methods.
 /// </summary>
-public partial class uSyncService
+public partial class SyncService
 {
-    /// <summary>
-    ///  perform a paged report with the supplied ordered nodes
-    /// </summary>
-    [Obsolete("use ReportPartialAsync will be removed in v16")]
-    public IEnumerable<uSyncAction> ReportPartial(IList<OrderedNodeInfo> orderedNodes, uSyncPagedImportOptions options, out int total)
-    {
-        total = orderedNodes.Count;
-        return ReportPartialAsync(orderedNodes, options).Result;
-    }
     public async Task<IEnumerable<uSyncAction>> ReportPartialAsync(IList<OrderedNodeInfo> orderedNodes, uSyncPagedImportOptions options)
     {
         var total = orderedNodes.Count;
@@ -78,16 +69,6 @@ public partial class uSyncService
         }
 
         return actions;
-    }
-
-    /// <summary>
-    ///  perform an import of items from the suppled ordered node list. 
-    /// </summary>
-    [Obsolete("use ImportPartialAsync will be removed in v16")]
-    public IEnumerable<uSyncAction> ImportPartial(IList<OrderedNodeInfo> orderedNodes, uSyncPagedImportOptions options, out int total)
-    {
-        total = orderedNodes.Count;
-        return ImportPartialAsync(orderedNodes, options).Result;
     }
 
     public async Task<IEnumerable<uSyncAction>> ImportPartialAsync(IList<OrderedNodeInfo> orderedNodes, uSyncPagedImportOptions options)
@@ -174,12 +155,6 @@ public partial class uSyncService
         }
     }
 
-    /// <summary>
-    ///  Perform a paged Import second pass against a given folder 
-    /// </summary>
-    public IEnumerable<uSyncAction> ImportPartialSecondPass(IEnumerable<uSyncAction> actions, uSyncPagedImportOptions options)
-        => ImportPartialSecondPassAsync(actions, options).Result;
-
     public async Task<IEnumerable<uSyncAction>> ImportPartialSecondPassAsync(IEnumerable<uSyncAction> actions, uSyncPagedImportOptions options)
     {
         try
@@ -248,13 +223,6 @@ public partial class uSyncService
         }
     }
 
-    /// <summary>
-    ///  Perform a paged Import post import against a given folder 
-    /// </summary>
-    [Obsolete("use ImportPartialPostImportAsync will be removed in v16")]
-    public IEnumerable<uSyncAction> ImportPartialPostImport(IEnumerable<uSyncAction> actions, uSyncPagedImportOptions options)
-        => ImportPartialPostImportAsync(actions, options).Result;
-
     public async Task<IEnumerable<uSyncAction>> ImportPartialPostImportAsync(IEnumerable<uSyncAction> actions, uSyncPagedImportOptions options)
     {
         if (actions == null || !actions.Any()) return [];
@@ -314,13 +282,6 @@ public partial class uSyncService
         }
     }
 
-    /// <summary>
-    ///  Perform a paged Clean after import for a given folder 
-    /// </summary>
-    [Obsolete("use ImportPostCleanFilesAsync will be removed in v16")]
-    public IEnumerable<uSyncAction> ImportPostCleanFiles(IEnumerable<uSyncAction> actions, uSyncPagedImportOptions options)
-        => ImportPostCleanFilesAsync(actions, options).Result;
-
     public async Task<IEnumerable<uSyncAction>> ImportPostCleanFilesAsync(IEnumerable<uSyncAction> actions, uSyncPagedImportOptions options)
     {
         if (actions == null) return [];
@@ -375,17 +336,6 @@ public partial class uSyncService
         {
             IncludeDisabled = options.IncludeDisabledHandlers
         };
-
-
-    /// <summary>
-    ///  load up ordered nodes from a handler folder, 
-    /// </summary>
-    /// <remarks>
-    ///  this makes ordered node loading faster, when we are processing multiple requests, because we don't have to calculate it each time
-    /// </remarks>
-    [Obsolete("use LoadOrderedNodesAsync will be removed in v16")]
-    public IList<OrderedNodeInfo> LoadOrderedNodes(ISyncHandler handler, string[] handlerFolders)
-        => LoadOrderedNodesAsync(handler, handlerFolders).Result;
 
     public async Task<IList<OrderedNodeInfo>> LoadOrderedNodesAsync(ISyncHandler handler, string[] handlerFolders)
         => [.. (await handler.FetchAllNodesAsync(handlerFolders))];

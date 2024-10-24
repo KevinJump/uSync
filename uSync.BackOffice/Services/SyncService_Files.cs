@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace uSync.BackOffice;
 
-public partial class uSyncService
+public partial class SyncService
 {
     /// <summary>
     ///  Zip up the contents of a folder

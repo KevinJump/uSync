@@ -11,7 +11,7 @@
 @inject IHostingEnvironment hostingEnvironment
 @inject IOptions<GlobalSettings> globalSettings
 @inject ISyncConfigService uSyncConfig;
-@inject uSyncService uSyncService;
+@inject ISyncService uSyncService;
 @{
     var umbracoPath = Model.UmbracoPath ?? "/umbraco";
     var uSyncPath = umbracoPath + "/section/settings/workspace/usync-root/view/default";
