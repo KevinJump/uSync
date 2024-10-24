@@ -157,7 +157,20 @@ public interface ISyncFileService
     /// </remarks>
     Task<IEnumerable<OrderedNodeInfo>> MergeFoldersAsync(string[] folders, string extension, ISyncTrackerBase? trackerBase);
 
- 
+
+    /// <summary>
+    ///  open a file stream for reading a file.
+    /// </summary>
+    public FileStream? OpenRead(string path);
+
+    /// <summary>
+    ///  open a file stream for writing a file.
+    /// </summary>
+    /// <param name="path"></param>
+    /// <returns></returns>
+    public FileStream OpenWrite(string path);
+
+
     /// <summary>
     ///  checks to see if the path of a and b are in fact the same (when resolved to the site)
     /// </summary>

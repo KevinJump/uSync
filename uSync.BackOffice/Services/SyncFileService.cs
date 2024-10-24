@@ -100,7 +100,7 @@ internal class SyncFileService : ISyncFileService
     }
 
     /// <inheritdoc/>
-    private FileStream? OpenRead(string path)
+    public FileStream? OpenRead(string path)
     {
         var localPath = GetAbsPath(path);
 
@@ -109,7 +109,7 @@ internal class SyncFileService : ISyncFileService
     }
 
     /// <inheritdoc/>
-    private FileStream OpenWrite(string path)
+    public FileStream OpenWrite(string path)
     {
         var localPath = GetAbsPath(path);
 
@@ -531,7 +531,6 @@ internal class SyncFileService : ISyncFileService
             return null;
         }
     }
-
     #endregion
 
 }
