@@ -48,7 +48,7 @@ public class WebhookHandler : SyncHandlerRoot<IWebhook, IWebhook>, ISyncHandler,
 		AppCaches appCaches,
 		IShortStringHelper shortStringHelper,
 		ISyncFileService syncFileService,
-		uSyncEventService mutexService,
+		ISyncEventService mutexService,
 		uSyncConfigService uSyncConfig,
 		ISyncItemFactory itemFactory,
 		IWebhookService webhookService)

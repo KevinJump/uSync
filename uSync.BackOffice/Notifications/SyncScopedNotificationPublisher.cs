@@ -22,7 +22,7 @@ internal class SyncScopedNotificationPublisher
     private readonly IEventAggregator _eventAggregator;
     private readonly SyncUpdateCallback? _updateCallback;
     private readonly uSyncConfigService _uSyncConfig;
-    private readonly uSyncEventService _uSyncEventService;
+    private readonly ISyncEventService _uSyncEventService;
 
     private readonly IBackgroundTaskQueue? _backgroundTaskQueue;
 
@@ -32,7 +32,7 @@ internal class SyncScopedNotificationPublisher
         SyncUpdateCallback? callback,
         uSyncConfigService uSyncConfig,
         IBackgroundTaskQueue? backgroundTaskQueue,
-        uSyncEventService uSyncEventService)
+        ISyncEventService uSyncEventService)
         : base(eventAggregator, false)
     {
         _eventAggregator = eventAggregator;

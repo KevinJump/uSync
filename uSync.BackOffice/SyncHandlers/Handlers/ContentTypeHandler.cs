@@ -49,7 +49,7 @@ public class ContentTypeHandler : ContentTypeBaseHandler<IContentType>, ISyncHan
         AppCaches appCaches,
         IShortStringHelper shortStringHelper,
         ISyncFileService syncFileService,
-        uSyncEventService mutexService,
+        ISyncEventService mutexService,
         uSyncConfigService uSyncConfig,
         ISyncItemFactory syncItemFactory,
         IContentTypeContainerService contentTypeContainerService)

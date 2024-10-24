@@ -9,12 +9,12 @@ namespace uSync.BackOffice;
 /// </summary>
 public class uSyncImportPause : IDisposable
 {
-    private readonly uSyncEventService _mutexService;
+    private readonly ISyncEventService _mutexService;
 
     /// <summary>
     /// Generate a pause object
     /// </summary>
-    public uSyncImportPause(uSyncEventService mutexService)
+    public uSyncImportPause(ISyncEventService mutexService)
     {
         _mutexService = mutexService;
         _mutexService.Pause();
@@ -23,7 +23,7 @@ public class uSyncImportPause : IDisposable
     /// <summary>
     ///  generate a pause object, but only pause if told to do so.
     /// </summary>
-    public uSyncImportPause(uSyncEventService mutexService, bool pause)
+    public uSyncImportPause(ISyncEventService mutexService, bool pause)
     {
         _mutexService = mutexService;
         if (pause)

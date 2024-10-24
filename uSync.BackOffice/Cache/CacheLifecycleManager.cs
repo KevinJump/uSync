@@ -34,7 +34,7 @@ public class CacheLifecycleManager :
 {
     private readonly SyncEntityCache _entityCache;
     private readonly ILogger<CacheLifecycleManager> _logger;
-    private readonly uSyncEventService _eventService;
+    private readonly ISyncEventService _eventService;
 
     /// <summary>
     ///  Constructor
@@ -42,7 +42,7 @@ public class CacheLifecycleManager :
     public CacheLifecycleManager(
         ILogger<CacheLifecycleManager> logger,
         SyncEntityCache entityCache,
-        uSyncEventService eventService)
+        ISyncEventService eventService)
     {
         _logger = logger;
         _entityCache = entityCache;

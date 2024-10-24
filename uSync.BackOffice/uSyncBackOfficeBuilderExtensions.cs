@@ -61,7 +61,7 @@ public static class uSyncBackOfficeBuilderExtensions
 
 
         // Setup the back office.
-        builder.Services.AddSingleton<uSyncEventService>();
+        builder.Services.AddSingleton<ISyncEventService, SyncEventService>();
         builder.Services.AddSingleton<uSyncConfigService>();
         builder.Services.AddSingleton<ISyncFileService, SyncFileService>();
 

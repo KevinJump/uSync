@@ -53,7 +53,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// <summary>
     /// Reference to the Event service used to handle locking
     /// </summary>
-    protected readonly uSyncEventService _mutexService;
+    protected readonly ISyncEventService _mutexService;
 
     /// <summary>
     /// List of dependency checkers for this Handler 
@@ -178,7 +178,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
             AppCaches appCaches,
             IShortStringHelper shortStringHelper,
             ISyncFileService syncFileService,
-            uSyncEventService mutexService,
+            ISyncEventService mutexService,
             uSyncConfigService uSyncConfig,
             ISyncItemFactory itemFactory)
     {

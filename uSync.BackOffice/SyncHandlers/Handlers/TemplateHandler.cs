@@ -57,7 +57,7 @@ public class TemplateHandler : SyncHandlerLevelBase<ITemplate>, ISyncHandler, IS
         AppCaches appCaches,
         IShortStringHelper shortStringHelper,
         ISyncFileService syncFileService,
-        uSyncEventService mutexService,
+        ISyncEventService mutexService,
         uSyncConfigService uSyncConfig,
         ISyncItemFactory syncItemFactory)
         : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfig, syncItemFactory)

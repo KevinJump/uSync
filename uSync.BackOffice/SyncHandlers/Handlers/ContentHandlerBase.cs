@@ -40,7 +40,7 @@ public abstract class ContentHandlerBase<TObject> : SyncHandlerTreeBase<TObject>
         AppCaches appCaches,
         IShortStringHelper shortStringHelper,
         ISyncFileService syncFileService,
-        uSyncEventService mutexService,
+        ISyncEventService mutexService,
         uSyncConfigService uSyncConfigService,
         ISyncItemFactory syncItemFactory)
         : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfigService, syncItemFactory)

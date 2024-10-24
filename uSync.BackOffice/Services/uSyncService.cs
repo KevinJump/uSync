@@ -49,7 +49,7 @@ public partial class uSyncService
     private readonly uSyncConfigService _uSyncConfig;
     private readonly SyncHandlerFactory _handlerFactory;
     private readonly ISyncFileService _syncFileService;
-    private readonly uSyncEventService _mutexService;
+    private readonly ISyncEventService _mutexService;
 
     private readonly ICoreScopeProvider _scopeProvider;
 
@@ -66,7 +66,7 @@ public partial class uSyncService
         uSyncConfigService uSyncConfigService,
         SyncHandlerFactory handlerFactory,
         ISyncFileService syncFileService,
-        uSyncEventService mutexService,
+        ISyncEventService mutexService,
         AppCaches appCaches,
         ICoreScopeProvider scopeProvider,
         ILoggerFactory loggerFactory,

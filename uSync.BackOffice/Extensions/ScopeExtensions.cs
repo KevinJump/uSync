@@ -25,7 +25,7 @@ internal static class ScopeExtensions
         IEventAggregator eventAggregator,
         ILoggerFactory loggerFactory,
         uSyncConfigService syncConfigService,
-        uSyncEventService syncEventService,
+        ISyncEventService syncEventService,
         IBackgroundTaskQueue? backgroundTaskQueue,
         SyncUpdateCallback? callback)
     {

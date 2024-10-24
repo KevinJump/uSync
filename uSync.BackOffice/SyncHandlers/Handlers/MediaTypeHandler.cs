@@ -47,7 +47,7 @@ public class MediaTypeHandler : ContentTypeBaseHandler<IMediaType>, ISyncHandler
         AppCaches appCaches,
         IShortStringHelper shortStringHelper,
         ISyncFileService syncFileService,
-        uSyncEventService mutexService,
+        ISyncEventService mutexService,
         uSyncConfigService uSyncConfig,
         ISyncItemFactory syncItemFactory,
         IMediaTypeContainerService mediaTypeContainerService)
