@@ -26,14 +26,14 @@ internal class uSyncManagementService : ISyncManagementService
     private readonly IHubContext<SyncHub> _hubContext;
     private readonly ISyncConfigService _configService;
 
-    private readonly SyncHandlerFactory _handlerFactory;
+    private readonly ISyncHandlerFactory _handlerFactory;
 
     public uSyncManagementService(
         ISyncActionService syncActionService,
         ISyncConfigService configService,
         ISyncManagementCache syncManagementCache,
         IHubContext<SyncHub> hubContext,
-        SyncHandlerFactory handlerFactory)
+        ISyncHandlerFactory handlerFactory)
     {
         _syncActionService = syncActionService;
         _configService = configService;

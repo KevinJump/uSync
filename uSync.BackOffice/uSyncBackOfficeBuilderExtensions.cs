@@ -55,10 +55,8 @@ public static class uSyncBackOfficeBuilderExtensions
         var handlerOptions = builder.Services.Configure<uSyncHandlerSetSettings>(uSync.Sets.DefaultSet,
             builder.Config.GetSection(uSync.Configuration.ConfigDefaultSet));
 
-
         // Setup uSync core.
         builder.AdduSyncCore();
-
 
         // Setup the back office.
         builder.Services.AddSingleton<ISyncEventService, SyncEventService>();
@@ -68,7 +66,7 @@ public static class uSyncBackOfficeBuilderExtensions
         builder.WithCollectionBuilder<SyncHandlerCollectionBuilder>()
             .Add(() => builder.TypeLoader.GetTypes<ISyncHandler>());
 
-        builder.Services.AddSingleton<SyncHandlerFactory>();
+        builder.Services.AddSingleton<ISyncHandlerFactory, SyncHandlerFactory>();
         builder.Services.AddSingleton<ISyncService, SyncService>();
         builder.Services.AddSingleton<CacheLifecycleManager>();
 
@@ -82,7 +80,6 @@ public static class uSyncBackOfficeBuilderExtensions
         builder.Services.AddSingleton<uSyncHubRoutes>();
         builder.Services.AddSignalR();
         builder.Services.AdduSyncSignalR();
-
 
         builder.Services.AddTransient<ISyncLegacyService, SyncLegacyService>();
 
@@ -243,7 +240,6 @@ public static class uSyncBackOfficeBuilderExtensions
             AddNotificationAsyncHandler<MediaSavedNotification, CacheLifecycleManager>().
             AddNotificationAsyncHandler<MediaDeletedNotification, CacheLifecycleManager>();
     }
-
 
     private static void CreatePolicies(AuthorizationOptions options,
         string backOfficeAuthScheme = Constants.Security.BackOfficeAuthenticationType)

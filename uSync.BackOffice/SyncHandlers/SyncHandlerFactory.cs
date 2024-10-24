@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Linq;
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-
+using Umbraco.Cms.Api.Management.ViewModels.RelationType.Item;
 using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;
@@ -16,13 +17,11 @@ namespace uSync.BackOffice.SyncHandlers;
 /// <summary>
 ///  Factory method for accessing the handlers and their configuration
 /// </summary>
-public class SyncHandlerFactory
+public class SyncHandlerFactory : ISyncHandlerFactory
 {
     private readonly SyncHandlerCollection _syncHandlers;
-    private readonly uSyncSettings _settings;
+    private readonly ISyncConfigService _configService;
     private readonly ILogger<SyncHandlerFactory> _logger;
-
-    private readonly IOptionsMonitor<uSyncHandlerSetSettings> _handlerSetSettingsAccessor;
 
     /// <summary>
     ///  Create a new SyncHandlerFactory object
@@ -30,19 +29,17 @@ public class SyncHandlerFactory
     public SyncHandlerFactory(
         ILogger<SyncHandlerFactory> logger,
         SyncHandlerCollection syncHandlers,
-        IOptionsMonitor<uSyncHandlerSetSettings> handlerSetSettingsAccessor,
-        IOptionsMonitor<uSyncSettings> options)
+        ISyncConfigService configService)
     {
-        _handlerSetSettingsAccessor = handlerSetSettingsAccessor;
         _logger = logger;
         _syncHandlers = syncHandlers;
-        _settings = options.CurrentValue;
+        _configService = configService;
     }
 
     /// <summary>
     ///  Name of the default handler set
     /// </summary>
-    public string DefaultSet => this._settings.DefaultSet;
+    public string DefaultSet => this._configService.Settings.DefaultSet;
 
     #region All getters (regardless of set or config)
 
@@ -174,13 +171,6 @@ public class SyncHandlerFactory
         => GetValidHandlers(options)
             .Where(x => aliases.InvariantContains(x.Handler.Alias));
 
-
-    private uSyncHandlerSetSettings GetSetSettings(string name)
-    {
-        return _handlerSetSettingsAccessor.Get(name);
-    }
-
-
     private static HandlerConfigPair LoadHandlerConfig(ISyncHandler handler, uSyncHandlerSetSettings setSettings)
     {
         return new HandlerConfigPair
@@ -199,7 +189,7 @@ public class SyncHandlerFactory
 
         var configs = new List<HandlerConfigPair>();
 
-        var handlerSetSettings = GetSetSettings(options.Set);
+        var handlerSetSettings = _configService.GetSetSettings(options.Set);
 
         foreach (var handler in _syncHandlers.Handlers.Where(x => options.IncludeDisabled || x.Enabled))
         {
@@ -224,7 +214,7 @@ public class SyncHandlerFactory
                 // only log if we are doing the default 'everything' group 
                 // because when doing groups we choose not to load things. 
                 // if (string.IsNullOrWhiteSpace(options.Group))
-                   //  _logger.LogWarning("No Handler with {alias} has been loaded", handler.Alias);
+                //  _logger.LogWarning("No Handler with {alias} has been loaded", handler.Alias);
             }
 
         }

@@ -26,14 +26,14 @@ internal class SyncActionService : ISyncActionService
 
     private readonly ISyncConfigService _uSyncConfig;
     private readonly ISyncService _uSyncService;
-    private readonly SyncHandlerFactory _handlerFactory;
+    private readonly ISyncHandlerFactory _handlerFactory;
     private readonly ISyncFileService _syncFileService;
 
     public SyncActionService(
         ILogger<SyncActionService> logger,
         ISyncConfigService uSyncConfig,
         ISyncService uSyncService,
-        SyncHandlerFactory handlerFactory,
+        ISyncHandlerFactory handlerFactory,
         ISyncFileService syncFileService)
     {
         _uSyncConfig = uSyncConfig;
