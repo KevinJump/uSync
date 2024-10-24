@@ -93,36 +93,24 @@ public partial class SyncService : ISyncService
 
     }
 
-    /// <summary>
-    ///  Does the given folder contain and uSync files for Content
-    /// </summary>
+    /// <inheritdoc/>>
     public bool HasContentFiles(string rootFolder)
     {
         return _syncFileService.DirectoryExists(rootFolder + "Content");
     }
 
-    /// <summary>
-    ///  check to see if any of the uSync folders have content files.
-    /// </summary>
+    /// <inheritdoc/>>
     public bool HasContentFiles(string[] folders)
         => folders.Any(x => HasContentFiles(x));
 
-    /// <summary>
-    ///  check if there are any root files on disk. 
-    /// </summary>
+    /// <inheritdoc/>>
     public bool HasRootFiles(string[] folders)
         => folders[..^1].Any(x => _syncFileService.DirectoryHasChildren(x));
 
 
     #region Reporting 
 
-    /// <summary>
-    ///  Report the changes for a folder
-    /// </summary>
-    /// <param name="folder">Folder to run the report for</param>
-    /// <param name="handlerOptions">Options to use for the report - used to load the handlers.</param>
-    /// <param name="callbacks">Callback functions to keep UI up to date</param>
-    /// <returns>List of actions detailing what would and wouldn't change</returns>
+    /// <inheritdoc/>>
     [Obsolete("Will be removed in v16")]
     public IEnumerable<uSyncAction> Report(string folder, SyncHandlerOptions handlerOptions, uSyncCallbacks? callbacks = null)
     {
@@ -133,13 +121,7 @@ public partial class SyncService : ISyncService
         return Report(folder, handlers, callbacks);
     }
 
-    /// <summary>
-    ///  Report the changes for a folder
-    /// </summary>
-    /// <param name="folder">Folder to run the report for</param>
-    /// <param name="handlerAliases">List of Aliases for the sync handlers to use</param>
-    /// <param name="callbacks">Callback functions to keep UI up to date</param>
-    /// <returns>List of actions detailing what would and wouldn't change</returns>
+    /// <inheritdoc/>>
     [Obsolete("Will be removed in v16")]
     public IEnumerable<uSyncAction> Report(string folder, IEnumerable<string> handlerAliases, uSyncCallbacks? callbacks)
     {
@@ -147,13 +129,7 @@ public partial class SyncService : ISyncService
         return Report(folder, handlers, callbacks);
     }
 
-    /// <summary>
-    ///  Report the changes for a folder
-    /// </summary>
-    /// <param name="folder">Folder to run the report for</param>
-    /// <param name="handlers">List of SyncHandlers to use for the report</param>
-    /// <param name="callbacks">Callback functions to keep UI up to date</param>
-    /// <returns>List of actions detailing what would and wouldn't change</returns>
+    /// <inheritdoc/>>
     [Obsolete("Will be removed in v16")]
     public IEnumerable<uSyncAction> Report(string folder, IEnumerable<HandlerConfigPair> handlers, uSyncCallbacks? callbacks)
     {
@@ -209,9 +185,7 @@ public partial class SyncService : ISyncService
     #region Importing
     static SemaphoreSlim _importSemaphoreLock = new SemaphoreSlim(1, 1);
 
-    /// <summary>
-    ///  Import items into Umbraco from a given set of folders
-    /// </summary>
+    /// <inheritdoc/>>
     public async Task<IEnumerable<uSyncAction>> StartupImportAsync(string[] folders, bool force, SyncHandlerOptions handlerOptions, uSyncCallbacks? callbacks = null)
     {
         handlerOptions ??= new SyncHandlerOptions();
@@ -220,6 +194,7 @@ public partial class SyncService : ISyncService
         return await ImportAsync(folders, force, handlers, callbacks);
     }
 
+    /// <inheritdoc/>>
     public async Task<IEnumerable<uSyncAction>> ImportAsync(string[] folders, bool force, IEnumerable<HandlerConfigPair> handlers, uSyncCallbacks? callbacks)
     {
         // if its blank, we just throw it back empty. 
@@ -337,6 +312,7 @@ public partial class SyncService : ISyncService
         return results;
     }
 
+    /// <inheritdoc/>>
     public async Task<uSyncAction> ImportSingleActionAsync(uSyncAction action)
     {
         if (action.HandlerAlias is null || action.FileName is null) return new();
@@ -352,9 +328,7 @@ public partial class SyncService : ISyncService
 
     #region Exporting 
 
-    /// <summary>
-    ///  Remove all the files from an export folder 
-    /// </summary>
+    /// <inheritdoc/>>
     public bool CleanExportFolder(string folder)
     {
         try
@@ -371,13 +345,7 @@ public partial class SyncService : ISyncService
     }
 
 
-    /// <summary>
-    ///  Export items from Umbraco into a given folder
-    /// </summary>
-    /// <param name="folder">folder to place items</param>
-    /// <param name="handlerOptions">Handler options to use when loading handlers</param>
-    /// <param name="callbacks">callback functions to update the UI</param>
-    /// <returns>List of actions detailing what was exported</returns>
+    /// <inheritdoc/>>
     public async Task<IEnumerable<uSyncAction>> StartupExportAsync(string folder, SyncHandlerOptions handlerOptions, uSyncCallbacks? callbacks = null)
     {
         handlerOptions ??= new SyncHandlerOptions();
@@ -391,9 +359,7 @@ public partial class SyncService : ISyncService
     }
 
 
-    /// <summary>
-    ///  checks all the possible folders for the version file
-    /// </summary>
+    /// <inheritdoc/>>
     public async Task<bool> CheckVersionFileAsync(string[] folders)
     {
         foreach (var folder in folders.Reverse())
@@ -405,9 +371,7 @@ public partial class SyncService : ISyncService
         return false;
     }
 
-    /// <summary>
-    ///  Check the uSync version file (in the root) to see if we are importing up to date files
-    /// </summary>
+    /// <inheritdoc/>>
     public async Task<bool> CheckVersionFileAsync(string folder)
     {
         var versionFile = Path.Combine(_syncFileService.GetAbsPath(folder), $"usync.{_uSyncConfig.Settings.DefaultExtension}");
@@ -461,13 +425,7 @@ public partial class SyncService : ISyncService
         }
     }
 
-    /// <summary>
-    ///  Export items from Umbraco into a given folder
-    /// </summary>
-    /// <param name="folder">folder to place items</param>
-    /// <param name="handlerAliases">aliases for the handlers to use while exporting</param>
-    /// <param name="callbacks">callback functions to update the UI</param>
-    /// <returns>List of actions detailing what was exported</returns>
+    /// <inheritdoc/>>
     [Obsolete("Will be removed in v15")]
     public IEnumerable<uSyncAction> Export(string folder, IEnumerable<string> handlerAliases, uSyncCallbacks? callbacks)
     {
@@ -475,17 +433,12 @@ public partial class SyncService : ISyncService
         return Export(folder, handlers, callbacks);
     }
 
-    /// <summary>
-    ///  Export items from Umbraco into a given folder
-    /// </summary>
-    /// <param name="folder">folder to place items</param>
-    /// <param name="handlers">Handler config pairs</param>
-    /// <param name="callbacks">callback functions to update the UI</param>
-    /// <returns>List of actions detailing what was exported</returns>
+    /// <inheritdoc/>>
     [Obsolete("Will be removed in v15")]
     public IEnumerable<uSyncAction> Export(string folder, IEnumerable<HandlerConfigPair> handlers, uSyncCallbacks? callbacks)
         => ExportAsync(folder, handlers, callbacks).Result;
 
+    /// <inheritdoc/>>
     public async Task<IEnumerable<uSyncAction>> ExportAsync(string folder, IEnumerable<HandlerConfigPair> handlers, uSyncCallbacks? callbacks)
     {
         var sw = Stopwatch.StartNew();

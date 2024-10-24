@@ -26,6 +26,7 @@ namespace uSync.BackOffice;
 /// </summary>
 public partial class SyncService
 {
+    /// <inheritdoc/>>
     public async Task<IEnumerable<uSyncAction>> ReportPartialAsync(IList<OrderedNodeInfo> orderedNodes, uSyncPagedImportOptions options)
     {
         var total = orderedNodes.Count;
@@ -71,6 +72,7 @@ public partial class SyncService
         return actions;
     }
 
+    /// <inheritdoc/>>
     public async Task<IEnumerable<uSyncAction>> ImportPartialAsync(IList<OrderedNodeInfo> orderedNodes, uSyncPagedImportOptions options)
     {
         try
@@ -155,6 +157,7 @@ public partial class SyncService
         }
     }
 
+    /// <inheritdoc/>>
     public async Task<IEnumerable<uSyncAction>> ImportPartialSecondPassAsync(IEnumerable<uSyncAction> actions, uSyncPagedImportOptions options)
     {
         try
@@ -223,6 +226,7 @@ public partial class SyncService
         }
     }
 
+    /// <inheritdoc/>>
     public async Task<IEnumerable<uSyncAction>> ImportPartialPostImportAsync(IEnumerable<uSyncAction> actions, uSyncPagedImportOptions options)
     {
         if (actions == null || !actions.Any()) return [];
@@ -282,6 +286,7 @@ public partial class SyncService
         }
     }
 
+    /// <inheritdoc/>>
     public async Task<IEnumerable<uSyncAction>> ImportPostCleanFilesAsync(IEnumerable<uSyncAction> actions, uSyncPagedImportOptions options)
     {
         if (actions == null) return [];
@@ -337,6 +342,7 @@ public partial class SyncService
             IncludeDisabled = options.IncludeDisabledHandlers
         };
 
+    /// <inheritdoc/>>
     public async Task<IList<OrderedNodeInfo>> LoadOrderedNodesAsync(ISyncHandler handler, string[] handlerFolders)
         => [.. (await handler.FetchAllNodesAsync(handlerFolders))];
 

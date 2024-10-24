@@ -27,6 +27,7 @@ public partial class SyncService
         return _uSyncConfig.GetFolders();
     }
 
+    /// <inheritdoc/>>
     public async Task<IEnumerable<uSyncAction>> ReportHandlerAsync(string handler, uSyncImportOptions options)
     {
         var handlerPair = _handlerFactory.GetValidHandler(handler, new SyncHandlerOptions
@@ -41,6 +42,7 @@ public partial class SyncService
         return await handlerPair.Handler.ReportAsync(folders, handlerPair.Settings, options.Callbacks?.Update);
     }
 
+    /// <inheritdoc/>>
     public async Task<IEnumerable<uSyncAction>> ImportHandlerAsync(string handlerAlias, uSyncImportOptions options)
     {
         try
@@ -82,6 +84,7 @@ public partial class SyncService
         }
     }
 
+    /// <inheritdoc/>>
     public async Task<IEnumerable<uSyncAction>> PerformPostImportAsync(string[] folders, string handlerSet, IEnumerable<uSyncAction> actions)
     {
         try
@@ -99,6 +102,7 @@ public partial class SyncService
         }
     }
 
+    /// <inheritdoc/>>
     public async Task<IEnumerable<uSyncAction>> ExportHandlerAsync(string handler, uSyncImportOptions options)
     {
         var handlerPair = _handlerFactory.GetValidHandler(handler, new SyncHandlerOptions
@@ -112,9 +116,7 @@ public partial class SyncService
         return await handlerPair.Handler.ExportAllAsync(folders, handlerPair.Settings, options.Callbacks?.Update);
     }
 
-    /// <summary>
-    ///  Start a bulk run, fires events, and for exports writes the version file.
-    /// </summary>
+    /// <inheritdoc/>>
     public async Task StartBulkProcessAsync(HandlerActions action)
     {
         switch (action)
@@ -133,9 +135,7 @@ public partial class SyncService
         }
     }
 
-    /// <summary>
-    ///  Complete a bulk run, fire the event so other things know we have done it.
-    /// </summary>
+    /// <inheritdoc/>>
     public async Task FinishBulkProcessAsync(HandlerActions action, IEnumerable<uSyncAction> actions)
     {
         switch (action)
