@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading.Tasks;
 
+using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
 using uSync.Core;
 
@@ -33,7 +34,7 @@ internal class SyncLegacyService : ISyncLegacyService
         _syncFileService = syncFileService;
     }
 
-
+    /// <inheritdoc/>
     public bool TryGetLatestLegacyFolder([MaybeNullWhen(false)] out string? folder)
     {
         folder = null;
@@ -54,6 +55,7 @@ internal class SyncLegacyService : ISyncLegacyService
         return false;
     }
 
+    /// <inheritdoc/>
     public async Task<bool> IgnoreLegacyFolderAsync(string folder, string message)
 	{
 		if (_syncFileService.DirectoryExists(folder) is false)
@@ -64,6 +66,7 @@ internal class SyncLegacyService : ISyncLegacyService
 		return true;
 	}
 
+    /// <inheritdoc/>
     public bool CopyLegacyFolder(string folder)
     {
         var latestPath = $"~/uSync/v{_majorVersion}";
@@ -84,6 +87,7 @@ internal class SyncLegacyService : ISyncLegacyService
         return true;
     }
 
+    /// <inheritdoc/>
 	public async Task<List<string>> FindLegacyDataTypesAsync(string folder)
     {
 
