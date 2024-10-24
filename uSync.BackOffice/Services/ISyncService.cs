@@ -139,6 +139,9 @@ public interface ISyncService
     /// </summary>
     Task FinishBulkProcessAsync(HandlerActions action, IEnumerable<uSyncAction> actions);
 
+    // obsolete methods (all of these will go in v16
+    //   implementations are mostly here in the interface, but there are a couple still in
+    //   the service which need to be removed too. 
 
     [Obsolete("use ExportHandlerAsync will be removed in v16")]
     IEnumerable<uSyncAction> Export(string folder, IEnumerable<HandlerConfigPair> handlers, uSyncCallbacks? callbacks);
