@@ -10,9 +10,9 @@ namespace uSync.Backoffice.Management.Api.Controllers.Settings;
 [ApiExplorerSettings(GroupName = "Settings")]
 public class uSyncSettingsController : uSyncControllerBase
 {
-    private readonly uSyncConfigService _configService;
+    private readonly ISyncConfigService _configService;
 
-    public uSyncSettingsController(uSyncConfigService configService)
+    public uSyncSettingsController(ISyncConfigService configService)
     {
         _configService = configService;
     }

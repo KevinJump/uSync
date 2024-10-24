@@ -46,7 +46,7 @@ public partial class uSyncService
 
     private readonly IEventAggregator _eventAggregator;
 
-    private readonly uSyncConfigService _uSyncConfig;
+    private readonly ISyncConfigService _uSyncConfig;
     private readonly SyncHandlerFactory _handlerFactory;
     private readonly ISyncFileService _syncFileService;
     private readonly ISyncEventService _mutexService;
@@ -63,7 +63,7 @@ public partial class uSyncService
     public uSyncService(
         ILogger<uSyncService> logger,
         IEventAggregator eventAggregator,
-        uSyncConfigService uSyncConfigService,
+        ISyncConfigService uSyncConfigService,
         SyncHandlerFactory handlerFactory,
         ISyncFileService syncFileService,
         ISyncEventService mutexService,

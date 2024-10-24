@@ -59,7 +59,7 @@ public class DataTypeHandler : SyncHandlerContainerBase<IDataType>, ISyncHandler
         IShortStringHelper shortStringHelper,
         ISyncFileService syncFileService,
         ISyncEventService mutexService,
-        uSyncConfigService uSyncConfig,
+        ISyncConfigService uSyncConfig,
         ISyncItemFactory syncItemFactory,
         IDataTypeContainerService dataTypeContainerService)
         : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfig, syncItemFactory)

@@ -32,7 +32,7 @@ public abstract class SyncHandlerTreeBase<TObject> : SyncHandlerLevelBase<TObjec
         IShortStringHelper shortStringHelper,
         ISyncFileService syncFileService,
         ISyncEventService mutexService,
-        uSyncConfigService uSyncConfig,
+        ISyncConfigService uSyncConfig,
         ISyncItemFactory syncItemFactory)
         : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfig, syncItemFactory)
     { }

@@ -30,7 +30,7 @@ internal class uSyncApplicationStartingHandler : INotificationAsyncHandler<Umbra
     private readonly IRuntimeState _runtimeState;
     private readonly IServerRoleAccessor _serverRegistrar;
     private readonly IUmbracoContextFactory _umbracoContextFactory;
-    private readonly uSyncConfigService _uSyncConfig;
+    private readonly ISyncConfigService _uSyncConfig;
     private readonly ISyncFileService _syncFileService;
     private readonly uSyncService _uSyncService;
 
@@ -42,7 +42,7 @@ internal class uSyncApplicationStartingHandler : INotificationAsyncHandler<Umbra
         IRuntimeState runtimeState,
         IServerRoleAccessor serverRegistrar,
         IUmbracoContextFactory umbracoContextFactory,
-        uSyncConfigService uSyncConfigService,
+        ISyncConfigService uSyncConfigService,
         ISyncFileService syncFileService,
         uSyncService uSyncService)
     {

@@ -14,7 +14,7 @@ using uSync.BackOffice.SyncHandlers.Interfaces;
 namespace uSync.BackOffice.Extensions;
 internal static class ScopeExtensions
 {
-    public static IDisposable SuppressScopeByConfig(this ICoreScope scope, uSyncConfigService configService)
+    public static IDisposable SuppressScopeByConfig(this ICoreScope scope, ISyncConfigService configService)
         => configService.Settings.DisableNotificationSuppression
             ? new DummyDisposable()
             : scope.Notifications.Suppress();
@@ -24,7 +24,7 @@ internal static class ScopeExtensions
         this ICoreScopeProvider scopeProvider,
         IEventAggregator eventAggregator,
         ILoggerFactory loggerFactory,
-        uSyncConfigService syncConfigService,
+        ISyncConfigService syncConfigService,
         ISyncEventService syncEventService,
         IBackgroundTaskQueue? backgroundTaskQueue,
         SyncUpdateCallback? callback)

@@ -163,7 +163,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// <summary>
     /// Reference to the uSyncConfigService
     /// </summary>
-    protected readonly uSyncConfigService uSyncConfig;
+    protected readonly ISyncConfigService uSyncConfig;
 
     /// <summary>
     /// Umbraco's shortStringHelper
@@ -179,7 +179,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
             IShortStringHelper shortStringHelper,
             ISyncFileService syncFileService,
             ISyncEventService mutexService,
-            uSyncConfigService uSyncConfig,
+            ISyncConfigService uSyncConfig,
             ISyncItemFactory itemFactory)
     {
         this.uSyncConfig = uSyncConfig;

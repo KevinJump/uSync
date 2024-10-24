@@ -45,7 +45,7 @@ public class DomainHandler : SyncHandlerBase<IDomain>, ISyncHandler,
         IShortStringHelper shortStringHelper,
         ISyncFileService syncFileService,
         ISyncEventService mutexService,
-        uSyncConfigService configService,
+        ISyncConfigService configService,
         ISyncItemFactory syncItemFactory)
         : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, configService, syncItemFactory)
     {

@@ -20,13 +20,13 @@ namespace uSync.BackOffice.HealthChecks;
     Group = "uSync")]
 public class SyncFolderIntegrityChecks : HealthCheck
 {
-    private readonly uSyncConfigService _configService;
+    private readonly ISyncConfigService _configService;
     private readonly ISyncFileService _fileService;
 
     /// <summary>
     ///  Constructor 
     /// </summary>
-    public SyncFolderIntegrityChecks(uSyncConfigService configService, ISyncFileService fileService)
+    public SyncFolderIntegrityChecks(ISyncConfigService configService, ISyncFileService fileService)
     {
         _configService = configService;
         _fileService = fileService;

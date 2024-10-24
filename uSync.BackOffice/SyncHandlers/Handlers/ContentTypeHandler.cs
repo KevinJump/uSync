@@ -50,7 +50,7 @@ public class ContentTypeHandler : ContentTypeBaseHandler<IContentType>, ISyncHan
         IShortStringHelper shortStringHelper,
         ISyncFileService syncFileService,
         ISyncEventService mutexService,
-        uSyncConfigService uSyncConfig,
+        ISyncConfigService uSyncConfig,
         ISyncItemFactory syncItemFactory,
         IContentTypeContainerService contentTypeContainerService)
         : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfig, syncItemFactory)

@@ -10,7 +10,7 @@
 
 @inject IHostingEnvironment hostingEnvironment
 @inject IOptions<GlobalSettings> globalSettings
-@inject uSyncConfigService uSyncConfig;
+@inject ISyncConfigService uSyncConfig;
 @inject uSyncService uSyncService;
 @{
     var umbracoPath = Model.UmbracoPath ?? "/umbraco";

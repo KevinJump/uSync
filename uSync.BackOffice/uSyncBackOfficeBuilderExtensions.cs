@@ -37,7 +37,7 @@ public static class uSyncBackOfficeBuilderExtensions
     public static IUmbracoBuilder AdduSync(this IUmbracoBuilder builder, Action<uSyncSettings>? defaultOptions = null)
     {
         // if the uSyncConfig Service is registered then we assume this has been added before so we don't do it again. 
-        if (builder.Services.FirstOrDefault(x => x.ServiceType == typeof(uSyncConfigService)) != null)
+        if (builder.Services.FirstOrDefault(x => x.ServiceType == typeof(ISyncConfigService)) != null)
             return builder;
 
         // load up the settings. 
@@ -62,7 +62,7 @@ public static class uSyncBackOfficeBuilderExtensions
 
         // Setup the back office.
         builder.Services.AddSingleton<ISyncEventService, SyncEventService>();
-        builder.Services.AddSingleton<uSyncConfigService>();
+        builder.Services.AddSingleton<ISyncConfigService, SyncConfigService>();
         builder.Services.AddSingleton<ISyncFileService, SyncFileService>();
 
         builder.WithCollectionBuilder<SyncHandlerCollectionBuilder>()

@@ -51,7 +51,7 @@ public class RelationTypeHandler : SyncHandlerBase<IRelationType>, ISyncHandler,
         IShortStringHelper shortStringHelper,
         ISyncFileService syncFileService,
         ISyncEventService mutexService,
-        uSyncConfigService uSyncConfigService,
+        ISyncConfigService uSyncConfigService,
         ISyncItemFactory syncItemFactory)
         : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfigService, syncItemFactory)
     {
