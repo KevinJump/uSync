@@ -37,3 +37,13 @@ public class uSyncOptions
     [DataMember(Name = "set")]
     public string Set { get; set; } = string.Empty;
 }
+
+internal static class uSyncOptionsExtensions
+{
+    internal static string GetSetOrDefault(this uSyncOptions? options, string defaultSet)
+       => string.IsNullOrWhiteSpace(options?.Set) ? defaultSet : options.Set;
+
+    internal static string GetGroupOrDefault(this uSyncOptions? options, string defaultGroup)
+        => string.IsNullOrWhiteSpace(options?.Group) ? defaultGroup : options.Group;
+}
+

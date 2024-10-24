@@ -1,5 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+
+using uSync.Core.Serialization;
 
 namespace uSync.BackOffice.Models;
 
@@ -39,3 +40,16 @@ public class SyncActionOptions
     public string[] Folders { get; set; } = [];
 
 }
+
+internal static class SyncActionOptionsExtensions
+{
+    internal static string GetSetOrDefault(this SyncActionOptions options, string defaultSet)
+        => string.IsNullOrWhiteSpace(options.Set) ? defaultSet : options.Set;
+
+    internal static string[] GetFoldersOrDefault(this SyncActionOptions options, string[] defaultFolders)
+        => options.Folders.Length != 0 ? options.Folders : defaultFolders;
+
+    internal static SerializerFlags GetImportFlags(this SyncActionOptions options)
+        => options.Force ? SerializerFlags.Force : SerializerFlags.None;
+}
+
