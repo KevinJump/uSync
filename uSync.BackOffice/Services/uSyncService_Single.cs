@@ -123,14 +123,16 @@ namespace uSync.BackOffice
 
                     var index = options.PageNumber * options.PageSize;
 
-                    using var scope = _scopeProvider.CreateNotificationScope(
+                    using (var scope = _scopeProvider.CreateNotificationScope(
                         eventAggregator: _eventAggregator,
                         loggerFactory: _loggerFactory, 
                         syncConfigService: _uSyncConfig,
                         syncEventService: _mutexService,
                         backgroundTaskQueue: _backgroundTaskQueue,
-                        options.Callbacks?.Update);
+                        options.Callbacks?.Update))
                     {
+                        using var suppression = scope.SuppressScopeByConfig(_uSyncConfig);
+                        
                         try
                         {
                             foreach (var item in orderedNodes.Skip(options.PageNumber * options.PageSize).Take(options.PageSize))
@@ -209,6 +211,8 @@ namespace uSync.BackOffice
                         backgroundTaskQueue: _backgroundTaskQueue,
                         options.Callbacks?.Update))
                     {
+                        using var suppression = scope.SuppressScopeByConfig(_uSyncConfig);
+                        
                         try
                         {
                             foreach (var action in actions.Skip(options.PageNumber * options.PageSize).Take(options.PageSize))

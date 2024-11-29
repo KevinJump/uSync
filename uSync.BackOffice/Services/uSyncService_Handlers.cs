@@ -70,6 +70,8 @@ namespace uSync.BackOffice
                         backgroundTaskQueue: _backgroundTaskQueue,
                         options.Callbacks?.Update);
 
+                    using var supression = scope.SuppressScopeByConfig(_uSyncConfig);
+
                     var results = handlerPair.Handler.ImportAll(folders, handlerPair.Settings, options);
 
                     scope.Complete();

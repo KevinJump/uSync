@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Umbraco.Cms.Core.Events;
 using Umbraco.Cms.Core.Notifications;
 using Umbraco.Cms.Infrastructure.HostedServices;
+using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
@@ -58,9 +59,15 @@ internal class SyncScopedNotificationPublisher
 
         foreach (var items in groupedNotifications)
         {
+            if (_uSyncConfig.Settings.SuppressNamedNotifications.InvariantContains(items.Key))
+            {
+                _logger.LogDebug("Suppressing {count} {name} notifications based on uSyncConfig", items.Count(), items.Key);
+                continue;
+            }
+
             if (_uSyncConfig.Settings.BackgroundNotifications is true && _backgroundTaskQueue != null)
             {
-                _logger.LogDebug("Pushed {count} notifications into background queue", items.Count());
+                _logger.LogDebug("Pushed {count} {name} notifications into background queue", items.Count(), items.Key);
                 _backgroundTaskQueue.QueueBackgroundWorkItem(
                     cancellationToken =>
                     {
@@ -75,6 +82,7 @@ internal class SyncScopedNotificationPublisher
             }
             else
             {
+                _logger.LogDebug("Processing {count} {name} notifications", items.Count(), items.Key);
                 _updateCallback?.Invoke($"Processing {items.Key}s ({items.Count()})", 90, 100);
                 _eventAggregator.Publish(items);
             }
