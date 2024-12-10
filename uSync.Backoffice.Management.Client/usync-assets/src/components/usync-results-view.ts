@@ -3,11 +3,10 @@ import {
 	html,
 	customElement,
 	property,
-	nothing,
 	css,
 	state,
 } from '@umbraco-cms/backoffice/external/lit';
-import { ChangeType, USYNC_ERROR_MODAL, uSyncActionView } from '@jumoo/uSync';
+import { ChangeType, uSyncActionView } from '@jumoo/uSync';
 import { UmbElementMixin } from '@umbraco-cms/backoffice/element-api';
 import {
 	UMB_MODAL_MANAGER_CONTEXT,
@@ -88,11 +87,9 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
 		return this.changeCount == 0 && !this.showAll
 			? html`
 					${this.renderResultBar(this.results?.length || 0, this.changeCount)}
-					<uui-box>
-						<div class="empty">
-							<umb-localize key="uSync_noChange"></umb-localize>
-						</div>
-					</uui-box>
+					<div class="empty">
+						<umb-localize key="uSync_noChange"></umb-localize>
+					</div>
 				`
 			: html`<div id="result-box">
 					${this.renderResultBar(this.results?.length || 0, this.changeCount)}
