@@ -40,10 +40,12 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
 		this.showAll = !this.showAll;
 	}
 
-	async #openDetailsView(result: uSyncActionView) {
+	async #showDetail(e: CustomEvent<uSyncActionView>) {
+		const action = e.detail;
+
 		const detailsModal = this.#modalContext?.open(this, USYNC_DETAILS_MODAL, {
 			data: {
-				item: result,
+				item: action,
 			},
 		});
 
@@ -53,120 +55,78 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
 		if (!data) return;
 	}
 
-	async #viewError(result: uSyncActionView) {
-		const modal = this.#modalContext?.open(this, USYNC_ERROR_MODAL, {
-			data: {
-				action: result,
-			},
-		});
-
-		const data = await modal?.onSubmit().catch(() => {
-			return;
-		});
-
-		return data;
+	groupBy<T>(arr: T[], fn: (item: T) => any) {
+		return arr.reduce<Record<string, T[]>>((prev, curr) => {
+			const groupKey = fn(curr);
+			const group = prev[groupKey] || [];
+			group.push(curr);
+			return { ...prev, [groupKey]: group };
+		}, {});
 	}
 
 	render() {
-		this.changeCount = 0;
+		this.changeCount =
+			this.results?.filter((r) => r.change !== ChangeType.NO_CHANGE).length ?? 0;
 
-		var rowsHtml = this.results?.map((result) => {
-			if (this.showAll == false && result.change == 'NoChange') {
-				return nothing;
-			}
+		const groups = this.groupBy(this.results || [], (result) => result.itemType);
+		const groupsHtml = [];
 
-			this.changeCount++;
+		for (const key in groups) {
+			const groupChanges =
+				groups[key].filter((r) => r.change !== ChangeType.NO_CHANGE).length ?? 0;
+			if (groupChanges === 0 && !this.showAll) continue;
 
-			const classes = result.success ? 'success' : 'error';
+			const groupHtml = html`<usync-result-group
+				.groupName=${key}
+				.results=${groups[key]}
+				.showAll=${this.showAll}
+				@show-detail=${this.#showDetail}></usync-result-group> `;
 
-			return html`
-				<uui-table-row class=${classes}>
-					<uui-table-cell
-						><uui-icon .name=${result.success ? 'icon-check' : 'icon-wrong'}></uui-icon
-					></uui-table-cell>
-					<uui-table-cell>${result.change}</uui-table-cell>
-					<uui-table-cell>${result.itemType}</uui-table-cell>
-					<uui-table-cell>${result.name}</uui-table-cell>
-					<uui-table-cell
-						>${result.details.length > 0
-							? this.renderDetailsButton(result)
-							: this.renderMessage(result)}</uui-table-cell
-					>
-				</uui-table-row>
-			`;
-		});
+			groupsHtml.push(groupHtml);
+		}
 
-		return this.changeCount == 0
+		return this.changeCount == 0 && !this.showAll
 			? html`
-					${this.renderResultBar(this.results?.length || 0)}
-					<div class="empty">
-						<umb-localize key="uSync_noChange"></umb-localize>
-					</div>
+					${this.renderResultBar(this.results?.length || 0, this.changeCount)}
+					<uui-box>
+						<div class="empty">
+							<umb-localize key="uSync_noChange"></umb-localize>
+						</div>
+					</uui-box>
 				`
-			: html`
-					${this.renderResultBar(this.results?.length || 0)}
-					<uui-table>
-						<uui-table-head>
-							<uui-table-head-cell>
-								<umb-localize key="uSync_success">Success</umb-localize>
-							</uui-table-head-cell>
-							<uui-table-head-cell>
-								<umb-localize key="uSync_change">Change</umb-localize>
-							</uui-table-head-cell>
-							<uui-table-head-cell>
-								<umb-localzie key="uSync_changeType">Type</umb-localzie>
-							</uui-table-head-cell>
-							<uui-table-head-cell>
-								<umb-localize key="uSync_changeName">Name</umb-localize>
-							</uui-table-head-cell>
-							<uui-table-head-cell>
-								<umb-localize key="uSync_changeDetail">Detail</umb-localize>
-							</uui-table-head-cell>
-						</uui-table-head>
-
-						${rowsHtml}
-					</uui-table>
-				`;
+			: html`<div id="result-box">
+					${this.renderResultBar(this.results?.length || 0, this.changeCount)}
+					${groupsHtml}
+				</div>`;
 	}
 
-	renderResultBar(count: number) {
-		return html` <div class="result-header">
+	renderResultBar(count: number, changes: number) {
+		const localKey = changes === 0 ? 'uSync_noChangeCount' : 'uSync_changeCount';
+
+		return html`<div class="result-header">
 			<uui-toggle
 				.label=${this.localize.term('uSync_showAll')}
 				?checked=${this.showAll}
 				@change=${this.#toggleShowAll}></uui-toggle>
-			<umb-localize key="uSync_changeCount" .args=${[count]}>${count} items</umb-localize>
+			<umb-localize .key=${localKey} .args=${[count, changes]}
+				>${changes}/${count} items</umb-localize
+			>
 		</div>`;
-	}
-
-	renderDetailsButton(result: uSyncActionView) {
-		return html`
-			<uui-button
-				look="default"
-				color="positive"
-				label="show details"
-				compact
-				@click=${() => this.#openDetailsView(result)}></uui-button>
-		`;
-	}
-
-	renderMessage(result: uSyncActionView) {
-		return (result.change != ChangeType.FAIL &&
-			result.change != ChangeType.IMPORT_FAIL) ||
-			!result.message
-			? nothing
-			: html` <uui-button
-					look="default"
-					color="warning"
-					label="View error"
-					compact
-					@click=${() => this.#viewError(result)}></uui-button>`;
 	}
 
 	static styles = css`
 		:host {
 			display: block;
 			margin: var(--uui-size-space-4) 0;
+			display: flex;
+			flex-direction: column;
+			gap: var(--uui-size-space-4);
+		}
+
+		#result-box {
+			display: flex;
+			flex-direction: column;
+			gap: var(--uui-size-space-4);
 		}
 
 		uui-table {
@@ -177,7 +137,12 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
 		.result-header {
 			display: flex;
 			justify-content: space-between;
-			margin-top: calc(var(--uui-size-space-4) * -1);
+			padding: var(--uui-size-space-4);
+		}
+
+		.result-header h3 {
+			margin: 0;
+			padding: 0;
 		}
 
 		.empty {

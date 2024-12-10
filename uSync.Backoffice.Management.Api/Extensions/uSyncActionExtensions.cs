@@ -11,7 +11,7 @@ public static class uSyncActionExtensions
             ? action.Message
             : string.IsNullOrWhiteSpace(action.Exception?.Message) is false
                 ? action.Exception.Message
-                : "An error message would go here, it could be quite long, but we'll just truncate it for now.";
+                : "";
 
         return new uSyncActionView
         {

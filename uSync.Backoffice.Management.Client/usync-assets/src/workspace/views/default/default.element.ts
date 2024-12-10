@@ -146,7 +146,7 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 	}
 
 	#renderActions() {
-        if (!this._actions || !Array.isArray(this._actions)) return nothing;
+		if (!this._actions || !Array.isArray(this._actions)) return nothing;
 
 		var actions = this._actions?.map((group) => {
 			return html`
@@ -189,11 +189,7 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 	#renderReport() {
 		if (!this._completed) return nothing;
 
-		return html`
-			<uui-box class="results-box">
-				<usync-results .results=${this._results}></usync-results>
-			</uui-box>
-		`;
+		return html`<usync-results .results=${this._results}></usync-results>`;
 	}
 
 	static styles = [
