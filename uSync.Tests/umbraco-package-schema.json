@@ -9061,7 +9061,7 @@
         },
         "FontFaceSet": {
             "properties": {
-                "__@toStringTag@1713": {
+                "__@toStringTag@1718": {
                     "type": "string"
                 },
                 "onloading": {
@@ -9093,7 +9093,7 @@
                 }
             },
             "required": [
-                "__@toStringTag@1713",
+                "__@toStringTag@1718",
                 "onloading",
                 "onloadingdone",
                 "onloadingerror",
@@ -9201,6 +9201,13 @@
                     "description": "The number of child nodes in this fragment.",
                     "type": "number"
                 },
+                "content": {
+                    "description": "The child nodes in this fragment.",
+                    "items": {
+                        "$ref": "#/definitions/Node_1"
+                    },
+                    "type": "array"
+                },
                 "firstChild": {
                     "anyOf": [
                         {
@@ -9230,6 +9237,7 @@
             },
             "required": [
                 "childCount",
+                "content",
                 "firstChild",
                 "lastChild",
                 "size"
@@ -42330,16 +42338,31 @@
                                 "$ref": "#/definitions/UmbConditionConfigBase<string>"
                             },
                             {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionBulkActionPermissionConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
                             },
                             {
-                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
@@ -42370,21 +42393,6 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbDocumentUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
@@ -42478,16 +42486,31 @@
                                 "$ref": "#/definitions/UmbConditionConfigBase<string>"
                             },
                             {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionBulkActionPermissionConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
                             },
                             {
-                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
@@ -42518,21 +42541,6 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbDocumentUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
@@ -42621,16 +42629,31 @@
                                 "$ref": "#/definitions/UmbConditionConfigBase<string>"
                             },
                             {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionBulkActionPermissionConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
                             },
                             {
-                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
@@ -42661,21 +42684,6 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbDocumentUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
@@ -42810,16 +42818,31 @@
                                 "$ref": "#/definitions/UmbConditionConfigBase<string>"
                             },
                             {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionBulkActionPermissionConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
                             },
                             {
-                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
@@ -42850,21 +42873,6 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbDocumentUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
@@ -42953,16 +42961,31 @@
                                 "$ref": "#/definitions/UmbConditionConfigBase<string>"
                             },
                             {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionBulkActionPermissionConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
                             },
                             {
-                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
@@ -42993,21 +43016,6 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbDocumentUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
@@ -43176,16 +43184,31 @@
                                 "$ref": "#/definitions/UmbConditionConfigBase<string>"
                             },
                             {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionBulkActionPermissionConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
                             },
                             {
-                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
@@ -43216,21 +43239,6 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbDocumentUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
@@ -43330,16 +43338,31 @@
                                 "$ref": "#/definitions/UmbConditionConfigBase<string>"
                             },
                             {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionBulkActionPermissionConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
                             },
                             {
-                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
@@ -43370,21 +43393,6 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbDocumentUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
@@ -43484,16 +43492,31 @@
                                 "$ref": "#/definitions/UmbConditionConfigBase<string>"
                             },
                             {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionBulkActionPermissionConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
                             },
                             {
-                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
@@ -43524,21 +43547,6 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbDocumentUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
@@ -43638,16 +43646,31 @@
                                 "$ref": "#/definitions/UmbConditionConfigBase<string>"
                             },
                             {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionBulkActionPermissionConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
                             },
                             {
-                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
@@ -43678,21 +43701,6 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbDocumentUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
@@ -43792,16 +43800,31 @@
                                 "$ref": "#/definitions/UmbConditionConfigBase<string>"
                             },
                             {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionBulkActionPermissionConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
                             },
                             {
-                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
@@ -43832,21 +43855,6 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbDocumentUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
@@ -43946,16 +43954,31 @@
                                 "$ref": "#/definitions/UmbConditionConfigBase<string>"
                             },
                             {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionBulkActionPermissionConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
                             },
                             {
-                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
@@ -43986,21 +44009,6 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbDocumentUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
@@ -44100,16 +44108,31 @@
                                 "$ref": "#/definitions/UmbConditionConfigBase<string>"
                             },
                             {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionBulkActionPermissionConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
                             },
                             {
-                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
@@ -44140,21 +44163,6 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbDocumentUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
@@ -44254,16 +44262,31 @@
                                 "$ref": "#/definitions/UmbConditionConfigBase<string>"
                             },
                             {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionBulkActionPermissionConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
                             },
                             {
-                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
@@ -44294,21 +44317,6 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbDocumentUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
@@ -44408,16 +44416,31 @@
                                 "$ref": "#/definitions/UmbConditionConfigBase<string>"
                             },
                             {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionBulkActionPermissionConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
                             },
                             {
-                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
@@ -44448,21 +44471,6 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbDocumentUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
@@ -44562,16 +44570,31 @@
                                 "$ref": "#/definitions/UmbConditionConfigBase<string>"
                             },
                             {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionBulkActionPermissionConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
                             },
                             {
-                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
@@ -44602,21 +44625,6 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbDocumentUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
@@ -44716,16 +44724,31 @@
                                 "$ref": "#/definitions/UmbConditionConfigBase<string>"
                             },
                             {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionBulkActionPermissionConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
                             },
                             {
-                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
@@ -44756,21 +44779,6 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbDocumentUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
@@ -44870,16 +44878,31 @@
                                 "$ref": "#/definitions/UmbConditionConfigBase<string>"
                             },
                             {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionBulkActionPermissionConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
                             },
                             {
-                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
@@ -44910,21 +44933,6 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbDocumentUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
@@ -45024,16 +45032,31 @@
                                 "$ref": "#/definitions/UmbConditionConfigBase<string>"
                             },
                             {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionBulkActionPermissionConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
                             },
                             {
-                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
@@ -45064,21 +45087,6 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbDocumentUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
@@ -45178,16 +45186,31 @@
                                 "$ref": "#/definitions/UmbConditionConfigBase<string>"
                             },
                             {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionBulkActionPermissionConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
                             },
                             {
-                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
@@ -45218,21 +45241,6 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbDocumentUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
@@ -45332,16 +45340,31 @@
                                 "$ref": "#/definitions/UmbConditionConfigBase<string>"
                             },
                             {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionBulkActionPermissionConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
                             },
                             {
-                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
@@ -45372,21 +45395,6 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbDocumentUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
@@ -45487,16 +45495,31 @@
                                 "$ref": "#/definitions/UmbConditionConfigBase<string>"
                             },
                             {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionBulkActionPermissionConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
                             },
                             {
-                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
@@ -45527,21 +45550,6 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbDocumentUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
@@ -45641,16 +45649,31 @@
                                 "$ref": "#/definitions/UmbConditionConfigBase<string>"
                             },
                             {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionBulkActionPermissionConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
                             },
                             {
-                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
@@ -45681,21 +45704,6 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbDocumentUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
@@ -45795,16 +45803,31 @@
                                 "$ref": "#/definitions/UmbConditionConfigBase<string>"
                             },
                             {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionBulkActionPermissionConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
                             },
                             {
-                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
@@ -45835,21 +45858,6 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbDocumentUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
@@ -45949,16 +45957,31 @@
                                 "$ref": "#/definitions/UmbConditionConfigBase<string>"
                             },
                             {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionBulkActionPermissionConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
                             },
                             {
-                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
@@ -45989,21 +46012,6 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbDocumentUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
@@ -46103,16 +46111,31 @@
                                 "$ref": "#/definitions/UmbConditionConfigBase<string>"
                             },
                             {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionBulkActionPermissionConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
                             },
                             {
-                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
@@ -46143,21 +46166,6 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbDocumentUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
@@ -46256,16 +46264,31 @@
                                 "$ref": "#/definitions/UmbConditionConfigBase<string>"
                             },
                             {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionBulkActionPermissionConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
                             },
                             {
-                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
@@ -46296,21 +46319,6 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbDocumentUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
@@ -46997,16 +47005,31 @@
                                 "$ref": "#/definitions/UmbConditionConfigBase<string>"
                             },
                             {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionBulkActionPermissionConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
                             },
                             {
-                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
@@ -47037,21 +47060,6 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbDocumentUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
@@ -47141,16 +47149,31 @@
                                 "$ref": "#/definitions/UmbConditionConfigBase<string>"
                             },
                             {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionBulkActionPermissionConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
                             },
                             {
-                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
@@ -47181,21 +47204,6 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbDocumentUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
@@ -47285,16 +47293,31 @@
                                 "$ref": "#/definitions/UmbConditionConfigBase<string>"
                             },
                             {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionBulkActionPermissionConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
                             },
                             {
-                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
@@ -47325,21 +47348,6 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbDocumentUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
@@ -47535,8 +47543,20 @@
                     ]
                 },
                 "meta": {
-                    "additionalProperties": true,
-                    "properties": {},
+                    "properties": {
+                        "icon": {
+                            "type": [
+                                "null",
+                                "string"
+                            ]
+                        },
+                        "label": {
+                            "type": [
+                                "null",
+                                "string"
+                            ]
+                        }
+                    },
                     "type": "object"
                 },
                 "name": {
@@ -47737,16 +47757,31 @@
                                 "$ref": "#/definitions/UmbConditionConfigBase<string>"
                             },
                             {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionBulkActionPermissionConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
                             },
                             {
-                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
@@ -47777,21 +47812,6 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbDocumentUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
@@ -47891,16 +47911,31 @@
                                 "$ref": "#/definitions/UmbConditionConfigBase<string>"
                             },
                             {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionBulkActionPermissionConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
                             },
                             {
-                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
@@ -47931,21 +47966,6 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbDocumentUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
@@ -48175,16 +48195,31 @@
                                 "$ref": "#/definitions/UmbConditionConfigBase<string>"
                             },
                             {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionBulkActionPermissionConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
                             },
                             {
-                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
@@ -48215,21 +48250,6 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbDocumentUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
@@ -48406,16 +48426,31 @@
                                 "$ref": "#/definitions/UmbConditionConfigBase<string>"
                             },
                             {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionBulkActionPermissionConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
                             },
                             {
-                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
@@ -48446,21 +48481,6 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbDocumentUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
@@ -48603,16 +48623,31 @@
                                 "$ref": "#/definitions/UmbConditionConfigBase<string>"
                             },
                             {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionBulkActionPermissionConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
                             },
                             {
-                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
@@ -48643,21 +48678,6 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbDocumentUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
@@ -48745,16 +48765,31 @@
                                 "$ref": "#/definitions/UmbConditionConfigBase<string>"
                             },
                             {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionBulkActionPermissionConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
                             },
                             {
-                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
@@ -48785,21 +48820,6 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbDocumentUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
@@ -49177,16 +49197,31 @@
                                 "$ref": "#/definitions/UmbConditionConfigBase<string>"
                             },
                             {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionBulkActionPermissionConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
                             },
                             {
-                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
@@ -49217,21 +49252,6 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbDocumentUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
@@ -49611,16 +49631,31 @@
                                 "$ref": "#/definitions/UmbConditionConfigBase<string>"
                             },
                             {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionBulkActionPermissionConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
                             },
                             {
-                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
@@ -49651,21 +49686,6 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbDocumentUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
@@ -49758,16 +49778,31 @@
                                 "$ref": "#/definitions/UmbConditionConfigBase<string>"
                             },
                             {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionBulkActionPermissionConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
                             },
                             {
-                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
@@ -49798,21 +49833,6 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbDocumentUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
@@ -49905,16 +49925,31 @@
                                 "$ref": "#/definitions/UmbConditionConfigBase<string>"
                             },
                             {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionBulkActionPermissionConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
                             },
                             {
-                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
@@ -49945,21 +49980,6 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbDocumentUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
@@ -50068,16 +50088,31 @@
                                 "$ref": "#/definitions/UmbConditionConfigBase<string>"
                             },
                             {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionBulkActionPermissionConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
                             },
                             {
-                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
@@ -50108,21 +50143,6 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbDocumentUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
@@ -50230,16 +50250,31 @@
                                 "$ref": "#/definitions/UmbConditionConfigBase<string>"
                             },
                             {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionBulkActionPermissionConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
                             },
                             {
-                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
@@ -50270,21 +50305,6 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbDocumentUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
@@ -50418,16 +50438,31 @@
                                 "$ref": "#/definitions/UmbConditionConfigBase<string>"
                             },
                             {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionBulkActionPermissionConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
                             },
                             {
-                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
@@ -50458,21 +50493,6 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbDocumentUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
@@ -50561,16 +50581,31 @@
                                 "$ref": "#/definitions/UmbConditionConfigBase<string>"
                             },
                             {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionBulkActionPermissionConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
                             },
                             {
-                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
@@ -50601,21 +50636,6 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbDocumentUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
@@ -50704,16 +50724,31 @@
                                 "$ref": "#/definitions/UmbConditionConfigBase<string>"
                             },
                             {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionBulkActionPermissionConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
                             },
                             {
-                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
@@ -50744,21 +50779,6 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbDocumentUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
@@ -50896,16 +50916,31 @@
                                 "$ref": "#/definitions/UmbConditionConfigBase<string>"
                             },
                             {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionBulkActionPermissionConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
                             },
                             {
-                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
@@ -50936,21 +50971,6 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbDocumentUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
@@ -51040,16 +51060,31 @@
                                 "$ref": "#/definitions/UmbConditionConfigBase<string>"
                             },
                             {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionBulkActionPermissionConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
                             },
                             {
-                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
@@ -51080,21 +51115,6 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbDocumentUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
@@ -51184,16 +51204,31 @@
                                 "$ref": "#/definitions/UmbConditionConfigBase<string>"
                             },
                             {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionBulkActionPermissionConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
                             },
                             {
-                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
@@ -51224,21 +51259,6 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbDocumentUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
@@ -52163,16 +52183,31 @@
                                 "$ref": "#/definitions/UmbConditionConfigBase<string>"
                             },
                             {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionBulkActionPermissionConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
                             },
                             {
-                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
@@ -52203,21 +52238,6 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbDocumentUserPermissionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceContentTypeAliasConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceEntityTypeConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/WorkspaceHasCollectionConditionConfig"
-                            },
-                            {
-                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/BlockEntryShowContentEditConditionConfig"
@@ -53115,7 +53135,7 @@
         "Mocha.ExclusiveTestFunction": {
             "type": "object"
         },
-        "Mocha.HookFunction": {
+        "Mocha.HookFunction<void>": {
             "type": "object"
         },
         "Mocha.PendingSuiteFunction": {
@@ -53877,6 +53897,13 @@
                     "description": "The number of children that the node has.",
                     "type": "number"
                 },
+                "children": {
+                    "description": "The array of this node's child nodes.",
+                    "items": {
+                        "$ref": "#/definitions/Node_1"
+                    },
+                    "type": "array"
+                },
                 "content": {
                     "$ref": "#/definitions/Fragment",
                     "description": "A container holding the node's children."
@@ -53958,6 +53985,7 @@
             "required": [
                 "attrs",
                 "childCount",
+                "children",
                 "content",
                 "firstChild",
                 "inlineContent",
@@ -54870,23 +54898,23 @@
         },
         "Promise<FontFaceSet>": {
             "properties": {
-                "__@toStringTag@1713": {
+                "__@toStringTag@1718": {
                     "type": "string"
                 }
             },
             "required": [
-                "__@toStringTag@1713"
+                "__@toStringTag@1718"
             ],
             "type": "object"
         },
         "Promise<ServiceWorkerRegistration>": {
             "properties": {
-                "__@toStringTag@1713": {
+                "__@toStringTag@1718": {
                     "type": "string"
                 }
             },
             "required": [
-                "__@toStringTag@1713"
+                "__@toStringTag@1718"
             ],
             "type": "object"
         },
@@ -69214,18 +69242,6 @@
             ],
             "type": "object"
         },
-        "UmbConditionConfigBase<\"Umb.Condition.WorkspaceAlias\">": {
-            "properties": {
-                "alias": {
-                    "const": "Umb.Condition.WorkspaceAlias",
-                    "type": "string"
-                }
-            },
-            "required": [
-                "alias"
-            ],
-            "type": "object"
-        },
         "UmbConditionConfigBase<\"Umb.Condition.WorkspaceContentTypeAlias\">": {
             "properties": {
                 "alias": {
@@ -69332,6 +69348,13 @@
                     "description": "Set the background property of the modal backdrop",
                     "type": "string"
                 },
+                "element": {
+                    "description": "Used to provide a custom modal element to replace the default uui-modal-dialog or uui-modal-sidebar",
+                    "type": [
+                        "string",
+                        "object"
+                    ]
+                },
                 "key": {
                     "type": "string"
                 },
@@ -69346,6 +69369,7 @@
                 },
                 "type": {
                     "enum": [
+                        "custom",
                         "dialog",
                         "sidebar"
                     ],
@@ -69912,19 +69936,19 @@
                     "type": "object"
                 },
                 "after": {
-                    "$ref": "#/definitions/Mocha.HookFunction",
+                    "$ref": "#/definitions/Mocha.HookFunction<void>",
                     "description": "Execute after running tests.\n\n- _Only available when invoked via the mocha CLI._"
                 },
                 "afterEach": {
-                    "$ref": "#/definitions/Mocha.HookFunction",
+                    "$ref": "#/definitions/Mocha.HookFunction<void>",
                     "description": "Execute after each test case.\n\n- _Only available when invoked via the mocha CLI._"
                 },
                 "before": {
-                    "$ref": "#/definitions/Mocha.HookFunction",
+                    "$ref": "#/definitions/Mocha.HookFunction<void>",
                     "description": "Execute before running tests.\n\n- _Only available when invoked via the mocha CLI._"
                 },
                 "beforeEach": {
-                    "$ref": "#/definitions/Mocha.HookFunction",
+                    "$ref": "#/definitions/Mocha.HookFunction<void>",
                     "description": "Execute before each test case.\n\n- _Only available when invoked via the mocha CLI._"
                 },
                 "caches": {
@@ -70793,7 +70817,7 @@
                     "$ref": "#/definitions/Storage"
                 },
                 "setup": {
-                    "$ref": "#/definitions/Mocha.HookFunction",
+                    "$ref": "#/definitions/Mocha.HookFunction<void>",
                     "description": "Execute before each test case.\n\n- _Only available when invoked via the mocha CLI._"
                 },
                 "specify": {
@@ -70814,15 +70838,15 @@
                     "description": "Describe a \"suite\" containing nested suites and tests.\n\n- _Only available when invoked via the mocha CLI._"
                 },
                 "suiteSetup": {
-                    "$ref": "#/definitions/Mocha.HookFunction",
+                    "$ref": "#/definitions/Mocha.HookFunction<void>",
                     "description": "Execute before running tests.\n\n- _Only available when invoked via the mocha CLI._"
                 },
                 "suiteTeardown": {
-                    "$ref": "#/definitions/Mocha.HookFunction",
+                    "$ref": "#/definitions/Mocha.HookFunction<void>",
                     "description": "Execute after running tests.\n\n- _Only available when invoked via the mocha CLI._"
                 },
                 "teardown": {
-                    "$ref": "#/definitions/Mocha.HookFunction",
+                    "$ref": "#/definitions/Mocha.HookFunction<void>",
                     "description": "Execute after each test case.\n\n- _Only available when invoked via the mocha CLI._"
                 },
                 "test": {
@@ -71106,27 +71130,27 @@
             "type": "object"
         },
         "WorkspaceAliasConditionConfig": {
-            "allOf": [
-                {
-                    "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.WorkspaceAlias\">"
+            "properties": {
+                "alias": {
+                    "const": "Umb.Condition.WorkspaceAlias",
+                    "type": "string"
                 },
-                {
-                    "properties": {
-                        "match": {
-                            "description": "Define the workspace that this extension should be available in",
-                            "type": "string"
-                        },
-                        "oneOf": {
-                            "description": "Define one or more workspaces that this extension should be available in",
-                            "items": {
-                                "type": "string"
-                            },
-                            "type": "array"
-                        }
+                "match": {
+                    "description": "Define the workspace that this extension should be available in",
+                    "type": "string"
+                },
+                "oneOf": {
+                    "description": "Define one or more workspaces that this extension should be available in",
+                    "items": {
+                        "type": "string"
                     },
-                    "type": "object"
+                    "type": "array"
                 }
-            ]
+            },
+            "required": [
+                "alias"
+            ],
+            "type": "object"
         },
         "WorkspaceContentTypeAliasConditionConfig": {
             "allOf": [
@@ -71296,12 +71320,6 @@
                         "$ref": "#/definitions/ManifestRepository<UmbApi>"
                     },
                     {
-                        "$ref": "#/definitions/ManifestCollectionAction"
-                    },
-                    {
-                        "$ref": "#/definitions/ManifestCollectionView"
-                    },
-                    {
                         "$ref": "#/definitions/ManifestEntityAction<MetaEntityAction>"
                     },
                     {
@@ -71315,6 +71333,36 @@
                     },
                     {
                         "$ref": "#/definitions/ManifestEntityActionDeleteKind"
+                    },
+                    {
+                        "$ref": "#/definitions/ManifestPropertyEditorSchema"
+                    },
+                    {
+                        "$ref": "#/definitions/ManifestPropertyEditorUi"
+                    },
+                    {
+                        "$ref": "#/definitions/ManifestPropertyValueResolver"
+                    },
+                    {
+                        "$ref": "#/definitions/ManifestUfmComponent"
+                    },
+                    {
+                        "$ref": "#/definitions/ManifestUfmFilter"
+                    },
+                    {
+                        "$ref": "#/definitions/ManifestSection"
+                    },
+                    {
+                        "$ref": "#/definitions/ManifestSectionRoute"
+                    },
+                    {
+                        "$ref": "#/definitions/ManifestSectionView"
+                    },
+                    {
+                        "$ref": "#/definitions/ManifestDashboard"
+                    },
+                    {
+                        "$ref": "#/definitions/ManifestMenu"
                     },
                     {
                         "$ref": "#/definitions/ManifestWorkspaceActionMenuItem<MetaWorkspaceActionMenuItem>"
@@ -71353,61 +71401,10 @@
                         "$ref": "#/definitions/ManifestWorkspaceContext"
                     },
                     {
-                        "$ref": "#/definitions/ManifestPropertyEditorSchema"
+                        "$ref": "#/definitions/ManifestCollectionAction"
                     },
                     {
-                        "$ref": "#/definitions/ManifestPropertyEditorUi"
-                    },
-                    {
-                        "$ref": "#/definitions/ManifestUfmComponent"
-                    },
-                    {
-                        "$ref": "#/definitions/ManifestUfmFilter"
-                    },
-                    {
-                        "$ref": "#/definitions/ManifestPropertyValueResolver"
-                    },
-                    {
-                        "$ref": "#/definitions/ManifestSection"
-                    },
-                    {
-                        "$ref": "#/definitions/ManifestSectionRoute"
-                    },
-                    {
-                        "$ref": "#/definitions/ManifestSectionView"
-                    },
-                    {
-                        "$ref": "#/definitions/ManifestDashboard"
-                    },
-                    {
-                        "$ref": "#/definitions/ManifestMenu"
-                    },
-                    {
-                        "$ref": "#/definitions/ManifestEntityUserPermission"
-                    },
-                    {
-                        "$ref": "#/definitions/ManifestIcons"
-                    },
-                    {
-                        "$ref": "#/definitions/ManifestEntityActionTrashKind"
-                    },
-                    {
-                        "$ref": "#/definitions/ManifestEntityActionRestoreFromRecycleBinKind"
-                    },
-                    {
-                        "$ref": "#/definitions/ManifestEntityActionEmptyRecycleBinKind"
-                    },
-                    {
-                        "$ref": "#/definitions/ManifestFileUploadPreview"
-                    },
-                    {
-                        "$ref": "#/definitions/ManifestGranularUserPermission"
-                    },
-                    {
-                        "$ref": "#/definitions/ManifestMenuItem"
-                    },
-                    {
-                        "$ref": "#/definitions/ManifestMenuItemLinkKind"
+                        "$ref": "#/definitions/ManifestCollectionView"
                     },
                     {
                         "$ref": "#/definitions/ManifestSearchProvider"
@@ -71419,10 +71416,55 @@
                         "$ref": "#/definitions/ManifestPickerSearchResultItem"
                     },
                     {
+                        "$ref": "#/definitions/ManifestUserProfileApp"
+                    },
+                    {
+                        "$ref": "#/definitions/ManifestCurrentUserAction<MetaCurrentUserAction>"
+                    },
+                    {
+                        "$ref": "#/definitions/ManifestEntityActionTrashKind"
+                    },
+                    {
+                        "$ref": "#/definitions/ManifestEntityActionRestoreFromRecycleBinKind"
+                    },
+                    {
+                        "$ref": "#/definitions/ManifestEntityActionEmptyRecycleBinKind"
+                    },
+                    {
+                        "$ref": "#/definitions/ManifestEntityUserPermission"
+                    },
+                    {
+                        "$ref": "#/definitions/ManifestGranularUserPermission"
+                    },
+                    {
+                        "$ref": "#/definitions/ManifestIcons"
+                    },
+                    {
+                        "$ref": "#/definitions/ManifestEntityActionRenameServerFileKind"
+                    },
+                    {
+                        "$ref": "#/definitions/ManifestTheme"
+                    },
+                    {
+                        "$ref": "#/definitions/ManifestFileUploadPreview"
+                    },
+                    {
+                        "$ref": "#/definitions/ManifestMenuItem"
+                    },
+                    {
+                        "$ref": "#/definitions/ManifestMenuItemLinkKind"
+                    },
+                    {
+                        "$ref": "#/definitions/ManifestLocalization"
+                    },
+                    {
                         "$ref": "#/definitions/ManifestEntityActionReloadTreeItemChildrenKind"
                     },
                     {
-                        "$ref": "#/definitions/ManifestMenuItemTreeKind"
+                        "$ref": "#/definitions/ManifestEntityActionDuplicateToKind"
+                    },
+                    {
+                        "$ref": "#/definitions/ManifestEntityActionSortChildrenOfKind"
                     },
                     {
                         "$ref": "#/definitions/ManifestEntityActionCreateFolderKind"
@@ -71434,13 +71476,10 @@
                         "$ref": "#/definitions/ManifestEntityActionUpdateFolderKind"
                     },
                     {
-                        "$ref": "#/definitions/ManifestEntityActionSortChildrenOfKind"
+                        "$ref": "#/definitions/ManifestMenuItemTreeKind"
                     },
                     {
                         "$ref": "#/definitions/ManifestEntityActionMoveToKind"
-                    },
-                    {
-                        "$ref": "#/definitions/ManifestEntityActionDuplicateToKind"
                     },
                     {
                         "$ref": "#/definitions/ManifestStore"
@@ -71458,25 +71497,10 @@
                         "$ref": "#/definitions/ManifestWorkspaceViewCollectionKind"
                     },
                     {
-                        "$ref": "#/definitions/ManifestLocalization"
-                    },
-                    {
                         "$ref": "#/definitions/ManifestPropertyAction<MetaPropertyAction>"
                     },
                     {
                         "$ref": "#/definitions/ManifestPropertyActionDefaultKind<MetaPropertyActionDefaultKind>"
-                    },
-                    {
-                        "$ref": "#/definitions/ManifestCurrentUserAction<MetaCurrentUserAction>"
-                    },
-                    {
-                        "$ref": "#/definitions/ManifestUserProfileApp"
-                    },
-                    {
-                        "$ref": "#/definitions/ManifestEntityActionRenameServerFileKind"
-                    },
-                    {
-                        "$ref": "#/definitions/ManifestTheme"
                     },
                     {
                         "$ref": "#/definitions/ManifestWorkspaceDefaultKind"
