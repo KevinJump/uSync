@@ -13,7 +13,7 @@ namespace uSync.Core.DataTypes
 
         public virtual string SerializeConfig(object configuration)
         {
-            return JsonConvert.SerializeObject(configuration, Formatting.Indented);
+            return JsonConvert.SerializeObject(configuration, Formatting.Indented, uSyncConstants.uSyncJsonSettings);
         }
 
     }
