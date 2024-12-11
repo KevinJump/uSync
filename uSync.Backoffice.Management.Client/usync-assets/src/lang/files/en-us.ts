@@ -75,6 +75,7 @@ export default {
 		IDomain: 'Domains',
 		IWebhook: 'Webhooks',
 		IRelationType: 'Relation Types',
+		MediaFile: 'Media Files',
 	},
 	uSyncSettings: {
 		settings: 'uSync Settings',
