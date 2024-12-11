@@ -55,6 +55,21 @@ Write-Host "Config   :" $env
 Write-Host "Folder   :" $outFolder
 "----------------------------------"; ""
 
+
+if ($skipClient) {
+    ""; "##### Skipping NPM Client Package"; "----------------------------------" ; ""
+} 
+else {
+
+    ""; "##### Generating NPM Client Package"; "----------------------------------" ; ""
+    Set-Location ..\uSync.Backoffice.Management.Client\usync-assets\
+
+    npm version $fullVersion 
+    npm run make
+
+    Set-Location ..\..\dist
+}
+
 $sln_name = "..\uSync.sln";
 
 # ""; "##### Restoring project"; "--------------------------------"; ""
@@ -80,20 +95,6 @@ $projects = "uSync.Core",
 foreach($project in $projects) {
     Write-Host "Packing $project : ";
     dotnet pack "..\$project\$project.csproj" --no-restore --no-build -c $env -o $outFolder -p:Version=$fullVersion -p:ContinuousIntegrationBuild=true
-}
-
-if ($skipClient) {
-    ""; "##### Skipping NPM Client Package"; "----------------------------------" ; ""
-} 
-else {
-
-    ""; "##### Generating NPM Client Package"; "----------------------------------" ; ""
-    Set-Location ..\uSync.Backoffice.Management.Client\usync-assets\
-
-    npm version $fullVersion 
-    npm run make
-
-    Set-Location ..\..\dist
 }
 
 ""; "##### Copying to LocalGit folder"; "----------------------------------" ; ""

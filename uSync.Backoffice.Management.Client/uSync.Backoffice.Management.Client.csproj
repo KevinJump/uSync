@@ -6,15 +6,13 @@
 		<Nullable>enable</Nullable>
 		<AddRazorSupportForMvc>true</AddRazorSupportForMvc>
 		<StaticWebAssetBasePath>/</StaticWebAssetBasePath>
-		
-		<EnableDefaultContentItems>false</EnableDefaultContentItems>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Umbraco.Cms.Infrastructure" Version="15.1.0-rc2" />
 	</ItemGroup>
 
-	<!-- 
+	<!--
 	<ItemGroup>
 		<Content Include="usync-assets/src/**">
 			<Pack>false</Pack>
@@ -22,6 +20,7 @@
 	</ItemGroup>
 	-->
 
+	<!--
 	<Target Name="NpmInstall" Inputs="usync-assets/package.json" Outputs="usync-assets/node_modules/.install-stamp">
 		<Message Importance="high" Text="Running npm Import" />
 		<Exec Command="npm install" Condition="'$(RestorePackagesWithLockFile)' != true" WorkingDirectory="usync-assets" />
@@ -32,5 +31,6 @@
 		<Message Importance="high" Text="Running npm build" />
 		<Exec Command="npm run build" WorkingDirectory="usync-assets" />		
 	</Target>
+	-->
 
 </Project>
