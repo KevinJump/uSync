@@ -9201,13 +9201,6 @@
                     "description": "The number of child nodes in this fragment.",
                     "type": "number"
                 },
-                "content": {
-                    "description": "The child nodes in this fragment.",
-                    "items": {
-                        "$ref": "#/definitions/Node_1"
-                    },
-                    "type": "array"
-                },
                 "firstChild": {
                     "anyOf": [
                         {
@@ -9237,7 +9230,6 @@
             },
             "required": [
                 "childCount",
-                "content",
                 "firstChild",
                 "lastChild",
                 "size"
@@ -53897,13 +53889,6 @@
                     "description": "The number of children that the node has.",
                     "type": "number"
                 },
-                "children": {
-                    "description": "The array of this node's child nodes.",
-                    "items": {
-                        "$ref": "#/definitions/Node_1"
-                    },
-                    "type": "array"
-                },
                 "content": {
                     "$ref": "#/definitions/Fragment",
                     "description": "A container holding the node's children."
@@ -53985,7 +53970,6 @@
             "required": [
                 "attrs",
                 "childCount",
-                "children",
                 "content",
                 "firstChild",
                 "inlineContent",

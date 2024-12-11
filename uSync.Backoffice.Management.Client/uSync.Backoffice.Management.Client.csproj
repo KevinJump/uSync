@@ -9,7 +9,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Umbraco.Cms.Infrastructure" Version="15.1.0-rc2" />
+		<PackageReference Include="Umbraco.Cms.Infrastructure" Version="15.1.0" />
 	</ItemGroup>
 
 	<!--
