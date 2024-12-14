@@ -56,6 +56,8 @@ public partial class SyncService : ISyncService
 
     private readonly IAppCache _appCache;
 
+    private readonly DistributedCache _distributedCache;
+
     /// <summary>
     ///  Create a new uSyncService (done via DI)
     /// </summary>
@@ -69,7 +71,8 @@ public partial class SyncService : ISyncService
         AppCaches appCaches,
         ICoreScopeProvider scopeProvider,
         ILoggerFactory loggerFactory,
-        IBackgroundTaskQueue backgroundTaskQueue)
+        IBackgroundTaskQueue backgroundTaskQueue,
+        DistributedCache distributedCache)
     {
         this._logger = logger;
 
@@ -88,7 +91,7 @@ public partial class SyncService : ISyncService
         _loggerFactory = loggerFactory;
 
         _backgroundTaskQueue = backgroundTaskQueue;
-
+        _distributedCache = distributedCache;
     }
 
     /// <inheritdoc/>>
@@ -189,7 +192,15 @@ public partial class SyncService : ISyncService
         handlerOptions ??= new SyncHandlerOptions();
         handlerOptions.Action = HandlerActions.Import;
         var handlers = _handlerFactory.GetValidHandlers(handlerOptions);
-        return await ImportAsync(folders, force, handlers, handlerOptions, callbacks);
+        
+        var changes = await ImportAsync(folders, force, handlers, handlerOptions, callbacks);
+
+        // if during startup, we alter any content, we need to refresh the memory cache, 
+        // or things don't appear as if they are published correctly. 
+        if (changes.Any(x => x.Change > ChangeType.NoChange && x.ItemType == "IContent"))
+            _distributedCache.RefreshAllPublishedSnapshot();
+
+        return changes;
     }
 
     /// <inheritdoc/>>
