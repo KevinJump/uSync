@@ -94,7 +94,8 @@ namespace uSync.Core.Serialization.Serializers
             return SyncAttempt<IDictionaryItem>.Succeed(item.ItemKey, item, ChangeType.Import, details);
         }
 
-        private IEnumerable<uSyncChange> DeserializeTranslations(IDictionaryItem item, XElement node, SyncSerializerOptions options)
+        protected virtual IEnumerable<uSyncChange> DeserializeTranslations(IDictionaryItem item, XElement node, SyncSerializerOptions options) => DeserializeTranslationsInternal(item, node, options);
+        private IEnumerable<uSyncChange> DeserializeTranslationsInternal(IDictionaryItem item, XElement node, SyncSerializerOptions options)
         {
             var translationNode = node?.Element("Translations");
             if (translationNode == null) return Enumerable.Empty<uSyncChange>();
