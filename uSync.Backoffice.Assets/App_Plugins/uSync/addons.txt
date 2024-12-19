@@ -5,7 +5,7 @@
     "title":  "uSync Complete",
     "headline": "Get everything with uSync.Complete",
     "text": "uSync Complete brings together all the best bits of uSync into one place.",
-    "link": "https://jumoo.co.uk/uSync/complete/",
+    "link": "https://jumoo.co.uk/usync/complete/",
     "icons": [
       {
         "icon": "icon-arrow-up",

@@ -53,7 +53,7 @@ export class uSyncAddOnsElement extends UmbElementMixin(LitElement) {
 
 						<div class="cta">
 							<uui-button
-								href="https://jumoo.co.uk/uSync/complete/"
+								href="https://jumoo.co.uk/usync/complete/"
 								target="_blank"
 								color="positive"
 								look="primary"

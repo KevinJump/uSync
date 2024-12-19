@@ -6,7 +6,7 @@
 
 		<PackageIconUrl></PackageIconUrl>
 		<PackageLicenseExpression>MPL-2.0</PackageLicenseExpression>
-		<PackageProjectUrl>https://jumoo.co.uk/uSync</PackageProjectUrl>
+		<PackageProjectUrl>https://jumoo.co.uk/usync</PackageProjectUrl>
 		<PackageTags>Umbraco</PackageTags>
 
 		<RepositoryUrl>https://github.com/KevinJump/uSync8/tree/core/main</RepositoryUrl>

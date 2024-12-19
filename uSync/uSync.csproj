@@ -15,7 +15,7 @@
 		<PackageReadmeFile>readme.md</PackageReadmeFile>
 
 		<PackageLicenseExpression>MPL-2.0</PackageLicenseExpression>
-		<PackageProjectUrl>https://jumoo.co.uk/uSync</PackageProjectUrl>
+		<PackageProjectUrl>https://jumoo.co.uk/usync</PackageProjectUrl>
 
 		<PackageTags>umbraco usync umbraco-marketplace</PackageTags>
 
