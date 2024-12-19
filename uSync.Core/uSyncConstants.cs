@@ -1,7 +1,15 @@
-﻿namespace uSync.Core
+﻿using Newtonsoft.Json;
+using uSync.Core.Json;
+
+namespace uSync.Core
 {
     public static partial class uSyncConstants
     {
+        public static JsonSerializerSettings uSyncJsonSettings = new JsonSerializerSettings()
+        {
+            ContractResolver = new uSyncContractResolver()
+        };
+
         public static class Xml
         {
             public const string Key = "Key";

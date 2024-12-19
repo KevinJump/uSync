@@ -37,8 +37,8 @@ namespace uSync.Core
 
         public static void AddUpdateJson(this List<uSyncChange> changes, string name, object oldValue, object newValue, string path, bool success)
         {
-            var oldJson = JsonConvert.SerializeObject(oldValue, Formatting.Indented);
-            var newJson = JsonConvert.SerializeObject(newValue, Formatting.Indented);
+            var oldJson = JsonConvert.SerializeObject(oldValue, Formatting.Indented, uSyncConstants.uSyncJsonSettings);
+            var newJson = JsonConvert.SerializeObject(newValue, Formatting.Indented, uSyncConstants.uSyncJsonSettings);
             AddUpdate(changes, name, oldJson, newJson, path, success);
         }
 

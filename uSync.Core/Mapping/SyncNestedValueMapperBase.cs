@@ -78,6 +78,9 @@ namespace uSync.Core.Mapping
         /// </summary>
         protected JObject GetExportProperties(JObject item, IContentType docType)
         {
+            // we want JObjects to be sorted. 
+            item.SortByName();
+
             foreach (var property in docType.CompositionPropertyTypes)
             {
                 if (item.ContainsKey(property.Alias))

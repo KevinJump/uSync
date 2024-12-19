@@ -1,6 +1,8 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
+using System.Linq;
+
 using Umbraco.Extensions;
 
 namespace uSync.Core
@@ -181,5 +183,20 @@ namespace uSync.Core
 
         public static bool IsAngularExpression(this string value)
             => value.StartsWith("{{") && value.EndsWith("}}");
+
+        /// <summary>
+        ///  performs an inplace sort of the properties in a JObject
+        /// </summary>
+        public static void SortByName(this JObject item)
+        {
+            var properties = item.Properties().OrderBy(x => x.Name).ToList();
+            item.RemoveAll();
+            foreach (var property in properties)
+            {
+                item.Add(property);
+            }
+        }
+
+
     }
 }
