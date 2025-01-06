@@ -5,7 +5,7 @@
                 \__,_/____/\__, /_/ /_/\___/  
                           /____/  v15.x            
 
-   Thanks for Installing uSync Thirteen, 
+   Thanks for Installing uSync Fifteen, 
    
    All the bits of your Umbraco settings and content will now be saved to disk.
 
