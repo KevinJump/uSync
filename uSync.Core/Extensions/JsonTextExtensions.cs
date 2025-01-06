@@ -1,6 +1,4 @@
-﻿using Json.More;
-
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -403,7 +401,14 @@ public static class JsonTextExtensions
 
         try
         {
-            result = propertyNode.AsObject();
+            result = propertyNode.GetValueKind() switch
+            {
+                JsonValueKind.String => new JsonObject 
+                {
+                    { propertyName, propertyNode.ToString() }
+                },
+                _ => propertyNode.AsObject(),
+            };
         }
         catch
         {
