@@ -486,12 +486,22 @@ internal class SyncFileService : ISyncFileService
     /// <inheritdoc/>
     public XElement? GetDifferences(List<XElement> nodes, ISyncTrackerBase? trackerBase)
     {
-        if (nodes is null || nodes?.Count == 0) return null;
-        if (nodes!.Count == 1) return nodes[0];
-        if (trackerBase is null)
-            return SyncRootMergerHelper.GetDifferencesByFileContents(nodes);
+        try
+        {
+            if (nodes is null || nodes?.Count == 0) return null;
+            if (nodes!.Count == 1) return nodes[0];
+            if (trackerBase is null)
+                return SyncRootMergerHelper.GetDifferencesByFileContents(nodes);
 
-        return trackerBase?.GetDifferences(nodes);
+            return trackerBase?.GetDifferences(nodes);
+        }
+        catch (Exception ex)
+        {
+            // 1. diffrences shouldn't stop the process, they are nice to have but 
+            // not critical. 
+            _logger.LogWarning(ex, "Error getting differences");
+            return null;
+        }
     }
 
     /// <inheritdoc/>
