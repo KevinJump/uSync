@@ -119,7 +119,7 @@ internal class uSyncApplicationStartingHandler : INotificationAsyncHandler<Umbra
                     }
                     else
                     {
-                        _logger.LogInformation("Startup Import blocked by usync.stop file");
+                        _logger.LogInformation("Startup Import blocked by {stopFile} file", _uSyncConfig.Settings.StopFile);
                     }
                 }
             }
@@ -155,18 +155,18 @@ internal class uSyncApplicationStartingHandler : INotificationAsyncHandler<Umbra
     ///  does the uSync folder contain a uSync.stop file (which would mean we would not process anything at startup)
     /// </summary>
     private bool HasStopFile(string folder)
-        => _syncFileService.FileExists($"{folder}/usync.stop");
+            => _syncFileService.FileExists($"{folder}/{_uSyncConfig.Settings.StopFile}");
 
     /// <summary>
     ///  Process the once file (if it exists we rename it to usync.stop).
     /// </summary>
     private async Task ProcessOnceFileAsync(string folder)
     {
-        if (_syncFileService.FileExists($"{folder}/usync.once"))
+        if (_syncFileService.FileExists($"{folder}/{_uSyncConfig.Settings.OnceFile}"))
         {
-            _syncFileService.DeleteFile($"{folder}/usync.once");
-            await _syncFileService.SaveFileAsync($"{folder}/usync.stop", "uSync Stop file, prevents startup import");
-            _logger.LogInformation("usync.once file replaced by usync.stop file");
+            _syncFileService.DeleteFile($"{folder}/{_uSyncConfig.Settings.OnceFile}");
+            await _syncFileService.SaveFileAsync($"{folder}/{_uSyncConfig.Settings.StopFile}", "uSync Stop file, prevents startup import");
+            _logger.LogInformation($"{_uSyncConfig.Settings.OnceFile} file replaced by {_uSyncConfig.Settings.StopFile} file");
         }
     }
 

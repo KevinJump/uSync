@@ -39,6 +39,18 @@ public class uSyncSettings
     public bool LockRoot { get; set; } = true;
 
     /// <summary>
+    ///  location of the stop file (relative to the uSync folder)
+    /// </summary>
+    [DefaultValue("usync.stop")]
+    public string StopFile { get; set; } = "usync.stop";
+
+    /// <summary>
+    ///  location of the once file (relative to the uSync folder)
+    /// </summary>
+    [DefaultValue("usync.once")]
+    public string OnceFile { get; set; } = "usync.once";
+
+    /// <summary>
     ///  lock specific types at root so they can't be changed in child sites. 
     /// </summary>
     /// <remarks>
