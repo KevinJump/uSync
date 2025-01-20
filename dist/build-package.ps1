@@ -76,7 +76,6 @@ $projects = "uSync.Core",
     "uSync.Backoffice.Management.Client",
     "uSync";
 
-
 foreach($project in $projects) {
     Write-Host "Packing $project : ";
     dotnet pack "..\$project\$project.csproj" --no-restore --no-build -c $env -o $outFolder -p:Version=$fullVersion -p:ContinuousIntegrationBuild=true
@@ -95,6 +94,8 @@ else {
 
     Set-Location ..\..\dist
 }
+
+
 
 ""; "##### Copying to LocalGit folder"; "----------------------------------" ; ""
 XCOPY "$outFolder\*.nupkg" "C:\Source\localgit" /Q /Y 

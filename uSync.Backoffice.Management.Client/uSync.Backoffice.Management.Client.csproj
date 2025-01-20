@@ -7,7 +7,7 @@
 		<AddRazorSupportForMvc>true</AddRazorSupportForMvc>
 		<StaticWebAssetBasePath>/</StaticWebAssetBasePath>
 		
-		<EnableDefaultContentItems>false</EnableDefaultContentItems>
+		<EnableDefaultContentItems>true</EnableDefaultContentItems>
 
 		<Description>v15 Client files for uSync</Description>
 	</PropertyGroup>
