@@ -8,6 +8,8 @@
 		<StaticWebAssetBasePath>/</StaticWebAssetBasePath>
 		
 		<EnableDefaultContentItems>false</EnableDefaultContentItems>
+
+		<Description>v15 Client files for uSync</Description>
 	</PropertyGroup>
 
 	<ItemGroup>
