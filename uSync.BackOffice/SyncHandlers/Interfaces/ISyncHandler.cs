@@ -88,7 +88,11 @@ namespace uSync.BackOffice.SyncHandlers
         /// these export methods do not obay roots, there are for use
         /// only when exporting to a custom folder.
         /// </remarks>
+        [Obsolete("Call method with folders for roots functionality, will be removed in v15")]
         IEnumerable<uSyncAction> Export(int id, string folder, HandlerSettings settings);
+        
+        IEnumerable<uSyncAction> Export(int id, string[] folders, HandlerSettings settings)
+            => Export(id, folders[^1], settings);
 
         /// <summary>
         /// Export an item based on the Udi value of the item
@@ -97,7 +101,11 @@ namespace uSync.BackOffice.SyncHandlers
         /// these export methods do not obay roots, there are for use
         /// only when exporting to a custom folder.
         /// </remarks>
+        [Obsolete("Call method with folders for roots functionality, will be removed in v15")]
         IEnumerable<uSyncAction> Export(Udi udi, string folder, HandlerSettings settings);
+
+        IEnumerable<uSyncAction> Export(Udi udi, string[] folders, HandlerSettings settings)
+            => Export(udi, folders[^1], settings);
 
         /// <summary>
         ///  Export all items 
@@ -218,6 +226,6 @@ namespace uSync.BackOffice.SyncHandlers
         ///  fetch all the nodes that are needed for an report/import.
         /// </summary>
         public IReadOnlyList<OrderedNodeInfo> FetchAllNodes(string[] folders)
-            => new List<OrderedNodeInfo>();
+            => [];
     }
 }
