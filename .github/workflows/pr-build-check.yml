@@ -1,0 +1,45 @@
+name: PR Build Check
+
+on:
+  push:
+    branches: [v15/actions]
+  pull_request:
+    branches: [v15/main]
+
+env:
+  config: Release
+  out_folder: ./build-out/
+
+jobs:
+build-project:
+  runs-on: windows-latest
+
+  needs: version
+
+  env:
+    solution_name: ./uSync.sln
+    test_project: ./uSync.Tests/uSync.tests.csproj
+    schema_gen_project: ./uSync.SchemaGenerator/uSync.SchemaGenerator.csproj
+
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Install .Net core
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 9.0.x
+
+    - name: restore
+      run: dotnet restore ${{ env.solution_name}}
+
+    - name: build
+      run: dotnet build ${{ env.solution_name }} -c ${{ env.config }} -p:ContinuousIntegrationBuild=true
+
+    - name: test
+      run: dotnet test ${{ env.solution_name }}
+
+    - name: Generate AppSettings Schema
+      run: dotnet run -c ${{env.Config}} --project ${{ env.schema_gen_project}}
