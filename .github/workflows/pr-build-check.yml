@@ -14,8 +14,6 @@ jobs:
   build-project:
     runs-on: windows-latest
 
-    needs: version
-
     env:
       solution_name: ./uSync.sln
       test_project: ./uSync.Tests/uSync.tests.csproj
