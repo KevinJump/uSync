@@ -11,35 +11,35 @@ env:
   out_folder: ./build-out/
 
 jobs:
-build-project:
-  runs-on: windows-latest
+  build-project:
+    runs-on: windows-latest
 
-  needs: version
+    needs: version
 
-  env:
-    solution_name: ./uSync.sln
-    test_project: ./uSync.Tests/uSync.tests.csproj
-    schema_gen_project: ./uSync.SchemaGenerator/uSync.SchemaGenerator.csproj
+    env:
+      solution_name: ./uSync.sln
+      test_project: ./uSync.Tests/uSync.tests.csproj
+      schema_gen_project: ./uSync.SchemaGenerator/uSync.SchemaGenerator.csproj
 
-  steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Install .Net core
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 9.0.x
+      - name: Install .Net core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
 
-    - name: restore
-      run: dotnet restore ${{ env.solution_name}}
+      - name: restore
+        run: dotnet restore ${{ env.solution_name}}
 
-    - name: build
-      run: dotnet build ${{ env.solution_name }} -c ${{ env.config }} -p:ContinuousIntegrationBuild=true
+      - name: build
+        run: dotnet build ${{ env.solution_name }} -c ${{ env.config }} -p:ContinuousIntegrationBuild=true
 
-    - name: test
-      run: dotnet test ${{ env.solution_name }}
+      - name: test
+        run: dotnet test ${{ env.solution_name }}
 
-    - name: Generate AppSettings Schema
-      run: dotnet run -c ${{env.Config}} --project ${{ env.schema_gen_project}}
+      - name: Generate AppSettings Schema
+        run: dotnet run -c ${{env.Config}} --project ${{ env.schema_gen_project}}
