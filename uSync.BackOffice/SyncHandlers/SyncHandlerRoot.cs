@@ -18,6 +18,7 @@ using Umbraco.Cms.Core.Strings;
 using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;
+using uSync.BackOffice.Extensions;
 using uSync.BackOffice.Models;
 using uSync.BackOffice.Services;
 using uSync.BackOffice.SyncHandlers.Interfaces;
@@ -753,12 +754,17 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     {
         // if createOnly is on, then we only create things that are not already there. 
         // this lookup is slow (relatively) so we only do it if we have to.
-        if (config.GetSetting(Core.uSyncConstants.DefaultSettings.CreateOnly, Core.uSyncConstants.DefaultSettings.CreateOnly_Default)
-            || config.GetSetting(Core.uSyncConstants.DefaultSettings.OneWay, Core.uSyncConstants.DefaultSettings.CreateOnly_Default))
+        if (config.IsCreateOnly())
         {
             var item = await serializer.FindItemAsync(node);
-            if (item != null)
+            if (item is not null)
             {
+                if (config.AllowCreateOnlyDeletes() is false || node.IsEmpty is false || node.GetEmptyAction() != SyncActionType.Delete)
+                {
+                    logger.LogDebug("CreateOnly: Item {alias} is a delete - deletes are also blocked for existing items.", node.GetAlias());
+                    return false;
+                }
+
                 logger.LogDebug("CreateOnly: Item {alias} already exist not importing it.", node.GetAlias());
                 return false;
             }
@@ -777,7 +783,6 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
                 return false;
             }
         }
-
 
         return true;
     }
