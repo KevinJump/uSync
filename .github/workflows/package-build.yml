@@ -2,7 +2,7 @@ name: Build and Package.
 
 on:
   push:
-    branches: [v15/actions]
+    branches: [v15/main]
 
 env:
   config: Release

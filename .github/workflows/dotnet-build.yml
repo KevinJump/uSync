@@ -1,8 +1,6 @@
-name: dotnet core build
+name: PR Project Build and Test
 
 on:
-  push:
-    branches: [v15/main]
   pull_request:
     branches: [v15/main]
 
