@@ -5,7 +5,7 @@ branches:
   main:
     mode: ContinuousDeployment
     tag: ""
-    regex: ^v12\/main$
+    regex: ^v15\/main$
   pull-request:
     mode: ContinuousDeployment
 ignore:

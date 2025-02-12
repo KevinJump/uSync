@@ -1,8 +1,6 @@
-name: dotnet core build
+name: PR Project Build and Test
 
 on:
-  push:
-    branches: [v15/main]
   pull_request:
     branches: [v15/main]
 
@@ -11,38 +9,8 @@ env:
   out_folder: ./build-out/
 
 jobs:
-  version:
-    runs-on: windows-latest
-    outputs:
-      version_string: ${{ steps.gitversion.outputs.fullSemVer }}
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Install GitVersion
-
-        uses: gittools/actions/gitversion/setup@v3.0.0
-        with:
-          versionSpec: "6.x"
-
-      - name: Determine Version with GitVersion (MSBuild in Proj will do this)
-        id: gitversion
-        uses: gittools/actions/gitversion/execute@v3.0.0
-        with:
-          useConfigFile: true
-          configFilePath: ./GitVersion.yml
-
-      - name: Display version
-        run: |
-          echo "Full Version: ${{ steps.gitversion.outputs.fullSemVer }}"
-
   build-project:
     runs-on: windows-latest
-
-    needs: version
 
     env:
       solution_name: ./uSync.sln
@@ -71,42 +39,3 @@ jobs:
 
       - name: Generate AppSettings Schema
         run: dotnet run -c ${{env.Config}} --project ${{ env.schema_gen_project}}
-
-      - name: Stamp version on package
-        working-directory: ./uSync.Backoffice.Management.Client/usync-assets
-        run: npm version ${{ needs.version.outputs.version_string }}
-
-  package-up:
-    runs-on: windows-latest
-
-    needs: [build-project, version]
-
-    strategy:
-      matrix:
-        package:
-          - uSync.Core
-          - uSync.Backoffice
-          - uSync.Backoffice.Management.Api
-          - uSync.Backoffice.Management.Client
-          - uSync.Backoffice.Targets
-          - uSync.Community.Contrib
-          - uSync.Community.DataTypeSerializers
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: version
-        run: |
-          echo "Version: ${{ needs.version.outputs.version_string}}"
-
-      - name: package ${{ matrix.package }}
-        run: dotnet pack ./${{ matrix.package }}/${{ matrix.package }}.csproj --no-restore -c ${{env.config}} --output ${{env.out_folder}} /p:version=${{ needs.version.outputs.version_string }}
-
-      - name: Upload nuget file as build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: Nuget Build Output
-          path: ${{env.OUT_FOLDER}}
