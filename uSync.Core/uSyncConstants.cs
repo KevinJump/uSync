@@ -91,6 +91,9 @@ public static partial class uSyncConstants
         public const string OneWay = "OneWay"; // legacy config name 
         public const bool CreateOnly_Default = false;
 
+        public const string AllowCreateOnlyDeletes = "CreateOnlyDeletes";
+        public const bool AllowCreateOnlyDeletes_Default = false; 
+
         // new properties only (so existing properties are left)
         public const string NewPropertiesOnly = "NewPropertiesOnly";
         public const bool NewPropertiesOnly_Default = false;
