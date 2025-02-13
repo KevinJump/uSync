@@ -13,9 +13,9 @@ name: "CodeQL"
 
 on:
   push:
-    branches: ["v14/dev", "v13/main", "v10/dev"]
+    branches: ["*/main"]
   pull_request:
-    branches: ["v14/dev", "v13/main", "v10/dev"]
+    branches: ["*/main"]
 
 jobs:
   analyze:
@@ -43,7 +43,7 @@ jobs:
       matrix:
         include:
           - language: csharp
-            build-mode: autobuild
+            build-mode: none
           - language: javascript-typescript
             build-mode: none
         # CodeQL supports the following values keywords for 'language': 'c-cpp', 'csharp', 'go', 'java-kotlin', 'javascript-typescript', 'python', 'ruby', 'swift'
