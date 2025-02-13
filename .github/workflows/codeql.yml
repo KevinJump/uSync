@@ -13,7 +13,7 @@ name: "CodeQL"
 
 on:
   push:
-    branches: ["*/main"]
+    branches: ["*/main", "v15/actions/*"]
   pull_request:
     branches: ["*/main"]
 
