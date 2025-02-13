@@ -115,15 +115,14 @@ internal class SyncActionService : ISyncActionService
         return new SyncActionResult(actions);
     }
 
-    public async Task<SyncActionResult> ImportPostAsync(SyncActionOptions options, uSyncCallbacks? callbacks)
+    public async Task<SyncActionResult> ImportPostAsync(SyncFinalActionRequest request)
     {
         var actions = await _uSyncService.PerformPostImportAsync(
-            options.GetFoldersOrDefault(_uSyncConfig.GetFolders()),
-            options.GetSetOrDefault(_uSyncConfig.Settings.DefaultSet),
-            options.Actions);
+            request.ActionOptions.GetFoldersOrDefault(_uSyncConfig.GetFolders()),
+            request.ActionOptions.GetSetOrDefault(_uSyncConfig.Settings.DefaultSet),
+            request.Actions);
 
-        callbacks?.Update?.Invoke("Import Complete", 1, 1);
-
+        request.Callbacks?.Update?.Invoke("Post Import Complete", 1, 1);
         return new SyncActionResult(actions.Where(x => x.Change > Core.ChangeType.NoChange).ToList());
     }
 
@@ -185,12 +184,16 @@ internal class SyncActionService : ISyncActionService
         => await _uSyncService.StartBulkProcessAsync(action);
 
     /// <inheritdoc/>
-    public async Task FinishProcessAsync(HandlerActions action, IEnumerable<uSyncAction> actions, string username)
+    public async Task<SyncActionResult> FinishProcessAsync(SyncFinalActionRequest request)
     {
-        await _uSyncService.FinishBulkProcessAsync(action, actions);
+        await _uSyncService.FinishBulkProcessAsync(request.HandlerAction, request.Actions);
 
         _logger.LogInformation("{user} finished {action} process ({changes} changes)",
-            username, action, actions.Count());
+            request.Username, request.HandlerAction, request.Actions.Count());
+
+        request.Callbacks?.Update?.Invoke("Process completed", 1, 1);
+
+        return new SyncActionResult(request.Actions.ToList());
     }
 
     public Stream GetExportFolderAsStream()

@@ -7,6 +7,7 @@ using Microsoft.Net.Http.Headers;
 using System.Net.Mime;
 using System.Text;
 
+using Umbraco.Cms.Core.Security;
 using Umbraco.Cms.Core.Services;
 
 using uSync.Backoffice.Management.Api.Models;
@@ -22,16 +23,22 @@ public class uSyncPerformActionController : uSyncControllerBase
     private readonly ISyncManagementService _managementService;
     private readonly ITemporaryFileService _temporaryFileService;
 
-    public uSyncPerformActionController(ISyncManagementService managementService, ITemporaryFileService temporaryFileService)
+    private readonly IBackOfficeSecurityAccessor _backOfficeSecurityAccessor;
+
+    public uSyncPerformActionController(
+        ISyncManagementService managementService,
+        ITemporaryFileService temporaryFileService,
+        IBackOfficeSecurityAccessor backOfficeSecurityAccessor)
     {
         _managementService = managementService;
         _temporaryFileService = temporaryFileService;
+        _backOfficeSecurityAccessor = backOfficeSecurityAccessor;
     }
 
     [HttpPost("Perform")]
     [ProducesResponseType(typeof(PerformActionResponse), 200)]
     public async Task<PerformActionResponse> PerformAction(PerformActionRequest model)
-        => await _managementService.PerformActionAsync(model);
+        => await _managementService.PerformActionAsync(model, _backOfficeSecurityAccessor.BackOfficeSecurity.CurrentUser);
 
 
     [HttpPost("Download")]
