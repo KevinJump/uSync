@@ -64,6 +64,9 @@ public abstract class SyncHandlerContainerBase<TObject>
     protected IEnumerable<uSyncAction> CleanFolders(int parent)
         => [];
 
+    /// <summary>
+    ///  Removes any empty 'containers' after import 
+    /// </summary>
     protected async Task<IEnumerable<uSyncAction>> CleanFoldersAsync(Guid parentKey)
     {
         var actions = new List<uSyncAction>();
@@ -198,7 +201,6 @@ public abstract class SyncHandlerContainerBase<TObject>
     /// <summary>
     ///  Handle container saving events
     /// </summary>
-    /// <param name="notification"></param>
     public virtual Task HandleAsync(EntityContainerSavedNotification notification, CancellationToken cancellationToken)
     {
         return Task.CompletedTask;
