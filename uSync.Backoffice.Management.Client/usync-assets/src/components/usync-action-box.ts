@@ -71,7 +71,6 @@ export class uSyncActionBox extends LitElement {
 	static styles = css`
 		:host {
 			flex-grow: 1;
-			margin: var(--uui-size-space-2);
 		}
 
 		.action-box {

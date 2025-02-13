@@ -127,8 +127,11 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 		} else {
 			return html`
 				<umb-body-layout>
-					${this.#renderLegacyBanner()} ${this.#renderActions()} ${this.#renderBanner()}
-					${this.#renderProcessBox()} ${this.#renderReport()}
+					${this.#renderLegacyBanner()}
+					<div class="wrapper">
+						${this.#renderActions()} ${this.#renderBanner()} ${this.#renderProcessBox()}
+						${this.#renderReport()}
+					</div>
 				</umb-body-layout>
 			`;
 		}
@@ -146,7 +149,7 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 	}
 
 	#renderActions() {
-        if (!this._actions || !Array.isArray(this._actions)) return nothing;
+		if (!this._actions || !Array.isArray(this._actions)) return nothing;
 
 		var actions = this._actions?.map((group) => {
 			return html`
@@ -203,6 +206,12 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 				margin-top: calc(var(--uui-size-space-4) * -1);
 			}
 
+			.wrapper {
+				display: flex;
+				flex-direction: column;
+				gap: var(--uui-size-space-4);
+			}
+
 			.legacy-banner {
 				display: flex;
 				gap: var(--uui-size-space-2);
@@ -216,16 +225,15 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 				position: relative;
 				display: block;
 				z-index: 1;
-				margin: var(--uui-size-space-4) 0;
 			}
 
 			.action-buttons-box {
 				position: relative;
 				display: flex;
+				gap: var(--uui-size-space-4);
 				flex-wrap: wrap;
 				align-content: stretch;
 				z-index: 1;
-				margin: calc(var(--uui-size-space-2) * -1);
 			}
 
 			umb-empty-state {

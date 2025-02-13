@@ -217,11 +217,13 @@ internal class uSyncManagementService : ISyncManagementService
         var results = await method(handlerOptions, callbacks);
         _syncManagementCache.CacheItems(requestId, results.Actions, false);
 
+        var allActions = _syncManagementCache.GetCachedActions(requestId);
         return new PerformActionResponse
         {
             RequestId = requestId.ToString(),
-            Actions = results.Actions.Select(x => x.ToActionView()),
-            Status = GetSummaries(action, handlers, actionRequest.StepNumber, results.Actions.ToList()),
+            Actions = allActions.Select(x => x.ToActionView()),
+            // results.Actions.Select(x => x.ToActionView()),
+            Status = GetSummaries(action, handlers, actionRequest.StepNumber, allActions), // results.Actions.ToList()),
             Complete = false
         };
     }
@@ -289,8 +291,8 @@ internal class uSyncManagementService : ISyncManagementService
                 Icon = handlers[n].Icon,
                 Status = n < nextStep ? HandlerStatus.Complete :
                       n == nextStep ? HandlerStatus.Processing : HandlerStatus.Pending,
-                Changes = handlerActions.Count(x => x.Change > Core.ChangeType.NoChange),
-                InError = handlerActions.Any(x => x.Change >= Core.ChangeType.Fail)
+                Changes = handlerActions.CountChanges(),
+                InError = handlerActions.ContainsErrors()
             };
         }
 
