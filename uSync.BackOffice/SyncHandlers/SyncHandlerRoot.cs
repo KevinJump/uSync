@@ -387,6 +387,9 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     public virtual IEnumerable<uSyncAction> Import(string filePath, HandlerSettings config, SerializerFlags flags)
         => ImportAsync(filePath, config, new uSyncImportOptions { Flags = flags }).Result;
 
+    /// <summary>
+    ///  Import a single item, from the .config file supplied
+    /// </summary>
     public virtual async Task<IEnumerable<uSyncAction>> ImportAsync(string filePath, HandlerSettings config, uSyncImportOptions options)
     {
         try
@@ -602,6 +605,10 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     protected virtual IEnumerable<uSyncAction> CleanFolder(string cleanFile, bool reportOnly, bool flat)
         => CleanFolderAsync(cleanFile, reportOnly, flat).Result;
 
+    /// <summary>
+    ///  given a folder we calculate what items we can remove, because they are 
+    ///  not in one the files in the folder.
+    /// </summary>
     protected virtual async Task<IEnumerable<uSyncAction>> CleanFolderAsync(string cleanFile, bool reportOnly, bool flat)
     {
         var folder = Path.GetDirectoryName(cleanFile);
@@ -702,6 +709,9 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     protected TObject? GetCleanParent(string file)
         => GetCleanParentAsync(file).Result;
 
+    /// <summary>
+    ///  Get the parent item of the clean file (so we can check if the folder has any versions of this item in it)
+    /// </summary>
     protected async Task<TObject?> GetCleanParentAsync(string file)
     {
         var node = XElement.Load(file);
@@ -721,6 +731,13 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     protected virtual IEnumerable<uSyncAction> DeleteMissingItems(TObject parent, IEnumerable<Guid> keysToKeep, bool reportOnly)
         => DeleteMissingItemsAsync(parent, keysToKeep, reportOnly).Result;
 
+    /// <summary>
+    ///  remove an items that are not listed in the GUIDs to keep
+    /// </summary>
+    /// <param name="parent">parent item that all keys will be under</param>
+    /// <param name="keysToKeep">list of GUIDs of items we don't want to delete</param>
+    /// <param name="reportOnly">will just report what would happen (doesn't do the delete)</param>
+    /// <returns>list of delete actions</returns>
     protected abstract Task<IEnumerable<uSyncAction>> DeleteMissingItemsAsync(TObject parent, IEnumerable<Guid> keysToKeep, bool reportOnly);
 
     /// <summary>
@@ -734,6 +751,13 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     protected virtual IEnumerable<uSyncAction> DeleteMissingItems(int parentId, IEnumerable<Guid> keysToKeep, bool reportOnly)
         => [];
 
+    /// <summary>
+    /// Remove an items that are not listed in the GUIDs to keep.
+    /// </summary>
+    /// <param name="key">parent item that all keys will be under</param>
+    /// <param name="keysToKeep">list of GUIDs of items we don't want to delete</param>
+    /// <param name="reportOnly">will just report what would happen (doesn't do the delete)</param>
+    /// <returns>list of delete actions</returns>
     protected virtual Task<IEnumerable<uSyncAction>> DeleteMissingItemsAsync(Guid key, IEnumerable<Guid> keysToKeep, bool reportOnly)
         => Task.FromResult(Enumerable.Empty<uSyncAction>());
 
@@ -750,6 +774,9 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     virtual protected bool ShouldImport(XElement node, HandlerSettings config)
         => ShouldImportAsync(node, config).Result;
 
+    /// <summary>
+    ///  check to see if this element should be imported as part of the process.
+    /// </summary>
     virtual protected async Task<bool> ShouldImportAsync(XElement node, HandlerSettings config)
     {
         // if createOnly is on, then we only create things that are not already there. 
@@ -793,6 +820,10 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// </summary>
     [Obsolete("Use ShouldExportAsync will be removed in v16")]
     virtual protected bool ShouldExport(XElement node, HandlerSettings config) => true;
+
+    /// <summary>
+    ///  Check to see if this element should be exported. 
+    /// </summary>
     virtual protected Task<bool> ShouldExportAsync(XElement node, HandlerSettings config) => Task.FromResult(true);
 
     #endregion
@@ -835,10 +866,16 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     virtual public IEnumerable<uSyncAction> ExportAll(TContainer? parent, string[] folders, HandlerSettings config, SyncUpdateCallback? callback)
         => ExportAllAsync(parent, folders, config, callback).Result;
 
+    /// <summary>
+    /// Export all items to a give folder on the disk
+    /// </summary>
     virtual public async Task<IEnumerable<uSyncAction>> ExportAllAsync(string[] folders, HandlerSettings settings, SyncUpdateCallback? callback)
         => await ExportAllAsync(default, folders, settings, callback);
 
 
+    /// <summary>
+    /// Export all items to a give folder on the disk
+    /// </summary>
     virtual public async Task<IEnumerable<uSyncAction>> ExportAllAsync(TContainer? parent, string[] folders, HandlerSettings config, SyncUpdateCallback? callback)
     {
         var actions = new List<uSyncAction>();
@@ -881,17 +918,21 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     [Obsolete("use GetFoldersAsync will be removed in v16")]
     virtual protected IEnumerable<TContainer> GetChildItems(TContainer? parent) => [];
 
+    /// <summary>
+    /// Fetch all child items beneath a given container 
+    /// </summary>
     abstract protected Task<IEnumerable<TContainer>> GetChildItemsAsync(TContainer? parent);
 
     /// <summary>
     /// Fetch all child items beneath a given folder
     /// </summary>
-    /// <param name="parent"></param>
-    /// <returns></returns>
     [Obsolete("use GetFoldersAsync will be removed in v16")]
     virtual protected IEnumerable<TContainer> GetFolders(TContainer? parent)
         => GetFoldersAsync(parent).Result;
 
+    /// <summary>
+    /// Fetch all child items beneath a given folder
+    /// </summary>
     abstract protected Task<IEnumerable<TContainer>> GetFoldersAsync(TContainer? parent);
 
     /// <summary>
@@ -901,6 +942,9 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     public bool HasChildren(TContainer item)
         => GetFolders(item).Any() || GetChildItems(item).Any();
 
+    /// <summary>
+    /// Does this container have any children 
+    /// </summary>
     public virtual async Task<bool> HasChildrenAsync(TContainer item)
         => (await GetFoldersAsync(item)).Any() || (await GetChildItemsAsync(item)).Any();
 
@@ -966,6 +1010,9 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     virtual public IEnumerable<uSyncAction> Export(TObject item, string[] folders, HandlerSettings config)
         => ExportAsync(item, folders, config).Result;
 
+    /// <summary>
+    /// Export a given item to disk
+    /// </summary>
     virtual public async Task<IEnumerable<uSyncAction>> ExportAsync(TObject item, string[] folders, HandlerSettings config)
     {
         if (item == null)
@@ -1016,6 +1063,12 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     protected virtual SyncAttempt<XElement> Export_DoExport(TObject item, string filename, string[] folders, HandlerSettings config)
         => Export_DoExportAsync(item, filename, folders, config).Result;
 
+    /// <summary>
+    ///  Do the meat of the export 
+    /// </summary>
+    /// <remarks>
+    ///  inheriting this method, means you don't have to repeat all the checks in child handlers. 
+    /// </remarks>
     protected virtual async Task<SyncAttempt<XElement>> Export_DoExportAsync(TObject item, string filename, string[] folders, HandlerSettings config)
     {
         var attempt = await SerializeItemAsync(item, new SyncSerializerOptions(config.Settings));
@@ -1107,6 +1160,13 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     protected virtual bool HasChildren(TObject item)
         => HasChildrenAsync(item).Result;
 
+    /// <summary>
+    ///  does this item have any children ? 
+    /// </summary>
+    /// <remarks>
+    ///  on items where we can check this (quickly) we can reduce the number of checks we might 
+    ///  make on child items or cleaning up where we don't need to. 
+    /// </remarks>
     protected virtual Task<bool> HasChildrenAsync(TObject item)
         => Task.FromResult(true);
 
@@ -1134,6 +1194,9 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 
     #region Reporting 
 
+    /// <summary>
+    ///  run the report on a folder,
+    /// </summary>
     public async Task<IEnumerable<uSyncAction>> ReportAsync(string[] folders, HandlerSettings config, SyncUpdateCallback? callback)
     {
         List<uSyncAction> actions = [];
@@ -1225,7 +1288,6 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     ///  name (tree items, such as content or media), this function has 
     ///  to be overridden to remove the name check.
     /// </remarks>
-
     protected virtual bool DoActionsMatch(uSyncAction a, uSyncAction b)
     {
         if (a.Key == b.Key) return true;
@@ -1324,6 +1386,9 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     protected virtual IEnumerable<uSyncAction> ReportElement(XElement node, string filename, HandlerSettings? config)
         => ReportElementAsync(node, filename, config ?? this.DefaultConfig, new uSyncImportOptions()).Result;
 
+    /// <summary>
+    /// Report on any changes for a single XML node.
+    /// </summary>
     public virtual async Task<IEnumerable<uSyncAction>> ReportElementAsync(XElement node, string filename, HandlerSettings settings, uSyncImportOptions options)
     {
         try
@@ -1408,6 +1473,10 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     [Obsolete("Use ReportItemAsync will be removed in v16")]
     protected IEnumerable<uSyncAction> ReportItem(string file, HandlerSettings config)
         => ReportItemAsync(file, config).Result;
+
+    /// <summary>
+    /// Run a report on a single file.
+    /// </summary>
     protected async Task<IEnumerable<uSyncAction>> ReportItemAsync(string file, HandlerSettings config)
     {
         try
@@ -1490,7 +1559,6 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// <summary>
     /// Handle the Umbraco Saved notification for items. 
     /// </summary>
-    /// <param name="notification"></param>
     public virtual async Task HandleAsync(SavedNotification<TObject> notification, CancellationToken cancellationToken)
     {
         if (!ShouldProcessEvent()) return;
@@ -1521,7 +1589,6 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// <summary>
     /// Handle the Umbraco moved notification for items.
     /// </summary>
-    /// <param name="notification"></param>
     public virtual async Task HandleAsync(MovedNotification<TObject> notification, CancellationToken cancellationToken)
     {
         try
@@ -1565,6 +1632,9 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         }
     }
 
+    /// <summary>
+    ///  export items that are in the recycle bin. 
+    /// </summary>
     protected virtual async Task ExportDeletedItemAsync(TObject item, string[] folders, HandlerSettings config)
     {
         if (item == null) return;
@@ -1633,6 +1703,13 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     protected virtual void CleanUp(TObject item, string newFile, string folder)
         => CleanUpAsync(item, newFile, folder).Wait();
 
+    /// <summary>
+    ///  Cleans up the handler folder, removing duplicate files for this item
+    ///  </summary>
+    ///  <remarks>
+    ///   e.g if someone renames a thing (and we are using the name in the file) 
+    ///   this will clean anything else in the folder that has that key / alias
+    ///  </remarks>
     protected virtual async Task CleanUpAsync(TObject item, string newFile, string folder)
     {
         var physicalFile = syncFileService.GetAbsPath(newFile);
@@ -1693,6 +1770,9 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     [Obsolete("This method is not used and will be removed in v16")]
     protected virtual TObject? GetFromService(Guid key) => GetFromServiceAsync(key).Result;
 
+    /// <summary>
+    /// Fetch an item via the Serializer
+    /// </summary>
     protected virtual async Task<TObject?> GetFromServiceAsync(Guid key) => await serializer.FindItemAsync(key);
 
     /// <summary>
@@ -1700,6 +1780,9 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// </summary>
     [Obsolete("This method is not used and will be removed in v16")]
     protected virtual TObject? GetFromService(string alias) => GetFromServiceAsync(alias).Result;
+    /// <summary>
+    /// Fetch an item via the Serializer
+    /// </summary>
     protected virtual async Task<TObject?> GetFromServiceAsync(string alias) => await serializer.FindItemAsync(alias);
 
     /// <summary>
@@ -1707,6 +1790,9 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// </summary>
     [Obsolete("This method is not used and will be removed in v16")]
     protected virtual void DeleteViaService(TObject item) => DeleteViaServiceAsync(item).Wait();
+    /// <summary>
+    /// Delete an item via the Serializer
+    /// </summary>
     protected virtual async Task DeleteViaServiceAsync(TObject item) => await serializer.DeleteItemAsync(item);
 
     /// <summary>
@@ -1722,11 +1808,13 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// <summary>
     /// Get a container item from the Umbraco service.
     /// </summary>
-
     [Obsolete("This method is not used and will be removed in v16")]
     virtual protected TObject? GetFromService(TContainer? item)
         => GetFromServiceAsync(item).Result;
 
+    /// <summary>
+    /// Get a container item from the Umbraco service.
+    /// </summary>
     abstract protected Task<TObject?> GetFromServiceAsync(TContainer? item);
 
     /// <summary>
@@ -1735,6 +1823,9 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     [Obsolete("This method is not used and will be removed in v16")]
     virtual protected TContainer? GetContainer(Guid key) => default;
 
+    /// <summary>
+    /// Get a container item from the Umbraco service.
+    /// </summary>
     virtual protected Task<TContainer?> GetContainerAsync(Guid key) => Task.FromResult<TContainer?>(default);
 
     /// <summary>
@@ -1913,6 +2004,13 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     protected IEnumerable<uSyncDependency> GetDependencies(TObject item, DependencyFlags flags)
         => GetDependenciesAsync(item, flags).Result;
 
+    /// <summary>
+    /// Calculate any dependencies for any given item based on loaded dependency checkers 
+    /// </summary>
+    /// <remarks>
+    /// uSync contains no dependency checkers by default - uSync.Complete will load checkers
+    /// when installed. 
+    /// </remarks>
     protected async Task<IEnumerable<uSyncDependency>> GetDependenciesAsync(TObject item, DependencyFlags flags)
     {
         if (item == null || !HasDependencyCheckers()) return [];
@@ -1975,16 +2073,22 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     protected SyncAttempt<XElement> SerializeItem(TObject item, SyncSerializerOptions options)
         => SerializeItemAsync(item, options).Result;
 
+    /// <summary>
+    ///  call the serializer to get an items xml.
+    /// </summary>
     protected async Task<SyncAttempt<XElement>> SerializeItemAsync(TObject item, SyncSerializerOptions options)
         => await serializer.SerializeAsync(item, options);
 
-    /// <inheritdoc />
     /// <summary>
     ///  turn the xml into an item (and optionally save it to umbraco).
     /// </summary>
     [Obsolete("Use DeserializeItemAsync instead will be removed in v16")]
     protected SyncAttempt<TObject> DeserializeItem(XElement node, SyncSerializerOptions options)
         => DeserializeItemAsync(node, options).Result;
+
+    /// <summary>
+    ///  turn the xml into an item (and optionally save it to umbraco).
+    /// </summary>
     protected async Task<SyncAttempt<TObject>> DeserializeItemAsync(XElement node, SyncSerializerOptions options)
             => await serializer.DeserializeAsync(node, options);
 
@@ -1994,6 +2098,10 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     [Obsolete("use DeserializeItemSecondPassAsync instead will be removed in v16")]
     protected SyncAttempt<TObject> DeserializeItemSecondPass(TObject item, XElement node, SyncSerializerOptions options)
         => DeserializeItemSecondPassAsync(item, node, options).Result;
+
+    /// <summary>
+    ///  perform a second pass on an item you are importing.
+    /// </summary>
     protected async Task<SyncAttempt<TObject>> DeserializeItemSecondPassAsync(TObject item, XElement node, SyncSerializerOptions options)
         => await serializer.DeserializeSecondPassAsync(item, node, options);
 
@@ -2037,6 +2145,9 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         public XElement? CurrentNode { get; set; }
     }
 
+    /// <summary>
+    ///  find a UDI from a XElement node
+    /// </summary>
     public async Task<Udi?> FindFromNodeAsync(XElement node)
     {
         var item = await serializer.FindItemAsync(node);
@@ -2054,6 +2165,9 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         return this.IsItemCurrent(node, serializerOptions).Change;
     }
 
+    /// <summary>
+    /// Calculate the current status of an item compared to the XML in a potential import
+    /// </summary>
     public async Task<ChangeType> GetItemStatusAsync(XElement node)
     {
         var options = new SyncSerializerOptions(SerializerFlags.None, this.DefaultConfig.Settings);

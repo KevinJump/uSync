@@ -127,6 +127,7 @@ public abstract class SyncHandlerBase<TObject>
     protected override async Task<IEnumerable<uSyncAction>> DeleteMissingItemsAsync(TObject parent, IEnumerable<Guid> keysToKeep, bool reportOnly)
         => await DeleteMissingItemsAsync(parent?.Key ?? Guid.Empty, keysToKeep, reportOnly);
 
+    /// <inheritdoc/>
     protected override async Task<IEnumerable<uSyncAction>> DeleteMissingItemsAsync(Guid key, IEnumerable<Guid> keysToKeep, bool reportOnly)
     {
         var items = (await GetChildItemsAsync(key)).ToArray();
@@ -169,6 +170,7 @@ public abstract class SyncHandlerBase<TObject>
         return actions;
     }
 
+    /// <inheritdoc/>
     protected override async Task<IEnumerable<IEntity>> GetChildItemsAsync(IEntity? parent)
         => await GetChildItemsAsync(parent?.Key ?? Guid.Empty);
 
@@ -192,6 +194,9 @@ public abstract class SyncHandlerBase<TObject>
         return GetChildItemsAsync(entity.Key).Result;
     }
 
+    /// <summary>
+    ///  Get all child items beneath a given item
+    /// </summary>
     [Obsolete("use GetChildItemsAsync will be removed in v16")]
     virtual protected IEnumerable<IEntity> GetChildItems(int parent, UmbracoObjectTypes objectType)
     {
@@ -217,12 +222,18 @@ public abstract class SyncHandlerBase<TObject>
 
     }
 
+    /// <summary>
+    ///  Get all child items beneath a given item
+    /// </summary>
     virtual protected async Task<IEnumerable<IEntity>> GetChildItemsAsync(Guid key)
     {
         if (this.ItemObjectType == UmbracoObjectTypes.Unknown) return [];
         return await GetChildItemsAsync(key, this.ItemObjectType);
     }
 
+    /// <summary>
+    ///  Get all child items beneath a given item
+    /// </summary>
     virtual protected async Task<IEnumerable<IEntity>> GetChildItemsAsync(Guid key, UmbracoObjectTypes objectType)
     {
         var cacheKey = $"{GetCacheKeyBase()}_parent_{key}_{objectType}";
@@ -233,6 +244,9 @@ public abstract class SyncHandlerBase<TObject>
         }, null) ?? [];
     }
 
+    /// <summary>
+    ///  Get all child items beneath a given key, for a given object type
+    /// </summary>
     private async Task<IEnumerable<IEntity>> GetEntityChildrenAsync(Guid key, UmbracoObjectTypes objectType)
     {
         // logger.LogDebug("Cache miss [{key}]", cacheKey);
@@ -267,6 +281,9 @@ public abstract class SyncHandlerBase<TObject>
         return [];
     }
 
+    /// <summary>
+    /// Get all 'folders' beneath a given item (usually these are Container items)
+    /// </summary>
     virtual protected async Task<IEnumerable<IEntity>> GetFoldersAsync(Guid key)
     {
         if (this.ItemContainerType == UmbracoObjectTypes.Unknown)
@@ -283,24 +300,27 @@ public abstract class SyncHandlerBase<TObject>
         return GetFolders(parent.Id);
     }
 
+    /// <inheritdoc/>
     protected override async Task<IEnumerable<IEntity>> GetFoldersAsync(IEntity? parent)
     {
         if (parent is null) return await GetFoldersAsync(Guid.Empty);
         return await GetFoldersAsync(parent.Key);
     }
 
+    /// <inheritdoc/>
     protected override async Task<TObject?> GetFromServiceAsync(IEntity? entity)
         => entity is null ? default : await GetFromServiceAsync(entity.Key);
 
     /// <summary>
     ///  for backwards compatibility up the tree.
     /// </summary>
-    /// <param name="id"></param>
-    /// <returns></returns>
     [Obsolete("Use GetFromServiceAsync will be removed in v16")]
     public bool HasChildren(int id)
         => true;
 
+    /// <summary>
+    ///  for backwards compatibility up the tree.
+    /// </summary>
     public async Task<bool> HasChildrenAsync(Guid key)
         => (await GetFoldersAsync(key)).Any() || (await GetChildItemsAsync(key)).Any();
 

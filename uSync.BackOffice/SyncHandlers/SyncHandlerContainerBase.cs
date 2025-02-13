@@ -64,6 +64,9 @@ public abstract class SyncHandlerContainerBase<TObject>
     protected IEnumerable<uSyncAction> CleanFolders(int parent)
         => [];
 
+    /// <summary>
+    ///  Removes any empty 'containers' after import 
+    /// </summary>
     protected async Task<IEnumerable<uSyncAction>> CleanFoldersAsync(Guid parentKey)
     {
         var actions = new List<uSyncAction>();
@@ -107,8 +110,14 @@ public abstract class SyncHandlerContainerBase<TObject>
     [Obsolete("Delete by key - will be removed in v16")]
     virtual protected void DeleteFolder(int id) { }
 
+    /// <summary>
+    /// delete a container
+    /// </summary>
     abstract protected Task DeleteFolderAsync(Guid key);
 
+    /// <summary>
+    ///  process things post import (at the end when everything has been imported)
+    /// </summary>
     public virtual async Task<IEnumerable<uSyncAction>> ProcessPostImportAsync(IEnumerable<uSyncAction> actions, HandlerSettings config)
     {
         if (actions == null || !actions.Any()) return [];
@@ -144,6 +153,10 @@ public abstract class SyncHandlerContainerBase<TObject>
     protected IEnumerable<uSyncAction> UpdateFolder(int folderId, string[] folders, HandlerSettings config)
         => [];
 
+    /// <summary>
+    ///  will resave everything in a folder (and beneath)
+    ///  we need to this when it's renamed
+    /// </summary>
     protected async Task<IEnumerable<uSyncAction>> UpdateFolderAsync(Guid folderKey, string[] folders, HandlerSettings config)
     {
         if (this.serializer is SyncContainerSerializerBase<TObject> containerSerializer)
@@ -188,7 +201,6 @@ public abstract class SyncHandlerContainerBase<TObject>
     /// <summary>
     ///  Handle container saving events
     /// </summary>
-    /// <param name="notification"></param>
     public virtual Task HandleAsync(EntityContainerSavedNotification notification, CancellationToken cancellationToken)
     {
         return Task.CompletedTask;
@@ -204,6 +216,9 @@ public abstract class SyncHandlerContainerBase<TObject>
     }
 
 
+    /// <summary>
+    ///  Handle container renamed events
+    /// </summary>
     public virtual async Task HandleAsync(EntityContainerRenamedNotification notification, CancellationToken cancellationToken)
     {
         if (!ShouldProcessEvent()) return;

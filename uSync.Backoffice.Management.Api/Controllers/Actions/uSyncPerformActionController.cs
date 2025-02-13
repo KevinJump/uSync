@@ -38,7 +38,7 @@ public class uSyncPerformActionController : uSyncControllerBase
     [HttpPost("Perform")]
     [ProducesResponseType(typeof(PerformActionResponse), 200)]
     public async Task<PerformActionResponse> PerformAction(PerformActionRequest model)
-        => await _managementService.PerformActionAsync(model, _backOfficeSecurityAccessor.BackOfficeSecurity.CurrentUser);
+        => await _managementService.PerformActionAsync(model, _backOfficeSecurityAccessor.BackOfficeSecurity?.CurrentUser);
 
 
     [HttpPost("Download")]
