@@ -192,11 +192,7 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 	#renderReport() {
 		if (!this._completed) return nothing;
 
-		return html`
-			<uui-box class="results-box">
-				<usync-results .results=${this._results}></usync-results>
-			</uui-box>
-		`;
+		return html`<usync-results .results=${this._results}></usync-results>`;
 	}
 
 	static styles = [

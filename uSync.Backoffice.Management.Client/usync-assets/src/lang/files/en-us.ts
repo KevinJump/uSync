@@ -12,7 +12,7 @@ export default {
 		ImportFile: 'Import from File',
 
 		noChange: 'Nothing has changed',
-		showAll: 'Show all',
+		showAll: 'Show all items',
 
 		detailHeadline: 'Detected Changes',
 		detailHeader: 'Things that are different',
@@ -27,7 +27,9 @@ export default {
 		changeType: 'Type',
 		changeName: 'Name',
 		changeDetail: 'Detail',
-		changeCount: '{0} items',
+		changeHeading: 'Results',
+		changeCount: '{1}/{0} changes',
+		noChangeCount: '0/{0} changes',
 
 		legacyInfo: `<p>uSync has found a legacy uSync folder at <strong>%0%</strong>.<br />
 						Its likely that the content in it will need coverting in someway</p>`,
@@ -60,6 +62,21 @@ export default {
 		uploadIntro: 'Select a zip file containing uSync files that you want to upload',
 		uploadSuccess: 'The files have been uploaded and extracted to the uSync folder',
 		uploadError: 'There was an error uploading the files',
+
+		ILanguage: 'Language',
+		IDictionaryItem: 'Dictionary Items',
+		IDataType: 'DataTypes',
+		ITemplate: 'Templates',
+		IContentType: 'Content Types',
+		IMediaType: 'Media Types',
+		IMemberType: 'Member Types',
+		IContent: 'Content',
+		IMedia: 'Media',
+		IDomain: 'Domains',
+		IWebhook: 'Webhooks',
+		IRelationType: 'Relation Types',
+		MediaFile: 'Media Files',
+		XElement: 'Other',
 	},
 	uSyncSettings: {
 		settings: 'uSync Settings',
