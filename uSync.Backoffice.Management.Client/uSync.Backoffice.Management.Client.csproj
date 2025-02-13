@@ -24,6 +24,7 @@
 	</ItemGroup>
 	-->
 
+	<!--
 	<Target Name="NpmInstall" Inputs="usync-assets/package.json" Outputs="usync-assets/node_modules/.install-stamp">
 		<Message Importance="high" Text="Running npm Import" />
 		<Exec Command="npm install" Condition="'$(RestorePackagesWithLockFile)' != true" WorkingDirectory="usync-assets" />
@@ -33,6 +34,6 @@
 	<Target Name="NpmRunBuild" DependsOnTargets="NpmInstall" BeforeTargets="BeforeBuild">
 		<Message Importance="high" Text="Running npm build" />
 		<Exec Command="npm run build" WorkingDirectory="usync-assets" />		
-	</Target>
+	</Target> -->
 
 </Project>
