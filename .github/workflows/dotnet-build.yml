@@ -2,7 +2,7 @@ name: PR Project Build and Test
 
 on:
   pull_request:
-    branches: [v15/main]
+    branches: [v15/main, v15/cached-actions]
 
 env:
   config: Release
@@ -27,9 +27,10 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 9.0.x
+          cache: true
 
       - name: restore
-        run: dotnet restore ${{ env.solution_name}}
+        run: dotnet restore ${{ env.solution_name}} --locked-mode
 
       - name: build
         run: dotnet build ${{ env.solution_name }} -c ${{ env.config }} -p:ContinuousIntegrationBuild=true
