@@ -1,8 +1,10 @@
 name: PR Project Build and Test
 
 on:
+  push:
+    branches: [v15/cached-actions]
   pull_request:
-    branches: [v15/main, v15/cached-actions]
+    branches: [v15/main]
 
 env:
   config: Release
