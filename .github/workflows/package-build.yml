@@ -2,7 +2,7 @@ name: Build and Package.
 
 on:
   push:
-    branches: [v15/main]
+    branches: [v15/main, v15/cached-actions]
 
 env:
   config: Release
@@ -48,16 +48,12 @@ jobs:
       schema_gen_project: ./uSync.SchemaGenerator/uSync.SchemaGenerator.csproj
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Install .Net core
-        uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 9.0.x
           cache: true
+          cache-dependency-path: "**/packages.lock.json"
 
       - name: restore
         run: dotnet restore ${{ env.solution_name}} --locked-mode
@@ -77,10 +73,12 @@ jobs:
     needs: [build-project, version]
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
         with:
-          fetch-depth: 0
+          dotnet-version: 9.0.x
+          cache: true
+          cache-dependency-path: "**/packages.lock.json"
 
       - name: version
         run: |
@@ -89,6 +87,17 @@ jobs:
       - name: Stamp version on NPM Package
         working-directory: ./uSync.Backoffice.Management.Client/usync-assets
         run: npm version ${{ needs.version.outputs.version_string }}
+
+      - name: npm install
+        working-directory: ./uSync.Backoffice.Management.Client/usync-assets
+        run: npm ci
+
+      - name: npm build
+        working-directory: ./uSync.Backoffice.Management.Client/usync-assets
+        run: npm run build
+
+      - name: restore
+        run: dotnet restore ${{ env.solution_name}} --locked-mode
 
       - name: package uSync.Core
         run: dotnet pack ./uSync.Core/uSync.Core.csproj -c ${{env.config}} --output ${{env.out_folder}} /p:version=${{ needs.version.outputs.version_string }}
