@@ -473,7 +473,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
             }
 
             // v14 we always save now, as save and publish doesn't do that anymore...
-            logger.LogDebug("Performing Save: {id} {name} {user}", item.Id, item.Name, options.UserId);
+            logger.LogDebug("Performing Save: {id} {name}", item.Id, item.Name);
             contentService.Save(item, options.UserId, scheduleCollection);
 
             if (publishedNode.HasElements)
@@ -531,7 +531,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
         else
         {
             // save?
-            logger.LogDebug("Performing Save (Not published): {id} {name} {user}", item.Id, item.Name, options.UserId);
+            logger.LogDebug("Performing Save (Not published): {id} {name}", item.Id, item.Name);
             contentService.Save(item, options.UserId);
 
         }
