@@ -605,6 +605,10 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     protected virtual IEnumerable<uSyncAction> CleanFolder(string cleanFile, bool reportOnly, bool flat)
         => CleanFolderAsync(cleanFile, reportOnly, flat).Result;
 
+    /// <summary>
+    ///  given a folder we calculate what items we can remove, because they are 
+    ///  not in one the files in the folder.
+    /// </summary>
     protected virtual async Task<IEnumerable<uSyncAction>> CleanFolderAsync(string cleanFile, bool reportOnly, bool flat)
     {
         var folder = Path.GetDirectoryName(cleanFile);
@@ -750,7 +754,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// <summary>
     /// Remove an items that are not listed in the GUIDs to keep.
     /// </summary>
-    /// <param name="parentId">parent item that all keys will be under</param>
+    /// <param name="key">parent item that all keys will be under</param>
     /// <param name="keysToKeep">list of GUIDs of items we don't want to delete</param>
     /// <param name="reportOnly">will just report what would happen (doesn't do the delete)</param>
     /// <returns>list of delete actions</returns>
@@ -1555,7 +1559,6 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// <summary>
     /// Handle the Umbraco Saved notification for items. 
     /// </summary>
-    /// <param name="notification"></param>
     public virtual async Task HandleAsync(SavedNotification<TObject> notification, CancellationToken cancellationToken)
     {
         if (!ShouldProcessEvent()) return;
@@ -1586,7 +1589,6 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// <summary>
     /// Handle the Umbraco moved notification for items.
     /// </summary>
-    /// <param name="notification"></param>
     public virtual async Task HandleAsync(MovedNotification<TObject> notification, CancellationToken cancellationToken)
     {
         try
