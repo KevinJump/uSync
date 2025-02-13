@@ -9,4 +9,6 @@ public class PerformActionRequest
     public string Action { get; set; } = HandlerActions.Report.ToString();
     public int StepNumber { get; set; }
     public uSyncOptions? Options { get; set; }
+
+    public string? Username { get; set; }
 }

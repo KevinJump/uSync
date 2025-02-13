@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 
+using Umbraco.Cms.Core.Models.Membership;
 using Umbraco.Extensions;
 
 using uSync.Backoffice.Management.Api.Extensions;
@@ -155,39 +156,10 @@ internal class uSyncManagementService : ISyncManagementService
         }
 
         return actionGroups;
-
-
-
-        //      List<SyncActionGroup> actions = [
-        //	new SyncActionGroup
-        //	{
-        //		GroupName = "Settings",
-        //		Icon = "icon-settings-alt",
-        //		Key = "settings",
-        //		Buttons = defaultButtons
-        //	},
-        //	new SyncActionGroup
-        //	{
-        //		GroupName = "Content",
-        //		Icon = "icon-documents",
-        //		Key = "content",
-        //		Buttons = defaultButtons
-        //	},
-        //	new SyncActionGroup
-        //	{
-        //		GroupName = "Everything",
-        //		Icon = "icon-paper-plane-alt",
-        //		Key = "all",
-        //		Buttons = everythingButtons
-        //	}
-        //];
-
-        //      return actions;
-
     }
 
 
-    public async Task<PerformActionResponse> PerformActionAsync(PerformActionRequest actionRequest)
+    public async Task<PerformActionResponse> PerformActionAsync(PerformActionRequest actionRequest, IUser? user)
     {
         if (Enum.TryParse(actionRequest.Action, out HandlerActions action) is false)
             throw new ArgumentException($"Invalid action {actionRequest.Action}");
@@ -197,6 +169,8 @@ internal class uSyncManagementService : ISyncManagementService
 
         if (action == HandlerActions.Export && string.IsNullOrWhiteSpace(actionRequest.RequestId))
         {
+            await _syncActionService.StartProcessAsync(action);
+
             // first step in an export.
             if (actionRequest.Options?.Clean is true)
             {
@@ -214,27 +188,6 @@ internal class uSyncManagementService : ISyncManagementService
         }
         uSyncCallbacks callbacks = hubClient?.Callbacks() ?? new uSyncCallbacks(null, null);
 
-        if (actionRequest.StepNumber >= handlers.Count)
-        {
-            var finalActions = _syncManagementCache.GetCachedActions(requestId);
-
-            // when complete we clean out our action cache.
-            _syncManagementCache.Clear(requestId);
-
-            callbacks?.Update?.Invoke("Finished", 1, 1);
-
-            // finished. 
-            return new PerformActionResponse
-            {
-                RequestId = requestId.ToString(),
-                Actions = finalActions.Select(x => x.ToActionView()),
-                Complete = true,
-                Status = GetSummaries(handlers, actionRequest.StepNumber, finalActions)
-            };
-        }
-
-        var currentHandler = handlers[actionRequest.StepNumber];
-        var method = GetHandlerMethodAsync(action);
 
 
         var handlerOptions = new SyncActionOptions()
@@ -243,8 +196,23 @@ internal class uSyncManagementService : ISyncManagementService
             Set = actionRequest.Options?.Set ?? _configService.Settings.DefaultSet,
             Force = actionRequest.Options?.Force ?? false,
             Actions = new List<uSyncAction>(),
-            Handler = currentHandler.Alias
         };
+
+        if (actionRequest.StepNumber >= handlers.Count)
+        {
+            var actions = await PerformFinalSteps(requestId, action, handlerOptions, callbacks, user?.Username);
+            // finished. 
+            return new PerformActionResponse
+           {
+                RequestId = requestId.ToString(),
+                Actions = actions.Select(x => x.ToActionView()),
+                Complete = true,
+                Status = GetSummaries(action, handlers, actionRequest.StepNumber + 1, actions)
+            };
+        }
+
+        handlerOptions.Handler = handlers[actionRequest.StepNumber].Alias;
+        var method = GetHandlerMethodAsync(action);
 
         var results = await method(handlerOptions, callbacks);
         _syncManagementCache.CacheItems(requestId, results.Actions, false);
@@ -253,9 +221,49 @@ internal class uSyncManagementService : ISyncManagementService
         {
             RequestId = requestId.ToString(),
             Actions = results.Actions.Select(x => x.ToActionView()),
-            Status = GetSummaries(handlers, actionRequest.StepNumber, results.Actions.ToList()),
+            Status = GetSummaries(action, handlers, actionRequest.StepNumber, results.Actions.ToList()),
             Complete = false
         };
+    }
+
+    private async Task<List<uSyncAction>> PerformFinalSteps(Guid requestId, HandlerActions action, SyncActionOptions options, uSyncCallbacks callbacks, string? username)
+    {
+        var finalActions = _syncManagementCache.GetCachedActions(requestId);
+        var finalSteps = GetFinalStep(action);
+
+        var request = new SyncFinalActionRequest
+        {
+            RequestId = requestId,
+            HandlerAction = action,
+            ActionOptions = options,
+            Actions = finalActions,
+            Callbacks = callbacks,
+            Username = username ?? ""
+        };
+
+        foreach (var step in finalSteps)
+        {
+            var result = await step(request);
+        }
+
+        // when complete we clean out our action cache.
+        _syncManagementCache.Clear(requestId);
+
+        callbacks?.Update?.Invoke("Finished", 1, 1);
+        return finalActions;
+    }
+
+    private IEnumerable<Func<SyncFinalActionRequest, Task<SyncActionResult>>> GetFinalStep(HandlerActions action)
+    {
+        var steps = new List<Func<SyncFinalActionRequest, Task<SyncActionResult>>>();
+
+        if (action == HandlerActions.Import)
+        {
+            steps.Add(_syncActionService.ImportPostAsync);
+        }
+
+        steps.Add(_syncActionService.FinishProcessAsync);
+        return steps;
     }
 
     private Guid GetRequestId(PerformActionRequest actionRequest)
@@ -268,7 +276,7 @@ internal class uSyncManagementService : ISyncManagementService
         return requestId;
     }
 
-    private IEnumerable<SyncHandlerSummary> GetSummaries(List<SyncHandlerView> handlers, int step, List<uSyncAction> actions)
+    private IEnumerable<SyncHandlerSummary> GetSummaries(HandlerActions action, List<SyncHandlerView> handlers, int step, List<uSyncAction> actions)
     {
         var nextStep = step + 1;
         for (int n = 0; n < handlers.Count; n++)
@@ -283,6 +291,19 @@ internal class uSyncManagementService : ISyncManagementService
                       n == nextStep ? HandlerStatus.Processing : HandlerStatus.Pending,
                 Changes = handlerActions.Count(x => x.Change > Core.ChangeType.NoChange),
                 InError = handlerActions.Any(x => x.Change >= Core.ChangeType.Fail)
+            };
+        }
+
+        if (action == HandlerActions.Import)
+        {
+            yield return new SyncHandlerSummary
+            {
+                Name = $"Post Import",
+                Icon = "icon-directions",
+                Status = nextStep == handlers.Count ? HandlerStatus.Processing :
+                        nextStep > handlers.Count ? HandlerStatus.Complete : HandlerStatus.Pending,
+                Changes = 0,
+                InError = false
             };
         }
     }

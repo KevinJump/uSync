@@ -53,11 +53,18 @@ public interface ISyncActionService
     [Obsolete("use ImportPostAsync will be removed in v16")]
     SyncActionResult ImportPost(SyncActionOptions options, uSyncCallbacks? callbacks)
         => ImportPostAsync(options, callbacks).Result;
-    
+
     /// <summary>
     ///  run an export based on the options provided
     /// </summary>
-    Task<SyncActionResult> ImportPostAsync(SyncActionOptions options, uSyncCallbacks? callbacks);
+    [Obsolete("use ImportPostAsync with finalActionRequest , will be removed in v16")]
+    Task<SyncActionResult> ImportPostAsync(SyncActionOptions options, uSyncCallbacks? callbacks)
+        => ImportPostAsync(new SyncFinalActionRequest { RequestId = Guid.NewGuid(), ActionOptions = options, Callbacks = callbacks });
+
+    /// <summary>
+    ///  run an export based on the options provided
+    /// </summary>
+    Task<SyncActionResult> ImportPostAsync(SyncFinalActionRequest request);
 
     /// <summary>
     ///  run a report for a given handler based on the options provided.
@@ -85,7 +92,21 @@ public interface ISyncActionService
     /// <summary>
     ///  finish the bulk process
     /// </summary>
-    Task FinishProcessAsync(HandlerActions action, IEnumerable<uSyncAction> actions, string username);
+    [Obsolete("use FinishProcessAsync with FinalActionRequest will be removed in v16")]
+    Task FinishProcessAsync(HandlerActions action, IEnumerable<uSyncAction> actions, string username)
+        => FinishProcessAsync(new SyncFinalActionRequest
+        {
+            HandlerAction = action,
+            RequestId = Guid.NewGuid(),
+            ActionOptions = new(),
+            Actions = actions,
+            Username = username
+        });
+
+    /// <summary>
+    ///  finish the bulk process
+    /// </summary>
+    Task<SyncActionResult> FinishProcessAsync(SyncFinalActionRequest request);
 
     /// <summary>
     ///  returns the export folder zipped up as a stream
