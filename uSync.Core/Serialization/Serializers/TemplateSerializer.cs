@@ -61,64 +61,50 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
         return SyncAttempt<ITemplate>.Succeed(alias, ChangeType.Hidden);
     }
 
-    protected override async Task<SyncAttempt<ITemplate>> DeserializeCoreAsync(XElement node, SyncSerializerOptions options)
+    private async Task<ITemplate?> FindTemplateFromNodeAsync(XElement node)
     {
         var key = node.GetKey();
         var alias = node.GetAlias();
 
-        var name = node.Element("Name").ValueOrDefault(string.Empty);
         var item = default(ITemplate);
+
+        if (key != Guid.Empty)
+             item = await FindItemAsync(key);
+        
+        return item ?? await FindItemAsync(alias);
+
+    }
+
+    protected override async Task<SyncAttempt<ITemplate>> DeserializeCoreAsync(XElement node, SyncSerializerOptions options)
+    {
+        var key = node.GetKey();
+        var alias = node.GetAlias();
+        var name = node.Element("Name").ValueOrDefault(string.Empty);
+
+        var contentAttempt = GetContentForTemplate(node, options);
+        if (!contentAttempt) return SyncAttempt<ITemplate>.Fail(name, ChangeType.Import, contentAttempt.Exception?.Message ?? "Failed to get content");
 
         var details = new List<uSyncChange>();
 
-        if (key != Guid.Empty)
-            item = await FindItemAsync(key);
-
-        item ??= await FindItemAsync(alias);
-
-        if (item == null)
+        var item = await FindTemplateFromNodeAsync(node);
+        if (item is null)
         {
-            item = new Template(_shortStringHelper, name, alias);
+            var userKey = await _userIdKeyResolver.GetAsync(options.UserId);
+            var attempt = await _templateService.CreateAsync(
+                name,
+                alias,
+                contentAttempt.Result,
+                userKey, key);
+
+            if (attempt.Success is false)
+                return SyncAttempt<ITemplate>.Fail(name, ChangeType.Import, "Failed to create template");
+
+            item = attempt.Result;
             details.AddNew(alias, alias, "Template");
-
-            if (ShouldGetContentFromNode(node, options))
-            {
-                logger.LogDebug("Getting content for Template from XML");
-                item.Content = GetContentFromConfig(node);
-            }
-            else
-            {
-                logger.LogDebug("Loading template content from disk");
-
-                var templatePath = ViewPath(alias);
-                if (templatePath is not null && _viewFileSystem?.FileExists(templatePath) is true)
-                {
-                    logger.LogDebug("Reading {path} contents", templatePath);
-                    item.Content = GetContentFromFile(templatePath);
-                    item.Path = templatePath;
-                }
-                else
-                {
-                    if (!ViewsAreCompiled(options))
-                    {
-                        // template is missing
-                        // we can't create 
-                        logger.LogWarning("Failed to create template {path} the local file is missing", templatePath);
-                        return SyncAttempt<ITemplate>.Fail(name, ChangeType.Import, $"The template {templatePath} file is missing.");
-                    }
-                    else
-                    {
-                        // template is not on disk, we could use the viewEngine to find the view 
-                        // if this finds the view it tells us that the view is somewhere else ? 
-
-                        logger.LogDebug("Failed to find content, but UsingRazorViews so will create anyway, then delete the file");
-                        item.Content = $"<!-- [uSyncMarker:{this.Id}]  template content - will be removed -->";
-                    }
-                }
-            }
+            logger.LogDebug("New Template: {alias} {path}", item.Alias, item.Path);
         }
 
-        if (item == null)
+        if (item is null)
         {
             // creating went wrong
             logger.LogWarning("Failed to create template");
@@ -153,18 +139,45 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
             }
         }
 
-        //var master = node.Element("Parent").ValueOrDefault(string.Empty);
-        //if (master != string.Empty)
-        //{
-        //    var masterItem = fileService.GetTemplate(master);
-        //    if (masterItem != null)
-        //        item.SetMasterTemplate(masterItem);
-        //}
-
-        // Deserialize now takes care of the save.
-        // fileService.SaveTemplate(item);
-
         return SyncAttempt<ITemplate>.Succeed(item.Name, item, ChangeType.Import, details);
+    }
+
+    private Attempt<string?> GetContentForTemplate(XElement node, SyncSerializerOptions options)
+    {
+        if (ShouldGetContentFromNode(node, options))
+        {
+            logger.LogDebug("Getting content for Template from XML");
+            return Attempt.Succeed(GetContentFromConfig(node));
+        }
+        else
+        {
+            logger.LogDebug("Loading template content from disk");
+
+            var templatePath = ViewPath(node.GetAlias());
+            if (templatePath is not null && _viewFileSystem?.FileExists(templatePath) is true)
+            {
+                logger.LogDebug("Reading {path} contents", templatePath);
+                return Attempt.Succeed(GetContentFromFile(templatePath));
+            }
+            else
+            {
+                if (!ViewsAreCompiled(options))
+                {
+                    // template is missing
+                    // we can't create 
+                    logger.LogWarning("Failed to create template {path} the local file is missing", templatePath);
+                    return Attempt.Fail("", new Exception($"The template {templatePath} file is missing."));
+                }
+                else
+                {
+                    // template is not on disk, we could use the viewEngine to find the view 
+                    // if this finds the view it tells us that the view is somewhere else ? 
+
+                    logger.LogDebug("Failed to find content, but UsingRazorViews so will create anyway, then delete the file");
+                    return Attempt.Succeed($"<!-- [uSyncMarker:{this.Id}]  template content - will be removed -->");
+                }
+            }
+        }
     }
 
     /// <summary>
@@ -230,23 +243,6 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
         var details = new List<uSyncChange>();
         var saved = false;
 
-        var master = node.Element("Parent").ValueOrDefault(string.Empty);
-        if (master != string.Empty && item.MasterTemplateAlias != master)
-        {
-            logger.LogDebug("Looking for master {master}", master);
-            var masterItem = await FindItemAsync(master);
-            if (masterItem != null && item.MasterTemplateAlias != master)
-            {
-                details.AddUpdate("Parent", item.MasterTemplateAlias ?? string.Empty, master);
-
-                logger.LogDebug("Setting Master {alias}", masterItem.Alias);
-                // item.SetMasterTemplate(masterItem);
-
-                await SaveItemAsync(item);
-                saved = true;
-            }
-        }
-
         if (ViewsAreCompiled(options))
         {
             // using razor views - we delete the template file at the end (because its in a razor view). 
@@ -257,7 +253,7 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
 
                 if (System.IO.File.Exists(fullPath))
                 {
-                    var content = System.IO.File.ReadAllText(fullPath);
+                    var content = await System.IO.File.ReadAllTextAsync(fullPath);
                     if (content.Contains($"[uSyncMarker:{this.Id}]"))
                     {
                         logger.LogDebug("Removing the file from disk, because it exists in a razor view {templatePath}", templatePath);
@@ -329,7 +325,7 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
             item.UpdateDate = existing.UpdateDate;
         }
 
-        logger.LogDebug("Save Template {name} {alias} [{contentLength}] {userKey} {key}", item.Name, item.Alias, item.Content?.Length ?? 0, userKey, item.Key);
+        logger.LogDebug("Saving: {alias} {path}", item.Alias, item.Path);
 
         if (existing is null)
         {
@@ -341,10 +337,6 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
             var result = await _templateService.UpdateAsync(item, userKey);
             logger.LogDebug("Update Template Result: [{key}] {result} {status}", item.Key, result.Success, result.Status);
         }
-
-        var templates = await _templateService.GetAllAsync();
-        logger.LogDebug("[Templates]: {count} {names}",
-               templates.Count(), string.Join(",", templates.Select(x => $"{x.Alias}-{x.Key}")));
     }
 
     public override async Task SaveAsync(IEnumerable<ITemplate> items)
