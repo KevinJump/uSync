@@ -69,8 +69,8 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
         var item = default(ITemplate);
 
         if (key != Guid.Empty)
-             item = await FindItemAsync(key);
-        
+            item = await FindItemAsync(key);
+
         return item ?? await FindItemAsync(alias);
 
     }
@@ -149,35 +149,25 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
             logger.LogDebug("Getting content for Template from XML");
             return Attempt.Succeed(GetContentFromConfig(node));
         }
-        else
+
+        var templatePath = ViewPath(node.GetAlias());
+        if (templatePath is not null && _viewFileSystem?.FileExists(templatePath) is true)
         {
-            logger.LogDebug("Loading template content from disk");
-
-            var templatePath = ViewPath(node.GetAlias());
-            if (templatePath is not null && _viewFileSystem?.FileExists(templatePath) is true)
-            {
-                logger.LogDebug("Reading {path} contents", templatePath);
-                return Attempt.Succeed(GetContentFromFile(templatePath));
-            }
-            else
-            {
-                if (!ViewsAreCompiled(options))
-                {
-                    // template is missing
-                    // we can't create 
-                    logger.LogWarning("Failed to create template {path} the local file is missing", templatePath);
-                    return Attempt.Fail("", new Exception($"The template {templatePath} file is missing."));
-                }
-                else
-                {
-                    // template is not on disk, we could use the viewEngine to find the view 
-                    // if this finds the view it tells us that the view is somewhere else ? 
-
-                    logger.LogDebug("Failed to find content, but UsingRazorViews so will create anyway, then delete the file");
-                    return Attempt.Succeed($"<!-- [uSyncMarker:{this.Id}]  template content - will be removed -->");
-                }
-            }
+            logger.LogDebug("Reading {path} contents", templatePath);
+            return Attempt.Succeed(GetContentFromFile(templatePath));
         }
+
+        if (!ViewsAreCompiled(options))
+        {
+            // template is missing and the views are not compiled , then we can't create.
+            logger.LogWarning("Failed to create template {path} the local file is missing", templatePath);
+            return Attempt.Fail("", new Exception($"The template {templatePath} file is missing."));
+        }
+        // template is not on disk, we could use the viewEngine to find the view 
+        // if this finds the view it tells us that the view is somewhere else ? 
+
+        logger.LogDebug("Failed to find content, but UsingRazorViews so will create anyway, then delete the file");
+        return Attempt.Succeed($"<!-- [uSyncMarker:{this.Id}]  template content - will be removed -->");
     }
 
     /// <summary>
