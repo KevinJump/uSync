@@ -5,6 +5,7 @@ import {
 	customElement,
 	html,
 	state,
+	when,
 } from '@umbraco-cms/backoffice/external/lit';
 import {
 	USYNC_CORE_CONTEXT_TOKEN,
@@ -49,7 +50,6 @@ export class uSyncSettingsViewElement extends UmbElementMixin(LitElement) {
 								.name=${this.localize.term('uSyncSettings_importAtStartup')}
 								.description=${this.localize.term('uSyncSettings_importAtStartupDesc')}
 								.value=${this.settings?.importAtStartup}></usync-setting-item>
-
 							<usync-setting-item
 								.name=${this.localize.term('uSyncSettings_exportAtStartup')}
 								.description=${this.localize.term('uSyncSettings_exportAtStartupDesc')}
@@ -123,6 +123,20 @@ export class uSyncSettingsViewElement extends UmbElementMixin(LitElement) {
 								.name=${this.localize.term('uSyncSettings_disabledHandlers')}
 								.description=${this.localize.term('uSyncSettings_disabledHandlersDesc')}
 								.value=${this.handlerSettings?.disabledHandlers}></usync-setting-item>
+						</uui-box>
+						<uui-box headline=${this.localize.term('uSyncSettings_bootSettings')}>
+							<usync-setting-item
+								.name=${this.localize.term('uSyncSettings_firstBoot')}
+								.description=${this.localize.term('uSyncSettings_firstBootDesc')}
+								.value=${this.settings?.importOnFirstBoot}></usync-setting-item>
+							${when(
+								this.settings?.importOnFirstBoot,
+								() =>
+									html` <usync-setting-item
+										.name=${this.localize.term('uSyncSettings_firstBootGroup')}
+										.description=${this.localize.term('uSyncSettings_firstBootGroupDesc')}
+										.value=${this.settings?.firstBootGroup}></usync-setting-item>`,
+							)}
 						</uui-box>
 					</div>
 				</div>

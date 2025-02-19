@@ -101,6 +101,10 @@ export const PerformActionRequestSchema = {
                 }
             ],
             nullable: true
+        },
+        username: {
+            type: 'string',
+            nullable: true
         }
     },
     additionalProperties: false
@@ -430,7 +434,7 @@ export const uSyncOptionsSchema = {
 } as const;
 
 export const uSyncSettingsSchema = {
-    required: ['addOnPing', 'backgroundNotifications', 'cacheFolderKeys', 'customMappings', 'defaultExtension', 'defaultSet', 'disableDashboard', 'disableNotificationSuppression', 'enableHistory', 'exportAtStartup', 'exportOnSave', 'failOnDuplicates', 'failOnMissingParent', 'firstBootGroup', 'folders', 'hideAddOns', 'importAtStartup', 'importOnFirstBoot', 'isRootSite', 'legacyFolder', 'lockRoot', 'lockRootTypes', 'rebuildCacheOnCompletion', 'reportDebug', 'rootFolder', 'showVersionCheckWarning', 'summaryDashboard', 'summaryLimit', 'uiEnabledGroups'],
+    required: ['addOnPing', 'backgroundNotifications', 'cacheFolderKeys', 'customMappings', 'defaultExtension', 'defaultSet', 'disableDashboard', 'disableNotificationSuppression', 'enableHistory', 'exportAtStartup', 'exportOnSave', 'failOnDuplicates', 'failOnMissingParent', 'firstBootGroup', 'folders', 'hideAddOns', 'importAtStartup', 'importOnFirstBoot', 'isRootSite', 'legacyFolder', 'lockRoot', 'lockRootTypes', 'onceFile', 'rebuildCacheOnCompletion', 'reportDebug', 'rootFolder', 'showVersionCheckWarning', 'stopFile', 'summaryDashboard', 'summaryLimit', 'uiEnabledGroups'],
     type: 'object',
     properties: {
         rootFolder: {
@@ -455,6 +459,14 @@ export const uSyncSettingsSchema = {
         lockRoot: {
             type: 'boolean',
             default: true
+        },
+        stopFile: {
+            type: 'string',
+            default: 'usync.stop'
+        },
+        onceFile: {
+            type: 'string',
+            default: 'usync.once'
         },
         lockRootTypes: {
             type: 'array',

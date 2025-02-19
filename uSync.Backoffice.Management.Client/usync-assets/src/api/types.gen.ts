@@ -75,6 +75,7 @@ export type PerformActionRequest = {
     action: string;
     stepNumber: number;
     options?: ((uSyncOptions) | null);
+    username?: (string) | null;
 };
 
 export type PerformActionResponse = {
@@ -177,6 +178,8 @@ export type uSyncSettings = {
     legacyFolder: string;
     isRootSite: boolean;
     lockRoot: boolean;
+    stopFile: string;
+    onceFile: string;
     lockRootTypes: Array<(string)>;
     defaultSet: string;
     importAtStartup: string;

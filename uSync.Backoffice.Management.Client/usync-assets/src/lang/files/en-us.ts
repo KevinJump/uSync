@@ -121,5 +121,13 @@ export default {
 		rootLockedDesc: 'Are changes for items that are from the root site locked?',
 
 		help: 'Settings are controlled via the appsettings.json file. <a href="https://docs.jumoo.co.uk/usync/uSync/reference/config" target="_blank" rel="noopener">see our docs</a>',
+
+		bootSettings: 'First boot 🥾 settings',
+
+		firstBoot: 'Import on First boot',
+		firstBootDesc: 'Run the import process on first boot of the site',
+
+		firstBootGroup: 'First boot groups',
+		firstBootGroupDesc: 'The groups to run on first boot',
 	},
 };
