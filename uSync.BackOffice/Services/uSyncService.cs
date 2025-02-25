@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 
 using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Events;
+using Umbraco.Cms.Core.Models.Entities;
 using Umbraco.Cms.Core.Scoping;
 using Umbraco.Cms.Core.Semver;
 using Umbraco.Cms.Infrastructure.HostedServices;
@@ -396,10 +397,10 @@ namespace uSync.BackOffice
             var handlerConfig = _handlerFactory.GetValidHandler(action.HandlerAlias);
             if (handlerConfig is null) return new uSyncAction();
 
-           
-                return handlerConfig.Handler
-                    .Import(action.FileName, handlerConfig.Settings, true)
-                    .FirstOrDefault();
+
+            return handlerConfig.Handler
+                .Import(action.FileName, handlerConfig.Settings, true)
+                .FirstOrDefault();
 
         }
 
@@ -451,7 +452,7 @@ namespace uSync.BackOffice
         /// </summary>
         public bool CheckVersionFile(string[] folders)
         {
-            foreach(var folder in folders.Reverse())
+            foreach (var folder in folders.Reverse())
             {
                 if (CheckVersionFile(folder))
                     return true;
@@ -618,5 +619,21 @@ namespace uSync.BackOffice
                 if (handlers.Any()) this.Export(e.Folder, handlers, null);
             }
         }
+
+        public IEnumerable<uSyncAction> ExportItem<TObject>(TObject item, string entityType)
+            where TObject : IEntity
+        {
+            var handler = _handlerFactory.GetValidHandlerByEntityType(entityType);
+            if (handler is null) return Enumerable.Empty<uSyncAction>();
+
+            var folder = _uSyncConfig
+                .GetFolders()
+                .Select(x => Path.Combine(x, handler.Handler.DefaultFolder))
+                .ToArray();
+
+            return handler.Handler.Export(item.Id, folder, handler.Settings);
+        }
+
+        
     }
 }
