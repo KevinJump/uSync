@@ -379,7 +379,7 @@ namespace uSync.BackOffice
             }
 
             return nodes
-                .OrderBy(x => (x.Level * 1000) + x.Node.GetItemSortOrder())
+                .OrderBy(x => (x.Level * 10000) + x.Node.GetItemSortOrder())
                 .ToList();
         }
 
