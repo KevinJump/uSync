@@ -33,8 +33,10 @@ internal class BlockGridConfigMerger : BlockListMergerBase, ISyncConfigMerger
         // merge block groups
         rootConfig.TryGetPropertyAsArray("blockGroups", out var rootGroups);
         targetConfig.TryGetPropertyAsArray("blockGroups", out var targetGroups);
-        targetConfig["blockGroups"] = MergeJsonArrays(rootGroups, targetGroups,
-                        "name", "name") ?? [];
+
+        var mergedGroups = MergeJsonArrays(rootGroups, targetGroups, "name", "name");
+        if (mergedGroups?.Count > 0)
+            targetConfig["blockGroups"] = mergedGroups;
 
         return targetConfig;
     }
@@ -54,8 +56,9 @@ internal class BlockGridConfigMerger : BlockListMergerBase, ISyncConfigMerger
         rootConfig.TryGetPropertyAsArray("blockGroups", out var rootGroups);
         targetConfig.TryGetPropertyAsArray("blockGroups", out var targetGroups);
 
-        targetConfig["blockGroups"] = GetJsonArrayDifferences(rootGroups, targetGroups,
-                                    "name", "name") ?? [];
+        var groupDiffrences = GetJsonArrayDifferences(rootGroups, targetGroups, "name", "name");
+        if (groupDiffrences?.Count > 0)
+            targetConfig["blockGroups"] = groupDiffrences;
 
         return targetConfig;
     }
