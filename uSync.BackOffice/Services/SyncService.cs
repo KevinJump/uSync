@@ -258,6 +258,9 @@ public partial class SyncService : ISyncService
 
             }
 
+            // run the post actions (deletes) as part of the startup import methods. 
+            var results = await SyncService.PerformPostImportAsync(handlers, actions);
+
             // fire complete
             await _mutexService.FireBulkCompleteAsync(new uSyncImportCompletedNotification(actions));
 
