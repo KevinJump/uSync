@@ -16,7 +16,7 @@ using uSync.Core.Models;
 
 namespace uSync.Core.Serialization.Serializers;
 
-[SyncSerializer("B3073706-5037-4FBD-A015-DF38D61F2934", "MediaTypeSerializer", uSyncConstants.Serialization.MediaType)]
+[SyncSerializer("B3073706-5037-4FBD-A015-DF38D61F2934", "MediaTypeSerializer", uSyncConstants.Serialization.MediaType, IsTwoPass = true)]
 public class MediaTypeSerializer : ContentTypeBaseSerializer<IMediaType>, ISyncSerializer<IMediaType>
 {
     private readonly IMediaTypeService _mediaTypeService;

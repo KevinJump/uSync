@@ -275,7 +275,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 
             options.Callbacks?.Update?.Invoke($"Importing {Path.GetFileNameWithoutExtension(item.Path)}", count, total);
 
-            var result = await ImportElementAsync(item.Node, item.Path, config, options);
+            var result = await ImportElementAsync(item.Node, item.FileName, config, options);
             foreach (var attempt in result)
             {
                 if (attempt.Success)
