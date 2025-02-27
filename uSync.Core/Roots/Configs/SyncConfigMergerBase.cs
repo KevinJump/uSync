@@ -1,4 +1,6 @@
-﻿using System.Text.Json.Nodes;
+﻿using Json.More;
+
+using System.Text.Json.Nodes;
 
 using Umbraco.Extensions;
 
@@ -93,7 +95,7 @@ internal class SyncConfigMergerBase
             targetOnly.Add(removedItem.Value);
         }
 
-        return [.. targetOnly];
+        return targetOnly.ToJsonArray();
     }
 
     protected static JsonArray? MergeJsonArrays(JsonArray? sourceArray, JsonArray? targetArray, string key, string removeProperty)
@@ -112,7 +114,7 @@ internal class SyncConfigMergerBase
             if (sourceObject.TryGetPropertyAsObject(key, out var sourceKey) is false) continue;
 
             var targetObject = targetArray.FirstOrDefault(
-                x => (x as JsonObject)?.TryGetPropertyAsObject(key, out var targetKey) == true && targetKey == sourceKey) as JsonObject;
+                x => (x as JsonObject)?.TryGetPropertyAsObject(key, out var targetKey) == true && targetKey.GetValueAsString(key) == sourceKey.GetValueAsString(key)) as JsonObject;
 
             if (targetObject is null)
             {

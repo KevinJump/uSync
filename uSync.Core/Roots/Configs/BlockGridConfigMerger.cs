@@ -27,14 +27,11 @@ internal class BlockGridConfigMerger : BlockListMergerBase, ISyncConfigMerger
         if (rootConfig is null) return target;
         if (targetConfig is null) return root;
 
+        // merge groups
+        targetConfig["blockGroups"] = MergeGroups(rootConfig, targetConfig);
+
         // merge blocks 
         targetConfig["blocks"] = GetMergedBlocks(rootConfig, targetConfig);
-
-        // merge block groups
-        rootConfig.TryGetPropertyAsArray("blockGroups", out var rootGroups);
-        targetConfig.TryGetPropertyAsArray("blockGroups", out var targetGroups);
-        targetConfig["blockGroups"] = MergeJsonArrays(rootGroups, targetGroups,
-                        "name", "name") ?? [];
 
         return targetConfig;
     }
@@ -47,16 +44,31 @@ internal class BlockGridConfigMerger : BlockListMergerBase, ISyncConfigMerger
         if (targetConfig is null) return target;
         if (rootConfig is null) return target;
 
+        // differences in block groups
+        targetConfig["blockGroups"] = GetGroupDiffrences(rootConfig, targetConfig);
+
         // differences in blocks
         targetConfig["blocks"] = GetBlockDifferences(rootConfig, targetConfig);
 
-        // differences in block groups
-        rootConfig.TryGetPropertyAsArray("blockGroups", out var rootGroups);
-        targetConfig.TryGetPropertyAsArray("blockGroups", out var targetGroups);
-
-        targetConfig["blockGroups"] = GetJsonArrayDifferences(rootGroups, targetGroups,
-                                    "name", "name") ?? [];
 
         return targetConfig;
     }
+
+    private static JsonArray GetGroupDiffrences(JsonObject rootConfig, JsonObject targetConfig)
+    {
+        rootConfig.TryGetPropertyAsArray("blockGroups", out var rootGroups);
+        targetConfig.TryGetPropertyAsArray("blockGroups", out var targetGroups);
+
+        var groupDiffrences = GetJsonArrayDifferences(rootGroups, targetGroups, "name", "name");
+        return groupDiffrences ?? [];
+    }
+
+    private static JsonArray MergeGroups(JsonObject rootConfig, JsonObject targetConfig)
+    {
+        rootConfig.TryGetPropertyAsArray("blockGroups", out var rootGroups);
+        targetConfig.TryGetPropertyAsArray("blockGroups", out var targetGroups);
+        var mergedGroups = MergeJsonArrays(rootGroups, targetGroups, "name", "name");
+        return mergedGroups ?? [];
+    }
+
 }
