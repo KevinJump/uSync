@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Nodes;
+﻿using System.Collections.Immutable;
+using System.Text.Json.Nodes;
 
 using Umbraco.Cms.Core;
 
@@ -54,21 +55,21 @@ internal class BlockGridConfigMerger : BlockListMergerBase, ISyncConfigMerger
         return targetConfig;
     }
 
-    private static JsonArray GetGroupDiffrences(JsonObject rootConfig, JsonObject targetConfig)
+    private static JsonArray? GetGroupDiffrences(JsonObject rootConfig, JsonObject targetConfig)
     {
         rootConfig.TryGetPropertyAsArray("blockGroups", out var rootGroups);
         targetConfig.TryGetPropertyAsArray("blockGroups", out var targetGroups);
 
         var groupDiffrences = GetJsonArrayDifferences(rootGroups, targetGroups, "name", "name");
-        return groupDiffrences ?? [];
+        return groupDiffrences?.Count > 0 ? groupDiffrences : null;
     }
 
-    private static JsonArray MergeGroups(JsonObject rootConfig, JsonObject targetConfig)
+    private static JsonArray? MergeGroups(JsonObject rootConfig, JsonObject targetConfig)
     {
         rootConfig.TryGetPropertyAsArray("blockGroups", out var rootGroups);
         targetConfig.TryGetPropertyAsArray("blockGroups", out var targetGroups);
         var mergedGroups = MergeJsonArrays(rootGroups, targetGroups, "name", "name");
-        return mergedGroups ?? [];
+        return mergedGroups?.Count > 0 ? mergedGroups : null;
     }
 
 }
