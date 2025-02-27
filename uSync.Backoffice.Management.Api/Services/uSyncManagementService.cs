@@ -221,7 +221,7 @@ internal class uSyncManagementService : ISyncManagementService
         return new PerformActionResponse
         {
             RequestId = requestId.ToString(),
-            Actions = allActions.Select(x => x.ToActionView()),
+            Actions = allActions.Where(x => x.Change != Core.ChangeType.Hidden).Select(x => x.ToActionView()),
             // results.Actions.Select(x => x.ToActionView()),
             Status = GetSummaries(action, handlers, actionRequest.StepNumber, allActions), // results.Actions.ToList()),
             Complete = false
@@ -243,16 +243,21 @@ internal class uSyncManagementService : ISyncManagementService
             Username = username ?? ""
         };
 
+        List<uSyncAction> actionResults = [.. finalActions];
+
         foreach (var step in finalSteps)
         {
+            request.Actions = actionResults;
             var result = await step(request);
+            // merge the actions here...
+            actionResults = actionResults.Merge(result.Actions);
         }
 
         // when complete we clean out our action cache.
         _syncManagementCache.Clear(requestId);
 
         callbacks?.Update?.Invoke("Finished", 1, 1);
-        return finalActions;
+        return [.. actionResults.Where(x => x.Change != Core.ChangeType.Hidden)];
     }
 
     private IEnumerable<Func<SyncFinalActionRequest, Task<SyncActionResult>>> GetFinalStep(HandlerActions action)

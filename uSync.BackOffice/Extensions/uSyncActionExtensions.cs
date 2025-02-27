@@ -70,4 +70,16 @@ public static class uSyncActionExtensions
         action = actions.FirstOrDefault(x => $"{x.Key}_{x.HandlerAlias}" == $"{key}_{handlerAlias}", new uSyncAction { Key = Guid.Empty });
         return action.Key != Guid.Empty;
     }
+
+
+    public static List<uSyncAction> Merge(this List<uSyncAction> a, List<uSyncAction> b)
+    {
+        // quicker than doing all that link.
+        if (b.Count == 0) return a;
+        if (a.Count == 0) return b;
+
+        // everythin that is in a but not b.
+        var actions = a.Where(x => b.Any(y => x.Key == y.Key && x.HandlerAlias == y.HandlerAlias) is false).ToList();
+        return [.. actions, .. b];
+    }
 }

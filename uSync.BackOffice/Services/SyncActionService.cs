@@ -193,7 +193,9 @@ internal class SyncActionService : ISyncActionService
 
         request.Callbacks?.Update?.Invoke("Process completed", 1, 1);
 
-        return new SyncActionResult(request.Actions.ToList());
+        // for speed we return an empty list. the merge will just take 
+        // what we where passed in, and we avoid a whole copy and compare step
+        return new SyncActionResult([]);
     }
 
     public Stream GetExportFolderAsStream()

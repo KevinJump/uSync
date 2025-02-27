@@ -17,7 +17,7 @@ using uSync.Core.Models;
 
 namespace uSync.Core.Serialization.Serializers;
 
-[SyncSerializer("B3F7F247-6077-406D-8480-DB1004C8211C", "ContentTypeSerializer", uSyncConstants.Serialization.ContentType)]
+[SyncSerializer("B3F7F247-6077-406D-8480-DB1004C8211C", "ContentTypeSerializer", uSyncConstants.Serialization.ContentType, IsTwoPass = true)]
 public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, ISyncSerializer<IContentType>
 {
     private readonly IContentTypeService _contentTypeService;
