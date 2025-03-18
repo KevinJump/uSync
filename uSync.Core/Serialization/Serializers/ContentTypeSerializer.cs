@@ -213,11 +213,11 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
 
         var changes = new List<uSyncChange>();
 
-        var listView = info.Element("ListView").ValueOrDefault<Guid?>(null);
-        if (listView.HasValue && item.ListView != listView)
+        var listView = info.Element("ListView").ValueOrDefault(Guid.Empty);
+        if (item.ListView != listView)
         {
             changes.AddUpdate("ListView", item.ListView, listView, "Info/ListView");
-            item.ListView = listView;
+            item.ListView = listView == Guid.Empty ? null : listView;
         }
 
 
