@@ -167,7 +167,9 @@ public abstract class SyncBlockMapperBase<TBlockValue> : SyncValueMapperBase
         {
             var property = contentType.CompositionPropertyTypes.FirstOrDefault(x => x.Alias == value.Alias);
             if (property == null) continue;
-            dependencies.AddRange(await _mapperCollection.Value.GetDependenciesAsync(value, property.PropertyEditorAlias, flags));
+
+            if (value.Value is null) continue;
+            dependencies.AddRange(await _mapperCollection.Value.GetDependenciesAsync(value.Value, property.PropertyEditorAlias, flags));
         }
         return dependencies;
     }
