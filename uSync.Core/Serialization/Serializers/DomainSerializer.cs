@@ -1,4 +1,8 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Lucene.Net.Util;
+
+using Microsoft.Extensions.Logging;
+
+using OpenIddict.Client.AspNetCore;
 
 using System.Xml.Linq;
 
@@ -59,6 +63,8 @@ public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncSerializer<IDo
             }
         }
 
+
+
         var rootItem = default(IContent);
 
         var rootKey = info.Element("Root")?.Attribute(uSyncConstants.Xml.Key).ValueOrDefault(Guid.Empty) ?? Guid.Empty;
@@ -118,7 +124,6 @@ public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncSerializer<IDo
             var info = new XElement(uSyncConstants.Xml.Info,
                 new XElement("IsWildcard", item.IsWildcard),
                 new XElement("Language", item.LanguageIsoCode));
-
 
             if (item.RootContentId.HasValue)
             {
@@ -192,7 +197,8 @@ public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncSerializer<IDo
         {
             // doesn't have sortable domains, remove the sortable value from the XML
             // so we don't get a false positive when down syncing.
-            node.Element(uSyncConstants.Xml.Info)?.Element(_sortablePropertyName)?.Remove();
+            var sortNode = node.Element(uSyncConstants.Xml.Info)?.Element(_sortablePropertyName);
+            if (sortNode is not null) sortNode.Value = string.Empty;
         }
 
         return base.CleanseNode(node);
@@ -282,7 +288,10 @@ public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncSerializer<IDo
     /// <returns></returns>
     public override async Task SaveItemAsync(IDomain item)
     {
-        if (item.LanguageIsoCode is null || item.RootContentId is null) return;
+        if (item.LanguageId is null || item.RootContentId is null) return;
+
+        var icoCode = item.LanguageIsoCode ?? (await _languageService.GetIsoCodesByIdsAsync([item.LanguageId.Value])).FirstOrDefault();
+        if (icoCode is null) return;
 
         var contentKey = entityService.GetKey(item.RootContentId.Value, UmbracoObjectTypes.Document);
         if (!contentKey.Success) return;
@@ -293,11 +302,12 @@ public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncSerializer<IDo
         var updateModel = new DomainsUpdateModel
         {
             Domains = newDomains
+                .OrderBy(x => x.SortOrder)
                 .DistinctBy(x => x.Key)
                 .Select(x => new DomainModel
                 {
                     DomainName = x.DomainName,
-                    IsoCode = x.LanguageIsoCode!,
+                    IsoCode = icoCode,
                 })
         };
 
@@ -319,4 +329,5 @@ public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncSerializer<IDo
 
     public override string ItemAlias(IDomain item)
         => item.DomainName;
+    
 }

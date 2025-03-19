@@ -42,6 +42,6 @@ public class uSyncCapabilityChecker
     /// <summary>
     ///  Domains (Culture and Hostnames) can be sorted - introduced in v11.3.0
     /// </summary>
-    public bool HasSortableDomains => _version.Version >= new Version(11, 3, 0);
+    public bool HasSortableDomains => _version.Version >= new Version(11, 3, 0) && _version.Version < new Version(15,0,0);
 }
 
