@@ -252,7 +252,7 @@ public abstract class SyncHandlerBase<TObject>
         // logger.LogDebug("Cache miss [{key}]", cacheKey);
         if (key == Guid.Empty)
         {
-            var result = await Task.FromResult(entityService.GetChildren(null, objectType));
+            var result = entityService.GetChildren(-1, objectType);
             return result;
         }
         else
