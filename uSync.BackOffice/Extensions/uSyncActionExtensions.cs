@@ -20,6 +20,12 @@ public static class uSyncActionExtensions
         => actions.Any(x => x.Change != Core.ChangeType.Hidden && x.Change >= Core.ChangeType.Fail || !x.Success);
 
     /// <summary>
+    ///  does this list of actions have any that in an error state?
+    /// </summary>
+    public static int CountErrors(this IEnumerable<uSyncAction> actions)
+        => actions.Count(x => x.Change != Core.ChangeType.Hidden && x.Change >= Core.ChangeType.Fail || !x.Success);
+
+    /// <summary>
     ///  count how many actions in this list are for changes
     /// </summary>
     public static int CountChanges(this IEnumerable<uSyncAction> actions)
