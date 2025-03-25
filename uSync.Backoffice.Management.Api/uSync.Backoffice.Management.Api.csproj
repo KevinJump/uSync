@@ -7,8 +7,6 @@
 		<AddRazorSupportForMvc>true</AddRazorSupportForMvc>
 		<StaticWebAssetBasePath>/</StaticWebAssetBasePath>
 		<Description>v15 management api for uSync</Description>
-
-		<NoWarn>NU1902</NoWarn>
 	</PropertyGroup>
 
 	<ItemGroup>

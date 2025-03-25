@@ -77,7 +77,9 @@ public static class uSyncActionExtensions
         return action.Key != Guid.Empty;
     }
 
-
+    /// <summary>
+    /// merge two lists of actions together, removing duplicates
+    /// </summary>
     public static List<uSyncAction> Merge(this List<uSyncAction> a, List<uSyncAction> b)
     {
         // quicker than doing all that link.
