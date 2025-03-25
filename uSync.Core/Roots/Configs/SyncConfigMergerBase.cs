@@ -44,12 +44,12 @@ internal class SyncConfigMergerBase
         }
 
         var x = mergedObject.RemoveAll(predicate);
-        return mergedObject.ToArray();
+        return [.. mergedObject];
     }
 
     protected TObject[] GetObjectDifferences<TObject, TKey>(TObject[]? rootObject, TObject[]? targetObject, Func<TObject, TKey> keySelector, Action<TObject, string> setMarker)
     {
-        var rootObjectKeys = rootObject?.Select(keySelector) ?? Enumerable.Empty<TKey>();
+        var rootObjectKeys = rootObject?.Select(keySelector) ?? [];
         var targetObjectKeys = targetObject?.Select(keySelector) ?? [];
 
         var remaining =
@@ -57,7 +57,7 @@ internal class SyncConfigMergerBase
             .ToList() ?? [];
 
         var removedKeys = rootObjectKeys.Except(targetObjectKeys);
-        var removals = rootObject?.Where(x => removedKeys.Contains(keySelector(x))) ?? Enumerable.Empty<TObject>();
+        var removals = rootObject?.Where(x => removedKeys.Contains(keySelector(x))) ?? [];
 
         foreach (var removedObject in removals)
         {
@@ -109,12 +109,12 @@ internal class SyncConfigMergerBase
         // merge them. 
         foreach (var sourceItem in sourceArray)
         {
-            var sourceObject = sourceItem as JsonObject;
-            if (sourceObject is null) continue;
+            if (sourceItem is not JsonObject sourceObject) continue;
             if (sourceObject.TryGetPropertyAsObject(key, out var sourceKey) is false) continue;
 
             var targetObject = targetArray.FirstOrDefault(
-                x => (x as JsonObject)?.TryGetPropertyAsObject(key, out var targetKey) == true && targetKey.GetValueAsString(key) == sourceKey.GetValueAsString(key)) as JsonObject;
+                x => (x as JsonObject)?.TryGetPropertyAsObject(key, out var targetKey) == true && targetKey.GetValueAsString(key) == sourceKey.GetValueAsString(key)) 
+                as JsonObject;
 
             if (targetObject is null)
             {
@@ -126,9 +126,7 @@ internal class SyncConfigMergerBase
         // removals. 
         foreach (var targetItem in targetArray)
         {
-            var targetObject = targetItem as JsonObject;
-            if (targetObject is null) continue;
-
+            if (targetItem is not JsonObject targetObject) continue;
             if (targetObject.ContainsKey(removeProperty) is false) continue;
 
             if (targetObject[removeProperty]!.ToString().StartsWith(_removedLabel) is true)

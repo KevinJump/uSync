@@ -31,16 +31,12 @@ public static class uSyncObjectType
     /// </summary>
     public static UmbracoObjectTypes ToContainerUmbracoObjectType(string entityType)
     {
-        switch (entityType)
+        return entityType switch
         {
-            case UdiEntityType.DocumentType:
-                return UmbracoObjectTypes.DocumentTypeContainer;
-            case UdiEntityType.MediaType:
-                return UmbracoObjectTypes.MediaTypeContainer;
-            case UdiEntityType.DataType:
-                return UmbracoObjectTypes.DataTypeContainer;
-            default:
-                return UmbracoObjectTypes.Unknown;
-        }
+            UdiEntityType.DocumentType => UmbracoObjectTypes.DocumentTypeContainer,
+            UdiEntityType.MediaType => UmbracoObjectTypes.MediaTypeContainer,
+            UdiEntityType.DataType => UmbracoObjectTypes.DataTypeContainer,
+            _ => UmbracoObjectTypes.Unknown,
+        };
     }
 }

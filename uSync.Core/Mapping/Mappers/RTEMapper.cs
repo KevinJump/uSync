@@ -39,11 +39,11 @@ public class RTEMapper : SyncValueMapperBase, ISyncMapper
 
     public override string Name => "TinyMCE RTE Mapper";
 
-    public override string[] Editors => new string[] {
+    public override string[] Editors => [
         "Umbraco.TinyMCE",
         Constants.PropertyEditors.Aliases.RichText,
         $"{Constants.PropertyEditors.Aliases.Grid}.rte"
-    };
+    ];
 
     public override async Task<IEnumerable<uSyncDependency>> GetDependenciesAsync(object value, string editorAlias, DependencyFlags flags)
     {

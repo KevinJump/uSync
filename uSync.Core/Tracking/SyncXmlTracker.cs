@@ -94,15 +94,12 @@ public class SyncXmlTracker<TObject>
         if (source == null) return uSyncChange.NoChange("", target.GetAlias());
 
         var action = target.Attribute("Change").ValueOrDefault(SyncActionType.None);
-        switch (action)
+        return action switch
         {
-            case SyncActionType.Delete:
-                return uSyncChange.Delete(target.GetAlias(), "Delete", target.GetAlias());
-            case SyncActionType.Rename:
-                return uSyncChange.Update(target.GetAlias(), "Rename", target.GetAlias(), "New name");
-            default:
-                return uSyncChange.NoChange("", target.GetAlias());
-        }
+            SyncActionType.Delete => uSyncChange.Delete(target.GetAlias(), "Delete", target.GetAlias()),
+            SyncActionType.Rename => uSyncChange.Update(target.GetAlias(), "Rename", target.GetAlias(), "New name"),
+            _ => uSyncChange.NoChange("", target.GetAlias()),
+        };
     }
 
     private async Task<ChangeType> GetChangeTypeAsync(XElement target, XElement source, SyncSerializerOptions options)
@@ -117,7 +114,7 @@ public class SyncXmlTracker<TObject>
     ///  actually kicks off here, if you have two xml files that are different. 
     /// </summary>
 
-    private IEnumerable<uSyncChange> CalculateDifferences(XElement target, XElement source)
+    private List<uSyncChange> CalculateDifferences(XElement target, XElement source)
     {
         var changes = new List<uSyncChange>();
 
@@ -125,20 +122,20 @@ public class SyncXmlTracker<TObject>
         {
             if (trackingItem.SingleItem)
             {
-                changes.AddNotNull(TrackSingleItem(trackingItem, target, source, TrackingDirection.TargetToSource));
-                changes.AddNotNull(TrackSingleItem(trackingItem, source, target, TrackingDirection.SourceToTarget));
+                changes.AddNotNull(SyncXmlTracker<TObject>.TrackSingleItem(trackingItem, target, source, TrackingDirection.TargetToSource));
+                changes.AddNotNull(SyncXmlTracker<TObject>.TrackSingleItem(trackingItem, source, target, TrackingDirection.SourceToTarget));
             }
             else
             {
-                changes.AddRange(TrackMultipleKeyedItems(trackingItem, target, source, TrackingDirection.TargetToSource));
-                changes.AddRange(TrackMultipleKeyedItems(trackingItem, source, target, TrackingDirection.SourceToTarget));
+                changes.AddRange(SyncXmlTracker<TObject>.TrackMultipleKeyedItems(trackingItem, target, source, TrackingDirection.TargetToSource));
+                changes.AddRange(SyncXmlTracker<TObject>.TrackMultipleKeyedItems(trackingItem, source, target, TrackingDirection.SourceToTarget));
             }
         }
 
         return changes;
     }
 
-    private uSyncChange? TrackSingleItem(TrackingItem item, XElement target, XElement source, TrackingDirection direction)
+    private static uSyncChange? TrackSingleItem(TrackingItem item, XElement target, XElement source, TrackingDirection direction)
     {
         var sourceNode = source.XPathSelectElement(item.Path);
         var targetNode = target.XPathSelectElement(item.Path);
@@ -173,7 +170,7 @@ public class SyncXmlTracker<TObject>
         return null;
     }
 
-    private List<uSyncChange> TrackMultipleKeyedItems(TrackingItem trackingItem, XElement target, XElement source, TrackingDirection direction)
+    private static List<uSyncChange> TrackMultipleKeyedItems(TrackingItem trackingItem, XElement target, XElement source, TrackingDirection direction)
     {
         var changes = new List<uSyncChange>();
 
@@ -182,10 +179,10 @@ public class SyncXmlTracker<TObject>
         foreach (var sourceNode in sourceItems)
         {
             // make the selection path for this item.
-            var itemPath = trackingItem.Path.Replace("*", sourceNode.Parent?.Name.LocalName) + MakeSelectionPath(sourceNode, trackingItem.Keys);
+            var itemPath = trackingItem.Path.Replace("*", sourceNode.Parent?.Name.LocalName) + SyncXmlTracker<TObject>.MakeSelectionPath(sourceNode, trackingItem.Keys);
 
             var itemName = trackingItem.Name.Replace("*", sourceNode.Parent?.Name.LocalName) +
-                MakeSelectionName(sourceNode, string.IsNullOrWhiteSpace(trackingItem.ValueKey) ? trackingItem.Keys : trackingItem.ValueKey);
+                SyncXmlTracker<TObject>.MakeSelectionName(sourceNode, string.IsNullOrWhiteSpace(trackingItem.ValueKey) ? trackingItem.Keys : trackingItem.ValueKey);
 
             var targetNode = target.XPathSelectElement(itemPath);
 
@@ -203,14 +200,14 @@ public class SyncXmlTracker<TObject>
             else if (direction == TrackingDirection.TargetToSource)
             {
                 // check the node to see if its an update. 
-                changes.AddRange(CompareNode(targetNode, sourceNode, trackingItem.Path, itemName, trackingItem.MaskValue));
+                changes.AddRange(SyncXmlTracker<TObject>.CompareNode(targetNode, sourceNode, trackingItem.Path, itemName, trackingItem.MaskValue));
             }
         }
 
         return changes;
     }
 
-    private string MakeSelectionPath(XElement node, string? keys)
+    private static string MakeSelectionPath(XElement node, string? keys)
     {
         if (keys is null) return node.Name.LocalName;
         if (keys == "#") return node.Name.LocalName;
@@ -244,7 +241,7 @@ public class SyncXmlTracker<TObject>
     }
 
 
-    private string MakeSelectionName(XElement node, string? keys)
+    private static string MakeSelectionName(XElement node, string? keys)
     {
         if (keys is null) return string.Empty;
 
@@ -270,7 +267,7 @@ public class SyncXmlTracker<TObject>
         return node.Element(key).ValueOrDefault(string.Empty);
     }
 
-    private List<uSyncChange> CompareNode(XElement target, XElement source, string path, string name, bool maskValue)
+    private static List<uSyncChange> CompareNode(XElement target, XElement source, string path, string name, bool maskValue)
     {
         var changes = new List<uSyncChange>();
 
