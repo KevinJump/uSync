@@ -191,9 +191,8 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
             ?? throw new KeyNotFoundException($"No Serializer found for handler {this.Alias}");
 
         this.serializer = _serializer;
-        this.trackers = this.itemFactory.GetTrackers<TObject>().ToList();
-        this.dependencyCheckers = this.itemFactory.GetCheckers<TObject>().ToList();
-
+        this.trackers = [.. this.itemFactory.GetTrackers<TObject>()];
+        this.dependencyCheckers = [.. this.itemFactory.GetCheckers<TObject>()];
 
         this.syncFileService = syncFileService;
         this._mutexService = mutexService;
@@ -336,8 +335,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     protected virtual async Task<IReadOnlyList<OrderedNodeInfo>> GetMergedItemsAsync(string[] folders)
     {
         var baseTracker = trackers.FirstOrDefault() as ISyncTrackerBase;
-        return (await syncFileService.MergeFoldersAsync(folders, uSyncConfig.Settings.DefaultExtension, baseTracker))
-            .ToArray();
+        return [.. (await syncFileService.MergeFoldersAsync(folders, uSyncConfig.Settings.DefaultExtension, baseTracker))];
     }
 
     /// <summary>
@@ -1689,7 +1687,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     ///  get all the possible folders for this handlers 
     /// </summary>
     protected string[] GetDefaultHandlerFolders()
-        => RootFolders.Select(f => Path.Combine(f, DefaultFolder)).ToArray();
+        => [.. RootFolders.Select(f => Path.Combine(f, DefaultFolder))];
 
 
     /// <summary>

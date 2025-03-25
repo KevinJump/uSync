@@ -112,7 +112,7 @@ public class DictionaryHandler : SyncHandlerLevelBase<IDictionaryItem>, ISyncHan
                 return await _dictionaryItemService.GetChildrenAsync(item.Key);
         }
 
-        return Enumerable.Empty<IEntity>();
+        return [];
     }
 
     /// <inheritdoc/>
@@ -142,6 +142,6 @@ public class DictionaryHandler : SyncHandlerLevelBase<IDictionaryItem>, ISyncHan
         return await base.ReportElementAsync(node, filename, settings, options);
     }
 
-    private bool IsOneWay(HandlerSettings? config)
+    private static bool IsOneWay(HandlerSettings? config)
         => config?.GetSetting("OneWay", false) == true;
 }

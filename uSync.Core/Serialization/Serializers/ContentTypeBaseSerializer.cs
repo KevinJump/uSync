@@ -1275,19 +1275,19 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         return await base.IsCurrentAsync(node, options);
     }
 
-    private void InsertMissingProperties(XElement node, string propertyName)
-    {
-        var propertiesNode = node?.Element("GenericProperties");
-        if (propertiesNode == null) return;
+    //private void InsertMissingProperties(XElement node, string propertyName)
+    //{
+    //    var propertiesNode = node?.Element("GenericProperties");
+    //    if (propertiesNode == null) return;
 
-        foreach (var propertyNode in propertiesNode.Elements("GenericProperty"))
-        {
-            if (propertyNode.Element(propertyName) == null)
-            {
-                propertyNode.Add(new XElement(propertyName, string.Empty));
-            }
-        }
-    }
+    //    foreach (var propertyNode in propertiesNode.Elements("GenericProperty"))
+    //    {
+    //        if (propertyNode.Element(propertyName) == null)
+    //        {
+    //            propertyNode.Add(new XElement(propertyName, string.Empty));
+    //        }
+    //    }
+    //}
 
     /// <summary>
     ///  Add missing sort value to XML before compare.

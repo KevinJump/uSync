@@ -56,7 +56,7 @@ public class WebhookSerializer : SyncSerializerBase<IWebhook>, ISyncSerializer<I
     protected override async Task<SyncAttempt<IWebhook>> DeserializeCoreAsync(XElement node, SyncSerializerOptions options)
     {
         var key = node.GetKey();
-        var alias = node.GetAlias();
+        // var alias = node.GetAlias();
 
         var details = new List<uSyncChange>();
 
@@ -68,10 +68,8 @@ public class WebhookSerializer : SyncSerializerBase<IWebhook>, ISyncSerializer<I
 
         var url = node.Element("Url").ValueOrDefault(string.Empty);
 
-        if (item == null)
-        {
-            item = new Webhook(url);
-        }
+        // setup if null.
+        item ??= new Webhook(url);
 
         if (item.Key != key)
         {
@@ -162,7 +160,7 @@ public class WebhookSerializer : SyncSerializerBase<IWebhook>, ISyncSerializer<I
         var keys = node.Element("Headers");
         if (keys == null) return details;
 
-        Dictionary<string, string> newHeaders = new();
+        Dictionary<string, string> newHeaders = [];
 
         foreach (var header in keys.Elements("Header"))
         {

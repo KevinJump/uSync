@@ -306,7 +306,6 @@ public partial class SyncService : ISyncService
     {
         if (action.HandlerAlias is null || action.FileName is null) return new();
 
-        var folders = _uSyncConfig.Settings.Folders;
         var handlerConfig = _handlerFactory.GetValidHandler(action.HandlerAlias);
         if (handlerConfig is null) return new();
 

@@ -1039,7 +1039,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
 
     private List<string> GetExcludedProperties(SyncSerializerOptions options)
     {
-        List<string> exclude = new List<string>(dontSerialize);
+        List<string> exclude = [.. dontSerialize];
         var excludeOptions = options.GetSetting<string>("DoNotSerialize", "");
         if (!string.IsNullOrWhiteSpace(excludeOptions))
             exclude.AddRange(excludeOptions.ToDelimitedList());

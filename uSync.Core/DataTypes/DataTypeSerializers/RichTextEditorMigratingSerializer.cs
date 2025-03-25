@@ -30,7 +30,7 @@ internal class RichTextEditorMigratingSerializer : ConfigurationSerializerBase, 
         return configuration.ToImmutableSortedDictionary();
     }
 
-    private IDictionary<string, object> FixMediaParent(IDictionary<string, object> configuration)
+    private static IDictionary<string, object> FixMediaParent(IDictionary<string, object> configuration)
     {
         if (configuration.TryGetValue("mediaParentId", out var mediaParent) is false || mediaParent is null)
             return configuration;
@@ -50,7 +50,7 @@ internal class RichTextEditorMigratingSerializer : ConfigurationSerializerBase, 
         return configuration;
     }
 
-    private IDictionary<string, object> TopLevelEditor(IDictionary<string, object> configuration)
+    private static IDictionary<string, object> TopLevelEditor(IDictionary<string, object> configuration)
     {
         if (configuration.TryGetValue("editor", out var editorObject) is false || editorObject is null)
             return configuration;

@@ -85,7 +85,7 @@ public abstract class ContentHandlerBase<TObject> : SyncHandlerTreeBase<TObject>
         // check base first - if it says no - then no point checking this. 
         if (!await base.ShouldImportAsync(node, config)) return false;
 
-        if (!ShouldImportTrashedItem(node, config)) return false;
+        if (!ContentHandlerBase<TObject>.ShouldImportTrashedItem(node, config)) return false;
 
         if (!ImportPaths(node, config)) return false;
 
@@ -100,7 +100,7 @@ public abstract class ContentHandlerBase<TObject> : SyncHandlerTreeBase<TObject>
     /// <remarks>
     /// Trashed items are only imported when the "ImportTrashed" setting is true on the handler
     /// </remarks>
-    private bool ShouldImportTrashedItem(XElement node, HandlerSettings config)
+    private static bool ShouldImportTrashedItem(XElement node, HandlerSettings config)
     {
         // unless the setting is explicit we don't import trashed items. 
         var trashed = node.Element("Info")?.Element("Trashed").ValueOrDefault(false);
@@ -112,7 +112,7 @@ public abstract class ContentHandlerBase<TObject> : SyncHandlerTreeBase<TObject>
     private bool ImportPaths(XElement node, HandlerSettings config)
     {
         var include = config.GetSetting("Include", "")
-            .Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            .Split([','], StringSplitOptions.RemoveEmptyEntries);
 
         if (include.Length > 0)
         {
@@ -125,7 +125,7 @@ public abstract class ContentHandlerBase<TObject> : SyncHandlerTreeBase<TObject>
         }
 
         var exclude = config.GetSetting("Exclude", "")
-            .Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            .Split([','], StringSplitOptions.RemoveEmptyEntries);
         if (exclude.Length > 0)
         {
             var path = node.Element("Info")?.Element("Path").ValueOrDefault(string.Empty);
@@ -181,7 +181,7 @@ public abstract class ContentHandlerBase<TObject> : SyncHandlerTreeBase<TObject>
         if (config.GetSetting("RulesOnExport", false))
         {
             // we run the import rules (but not the base rules as that would confuse.)
-            if (!ShouldImportTrashedItem(node, config)) return false;
+            if (!ContentHandlerBase<TObject>.ShouldImportTrashedItem(node, config)) return false;
             if (!ImportPaths(node, config)) return false;
             if (!ByDocTypeConfigCheck(node, config)) return false;
         }

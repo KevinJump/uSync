@@ -10,12 +10,12 @@ namespace uSync.Core;
 
 public class SyncItemFactory : ISyncItemFactory
 {
-    private readonly SyncTrackerCollection syncTrackers;
-    private readonly SyncDependencyCollection syncCheckers;
+    private readonly SyncTrackerCollection _syncTrackers;
+    private readonly SyncDependencyCollection _syncCheckers;
 
-    private readonly SyncEntityCache entityCache;
+    private readonly SyncEntityCache _entityCache;
 
-    private readonly SyncSerializerCollection syncSerializers;
+    private readonly SyncSerializerCollection _syncSerializers;
 
 
     public SyncItemFactory(
@@ -24,42 +24,42 @@ public class SyncItemFactory : ISyncItemFactory
         SyncTrackerCollection syncTrackers,
         SyncDependencyCollection syncCheckers)
     {
-        this.syncSerializers = syncSerializers;
-        this.syncTrackers = syncTrackers;
-        this.syncCheckers = syncCheckers;
-        this.entityCache = entityCache;
+        _syncSerializers = syncSerializers;
+        _syncTrackers = syncTrackers;
+        _syncCheckers = syncCheckers;
+        _entityCache = entityCache;
     }
 
-    public SyncEntityCache EntityCache => entityCache;
+    public SyncEntityCache EntityCache => _entityCache;
 
     public IEnumerable<ISyncSerializer<TObject>> GetSerializers<TObject>()
-        => syncSerializers.GetSerializers<TObject>();
+        => _syncSerializers.GetSerializers<TObject>();
 
     public ISyncSerializer<TObject>? GetSerializer<TObject>(string name)
-        => syncSerializers.GetSerializer<TObject>(name);
+        => _syncSerializers.GetSerializer<TObject>(name);
 
 
     public IEnumerable<ISyncTracker<TObject>> GetTrackers<TObject>()
-        => syncTrackers.GetTrackers<TObject>();
+        => _syncTrackers.GetTrackers<TObject>();
 
     public async Task<IEnumerable<uSyncChange>> GetChangesAsync<TObject>(XElement node, SyncSerializerOptions options)
-        => await syncTrackers.GetChangesAsync<TObject>(node, options);
+        => await _syncTrackers.GetChangesAsync<TObject>(node, options);
 
     public async Task<IEnumerable<uSyncChange>> GetChangesAsync<TObject>(XElement node, XElement currentNode, SyncSerializerOptions options)
     {
         if (currentNode == null)
-            return await syncTrackers.GetChangesAsync<TObject>(node, options);
+            return await _syncTrackers.GetChangesAsync<TObject>(node, options);
         else
-            return await syncTrackers.GetChangesAsync<TObject>(node, currentNode, options);
+            return await _syncTrackers.GetChangesAsync<TObject>(node, currentNode, options);
     }
 
     public IEnumerable<ISyncDependencyChecker<TObject>> GetCheckers<TObject>()
-        => syncCheckers.GetCheckers<TObject>();
+        => _syncCheckers.GetCheckers<TObject>();
 
     public async Task<IEnumerable<uSyncDependency>> GetDependenciesAsync<TObject>(TObject item, DependencyFlags flags)
     {
         var dependencies = new List<uSyncDependency>();
-        foreach (var checker in syncCheckers.GetCheckers<TObject>())
+        foreach (var checker in _syncCheckers.GetCheckers<TObject>())
         {
             if (checker is null) continue;
             dependencies.AddRange(await checker.GetDependenciesAsync(item, flags) ?? []);

@@ -29,11 +29,10 @@ public static class StringExtensions
     }
 
 
-    private static readonly char[] _base32Table =
-    {
+    private static readonly char[] _base32Table = [
         'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p',
         'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5'
-    };
+    ];
 
     /// IN UmbracoCore but private (so renamed, to avoid future clashes)
     /// <summary>

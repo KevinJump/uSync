@@ -37,7 +37,7 @@ public class RelationTypeHandler : SyncHandlerBase<IRelationType>, ISyncHandler,
     INotificationAsyncHandler<SavingNotification<IRelationType>>,
     INotificationAsyncHandler<DeletingNotification<IRelationType>>
 {
-    private readonly IRelationService relationService;
+    private readonly IRelationService _relationService;
 
     /// <inheritdoc/>
     public override string Group => uSyncConstants.Groups.Content;
@@ -55,19 +55,19 @@ public class RelationTypeHandler : SyncHandlerBase<IRelationType>, ISyncHandler,
         ISyncItemFactory syncItemFactory)
         : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfigService, syncItemFactory)
     {
-        this.relationService = relationService;
+        _relationService = relationService;
     }
 
     /// <summary>
     ///  Relations that by default we exclude, if the exclude setting is used,then it will override these values
     ///  and they will be included if not explicitly set;
     /// </summary>
-    private const string defaultRelations = "relateParentDocumentOnDelete,relateParentMediaFolderOnDelete,relateDocumentOnCopy,umbMedia,umbDocument";
+    private const string _defaultRelations = "relateParentDocumentOnDelete,relateParentMediaFolderOnDelete,relateDocumentOnCopy,umbMedia,umbDocument";
 
     /// <inheritdoc/>
     protected override Task<bool> ShouldExportAsync(XElement node, HandlerSettings config)
     {
-        var exclude = config.GetSetting<string>("Exclude", defaultRelations);
+        var exclude = config.GetSetting<string>("Exclude", _defaultRelations);
 
         if (!string.IsNullOrWhiteSpace(exclude) && exclude.Contains(node.GetAlias()))
             return Task.FromResult(false);
@@ -90,6 +90,6 @@ public class RelationTypeHandler : SyncHandlerBase<IRelationType>, ISyncHandler,
     /// <inheritdoc/>
     protected override async Task<IEnumerable<IEntity>> GetChildItemsAsync(Guid key)
         => key == Guid.Empty
-            ? await Task.FromResult(relationService.GetAllRelationTypes())
+            ? await Task.FromResult(_relationService.GetAllRelationTypes())
             : [];
 }

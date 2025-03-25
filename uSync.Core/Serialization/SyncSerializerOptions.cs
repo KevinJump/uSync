@@ -68,9 +68,9 @@ public class SyncSerializerOptions
 
     public TResult GetSetting<TResult>(string key, TResult defaultValue)
     {
-        if (this.Settings != null && this.Settings.ContainsKey(key))
+        if (this.Settings?.TryGetValue(key, out string? value) is true)
         {
-            var attempt = this.Settings[key].TryConvertTo<TResult>();
+            var attempt = value.TryConvertTo<TResult>();
             if (attempt.Success && attempt.Result is not null)
                 return attempt.Result;
         }
@@ -112,10 +112,7 @@ public class SyncSerializerOptions
     /// </summary>
     public void MergeSettings(Dictionary<string, string>? newSettings)
     {
-        if (Settings is null)
-        {
-            Settings = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
-        }
+        Settings ??= new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
 
         if (newSettings is not null)
         {

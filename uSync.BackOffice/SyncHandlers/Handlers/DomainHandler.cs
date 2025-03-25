@@ -34,7 +34,7 @@ public class DomainHandler : SyncHandlerBase<IDomain>, ISyncHandler,
     /// <inheritdoc/>
     public override string Group => uSyncConstants.Groups.Content;
 
-    private readonly IDomainService domainService;
+    private readonly IDomainService _domainService;
 
     /// <inheritdoc/>
     public DomainHandler(
@@ -49,7 +49,7 @@ public class DomainHandler : SyncHandlerBase<IDomain>, ISyncHandler,
         ISyncItemFactory syncItemFactory)
         : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, configService, syncItemFactory)
     {
-        this.domainService = domainService;
+        _domainService = domainService;
     }
 
     /// <inheritdoc/>
@@ -64,7 +64,7 @@ public class DomainHandler : SyncHandlerBase<IDomain>, ISyncHandler,
     protected override async Task<IEnumerable<IEntity>> GetChildItemsAsync(Guid key)
     {
         if (key == Guid.Empty)
-            return (await domainService.GetAllAsync(true))
+            return (await _domainService.GetAllAsync(true))
                 .Where(x => x is IEntity)
                 .Select(x => x as IEntity);
 

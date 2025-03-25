@@ -466,7 +466,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
         {
             var schedules = GetSchedules(node.Element("Info")?.Element("Schedule"));
 
-            ContentScheduleCollection scheduleCollection = new ContentScheduleCollection();
+            var scheduleCollection = new ContentScheduleCollection();
             foreach (var schedule in schedules)
             {
                 scheduleCollection.Add(schedule);
@@ -645,7 +645,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
             }
 
             if (unpublishMissing)
-                UnpublishMissingCultures(item, cultures.Select(x => x.Key).ToArray());
+                UnpublishMissingCultures(item, [.. cultures.Select(x => x.Key)]);
 
             return Attempt.Succeed("Done");
         }

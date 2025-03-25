@@ -7,7 +7,7 @@ namespace uSync.BackOffice.Configuration;
 /// <inheritdoc/>
 internal class SyncConfigService : ISyncConfigService
 {
-    private IOptionsMonitor<uSyncHandlerSetSettings> _setOptionsMonitor;
+    private readonly IOptionsMonitor<uSyncHandlerSetSettings> _setOptionsMonitor;
 
     /// <inheritdoc/>
     public uSyncSettings Settings { get; private set; }
@@ -40,7 +40,7 @@ internal class SyncConfigService : ISyncConfigService
     public string[] GetFolders()
         => Settings.IsRootSite
             ? [Settings.Folders[0].TrimStart('/')]
-            : Settings.Folders.Select(x => x.TrimStart('/')).ToArray();
+            : [.. Settings.Folders.Select(x => x.TrimStart('/'))];
 
     /// <inheritdoc/>
     public uSyncHandlerSetSettings GetSetSettings(string setName)

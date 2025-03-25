@@ -73,9 +73,7 @@ public class LanguageHandler : SyncHandlerBase<ILanguage>, ISyncHandler,
     ///  order the merged items, making sure the default language is first. 
     /// </summary>
     protected override async Task<IReadOnlyList<OrderedNodeInfo>> GetMergedItemsAsync(string[] folders)
-        => (await base.GetMergedItemsAsync(folders))
-            .OrderBy(x => x.Node.Element("IsDefault").ValueOrDefault(false) ? 0 : 1)
-            .ToList();
+        => [.. (await base.GetMergedItemsAsync(folders)).OrderBy(x => x.Node.Element("IsDefault").ValueOrDefault(false) ? 0 : 1)];
 
     /// <summary>
     ///  ensure we import the 'default' language first, so we don't get errors doing it. 
@@ -97,7 +95,7 @@ public class LanguageHandler : SyncHandlerBase<ILanguage>, ISyncHandler,
                 ordered[file] = order;
             }
 
-            return ordered.OrderBy(x => x.Value).Select(x => x.Key).ToList();
+            return [.. ordered.OrderBy(x => x.Value).Select(x => x.Key)];
         }
         catch
         {
@@ -164,7 +162,7 @@ public class LanguageHandler : SyncHandlerBase<ILanguage>, ISyncHandler,
         }
     }
 
-    private static ConcurrentDictionary<string, string> newLanguages = new();
+    private static ConcurrentDictionary<string, string> _newLanguages = new();
 
     /// <inheritdoc/>
     public override async Task HandleAsync(SavingNotification<ILanguage> notification, CancellationToken cancellationToken)
@@ -183,7 +181,7 @@ public class LanguageHandler : SyncHandlerBase<ILanguage>, ISyncHandler,
             // 
             if (item.Id == 0)
             {
-                newLanguages.TryAdd(item.IsoCode, item.CultureName);
+                _newLanguages.TryAdd(item.IsoCode, item.CultureName);
                 // is new, we want to set this as a flag, so we don't do the full content save.n
                 // newLanguages.Add(item.IsoCode);
             }
@@ -201,7 +199,7 @@ public class LanguageHandler : SyncHandlerBase<ILanguage>, ISyncHandler,
         {
             bool newItem = false;
 
-            if (newLanguages.TryRemove(item.IsoCode, out var _))
+            if (_newLanguages.TryRemove(item.IsoCode, out var _))
             {
                 newItem = true;
             }

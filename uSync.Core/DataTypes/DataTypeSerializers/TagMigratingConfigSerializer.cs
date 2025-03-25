@@ -16,8 +16,8 @@ internal class TagMigratingConfigSerializer : ConfigurationSerializerBase, IConf
             return configuration;
         }
 
-        if (configuration.ContainsKey("delimiter"))
-            configuration.Remove("delimiter");
+        // will not throw if the key doesn't exist (ca1853)
+        configuration.Remove("delimiter");
 
         if (storageType is int storageInt is false) return configuration;
 
