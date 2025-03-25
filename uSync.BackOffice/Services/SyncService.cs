@@ -192,7 +192,7 @@ public partial class SyncService : ISyncService
         handlerOptions ??= new SyncHandlerOptions();
         handlerOptions.Action = HandlerActions.Import;
         var handlers = _handlerFactory.GetValidHandlers(handlerOptions);
-        
+
         var changes = await ImportAsync(folders, force, handlers, handlerOptions, callbacks);
 
         // on first boot, we refresh the snapshot cache if we have imported any content 
@@ -200,7 +200,7 @@ public partial class SyncService : ISyncService
         if (changes.Any(x => x.Change > ChangeType.NoChange && x.ItemType == "IContent"))
             _distributedCache.RefreshAllPublishedSnapshot();
 
-        return changes; 
+        return changes;
     }
 
     /// <inheritdoc/>>
@@ -269,6 +269,9 @@ public partial class SyncService : ISyncService
                 actions.Count,
                 actions.CountChanges(),
             sw.ElapsedMilliseconds);
+
+            if (actions.ContainsErrors())
+                _logger.LogWarning("uSync Import: Errors detected in import : {count}", actions.CountErrors());
 
             callbacks?.Update?.Invoke($"Processed {actions.Count} items in {sw.ElapsedMilliseconds}ms", 1, 1);
 

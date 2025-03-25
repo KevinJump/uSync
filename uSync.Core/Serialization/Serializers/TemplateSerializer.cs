@@ -102,6 +102,9 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
             item = attempt.Result;
             details.AddNew(alias, alias, "Template");
             logger.LogDebug("New Template: {alias} {path}", item.Alias, item.Path);
+
+            // don't need to go through the process, the create also saves it.
+            return SyncAttempt<ITemplate>.Succeed(name, item, ChangeType.Import, "Created", true, details);
         }
 
         if (item is null)
@@ -306,25 +309,17 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
     {
         var userKey = Constants.Security.SuperUserKey;
 
-        var existing = await _templateService.GetAsync(item.Alias);
-        if (existing is not null)
+        if (item.HasIdentity)
         {
-            item.Key = existing.Key;
-            item.Id = existing.Id;
-            item.CreateDate = existing.CreateDate;
-            item.UpdateDate = existing.UpdateDate;
-        }
-
-        logger.LogDebug("Saving: {alias} {path}", item.Alias, item.Path);
-
-        if (existing is null)
-        {
-            var result = await _templateService.CreateAsync(item.Name ?? item.Alias, item.Alias, item.Content, userKey, item.Key);
-            logger.LogDebug("Create Template Result: [{key}] {result} {status}", result.Result.Key, result.Success, result.Status);
+            // update
+            logger.LogDebug("Saving: {alias} {path}", item.Alias, item.Path);
+            var result = await _templateService.UpdateAsync(item, userKey);
+            logger.LogDebug("Update Template Result: [{key}] {result} {status}", item.Key, result.Success, result.Status);
         }
         else
         {
-            var result = await _templateService.UpdateAsync(item, userKey);
+            logger.LogDebug("Creating: {alias} {path}", item.Alias, item.Path);
+            var result = await _templateService.CreateAsync(item.Name ?? item.Alias, item.Alias, item.Content, userKey, item.Key);
             logger.LogDebug("Update Template Result: [{key}] {result} {status}", item.Key, result.Success, result.Status);
         }
     }

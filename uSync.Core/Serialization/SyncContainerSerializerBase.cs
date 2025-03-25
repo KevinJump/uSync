@@ -229,6 +229,7 @@ public abstract class SyncContainerSerializerBase<TObject>
         if (entityTypeContainerTypeService is null) return Attempt<EntityContainer?, EntityContainerOperationStatus>.Fail(EntityContainerOperationStatus.InvalidObjectType);
 
         int parentLevel = 1;
+        int parentId = -1;
         Guid? parentKeyValue = parentKey == Guid.Empty ? null : parentKey;
 
         if (parentKeyValue is not null)
@@ -237,20 +238,17 @@ public abstract class SyncContainerSerializerBase<TObject>
             if (parent is null || parent.Name is null)
                 return Attempt<EntityContainer?, EntityContainerOperationStatus>.Fail(EntityContainerOperationStatus.ParentNotFound);
 
+            parentId = parent.Id;
             parentLevel = parent.Level;
         }
 
-        var existing = (await entityTypeContainerTypeService.GetAsync(name, parentLevel)).FirstOrDefault(x => x.Name.InvariantEquals(name));
-        if (existing is null || existing.Name is null)
-        {
-            var result = await entityTypeContainerTypeService.CreateAsync(Guid.NewGuid(), name, parentKeyValue, Constants.Security.SuperUserKey);
-            return result;
-        }
-        else
-        {
-            var result = await entityTypeContainerTypeService.UpdateAsync(existing.Key, existing.Name, Constants.Security.SuperUserKey);
-            return result;
-        }
+        var existing = (await entityTypeContainerTypeService.GetAsync(name, parentLevel))
+            .FirstOrDefault(x => x.Name.InvariantEquals(name) && (parentId == -1 || x.ParentId == parentId));
+
+        var result = existing?.Name is null 
+            ? await entityTypeContainerTypeService.CreateAsync(Guid.NewGuid(), name, parentKeyValue, Constants.Security.SuperUserKey)
+            : await entityTypeContainerTypeService.UpdateAsync(existing.Key, existing.Name, Constants.Security.SuperUserKey);
+        return result;
     }
 
     protected virtual async Task<EntityContainer?> FindFolderAsync(Guid key, string path)
