@@ -206,13 +206,6 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
 
         details.AddRange(propertiesAttempt.Result);
 
-        if (!options.GetSetting<bool>("IgnoreSortOrder", false))
-        {
-            // sort order
-            var sortOrder = infoNode?.Element("SortOrder").ValueOrDefault(-1) ?? -1;
-            details.AddNotNull(HandleSortOrder(item, sortOrder));
-        }
-
         var publishTimer = Stopwatch.StartNew();
 
 
@@ -318,11 +311,25 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
     /// </remarks>
     public override async Task<SyncAttempt<IContent>> DeserializeSecondPassAsync(IContent item, XElement node, SyncSerializerOptions options)
     {
+        // move sort to second pass, as if we attempt to set this 
+        // on a brand new item, it doesn't get set. 
+        // doing it on second pass ensures it gets set on the item
+        // after it has been saved by umbraco. 
+        var details = new List<uSyncChange>();
+        if (!options.GetSetting<bool>("IgnoreSortOrder", false))
+        {
+            var sortOrder = node.Element("Info")?.Element("SortOrder").ValueOrDefault(-1) ?? -1;
+            details.AddNotNull(HandleSortOrder(item, sortOrder));
+        }
+
         var changes = await DeserializeSchedulesAsync(item, node, options);
         if (changes.Count != 0)
-            return SyncAttempt<IContent>.Succeed(item.Name ?? item.Id.ToString(), item, ChangeType.Import, "" ?? string.Empty, true, changes);
+            return SyncAttempt<IContent>.Succeed(item.Name ?? item.Id.ToString(), item, ChangeType.Import, "" ?? string.Empty, true,
+                [..details, ..changes]);
 
-        return SyncAttempt<IContent>.Succeed(item.Name ?? item.Id.ToString(), item, ChangeType.NoChange);
+        // if we have changed the sort order, then we return a change, else it was no change.        
+        return SyncAttempt<IContent>.Succeed(item.Name ?? item.Id.ToString(), item,
+            details.Count == 0 ? ChangeType.NoChange : ChangeType.Import);
     }
 
     private Task<List<uSyncChange>> DeserializeSchedulesAsync(IContent item, XElement node, SyncSerializerOptions options)
