@@ -43,7 +43,7 @@ public class DataTypeHandler : SyncHandlerContainerBase<IDataType>, ISyncHandler
     INotificationAsyncHandler<DeletingNotification<IDataType>>
 {
 
-    private readonly IDataTypeService dataTypeService;
+    private readonly IDataTypeService _dataTypeService;
     private readonly IDataTypeContainerService _dataTypeContainerService;
 
     /// <summary>
@@ -62,7 +62,7 @@ public class DataTypeHandler : SyncHandlerContainerBase<IDataType>, ISyncHandler
         IDataTypeContainerService dataTypeContainerService)
         : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfig, syncItemFactory)
     {
-        this.dataTypeService = dataTypeService;
+        _dataTypeService = dataTypeService;
         _dataTypeContainerService = dataTypeContainerService;
     }
 

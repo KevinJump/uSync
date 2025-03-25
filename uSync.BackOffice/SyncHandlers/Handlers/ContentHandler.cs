@@ -44,7 +44,7 @@ public class ContentHandler : ContentHandlerBase<IContent>, ISyncHandler,
     /// </summary>
     public override string Group => uSyncConstants.Groups.Content;
 
-    private readonly IContentService contentService;
+    private readonly IContentService _contentService;
 
     /// <summary>
     /// Constructor, called via DI
@@ -61,7 +61,7 @@ public class ContentHandler : ContentHandlerBase<IContent>, ISyncHandler,
         ISyncItemFactory syncItemFactory)
         : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfigService, syncItemFactory)
     {
-        this.contentService = contentService;
+        _contentService = contentService;
 
         // make sure we get the default content serializer (not just the first one that loads)
         this.serializer = syncItemFactory.GetSerializer<IContent>("ContentSerializer")
@@ -70,7 +70,7 @@ public class ContentHandler : ContentHandlerBase<IContent>, ISyncHandler,
 
     /// <inheritdoc />
     protected override Task<bool> HasChildrenAsync(IContent item)
-        => Task.FromResult(contentService.HasChildren(item.Id));
+        => Task.FromResult(_contentService.HasChildren(item.Id));
 
     /// <summary>
     ///  Get child items 
@@ -84,7 +84,7 @@ public class ContentHandler : ContentHandlerBase<IContent>, ISyncHandler,
     {
         return uSyncTaskHelper.FromResultOf<IEnumerable<IEntity>>(() =>
         {
-            if (parent is null) return contentService.GetRootContent();
+            if (parent is null) return _contentService.GetRootContent();
 
             var items = new List<IContent>();
             const int pageSize = 5000;
@@ -92,7 +92,7 @@ public class ContentHandler : ContentHandlerBase<IContent>, ISyncHandler,
             var total = long.MaxValue;
             while (page * pageSize < total)
             {
-                items.AddRange(contentService.GetPagedChildren(parent.Id, page++, pageSize, out total));
+                items.AddRange(_contentService.GetPagedChildren(parent.Id, page++, pageSize, out total));
             }
             return items;
 

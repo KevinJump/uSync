@@ -140,8 +140,11 @@ public struct uSyncActionHelper<T>
     /// </summary>
     public static uSyncAction SetAction(SyncAttempt<T> attempt, string filename, Guid key, string handlerAlias, bool requirePostProcessing = true)
     {
-        var action = new uSyncAction(attempt.Success, attempt.Name, attempt.ItemType, attempt.Change, attempt.Message, attempt.Exception, filename, handlerAlias, requirePostProcessing);
-        action.Key = key;
+        var action = new uSyncAction(attempt.Success, attempt.Name, attempt.ItemType, attempt.Change, attempt.Message, attempt.Exception, filename, handlerAlias, requirePostProcessing)
+        {
+            Key = key
+        };
+
         if (attempt.Details != null && attempt.Details.Any())
         {
             action.Details = attempt.Details;

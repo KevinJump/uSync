@@ -17,6 +17,7 @@ using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
 using uSync.BackOffice.SyncHandlers.Interfaces;
 using uSync.Core;
+using uSync.Core.Extensions;
 using uSync.Core.Models;
 
 namespace uSync.BackOffice.SyncHandlers;
@@ -247,25 +248,28 @@ public abstract class SyncHandlerBase<TObject>
     /// <summary>
     ///  Get all child items beneath a given key, for a given object type
     /// </summary>
-    private async Task<IEnumerable<IEntity>> GetEntityChildrenAsync(Guid key, UmbracoObjectTypes objectType)
+    private Task<IEnumerable<IEntity>> GetEntityChildrenAsync(Guid key, UmbracoObjectTypes objectType)
     {
-        // logger.LogDebug("Cache miss [{key}]", cacheKey);
-        if (key == Guid.Empty)
-        {
-            var result = entityService.GetChildren(-1, objectType);
-            return result;
-        }
-        else
-        {
-            // If you ask for the type then you get more info, and there is extra db calls to 
-            // load it, so GetChildren without the object type is quicker. 
+        return uSyncTaskHelper.FromResultOf<IEnumerable<IEntity>>(() => {
 
-            var item = entityService.Get(key);
-            if (item is null) return [];
-            // but we need to know that we only get our type so we then filter.
-            var guidType = ObjectTypes.GetGuid(objectType);
-            return entityService.GetChildren(item.Id).Where(x => x.NodeObjectType == guidType);
-        }
+            // logger.LogDebug("Cache miss [{key}]", cacheKey);
+            if (key == Guid.Empty)
+            {
+                var result = entityService.GetChildren(-1, objectType);
+                return result;
+            }
+            else
+            {
+                // If you ask for the type then you get more info, and there is extra db calls to 
+                // load it, so GetChildren without the object type is quicker. 
+
+                var item = entityService.Get(key);
+                if (item is null) return [];
+                // but we need to know that we only get our type so we then filter.
+                var guidType = ObjectTypes.GetGuid(objectType);
+                return entityService.GetChildren(item.Id).Where(x => x.NodeObjectType == guidType);
+            }
+        });
     }
 
 

@@ -228,7 +228,7 @@ internal class SyncFileService : ISyncFileService
         using (Stream stream = OpenWrite(localFile))
         {
             byte[] info = new UTF8Encoding(true).GetBytes(content);
-            await stream.WriteAsync(info, 0, info.Length);
+            await stream.WriteAsync(info);
             await stream.FlushAsync();
             stream.Dispose();
         }
@@ -441,9 +441,8 @@ internal class SyncFileService : ISyncFileService
         return latest;
     }
 
-    private XElement MergeNodes(XElement source, XElement target, ISyncTrackerBase? trackerBase)
+    private static XElement MergeNodes(XElement source, XElement target, ISyncTrackerBase? trackerBase)
         => trackerBase is null ? target : trackerBase.MergeFiles(source, target) ?? target;
-
 
     private async Task<IEnumerable<KeyValuePair<string, OrderedNodeInfo>>> GetFolderItemsAsync(string folder, string extension)
     {

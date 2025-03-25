@@ -36,7 +36,7 @@ public static class uSyncActionExtensions
     /// </summary>
     public static bool IsValidAction(this HandlerActions requestedAction, IEnumerable<string> actions)
         => requestedAction == HandlerActions.None ||
-            actions.Count() == 0 ||
+            !actions.Any() ||
             actions.InvariantContains("all") ||
             actions.InvariantContains(requestedAction.ToString());
 

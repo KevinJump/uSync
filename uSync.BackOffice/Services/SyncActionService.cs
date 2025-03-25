@@ -83,13 +83,13 @@ internal class SyncActionService : ISyncActionService
         {
             Callbacks = callbacks,
             HandlerSet = options.GetSetOrDefault(_uSyncConfig.Settings.DefaultSet),
-            Folders = options.GetFoldersOrDefault(_uSyncConfig.GetFolders()).Select(MakeValidImportFolder).ToArray()
+            Folders = [.. options.GetFoldersOrDefault(_uSyncConfig.GetFolders()).Select(MakeValidImportFolder)]
         };
 
         var actions = (await _uSyncService.ReportHandlerAsync(options.Handler, importOptions)).ToList();
 
         if (_uSyncConfig.Settings.SummaryDashboard || actions.Count > _uSyncConfig.Settings.SummaryLimit)
-            actions = actions.ConvertToSummary(_uSyncConfig.Settings.SummaryDashboard).ToList();
+            actions = [.. actions.ConvertToSummary(_uSyncConfig.Settings.SummaryDashboard)];
 
         return new SyncActionResult(actions);
     }
@@ -110,7 +110,7 @@ internal class SyncActionService : ISyncActionService
         var actions = (await _uSyncService.ImportHandlerAsync(options.Handler, importOptions)).ToList();
 
         if (_uSyncConfig.Settings.SummaryDashboard || actions.Count > _uSyncConfig.Settings.SummaryLimit)
-            actions = actions.ConvertToSummary(_uSyncConfig.Settings.SummaryDashboard).ToList();
+            actions = [.. actions.ConvertToSummary(_uSyncConfig.Settings.SummaryDashboard)];
 
         return new SyncActionResult(actions);
     }
@@ -123,7 +123,7 @@ internal class SyncActionService : ISyncActionService
             request.Actions);
 
         request.Callbacks?.Update?.Invoke("Post Import Complete", 1, 1);
-        return new SyncActionResult(actions.Where(x => x.Change > Core.ChangeType.NoChange).ToList());
+        return new SyncActionResult([.. actions.Where(x => x.Change > Core.ChangeType.NoChange)]);
     }
 
     public async Task<SyncActionResult> ExportHandlerAsync(SyncActionOptions options, uSyncCallbacks? callbacks)
@@ -140,7 +140,7 @@ internal class SyncActionService : ISyncActionService
         var actions = (await _uSyncService.ExportHandlerAsync(options.Handler, importOptions)).ToList();
 
         if (_uSyncConfig.Settings.SummaryDashboard || actions.Count > _uSyncConfig.Settings.SummaryLimit)
-            actions = actions.ConvertToSummary(_uSyncConfig.Settings.SummaryDashboard).ToList();
+            actions = [.. actions.ConvertToSummary(_uSyncConfig.Settings.SummaryDashboard)];
 
         return new SyncActionResult(actions);
     }

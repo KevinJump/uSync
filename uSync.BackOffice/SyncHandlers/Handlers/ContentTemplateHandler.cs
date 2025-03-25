@@ -38,7 +38,7 @@ public class ContentTemplateHandler : ContentHandlerBase<IContent>, ISyncHandler
     /// </summary>
     public override string Group => uSyncConstants.Groups.Content;
 
-    private readonly IContentService contentService;
+    private readonly IContentService _contentService;
 
     /// <summary>
     ///  Handler constructor Loaded via DI
@@ -56,7 +56,7 @@ public class ContentTemplateHandler : ContentHandlerBase<IContent>, ISyncHandler
         : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfigService, syncItemFactory)
     {
 
-        this.contentService = contentService;
+        _contentService = contentService;
 
         // make sure we load up the template serializer - because we need that one, not the normal content one.
         this.serializer = syncItemFactory.GetSerializer<IContent>("contentTemplateSerializer") ??
@@ -76,13 +76,13 @@ public class ContentTemplateHandler : ContentHandlerBase<IContent>, ISyncHandler
     /// </summary>
     /// 
     protected override async Task DeleteViaServiceAsync(IContent item)
-        => await Task.Run(() => contentService.DeleteBlueprint(item));
+        => await Task.Run(() => _contentService.DeleteBlueprint(item));
 
     /// <summary>
     ///  Fetch a content template via the ContentService
     /// </summary>
     protected override async Task<IContent?> GetFromServiceAsync(Guid key)
-        => await Task.FromResult(contentService.GetBlueprintById(key));
+        => await Task.FromResult(_contentService.GetBlueprintById(key));
 
     /// <summary>
     ///  Fetch a content template via the ContentService

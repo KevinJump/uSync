@@ -40,7 +40,7 @@ public class MediaHandler : ContentHandlerBase<IMedia>, ISyncHandler, ISyncClean
     /// <inheritdoc/>
     public override string Group => uSyncConstants.Groups.Content;
 
-    private readonly IMediaService mediaService;
+    private readonly IMediaService _mediaService;
 
     /// <inheritdoc/>
     public MediaHandler(
@@ -55,12 +55,12 @@ public class MediaHandler : ContentHandlerBase<IMedia>, ISyncHandler, ISyncClean
         ISyncItemFactory syncItemFactory)
         : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfigService, syncItemFactory)
     {
-        this.mediaService = mediaService;
+        _mediaService = mediaService;
     }
 
     /// <inheritdoc />
     protected override Task<bool> HasChildrenAsync(IMedia item)
-        => Task.FromResult(mediaService.HasChildren(item.Id));
+        => Task.FromResult(_mediaService.HasChildren(item.Id));
 
     /// <inheritdoc/>
     protected override async Task<IEnumerable<IEntity>> GetChildItemsAsync(IEntity? parent)
@@ -73,13 +73,13 @@ public class MediaHandler : ContentHandlerBase<IMedia>, ISyncHandler, ISyncClean
             var total = long.MaxValue;
             while (page * pageSize < total)
             {
-                items.AddRange(mediaService.GetPagedChildren(parent.Id, page++, pageSize, out total));
+                items.AddRange(_mediaService.GetPagedChildren(parent.Id, page++, pageSize, out total));
             }
             return items;
         }
         else
         {
-            return await Task.FromResult(mediaService.GetRootMedia());
+            return await Task.FromResult(_mediaService.GetRootMedia());
         }
     }
 }

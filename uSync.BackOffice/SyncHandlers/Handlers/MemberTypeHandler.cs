@@ -37,7 +37,7 @@ public class MemberTypeHandler : ContentTypeBaseHandler<IMemberType>, ISyncHandl
     INotificationAsyncHandler<MovingNotification<IMemberType>>,
     INotificationAsyncHandler<DeletingNotification<IMemberType>>
 {
-    private readonly IMemberTypeService memberTypeService;
+    private readonly IMemberTypeService _memberTypeService;
 
     /// <inheritdoc/>
     public MemberTypeHandler(
@@ -52,7 +52,7 @@ public class MemberTypeHandler : ContentTypeBaseHandler<IMemberType>, ISyncHandl
         ISyncItemFactory syncItemFactory)
         : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfig, syncItemFactory)
     {
-        this.memberTypeService = memberTypeService;
+        _memberTypeService = memberTypeService;
     }
 
 
@@ -61,12 +61,12 @@ public class MemberTypeHandler : ContentTypeBaseHandler<IMemberType>, ISyncHandl
     {
         var container = await GetContainerAsync(key);
         if (container is null) return;
-        memberTypeService.DeleteContainer(container.Id);
+        _memberTypeService.DeleteContainer(container.Id);
     }
 
     /// <inheritdoc/>
     protected override Task<IEntity?> GetContainerAsync(Guid key)
-        => Task.FromResult<IEntity?>(memberTypeService.GetContainer(key));
+        => Task.FromResult<IEntity?>(_memberTypeService.GetContainer(key));
 
     /// <inheritdoc/>
     protected override string GetEntityTreeName(IUmbracoEntity item, bool useGuid)
