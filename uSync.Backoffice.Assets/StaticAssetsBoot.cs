@@ -12,6 +12,7 @@ using uSync.BackOffice.Assets.Notifications;
 
 namespace uSync.Backoffice.Assets
 {
+    [ComposeAfter(typeof(uSyncBackOfficeComposer))]
     public class StaticAssetsBoot : IComposer
     {
         public void Compose(IUmbracoBuilder builder)

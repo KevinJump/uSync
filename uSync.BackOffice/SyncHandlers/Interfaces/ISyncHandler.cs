@@ -90,7 +90,10 @@ namespace uSync.BackOffice.SyncHandlers
         /// </remarks>
         [Obsolete("Call method with folders for roots functionality, will be removed in v15")]
         IEnumerable<uSyncAction> Export(int id, string folder, HandlerSettings settings);
-        
+
+        /// <summary>
+        ///  Export an item based on the int id value in umbraco
+        /// </summary>
         IEnumerable<uSyncAction> Export(int id, string[] folders, HandlerSettings settings)
             => Export(id, folders[^1], settings);
 
@@ -104,6 +107,10 @@ namespace uSync.BackOffice.SyncHandlers
         [Obsolete("Call method with folders for roots functionality, will be removed in v15")]
         IEnumerable<uSyncAction> Export(Udi udi, string folder, HandlerSettings settings);
 
+
+        /// <summary>
+        /// Export an item based on the Udi value of the item
+        /// </summary>
         IEnumerable<uSyncAction> Export(Udi udi, string[] folders, HandlerSettings settings)
             => Export(udi, folders[^1], settings);
 

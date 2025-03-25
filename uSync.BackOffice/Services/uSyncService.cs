@@ -620,6 +620,9 @@ namespace uSync.BackOffice
             }
         }
 
+        /// <summary>
+        ///  Export an individual item.
+        /// </summary>
         public IEnumerable<uSyncAction> ExportItem<TObject>(TObject item, string entityType)
             where TObject : IEntity
         {
