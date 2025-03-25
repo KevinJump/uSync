@@ -27,10 +27,14 @@ namespace uSync.Core.Serialization.Serializers
 
         protected override SyncAttempt<IDictionaryItem> DeserializeCore(XElement node, SyncSerializerOptions options)
         {
+
             var item = FindItem(node);
 
             var info = node.Element(uSyncConstants.Xml.Info);
             var alias = node.GetAlias();
+            var key = node.GetKey();
+
+            logger.LogDebug("Dictionary Deserialize: {alias} {key}", alias, key);
 
             var details = new List<uSyncChange>();
 
@@ -38,14 +42,28 @@ namespace uSync.Core.Serialization.Serializers
             var parentItemKey = info.Element(uSyncConstants.Xml.Parent).ValueOrDefault(string.Empty);
             if (parentItemKey != string.Empty)
             {
-                var parent = _localizationService.GetDictionaryItemByKey(parentItemKey);
-                if (parent != null)
+                var keymap = _localizationService.GetDictionaryItemKeyMap();
+
+                if (keymap.TryGetValue(parentItemKey, out var dictionaryKey) is true)
                 {
-                    parentKey = parent.Key;
+                    logger.LogDebug("Found parent in keymap. {parentItemKey} = {dictionaryKey}", parentItemKey, dictionaryKey);
+                    parentKey = dictionaryKey;
+                }
+                else
+                {
+                    logger.LogDebug("Looking for parent: {parentItemKey}", parentItemKey);
+                    var parent = _localizationService.GetDictionaryItemByKey(parentItemKey);
+                    if (parent != null)
+                    {
+                        parentKey = parent.Key;
+                    }
+                    else
+                    {
+                        logger.LogDebug("Parent not found: {parentItemKey}", parentItemKey);
+                    }
                 }
             }
 
-            var key = node.GetKey();
 
             if (item == null)
             {
