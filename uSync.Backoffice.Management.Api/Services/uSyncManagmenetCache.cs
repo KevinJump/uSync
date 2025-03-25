@@ -25,8 +25,8 @@ internal class uSyncManagementCache : ISyncManagementCache
     public void CacheItems(Guid id, IEnumerable<uSyncAction> actions, bool overwrite)
     {
         if (overwrite)
-        {
-            _actionCache.TryAdd(id, actions.ToList());
+        { 
+            _actionCache.AddOrUpdate(id, [.. actions], (_, _) => [.. actions]);
             return;
         }
 

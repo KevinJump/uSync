@@ -28,7 +28,7 @@ public class uSyncSettingsAddOnsController : uSyncControllerBase
         };
     }
 
-    private string GetuSyncVersion()
+    private static string GetuSyncVersion()
     {
         var assembly = typeof(uSyncClient).Assembly;
         try

@@ -195,7 +195,7 @@ internal class uSyncManagementService : ISyncManagementService
             Folders = _configService.GetFolders(),
             Set = actionRequest.Options?.Set ?? _configService.Settings.DefaultSet,
             Force = actionRequest.Options?.Force ?? false,
-            Actions = new List<uSyncAction>(),
+            Actions = [],
         };
 
         if (actionRequest.StepNumber >= handlers.Count)
@@ -260,7 +260,7 @@ internal class uSyncManagementService : ISyncManagementService
         return [.. actionResults.Where(x => x.Change != Core.ChangeType.Hidden)];
     }
 
-    private IEnumerable<Func<SyncFinalActionRequest, Task<SyncActionResult>>> GetFinalStep(HandlerActions action)
+    private List<Func<SyncFinalActionRequest, Task<SyncActionResult>>> GetFinalStep(HandlerActions action)
     {
         var steps = new List<Func<SyncFinalActionRequest, Task<SyncActionResult>>>();
 
@@ -283,7 +283,7 @@ internal class uSyncManagementService : ISyncManagementService
         return requestId;
     }
 
-    private IEnumerable<SyncHandlerSummary> GetSummaries(HandlerActions action, List<SyncHandlerView> handlers, int step, List<uSyncAction> actions)
+    private static IEnumerable<SyncHandlerSummary> GetSummaries(HandlerActions action, List<SyncHandlerView> handlers, int step, List<uSyncAction> actions)
     {
         var nextStep = step + 1;
         for (int n = 0; n < handlers.Count; n++)
