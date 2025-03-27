@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Lucene.Net.Queries.Function.ValueSources;
+
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -212,6 +214,21 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
 
     public string GetContentFromFile(string templatePath)
     {
+        try
+        {
+            var templateFilePath = _viewFileSystem?.GetFullPath(templatePath);
+            if (System.IO.File.Exists(templateFilePath) is true)
+            {
+                // read it locally, (quicker less likely to lock).
+                return System.IO.File.ReadAllText(templateFilePath);
+            }
+        }
+        catch(Exception ex)
+        {
+            logger.LogWarning(ex, "Error reading template, will read from filesystem provider instead");
+        }
+        
+        // via the file system, which does work, but occasionaly it locks.
         var content = "";
         using (var stream = _viewFileSystem?.OpenFile(templatePath))
         {
@@ -234,7 +251,7 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
     public override async Task<SyncAttempt<ITemplate>> DeserializeSecondPassAsync(ITemplate item, XElement node, SyncSerializerOptions options)
     {
         var details = new List<uSyncChange>();
-        var saved = false;
+        var saved = true;
 
         if (ViewsAreCompiled(options))
         {
