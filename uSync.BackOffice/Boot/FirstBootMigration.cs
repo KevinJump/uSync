@@ -59,7 +59,6 @@ public class FirstBootMigration : MigrationBase
         // first boot migration. 
         try
         {
-
             if (!_uSyncConfig.Settings.ImportOnFirstBoot)
                 return;
 

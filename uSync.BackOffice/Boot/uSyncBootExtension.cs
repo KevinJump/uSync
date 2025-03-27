@@ -36,7 +36,7 @@ internal static class uSyncBootExtension
         });
 
         // add notification handler to do the actual first boot run. 
-        builder.AddNotificationHandler<UmbracoApplicationStartedNotification, FirstBootAppStartingHandler>();
+        builder.AddNotificationHandler<UmbracoApplicationStartingNotification, FirstBootAppStartingHandler>();
 
         return builder;
     }
@@ -46,7 +46,7 @@ internal static class uSyncBootExtension
 ///  Handler to mange app starting for first boot migrations 
 /// </summary>
 internal class FirstBootAppStartingHandler
-    : INotificationHandler<UmbracoApplicationStartedNotification>
+    : INotificationHandler<UmbracoApplicationStartingNotification>
 {
 
     private readonly ICoreScopeProvider _scopeProvider;
@@ -69,7 +69,7 @@ internal class FirstBootAppStartingHandler
 
 
     /// <inheritdoc/>
-    public void Handle(UmbracoApplicationStartedNotification notification)
+    public void Handle(UmbracoApplicationStartingNotification notification)
     {
         if (_runtimeState.Level != Umbraco.Cms.Core.RuntimeLevel.Run) return;
 
