@@ -251,7 +251,7 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
     public override async Task<SyncAttempt<ITemplate>> DeserializeSecondPassAsync(ITemplate item, XElement node, SyncSerializerOptions options)
     {
         var details = new List<uSyncChange>();
-        var saved = false;
+        var saved = true;
 
         if (ViewsAreCompiled(options))
         {
