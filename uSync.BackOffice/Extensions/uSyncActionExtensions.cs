@@ -1,10 +1,14 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+
+using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 using Umbraco.Extensions;
 
 using uSync.BackOffice.SyncHandlers.Models;
+using uSync.Core.Models;
 
 namespace uSync.BackOffice;
 
@@ -90,4 +94,45 @@ public static class uSyncActionExtensions
         var actions = a.Where(x => b.Any(y => x.Key == y.Key && x.HandlerAlias == y.HandlerAlias) is false).ToList();
         return [.. actions, .. b];
     }
+
+    /// <summary>
+    ///  update any existing action with the details from the attempt. 
+    /// </summary>
+    public static void UpdateActions<TObject>(this List<uSyncAction> actions, Guid key, string handlerAlias, SyncAttempt<TObject> attempt)
+    {
+        if (key == Guid.Empty) return;
+
+        // if it's not an error, and has a no message and blank details, its not worth updating, 
+        // so we skit the lookup and update (worth it as the list may have 10000's of items)
+        if (attempt.Success == true 
+            && string.IsNullOrWhiteSpace(attempt.Message) is true 
+            && attempt.Details?.Count() == 0) return;
+
+        if (actions.TryFindAction(key, handlerAlias, out var action))
+        {
+            actions.Remove(action);
+            action.Message += attempt.Message;
+            action.Details = [.. action.Details ?? [], .. attempt.Details ?? []];
+
+            action.Success = attempt.Success;
+
+            if (attempt.Success is false)
+            {
+                action.Message = "Failed: " + action.Message;
+                action.Exception = attempt.Exception;
+                action.Change = Core.ChangeType.Fail;
+            }
+            actions.Add(action);
+        }
+    }
+
+    /// <summary>
+    ///  does the item in this attempt need to be saved ?
+    /// </summary>
+    /// <remarks>
+    ///  if something comes back successful, and it wasn't saved by the serializer
+    ///  then we might want to save it ourselves. 
+    /// </remarks>
+    public static bool RequiresSave<TObject>(this SyncAttempt<TObject> attempt)
+        => attempt.Success && attempt.Change > Core.ChangeType.NoChange && !attempt.Saved && attempt.Item != null;
 }

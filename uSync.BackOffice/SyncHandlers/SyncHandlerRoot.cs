@@ -497,47 +497,13 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         {
             var itemKey = item.update.Node.GetKey();
 
-            callback?.Invoke($"Second Pass {item.update.Node.GetKey()}", item.Index, importedItems.Count);
+            callback?.Invoke($"Second Pass {item.update.Node.GetAlias()}", item.Index, importedItems.Count);
             var attempt = await ImportSecondPassAsync(item.update.Node, item.update.Item, config, callback);
-            if (attempt.Success)
-            {
-                // if the second attempt has a message on it, add it to the first attempt.
-                if (!string.IsNullOrWhiteSpace(attempt.Message) || attempt.Details?.Any() == true)
-                {
-                    // uSyncAction action = actions.FirstOrDefault(x => $"{x.key}_{x.HandlerAlias}" == $"{itemKey}_{this.Alias}", new uSyncAction { key = Guid.Empty });
-                    if (actions.TryFindAction(itemKey, this.Alias, out var action))
-                    {
-                        if (action.Key != Guid.Empty)
-                        {
-                            actions.Remove(action);
-                            action.Message += attempt.Message ?? "";
 
-                            if (attempt.Details?.Any() == true)
-                            {
-                                var details = action.Details?.ToList() ?? [];
-                                details.AddRange(attempt.Details);
-                                action.Details = details;
-                            }
-                            actions.Add(action);
-                        }
-                    }
-                }
-                if (attempt.Change > ChangeType.NoChange && !attempt.Saved && attempt.Item != null)
-                {
-                    await serializer.SaveAsync(attempt.Item.AsEnumerableOfOne());
-                }
-            }
-            else
-            {
-                if (actions.TryFindAction(itemKey, this.Alias, out var action))
-                {
-                    actions.Remove(action);
-                    action.Success = attempt.Success;
-                    action.Message = $"Second Pass Fail: {attempt.Message}";
-                    action.Exception = attempt.Exception;
-                    actions.Add(action);
-                }
-            }
+            if (attempt.RequiresSave())
+                await serializer.SaveAsync(attempt.Item!.AsEnumerableOfOne());
+
+            actions.UpdateActions(itemKey, this.Alias, attempt);
         }
     }
 
