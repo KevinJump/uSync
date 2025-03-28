@@ -94,6 +94,9 @@ namespace uSync.Core.Mapping
                 }
             }
 
+            // sort the property names 
+            item.SortByName();
+
             return item;
         }
 
