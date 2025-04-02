@@ -104,7 +104,7 @@ internal class SyncConfigMergerBase
         if (sourceArray is null) return targetArray;
 
         // no target we return source (we have to clone it).
-        if (targetArray is null) return sourceArray?.DeepClone().AsArray(); 
+        if (targetArray is null) return sourceArray.DeepClone().AsArray(); 
 
         // merge them. 
         foreach (var sourceItem in sourceArray)
