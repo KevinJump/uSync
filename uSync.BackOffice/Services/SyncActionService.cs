@@ -83,7 +83,7 @@ internal class SyncActionService : ISyncActionService
         {
             Callbacks = callbacks,
             HandlerSet = options.GetSetOrDefault(_uSyncConfig.Settings.DefaultSet),
-            Folders = [.. options.GetFoldersOrDefault(_uSyncConfig.GetFolders()).Select(MakeValidImportFolder)]
+            Folders = [.. options.GetFoldersOrDefault(_uSyncConfig.GetFolders())]
         };
 
         var actions = (await _uSyncService.ReportHandlerAsync(options.Handler, importOptions)).ToList();
