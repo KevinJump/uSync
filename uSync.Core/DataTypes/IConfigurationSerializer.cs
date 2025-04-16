@@ -19,4 +19,6 @@ public interface IConfigurationSerializer
         => configuration;
 
     string? GetEditorAlias() => null;
+
+    string? GetEditorUIAlias() => null;
 }
