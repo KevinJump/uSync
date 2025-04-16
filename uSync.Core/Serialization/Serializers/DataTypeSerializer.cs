@@ -389,7 +389,7 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
     /// <remarks>
     ///  these values are taken from an Umbraco migration in v14.
     /// </remarks>
-    private static string? ToPropertyEditorUiAlias(string editorAlias)
+    private string? ToPropertyEditorUiAlias(string editorAlias)
     {
         return editorAlias switch
         {
@@ -424,7 +424,15 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
             Constants.PropertyEditors.Aliases.UploadField => "Umb.PropertyEditorUi.UploadField",
             Constants.PropertyEditors.Aliases.EmailAddress => "Umb.PropertyEditorUi.EmailAddress",
             Constants.PropertyEditors.Aliases.MultiUrlPicker => "Umb.PropertyEditorUi.MultiUrlPicker",
-            _ => null
+            _ => GetEditorUIAliasFromSerializer(editorAlias)
         };
     }
+
+    /// <summary>
+    ///  fetch the editor UI alias from a datatype serializer ? 
+    /// </summary>
+    /// <param name="editorAlias"></param>
+    /// <returns></returns>
+    private string? GetEditorUIAliasFromSerializer(string editorAlias)
+        => _configurationSerializers.GetSerializer(editorAlias)?.GetEditorUIAlias();
 }
