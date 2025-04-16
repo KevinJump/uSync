@@ -95,8 +95,9 @@ public class SyncValueMapperCollection
     /// </summary>
     private static string GetCleanFlatJson(string stringValue)
     {
-        if (stringValue.TryConvertToJsonNode(out var result) is false || result is null)
-            return stringValue.Trim(_trimChars);
+        // fix #749 be less aggressive about cleaning up json (let strings be strings)
+        if (stringValue.TryParseToJsonNode(out var result) is false || result is null)
+            return stringValue;
 
         if (result.TrySerializeJsonNode(out var jsonString, indent: false) is true)
             return jsonString.Trim(_trimChars);
