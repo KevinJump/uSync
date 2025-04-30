@@ -25,6 +25,8 @@ export class uSyncProcessBox extends UmbElementMixin(LitElement) {
 		super();
 
 		this.consumeContext(USYNC_SIGNALR_CONTEXT_TOKEN, (_signalR) => {
+			if (!_signalR) return;
+
 			this.observe(_signalR.update, (_update) => {
 				this.updateMsg = _update;
 			});

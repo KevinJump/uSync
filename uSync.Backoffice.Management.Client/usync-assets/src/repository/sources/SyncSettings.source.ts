@@ -1,36 +1,36 @@
 import { UmbDataSourceResponse } from '@umbraco-cms/backoffice/repository';
 import { UmbControllerHost } from '@umbraco-cms/backoffice/controller-api';
-import { tryExecuteAndNotify } from '@umbraco-cms/backoffice/resources';
-import { SettingsService, uSyncHandlerSetSettings, uSyncSettings } from '@jumoo/uSync';
+import { tryExecute } from '@umbraco-cms/backoffice/resources';
+import { SettingsService, USyncHandlerSetSettings, USyncSettings } from '@jumoo/uSync';
 
 export interface SyncSettingsDataSource {
-	getSettings(): Promise<UmbDataSourceResponse<uSyncSettings>>;
+	getSettings(): Promise<UmbDataSourceResponse<USyncSettings>>;
 	getHandlerSettings(
 		setName: string,
-	): Promise<UmbDataSourceResponse<uSyncHandlerSetSettings>>;
+	): Promise<UmbDataSourceResponse<USyncHandlerSetSettings>>;
 }
 
-export class uSyncSettingsDataSource implements SyncSettingsDataSource {
+export class USyncSettingsDataSource implements SyncSettingsDataSource {
 	#host: UmbControllerHost;
 
 	constructor(host: UmbControllerHost) {
 		this.#host = host;
 	}
 
-	async getSettings(): Promise<UmbDataSourceResponse<uSyncSettings>> {
-		return await tryExecuteAndNotify(this.#host, SettingsService.getSettings());
+	async getSettings(): Promise<UmbDataSourceResponse<USyncSettings>> {
+		return await tryExecute(this.#host, SettingsService.getSettings());
 	}
 
 	async getHandlerSettings(
 		setName: string,
-	): Promise<UmbDataSourceResponse<uSyncHandlerSetSettings>> {
-		return await tryExecuteAndNotify(
+	): Promise<UmbDataSourceResponse<USyncHandlerSetSettings>> {
+		return await tryExecute(
 			this.#host,
-			SettingsService.getHandlerSetSettings({ id: setName }),
+			SettingsService.getHandlerSetSettings({ query: { id: setName } }),
 		);
 	}
 
 	async getAddons() {
-		return await tryExecuteAndNotify(this.#host, SettingsService.getAddOns());
+		return await tryExecute(this.#host, SettingsService.getAddOns());
 	}
 }

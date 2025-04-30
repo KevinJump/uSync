@@ -6,7 +6,7 @@ import {
 	css,
 	state,
 } from '@umbraco-cms/backoffice/external/lit';
-import { ChangeType, uSyncActionView } from '@jumoo/uSync';
+import { ChangeType, USyncActionView } from '@jumoo/uSync';
 import { UmbElementMixin } from '@umbraco-cms/backoffice/element-api';
 import {
 	UMB_MODAL_MANAGER_CONTEXT,
@@ -27,7 +27,7 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
 	}
 
 	@property({ type: Array })
-	results: Array<uSyncActionView> | undefined = [];
+	results: Array<USyncActionView> | undefined = [];
 
 	@state()
 	showAll: boolean = false;
@@ -39,7 +39,7 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
 		this.showAll = !this.showAll;
 	}
 
-	async #showDetail(e: CustomEvent<uSyncActionView>) {
+	async #showDetail(e: CustomEvent<USyncActionView>) {
 		const action = e.detail;
 
 		const detailsModal = this.#modalContext?.open(this, USYNC_DETAILS_MODAL, {

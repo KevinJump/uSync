@@ -9,24 +9,26 @@ import {
 } from '@umbraco-cms/backoffice/external/lit';
 import {
 	USYNC_CORE_CONTEXT_TOKEN,
-	uSyncHandlerSetSettings,
-	uSyncSettings,
+	USyncHandlerSetSettings,
+	USyncSettings,
 } from '@jumoo/uSync';
 
 export * from './components/usyncSettingItem.element.ts';
 
 @customElement('usync-settings-view')
-export class uSyncSettingsViewElement extends UmbElementMixin(LitElement) {
+export class USyncSettingsViewElement extends UmbElementMixin(LitElement) {
 	@state()
-	settings?: uSyncSettings;
+	settings?: USyncSettings;
 
 	@state()
-	handlerSettings?: uSyncHandlerSetSettings;
+	handlerSettings?: USyncHandlerSetSettings;
 
 	constructor() {
 		super();
 
 		this.consumeContext(USYNC_CORE_CONTEXT_TOKEN, (_instance) => {
+			if (!_instance) return;
+
 			this.observe(_instance.settings, (_settings) => {
 				this.settings = _settings;
 			});
@@ -45,103 +47,103 @@ export class uSyncSettingsViewElement extends UmbElementMixin(LitElement) {
 			<umb-body-layout>
 				<div class="usync-settings-layout">
 					<div>
-						<uui-box headline=${this.localize.term('uSyncSettings_settings')}>
+						<uui-box headline=${this.localize.term('USyncSettings_settings')}>
 							<usync-setting-item
-								.name=${this.localize.term('uSyncSettings_importAtStartup')}
-								.description=${this.localize.term('uSyncSettings_importAtStartupDesc')}
+								.name=${this.localize.term('USyncSettings_importAtStartup')}
+								.description=${this.localize.term('USyncSettings_importAtStartupDesc')}
 								.value=${this.settings?.importAtStartup}></usync-setting-item>
 							<usync-setting-item
-								.name=${this.localize.term('uSyncSettings_exportAtStartup')}
-								.description=${this.localize.term('uSyncSettings_exportAtStartupDesc')}
+								.name=${this.localize.term('USyncSettings_exportAtStartup')}
+								.description=${this.localize.term('USyncSettings_exportAtStartupDesc')}
 								.value=${this.settings?.exportAtStartup}></usync-setting-item>
 
 							<usync-setting-item
-								.name=${this.localize.term('uSyncSettings_exportOnSaveup')}
-								.description=${this.localize.term('uSyncSettings_exportOnSaveDesc')}
+								.name=${this.localize.term('USyncSettings_exportOnSaveup')}
+								.description=${this.localize.term('USyncSettings_exportOnSaveDesc')}
 								.value=${this.settings?.exportOnSave}></usync-setting-item>
 
 							<usync-setting-item
-								.name=${this.localize.term('uSyncSettings_uiEnabledGroups')}
-								.description=${this.localize.term('uSyncSettings_uiEnabledGroupsDesc')}
+								.name=${this.localize.term('USyncSettings_uiEnabledGroups')}
+								.description=${this.localize.term('USyncSettings_uiEnabledGroupsDesc')}
 								.value=${this.settings?.uiEnabledGroups}></usync-setting-item>
 
 							<usync-setting-item
-								.name=${this.localize.term('uSyncSettings_failOnMissingParent')}
+								.name=${this.localize.term('USyncSettings_failOnMissingParent')}
 								.description=${this.localize.term(
-									'uSyncSettings_failOnMissingParentDesc',
+									'USyncSettings_failOnMissingParentDesc',
 								)}
 								.value=${this.settings?.failOnMissingParent}></usync-setting-item>
 						</uui-box>
 
-						<uui-box headline=${this.localize.term('uSyncSettings_filesAndFolders')}>
+						<uui-box headline=${this.localize.term('USyncSettings_filesAndFolders')}>
 							<usync-setting-item
-								.name=${this.localize.term('uSyncSettings_rootSite')}
-								.description=${this.localize.term('uSyncSettings_rootSiteDesc')}
+								.name=${this.localize.term('USyncSettings_rootSite')}
+								.description=${this.localize.term('USyncSettings_rootSiteDesc')}
 								.value=${this.settings?.isRootSite}></usync-setting-item>
 
 							<usync-setting-item
-								.name=${this.localize.term('uSyncSettings_rootLocked')}
-								.description=${this.localize.term('uSyncSettings_rootLockedDesc')}
+								.name=${this.localize.term('USyncSettings_rootLocked')}
+								.description=${this.localize.term('USyncSettings_rootLockedDesc')}
 								.value=${this.settings?.lockRoot}></usync-setting-item>
 
 							<usync-setting-item
-								.name=${this.localize.term('uSyncSettings_folders')}
-								.description=${this.localize.term('uSyncSettings_foldersDesc')}
+								.name=${this.localize.term('USyncSettings_folders')}
+								.description=${this.localize.term('USyncSettings_foldersDesc')}
 								.value=${this.settings?.folders}></usync-setting-item>
 						</uui-box>
 					</div>
 
 					<div>
-						<uui-box headline=${this.localize.term('uSyncSettings_handlerDefaults')}>
+						<uui-box headline=${this.localize.term('USyncSettings_handlerDefaults')}>
 							<usync-setting-item
-								.name=${this.localize.term('uSyncSettings_flatStructure')}
-								.description=${this.localize.term('uSyncSettings_flatStructureDesc')}
+								.name=${this.localize.term('USyncSettings_flatStructure')}
+								.description=${this.localize.term('USyncSettings_flatStructureDesc')}
 								.value=${this.handlerSettings?.handlerDefaults
 									?.useFlatStructure}></usync-setting-item>
 
 							<usync-setting-item
-								.name=${this.localize.term('uSyncSettings_guidNames')}
-								.description=${this.localize.term('uSyncSettings_guidNamesDesc')}
+								.name=${this.localize.term('USyncSettings_guidNames')}
+								.description=${this.localize.term('USyncSettings_guidNamesDesc')}
 								.value=${this.handlerSettings?.handlerDefaults
 									?.guidNames}></usync-setting-item>
 
 							<usync-setting-item
-								.name=${this.localize.term('uSyncSettings_handlerGroups')}
-								.description=${this.localize.term('uSyncSettings_handlerGroupsDesc')}
+								.name=${this.localize.term('USyncSettings_handlerGroups')}
+								.description=${this.localize.term('USyncSettings_handlerGroupsDesc')}
 								.value=${this.handlerSettings?.handlerDefaults
 									?.group}></usync-setting-item>
 
 							<usync-setting-item
-								.name=${this.localize.term('uSyncSettings_failOnMissingParent')}
+								.name=${this.localize.term('USyncSettings_failOnMissingParent')}
 								.description=${this.localize.term(
-									'uSyncSettings_failOnMissingParentDesc',
+									'USyncSettings_failOnMissingParentDesc',
 								)}
 								.value=${this.handlerSettings?.handlerDefaults
 									?.failOnMissingParent}></usync-setting-item>
 
 							<usync-setting-item
-								.name=${this.localize.term('uSyncSettings_disabledHandlers')}
-								.description=${this.localize.term('uSyncSettings_disabledHandlersDesc')}
+								.name=${this.localize.term('USyncSettings_disabledHandlers')}
+								.description=${this.localize.term('USyncSettings_disabledHandlersDesc')}
 								.value=${this.handlerSettings?.disabledHandlers}></usync-setting-item>
 						</uui-box>
-						<uui-box headline=${this.localize.term('uSyncSettings_bootSettings')}>
+						<uui-box headline=${this.localize.term('USyncSettings_bootSettings')}>
 							<usync-setting-item
-								.name=${this.localize.term('uSyncSettings_firstBoot')}
-								.description=${this.localize.term('uSyncSettings_firstBootDesc')}
+								.name=${this.localize.term('USyncSettings_firstBoot')}
+								.description=${this.localize.term('USyncSettings_firstBootDesc')}
 								.value=${this.settings?.importOnFirstBoot}></usync-setting-item>
 							${when(
 								this.settings?.importOnFirstBoot,
 								() =>
 									html` <usync-setting-item
-										.name=${this.localize.term('uSyncSettings_firstBootGroup')}
-										.description=${this.localize.term('uSyncSettings_firstBootGroupDesc')}
+										.name=${this.localize.term('USyncSettings_firstBootGroup')}
+										.description=${this.localize.term('USyncSettings_firstBootGroupDesc')}
 										.value=${this.settings?.firstBootGroup}></usync-setting-item>`,
 							)}
 						</uui-box>
 					</div>
 				</div>
 				<div class="setting-link">
-					<umb-localize key="uSyncSettings_help"></umb-localize>
+					<umb-localize key="USyncSettings_help"></umb-localize>
 				</div>
 			</umb-body-layout>
 		`;
@@ -172,10 +174,10 @@ export class uSyncSettingsViewElement extends UmbElementMixin(LitElement) {
 	`;
 }
 
-export default uSyncSettingsViewElement;
+export default USyncSettingsViewElement;
 
 declare global {
 	interface HTMLElementTagNameMap {
-		'usync-settings-view': uSyncSettingsViewElement;
+		'usync-settings-view': USyncSettingsViewElement;
 	}
 }

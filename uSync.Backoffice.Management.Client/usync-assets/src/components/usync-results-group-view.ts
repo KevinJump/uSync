@@ -9,7 +9,7 @@ import {
 	when,
 } from '@umbraco-cms/backoffice/external/lit';
 import { UmbLitElement } from '@umbraco-cms/backoffice/lit-element';
-import { ChangeType, uSyncActionView } from '../api';
+import { ChangeType, USyncActionView } from '../api';
 import { UMB_MODAL_MANAGER_CONTEXT } from '@umbraco-cms/backoffice/modal';
 import { USYNC_ERROR_MODAL } from '../dialogs';
 
@@ -22,16 +22,16 @@ export class uSyncResultGroupView extends UmbLitElement {
 	showAll: boolean = false;
 
 	@property({ type: Array })
-	results: Array<uSyncActionView> = [];
+	results: Array<USyncActionView> = [];
 
 	@property({ type: String })
 	groupName: string = '';
 
-	async #showDetail(action: uSyncActionView) {
+	async #showDetail(action: USyncActionView) {
 		if (action.change == ChangeType.NO_CHANGE) return;
 
 		this.dispatchEvent(
-			new CustomEvent<uSyncActionView>('show-detail', { detail: action }),
+			new CustomEvent<USyncActionView>('show-detail', { detail: action }),
 		);
 	}
 
@@ -62,7 +62,7 @@ export class uSyncResultGroupView extends UmbLitElement {
 		`;
 	}
 
-	renderGroupedRows(results?: uSyncActionView[]) {
+	renderGroupedRows(results?: USyncActionView[]) {
 		const rowsHtml = results?.map((result) => {
 			if (!this.showAll && result.change == ChangeType.NO_CHANGE) return nothing;
 
@@ -99,7 +99,7 @@ export class uSyncResultGroupView extends UmbLitElement {
 		return html`${rowsHtml}`;
 	}
 
-	renderMessage(result: uSyncActionView) {
+	renderMessage(result: USyncActionView) {
 		return (result.change != ChangeType.FAIL &&
 			result.change != ChangeType.IMPORT_FAIL) ||
 			!result.message
@@ -112,7 +112,7 @@ export class uSyncResultGroupView extends UmbLitElement {
 					@click=${(e: Event) => this.#viewError(e, result)}></uui-button>`;
 	}
 
-	async #viewError(e: Event, result: uSyncActionView) {
+	async #viewError(e: Event, result: USyncActionView) {
 		e.stopPropagation();
 		const modalContext = await this.getContext(UMB_MODAL_MANAGER_CONTEXT);
 		const modal = modalContext?.open(this, USYNC_ERROR_MODAL, {

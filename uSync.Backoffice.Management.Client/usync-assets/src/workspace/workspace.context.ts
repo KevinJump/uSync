@@ -10,9 +10,9 @@ import {
 	SyncActionGroup,
 	SyncHandlerSummary,
 	SyncLegacyCheckResponse,
-	uSyncActionView,
-	uSyncHandlerSetSettings,
-	uSyncSettings,
+	USyncActionView,
+	USyncHandlerSetSettings,
+	USyncSettings,
 	uSyncActionRepository,
 	uSyncConstants,
 	SyncPerformActionOptions,
@@ -68,19 +68,19 @@ export class uSyncWorkspaceContext
 	/**
 	 * The results of a run.
 	 */
-	#results = new UmbArrayState<uSyncActionView>([], (x) => x.name);
+	#results = new UmbArrayState<USyncActionView>([], (x) => x.name);
 	public readonly results = this.#results.asObservable();
 
 	/**
 	 * Current settings for uSync
 	 */
-	#settings = new UmbObjectState<uSyncSettings | undefined>(undefined);
+	#settings = new UmbObjectState<USyncSettings | undefined>(undefined);
 	public readonly settings = this.#settings?.asObservable();
 
 	/**
 	 * Handler settings object
 	 */
-	#handlerSettings = new UmbObjectState<uSyncHandlerSetSettings | undefined>(undefined);
+	#handlerSettings = new UmbObjectState<USyncHandlerSetSettings | undefined>(undefined);
 	public readonly handlerSettings = this.#handlerSettings?.asObservable();
 
 	#legacy = new UmbObjectState<SyncLegacyCheckResponse | undefined>(undefined);

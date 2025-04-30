@@ -27,6 +27,8 @@ export class SyncLegacyFilesElement extends UmbLitElement {
 		super();
 
 		this.consumeContext(USYNC_CORE_CONTEXT_TOKEN, (_instance) => {
+			if (!_instance) return;
+
 			this.#actionContext = _instance;
 
 			this.observe(_instance.legacy, (_legacy) => {

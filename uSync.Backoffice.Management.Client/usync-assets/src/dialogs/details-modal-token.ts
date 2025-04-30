@@ -1,8 +1,8 @@
 import { UmbModalToken } from '@umbraco-cms/backoffice/modal';
-import { uSyncActionView } from '@jumoo/uSync';
+import { USyncActionView } from '@jumoo/uSync';
 
 export interface uSyncDetailsModalData {
-	item: uSyncActionView;
+	item: USyncActionView;
 }
 
 export interface uSyncDetailsModalValue {

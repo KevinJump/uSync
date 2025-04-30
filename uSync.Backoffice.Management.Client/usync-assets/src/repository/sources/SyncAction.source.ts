@@ -1,6 +1,6 @@
 import { UmbControllerHost } from '@umbraco-cms/backoffice/controller-api';
 import { UmbDataSourceResponse } from '@umbraco-cms/backoffice/repository';
-import { tryExecuteAndNotify } from '@umbraco-cms/backoffice/resources';
+import { tryExecute } from '@umbraco-cms/backoffice/resources';
 import {
 	ActionsService,
 	PerformActionRequest,
@@ -23,34 +23,38 @@ export class uSyncActionDataSource implements SyncActionDataSource {
 	}
 
 	async getActions(): Promise<UmbDataSourceResponse<Array<SyncActionGroup>>> {
-		return await tryExecuteAndNotify(this.#host, ActionsService.getActions());
+		return await tryExecute(this.#host, ActionsService.getActions());
 	}
 
 	async performAction(
 		request: PerformActionRequest,
 	): Promise<UmbDataSourceResponse<PerformActionResponse>> {
-		return await tryExecuteAndNotify(
+		return await tryExecute(
 			this.#host,
 			ActionsService.performAction({
-				requestBody: request,
+				body: request,
 			}),
 		);
 	}
 
 	async downloadFile(requestId: string) {
-		return await tryExecuteAndNotify(
+		return await tryExecute(
 			this.#host,
 			ActionsService.download({
-				requestId: requestId,
+				query: {
+					requestId: requestId,
+				},
 			}),
 		);
 	}
 
 	async processUpload(fileId: string) {
-		return await tryExecuteAndNotify(
+		return await tryExecute(
 			this.#host,
 			ActionsService.processUpload({
-				tempKey: fileId,
+				query: {
+					tempKey: fileId,
+				},
 			}),
 		);
 	}

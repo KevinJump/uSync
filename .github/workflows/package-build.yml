@@ -1,8 +1,8 @@
-name: Build and Package.
+name: v16: Build and Package.
 
 on:
   push:
-    branches: [v15/main]
+    branches: [v16/main]
 
 env:
   config: Release

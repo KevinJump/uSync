@@ -21,6 +21,8 @@ export class SyncLegacyFilesCondition extends UmbConditionBase<SyncLegacyFilesCo
 		this.config = args.config;
 
 		this.consumeContext(USYNC_CORE_CONTEXT_TOKEN, (_instance) => {
+			if (!_instance) return;
+
 			// consuming the context means it only happens when the context exists.
 			_instance.checkLegacy().then((response) => {
 				this.permitted = response?.hasLegacy ?? false;

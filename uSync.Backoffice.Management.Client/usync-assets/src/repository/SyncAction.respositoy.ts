@@ -2,7 +2,7 @@ import { UmbControllerHost } from '@umbraco-cms/backoffice/controller-api';
 import { UmbControllerBase } from '@umbraco-cms/backoffice/class-api';
 import {
 	uSyncActionDataSource,
-	uSyncSettingsDataSource,
+	USyncSettingsDataSource,
 	uSyncMigrationDataSource,
 } from '@jumoo/uSync';
 
@@ -43,13 +43,13 @@ export type SyncPerformRequest = {
  */
 export class uSyncActionRepository extends UmbControllerBase {
 	#actionDataSource: uSyncActionDataSource;
-	#settingsDataSource: uSyncSettingsDataSource;
+	#settingsDataSource: USyncSettingsDataSource;
 	#migrartionDataSource: uSyncMigrationDataSource;
 
 	constructor(host: UmbControllerHost) {
 		super(host);
 		this.#actionDataSource = new uSyncActionDataSource(this);
-		this.#settingsDataSource = new uSyncSettingsDataSource(this);
+		this.#settingsDataSource = new USyncSettingsDataSource(this);
 		this.#migrartionDataSource = new uSyncMigrationDataSource(this);
 	}
 

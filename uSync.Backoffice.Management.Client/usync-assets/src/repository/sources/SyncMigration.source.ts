@@ -1,7 +1,7 @@
 import { UmbControllerHost } from '@umbraco-cms/backoffice/controller-api';
 import { UmbDataSourceResponse } from '@umbraco-cms/backoffice/repository';
 import { MigrationsService, SyncLegacyCheckResponse } from '@jumoo/uSync';
-import { tryExecuteAndNotify } from '@umbraco-cms/backoffice/resources';
+import { tryExecute } from '@umbraco-cms/backoffice/resources';
 
 export interface SyncMigrationDataSource {
 	checkLegacy(): Promise<UmbDataSourceResponse<SyncLegacyCheckResponse>>;
@@ -15,14 +15,14 @@ export class uSyncMigrationDataSource {
 	}
 
 	async checkLegacy(): Promise<UmbDataSourceResponse<SyncLegacyCheckResponse>> {
-		return await tryExecuteAndNotify(this.#host, MigrationsService.checkLegacy());
+		return await tryExecute(this.#host, MigrationsService.checkLegacy());
 	}
 
 	async ignoreLegacy(): Promise<UmbDataSourceResponse<boolean>> {
-		return await tryExecuteAndNotify(this.#host, MigrationsService.ignoreLegacy());
+		return await tryExecute(this.#host, MigrationsService.ignoreLegacy());
 	}
 
 	async copyLegacy(): Promise<UmbDataSourceResponse<boolean>> {
-		return await tryExecuteAndNotify(this.#host, MigrationsService.copyLegacy());
+		return await tryExecute(this.#host, MigrationsService.copyLegacy());
 	}
 }

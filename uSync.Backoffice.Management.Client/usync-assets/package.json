@@ -49,9 +49,10 @@
 		"make": "npm run build && npm run client:make"
 	},
 	"devDependencies": {
-		"@hey-api/openapi-ts": "^0.54.3",
+		"@hey-api/client-fetch": "^0.10.0",
+		"@hey-api/openapi-ts": "^0.66.7",
 		"@microsoft/signalr": "^8.0.7",
-		"@umbraco-cms/backoffice": "^15.0.0",
+		"@umbraco-cms/backoffice": "^16.0.0-rc",
 		"del-cli": "^5.1.0",
 		"lit": "^3.2.1",
 		"prettier": "^3.3.3",

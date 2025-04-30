@@ -78,7 +78,7 @@ export default {
 		MediaFile: 'Media Files',
 		XElement: 'Other',
 	},
-	uSyncSettings: {
+	USyncSettings: {
 		settings: 'uSync Settings',
 		filesAndFolders: 'File and folders',
 		handlerDefaults: 'Handler defaults',
