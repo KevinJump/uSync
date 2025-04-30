@@ -7,8 +7,9 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Umbraco.Cms.Core.Events;
+using Umbraco.Cms.Core.HostedServices;
 using Umbraco.Cms.Core.Notifications;
-using Umbraco.Cms.Infrastructure.HostedServices;
+
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
 using uSync.BackOffice.SyncHandlers.Interfaces;

@@ -1,8 +1,10 @@
-﻿using Umbraco.Cms.Core.Services;
+﻿using System.Threading.Tasks;
+
+using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Infrastructure.Migrations;
 
 namespace uSync.BackOffice.Boot;
-internal class LogViewerMigration : MigrationBase
+internal class LogViewerMigration : AsyncMigrationBase
 {
     private static string _uSyncLogQuery = "StartsWith(SourceContext, 'uSync')";
 
@@ -15,15 +17,14 @@ internal class LogViewerMigration : MigrationBase
         _logViewerService = logViewerService;
     }
 
-    protected override void Migrate()
+    protected override async Task MigrateAsync()
     {
         var name = "Find all uSync Log Entries";
 
-        var existing = _logViewerService.GetSavedLogQueryByNameAsync(name).Result;
+        var existing = await _logViewerService.GetSavedLogQueryByNameAsync(name);
         if (existing != null) return;
 
-        _logViewerService
-            .AddSavedLogQueryAsync(name, _uSyncLogQuery).Wait();
+        await _logViewerService.AddSavedLogQueryAsync(name, _uSyncLogQuery);
 
     }
 }

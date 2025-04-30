@@ -1,14 +1,14 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
-using System.Diagnostics;
 using System.Text.Json.Nodes;
 
 using Umbraco.Cms.Core.Composing;
 using Umbraco.Cms.Core.DependencyInjection;
 using Umbraco.Cms.Core.Manifest;
-using Umbraco.Cms.Core.Semver;
 using Umbraco.Cms.Infrastructure.Manifest;
 using Umbraco.Extensions;
+
+using uSync.BackOffice.Extensions;
 
 namespace uSync.Backoffice.Management.Client;
 
@@ -59,9 +59,7 @@ internal sealed class uSyncManifestReader : IPackageManifestReader
         var assembly = typeof(uSyncManifestReader).Assembly;
         try
         {
-            var fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.GetAssemblyFile().FullName);
-            var productVersion = SemVersion.Parse(fileVersionInfo.ProductVersion ?? assembly.GetName()?.Version?.ToString(3) ?? "15.0.0");
-            return productVersion.ToSemanticStringWithoutBuild();
+            return assembly.GetAssemblyProductVersion().ToSemanticStringWithoutBuild();
         }
         catch
         {

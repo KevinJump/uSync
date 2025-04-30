@@ -2432,7 +2432,7 @@
         "type": "Project",
         "dependencies": {
           "uSync.Community.Contrib": "[12.0.0, )",
-          "uSync.Core": "[15.0.0, )"
+          "uSync.Core": "[16.0.0, )"
         }
       },
       "usync.backoffice.management.api": {
@@ -2440,13 +2440,14 @@
         "dependencies": {
           "Microsoft.AspNetCore.Components.Web": "[9.0.0, )",
           "Umbraco.Cms.Api.Management": "[16.0.0-rc, )",
-          "uSync.BackOffice": "[15.0.0, )"
+          "uSync.BackOffice": "[16.0.0, )"
         }
       },
       "usync.backoffice.management.client": {
         "type": "Project",
         "dependencies": {
-          "Umbraco.Cms.Infrastructure": "[16.0.0-rc, )"
+          "Umbraco.Cms.Infrastructure": "[16.0.0-rc, )",
+          "uSync.BackOffice": "[16.0.0, )"
         }
       },
       "usync.backoffice.targets": {
@@ -2455,7 +2456,7 @@
       "usync.community.contrib": {
         "type": "Project",
         "dependencies": {
-          "uSync.Core": "[15.0.0, )"
+          "uSync.Core": "[16.0.0, )"
         }
       },
       "usync.core": {

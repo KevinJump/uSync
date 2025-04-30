@@ -2,6 +2,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 using Umbraco.Cms.Core.Web;
 using Umbraco.Cms.Infrastructure.Migrations;
@@ -29,7 +30,7 @@ public class FirstBootMigrationPlan : MigrationPlan
 /// <summary>
 /// First boot Feature migration
 /// </summary>
-public class FirstBootMigration : MigrationBase
+public class FirstBootMigration : AsyncMigrationBase
 {
     private readonly IUmbracoContextFactory _umbracoContextFactory;
     private readonly ISyncConfigService _uSyncConfig;
@@ -51,7 +52,7 @@ public class FirstBootMigration : MigrationBase
     }
 
     /// <inheritdoc/>
-    protected override void Migrate()
+    protected override async Task MigrateAsync()
     {
         // TODO: doesn't work in the betas. might need a new migration to add it.
         // return;
@@ -76,10 +77,10 @@ public class FirstBootMigration : MigrationBase
 
             using (var reference = _umbracoContextFactory.EnsureUmbracoContext())
             {
-                var results = _uSyncService.StartupImportAsync(_uSyncConfig.GetFolders(), false, new SyncHandlerOptions
+                var results = await _uSyncService.StartupImportAsync(_uSyncConfig.GetFolders(), false, new SyncHandlerOptions
                 {
                     Group = _uSyncConfig.Settings.FirstBootGroup
-                }).Result;
+                });
 
                 changes = results.CountChanges();
             };

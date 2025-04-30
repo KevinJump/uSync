@@ -39,15 +39,13 @@ public class SyncFolderIntegrityChecks : HealthCheck
     }
 
     /// <inheritdoc/>
-    public override Task<IEnumerable<HealthCheckStatus>> GetStatus()
+    public override Task<IEnumerable<HealthCheckStatus>> GetStatusAsync()
     {
         var items = new List<HealthCheckStatus>
         {
             CheckuSyncFolder(),
             CheckConfigFolderValidity()
         };
-
-
 
         return Task.FromResult((IEnumerable<HealthCheckStatus>)items);
     }

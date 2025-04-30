@@ -7,6 +7,8 @@ using System.Diagnostics;
 using Umbraco.Cms.Core.Semver;
 using Umbraco.Extensions;
 
+using uSync.BackOffice.Extensions;
+
 namespace uSync.Backoffice.Management.Api.Controllers.Settings;
 
 [ApiVersion("1.0")]
@@ -33,9 +35,7 @@ public class uSyncSettingsAddOnsController : uSyncControllerBase
         var assembly = typeof(uSyncClient).Assembly;
         try
         {
-            var fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.GetAssemblyFile().FullName);
-            var productVersion = SemVersion.Parse(fileVersionInfo.ProductVersion ?? assembly.GetName()?.Version?.ToString(3) ?? "15.0.0");
-            return productVersion.ToSemanticStringWithoutBuild();
+            return assembly.GetAssemblyProductVersion().ToSemanticStringWithoutBuild();
         }
         catch
         {

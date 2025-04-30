@@ -1,5 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
+using System.Threading;
+using System.Threading.Tasks;
+
 using Umbraco.Cms.Core.Configuration.Models;
 using Umbraco.Cms.Core.DependencyInjection;
 using Umbraco.Cms.Core.Events;
@@ -36,7 +39,7 @@ internal static class uSyncBootExtension
         });
 
         // add notification handler to do the actual first boot run. 
-        builder.AddNotificationHandler<UmbracoApplicationStartingNotification, FirstBootAppStartingHandler>();
+        builder.AddNotificationAsyncHandler<UmbracoApplicationStartingNotification, FirstBootAppStartingHandler>();
 
         return builder;
     }
@@ -46,7 +49,7 @@ internal static class uSyncBootExtension
 ///  Handler to mange app starting for first boot migrations 
 /// </summary>
 internal class FirstBootAppStartingHandler
-    : INotificationHandler<UmbracoApplicationStartingNotification>
+    : INotificationAsyncHandler<UmbracoApplicationStartingNotification>
 {
 
     private readonly ICoreScopeProvider _scopeProvider;
@@ -69,7 +72,7 @@ internal class FirstBootAppStartingHandler
 
 
     /// <inheritdoc/>
-    public void Handle(UmbracoApplicationStartingNotification notification)
+    public async Task HandleAsync(UmbracoApplicationStartingNotification notification, CancellationToken cancellationToken)
     {
         if (_runtimeState.Level != Umbraco.Cms.Core.RuntimeLevel.Run) return;
 
@@ -80,6 +83,6 @@ internal class FirstBootAppStartingHandler
         // but we don't want the extra three log messages during startup.
         var currentState = _keyValueService.GetValue(upgrader.StateValueKey);
         if (currentState == null || currentState != firstBootMigration.FinalState)
-            upgrader.Execute(_migrationPlanExecutor, _scopeProvider, _keyValueService);
+            await upgrader.ExecuteAsync(_migrationPlanExecutor, _scopeProvider, _keyValueService);
     }
 }

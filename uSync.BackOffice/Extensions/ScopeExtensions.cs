@@ -3,8 +3,8 @@
 using System;
 
 using Umbraco.Cms.Core.Events;
+using Umbraco.Cms.Core.HostedServices;
 using Umbraco.Cms.Core.Scoping;
-using Umbraco.Cms.Infrastructure.HostedServices;
 
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Notifications;

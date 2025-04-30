@@ -11,9 +11,9 @@ using System.Xml.Linq;
 
 using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Events;
+using Umbraco.Cms.Core.HostedServices;
 using Umbraco.Cms.Core.Scoping;
 using Umbraco.Cms.Core.Semver;
-using Umbraco.Cms.Infrastructure.HostedServices;
 using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;

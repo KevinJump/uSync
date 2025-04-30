@@ -29,7 +29,7 @@ public class uSyncHubRoutes : IAreaRoutes
         IRuntimeState runtimeState)
     {
         _runtimeState = runtimeState;
-        _umbracoPathSegment = globalSettings.Value.GetUmbracoMvcArea(hostingEnvironment);
+        _umbracoPathSegment = Constants.System.UmbracoPathSegment; 
     }
 
     /// <summary>
