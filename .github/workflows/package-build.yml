@@ -1,4 +1,4 @@
-name: v16: Build and Package.
+name: v16 - Build and Package.
 
 on:
   push:

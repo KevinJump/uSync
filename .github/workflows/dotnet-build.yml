@@ -1,4 +1,4 @@
-name: v16: PR Project Build and Test
+name: v16 - PR Project Build and Test
 
 on:
   pull_request:
