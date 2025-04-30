@@ -31,16 +31,9 @@ public abstract class SyncValueMapperBase
     public virtual bool IsMapper(PropertyType propertyType)
         => Editors.InvariantContains(propertyType.PropertyEditorAlias);
 
-    [Obsolete("use GetDependenciesAsync will be removed in v16")]
-    public virtual IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags)
-        => GetDependenciesAsync(value, editorAlias, flags).Result;
-
     public virtual Task<IEnumerable<uSyncDependency>> GetDependenciesAsync(object value, string editorAlias, DependencyFlags flags)
         => Task.FromResult(Enumerable.Empty<uSyncDependency>());
 
-    [Obsolete("use GetExportValueAsync will be removed in v16")]
-    public virtual string? GetExportValue(object value, string editorAlias)
-        => GetExportValueAsync(value, editorAlias).Result;
     public virtual Task<string?> GetExportValueAsync(object value, string editorAlias)
     {
         return uSyncTaskHelper.FromResultOf(() =>
@@ -53,10 +46,6 @@ public abstract class SyncValueMapperBase
             return value.ToString();
         });
     }
-
-    [Obsolete("use GetImportValueAsync will be removed in v16")]
-    public virtual string? GetImportValue(string value, string editorAlias)
-        => GetImportValueAsync(value, editorAlias).Result;
 
     public virtual Task<string?> GetImportValueAsync(string value, string editorAlias)
         => Task.FromResult<string?>(value);

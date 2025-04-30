@@ -327,11 +327,6 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
 
     }
 
-
-    [Obsolete("Use DeserializeBaseAsync will be removed in v16")]
-    protected IEnumerable<uSyncChange> DeserializeStructure(TObject item, XElement node)
-        => DeserializeStructureAsync(item, node).Result;
-
     protected async Task<IEnumerable<uSyncChange>> DeserializeStructureAsync(TObject item, XElement node)
     {
         logger.LogDebug("De-serializing Structure");
@@ -1020,9 +1015,6 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         return [];
     }
 
-    [Obsolete("Use CleanFolderAsync will be removed in v16")]
-    protected void CleanFolder(TObject item, XElement node)
-        => CleanFolderAsync(item, node).Wait();
     protected async Task CleanFolderAsync(TObject item, XElement node)
     {
         var folderNode = node.Element(uSyncConstants.Xml.Info)?.Element("Folder");
@@ -1040,10 +1032,6 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         logger.LogDebug("Clean folder - Key doesn't not match");
         await FindFolderAsync(key, folderNode.Value);
     }
-
-    [Obsolete("Use CleanMasterAsync will be removed in v16")]
-    protected IEnumerable<uSyncChange> DeserializeCompositions(TObject item, XElement node)
-        => DeserializeCompositionsAsync(item, node).Result;
 
     protected async Task<IEnumerable<uSyncChange>> DeserializeCompositionsAsync(TObject item, XElement node)
     {

@@ -1072,37 +1072,4 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
     ///  find the item by id, (we really don't want to do this, but parents are only stored in content by id).
     /// </summary>
     protected abstract Task<TObject?> FindParentByIdAsync(int id);
-
-
-    /// <summary>
-    ///  Serialize the Info - (Item Attributes) Node
-    /// </summary>
-    [Obsolete("Use SerializeInfoAsync will be removed in v16")]
-    protected virtual XElement SerializeInfo(TObject item, SyncSerializerOptions options)
-        => SerializeInfoAsync(item, options).Result;
-    [Obsolete("Use FindItemAsync will be removed in v16")]
-    protected virtual TObject? FindItem(string alias, Guid parentKey)
-        => FindItemAsync(alias, parentKey).Result;
-
-    [Obsolete("Use FindItemAsync will be removed in v16")]
-    protected virtual TObject? FindItem(string alias, TObject? parent)
-        => FindItemAsync(alias, parent).Result;
-    [Obsolete("Use FindItemAsync will be removed in v16")]
-    protected virtual TObject? FindAtRoot(string alias)
-        => FindAtRootAsync(alias).Result;
-
-    [Obsolete("Use FindItemAsync will be removed in v16")]
-    protected TObject? FindParent(XElement node, bool searchByAlias = false)
-        => FindParentAsync(node, searchByAlias).Result;
-    [Obsolete("Use FindParentAsync will be removed in v16")]
-    protected TObject? FindParentByPath(string path, bool failIfNotExact = false)
-        => FindParentByPathAsync(path, failIfNotExact).Result;
-
-    [Obsolete("Use FindItemAsync will be removed in v16")]
-    protected TObject? FindByPath(IEnumerable<string> folders, bool failIfNotExact)
-        => FindByPathAsync(folders, failIfNotExact).Result;
-    [Obsolete("Use DeserializeBaseAsync will be removed in v16")]
-    protected virtual IEnumerable<uSyncChange> DeserializeBase(TObject item, XElement node, SyncSerializerOptions options)
-        => DeserializeBaseAsync(item, node, options).Result;
-
 }

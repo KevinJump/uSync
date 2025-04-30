@@ -12,10 +12,6 @@ public interface ISyncManagementService
     List<SyncActionGroup> GetActions();
     Func<SyncActionOptions, uSyncCallbacks, Task<SyncActionResult>> GetHandlerMethodAsync(HandlerActions action);
     
-    [Obsolete("Pass in IUser for better logging, will be removed in v16")]
-    Task<PerformActionResponse> PerformActionAsync(PerformActionRequest actionRequest)
-        => PerformActionAsync(actionRequest, null);
-
     Task<PerformActionResponse> PerformActionAsync(PerformActionRequest actionRequest, IUser? user);
     UploadImportResult UnpackStream(Stream stream);
 }
