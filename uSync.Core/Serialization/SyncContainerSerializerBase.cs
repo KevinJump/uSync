@@ -130,10 +130,6 @@ public abstract class SyncContainerSerializerBase<TObject>
     #region Getters
     // Getters - get information we already know (either in the object or the XElement)
 
-    [Obsolete("Use GetFolderNode will be removed in v16")]
-    protected XElement? GetFolderNode(TObject item)
-        => GetFolderNodeAsync(item).Result;
-
     protected async Task<XElement?> GetFolderNodeAsync(TObject item)
     {
         if (item.ParentId <= 0) return default;
@@ -151,11 +147,6 @@ public abstract class SyncContainerSerializerBase<TObject>
 
         return default;
     }
-
-    [Obsolete("Use GetContainers will be removed in v16")]
-    protected virtual IEnumerable<EntityContainer> GetContainers(TObject item)
-        => GetContainersAsync(item).Result;
-
 
     protected XElement? GetFolderNode(IEnumerable<EntityContainer> containers)
     {
@@ -318,27 +309,4 @@ public abstract class SyncContainerSerializerBase<TObject>
         ClearFolderCache();
     }
     #endregion
-
-
-    [Obsolete("Use FindItemAsync will be removed in v16")]
-    protected virtual EntityContainer? FindFolder(Guid key, string path)
-        => FindFolderAsync(key, path).Result;
-    [Obsolete("Use FindItemAsync will be removed in v16")]
-    protected virtual EntityContainer? FindContainer(Guid key)
-        => FindContainerAsync(key).Result;
-
-    [Obsolete("Use FindItemAsync will be removed in v16")]
-    protected virtual IEnumerable<EntityContainer> FindContainers(string folder, int level)
-        => FindContainersAsync(folder, level).Result;
-
-    [Obsolete("CreateContainer by ID will no longer work, will be removed in v16")]
-    protected virtual Attempt<OperationResult<OperationResultType, EntityContainer>?> CreateContainer(int parentId, string name)
-        => Attempt<OperationResult<OperationResultType, EntityContainer>?>.Fail(new Exception("Container by Id not supporting in v15"));
-
-    [Obsolete("Use SaveItemAsync will be removed in v16")]
-    protected virtual void SaveContainer(EntityContainer container)
-    {
-        // no op.
-    }
-
 }

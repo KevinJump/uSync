@@ -60,13 +60,6 @@ public abstract class SyncHandlerContainerBase<TObject>
     /// <summary>
     ///  Removes any empty 'containers' after import 
     /// </summary>
-    [Obsolete("use CleanFoldersAsync will be removed in v16")]
-    protected IEnumerable<uSyncAction> CleanFolders(int parent)
-        => [];
-
-    /// <summary>
-    ///  Removes any empty 'containers' after import 
-    /// </summary>
     protected async Task<IEnumerable<uSyncAction>> CleanFoldersAsync(Guid parentKey)
     {
         var actions = new List<uSyncAction>();
@@ -107,12 +100,6 @@ public abstract class SyncHandlerContainerBase<TObject>
     /// <summary>
     /// delete a container
     /// </summary>
-    [Obsolete("Delete by key - will be removed in v16")]
-    virtual protected void DeleteFolder(int id) { }
-
-    /// <summary>
-    /// delete a container
-    /// </summary>
     abstract protected Task DeleteFolderAsync(Guid key);
 
     /// <summary>
@@ -136,22 +123,6 @@ public abstract class SyncHandlerContainerBase<TObject>
 
         return results;
     }
-
-    /// <summary>
-    ///  will resave everything in a folder (and beneath)
-    ///  we need to this when it's renamed
-    /// </summary>
-    [Obsolete("Use UpdateFolderAsync (and pass a guid) will be removed in v16")]
-    protected IEnumerable<uSyncAction> UpdateFolder(int folderId, string folder, HandlerSettings config)
-        => UpdateFolder(folderId, [folder], config);
-
-    /// <summary>
-    ///  will resave everything in a folder (and beneath)
-    ///  we need to this when it's renamed
-    /// </summary>
-    [Obsolete("Use UpdateFolderAsync (and pass a guid) will be removed in v16")]
-    protected IEnumerable<uSyncAction> UpdateFolder(int folderId, string[] folders, HandlerSettings config)
-        => [];
 
     /// <summary>
     ///  will resave everything in a folder (and beneath)

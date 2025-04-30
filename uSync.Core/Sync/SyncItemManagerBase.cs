@@ -90,24 +90,3 @@ public abstract class SyncItemManagerBase
     /// </remarks>
     public virtual SyncEntityInfo? GetSyncInfo(string entityType) => null;
 }
-
-/// <summary>
-///  Base class for ISyncItemManager items where the ID for the entity is of Type TIndexType
-/// </summary>
-/// <remarks>
-///  saves you having to write the conversion code in your methods to convert the ID from
-///  a string to whatever type the entity uses. 
-/// </remarks>
-[Obsolete("No longer need to have an indexed based, use SyncItemManagerBase will be removed in v16")]
-public abstract class SyncItemManagerIndexBase<TIndexType> : SyncItemManagerBase
-{
-    [Obsolete("no longer used will be removed in v16")]
-    protected virtual Task<SyncLocalItem?> GetLocalEntityAsync(TIndexType id)
-        => Task.FromResult(default(SyncLocalItem));
-
-
-    /// <inheritdoc />
-    [Obsolete("no longer used will be removed in v16")]
-    public virtual Task<SyncLocalItem?> GetEntityAsync(SyncTreeItem treeItem)
-        => Task.FromResult(default(SyncLocalItem));
-}

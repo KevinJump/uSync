@@ -20,10 +20,6 @@ public class SyncTrackerCollection : BuilderCollectionBase<ISyncTrackerBase>
             .Select(x => x as ISyncTracker<TObject>).WhereNotNull();
     }
 
-    [Obsolete("use GetChangesAsync will be removed in v16")]
-    public IEnumerable<uSyncChange> GetChanges<TObject>(XElement node, SyncSerializerOptions options)
-        => GetChangesAsync<TObject>(node, options).Result;
-
     public async Task<IEnumerable<uSyncChange>> GetChangesAsync<TObject>(XElement node, SyncSerializerOptions options)
     {
         var changes = new List<uSyncChange>();
@@ -34,10 +30,6 @@ public class SyncTrackerCollection : BuilderCollectionBase<ISyncTrackerBase>
         }
         return changes;
     }
-
-    [Obsolete("use GetChangesAsync will be removed in v16")]
-    public IEnumerable<uSyncChange> GetChanges<TObject>(XElement node, XElement currentNode, SyncSerializerOptions options)
-        => GetChangesAsync<TObject>(node, currentNode, options).Result;
 
     public async Task<IEnumerable<uSyncChange>> GetChangesAsync<TObject>(XElement node, XElement currentNode, SyncSerializerOptions options)
     {

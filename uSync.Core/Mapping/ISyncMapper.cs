@@ -11,15 +11,6 @@ public interface ISyncMapper
 
     bool IsMapper(PropertyType propertyType);
 
-    //[Obsolete]
-    //string? GetExportValue(object value, string editorAlias);
-
-    //[Obsolete]
-    //string? GetImportValue(string value, string editorAlias);
-
-    //[Obsolete]
-    //IEnumerable<uSyncDependency> GetDependencies(object value, string editorAlias, DependencyFlags flags);
-
     Task<string?> GetExportValueAsync(object value, string editorAlias);
     Task<string?> GetImportValueAsync(string value, string editorAlias);
 

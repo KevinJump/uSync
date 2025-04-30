@@ -109,79 +109,6 @@ public partial class SyncService : ISyncService
         => folders[..^1].Any(x => _syncFileService.DirectoryHasChildren(x));
 
 
-    #region Reporting 
-
-    /// <inheritdoc/>>
-    [Obsolete("Will be removed in v16")]
-    public IEnumerable<uSyncAction> Report(string folder, SyncHandlerOptions handlerOptions, uSyncCallbacks? callbacks = null)
-    {
-        handlerOptions ??= new SyncHandlerOptions();
-        handlerOptions.Action = HandlerActions.Report;
-
-        var handlers = _handlerFactory.GetValidHandlers(handlerOptions);
-        return Report(folder, handlers, callbacks);
-    }
-
-    /// <inheritdoc/>>
-    [Obsolete("Will be removed in v16")]
-    public IEnumerable<uSyncAction> Report(string folder, IEnumerable<string> handlerAliases, uSyncCallbacks? callbacks)
-    {
-        var handlers = _handlerFactory.GetDefaultHandlers(handlerAliases);
-        return Report(folder, handlers, callbacks);
-    }
-
-    /// <inheritdoc/>>
-    [Obsolete("Will be removed in v16")]
-    public IEnumerable<uSyncAction> Report(string folder, IEnumerable<HandlerConfigPair> handlers, uSyncCallbacks? callbacks)
-    {
-
-        var sw = Stopwatch.StartNew();
-
-        _mutexService.FireBulkStartingAsync(new uSyncReportStartingNotification()).Wait();
-
-        _logger.LogDebug("Reporting For [{handlers}]", string.Join(",", handlers.Select(x => x.Handler.Name)));
-
-        var actions = new List<uSyncAction>();
-
-        var summary = new SyncProgressSummary(handlers.Select(x => x.Handler), "Reporting", handlers.Count());
-
-        foreach (var configuredHandler in handlers)
-        {
-            var handler = configuredHandler.Handler;
-            var handlerSettings = configuredHandler.Settings;
-
-            summary.Increment();
-
-            summary.UpdateHandler(handler.Name, HandlerStatus.Processing, $"Reporting {handler.Name}", 0);
-
-            callbacks?.Callback?.Invoke(summary);
-
-            var handlerActions = handler.Report([$"{folder}/{handler.DefaultFolder}"], handlerSettings, callbacks?.Update);
-            actions.AddRange(handlerActions);
-
-            summary.UpdateHandler(handler.Name, HandlerStatus.Complete,
-                handlerActions.CountChanges(),
-                handlerActions.ContainsErrors());
-        }
-
-        summary.UpdateMessage("Report Complete");
-        callbacks?.Callback?.Invoke(summary);
-
-
-        _mutexService.FireBulkCompleteAsync(new uSyncReportCompletedNotification(actions)).Wait();
-        sw.Stop();
-
-        _logger.LogInformation("uSync Report: {handlerCount} handlers, processed {itemCount} items, {changeCount} changes in {ElapsedMilliseconds}ms",
-            handlers.Count(), actions.Count,
-            actions.CountChanges(),
-            sw.ElapsedMilliseconds);
-
-        callbacks?.Update?.Invoke($"Processed {actions.Count} items in {sw.ElapsedMilliseconds}ms", 1, 1);
-
-        return actions;
-    }
-
-    #endregion
 
     #region Importing
     static SemaphoreSlim _importSemaphoreLock = new SemaphoreSlim(1, 1);
@@ -412,19 +339,6 @@ public partial class SyncService : ISyncService
             _logger.LogWarning(ex, "Issue saving the usync.config file in the root of {folder}", folder);
         }
     }
-
-    /// <inheritdoc/>>
-    [Obsolete("Will be removed in v15")]
-    public IEnumerable<uSyncAction> Export(string folder, IEnumerable<string> handlerAliases, uSyncCallbacks? callbacks)
-    {
-        var handlers = _handlerFactory.GetDefaultHandlers(handlerAliases);
-        return Export(folder, handlers, callbacks);
-    }
-
-    /// <inheritdoc/>>
-    [Obsolete("Will be removed in v15")]
-    public IEnumerable<uSyncAction> Export(string folder, IEnumerable<HandlerConfigPair> handlers, uSyncCallbacks? callbacks)
-        => ExportAsync(folder, handlers, callbacks).Result;
 
     /// <inheritdoc/>>
     public async Task<IEnumerable<uSyncAction>> ExportAsync(string folder, IEnumerable<HandlerConfigPair> handlers, uSyncCallbacks? callbacks)

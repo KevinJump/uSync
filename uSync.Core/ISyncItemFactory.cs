@@ -55,17 +55,4 @@ public interface ISyncItemFactory
     ///  an entity cache - can be used to improve lookup times on large syncs. 
     /// </summary>
     SyncEntityCache EntityCache { get; }
-
-    [Obsolete("use GetChangesAsync will be removed in v16")]
-    IEnumerable<uSyncChange> GetChanges<TObject>(XElement node, SyncSerializerOptions options)
-    => GetChangesAsync<TObject>(node, options).Result;
-
-    [Obsolete("use GetChangesAsync will be removed in v16")]
-    IEnumerable<uSyncChange> GetChanges<TObject>(XElement node, XElement currentNode, SyncSerializerOptions options)
-        => GetChangesAsync<TObject>(node, currentNode, options).Result;
-
-    [Obsolete("Use GetDependenciesAsync will be removed in v16")]
-    IEnumerable<uSyncDependency> GetDependencies<TObject>(TObject item, DependencyFlags flags)
-        => GetDependenciesAsync(item, flags).Result;
-
 }

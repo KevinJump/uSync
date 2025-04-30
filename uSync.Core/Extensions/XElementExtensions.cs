@@ -297,13 +297,6 @@ public static class XElementExtensions
     }
     #endregion
 
-    /// <summary>
-    ///  gets a hash of the xml, in a platform agnostic way. 
-    /// </summary>
-    [Obsolete("Use MakePlatformSafeHashAsync instead - will be removed in v16")]
-    public static string MakePlatformSafeHash(this XElement node)
-        => node.MakePlatformSafeHashAsync().Result;
-
     private static XmlWriterSettings _xmlWriterSettings = new XmlWriterSettings
     {
         NewLineChars = "\r\n",

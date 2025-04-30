@@ -55,14 +55,6 @@ public interface ISyncItemManager
     Task<IEnumerable<SyncItem>> GetItemsAsync(SyncItem item);
 
     /// <summary>
-    ///  Get the underling Local item for something that was picked from the tree.
-    /// </summary>
-    [Obsolete("no longer called - will be removed in v16")]
-    Task<SyncLocalItem?> GetEntityAsync(SyncTreeItem treeItem) =>
-        Task.FromResult(default(SyncLocalItem));
-
-
-    /// <summary>
     ///  for a given key find the sync entity. 
     /// </summary>
     /// <param name="key"></param>

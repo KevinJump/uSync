@@ -76,10 +76,6 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
         return info;
     }
 
-    [Obsolete("Use SerializeTemplateAsync will be removed in v16")]
-    protected virtual XElement SerializeTemplate(IContent item, SyncSerializerOptions options)
-        => SerializeTemplateAsync(item, options).Result;
-
     protected virtual async Task<XElement> SerializeTemplateAsync(IContent item, SyncSerializerOptions options)
     {
         if (item.TemplateId != null && item.TemplateId.HasValue)
@@ -116,10 +112,6 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
         }
         return published;
     }
-
-    [Obsolete("Use SerializeScheduleAsync will be removed in v16")]
-    protected virtual XElement SerializeSchedule(IContent item, SyncSerializerOptions options)
-        => SerializeScheduleAsync(item, options).Result;
 
     protected virtual Task<XElement> SerializeScheduleAsync(IContent item, SyncSerializerOptions options)
     {
