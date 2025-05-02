@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 using System.Diagnostics;
 using System.Reflection;
@@ -41,6 +42,8 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
         _templateService = templateService;
         _capabilities = uSyncCapabilityChecker;
     }
+
+    protected override Guid GetDefaultListType() => Constants.DataTypes.Guids.ListViewContentGuid;
 
     protected override void EnsureAliasCache()
     {
