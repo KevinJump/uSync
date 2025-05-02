@@ -34,6 +34,8 @@ public class MediaTypeSerializer : ContentTypeBaseSerializer<IMediaType>, ISyncS
         _mediaTypeContainerService = mediaTypeContainerService;
     }
 
+    protected override Guid GetDefaultListType() => Constants.DataTypes.Guids.ListViewMediaGuid;
+
     protected override async Task<SyncAttempt<XElement>> SerializeCoreAsync(IMediaType item, SyncSerializerOptions options)
     {
         var node = SerializeBase(item);
