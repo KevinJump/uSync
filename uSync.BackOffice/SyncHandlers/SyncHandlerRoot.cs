@@ -1040,8 +1040,10 @@ namespace uSync.BackOffice.SyncHandlers
         /// </summary>
         virtual public IEnumerable<uSyncAction> Export(TObject item, string folder, HandlerSettings config)
             => Export(item, [folder], config);
-
-        virtual public string GetDirectoryForItem(TObject item, string[] folders, HandlerSettings config) => folders.Last();
+        /// <summary>
+        /// Prepares directory name for export of a given item.
+        /// </summary>
+        virtual protected string GetDirectoryForItem(TObject item, string[] folders, HandlerSettings config) => folders.Last();
         /// <summary>
         /// Export a given item to disk
         /// </summary>
