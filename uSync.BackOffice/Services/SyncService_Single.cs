@@ -106,7 +106,7 @@ public partial class SyncService
                     {
                         foreach (var item in orderedNodes.Skip(options.PageNumber * options.PageSize).Take(options.PageSize))
                         {
-                            var node = item.Node ?? XElement.Load(item.FileName);
+                            var node = item.Node ?? await _syncFileService.LoadXElementAsync(item.FileName);
 
                             var itemType = node.GetItemType();
                             if (!itemType.InvariantEquals(lastType))

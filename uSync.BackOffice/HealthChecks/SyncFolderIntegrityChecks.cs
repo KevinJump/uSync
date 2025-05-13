@@ -83,7 +83,7 @@ public class SyncFolderIntegrityChecks : HealthCheck
         }
     }
 
-    private static List<string> CheckFolder(string folder)
+    private List<string> CheckFolder(string folder)
     {
         var _keys = new Dictionary<Guid, string>();
 
@@ -95,7 +95,7 @@ public class SyncFolderIntegrityChecks : HealthCheck
         {
             try
             {
-                var node = XElement.Load(file);
+                var node = _fileService.LoadXElementAsync(file).Result;
 
                 if (!node.IsEmptyItem())
                 {
@@ -144,7 +144,7 @@ public class SyncFolderIntegrityChecks : HealthCheck
         {
             try
             {
-                var node = XElement.Load(file);
+                var node = _fileService.LoadXElementAsync(file).Result;
             }
             catch (Exception ex)
             {

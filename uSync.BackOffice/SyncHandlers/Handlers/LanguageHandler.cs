@@ -90,7 +90,7 @@ public class LanguageHandler : SyncHandlerBase<ILanguage>, ISyncHandler,
             Dictionary<string, string> ordered = [];
             foreach (var file in files)
             {
-                var node = XElement.Load(file);
+                var node = syncFileService.LoadXElementAsync(file).Result;
                 var order = (node.Element("IsDefault").ValueOrDefault(false) ? "0" : "1") + Path.GetFileName(file);
                 ordered[file] = order;
             }
