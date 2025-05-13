@@ -11,7 +11,7 @@
         vm.loading = true;
         vm.readonly = true;
 
-        vm.docslink = "https://docs.jumoo.co.uk/usync/reference/config/";
+        vm.docslink = "https://docs.jumoo.co.uk/usync/13.x/uSync/reference/config";
 
         vm.umbracoVersion = Umbraco.Sys.ServerVariables.application.version;
 
