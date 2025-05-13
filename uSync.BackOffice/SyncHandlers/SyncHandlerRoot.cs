@@ -1025,7 +1025,7 @@ namespace uSync.BackOffice.SyncHandlers
             if (udi.IsRoot && settings.CreateClean)
             {
                 // for roots we still can create a clean
-                var targetFolder = folders.Last();
+                var targetFolder = GetDirectoryForItem(item,folders,settings);
                 var filename = Path.Combine(targetFolder, $"{Guid.Empty}.{this.uSyncConfig.Settings.DefaultExtension}");
                 CreateCleanFile(Guid.Empty, filename);
             }
@@ -1040,7 +1040,10 @@ namespace uSync.BackOffice.SyncHandlers
         /// </summary>
         virtual public IEnumerable<uSyncAction> Export(TObject item, string folder, HandlerSettings config)
             => Export(item, [folder], config);
-
+        /// <summary>
+        /// Prepares directory name for export of a given item.
+        /// </summary>
+        virtual protected string GetDirectoryForItem(TObject item, string[] folders, HandlerSettings config) => folders.Last();
         /// <summary>
         /// Export a given item to disk
         /// </summary>
@@ -1058,7 +1061,7 @@ namespace uSync.BackOffice.SyncHandlers
                     .AsEnumerableOfOne();
             }
 
-            var targetFolder = folders.Last();
+            var targetFolder = GetDirectoryForItem(item,folders, config);
 
             var filename = GetPath(targetFolder, item, config.GuidNames, config.UseFlatStructure)
                 .ToAppSafeFileName();
@@ -1083,6 +1086,7 @@ namespace uSync.BackOffice.SyncHandlers
 
             return uSyncActionHelper<XElement>.SetAction(attempt, syncFileService.GetSiteRelativePath(filename), GetItemKey(item), this.Alias).AsEnumerableOfOne();
         }
+
 
         /// <summary>
         ///  Do the meat of the export 
@@ -1660,7 +1664,7 @@ namespace uSync.BackOffice.SyncHandlers
         {
             if (item == null) return;
 
-            var targetFolder = folders.Last();
+            var targetFolder = GetDirectoryForItem(item,folders,config);
 
             var filename = GetPath(targetFolder, item, config.GuidNames, config.UseFlatStructure)
                 .ToAppSafeFileName();
