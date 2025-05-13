@@ -651,7 +651,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 
             foreach (var file in files)
             {
-                var node = XElement.Load(file);
+                var node = syncFileService.LoadXElementAsync(file).Result;
                 var key = node.GetKey();
                 if (key != Guid.Empty && !keys.Contains(key))
                 {
@@ -678,7 +678,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// </summary>
     protected async Task<TObject?> GetCleanParentAsync(string file)
     {
-        var node = XElement.Load(file);
+        var node = await syncFileService.LoadXElementAsync(file);
         var key = node.GetKey();
         if (key == Guid.Empty) return default;
         return await GetFromServiceAsync(key);
@@ -1294,7 +1294,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         {
             if (actions[i].Change != ChangeType.ParentMissing || actions[i].FileName is null) continue;
 
-            var node = XElement.Load(actions[i].FileName!);
+            var node = syncFileService.LoadXElementAsync(actions[i].FileName!).Result;
             var guid = node.GetParentKey();
 
             if (guid != Guid.Empty)
