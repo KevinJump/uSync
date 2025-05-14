@@ -60,8 +60,8 @@ public class HandlerSettings
 
     // TODO: v13 - change this to string, object settings collection. 
     //             makes for better intellisense from schema.
-    public Dictionary<string, string> Settings { get; set; }
-        = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
+    public Dictionary<string, object?> Settings { get; set; }
+        = new Dictionary<string, object?>(StringComparer.InvariantCultureIgnoreCase);
 }
 
 /// <summary>
@@ -79,7 +79,7 @@ public static class HandlerSettingsExtensions
     /// <returns></returns>
     public static TResult GetSetting<TResult>(this HandlerSettings settings, string key, TResult defaultValue)
     {
-        if (settings.Settings != null && settings.Settings.TryGetValue(key, out string? value))
+        if (settings.Settings != null && settings.Settings.TryGetValue(key, out var value))
         {
             var attempt = value.TryConvertTo<TResult>();
             if (attempt) return attempt.Result ?? defaultValue;
@@ -96,7 +96,7 @@ public static class HandlerSettingsExtensions
     /// <param name="value"></param>
     public static void AddSetting<TObject>(this HandlerSettings settings, string key, TObject value)
     {
-        settings.Settings ??= new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
+        settings.Settings ??= new Dictionary<string, object?>(StringComparer.InvariantCultureIgnoreCase);
 
         settings.Settings.TryAdd(key, value?.ToString() ?? string.Empty);
     }
@@ -116,7 +116,7 @@ public static class HandlerSettingsExtensions
             UseFlatStructure = settings.UseFlatStructure,
             Group = settings.Group,
             GuidNames = settings.GuidNames,
-            Settings = new Dictionary<string, string>(settings.Settings, StringComparer.InvariantCultureIgnoreCase)
+            Settings = new Dictionary<string, object?>(settings.Settings, StringComparer.InvariantCultureIgnoreCase)
         };
     }
 
