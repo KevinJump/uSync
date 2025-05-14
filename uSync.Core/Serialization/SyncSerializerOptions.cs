@@ -19,19 +19,21 @@ public class SyncSerializerOptions
         this.Flags = flags;
     }
 
-    public SyncSerializerOptions(Dictionary<string, string> settings)
+    public SyncSerializerOptions(Dictionary<string, object?> settings)
     {
-        this.Settings = settings != null ? new Dictionary<string, string>(settings) : new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
+        this.Settings = settings != null 
+            ? new Dictionary<string, object?>(settings, StringComparer.InvariantCultureIgnoreCase) 
+            : new Dictionary<string, object?>(StringComparer.InvariantCultureIgnoreCase);
 
     }
 
-    public SyncSerializerOptions(SerializerFlags flags, Dictionary<string, string> settings)
+    public SyncSerializerOptions(SerializerFlags flags, Dictionary<string, object?> settings)
         : this(settings)
     {
         this.Flags = flags;
     }
 
-    public SyncSerializerOptions(SerializerFlags flags, Dictionary<string, string> settings, int userId)
+    public SyncSerializerOptions(SerializerFlags flags, Dictionary<string, object?> settings, int userId)
         : this(flags, settings)
     {
         UserId = userId;
@@ -53,7 +55,7 @@ public class SyncSerializerOptions
     /// <summary>
     ///  Parameterized options, custom for each handler
     /// </summary>
-    public Dictionary<string, string> Settings { get; internal set; } = [];
+    public Dictionary<string, object?> Settings { get; internal set; } = [];
 
     /// <summary>
     ///  flag properties, we can move this away from flags if we want to.
@@ -68,7 +70,7 @@ public class SyncSerializerOptions
 
     public TResult GetSetting<TResult>(string key, TResult defaultValue)
     {
-        if (this.Settings?.TryGetValue(key, out string? value) is true)
+        if (this.Settings?.TryGetValue(key, out var value) is true)
         {
             var attempt = value.TryConvertTo<TResult>();
             if (attempt.Success && attempt.Result is not null)
@@ -112,7 +114,7 @@ public class SyncSerializerOptions
     /// </summary>
     public void MergeSettings(Dictionary<string, string>? newSettings)
     {
-        Settings ??= new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
+        Settings ??= new Dictionary<string, object?>(StringComparer.InvariantCultureIgnoreCase);
 
         if (newSettings is not null)
         {

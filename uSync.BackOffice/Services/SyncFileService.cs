@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml;
 using System.Xml.Linq;
 
 using Umbraco.Cms.Core.Extensions;
@@ -196,7 +197,10 @@ internal class SyncFileService : ISyncFileService
                 if (stream is null)
                     throw new FileNotFoundException($"Cannot create stream for {file}"); ;
 
-                return await XElement.LoadAsync(stream, LoadOptions.PreserveWhitespace, CancellationToken.None);
+                using (var xmlReader = XmlReader.Create(stream, _readerSettings))
+                {
+                    return await XElement.LoadAsync(xmlReader, LoadOptions.PreserveWhitespace, CancellationToken.None);    
+                }
             }
         }
         catch (Exception ex)
@@ -234,13 +238,33 @@ internal class SyncFileService : ISyncFileService
         }
     }
 
+    private static XmlReaderSettings _readerSettings = new XmlReaderSettings
+    {
+        CheckCharacters = false,
+        Async = true,
+    };
+
+    private static XmlWriterSettings _writerSettings = new XmlWriterSettings
+    {
+        Encoding = Encoding.UTF8,
+        CheckCharacters = false,
+        Async = true,
+        CloseOutput= false,
+        Indent = true,
+        
+
+    };
+
     /// <inheritdoc/>
     public async Task SaveXElementAsync(XElement node, string filename)
     {
         var localPath = GetAbsPath(filename);
         using (var stream = OpenWrite(localPath))
         {
-            await node.SaveAsync(stream, SaveOptions.None, CancellationToken.None);
+            using (var writer = XmlWriter.Create(stream, _writerSettings))
+            {
+                await node.SaveAsync(writer, CancellationToken.None);
+            }
             await stream.FlushAsync();
             stream.Dispose();
         }
@@ -326,7 +350,7 @@ internal class SyncFileService : ISyncFileService
         {
             try
             {
-                var node = XElement.Load(file);
+                var node = LoadXElementAsync(file).Result;
 
                 if (!node.IsEmptyItem())
                 {
@@ -496,7 +520,7 @@ internal class SyncFileService : ISyncFileService
         }
         catch (Exception ex)
         {
-            // 1. diffrences shouldn't stop the process, they are nice to have but 
+            // 1. differences shouldn't stop the process, they are nice to have but 
             // not critical. 
             _logger.LogWarning(ex, "Error getting differences");
             return null;

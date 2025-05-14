@@ -44,6 +44,8 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         _appCache = appCaches.RuntimeCache;
     }
 
+    protected virtual Guid GetDefaultListType() => Guid.Empty;
+
     #region Serialization 
 
     protected XElement SerializeBase(TObject item)
@@ -284,12 +286,17 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
             item.IsElement = isElement;
         }
 
-        //var isContainer = info.Element("IsListView").ValueOrDefault(false);
-        //if (item.IsContainer != isContainer)
-        //{
-        //    changes.AddUpdate("IsListView", item.IsContainer, isContainer, "");
-        //    item.IsContainer = isContainer;
-        //}
+        if (info.Element("ListView") is null && info.Element("IsListView").ValueOrDefault(false) == true)
+        {
+            // if the newer ListView value is not set, but the legacy "IsListView" one is, 
+            // then we get the default type and set it (if it hasn't already been set).
+            var defaultListType = GetDefaultListType();
+            if (item.ListView != defaultListType)
+            {
+                changes.AddUpdate("ListView", item.ListView, defaultListType, "");
+                item.ListView = defaultListType;
+            }
+        }
 
         var listView = info.Element("ListView").ValueOrDefault(Guid.Empty);
         if (listView != Guid.Empty && item.ListView != listView)

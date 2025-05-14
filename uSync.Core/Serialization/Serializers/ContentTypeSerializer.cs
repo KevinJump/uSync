@@ -42,6 +42,8 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
         _capabilities = uSyncCapabilityChecker;
     }
 
+    protected override Guid GetDefaultListType() => Constants.DataTypes.Guids.ListViewContentGuid;
+
     protected override void EnsureAliasCache()
     {
         aliasCache = _appCache.GetCacheItem<List<string>>(
