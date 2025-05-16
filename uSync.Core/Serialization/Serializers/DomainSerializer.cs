@@ -1,8 +1,4 @@
-﻿using Lucene.Net.Util;
-
-using Microsoft.Extensions.Logging;
-
-using OpenIddict.Client.AspNetCore;
+﻿using Microsoft.Extensions.Logging;
 
 using System.Xml.Linq;
 
@@ -282,7 +278,11 @@ public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncSerializer<IDo
     ///  but the domain methods only except the key, so we have to look up the key
     ///  from the id to pass it, and then internally Umbraco uses the key to find the 
     ///  content item - given that the id is stored, it should be the thing we pass
-    ///  or more likely the key should be stored agains the domain?) 
+    ///  or more likely the key should be stored against the domain?) 
+    ///  
+    ///  also, update one domain value? well we have to load them all in, manipulate the 
+    ///  list and then put them back, when to be clear here. these are all separate in the 
+    ///  db, so old style crud was ok and fine ?
     /// </remarks>
     /// <param name="item"></param>
     /// <returns></returns>
@@ -290,28 +290,65 @@ public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncSerializer<IDo
     {
         if (item.LanguageId is null || item.RootContentId is null) return;
 
-        var icoCode = item.LanguageIsoCode ?? (await _languageService.GetIsoCodesByIdsAsync([item.LanguageId.Value])).FirstOrDefault();
-        if (icoCode is null) return;
+        // the isoCode might have changed (and we can only change the language id, so look it up)
+        var isoCode = (await _languageService.GetIsoCodesByIdsAsync([item.LanguageId.Value])).FirstOrDefault();
+        if (isoCode is null) return;
 
         var contentKey = entityService.GetKey(item.RootContentId.Value, UmbracoObjectTypes.Document);
         if (!contentKey.Success) return;
 
+        // get all the existing domains for the content item. 
         var existing = await _domainService.GetAssignedDomainsAsync(contentKey.Result, true);
 
-        List<IDomain> newDomains = [.. existing, item];
+        // turn them into a model we can update (but we want to keep the sort order, so we have our own model)
+        var existingModels = existing
+            .Where(x => x.Key != item.Key)
+            .OrderBy(x => x.SortOrder)
+            .DistinctBy(x => x.Key)
+            .Select(x => new DomainSyncModal
+            {
+                Key = x.Key,
+                DomainName = x.DomainName,
+                IsoCode = x.LanguageIsoCode!,
+                SortOrder = x.SortOrder,
+            });
+
+
+
+        // create a new model for the item we are saving, and add it to the list of existing models.
+        var updatedModel = new DomainSyncModal
+        {
+            Key = item.Key,
+            DomainName = item.DomainName,
+            IsoCode = isoCode,
+            SortOrder = item.SortOrder
+        };
+
+
+        List<DomainSyncModal> newDomains = [.. existingModels, updatedModel];
+
         var updateModel = new DomainsUpdateModel
         {
+            // pass the full list of domains to the update model
             Domains = newDomains
                 .OrderBy(x => x.SortOrder)
                 .DistinctBy(x => x.Key)
                 .Select(x => new DomainModel
                 {
                     DomainName = x.DomainName,
-                    IsoCode = icoCode,
+                    IsoCode = x.IsoCode,
                 })
         };
 
         await _domainService.UpdateDomainsAsync(contentKey.Result, updateModel);
+    }
+
+    private class DomainSyncModal
+    {
+        public required Guid Key { get; set; }
+        public required string DomainName { get; set; }
+        public required string IsoCode { get; set; }
+        public int SortOrder { get; set; } = -1;
     }
 
     public override async Task DeleteItemAsync(IDomain item)
