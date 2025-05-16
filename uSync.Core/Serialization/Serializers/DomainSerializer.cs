@@ -305,7 +305,7 @@ public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncSerializer<IDo
             .Where(x => x.Key != item.Key)
             .OrderBy(x => x.SortOrder)
             .DistinctBy(x => x.Key)
-            .Select(x => new DomainSyncModal
+            .Select(x => new DomainSyncModel
             {
                 Key = x.Key,
                 DomainName = x.DomainName,
@@ -316,7 +316,7 @@ public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncSerializer<IDo
 
 
         // create a new model for the item we are saving, and add it to the list of existing models.
-        var updatedModel = new DomainSyncModal
+        var updatedModel = new DomainSyncModel
         {
             Key = item.Key,
             DomainName = item.DomainName,
@@ -325,7 +325,7 @@ public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncSerializer<IDo
         };
 
 
-        List<DomainSyncModal> newDomains = [.. existingModels, updatedModel];
+        List<DomainSyncModel> newDomains = [.. existingModels, updatedModel];
 
         var updateModel = new DomainsUpdateModel
         {
@@ -343,7 +343,7 @@ public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncSerializer<IDo
         await _domainService.UpdateDomainsAsync(contentKey.Result, updateModel);
     }
 
-    private class DomainSyncModal
+    private class DomainSyncModel
     {
         public required Guid Key { get; set; }
         public required string DomainName { get; set; }
