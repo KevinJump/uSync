@@ -1064,7 +1064,8 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         }
         catch (ArgumentException ex)
         {
-            logger.LogDebug("Unable to parse pattern '{pattern}' from '{settingsKey}' as Regex. {error}. Pattern will not be considered.", pattern, settingsKey, ex.Message);
+            logger.LogDebug("Unable to parse pattern '{pattern}' from '{settingsKey}' as Regex. {error}. Pattern will not be considered.", pattern, 
+                uSyncConstants.DefaultSettings.DoNotSerializePattern, ex.Message);
             return null;
         }
     }
