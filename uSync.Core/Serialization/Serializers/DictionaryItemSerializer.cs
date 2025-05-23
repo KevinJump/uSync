@@ -77,7 +77,7 @@ public class DictionaryItemSerializer : SyncSerializerBase<IDictionaryItem>, ISy
             logger.LogInformation("Dictionary keys (Guids) do not match - we can continue with this, but renaming dictionary items from a source computer with a mismatched key value might result in duplicate entries in your dictionary values.");
             details.AddUpdate(uSyncConstants.Xml.Key, item.Key, key);
 
-            if (options.GetSetting<bool>("ForceKeySync", false))
+            if (options.GetSetting<bool>(uSyncConstants.DefaultSettings.ForceKeySync, uSyncConstants.DefaultSettings.ForceKeySync_Default))
             {
                 logger.LogDebug("Forcing key sync of dictionary item - if the keys are out of sync on existing items this can cause a SQL Constraint error");
                 item.Key = key;
@@ -85,7 +85,7 @@ public class DictionaryItemSerializer : SyncSerializerBase<IDictionaryItem>, ISy
         }
 
         // key only translation, would not add the translation values. 
-        if (!options.GetSetting("KeysOnly", false))
+        if (!options.GetSetting(uSyncConstants.DefaultSettings.KeysOnly, uSyncConstants.DefaultSettings.KeysOnly_Default))
         {
             details.AddRange(await DeserializeTranslationsAsync(item, node, options));
         }
@@ -233,7 +233,7 @@ public class DictionaryItemSerializer : SyncSerializerBase<IDictionaryItem>, ISy
     protected override XElement CleanseNode(XElement node)
     {
         var clone = XElement.Parse(node.ToString());
-        var keyAttribute = clone.Attribute("Key");
+        var keyAttribute = clone.Attribute(uSyncConstants.Xml.Key);
         if (keyAttribute != null) keyAttribute.Value = Guid.Empty.ToString();
         return base.CleanseNode(clone);
     }

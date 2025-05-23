@@ -72,9 +72,9 @@ public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncSerializer<IM
             return SyncAttempt<IMedia>.Fail(item.Name ?? item.Id.ToString(), item, ChangeType.Fail, "Failed to save properties",
                 propertyAttempt.Exception ?? new Exception($"Error with properties {item.Id}"));
 
-        if (!options.GetSetting<bool>("IgnoreSortOrder", false))
+        if (!options.GetSetting<bool>(uSyncConstants.DefaultSettings.IgnoreSortOrder, uSyncConstants.DefaultSettings.IgnoreSortOrder_Default))
         {
-            var sortOrder = info?.Element("SortOrder").ValueOrDefault(-1) ?? -1;
+            var sortOrder = info?.Element(uSyncConstants.Xml.SortOrder).ValueOrDefault(-1) ?? -1;
             HandleSortOrder(item, sortOrder);
         }
 
@@ -143,7 +143,7 @@ public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncSerializer<IM
         // serializing the file hash, will mean if the image changes, then the media item will
         // trigger as a change - this doesn't mean the image will be updated other methods are
         // used to copy media between servers (uSync.Complete)
-        if (options.GetSetting("IncludeFileHash", false))
+        if (options.GetSetting(uSyncConstants.DefaultSettings.IncludeFileHash, uSyncConstants.DefaultSettings.IncludeFileHash_Default))
             info.Add(SerializeFileHash(item));
 
         return SyncAttempt<XElement>.Succeed(

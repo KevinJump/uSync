@@ -369,5 +369,5 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
 
     private bool ViewsAreCompiled(SyncSerializerOptions options)
         => _configuration.IsUmbracoRunningInProductionMode()
-            || options.GetSetting("UsingRazorViews", false);
+            || options.GetSetting(uSyncConstants.DefaultSettings.UsingRazorViews, uSyncConstants.DefaultSettings.UsingRazorViews_Default);
 }

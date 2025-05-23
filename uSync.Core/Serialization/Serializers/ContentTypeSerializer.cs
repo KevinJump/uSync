@@ -210,7 +210,7 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
 
     private async Task<List<uSyncChange>> DeserializeContentTypePropertiesAsync(IContentType item, XElement node)
     {
-        var info = node?.Element("Info");
+        var info = node?.Element(uSyncConstants.Xml.Info);
         if (info is null) return [];
 
         var changes = new List<uSyncChange>();
@@ -284,7 +284,7 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
         var newTemplates = string.Join(",", allowedTemplates.Select(x => x.Alias).OrderBy(x => x));
 
         // New "KeepTemplates" Option, will merge uSync templates with existing ones (not a complete sync!)
-        if (options.GetSetting<bool>("KeepTemplates", false))
+        if (options.GetSetting<bool>(uSyncConstants.DefaultSettings.KeepTemplates, uSyncConstants.DefaultSettings.KeepTemplates_Default))
         {
             allowedTemplates =
             [
@@ -378,7 +378,7 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
     {
         if (!_capabilities.HasHistoryCleanup || node == null) return [];
 
-        var cleanupNode = node.Element("Info")?.Element(_historyCleanupName);
+        var cleanupNode = node.Element(uSyncConstants.Xml.Info)?.Element(_historyCleanupName);
         if (cleanupNode is null) return [];
 
         try

@@ -93,7 +93,7 @@ public class DataTypeTracker : SyncXmlTrackAndMerger<IDataType>, ISyncTracker<ID
     }
 
     private string GetEditorAlias(XElement node)
-        => node.Element("Info")?.Element("EditorAlias").ValueOrDefault(string.Empty) ?? string.Empty;
+        => node.Element(uSyncConstants.Xml.Info)?.Element("EditorAlias").ValueOrDefault(string.Empty) ?? string.Empty;
 
 
     private ISyncConfigMerger? GetConfigMerger(string editorAlias)

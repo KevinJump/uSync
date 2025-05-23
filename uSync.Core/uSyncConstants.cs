@@ -110,6 +110,36 @@ public static partial class uSyncConstants
         public const string NoConfigNames = "NoConfigNames";
         public const string NoConfigNames_Default = "";
 
+        public const string IncludeUserInfo = "IncludeUserInfo";
+        public const bool IncludeUserInfo_Default = false;
+
+        public const string IgnoreSortOrder = "IgnoreSortOrder";
+        public const bool IgnoreSortOrder_Default = false;
+
+        public const string DoNotSerialize = "DoNotSerialize";
+        public const string DoNotSerialize_Default = "";
+
+        public const string DoNotSerializePattern = "DoNotSerializePattern";
+        public const string DoNotSerializePattern_Default = "";
+
+        public const string KeepTemplates = "KeepTemplates";
+        public const bool KeepTemplates_Default = false;
+
+        public const string ForceKeySync = "ForceKeySync";
+        public const bool ForceKeySync_Default = false;
+
+        public const string KeysOnly = "KeysOnly";
+        public const bool KeysOnly_Default = false;
+
+        public const string IncludeFileHash = "IncludeFileHash";
+        public const bool IncludeFileHash_Default = false;
+
+        public const string IncludeRelations = "IncludeRelations";
+        public const bool IncludeRelations_Default = false;
+
+        public const string UsingRazorViews = "UsingRazorViews";
+        public const bool UsingRazorViews_Default = false;
+
     }
 
     public const int DependencyCountMax = 204800;

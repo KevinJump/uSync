@@ -145,7 +145,7 @@ public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncSerializer<IDo
         });
     }
 
-    private const string _sortablePropertyName = "SortOrder";
+    private const string _sortablePropertyName = uSyncConstants.Xml.SortOrder;
 
     /// <summary>
     ///  Retrieve the SortOrder value for the item

@@ -80,7 +80,7 @@ public class SyncXmlTracker<TObject>
     {
         if (source == null) return uSyncChange.NoChange("", target.GetAlias());
 
-        var action = target.Attribute("Change").ValueOrDefault(SyncActionType.None);
+        var action = target.Attribute(uSyncConstants.Xml.Change).ValueOrDefault(SyncActionType.None);
         return action switch
         {
             SyncActionType.Delete => uSyncChange.Delete(target.GetAlias(), "Delete", target.GetAlias()),

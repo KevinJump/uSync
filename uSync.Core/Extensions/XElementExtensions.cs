@@ -119,7 +119,7 @@ public static class XElementExtensions
     ///  us work this out.
     /// </remarks>
     public static bool IsBlueprint(this XElement node)
-        => node.Element("Info")?.Element("IsBlueprint").ValueOrDefault(false) is true;
+        => node.Element(uSyncConstants.Xml.Info)?.Element("IsBlueprint").ValueOrDefault(false) is true;
 
 
     /// <summary>

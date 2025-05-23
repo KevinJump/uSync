@@ -101,7 +101,7 @@ public class MemberTypeSerializer : ContentTypeBaseSerializer<IMemberType>, ISyn
         var node = await base.SerializePropertiesAsync(item);
         foreach (var property in node.Elements("GenericProperty") ?? [])
         {
-            var alias = property.Element("Alias").ValueOrDefault(string.Empty);
+            var alias = property.Element(uSyncConstants.Xml.Alias).ValueOrDefault(string.Empty);
             if (!string.IsNullOrWhiteSpace(alias) && _builtInProperties.TryGetValue(alias, out string? value))
             {
                 var key = value;

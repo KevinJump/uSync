@@ -68,7 +68,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
         info.Add(await SerializeScheduleAsync(item, options));
         info.Add(await SerializeTemplateAsync(item, options));
 
-        if (options.GetSetting<bool>("IncludeUserInfo", false))
+        if (options.GetSetting<bool>(uSyncConstants.DefaultSettings.IncludeUserInfo, uSyncConstants.DefaultSettings.IncludeUserInfo_Default))
         {
             info.Add(await SerializerWriterInfoAsync(item, options));
         }
@@ -247,7 +247,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
 
     protected virtual async Task<uSyncChange?> DeserializeTemplate(IContent item, XElement node)
     {
-        var templateNode = node.Element("Info")?.Element("Template");
+        var templateNode = node.Element(uSyncConstants.Xml.Info)?.Element("Template");
 
         if (templateNode != null)
         {
@@ -281,7 +281,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
 
     public int DeserializeWriterInfo(IContent item, XElement node, SyncSerializerOptions options)
     {
-        var writerNode = node.Element("Info")?.Element("UserInfo");
+        var writerNode = node.Element(uSyncConstants.Xml.Info)?.Element("UserInfo");
         if (writerNode == null) return -1;
 
         var emails = new Dictionary<string, int>();
@@ -308,9 +308,11 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
         // doing it on second pass ensures it gets set on the item
         // after it has been saved by umbraco. 
         var details = new List<uSyncChange>();
-        if (!options.GetSetting<bool>("IgnoreSortOrder", false))
+        if (!options.GetSetting<bool>(
+            uSyncConstants.DefaultSettings.IgnoreSortOrder,
+            uSyncConstants.DefaultSettings.IgnoreSortOrder_Default))
         {
-            var sortOrder = node.Element("Info")?.Element("SortOrder").ValueOrDefault(-1) ?? -1;
+            var sortOrder = node.Element(uSyncConstants.Xml.Info)?.Element(uSyncConstants.Xml.SortOrder).ValueOrDefault(-1) ?? -1;
             details.AddNotNull(HandleSortOrder(item, sortOrder));
         }
 
@@ -333,7 +335,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
             var currentSchedules = contentService.GetContentScheduleByContentId(item.Id);
             var cultures = options.GetDeserializedCultures(node);
 
-            var schedules = node.Element("Info")?.Element("Schedule");
+            var schedules = node.Element(uSyncConstants.Xml.Info)?.Element("Schedule");
             if (schedules != null && schedules.HasElements)
             {
                 logger.LogDebug("De-serialize Schedules {name}", item.Name);
@@ -459,11 +461,11 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
             return Attempt.Succeed("No Changes");
         }
 
-        var trashed = item.Trashed || (node.Element("Info")?.Element("Trashed").ValueOrDefault(false) ?? false);
-        var publishedNode = node.Element("Info")?.Element("Published");
+        var trashed = item.Trashed || (node.Element(uSyncConstants.Xml.Info)?.Element("Trashed").ValueOrDefault(false) ?? false);
+        var publishedNode = node.Element(uSyncConstants.Xml.Info)?.Element("Published");
         if (!trashed && publishedNode != null)
         {
-            var schedules = GetSchedules(node.Element("Info")?.Element("Schedule"));
+            var schedules = GetSchedules(node.Element(uSyncConstants.Xml.Info)?.Element("Schedule"));
 
             var scheduleCollection = new ContentScheduleCollection();
             foreach (var schedule in schedules)

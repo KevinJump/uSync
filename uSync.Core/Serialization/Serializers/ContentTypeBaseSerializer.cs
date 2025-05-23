@@ -76,9 +76,9 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
             tabs.Add(new XElement("Tab",
                         new XElement(uSyncConstants.Xml.Key, tab.Key),
                         new XElement("Caption", tab.Name),
-                        new XElement("Alias", tab.Alias),
+                        new XElement(uSyncConstants.Xml.Alias, tab.Alias),
                         new XElement("Type", tab.Type),
-                        new XElement("SortOrder", tab.SortOrder)));
+                        new XElement(uSyncConstants.Xml.SortOrder, tab.SortOrder)));
 
         }
 
@@ -115,12 +115,12 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
             var description = string.IsNullOrEmpty(property.Description) ? "" : property.Description;
             propNode.Add(new XElement("Description", new XCData(description)));
 
-            propNode.Add(new XElement("SortOrder", property.SortOrder));
+            propNode.Add(new XElement(uSyncConstants.Xml.SortOrder, property.SortOrder));
 
             // cross version compatibility, before v8.17 - tabs are by name. 
             var tab = item.PropertyGroups.FirstOrDefault(x => x.PropertyTypes?.Contains(property) is true);
             var tabNode = new XElement("Tab", tab != null ? tab.Name : "");
-            if (tab != null) tabNode.Add(new XAttribute("Alias", tab.Alias));
+            if (tab != null) tabNode.Add(new XAttribute(uSyncConstants.Xml.Alias, tab.Alias));
             propNode.Add(tabNode);
 
             SerializeExtraProperties(propNode, item, property);
@@ -481,10 +481,10 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
                 result.Property.ValidationRegExp = propertyNode.Element("Validation").ValueOrDefault(string.Empty);
             }
 
-            var sortOrder = propertyNode.Element("SortOrder").ValueOrDefault(0);
+            var sortOrder = propertyNode.Element(uSyncConstants.Xml.SortOrder).ValueOrDefault(0);
             if (result.Property.SortOrder != sortOrder)
             {
-                changes.AddUpdate("SortOrder", result.Property.SortOrder, sortOrder, $"{alias}/SortOrder");
+                changes.AddUpdate(uSyncConstants.Xml.SortOrder, result.Property.SortOrder, sortOrder, $"{alias}/SortOrder");
                 result.Property.SortOrder = sortOrder;
             }
 

@@ -162,7 +162,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         }
         info.Add(title);
 
-        if (!options.GetSetting<bool>("IgnoreSortOrder", false))
+        if (!options.GetSetting<bool>(uSyncConstants.DefaultSettings.IgnoreSortOrder, uSyncConstants.DefaultSettings.IgnoreSortOrder_Default))
         {
             info.Add(new XElement(uSyncConstants.Xml.SortOrder, item.SortOrder));
         }
@@ -1040,7 +1040,10 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
     private List<string> GetExcludedProperties(SyncSerializerOptions options)
     {
         List<string> exclude = [.. dontSerialize];
-        var excludeOptions = options.GetSetting<string>("DoNotSerialize", "");
+        
+        var excludeOptions = options.GetSetting<string>(uSyncConstants.DefaultSettings.DoNotSerialize, 
+            uSyncConstants.DefaultSettings.DoNotSerialize_Default);
+
         if (!string.IsNullOrWhiteSpace(excludeOptions))
             exclude.AddRange(excludeOptions.ToDelimitedList());
 
@@ -1049,9 +1052,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
 
     private Regex? GetExcludedPropertiesPattern(SyncSerializerOptions options)
     {
-        const string settingsKey = "DoNotSerializePattern";
-
-        string pattern = options.GetSetting<string>(settingsKey, "");
+        string pattern = options.GetSetting<string>(uSyncConstants.DefaultSettings.DoNotSerializePattern, uSyncConstants.DefaultSettings.DoNotSerializePattern_Default);
         if (string.IsNullOrWhiteSpace(pattern))
         {
             return null;

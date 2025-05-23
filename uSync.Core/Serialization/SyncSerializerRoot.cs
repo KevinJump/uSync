@@ -148,7 +148,7 @@ public abstract class SyncSerializerRoot<TObject>
         if (!node.IsEmptyItem())
             throw new ArgumentException("Cannot process actions on a non-empty node");
 
-        var actionType = node.Attribute("Change").ValueOrDefault<SyncActionType>(SyncActionType.None);
+        var actionType = node.Attribute(uSyncConstants.Xml.Change).ValueOrDefault<SyncActionType>(SyncActionType.None);
 
 
         var (key, alias) = FindKeyAndAlias(node);

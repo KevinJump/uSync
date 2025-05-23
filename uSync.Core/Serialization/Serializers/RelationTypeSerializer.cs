@@ -32,7 +32,7 @@ public class RelationTypeSerializer
         var key = node.GetKey();
         var alias = node.GetAlias();
 
-        var info = node.Element("Info");
+        var info = node.Element(uSyncConstants.Xml.Info);
 
         var name = info?.Element("Name").ValueOrDefault(string.Empty) ?? node.GetAlias();
         var parentType = info?.Element("ParentType").ValueOrDefault<Guid?>(null);
@@ -86,7 +86,7 @@ public class RelationTypeSerializer
 
         var hasBeenSaved = false;
         var message = "";
-        if (options.GetSetting<bool>("IncludeRelations", false))
+        if (options.GetSetting<bool>(uSyncConstants.DefaultSettings.IncludeRelations, uSyncConstants.DefaultSettings.IncludeRelations_Default))
         {
             // we have to save before we can add the relations. 
             await this.SaveItemAsync(item);

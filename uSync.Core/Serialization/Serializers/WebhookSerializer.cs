@@ -73,7 +73,7 @@ public class WebhookSerializer : SyncSerializerBase<IWebhook>, ISyncSerializer<I
 
         if (item.Key != key)
         {
-            details.AddUpdate("Key", item.Key, key);
+            details.AddUpdate(uSyncConstants.Xml.Key, item.Key, key);
             item.Key = key;
         }
 
@@ -99,7 +99,7 @@ public class WebhookSerializer : SyncSerializerBase<IWebhook>, ISyncSerializer<I
 
         List<Guid> newKeys = [];
 
-        foreach (var key in keys.Elements("Key"))
+        foreach (var key in keys.Elements(uSyncConstants.Xml.Key))
         {
             var keyValue = key.ValueOrDefault(Guid.Empty);
             if (keyValue == Guid.Empty) continue;
@@ -164,7 +164,7 @@ public class WebhookSerializer : SyncSerializerBase<IWebhook>, ISyncSerializer<I
 
         foreach (var header in keys.Elements("Header"))
         {
-            var headerKey = header.Attribute("Key").ValueOrDefault(string.Empty);
+            var headerKey = header.Attribute(uSyncConstants.Xml.Key).ValueOrDefault(string.Empty);
             var headerValue = header.ValueOrDefault(string.Empty);
 
             if (headerKey == string.Empty) continue;
@@ -210,7 +210,7 @@ public class WebhookSerializer : SyncSerializerBase<IWebhook>, ISyncSerializer<I
         var keysNode = new XElement("ContentTypeKeys");
         foreach (var contentTypeKey in item.ContentTypeKeys.Order())
         {
-            keysNode.Add(new XElement("Key", contentTypeKey));
+            keysNode.Add(new XElement(uSyncConstants.Xml.Key, contentTypeKey));
         }
 
         return keysNode;
@@ -232,7 +232,7 @@ public class WebhookSerializer : SyncSerializerBase<IWebhook>, ISyncSerializer<I
         foreach (var headerItem in item.Headers.OrderBy(x => x.Key))
         {
             headerNode.Add(new XElement("Header",
-                 new XAttribute("Key", headerItem.Key),
+                 new XAttribute(uSyncConstants.Xml.Key, headerItem.Key),
                  new XCData(headerItem.Value)));
         }
 
