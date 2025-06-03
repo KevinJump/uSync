@@ -1,82 +1,76 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Serialization;
+﻿using Namotion.Reflection;
 
+using NJsonSchema;
 using NJsonSchema.Generation;
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace uSync;
 
-internal class uSyncSchemaGenerator
+internal class uSyncSchemaGenerator : JsonSchemaGenerator
 {
-    private readonly JsonSchemaGenerator _schemaGenerator;
-
     public uSyncSchemaGenerator()
-    {
-        _schemaGenerator = new JsonSchemaGenerator(
-            new uSyncSchemaGeneratorSettings());
-    }
-
-    public string Generate()
-    {
-        var uSyncSchema = GenerateuSyncSchema();
-        return uSyncSchema.ToString();
-    }
-
-    private JObject GenerateuSyncSchema()
-    {
-        var schema = _schemaGenerator.Generate(typeof(AppSettings));
-        return JsonConvert.DeserializeObject<JObject>(schema.ToJson());
-    }
-
+        : base(new SystemTextJsonSchemaGeneratorSettings()
+        {
+            AlwaysAllowAdditionalObjectProperties = true,
+            FlattenInheritanceHierarchy = true,
+            IgnoreObsoleteProperties = true,
+            ReflectionService = new UmbracoSystemTextJsonReflectionService(),
+            SerializerOptions = new JsonSerializerOptions()
+            {
+                Converters = { new JsonStringEnumConverter() },
+                IgnoreReadOnlyProperties = true,
+            },
+            DefaultReferenceTypeNullHandling = ReferenceTypeNullHandling.NotNull,
+            SchemaNameGenerator = new NamespacePrefixedSchemaNameGenerator(),
+            GenerateExamples = true,
+        })
+    { }
 }
 
-internal class uSyncSchemaGeneratorSettings : JsonSchemaGeneratorSettings
+internal class uSyncSchemaGeneratorSettings : SystemTextJsonSchemaGeneratorSettings
 {
     public uSyncSchemaGeneratorSettings()
     {
         AlwaysAllowAdditionalObjectProperties = true;
-        SerializerSettings = new JsonSerializerSettings()
+        IgnoreObsoleteProperties = true;
+        SerializerOptions = new JsonSerializerOptions()
         {
-            ContractResolver = new WritablePropertiesOnlyResolver(),
+            Converters = { new JsonStringEnumConverter() },
+            IgnoreReadOnlyProperties = true,
         };
+        ReflectionService = new UmbracoSystemTextJsonReflectionService();
         DefaultReferenceTypeNullHandling = ReferenceTypeNullHandling.NotNull;
         SchemaNameGenerator = new NamespacePrefixedSchemaNameGenerator();
-        SerializerSettings.Converters.Add(new StringEnumConverter());
-        IgnoreObsoleteProperties = true;
         GenerateExamples = true;
     }
-
-    private class WritablePropertiesOnlyResolver : DefaultContractResolver
+}
+    internal class UmbracoSystemTextJsonReflectionService : SystemTextJsonReflectionService
     {
-        protected override IList<JsonProperty> CreateProperties(Type type, MemberSerialization memberSerialization)
+        /// <inheritdoc />
+        public override void GenerateProperties(JsonSchema schema, ContextualType contextualType, SystemTextJsonSchemaGeneratorSettings settings, JsonSchemaGenerator schemaGenerator, JsonSchemaResolver schemaResolver)
         {
-            IList<JsonProperty> props = base.CreateProperties(type, memberSerialization);
-            var result = props.Where(p => p.Writable).ToList();
-            result.ForEach(x => x.PropertyName = ToPascalCase(x.PropertyName));
-            return result;
-        }
+            // Populate schema properties
+            base.GenerateProperties(schema, contextualType, settings, schemaGenerator, schemaResolver);
 
-        /// <summary>
-        ///  we serialize everything camel case inside uSync but the settings are actually PascalCase 
-        ///  for appsettings.json, so we need to PascalCase each property. 
-        /// </summary>
-        private string ToPascalCase(string str)
-        {
-            if (!string.IsNullOrEmpty(str))
+            if (settings.SerializerOptions.IgnoreReadOnlyProperties)
             {
-                return char.ToUpperInvariant(str[0]) + str.Substring(1);
+                // Remove read-only properties (because this is not implemented by the base class)
+                foreach (ContextualPropertyInfo property in contextualType.Properties)
+                {
+                    if (property.CanWrite is false)
+                    {
+                        string propertyName = GetPropertyName(property, settings);
+
+                        schema.Properties.Remove(propertyName);
+                    }
+                }
             }
-
-            return str;
-
         }
     }
-}
+
 
 internal class NamespacePrefixedSchemaNameGenerator : DefaultSchemaNameGenerator
 {

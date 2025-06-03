@@ -4,6 +4,8 @@ import { UmbObjectState } from '@umbraco-cms/backoffice/observable-api';
 
 import * as signalR from '@jumoo/uSync/external/signalr';
 import { USYNC_SIGNALR_CONTEXT_TOKEN, SyncUpdateMessage } from '@jumoo/uSync';
+import { TokenError } from '@umbraco-cms/backoffice/external/openid';
+import { UMB_AUTH_CONTEXT } from '@umbraco-cms/backoffice/auth';
 
 export class uSyncSignalRContext extends UmbControllerBase {
 	#connection?: signalR.HubConnection;
@@ -11,11 +13,18 @@ export class uSyncSignalRContext extends UmbControllerBase {
 	constructor(host: UmbControllerHost) {
 		super(host);
 		this.provideContext(USYNC_SIGNALR_CONTEXT_TOKEN, this);
+
+		this.consumeContext(UMB_AUTH_CONTEXT, async (auth) => {
+			if (!auth) return;
+
+			const authConfig = auth?.getOpenApiConfiguration();
+			if (!authConfig) return;
+			this.#setupConnection('/umbraco/SyncHub', await auth.getLatestToken());
+		});
 	}
 
 	hostConnected(): void {
 		super.hostConnected();
-		this.#setupConnection('/umbraco/SyncHub');
 	}
 
 	hostDisconnected(): void {
@@ -35,10 +44,10 @@ export class uSyncSignalRContext extends UmbControllerBase {
 	#add = new UmbObjectState({});
 	public readonly add = this.#add.asObservable();
 
-	#setupConnection(url: string) {
+	#setupConnection(url: string, token: string) {
 		this.#connection = new signalR.HubConnectionBuilder()
+			.withUrl(url, { accessTokenFactory: () => token })
 			.configureLogging(signalR.LogLevel.Warning)
-			.withUrl(url)
 			.build();
 
 		this.#connection.on('add', (data) => {
@@ -50,7 +59,7 @@ export class uSyncSignalRContext extends UmbControllerBase {
 		});
 
 		this.#connection.start().then(() => {
-			console.debug('connection started');
+			// console.debug('connection started');
 		});
 	}
 }

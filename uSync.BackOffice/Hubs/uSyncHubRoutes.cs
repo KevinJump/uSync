@@ -37,15 +37,8 @@ public class uSyncHubRoutes : IAreaRoutes
     /// </summary>
     public void CreateRoutes(IEndpointRouteBuilder endpoints)
     {
-        switch (_runtimeState.Level)
-        {
-            case RuntimeLevel.Install:
-            case RuntimeLevel.Upgrade:
-            case RuntimeLevel.Run:
-                endpoints.MapHub<SyncHub>(GetuSyncHubRoute());
-                break;
-
-        }
+        if (_runtimeState.Level != RuntimeLevel.Run) return;
+        endpoints.MapHub<SyncHub>(GetuSyncHubRoute());
     }
 
     /// <summary>

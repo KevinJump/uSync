@@ -32,14 +32,15 @@ internal class Program
         // very specific, for uSync we want everything but the first element
         // to be upper cased, it doesn't really matter but it looks "right"
 
-        var schema = generator.Generate()
+        var result = generator.Generate(typeof(AppSettings))
+            .ToJson()
             .Replace("\"USync\"", "\"uSync\"");
 
         var path = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, options.OutputFile));
         Console.WriteLine("Path to use {0}", path);
         Directory.CreateDirectory(Path.GetDirectoryName(path));
         Console.WriteLine("Ensured directory exists");
-        await File.WriteAllTextAsync(path, schema);
+        await File.WriteAllTextAsync(path, result);
 
         Console.WriteLine("File written at {0}", path);
     }
