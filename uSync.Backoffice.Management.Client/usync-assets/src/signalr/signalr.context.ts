@@ -1,11 +1,9 @@
 import { UmbControllerBase } from '@umbraco-cms/backoffice/class-api';
 import { UmbControllerHost } from '@umbraco-cms/backoffice/controller-api';
 import { UmbObjectState } from '@umbraco-cms/backoffice/observable-api';
-
-import * as signalR from '@jumoo/uSync/external/signalr';
 import { USYNC_SIGNALR_CONTEXT_TOKEN, SyncUpdateMessage } from '@jumoo/uSync';
-import { TokenError } from '@umbraco-cms/backoffice/external/openid';
 import { UMB_AUTH_CONTEXT } from '@umbraco-cms/backoffice/auth';
+import * as signalR from '@jumoo/uSync/external/signalr';
 
 export class uSyncSignalRContext extends UmbControllerBase {
 	#connection?: signalR.HubConnection;
