@@ -61,7 +61,7 @@ export class uSyncActionPerformEvent extends Event {
 		key: string,
 		force?: boolean,
 		clean?: boolean,
-		file?: File,
+		file?: boolean,
 	) {
 		super(USYNC_ACTION_PERFORM_EVENT, {
 			bubbles: true,
@@ -80,5 +80,5 @@ export class uSyncActionPerformEvent extends Event {
 	key: string;
 	force?: boolean;
 	clean?: boolean;
-	file?: File;
+	file?: boolean;
 }
