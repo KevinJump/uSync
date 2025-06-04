@@ -8,6 +8,10 @@ import {
 } from '@umbraco-cms/backoffice/external/lit';
 import { SyncActionGroup } from '@jumoo/uSync';
 import { UUIButtonState } from '@umbraco-cms/backoffice/external/uui';
+import {
+	uSyncActionButtonClickEvent,
+	uSyncActionPerformEvent,
+} from '../workspace/components/events';
 
 /**
  * displays the action buttons for a given group
@@ -29,19 +33,17 @@ export class uSyncActionBox extends LitElement {
 	@property({ type: Boolean })
 	disabled: boolean = false;
 
-	#onAction(e: CustomEvent, group: SyncActionGroup) {
-		if (!e.detail?.button) return;
+	#onAction(e: uSyncActionButtonClickEvent, group: SyncActionGroup) {
+		if (!e?.button) return;
 
 		this.dispatchEvent(
-			new CustomEvent('perform-action', {
-				detail: {
-					group: group,
-					key: e.detail.button.key,
-					force: e.detail.button.force,
-					clean: e.detail.button.clean,
-					file: e.detail.button.file,
-				},
-			}),
+			new uSyncActionPerformEvent(
+				group,
+				e.button.key,
+				e.button.force,
+				e.button.clean,
+				e.button.file,
+			),
 		);
 	}
 
@@ -52,7 +54,7 @@ export class uSyncActionBox extends LitElement {
 					.button=${b}
 					.disabled=${this.disabled}
 					state=${ifDefined(this.state)}
-					@usync-action-click=${(e: CustomEvent) =>
+					@usync-action-click=${(e: uSyncActionButtonClickEvent) =>
 						this.#onAction(e, this.group)}></usync-action-button>
 			`;
 		});

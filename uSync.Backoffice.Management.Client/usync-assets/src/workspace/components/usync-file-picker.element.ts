@@ -8,6 +8,7 @@ import {
 	state,
 } from '@umbraco-cms/backoffice/external/lit';
 import { UmbLitElement } from '@umbraco-cms/backoffice/lit-element';
+import { uSyncFilePickerChangeEvent } from './events';
 
 @customElement('usync-upload-file-picker')
 export class uSyncFilePicker extends UmbLitElement {
@@ -51,7 +52,7 @@ export class uSyncFilePicker extends UmbLitElement {
 	}
 
 	private _dispachChangeEvent() {
-		this.dispatchEvent(new CustomEvent('change', { detail: this._file }));
+		this.dispatchEvent(new uSyncFilePickerChangeEvent(this._file));
 	}
 
 	render() {
@@ -69,7 +70,11 @@ export class uSyncFilePicker extends UmbLitElement {
 
 		return html` <div class="file">
 			<div>${this._file.name}</div>
-			<uui-button @click="${() => this._removeFile()}" compact color="danger">
+			<uui-button
+				@click="${() => this._removeFile()}"
+				compact
+				color="danger"
+				label="Remove">
 				<umb-icon name="icon-trash"></umb-icon>
 			</uui-button>
 		</div>`;

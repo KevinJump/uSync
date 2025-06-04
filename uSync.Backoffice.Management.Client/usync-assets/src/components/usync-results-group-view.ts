@@ -12,6 +12,7 @@ import { UmbLitElement } from '@umbraco-cms/backoffice/lit-element';
 import { ChangeType, USyncActionView } from '../api';
 import { UMB_MODAL_MANAGER_CONTEXT } from '@umbraco-cms/backoffice/modal';
 import { USYNC_ERROR_MODAL } from '../dialogs';
+import { uSyncShowDetailEvent } from './events';
 
 @customElement('usync-result-group')
 export class uSyncResultGroupView extends UmbLitElement {
@@ -30,9 +31,9 @@ export class uSyncResultGroupView extends UmbLitElement {
 	async #showDetail(action: USyncActionView) {
 		if (action.change == ChangeType.NO_CHANGE) return;
 
-		this.dispatchEvent(
-			new CustomEvent<USyncActionView>('show-detail', { detail: action }),
-		);
+		console.debug('Showing detail for action:', action);
+
+		this.dispatchEvent(new uSyncShowDetailEvent(action));
 	}
 
 	getChangeCount() {

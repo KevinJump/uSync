@@ -14,6 +14,7 @@ import {
 	UUIInterfaceColor,
 	UUIInterfaceLook,
 } from '@umbraco-cms/backoffice/external/uui';
+import { uSyncActionButtonClickEvent } from './events';
 
 @customElement('usync-action-button')
 export class SyncActionButtonElement extends UmbLitElement {
@@ -32,13 +33,7 @@ export class SyncActionButtonElement extends UmbLitElement {
 	#onClick(item?: SyncActionButton) {
 		if (!item) return;
 
-		this.dispatchEvent(
-			new CustomEvent('usync-action-click', {
-				detail: {
-					button: item,
-				},
-			}),
-		);
+		this.dispatchEvent(new uSyncActionButtonClickEvent(item));
 	}
 
 	render() {

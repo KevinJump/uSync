@@ -13,6 +13,7 @@ import {
 	UmbTemporaryFileManager,
 	UmbTemporaryFileModel,
 } from '@umbraco-cms/backoffice/temporary-file';
+import { uSyncFilePickerChangeEvent, uSyncFilePickerUploadedEvent } from './events';
 
 @customElement('usync-file-upload')
 export class uSyncFileUploadElement extends UmbLitElement {
@@ -20,7 +21,7 @@ export class uSyncFileUploadElement extends UmbLitElement {
 	#repository: uSyncActionRepository;
 
 	@state()
-	selected: File | undefined;
+	selected: File | null | undefined;
 
 	@state()
 	result: string | undefined;
@@ -60,17 +61,11 @@ export class uSyncFileUploadElement extends UmbLitElement {
 			return;
 		}
 
-		this.dispatchEvent(
-			new CustomEvent('uploaded', {
-				composed: true,
-				bubbles: true,
-				detail: result,
-			}),
-		);
+		this.dispatchEvent(new uSyncFilePickerUploadedEvent(result));
 	}
 
-	#onFileChange(e: CustomEvent<File>) {
-		this.selected = e.detail;
+	#onFileChange(e: uSyncFilePickerChangeEvent) {
+		this.selected = e.file;
 	}
 
 	render() {

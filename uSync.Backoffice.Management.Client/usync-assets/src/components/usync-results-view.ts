@@ -13,6 +13,7 @@ import {
 	UmbModalManagerContext,
 } from '@umbraco-cms/backoffice/modal';
 import { USYNC_DETAILS_MODAL } from '@jumoo/uSync';
+import { uSyncShowDetailEvent } from './events';
 
 @customElement('usync-results')
 export class uSyncResultsView extends UmbElementMixin(LitElement) {
@@ -39,12 +40,12 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
 		this.showAll = !this.showAll;
 	}
 
-	async #showDetail(e: CustomEvent<USyncActionView>) {
-		const action = e.detail;
+	async #showDetail(e: uSyncShowDetailEvent) {
+		console.debug('Showing detail for action:', e.action);
 
 		const detailsModal = this.#modalContext?.open(this, USYNC_DETAILS_MODAL, {
 			data: {
-				item: action,
+				item: e.action,
 			},
 		});
 

@@ -7,6 +7,7 @@ import {
 } from '@umbraco-cms/backoffice/external/lit';
 import { UmbModalBaseElement } from '@umbraco-cms/backoffice/modal';
 import { UploadImportResult } from '../../api';
+import { uSyncFilePickerUploadedEvent } from '../components/events';
 
 @customElement('usync-import-dialog')
 export class uSyncImportModalDialog extends UmbModalBaseElement<any, any> {
@@ -22,8 +23,8 @@ export class uSyncImportModalDialog extends UmbModalBaseElement<any, any> {
 		this.modalContext?.submit();
 	}
 
-	#onUploaded(e: CustomEvent<UploadImportResult>) {
-		this.result = e.detail;
+	#onUploaded(e: uSyncFilePickerUploadedEvent) {
+		this.result = e.result;
 	}
 
 	render() {
@@ -62,7 +63,7 @@ export class uSyncImportModalDialog extends UmbModalBaseElement<any, any> {
 
 	static styles = css`
 		umb-body-layout {
-			max-width: 350px;
+			max-width: 450px;
 		}
 
 		usync-file-upload {

@@ -16,6 +16,7 @@ import {
 	SyncLegacyCheckResponse,
 	USyncActionView,
 } from '@jumoo/uSync';
+import { uSyncActionPerformEvent } from '../../components/events';
 
 @customElement('usync-default-view')
 export class uSyncDefaultViewElement extends UmbLitElement {
@@ -108,18 +109,20 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 
 	/**
 	 * @method performAction
-	 * @param {CustomEventInit} event
+	 * @param {uSyncActionPerformEvent} event
 	 * @description do a thing, (report, import, export)
 	 */
-	#performAction(event: CustomEventInit) {
+	#performAction(event: uSyncActionPerformEvent) {
+		if (!event) return;
+
 		this._showProgress = true;
-		this._group = event.detail.group;
+		this._group = event.group;
 		this.#actionContext?.performAction({
-			group: event.detail.group,
-			action: event.detail.key,
-			force: event.detail.force,
-			clean: event.detail.clean,
-			file: event.detail.file,
+			group: event.group,
+			action: event.key,
+			force: event.force ?? false,
+			clean: event.clean ?? false,
+			file: event.file ?? false,
 		});
 	}
 
