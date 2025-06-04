@@ -50,7 +50,12 @@ export class uSyncResultGroupView extends UmbLitElement {
 					class="summary ${when(this.expanded, () => 'expanded')}"
 					@click=${() => (this.expanded = !this.expanded)}>
 					<h4>${this.localize.term('uSync_' + this.groupName)}</h4>
-					<h4 class="count">${changeCount}/${this.results?.length}</h4>
+					<div class="summary-right">
+						<h4 class="count">${changeCount}/${this.results?.length}</h4>
+						<uui-icon
+							name="icon-play"
+							class=${classMap({ expanded: this.expanded })}></uui-icon>
+					</div>
 				</div>
 				<uui-table>
 					${when(
@@ -131,18 +136,35 @@ export class uSyncResultGroupView extends UmbLitElement {
 	static styles = css`
 		uui-box {
 			cursor: pointer;
-			--uui-box-default-padding: 1px 20px;
-		}
-
-		.summary {
-			display: flex;
-			margin: 0 -20px;
-			padding: 0 20px;
-			justify-content: space-between;
+			--uui-box-default-padding: 0;
 		}
 
 		.expanded {
 			border-bottom: 1px solid var(--uui-color-border);
+		}
+
+		.summary {
+			display: flex;
+			margin: 0;
+			padding: 0 20px;
+			justify-content: space-between;
+		}
+
+		.summary-right {
+			display: flex;
+			align-items: center;
+			gap: var(--uui-size-space-2);
+		}
+
+		.summary-right uui-icon {
+			transform: rotate(90deg);
+			color: var(--uui-color-text-alt);
+			transition: transform 0.5s cubic-bezier(0.42, 0, 0.37, 1.62);
+		}
+
+		.summary-right uui-icon.expanded {
+			transform: rotate(-90deg);
+			border-bottom: none;
 		}
 
 		.count {
@@ -158,6 +180,7 @@ export class uSyncResultGroupView extends UmbLitElement {
 		}
 
 		.icon-cell {
+			padding-left: 20px;
 			width: var(--uui-size-8);
 		}
 
@@ -171,10 +194,15 @@ export class uSyncResultGroupView extends UmbLitElement {
 			justify-content: space-between;
 			font-size: smaller;
 			color: var(--uui-color-disabled-contrast);
+			padding-right: 20px;
 		}
 
 		uui-table-row:first-child uui-table-cell {
 			border-top-color: transparent;
+		}
+
+		uui-table-row:hover {
+			background-color: var(--uui-color-surface-emphasis);
 		}
 	`;
 }

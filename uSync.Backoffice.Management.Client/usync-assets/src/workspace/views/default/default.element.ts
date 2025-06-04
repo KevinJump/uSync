@@ -168,7 +168,7 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 	}
 
 	#renderBanner() {
-		if (this._showProgress === true) return nothing;
+		if (this._showProgress === true || this._completed === true) return nothing;
 
 		return html`
 			<umb-empty-state>
@@ -181,7 +181,7 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 	}
 
 	#renderProcessBox() {
-		if (this._showProgress == false) return nothing;
+		if (this._showProgress == false && this._completed == false) return nothing;
 
 		return html`
 			<usync-progress-box

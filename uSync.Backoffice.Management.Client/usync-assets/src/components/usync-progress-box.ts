@@ -58,13 +58,14 @@ export class uSyncProcessBox extends UmbElementMixin(LitElement) {
 		var actionHtml = this.actions?.map((action) => {
 			return html`
 				<div
-					style="position: relative;"
 					class="action 
                     ${action.status == HandlerStatus.COMPLETE ? 'complete' : ''} 
                     ${action.status == HandlerStatus.PROCESSING ? 'working' : ''}">
-					<uui-icon .name=${action.icon ?? 'icon-box'}></uui-icon>
-					${this.renderBadge(action)}
-					<h5>${action.name ?? 'unknown'}</h5>
+					<div class="icon-holder">
+						<uui-icon .name=${action.icon ?? 'icon-box'}></uui-icon>
+						${this.renderBadge(action)}
+					</div>
+					<h4>${action.name ?? 'unknown'}</h4>
 				</div>
 			`;
 		});
@@ -120,17 +121,27 @@ export class uSyncProcessBox extends UmbElementMixin(LitElement) {
 			display: flex;
 			flex-direction: column;
 			align-items: center;
-			min-width: 90px;
+			min-width: var(--uui-size-layout-5);
 			color: var(--uui-color-text-alt);
 			opacity: 0.67;
+			margin: var(--uui-size-space-4) 0 var(--uui-size-space-6);
+		}
+
+		.action h4 {
+			margin: var(--uui-size-space-4) 0;
+		}
+
+		.icon-holder {
+			position: relative;
+			padding: 0 var(--uui-size-7);
 		}
 
 		.action uui-icon {
-			font-size: var(--uui-type-h3-size);
+			font-size: var(--uui-size-12);
 		}
 
 		.action uui-badge uui-icon {
-			font-size: 16px;
+			font-size: var(--uui-type-h4-size);
 		}
 
 		.complete {

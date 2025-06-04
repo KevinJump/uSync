@@ -27,10 +27,10 @@ export class uSyncAddOnsElement extends UmbElementMixin(LitElement) {
 						<div class="logos">
 							<div class="logo">
 								<uui-icon name="icon-shift"></uui-icon>
-								<h4>Publish</h4>
+								<h4>peopleublish</h4>
 							</div>
 							<div class="logo">
-								<uui-icon name="icon-notepad"></uui-icon>
+								<uui-icon name="icon-shift" class="rotated"></uui-icon>
 								<h4>content</h4>
 							</div>
 							<div class="logo">
@@ -78,6 +78,10 @@ export class uSyncAddOnsElement extends UmbElementMixin(LitElement) {
 			height: 100%;
 		}
 
+		.addon-view > div {
+			margin-top: -15vh;
+		}
+
 		.header,
 		.cta {
 			display: flex;
@@ -105,7 +109,7 @@ export class uSyncAddOnsElement extends UmbElementMixin(LitElement) {
 		}
 
 		.cta {
-			margin-bottom: var(--uui-size-space-6);
+			margin: var(--uui-size-space-6) 0;
 		}
 
 		uui-button {
