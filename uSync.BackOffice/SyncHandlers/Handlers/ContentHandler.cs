@@ -1,6 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Umbraco.Cms.Core.Cache;
@@ -31,6 +34,8 @@ public class ContentHandler : ContentHandlerBase<IContent>, ISyncHandler,
 
     INotificationAsyncHandler<SavedNotification<IContent>>,
     INotificationAsyncHandler<DeletedNotification<IContent>>,
+    INotificationAsyncHandler<ContentPublishedNotification>,
+    INotificationAsyncHandler<ContentUnpublishedNotification>,
     INotificationAsyncHandler<MovedNotification<IContent>>,
     INotificationAsyncHandler<MovedToRecycleBinNotification<IContent>>,
     INotificationAsyncHandler<SavingNotification<IContent>>,
@@ -97,5 +102,51 @@ public class ContentHandler : ContentHandlerBase<IContent>, ISyncHandler,
             return items;
 
         });
+    }
+
+    public async Task HandleAsync(ContentPublishedNotification notification, CancellationToken cancellationToken)
+    {
+        if (!ShouldProcessEvent()) return;
+        if (notification.State.TryGetValue(uSync.EventPausedKey, out var paused) && paused is true)
+            return;
+
+        var handlerFolders = GetDefaultHandlerFolders();
+
+        foreach (var item in notification.PublishedEntities)
+        {
+            await ProcessItem(notification, item, handlerFolders);
+        }
+    }
+
+    public async Task HandleAsync(ContentUnpublishedNotification notification, CancellationToken cancellationToken)
+    {
+        if (!ShouldProcessEvent()) return;
+        if (notification.State.TryGetValue(uSync.EventPausedKey, out var paused) && paused is true)
+            return;
+
+        var handlerFolders = GetDefaultHandlerFolders();
+
+        foreach(var item in notification.UnpublishedEntities)
+        {
+            await ProcessItem(notification, item, handlerFolders);
+        }
+    }
+
+    private async Task ProcessItem(EnumerableObjectNotification<IContent> notification, IContent item, string[] handlerFolders)
+    {
+        try
+        {
+            var attempts = await ExportAsync(item, handlerFolders, DefaultConfig);
+            foreach (var attempt in attempts.Where(x => x.Success))
+            {
+                if (attempt.FileName is null) continue;
+                await this.CleanUpAsync(item, attempt.FileName, handlerFolders.Last());
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Failed to create uSync export file");
+            notification.Messages.Add(new EventMessage("uSync", $"Failed to create export file : {ex.Message}", EventMessageType.Warning));
+        }
     }
 }
