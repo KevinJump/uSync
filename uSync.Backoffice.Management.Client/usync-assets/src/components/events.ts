@@ -16,8 +16,8 @@ export class uSyncShowDetailEvent extends Event {
 	action: USyncActionView;
 }
 
-
 declare global {
 	interface GlobalEventHandlersEventMap {
 		[USYNC_SHOW_DETAIL_EVENT]: uSyncShowDetailEvent;
+	}
 }
