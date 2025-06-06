@@ -104,6 +104,12 @@ public class ContentHandler : ContentHandlerBase<IContent>, ISyncHandler,
         });
     }
 
+    /// <summary>
+    ///  Handle the publish events for content
+    /// </summary>
+    /// <remarks>
+    ///  some publication events do not fire the save notification, so we need to handle those here.
+    /// </remarks>
     public async Task HandleAsync(ContentPublishedNotification notification, CancellationToken cancellationToken)
     {
         if (!ShouldProcessEvent()) return;
@@ -118,6 +124,12 @@ public class ContentHandler : ContentHandlerBase<IContent>, ISyncHandler,
         }
     }
 
+    /// <summary>
+    ///  un-publish content items, this is called when content is unpublished (not deleted)
+    /// </summary>
+    /// <remarks>
+    ///  un-publish does not fire the save notification, so we need to handle those here.
+    /// </remarks>
     public async Task HandleAsync(ContentUnpublishedNotification notification, CancellationToken cancellationToken)
     {
         if (!ShouldProcessEvent()) return;
