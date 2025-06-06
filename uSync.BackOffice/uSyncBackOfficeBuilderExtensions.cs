@@ -209,6 +209,8 @@ public static class uSyncBackOfficeBuilderExtensions
         builder.AddNotificationAsyncHandler<ContentDeletedNotification, ContentHandler>();
         builder.AddNotificationAsyncHandler<ContentMovedNotification, ContentHandler>();
         builder.AddNotificationAsyncHandler<ContentMovedToRecycleBinNotification, ContentHandler>();
+        builder.AddNotificationAsyncHandler<ContentPublishedNotification, ContentHandler>();
+        builder.AddNotificationAsyncHandler<ContentUnpublishedNotification, ContentHandler>();
 
         builder.AddNotificationAsyncHandler<MediaSavedNotification, MediaHandler>();
         builder.AddNotificationAsyncHandler<MediaDeletedNotification, MediaHandler>();
