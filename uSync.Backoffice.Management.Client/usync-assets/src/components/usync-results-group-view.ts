@@ -188,6 +188,7 @@ export class uSyncResultGroupView extends UmbLitElement {
 		.item-name {
 			display: flex;
 			justify-content: space-between;
+			padding-right: 20px;
 		}
 
 		.item-detail {
