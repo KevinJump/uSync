@@ -524,6 +524,12 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
             // do the second pass on this item
             var result = await DeserializeItemSecondPassAsync(item, node, serializerOptions);
 
+            if (result.Success && result.Change > ChangeType.NoChange && result.Saved is false && result.Item is not null)
+            {
+                logger.LogTrace("Second Pass Import for {alias} - Saving item {key}", this.Alias, node.GetKey());
+                await serializer.SaveAsync(result.Item.AsEnumerableOfOne());
+            }
+
             return uSyncActionHelper<TObject>.SetAction(result, syncFileService.GetSiteRelativePath(fileName), node.GetKey(), this.Alias).AsEnumerableOfOne();
         }
         catch (Exception ex)

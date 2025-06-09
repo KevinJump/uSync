@@ -636,7 +636,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
     {
         if (sortOrder != -1 && item.SortOrder != sortOrder)
         {
-            logger.LogTrace("{id} Setting Sort Order {sortOrder}", item.Id, sortOrder);
+            logger.LogTrace("{id} Setting Sort Order {sortOrder}", item.Name ?? item.Key.ToString(), sortOrder);
 
             var currentSortOrder = item.SortOrder;
 
