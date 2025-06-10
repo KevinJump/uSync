@@ -83,6 +83,27 @@ public class WebhookSerializer : SyncSerializerBase<IWebhook>, ISyncSerializer<I
             item.Url = url;
         }
 
+        var enabled = node.Element("Enabled").ValueOrDefault(true);
+        if (item.Enabled != enabled)
+        {
+            details.AddUpdate("Enabled", item.Enabled, enabled);
+            item.Enabled = enabled;
+        }
+
+        var name = node.Element("Name").ValueOrDefault(string.Empty);
+        if (item.Name != name)
+        {
+            details.AddUpdate("Name", item.Name ?? "", name);
+            item.Name = name;
+        }
+
+        var description = node.Element("Description").ValueOrDefault(string.Empty);
+        if (item.Description != description)
+        {
+            details.AddUpdate("Description", item.Description ?? "", description);
+            item.Description = description;
+        }
+
         details.AddRange(DeserializeContentKeys(item, node));
         details.AddRange(DeserializeEvents(item, node));
         details.AddRange(DeserializeHeaders(item, node));
@@ -196,6 +217,8 @@ public class WebhookSerializer : SyncSerializerBase<IWebhook>, ISyncSerializer<I
 
             node.Add(new XElement("Url", item.Url));
             node.Add(new XElement("Enabled", item.Enabled));
+            node.Add(new XElement("Name", item.Name));
+            node.Add(new XElement("Description", item.Description));
 
             node.Add(SerializeContentKeys(item));
             node.Add(SerializeEvents(item));
