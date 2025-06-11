@@ -6,7 +6,7 @@
 		<Nullable>enable</Nullable>
 		<AddRazorSupportForMvc>true</AddRazorSupportForMvc>
 		<StaticWebAssetBasePath>/</StaticWebAssetBasePath>
-		<Description>v15 management api for uSync</Description>
+		<Description>Management api for uSync</Description>
 	</PropertyGroup>
 
 	<ItemGroup>

@@ -9,7 +9,7 @@
 		
 		<EnableDefaultContentItems>true</EnableDefaultContentItems>
 
-		<Description>v15 Client files for uSync</Description>
+		<Description>Client files for uSync</Description>
 	</PropertyGroup>
 
 	<ItemGroup>
