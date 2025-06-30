@@ -20,8 +20,12 @@ using Umbraco.Extensions;
 
 namespace uSync.AutoTemplates;
 
-public class TemplateWatcher : IRegisteredObject
+public partial class TemplateWatcher : IRegisteredObject
 {
+
+    [GeneratedRegex(AutoTemplates.LayoutRegEx, RegexOptions.IgnoreCase)]
+    private static partial Regex TemplateLayoutRegex();
+
     private readonly IApplicationShutdownRegistry _hostingLifetime;
     private readonly FileSystemWatcher _watcher;
     private readonly ILogger<TemplateWatcher> _logger;
@@ -173,7 +177,7 @@ public class TemplateWatcher : IRegisteredObject
             {
 
                 var text = GetFileContents(filename);
-                var match = Regex.Match(text, AutoTemplates.LayoutRegEx);
+                var match = TemplateLayoutRegex().Match(text);
 
                 if (match == null || match.Groups.Count != 2) return;
 

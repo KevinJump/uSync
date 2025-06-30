@@ -17,7 +17,7 @@ namespace uSync.Core.Mapping;
 /// 
 /// "<p>Content Updated with a <a data-udi=\"umb://document/469b6e232ae04dcdb4a26e857f75e1fb\" href=\"/{localLink:umb://document/469b6e232ae04dcdb4a26e857f75e1fb}\" title=\"ContentTemplate\">link</a></p>" 
 /// </remarks>
-public class RTEMapper : SyncValueMapperBase, ISyncMapper
+public partial class RTEMapper : SyncValueMapperBase, ISyncMapper
 {
     private readonly Lazy<SyncValueMapperCollection> _mapperCollection;
 
@@ -31,11 +31,9 @@ public class RTEMapper : SyncValueMapperBase, ISyncMapper
 
     // would preferer the link regex - less likely to get rouge ones 
     // private string linkRegEx = "((?&lt;=localLink:)([0-9]+)|(?&lt;=data-id=&quot;)([0-9]+))";
-    private Regex UdiRegEx = new Regex(@"(umb:[/\\]+[a-zA-Z-]+[/\\][a-zA-Z0-9-]+)",
-        RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace);
+    private Regex UdiRegEx = UdiRegExPattern();
 
-    private Regex MacroRegEx = new Regex("<\\?UMBRACO_MACRO[^>]*>",
-        RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace);
+    private Regex MacroRegEx = MacroRegExPattern();
 
     public override string Name => "TinyMCE RTE Mapper";
 
@@ -109,4 +107,11 @@ public class RTEMapper : SyncValueMapperBase, ISyncMapper
 
         return dependencies.Distinct();
     }
+
+    [GeneratedRegex(@"(umb:[/\\]+[a-zA-Z-]+[/\\][a-zA-Z0-9-]+)",
+        RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace, "en-GB")]
+    private static partial Regex UdiRegExPattern();
+    [GeneratedRegex("<\\?UMBRACO_MACRO[^>]*>",
+        RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace, "en-GB")]
+    private static partial Regex MacroRegExPattern();
 }
