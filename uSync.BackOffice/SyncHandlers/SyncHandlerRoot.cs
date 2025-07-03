@@ -1098,6 +1098,9 @@ namespace uSync.BackOffice.SyncHandlers
                 if (ShouldExport(attempt.Item, config))
                 {
                     var files = folders.Select(x => GetPath(x, item, config.GuidNames, config.UseFlatStructure)).ToArray();
+
+                    // load all the nodes from everything but the last folder, 
+                    // so if it returns anything, we have files in a root folder somewhere. 
                     var nodes = syncFileService.GetAllNodes(files[..^1]);
                     if (nodes.Count > 0)
                     {
