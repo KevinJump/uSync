@@ -1105,7 +1105,8 @@ namespace uSync.BackOffice.SyncHandlers
                         var differences = syncFileService.GetDifferences(nodes, trackers.FirstOrDefault());
                         if (differences is not null && differences.HasElements)
                         {
-							syncFileService.SaveXElement(attempt.Item, filename);
+                            // save the Diffrence file as the XElement, then on import we merge it with root.
+							syncFileService.SaveXElement(differences, filename);
 						}
                         else
                         {
