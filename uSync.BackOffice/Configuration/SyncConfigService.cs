@@ -1,6 +1,9 @@
 ﻿using Microsoft.Extensions.Options;
 
+using System.Collections.Generic;
 using System.Linq;
+
+using Umbraco.Extensions;
 
 namespace uSync.BackOffice.Configuration;
 
@@ -8,6 +11,7 @@ namespace uSync.BackOffice.Configuration;
 internal class SyncConfigService : ISyncConfigService
 {
     private readonly IOptionsMonitor<uSyncHandlerSetSettings> _setOptionsMonitor;
+    private readonly SyncFolderCollection _syncFolders;
 
     /// <inheritdoc/>
     public uSyncSettings Settings { get; private set; }
@@ -17,7 +21,8 @@ internal class SyncConfigService : ISyncConfigService
     /// </summary>
     public SyncConfigService(
         IOptionsMonitor<uSyncSettings> settingsOptionsMonitor,
-        IOptionsMonitor<uSyncHandlerSetSettings> setOptionsMonitor)
+        IOptionsMonitor<uSyncHandlerSetSettings> setOptionsMonitor,
+        SyncFolderCollection syncFolders)
     {
         Settings = settingsOptionsMonitor.CurrentValue;
 
@@ -27,20 +32,56 @@ internal class SyncConfigService : ISyncConfigService
         });
 
         _setOptionsMonitor = setOptionsMonitor;
+        _syncFolders = syncFolders;
+    }
 
+    private string[] FetchFolders()
+    {
+        var folders = Settings.Folders
+            .Select((x, index) => new SyncFolderItem
+            {
+                Path = x.TrimStart('/').EnsureEndsWith('/'),
+                Weight = index * 1000
+            })
+            .ToList();
+
+        folders.AddRange(
+        _syncFolders.Select(x => new SyncFolderItem
+        {
+            Path = x.Path.TrimStart('/').EnsureEndsWith('/'),
+            Weight = x.Weight
+        }));
+
+        return folders.OrderBy(x => x.Weight)
+            .Select(x => x.Path)
+            .ToArray();
+    }
+
+    private class SyncFolderItem
+    {
+        public required string Path { get; set; }
+        public int Weight { get; set; }
     }
 
     /// <inheritdoc/>
     public string GetWorkingFolder()
-        => Settings.IsRootSite
-            ? Settings.Folders[0].TrimStart('/')
-            : Settings.Folders.Last().TrimStart('/');
+    {
+        var folders = FetchFolders();
+
+        return Settings.IsRootSite
+            ? folders[0].TrimStart('/')
+            : folders.Last().TrimStart('/');
+    }
 
     /// <inheritdoc/>
     public string[] GetFolders()
-        => Settings.IsRootSite
-            ? [Settings.Folders[0].TrimStart('/')]
-            : [.. Settings.Folders.Select(x => x.TrimStart('/'))];
+    {
+        var folders = FetchFolders();
+
+        return Settings.IsRootSite
+            ? [folders[0].TrimStart('/')]
+            : [.. folders.Select(x => x.TrimStart('/'))];
+    }
 
     /// <inheritdoc/>
     public uSyncHandlerSetSettings GetSetSettings(string setName)

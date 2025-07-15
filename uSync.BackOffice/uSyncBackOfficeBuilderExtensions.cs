@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 using OpenIddict.Validation.AspNetCore;
 
@@ -60,6 +61,11 @@ public static class uSyncBackOfficeBuilderExtensions
         // Setup uSync core.
         builder.AdduSyncCore();
 
+        // folder collection, so you can inject folders into the sync process.
+        builder.WithCollectionBuilder<SyncFolderCollectionBuilder>()
+            .Add(builder.TypeLoader.GetTypes<ISyncFolder>());
+
+
         // Setup the back office.
         builder.Services.AddSingleton<ISyncEventService, SyncEventService>();
         builder.Services.AddSingleton<ISyncConfigService, SyncConfigService>();
@@ -89,6 +95,7 @@ public static class uSyncBackOfficeBuilderExtensions
         builder.Services.AddAuthorization(o => CreatePolicies(o));
 
         builder.Services.AddTransient<ISyncActionService, SyncActionService>();
+
 
         _ = builder.Services.PostConfigure<uSyncSettings>(options =>
         {

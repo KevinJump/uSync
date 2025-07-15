@@ -23,4 +23,20 @@ public class ConfigurationSerializerCollection :
 
     public IEnumerable<IConfigurationSerializer> GetSerializers(string editorAlias)
         => this.Where(x => x.Editors.InvariantContains(editorAlias));
+
+    /// <summary>
+    ///  find the first serializer that returns a non-null UI alias.
+    /// </summary>
+    public string? GetEditorUIAlias(string editorAlias)
+    {
+        foreach (var serializer in GetSerializers(editorAlias))
+        {
+            var uiAlias = serializer.GetEditorUIAlias();
+            if (uiAlias.IsNullOrWhiteSpace() is false)
+            {
+                return uiAlias;
+            }
+        }
+        return null;
+    }
 }

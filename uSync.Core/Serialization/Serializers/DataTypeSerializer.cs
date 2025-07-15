@@ -129,9 +129,12 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
 
         var editorUiAlias = info?.Element("EditorUIAlias").ValueOrDefault(string.Empty) ?? string.Empty;
 
-        // migration thing if this is missing we guess it.
-        if (string.IsNullOrWhiteSpace(editorUiAlias))
-            editorUiAlias = ToPropertyEditorUiAlias(editorAlias) ?? string.Empty;
+        // EditorUIAlias is often not set on migrations, so we need to go get it.
+        // Also for updates (like RTE to TipTap) then this value needs to change.
+        // so if it's blank or if fetching it gets us a new value, we should update it.
+        var newEditorUiAlias = ToPropertyEditorUiAlias(editorAlias) ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(editorUiAlias) || string.IsNullOrWhiteSpace(newEditorUiAlias) is false)
+            editorUiAlias = newEditorUiAlias;
 
         if (item.EditorUiAlias != editorUiAlias)
         {
@@ -326,7 +329,9 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
 
     public override async Task SaveItemAsync(IDataType item)
     {
-        if (item.IsDirty() is false) return;
+        // v16: dirty flag is not set if you change the EditorUIAlias, so we can't trust it. 
+        // see : https://github.com/umbraco/Umbraco-CMS/issues/19732
+        // if (item.IsDirty() is false) return;
 
         if (item.HasIdentity is true)
             await _dataTypeService.UpdateAsync(item, Constants.Security.SuperUserKey);
@@ -416,8 +421,8 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
             Constants.PropertyEditors.Aliases.Tags => "Umb.PropertyEditorUi.Tags",
             Constants.PropertyEditors.Aliases.TextBox => "Umb.PropertyEditorUi.TextBox",
             Constants.PropertyEditors.Aliases.TextArea => "Umb.PropertyEditorUi.TextArea",
-            Constants.PropertyEditors.Aliases.RichText => "Umb.PropertyEditorUi.TinyMCE",
-            "Umbraco.TinyMCE" => "Umb.PropertyEditorUi.TinyMCE",
+            //Constants.PropertyEditors.Aliases.RichText => "Umb.PropertyEditorUi.TinyMCE",
+            //"Umbraco.TinyMCE" => "Umb.PropertyEditorUi.TinyMCE",
             Constants.PropertyEditors.Aliases.Boolean => "Umb.PropertyEditorUi.Toggle",
             Constants.PropertyEditors.Aliases.MarkdownEditor => "Umb.PropertyEditorUi.MarkdownEditor",
             Constants.PropertyEditors.Aliases.UserPicker => "Umb.PropertyEditorUi.UserPicker",
@@ -434,5 +439,5 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
     /// <param name="editorAlias"></param>
     /// <returns></returns>
     private string? GetEditorUIAliasFromSerializer(string editorAlias)
-        => _configurationSerializers.GetSerializer(editorAlias)?.GetEditorUIAlias();
+        => _configurationSerializers.GetEditorUIAlias(editorAlias);
 }

@@ -20,7 +20,11 @@ public class uSyncSettingsController : uSyncControllerBase
     [HttpGet("Settings")]
     [ProducesResponseType(typeof(uSyncSettings), 200)]
     public uSyncSettings GetSettings()
-        => _configService.Settings;
+    {
+        var settings = _configService.Settings;
+        settings.Folders = _configService.GetFolders();
+        return settings;
+    }
 
     [HttpGet("HandlerSettings")]
     [ProducesResponseType(typeof(uSyncHandlerSetSettings), 200)]
