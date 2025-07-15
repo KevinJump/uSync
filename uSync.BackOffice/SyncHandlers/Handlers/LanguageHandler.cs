@@ -167,7 +167,9 @@ public class LanguageHandler : SyncHandlerBase<ILanguage>, ISyncHandler,
     /// <inheritdoc/>
     public override async Task HandleAsync(SavingNotification<ILanguage> notification, CancellationToken cancellationToken)
     {
-        if (_mutexService.IsPaused) return;
+        if (!ShouldProcessEvent()) return;
+        if (notification.State.TryGetValue(uSync.EventPausedKey, out var paused) && paused is true)
+            return;
 
         if (await ShouldBlockRootChangesAsync(notification.SavedEntities))
         {
@@ -193,7 +195,9 @@ public class LanguageHandler : SyncHandlerBase<ILanguage>, ISyncHandler,
     /// <inheritdoc/>
     public override async Task HandleAsync(SavedNotification<ILanguage> notification, CancellationToken cancellationToken)
     {
-        if (_mutexService.IsPaused) return;
+        if (!ShouldProcessEvent()) return;
+        if (notification.State.TryGetValue(uSync.EventPausedKey, out var paused) && paused is true)
+            return;
 
         foreach (var item in notification.SavedEntities)
         {
