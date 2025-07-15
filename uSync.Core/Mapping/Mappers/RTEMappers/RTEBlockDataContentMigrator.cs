@@ -6,6 +6,7 @@ using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Models.Blocks;
 using Umbraco.Cms.Core.Services;
 
+using uSync.Core.Dependency;
 using uSync.Core.Extensions;
 
 namespace uSync.Core.Mapping.Mappers.RTEMappers;
@@ -29,14 +30,17 @@ public class RTEBlockDataContentMigrator : SyncBlockMapperBase<RichTextBlockValu
         : base(entityService, contentTypeService, mapperCollection, logger)
     { }
 
+    /// <inheritdoc />
     public override string Name => "RTE Block Data Content Mapper";
 
+    /// <inheritdoc />
     public override string[] Editors => [
         "Umbraco.TinyMCE",
         Constants.PropertyEditors.Aliases.RichText,
         $"{Constants.PropertyEditors.Aliases.Grid}.rte"
     ];
 
+    /// <inheritdoc />
     public override async Task<string?> GetImportValueAsync(string value, string editorAlias)
     {
         if (value.TryDeserialize<RichTextEditorValue>(out RichTextEditorValue? richTextEditorValue) is false || richTextEditorValue is null)
@@ -56,6 +60,7 @@ public class RTEBlockDataContentMigrator : SyncBlockMapperBase<RichTextBlockValu
         return richTextEditorValue.SerializeJsonString();
     }
 
+    /// <inheritdoc />
     public override async Task<string?> GetExportValueAsync(object value, string editorAlias)
     {
         var stringValue = value?.ToString() ?? string.Empty;
@@ -75,6 +80,9 @@ public class RTEBlockDataContentMigrator : SyncBlockMapperBase<RichTextBlockValu
         return richTextEditorValue.SerializeJsonString(true);
     }
 
+    /// <summary>
+    ///  checks to see if the markup contains any html for block elements, and if so, migrates the data-content-udi attributes to data-content-key.
+    /// </summary>
     private string MigrateRTEMarkupBlocks(string markup)
     {
         if (RTEBlockHelper.BlockRegex().IsMatch(markup) is false)
@@ -88,4 +96,10 @@ public class RTEBlockDataContentMigrator : SyncBlockMapperBase<RichTextBlockValu
                     .Replace(match.Groups["udi"].Value, guidUdi.Guid.ToString("D"))
                 : string.Empty);
     }
+
+    /// <summary>
+    ///  dependency check is done in the core RTE mapper, (which just calls the mapperCollection for blocks.
+    /// </summary>
+    public override Task<IEnumerable<uSyncDependency>> GetDependenciesAsync(object value, string editorAlias, DependencyFlags flags)
+        => Task.FromResult<IEnumerable<uSyncDependency>>([]);
 }
