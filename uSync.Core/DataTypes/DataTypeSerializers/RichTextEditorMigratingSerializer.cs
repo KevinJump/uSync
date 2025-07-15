@@ -15,7 +15,6 @@ namespace uSync.Core.DataTypes.DataTypeSerializers;
 internal class RichTextEditorMigratingSerializer : ConfigurationSerializerBase, IConfigurationSerializer
 {
     private readonly TinyMceToTiptapMigrationSettings _options;
-
     private readonly ILogger<RichTextEditorMigratingSerializer> _logger;
 
     public RichTextEditorMigratingSerializer(IOptions<TinyMceToTiptapMigrationSettings> options, ILogger<RichTextEditorMigratingSerializer> logger)
@@ -49,20 +48,20 @@ internal class RichTextEditorMigratingSerializer : ConfigurationSerializerBase, 
 
     public override IDictionary<string, object> GetConfigurationImport(IDictionary<string, object> configuration)
     {
-        configuration = MigrateToTipTap(configuration);
         configuration = FixMediaParent(configuration);
         configuration = TopLevelEditor(configuration);
+        configuration = MigrateToTipTap(configuration);
         return configuration.ToImmutableSortedDictionary();
     }
 
     private IDictionary<string, object> MigrateToTipTap(IDictionary<string, object> configuration)
     {
-        if (_options.DisableMigration is true)
+        if (_options?.DisableMigration is true)
             return configuration;
 
         if (configuration.ContainsKey("mode") is false && configuration.ContainsKey("hideLabel") is false)
         {
-            _logger.LogDebug("Skipping Tiptap migration as it does not contain 'mode' or 'hideLabel'.");   
+            _logger.LogDebug("Skipping Tiptap migration as it does not contain 'mode' or 'hideLabel'.");
             // if both mode and hideLabel are not present, then this has probibly already been migrated
             return configuration;
         }
@@ -70,10 +69,15 @@ internal class RichTextEditorMigratingSerializer : ConfigurationSerializerBase, 
         _logger.LogDebug("Migrating TinyMCE configuration to Tiptap format.");
         // do the tip tap things. 
 
-        if (!configuration.TryGetValue("toolbar", out var toolbar) || toolbar is not List<string> toolBarList)
-        {
-            return configuration;
+
+
+        if (!configuration.TryGetValue("toolbar", out var toolbar)
+            || (toolbar is not List<string> toolBarList && TryGetToolbarArray(toolbar, out toolBarList) is false)) 
+        { 
+                _logger.LogDebug("Skipping Tiptap migration as toolbar is not a list or string.");
+                return configuration;
         }
+    
 
         configuration.Remove("mode");
         configuration.Remove("hideLabel");
@@ -107,6 +111,16 @@ internal class RichTextEditorMigratingSerializer : ConfigurationSerializerBase, 
         configuration["extensions"] = extensions.ToArray();
 
         return configuration;
+    }
+
+    private bool TryGetToolbarArray(object? toolbar, out List<string> toolBarList)
+    {
+        toolBarList = new List<string>();
+        if (toolbar is null || toolbar is not JsonElement jsonElement || jsonElement.ValueKind != JsonValueKind.Array)
+            return false; 
+        
+        toolBarList = jsonElement.EnumerateArray().Select(x => x.GetString() ?? string.Empty).ToList();
+        return true;
     }
 
     private string? MapToolbarItem(string item)

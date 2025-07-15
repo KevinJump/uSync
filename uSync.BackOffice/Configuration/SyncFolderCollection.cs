@@ -14,6 +14,7 @@ namespace uSync.BackOffice.Configuration;
 /// </summary>
 public class SyncFolderCollection : BuilderCollectionBase<ISyncFolder>
 {
+    /// <inheritdoc/>
     public SyncFolderCollection(Func<IEnumerable<ISyncFolder>> items)
         : base(items)
     { }
@@ -32,6 +33,8 @@ public class SyncFolderCollection : BuilderCollectionBase<ISyncFolder>
 public class SyncFolderCollectionBuilder
     : SetCollectionBuilderBase<SyncFolderCollectionBuilder, SyncFolderCollection, ISyncFolder>
 {
+
+    /// <inheritdoc/>
     protected override SyncFolderCollectionBuilder This => this;
 }
 
