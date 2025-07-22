@@ -55,6 +55,16 @@ public class HandlerSettings
     public bool CreateClean { get; set; } = false;
 
     /// <summary>
+    ///  when saving root items with differences, save all the items, (this is the legacy behavior)
+    /// </summary>
+    /// <remarks>
+    ///  pre v13.3 when a change is made the whole .config file is saved to the new ./usync folder
+    ///  but this is a bug, the intention was and it that only the changes are saved to the folder
+    ///  this turns the old behavior back on. 
+    /// </remarks>
+    public bool FullFileOnDifference { get; set; } = false;
+
+    /// <summary>
     /// Additional settings for the handler
     /// </summary>
 
