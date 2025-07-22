@@ -43,6 +43,15 @@ namespace uSync
             await File.WriteAllTextAsync(path, schema);
 
             Console.WriteLine("File written at {0}", path);
+
+            if (string.IsNullOrWhiteSpace(options.Site) is false)
+            {
+                var sitePath = Path.Combine("..", options.Site, "appsettings-schema.usync.json");
+                Console.WriteLine("Writing to site path {0}", sitePath);
+                Directory.CreateDirectory(Path.GetDirectoryName(sitePath));
+                await File.WriteAllTextAsync(sitePath, schema);
+                Console.WriteLine("File written at {0}", sitePath);
+            }
         }
     }
 }
