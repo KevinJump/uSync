@@ -225,7 +225,7 @@ public class SyncRootMergerHelper
     /// <summary>
     ///  changes where the path contains a wildcard (e.g /item/*/value)
     /// </summary>
-    private static (XElement combined, XElement diffrences) GetWildcardChanges(TrackingItem item, XElement source, XElement target)
+    private static (XElement combined, XElement differences) GetWildcardChanges(TrackingItem item, XElement source, XElement target)
     {
         var rootPath = item.Path.Substring(0, item.Path.IndexOf("/*"));
 
