@@ -27,12 +27,12 @@ public class ContentTypeBaseTracker<TObject> : SyncXmlTrackAndMerger<TObject>
 
         TrackingItem.Single("History", "/Info/HistoryCleanup"),
 
-        TrackingItem.Many("Compositions", "/Info/Compositions/Composition", "@Key"),
-        TrackingItem.Many("AllowedTemplates", "/Info/AllowedTemplates/Template", "@Key"),
+        TrackingItem.Many("Compositions", "/Info/Compositions/Composition", "@Key", "", "#"),
+        TrackingItem.Many("AllowedTemplates", "/Info/AllowedTemplates/Template", "@Key", "", "#"),
 
-        TrackingItem.Many("Allowed child node types", "/Structure/ContentType", "@Key"),
-        TrackingItem.Many("Allowed child node types", "/Structure/MediaType", "@Key"),
-        TrackingItem.Many("Allowed child node types", "/Structure/MemberType", "@Key"),
+        TrackingItem.Many("Allowed child node types", "/Structure/ContentType", "@Key", "", "SortOrder"),
+        TrackingItem.Many("Allowed child node types", "/Structure/MediaType", "@Key", "", "SortOrder"),
+        TrackingItem.Many("Allowed child node types", "/Structure/MemberType", "@Key", "", "SortOrder"),
 
 
         TrackingItem.Many("Property", "/GenericProperties/GenericProperty", uSyncConstants.Xml.Key, "Name", "Alias"),
