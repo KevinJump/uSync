@@ -223,12 +223,11 @@ public class SyncRootMergerHelper
     /// <summary>
     ///  changes where the path contains a wildcard (e.g /item/*/value)
     /// </summary>
-    private static (XElement combined, XElement differences) GetWildcardChanges(TrackingItem item, XElement source, XElement target)
+    private static (XElement? combined, XElement? differences) GetWildcardChanges(TrackingItem item, XElement source, XElement target)
     {
         var rootPath = item.Path.Substring(0, item.Path.IndexOf("/*"));
 
         var path = item.Path.Substring(0, item.Path.LastIndexOf('/'));
-        var element = item.Path.Substring(item.Path.LastIndexOf('/') + 1);
 
         var sourceCollection = source.XPathSelectElements(path);
         var targetCollection = target.XPathSelectElements(path);
@@ -286,7 +285,7 @@ public class SyncRootMergerHelper
             ? string.IsNullOrWhiteSpace(keyName)
                 ? [.. node.Elements(elementName).OrderBy(e => e.Value ?? "")]
                 : [.. node.Elements(elementName).OrderBy(e => e.Element(keyName)?.Value ?? "")]
-            : [.. node.Elements(elementName).OrderBy(x => (string)x.Element(key) ?? "")];
+            : [.. node.Elements(elementName).OrderBy(x => (string?)x.Element(key) ?? "")];
 
         node.RemoveNodes();
         node.Add(sorted);
@@ -341,7 +340,7 @@ public class SyncRootMergerHelper
     /// Removes all empty child elements from the given XElement node recursively.
     /// An element is considered empty if it has no child elements, no attributes, and no value.
     /// </summary>
-    public static XElement RemoveEmptyChildren(XElement node)
+    private static XElement? RemoveEmptyChildren(XElement? node)
     {
         if (node == null) return node;
 
