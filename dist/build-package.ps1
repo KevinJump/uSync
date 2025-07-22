@@ -53,6 +53,10 @@ Write-Host "Folder   :" $outFolder
 
 $sln_name = "..\uSync.sln";
 
+cd ..
+gulp minify --release $fullVersion
+cd .\dist
+
 ""; "##### Restoring project"; "--------------------------------"; ""
 dotnet restore $sln_name -noLogo
 
