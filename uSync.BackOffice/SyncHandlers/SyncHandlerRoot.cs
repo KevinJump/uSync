@@ -895,7 +895,14 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
                     var differences = syncFileService.GetDifferences(nodes, trackers.FirstOrDefault());
                     if (differences is not null && differences.HasElements)
                     {
-                        await syncFileService.SaveXElementAsync(differences, filename);
+                        if (config.FullFileOnDifference)
+                        {
+                            await syncFileService.SaveXElementAsync(attempt.Item, filename);
+                        }
+                        else
+                        {
+                            await syncFileService.SaveXElementAsync(differences, filename);
+                        }
                     }
                     else
                     {
