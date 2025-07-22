@@ -90,7 +90,9 @@ public class SyncRootMergerHelper
 
             if (item.SingleItem is false)
             {
-                var path = item.Path.Substring(0, item.Path.LastIndexOf('/'));
+                var path = item.Path.Contains('*')
+                    ? item.Path.Substring(0, item.Path.IndexOf('*')).TrimEnd('/')
+                    : item.Path.Substring(0, item.Path.LastIndexOf('/'));
 
                 var (combined, difference) = GetMultipleChanges(item, source, target);
                 if (difference != null)
@@ -154,6 +156,9 @@ public class SyncRootMergerHelper
 
     private static (XElement? combined, XElement? diffrence) GetMultipleChanges(TrackingItem item, XElement source, XElement target)
     {
+        if (item.Path.Contains('*'))
+            return GetWildcardChanges(item, source, target);
+
         var path = item.Path.Substring(0, item.Path.LastIndexOf('/'));
         var element = item.Path.Substring(item.Path.LastIndexOf('/') + 1);
 
@@ -215,18 +220,78 @@ public class SyncRootMergerHelper
         return (combinedCollection, differenceCollection);
     }
 
+    /// <summary>
+    ///  changes where the path contains a wildcard (e.g /item/*/value)
+    /// </summary>
+    private static (XElement combined, XElement differences) GetWildcardChanges(TrackingItem item, XElement source, XElement target)
+    {
+        var rootPath = item.Path.Substring(0, item.Path.IndexOf("/*"));
+
+        var path = item.Path.Substring(0, item.Path.LastIndexOf('/'));
+        var element = item.Path.Substring(item.Path.LastIndexOf('/') + 1);
+
+        var sourceCollection = source.XPathSelectElements(path);
+        var targetCollection = target.XPathSelectElements(path);
+
+        if (sourceCollection == null || targetCollection == null)
+            return (source, target);
+
+        var combined = XElement.Parse(source.ToString());
+        var differences = XElement.Parse(target.ToString());
+
+        foreach (var sourceElement in sourceCollection)
+        {
+            var elementPath = item.Path.Replace("*", sourceElement.Name.LocalName);
+
+            var sourceNode = combined.XPathSelectElement(elementPath);
+            var targetNode = differences.XPathSelectElement(elementPath);
+
+            if (sourceNode == null || targetNode == null) continue;
+
+            if (targetNode.Attribute("deleted")?.Value == "true")
+            {
+                // if the target node is deleted, we need to remove it from the source
+                combined.XPathSelectElement(elementPath)?.Remove();
+                continue;
+            }
+
+            // compare. 
+            var sourceValue = sourceNode.ValueOrDefault(string.Empty);
+            var targetValue = targetNode.ValueOrDefault(string.Empty);
+
+            if (sourceValue.Equals(targetValue) is true)
+            {
+                // the same, remove from differences
+                differences.XPathSelectElement(elementPath)?.Remove();
+            }
+            else
+            {
+                var replacement = combined.XPathSelectElement(elementPath);
+                replacement?.AddAfterSelf(targetNode);
+                replacement?.Remove();
+            }
+        }
+
+        return (
+            combined.XPathSelectElement(rootPath),
+            RemoveEmptyChildren(differences.XPathSelectElement(rootPath))
+        );
+    }
+
     private static XElement SortElement(XElement node, string elementName, string key)
     {
-        var sorted = node.Elements(elementName)
-            .OrderBy(x => x.Element(key)?.Value ?? "")
-            .ToList();
+        var keyName = key.StartsWith('#') ? key.Substring(1) : key;
+
+        List<XElement> sorted = key.StartsWith('#')
+            ? string.IsNullOrWhiteSpace(keyName)
+                ? [.. node.Elements(elementName).OrderBy(e => e.Value ?? "")]
+                : [.. node.Elements(elementName).OrderBy(e => e.Element(keyName)?.Value ?? "")]
+            : [.. node.Elements(elementName).OrderBy(x => (string)x.Element(key) ?? "")];
 
         node.RemoveNodes();
         node.Add(sorted);
-
         return node;
     }
-
     private static string GetKey(XElement collection, string? keyName)
     {
         if (keyName is null) return string.Empty;
@@ -270,5 +335,31 @@ public class SyncRootMergerHelper
         var blank = XElement.Parse(source.ToString());
         blank.RemoveNodes();
         return blank;
+    }
+
+    /// <summary>
+    /// Removes all empty child elements from the given XElement node recursively.
+    /// An element is considered empty if it has no child elements, no attributes, and no value.
+    /// </summary>
+    public static XElement RemoveEmptyChildren(XElement node)
+    {
+        if (node == null) return node;
+
+        // Recursively process child nodes to check they don't have any empty children
+        foreach (var child in node.Elements().Where(e => e.HasElements || e.HasAttributes))
+        {
+            RemoveEmptyChildren(child);
+        }
+
+        // Make a list to avoid modifying the collection while iterating
+        var emptyChildren = node.Elements()
+            .Where(e => !e.HasElements && string.IsNullOrWhiteSpace(e.Value) && !e.HasAttributes)
+            .ToList();
+        foreach (var empty in emptyChildren)
+        {
+            empty.Remove();
+        }
+
+        return node;
     }
 }
