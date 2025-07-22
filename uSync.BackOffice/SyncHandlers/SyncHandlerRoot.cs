@@ -1119,7 +1119,7 @@ namespace uSync.BackOffice.SyncHandlers
                     // so we have a setting to turn it back on.
                     if (config.FullFileOnDifference)
                     {
-                        logger.LogDebug("Exporting {alias} as exported", GetItemAlias(item));
+                        logger.LogDebug("Exporting {alias} with full file content", GetItemAlias(item));
                         syncFileService.SaveXElement(attempt.Item, filename);
                     }
                     else
