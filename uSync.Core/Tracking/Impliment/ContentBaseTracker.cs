@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Xml.Linq;
 
 using Umbraco.Cms.Core.Models;
 
@@ -36,5 +37,16 @@ namespace uSync.Core.Tracking.Impliment
 
             TrackingItem.Many("GenericProperty", "/GenericProperties/GenericProperty", uSyncConstants.Xml.Key)
         };
+
+        /// <summary>
+        ///  we don't support content merging content in roots, so just return the target all the time. 
+        /// </summary>
+        /// <remarks>
+        ///  we can do it,(the code is there). but blocks mean if people do change content in a block
+        ///  we would mark the whole block as changed, and i suspect editors would expect only the block to change
+        ///  so the level of potential confusion is too high.
+        /// </remarks>
+        public override XElement MergeFiles(XElement source, XElement target) => target;
+        public override XElement GetDifferences(List<XElement> nodes) => nodes[^1];
     }
 }
