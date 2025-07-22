@@ -59,6 +59,9 @@ namespace uSync.BackOffice
             // Setup uSync core.
             builder.AdduSyncCore();
 
+            // folder collection, so you can inject folders into the sync process.
+            builder.WithCollectionBuilder<SyncFolderCollectionBuilder>()
+                .Add(builder.TypeLoader.GetTypes<ISyncFolder>());
 
             // Setup the back office.
             builder.Services.AddSingleton<uSyncEventService>();

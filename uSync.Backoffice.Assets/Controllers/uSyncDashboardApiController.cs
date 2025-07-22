@@ -119,7 +119,11 @@ namespace uSync.BackOffice.Assets.Controllers
         /// </summary>
         [HttpGet]
         public uSyncSettings GetSettings()
-            => this._uSyncConfig.Settings;
+        {
+            var settings = this._uSyncConfig.Settings;
+            settings.Folders = _uSyncConfig.GetFolders();
+            return settings;
+        }
 
         /// <summary>
         /// Return the default set name based on configuration
