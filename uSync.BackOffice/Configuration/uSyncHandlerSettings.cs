@@ -56,7 +56,18 @@ namespace uSync.BackOffice.Configuration
         /// <remarks>
         ///  the clean file will only get created if the item in question has children.
         /// </remarks>
-        public bool CreateClean { get; set; } = false;  
+        public bool CreateClean { get; set; } = false;
+
+
+        /// <summary>
+        ///  when saving root items with differences, save all the items, (this is the legacy behavior)
+        /// </summary>
+        /// <remarks>
+        ///  pre v13.3 when a change is made the whole .config file is saved to the new ./usync folder
+        ///  but this is a bug, the intention was and it that only the changes are saved to the folder
+        ///  this turns the old behavior back on. 
+        /// </remarks>
+        public bool LegacyRootMerge { get; set; } = false;
 
         /// <summary>
         /// Additional settings for the handler
@@ -120,6 +131,8 @@ namespace uSync.BackOffice.Configuration
                 UseFlatStructure = settings.UseFlatStructure,
                 Group = settings.Group,
                 GuidNames = settings.GuidNames,
+                LegacyRootMerge = settings.LegacyRootMerge,
+                CreateClean = settings.CreateClean,
                 Settings = new Dictionary<string, string>(settings.Settings, StringComparer.InvariantCultureIgnoreCase)
             };
         }

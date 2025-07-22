@@ -1093,51 +1093,59 @@ namespace uSync.BackOffice.SyncHandlers
         protected virtual SyncAttempt<XElement> Export_DoExport(TObject item, string filename, string[] folders, HandlerSettings config)
         {
             var attempt = SerializeItem(item, new SyncSerializerOptions(config.Settings));
-            if (attempt.Success)
+            if (attempt.Success is false)
+                return attempt;
+
+            if (ShouldExport(attempt.Item, config) is false)
+                return SyncAttempt<XElement>.Succeed(Path.GetFileName(filename), ChangeType.NoChange, "Not Exported (Based on configuration)");
+
+            var files = folders.Select(x => GetPath(x, item, config.GuidNames, config.UseFlatStructure)).ToArray();
+
+            // load all the nodes from everything but the last folder, 
+            // so if it returns anything, we have files in a root folder somewhere. 
+            var nodes = syncFileService.GetAllNodes(files[..^1]);
+            if (nodes.Count > 0)
             {
-                if (ShouldExport(attempt.Item, config))
+                nodes.Add(attempt.Item);
+                var differences = syncFileService.GetDifferences(nodes, trackers.FirstOrDefault());
+                if (differences is not null && differences.HasElements)
                 {
-                    var files = folders.Select(x => GetPath(x, item, config.GuidNames, config.UseFlatStructure)).ToArray();
-
-                    // load all the nodes from everything but the last folder, 
-                    // so if it returns anything, we have files in a root folder somewhere. 
-                    var nodes = syncFileService.GetAllNodes(files[..^1]);
-                    if (nodes.Count > 0)
+                    // if we have differences, then we save them to the file.
+                    // the buggy way was to save the whole item, but people might now expect that, 
+                    // so we have a setting to turn it back on.
+                    if (config.LegacyRootMerge)
                     {
-                        nodes.Add(attempt.Item);
-                        var differences = syncFileService.GetDifferences(nodes, trackers.FirstOrDefault());
-                        if (differences is not null && differences.HasElements)
-                        {
-                            // save the Diffrence file as the XElement, then on import we merge it with root.
-							syncFileService.SaveXElement(differences, filename);
-						}
-                        else
-                        {
-
-                            if (syncFileService.FileExists(filename))
-							{
-								// we don't delete them - because in deployments they might then hang around
-                                // we mark them as reverted and then they don't get processed.
-								var emptyNode = XElementExtensions.MakeEmpty(attempt.Item.GetKey(), SyncActionType.None, "Reverted to root");
-                                syncFileService.SaveXElement(emptyNode, filename);
-                            }
-                        }
-					}
-                    else
-                    {
+                        logger.LogDebug("Exporting {alias} with legacy root merge", GetItemAlias(item));
                         syncFileService.SaveXElement(attempt.Item, filename);
                     }
-
-                    if (config.CreateClean && HasChildren(item))
+                    else
                     {
-                        CreateCleanFile(GetItemKey(item), filename);
+                        logger.LogDebug("Exporting {alias} with differences", GetItemAlias(item));
+                        syncFileService.SaveXElement(differences, filename);
                     }
                 }
                 else
                 {
-                    return SyncAttempt<XElement>.Succeed(Path.GetFileName(filename), ChangeType.NoChange, "Not Exported (Based on configuration)");
+
+                    if (syncFileService.FileExists(filename))
+                    {
+                        // we don't delete them - because in deployments they might then hang around
+                        // we mark them as reverted and then they don't get processed.
+                        var emptyNode = XElementExtensions.MakeEmpty(attempt.Item.GetKey(), SyncActionType.None, "Reverted to root");
+                        syncFileService.SaveXElement(emptyNode, filename);
+                    }
                 }
             }
+            else
+            {
+                syncFileService.SaveXElement(attempt.Item, filename);
+            }
+
+            if (config.CreateClean && HasChildren(item))
+            {
+                CreateCleanFile(GetItemKey(item), filename);
+            }
+
             return attempt;
         }
 
