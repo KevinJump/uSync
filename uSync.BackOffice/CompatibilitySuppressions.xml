@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<!-- https://learn.microsoft.com/en-us/dotnet/fundamentals/package-validation/diagnostic-ids -->
+<!-- https://learn.microsoft.com/dotnet/fundamentals/package-validation/diagnostic-ids -->
 <Suppressions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <Suppression>
     <DiagnosticId>CP0001</DiagnosticId>
@@ -60,6 +60,13 @@
   <Suppression>
     <DiagnosticId>CP0001</DiagnosticId>
     <Target>T:uSync.BackOffice.Controllers.uSyncWarningMessage</Target>
+    <Left>lib/net8.0/uSync.BackOffice.dll</Left>
+    <Right>lib/net8.0/uSync.BackOffice.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:uSync.BackOffice.Configuration.uSyncConfigService.#ctor(Microsoft.Extensions.Options.IOptionsMonitor{uSync.BackOffice.Configuration.uSyncSettings},Microsoft.Extensions.Options.IOptionsMonitor{uSync.BackOffice.Configuration.uSyncHandlerSetSettings})</Target>
     <Left>lib/net8.0/uSync.BackOffice.dll</Left>
     <Right>lib/net8.0/uSync.BackOffice.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>

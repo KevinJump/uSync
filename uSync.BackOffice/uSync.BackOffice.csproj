@@ -48,9 +48,7 @@
 
 	<!-- Package Validation -->
 	<PropertyGroup>
-		<!--
 		<GenerateCompatibilitySuppressionFile>true</GenerateCompatibilitySuppressionFile>
-		-->
 		<EnablePackageValidation>true</EnablePackageValidation>
 		<PackageValidationBaselineVersion>13.0.0</PackageValidationBaselineVersion>
 		<EnableStrictModeForCompatibleFrameworksInPackage>true</EnableStrictModeForCompatibleFrameworksInPackage>

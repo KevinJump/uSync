@@ -1117,9 +1117,9 @@ namespace uSync.BackOffice.SyncHandlers
                     // if we have differences, then we save them to the file.
                     // the buggy way was to save the whole item, but people might now expect that, 
                     // so we have a setting to turn it back on.
-                    if (config.LegacyRootMerge)
+                    if (config.FullFileOnDifference)
                     {
-                        logger.LogDebug("Exporting {alias} with legacy root merge", GetItemAlias(item));
+                        logger.LogDebug("Exporting {alias} with full file content", GetItemAlias(item));
                         syncFileService.SaveXElement(attempt.Item, filename);
                     }
                     else

@@ -67,7 +67,7 @@ namespace uSync.BackOffice.Configuration
         ///  but this is a bug, the intention was and it that only the changes are saved to the folder
         ///  this turns the old behavior back on. 
         /// </remarks>
-        public bool LegacyRootMerge { get; set; } = false;
+        public bool FullFileOnDifference { get; set; } = false;
 
         /// <summary>
         /// Additional settings for the handler
@@ -131,7 +131,7 @@ namespace uSync.BackOffice.Configuration
                 UseFlatStructure = settings.UseFlatStructure,
                 Group = settings.Group,
                 GuidNames = settings.GuidNames,
-                LegacyRootMerge = settings.LegacyRootMerge,
+                FullFileOnDifference = settings.FullFileOnDifference,
                 CreateClean = settings.CreateClean,
                 Settings = new Dictionary<string, string>(settings.Settings, StringComparer.InvariantCultureIgnoreCase)
             };
