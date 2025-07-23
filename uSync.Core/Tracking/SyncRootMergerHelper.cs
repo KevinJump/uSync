@@ -148,10 +148,33 @@ public class SyncRootMergerHelper
         }
 
         // they match 
-        if (sourceNode.ToString() == targetNode.ToString())
+        if (XMLMatches(sourceNode, targetNode) is true)
             return null;
 
         return targetNode;
+    }
+
+    /// <summary>
+    ///  Compare bits of XML. 
+    /// </summary>
+    /// <remarks>
+    ///  XML can contain formatting and whitespaces in-between the elements, 
+    ///  the "quick" way is to reparse it, then compare the strings
+    ///  
+    ///  There is a more in-depth way where you re-write the elements and attributes in-order
+    ///  but we do this A LOT, and this works for the xml we produce as attribute order
+    ///  is set within the uSync code. 
+    /// </remarks>
+    private static bool XMLMatches(XElement a, XElement b)
+    {
+        try
+        {
+            return XElement.Parse(a.ToString()).ToString() == XElement.Parse(b.ToString()).ToString();
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     private static (XElement? combined, XElement? diffrence) GetMultipleChanges(TrackingItem item, XElement source, XElement target)

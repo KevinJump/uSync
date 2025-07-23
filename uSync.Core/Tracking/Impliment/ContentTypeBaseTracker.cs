@@ -18,7 +18,7 @@ public class ContentTypeBaseTracker<TObject> : SyncXmlTrackAndMerger<TObject>
         TrackingItem.Single("Thumbnail", "/Info/Thumbnail"),
         TrackingItem.Single("Description", "/Info/Description"),
         TrackingItem.Single("Allowed at root", "/Info/AllowAtRoot"),
-        TrackingItem.Single("List View", "/Info/IsListView"),
+        TrackingItem.Single("List View", "/Info/ListView"),
         TrackingItem.Single("Variations", "/Info/Variations"),
         TrackingItem.Single("Element type", "/Info/IsElement"),
         TrackingItem.Single("Folder", "/Info/Folder"),
