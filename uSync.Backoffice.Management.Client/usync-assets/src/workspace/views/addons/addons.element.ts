@@ -27,7 +27,7 @@ export class uSyncAddOnsElement extends UmbElementMixin(LitElement) {
 						<div class="logos">
 							<div class="logo">
 								<uui-icon name="icon-shift"></uui-icon>
-								<h4>peopleublish</h4>
+								<h4>publish</h4>
 							</div>
 							<div class="logo">
 								<uui-icon name="icon-shift" class="rotated"></uui-icon>
