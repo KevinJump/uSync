@@ -30,15 +30,17 @@ export class USyncSettingsViewElement extends UmbElementMixin(LitElement) {
 			if (!_instance) return;
 
 			this.observe(_instance.settings, (_settings) => {
+				if (!_settings) return;
 				this.settings = _settings;
+				_instance.getDefaultHandlerSetSettings(this.settings.defaultSet ?? 'Default');
 			});
 
 			this.observe(_instance.handlerSettings, (_handlerSettings) => {
+				if (!_handlerSettings) return;
 				this.handlerSettings = _handlerSettings;
 			});
 
 			_instance.getSettings();
-			_instance.getDefaultHandlerSetSettings();
 		});
 	}
 
@@ -95,6 +97,11 @@ export class USyncSettingsViewElement extends UmbElementMixin(LitElement) {
 
 					<div>
 						<uui-box headline=${this.localize.term('USyncSettings_handlerDefaults')}>
+							<usync-setting-item
+								.name=${this.localize.term('USyncSettings_handlerSet')}
+								.description=${this.localize.term('USyncSettings_handlerSetDesc')}
+								.value=${this.settings?.defaultSet}></usync-setting-item>
+
 							<usync-setting-item
 								.name=${this.localize.term('USyncSettings_flatStructure')}
 								.description=${this.localize.term('USyncSettings_flatStructureDesc')}

@@ -98,6 +98,11 @@ export default {
 		failOnMissingParent: 'Fail on missing parent',
 		failOnMissingParentDesc: 'Fail on missing parent',
 
+		currentHandlerSet: 'Current Set',
+
+		handlerSet: 'Default handler set',
+		handlerSetDesc: 'The default handler set to use for the site',
+
 		flatStructure: 'Flat structure',
 		flatStructureDesc: 'All items of a type are stored in a flat folder structure',
 

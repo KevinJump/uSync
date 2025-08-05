@@ -44,8 +44,9 @@ export type HandlerSettings = {
     failOnMissingParent: boolean;
     group: string;
     createClean: boolean;
+    fullFileOnDifference: boolean;
     settings: {
-        [key: string]: string;
+        [key: string]: unknown;
     };
 };
 
@@ -109,6 +110,11 @@ export type SyncLegacyCheckResponse = {
     legacyTypes: Array<string>;
     latestFolder: string;
     latestVersion: string;
+};
+
+export type SyncSelectableSet = {
+    name: string;
+    settings: USyncHandlerSetSettings;
 };
 
 export type UploadImportResult = {
@@ -215,6 +221,24 @@ export type GetActionsResponses = {
 };
 
 export type GetActionsResponse = GetActionsResponses[keyof GetActionsResponses];
+
+export type GetActionsBySetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        setName?: string;
+    };
+    url: '/umbraco/usync/api/v1/ActionsBySet';
+};
+
+export type GetActionsBySetResponses = {
+    /**
+     * OK
+     */
+    200: Array<SyncActionGroup>;
+};
+
+export type GetActionsBySetResponse = GetActionsBySetResponses[keyof GetActionsBySetResponses];
 
 export type DownloadData = {
     body?: never;
@@ -365,6 +389,22 @@ export type GetHandlerSetSettingsResponses = {
 };
 
 export type GetHandlerSetSettingsResponse = GetHandlerSetSettingsResponses[keyof GetHandlerSetSettingsResponses];
+
+export type GetSetsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/umbraco/usync/api/v1/Sets';
+};
+
+export type GetSetsResponses = {
+    /**
+     * OK
+     */
+    200: Array<SyncSelectableSet>;
+};
+
+export type GetSetsResponse = GetSetsResponses[keyof GetSetsResponses];
 
 export type GetSettingsData = {
     body?: never;

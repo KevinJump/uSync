@@ -85,7 +85,7 @@ internal class SyncConfigService : ISyncConfigService
 
     /// <inheritdoc/>
     public uSyncHandlerSetSettings GetSetSettings(string setName)
-        => _setOptionsMonitor.Get(setName);
+        => _setOptionsMonitor.Get(setName) ?? new uSyncHandlerSetSettings();
 
     /// <inheritdoc/>
     public uSyncHandlerSetSettings GetDefaultSetSettings()

@@ -15,13 +15,13 @@ import {
 	SyncHandlerSummary,
 	SyncLegacyCheckResponse,
 	USyncActionView,
+	SyncSelectableSet,
 } from '@jumoo/uSync';
 import { uSyncActionPerformEvent } from '../../components/events';
 
 @customElement('usync-default-view')
 export class uSyncDefaultViewElement extends UmbLitElement {
 	#actionContext?: uSyncWorkspaceContext;
-	#contextLoaded: Boolean = false;
 
 	@state()
 	_actions?: Array<SyncActionGroup>;
@@ -56,15 +56,38 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 	@state()
 	_disabled: boolean = false;
 
+	@state()
+	_setName: string = 'Default';
+
+	@state()
+	_sets: Array<SyncSelectableSet> = [];
+
 	constructor() {
 		super();
 
 		this.consumeContext(USYNC_CORE_CONTEXT_TOKEN, (_instance) => {
 			if (!_instance) return;
-
 			this.#actionContext = _instance;
 
+			_instance.getSettings();
+
+			this.observe(_instance.settings, (_settings) => {
+				if (!_settings) return;
+
+				this._setName = _settings.defaultSet ?? 'Default';
+
+				this.#actionContext?.checkLegacy();
+				this.#actionContext?.getHandlerSets();
+			});
+
+			this.observe(_instance.sets, (sets) => {
+				if (!sets) return;
+				this._sets = sets;
+				this.#actionContext?.getActions(this._setName);
+			});
+
 			this.observe(_instance.actions, (_actions) => {
+				if (!_actions || _actions.length == 0) return;
 				this._actions = _actions;
 				this._loaded = this._actions !== null;
 			});
@@ -98,12 +121,6 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 			this.observe(_instance.legacy, (_legacy) => {
 				this._legacy = _legacy;
 			});
-
-			if (this.#contextLoaded == false) {
-				this.#actionContext?.checkLegacy();
-				this.#actionContext?.getActions();
-				this.#contextLoaded;
-			}
 		});
 	}
 
@@ -118,6 +135,7 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 		this._showProgress = true;
 		this._group = event.group;
 		this.#actionContext?.performAction({
+			setName: this._setName,
 			group: event.group,
 			action: event.key,
 			force: event.force ?? false,
@@ -132,7 +150,7 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 		} else {
 			return html`
 				<umb-body-layout>
-					${this.#renderLegacyBanner()}
+					${this.#renderLegacyBanner()} ${this.#renderSetPicker()}
 					<div class="wrapper">
 						${this.#renderActions()} ${this.#renderBanner()} ${this.#renderProcessBox()}
 						${this.#renderReport()}
@@ -140,6 +158,35 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 				</umb-body-layout>
 			`;
 		}
+	}
+
+	#renderSetPicker() {
+		if (this._sets.length < 2) return nothing;
+
+		var options = this._sets.map((set) => {
+			return {
+				name: set.name,
+				value: set.name,
+				selected: set.name === this._setName,
+			};
+		});
+
+		return html`<div class="set-picker">
+			<label for="set-select"
+				>${this.localize.term('USyncSettings_currentHandlerSet')}</label
+			>
+			<uui-select
+				id="set-select"
+				.label=${this.localize.term('USyncSettings_currentHandlerSet')}
+				.value=${this._group?.key ?? 'Default'}
+				.options=${options}
+				@change=${(e: Event) => {
+					const select = e.target as HTMLSelectElement;
+					this._setName = select.value;
+					this.#actionContext?.getActions(this._setName);
+				}}>
+			</uui-select>
+		</div> `;
 	}
 
 	#renderLegacyBanner() {
@@ -255,7 +302,24 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 
 			umb-empty-state uui-icon {
 				position: relative;
-				top: var(--uui-size-4);
+				top: var(--uui-size-2);
+			}
+
+			.set-picker {
+				display: flex;
+				flex-direction: row;
+				align-items: center;
+				justify-content: flex-end;
+				gap: var(--uui-size-space-2);
+				margin-bottom: var(--uui-size-space-4);
+			}
+
+			.set-picker label {
+				font-weight: 700;
+			}
+
+			.set-picker label::after {
+				content: ':';
 			}
 		`,
 	];
