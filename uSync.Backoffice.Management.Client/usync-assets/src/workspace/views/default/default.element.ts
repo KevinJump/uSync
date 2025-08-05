@@ -178,7 +178,6 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 			<uui-select
 				id="set-select"
 				.label=${this.localize.term('USyncSettings_currentHandlerSet')}
-				.value=${this._group?.key ?? 'Default'}
 				.options=${options}
 				@change=${(e: Event) => {
 					const select = e.target as HTMLSelectElement;
