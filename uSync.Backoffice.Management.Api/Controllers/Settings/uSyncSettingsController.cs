@@ -59,7 +59,7 @@ public class uSyncSettingsController : uSyncControllerBase
         foreach (var item in section.GetChildren())
         {
             var settings = _configService.GetSetSettings(item.Key);
-            if (sets is null || settings.Enabled is false) continue;
+            if (settings is null || settings.Enabled is false) continue;
             sets.Add(new SyncSelectableSet
             {
                 Name = item.Key,
