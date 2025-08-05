@@ -57,8 +57,8 @@ export class uSyncActionRepository extends UmbControllerBase {
 	 * Get the list of possible actions from the server
 	 * @returns Promise
 	 */
-	async getActions() {
-		return this.#actionDataSource.getActions();
+	async getActions(setName: string) {
+		return this.#actionDataSource.getActionsBySet(setName);
 	}
 
 	/**
@@ -132,5 +132,9 @@ export class uSyncActionRepository extends UmbControllerBase {
 
 	async processUpload(fileId: string) {
 		return (await this.#actionDataSource.processUpload(fileId)).data;
+	}
+
+	async getSets() {
+		return await this.#settingsDataSource.getSets();
 	}
 }

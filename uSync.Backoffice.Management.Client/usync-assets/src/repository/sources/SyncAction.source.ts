@@ -9,7 +9,7 @@ import {
 } from '@jumoo/uSync';
 
 export interface SyncActionDataSource {
-	getActions(): Promise<UmbDataSourceResponse<unknown>>;
+	getActionsBySet(setName: string): Promise<UmbDataSourceResponse<unknown>>;
 	performAction(
 		request: PerformActionRequest,
 	): Promise<UmbDataSourceResponse<PerformActionResponse>>;
@@ -22,8 +22,15 @@ export class uSyncActionDataSource implements SyncActionDataSource {
 		this.#host = host;
 	}
 
-	async getActions(): Promise<UmbDataSourceResponse<Array<SyncActionGroup>>> {
-		return await tryExecute(this.#host, ActionsService.getActions());
+	async getActionsBySet(
+		setName: string,
+	): Promise<UmbDataSourceResponse<Array<SyncActionGroup>>> {
+		return await tryExecute(
+			this.#host,
+			ActionsService.getActionsBySet({
+				query: { setName: setName },
+			}),
+		);
 	}
 
 	async performAction(

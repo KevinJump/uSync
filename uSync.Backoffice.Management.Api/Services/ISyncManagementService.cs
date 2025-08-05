@@ -9,7 +9,10 @@ namespace uSync.Backoffice.Management.Api.Services;
 public interface ISyncManagementService
 {
     Stream CompressExportFolder();
+
+    [Obsolete("Use GetActions(string setName) instead, this will be removed in v18")]
     List<SyncActionGroup> GetActions();
+    List<SyncActionGroup> GetActions(string setName);
     Func<SyncActionOptions, uSyncCallbacks, Task<SyncActionResult>> GetHandlerMethodAsync(HandlerActions action);
     
     Task<PerformActionResponse> PerformActionAsync(PerformActionRequest actionRequest, IUser? user);

@@ -41,10 +41,14 @@ internal class uSyncManagementService : ISyncManagementService
         _handlerFactory = handlerFactory;
     }
 
+    [Obsolete("Use GetActions(string setName) instead, this will be removed in v18")]
+    public List<SyncActionGroup> GetActions()
+        => GetActions(_configService.Settings.DefaultSet);
+
     /// <summary>
     ///  Gets the list of available actions
     /// </summary>
-    public List<SyncActionGroup> GetActions()
+    public List<SyncActionGroup> GetActions(string setName)
     {
         // TODO: Load the actions based on the handlers, and the config, (so they can be turned on and off)
 
@@ -125,7 +129,7 @@ internal class uSyncManagementService : ISyncManagementService
 
         List<SyncActionGroup> actionGroups = [];
 
-        var options = new SyncHandlerOptions(_configService.Settings.DefaultSet)
+        var options = new SyncHandlerOptions(setName)
         {
             Group = _configService.Settings.UIEnabledGroups
         };

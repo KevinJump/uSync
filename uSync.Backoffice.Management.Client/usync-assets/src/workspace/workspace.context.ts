@@ -16,6 +16,7 @@ import {
 	uSyncActionRepository,
 	uSyncConstants,
 	SyncPerformActionOptions,
+	SyncSelectableSet,
 } from '@jumoo/uSync';
 import uSyncSignalRContext from '../signalr/signalr.context';
 import {
@@ -83,6 +84,9 @@ export class uSyncWorkspaceContext
 	#handlerSettings = new UmbObjectState<USyncHandlerSetSettings | undefined>(undefined);
 	public readonly handlerSettings = this.#handlerSettings?.asObservable();
 
+	#handlerSets = new UmbArrayState<SyncSelectableSet>([], (x) => x);
+	public readonly sets = this.#handlerSets.asObservable();
+
 	#legacy = new UmbObjectState<SyncLegacyCheckResponse | undefined>(undefined);
 	public readonly legacy = this.#legacy?.asObservable();
 
@@ -100,8 +104,8 @@ export class uSyncWorkspaceContext
 	/**
 	 * Return the current actions from the repository
 	 */
-	async getActions() {
-		const { data } = await this.#repository.getActions();
+	async getActions(setName: string) {
+		const { data } = await this.#repository.getActions(setName);
 
 		if (data) {
 			this.#actions.setValue(data);
@@ -151,11 +155,18 @@ export class uSyncWorkspaceContext
 	/**
 	 * Get handler defaults.
 	 */
-	async getDefaultHandlerSetSettings() {
-		const { data } = await this.#repository.getHandlerSettings('Default');
+	async getDefaultHandlerSetSettings(setName: string) {
+		const { data } = await this.#repository.getHandlerSettings(setName);
 
 		if (data) {
 			this.#handlerSettings.setValue(data);
+		}
+	}
+
+	async getHandlerSets() {
+		const { data } = await this.#repository.getSets();
+		if (data) {
+			this.#handlerSets.setValue(data);
 		}
 	}
 
@@ -189,6 +200,7 @@ export class uSyncWorkspaceContext
 		do {
 			const { data } = await this.#repository.performAction({
 				id: id,
+				set: options.setName,
 				action: options.action,
 				group: options.group.key,
 				force: options.force,

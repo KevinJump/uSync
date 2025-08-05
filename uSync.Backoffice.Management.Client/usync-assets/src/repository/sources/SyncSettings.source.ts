@@ -33,4 +33,8 @@ export class USyncSettingsDataSource implements SyncSettingsDataSource {
 	async getAddons() {
 		return await tryExecute(this.#host, SettingsService.getAddOns());
 	}
+
+	async getSets() {
+		return await tryExecute(this.#host, SettingsService.getSets());
+	}
 }
