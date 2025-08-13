@@ -29,7 +29,8 @@ export class uSyncResultGroupView extends UmbLitElement {
 	groupName: string = '';
 
 	async #showDetail(action: USyncActionView) {
-		if (action.change == ChangeType.NO_CHANGE) return;
+		if (action.change == ChangeType.NO_CHANGE || action.change == ChangeType.EXPORT)
+			return;
 
 		console.debug('Showing detail for action:', action);
 
@@ -79,9 +80,11 @@ export class uSyncResultGroupView extends UmbLitElement {
 						? 'icon-check color-green'
 						: 'icon-wrong color-red';
 
+			const isChange =
+				result.change != ChangeType.NO_CHANGE && result.change != ChangeType.EXPORT;
+
 			return html`
-				<uui-table-row
-					class=${classMap({ changerow: result.change != ChangeType.NO_CHANGE })}>
+				<uui-table-row class=${classMap({ changerow: isChange })}>
 					<uui-table-cell class="icon-cell" .noPadding=${true}>
 						<umb-icon .name=${icon}></umb-icon>
 					</uui-table-cell>
@@ -155,21 +158,17 @@ export class uSyncResultGroupView extends UmbLitElement {
 			display: flex;
 			align-items: center;
 			gap: var(--uui-size-space-2);
+			color: var(--uui-color-border-emphasis);
 		}
 
 		.summary-right uui-icon {
 			transform: rotate(90deg);
-			color: var(--uui-color-text-alt);
 			transition: transform 0.5s cubic-bezier(0.42, 0, 0.37, 1.62);
 		}
 
 		.summary-right uui-icon.expanded {
 			transform: rotate(-90deg);
 			border-bottom: none;
-		}
-
-		.count {
-			color: var(--uui-color-border);
 		}
 
 		.has_changes .count {

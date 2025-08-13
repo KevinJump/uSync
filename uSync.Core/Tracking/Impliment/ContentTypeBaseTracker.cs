@@ -25,7 +25,10 @@ public class ContentTypeBaseTracker<TObject> : SyncXmlTrackAndMerger<TObject>
         TrackingItem.Single("Default Template", "/Info/DefaultTemplate"),
 
 
-        TrackingItem.Single("History", "/Info/HistoryCleanup"),
+        TrackingItem.Single("History", "/Info/HistoryCleanup/PreventCleanup"),
+        TrackingItem.Single("History", "/Info/HistoryCleanup/KeepAllVersionsNewerThanDays"),
+        TrackingItem.Single("History", "/Info/HistoryCleanup/KeepLatestVersionPerDayForDays"),
+
 
         TrackingItem.Many("Compositions", "/Info/Compositions/Composition", "@Key", "", "#"),
         TrackingItem.Many("AllowedTemplates", "/Info/AllowedTemplates/Template", "@Key", "", "#"),

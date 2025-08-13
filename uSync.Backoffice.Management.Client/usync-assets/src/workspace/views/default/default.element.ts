@@ -311,6 +311,8 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 				justify-content: flex-end;
 				gap: var(--uui-size-space-2);
 				margin-bottom: var(--uui-size-space-4);
+				border: 1px solid var(--uui-color-border);
+				padding: var(--uui-size-space-4);
 			}
 
 			.set-picker label {

@@ -40,6 +40,7 @@ export class SyncActionButtonElement extends UmbLitElement {
 		return html`
 			<uui-button-group>
 				<uui-button
+					class="action-button"
 					.disabled=${this.disabled}
 					label=${this.localize.term(`uSync_${this.button?.label}`)}
 					color=${<UUIInterfaceColor>this.button?.color}
@@ -96,6 +97,10 @@ export class SyncActionButtonElement extends UmbLitElement {
 	}
 
 	static styles = css`
+		.action-button {
+			min-width: 110px;
+		}
+
 		.expand-symbol {
 			transform: rotate(90deg);
 		}

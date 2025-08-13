@@ -42,6 +42,7 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
 
 	async #showDetail(e: uSyncShowDetailEvent) {
 		console.debug('Showing detail for action:', e.action);
+		if (e.action.change == ChangeType.EXPORT) return;
 
 		const detailsModal = this.#modalContext?.open(this, USYNC_DETAILS_MODAL, {
 			data: {
@@ -135,6 +136,8 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
 		.result-header {
 			display: flex;
 			justify-content: space-between;
+			padding: var(--uui-size-space-4);
+			border: 1px solid var(--uui-color-border);
 			padding: var(--uui-size-space-4);
 		}
 
