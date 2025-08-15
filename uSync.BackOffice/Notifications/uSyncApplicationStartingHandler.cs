@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Events;
+using Umbraco.Cms.Core.HostedServices;
 using Umbraco.Cms.Core.Notifications;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Sync;
@@ -31,6 +32,7 @@ internal class uSyncApplicationStartingHandler : INotificationAsyncHandler<Umbra
     private readonly ISyncConfigService _uSyncConfig;
     private readonly ISyncFileService _syncFileService;
     private readonly ISyncService _uSyncService;
+    private readonly IBackgroundTaskQueue _backgroundTaskQueue;
 
     /// <summary>
     /// Generate a new uSyncApplicationStartingHandler object
@@ -42,7 +44,8 @@ internal class uSyncApplicationStartingHandler : INotificationAsyncHandler<Umbra
         IUmbracoContextFactory umbracoContextFactory,
         ISyncConfigService uSyncConfigService,
         ISyncFileService syncFileService,
-        ISyncService uSyncService)
+        ISyncService uSyncService,
+        IBackgroundTaskQueue backgroundTaskQueue)
     {
         _runtimeState = runtimeState;
         _serverRegistrar = serverRegistrar;
@@ -55,6 +58,7 @@ internal class uSyncApplicationStartingHandler : INotificationAsyncHandler<Umbra
 
         _syncFileService = syncFileService;
         _uSyncService = uSyncService;
+        _backgroundTaskQueue = backgroundTaskQueue;
     }
 
     /// <summary>
@@ -75,8 +79,25 @@ internal class uSyncApplicationStartingHandler : INotificationAsyncHandler<Umbra
             _logger.LogInformation("This is a replicate server in a load balanced setup - uSync will not run {serverRole}", _serverRegistrar.CurrentServerRole);
             return;
         }
+        
+        if (_uSyncConfig.Settings.BackgroundStartup)
+        {
+            _logger.LogInformation("uSync: Running startup in background");
+            _backgroundTaskQueue.QueueBackgroundWorkItem(
+                cancellationToken =>
+                {
+                    using (ExecutionContext.SuppressFlow())
+                    {
+                        Task.Run(async () => await InituSyncAsync());
+                        return Task.CompletedTask;
+                    }
+                });
+        }
+        else
+        {
+            await InituSyncAsync();
+        }
 
-        await InituSyncAsync();
     }
 
     /// <summary>

@@ -61,6 +61,16 @@ public class uSyncSettings
     public string[] LockRootTypes { get; set; } = [];
 
     /// <summary>
+    ///  Run the uSync startup processes in the background, so the site can start up quicker.
+    /// </summary>
+    /// <remarks>
+    ///  Will reduce the startup time of the site, but it might mean that things
+    ///  are still being imported while people are using the site. 
+    /// </remarks>
+    [DefaultValue(false)]
+    public bool BackgroundStartup { get; set; } = true;
+
+    /// <summary>
     /// The default handler set to use on all notification triggered events
     /// </summary>
     [DefaultValue(uSync.Sets.DefaultSet)]
