@@ -68,7 +68,7 @@ public class uSyncSettings
     ///  are still being imported while people are using the site. 
     /// </remarks>
     [DefaultValue(false)]
-    public bool BackgroundStartup { get; set; } = true;
+    public bool BackgroundStartup { get; set; } = false;
 
     /// <summary>
     /// The default handler set to use on all notification triggered events
