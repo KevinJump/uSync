@@ -57,7 +57,7 @@ public class LanguageSerializer : SyncSerializerBase<ILanguage>, ISyncSerializer
         item.IsDefault = isDefault;
 
         var fallbackIsoCode = GetFallbackLanguageIsoCode(item, node);
-        details.AddIfUpdated(nameof(item.FallbackIsoCode), item.FallbackIsoCode ?? "(None)", fallbackIsoCode);
+        details.AddIfUpdated(nameof(item.FallbackIsoCode), item.FallbackIsoCode, fallbackIsoCode);
         item.FallbackIsoCode = fallbackIsoCode;
 
         return SyncAttempt<ILanguage>.Succeed(item.CultureName, item, ChangeType.Import, details);
@@ -77,7 +77,7 @@ public class LanguageSerializer : SyncSerializerBase<ILanguage>, ISyncSerializer
         item.IsDefault = isDefault;
 
         var fallbackIsoCode = GetFallbackLanguageIsoCode(item, node);
-        details.AddIfUpdated(nameof(item.FallbackIsoCode), item.FallbackIsoCode ?? "(None)", fallbackIsoCode);
+        details.AddIfUpdated(nameof(item.FallbackIsoCode), item.FallbackIsoCode, fallbackIsoCode);
         item.FallbackIsoCode = fallbackIsoCode;
 
         if (!options.Flags.HasFlag(SerializerFlags.DoNotSave) && item.IsDirty())

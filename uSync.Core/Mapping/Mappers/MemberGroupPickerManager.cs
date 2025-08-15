@@ -11,7 +11,10 @@ public class MemberGroupPickerMapper : SyncValueMapperBase, ISyncMapper
 {
     private readonly IMemberGroupService _memberGroupService;
 
-    public MemberGroupPickerMapper(IEntityService entityService, IMemberGroupService memberGroupService) : base(entityService)
+    public MemberGroupPickerMapper(
+        IEntityService entityService,
+        IMemberGroupService memberGroupService)
+        : base(entityService)
     {
         _memberGroupService = memberGroupService;
     }
@@ -30,17 +33,18 @@ public class MemberGroupPickerMapper : SyncValueMapperBase, ISyncMapper
         if (attempt.Success is false || attempt.Result is null)
             return await base.GetExportValueAsync(value, editorAlias);
 
-        var values = ConvertToList<int>(attempt.Result.ToDelimitedList());
+        var values = attempt.Result.ToDelimitedList().ConvertItems<int>();
 
         var groups = new List<string>();
 
         foreach (var item in values)
         {
             if (item <= 0) continue;
-            // get the group by id
-            var group = _memberGroupService.GetById(item);
-            if (group is not null)
-                groups.Add(group?.Name ?? string.Empty);
+
+            // do this via the entity service, saves us calling the full service to get the name. 
+            var entity = entityService.Get(item, Umbraco.Cms.Core.Models.UmbracoObjectTypes.MemberGroup);
+            if (entity is null) continue;
+            groups.Add(entity.Name ?? string.Empty);
         }
 
         return string.Join(",", groups);
@@ -63,7 +67,7 @@ public class MemberGroupPickerMapper : SyncValueMapperBase, ISyncMapper
             if (string.IsNullOrWhiteSpace(item)) continue;
 
             // otherwise, we assume its a group name and try to find the group by name
-            var group = _memberGroupService.GetByName(item);
+            var group = await _memberGroupService.GetByNameAsync(item);
             if (group is not null)
                 values.Add(group.Id.ToString());
         }
@@ -85,14 +89,15 @@ public class MemberGroupPickerMapper : SyncValueMapperBase, ISyncMapper
         if (attempt.Success is false || attempt.Result is null) 
             return await base.GetDependenciesAsync(value, editorAlias, flags);
 
-        var values = ConvertToList<int>(attempt.Result.ToDelimitedList());
+        var values = attempt.Result.ToDelimitedList().ConvertItems<int>();
+
         var dependencies = new List<uSyncDependency>();
 
         foreach (var item in values)
         {
             if (string.IsNullOrWhiteSpace(item.ToString())) continue;
 
-            var group = _memberGroupService.GetById(item);
+            var group = entityService.Get(item, Umbraco.Cms.Core.Models.UmbracoObjectTypes.MemberGroup);
             if (group is not null)
             {
                 dependencies.Add(new uSyncDependency
@@ -107,18 +112,5 @@ public class MemberGroupPickerMapper : SyncValueMapperBase, ISyncMapper
         }
 
         return dependencies;
-    }
-
-    private IEnumerable<T> ConvertToList<T>(IEnumerable<string> items)
-    {
-        foreach(var item in items)
-        {
-            if (string.IsNullOrWhiteSpace(item)) continue;
-            var attempt = item.TryConvertTo<T>();
-            if (attempt.Success && attempt.Result is not null)
-            {
-                yield return attempt.Result;
-            }
-        }
     }
 }

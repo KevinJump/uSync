@@ -119,20 +119,25 @@ public class DictionaryItemSerializer : SyncSerializerBase<IDictionaryItem>, ISy
             if (!activeCultures.IsValid(language)) continue;
 
             var itemTranslation = item.Translations.FirstOrDefault(x => x.LanguageIsoCode == language);
-            if (itemTranslation != null && itemTranslation.Value != translation.Value)
-            {
-                changes.AddUpdate(language, itemTranslation.Value, translation.Value, $"{item.ItemKey}/{language}");
-                itemTranslation.Value = translation.Value;
-
-            }
-            else
+            if (itemTranslation is null)
             {
                 var lang = await _languageService.GetAsync(language);
-                if (lang != null)
+                if (lang is not null)
                 {
                     changes.AddNew(language, translation.Value, $"{item.ItemKey}/{language}");
                     currentTranslations.Add(new DictionaryTranslation(lang, translation.Value));
                 }
+                else
+                {
+                    logger.LogWarning("Dictionary item {ItemKey} has a translation for language {Language} but that language does not exist in the system.", item.ItemKey, language);
+                }
+                continue;
+            }
+            
+            if (itemTranslation.Value != translation.Value)
+            {
+                changes.AddUpdate(language, itemTranslation.Value, translation.Value, $"{item.ItemKey}/{language}");
+                itemTranslation.Value = translation.Value;
             }
         }
 

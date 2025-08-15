@@ -5,6 +5,7 @@ import {
 	customElement,
 	html,
 	property,
+	when,
 } from '@umbraco-cms/backoffice/external/lit';
 import { ChangeType, USyncActionView } from '@jumoo/uSync';
 import { diffWords } from '@umbraco-cms/backoffice/utils';
@@ -22,6 +23,14 @@ export class uSyncChangeView extends UmbElementMixin(LitElement) {
 			return this.render_create();
 		}
 
+		if (this.item?.details.length ?? 0 > 0) {
+			return this.renderChangeTable();
+		} else {
+			return this.renderNoChanges();
+		}
+	}
+
+	renderChangeTable() {
 		return html`
 			<uui-table>
 				<uui-table-head>
@@ -37,6 +46,27 @@ export class uSyncChangeView extends UmbElementMixin(LitElement) {
 				</uui-table-head>
 				${this.render_details()}
 			</uui-table>
+		`;
+	}
+
+	renderNoChanges() {
+		return html`
+			<div class="change-box">
+				<h3>
+					<umb-localize key="uSync_noChanges${this.item?.change}"
+						>No changes</umb-localize
+					>
+				</h3>
+				${when(
+					this.item?.change == ChangeType.IMPORT,
+					() =>
+						html`<div>
+							${(this.item?.message ?? '').length > 0
+								? this.item?.message
+								: 'Item was imported but no properties were changed '}
+						</div>`,
+				)}
+			</div>
 		`;
 	}
 
@@ -92,6 +122,16 @@ export class uSyncChangeView extends UmbElementMixin(LitElement) {
 		:host {
 			display: block;
 			margin: var(--uui-size-space-4) 0;
+		}
+
+		.change-box {
+			padding: var(
+				--uui-box-header-padding,
+				var(--uui-size-space-4, 12px) var(--uui-size-space-5, 18px)
+			);
+		}
+		.change-box h3 {
+			margin: 0;
 		}
 
 		uui-table-cell {

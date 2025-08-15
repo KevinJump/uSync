@@ -1,4 +1,6 @@
-﻿namespace uSync.Core;
+﻿using Umbraco.Extensions;
+
+namespace uSync.Core;
 
 public static class ListExtensions
 {
@@ -25,4 +27,24 @@ public static class ListExtensions
 
     public static bool IsValidOrBlank(this IList<string> list, string value)
         => string.IsNullOrWhiteSpace(value) || list.IsValid(value);
+
+    /// <summary>
+    /// Converts a list of strings to an enumerable of the specified type.
+    /// Skips null, empty, or whitespace strings and only returns successfully converted items.
+    /// </summary>
+    /// <typeparam name="T">The target type to convert each string to</typeparam>
+    /// <param name="items">The list of strings to convert</param>
+    /// <returns>An enumerable containing only the successfully converted items of type T</returns>
+    internal static IEnumerable<T> ConvertItems<T>(this IList<string> items)
+    {
+        foreach (var item in items)
+        {
+            if (string.IsNullOrWhiteSpace(item)) continue;
+            var attempt = item.TryConvertTo<T>();
+            if (attempt.Success && attempt.Result is not null)
+            {
+                yield return attempt.Result;
+            }
+        }
+    }
 }

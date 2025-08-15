@@ -86,12 +86,12 @@ export class uSyncActionBox extends LitElement {
 		}
 
 		.box-heading {
-			font-size: var(--uui-size-7);
+			font-size: var(--uui-size-8);
 			margin: 0;
 		}
 
 		umb-icon {
-			margin: var(--uui-size-space-6);
+			margin: var(--uui-size-8) 0 var(--uui-size-10);
 			font-size: var(--uui-type-h2-size);
 			color: var(--uui-color-text-alt);
 		}

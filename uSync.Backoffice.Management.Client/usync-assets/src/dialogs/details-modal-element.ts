@@ -1,5 +1,5 @@
 import { UmbModalBaseElement } from '@umbraco-cms/backoffice/modal';
-import { customElement, html } from '@umbraco-cms/backoffice/external/lit';
+import { css, customElement, html } from '@umbraco-cms/backoffice/external/lit';
 import { uSyncDetailsModalData, uSyncDetailsModalValue } from '@jumoo/uSync';
 
 @customElement('usync-details-modal')
@@ -14,10 +14,13 @@ export class uSyncDetailsModalElement extends UmbModalBaseElement<
 	render() {
 		return html`
 			<umb-body-layout headline="Changes : ${this.data?.item.name ?? ''}">
-				<uui-box .headline=${this.localize.term('uSync_detailHeadline')}>
-					<div slot="header">
+				<uui-box style="--uui-box-default-padding: 0;">
+					<div slot="header" id="header">
+						<h3><umb-localize key="uSync_detailHeadline"></umb-localize></h3>
 						<umb-localize key="uSync_detailHeader"></umb-localize>
 					</div>
+				</uui-box>
+				<uui-box style="--uui-box-default-padding: 0;">
 					<usync-change-view .item=${this.data?.item}></usync-change-view>
 				</uui-box>
 				<div slot="actions">
@@ -29,6 +32,12 @@ export class uSyncDetailsModalElement extends UmbModalBaseElement<
 			</umb-body-layout>
 		`;
 	}
+
+	static styles = css`
+		#header h3 {
+			margin: 0;
+		}
+	`;
 }
 
 export default uSyncDetailsModalElement;
