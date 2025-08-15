@@ -1,4 +1,4 @@
-import { uSyncMenuElement } from '@jumoo/uSync';
+import { uSyncConstants, uSyncMenuElement } from '@jumoo/uSync';
 
 const sectionAlias = 'Umb.Section.Settings';
 
@@ -6,7 +6,7 @@ const menuConstants = {
 	alias: 'usync.menu',
 	name: 'uSync',
 	icon: 'icon-infinity',
-	rootElement: 'usync-root',
+	rootElement: uSyncConstants.workspace.rootElement,
 };
 
 const menu: UmbExtensionManifest = {
@@ -28,7 +28,7 @@ const menuItem: UmbExtensionManifest = {
 	meta: {
 		label: 'uSync',
 		icon: 'usync-logo',
-		entityType: 'usync-root',
+		entityType: uSyncConstants.workspace.rootElement,
 		menus: [menuConstants.alias],
 	},
 };

@@ -32,8 +32,6 @@ export class uSyncResultGroupView extends UmbLitElement {
 		if (action.change == ChangeType.NO_CHANGE || action.change == ChangeType.EXPORT)
 			return;
 
-		console.debug('Showing detail for action:', action);
-
 		this.dispatchEvent(new uSyncShowDetailEvent(action));
 	}
 
@@ -47,7 +45,10 @@ export class uSyncResultGroupView extends UmbLitElement {
 		if (changeCount === 0 && !this.showAll) return nothing;
 
 		return html`
-			<uui-box class=${classMap({ has_changes: changeCount > 0 })}>
+			<uui-box
+				class=${classMap({
+					has_changes: changeCount > 0,
+				})}>
 				<div
 					class="summary ${when(this.expanded, () => 'expanded')}"
 					@click=${() => (this.expanded = !this.expanded)}>
@@ -83,8 +84,11 @@ export class uSyncResultGroupView extends UmbLitElement {
 			const isChange =
 				result.change != ChangeType.NO_CHANGE && result.change != ChangeType.EXPORT;
 
+			const changeCount = result.details.length;
+
 			return html`
-				<uui-table-row class=${classMap({ changerow: isChange })}>
+				<uui-table-row
+					class=${classMap({ changerow: isChange, no_change: changeCount == 0 })}>
 					<uui-table-cell class="icon-cell" .noPadding=${true}>
 						<umb-icon .name=${icon}></umb-icon>
 					</uui-table-cell>

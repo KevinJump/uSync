@@ -12,7 +12,6 @@ export class uSyncDetailsModalElement extends UmbModalBaseElement<
 	}
 
 	render() {
-		console.log(this.data);
 		return html`
 			<umb-body-layout headline="Changes : ${this.data?.item.name ?? ''}">
 				<uui-box style="--uui-box-default-padding: 0;">

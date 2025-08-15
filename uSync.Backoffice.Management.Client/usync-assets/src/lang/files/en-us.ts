@@ -21,6 +21,8 @@ export default {
 		changeItem: 'Item',
 		changeDiffrence: 'Difference',
 		changeCreate: 'This item is being created',
+		noChangesImport: 'No changes where made to this item',
+		noChangesReport: 'No changes detected',
 
 		success: 'Success',
 		change: 'Change',
