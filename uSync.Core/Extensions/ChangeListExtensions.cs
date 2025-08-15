@@ -17,7 +17,7 @@ public static class ChangeListExtensions
 
     public static void AddIfUpdated<TObject>(this List<uSyncChange> changes, string name, TObject oldValue, TObject newValue, string path = "")
     {
-        if (newValue?.Equals(oldValue) is true) return;
+        if (newValue is null && oldValue is null || newValue?.Equals(oldValue) is true) return;
         AddUpdate(changes, name, oldValue, newValue, path, true);
     }
 
