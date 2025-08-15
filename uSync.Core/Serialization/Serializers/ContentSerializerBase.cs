@@ -497,6 +497,8 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         if (properties == null || !properties.HasElements)
             return Attempt.SucceedWithStatus(errors, changes); // new Exception("No Properties in the content node"));
 
+        var defaultLanguageIsoCode = await _languageService.GetDefaultIsoCodeAsync();
+
         foreach (var property in properties.Elements())
         {
             var alias = property.Name.LocalName;
@@ -508,7 +510,6 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
                 logger.LogTrace("De-serialize Property {alias} {editorAlias}", alias, current.PropertyType.PropertyEditorAlias);
 
                 var values = property.Elements("Value").ToList();
-                var defaultLanguageIsoCode = await _languageService.GetDefaultIsoCodeAsync();
 
                 foreach (var value in values)
                 {

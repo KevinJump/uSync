@@ -45,17 +45,17 @@ public class uSyncChange
             NewValue = useNew ? newValue : "New Property"
         };
 
-    public static uSyncChange Delete(string path, string name, string oldValue, bool useOld = true)
+    public static uSyncChange Delete(string path, string name, string? oldValue, bool useOld = true)
         => new()
         {
             Change = ChangeDetailType.Delete,
             Path = path,
             Name = name,
-            OldValue = useOld ? oldValue : "Missing Property",
+            OldValue = useOld ? (string.IsNullOrEmpty(oldValue) ? "(Blank)" : oldValue) : "Missing Property",
             NewValue = ""
         };
 
-    public static uSyncChange Update(string path, string name, string oldValue, string newValue, bool success)
+    public static uSyncChange Update(string path, string name, string? oldValue, string? newValue, bool success)
         => new()
         {
             Success = success,
@@ -69,7 +69,7 @@ public class uSyncChange
     public static uSyncChange Update(string path, string name, IEnumerable<string> oldValues, IEnumerable<string> newValues)
         => Update(path, name, string.Join(",", oldValues), string.Join(",", newValues));
 
-    public static uSyncChange Update<TObject>(string path, string name, TObject oldValue, TObject newValue)
+    public static uSyncChange Update<TObject>(string path, string name, TObject? oldValue, TObject? newValue)
         => Update(path, name, oldValue?.ToString() ?? string.Empty, newValue?.ToString() ?? string.Empty, true);
 
     public static uSyncChange NoChange(string path, string name)

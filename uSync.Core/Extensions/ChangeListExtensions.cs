@@ -1,6 +1,4 @@
-﻿using Org.BouncyCastle.Tls;
-
-using uSync.Core.Extensions;
+﻿using uSync.Core.Extensions;
 using uSync.Core.Models;
 
 namespace uSync.Core;
@@ -8,12 +6,11 @@ namespace uSync.Core;
 public static class ChangeListExtensions
 {
     public static void AddNew(this List<uSyncChange> changes, string name, string value, string path)
-        => AddNew(changes, name, value, path, true);
+        => changes.Add(uSyncChange.Create(path, name, value, true));
 
+    [Obsolete("Use AddNew without success parameter instead, will be removed in v18")]
     public static void AddNew(this List<uSyncChange> changes, string name, string value, string path, bool success)
-    {
-        changes.Add(uSyncChange.Create(path, name, value));
-    }
+        => AddNew(changes, name, value, path);
 
     public static void AddIfUpdated<TObject>(this List<uSyncChange> changes, string name, TObject oldValue, TObject newValue, string path = "")
     {
@@ -21,28 +18,28 @@ public static class ChangeListExtensions
         AddUpdate(changes, name, oldValue, newValue, path, true);
     }
 
-    public static void AddUpdate<TObject>(this List<uSyncChange> changes, string name, TObject oldValue, TObject newValue, string path = "")
+    public static void AddUpdate<TObject>(this List<uSyncChange> changes, string name, TObject? oldValue, TObject? newValue, string path = "")
         => AddUpdate(changes, name, oldValue, newValue, path, true);
 
-    public static void AddUpdate<TObject>(this List<uSyncChange> changes, string name, TObject oldValue, TObject newValue, string path, bool success)
+    public static void AddUpdate<TObject>(this List<uSyncChange> changes, string name, TObject? oldValue, TObject? newValue, string path, bool success)
         => AddUpdate(changes, name, oldValue?.ToString() ?? string.Empty, newValue?.ToString() ?? string.Empty, path, success);
 
-    public static void AddUpdate(this List<uSyncChange> changes, string name, string oldValue, string newValue, string path = "")
+    public static void AddUpdate(this List<uSyncChange> changes, string name, string? oldValue, string? newValue, string path = "")
         => AddUpdate(changes, name, oldValue, newValue, path, true);
 
-    public static void AddUpdate(this List<uSyncChange> changes, string name, string oldValue, string newValue, string path, bool success)
+    public static void AddUpdate(this List<uSyncChange> changes, string name, string? oldValue, string? newValue, string path, bool success)
         => changes.Add(uSyncChange.Update(path, name, oldValue, newValue, success));
 
     public static void AddWarning(this List<uSyncChange> changes, string path, string name, string warning)
         => changes.Add(uSyncChange.Warning(path, name, warning));
 
-    public static void AddUpdateJson(this List<uSyncChange> changes, string name, object oldValue, object newValue, string path = "")
+    public static void AddUpdateJson(this List<uSyncChange> changes, string name, object? oldValue, object? newValue, string path = "")
         => AddUpdateJson(changes, name, oldValue, newValue, path, true);
 
-    public static void AddUpdateJson(this List<uSyncChange> changes, string name, object oldValue, object newValue, string path, bool success)
+    public static void AddUpdateJson(this List<uSyncChange> changes, string name, object? oldValue, object? newValue, string path, bool success)
     {
-        var oldJson = oldValue.SerializeJsonString();
-        var newJson = newValue.SerializeJsonString();
+        var oldJson = oldValue?.SerializeJsonString() ?? null;
+        var newJson = newValue?.SerializeJsonString() ?? null;
 
         AddUpdate(changes, name, oldJson, newJson, path, success);
     }
