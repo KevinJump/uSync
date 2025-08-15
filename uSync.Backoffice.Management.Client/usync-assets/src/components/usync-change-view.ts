@@ -63,7 +63,7 @@ export class uSyncChangeView extends UmbElementMixin(LitElement) {
 						html`<div>
 							${(this.item?.message ?? '').length > 0
 								? this.item?.message
-								: 'Item was imported but no properties where changed '}
+								: 'Item was imported but no properties were changed '}
 						</div>`,
 				)}
 			</div>
