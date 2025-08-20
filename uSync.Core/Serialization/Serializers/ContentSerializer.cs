@@ -323,7 +323,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
 
         // if we have changed the sort order, then we return a change, else it was no change.        
         return SyncAttempt<IContent>.Succeed(item.Name ?? item.Id.ToString(), item,
-            details.Count == 0 ? ChangeType.NoChange : ChangeType.Import);
+            details.Count == 0 ? ChangeType.NoChange : ChangeType.Import, details);
     }
 
     private Task<List<uSyncChange>> DeserializeSchedulesAsync(IContent item, XElement node, SyncSerializerOptions options)

@@ -69,6 +69,11 @@ public struct SyncAttempt<TObject>
     public static SyncAttempt<TObject> Succeed(string name, ChangeType change, string message)
         => new(true, name, default, typeof(TObject).Name, change, message, null, false);
 
+    // XElement ones, pass type
+    public static SyncAttempt<TObject> Succeed(string name, TObject item, Type itemType, ChangeType change)
+        => new(true, name, item, itemType.Name, change, string.Empty, null, false);
+
+    [Obsolete("Pass details (even if empty) for consistency will be removed in v18")]
     public static SyncAttempt<TObject> Succeed(string name, TObject item, ChangeType change)
         => new(true, name, item, typeof(TObject).Name, change, string.Empty, null, false);
 
@@ -100,10 +105,6 @@ public struct SyncAttempt<TObject>
 
     public static SyncAttempt<TObject> Fail(string name, ChangeType change, string message)
         => new(false, name, default, typeof(TObject).Name, change, message, null, false);
-
-    // XElement ones, pass type
-    public static SyncAttempt<TObject> Succeed(string name, TObject item, Type itemType, ChangeType change)
-        => new(true, name, item, itemType.Name, change, string.Empty, null, false);
 
     public static SyncAttempt<TObject> SucceedIf(bool condition, string name, TObject? item, Type itemType, ChangeType change)
         => new(condition, name, item, itemType.Name, change, string.Empty, null, false);
