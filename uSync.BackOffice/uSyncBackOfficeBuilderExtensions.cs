@@ -258,7 +258,8 @@ public static class uSyncBackOfficeBuilderExtensions
         options.AddPolicy(SyncAuthorizationPolicies.TreeAccessuSync, policy =>
         {
             policy.AuthenticationSchemes.Add(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme);
-            policy.Requirements.Add(new uSyncApplicationRequirement(Constants.Applications.Settings));                
+            policy.Requirements.Add(new uSyncApplicationRequirement(
+                Constants.Applications.Settings, uSyncConstants.uSyncSection));                
         });
     }
 }

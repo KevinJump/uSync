@@ -11,6 +11,7 @@ public static partial class uSyncConstants
     ///  folder name used when we merge two or more items together.
     /// </summary>
     public const string MergedFolderName = "Combined";
+    public const string uSyncSection = "usync.section";
 
     /// <summary>
     /// Information about the package name/files

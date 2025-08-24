@@ -2,6 +2,17 @@ import { uSyncConstants, uSyncMenuElement } from '@jumoo/uSync';
 
 const sectionAlias = 'Umb.Section.Settings';
 
+const uSyncSection: UmbExtensionManifest = {
+	type: 'section',
+	alias: 'usync.section',
+	name: 'uSync',
+	weight: 350,
+	meta: {
+		label: '#uSync_section',
+		pathname: 'sync',
+	},
+};
+
 const menuConstants = {
 	alias: 'usync.menu',
 	name: 'uSync',
@@ -46,7 +57,7 @@ const menuSidebarApp: UmbExtensionManifest = {
 	conditions: [
 		{
 			alias: 'Umb.Condition.SectionAlias',
-			match: sectionAlias,
+			oneOf: [sectionAlias, uSyncSection.alias],
 		},
 	],
 };
@@ -66,6 +77,7 @@ const menuSidebarApp: UmbExtensionManifest = {
 // }
 
 export const manifests = [
+	uSyncSection,
 	menu,
 	menuSidebarApp,
 	menuItem,
