@@ -1,10 +1,22 @@
 import { uSyncConstants, uSyncMenuElement } from '@jumoo/uSync';
+import { USYNC_CONDITION_NEW_SECTION } from '../conditions/constants';
+import { USYNC_SECTION_ALIAS } from './constants';
 
 const sectionAlias = 'Umb.Section.Settings';
 
+/*
+ * config slight of hand: This manifest is added in c#
+ * via a manaifestreader, that only adds it if a setting
+ * is true in the appsettings.json file.
+ *
+ * we can then use conditional code that will only allow
+ * the tree to show in settings when this section doesn't
+ * exist globally.
+ */
+/*
 const uSyncSection: UmbExtensionManifest = {
 	type: 'section',
-	alias: 'usync.section',
+	alias: USYNC_SECTION_ALIAS,
 	name: 'uSync',
 	weight: 350,
 	meta: {
@@ -12,6 +24,7 @@ const uSyncSection: UmbExtensionManifest = {
 		pathname: 'sync',
 	},
 };
+*/
 
 const menuConstants = {
 	alias: 'usync.menu',
@@ -57,7 +70,10 @@ const menuSidebarApp: UmbExtensionManifest = {
 	conditions: [
 		{
 			alias: 'Umb.Condition.SectionAlias',
-			oneOf: [sectionAlias, uSyncSection.alias],
+			oneOf: [sectionAlias, USYNC_SECTION_ALIAS],
+		},
+		{
+			alias: USYNC_CONDITION_NEW_SECTION,
 		},
 	],
 };
@@ -77,7 +93,7 @@ const menuSidebarApp: UmbExtensionManifest = {
 // }
 
 export const manifests = [
-	uSyncSection,
+	// uSyncSection,
 	menu,
 	menuSidebarApp,
 	menuItem,

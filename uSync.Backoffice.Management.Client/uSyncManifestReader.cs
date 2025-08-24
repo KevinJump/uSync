@@ -8,15 +8,55 @@ using Umbraco.Cms.Core.Manifest;
 using Umbraco.Cms.Infrastructure.Manifest;
 using Umbraco.Extensions;
 
+using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Extensions;
 
 namespace uSync.Backoffice.Management.Client;
 
+[ComposeAfter(typeof(BackOffice.uSyncBackOfficeComposer))]
 public class uSyncManifestComposer : IComposer
 {
     public void Compose(IUmbracoBuilder builder)
     {
         builder.Services.AddSingleton<IPackageManifestReader, uSyncManifestReader>();
+        builder.Services.AddSingleton<IPackageManifestReader, SyncSectionManifestReader>();
+    }
+}
+
+internal sealed class SyncSectionManifestReader : IPackageManifestReader
+{
+    private readonly ISyncConfigService _configService;
+
+    public SyncSectionManifestReader(ISyncConfigService configService)
+    {
+        _configService = configService;
+    }
+
+    public Task<IEnumerable<PackageManifest>> ReadPackageManifestsAsync()
+    {
+        if (_configService.Settings.MoveToSection is false) 
+            return Task.FromResult(Enumerable.Empty<PackageManifest>());
+
+        List<PackageManifest> manifest = [
+            new PackageManifest
+            {
+                Id = "uSync.Section",
+                Name = "uSync Section",
+                AllowTelemetry = false,
+                Version = typeof(SyncSectionManifestReader).Assembly.GetName()?.Version?.ToString(3) ?? "15.0.0",
+                Extensions = [ new JsonObject {
+                    ["type"] = "section",
+                    ["name"] = "uSync Section",
+                    ["alias"] = "usync.section",
+                    ["weight"] = 350,
+                    ["meta"] = new JsonObject {
+                        ["label"] = "#uSync_section",
+                        ["pathname"] = "sync"
+                    }
+                }]
+            }
+        ];
+        return Task.FromResult(manifest.AsEnumerable());
     }
 }
 
