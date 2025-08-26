@@ -230,4 +230,12 @@ public class uSyncSettings
     /// </remarks>
     [DefaultValue(false)]
     public bool BackgroundNotifications { get; set; } = false;
+
+
+    /// <summary>
+    ///  Move the uSync tree to it's own section in the back office. 
+    ///  (requires a restart to take effect).
+    /// </summary>
+    [DefaultValue(false)]
+    public bool MoveToSection { get; set; } = false;
 }
