@@ -1,6 +1,6 @@
 export default {
 	uSync: {
-		section: 'Syncronisation',
+		section: 'Synchronisation',
 		name: 'uSync',
 		banner: 'uSync all the things',
 
