@@ -13,7 +13,7 @@ public static partial class uSyncConstants
     public const string MergedFolderName = "Combined";
 
     /// <summary>
-    ///  alias for the custon 'usync' section that can be added in the backoffice.
+    ///  alias for the custom 'usync' section that can be added in the backoffice.
     /// </summary>
     public const string uSyncSection = "usync.section";
 
