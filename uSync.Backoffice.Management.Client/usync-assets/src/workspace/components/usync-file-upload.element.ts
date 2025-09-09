@@ -14,11 +14,15 @@ import {
 	UmbTemporaryFileModel,
 } from '@umbraco-cms/backoffice/temporary-file';
 import { uSyncFilePickerChangeEvent, uSyncFilePickerUploadedEvent } from './events';
+import { UUIButtonState } from '@umbraco-cms/backoffice/external/uui';
 
 @customElement('usync-file-upload')
 export class uSyncFileUploadElement extends UmbLitElement {
 	#fileManager: UmbTemporaryFileManager;
 	#repository: uSyncActionRepository;
+
+	@state()
+	buttonState?: UUIButtonState;
 
 	@state()
 	selected: File | null | undefined;
@@ -36,6 +40,7 @@ export class uSyncFileUploadElement extends UmbLitElement {
 			value.forEach((file) => {
 				if (file.status === TemporaryFileStatus.SUCCESS) {
 					this.#uploadComplete(file.temporaryUnique);
+					this.buttonState = 'success';
 				}
 			});
 		});
@@ -43,6 +48,8 @@ export class uSyncFileUploadElement extends UmbLitElement {
 
 	#onUpload() {
 		if (!this.selected) return;
+
+		this.buttonState = 'waiting';
 
 		const upload: UmbTemporaryFileModel = {
 			temporaryUnique: UmbId.new(),
@@ -93,7 +100,8 @@ export class uSyncFileUploadElement extends UmbLitElement {
 			type="button"
 			look="primary"
 			@click="${this.#onUpload}"
-			label="Upload"></uui-button>`;
+			label="Upload"
+			.state=${this.buttonState}></uui-button>`;
 	}
 
 	static styles = css`

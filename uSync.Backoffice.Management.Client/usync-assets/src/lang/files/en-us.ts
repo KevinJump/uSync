@@ -25,6 +25,8 @@ export default {
 		noChangesImport: 'No changes where made to this item',
 		noChangesReport: 'No changes detected',
 
+		importHeader: 'Import from file',
+
 		success: 'Success',
 		change: 'Change',
 		changeType: 'Type',
