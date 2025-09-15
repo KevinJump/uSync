@@ -2,6 +2,8 @@
 using System.Text.Json.Serialization;
 using System.Xml.Linq;
 
+using Umbraco.Cms.Core.Models.Blocks;
+
 namespace uSync.Core.Json;
 
 public class JsonXElementConverter : JsonConverter<XElement>
@@ -16,3 +18,4 @@ public class JsonXElementConverter : JsonConverter<XElement>
         writer.WriteStringValue(value.ToString());
     }
 }
+
