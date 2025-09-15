@@ -2,7 +2,6 @@
 using System.Text.Json.Serialization;
 
 using Umbraco.Cms.Core.Models.Blocks;
-using Umbraco.Extensions;
 
 namespace uSync.Core.Json;
 
