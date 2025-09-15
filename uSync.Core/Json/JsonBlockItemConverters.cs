@@ -60,7 +60,7 @@ public abstract class JsonBlockItemConverterBase<T> : JsonConverter<T>
         // we could just not write out the obsolete properties, but they will appear as null it 
         // lots of people's existing exports , so we can write them out as null to keep things consistent.
         writer.WriteStartObject();
-        writer.WriteString("contentKey", value.SettingsKey.ToString());
+        writer.WriteString("contentKey", value.ContentKey.ToString());
         writer.WriteNull("contentUdi");
 
         if (value.SettingsKey.HasValue && value.SettingsKey != Guid.Empty)
