@@ -31,6 +31,8 @@ public static class JsonTextExtensions
             new JsonUdiRangeConverter(),
             new JsonBooleanConverter(),
             new JsonXElementConverter(),
+            new JsonBlockListLayoutItemConverter(),
+            new JsonBlockGridLayoutItemConverter()
         }
     };
 
