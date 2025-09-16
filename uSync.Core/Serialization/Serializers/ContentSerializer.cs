@@ -175,19 +175,6 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
 
         details.AddRange(await DeserializeBaseAsync(item, node, options));
 
-        var infoNode = node.Element(uSyncConstants.Xml.Info);
-
-        if (infoNode is not null)
-        {
-            var trashed = infoNode.Element("Trashed").ValueOrDefault(false);
-            var restoreParent = infoNode.Element("Trashed")?.Attribute("Parent").ValueOrDefault(Guid.Empty) ?? Guid.Empty;
-            details.AddNotNull(HandleTrashedState(item, trashed, restoreParent));
-        }
-
-        // cultures...
-
-
-
         details.AddNotNull(await DeserializeTemplate(item, node));
 
         var propertiesAttempt = await DeserializePropertiesAsync(item, node, options);
@@ -303,11 +290,15 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
     /// </remarks>
     public override async Task<SyncAttempt<IContent>> DeserializeSecondPassAsync(IContent item, XElement node, SyncSerializerOptions options)
     {
+        var details = new List<uSyncChange>();
+
+        // move trashed state to second pass, as the item needs an Id for the relation to work. 
+        details.AddNotNull(await DeserializeTrashed(node, item, Constants.Conventions.RelationTypes.RelateParentDocumentOnDeleteAlias));
+
         // move sort to second pass, as if we attempt to set this 
         // on a brand new item, it doesn't get set. 
         // doing it on second pass ensures it gets set on the item
         // after it has been saved by umbraco. 
-        var details = new List<uSyncChange>();
         if (!options.GetSetting<bool>(
             uSyncConstants.DefaultSettings.IgnoreSortOrder,
             uSyncConstants.DefaultSettings.IgnoreSortOrder_Default))
@@ -417,41 +408,12 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
         return null;
     }
 
+    // trashed helpers. 
+    protected override void MoveToRecycleBin(IContent item) => contentService.MoveToRecycleBin(item);
+    protected override void SetTrashed(IContent item) => ((ContentBase)item).Trashed = true;
+    protected override void MoveItem(IContent item, int parentId) => contentService.Move(item, parentId);
+    protected override IContent? GetByKey(Guid id) => contentService.GetById(id);
 
-    protected override uSyncChange? HandleTrashedState(IContent item, bool trashed, Guid restoreParentKey)
-    {
-        if (!trashed && item.Trashed)
-        {
-            // if the item is trashed, then the change of it's parent 
-            // should restore it (as long as we do a move!)
-
-
-            var restoreParentId = GetRelationParentId(item, restoreParentKey, Constants.Conventions.RelationTypes.RelateParentDocumentOnDeleteAlias);
-            contentService.Move(item, restoreParentId);
-
-            // clean out any relations for this item (some versions of Umbraco don't do this on a Move)
-            CleanRelations(item, Constants.Conventions.RelationTypes.RelateParentDocumentOnDeleteAlias);
-
-            return uSyncChange.Update("Restored", item.Name ?? item.Id.ToString(), "Recycle Bin", restoreParentKey.ToString());
-
-        }
-        else if (trashed && !item.Trashed)
-        {
-            // not already in the recycle bin?
-            if (item.ParentId > Constants.System.RecycleBinContent)
-            {
-                // clean any relations that may be there (stops an error)
-                CleanRelations(item, Constants.Conventions.RelationTypes.RelateParentDocumentOnDeleteAlias);
-
-                // move to the recycle bin    
-                contentService.MoveToRecycleBin(item);
-            }
-
-            return uSyncChange.Update("Moved to Bin", item.Name ?? item.Id.ToString(), "", "Recycle Bin");
-        }
-
-        return null;
-    }
 
     protected virtual Attempt<string?> DoSaveOrPublish(IContent item, XElement node, SyncSerializerOptions options)
     {

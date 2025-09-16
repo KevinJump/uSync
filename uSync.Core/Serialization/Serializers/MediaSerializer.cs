@@ -59,18 +59,12 @@ public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncSerializer<IM
 
         details.AddRange(await DeserializeBaseAsync(item, node, options));
 
-        var info = node.Element(uSyncConstants.Xml.Info);
-        if (info is not null)
-        {
-            var trashed = info.Element("Trashed").ValueOrDefault(false);
-            var restoreParent = info.Element("Trashed")?.Attribute("Parent").ValueOrDefault(Guid.Empty) ?? Guid.Empty;
-            details.AddNotNull(HandleTrashedState(item, trashed, restoreParent));
-        }
-
         var propertyAttempt = await DeserializePropertiesAsync(item, node, options);
         if (!propertyAttempt.Success)
             return SyncAttempt<IMedia>.Fail(item.Name ?? item.Id.ToString(), item, ChangeType.Fail, "Failed to save properties",
                 propertyAttempt.Exception ?? new Exception($"Error with properties {item.Id}"));
+
+        var info = node.Element(uSyncConstants.Xml.Info);
 
         if (!options.GetSetting<bool>(uSyncConstants.DefaultSettings.IgnoreSortOrder, uSyncConstants.DefaultSettings.IgnoreSortOrder_Default))
         {
@@ -103,32 +97,19 @@ public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncSerializer<IM
         return SyncAttempt<IMedia>.Succeed(item.Name ?? item.Id.ToString(), item, ChangeType.Import, "", true, propertyAttempt.Result);
     }
 
-    protected override uSyncChange? HandleTrashedState(IMedia item, bool trashed, Guid restoreParentKey)
+    public override async Task<SyncAttempt<IMedia>> DeserializeSecondPassAsync(IMedia item, XElement node, SyncSerializerOptions options)
     {
-        if (!trashed && item.Trashed)
-        {
-            // if the item is trashed, then moving it back to the parent value 
-            // restores it.
+        var details = new List<uSyncChange>();
+        details.AddNotNull(await DeserializeTrashed(node, item, Constants.Conventions.RelationTypes.RelateParentMediaFolderOnDeleteAlias));
 
-            var restoreParentId = GetRelationParentId(item, restoreParentKey, Constants.Conventions.RelationTypes.RelateParentMediaFolderOnDeleteAlias);
-            _mediaService.Move(item, restoreParentId);
-
-            CleanRelations(item, Constants.Conventions.RelationTypes.RelateParentMediaFolderOnDeleteAlias);
-
-            return uSyncChange.Update("Restored", item.Name ?? item.Id.ToString(), "Recycle Bin", item.ParentId.ToString());
-        }
-        else if (trashed && !item.Trashed)
-        {
-            // clean any rouge relations 
-            CleanRelations(item, Constants.Conventions.RelationTypes.RelateParentMediaFolderOnDeleteAlias);
-
-            // move to the recycle bin
-            _mediaService.MoveToRecycleBin(item);
-            return uSyncChange.Update("Moved to Bin", item.Name ?? item.Id.ToString(), "", "Recycle Bin");
-        }
-
-        return null;
+        return SyncAttempt<IMedia>.Succeed(item.Name ?? item.Id.ToString(), item,
+            details.Count == 0 ? ChangeType.NoChange : ChangeType.Import, details);
     }
+
+    protected override void MoveToRecycleBin(IMedia item) => _mediaService.MoveToRecycleBin(item);
+    protected override void SetTrashed(IMedia item) => ((ContentBase)item).Trashed = true;
+    protected override void MoveItem(IMedia item, int parentId) => _mediaService.Move(item, parentId);
+    protected override IMedia? GetByKey(Guid id) => _mediaService.GetById(id);
 
     protected override async Task<SyncAttempt<XElement>> SerializeCoreAsync(IMedia item, SyncSerializerOptions options)
     {
