@@ -649,10 +649,10 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         return null;
     }
 
-    protected abstract void MoveToRecycleBin(TObject item);
-    protected abstract void SetTrashed(TObject item);
-    protected abstract void MoveItem(TObject item, int parentId);
-    protected abstract TObject? GetByKey(Guid id);
+    protected virtual void MoveToRecycleBin(TObject item) { }
+    protected virtual void SetTrashed(TObject item) { }
+    protected virtual void MoveItem(TObject item, int parentId) { }
+    protected virtual TObject? GetByKey(Guid id) => default;
 
     protected async Task<uSyncChange?> DeserializeTrashed(XElement node, TObject item, string relationAlias)
     {
