@@ -1075,7 +1075,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
     }
 
     /// <summary>
-    ///  a relation for the given item, if the relation already exists, its not added again.
+    /// Adds a relation for the given item. If the relation already exists, it is not added again.
     /// </summary>
     private void AddRelation(string relationAlias, Guid parentKey, int childId)
     {
