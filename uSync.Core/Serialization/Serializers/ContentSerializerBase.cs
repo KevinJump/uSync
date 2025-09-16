@@ -1,5 +1,3 @@
-﻿using Lucene.Net.Queries.Function.ValueSources;
-
 using Microsoft.Extensions.Logging;
 
 using System.Globalization;
