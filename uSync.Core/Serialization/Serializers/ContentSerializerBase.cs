@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 
 using System.Globalization;
 using System.Text.RegularExpressions;
@@ -649,8 +649,68 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         return null;
     }
 
+    protected virtual void MoveToRecycleBin(TObject item) { }
+    protected virtual void SetTrashed(TObject item) { }
+    protected virtual void MoveItem(TObject item, int parentId) { }
+    protected virtual TObject? GetByKey(Guid id) => default;
+
+    protected async Task<uSyncChange?> DeserializeTrashed(XElement node, TObject item, string relationAlias)
+    {
+        var info = node.Element(uSyncConstants.Xml.Info);
+        if (info is null) return null;
+
+        var trashed = info.Element("Trashed").ValueOrDefault(false);
+        var restoreParent = info.Element("Trashed")?.Attribute("Parent").ValueOrDefault(Guid.Empty) ?? Guid.Empty;
+        return await HandleTrashedState(item, trashed, restoreParent, relationAlias);
+    }
+
+    [Obsolete("Use HandleTrashedState with relationAlias, will be removed in v18")]
     protected virtual uSyncChange? HandleTrashedState(TObject item, bool trashed, Guid restoreParent)
         => uSyncChange.NoChange($"Member/{item.Name}", item.Name ?? item.Id.ToString());
+
+    protected virtual Task<uSyncChange?> HandleTrashedState(TObject item, bool trashed, Guid restoreParent, string relationAlias)
+    {
+        if (!trashed && item.Trashed)
+        {
+            // if the item is trashed, then the change of it's parent 
+            // should restore it (as long as we do a move!)
+
+            var restoreParentId = GetRelationParentId(item, restoreParent, relationAlias);
+            MoveItem(item, restoreParentId);
+
+            // clean out any relations for this item (some versions of Umbraco don't do this on a Move)
+            CleanRelations(item, relationAlias);
+
+            return Task.FromResult<uSyncChange?>(uSyncChange.Update("Restored", item.Name ?? item.Id.ToString(), "Recycle Bin", restoreParent.ToString()));
+
+        }
+        else if (trashed && !item.Trashed)
+        {
+            // not already in the recycle bin?
+            if (item.ParentId > Constants.System.RecycleBinContent)
+            {
+                // clean any relations that may be there (stops an error)
+                CleanRelations(item, relationAlias);
+
+                // move to the recycle bin    
+                MoveToRecycleBin(item);
+            }
+            else
+            {
+                // on first import the item might be in the recycle bin, but not marked as trash.
+                // but one does not simple set 'trashed' on a content item.
+                SetTrashed(item);
+
+                AddRelation(relationAlias, restoreParent, item.Id);
+            }
+
+            return Task.FromResult<uSyncChange?>(uSyncChange.Update("Moved to Bin", item.Name ?? item.Id.ToString(), "", "Recycle Bin"));
+        }
+
+        return Task.FromResult<uSyncChange?>(null);
+
+    }
+
 
     protected async Task<string> GetExportValueAsync(object? value, IPropertyType propertyType, string culture, string segment)
     {
@@ -1012,7 +1072,19 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         {
             logger.LogWarning(exception, "Error cleaning up relations: {id}", item.Id);
         }
+    }
 
+    /// <summary>
+    /// Adds a relation for the given item. If the relation already exists, it is not added again.
+    /// </summary>
+    private void AddRelation(string relationAlias, Guid parentKey, int childId)
+    {
+        var existing = relationService.GetByChildId(childId, relationAlias);
+        if (existing.Any()) return;
+
+        var parent = GetByKey(parentKey);
+        if (parent != null && childId > 0)
+            relationService.Relate(parent.Id, childId, relationAlias);
     }
 
     protected int GetRelationParentId(TObject item, Guid restoreParentKey, string relationType)
@@ -1041,8 +1113,8 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
     private List<string> GetExcludedProperties(SyncSerializerOptions options)
     {
         List<string> exclude = [.. dontSerialize];
-        
-        var excludeOptions = options.GetSetting<string>(uSyncConstants.DefaultSettings.DoNotSerialize, 
+
+        var excludeOptions = options.GetSetting<string>(uSyncConstants.DefaultSettings.DoNotSerialize,
             uSyncConstants.DefaultSettings.DoNotSerialize_Default);
 
         if (!string.IsNullOrWhiteSpace(excludeOptions))
@@ -1065,7 +1137,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         }
         catch (ArgumentException ex)
         {
-            logger.LogDebug("Unable to parse pattern '{pattern}' from '{settingsKey}' as Regex. {error}. Pattern will not be considered.", pattern, 
+            logger.LogDebug("Unable to parse pattern '{pattern}' from '{settingsKey}' as Regex. {error}. Pattern will not be considered.", pattern,
                 uSyncConstants.DefaultSettings.DoNotSerializePattern, ex.Message);
             return null;
         }
