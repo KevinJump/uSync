@@ -24,7 +24,7 @@ namespace uSync.BackOffice
         {
             FileName = filename;
             Node = node;
-            Key = $"{node.Name.LocalName}_{node.GetKey()}".ToGuid();
+            Key = node.GetKey();
             Alias = node.GetAlias();
         }
 
