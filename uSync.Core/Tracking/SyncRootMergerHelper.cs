@@ -132,7 +132,7 @@ public class SyncRootMergerHelper
             }
         }
 
-        return (source, target);
+        return (XElement.Parse(source.ToString()), target);
     }
 
     private static XElement? GetSingleChange(TrackingItem item, XElement source, XElement target)
@@ -191,8 +191,8 @@ public class SyncRootMergerHelper
         if (targetCollection == null || sourceCollection == null)
             return (sourceCollection, targetCollection);
 
-        var differenceCollection = XElement.Parse(targetCollection.ToString());
-        var combinedCollection = XElement.Parse(sourceCollection.ToString());
+        var differenceCollection = XElement.Parse(targetCollection.ToString(), LoadOptions.PreserveWhitespace);
+        var combinedCollection = XElement.Parse(sourceCollection.ToString(), LoadOptions.PreserveWhitespace);
 
         if (item.Keys is null) return (differenceCollection, combinedCollection);
 
