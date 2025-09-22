@@ -235,8 +235,6 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
 
     private XElement SerializeConfiguration(IDataType item)
     {
-        var serializer = _configurationSerializers.GetSerializer(item.EditorAlias);
-
         var configurationObject = TryGetConfigurationObject(item);
 
         // merge the configurationData and configurationObject into one dictionary
@@ -245,12 +243,18 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
             ? item.ConfigurationData.MergeIgnoreDuplicates(objectDictionary)
             : item.ConfigurationData;
 
-        var exportConfig = serializer == null ? merged : serializer.GetConfigurationExport(merged);
+        var serializers = _configurationSerializers.GetSerializers(item.EditorAlias);
+        foreach(var serializer in serializers)
+        {
+            logger.LogDebug("Running Configuration Serializer : {name} for {type}", serializer.Name, item.EditorAlias);
+            merged = serializer.GetConfigurationExport(merged);
+        }
 
-        var json = exportConfig
+        var json = merged
             .OrderBy(x => x.Key)
             .ToDictionary()
             .SerializeJsonString() ?? string.Empty;
+
         return new XElement("Config", new XCData(json));
     }
 
