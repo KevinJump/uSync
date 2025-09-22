@@ -30,7 +30,7 @@ namespace uSync.Core.Serialization.Serializers
         private readonly PropertyEditorCollection _propertyEditors;
         private readonly IConfigurationEditorJsonSerializer _jsonSerializer;
 
-        private readonly JsonSerializerSettings _jsonSettings; 
+        private readonly JsonSerializerSettings _jsonSettings;
 
         public DataTypeSerializer(IEntityService entityService, ILogger<DataTypeSerializer> logger,
             IDataTypeService dataTypeService,
@@ -80,7 +80,7 @@ namespace uSync.Core.Serialization.Serializers
         /// </remarks>
         protected override SyncAttempt<IDataType> ProcessDelete(Guid key, string alias, SerializerFlags flags)
         {
-            if (flags.HasFlag(SerializerFlags.LastPass)) 
+            if (flags.HasFlag(SerializerFlags.LastPass))
             {
                 logger.LogDebug("Processing deletes as part of the last pass)");
                 return base.ProcessDelete(key, alias, flags);
@@ -142,7 +142,7 @@ namespace uSync.Core.Serialization.Serializers
             }
 
             // config 
-            if (ShouldDeserilizeConfig(name, editorAlias, options))
+            if (ShouldDeserializeConfig(name, editorAlias, options))
             {
                 details.AddRange(DeserializeConfiguration(item, node));
             }
@@ -172,7 +172,7 @@ namespace uSync.Core.Serialization.Serializers
         }
 
 
-        private IEnumerable<uSyncChange> DeserializeConfiguration(IDataType item, XElement node)
+        private List<uSyncChange> DeserializeConfiguration(IDataType item, XElement node)
         {
             var config = node.Element("Config").ValueOrDefault(string.Empty);
 
@@ -180,31 +180,17 @@ namespace uSync.Core.Serialization.Serializers
             {
                 var changes = new List<uSyncChange>();
 
-                var serializer = this._configurationSerializers.GetSerializer(item.EditorAlias);
-                if (serializer == null)
+                var configObject = _configurationSerializers.DeserializeConfig(item.EditorAlias, config, item.Configuration.GetType());
+                if (!IsJsonEqual(item.Configuration, configObject, _jsonSettings))
                 {
-                    var configObject = JsonConvert.DeserializeObject(config, item.Configuration.GetType());
-                    if (!IsJsonEqual(item.Configuration, configObject, _jsonSettings))
-                    {
-                        changes.AddUpdateJson("Config", item.Configuration, configObject, "Configuration");
-                        item.Configuration = configObject;
-                    }
-                }
-                else
-                {
-                    logger.LogTrace("Deserializing Config via {0}", serializer.Name);
-                    var configObject = serializer.DeserializeConfig(config, item.Configuration.GetType());
-                    if (!IsJsonEqual(item.Configuration, configObject, _jsonSettings))
-                    {
-                        changes.AddUpdateJson("Config", item.Configuration, configObject, "Configuration");
-                        item.Configuration = configObject;
-                    }
+                    changes.AddUpdateJson("Config", item.Configuration, configObject, "Configuration");
+                    item.Configuration = configObject;
                 }
 
                 return changes;
             }
 
-            return Enumerable.Empty<uSyncChange>();
+            return [];
 
         }
 
@@ -212,7 +198,7 @@ namespace uSync.Core.Serialization.Serializers
         ///  tells us if the json for an object is equal, helps when the config objects don't have their
         ///  own Equals functions
         /// </summary>
-        private bool IsJsonEqual(object currentObject, object newObject, JsonSerializerSettings jsonSettings)
+        private static bool IsJsonEqual(object currentObject, object newObject, JsonSerializerSettings jsonSettings)
         {
             var currentString = JsonConvert.SerializeObject(currentObject, Formatting.None, jsonSettings);
             var newString = JsonConvert.SerializeObject(newObject, Formatting.None, jsonSettings);
@@ -254,25 +240,10 @@ namespace uSync.Core.Serialization.Serializers
 
         private XElement SerializeConfiguration(IDataType item)
         {
-            if (item.Configuration != null)
-            {
-                var serializer = this._configurationSerializers.GetSerializer(item.EditorAlias);
+            if (item.Configuration is null) return null;
 
-                string config;
-                if (serializer == null)
-                {
-                    config = JsonConvert.SerializeObject(item.Configuration, Formatting.Indented, _jsonSettings);
-                }
-                else
-                {
-                    logger.LogDebug("Serializing Config via {0}", serializer.Name);
-                    config = serializer.SerializeConfig(item.Configuration);
-                }
-
-                return new XElement("Config", new XCData(config ?? string.Empty));
-            }
-
-            return null;
+            var config = _configurationSerializers.SerializeConfig(item.EditorAlias, item.Configuration, _jsonSettings);
+            return new XElement("Config", new XCData(config ?? string.Empty));
         }
 
 
@@ -356,10 +327,10 @@ namespace uSync.Core.Serialization.Serializers
         ///     <Add Key="NoConfigNames" Value="Approved Colour,My Colour Picker" />
         ///   </code>
         /// </remarks>
-        private bool ShouldDeserilizeConfig(string itemName, string editorAlias, SyncSerializerOptions options)
+        private static bool ShouldDeserializeConfig(string itemName, string editorAlias, SyncSerializerOptions options)
         {
             var noConfigEditors = options.GetSetting(
-                uSyncConstants.DefaultSettings.NoConfigEditors, 
+                uSyncConstants.DefaultSettings.NoConfigEditors,
                 uSyncConstants.DefaultSettings.NoConfigEditors_Default);
 
             if (!string.IsNullOrWhiteSpace(noConfigEditors) && noConfigEditors.InvariantContains(editorAlias))
