@@ -12,10 +12,10 @@ namespace uSync8.Community.DataTypeSerializers.CoreTypes
 {
     public class MNTPickerConfigSerializer : SyncDataTypeSerializerBase, IConfigurationSerializer
     {
-        private readonly ILogger<MediaPicker3ConfigSerializer> _logger;
+        private readonly ILogger<MNTPickerConfigSerializer> _logger;
         public MNTPickerConfigSerializer(
             IEntityService entityService,
-            ILogger<MediaPicker3ConfigSerializer> logger)
+            ILogger<MNTPickerConfigSerializer> logger)
             : base(entityService)
         {
             _logger = logger;
