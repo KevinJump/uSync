@@ -29,26 +29,26 @@ namespace uSync8.Community.DataTypeSerializers.CoreTypes
 
         public override string SerializeConfig(object configuration)
         {
-
-            if (configuration is ContentPickerConfiguration pickerConfig)
+            if (configuration is not ContentPickerConfiguration pickerConfig)
             {
-                var contentPickerConfig = new MappedPathConfigBase<ContentPickerConfiguration>()
-                {
-                    Config = new ContentPickerConfiguration()
-                    {
-                        IgnoreUserStartNodes = pickerConfig.IgnoreUserStartNodes,
-                        StartNodeId = null,
-                        ShowOpenButton = pickerConfig.ShowOpenButton
-                    }
-                };
-
-                if (pickerConfig.StartNodeId != null)
-                    contentPickerConfig.MappedPath = UdiToEntityPath(pickerConfig.StartNodeId);
-
-                return base.SerializeConfig(contentPickerConfig);
+                _logger.LogWarning("ContentPickerConfigSerializer called for non ContentPickerConfiguration type: {configType}", configuration.GetType());
+                return base.SerializeConfig(configuration);
             }
 
-            return base.SerializeConfig(configuration);
+            var contentPickerConfig = new MappedPathConfigBase<ContentPickerConfiguration>()
+            {
+                Config = new ContentPickerConfiguration()
+                {
+                    IgnoreUserStartNodes = pickerConfig.IgnoreUserStartNodes,
+                    StartNodeId = null,
+                    ShowOpenButton = pickerConfig.ShowOpenButton
+                }
+            };
+
+            if (pickerConfig.StartNodeId != null)
+                contentPickerConfig.MappedPath = UdiToEntityPath(pickerConfig.StartNodeId);
+
+            return base.SerializeConfig(contentPickerConfig);
         }
 
 
