@@ -45,7 +45,7 @@ namespace uSync8.Community.DataTypeSerializers.CoreTypes
                 }
             };
 
-            if (pickerConfig.StartNodeId != null)
+            if (pickerConfig.StartNodeId is not null)
                 contentPickerConfig.MappedPath = UdiToEntityPath(pickerConfig.StartNodeId);
 
             return base.SerializeConfig(contentPickerConfig);
@@ -61,9 +61,9 @@ namespace uSync8.Community.DataTypeSerializers.CoreTypes
             }
 
             var mappedConfig = JsonConvert.DeserializeObject<MappedPathConfigBase<ContentPickerConfiguration>>(config);
-            if (mappedConfig is null || mappedConfig.Config is null)
+            if (mappedConfig?.Config is null)
             {
-                _logger.LogWarning("ContentPickerConfigSerializer failed to deserialize config: {config}", config);
+                _logger.LogWarning("ContentPickerConfigSerializer no config found {config}", config);
                 return base.DeserializeConfig(config, configType);
             }
 

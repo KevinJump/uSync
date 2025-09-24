@@ -1,17 +1,20 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
 
 using Newtonsoft.Json;
 
-using Umbraco.Cms.Core.Services;
+using System;
+
 using Umbraco.Cms.Core.PropertyEditors;
+using Umbraco.Cms.Core.Services;
 
 using uSync.Core.DataTypes;
-using Microsoft.Extensions.Logging;
 
 namespace uSync8.Community.DataTypeSerializers.CoreTypes
 {
     public class MNTPickerConfigSerializer : SyncDataTypeSerializerBase, IConfigurationSerializer
     {
+        private const string _keyOriginAlias = "ByKey";
+
         private readonly ILogger<MNTPickerConfigSerializer> _logger;
         public MNTPickerConfigSerializer(
             IEntityService entityService,
@@ -35,7 +38,6 @@ namespace uSync8.Community.DataTypeSerializers.CoreTypes
 
             var MNTPMappedConfig = new MappedPathConfigBase<MultiNodePickerConfiguration>()
             {
-
                 Config = new MultiNodePickerConfiguration()
                 {
                     IgnoreUserStartNodes = pickerConfig.IgnoreUserStartNodes,
@@ -47,19 +49,25 @@ namespace uSync8.Community.DataTypeSerializers.CoreTypes
                     {
                         ObjectType = pickerConfig.TreeSource?.ObjectType,
                         StartNodeId = pickerConfig.TreeSource?.StartNodeId,
-                        StartNodeQuery = pickerConfig.TreeSource?.StartNodeQuery
+                        StartNodeQuery = pickerConfig.TreeSource?.StartNodeQuery,
+                        DynamicRoot = pickerConfig.TreeSource?.DynamicRoot
                     }
                 }
             };
 
-            if (pickerConfig?.TreeSource?.StartNodeId != null)
+            if (pickerConfig.TreeSource?.StartNodeId is not null)
             {
                 MNTPMappedConfig.MappedPath = UdiToEntityPath(pickerConfig.TreeSource.StartNodeId);
             }
 
+            if (pickerConfig.TreeSource?.DynamicRoot?.OriginAlias.Equals(_keyOriginAlias) is true
+                && pickerConfig.TreeSource.DynamicRoot.OriginKey.HasValue is true)
+            {
+                MNTPMappedConfig.MappedRoot = GuidToEntityPath(pickerConfig.TreeSource.DynamicRoot.OriginKey.Value);
+            }
+
             return base.SerializeConfig(MNTPMappedConfig);
         }
-
 
         public override object DeserializeConfig(string config, Type configType)
         {
@@ -70,19 +78,28 @@ namespace uSync8.Community.DataTypeSerializers.CoreTypes
             }
 
             var mappedConfig = JsonConvert.DeserializeObject<MappedPathConfigBase<MultiNodePickerConfiguration>>(config);
-            if (mappedConfig is null) {
+            if (mappedConfig is null)
+            {
                 _logger.LogWarning("MNTPickerConfigSerializer failed to deserialize config: {config}", config);
                 return base.DeserializeConfig(config, configType);
             }
 
-            if (mappedConfig.Config.TreeSource == null) {
+            if (mappedConfig.Config.TreeSource is null)
+            {
                 _logger.LogWarning("MNTPickerConfigSerializer deserialized config has no TreeSource section: {config}", config);
                 return base.DeserializeConfig(config, configType);
             }
 
-            if (!string.IsNullOrWhiteSpace(mappedConfig.MappedPath) && mappedConfig.Config.TreeSource != null)
+            if (string.IsNullOrWhiteSpace(mappedConfig.MappedPath) is false 
+                && mappedConfig.Config.TreeSource is not null)
             {
                 mappedConfig.Config.TreeSource.StartNodeId = PathToUdi(mappedConfig.MappedPath);
+            }
+
+            if (mappedConfig.Config.TreeSource?.DynamicRoot?.OriginAlias.Equals(_keyOriginAlias) is true
+                && (string.IsNullOrWhiteSpace(mappedConfig.MappedRoot) is false)) 
+            {
+                mappedConfig.Config.TreeSource.DynamicRoot.OriginKey = PathToGuid(mappedConfig.MappedRoot);
             }
 
             return mappedConfig.Config;
