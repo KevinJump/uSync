@@ -23,8 +23,12 @@ namespace uSync.Core.DataTypes
     {
         private readonly ILogger<ConfigurationSerializerCollection> _logger;
 
-        public ConfigurationSerializerCollection(
-            Func<IEnumerable<IConfigurationSerializer>> items,
+        [Obsolete("Use constructor with logger will be removed in 18")]
+        public ConfigurationSerializerCollection(Func<IEnumerable<IConfigurationSerializer>> items)
+            : base(items) 
+        { }
+
+        public ConfigurationSerializerCollection(Func<IEnumerable<IConfigurationSerializer>> items,
             ILogger<ConfigurationSerializerCollection> logger)
             : base(items)
         {
@@ -46,7 +50,7 @@ namespace uSync.Core.DataTypes
             }
             catch(Exception ex)
             {
-                _logger.LogError(ex, "Error deserializing config for editor {editorAlias} and type {configType}", editorAlias, configType);
+                _logger?.LogError(ex, "Error deserializing config for editor {editorAlias} and type {configType}", editorAlias, configType);
                 throw; 
             }
         }
@@ -63,7 +67,7 @@ namespace uSync.Core.DataTypes
             }
             catch(Exception ex)
             {
-                _logger.LogError(ex, "Error serializing config for editor {editorAlias} and config type {configType}", editorAlias, configuration.GetType());
+                _logger?.LogError(ex, "Error serializing config for editor {editorAlias} and config type {configType}", editorAlias, configuration.GetType());
                 throw; 
             }
         }
