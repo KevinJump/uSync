@@ -42,7 +42,8 @@ namespace uSync8.Community.DataTypeSerializers.CoreTypes
                     IgnoreUserStartNodes = pickerConfig.IgnoreUserStartNodes,
                     Multiple = pickerConfig.Multiple,
                     OnlyImages = pickerConfig.OnlyImages,
-                    StartNodeId = null
+                    StartNodeId = null,
+                    
                 }
             };
 

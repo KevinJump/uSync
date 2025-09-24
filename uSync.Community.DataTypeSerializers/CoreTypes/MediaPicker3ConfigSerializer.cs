@@ -45,10 +45,11 @@ namespace uSync8.Community.DataTypeSerializers.CoreTypes
                     IgnoreUserStartNodes = pickerConfig.IgnoreUserStartNodes,
                     Multiple = pickerConfig.Multiple,
                     ValidationLimit = pickerConfig.ValidationLimit
+                    
                 }
             };
 
-            if (pickerConfig.StartNodeId != null)
+            if (pickerConfig.StartNodeId is not null)
                 mediaPickerConfig.MappedPath = UdiToEntityPath(pickerConfig.StartNodeId);
 
             return base.SerializeConfig(mediaPickerConfig);
