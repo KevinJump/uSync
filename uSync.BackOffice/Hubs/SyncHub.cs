@@ -1,14 +1,18 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.SignalR;
+
+using System;
 using System.Globalization;
 using System.Threading.Tasks;
 
-using Microsoft.AspNetCore.SignalR;
+using Umbraco.Cms.Web.Common.Authorization;
 
 namespace uSync.BackOffice.Hubs
 {
     /// <summary>
     ///  SignalR Hub
     /// </summary>
+    [Authorize(Policy = uSyncHubPolicy.AccessHub)]
     public class SyncHub : Hub<ISyncHub>
     {
         /// <summary>

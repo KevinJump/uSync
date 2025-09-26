@@ -109,12 +109,26 @@ namespace uSync.BackOffice
         /// </summary>
         public static IServiceCollection AdduSyncSignalR(this IServiceCollection services)
         {
+            services.AddSingleton<IAuthorizationHandler, uSyncHubAuthorizationHandler>();
+            services.AddSingleton<uSyncHubMiddleware>();
+
+            services.AddAuthorization(o =>
+            {
+                o.AddPolicy(uSyncHubPolicy.AccessHub, policy =>
+                {
+                    policy.AuthenticationSchemes.Add(Constants.Security.BackOfficeAuthenticationType);
+                    policy.Requirements.Add(new uSyncHubRequirement());
+                });
+            });
 
             services.Configure<UmbracoPipelineOptions>(options =>
             {
                 options.AddFilter(new UmbracoPipelineFilter(
                     "uSync",
-                    applicationBuilder => { },
+                    applicationBuilder => {
+                        applicationBuilder.UseWhen(x => x.Request.Path.StartsWithSegments("/umbraco/SyncHub", StringComparison.OrdinalIgnoreCase),
+                            appBuilder => appBuilder.UseMiddleware<uSyncHubMiddleware>());
+                    },
                     applicationBuilder => { },
                     applicationBuilder =>
                     {
