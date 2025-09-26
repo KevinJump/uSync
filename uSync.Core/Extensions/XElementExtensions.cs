@@ -303,7 +303,7 @@ public static class XElementExtensions
     };
 
     /// <summary>
-    ///  make a platform save hash of the xml node. 
+    ///  make a platform safe hash of the xml node. 
     /// </summary>
     /// <remarks>
     ///  this isn't used for security it's here as a quick way of comparing xml 
