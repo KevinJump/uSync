@@ -56,7 +56,7 @@ public abstract class ContentHandlerBase<TObject> : SyncHandlerTreeBase<TObject>
         {
             itemPath = contentSerializer.GetItemPath(item);
         }
-        return $"{item.Name}_{itemPath}".ToLower();
+        return $"{item.Name}_{itemPath}";
     }
 
     /// <summary>
@@ -65,7 +65,7 @@ public abstract class ContentHandlerBase<TObject> : SyncHandlerTreeBase<TObject>
     protected override string GetXmlMatchString(XElement node)
     {
         var path = node.Element("Info")?.Element("Path").ValueOrDefault(node.GetLevel().ToString());
-        return $"{node.GetAlias()}_{path}".ToLower();
+        return $"{node.GetAlias()}_{path}";
     }
 
 

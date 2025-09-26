@@ -1638,7 +1638,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 
             if (node == null) return path;
             if (GetItemKey(item) == node.GetKey()) return path;
-            if (GetXmlMatchString(node) == GetItemMatchString(item)) return path;
+            if (GetXmlMatchString(node).Equals(GetItemMatchString(item), StringComparison.InvariantCultureIgnoreCase)) return path;
 
             // get here we have a clash, we should append something
             var append = GetItemKey(item).ToShortKeyString(8); // (this is the shortened GUID like media folders do)

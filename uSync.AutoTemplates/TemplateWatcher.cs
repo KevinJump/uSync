@@ -268,17 +268,16 @@ public partial class TemplateWatcher : IRegisteredObject
         _hostingLifetime.UnregisterObject(this);
     }
 
-    ConcurrentDictionary<string, bool> QueuedItems = new ConcurrentDictionary<string, bool>();
-
+    ConcurrentDictionary<string, bool> _queuedItems = new ConcurrentDictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
 
     public void QueueChange(string alias)
     {
-        QueuedItems.TryAdd(alias.ToLower(), true);
+        _queuedItems.TryAdd(alias, true);
     }
 
     public bool IsQueued(string alias)
     {
-        if (QueuedItems.TryRemove(alias.ToLower(), out bool flag))
+        if (_queuedItems.TryRemove(alias, out bool flag))
             return flag;
 
         return false;

@@ -11,7 +11,7 @@ namespace uSync.Core.Mapping;
 public class SyncValueMapperCollection
         : BuilderCollectionBase<ISyncMapper>
 {
-    private readonly ConcurrentDictionary<string, string> _customMappings;
+    private readonly ConcurrentDictionary<string, string> _customMappings = new(StringComparer.InvariantCultureIgnoreCase);
 
     public SyncEntityCache EntityCache { get; private set; }
 
@@ -121,7 +121,7 @@ public class SyncValueMapperCollection
     ///  looks up the alias for a mapper (replacing it from settings if need be)
     /// </summary>
     private string GetMapperAlias(string alias)
-        => _customMappings.TryGetValue(alias.ToLower(), out var mappedAlias) ? mappedAlias : alias;
+        => _customMappings.TryGetValue(alias, out var mappedAlias) ? mappedAlias : alias;
 }
 
 public class SyncValueMapperCollectionBuilder
