@@ -437,7 +437,15 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
 
             // v14 we always save now, as save and publish doesn't do that anymore...
             logger.LogDebug("Performing Save: {id} {name}", item.Id, item.Name);
-            contentService.Save(item, options.UserId, scheduleCollection);
+            var result = contentService.Save(item, options.UserId, scheduleCollection);
+            if (result.Success)
+                item = contentService.GetById(item.Id)!;
+            else
+            {
+                // something went wrong saving. ???
+                logger.LogWarning("Failed to save item {name} [{messages}]", item.Name, result.EventMessages?.FormatMessages(",") ?? "(none)");
+                return Attempt.Fail($"Failed to save {item.Name} [{result.EventMessages?.FormatMessages(",") ?? "(none)"}]");
+            }
 
             if (publishedNode.HasElements)
             {
