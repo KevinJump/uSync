@@ -113,7 +113,7 @@ public abstract class SyncSerializerRoot<TObject>
     /// <returns></returns>
     protected virtual XElement InitializeBaseNode(TObject item, string alias, int level = 0)
         => new XElement(ItemType,
-            new XAttribute(uSyncConstants.Xml.Key, ItemKey(item).ToString().ToLower()),
+            new XAttribute(uSyncConstants.Xml.Key, ItemKey(item).ToString()),
             new XAttribute(uSyncConstants.Xml.Alias, alias),
             new XAttribute(uSyncConstants.Xml.Level, level));
 

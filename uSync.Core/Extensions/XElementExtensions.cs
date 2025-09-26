@@ -302,6 +302,16 @@ public static class XElementExtensions
         NewLineChars = "\r\n",
     };
 
+    /// <summary>
+    ///  make a platform safe hash of the xml node. 
+    /// </summary>
+    /// <remarks>
+    ///  this isn't used for security it's here as a quick way of comparing xml 
+    ///  nodes to see if they are the same or not.
+    ///  
+    ///  We don't use GetHashCode as this can change between .net versions/platforms
+    ///  so comparing a node from a pc to azure for example might give different results.
+    /// </remarks>
     public static async Task<string> MakePlatformSafeHashAsync(this XElement node)
     {
         using (MemoryStream stream = new MemoryStream())
@@ -312,7 +322,7 @@ public static class XElementExtensions
             using (HashAlgorithm hashAlgorithm = CryptoConfig.AllowOnlyFipsAlgorithms ? SHA1.Create() : MD5.Create())
             {
                 var hash = await hashAlgorithm.ComputeHashAsync(stream);
-                return BitConverter.ToString(hash).Replace("-", "").ToLower();
+                return Convert.ToHexStringLower(hash);
             }
         }
     }

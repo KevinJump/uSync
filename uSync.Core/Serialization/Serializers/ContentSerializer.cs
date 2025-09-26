@@ -271,7 +271,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
         var writerNode = node.Element(uSyncConstants.Xml.Info)?.Element("UserInfo");
         if (writerNode == null) return -1;
 
-        var emails = new Dictionary<string, int>();
+        var emails = new Dictionary<string, int>(StringComparer.InvariantCultureIgnoreCase);
 
         item.CreatorId = emails.GetEmails(writerNode.Element("Creator").ValueOrDefault(string.Empty), userService.GetByEmail!);
         item.WriterId = emails.GetEmails(writerNode.Element("Writer").ValueOrDefault(string.Empty), userService.GetByEmail!);
@@ -473,7 +473,6 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
                         cultureStatuses[culture] =
                             schedules.CalculateCultureState(culture, configState);
                     }
-
                 }
 
                 if (cultureStatuses.Count > 0)
