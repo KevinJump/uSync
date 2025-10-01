@@ -546,7 +546,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
                     var tabGroup = item.PropertyGroups.FindTab(tabAlias);
                     if (tabGroup != null)
                     {
-                        if (!tabGroup.PropertyTypes?.Contains(result.Property.Alias) is true)
+                        if (tabGroup.PropertyTypes?.Contains(result.Property.Alias) is false)
                         {
                             // this property is not currently in this tab.
                             // add to our move list.
@@ -848,6 +848,8 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
                     changes.AddUpdate("Tab type", existing.Type, tab.Type, $"Tabs/{tab.Name}/Type");
                     existing.Type = tab.Type;
                 }
+
+                changes.AddNotNull(EnsureParentTabExists(item, tab));
             }
             else
             {
@@ -862,28 +864,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
                     tab.Alias = SyncPropertyGroupHelpers.GetTempTabAlias(tab.Alias);
 
                 // v14: if the tab is a child (group) - then we might need to create a parent tab
-                if (tab.Depth > 0)
-                {
-                    var tabRoot = tab.Alias.Split('/')[0];
-                    if (item.PropertyGroups.Contains(tabRoot))
-                    {
-                        logger.LogDebug("Parent Tab {tabRoot} already exists", tabRoot);
-                    }
-                    else
-                    {
-                        logger.LogDebug("Parent Tab {tabRoot} doesn't exist, creating", tabRoot);
-
-                        var compositionParent = item.CompositionPropertyGroups.FirstOrDefault(x => x.Alias.InvariantEquals(tabRoot));
-                        if (compositionParent != null)
-                        {
-                            logger.LogInformation("Creating parent tab from inherited tab data, {alias} {name}", compositionParent.Alias, compositionParent.Name ?? compositionParent.Alias);
-
-                            item.AddPropertyGroup(tabRoot, compositionParent.Name ?? tabRoot);
-                            item.PropertyGroups[tabRoot].Type = compositionParent.Type;
-                            item.PropertyGroups[tabRoot].SortOrder = compositionParent.SortOrder;
-                        }
-                    }
-                }
+                changes.AddNotNull(EnsureParentTabExists(item, tab));
 
                 // create the tab
                 item.AddPropertyGroup(tab.Alias, tab.Name ?? tab.Alias);
@@ -903,6 +884,34 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         ClearAllTabsCache();
 
         return changes;
+    }
+
+    private uSyncChange? EnsureParentTabExists(TObject item, TabInfo tab)
+    {
+        if (tab.Depth == 0) return null;
+        var parts = tab.Alias.Split('/', 2);
+        var tabRoot = parts[0];
+
+        // does the root tab already exist. 
+        if (item.PropertyGroups.Contains(tabRoot) is true)
+        {
+            logger.LogDebug("Parent Tab {tabRoot} already exists", tabRoot);
+            return null;
+        }
+
+        var compositionParent = item.CompositionPropertyGroups.FirstOrDefault(x => x.Alias.InvariantEquals(tabRoot));
+        if (compositionParent == null)
+        {
+            logger.LogWarning("Cannot find parent tab {tabRoot} in compositions", tabRoot);
+            return null;
+        }
+
+        logger.LogDebug("Parent Tab {tabRoot} doesn't exist, creating", tabRoot);
+        item.AddPropertyGroup(tabRoot, compositionParent.Name ?? tabRoot);
+        item.PropertyGroups[tabRoot].Type = compositionParent.Type;
+        item.PropertyGroups[tabRoot].SortOrder = compositionParent.SortOrder;
+
+        return uSyncChange.Update("Tabs", "Created parent tab", "", $"Tabs/{tabRoot}");
     }
 
     private static PropertyGroup? FindTab(TObject item, string alias, string? name, Guid key)
