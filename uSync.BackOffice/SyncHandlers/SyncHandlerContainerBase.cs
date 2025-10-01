@@ -68,7 +68,6 @@ public abstract class SyncHandlerContainerBase<TObject>
         {
             if (folder is null) continue;
 
-            logger.LogDebug("Checking Container: {folder} for any childItems [{type}]", folder.Id, folder.GetType()?.Name ?? "Unknown");
             actions.AddRange(await CleanFoldersAsync(folder.Key));
 
             if (!await HasChildrenAsync(folder))
@@ -247,16 +246,18 @@ public abstract class SyncHandlerContainerBase<TObject>
 
         foreach (var item in items)
         {
-            graph.AddRange(SyncHandlerContainerBase<TObject>.GetCompositions(item.Node).Select(x => GraphEdge.Create(item.Key, x)));
+            graph.AddRange(SyncHandlerContainerBase<TObject>.GetCompositions(item.Node)
+                .Where(x => item.Key != x) // don't add self references
+                .Select(x => GraphEdge.Create(item.Key, x)));
         }
 
-        var cleanGraph = graph.Where(x => x.Node == x.Edge).ToList();
-        var sortedList = nodes.Keys.TopologicalSort(cleanGraph);
+        var sortedList = nodes.Keys.TopologicalSort(graph);
 
         if (sortedList is null)
             return [.. items.OrderBy(x => x.Level)];
 
-        var results = new List<OrderedNodeInfo>();
+        var results = new List<OrderedNodeInfo>(sortedList.Count);
+
         foreach (var key in sortedList)
         {
             if (nodes.TryGetValue(key, out OrderedNodeInfo? value) && value is not null)
