@@ -46,7 +46,13 @@ public interface ISyncActionService
     /// <summary>
     ///  run an export based on the options provided
     /// </summary>
+    [Obsolete("Use StartProcessAsync(SyncStartActionRequest request) will be removed in v18")]
     Task StartProcessAsync(HandlerActions action);
+
+    /// <summary>
+    ///  run an export based on the options provided
+    /// </summary>
+    Task StartProcessAsync(SyncStartActionRequest request);
 
     /// <summary>
     ///  finish the bulk process

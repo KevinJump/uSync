@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Resources;
 using System.Threading.Tasks;
 
 using uSync.BackOffice.Configuration;
@@ -183,12 +184,17 @@ internal class SyncActionService : ISyncActionService
     private static Stopwatch? _timer;
 
     /// <inheritdoc/>
-    public async Task StartProcessAsync(HandlerActions action)
+    public async Task StartProcessAsync(SyncStartActionRequest request)
     {
-        _logger.LogInformation("Starting {action} process", action);
+        _logger.LogInformation("[uSync {version}] {user} Starting {action} process",
+                uSync.Version.ToString(3), request.Username, request.HandlerAction);
         _timer = Stopwatch.StartNew();
-        await _uSyncService.StartBulkProcessAsync(action);
+        await _uSyncService.StartBulkProcessAsync(request.HandlerAction);
     }
+
+    /// <inheritdoc/>
+    public async Task StartProcessAsync(HandlerActions action)
+        => await StartProcessAsync(new SyncStartActionRequest { HandlerAction = action, Username = "" });
 
     /// <inheritdoc/>
     public async Task<SyncActionResult> FinishProcessAsync(SyncFinalActionRequest request)
@@ -198,10 +204,11 @@ internal class SyncActionService : ISyncActionService
         _timer?.Stop();
         var elapsed = _timer?.ElapsedMilliseconds ?? 0;
 
-        _logger.LogInformation("{user} finished {action} process ({changes} changes {time})",
-            request.Username, request.HandlerAction, request.Actions.Count(), elapsed);
+        _logger.LogInformation("[uSync {version}] {user} finished {action} process ({changes}/{count} changes) in ({time:#,#}ms)",
+            uSync.Version.ToString(3), request.Username, request.HandlerAction,
+            request.Actions.CountChanges(), request.Actions.Count(), elapsed);
 
-        request.Callbacks?.Update?.Invoke("Process completed", 1, 1);
+        request.Callbacks?.Update?.Invoke($"{request.HandlerAction} completed ({elapsed:#,#}ms)", 1, 1);
 
         // for speed we return an empty list. the merge will just take 
         // what we where passed in, and we avoid a whole copy and compare step

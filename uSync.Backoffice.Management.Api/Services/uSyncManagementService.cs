@@ -173,7 +173,11 @@ internal class uSyncManagementService : ISyncManagementService
 
         if (string.IsNullOrWhiteSpace(actionRequest.RequestId) is true)
         {
-            await _syncActionService.StartProcessAsync(action);
+            await _syncActionService.StartProcessAsync(new SyncStartActionRequest
+            {
+                Username = user?.Username,
+                HandlerAction = action
+            });
 
             if (action == HandlerActions.Export && actionRequest.Options?.Clean is true)
             {
@@ -259,7 +263,6 @@ internal class uSyncManagementService : ISyncManagementService
         // when complete we clean out our action cache.
         _syncManagementCache.Clear(requestId);
 
-        callbacks?.Update?.Invoke("Finished", 1, 1);
         return [.. actionResults.Where(x => x.Change != Core.ChangeType.Hidden)];
     }
 
