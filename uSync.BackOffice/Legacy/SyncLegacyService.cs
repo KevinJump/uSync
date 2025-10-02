@@ -42,7 +42,7 @@ internal class SyncLegacyService : ISyncLegacyService
     {
         folder = null;
 
-        // if the default folder is not point to latest, then we don't check for legacy. 
+        // if the default folder does not point to latest, then we don't check for legacy. 
         var latest = _configService.GetFolders().Last();
         if (latest.Contains($"uSync/v{_majorVersion}/", StringComparison.OrdinalIgnoreCase) is false)
             return false;
