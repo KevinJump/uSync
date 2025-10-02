@@ -2,10 +2,13 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Configuration.Models;
+using Umbraco.Cms.Core.PropertyEditors.ValueConverters;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Extensions;
 
@@ -70,10 +73,11 @@ public class ImagePathMapper : SyncValueMapperBase, ISyncMapper
             var stringValue = value?.ToString();
             if (string.IsNullOrWhiteSpace(stringValue)) return stringValue;
 
-
             if (stringValue.TryParseToJsonObject(out var json) is false || json is null)
-                return StripSitePath(stringValue);
-
+            {
+                var cropper = new ImageCropperValue() { Src = StripSitePath(stringValue) };
+                return cropper.SerializeJsonString();
+            }
 
             if (json.TryGetPropertyValue("src", out var source) is true && source is not null)
             {
