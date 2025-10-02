@@ -4,7 +4,7 @@ import {
 	SyncImportSingleModalResult,
 } from './single-import-modal.token';
 import { customElement, state } from 'lit/decorators.js';
-import { css, html, nothing } from 'lit';
+import { css, html } from 'lit';
 import { UUIButtonState } from '@umbraco-cms/backoffice/external/uui';
 import { USYNC_CORE_CONTEXT_TOKEN, uSyncWorkspaceContext } from '../workspace';
 import { USyncAction } from '../api';

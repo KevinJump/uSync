@@ -5,9 +5,7 @@ import {
 	css,
 	customElement,
 	html,
-	nothing,
 	property,
-	when,
 } from '@umbraco-cms/backoffice/external/lit';
 import { ChangeType, USyncActionView } from '@jumoo/uSync';
 import { diffWords } from '@umbraco-cms/backoffice/utils';
