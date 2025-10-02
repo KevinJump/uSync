@@ -38,11 +38,9 @@ export default class SyncImportSingleModalElement extends UmbModalBaseElement<
 
 	async #doImport() {
 		if (!this.data?.action) return;
-		console.log('import single item', this.data);
 		this.importState = 'waiting';
 
 		const result = await this.#actionContext?.importSingle(this.data.action);
-		console.log('import result', result);
 		this.result = result?.data;
 		if (result?.data.success) this.importState = 'success';
 		else this.importState = 'failed';
