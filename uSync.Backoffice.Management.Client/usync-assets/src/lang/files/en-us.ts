@@ -27,7 +27,7 @@ export default {
 		changeAction: 'Action',
 		changeItem: 'Item',
 		changeDiffrence: 'Difference',
-		changeCreate: 'This item does not exist in umbraco and is being created',
+		changeCreate: 'This item does not exist in Umbraco and is being created',
 		noChangesImport: 'No changes where made to this item',
 		noChangesReport: 'No changes detected',
 		noChangesDelete: 'This item has been deleted from Umbraco',
