@@ -47,6 +47,10 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
 		const detailsModal = this.#modalContext?.open(this, USYNC_DETAILS_MODAL, {
 			data: {
 				item: e.action,
+				showActions:
+					e.action.change == ChangeType.CREATE ||
+					e.action.change == ChangeType.UPDATE ||
+					e.action.change == ChangeType.IMPORT,
 			},
 		});
 

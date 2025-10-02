@@ -6,6 +6,7 @@ import {
 	PerformActionRequest,
 	PerformActionResponse,
 	SyncActionGroup,
+	USyncActionView,
 } from '@jumoo/uSync';
 
 export interface SyncActionDataSource {
@@ -62,6 +63,15 @@ export class uSyncActionDataSource implements SyncActionDataSource {
 				query: {
 					tempKey: fileId,
 				},
+			}),
+		);
+	}
+
+	async importSingle(view: USyncActionView) {
+		return await tryExecute(
+			this.#host,
+			ActionsService.importSingle({
+				body: view,
 			}),
 		);
 	}

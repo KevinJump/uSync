@@ -19,4 +19,11 @@ const errorModal: UmbExtensionManifest = {
 	js: () => import('./error-modal-element.js'),
 };
 
-export const manifests = [modal, legacyModal, errorModal];
+const singleImportModal: UmbExtensionManifest = {
+	type: 'modal',
+	alias: 'usync.import.single.modal',
+	name: 'uSync single import modal',
+	js: () => import('./single-import-modal.element.js'),
+};
+
+export const manifests = [modal, legacyModal, errorModal, singleImportModal];

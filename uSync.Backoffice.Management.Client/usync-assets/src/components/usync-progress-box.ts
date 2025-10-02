@@ -6,7 +6,6 @@ import {
 	property,
 	nothing,
 	state,
-	when,
 	classMap,
 } from '@umbraco-cms/backoffice/external/lit';
 import { UmbElementMixin } from '@umbraco-cms/backoffice/element-api';

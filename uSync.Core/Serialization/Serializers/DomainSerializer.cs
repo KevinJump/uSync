@@ -52,14 +52,15 @@ public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncSerializer<IDo
         if (!string.IsNullOrWhiteSpace(isoCode))
         {
             var language = await _languageService.GetAsync(isoCode);
-            if (language != null && item.LanguageId != language.Id)
+            if (language is null)
+                return SyncAttempt<IDomain>.Fail(node.GetAlias(), ChangeType.Fail, $"No Matching language {isoCode} exists on this site for the domain");
+            
+            if (item.LanguageId != language.Id)
             {
                 changes.AddUpdate("Id", item.LanguageId, language.Id);
                 item.LanguageId = language.Id;
             }
         }
-
-
 
         var rootItem = default(IContent);
 
@@ -78,7 +79,10 @@ public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncSerializer<IDo
             }
         }
 
-        if (rootItem != default(IContent) && item.RootContentId != rootItem.Id)
+        if (rootItem is null)
+            return SyncAttempt<IDomain>.Fail(node.GetAlias(), ChangeType.Fail, "No content item could be found to attach domain");
+
+        if (item.RootContentId != rootItem.Id)
         {
             changes.AddUpdate("RootItem", item.RootContentId, rootItem.Id);
             item.RootContentId = rootItem.Id;

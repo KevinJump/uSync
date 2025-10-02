@@ -153,4 +153,11 @@ public interface ISyncHandler
     /// <param name="folders"></param>
     /// <returns></returns>
     Task<IReadOnlyList<OrderedNodeInfo>> FetchAllNodesAsync(string[] folders);
+
+    /// <summary>
+    ///  find an element by its key
+    /// </summary>
+    /// <param name="key"></param>
+    /// <returns></returns>
+    Task<XElement?> TryFindItemNodeAsync(Guid key) => Task.FromResult<XElement?>(null);
 }

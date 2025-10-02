@@ -1996,4 +1996,19 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     }
 
     #endregion
+
+    /// <inheritdoc/>
+    public async Task<XElement?> TryFindItemNodeAsync(Guid key)
+    {
+        var folders = GetDefaultHandlerFolders();
+        var items = await GetMergedItemsAsync(folders);
+
+        foreach (var item in items)
+        {
+            if (item.Node.GetKey() == key)
+                return item.Node;
+        }
+
+        return null;
+    }
 }

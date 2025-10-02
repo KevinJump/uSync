@@ -18,6 +18,12 @@ export default {
 		detailHeadline: 'Detected Changes',
 		detailHeader: 'Things that are different',
 
+		importSingle: 'Import',
+		importSingleWarning:
+			'This will import this item into Umbraco. If this item has dependencies they will not be imported, and will have to be resolved manually.',
+		importSingleSuccess: 'The item has been imported successfully',
+		importSingleFailed: `<p>There was an error importing the item</p><strong>%0%</strong>`,
+
 		changeAction: 'Action',
 		changeItem: 'Item',
 		changeDiffrence: 'Difference',

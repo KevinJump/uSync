@@ -270,6 +270,13 @@ export class uSyncWorkspaceContext
 		download.remove();
 		window.URL.revokeObjectURL(url);
 	}
+
+	async importSingle(item: USyncActionView) {
+		if (!item) return;
+		console.log('import single item', item);
+		const data = await this.#repository.importSingle(item);
+		return data;
+	}
 }
 
 export default uSyncWorkspaceContext;
