@@ -80,7 +80,10 @@ public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncSerializer<IDo
         }
 
         if (rootItem is null)
-            return SyncAttempt<IDomain>.Fail(node.GetAlias(), ChangeType.Fail, "No content item could be found to attach domain");
+            return SyncAttempt<IDomain>.Fail(
+                node.GetAlias(),
+                ChangeType.Fail,
+                $"No content item could be found to attach domain to. Attempted rootKey: {rootKey}, rootName: '{rootName}'");
 
         if (item.RootContentId != rootItem.Id)
         {
