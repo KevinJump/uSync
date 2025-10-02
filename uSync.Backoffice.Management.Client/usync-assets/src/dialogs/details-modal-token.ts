@@ -3,6 +3,7 @@ import { USyncActionView } from '@jumoo/uSync';
 
 export interface uSyncDetailsModalData {
 	item: USyncActionView;
+	showActions?: boolean;
 }
 
 export interface uSyncDetailsModalValue {

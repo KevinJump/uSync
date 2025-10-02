@@ -4,6 +4,7 @@ import {
 	uSyncActionDataSource,
 	USyncSettingsDataSource,
 	uSyncMigrationDataSource,
+	USyncActionView,
 } from '@jumoo/uSync';
 
 /**
@@ -136,5 +137,9 @@ export class uSyncActionRepository extends UmbControllerBase {
 
 	async getSets() {
 		return await this.#settingsDataSource.getSets();
+	}
+
+	async importSingle(action: USyncActionView) {
+		return await this.#actionDataSource.importSingle(action);
 	}
 }

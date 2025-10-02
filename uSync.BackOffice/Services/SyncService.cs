@@ -239,6 +239,18 @@ public partial class SyncService : ISyncService
         return (await handlerConfig.Handler.ImportAsync(action.FileName, handlerConfig.Settings, true)).FirstOrDefault();
     }
 
+    public async Task<uSyncAction> ImportSingleItemAsync(Guid key, string handlerAlias)
+    {
+        var handlerConfig = _handlerFactory.GetValidHandler(handlerAlias);
+        if (handlerConfig is null) return uSyncAction.Fail("Unknown", handlerAlias, "Unknown", ChangeType.Fail, $"Could not find handler with alias {handlerAlias}", new KeyNotFoundException(handlerAlias));
+
+        var node = await handlerConfig.Handler.TryFindItemNodeAsync(key);
+        if (node is null) return uSyncAction.Fail("Unknown", handlerAlias, handlerConfig.Handler.ItemType, ChangeType.Fail , $"Could not find item with key {key}", new FileNotFoundException(key.ToString()));
+
+        var result = await handlerConfig.Handler.ImportElementAsync(node, $"Single Item {key}", handlerConfig.Settings, new uSyncImportOptions { Flags = SerializerFlags.Force });
+        return result.FirstOrDefault();
+    }
+
     #endregion
 
     #region Exporting 

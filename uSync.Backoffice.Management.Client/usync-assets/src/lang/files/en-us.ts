@@ -18,12 +18,19 @@ export default {
 		detailHeadline: 'Detected Changes',
 		detailHeader: 'Things that are different',
 
+		importSingle: 'Import',
+		importSingleWarning:
+			'This will import this item into Umbraco. If this item has dependencies they will not be imported, and will have to be resolved manually.',
+		importSingleSuccess: 'The item has been imported successfully',
+		importSingleFailed: `<p>There was an error importing the item</p><strong>%0%</strong>`,
+
 		changeAction: 'Action',
 		changeItem: 'Item',
 		changeDiffrence: 'Difference',
-		changeCreate: 'This item is being created',
+		changeCreate: 'This item does not exist in Umbraco and is being created',
 		noChangesImport: 'No changes where made to this item',
 		noChangesReport: 'No changes detected',
+		noChangesDelete: 'This item has been deleted from Umbraco',
 
 		importHeader: 'Import from file',
 
@@ -92,6 +99,7 @@ export default {
 		ContentHandler: 'Content',
 		MediaHandler: 'Media',
 		RelationTypeHandler: 'Relation Types',
+		EntityContainer: 'Containers',
 	},
 	USyncSettings: {
 		settings: 'uSync Settings',

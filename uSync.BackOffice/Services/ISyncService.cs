@@ -106,6 +106,12 @@ public interface ISyncService
     /// <returns></returns>
     Task<uSyncAction> ImportSingleActionAsync(uSyncAction action);
 
+
+    /// <summary>
+    ///  Import single item from disk given the key and handler alias
+    /// </summary>
+    Task<uSyncAction> ImportSingleItemAsync(Guid key, string handlerAlias);
+
     /// <summary>
     ///  get the ordered nodes for a process and handler
     /// </summary>
