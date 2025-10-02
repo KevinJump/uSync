@@ -6,6 +6,8 @@ import {
 	property,
 	nothing,
 	state,
+	when,
+	classMap,
 } from '@umbraco-cms/backoffice/external/lit';
 import { UmbElementMixin } from '@umbraco-cms/backoffice/element-api';
 import {
@@ -52,10 +54,26 @@ export class uSyncProcessBox extends UmbElementMixin(LitElement) {
 	@property({ type: Boolean })
 	complete: boolean = false;
 
+	@state()
+	showProgress: boolean = true;
+
+	#hideProgress() {
+		window.setTimeout(() => {
+			this.showProgress = false;
+		}, 2000);
+	}
+
 	render() {
 		if (!this.actions) return nothing;
 
-		var actionHtml = this.actions?.map((action) => {
+		let progress = 0;
+		const actionCount = this.actions.length;
+		const boxSize = 100 / actionCount;
+		const actionProgress = (this.updateMsg?.count ?? 0) / (this.updateMsg?.total ?? 1);
+
+		let actionHtml = this.actions?.map((action) => {
+			if (action.status == HandlerStatus.COMPLETE) progress++;
+
 			return html`
 				<div
 					class="action 
@@ -70,11 +88,26 @@ export class uSyncProcessBox extends UmbElementMixin(LitElement) {
 			`;
 		});
 
+		let overall = this.showProgress
+			? progress * boxSize + actionProgress * boxSize - boxSize
+			: 0;
+
+		if (this.complete) {
+			this.#hideProgress();
+		} else {
+			this.showProgress = true;
+		}
+
+		const progressClass = { hidden: !this.showProgress };
+
 		return html`
 			<uui-box>
 				<h2>${this.title}</h2>
 				<div class="action-list">${actionHtml}</div>
 				<div class="update-box">${this.updateMsg?.message}</div>
+				<uui-progress-bar
+					progress=${overall}
+					class=${classMap(progressClass)}></uui-progress-bar>
 			</uui-box>
 		`;
 	}
@@ -83,7 +116,7 @@ export class uSyncProcessBox extends UmbElementMixin(LitElement) {
 		if (action.status == HandlerStatus.PENDING) return;
 		if (action.status == HandlerStatus.PROCESSING) {
 			return html`<uui-badge color="positive" look="default">
-				<uui-icon name="icon-sync"></uui-icon
+				<uui-icon name="icon-sync" class="rotating"></uui-icon
 			></uui-badge>`;
 		}
 
@@ -136,6 +169,21 @@ export class uSyncProcessBox extends UmbElementMixin(LitElement) {
 			padding: 0 var(--uui-size-7);
 		}
 
+		.rotating {
+			animation: spin-animation 1s infinite;
+			animation-timing-function: linear;
+			display: inline-block;
+		}
+
+		@keyframes spin-animation {
+			0% {
+				transform: rotate(360deg);
+			}
+			100% {
+				transform: rotate(0deg);
+			}
+		}
+
 		.action uui-icon {
 			font-size: var(--uui-size-12);
 		}
@@ -156,6 +204,15 @@ export class uSyncProcessBox extends UmbElementMixin(LitElement) {
 		.update-box {
 			font-weight: bold;
 			text-align: center;
+		}
+
+		uui-progress-bar {
+			padding: 0;
+			margin: 0;
+		}
+
+		.hidden {
+			opacity: 0;
 		}
 	`;
 }
