@@ -171,12 +171,11 @@ internal class uSyncManagementService : ISyncManagementService
         var handlers = _syncActionService.GetActionHandlers(action, actionRequest.Options)
             .ToList();
 
-        if (action == HandlerActions.Export && string.IsNullOrWhiteSpace(actionRequest.RequestId))
+        if (string.IsNullOrWhiteSpace(actionRequest.RequestId) is true)
         {
             await _syncActionService.StartProcessAsync(action);
 
-            // first step in an export.
-            if (actionRequest.Options?.Clean is true)
+            if (action == HandlerActions.Export && actionRequest.Options?.Clean is true)
             {
                 // clean the export folder.  
                 _syncActionService.CleanExportFolder();
