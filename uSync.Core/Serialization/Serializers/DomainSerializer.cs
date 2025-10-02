@@ -53,7 +53,7 @@ public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncSerializer<IDo
         {
             var language = await _languageService.GetAsync(isoCode);
             if (language is null)
-                return SyncAttempt<IDomain>.Fail(node.GetAlias(), ChangeType.Fail, $"No Matching language {isoCode} exists on this site for the domain");
+                return SyncAttempt<IDomain>.Fail(node.GetAlias(), ChangeType.Fail, $"No matching language '{isoCode}' exists on this site for the domain");
             
             if (item.LanguageId != language.Id)
             {
