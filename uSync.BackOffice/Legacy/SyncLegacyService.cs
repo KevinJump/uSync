@@ -43,9 +43,7 @@ internal class SyncLegacyService : ISyncLegacyService
         folder = null;
 
         // if the default folder is not point to latest, then we don't check for legacy. 
-        var latest = _configService.GetFolders().Last();
-        if (latest.Contains($"uSync/v{_majorVersion}/", StringComparison.OrdinalIgnoreCase) is false)
-            return false;
+        if (HasDefaultConfigFolder() is false) return false;
 
         for (int n = _majorVersion - 1; n > 8; n--)
         {
@@ -61,6 +59,18 @@ internal class SyncLegacyService : ISyncLegacyService
         }
 
         return false;
+    }
+
+    /// <summary>
+    ///  Check to see if the last folder in the current config, is the default one for this version.
+    /// </summary>
+    private bool HasDefaultConfigFolder()
+    {
+        var folders = _configService.GetFolders();
+        if (folders is null || folders.Length == 0)
+            return false;
+
+        return folders.Last().Contains($"uSync/v{_majorVersion}/", StringComparison.OrdinalIgnoreCase);
     }
 
     /// <inheritdoc/>
