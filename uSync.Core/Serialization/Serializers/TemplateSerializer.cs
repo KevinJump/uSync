@@ -144,6 +144,15 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
             }
         }
 
+        if (ViewsAreCompiled(options) && string.IsNullOrWhiteSpace(item.Content))
+        {
+            if (contentAttempt.Result != item.Content)
+            { 
+                details.AddUpdate("Content", item.Content ?? string.Empty, contentAttempt.Result ?? string.Empty);
+                item.Content = contentAttempt.Result;
+            }
+        }
+
         return SyncAttempt<ITemplate>.Succeed(item.Name, item, ChangeType.Import, details);
     }
 
