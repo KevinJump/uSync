@@ -79,7 +79,7 @@ export class uSyncChangeView extends UmbElementMixin(LitElement) {
 			(this.item?.message?.length ?? 0 > 0)
 				? this.item?.message
 				: this.item?.change == ChangeType.IMPORT
-					? 'No changes where made but the item was imported'
+					? 'No changes were made but the item was imported'
 					: '...';
 
 		const classes = { error: this.item?.success == false };
