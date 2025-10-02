@@ -115,7 +115,7 @@ export class uSyncProcessBox extends UmbElementMixin(LitElement) {
 		if (action.status == HandlerStatus.PENDING) return;
 		if (action.status == HandlerStatus.PROCESSING) {
 			return html`<uui-badge color="positive" look="default">
-				<uui-icon name="icon-sync" class="rotating"></uui-icon
+				<uui-icon name="icon-circle-dotted" class="rotating"></uui-icon
 			></uui-badge>`;
 		}
 
@@ -169,7 +169,7 @@ export class uSyncProcessBox extends UmbElementMixin(LitElement) {
 		}
 
 		.rotating {
-			animation: spin-animation 1s infinite;
+			animation: spin-animation 2s infinite;
 			animation-timing-function: linear;
 			display: inline-block;
 		}

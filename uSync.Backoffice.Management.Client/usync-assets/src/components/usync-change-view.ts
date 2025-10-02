@@ -1,9 +1,11 @@
 import { UmbElementMixin } from '@umbraco-cms/backoffice/element-api';
 import {
 	LitElement,
+	classMap,
 	css,
 	customElement,
 	html,
+	nothing,
 	property,
 	when,
 } from '@umbraco-cms/backoffice/external/lit';
@@ -57,25 +59,31 @@ export class uSyncChangeView extends UmbElementMixin(LitElement) {
 						>No changes</umb-localize
 					>
 				</h3>
-				${when(
-					this.item?.change == ChangeType.IMPORT,
-					() =>
-						html`<div>
-							${(this.item?.message ?? '').length > 0
-								? this.item?.message
-								: 'Item was imported but no properties were changed '}
-						</div>`,
-				)}
+				${this.renderMessage()}
 			</div>
 		`;
 	}
 
 	render_create() {
 		return html`
-			<h1>
-				<umb-localize key="uSync_changeCreate">This item is being created</umb-localize>
-			</h1>
+			<div class="change-box">
+				<h3>
+					<umb-localize key="uSync_changeCreate">This item is being created</umb-localize>
+				</h3>
+			</div>
 		`;
+	}
+
+	renderMessage() {
+		const message =
+			(this.item?.message?.length ?? 0 > 0)
+				? this.item?.message
+				: this.item?.change == ChangeType.IMPORT
+					? 'No changes where made but the item was imported'
+					: '...';
+
+		const classes = { error: this.item?.success == false };
+		return html`<div class="${classMap(classes)}">${message}</div> `;
 	}
 
 	#getJsonOrString(value: string | null | undefined) {
@@ -125,13 +133,20 @@ export class uSyncChangeView extends UmbElementMixin(LitElement) {
 		}
 
 		.change-box {
+			display: block;
 			padding: var(
 				--uui-box-header-padding,
 				var(--uui-size-space-4, 12px) var(--uui-size-space-5, 18px)
 			);
 		}
+
 		.change-box h3 {
 			margin: 0;
+		}
+
+		.error {
+			color: var(--uui-color-danger);
+			margin-top: var(--uui-size-space-2);
 		}
 
 		uui-table-cell {
