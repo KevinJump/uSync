@@ -171,12 +171,15 @@ internal class uSyncManagementService : ISyncManagementService
         var handlers = _syncActionService.GetActionHandlers(action, actionRequest.Options)
             .ToList();
 
-        if (action == HandlerActions.Export && string.IsNullOrWhiteSpace(actionRequest.RequestId))
+        if (string.IsNullOrWhiteSpace(actionRequest.RequestId) is true)
         {
-            await _syncActionService.StartProcessAsync(action);
+            await _syncActionService.StartProcessAsync(new SyncStartActionRequest
+            {
+                Username = user?.Username,
+                HandlerAction = action
+            });
 
-            // first step in an export.
-            if (actionRequest.Options?.Clean is true)
+            if (action == HandlerActions.Export && actionRequest.Options?.Clean is true)
             {
                 // clean the export folder.  
                 _syncActionService.CleanExportFolder();
@@ -260,7 +263,6 @@ internal class uSyncManagementService : ISyncManagementService
         // when complete we clean out our action cache.
         _syncManagementCache.Clear(requestId);
 
-        callbacks?.Update?.Invoke("Finished", 1, 1);
         return [.. actionResults.Where(x => x.Change != Core.ChangeType.Hidden)];
     }
 

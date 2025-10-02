@@ -41,3 +41,15 @@ public class SyncFinalActionRequest
     public uSyncCallbacks? Callbacks { get; set; }
 }
 
+public class SyncStartActionRequest
+{
+    /// <summary>
+    ///  current handler action (e.g import, export)
+    /// </summary>
+    public HandlerActions HandlerAction { get; set; } = HandlerActions.None;
+
+    /// <summary>
+    ///  user of the person who triggered the process
+    /// </summary>
+    public string? Username { get; set; }
+}
