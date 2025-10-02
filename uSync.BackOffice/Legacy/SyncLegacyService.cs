@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
+using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
 using uSync.Core;
 
@@ -27,16 +29,23 @@ internal class SyncLegacyService : ISyncLegacyService
     };
 
     private readonly ISyncFileService _syncFileService;
+    private readonly ISyncConfigService _configService;
 
-    public SyncLegacyService(ISyncFileService syncFileService)
+    public SyncLegacyService(ISyncFileService syncFileService, ISyncConfigService configService)
     {
         _syncFileService = syncFileService;
+        _configService = configService;
     }
 
     /// <inheritdoc/>
     public bool TryGetLatestLegacyFolder([MaybeNullWhen(false)] out string? folder)
     {
         folder = null;
+
+        // if the default folder is not point to latest, then we don't check for legacy. 
+        var latest = _configService.GetFolders().Last();
+        if (latest.Contains($"uSync/v{_majorVersion}/", StringComparison.OrdinalIgnoreCase) is false)
+            return false;
 
         for (int n = _majorVersion - 1; n > 8; n--)
         {
