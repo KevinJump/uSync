@@ -144,14 +144,9 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
             }
         }
 
-        if (ViewsAreCompiled(options) && string.IsNullOrWhiteSpace(item.Content))
-        {
-            if (contentAttempt.Result != item.Content)
-            { 
-                details.AddUpdate("Content", item.Content ?? string.Empty, contentAttempt.Result ?? string.Empty);
-                item.Content = contentAttempt.Result;
-            }
-        }
+        // v16+ if the views are compiled, then we never actually see them get written to disk.
+        // so we are not going to mark them. Later on in the second pass we will delete any empty 
+        // templates while in razor view mode - but that is all. 
 
         return SyncAttempt<ITemplate>.Succeed(item.Name, item, ChangeType.Import, details);
     }
@@ -171,17 +166,19 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
             return Attempt.Succeed(GetContentFromFile(templatePath));
         }
 
-        if (!ViewsAreCompiled(options))
-        {
-            // template is missing and the views are not compiled , then we can't create.
-            logger.LogWarning("Failed to create template {path} the local file is missing", templatePath);
-            return Attempt.Fail("", new Exception($"The template {templatePath} file is missing."));
-        }
-        // template is not on disk, we could use the viewEngine to find the view 
-        // if this finds the view it tells us that the view is somewhere else ? 
+        // isn't on disk, but might be compiled. --> 
 
-        logger.LogDebug("Failed to find content, but UsingRazorViews so will create anyway, then delete the file");
-        return Attempt.Succeed($"<!-- [uSyncMarker:{this.Id}]  template content - will be removed -->");
+        if (ViewsAreCompiled(options) is true)
+        {
+            // template is not on disk, we could use the viewEngine to find the view 
+            // if this finds the view it tells us that the view is somewhere else ? 
+            logger.LogDebug("Failed to find content, but UsingRazorViews so if Umbraco create's anyway, we will then delete the file");
+            return Attempt.Succeed($"<!-- [uSyncMarker:{this.Id}]  template content - will be removed -->");
+        }
+
+        // template is missing and the views are not compiled , then we can't create.
+        logger.LogWarning("Failed to create template {path} the local file is missing", templatePath);
+        return Attempt.Fail("", new Exception($"The template {templatePath} file is missing."));
     }
 
     /// <summary>
