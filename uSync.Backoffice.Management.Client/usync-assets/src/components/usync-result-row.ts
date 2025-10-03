@@ -48,11 +48,13 @@ export class uSyncResultRow extends UmbLitElement {
 		const noChange =
 			result.change == ChangeType.NO_CHANGE || result.change == ChangeType.EXPORT;
 
-		return html`<div class="${classMap({ no_change: noChange })} row">
+		return html`<div
+			class="${classMap({ no_change: noChange })} row"
+			@click=${() => this.#showDetail(result)}>
 			<div class="icon-cell" .noPadding=${true}>
 				<umb-icon .name=${icon}></umb-icon>
 			</div>
-			<div class="row-content" @click=${() => this.#showDetail(result)} .clipText=${true}>
+			<div class="row-content" .clipText=${true}>
 				<div class="item-detail">
 					<div class="item-change">${result.change}</div>
 				</div>
@@ -119,4 +121,12 @@ export class uSyncResultRow extends UmbLitElement {
 			min-width: 60px;
 		}
 	`;
+}
+
+export default uSyncResultRow;
+
+declare global {
+	interface HTMLElementTagNameMap {
+		'usync-result-row': uSyncResultRow;
+	}
 }
