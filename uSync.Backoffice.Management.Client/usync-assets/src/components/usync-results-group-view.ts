@@ -10,9 +10,6 @@ import {
 } from '@umbraco-cms/backoffice/external/lit';
 import { UmbLitElement } from '@umbraco-cms/backoffice/lit-element';
 import { ChangeType, USyncActionView } from '../api';
-import { UMB_MODAL_MANAGER_CONTEXT } from '@umbraco-cms/backoffice/modal';
-import { USYNC_ERROR_MODAL } from '../dialogs';
-import { uSyncShowDetailEvent } from './events';
 
 @customElement('usync-result-group')
 export class uSyncResultGroupView extends UmbLitElement {
@@ -27,13 +24,6 @@ export class uSyncResultGroupView extends UmbLitElement {
 
 	@property({ type: String })
 	groupName: string = '';
-
-	async #showDetail(action: USyncActionView) {
-		if (action.change == ChangeType.NO_CHANGE || action.change == ChangeType.EXPORT)
-			return;
-
-		this.dispatchEvent(new uSyncShowDetailEvent(action));
-	}
 
 	getChangeCount() {
 		return this.results?.filter((r) => r.change !== ChangeType.NO_CHANGE).length;
@@ -73,72 +63,10 @@ export class uSyncResultGroupView extends UmbLitElement {
 	renderGroupedRows(results?: USyncActionView[]) {
 		const rowsHtml = results?.map((result) => {
 			if (!this.showAll && result.change == ChangeType.NO_CHANGE) return nothing;
-
-			const icon =
-				result.change == ChangeType.NO_CHANGE
-					? 'icon-trafic'
-					: result.success
-						? 'icon-check color-green'
-						: 'icon-wrong color-red';
-
-			const isChange =
-				result.change != ChangeType.NO_CHANGE && result.change != ChangeType.EXPORT;
-
-			const changeCount = result.details.length;
-
-			return html`
-				<uui-table-row
-					class=${classMap({ changerow: isChange, no_change: changeCount == 0 })}>
-					<uui-table-cell class="icon-cell" .noPadding=${true}>
-						<umb-icon .name=${icon}></umb-icon>
-					</uui-table-cell>
-					<uui-table-cell
-						@click=${() => this.#showDetail(result)}
-						.clipText=${true}
-						style="--uui-table-cell-padding: var(--uui-size-space-2);">
-						<div class="item-name">
-							<div>${result.name}</div>
-							<div>${this.renderMessage(result)}</div>
-						</div>
-						<div class="item-detail">
-							<div>${result.itemType}</div>
-							<div>${result.change}</div>
-						</div>
-					</uui-table-cell>
-				</uui-table-row>
-			`;
+			return html`<usync-result-row .result=${result}></usync-result-row>`;
 		});
 
-		return html`${rowsHtml}`;
-	}
-
-	renderMessage(result: USyncActionView) {
-		return (result.change != ChangeType.FAIL &&
-			result.change != ChangeType.IMPORT_FAIL) ||
-			!result.message
-			? html`<em>${result.message}</em>`
-			: html` <uui-button
-					look="default"
-					color="danger"
-					label="View error"
-					compact
-					@click=${(e: Event) => this.#viewError(e, result)}></uui-button>`;
-	}
-
-	async #viewError(e: Event, result: USyncActionView) {
-		e.stopPropagation();
-		const modalContext = await this.getContext(UMB_MODAL_MANAGER_CONTEXT);
-		const modal = modalContext?.open(this, USYNC_ERROR_MODAL, {
-			data: {
-				action: result,
-			},
-		});
-
-		const data = await modal?.onSubmit().catch(() => {
-			return;
-		});
-
-		return data;
+		return rowsHtml;
 	}
 
 	static styles = css`
@@ -175,39 +103,8 @@ export class uSyncResultGroupView extends UmbLitElement {
 			border-bottom: none;
 		}
 
-		.has_changes .count {
+		.count {
 			color: var(--uui-text);
-		}
-
-		.changerow {
-			cursor: pointer;
-		}
-
-		.icon-cell {
-			padding-left: 20px;
-			width: var(--uui-size-8);
-		}
-
-		.item-name {
-			display: flex;
-			justify-content: space-between;
-			padding-right: 20px;
-		}
-
-		.item-detail {
-			display: flex;
-			justify-content: space-between;
-			font-size: smaller;
-			color: var(--uui-color-disabled-contrast);
-			padding-right: 20px;
-		}
-
-		uui-table-row:first-child uui-table-cell {
-			border-top-color: transparent;
-		}
-
-		uui-table-row:hover {
-			background-color: var(--uui-color-surface-emphasis);
 		}
 	`;
 }
