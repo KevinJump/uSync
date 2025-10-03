@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Configuration.Models;
+using Umbraco.Cms.Core.Media;
 using Umbraco.Cms.Core.PropertyEditors.ValueConverters;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Extensions;
@@ -35,14 +36,15 @@ public class ImagePathMapper : SyncValueMapperBase, ISyncMapper
     private readonly string _siteRoot;
     private string _mediaFolder;
     private readonly ILogger<ImagePathMapper> _logger;
-
     private readonly IConfiguration _configuration;
+    private readonly IImageUrlGenerator _imageUrlGenerator;
 
     public ImagePathMapper(
         IConfiguration configuration,
         IOptionsMonitor<GlobalSettings> _globalOptions,
         IEntityService entityService,
-        ILogger<ImagePathMapper> logger) : base(entityService)
+        ILogger<ImagePathMapper> logger,
+        IImageUrlGenerator imageUrlGenerator) : base(entityService)
     {
         _logger = logger;
         _configuration = configuration;
@@ -57,6 +59,8 @@ public class ImagePathMapper : SyncValueMapperBase, ISyncMapper
         {
             logger.LogDebug("Media Folders: [{media}]", _mediaFolder);
         }
+
+        _imageUrlGenerator = imageUrlGenerator;
     }
 
     public override string Name => "ImageCropper Mapper";
@@ -75,9 +79,22 @@ public class ImagePathMapper : SyncValueMapperBase, ISyncMapper
 
             if (stringValue.TryParseToJsonObject(out var json) is false || json is null)
             {
-                var cropper = new ImageCropperValue() { Src = StripSitePath(stringValue) };
-                return cropper.SerializeJsonString();
+                var extension = Path.GetExtension(stringValue);
+                if (string.IsNullOrWhiteSpace(extension)) return stringValue;
+
+                if (_imageUrlGenerator.IsSupportedImageFormat(extension.TrimStart(Constants.CharArrays.Period)) is true) 
+                {
+                    // its a 'bug' that things imported via starter kits etc, can end up going in without the image cropper json structure.
+                    // if we find a straight image path for a supported image format, we convert it to the json structure here.
+                    var cropper = new ImageCropperValue() { Src = StripSitePath(stringValue) };
+                    return cropper.SerializeJsonString();
+                }
+
+                // we can only convert things that support the cropper.
+                // So if its not one of them we put them back as we find them.
+                return stringValue;
             }
+           
 
             if (json.TryGetPropertyValue("src", out var source) is true && source is not null)
             {
