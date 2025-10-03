@@ -1189,6 +1189,13 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     {
         try
         {
+            if ((await ShouldImportAsync(node, settings)) is false)
+            {
+                return uSyncActionHelper<TObject>.ReportAction(ChangeType.NoChange, node.GetAlias(), node.GetPath(), syncFileService.GetSiteRelativePath(filename), node.GetKey(),
+                    this.Alias, "Will not be imported (Based on configuration)")
+                    .AsEnumerableOfOne<uSyncAction>();
+            }
+
             //  starting reporting notification
             //  this lets us intercept a report and 
             //  shortcut the checking (sometimes).

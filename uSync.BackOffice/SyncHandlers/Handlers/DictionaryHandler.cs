@@ -61,38 +61,6 @@ public class DictionaryHandler : SyncHandlerLevelBase<IDictionaryItem>, ISyncHan
     }
 
     /// <inheritdoc/>
-    public override async Task<IEnumerable<uSyncAction>> ImportAsync(string file, HandlerSettings config, uSyncImportOptions options)
-    {
-        if (IsOneWay(config))
-        {
-            // only sync dictionary items if they are new
-            // so if it already exists we don't do the sync
-
-            //
-            // <Handler Alias="dictionaryHandler" Enabled="true">
-            //    <Add Key="OneWay" Value="true" />
-            // </Handler>
-            //
-            var item = await GetExistingItemAsync(file);
-            if (item != null)
-            {
-                return uSyncAction.SetAction(true, item.ItemKey, change: ChangeType.NoChange).AsEnumerableOfOne();
-            }
-        }
-
-        return await base.ImportAsync(file, config, options);
-
-    }
-
-    private async Task<IDictionaryItem?> GetExistingItemAsync(string filePath)
-    {
-        syncFileService.EnsureFileExists(filePath);
-
-        var node = await syncFileService.LoadXElementAsync(filePath);
-        return await serializer.FindItemAsync(node);
-    }
-
-    /// <inheritdoc/>
     protected override async Task<IEnumerable<IEntity>> GetFoldersAsync(Guid key)
         => await GetChildItemsAsync(key);
 
@@ -122,26 +90,6 @@ public class DictionaryHandler : SyncHandlerLevelBase<IDictionaryItem>, ISyncHan
     /// <inheritdoc/>
     protected override string GetItemPath(IDictionaryItem item, bool useGuid, bool isFlat)
         => item.ItemKey.ToSafeFileName(shortStringHelper);
-
-    /// <inheritdoc/>
-    public override async Task<IEnumerable<uSyncAction>> ReportElementAsync(XElement node, string filename, HandlerSettings settings, uSyncImportOptions options)
-    {
-        if (IsOneWay(settings))
-        {
-            // we check if there is no change, we don't report it.
-            // if we find it then there is no change. 
-            var item = await GetExistingItemAsync(filename);
-            if (item != null)
-            {
-                return uSyncActionHelper<IDictionaryItem>
-                    .ReportAction(ChangeType.NoChange, item.ItemKey, node.GetPath(), syncFileService.GetSiteRelativePath(filename), item.Key, this.Alias, "Existing Item will not be overwritten")
-                    .AsEnumerableOfOne<uSyncAction>();
-            }
-        }
-
-        return await base.ReportElementAsync(node, filename, settings, options);
-    }
-
-    private static bool IsOneWay(HandlerSettings? config)
-        => config?.GetSetting("OneWay", false) == true;
 }
+
+  
