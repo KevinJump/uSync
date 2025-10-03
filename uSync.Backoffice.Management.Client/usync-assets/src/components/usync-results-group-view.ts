@@ -73,43 +73,10 @@ export class uSyncResultGroupView extends UmbLitElement {
 	renderGroupedRows(results?: USyncActionView[]) {
 		const rowsHtml = results?.map((result) => {
 			if (!this.showAll && result.change == ChangeType.NO_CHANGE) return nothing;
-
-			const icon =
-				result.change == ChangeType.NO_CHANGE
-					? 'icon-trafic'
-					: result.success
-						? 'icon-check color-green'
-						: 'icon-wrong color-red';
-
-			const isChange =
-				result.change != ChangeType.NO_CHANGE && result.change != ChangeType.EXPORT;
-
-			const changeCount = result.details.length;
-
-			return html`
-				<uui-table-row
-					class=${classMap({ changerow: isChange, no_change: changeCount == 0 })}>
-					<uui-table-cell class="icon-cell" .noPadding=${true}>
-						<umb-icon .name=${icon}></umb-icon>
-					</uui-table-cell>
-					<uui-table-cell
-						@click=${() => this.#showDetail(result)}
-						.clipText=${true}
-						style="--uui-table-cell-padding: var(--uui-size-space-2);">
-						<div class="item-name">
-							<div>${result.name}</div>
-							<div>${this.renderMessage(result)}</div>
-						</div>
-						<div class="item-detail">
-							<div>${result.itemType}</div>
-							<div>${result.change}</div>
-						</div>
-					</uui-table-cell>
-				</uui-table-row>
-			`;
+			return html`<usync-result-row .result=${result}></usync-result-row>`;
 		});
 
-		return html`${rowsHtml}`;
+		return rowsHtml;
 	}
 
 	renderMessage(result: USyncActionView) {
