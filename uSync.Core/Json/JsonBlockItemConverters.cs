@@ -29,7 +29,7 @@ public abstract class JsonBlockItemConverterBase<T> : JsonConverter<T>
                 return item;
 
             if (reader.TokenType != JsonTokenType.PropertyName)
-                throw new JsonException("Expecting property name");
+                continue;
 
             var propertyName = reader.GetString();
             reader.Read();
