@@ -256,7 +256,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 
         options.Callbacks?.Update?.Invoke("Calculating import order", 1, 9);
 
-        var items = await GetMergedItemsAsync(folders);
+        var items = await GetMergedItemsAsync(folders, new SyncMergeOptions(options.Callbacks?.Update));
 
         options.Callbacks?.Update?.Invoke($"Processing {items.Count} items", 2, 9);
 
@@ -327,16 +327,21 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// <param name="folders"></param>
     /// <returns></returns>
     public async Task<IReadOnlyList<OrderedNodeInfo>> FetchAllNodesAsync(string[] folders)
-        => await GetMergedItemsAsync(folders);
+        => await GetMergedItemsAsync(folders, new SyncMergeOptions());
 
-    /// <summary>
-    ///  method to get the merged folders, handlers that care about orders should override this. 
-    /// </summary>
-    protected virtual async Task<IReadOnlyList<OrderedNodeInfo>> GetMergedItemsAsync(string[] folders)
+
+    protected virtual async Task<IReadOnlyList<OrderedNodeInfo>> GetMergedItemsAsync(string[] folders, SyncMergeOptions options)
     {
         var baseTracker = trackers.FirstOrDefault() as ISyncTrackerBase;
         return [.. (await syncFileService.MergeFoldersAsync(folders, uSyncConfig.Settings.DefaultExtension, baseTracker))];
     }
+
+    /// <summary>
+    ///  method to get the merged folders, handlers that care about orders should override this. 
+    /// </summary>
+    [Obsolete("Use GetMergedItemsAsync with SyncMergeOptions will be removed in v18")]
+    protected virtual async Task<IReadOnlyList<OrderedNodeInfo>> GetMergedItemsAsync(string[] folders)
+        => await GetMergedItemsAsync(folders, new SyncMergeOptions());
 
     /// <summary>
     ///  given a file path, will give you the merged values across all folders. 
@@ -1006,9 +1011,9 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 
         var cacheKey = PrepCaches();
 
-        callback?.Invoke("Organizing import structure", 1, 3);
+        callback?.Invoke("Calculating order", 1, 3);
 
-        var items = await GetMergedItemsAsync(folders);
+        var items = await GetMergedItemsAsync(folders, new SyncMergeOptions(callback));
         var options = new uSyncImportOptions();
 
         int count = 0;
@@ -2008,7 +2013,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     public async Task<XElement?> TryFindItemNodeAsync(Guid key)
     {
         var folders = GetDefaultHandlerFolders();
-        var items = await GetMergedItemsAsync(folders);
+        var items = await GetMergedItemsAsync(folders, new SyncMergeOptions());
 
         foreach (var item in items)
         {

@@ -13,6 +13,7 @@ using Umbraco.Cms.Core.Strings;
 using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;
+using uSync.BackOffice.Models;
 using uSync.BackOffice.Services;
 using uSync.Core;
 
@@ -48,8 +49,8 @@ public abstract class SyncHandlerLevelBase<TObject>
     ///  as we are already loading everything to merge, it doesn't
     ///  then cost us much to sort them when we have to.
     /// </remarks>
-    protected override async Task<IReadOnlyList<OrderedNodeInfo>> GetMergedItemsAsync(string[] folders)
-        => [.. (await base.GetMergedItemsAsync(folders)).OrderBy(x => x.Level)];
+    protected override async Task<IReadOnlyList<OrderedNodeInfo>> GetMergedItemsAsync(string[] folders, SyncMergeOptions options)
+        => [.. (await base.GetMergedItemsAsync(folders, options)).OrderBy(x => x.Level)];
 
     /// <inheritdoc/>
     override protected string GetItemPath(TObject item, bool useGuid, bool isFlat)

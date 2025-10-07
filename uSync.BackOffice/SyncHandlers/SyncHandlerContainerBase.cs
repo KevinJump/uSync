@@ -234,11 +234,16 @@ public abstract class SyncHandlerContainerBase<TObject>
     /// <summary>
     ///  Get merged items from a collection of folders. 
     /// </summary>
-    protected override async Task<IReadOnlyList<OrderedNodeInfo>> GetMergedItemsAsync(string[] folders)
+    protected override async Task<IReadOnlyList<OrderedNodeInfo>> GetMergedItemsAsync(string[] folders, SyncMergeOptions options)
     {
-        var items = await base.GetMergedItemsAsync(folders);
+        options.UpdateCallback?.Invoke("Order: Loading files from disk", 1, 5);
 
+        var items = await base.GetMergedItemsAsync(folders, options);
+
+        options.UpdateCallback?.Invoke("Order: Checking for duplicates", 2, 5);
         CheckForDuplicates(items);
+
+        options.UpdateCallback?.Invoke("Order: Sorting items", 3, 5);
 
         var nodes = items.DistinctBy(x => x.Key).ToDictionary(k => k.Key);
         var renames = nodes.Where(x => x.Value.Node.IsEmptyItem()).Select(x => x.Value);
@@ -258,11 +263,15 @@ public abstract class SyncHandlerContainerBase<TObject>
 
         var results = new List<OrderedNodeInfo>(sortedList.Count);
 
+        options?.UpdateCallback?.Invoke("Order: Building sorted list", 4, 5);
+
         foreach (var key in sortedList)
         {
             if (nodes.TryGetValue(key, out OrderedNodeInfo? value) && value is not null)
                 results.Add(value);
         }
+
+        options?.UpdateCallback?.Invoke("Order: Adding actions", 5, 5);
 
         if (renames.Any())
         {

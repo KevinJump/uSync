@@ -111,7 +111,7 @@ public partial class SyncService : ISyncService
 
 
     #region Importing
-    static SemaphoreSlim _importSemaphoreLock = new SemaphoreSlim(1, 1);
+    static readonly SemaphoreSlim _importSemaphoreLock = new SemaphoreSlim(1, 1);
 
     /// <inheritdoc/>>
     public async Task<IEnumerable<uSyncAction>> StartupImportAsync(string[] folders, bool force, SyncHandlerOptions handlerOptions, uSyncCallbacks? callbacks = null)

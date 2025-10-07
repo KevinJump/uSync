@@ -19,6 +19,7 @@ using Umbraco.Cms.Core.Strings;
 using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;
+using uSync.BackOffice.Models;
 using uSync.BackOffice.Services;
 using uSync.BackOffice.SyncHandlers.Interfaces;
 using uSync.BackOffice.SyncHandlers.Models;
@@ -72,8 +73,8 @@ public class LanguageHandler : SyncHandlerBase<ILanguage>, ISyncHandler,
     /// <summary>
     ///  order the merged items, making sure the default language is first. 
     /// </summary>
-    protected override async Task<IReadOnlyList<OrderedNodeInfo>> GetMergedItemsAsync(string[] folders)
-        => [.. (await base.GetMergedItemsAsync(folders)).OrderBy(x => x.Node.Element("IsDefault").ValueOrDefault(false) ? 0 : 1)];
+    protected override async Task<IReadOnlyList<OrderedNodeInfo>> GetMergedItemsAsync(string[] folders, SyncMergeOptions options)
+        => [.. (await base.GetMergedItemsAsync(folders, options)).OrderBy(x => x.Node.Element("IsDefault").ValueOrDefault(false) ? 0 : 1)];
 
     /// <summary>
     ///  ensure we import the 'default' language first, so we don't get errors doing it. 
@@ -162,7 +163,7 @@ public class LanguageHandler : SyncHandlerBase<ILanguage>, ISyncHandler,
         }
     }
 
-    private static ConcurrentDictionary<string, string> _newLanguages = new();
+    private readonly static ConcurrentDictionary<string, string> _newLanguages = new();
 
     /// <inheritdoc/>
     public override async Task HandleAsync(SavingNotification<ILanguage> notification, CancellationToken cancellationToken)
