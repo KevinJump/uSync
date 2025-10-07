@@ -11,5 +11,5 @@ public class SyncMergeOptions
         UpdateCallback = callback;
     }
 
-    public SyncUpdateCallback? UpdateCallback;
+    public SyncUpdateCallback? UpdateCallback { get; set; }
 }
