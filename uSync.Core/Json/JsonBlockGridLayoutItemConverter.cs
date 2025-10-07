@@ -30,33 +30,28 @@ public class JsonBlockGridLayoutItemConverter : JsonConverter<BlockGridLayoutIte
             switch (propertyName)
             {
                 case "areas":
-                case nameof(BlockGridLayoutItem.Areas):
                     var areas = JsonSerializer.Deserialize<List<BlockGridLayoutAreaItem>>(ref reader, options);
                     if (areas != null)
                         item.Areas = [.. areas];
                     break;
                 
                 case "columnSpan":
-                case nameof(BlockGridLayoutItem.ColumnSpan):
                     if (reader.TokenType == JsonTokenType.Number && reader.TryGetInt32(out var colSpan))
                         ((BlockGridLayoutItem)item).ColumnSpan = colSpan;
                     break;
                 
                 case "rowSpan":
-                case nameof(BlockGridLayoutItem.RowSpan):
                     if (reader.TokenType == JsonTokenType.Number && reader.TryGetInt32(out var rowSpan))
                         ((BlockGridLayoutItem)item).RowSpan = rowSpan;
                     break;
                 
                 case "contentKey":
-                case nameof(BlockGridLayoutItem.ContentKey):
                     var contentKey = reader.GetString();
                     if (contentKey != null && Guid.TryParse(contentKey, out var contentGuid))
                         item.ContentKey = contentGuid;
                     break;
                 
                 case "settingsKey":
-                case nameof(BlockGridLayoutItem.SettingsKey):
                     var settingsKey = reader.GetString();
                     if (settingsKey != null && Guid.TryParse(settingsKey, out var settingsGuid))
                         item.SettingsKey = settingsGuid;
