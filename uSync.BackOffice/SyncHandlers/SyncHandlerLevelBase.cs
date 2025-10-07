@@ -42,13 +42,7 @@ public abstract class SyncHandlerLevelBase<TObject>
         : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfig, syncItemFactory)
     { }
 
-    /// <summary>
-    ///  Sorts the loaded items. 
-    /// </summary>
-    /// <remarks>
-    ///  as we are already loading everything to merge, it doesn't
-    ///  then cost us much to sort them when we have to.
-    /// </remarks>
+    /// <inheritdoc/>
     protected override async Task<IReadOnlyList<OrderedNodeInfo>> GetMergedItemsAsync(string[] folders, SyncMergeOptions options)
         => [.. (await base.GetMergedItemsAsync(folders, options)).OrderBy(x => x.Level)];
 

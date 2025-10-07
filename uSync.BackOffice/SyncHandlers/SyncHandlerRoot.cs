@@ -330,6 +330,9 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         => await GetMergedItemsAsync(folders, new SyncMergeOptions());
 
 
+    /// <summary>
+    ///  method to get the merged folders, handlers that care about orders should override this.
+    /// </summary>
     protected virtual async Task<IReadOnlyList<OrderedNodeInfo>> GetMergedItemsAsync(string[] folders, SyncMergeOptions options)
     {
         var baseTracker = trackers.FirstOrDefault() as ISyncTrackerBase;

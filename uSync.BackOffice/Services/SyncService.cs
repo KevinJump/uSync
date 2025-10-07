@@ -239,6 +239,7 @@ public partial class SyncService : ISyncService
         return (await handlerConfig.Handler.ImportAsync(action.FileName, handlerConfig.Settings, true)).FirstOrDefault();
     }
 
+    /// <inheritdoc/>>
     public async Task<uSyncAction> ImportSingleItemAsync(Guid key, string handlerAlias)
     {
         var handlerConfig = _handlerFactory.GetValidHandler(handlerAlias);

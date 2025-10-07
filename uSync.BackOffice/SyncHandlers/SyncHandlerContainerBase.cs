@@ -231,9 +231,7 @@ public abstract class SyncHandlerContainerBase<TObject>
         return node.GetAlias().InvariantEquals(GetItemAlias(item));
     }
 
-    /// <summary>
-    ///  Get merged items from a collection of folders. 
-    /// </summary>
+    /// <inheritdoc/>
     protected override async Task<IReadOnlyList<OrderedNodeInfo>> GetMergedItemsAsync(string[] folders, SyncMergeOptions options)
     {
         options.UpdateCallback?.Invoke("Order: Loading files from disk", 1, 5);

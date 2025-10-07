@@ -41,6 +41,10 @@ public class SyncFinalActionRequest
     public uSyncCallbacks? Callbacks { get; set; }
 }
 
+
+/// <summary>
+///  Request model sent at the start of the process.
+/// </summary>
 public class SyncStartActionRequest
 {
     /// <summary>
