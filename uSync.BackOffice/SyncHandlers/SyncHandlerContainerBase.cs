@@ -263,7 +263,7 @@ public abstract class SyncHandlerContainerBase<TObject>
 
         var results = new List<OrderedNodeInfo>(sortedList.Count);
 
-        options?.UpdateCallback?.Invoke("Order: Building sorted list", 4, 5);
+        options.UpdateCallback?.Invoke("Order: Building sorted list", 4, 5);
 
         foreach (var key in sortedList)
         {
