@@ -704,7 +704,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
                 // but one does not simple set 'trashed' on a content item.
                 SetTrashed(latestItem);
 
-                AddRelation(relationAlias, restoreParent, item.Id);
+                AddRelation(relationAlias, restoreParent, latestItem.Id);
             }
 
             return Task.FromResult<uSyncChange?>(uSyncChange.Update("Moved to Bin", item.Name ?? item.Id.ToString(), "", "Recycle Bin"));
