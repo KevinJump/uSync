@@ -68,9 +68,9 @@ public class TemplateHandler : SyncHandlerLevelBase<ITemplate>, ISyncHandler, IS
     }
 
     /// <inheritdoc/>
-    protected override async Task<IReadOnlyList<OrderedNodeInfo>> GetMergedItemsAsync(string[] folders)
+    protected override async Task<IReadOnlyList<OrderedNodeInfo>> GetMergedItemsAsync(string[] folders, SyncMergeOptions options)
     {
-        var items = await base.GetMergedItemsAsync(folders);
+        var items = await base.GetMergedItemsAsync(folders, options);
         try
         {
             var results = new List<OrderedNodeInfo>();
