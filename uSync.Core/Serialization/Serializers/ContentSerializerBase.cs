@@ -674,11 +674,12 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
     {
         if (!trashed && item.Trashed)
         {
+            var latestItem = GetByKey(item.Key) ?? item;
             // if the item is trashed, then the change of it's parent 
             // should restore it (as long as we do a move!)
 
-            var restoreParentId = GetRelationParentId(item, restoreParent, relationAlias);
-            MoveItem(item, restoreParentId);
+            var restoreParentId = GetRelationParentId(latestItem, restoreParent, relationAlias);
+            MoveItem(latestItem, restoreParentId);
 
             // clean out any relations for this item (some versions of Umbraco don't do this on a Move)
             CleanRelations(item, relationAlias);
@@ -688,20 +689,21 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         }
         else if (trashed && !item.Trashed)
         {
+            var latestItem = GetByKey(item.Key) ?? item;
             // not already in the recycle bin?
-            if (item.ParentId > Constants.System.RecycleBinContent)
+            if (latestItem.ParentId > Constants.System.RecycleBinContent)
             {
                 // clean any relations that may be there (stops an error)
-                CleanRelations(item, relationAlias);
+                CleanRelations(latestItem, relationAlias);
 
                 // move to the recycle bin    
-                MoveToRecycleBin(item);
+                MoveToRecycleBin(latestItem);
             }
             else
             {
                 // on first import the item might be in the recycle bin, but not marked as trash.
                 // but one does not simple set 'trashed' on a content item.
-                SetTrashed(item);
+                SetTrashed(latestItem);
 
                 AddRelation(relationAlias, restoreParent, item.Id);
             }
