@@ -5,23 +5,14 @@ using Umbraco.Cms.Core.Models.Blocks;
 
 namespace uSync.Core.Json;
 
-/// <summary>
-/// in v16 the BlockLayoutItem(s) have obsolete properties that are sometimes set and sometimes not
-/// this leads to false positive's when looking for changes. 
-/// 
-///  these two custom converters write those properties out as null, so they never change. causing
-///  the serialized json to be consistent. 
-/// </summary>
-
-public abstract class JsonBlockItemConverterBase<T> : JsonConverter<T>
-    where T : BlockLayoutItemBase, new()
+public class JsonBlockListLayoutItemConverter : JsonConverter<BlockListLayoutItem>
 {
-    public override T? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override BlockListLayoutItem? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType != JsonTokenType.StartObject)
             throw new JsonException("Invalid JSON expecting start object");
 
-        var item = new T();
+        var item = new BlockListLayoutItem();
 
         while (reader.Read())
         {
@@ -29,7 +20,7 @@ public abstract class JsonBlockItemConverterBase<T> : JsonConverter<T>
                 return item;
 
             if (reader.TokenType != JsonTokenType.PropertyName)
-                throw new JsonException("Expecting property name");
+                throw new JsonException("Invalid JSON expecting property name");
 
             var propertyName = reader.GetString();
             reader.Read();
@@ -55,7 +46,7 @@ public abstract class JsonBlockItemConverterBase<T> : JsonConverter<T>
         throw new JsonException("Unexpected end of JSON");
     }
 
-    public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, BlockListLayoutItem value, JsonSerializerOptions options)
     {
         // we could just not write out the obsolete properties, but they will appear as null it 
         // lots of people's existing exports , so we can write them out as null to keep things consistent.
@@ -72,7 +63,3 @@ public abstract class JsonBlockItemConverterBase<T> : JsonConverter<T>
         writer.WriteEndObject();
     }
 }
-
-public class JsonBlockListLayoutItemConverter : JsonBlockItemConverterBase<BlockListLayoutItem> { }
-
-public class JsonBlockGridLayoutItemConverter : JsonBlockItemConverterBase<BlockGridLayoutItem> { }
