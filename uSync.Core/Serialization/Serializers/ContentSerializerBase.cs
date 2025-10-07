@@ -681,7 +681,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
             MoveItem(latestItem, restoreParentId);
 
             // clean out any relations for this item (some versions of Umbraco don't do this on a Move)
-            CleanRelations(item, relationAlias);
+            CleanRelations(latestItem, relationAlias);
 
             return Task.FromResult<uSyncChange?>(uSyncChange.Update("Restored", item.Name ?? item.Id.ToString(), "Recycle Bin", restoreParent.ToString()));
 
