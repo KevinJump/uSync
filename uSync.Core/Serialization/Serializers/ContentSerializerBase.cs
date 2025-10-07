@@ -641,9 +641,8 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
 
             var currentSortOrder = item.SortOrder;
 
-            var updatedItem = GetByKey(item.Key);
-            if (updatedItem is not null)
-                updatedItem.SortOrder = sortOrder; ;
+            var updatedItem = GetByKey(item.Key) ?? item;
+            updatedItem.SortOrder = sortOrder;
 
             return uSyncChange.Update(uSyncConstants.Xml.SortOrder, uSyncConstants.Xml.SortOrder, currentSortOrder, sortOrder);
         }
