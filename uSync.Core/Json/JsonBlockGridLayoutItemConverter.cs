@@ -34,12 +34,12 @@ public class JsonBlockGridLayoutItemConverter : JsonConverter<BlockGridLayoutIte
                 
                 case "columnSpan":
                     if (reader.TokenType == JsonTokenType.Number && reader.TryGetInt32(out var colSpan))
-                        ((BlockGridLayoutItem)item).ColumnSpan = colSpan;
+                        item.ColumnSpan = colSpan;
                     break;
                 
                 case "rowSpan":
                     if (reader.TokenType == JsonTokenType.Number && reader.TryGetInt32(out var rowSpan))
-                        ((BlockGridLayoutItem)item).RowSpan = rowSpan;
+                        item.RowSpan = rowSpan;
                     break;
                 
                 case "contentKey":
