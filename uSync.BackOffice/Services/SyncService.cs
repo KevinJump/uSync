@@ -132,7 +132,7 @@ public partial class SyncService : ISyncService
 
         if (_lastStartupRun.HasValue && _lastStartupRun.Value == runHash)
         {
-            _logger.LogInformation("uSync Startup Import: Skipping duplicate import");
+            _logger.LogInformation("uSync: Skipping [duplicate] startup import has already ran with these parameters");
             return [];
         }
 
