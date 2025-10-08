@@ -128,7 +128,7 @@ public partial class SyncService : ISyncService
     /// <inheritdoc/>>
     public async Task<IEnumerable<uSyncAction>> StartupImportAsync(string[] folders, bool force, SyncHandlerOptions handlerOptions, uSyncCallbacks? callbacks = null)
     {
-        var runHash = $"{string.Join(",", folders)}|{force}|{handlerOptions.SerializeJsonString(false)}".GetDeterministicHashCode();
+        var runHash = $"{string.Join(",", folders)}{force}{handlerOptions.SerializeJsonString(false)}".GetDeterministicHashCode();
 
         if (_lastStartupRun.HasValue && _lastStartupRun.Value == runHash)
         {
