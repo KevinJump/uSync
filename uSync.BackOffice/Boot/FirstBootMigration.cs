@@ -58,19 +58,16 @@ public class FirstBootMigration : UnscopedAsyncMigrationBase
     /// <inheritdoc/>
     protected override async Task MigrateAsync()
     {
-        if (_serverRoleAccessor.CurrentServerRole == ServerRole.Subscriber)
-        {
-            _logger.LogInformation("This is a Subscriber server in a load balanced setup - uSync only runs on single or schedulingPublisher (main) servers");
-            Context.Complete();
-            return;
-        }
 
         // first boot migration. 
         try
         {
             if (!_uSyncConfig.Settings.ImportOnFirstBoot)
+                return;
+
+            if (_serverRoleAccessor.CurrentServerRole == ServerRole.Subscriber)
             {
-                Context.Complete();
+                _logger.LogInformation("This is a Subscriber server in a load balanced setup - uSync only runs on single or schedulingPublisher (main) servers");
                 return;
             }
 
@@ -105,7 +102,11 @@ public class FirstBootMigration : UnscopedAsyncMigrationBase
         {
             _logger.LogError(ex, "uSync First boot failed {message}", ex.Message);
         }
-
-        Context.Complete();
+        finally
+        {
+            // we always complete the context - even if we fail.
+            // we don't want to keep trying this migration every time.
+            Context.Complete();
+        }        
     }
 }
