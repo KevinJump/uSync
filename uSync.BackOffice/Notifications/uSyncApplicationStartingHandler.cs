@@ -120,8 +120,8 @@ internal class uSyncApplicationStartingHandler : INotificationAsyncHandler<Umbra
                     };
 
                     _logger.LogInformation("uSync: Running export at startup");
-
-
+                    
+                    
                     _uSyncService.StartupExportAsync(_uSyncConfig.GetWorkingFolder(), options).Wait();
                 }
 
@@ -131,10 +131,10 @@ internal class uSyncApplicationStartingHandler : INotificationAsyncHandler<Umbra
 
                     if (!HasStopFile(_uSyncConfig.GetWorkingFolder()))
                     {
-                        _uSyncService.StartupImportAsync(_uSyncConfig.GetFolders(), false, new SyncHandlerOptions
+                        await _uSyncService.StartupImportAsync(_uSyncConfig.GetFolders(), false, new SyncHandlerOptions
                         {
                             Group = _uSyncConfig.Settings.ImportAtStartup
-                        }).Wait();
+                        });
 
                         await ProcessOnceFileAsync(_uSyncConfig.GetWorkingFolder());
                     }
