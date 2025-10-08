@@ -206,10 +206,10 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
 
         // published status
         // this does the last save and publish
-        var saveAttempt = DoSaveOrPublish(item, node, options);
+        var saveAttempt = await DoSaveOrPublishAsync(item, node, options);
         if (saveAttempt.Success)
         {
-            var message = saveAttempt.Result;
+            var message = saveAttempt.Message;
 
             if (details.Any(x => x.Change == ChangeDetailType.Warning))
                 message += $" with warning(s)";
@@ -224,11 +224,11 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
 
             // we say no change back, this stops the core second pass function from saving 
             // this item (which we have just done with DoSaveOrPublish)
-            return SyncAttempt<IContent>.Succeed(item.Name ?? item.Id.ToString(), item, changeType, message ?? string.Empty, true, details);
+            return SyncAttempt<IContent>.Succeed(item.Name ?? item.Id.ToString(), saveAttempt.Content, changeType, message ?? string.Empty, true, details);
         }
         else
         {
-            return SyncAttempt<IContent>.Fail(item.Name ?? item.Id.ToString(), item, ChangeType.ImportFail, saveAttempt.Result ?? string.Empty, saveAttempt.Exception);
+            return SyncAttempt<IContent>.Fail(item.Name ?? item.Id.ToString(), item, ChangeType.ImportFail, saveAttempt.Message ?? string.Empty, saveAttempt.Exception);
         }
     }
 
@@ -291,7 +291,6 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
     public override async Task<SyncAttempt<IContent>> DeserializeSecondPassAsync(IContent item, XElement node, SyncSerializerOptions options)
     {
         var details = new List<uSyncChange>();
-
         // move trashed state to second pass, as the item needs an Id for the relation to work. 
         details.AddNotNull(await DeserializeTrashed(node, item, Constants.Conventions.RelationTypes.RelateParentDocumentOnDeleteAlias));
 
@@ -378,8 +377,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
                 if (changes.Count != 0)
                 {
                     logger.LogDebug("Saving Schedule changes: {item}", item.Name);
-                    var latest = GetByKey(item.Key) ?? item;
-                    contentService.PersistContentSchedule(latest, currentSchedules);
+                    contentService.PersistContentSchedule(item, currentSchedules);
                     return changes;
                 }
 
@@ -415,13 +413,19 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
     protected override void MoveItem(IContent item, int parentId) => contentService.Move(item, parentId);
     protected override IContent? GetByKey(Guid id) => contentService.GetById(id);
 
-
+    [Obsolete("Use DoSaveOrPublishAsync will be removed in v18")]
     protected virtual Attempt<string?> DoSaveOrPublish(IContent item, XElement node, SyncSerializerOptions options)
+    {
+        SyncContentUpdateResult result = DoSaveOrPublishAsync(item, node, options).Result;
+        return Attempt.If(result.Success, result.Message);
+    }
+
+    protected virtual async Task<SyncContentUpdateResult> DoSaveOrPublishAsync(IContent item, XElement node, SyncSerializerOptions options)
     {
         if (options.GetSetting(uSyncConstants.DefaultSettings.OnlyPublishDirty, uSyncConstants.DefaultSettings.OnlyPublishDirty_Default) && !item.IsDirty())
         {
             logger.LogDebug("{name} not publishing because nothing is dirty [{dirty} {userDirty}]", item.Name, item.IsDirty(), item.IsAnyUserPropertyDirty());
-            return Attempt.Succeed("No Changes");
+            return new SyncContentUpdateResult(true, item, "No changes");
         }
 
         var trashed = item.Trashed || (node.Element(uSyncConstants.Xml.Info)?.Element("Trashed").ValueOrDefault(false) ?? false);
@@ -445,7 +449,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
             {
                 // something went wrong saving. ???
                 logger.LogWarning("Failed to save item {name} [{messages}]", item.Name, result.EventMessages?.FormatMessages(",") ?? "(none)");
-                return Attempt.Fail($"Failed to save {item.Name} [{result.EventMessages?.FormatMessages(",") ?? "(none)"}]");
+                return new SyncContentUpdateResult(false, item, $"Failed to save {item.Name} [{result.EventMessages?.FormatMessages(",") ?? "(none)"}]");
             }
 
             if (publishedNode.HasElements)
@@ -478,7 +482,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
 
                 if (cultureStatuses.Count > 0)
                 {
-                    return PublishItem(item, cultureStatuses, unpublishMissingCultures, options.UserId);
+                    return await PublishItemAsync(item, cultureStatuses, unpublishMissingCultures, options.UserId);
                 }
             }
             else
@@ -491,7 +495,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
 
                 if (state == uSyncContentState.Published)
                 {
-                    return PublishItem(item, options.UserId);
+                    return await PublishItemAsync(item, options.UserId);
                 }
                 else if (state == uSyncContentState.Unpublished && item.Published == true)
                 {
@@ -503,11 +507,11 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
         {
             // save?
             logger.LogDebug("Performing Save (Not published): {id} {name}", item.Id, item.Name);
-            contentService.Save(item, options.UserId);
-
+            await SaveItemAsync(item, options.UserId);
+            item = contentService.GetById(item.Id) ?? item;
         }
 
-        return Attempt.Succeed("Saved");
+        return new SyncContentUpdateResult(true, item, "Saved");
     }
 
     /// <summary>
@@ -527,7 +531,20 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
         return schedules;
     }
 
+    /// <summary>
+    ///  Publish a single item, all cultures
+    /// </summary>
+    [Obsolete("Use PublishItemAsync will be removed in v18")]
     public Attempt<string?> PublishItem(IContent item, int userId)
+    {
+        var result = PublishItemAsync(item, userId).Result;
+        return Attempt.If(result.Success, result.Message);
+    }
+
+    /// <summary>
+    ///  Publish a single item, all cultures
+    /// </summary>
+    public Task<SyncContentUpdateResult> PublishItemAsync(IContent item, int userId)
     {
         try
         {
@@ -543,30 +560,43 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
                 }
 
             }
-            return result.ToAttempt();
+
+            return Task.FromResult(result.FromPublishResult());
         }
         catch (ArgumentNullException ex)
         {
             // we can get thrown a null argument exception by the notifier, 
             // which is non critical! but we are ignoring this error. ! <= 8.1.5
             if (!ex.Message.Contains("siteUri")) throw;
-            return Attempt.Succeed($"Published");
+
+            return Task.FromResult(new SyncContentUpdateResult
+            {
+                Success = true,
+                Content = GetByKey(item.Key) ?? item,
+                Message = "Published",
+                Exception = ex
+            });
         }
     }
 
     /// <summary>
     ///  Publish/unpublish Specified cultures for an item, and optionally un-publish missing cultures
     /// </summary>
-    /// <param name="item"></param>
-    /// <param name="cultures"></param>
-    /// <param name="unpublishMissing"></param>
-    /// <returns></returns>
+    [Obsolete("Use PublishItemAsync will be removed in v18")]
     private Attempt<string?> PublishItem(IContent item, IDictionary<string, uSyncContentState> cultures, bool unpublishMissing, int userId)
     {
-        if (cultures == null) return PublishItem(item, userId);
+        var result = PublishItemAsync(item, cultures, unpublishMissing, userId).Result;
+        return Attempt.If(result.Success, result.Message);
+    }
+
+    private async Task<SyncContentUpdateResult> PublishItemAsync(IContent item, IDictionary<string, uSyncContentState> cultures, bool unpublishMissing, int userId)
+    {
+        if (cultures == null) return await PublishItemAsync(item, userId);
 
         try
         {
+            IContent content = item;
+
             var publishedCultures = cultures
                 .Where(x => x.Value == uSyncContentState.Published)
                 .Select(x => x.Key)
@@ -589,8 +619,10 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
                         logger.LogError("Invalid Properties: {properties}", string.Join(", ", result.InvalidProperties.Select(x => x.Alias)));
                     }
 
-                    return result.ToAttempt();
+                    return result.FromPublishResult();
                 }
+
+                content = result.Content;
             }
 
             var unpublishedCultures = cultures
@@ -609,23 +641,34 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
                         logger.LogDebug("Unpublishing {item} as {user} for {culture}",
                             item.Name, userId, culture);
 
-                        contentService.Unpublish(item, culture, userId);
+                        var result = contentService.Unpublish(item, culture, userId);
+                        if (result.Success)
+                            content = result.Content;
                     }
 
                 }
             }
 
             if (unpublishMissing)
-                UnpublishMissingCultures(item, [.. cultures.Select(x => x.Key)]);
+            {
+                content = UnpublishMissingCultures(item, [.. cultures.Select(x => x.Key)]);
+            }
 
-            return Attempt.Succeed("Done");
+            return new SyncContentUpdateResult(true, content, "Done");
         }
         catch (ArgumentNullException ex)
         {
             // we can get thrown a null argument exception by the notifier, 
             // which is non critical! but we are ignoring this error. ! <= 8.1.5
             if (!ex.Message.Contains("siteUri")) throw;
-            return Attempt.Succeed($"Published");
+
+            return new SyncContentUpdateResult
+            {
+                Success = true,
+                Content = GetByKey(item.Key) ?? item,
+                Message = "Published",
+                Exception = ex
+            };
         }
     }
     /// <summary>
@@ -634,8 +677,10 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
     /// </summary>
     /// <param name="item"></param>
     /// <param name="publishedCultures"></param>
-    private void UnpublishMissingCultures(IContent item, string[] allCultures)
+    private IContent UnpublishMissingCultures(IContent item, string[] allCultures)
     {
+        IContent content = item;
+
         var missingCultures = item
             .PublishedCultures
             .Where(x => !allCultures.InvariantContains(x))
@@ -646,9 +691,13 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
             foreach (var culture in missingCultures)
             {
                 logger.LogDebug("Unpublishing {item} culture not defined in config file {culture}", item.Name, culture);
-                contentService.Unpublish(item, culture);
+                var result = contentService.Unpublish(item, culture);
+                if (result.Success)
+                    content = result.Content;
             }
         }
+
+        return content;
     }
 
     #endregion

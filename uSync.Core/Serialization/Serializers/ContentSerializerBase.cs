@@ -640,9 +640,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
             logger.LogTrace("{id} Setting Sort Order {sortOrder}", item.Name ?? item.Key.ToString(), sortOrder);
 
             var currentSortOrder = item.SortOrder;
-
-            var updatedItem = GetByKey(item.Key) ?? item;
-            updatedItem.SortOrder = sortOrder;
+            item.SortOrder = sortOrder;
 
             return uSyncChange.Update(uSyncConstants.Xml.SortOrder, uSyncConstants.Xml.SortOrder, currentSortOrder, sortOrder);
         }
@@ -673,38 +671,36 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
     {
         if (!trashed && item.Trashed)
         {
-            var latestItem = GetByKey(item.Key) ?? item;
             // if the item is trashed, then the change of it's parent 
             // should restore it (as long as we do a move!)
 
-            var restoreParentId = GetRelationParentId(latestItem, restoreParent, relationAlias);
-            MoveItem(latestItem, restoreParentId);
+            var restoreParentId = GetRelationParentId(item, restoreParent, relationAlias);
+            MoveItem(item, restoreParentId);
 
             // clean out any relations for this item (some versions of Umbraco don't do this on a Move)
-            CleanRelations(latestItem, relationAlias);
+            CleanRelations(item, relationAlias);
 
             return Task.FromResult<uSyncChange?>(uSyncChange.Update("Restored", item.Name ?? item.Id.ToString(), "Recycle Bin", restoreParent.ToString()));
 
         }
         else if (trashed && !item.Trashed)
         {
-            var latestItem = GetByKey(item.Key) ?? item;
             // not already in the recycle bin?
-            if (latestItem.ParentId > Constants.System.RecycleBinContent)
+            if (item.ParentId > Constants.System.RecycleBinContent)
             {
                 // clean any relations that may be there (stops an error)
-                CleanRelations(latestItem, relationAlias);
+                CleanRelations(item, relationAlias);
 
                 // move to the recycle bin    
-                MoveToRecycleBin(latestItem);
+                MoveToRecycleBin(item);
             }
             else
             {
                 // on first import the item might be in the recycle bin, but not marked as trash.
                 // but one does not simple set 'trashed' on a content item.
-                SetTrashed(latestItem);
+                SetTrashed(item);
 
-                AddRelation(relationAlias, restoreParent, latestItem.Id);
+                AddRelation(relationAlias, restoreParent, item.Id);
             }
 
             return Task.FromResult<uSyncChange?>(uSyncChange.Update("Moved to Bin", item.Name ?? item.Id.ToString(), "", "Recycle Bin"));
