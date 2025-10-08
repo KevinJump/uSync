@@ -535,7 +535,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
             if (result.Success && result.Change > ChangeType.NoChange && result.Saved is false && result.Item is not null)
             {
                 logger.LogTrace("Second Pass Import for {alias} - Saving item {key}", this.Alias, node.GetKey());
-                await serializer.SaveAsync(result.Item.AsEnumerableOfOne());
+                await serializer.SaveItemAsync(result.Item);
             }
 
             return uSyncActionHelper<TObject>.SetAction(result, syncFileService.GetSiteRelativePath(fileName), node.GetKey(), this.Alias).AsEnumerableOfOne();
