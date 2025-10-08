@@ -22,6 +22,7 @@ using uSync.BackOffice.Services;
 using uSync.BackOffice.SyncHandlers;
 using uSync.BackOffice.SyncHandlers.Models;
 using uSync.Core;
+using uSync.Core.Extensions;
 using uSync.Core.Serialization;
 
 namespace uSync.BackOffice;
@@ -113,9 +114,28 @@ public partial class SyncService : ISyncService
     #region Importing
     static readonly SemaphoreSlim _importSemaphoreLock = new SemaphoreSlim(1, 1);
 
+    /// <summary>
+    ///  hash of the options last used in a startup import
+    /// </summary>
+    /// <remarks>
+    ///  as both first boot and import at startup use this method,
+    ///  and both can be triggered at startup, we use a hash of the 
+    ///  options and folders to make sure we are not running them 
+    ///  both if they are asking the same thing. 
+    /// </remarks>
+    static int? _lastStartupRun;
+
     /// <inheritdoc/>>
     public async Task<IEnumerable<uSyncAction>> StartupImportAsync(string[] folders, bool force, SyncHandlerOptions handlerOptions, uSyncCallbacks? callbacks = null)
     {
+        var runHash = $"{string.Join(",", folders)}|{force}|{handlerOptions.SerializeJsonString(false)}".GetDeterministicHashCode();
+
+        if (_lastStartupRun.HasValue && _lastStartupRun.Value == runHash)
+        {
+            _logger.LogInformation("uSync Startup Import: Skipping duplicate import");
+            return [];
+        }
+
         handlerOptions ??= new SyncHandlerOptions();
         handlerOptions.Action = HandlerActions.Import;
         var handlers = _handlerFactory.GetValidHandlers(handlerOptions);
@@ -126,6 +146,8 @@ public partial class SyncService : ISyncService
         // just because it seems not to refresh as part of the boot. 
         if (changes.Any(x => x.Change > ChangeType.NoChange && x.ItemType == "IContent"))
             _distributedCache.RefreshAllPublishedSnapshot();
+
+        _lastStartupRun = runHash;
 
         return changes;
     }
