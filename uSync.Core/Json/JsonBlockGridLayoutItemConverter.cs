@@ -60,7 +60,7 @@ public class JsonBlockGridLayoutItemConverter : JsonConverter<BlockGridLayoutIte
             }
         }
 
-        throw new JsonException("Unexpected end of JSON block");
+        throw new JsonException("Unexpected end of JSON");
     }
 
     public override void Write(Utf8JsonWriter writer, BlockGridLayoutItem value, JsonSerializerOptions options)
