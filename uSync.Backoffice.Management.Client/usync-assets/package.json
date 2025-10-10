@@ -8,7 +8,7 @@
 	"homepage": "https://jumoo.co.uk/uSync",
 	"license": "MPL-2.0",
 	"type": "module",
-	"version": "16.1.0-build.20251010.2",
+	"version": "16.1.0-build.20251010.5",
 	"main": "./dist/usync.js",
 	"types": "./dist/index.d.ts",
 	"module": "./dist/usync.js",
@@ -43,7 +43,7 @@
 	"scripts": {
 		"client:build": "tsc --project ./tsconfig.dist.json",
 		"client:pack": "npm pack --pack-destination ./pack",
-		"client:publish": "npm publish",
+		"client:publish": "npm publish --tag next",
 		"client:make": "npm run client:build && npm run client:pack && npm run client:publish",
 		"client:link": "npm link",
 		"generate": "openapi-ts",

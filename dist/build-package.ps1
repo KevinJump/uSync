@@ -31,8 +31,10 @@ if ($version.IndexOf('-') -ne -1) {
 }
 
 $fullVersion = $version;
+$finalRelease = $true;
 
 if (![string]::IsNullOrWhiteSpace($suffix)) {
+   $finalRelease = $false;
    $fullVersion = -join($version, '-', $suffix)
 }
 
@@ -64,7 +66,28 @@ else {
     Set-Location ..\uSync.Backoffice.Management.Client\usync-assets\
 
     npm version $fullVersion 
-    npm run make
+    ## npm run make
+
+    ""; "'### Building uSync client"; "----------------------------------" ; ""
+    ## build Client
+    npm run build
+
+    ""; "### Build uSync Package"; "----------------------------------" ; ""
+    ## build the npm package version 
+    npm run client:build
+
+    ""; "### Packaging uSync Package"; "----------------------------------" ; ""
+    ## pack the package 
+    npm run client:pack
+
+    ""; "### Publishing uSync Package"; "----------------------------------" ; ""
+    ## publish the package . 
+    if (!$finalRelease) {
+        npm publish --tag next 
+    }
+    else {
+        npm publish --tag latest
+    }
 
     Set-Location ..\..\dist
 }
