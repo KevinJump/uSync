@@ -89,6 +89,9 @@ else {
         npm publish --tag latest
     }
 
+    ## stamp the version, just means this value does not change per test build
+    npm version $version;
+
     Set-Location ..\..\dist
 }
 
