@@ -607,7 +607,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
     }
 
     /// <summary>
-    ///  things most 'IContentBase' serializers need (ones that have trash anyway).
+    ///  Things most 'IContentBase' serializers need (ones that have trash anyway).
     /// </summary>
     protected async Task<List<uSyncChange>> DeserializeSecondPassSharedAsync(TObject item, XElement node, SyncSerializerOptions options)
     {
