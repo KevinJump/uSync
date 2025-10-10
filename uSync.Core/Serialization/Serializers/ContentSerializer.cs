@@ -291,20 +291,8 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
     public override async Task<SyncAttempt<IContent>> DeserializeSecondPassAsync(IContent item, XElement node, SyncSerializerOptions options)
     {
         var details = new List<uSyncChange>();
-        // move trashed state to second pass, as the item needs an Id for the relation to work. 
-        details.AddNotNull(await DeserializeTrashed(node, item, Constants.Conventions.RelationTypes.RelateParentDocumentOnDeleteAlias));
 
-        // move sort to second pass, as if we attempt to set this 
-        // on a brand new item, it doesn't get set. 
-        // doing it on second pass ensures it gets set on the item
-        // after it has been saved by umbraco. 
-        if (!options.GetSetting<bool>(
-            uSyncConstants.DefaultSettings.IgnoreSortOrder,
-            uSyncConstants.DefaultSettings.IgnoreSortOrder_Default))
-        {
-            var sortOrder = node.Element(uSyncConstants.Xml.Info)?.Element(uSyncConstants.Xml.SortOrder).ValueOrDefault(-1) ?? -1;
-            details.AddNotNull(HandleSortOrder(item, sortOrder));
-        }
+        details.AddRange(await this.DeserializeSecondPassSharedAsync(item, node, options));
 
         var changes = await DeserializeSchedulesAsync(item, node, options);
         if (changes.Count != 0)

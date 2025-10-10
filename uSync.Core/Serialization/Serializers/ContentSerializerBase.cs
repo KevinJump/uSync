@@ -607,6 +607,32 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
     }
 
     /// <summary>
+    ///  things most 'IContentBase' serializers need (ones that have trash anyway).
+    /// </summary>
+    protected async Task<List<uSyncChange>> DeserializeSecondPassSharedAsync(TObject item, XElement node, SyncSerializerOptions options)
+    {
+        var details = new List<uSyncChange>();
+
+        // move trashed state to second pass, as the item needs an Id for the relation to work. 
+        details.AddNotNull(await DeserializeTrashed(node, item, Constants.Conventions.RelationTypes.RelateParentDocumentOnDeleteAlias));
+
+        // move sort to second pass, as if we attempt to set this 
+        // on a brand new item, it doesn't get set. 
+        // doing it on second pass ensures it gets set on the item
+        // after it has been saved by umbraco. 
+        if (!options.GetSetting<bool>(
+            uSyncConstants.DefaultSettings.IgnoreSortOrder,
+            uSyncConstants.DefaultSettings.IgnoreSortOrder_Default))
+        {
+            var sortOrder = node.Element(uSyncConstants.Xml.Info)?.Element(uSyncConstants.Xml.SortOrder).ValueOrDefault(-1) ?? -1;
+            details.AddNotNull(HandleSortOrder(item, sortOrder));
+        }
+
+        return details;
+    }
+
+
+    /// <summary>
     ///  compares to object values to see if they are the same. 
     /// </summary>
     /// <remarks>
