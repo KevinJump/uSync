@@ -4,6 +4,8 @@ using Microsoft.OpenApi.Models;
 
 using Swashbuckle.AspNetCore.SwaggerGen;
 
+using Umbraco.Cms.Api.Management.OpenApi;
+
 namespace uSync.Backoffice.Management.Api.Configuration;
 public class ConfigSyncApiSwaggerGenOptions : IConfigureOptions<SwaggerGenOptions>
 {
@@ -18,5 +20,12 @@ public class ConfigSyncApiSwaggerGenOptions : IConfigureOptions<SwaggerGenOption
               Description = "Api access uSync operations"
           });
 
+        options.OperationFilter<uSyncClientOperationSecurityFilter>();
+
     }
+}
+
+public class uSyncClientOperationSecurityFilter : BackOfficeSecurityRequirementsOperationFilterBase
+{
+    protected override string ApiName => "uSync";
 }
