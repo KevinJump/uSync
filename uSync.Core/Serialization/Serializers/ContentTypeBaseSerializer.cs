@@ -185,14 +185,19 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         var allowedTypeOrdered = item.AllowedContentTypes?.OrderBy(x => x.SortOrder);
         if (allowedTypeOrdered is null) return node;
 
+        int defaultSortOrder = 0;
         foreach (var allowedType in allowedTypeOrdered)
         {
             var allowedItem = await FindItemAsync(allowedType.Key);
             if (allowedItem != null)
             {
+                var sortOrder = allowedType.SortOrder > 0 ? allowedType.SortOrder : defaultSortOrder;
+
                 node.Add(new XElement(ItemType,
                     new XAttribute(uSyncConstants.Xml.Key, allowedItem.Key),
-                    new XAttribute(uSyncConstants.Xml.SortOrder, allowedType.SortOrder), allowedItem.Alias));
+                    new XAttribute(uSyncConstants.Xml.SortOrder, sortOrder), allowedItem.Alias));
+
+                defaultSortOrder = sortOrder + 1;
             }
         }
         return node;
@@ -346,7 +351,11 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
 
         int sortOrder = 0;
 
-        foreach (var baseNode in structure.Elements(ItemType))
+        // do it in the sort order (if there is one). 
+        // makes it more likely to 'work' first time.
+        var nodes = structure.Elements(ItemType).OrderBy(x => x.Attribute(uSyncConstants.Xml.SortOrder).ValueOrDefault(int.MinValue));
+
+        foreach (var baseNode in nodes)
         {
             logger.LogDebug("baseNode {base}", baseNode.ToString());
             var alias = baseNode.Value;
@@ -375,34 +384,30 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
 
             if (baseItem != null)
             {
-                logger.LogDebug("Structure Found {alias}", baseItem.Alias);
                 allowed.Add(new ContentTypeSort(baseItem.Key, itemSortOrder, baseItem.Alias));
                 sortOrder = itemSortOrder + 1;
             }
         }
 
-        logger.LogDebug("Structure: {count} items", allowed.Count);
-
-
         if (item.AllowedContentTypes is not null)
         {
             // compare the two lists (the equality compare fails because the id value is lazy)
-            var currentHash = string.Join(":", item.AllowedContentTypes.Select(x => $"{x.Key}-{x.SortOrder}").OrderBy(x => x));
-            var newHash = string.Join(":", allowed.Select(x => $"{x.Key}-{x.SortOrder}").OrderBy(x => x));
+            var currentHash = string.Join(":", item.AllowedContentTypes.Select(x => $"{x.Key}-{x.SortOrder}").OrderBy(x => x)).GetDeterministicHashCode();
+            var newHash = string.Join(":", allowed.Select(x => $"{x.Key}-{x.SortOrder}").OrderBy(x => x)).GetDeterministicHashCode();
 
-            if (!currentHash.Equals(newHash))
+            if (currentHash.Equals(newHash) is false)
             {
                 changes.AddUpdate("Allowed",
-                    string.Join(",", item.AllowedContentTypes.Select(x => x.Alias) ?? []),
-                    string.Join(",", allowed.Select(x => x.Alias) ?? []), "/Structure");
+                    string.Join("::", item.AllowedContentTypes.Select(x => x.Alias)?? []),
+                    string.Join("::", allowed.Select(x => x.Alias) ?? []), "/Structure");
 
-                logger.LogDebug("Updating allowed content types {old}, {new}", currentHash, newHash);
-                item.AllowedContentTypes = allowed;
+                item.AllowedContentTypes = allowed.OrderBy(x => x.SortOrder);
             }
         }
         else
         {
-            item.AllowedContentTypes = allowed;
+            changes.AddNew("Allowed", string.Join("::", allowed.Select(x => x.Alias) ?? []), "/Structure");
+            item.AllowedContentTypes = allowed.OrderBy(x => x.SortOrder);
         }
 
         return changes;
@@ -1348,7 +1353,12 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
 
     public override async Task SaveItemAsync(TObject item)
     {
-        if (item.IsDirty() is false) return;
+        logger.LogDebug("Save Item {name} ({alias})", item.Name, item.Alias);
+        if (item.IsDirty() is false)
+        {
+            logger.LogDebug("Item not dirty, skipping save");
+            return;
+        }
 
         if (item.Id <= 0)
         {
