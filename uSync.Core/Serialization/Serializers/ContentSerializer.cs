@@ -433,7 +433,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
             logger.LogDebug("Performing Save: {id} {name}", item.Id, item.Name);
             var result = contentService.Save(item, options.UserId, scheduleCollection);
             if (result.Success)
-                item = contentService.GetById(item.Id)!;
+                item = contentService.GetById(item.Id) ?? item;
             else
             {
                 // something went wrong saving. ???
