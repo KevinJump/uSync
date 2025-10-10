@@ -292,7 +292,8 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
     {
         var details = new List<uSyncChange>();
 
-        details.AddRange(await this.DeserializeSecondPassSharedAsync(item, node, options));
+        details.AddRange(await this.DeserializeSecondPassSharedAsync(item, node, options,
+             Constants.Conventions.RelationTypes.RelateParentDocumentOnDeleteAlias));
 
         var changes = await DeserializeSchedulesAsync(item, node, options);
         if (changes.Count != 0)

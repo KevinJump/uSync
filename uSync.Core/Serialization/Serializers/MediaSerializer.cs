@@ -99,7 +99,8 @@ public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncSerializer<IM
 
     public override async Task<SyncAttempt<IMedia>> DeserializeSecondPassAsync(IMedia item, XElement node, SyncSerializerOptions options)
     {
-        var details = await DeserializeSecondPassSharedAsync(item, node, options);
+        var details = await DeserializeSecondPassSharedAsync(item, node, options,
+             Constants.Conventions.RelationTypes.RelateParentMediaFolderOnDeleteAlias);
 
         return SyncAttempt<IMedia>.Succeed(item.Name ?? item.Id.ToString(), item,
             details.Count == 0 ? ChangeType.NoChange : ChangeType.Import, details);

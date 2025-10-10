@@ -609,12 +609,13 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
     /// <summary>
     ///  things most 'IContentBase' serializers need (ones that have trash anyway).
     /// </summary>
-    protected async Task<List<uSyncChange>> DeserializeSecondPassSharedAsync(TObject item, XElement node, SyncSerializerOptions options)
+    protected async Task<List<uSyncChange>> DeserializeSecondPassSharedAsync(TObject item, XElement node, SyncSerializerOptions options
+        string trashedRelationAlias)
     {
         var details = new List<uSyncChange>();
 
         // move trashed state to second pass, as the item needs an Id for the relation to work. 
-        details.AddNotNull(await DeserializeTrashed(node, item, Constants.Conventions.RelationTypes.RelateParentDocumentOnDeleteAlias));
+        details.AddNotNull(await DeserializeTrashed(node, item, trashedRelationAlias));
 
         // move sort to second pass, as if we attempt to set this 
         // on a brand new item, it doesn't get set. 
