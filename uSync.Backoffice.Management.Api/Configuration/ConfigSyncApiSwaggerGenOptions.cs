@@ -12,7 +12,7 @@ public class ConfigSyncApiSwaggerGenOptions : IConfigureOptions<SwaggerGenOption
     public void Configure(SwaggerGenOptions options)
     {
         options.SwaggerDoc(
-          "uSync",
+          uSyncClient.Api.ApiName,
           new OpenApiInfo
           {
               Title = "uSync Management Api",
@@ -27,5 +27,5 @@ public class ConfigSyncApiSwaggerGenOptions : IConfigureOptions<SwaggerGenOption
 
 public class uSyncClientOperationSecurityFilter : BackOfficeSecurityRequirementsOperationFilterBase
 {
-    protected override string ApiName => "uSync";
+    protected override string ApiName => uSyncClient.Api.ApiName;
 }
