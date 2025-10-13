@@ -89,9 +89,7 @@ internal class SyncConfigMergerBase
         // keys that are only in the source have been removed from the child, we need to mark them as removed. 
         foreach (var removedItem in sourceItems.Where(x => targetItems.ContainsKey(x.Key) is false))
         {
-            if (removedItem.Value.ContainsKey(removeProperty))
-                removedItem.Value[removeProperty] = _removedLabel;
-
+            removedItem.Value[removeProperty] = _removedLabel;
             targetOnly.Add(removedItem.Value);
         }
 
@@ -123,17 +121,22 @@ internal class SyncConfigMergerBase
             }
         }
 
-        // removals. 
-        foreach (var targetItem in targetArray)
+        List<int> removals = [];
+        for(int i = 0; i < targetArray.Count; i++)
         {
-            if (targetItem is not JsonObject targetObject) continue;
+            if (targetArray[i] is not JsonObject targetObject) continue;
             if (targetObject.ContainsKey(removeProperty) is false) continue;
 
             if (targetObject[removeProperty]!.ToString().StartsWith(_removedLabel) is true)
             {
-                // remove it. 
-                targetArray.Remove(targetItem);
+                // we can't remove it while iterating, so add to a list. 
+                removals.Add(i);
             }
+        }
+        
+        foreach(var index in removals.OrderDescending())
+        {
+            targetArray.RemoveAt(index);
         }
 
         return targetArray;
