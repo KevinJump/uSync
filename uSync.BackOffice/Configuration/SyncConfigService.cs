@@ -66,11 +66,8 @@ internal class SyncConfigService : ISyncConfigService
     /// <inheritdoc/>
     public string GetWorkingFolder()
     {
-        var folders = FetchFolders();
-
-        return Settings.IsRootSite
-            ? folders[0].TrimStart('/')
-            : folders.Last().TrimStart('/');
+        var folders = GetFolders();
+        return folders.Last().TrimStart('/');
     }
 
     /// <inheritdoc/>
@@ -78,9 +75,15 @@ internal class SyncConfigService : ISyncConfigService
     {
         var folders = FetchFolders();
 
-        return Settings.IsRootSite
-            ? [folders[0].TrimStart('/')]
-            : [.. folders.Select(x => x.TrimStart('/'))];
+        switch(Settings.FolderMode)
+        {
+            case SyncFolderMode.Root:
+                return [folders[0].TrimStart('/')];
+            case SyncFolderMode.Production:
+                return [Settings.ProductionFolder];
+            default:
+                return [.. folders.Select(x => x.TrimStart('/'))];
+        }
     }
 
     /// <inheritdoc/>

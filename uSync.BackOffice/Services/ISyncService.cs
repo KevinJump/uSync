@@ -156,4 +156,10 @@ public interface ISyncService
     ///  trigger the end of the bulk process
     /// </summary>
     Task FinishBulkProcessAsync(HandlerActions action, IEnumerable<uSyncAction> actions);
+
+    /// <summary>
+    ///  merge the given folders in single 'production' files for each handler.
+    /// </summary>
+    Task<int> MergeExportFolder(string[] paths, IEnumerable<HandlerConfigPair> handlers, bool clean);
+
 }

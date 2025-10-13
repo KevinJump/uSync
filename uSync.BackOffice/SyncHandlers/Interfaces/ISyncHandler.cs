@@ -10,6 +10,7 @@ using uSync.BackOffice.Models;
 using uSync.Core;
 using uSync.Core.Dependency;
 using uSync.Core.Models;
+using uSync.Core.Tracking;
 
 namespace uSync.BackOffice.SyncHandlers.Interfaces;
 
@@ -23,6 +24,9 @@ public delegate void SyncUpdateCallback(string message, int count, int total);
 /// </summary>
 public interface ISyncHandler
 {
+    string SerializeType { get; }
+    ISyncTrackerBase? BaseTracker { get; }
+
     /// <summary>
     ///  alias for handler, used when finding a handler 
     /// </summary>

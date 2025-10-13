@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using System.Xml.XPath;
 
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Cache;
@@ -115,7 +116,19 @@ public abstract class SyncHandlerContainerBase<TObject>
         foreach (var action in actions.Where(x => x.Change == ChangeType.Hidden))
         {
             if (action.FileName is null) continue;
-            results.AddRange(await ImportAsync(action.FileName, config, options));
+
+            if (syncFileService.FileExists(action.FileName))
+            {
+                var xml = await syncFileService.LoadXElementAsync(action.FileName);
+                var node = xml.XPathSelectElement($"//Empty[@Key='{action.Key}']");
+                if (node is null) continue;
+                results.AddRange(
+                    await ImportElementAsync(node, action.FileName, config, options));
+            }
+            else
+            {
+                await ImportAsync(action.FileName, config, options);
+            }
         }
 
         results.AddRange(await CleanFoldersAsync(Guid.Empty));

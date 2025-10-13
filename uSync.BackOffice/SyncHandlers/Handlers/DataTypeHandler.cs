@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml.XPath;
 
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Cache;
@@ -66,40 +67,7 @@ public class DataTypeHandler : SyncHandlerContainerBase<IDataType>, ISyncHandler
         _dataTypeContainerService = dataTypeContainerService;
     }
 
-    /// <summary>
-    /// Process all DataType actions at the end of the import process
-    /// </summary>
-    /// <remarks>
-    /// Datatypes have to exist early on so DocumentTypes can reference them, but
-    /// some doctypes reference content or document types, so we re-process them
-    /// at the end of the import process to ensure those settings can be made too.
-    /// 
-    /// HOWEVER: The above isn't a problem Umbraco 10+ - the references can be set
-    /// before the actual doctypes exist, so we can do that in one pass.
-    /// 
-    /// HOWEVER: If we move deletes to the end , we still need to process them. 
-    /// but deletes are always 'change' = 'Hidden', so we only process hidden changes
-    /// </remarks>
-    public override async Task<IEnumerable<uSyncAction>> ProcessPostImportAsync(IEnumerable<uSyncAction> actions, HandlerSettings config)
-    {
-        if (actions == null || !actions.Any()) return [];
-
-        var results = new List<uSyncAction>();
-        var options = new uSyncImportOptions { Flags = SerializerFlags.LastPass };
-
-        // we only do deletes here. 
-        foreach (var action in actions.Where(x => x.Change == ChangeType.Hidden))
-        {
-            if (action.FileName is null) continue;
-            results.AddRange(
-                await ImportAsync(action.FileName, config, options));
-        }
-
-        results.AddRange(await CleanFoldersAsync(Guid.Empty));
-
-        return results;
-    }
-
+    
     /// <summary>
     ///  Fetch a DataType Container from the DataTypeService
     /// </summary>

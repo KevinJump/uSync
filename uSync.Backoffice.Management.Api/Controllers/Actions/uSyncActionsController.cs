@@ -33,7 +33,7 @@ public class uSyncActionsController : uSyncControllerBase
     public async Task<List<SyncActionGroup>> GetActionsBySet(string setName)
     {
         return await Task.FromResult(_syncManagementService.GetActions(setName));
-    }
+    }   
 
 
 }

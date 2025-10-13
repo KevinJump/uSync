@@ -1,7 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Threading.Tasks;
+
+using uSync.BackOffice.SyncHandlers.Models;
 
 namespace uSync.BackOffice;
 
@@ -104,4 +108,21 @@ public partial class SyncService
         => Path.GetFullPath(
             path.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar))
             .TrimEnd(Path.DirectorySeparatorChar);
+
+    /// <inheritdoc />
+    public async Task<int> MergeExportFolder(string[] paths, IEnumerable<HandlerConfigPair> handlers, bool clean)
+    {
+        var totalMerged = 0;
+        var root = _uSyncConfig.GetWorkingFolder();
+
+        foreach (var handler in handlers)
+        {
+            var folders = paths.Select(x => Path.Combine(x, handler.Handler.DefaultFolder)).ToArray();
+            var target = _uSyncConfig.Settings.ProductionFolder;
+
+            totalMerged += await _syncFileService.MakeSingleExportFromFolders(folders, handler.Handler.SerializeType, handler.Handler.BaseTracker, target, handler.Handler.DefaultFolder);
+        }
+
+        return totalMerged;
+    }
 }

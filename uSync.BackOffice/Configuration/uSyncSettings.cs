@@ -197,26 +197,22 @@ public class uSyncSettings
     public string HideAddOns { get; set; } = "licence";
 
     /// <summary>
-    ///  turns of use of the Notifications.Supress method, so notifications
+    ///  turns of use of the Notifications.Suppress method, so notifications
     ///  fire after every item is imported.
     /// </summary>
     /// <remarks>
-    ///  I am not sure this does what i think it does, it doesn't suppress
-    ///  then fire at the end , it just suppresses them all. 
+    ///  this disables the internal uSync scope provider that delays all 
+    ///  non cancellable notifications until after the import is complete.
     ///  
-    ///  until we have had time to look at this , we will leave this as 
-    ///  disabled by default so all notification messages fire.
+    ///  on v13 this is false, the import happens and then the notifications fire.
     ///  
-    ///  for v13 thius is fine, but for v14, grouping the notifications
-    ///  can causes issues if something fails. 
-    ///   
-    ///  So if a single content import fails then the whole batch doesn't 
-    ///  get published properly (so no content for you :( ) .
+    ///  on v16 the default is true, because some of the notifications appear to 
+    ///  be closely coupled to the save/publish process, and if something goes 
+    ///  wrong in one item's import it can cause a cascade of failures across 
+    ///  everything that might have been imported along with it. 
     ///  
-    ///  there might be something downlever we can do, but it likey means
-    ///  lots of core investigation to find that, for now 'old' school
-    ///  non suppressed notifications should be fine (if a little slower).
-    /// 
+    ///  if the notifications are not suppressed, then if an item fails to import
+    ///  it doesn't stop other items from being imported. 
     /// </remarks>
     [DefaultValue("true")]
     public bool DisableNotificationSuppression { get; set; } = true;
@@ -238,4 +234,25 @@ public class uSyncSettings
     /// </summary>
     [DefaultValue(false)]
     public bool MoveToSection { get; set; } = false;
+
+    /// <summary>
+    ///  What type of mode the folder should work in (default, root, or production)
+    /// </summary>
+    [DefaultValue("Normal")]
+    public SyncFolderMode FolderMode { get; set; } = SyncFolderMode.Normal;
+
+    /// <summary>
+    ///  location of the 'production' folder to use when in production mode, 
+    ///  or when creating the production mode files.
+    /// </summary>
+    [DefaultValue("uSync/production")]
+    public string ProductionFolder { get; set; } = "uSync/production";
 }
+
+public enum SyncFolderMode
+{
+    Normal,
+    Root,
+    Production,
+};
+
