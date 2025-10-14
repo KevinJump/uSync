@@ -249,10 +249,24 @@ public class uSyncSettings
     public string ProductionFolder { get; set; } = "uSync/production";
 }
 
+/// <summary>
+///  uSync's folder mode - normal, root or production
+/// </summary>
 public enum SyncFolderMode
 {
+    /// <summary>
+    ///  normal - expects individual files in the uSync folder(s)
+    /// </summary>
     Normal,
+
+    /// <summary>
+    ///  root - will read and write things to the root folder, 
+    /// </summary>
     Root,
+
+    /// <summary>
+    ///  production - looks in a 'production' folder, expects a single file per handler.
+    /// </summary>
     Production,
 };
 

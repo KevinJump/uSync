@@ -469,7 +469,14 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         return await ImportSingleElementAsync(node, filename, settings, options);
     }
 
-    virtual public async Task<IEnumerable<uSyncAction>> ImportSingleElementAsync(XElement node, string filename, HandlerSettings settings, uSyncImportOptions options)
+    /// <summary>
+    ///  import a single XElement into umbraco. 
+    /// </summary>
+    /// <remarks>
+    ///  if the XElement contains multiple entries, then this method will not import them, if there is a possibility of that
+    ///  then the ImportElementAsync method should be used - which splits them before loading this call. 
+    /// </remarks>
+    virtual protected async Task<IEnumerable<uSyncAction>> ImportSingleElementAsync(XElement node, string filename, HandlerSettings settings, uSyncImportOptions options)
     {
         if (!await ShouldImportAsync(node, settings))
         {

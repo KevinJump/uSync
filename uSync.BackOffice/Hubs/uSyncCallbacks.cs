@@ -15,7 +15,15 @@ public delegate void SyncEventCallback(SyncProgressSummary summary);
 /// </summary>
 public delegate void SyncUpdateCallback(string message, int count, int total);
 
+/// <summary>
+///  callback delegate to set the start and end rage for the update counters.
+/// </summary>
 public delegate void SyncSetUpdateRange(int start, int end);
+
+/// <summary>
+///  callback to send a update message and increment the counter by one so moving the progress bar.
+/// </summary>
+/// <param name="message"></param>
 public delegate void SyncIncrementalUpdateCallback(string message);
 
 
@@ -34,8 +42,14 @@ public class uSyncCallbacks
     /// </summary>
     public SyncUpdateCallback? Update { get; private set; }
 
+    /// <summary>
+    ///  set a start and end range for the counter.
+    /// </summary>
     public SyncSetUpdateRange? SetRange { get; private set; }
 
+    /// <summary>
+    ///  update and increment callback.
+    /// </summary>
     public SyncIncrementalUpdateCallback? IncrementalUpdate { get; private set; }
 
     /// <summary>
@@ -47,6 +61,9 @@ public class uSyncCallbacks
         this.Update = update;
     }
 
+    /// <summary>
+    ///  generate a callback object with range and incremental update
+    /// </summary>
     public uSyncCallbacks(SyncEventCallback? callback, SyncUpdateCallback? update, SyncSetUpdateRange? updateRange, SyncIncrementalUpdateCallback incrementalUpdate)
         : this(callback, update)
     {

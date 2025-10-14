@@ -85,12 +85,18 @@ public class HubClientService
     private int _start = 0;
     private int _end = 0;
 
+    /// <summary>
+    ///  set a range (start to end) that we except the next set of updates to be bound within.
+    /// </summary>
     public void SetCountRange(int start, int end)
     {
         _start = start;
         _end = end;
     }
 
+    /// <summary>
+    ///  post an update and increment the counter by one.
+    /// </summary>
     public void PostIncrementalUpdate(string message)
     {
         _start++;

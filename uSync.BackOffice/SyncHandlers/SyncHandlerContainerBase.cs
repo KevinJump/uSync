@@ -130,13 +130,13 @@ public abstract class SyncHandlerContainerBase<TObject>
 
             // single 
             if (_loadedFiles[action.FileName].Name.LocalName.Equals(Core.uSyncConstants.Serialization.Empty) is true)
-                return await ImportElementAsync(_loadedFiles[action.FileName], action.FileName, config, options);
+                return await ImportSingleElementAsync(_loadedFiles[action.FileName], action.FileName, config, options);
 
             // multiple ? 
             var node = _loadedFiles[action.FileName].XPathSelectElement($"//{Core.uSyncConstants.Serialization.Empty}[@Key='{action.Key}']");
             if (node is null) continue;
            
-            results.AddRange(await ImportElementAsync(node, action.FileName, config, options));
+            results.AddRange(await ImportSingleElementAsync(node, action.FileName, config, options));
         }
 
         _loadedFiles.Clear();
