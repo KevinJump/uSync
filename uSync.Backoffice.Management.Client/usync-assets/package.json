@@ -8,7 +8,7 @@
 	"homepage": "https://jumoo.co.uk/uSync",
 	"license": "MPL-2.0",
 	"type": "module",
-	"version": "16.1.0-build.20251013.4",
+	"version": "16.1.0",
 	"main": "./dist/usync.js",
 	"types": "./dist/index.d.ts",
 	"module": "./dist/usync.js",

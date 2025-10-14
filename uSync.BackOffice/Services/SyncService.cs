@@ -27,12 +27,6 @@ using uSync.Core.Serialization;
 
 namespace uSync.BackOffice;
 
-
-/// <summary>
-///  Callback event for SignalR hub
-/// </summary>
-public delegate void SyncEventCallback(SyncProgressSummary summary);
-
 /// <summary>
 ///  the service that does all the processing,
 ///  this forms the entry point as an API to 

@@ -80,5 +80,21 @@ public class HubClientService
     ///  get the uSync callbacks for this connection
     /// </summary>
     /// <returns></returns>
-    public uSyncCallbacks Callbacks() => new(this.PostSummary, this.PostUpdate);
+    public uSyncCallbacks Callbacks() => new(this.PostSummary, this.PostUpdate, this.SetCountRange, this.PostIncrementalUpdate);
+
+    private int _start = 0;
+    private int _end = 0;
+
+    public void SetCountRange(int start, int end)
+    {
+        _start = start;
+        _end = end;
+    }
+
+    public void PostIncrementalUpdate(string message)
+    {
+        _start++;
+        if (_start > _end) _end = _start;
+        this.PostUpdate(message, _start, _end);
+    }
 }

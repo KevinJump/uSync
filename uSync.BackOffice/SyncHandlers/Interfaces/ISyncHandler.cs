@@ -15,11 +15,6 @@ using uSync.Core.Tracking;
 namespace uSync.BackOffice.SyncHandlers.Interfaces;
 
 /// <summary>
-///  callback delegate for SignalR messaging 
-/// </summary>
-public delegate void SyncUpdateCallback(string message, int count, int total);
-
-/// <summary>
 ///  Handler interface for anything that wants to process elements via uSync
 /// </summary>
 public interface ISyncHandler

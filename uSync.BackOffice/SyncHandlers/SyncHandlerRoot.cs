@@ -278,6 +278,8 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         int count = 0;
         int total = items.Count;
 
+        options.Callbacks?.SetRange?.Invoke(count, total);
+
         foreach (var item in items)
         {
             count++;
@@ -455,7 +457,9 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         if (node.Name.LocalName == this.serializer.ItemType + "s")
         {
             var actions = new List<uSyncAction>();
-            foreach (var item in node.Elements())
+            var elements = node.Elements().ToList();
+            options.Callbacks?.SetRange?.Invoke(0, elements.Count);
+            foreach (var item in elements)
             {
                 actions.AddRange(await ImportSingleElementAsync(new XElement(item), filename, settings, options));
             }
@@ -483,6 +487,8 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 
         try
         {
+            options.Callbacks?.IncrementalUpdate?.Invoke(node.GetAlias());
+
             // merge the options from the handler and any import options into our serializer options.
             var serializerOptions = new SyncSerializerOptions(options.Flags, settings.Settings, options.UserId);
             serializerOptions.MergeSettings(options.Settings);
