@@ -38,16 +38,17 @@ public partial class SyncService
         if (handlerPair == null) return [];
         var folders = GetHandlerFolders(GetFolderFromOptions(options), handlerPair.Handler);
 
-        if (File.Exists(folders.Last() + ".config"))
-        {
-            var fileName = folders.Last() + ".config";
-            var node = await _syncFileService.LoadXElementAsync(fileName);
-            return await handlerPair.Handler.ReportElementAsync(node, fileName, handlerPair.Settings, options);
-        }
-        else
-        {
-            return await handlerPair.Handler.ReportAsync(folders, handlerPair.Settings, options.Callbacks?.Update);
-        }
+        var productionFile = $"{folders.Last()}.{_uSyncConfig.Settings.DefaultExtension}";
+        if (File.Exists(productionFile))
+            return await ReportMergedFile(productionFile, handlerPair, options);
+
+        return await handlerPair.Handler.ReportAsync(folders, handlerPair.Settings, options.Callbacks?.Update);
+    }
+
+    private async Task<IEnumerable<uSyncAction>> ReportMergedFile(string filename, HandlerConfigPair handlerPair, uSyncImportOptions options)
+    {
+        var node = await _syncFileService.LoadXElementAsync(filename);
+        return await handlerPair.Handler.ReportElementAsync(node, filename, handlerPair.Settings, options);
     }
 
     /// <inheritdoc/>>
@@ -79,21 +80,13 @@ public partial class SyncService
 
                 List<uSyncAction> results;
 
-                if (File.Exists(folders.Last() + ".config"))
-                {
-                    var fileName = folders.Last() + ".config";
-                    var node = await _syncFileService.LoadXElementAsync(fileName);
-                    results = [.. await handlerPair.Handler.ImportElementAsync(node, fileName, handlerPair.Settings, options)];
-                }
+                var productionFile = $"{folders.Last()}.{_uSyncConfig.Settings.DefaultExtension}";
+                if (File.Exists(productionFile))
+                    results = [.. await ImportMergedFile(productionFile, handlerPair, options)];
                 else
-                {
-                    results = [..await handlerPair.Handler.ImportAllAsync(folders, handlerPair.Settings, options)];
-                }
-
-                // _logger.LogDebug("< Import Handler {handler}", handlerAlias);
+                    results = [.. await handlerPair.Handler.ImportAllAsync(folders, handlerPair.Settings, options)];
 
                 scope?.Complete();
-
                 return results;
             }
         }
@@ -101,6 +94,12 @@ public partial class SyncService
         {
             _importSemaphoreLock.Release();
         }
+    }
+
+    private async Task<IEnumerable<uSyncAction>> ImportMergedFile(string filename, HandlerConfigPair handlerPair, uSyncImportOptions options)
+    {
+        var node = await _syncFileService.LoadXElementAsync(filename);
+        return await handlerPair.Handler.ImportElementAsync(node, filename, handlerPair.Settings, options);
     }
 
     /// <inheritdoc/>>
