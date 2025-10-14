@@ -112,23 +112,34 @@ public abstract class SyncHandlerContainerBase<TObject>
         var results = new List<uSyncAction>();
         var options = new uSyncImportOptions { Flags = SerializerFlags.LastPass };
 
+        // a cache of loaded files so we don't keep loading the same file multiple times
+        // in production mode the same file might contain multiple 'empty' nodes
+        // and they can be large, and require loading from disk multiple times would slow
+        // it all down.
+        Dictionary<string, XElement> _loadedFiles = [];
+
         // we only do deletes here. 
         foreach (var action in actions.Where(x => x.Change == ChangeType.Hidden))
         {
             if (action.FileName is null) continue;
             if (syncFileService.FileExists(action.FileName) is false) continue;
 
+            // load the file if we haven't already
+            if (_loadedFiles.TryGetValue(action.FileName, out XElement? xml) is false)
+                _loadedFiles[action.FileName] = await syncFileService.LoadXElementAsync(action.FileName);
+
             // single 
-            var xml = await syncFileService.LoadXElementAsync(action.FileName);
-            if (xml.Name.LocalName.Equals(Core.uSyncConstants.Serialization.Empty) is true)
-                return await ImportElementAsync(xml, action.FileName, config, options);
+            if (_loadedFiles[action.FileName].Name.LocalName.Equals(Core.uSyncConstants.Serialization.Empty) is true)
+                return await ImportElementAsync(_loadedFiles[action.FileName], action.FileName, config, options);
 
             // multiple ? 
-            var node = xml.XPathSelectElement($"//{Core.uSyncConstants.Serialization.Empty}[@Key='{action.Key}']");
+            var node = _loadedFiles[action.FileName].XPathSelectElement($"//{Core.uSyncConstants.Serialization.Empty}[@Key='{action.Key}']");
             if (node is null) continue;
-            
+           
             results.AddRange(await ImportElementAsync(node, action.FileName, config, options));
         }
+
+        _loadedFiles.Clear();
 
         results.AddRange(await CleanFoldersAsync(Guid.Empty));
 
