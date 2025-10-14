@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -120,7 +122,14 @@ public partial class SyncService
             var folders = paths.Select(x => Path.Combine(x, handler.Handler.DefaultFolder)).ToArray();
             var target = _uSyncConfig.Settings.ProductionFolder;
 
-            totalMerged += await _syncFileService.MakeSingleExportFromFolders(folders, handler.Handler.SerializeType, handler.Handler.BaseTracker, target, handler.Handler.DefaultFolder);
+            var serializerType = handler.Handler.GetSerializeType();
+            if (serializerType is null)
+            {
+                _logger.LogWarning("Handler {Handler} does not support file export", handler.Handler.Alias);
+                continue;
+            }
+
+            totalMerged += await _syncFileService.MakeSingleExportFromFolders(folders, serializerType, handler.Handler.GetBaseTracker(), target, handler.Handler.DefaultFolder);
         }
 
         return totalMerged;

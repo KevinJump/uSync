@@ -172,12 +172,12 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// <summary>
     ///  The serializer's item type (this is what the xml-node name will be.
     /// </summary>
-    public string SerializeType => serializer.ItemType;
+    public string? GetSerializerType() => serializer.ItemType;
 
     /// <summary>
-    ///  tracker used by the seralizer.
+    ///  tracker used by the serializer.
     /// </summary>
-    public ISyncTrackerBase? BaseTracker => trackers.FirstOrDefault() as ISyncTrackerBase;
+    public ISyncTrackerBase? GetBaseTracker() => trackers.FirstOrDefault() as ISyncTrackerBase;
 
     /// <summary>
     ///  Constructor, base for all handlers`

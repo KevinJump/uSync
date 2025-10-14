@@ -24,8 +24,15 @@ public delegate void SyncUpdateCallback(string message, int count, int total);
 /// </summary>
 public interface ISyncHandler
 {
-    string SerializeType { get; }
-    ISyncTrackerBase? BaseTracker { get; }
+    /// <summary>
+    ///  get the serializer type for the handler (e.g the name used in the xml)
+    /// </summary>
+    string? GetSerializeType() => null;
+
+    /// <summary>
+    ///  gets the base tracker from the serializer (used to track changes, merge items).
+    /// </summary>
+    ISyncTrackerBase? GetBaseTracker() => null;
 
     /// <summary>
     ///  alias for handler, used when finding a handler 
