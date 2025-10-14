@@ -446,12 +446,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         return await ImportAsync(file, config, options);
     }
 
-    /// <summary>
-    /// Import a node, with settings and options 
-    /// </summary>
-    /// <remarks>
-    ///  All Imports lead here
-    /// </remarks>
+    /// <inheritdoc />
     virtual public async Task<IEnumerable<uSyncAction>> ImportElementAsync(XElement node, string filename, HandlerSettings settings, uSyncImportOptions options)
     {
         if (node.Name.LocalName == this.serializer.ItemType + "s")
