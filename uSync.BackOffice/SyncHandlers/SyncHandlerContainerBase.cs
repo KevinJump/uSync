@@ -116,19 +116,18 @@ public abstract class SyncHandlerContainerBase<TObject>
         foreach (var action in actions.Where(x => x.Change == ChangeType.Hidden))
         {
             if (action.FileName is null) continue;
+            if (syncFileService.FileExists(action.FileName) is false) continue;
 
-            if (syncFileService.FileExists(action.FileName))
-            {
-                var xml = await syncFileService.LoadXElementAsync(action.FileName);
-                var node = xml.XPathSelectElement($"//Empty[@Key='{action.Key}']");
-                if (node is null) continue;
-                results.AddRange(
-                    await ImportElementAsync(node, action.FileName, config, options));
-            }
-            else
-            {
-                await ImportAsync(action.FileName, config, options);
-            }
+            // single 
+            var xml = await syncFileService.LoadXElementAsync(action.FileName);
+            if (xml.Name.LocalName.Equals(Core.uSyncConstants.Serialization.Empty) is true)
+                return await ImportElementAsync(xml, action.FileName, config, options);
+
+            // multiple ? 
+            var node = xml.XPathSelectElement($"//{Core.uSyncConstants.Serialization.Empty}[@Key='{action.Key}']");
+            if (node is null) continue;
+            
+            results.AddRange(await ImportElementAsync(node, action.FileName, config, options));
         }
 
         results.AddRange(await CleanFoldersAsync(Guid.Empty));

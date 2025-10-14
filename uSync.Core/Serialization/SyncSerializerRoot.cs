@@ -281,7 +281,7 @@ public abstract class SyncSerializerRoot<TObject>
 
         var node = XElementExtensions.MakeEmpty(ItemKey(item), change, alias);
 
-        return Task.FromResult(SyncAttempt<XElement>.Succeed("Empty", node, ChangeType.Removed, []));
+        return Task.FromResult(SyncAttempt<XElement>.Succeed(uSyncConstants.Serialization.Empty, node, ChangeType.Removed, []));
     }
 
 

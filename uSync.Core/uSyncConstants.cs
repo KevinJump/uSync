@@ -49,6 +49,9 @@ public static partial class uSyncConstants
 
         public const string Domain = "Domain";
 
+        /// <summary>
+        ///  action files are 'empty' with an action to say what they do.
+        /// </summary>
         public const string Empty = "Empty";
 
         public const string RelationType = "RelationType";
