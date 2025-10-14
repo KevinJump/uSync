@@ -324,9 +324,9 @@ internal class SyncFileService : ISyncFileService
         }
     }
 
-    public async Task<int> MakeSingleExportFromFolders(string[] folders, string itemType, ISyncTrackerBase? trackerBase, string targetFolder, string filename)
+    public async Task<int> MakeSingleExportFromFolders(string[] folders, string itemType, ISyncTrackerBase? trackerBase, string filename, string extension)
     {
-        var merged = await MergeFoldersAsync(folders, "config", trackerBase);
+        var merged = await MergeFoldersAsync(folders, extension, trackerBase);
 
         var megaNode = new XElement(itemType + "s");
         int count = 0;
@@ -336,11 +336,10 @@ internal class SyncFileService : ISyncFileService
             megaNode.Add(new XElement(item.Node));
         }
 
-        var resolvedTargetFolder = GetAbsPath(targetFolder);
-        CreateFolder(resolvedTargetFolder);
+        var resolvedTargetFile = GetAbsPath(filename);
+        CreateFoldersForFile(resolvedTargetFile);
 
-        var singleFileName = Path.Combine(resolvedTargetFolder, $"{filename}.config");
-        await SaveXElementAsync(megaNode, singleFileName);
+        await SaveXElementAsync(megaNode, filename);
 
         return count;
     }

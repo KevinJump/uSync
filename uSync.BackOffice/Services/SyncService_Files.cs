@@ -119,17 +119,19 @@ public partial class SyncService
 
         foreach (var handler in handlers)
         {
-            var folders = paths.Select(x => Path.Combine(x, handler.Handler.DefaultFolder)).ToArray();
-            var target = _uSyncConfig.Settings.ProductionFolder;
-
             var serializerType = handler.Handler.GetSerializeType();
-            if (serializerType is null)
+            var baseTracker = handler.Handler.GetBaseTracker();
+            if (serializerType is null || baseTracker is null)
             {
-                _logger.LogWarning("Handler {Handler} does not support file export", handler.Handler.Alias);
+                _logger.LogWarning("Handler {Handler} does not support file merging", handler.Handler.Alias);
                 continue;
             }
 
-            totalMerged += await _syncFileService.MakeSingleExportFromFolders(folders, serializerType, handler.Handler.GetBaseTracker(), target, handler.Handler.DefaultFolder);
+            var folders = paths.Select(x => Path.Combine(x, handler.Handler.DefaultFolder)).ToArray();
+            var targetFileName = Path.Combine(_uSyncConfig.Settings.ProductionFolder,
+                handler.Handler.DefaultFolder + "." + _uSyncConfig.Settings.DefaultExtension);
+
+            totalMerged += await _syncFileService.MakeSingleExportFromFolders(folders, serializerType, baseTracker, targetFileName, _uSyncConfig.Settings.DefaultExtension);
         }
 
         return totalMerged;
