@@ -180,7 +180,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     public ISyncTrackerBase? GetBaseTracker() => trackers.FirstOrDefault() as ISyncTrackerBase;
 
     /// <summary>
-    ///  Constructor, base for all handlers`
+    ///  Constructor, base for all handlers
     /// </summary>
     public SyncHandlerRoot(
             ILogger<SyncHandlerRoot<TObject, TContainer>> logger,
