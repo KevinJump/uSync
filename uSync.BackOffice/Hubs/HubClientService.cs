@@ -86,7 +86,7 @@ public class HubClientService
     private int _end = 0;
 
     /// <summary>
-    ///  set a range (start to end) that we except the next set of updates to be bound within.
+    ///  set a range (start to end) that we expect the next set of updates to be bound within.
     /// </summary>
     public void SetCountRange(int start, int end)
     {
