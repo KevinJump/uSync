@@ -1,5 +1,3 @@
-﻿using Org.BouncyCastle.Bcpg.OpenPgp;
-
 using uSync.BackOffice.Models;
 using uSync.BackOffice.SyncHandlers.Interfaces;
 
