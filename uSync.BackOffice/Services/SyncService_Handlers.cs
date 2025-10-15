@@ -39,7 +39,7 @@ public partial class SyncService
         var folders = GetHandlerFolders(GetFolderFromOptions(options), handlerPair.Handler);
 
         var productionFile = $"{folders.Last()}.{_uSyncConfig.Settings.DefaultExtension}";
-        if (File.Exists(productionFile))
+        if (_syncFileService.FileExists(productionFile))
             return await ReportMergedFile(productionFile, handlerPair, options);
 
         return await handlerPair.Handler.ReportAsync(folders, handlerPair.Settings, options.Callbacks?.Update);
@@ -81,7 +81,7 @@ public partial class SyncService
                 List<uSyncAction> results;
 
                 var productionFile = $"{folders.Last()}.{_uSyncConfig.Settings.DefaultExtension}";
-                if (File.Exists(productionFile))
+                if (_syncFileService.FileExists(productionFile))
                     results = [.. await ImportMergedFile(productionFile, handlerPair, options)];
                 else
                     results = [.. await handlerPair.Handler.ImportAllAsync(folders, handlerPair.Settings, options)];
