@@ -22,7 +22,7 @@ public interface ISyncHandler
     /// <summary>
     ///  get the serializer type for the handler (e.g the name used in the xml)
     /// </summary>
-    string? GetSerializeType() => null;
+    string? GetSerializerType() => null;
 
     /// <summary>
     ///  gets the base tracker from the serializer (used to track changes, merge items).
