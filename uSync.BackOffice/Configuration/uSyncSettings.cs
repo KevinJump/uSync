@@ -238,7 +238,7 @@ public class uSyncSettings
     /// <summary>
     ///  What type of mode the folder should work in (default, root, or production)
     /// </summary>
-    [DefaultValue("Normal")]
+    [DefaultValue(SyncFolderMode.Normal)]
     public SyncFolderMode FolderMode { get; set; } = SyncFolderMode.Normal;
 
     /// <summary>
