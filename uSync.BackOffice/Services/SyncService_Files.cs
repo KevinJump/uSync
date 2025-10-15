@@ -118,7 +118,7 @@ public partial class SyncService
 
         foreach (var handler in handlers)
         {
-            var serializerType = handler.Handler.GetSerializeType();
+            var serializerType = handler.Handler.GetSerializerType();
             var baseTracker = handler.Handler.GetBaseTracker();
             if (serializerType is null || baseTracker is null)
             {
