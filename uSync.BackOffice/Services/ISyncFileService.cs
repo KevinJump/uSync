@@ -136,6 +136,11 @@ public interface ISyncFileService
     Task<XElement> LoadXElementAsync(string file);
 
     /// <summary>
+    ///  merge all the files in the given folders into a single xml node, that can be bulk imported
+    /// </summary>
+    Task<int> MakeSingleExportFromFolders(string[] folders, string itemType, ISyncTrackerBase? trackerBase, string fileName, string extension);
+
+    /// <summary>
     ///  merge a list of files into a single XElement
     /// </summary>
     /// <remarks>

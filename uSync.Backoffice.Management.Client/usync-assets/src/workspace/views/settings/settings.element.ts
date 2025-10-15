@@ -60,7 +60,7 @@ export class USyncSettingsViewElement extends UmbElementMixin(LitElement) {
 								.value=${this.settings?.exportAtStartup}></usync-setting-item>
 
 							<usync-setting-item
-								.name=${this.localize.term('USyncSettings_exportOnSaveup')}
+								.name=${this.localize.term('USyncSettings_exportOnSave')}
 								.description=${this.localize.term('USyncSettings_exportOnSaveDesc')}
 								.value=${this.settings?.exportOnSave}></usync-setting-item>
 

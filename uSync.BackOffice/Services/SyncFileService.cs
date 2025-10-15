@@ -242,6 +242,7 @@ internal class SyncFileService : ISyncFileService
     {
         CheckCharacters = false,
         Async = true,
+        IgnoreWhitespace = true,
     };
 
     private static XmlWriterSettings _writerSettings = new XmlWriterSettings
@@ -251,8 +252,6 @@ internal class SyncFileService : ISyncFileService
         Async = true,
         CloseOutput= false,
         Indent = true,
-        
-
     };
 
     /// <inheritdoc/>
@@ -323,7 +322,26 @@ internal class SyncFileService : ISyncFileService
         {
             File.Copy(file, file.Replace(resolvedSource, resolvedTarget), true);
         }
+    }
 
+    public async Task<int> MakeSingleExportFromFolders(string[] folders, string itemType, ISyncTrackerBase? trackerBase, string filename, string extension)
+    {
+        var merged = await MergeFoldersAsync(folders, extension, trackerBase);
+
+        var megaNode = new XElement(itemType + "s");
+        int count = 0;
+        foreach(var item in merged)
+        {
+            count++;
+            megaNode.Add(new XElement(item.Node));
+        }
+
+        var resolvedTargetFile = GetAbsPath(filename);
+        CreateFoldersForFile(resolvedTargetFile);
+
+        await SaveXElementAsync(megaNode, resolvedTargetFile);
+
+        return count;
     }
 
     /// <inheritdoc/>

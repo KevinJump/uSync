@@ -10,19 +10,25 @@ using uSync.BackOffice.Models;
 using uSync.Core;
 using uSync.Core.Dependency;
 using uSync.Core.Models;
+using uSync.Core.Tracking;
 
 namespace uSync.BackOffice.SyncHandlers.Interfaces;
-
-/// <summary>
-///  callback delegate for SignalR messaging 
-/// </summary>
-public delegate void SyncUpdateCallback(string message, int count, int total);
 
 /// <summary>
 ///  Handler interface for anything that wants to process elements via uSync
 /// </summary>
 public interface ISyncHandler
 {
+    /// <summary>
+    ///  get the serializer type for the handler (e.g the name used in the xml)
+    /// </summary>
+    string? GetSerializerType() => null;
+
+    /// <summary>
+    ///  gets the base tracker from the serializer (used to track changes, merge items).
+    /// </summary>
+    ISyncTrackerBase? GetBaseTracker() => null;
+
     /// <summary>
     ///  alias for handler, used when finding a handler 
     /// </summary>

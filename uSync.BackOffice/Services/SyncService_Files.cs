@@ -1,7 +1,13 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Threading.Tasks;
+
+using uSync.BackOffice.SyncHandlers.Models;
 
 namespace uSync.BackOffice;
 
@@ -104,4 +110,29 @@ public partial class SyncService
         => Path.GetFullPath(
             path.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar))
             .TrimEnd(Path.DirectorySeparatorChar);
+
+    /// <inheritdoc />
+    public async Task<int> MergeExportFolder(string[] paths, IEnumerable<HandlerConfigPair> handlers)
+    {
+        var totalMerged = 0;
+
+        foreach (var handler in handlers)
+        {
+            var serializerType = handler.Handler.GetSerializerType();
+            var baseTracker = handler.Handler.GetBaseTracker();
+            if (serializerType is null || baseTracker is null)
+            {
+                _logger.LogWarning("Handler {Handler} does not support file merging", handler.Handler.Alias);
+                continue;
+            }
+
+            var folders = paths.Select(x => Path.Combine(x, handler.Handler.DefaultFolder)).ToArray();
+            var targetFileName = Path.Combine(_uSyncConfig.Settings.ProductionFolder,
+                handler.Handler.DefaultFolder + "." + _uSyncConfig.Settings.DefaultExtension);
+
+            totalMerged += await _syncFileService.MakeSingleExportFromFolders(folders, serializerType, baseTracker, targetFileName, _uSyncConfig.Settings.DefaultExtension);
+        }
+
+        return totalMerged;
+    }
 }

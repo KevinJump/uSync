@@ -170,6 +170,16 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     protected readonly IShortStringHelper shortStringHelper;
 
     /// <summary>
+    ///  The serializer's item type (this is what the xml-node name will be).
+    /// </summary>
+    public string? GetSerializerType() => serializer.ItemType;
+
+    /// <summary>
+    ///  tracker used by the serializer.
+    /// </summary>
+    public ISyncTrackerBase? GetBaseTracker() => trackers.FirstOrDefault() as ISyncTrackerBase;
+
+    /// <summary>
     ///  Constructor, base for all handlers
     /// </summary>
     public SyncHandlerRoot(
@@ -268,11 +278,12 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         int count = 0;
         int total = items.Count;
 
+        options.Callbacks?.SetRange?.Invoke(count, total);
+
         foreach (var item in items)
         {
             count++;
 
-            options.Callbacks?.Update?.Invoke($"Importing {Path.GetFileNameWithoutExtension(item.Path)}", count, total);
 
             var result = await ImportElementAsync(item.Node, item.FileName, config, options);
             foreach (var attempt in result)
@@ -435,13 +446,32 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         return await ImportAsync(file, config, options);
     }
 
+    /// <inheritdoc />
+    virtual public async Task<IEnumerable<uSyncAction>> ImportElementAsync(XElement node, string filename, HandlerSettings settings, uSyncImportOptions options)
+    {
+        if (node.Name.LocalName == this.serializer.ItemType + "s")
+        {
+            var actions = new List<uSyncAction>();
+            var elements = node.Elements().ToList();
+            options.Callbacks?.SetRange?.Invoke(0, elements.Count);
+            foreach (var item in elements)
+            {
+                actions.AddRange(await ImportSingleElementAsync(new XElement(item), filename, settings, options));
+            }
+            return actions;
+        }
+
+        return await ImportSingleElementAsync(node, filename, settings, options);
+    }
+
     /// <summary>
-    /// Import a node, with settings and options 
+    ///  import a single XElement into umbraco. 
     /// </summary>
     /// <remarks>
-    ///  All Imports lead here
+    ///  if the XElement contains multiple entries, then this method will not import them, if there is a possibility of that
+    ///  then the ImportElementAsync method should be used - which splits them before loading this call. 
     /// </remarks>
-    virtual public async Task<IEnumerable<uSyncAction>> ImportElementAsync(XElement node, string filename, HandlerSettings settings, uSyncImportOptions options)
+    virtual protected async Task<IEnumerable<uSyncAction>> ImportSingleElementAsync(XElement node, string filename, HandlerSettings settings, uSyncImportOptions options)
     {
         if (!await ShouldImportAsync(node, settings))
         {
@@ -459,6 +489,8 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 
         try
         {
+            options.Callbacks?.IncrementalUpdate?.Invoke(node.GetAlias());
+
             // merge the options from the handler and any import options into our serializer options.
             var serializerOptions = new SyncSerializerOptions(options.Flags, settings.Settings, options.UserId);
             serializerOptions.MergeSettings(options.Settings);
@@ -1191,9 +1223,28 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     }
 
     /// <summary>
-    /// Report on any changes for a single XML node.
+    /// Report on any changes for a single XML node. (may contain multiple items in a single node).
     /// </summary>
     public virtual async Task<IEnumerable<uSyncAction>> ReportElementAsync(XElement node, string filename, HandlerSettings settings, uSyncImportOptions options)
+    {
+        if (node.Name.LocalName == this.serializer.ItemType + "s")
+        {
+            var actions = new List<uSyncAction>();
+            foreach (var item in node.Elements())
+            {
+                var cleanItem = new XElement(item);
+                actions.AddRange(await ReportElementSingleAsync(cleanItem, filename, settings, options));
+            }
+            return actions;
+        }
+
+        return await ReportElementSingleAsync(node, filename, settings, options);
+    }
+
+    /// <summary>
+    /// Report on any changes for a single XML node.
+    /// </summary>
+    public virtual async Task<IEnumerable<uSyncAction>> ReportElementSingleAsync(XElement node, string filename, HandlerSettings settings, uSyncImportOptions options)
     {
         try
         {

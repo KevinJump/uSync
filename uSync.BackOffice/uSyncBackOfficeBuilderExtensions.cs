@@ -103,6 +103,9 @@ public static class uSyncBackOfficeBuilderExtensions
             {
                 options.Folders = ["uSync/Root/", options.RootFolder];
             }
+
+            if (options.IsRootSite is true && options.FolderMode == SyncFolderMode.Normal)
+                options.FolderMode = SyncFolderMode.Root;
         });
 
         return builder;

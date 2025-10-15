@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using System.Xml.XPath;
 
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Cache;
@@ -23,6 +24,8 @@ using uSync.BackOffice.Services;
 using uSync.Core;
 using uSync.Core.Dependency;
 using uSync.Core.Serialization;
+
+using CoreConstants = uSync.Core.uSyncConstants;
 
 namespace uSync.BackOffice.SyncHandlers;
 
@@ -111,12 +114,38 @@ public abstract class SyncHandlerContainerBase<TObject>
         var results = new List<uSyncAction>();
         var options = new uSyncImportOptions { Flags = SerializerFlags.LastPass };
 
+        // a cache of loaded files so we don't keep loading the same file multiple times
+        // in production mode the same file might contain multiple 'empty' nodes
+        // and they can be large, and require loading from disk multiple times would slow
+        // it all down.
+        Dictionary<string, XElement> _loadedFiles = [];
+
         // we only do deletes here. 
         foreach (var action in actions.Where(x => x.Change == ChangeType.Hidden))
         {
             if (action.FileName is null) continue;
-            results.AddRange(await ImportAsync(action.FileName, config, options));
+            if (syncFileService.FileExists(action.FileName) is false) continue;
+
+            // load the file if we haven't already
+            if (_loadedFiles.TryGetValue(action.FileName, out XElement? xml) is false)
+                _loadedFiles[action.FileName] = await syncFileService.LoadXElementAsync(action.FileName);
+
+            if (_loadedFiles[action.FileName].Name.LocalName.Equals(CoreConstants.Serialization.Empty) is true)
+            {
+                // single 
+                results.AddRange(await ImportSingleElementAsync(_loadedFiles[action.FileName], action.FileName, config, options));
+            }
+            else
+            {
+                // multiple ?
+                var node = _loadedFiles[action.FileName].XPathSelectElement($"//{CoreConstants.Serialization.Empty}[@Key='{action.Key}']");
+                if (node is null) continue;
+
+                results.AddRange(await ImportSingleElementAsync(node, action.FileName, config, options));
+            }
         }
+
+        _loadedFiles.Clear();
 
         results.AddRange(await CleanFoldersAsync(Guid.Empty));
 
