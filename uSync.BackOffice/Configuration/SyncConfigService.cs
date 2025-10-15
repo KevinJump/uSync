@@ -80,7 +80,7 @@ internal class SyncConfigService : ISyncConfigService
             case SyncFolderMode.Root:
                 return [folders[0].TrimStart('/')];
             case SyncFolderMode.Production:
-                return [Settings.ProductionFolder];
+                return [Settings.ProductionFolder.TrimStart('/')];
             default:
                 return [.. folders.Select(x => x.TrimStart('/'))];
         }
