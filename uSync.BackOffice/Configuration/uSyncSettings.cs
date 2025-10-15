@@ -197,7 +197,7 @@ public class uSyncSettings
     public string HideAddOns { get; set; } = "licence";
 
     /// <summary>
-    ///  turns of use of the Notifications.Suppress method, so notifications
+    ///  turns off use of the Notifications.Suppress method, so notifications
     ///  fire after every item is imported.
     /// </summary>
     /// <remarks>
