@@ -115,7 +115,6 @@ public partial class SyncService
     public async Task<int> MergeExportFolder(string[] paths, IEnumerable<HandlerConfigPair> handlers, bool clean)
     {
         var totalMerged = 0;
-        var root = _uSyncConfig.GetWorkingFolder();
 
         foreach (var handler in handlers)
         {
