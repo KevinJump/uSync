@@ -16,7 +16,7 @@ public delegate void SyncEventCallback(SyncProgressSummary summary);
 public delegate void SyncUpdateCallback(string message, int count, int total);
 
 /// <summary>
-///  callback delegate to set the start and end rage for the update counters.
+///  callback delegate to set the start and end range for the update counters.
 /// </summary>
 public delegate void SyncSetUpdateRange(int start, int end);
 
