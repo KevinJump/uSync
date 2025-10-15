@@ -339,7 +339,7 @@ internal class SyncFileService : ISyncFileService
         var resolvedTargetFile = GetAbsPath(filename);
         CreateFoldersForFile(resolvedTargetFile);
 
-        await SaveXElementAsync(megaNode, filename);
+        await SaveXElementAsync(megaNode, resolvedTargetFile);
 
         return count;
     }
