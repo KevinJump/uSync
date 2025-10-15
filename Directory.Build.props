@@ -1,6 +1,6 @@
 <Project>
     <PropertyGroup>
-		<VersionPrefix>16.0.0</VersionPrefix>
+		<VersionPrefix>17.0.0</VersionPrefix>
 		<Authors>Kevin Jump</Authors>
 		<Company>Jumoo</Company>
 
@@ -37,7 +37,9 @@
 12.0 : Umbraco v12 release
 13.o : Umbraco v13 release
 14.0 : Umbraco v14 release
-15.0 : Umbraco v15 release]]>
+15.0 : Umbraco v15 release
+16.0 : Umbraco v16 release
+17.0 : Umbraco v17 release]]>
 		</PackageReleaseNotes>
 
 		<EmbedUntrackedSources>true</EmbedUntrackedSources>

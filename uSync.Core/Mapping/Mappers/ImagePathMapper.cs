@@ -212,7 +212,7 @@ public class ImagePathMapper : SyncValueMapperBase, ISyncMapper
     /// </summary>
     public override Task<IEnumerable<uSyncDependency>> GetDependenciesAsync(object value, string editorAlias, DependencyFlags flags)
     {
-        return uSyncTaskHelper.FromResultOf(() =>
+        return uSyncTaskHelper.FromResultOf<IEnumerable<uSyncDependency>>(() =>
         {
 
             var stringValue = value?.ToString();
@@ -223,14 +223,14 @@ public class ImagePathMapper : SyncValueMapperBase, ISyncMapper
 
             if (!string.IsNullOrWhiteSpace(stringPath))
             {
-                return new uSyncDependency()
+                return [new uSyncDependency()
                 {
                     Name = $"File: {Path.GetFileName(stringPath)}",
                     Udi = Udi.Create(Constants.UdiEntityType.MediaFile, stringPath),
                     Flags = flags,
                     Order = DependencyOrders.OrderFromEntityType(Constants.UdiEntityType.MediaFile),
                     Level = 0
-                }.AsEnumerableOfOne();
+                }];
             }
 
             return [];

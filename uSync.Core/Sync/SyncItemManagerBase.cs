@@ -78,7 +78,7 @@ public abstract class SyncItemManagerBase
         }
         else
         {
-            return item.AsEnumerableOfOne();
+            return [item];
         }
     }
 
