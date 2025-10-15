@@ -112,7 +112,7 @@ public partial class SyncService
             .TrimEnd(Path.DirectorySeparatorChar);
 
     /// <inheritdoc />
-    public async Task<int> MergeExportFolder(string[] paths, IEnumerable<HandlerConfigPair> handlers, bool clean)
+    public async Task<int> MergeExportFolder(string[] paths, IEnumerable<HandlerConfigPair> handlers)
     {
         var totalMerged = 0;
 

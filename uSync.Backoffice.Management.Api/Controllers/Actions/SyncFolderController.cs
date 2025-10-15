@@ -31,7 +31,7 @@ public class SyncFolderController : uSyncControllerBase
     {
         var folders = _configService.GetFolders();
         var handlers = _handlerFactory.GetValidHandlers(new BackOffice.SyncHandlers.Models.SyncHandlerOptions { Set = _configService.Settings.DefaultSet });
-        var result = await _syncService.MergeExportFolder(folders, handlers, false);
+        var result = await _syncService.MergeExportFolder(folders, handlers);
         return Ok(result);
     }
 }

@@ -160,6 +160,6 @@ public interface ISyncService
     /// <summary>
     ///  merge the given folders in single 'production' files for each handler.
     /// </summary>
-    Task<int> MergeExportFolder(string[] paths, IEnumerable<HandlerConfigPair> handlers, bool clean);
+    Task<int> MergeExportFolder(string[] paths, IEnumerable<HandlerConfigPair> handlers);
 
 }
