@@ -128,15 +128,19 @@ public abstract class SyncHandlerContainerBase<TObject>
             if (_loadedFiles.TryGetValue(action.FileName, out XElement? xml) is false)
                 _loadedFiles[action.FileName] = await syncFileService.LoadXElementAsync(action.FileName);
 
-            // single 
             if (_loadedFiles[action.FileName].Name.LocalName.Equals(Core.uSyncConstants.Serialization.Empty) is true)
-                return await ImportSingleElementAsync(_loadedFiles[action.FileName], action.FileName, config, options);
+            {
+                // single 
+                results.AddRange(await ImportSingleElementAsync(_loadedFiles[action.FileName], action.FileName, config, options));
+            }
+            else
+            {
+                // multiple ? 
+                var node = _loadedFiles[action.FileName].XPathSelectElement($"//{Core.uSyncConstants.Serialization.Empty}[@Key='{action.Key}']");
+                if (node is null) continue;
 
-            // multiple ? 
-            var node = _loadedFiles[action.FileName].XPathSelectElement($"//{Core.uSyncConstants.Serialization.Empty}[@Key='{action.Key}']");
-            if (node is null) continue;
-           
-            results.AddRange(await ImportSingleElementAsync(node, action.FileName, config, options));
+                results.AddRange(await ImportSingleElementAsync(node, action.FileName, config, options));
+            }
         }
 
         _loadedFiles.Clear();
