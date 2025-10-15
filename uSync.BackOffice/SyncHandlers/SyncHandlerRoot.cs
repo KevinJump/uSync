@@ -170,7 +170,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     protected readonly IShortStringHelper shortStringHelper;
 
     /// <summary>
-    ///  The serializer's item type (this is what the xml-node name will be.
+    ///  The serializer's item type (this is what the xml-node name will be).
     /// </summary>
     public string? GetSerializerType() => serializer.ItemType;
 
