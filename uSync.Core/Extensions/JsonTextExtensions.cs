@@ -205,6 +205,8 @@ public static class JsonTextExtensions
     public static void AddOrRemoveIfNull<T>(this JsonObject? jsonObject, string property, T? value)
         where T : JsonNode
     {
+        if (jsonObject == null)
+            return;
         if (value is not null)
             jsonObject[property] = value;
         else
