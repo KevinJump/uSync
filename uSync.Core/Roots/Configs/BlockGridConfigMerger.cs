@@ -1,5 +1,4 @@
-﻿using System.Collections.Immutable;
-using System.Text.Json.Nodes;
+﻿using System.Text.Json.Nodes;
 
 using Umbraco.Cms.Core;
 
@@ -28,11 +27,12 @@ internal class BlockGridConfigMerger : BlockListMergerBase, ISyncConfigMerger
         if (rootConfig is null) return target;
         if (targetConfig is null) return root;
 
-        // merge groups
-        targetConfig["blockGroups"] = MergeGroups(rootConfig, targetConfig);
 
         // merge blocks 
         targetConfig["blocks"] = GetMergedBlocks(rootConfig, targetConfig);
+
+        // merge groups
+        targetConfig.AddOrRemoveIfNull("blockGroups", MergeGroups(rootConfig, targetConfig));
 
         return targetConfig;
     }
@@ -60,7 +60,7 @@ internal class BlockGridConfigMerger : BlockListMergerBase, ISyncConfigMerger
         rootConfig.TryGetPropertyAsArray("blockGroups", out var rootGroups);
         targetConfig.TryGetPropertyAsArray("blockGroups", out var targetGroups);
 
-        var groupDiffrences = GetJsonArrayDifferences(rootGroups, targetGroups, "name", "name");
+        var groupDiffrences = GetJsonArrayDifferences(rootGroups, targetGroups, "key", "name");
         return groupDiffrences?.Count > 0 ? groupDiffrences : null;
     }
 
@@ -68,7 +68,7 @@ internal class BlockGridConfigMerger : BlockListMergerBase, ISyncConfigMerger
     {
         rootConfig.TryGetPropertyAsArray("blockGroups", out var rootGroups);
         targetConfig.TryGetPropertyAsArray("blockGroups", out var targetGroups);
-        var mergedGroups = MergeJsonArrays(rootGroups, targetGroups, "name", "name");
+        var mergedGroups = MergeJsonArrays(rootGroups, targetGroups, "key", "name");
         return mergedGroups?.Count > 0 ? mergedGroups : null;
     }
 

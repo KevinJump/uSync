@@ -202,6 +202,15 @@ public static class JsonTextExtensions
     public static JsonObject? ConvertToJsonObject(this object value)
         => value.TryConvertToJsonObject(out JsonObject? result) ? result : default;
 
+    public static void AddOrRemoveIfNull<T>(this JsonObject? jsonObject, string property, T? value)
+        where T : JsonNode
+    {
+        if (value is not null)
+            jsonObject[property] = value;
+        else
+            jsonObject.Remove(property);
+    }
+
     #endregion
 
     #region JsonArray
