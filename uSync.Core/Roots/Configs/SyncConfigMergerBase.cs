@@ -251,9 +251,10 @@ internal class SyncConfigMergerBase
                     targetObject[property.Key] = MergeJsonArrays(sourceArray, targetArray, arrayKey, arrayLabel);
                     continue;
                 case JsonValueKind.Object:
-                    if (sourceObject.GetPropertyAsObject(property.Key) is not null && property.Value is JsonObject targetPropertyObject)
+                    var sourcePropertyObject = sourceObject.GetPropertyAsObject(property.Key);
+                    if (sourcePropertyObject is not null && property.Value is JsonObject targetPropertyObject)
                     {
-                        targetObject[property.Key] = MergeJsonProperties(sourceObject.GetPropertyAsObject(property.Key), targetPropertyObject, string.Empty);
+                        targetObject[property.Key] = MergeJsonProperties(sourcePropertyObject, targetPropertyObject, string.Empty);
                     }
                     break;
             }
