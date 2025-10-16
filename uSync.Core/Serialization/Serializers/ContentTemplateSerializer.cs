@@ -143,7 +143,7 @@ public class ContentTemplateSerializer : ContentSerializer, ISyncSerializer<ICon
 
     protected override Task<SyncContentUpdateResult> DoSaveOrPublishAsync(IContent item, XElement node, SyncSerializerOptions options)
     {
-        contentService.SaveBlueprint(item, options.UserId);
+        contentService.SaveBlueprint(item, null, options.UserId);
         var updatedItem = contentService.GetBlueprintById(item.Id);
         return Task.FromResult(new SyncContentUpdateResult
         {
@@ -156,7 +156,7 @@ public class ContentTemplateSerializer : ContentSerializer, ISyncSerializer<ICon
     public override Task SaveItemAsync(IContent item)
         => uSyncTaskHelper.FromResultOf(() =>
         {
-            contentService.SaveBlueprint(item);
+            contentService.SaveBlueprint(item, null, Constants.Security.SuperUserId);
         });
 
     public override Task DeleteItemAsync(IContent item)

@@ -100,8 +100,7 @@
         "dependencies": {
           "Examine.Core": "3.7.1",
           "Lucene.Net.QueryParser": "4.8.0-beta00017",
-          "Lucene.Net.Replicator": "4.8.0-beta00017",
-          "System.Threading.AccessControl": "8.0.0"
+          "Lucene.Net.Replicator": "4.8.0-beta00017"
         }
       },
       "HtmlAgilityPack": {
@@ -1233,11 +1232,6 @@
         "dependencies": {
           "System.Security.Cryptography.Pkcs": "8.0.0"
         }
-      },
-      "System.Threading.AccessControl": {
-        "type": "Transitive",
-        "resolved": "8.0.0",
-        "contentHash": "cIed5+HuYz+eV9yu9TH95zPkqmm1J9Qps9wxjB335sU8tsqc2kGdlTEH9FZzZeCS8a7mNSEsN8ZkyhQp1gfdEw=="
       },
       "System.Threading.RateLimiting": {
         "type": "Transitive",
