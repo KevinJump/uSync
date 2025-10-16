@@ -1,5 +1,7 @@
 ﻿using Json.More;
 
+using Microsoft.AspNetCore.Components.Forms;
+
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
@@ -211,6 +213,15 @@ internal class SyncConfigMergerBase
             if (targetObject[removeProperty]!.ToString().StartsWith(_removedLabel) is true)
             {
                 // we can't remove it while iterating, so add to a list. 
+                removals.Add(i);
+                continue;
+            }
+
+            // if the item has been removed from source, but the target has
+            // values inherited from source we need to now remove it?
+            var targetJson = targetObject.SerializeJsonString(false);
+            if (targetJson.Contains(_inheritedValue) is true)
+            {
                 removals.Add(i);
             }
         }
