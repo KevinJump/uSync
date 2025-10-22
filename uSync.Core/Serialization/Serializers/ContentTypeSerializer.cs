@@ -160,7 +160,7 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
 
             property.Variations = variations;
 
-            return change.AsEnumerableOfOne();
+            return [change];
         }
 
         return [];

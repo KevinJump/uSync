@@ -64,14 +64,14 @@ public class SyncXmlTracker<TObject>
             return [];
 
         if (target.IsEmptyItem())
-            return SyncXmlTracker<TObject>.GetEmptyFileChange(target, source).AsEnumerableOfOne();
+            return [SyncXmlTracker<TObject>.GetEmptyFileChange(target, source)];
 
         if (GetSerializer(target)?.IsValid(target) is false)
-            return uSyncChange.Error("", "Invalid File", target.Name.LocalName).AsEnumerableOfOne();
+            return [uSyncChange.Error("", "Invalid File", target.Name.LocalName)];
 
         var changeType = await GetChangeTypeAsync(target, source, options);
         if (changeType == ChangeType.NoChange)
-            return uSyncChange.NoChange("", target.GetAlias()).AsEnumerableOfOne();
+            return [uSyncChange.NoChange("", target.GetAlias())];
 
         return CalculateDifferences(target, source);
     }

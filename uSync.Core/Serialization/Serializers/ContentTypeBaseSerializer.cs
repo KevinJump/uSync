@@ -1084,7 +1084,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
 
             item.ContentTypeComposition = compositions;
 
-            return change.AsEnumerableOfOne();
+            return [change];
         }
 
         return [];

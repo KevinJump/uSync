@@ -410,14 +410,12 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         }
         catch (FileNotFoundException notFoundException)
         {
-            return uSyncAction.Fail(Path.GetFileName(filePath), this.handlerType, this.ItemType, ChangeType.Fail, $"File not found {notFoundException.Message}", notFoundException)
-                .AsEnumerableOfOne();
+            return [uSyncAction.Fail(Path.GetFileName(filePath), this.handlerType, this.ItemType, ChangeType.Fail, $"File not found {notFoundException.Message}", notFoundException)];
         }
         catch (Exception ex)
         {
             logger.LogWarning("[{alias}] Import Failed : {exception}", this.Alias, ex.ToString());
-            return uSyncAction.Fail(Path.GetFileName(filePath), this.handlerType, this.ItemType, ChangeType.Fail, $"Import Fail: {ex.Message}", new Exception(ex.Message, ex))
-                .AsEnumerableOfOne();
+            return [uSyncAction.Fail(Path.GetFileName(filePath), this.handlerType, this.ItemType, ChangeType.Fail, $"Import Fail: {ex.Message}", new Exception(ex.Message, ex))];
         }
     }
 
@@ -475,16 +473,14 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     {
         if (!await ShouldImportAsync(node, settings))
         {
-            return uSyncAction.SetAction(true, node.GetAlias(), message: "Change blocked (based on configuration)")
-                .AsEnumerableOfOne();
+            return [uSyncAction.SetAction(true, node.GetAlias(), message: "Change blocked (based on configuration)")];
         }
 
         if (await _mutexService.FireItemStartingEventAsync(new uSyncImportingItemNotification(node, (ISyncHandler)this)))
         {
             // blocked
-            return uSyncActionHelper<TObject>
-                .ReportAction(ChangeType.NoChange, node.GetAlias(), node.GetPath(), GetNameFromFileOrNode(filename, node), node.GetKey(), this.Alias, "Change stopped by delegate event")
-                .AsEnumerableOfOne();
+            return [uSyncActionHelper<TObject>
+                .ReportAction(ChangeType.NoChange, node.GetAlias(), node.GetPath(), GetNameFromFileOrNode(filename, node), node.GetKey(), this.Alias, "Change stopped by delegate event")];
         }
 
         try
@@ -508,14 +504,13 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
             // this might not be the place to do this because, two pass items are imported at another point too.
             await _mutexService.FireItemCompletedEventAsync(new uSyncImportedItemNotification(node, attempt.Change));
 
-            return action.AsEnumerableOfOne();
+            return [action];
         }
         catch (Exception ex)
         {
             logger.LogWarning("[{alias}] ImportElement Failed : {exception}", this.Alias, ex.ToString());
-            return uSyncAction.Fail(Path.GetFileName(filename), this.Alias, this.ItemType, ChangeType.Fail,
-                $"{this.Alias} Import Fail: {ex.Message}", new Exception(ex.Message))
-                .AsEnumerableOfOne();
+            return [uSyncAction.Fail(Path.GetFileName(filename), this.Alias, this.ItemType, ChangeType.Fail,
+                $"{this.Alias} Import Fail: {ex.Message}", new Exception(ex.Message))];
         }
 
     }
@@ -533,8 +528,8 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
             callback?.Invoke($"Second Pass {item.update.Node.GetAlias()}", item.Index, importedItems.Count);
             var attempt = await ImportSecondPassAsync(item.update.Node, item.update.Item, config, callback);
 
-            if (attempt.RequiresSave())
-                await serializer.SaveAsync(attempt.Item!.AsEnumerableOfOne());
+            if (attempt.RequiresSave() && attempt.Item is not null)
+                await serializer.SaveAsync([attempt.Item]);
 
             actions.UpdateActions(itemKey, this.Alias, attempt);
         }
@@ -570,12 +565,12 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
                 await serializer.SaveItemAsync(result.Item);
             }
 
-            return uSyncActionHelper<TObject>.SetAction(result, syncFileService.GetSiteRelativePath(fileName), node.GetKey(), this.Alias).AsEnumerableOfOne();
+            return [uSyncActionHelper<TObject>.SetAction(result, syncFileService.GetSiteRelativePath(fileName), node.GetKey(), this.Alias)];
         }
         catch (Exception ex)
         {
             logger.LogWarning(ex, "Second Import Failed");
-            return uSyncAction.Fail(action.Name, this.handlerType, action.ItemType, ChangeType.ImportFail, "Second import failed", ex).AsEnumerableOfOne();
+            return [uSyncAction.Fail(action.Name, this.handlerType, action.ItemType, ChangeType.ImportFail, "Second import failed", ex)];
         }
     }
 
@@ -862,9 +857,8 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         }
 
 
-        return uSyncAction.Fail(nameof(udi), this.handlerType, this.ItemType, ChangeType.Fail, $"Item not found {udi}",
-             new KeyNotFoundException(nameof(udi)))
-            .AsEnumerableOfOne();
+        return [uSyncAction.Fail(nameof(udi), this.handlerType, this.ItemType, ChangeType.Fail, $"Item not found {udi}",
+             new KeyNotFoundException(nameof(udi)))];
     }
 
     /// <summary>
@@ -873,15 +867,14 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     virtual public async Task<IEnumerable<uSyncAction>> ExportAsync(TObject item, string[] folders, HandlerSettings config)
     {
         if (item == null)
-            return uSyncAction.Fail(nameof(item), this.handlerType, this.ItemType, ChangeType.Fail, "Item not set",
-                new ArgumentNullException(nameof(item))).AsEnumerableOfOne();
+            return [uSyncAction.Fail(nameof(item), this.handlerType, this.ItemType, ChangeType.Fail, "Item not set",
+                new ArgumentNullException(nameof(item)))];
 
         if (await _mutexService.FireItemStartingEventAsync(new uSyncExportingItemNotification<TObject>(item, (ISyncHandler)this)))
         {
-            return uSyncActionHelper<TObject>
+            return [uSyncActionHelper<TObject>
                 .ReportAction(ChangeType.NoChange, GetItemName(item), string.Empty, string.Empty, GetItemKey(item), this.Alias,
-                                "Change stopped by delegate event")
-                .AsEnumerableOfOne();
+                                "Change stopped by delegate event")];
         }
 
         var targetFolder = folders.Last();
@@ -894,11 +887,11 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         {
             // if we have lock roots on, then this item will not export 
             // because exporting would mean the root was no longer used.
-            return uSyncAction.SetAction(true, syncFileService.GetSiteRelativePath(filename),
+            return [uSyncAction.SetAction(true, syncFileService.GetSiteRelativePath(filename),
                 type: typeof(TObject).ToString(),
                 change: ChangeType.NoChange,
                 message: "Not exported (would overwrite root value)",
-                filename: filename).AsEnumerableOfOne();
+                filename: filename)];
         }
 
 
@@ -907,7 +900,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         if (attempt.Change > ChangeType.NoChange)
             await _mutexService.FireItemCompletedEventAsync(new uSyncExportedItemNotification(attempt.Item, ChangeType.Export));
 
-        return uSyncActionHelper<XElement>.SetAction(attempt, syncFileService.GetSiteRelativePath(filename), GetItemKey(item), this.Alias).AsEnumerableOfOne();
+        return [uSyncActionHelper<XElement>.SetAction(attempt, syncFileService.GetSiteRelativePath(filename), GetItemKey(item), this.Alias)];
     }
 
     /// <summary>
@@ -1250,9 +1243,8 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         {
             if ((await ShouldImportAsync(node, settings)) is false)
             {
-                return uSyncActionHelper<TObject>.ReportAction(ChangeType.NoChange, node.GetAlias(), node.GetPath(), syncFileService.GetSiteRelativePath(filename), node.GetKey(),
-                    this.Alias, "Will not be imported (Based on configuration)")
-                    .AsEnumerableOfOne<uSyncAction>();
+                return [uSyncActionHelper<TObject>.ReportAction(ChangeType.NoChange, node.GetAlias(), node.GetPath(), syncFileService.GetSiteRelativePath(filename), node.GetKey(),
+                    this.Alias, "Will not be imported (Based on configuration)")];
             }
 
             //  starting reporting notification
@@ -1260,10 +1252,9 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
             //  shortcut the checking (sometimes).
             if (await _mutexService.FireItemStartingEventAsync(new uSyncReportingItemNotification(node)))
             {
-                return uSyncActionHelper<TObject>
+                return [uSyncActionHelper<TObject>
                     .ReportAction(ChangeType.NoChange, node.GetAlias(), node.GetPath(), GetNameFromFileOrNode(filename, node), node.GetKey(), this.Alias,
-                        "Change stopped by delegate event")
-                    .AsEnumerableOfOne();
+                        "Change stopped by delegate event")];
             }
 
             var actions = new List<uSyncAction>();
@@ -1294,7 +1285,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
                     if (action.Change != ChangeType.Create && (action.Details == null || !action.Details.Any()))
                     {
                         action.Message = "XML is different - but properties may not have changed";
-                        action.Details = SyncHandlerRoot<TObject, TContainer>.MakeRawChange(node, change.CurrentNode).AsEnumerableOfOne();
+                        action.Details = [SyncHandlerRoot<TObject, TContainer>.MakeRawChange(node, change.CurrentNode)];
                     }
                     else
                     {
@@ -1315,9 +1306,9 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         }
         catch (FormatException fex)
         {
-            return uSyncActionHelper<TObject>
-                .ReportActionFail(Path.GetFileName(node.GetAlias()), $"format error {fex.Message}")
-                .AsEnumerableOfOne();
+            return [uSyncActionHelper<TObject>
+                .ReportActionFail(Path.GetFileName(node.GetAlias()), $"format error {fex.Message}")];
+                
         }
     }
 
@@ -1344,16 +1335,14 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
             }
             else
             {
-                return uSyncActionHelper<TObject>.ReportAction(ChangeType.NoChange, node.GetAlias(), node.GetPath(), syncFileService.GetSiteRelativePath(file), node.GetKey(),
-                    this.Alias, "Will not be imported (Based on configuration)")
-                    .AsEnumerableOfOne<uSyncAction>();
+                return [uSyncActionHelper<TObject>.ReportAction(ChangeType.NoChange, node.GetAlias(), node.GetPath(), syncFileService.GetSiteRelativePath(file), node.GetKey(),
+                    this.Alias, "Will not be imported (Based on configuration)")];
             }
         }
         catch (Exception ex)
         {
-            return uSyncActionHelper<TObject>
-                .ReportActionFail(Path.GetFileName(file), $"Reporting error {ex.Message}")
-                .AsEnumerableOfOne();
+            return [uSyncActionHelper<TObject>
+                .ReportActionFail(Path.GetFileName(file), $"Reporting error {ex.Message}")];
         }
 
     }

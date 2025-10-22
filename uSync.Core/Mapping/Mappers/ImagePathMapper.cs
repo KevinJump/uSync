@@ -217,20 +217,20 @@ public class ImagePathMapper : SyncValueMapperBase, ISyncMapper
 
             var stringValue = value?.ToString();
             if (string.IsNullOrWhiteSpace(stringValue))
-                return [];
+                return Enumerable.Empty<uSyncDependency>();
 
             var stringPath = GetImagePath(stringValue).TrimStart('/').ToLower();
 
             if (!string.IsNullOrWhiteSpace(stringPath))
             {
-                return new uSyncDependency()
+                return [new uSyncDependency()
                 {
                     Name = $"File: {Path.GetFileName(stringPath)}",
                     Udi = Udi.Create(Constants.UdiEntityType.MediaFile, stringPath),
                     Flags = flags,
                     Order = DependencyOrders.OrderFromEntityType(Constants.UdiEntityType.MediaFile),
                     Level = 0
-                }.AsEnumerableOfOne();
+                }];
             }
 
             return [];

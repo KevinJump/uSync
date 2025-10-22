@@ -56,7 +56,7 @@ internal sealed class SyncSectionManifestReader : IPackageManifestReader
                 }]
             }
         ];
-        return Task.FromResult(manifest.AsEnumerable());
+        return Task.FromResult<IEnumerable<PackageManifest>>(manifest);
     }
 }
 
@@ -91,7 +91,7 @@ internal sealed class uSyncManifestReader : IPackageManifestReader
             }
         ];
 
-        return Task.FromResult(manifest.AsEnumerable());
+        return Task.FromResult<IEnumerable<PackageManifest>>(manifest);
     }
 
     private string GetuSyncVersion()
