@@ -1,5 +1,7 @@
 ﻿using Json.More;
 
+
+using System.Text.Json;
 using System.Text.Json.Nodes;
 
 using Umbraco.Extensions;
@@ -11,6 +13,14 @@ namespace uSync.Core.Roots.Configs;
 internal class SyncConfigMergerBase
 {
     protected static string _removedLabel = "uSync:Removed in child site.";
+    protected static string _inheritedValue = "uSync:Inherited from root.";
+
+    protected static Dictionary<string, (string key, string label)> _knownArrayKeys = new() {
+        { "blocks", (key: "contentElementTypeKey", label: "label") },
+        { "blockGroups", (key: "key", label: "name") },
+        { "areas", (key: "key", label: "alias") },
+        { "specifiedAllowance", (key: "elementTypeKey", label: "removed") }
+    };
 
     protected TConfig? TryGetConfiguration<TConfig>(string value)
     {
@@ -47,7 +57,7 @@ internal class SyncConfigMergerBase
         return [.. mergedObject];
     }
 
-    protected TObject[] GetObjectDifferences<TObject, TKey>(TObject[]? rootObject, TObject[]? targetObject, Func<TObject, TKey> keySelector, Action<TObject, string> setMarker)
+    protected static TObject[] GetObjectDifferences<TObject, TKey>(TObject[]? rootObject, TObject[]? targetObject, Func<TObject, TKey> keySelector, Action<TObject, string> setMarker)
     {
         var rootObjectKeys = rootObject?.Select(keySelector) ?? [];
         var targetObjectKeys = targetObject?.Select(keySelector) ?? [];
@@ -76,15 +86,28 @@ internal class SyncConfigMergerBase
         var sourceItems = sourceArray?
             .Select(x => x as JsonObject)?
             .WhereNotNull()
-            .ToDictionary(k => k.TryGetPropertyAsObject(key, out var sourceKey) ? sourceKey.ToString() : "", v => v) ?? [];
+            .ToDictionary(k => k.TryGetPropertyAsObject(key, out var sourceKey) ? sourceKey.GetValueAsString(key) ?? sourceKey.ToString() : "", v => v) ?? [];
 
         var targetItems = targetArray?
             .Select(x => x as JsonObject)?
             .WhereNotNull()
-            .ToDictionary(k => k.TryGetPropertyAsObject(key, out var targetKey) ? targetKey.ToString() : "", v => v) ?? [];
+            .ToDictionary(k => k.TryGetPropertyAsObject(key, out var targetKey) ? targetKey.GetValueAsString(key) ?? targetKey.ToString() : "", v => v) ?? [];
 
         // things that are only in the target. 
         var targetOnly = targetItems.Where(x => sourceItems.ContainsKey(x.Key) is false).Select(x => x.Value).ToList() ?? [];
+
+        foreach (var block in targetItems)
+        {
+            var sourceItem = sourceItems.GetValueOrDefault(block.Key);
+            if (sourceItem is null) continue;
+
+            if (block.Value.IsJsonEqual(sourceItem) is false)
+            {
+                // the values are different, so we go property by property to see if we can merge them.
+                var target = GetJsonPropertyDifferences(sourceItem, block.Value, key);
+                targetOnly.Add(target);
+            }
+        }
 
         // keys that are only in the source have been removed from the child, we need to mark them as removed. 
         foreach (var removedItem in sourceItems.Where(x => targetItems.ContainsKey(x.Key) is false))
@@ -96,13 +119,63 @@ internal class SyncConfigMergerBase
         return targetOnly.ToJsonArray();
     }
 
+    private static JsonObject GetJsonPropertyDifferences(JsonObject sourceObject, JsonObject targetObject, string propertyKey)
+    {
+        foreach (var property in sourceObject)
+        {
+            // if this is the key property or it's value is null skip it.
+            if (property.Key == propertyKey || property.Value is null) continue;
+
+            if (targetObject.TryGetPropertyValue(property.Key, out var targetValue) is false || targetValue is null)
+            {
+                // value isn't in target. inherit.
+                targetObject[property.Key] = JsonValue.Create(_inheritedValue);
+                continue;
+            }
+            
+            if (property.Value.IsJsonEqual(targetValue) is false)
+            {
+                // target is an update so we keep this value.
+                // unless its an array, and then we have to merge deeper. 
+                switch (targetValue.GetValueKind())
+                {
+                    case JsonValueKind.Array:
+                        var sourceArray = property.Value as JsonArray;
+                        var targetArray = targetValue as JsonArray;
+
+                        // this assumes we know what they key should be based on our array of well known array keys.
+                        // if the array is new or generic we fall back to 'key';
+                        var (arrayKey, arrayLabel) = _knownArrayKeys.GetValueOrDefault(property.Key, (key: "key", label: "label"));
+                        targetObject[property.Key] = GetJsonArrayDifferences(sourceArray, targetArray, arrayKey, arrayLabel);
+                        break;
+                    case JsonValueKind.Object:
+                        // i am not sure we ever hit this in the block config, but it's here should the block or json store
+                        // an object in it. - the key is redundant, at this point, because a single object (not an array)
+                        // wouldn't have a key. 
+                        if (property.Value is JsonObject sourceObj && targetValue is JsonObject targetObj)
+                        {
+                            targetObject[property.Key] = GetJsonPropertyDifferences(sourceObj, targetObj, string.Empty);
+                        }
+                        break;
+                }
+            }
+            else
+            {
+                // source wins.
+                targetObject[property.Key] = JsonValue.Create(_inheritedValue);
+            }
+        }
+
+        return targetObject;
+    }
+
     protected static JsonArray? MergeJsonArrays(JsonArray? sourceArray, JsonArray? targetArray, string key, string removeProperty)
     {
         // no source, we return target
         if (sourceArray is null) return targetArray;
 
         // no target we return source (we have to clone it).
-        if (targetArray is null) return sourceArray.DeepClone().AsArray(); 
+        if (targetArray is null) return sourceArray.DeepClone() as JsonArray;
 
         // merge them. 
         foreach (var sourceItem in sourceArray)
@@ -110,19 +183,28 @@ internal class SyncConfigMergerBase
             if (sourceItem is not JsonObject sourceObject) continue;
             if (sourceObject.TryGetPropertyAsObject(key, out var sourceKey) is false) continue;
 
-            var targetObject = targetArray.FirstOrDefault(
-                x => (x as JsonObject)?.TryGetPropertyAsObject(key, out var targetKey) == true && targetKey.GetValueAsString(key) == sourceKey.GetValueAsString(key)) 
-                as JsonObject;
+            var targetObject = targetArray
+                .Select(x => x as JsonObject)
+                .WhereNotNull()
+                .FirstOrDefault(x => x?.TryGetPropertyAsObject(key, out var targetKey) == true && targetKey.GetValueAsString(key) == sourceKey.GetValueAsString(key));
 
             if (targetObject is null)
             {
                 var clonedItem = sourceObject.SerializeJsonString().DeserializeJson<JsonObject>();
                 targetArray.Add(clonedItem);
             }
+            else
+            {
+                if (sourceItem.IsJsonEqual(targetObject) is false)
+                {
+                    // they are different we need to merge the properties. 
+                    targetObject = MergeJsonProperties(sourceObject, targetObject, key);
+                }
+            }
         }
 
         List<int> removals = [];
-        for(int i = 0; i < targetArray.Count; i++)
+        for (int i = 0; i < targetArray.Count; i++)
         {
             if (targetArray[i] is not JsonObject targetObject) continue;
             if (targetObject.ContainsKey(removeProperty) is false) continue;
@@ -131,15 +213,70 @@ internal class SyncConfigMergerBase
             {
                 // we can't remove it while iterating, so add to a list. 
                 removals.Add(i);
+                continue;
+            }
+
+            // if the item has been removed from source, but the target has
+            // values inherited from source we need to now remove it?
+            var targetJson = targetObject.SerializeJsonString(false);
+            if (targetJson.Contains(_inheritedValue) is true)
+            {
+                removals.Add(i);
             }
         }
-        
-        foreach(var index in removals.OrderDescending())
+
+        foreach (var index in removals.OrderDescending())
         {
             targetArray.RemoveAt(index);
         }
 
         return targetArray;
+    }
+
+    private static JsonObject MergeJsonProperties(JsonObject sourceObject, JsonObject targetObject, string propertyKey)
+    {
+        var targetItems = targetObject.ToDictionary(
+            k => k.Key, v => v.Value);
+
+        foreach (var property in targetItems)
+        {
+            if (property.Key == propertyKey || property.Value is null) continue;
+
+            switch (property.Value.GetValueKind())
+            {
+                case JsonValueKind.Array:
+                    var sourceArray = sourceObject.GetPropertyAsArray(property.Key);
+                    var targetArray = targetObject.GetPropertyAsArray(property.Key);
+                    var (arrayKey, arrayLabel) = _knownArrayKeys.GetValueOrDefault(property.Key, (key: "key", label: "label"));
+                    targetObject[property.Key] = MergeJsonArrays(sourceArray, targetArray, arrayKey, arrayLabel);
+                    continue;
+                case JsonValueKind.Object:
+                    var sourcePropertyObject = sourceObject.GetPropertyAsObject(property.Key);
+                    if (sourcePropertyObject is not null && property.Value is JsonObject targetPropertyObject)
+                    {
+                        targetObject[property.Key] = MergeJsonProperties(sourcePropertyObject, targetPropertyObject, string.Empty);
+                    }
+                    break;
+            }
+
+            if (property.Value.ToString() == _inheritedValue)
+            {
+                if (sourceObject.TryGetPropertyValue(property.Key, out var sourceValue) is false)
+                {
+                    // is this an error?
+                    // It means the value doesn't exist in the source, but at some point it has,
+                    // because we have inherited it from the source. If it's a case of the values
+                    // that are not set just not making it to the JSON then we can remove the
+                    // property from target, and that is the same as it inheriting it from the source. 
+                    targetObject.Remove(property.Key);
+                    continue;
+                }
+
+                targetObject[property.Key] = sourceValue?.DeepClone();
+            }
+        }
+
+        return targetObject;
     }
 
 }
