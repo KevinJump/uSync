@@ -13,8 +13,16 @@ internal class FileUploadMigratingConfigSerializer : ConfigurationSerializerBase
 
     public override IDictionary<string, object> GetConfigurationImport(IDictionary<string, object> configuration)
     {
-        if (configuration.TryGetValue("fileExtensions", out var items) is false || items is null)
+        if (configuration.TryGetValue("fileExtensions", out var items) is false)
             return configuration;
+
+        // mitigation : older sites might have fileExtensions set as, and that breaks drag and drop in umbraco.
+        // https://github.com/umbraco/Umbraco-CMS/issues/20620
+        if (items is null)
+        {
+            configuration.Remove("fileExtensions");
+            return configuration;
+        }
 
         if (items is JsonArray element == false) return configuration;
 
@@ -28,8 +36,9 @@ internal class FileUploadMigratingConfigSerializer : ConfigurationSerializerBase
             if (item.Value is null) continue;
             convertedItems.Add(item.Value);
         }
-
+        
         configuration["fileExtensions"] = convertedItems;
+        
         return configuration;
     }
 
