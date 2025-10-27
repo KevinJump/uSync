@@ -175,7 +175,7 @@ internal class uSyncManagementService : ISyncManagementService
             return await PerformBackgroundActionAsync(actionRequest, user);
         }
 
-        return await PerformActionInternalAsnyc(string.IsNullOrWhiteSpace(actionRequest.RequestId), actionRequest, user);
+        return await PerformActionInternalAsync(string.IsNullOrWhiteSpace(actionRequest.RequestId), actionRequest, user);
     }
 
 
@@ -213,7 +213,7 @@ internal class uSyncManagementService : ISyncManagementService
 
         do
         {
-            result = await PerformActionInternalAsnyc(count == 0, request, user);
+            result = await PerformActionInternalAsync(count == 0, request, user);
             request.RequestId = result.RequestId;
             request.StepNumber++;
             count++;
@@ -222,7 +222,7 @@ internal class uSyncManagementService : ISyncManagementService
         
     }
 
-    private async Task<PerformActionResponse> PerformActionInternalAsnyc(bool isFirstRequest, PerformActionRequest actionRequest, IUser? user)
+    private async Task<PerformActionResponse> PerformActionInternalAsync(bool isFirstRequest, PerformActionRequest actionRequest, IUser? user)
     {
         if (Enum.TryParse(actionRequest.Action, out HandlerActions action) is false)
             throw new ArgumentException($"Invalid action {actionRequest.Action}");
