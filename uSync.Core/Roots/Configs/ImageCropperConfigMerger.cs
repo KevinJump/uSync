@@ -1,7 +1,6 @@
 ﻿using System.Text.Json.Nodes;
 
 using Umbraco.Cms.Core;
-using Umbraco.Cms.Core.PropertyEditors;
 
 using uSync.Core.Extensions;
 
