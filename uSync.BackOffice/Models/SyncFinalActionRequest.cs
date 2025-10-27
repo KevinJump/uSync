@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 
-using Umbraco.Cms.Core.Security;
-
 using uSync.BackOffice.SyncHandlers.Models;
 
 namespace uSync.BackOffice.Models;
