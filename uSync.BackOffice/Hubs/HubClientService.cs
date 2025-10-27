@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 
 using System;
+using System.Collections.Generic;
 
 using uSync.BackOffice.Models;
 
@@ -63,6 +64,22 @@ public class HubClientService
         this.SendMessage(summary);
     }
 
+    public void PostComplete(Guid requestId, string message, bool success, IEnumerable<uSyncActionView> actions)
+    {
+        if (_hubContext == null || string.IsNullOrWhiteSpace(_clientId)) return;
+
+        var client = _hubContext.Clients.Client(_clientId);
+        if (client == null) return;
+
+        client.SendAsync("Complete", new SyncCompleteMessage
+        {
+            RequestId = requestId,
+            Message = message,
+            Success = success,
+            Actions = actions
+        }).Wait();
+    }
+
     /// <summary>
     ///  post a progress 'update' message to the client 
     /// </summary>
@@ -80,7 +97,7 @@ public class HubClientService
     ///  get the uSync callbacks for this connection
     /// </summary>
     /// <returns></returns>
-    public uSyncCallbacks Callbacks() => new(this.PostSummary, this.PostUpdate, this.SetCountRange, this.PostIncrementalUpdate);
+    public uSyncCallbacks Callbacks() => new(this.PostSummary, this.PostUpdate, this.SetCountRange, this.PostIncrementalUpdate, this.PostComplete);
 
     private int _start = 0;
     private int _end = 0;

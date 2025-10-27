@@ -190,11 +190,18 @@ internal class SyncActionService : ISyncActionService
                 uSync.Version.ToString(3), request.Username, request.HandlerAction);
         _timer = Stopwatch.StartNew();
         await _uSyncService.StartBulkProcessAsync(request.HandlerAction);
+
+        if (request.HandlerAction == HandlerActions.Export && request.Clean is true)
+        {
+            // clean the export folder.  
+            CleanExportFolder();
+        }
+
     }
 
     /// <inheritdoc/>
     public async Task StartProcessAsync(HandlerActions action)
-        => await StartProcessAsync(new SyncStartActionRequest { HandlerAction = action, Username = "" });
+        => await StartProcessAsync(new SyncStartActionRequest { HandlerAction = action, Username = "", Clean = false });
 
     /// <inheritdoc/>
     public async Task<SyncActionResult> FinishProcessAsync(SyncFinalActionRequest request)

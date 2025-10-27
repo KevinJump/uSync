@@ -51,6 +51,10 @@ export class USyncSettingsViewElement extends UmbElementMixin(LitElement) {
 					<div>
 						<uui-box headline=${this.localize.term('USyncSettings_settings')}>
 							<usync-setting-item
+								.name=${this.localize.term('USyncSettings_processingMode')}
+								.description=${this.localize.term('USyncSettings_processingModeDesc')}
+								.value=${this.settings?.processingMode}></usync-setting-item>
+							<usync-setting-item
 								.name=${this.localize.term('USyncSettings_importAtStartup')}
 								.description=${this.localize.term('USyncSettings_importAtStartupDesc')}
 								.value=${this.settings?.importAtStartup}></usync-setting-item>

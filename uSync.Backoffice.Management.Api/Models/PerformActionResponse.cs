@@ -10,4 +10,9 @@ public class PerformActionResponse
     public IEnumerable<uSyncActionView>? Actions { get; set; }
 
     public bool Complete { get; set; }
+
+    /// <summary>
+    ///  the action is being performed in the background
+    /// </summary>
+    public bool InBackground { get; set; }
 }

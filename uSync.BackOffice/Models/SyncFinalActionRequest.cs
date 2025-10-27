@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using Umbraco.Cms.Core.Security;
+
 using uSync.BackOffice.SyncHandlers.Models;
 
 namespace uSync.BackOffice.Models;
@@ -56,4 +58,9 @@ public class SyncStartActionRequest
     ///  user of the person who triggered the process
     /// </summary>
     public string? Username { get; set; }
+
+    /// <summary>
+    ///  should the folder be cleaned before the action(export) runs?
+    /// </summary>
+    public bool Clean { get; set; }
 }

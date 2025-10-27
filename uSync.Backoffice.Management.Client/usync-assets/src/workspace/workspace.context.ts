@@ -60,6 +60,9 @@ export class uSyncWorkspaceContext
 	#working = new UmbBooleanState(false);
 	public readonly working = this.#working.asObservable();
 
+	#inBackground = new UmbBooleanState(false);
+	public readonly inBackground = this.#inBackground.asObservable();
+
 	/**
 	 * Flag to say that the last run has been completed (so results will show)
 	 */
@@ -99,6 +102,22 @@ export class uSyncWorkspaceContext
 		this.#repository = new uSyncActionRepository(this);
 
 		this.#signalRContext = new uSyncSignalRContext(this);
+
+		this.observe(this.#signalRContext.connected, (connected) => {
+			console.log('SignalR connected', connected);
+		});
+
+		this.observe(this.#signalRContext.complete, (complete) => {
+			if (!complete) return;
+
+			if (complete.success) {
+				this.#completed.setValue(true);
+				this.#working.setValue(false);
+				this.#inBackground.setValue(false);
+
+				this.#results.setValue(complete.actions ?? []);
+			}
+		});
 	}
 
 	/**
@@ -213,12 +232,16 @@ export class uSyncWorkspaceContext
 			if (data) {
 				step++;
 
+				console.log('performAction data', data);
+
 				let summary = data.status ?? [];
 
 				this.#workingActions.setValue(summary);
 
 				id = data.requestId;
 				complete = data.complete;
+
+				this.#inBackground.setValue(data.inBackground);
 
 				if (complete) {
 					this.#results.setValue(data?.actions ?? []);
@@ -234,8 +257,10 @@ export class uSyncWorkspaceContext
 			await this.downloadFile(id);
 		}
 
-		this.#completed.setValue(true);
-		this.#working.setValue(false);
+		if (!this.#inBackground.getValue()) {
+			this.#completed.setValue(true);
+			this.#working.setValue(false);
+		}
 	}
 
 	async uploadFile() {
@@ -273,7 +298,7 @@ export class uSyncWorkspaceContext
 
 	async importSingle(item: USyncActionView) {
 		if (!item) return;
-		
+
 		const data = await this.#repository.importSingle(item);
 		return data;
 	}

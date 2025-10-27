@@ -5,6 +5,8 @@ using System;
 using System.Globalization;
 using System.Threading.Tasks;
 
+using Umbraco.Cms.Api.Common.Filters;
+using Umbraco.Cms.Core;
 using Umbraco.Cms.Web.Common.Authorization;
 
 namespace uSync.BackOffice.Hubs;
@@ -13,6 +15,7 @@ namespace uSync.BackOffice.Hubs;
 ///  SignalR Hub
 /// </summary>
 [Authorize(Policy = AuthorizationPolicies.BackOfficeAccess)]
+[JsonOptionsName(Constants.JsonOptionsNames.BackOffice)]
 public class SyncHub : Hub<ISyncHub>
 {
     /// <summary>

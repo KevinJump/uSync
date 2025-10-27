@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
 
 using uSync.BackOffice.SyncHandlers.Interfaces;
 
@@ -165,6 +166,7 @@ public class SyncHandlerSummary
 /// <summary>
 ///  current status of a handler.
 /// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter<HandlerStatus>))]
 public enum HandlerStatus
 {
     /// <summary>

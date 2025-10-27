@@ -1,5 +1,7 @@
+using System;
+using System.Collections.Generic;
+
 using uSync.BackOffice.Models;
-using uSync.BackOffice.SyncHandlers.Interfaces;
 
 namespace uSync.BackOffice;
 
@@ -23,6 +25,11 @@ public delegate void SyncSetUpdateRange(int start, int end);
 /// </summary>
 /// <param name="message"></param>
 public delegate void SyncIncrementalUpdateCallback(string message);
+
+/// <summary>
+///  callback to signal that the sync is complete
+/// </summary>
+public delegate void SyncCompleteCallBack(Guid id, string message, bool success, IEnumerable<uSyncActionView> actions);
 
 
 /// <summary>
@@ -51,6 +58,12 @@ public class uSyncCallbacks
     public SyncIncrementalUpdateCallback? IncrementalUpdate { get; private set; }
 
     /// <summary>
+    ///  callback to signal that the sync is complete
+    /// </summary>
+    public SyncCompleteCallBack? Complete { get; private set; }
+
+
+    /// <summary>
     ///  generate a new callback object 
     /// </summary>
     public uSyncCallbacks(SyncEventCallback? callback, SyncUpdateCallback? update)
@@ -62,10 +75,15 @@ public class uSyncCallbacks
     /// <summary>
     ///  generate a callback object with range and incremental update
     /// </summary>
-    public uSyncCallbacks(SyncEventCallback? callback, SyncUpdateCallback? update, SyncSetUpdateRange? updateRange, SyncIncrementalUpdateCallback incrementalUpdate)
+    public uSyncCallbacks(SyncEventCallback? callback, 
+        SyncUpdateCallback? update,
+        SyncSetUpdateRange? updateRange, 
+        SyncIncrementalUpdateCallback incrementalUpdate,
+        SyncCompleteCallBack? complete)
         : this(callback, update)
     {
         this.SetRange = updateRange;
         this.IncrementalUpdate = incrementalUpdate;
+        this.Complete = complete;
     }
 }
