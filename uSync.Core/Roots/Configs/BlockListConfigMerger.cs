@@ -27,9 +27,7 @@ internal class BlockListConfigMerger : BlockListMergerBase, ISyncConfigMerger
         if (rootConfig is null) return target;
         if (targetConfig is null) return root;
 
-        targetConfig["blocks"] = GetMergedBlocks(rootConfig, targetConfig);
-
-        return targetConfig;
+        return MergeJsonProperties(rootConfig, targetConfig, "_");
     }
 
     public virtual object GetDifferenceConfig(string root, string target)
@@ -40,9 +38,7 @@ internal class BlockListConfigMerger : BlockListMergerBase, ISyncConfigMerger
         if (targetConfig is null) return target;
         if (rootConfig is null) return target;
 
-        targetConfig["blocks"] = GetBlockDifferences(rootConfig, targetConfig);
-
-        return targetConfig;
+        return GetJsonPropertyDifferences(rootConfig, targetConfig, "_");
     }
 
 }

@@ -1,44 +1,41 @@
-﻿using Umbraco.Cms.Core;
+﻿using System.Text.Json.Nodes;
+
+using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.PropertyEditors;
+
+using uSync.Core.Extensions;
 
 namespace uSync.Core.Roots.Configs;
 internal class ImageCropperConfigMerger : SyncConfigMergerBase, ISyncConfigMerger
 {
+    public override Dictionary<string, (string key, string label)> _knownArrayKeys => new()
+    {
+        {  "crops", (key: "alias", label: "removed") }
+    };
+
     public string[] Editors => [
         Constants.PropertyEditors.Aliases.ImageCropper
     ];
 
     public object? GetMergedConfig(string root, string target)
     {
-        var rootConfig = TryGetConfiguration<ImageCropperConfiguration>(root);
-        var targetConfig = TryGetConfiguration<ImageCropperConfiguration>(target);
+        var rootConfig = root.DeserializeJson<JsonObject>();
+        var targetConfig = target.DeserializeJson<JsonObject>();
 
-        if (targetConfig?.Crops is null || rootConfig?.Crops is null) return targetConfig;
+        if (rootConfig is null) return target;
+        if (targetConfig is null) return root;
 
-        targetConfig.Crops = MergeObjects(
-            rootConfig.Crops,
-            targetConfig.Crops,
-            x => x.Alias,
-            x => x.Alias?.StartsWith(_removedLabel) == true);
-
-        return targetConfig;
+        return MergeJsonProperties(rootConfig, targetConfig, "_");
     }
 
     public object? GetDifferenceConfig(string root, string target)
     {
-        var rootConfig = TryGetConfiguration<ImageCropperConfiguration>(root);
-        var targetConfig = TryGetConfiguration<ImageCropperConfiguration>(target);
+        var rootConfig = root.DeserializeJson<JsonObject>();
+        var targetConfig = target.DeserializeJson<JsonObject>();
 
-        if (targetConfig?.Crops is null || rootConfig?.Crops is null) return targetConfig;
+        if (targetConfig is null) return target;
+        if (rootConfig is null) return target;
 
-        targetConfig.Crops = GetObjectDifferences(
-            rootConfig.Crops,
-            targetConfig.Crops,
-            x => x.Alias,
-            (x, label) => x.Alias = $"{_removedLabel}:{x.Alias}");
-
-        if (targetConfig.Crops.Length == 0) return null;
-
-        return targetConfig;
+        return GetJsonPropertyDifferences(rootConfig, targetConfig, "_");
     }
 }

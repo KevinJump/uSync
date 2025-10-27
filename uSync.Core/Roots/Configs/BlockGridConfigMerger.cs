@@ -27,14 +27,7 @@ internal class BlockGridConfigMerger : BlockListMergerBase, ISyncConfigMerger
         if (rootConfig is null) return target;
         if (targetConfig is null) return root;
 
-
-        // merge blocks 
-        targetConfig["blocks"] = GetMergedBlocks(rootConfig, targetConfig);
-
-        // merge groups
-        targetConfig.AddOrRemoveIfNull("blockGroups", MergeGroups(rootConfig, targetConfig));
-
-        return targetConfig;
+        return MergeJsonProperties(rootConfig, targetConfig, "_");
     }
 
     public virtual object GetDifferenceConfig(string root, string target)
@@ -45,31 +38,6 @@ internal class BlockGridConfigMerger : BlockListMergerBase, ISyncConfigMerger
         if (targetConfig is null) return target;
         if (rootConfig is null) return target;
 
-        // differences in block groups
-        targetConfig["blockGroups"] = GetGroupDiffrences(rootConfig, targetConfig);
-
-        // differences in blocks
-        targetConfig["blocks"] = GetBlockDifferences(rootConfig, targetConfig);
-
-
-        return targetConfig;
+        return GetJsonPropertyDifferences(rootConfig, targetConfig, "_");
     }
-
-    private static JsonArray? GetGroupDiffrences(JsonObject rootConfig, JsonObject targetConfig)
-    {
-        rootConfig.TryGetPropertyAsArray("blockGroups", out var rootGroups);
-        targetConfig.TryGetPropertyAsArray("blockGroups", out var targetGroups);
-
-        var groupDiffrences = GetJsonArrayDifferences(rootGroups, targetGroups, "key", "name");
-        return groupDiffrences?.Count > 0 ? groupDiffrences : null;
-    }
-
-    private static JsonArray? MergeGroups(JsonObject rootConfig, JsonObject targetConfig)
-    {
-        rootConfig.TryGetPropertyAsArray("blockGroups", out var rootGroups);
-        targetConfig.TryGetPropertyAsArray("blockGroups", out var targetGroups);
-        var mergedGroups = MergeJsonArrays(rootGroups, targetGroups, "key", "name");
-        return mergedGroups?.Count > 0 ? mergedGroups : null;
-    }
-
 }

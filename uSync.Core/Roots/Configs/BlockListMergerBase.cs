@@ -6,25 +6,10 @@ namespace uSync.Core.Roots.Configs;
 
 internal abstract class BlockListMergerBase : SyncConfigMergerBase
 {
-    protected JsonArray? GetMergedBlocks(JsonObject rootConfig, JsonObject targetConfig)
-    {
-        rootConfig.TryGetPropertyAsArray("blocks", out var rootBlocks);
-        targetConfig.TryGetPropertyAsArray("blocks", out var targetBlocks);
-
-        var merged = MergeJsonArrays(rootBlocks, targetBlocks,
-            "contentElementTypeKey", "label");
-
-        return merged?.Count > 0 ? merged : null;
-    }
-
-    protected JsonArray? GetBlockDifferences(JsonObject rootConfig, JsonObject targetConfig)
-    {
-        rootConfig.TryGetPropertyAsArray("blocks", out var rootBlocks);
-        targetConfig.TryGetPropertyAsArray("blocks", out var targetBlocks);
-
-        var diffrences = GetJsonArrayDifferences(rootBlocks, targetBlocks,
-                        "contentElementTypeKey", "label") ?? [];
-
-        return diffrences?.Count > 0 ? diffrences : null;
-    }
+    public override Dictionary<string, (string key, string label)> _knownArrayKeys => new() {
+        { "blocks", (key: "contentElementTypeKey", label: "label") },
+        { "blockGroups", (key: "key", label: "name") },
+        { "areas", (key: "key", label: "alias") },
+        { "specifiedAllowance", (key: "elementTypeKey", label: "removed") }
+    };
 }

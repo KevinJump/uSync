@@ -1,6 +1,5 @@
 ﻿using Json.More;
 
-
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
@@ -10,17 +9,12 @@ using uSync.Core.Extensions;
 
 namespace uSync.Core.Roots.Configs;
 
-internal class SyncConfigMergerBase
+internal abstract class SyncConfigMergerBase
 {
     protected static string _removedLabel = "uSync:Removed in child site.";
     protected static string _inheritedValue = "uSync:Inherited from root.";
 
-    protected static Dictionary<string, (string key, string label)> _knownArrayKeys = new() {
-        { "blocks", (key: "contentElementTypeKey", label: "label") },
-        { "blockGroups", (key: "key", label: "name") },
-        { "areas", (key: "key", label: "alias") },
-        { "specifiedAllowance", (key: "elementTypeKey", label: "removed") }
-    };
+    public abstract Dictionary<string, (string key, string label)> _knownArrayKeys { get; }
 
     protected TConfig? TryGetConfiguration<TConfig>(string value)
     {
@@ -78,7 +72,7 @@ internal class SyncConfigMergerBase
         return [.. remaining];
     }
 
-    protected static JsonArray? GetJsonArrayDifferences(JsonArray? sourceArray, JsonArray? targetArray, string key, string removeProperty)
+    protected JsonArray? GetJsonArrayDifferences(JsonArray? sourceArray, JsonArray? targetArray, string key, string removeProperty)
     {
         // if target is blank the difference is nothing?
         if (targetArray is null) return [];
@@ -119,7 +113,7 @@ internal class SyncConfigMergerBase
         return targetOnly.ToJsonArray();
     }
 
-    private static JsonObject GetJsonPropertyDifferences(JsonObject sourceObject, JsonObject targetObject, string propertyKey)
+    public JsonObject GetJsonPropertyDifferences(JsonObject sourceObject, JsonObject targetObject, string propertyKey)
     {
         foreach (var property in sourceObject)
         {
@@ -169,7 +163,7 @@ internal class SyncConfigMergerBase
         return targetObject;
     }
 
-    protected static JsonArray? MergeJsonArrays(JsonArray? sourceArray, JsonArray? targetArray, string key, string removeProperty)
+    protected JsonArray? MergeJsonArrays(JsonArray? sourceArray, JsonArray? targetArray, string key, string removeProperty)
     {
         // no source, we return target
         if (sourceArray is null) return targetArray;
@@ -233,7 +227,7 @@ internal class SyncConfigMergerBase
         return targetArray;
     }
 
-    private static JsonObject MergeJsonProperties(JsonObject sourceObject, JsonObject targetObject, string propertyKey)
+    public JsonObject MergeJsonProperties(JsonObject sourceObject, JsonObject targetObject, string propertyKey)
     {
         var targetItems = targetObject.ToDictionary(
             k => k.Key, v => v.Value);
@@ -256,7 +250,7 @@ internal class SyncConfigMergerBase
                     {
                         targetObject[property.Key] = MergeJsonProperties(sourcePropertyObject, targetPropertyObject, string.Empty);
                     }
-                    break;
+                    continue;
             }
 
             if (property.Value.ToString() == _inheritedValue)
@@ -276,7 +270,15 @@ internal class SyncConfigMergerBase
             }
         }
 
+        // properties that are set on the base, but not on the target need to be copied over. 
+        var sourceOnly = sourceObject.ToDictionary(k => k.Key, v => v.Value)
+            .Where(k => targetItems.ContainsKey(k.Key) is false);
+
+        foreach(var sourceProperty in sourceOnly)
+        {
+            targetItems[sourceProperty.Key] = sourceProperty.Value?.DeepClone();
+        }
+
         return targetObject;
     }
-
 }
