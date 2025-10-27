@@ -219,7 +219,7 @@ internal class uSyncManagementService : ISyncManagementService
             count++;
         } while (result.Complete is false && count < 100);
 
-        return; 
+        
     }
 
     private async Task<PerformActionResponse> PerformActionInternalAsnyc(bool isFirstRequest, PerformActionRequest actionRequest, IUser? user)
