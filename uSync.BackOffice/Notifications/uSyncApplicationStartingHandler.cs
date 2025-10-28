@@ -80,7 +80,7 @@ internal class uSyncApplicationStartingHandler : INotificationAsyncHandler<Umbra
             return;
         }
         
-        if (_uSyncConfig.Settings.BackgroundStartup)
+        if (_uSyncConfig.Settings.BackgroundStartup || _uSyncConfig.Settings.ProcessingMode == SyncProcessingMode.Background)
         {
             _logger.LogInformation("uSync: Running startup in background");
             _backgroundTaskQueue.QueueBackgroundWorkItem(

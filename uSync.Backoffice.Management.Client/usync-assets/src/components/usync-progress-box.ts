@@ -14,6 +14,7 @@ import {
 	SyncUpdateMessage,
 	HandlerStatus,
 	SyncHandlerSummary,
+	SyncProgressSummary,
 } from '@jumoo/uSync';
 import { UUIInterfaceColor } from '@umbraco-cms/backoffice/external/uui';
 
@@ -42,7 +43,7 @@ export class uSyncProcessBox extends UmbElementMixin(LitElement) {
 	updateMsg?: SyncUpdateMessage;
 
 	@state()
-	addMsg: object = {};
+	addMsg?: SyncProgressSummary;
 
 	@property({ type: String })
 	title: string = '';
@@ -63,14 +64,19 @@ export class uSyncProcessBox extends UmbElementMixin(LitElement) {
 	}
 
 	render() {
-		if (!this.actions) return nothing;
+		let actions = this.actions;
+		if (!this.actions || this.actions.length === 0) {
+			actions = this.addMsg?.handlers;
+		}
+
+		if (!actions) return nothing;
 
 		let progress = 0;
-		const actionCount = this.actions.length;
+		const actionCount = actions.length;
 		const boxSize = 100 / actionCount;
 		const actionProgress = (this.updateMsg?.count ?? 0) / (this.updateMsg?.total ?? 1);
 
-		let actionHtml = this.actions?.map((action) => {
+		let actionHtml = actions?.map((action) => {
 			if (action.status == HandlerStatus.COMPLETE) progress++;
 
 			return html`

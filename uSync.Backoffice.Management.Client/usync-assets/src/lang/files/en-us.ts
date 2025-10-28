@@ -18,6 +18,12 @@ export default {
 		detailHeadline: 'Detected Changes',
 		detailHeader: 'Things that are different',
 
+		runningInBackground:
+			'uSync is running this process in background, if you navigate away from this page it will continue to run.',
+
+		connectionLost:
+			'the connection to the server has been lost, the process will continue to run in the background but you will not see updates here.',
+
 		importSingle: 'Import',
 		importSingleWarning:
 			'This will import this item into Umbraco. If this item has dependencies they will not be imported, and will have to be resolved manually.',
@@ -105,6 +111,10 @@ export default {
 		settings: 'uSync Settings',
 		filesAndFolders: 'File and folders',
 		handlerDefaults: 'Handler defaults',
+
+		processingMode: 'Processing Mode',
+		processingModeDesc:
+			'How the uSync process runs, either in the background or interactively (Normal)',
 
 		importAtStartup: 'Import at startup',
 		importAtStartupDesc: 'Run an import of files from the disk when Umbraco starts',

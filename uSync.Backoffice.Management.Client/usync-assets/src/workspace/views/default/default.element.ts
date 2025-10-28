@@ -16,6 +16,7 @@ import {
 	SyncLegacyCheckResponse,
 	USyncActionView,
 	SyncSelectableSet,
+	USYNC_SIGNALR_CONTEXT_TOKEN,
 } from '@jumoo/uSync';
 import { uSyncActionPerformEvent } from '../../components/events';
 
@@ -45,6 +46,12 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 	_completed: boolean = false;
 
 	@state()
+	_inBackground: boolean = false;
+
+	@state()
+	_connected: boolean = false;
+
+	@state()
 	_showProgress: boolean = false;
 
 	@state()
@@ -64,6 +71,14 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 
 	constructor() {
 		super();
+
+		this.consumeContext(USYNC_SIGNALR_CONTEXT_TOKEN, (_signalR) => {
+			if (!_signalR) return;
+
+			this.observe(_signalR.connected, (_connected) => {
+				this._connected = _connected;
+			});
+		});
 
 		this.consumeContext(USYNC_CORE_CONTEXT_TOKEN, (_instance) => {
 			if (!_instance) return;
@@ -121,6 +136,11 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 			this.observe(_instance.legacy, (_legacy) => {
 				this._legacy = _legacy;
 			});
+
+			this.observe(_instance.inBackground, (_inBackground) => {
+				console.log('inBackground', _inBackground);
+				this._inBackground = _inBackground;
+			});
 		});
 	}
 
@@ -152,8 +172,9 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 				<umb-body-layout>
 					${this.#renderLegacyBanner()} ${this.#renderSetPicker()}
 					<div class="wrapper">
-						${this.#renderActions()} ${this.#renderBanner()} ${this.#renderProcessBox()}
-						${this.#renderReport()}
+						${this.#renderActions()} ${this.#renderBanner()}
+						${this.#renderBackgroundBanner()}
+						${this.#renderProcessBox()}${this.#renderReport()}
 					</div>
 				</umb-body-layout>
 			`;
@@ -246,6 +267,24 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 		return html`<usync-results .results=${this._results}></usync-results>`;
 	}
 
+	#renderBackgroundBanner() {
+		if (!this._inBackground || !this._working) return nothing;
+
+		if (!this._connected) {
+			return html` <uui-box class="banner warning">
+				<uui-icon name="icon-alert"></uui-icon>
+				${this.localize.term('uSync_runningInBackground')}
+				<br />
+				${this.localize.term('uSync_connectionLost')}
+			</uui-box>`;
+		}
+
+		return html`<uui-box class="banner info">
+			<uui-icon name="icon-info"></uui-icon>
+			${this.localize.term('uSync_runningInBackground')}
+		</uui-box>`;
+	}
+
 	static styles = [
 		css`
 			:host {
@@ -321,6 +360,16 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 
 			.set-picker label::after {
 				content: ':';
+			}
+
+			.info {
+				background-color: var(--uui-color-positive);
+				color: var(--uui-color-positive-contrast);
+			}
+
+			.warning {
+				background-color: var(--uui-color-warning);
+				color: var(--uui-color-warning-contrast);
 			}
 		`,
 	];

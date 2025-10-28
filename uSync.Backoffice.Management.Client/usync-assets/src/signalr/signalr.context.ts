@@ -1,7 +1,12 @@
 import { UmbControllerBase } from '@umbraco-cms/backoffice/class-api';
 import { UmbControllerHost } from '@umbraco-cms/backoffice/controller-api';
 import { UmbObjectState } from '@umbraco-cms/backoffice/observable-api';
-import { USYNC_SIGNALR_CONTEXT_TOKEN, SyncUpdateMessage } from '@jumoo/uSync';
+import {
+	USYNC_SIGNALR_CONTEXT_TOKEN,
+	SyncUpdateMessage,
+	SyncProgressSummary,
+	SyncCompleteMessage,
+} from '@jumoo/uSync';
 import { UMB_AUTH_CONTEXT } from '@umbraco-cms/backoffice/auth';
 import * as signalR from '@jumoo/uSync/external/signalr';
 
@@ -28,7 +33,7 @@ export class uSyncSignalRContext extends UmbControllerBase {
 	hostDisconnected(): void {
 		super.hostDisconnected();
 		this.#connection?.stop().then(() => {
-			console.debug('connection stopped');
+			this.#connected.setValue(false);
 		});
 	}
 
@@ -36,11 +41,17 @@ export class uSyncSignalRContext extends UmbControllerBase {
 		return this.#connection?.connectionId ?? null;
 	}
 
+	#connected = new UmbObjectState<boolean>(false);
+	public readonly connected = this.#connected.asObservable();
+
 	#update = new UmbObjectState<SyncUpdateMessage | undefined>(undefined);
 	public readonly update = this.#update.asObservable();
 
-	#add = new UmbObjectState({});
+	#add = new UmbObjectState<SyncProgressSummary | undefined>(undefined);
 	public readonly add = this.#add.asObservable();
+
+	#complete = new UmbObjectState<SyncCompleteMessage | undefined>(undefined);
+	public readonly complete = this.#complete.asObservable();
 
 	#setupConnection(url: string, token: string) {
 		this.#connection = new signalR.HubConnectionBuilder()
@@ -56,8 +67,16 @@ export class uSyncSignalRContext extends UmbControllerBase {
 			this.#update.setValue(data);
 		});
 
+		this.#connection.on('complete', (data) => {
+			this.#complete.setValue(data);
+		});
+
 		this.#connection.start().then(() => {
-			// console.debug('connection started');
+			this.#connected.setValue(true);
+		});
+
+		this.#connection.onclose(() => {
+			this.#connected.setValue(false);
 		});
 	}
 }

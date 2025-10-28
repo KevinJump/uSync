@@ -1,7 +1,10 @@
-﻿using uSync.Core;
+﻿using System;
+using System.Collections.Generic;
+
+using uSync.Core;
 using uSync.Core.Models;
 
-namespace uSync.Backoffice.Management.Api.Models;
+namespace uSync.BackOffice.Models;
 
 public class uSyncActionView
 {

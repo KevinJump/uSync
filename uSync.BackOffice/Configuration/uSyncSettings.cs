@@ -242,6 +242,12 @@ public class uSyncSettings
     public SyncFolderMode FolderMode { get; set; } = SyncFolderMode.Normal;
 
     /// <summary>
+    ///  What type of processing mode to use (normal or background)
+    /// </summary> 
+    [DefaultValue(SyncProcessingMode.Background)]
+    public SyncProcessingMode ProcessingMode { get; set; } = SyncProcessingMode.Normal;
+
+    /// <summary>
     ///  location of the 'production' folder to use when in production mode, 
     ///  or when creating the production mode files.
     /// </summary>
@@ -270,3 +276,14 @@ public enum SyncFolderMode
     Production,
 };
 
+public enum SyncProcessingMode
+{
+    /// <summary>
+    ///  normal processing - each item is processed individually. 
+    /// </summary>
+    Normal,
+    /// <summary>
+    ///  Background processing things happen in the background. 
+    /// </summary>
+    Background,
+}

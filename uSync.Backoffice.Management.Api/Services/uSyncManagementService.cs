@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 
 using Umbraco.Cms.Core.Models.Membership;
+using Umbraco.Cms.Core.Services;
 using Umbraco.Extensions;
 
 using uSync.Backoffice.Management.Api.Extensions;
@@ -27,18 +28,22 @@ internal class uSyncManagementService : ISyncManagementService
 
     private readonly ISyncHandlerFactory _handlerFactory;
 
+    private readonly ILongRunningOperationService _longRunningOperationService;
+
     public uSyncManagementService(
         ISyncActionService syncActionService,
         ISyncConfigService configService,
         ISyncManagementCache syncManagementCache,
         IHubContext<SyncHub> hubContext,
-        ISyncHandlerFactory handlerFactory)
+        ISyncHandlerFactory handlerFactory,
+        ILongRunningOperationService longRunningOperationService)
     {
         _syncActionService = syncActionService;
         _configService = configService;
         _syncManagementCache = syncManagementCache;
         _hubContext = hubContext;
         _handlerFactory = handlerFactory;
+        _longRunningOperationService = longRunningOperationService;
     }
 
     [Obsolete("Use GetActions(string setName) instead, this will be removed in v18")]
@@ -165,37 +170,78 @@ internal class uSyncManagementService : ISyncManagementService
 
     public async Task<PerformActionResponse> PerformActionAsync(PerformActionRequest actionRequest, IUser? user)
     {
+        if (_configService.Settings.ProcessingMode == SyncProcessingMode.Background)
+        {
+            return await PerformBackgroundActionAsync(actionRequest, user);
+        }
+
+        return await PerformActionInternalAsync(string.IsNullOrWhiteSpace(actionRequest.RequestId), actionRequest, user);
+    }
+
+
+    private async Task<PerformActionResponse> PerformBackgroundActionAsync(PerformActionRequest actionRequest, IUser? user)
+    {
         if (Enum.TryParse(actionRequest.Action, out HandlerActions action) is false)
             throw new ArgumentException($"Invalid action {actionRequest.Action}");
 
         var handlers = _syncActionService.GetActionHandlers(action, actionRequest.Options)
             .ToList();
 
-        if (string.IsNullOrWhiteSpace(actionRequest.RequestId) is true)
+        actionRequest.RequestId = GetRequestId(actionRequest).ToString();
+
+        var enqueAttempt = await _longRunningOperationService.RunAsync(
+            actionRequest.RequestId,
+            async _ => await ProcessAllActions(actionRequest, user),
+            allowConcurrentExecution: false);
+
+        return new PerformActionResponse
+        {
+            RequestId = Guid.NewGuid().ToString(),
+            Complete = true,
+            InBackground = true
+        };
+    }
+
+    public async Task ProcessAllActions(PerformActionRequest request, IUser? user)
+    {
+        var result = default(PerformActionResponse);
+
+        // this is a break should something get stuck in a loop.
+        // in theory there is only ~ 13/14 handlers so 100 means 
+        // its gone wrong by a bit. 
+        var count = 0;
+
+        do
+        {
+            result = await PerformActionInternalAsync(count == 0, request, user);
+            request.RequestId = result.RequestId;
+            request.StepNumber++;
+            count++;
+        } while (result.Complete is false && count < 100);
+
+        
+    }
+
+    private async Task<PerformActionResponse> PerformActionInternalAsync(bool isFirstRequest, PerformActionRequest actionRequest, IUser? user)
+    {
+        if (Enum.TryParse(actionRequest.Action, out HandlerActions action) is false)
+            throw new ArgumentException($"Invalid action {actionRequest.Action}");
+
+        var handlers = _syncActionService.GetActionHandlers(action, actionRequest.Options)
+            .ToList();
+
+        if (isFirstRequest)
         {
             await _syncActionService.StartProcessAsync(new SyncStartActionRequest
             {
                 Username = user?.Username,
-                HandlerAction = action
+                HandlerAction = action,
+                Clean = actionRequest.Options?.Clean ?? false
             });
-
-            if (action == HandlerActions.Export && actionRequest.Options?.Clean is true)
-            {
-                // clean the export folder.  
-                _syncActionService.CleanExportFolder();
-            }
         }
 
         Guid requestId = GetRequestId(actionRequest);
-
-        HubClientService? hubClient = default;
-        if (actionRequest.Options?.ClientId != null)
-        {
-            hubClient = new HubClientService(_hubContext, actionRequest.Options.ClientId);
-        }
-        uSyncCallbacks callbacks = hubClient?.Callbacks() ?? new uSyncCallbacks(null, null);
-
-
+        uSyncCallbacks callbacks = GetCallbacksFromRequest(actionRequest);
 
         var handlerOptions = new SyncActionOptions()
         {
@@ -208,31 +254,55 @@ internal class uSyncManagementService : ISyncManagementService
         if (actionRequest.StepNumber >= handlers.Count)
         {
             var actions = await PerformFinalSteps(requestId, action, handlerOptions, callbacks, user?.Username);
-            // finished. 
-            return new PerformActionResponse
-           {
-                RequestId = requestId.ToString(),
-                Actions = actions.Select(x => x.ToActionView()),
-                Complete = true,
-                Status = GetSummaries(action, handlers, actionRequest.StepNumber + 1, actions)
-            };
+            return SummerizeCompleteProcess(actionRequest, action, handlers, requestId, callbacks, actions);
         }
+
 
         handlerOptions.Handler = handlers[actionRequest.StepNumber].Alias;
         var method = GetHandlerMethodAsync(action);
 
         var results = await method(handlerOptions, callbacks);
+        
         _syncManagementCache.CacheItems(requestId, results.Actions, false);
-
         var allActions = _syncManagementCache.GetCachedActions(requestId);
+
+        var summaries = GetSummaries(action, handlers, actionRequest.StepNumber, allActions);
+        callbacks.Callback?.Invoke(new SyncProgressSummary(summaries, "Processing " + action.ToString(), handlers.Count));
+
         return new PerformActionResponse
         {
             RequestId = requestId.ToString(),
             Actions = allActions.Where(x => x.Change != Core.ChangeType.Hidden).Select(x => x.ToActionView()),
-            // results.Actions.Select(x => x.ToActionView()),
-            Status = GetSummaries(action, handlers, actionRequest.StepNumber, allActions), // results.Actions.ToList()),
+            Status = summaries,
             Complete = false
         };
+    }
+
+    private static PerformActionResponse SummerizeCompleteProcess(PerformActionRequest actionRequest, HandlerActions action, List<SyncHandlerView> handlers, Guid requestId, uSyncCallbacks callbacks, List<uSyncAction> actions)
+    {
+        var finalSummary = GetSummaries(action, handlers, actionRequest.StepNumber + 1, actions);
+        var actionViews = actions.Select(x => x.ToActionView());
+
+        callbacks?.Callback?.Invoke(new SyncProgressSummary(finalSummary, "Completed", handlers.Count));
+        callbacks?.Complete?.Invoke(requestId, "Sync complete", true, actionViews);
+
+        // finished. 
+        return new PerformActionResponse
+        {
+            RequestId = requestId.ToString(),
+            Actions = actionViews,
+            Complete = true,
+            Status = finalSummary
+        };
+    }
+
+    private uSyncCallbacks GetCallbacksFromRequest(PerformActionRequest request)
+    {
+        var hubClient = request.Options?.ClientId == null 
+            ? null 
+            : new HubClientService(_hubContext, request.Options.ClientId);
+
+        return hubClient?.Callbacks() ?? new uSyncCallbacks(null, null);
     }
 
     private async Task<List<uSyncAction>> PerformFinalSteps(Guid requestId, HandlerActions action, SyncActionOptions options, uSyncCallbacks callbacks, string? username)
