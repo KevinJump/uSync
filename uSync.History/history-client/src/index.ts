@@ -6,7 +6,6 @@ import { UMB_AUTH_CONTEXT } from "@umbraco-cms/backoffice/auth";
 import { client } from "./api/client.gen.js";
 
 export const onInit: UmbEntryPointOnInit = (_host, extensionRegistry) => {
-  console.log("hit");
   extensionRegistry.registerMany([...localizations, ...views, ...modals]);
 
   _host.consumeContext(UMB_AUTH_CONTEXT, (_auth) => {
