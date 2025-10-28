@@ -38,7 +38,7 @@ namespace uSync.History
                 {
                     Title = "uSync History API",
                     Version = "Latest",
-                    Description = "it's uSync history methods"
+                    Description = "uSync History API methods"
                 });
 
         }
