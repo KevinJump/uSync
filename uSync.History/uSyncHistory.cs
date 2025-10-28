@@ -11,7 +11,7 @@ namespace uSync.History
     {
         public string Name => "_uSync History";
 
-        public string Version => typeof(uSyncHistory).Assembly.GetName().Version.ToString(3);
+        public string Version => typeof(uSyncHistory).Assembly.GetName().Version?.ToString(3) ?? "16.1.0";
 
         public string Icon => "icon-calendar-alt";
 
