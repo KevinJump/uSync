@@ -49,6 +49,12 @@ export class uSyncWorkspaceContext
 	public readonly actions = this.#actions.asObservable();
 
 	/**
+	 * the working group name
+	 */
+	#workingGroup = new UmbObjectState<SyncActionGroup | undefined>(undefined);
+	public readonly workingGroup = this.#workingGroup.asObservable();
+
+	/**
 	 * The summary objects that show the handler boxes
 	 */
 	#workingActions = new UmbArrayState<SyncHandlerSummary>([], (x) => x.name);
@@ -199,6 +205,7 @@ export class uSyncWorkspaceContext
 		this.#working.setValue(true);
 		this.#completed.setValue(false);
 		this.#results.setValue([]);
+		this.#workingGroup.setValue(options.group);
 
 		var complete = false;
 		var id = '';

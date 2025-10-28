@@ -141,6 +141,12 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 				console.log('inBackground', _inBackground);
 				this._inBackground = _inBackground;
 			});
+
+			this.observe(_instance.workingGroup, (_workingGroup) => {
+				if (_workingGroup) {
+					this._group = _workingGroup;
+				}
+			});
 		});
 	}
 
@@ -153,7 +159,7 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 		if (!event) return;
 
 		this._showProgress = true;
-		this._group = event.group;
+
 		this.#actionContext?.performAction({
 			setName: this._setName,
 			group: event.group,
