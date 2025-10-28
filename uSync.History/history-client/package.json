@@ -28,7 +28,7 @@
         "prettier": "^3.6.2",
         "rm-rs": "^0.2.3",
         "typescript": "^5.9.3",
-        "vite": "^5.4.21",
+        "vite": "^7.1.12",
         "vite-plugin-checker": "^0.6.4",
         "vite-plugin-static-copy": "^1.0.6"
     }
