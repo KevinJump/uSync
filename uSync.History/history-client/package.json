@@ -28,8 +28,8 @@
         "prettier": "^3.3.3",
         "rm-rs": "^0.2.3",
         "typescript": "^5.6.2",
-        "vite": "^5.2.12",
+        "vite": "^7.1.12",
         "vite-plugin-checker": "^0.6.4",
-        "vite-plugin-static-copy": "^1.0.6"
+        "vite-plugin-static-copy": "^3.1.4"
     }
 }
