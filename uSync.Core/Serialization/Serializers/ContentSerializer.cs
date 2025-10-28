@@ -70,7 +70,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
 
         if (options.GetSetting<bool>(uSyncConstants.DefaultSettings.IncludeUserInfo, uSyncConstants.DefaultSettings.IncludeUserInfo_Default))
         {
-            info.Add(await SerializerWriterInfoAsync(item, options));
+            info.Add(await SerializerWriterInfoAsync(item));
         }
 
         return info;
@@ -144,7 +144,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
         });
     }
 
-    private Task<XElement> SerializerWriterInfoAsync(IContent item, SyncSerializerOptions options)
+    private Task<XElement> SerializerWriterInfoAsync(IContent item)
     {
         return uSyncTaskHelper.FromResultOf(() =>
         {
@@ -196,7 +196,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
         }
 
         // read user ids from the xml, 
-        var userId = DeserializeWriterInfo(item, node, options);
+        var userId = DeserializeWriterInfo(item, node);
 
         // if the userId hasn't been set in the options , we use the one from the xml.
         if (options.UserId == -1)
@@ -266,7 +266,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
         return null;
     }
 
-    public int DeserializeWriterInfo(IContent item, XElement node, SyncSerializerOptions options)
+    public int DeserializeWriterInfo(IContent item, XElement node)
     {
         var writerNode = node.Element(uSyncConstants.Xml.Info)?.Element("UserInfo");
         if (writerNode == null) return -1;
@@ -317,7 +317,8 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
             var schedules = node.Element(uSyncConstants.Xml.Info)?.Element("Schedule");
             if (schedules != null && schedules.HasElements)
             {
-                logger.LogDebug("De-serialize Schedules {name}", item.Name);
+                if (logger.IsEnabled(LogLevel.Debug))
+                    logger.LogDebug("De-serialize Schedules {name}", item.Name);
 
                 foreach (var schedule in schedules.Elements("ContentSchedule"))
                 {
@@ -327,7 +328,9 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
                         if (importSchedule.Date < DateTime.Now)
                             continue; // don't add schedules in the past
 
-                        logger.LogDebug("Adding {action} {culture} {date}", importSchedule.Action, importSchedule.Culture, importSchedule.Date);
+                        if (logger.IsEnabled(LogLevel.Debug))
+                            logger.LogDebug("Adding {action} {culture} {date}", importSchedule.Action, importSchedule.Culture, importSchedule.Date);
+
                         nodeSchedules.Add(importSchedule);
 
                         var existing = FindSchedule(currentSchedules, importSchedule);
@@ -347,14 +350,16 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
                 var toRemove = currentSchedules.FullSchedule.Where(x => FindSchedule(nodeSchedules, x) == null)
                     .ToList();
 
-                if (toRemove.Count > 0)
+                if (logger.IsEnabled(LogLevel.Debug) && toRemove.Count > 0)
                     logger.LogDebug("Removing Schedules {name} ({count} to remove)", item.Name, toRemove.Count);
 
                 foreach (var oldItem in toRemove)
                 {
                     if (cultures.IsValidOrBlank(oldItem.Culture))
                     {
-                        logger.LogDebug("Removing Schedule : {culture} {action} {date}", oldItem.Culture, oldItem.Action, oldItem.Date);
+                        if (logger.IsEnabled(LogLevel.Debug))
+                            logger.LogDebug("Removing Schedule : {culture} {action} {date}", oldItem.Culture, oldItem.Action, oldItem.Date);
+
                         // only remove a culture if this serialization included it. 
                         // we don't remove things we didn't serialize. 
                         currentSchedules.Remove(oldItem);
@@ -365,7 +370,9 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
 
                 if (changes.Count != 0)
                 {
-                    logger.LogDebug("Saving Schedule changes: {item}", item.Name);
+                    if (logger.IsEnabled(LogLevel.Debug))
+                        logger.LogDebug("Saving Schedule changes: {item}", item.Name);
+
                     contentService.PersistContentSchedule(item, currentSchedules);
                     return changes;
                 }
@@ -413,7 +420,9 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
     {
         if (options.GetSetting(uSyncConstants.DefaultSettings.OnlyPublishDirty, uSyncConstants.DefaultSettings.OnlyPublishDirty_Default) && !item.IsDirty())
         {
-            logger.LogDebug("{name} not publishing because nothing is dirty [{dirty} {userDirty}]", item.Name, item.IsDirty(), item.IsAnyUserPropertyDirty());
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("{name} not publishing because nothing is dirty [{dirty} {userDirty}]", item.Name, item.IsDirty(), item.IsAnyUserPropertyDirty());
+
             return new SyncContentUpdateResult(true, item, "No changes");
         }
 
@@ -430,7 +439,9 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
             }
 
             // v14 we always save now, as save and publish doesn't do that anymore...
-            logger.LogDebug("Performing Save: {id} {name}", item.Id, item.Name);
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("Performing Save: {id} {name}", item.Id, item.Name);
+
             var result = contentService.Save(item, options.UserId, scheduleCollection);
             if (result.Success)
                 item = contentService.GetById(item.Id) ?? item;
@@ -495,7 +506,9 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
         else
         {
             // save?
-            logger.LogDebug("Performing Save (Not published): {id} {name}", item.Id, item.Name);
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("Performing Save (Not published): {id} {name}", item.Id, item.Name);
+
             await SaveItemAsync(item, options.UserId);
             item = contentService.GetById(item.Id) ?? item;
         }
@@ -537,7 +550,9 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
     {
         try
         {
-            logger.LogDebug("Publishing: {item} as User:{user}", item.Name, userId);
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("Publishing: {item}", item.Name);
+
             var result = contentService.Publish(item, cultures: [], userId: userId);
             if (!result.Success)
             {
@@ -593,8 +608,8 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
 
             if (publishedCultures.Length > 0)
             {
-                logger.LogDebug("Publishing {item} as {user} for {cultures}", item.Name, userId,
-                    string.Join(",", publishedCultures));
+                if (logger.IsEnabled(LogLevel.Debug))
+                    logger.LogDebug("Publishing {item} for {cultures}", item.Name, string.Join(",", publishedCultures));
 
                 var result = contentService.Publish(item, publishedCultures, userId);
 
@@ -627,8 +642,8 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
                     // unpublish if the culture is currently published.
                     if (item.PublishedCultures.InvariantContains(culture))
                     {
-                        logger.LogDebug("Unpublishing {item} as {user} for {culture}",
-                            item.Name, userId, culture);
+                        if (logger.IsEnabled(LogLevel.Debug))
+                            logger.LogDebug("Unpublishing {item} for {culture}", item.Name, culture);
 
                         var result = contentService.Unpublish(item, culture, userId);
                         if (result.Success)
@@ -679,7 +694,9 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
         {
             foreach (var culture in missingCultures)
             {
-                logger.LogDebug("Unpublishing {item} culture not defined in config file {culture}", item.Name, culture);
+                if (logger.IsEnabled(LogLevel.Debug))
+                    logger.LogDebug("Unpublishing {item} culture not defined in config file {culture}", item.Name, culture);
+
                 var result = contentService.Unpublish(item, culture);
                 if (result.Success)
                     content = result.Content;
@@ -695,7 +712,9 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
     {
         return uSyncTaskHelper.FromResultOf(() =>
         {
-            logger.LogDebug("Create: {alias} {parent} {type}", alias, parent?.Id ?? -1, itemType);
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("Create: {alias} {parent} {type}", alias, parent?.Id ?? -1, itemType);
+
             try
             {
                 var item = contentService.Create(alias, parent?.Id ?? -1, itemType);
