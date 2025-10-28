@@ -74,8 +74,7 @@ export class uSyncHistoryElement extends UmbLitElement {
         ><uui-table-cell>${item.changes}/${item.total}</uui-table-cell
         ><uui-table-cell>${item.username}</uui-table-cell>
         <uui-table-cell
-          >${(item.date,
-          this.localize.date(item.date, TimeFormatOptions))}</uui-table-cell
+          >${this.localize.date(item.date, TimeFormatOptions)}</uui-table-cell
         ></uui-table-row
       >`;
     });
@@ -93,12 +92,10 @@ export class uSyncHistoryElement extends UmbLitElement {
   }
 
   async #showDetail(item: HistoryInfo) {
-    console.log("thing happen", item);
+    
     umbOpenModal(this, HISTORY_MODAL_TOKEN, {
       data: { item: item },
     }).catch(() => undefined);
-
-    return null;
   }
 
   renderTableHead() {

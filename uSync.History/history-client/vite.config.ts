@@ -18,7 +18,7 @@ export default defineConfig({
       onwarn: () => {},
     },
   },
-  base: "/uSyncExporter/",
+  base: "/uSync.History/",
   mode: "production",
   plugins: [
     nodeResolve(),
