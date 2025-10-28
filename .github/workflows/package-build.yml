@@ -1,5 +1,8 @@
 name: v16 - Build and Package.
-
+permissions:
+  contents: read
+  pull-requests: write
+  
 on:
   push:
     branches: [v16/main]
