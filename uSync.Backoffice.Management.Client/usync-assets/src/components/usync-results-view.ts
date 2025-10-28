@@ -5,6 +5,7 @@ import {
 	property,
 	css,
 	state,
+	nothing,
 } from '@umbraco-cms/backoffice/external/lit';
 import { ChangeType, USyncActionView } from '@jumoo/uSync';
 import { UmbElementMixin } from '@umbraco-cms/backoffice/element-api';
@@ -30,6 +31,12 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
 	@property({ type: Array })
 	results: Array<USyncActionView> | undefined = [];
 
+	@property({ type: Boolean })
+	hideResultBar: boolean = false;
+
+	@property({ type: Boolean })
+	hideActions: boolean = false;
+
 	@state()
 	showAll: boolean = false;
 
@@ -48,9 +55,10 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
 			data: {
 				item: e.action,
 				showActions:
-					e.action.change == ChangeType.CREATE ||
-					e.action.change == ChangeType.UPDATE ||
-					e.action.change == ChangeType.IMPORT,
+					!this.hideActions &&
+					(e.action.change == ChangeType.CREATE ||
+						e.action.change == ChangeType.UPDATE ||
+						e.action.change == ChangeType.IMPORT),
 			},
 		});
 
@@ -104,6 +112,7 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
 	}
 
 	renderResultBar(count: number, changes: number) {
+		if (this.hideResultBar) return nothing;
 		const localKey = changes === 0 ? 'uSync_noChangeCount' : 'uSync_changeCount';
 
 		return html`<div class="result-header">

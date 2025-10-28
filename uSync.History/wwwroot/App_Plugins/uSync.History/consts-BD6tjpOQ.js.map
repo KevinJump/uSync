@@ -1,0 +1,1 @@
+{"version":3,"file":"consts-BD6tjpOQ.js","sources":["../../../history-client/src/consts.ts"],"sourcesContent":["export const TimeFormatOptions: Intl.DateTimeFormatOptions = {\r\n  dateStyle: \"long\",\r\n  timeStyle: \"short\",\r\n};\r\n"],"names":["TimeFormatOptions"],"mappings":"AAAO,MAAMA,IAAgD;AAAA,EAC3D,WAAW;AAAA,EACX,WAAW;AACb;"}
