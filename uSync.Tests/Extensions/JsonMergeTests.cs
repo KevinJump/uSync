@@ -7,6 +7,8 @@ using System.Text.Json.Nodes;
 
 using NUnit.Framework;
 
+using SixLabors.ImageSharp.PixelFormats;
+
 using Umbraco.Extensions;
 
 using uSync.Core.Extensions;
@@ -16,15 +18,24 @@ namespace uSync.Tests.Extensions;
 [TestFixture]
 internal class JsonMergeTests
 {
-    private static readonly Type SyncConfigMergerBaseType = Type.GetType("uSync.Core.Roots.Configs.SyncConfigMergerBase, uSync.Core")!;
-    
+    private static readonly Type ImageCropperConfigMergerType = Type.GetType("uSync.Core.Roots.Configs.ImageCropperConfigMerger, uSync.Core")!;
+
+    // Create an instance of the concrete merger for testing
+    private object _mergerInstance = null!;
+
+    [OneTimeSetUp]
+    public void OneTimeSetUp()
+    {
+        _mergerInstance = Activator.CreateInstance(ImageCropperConfigMergerType)!;
+    }
+
     // Test helper class for MergeObjects tests
     private class TestObject
     {
         public string Id { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public bool IsRemoved { get; set; }
-        
+
         public override bool Equals(object? obj) => obj is TestObject other && Id == other.Id && Name == other.Name;
         public override int GetHashCode() => HashCode.Combine(Id, Name);
     }
@@ -37,16 +48,16 @@ internal class JsonMergeTests
         // Arrange
         var rootObjects = new[]
         {
-            new TestObject { Id = "1", Name = "Root1" },
+new TestObject { Id = "1", Name = "Root1" },
             new TestObject { Id = "2", Name = "Root2" },
-            new TestObject { Id = "3", Name = "Root3" }
+   new TestObject { Id = "3", Name = "Root3" }
         };
 
         var targetObjects = new[]
-        {
+         {
             new TestObject { Id = "2", Name = "Target2" }, // Override
-            new TestObject { Id = "4", Name = "Target4" }  // New
-        };
+       new TestObject { Id = "4", Name = "Target4" }  // New
+    };
 
         var method = GetGenericStaticMethod("MergeObjects", typeof(TestObject), typeof(string));
         var keySelector = new Func<TestObject, string>(x => x.Id);
@@ -68,8 +79,8 @@ internal class JsonMergeTests
     {
         // Arrange
         var rootObjects = new[]
-        {
-            new TestObject { Id = "1", Name = "Root1" },
+                {
+    new TestObject { Id = "1", Name = "Root1" },
             new TestObject { Id = "2", Name = "Root2" }
         };
 
@@ -94,12 +105,12 @@ internal class JsonMergeTests
         {
             new TestObject { Id = "1", Name = "Root1" },
             new TestObject { Id = "2", Name = "Root2" }
-        };
+ };
 
         var targetObjects = new[]
         {
-            new TestObject { Id = "3", Name = "Target3", IsRemoved = true },
-            new TestObject { Id = "4", Name = "Target4", IsRemoved = false }
+    new TestObject { Id = "3", Name = "Target3", IsRemoved = true },
+     new TestObject { Id = "4", Name = "Target4", IsRemoved = false }
         };
 
         var method = GetGenericStaticMethod("MergeObjects", typeof(TestObject), typeof(string));
@@ -121,14 +132,14 @@ internal class JsonMergeTests
         // Arrange
         var rootObjects = new[]
         {
-            new TestObject { Id = "1", Name = "Root1" },
-            new TestObject { Id = "2", Name = "Root2" }
+    new TestObject { Id = "1", Name = "Root1" },
+        new TestObject { Id = "2", Name = "Root2" }
         };
 
         var targetObjects = new[]
-        {
-            new TestObject { Id = "uSync:Removed in child site.:1", Name = "Target1" }, // Contains removal label
-            new TestObject { Id = "3", Name = "Target3" }
+{
+       new TestObject { Id = "uSync:Removed in child site.:1", Name = "Target1" }, // Contains removal label
+     new TestObject { Id = "3", Name = "Target3" }
         };
 
         var method = GetGenericStaticMethod("MergeObjects", typeof(TestObject), typeof(string));
@@ -143,7 +154,7 @@ internal class JsonMergeTests
         // This matches the root object with Id "1", so the root object is excluded from the merge
         // The final result should have: Target1 (with full removal label), Root2, Target3
         Assert.That(result, Has.Length.EqualTo(3));
-        
+
         // Should include the target item with the full removal label
         Assert.That(result.Any(x => x.Id.Contains("uSync:Removed in child site.:1")), Is.True);
         // Should include Root2 since it has no matching target
@@ -164,16 +175,16 @@ internal class JsonMergeTests
         // Arrange
         var rootObjects = new[]
         {
-            new TestObject { Id = "1", Name = "Root1" },
+     new TestObject { Id = "1", Name = "Root1" },
             new TestObject { Id = "2", Name = "Root2" },
-            new TestObject { Id = "3", Name = "Root3" }
+  new TestObject { Id = "3", Name = "Root3" }
         };
 
         var targetObjects = new[]
         {
-            new TestObject { Id = "1", Name = "Target1" }, // Exists in both
-            new TestObject { Id = "4", Name = "Target4" }  // Only in target
-        };
+          new TestObject { Id = "1", Name = "Target1" }, // Exists in both
+   new TestObject { Id = "4", Name = "Target4" }  // Only in target
+     };
 
         var method = GetGenericStaticMethod("GetObjectDifferences", typeof(TestObject), typeof(string));
         var keySelector = new Func<TestObject, string>(x => x.Id);
@@ -184,10 +195,10 @@ internal class JsonMergeTests
 
         // Assert
         Assert.That(result, Has.Length.EqualTo(3));
-        
+
         // Should contain items only in target
         Assert.That(result.Any(x => x.Id == "4" && x.Name == "Target4"), Is.True);
-        
+
         // Should contain removed items from root marked with removal label
         var removedItems = result.Where(x => x.Name.StartsWith("uSync:Removed in child site.:")).ToArray();
         Assert.That(removedItems, Has.Length.EqualTo(2));
@@ -220,38 +231,36 @@ internal class JsonMergeTests
     public void GetJsonArrayDifferences_WithBasicArrays_ReturnsCorrectDifferences()
     {
         // Arrange
-        var sourceArray = JsonSerializer.Deserialize<JsonArray>("""
-        [
-            { "key": "item1", "value": "source1", "label": "Source Item 1" },
-            { "key": "item2", "value": "source2", "label": "Source Item 2" }
-        ]
-        """);
+        var sourceJson = @"[
+         { ""key"": ""item1"", ""value"": ""source1"", ""label"": ""Source Item 1"" },
+      { ""key"": ""item2"", ""value"": ""source2"", ""label"": ""Source Item 2"" }
+        ]";
 
-        var targetArray = JsonSerializer.Deserialize<JsonArray>("""
-        [
-            { "key": "item1", "value": "target1", "label": "Target Item 1" },
-            { "key": "item3", "value": "target3", "label": "Target Item 3" }
-        ]
-        """);
+        var targetJson = @"[
+  { ""key"": ""item1"", ""value"": ""target1"", ""label"": ""Target Item 1"" },
+            { ""key"": ""item3"", ""value"": ""target3"", ""label"": ""Target Item 3"" }
+        ]";
 
-        var method = GetStaticMethod("GetJsonArrayDifferences");
+        var sourceArray = JsonSerializer.Deserialize<JsonArray>(sourceJson);
+        var targetArray = JsonSerializer.Deserialize<JsonArray>(targetJson);
+        var method = GetInstanceMethod("GetJsonArrayDifferences");
 
         // Act
-        var result = (JsonArray)method.Invoke(null, [sourceArray, targetArray, "key", "label"])!;
+        var result = (JsonArray)method.Invoke(_mergerInstance, [sourceArray, targetArray, "key", "label"])!;
 
         // Assert
         Assert.That(result, Is.Not.Null);
         Assert.That(result.Count, Is.EqualTo(3));
-        
+
         // Should have the modified item1
         var item1 = result.FirstOrDefault(x => x?["key"]?.ToString() == "item1");
         Assert.That(item1, Is.Not.Null);
         Assert.That(item1!["value"]?.ToString(), Is.EqualTo("target1"));
-        
+
         // Should have the new item3
         var item3 = result.FirstOrDefault(x => x?["key"]?.ToString() == "item3");
         Assert.That(item3, Is.Not.Null);
-        
+
         // Should have the removed item2 marked as removed
         var item2 = result.FirstOrDefault(x => x?["key"]?.ToString() == "item2");
         Assert.That(item2, Is.Not.Null);
@@ -262,16 +271,15 @@ internal class JsonMergeTests
     public void GetJsonArrayDifferences_WithNullTargetArray_ReturnsEmptyArray()
     {
         // Arrange
-        var sourceArray = JsonSerializer.Deserialize<JsonArray>("""
-        [
-            { "key": "item1", "value": "source1" }
-        ]
-        """);
+        var sourceJson = @"[
+      { ""key"": ""item1"", ""value"": ""source1"" }
+        ]";
 
-        var method = GetStaticMethod("GetJsonArrayDifferences");
+        var sourceArray = JsonSerializer.Deserialize<JsonArray>(sourceJson);
+        var method = GetInstanceMethod("GetJsonArrayDifferences");
 
         // Act
-        var result = (JsonArray)method.Invoke(null, [sourceArray, null, "key", "label"])!;
+        var result = (JsonArray)method.Invoke(_mergerInstance, [sourceArray, null, "key", "label"])!;
 
         // Assert
         Assert.That(result, Is.Not.Null);
@@ -282,26 +290,20 @@ internal class JsonMergeTests
     public void GetJsonArrayDifferences_WithIdenticalArrays_ReturnsInheritedValues()
     {
         // Arrange
-        var sourceArray = JsonSerializer.Deserialize<JsonArray>("""
-        [
-            { "key": "item1", "value": "same", "label": "Same Item" }
-        ]
-        """);
+        var json = @"[
+   { ""key"": ""item1"", ""value"": ""same"", ""label"": ""Same Item"" }
+        ]";
 
-        var targetArray = JsonSerializer.Deserialize<JsonArray>("""
-        [
-            { "key": "item1", "value": "same", "label": "Same Item" }
-        ]
-        """);
-
-        var method = GetStaticMethod("GetJsonArrayDifferences");
+        var sourceArray = JsonSerializer.Deserialize<JsonArray>(json);
+        var targetArray = JsonSerializer.Deserialize<JsonArray>(json);
+        var method = GetInstanceMethod("GetJsonArrayDifferences");
 
         // Act
-        var result = (JsonArray)method.Invoke(null, [sourceArray, targetArray, "key", "label"])!;
+        var result = (JsonArray)method.Invoke(_mergerInstance, [sourceArray, targetArray, "key", "label"])!;
 
         // Assert
         Assert.That(result, Is.Not.Null);
-        // when everthing is identical nothing is returned because the root is right.
+        // when everything is identical nothing is returned because the root is right.
         Assert.That(result.Count, Is.EqualTo(0));
     }
 
@@ -309,43 +311,41 @@ internal class JsonMergeTests
     public void GetJsonArrayDifferences_WithNestedArrayProperties_HandlesCorrectly()
     {
         // Arrange
-        var sourceArray = JsonSerializer.Deserialize<JsonArray>("""
-        [
-            { 
-                "key": "item1", 
-                "value": "source1",
-                "nestedArray": [
-                    { "subkey": "sub1", "subvalue": "sourceSubValue1" }
-                ]
-            }
+        var sourceJson = @"[
+        { 
+                ""key"": ""item1"", 
+       ""value"": ""source1"",
+                ""nestedArray"": [
+   { ""subkey"": ""sub1"", ""subvalue"": ""sourceSubValue1"" }
         ]
-        """);
+         }
+        ]";
 
-        var targetArray = JsonSerializer.Deserialize<JsonArray>("""
-        [
-            { 
-                "key": "item1", 
-                "value": "target1",
-                "nestedArray": [
-                    { "subkey": "sub1", "subvalue": "targetSubValue1" }
-                ]
+        var targetJson = @"[
+   { 
+      ""key"": ""item1"", 
+      ""value"": ""target1"",
+        ""nestedArray"": [
+      { ""subkey"": ""sub1"", ""subvalue"": ""targetSubValue1"" }
+  ]
             }
-        ]
-        """);
+        ]";
 
-        var method = GetStaticMethod("GetJsonArrayDifferences");
+        var sourceArray = JsonSerializer.Deserialize<JsonArray>(sourceJson);
+        var targetArray = JsonSerializer.Deserialize<JsonArray>(targetJson);
+        var method = GetInstanceMethod("GetJsonArrayDifferences");
 
         // Act
-        var result = (JsonArray)method.Invoke(null, [sourceArray, targetArray, "key", "label"])!;
+        var result = (JsonArray)method.Invoke(_mergerInstance, [sourceArray, targetArray, "key", "label"])!;
 
         // Assert
         Assert.That(result, Is.Not.Null);
         Assert.That(result.Count, Is.EqualTo(1));
-        
+
         var item = result[0];
         Assert.That(item!["key"]?.ToString(), Is.EqualTo("item1"));
         Assert.That(item["value"]?.ToString(), Is.EqualTo("target1"));
-        
+
         // Should handle nested array differences
         var nestedArray = item["nestedArray"] as JsonArray;
         Assert.That(nestedArray, Is.Not.Null);
@@ -359,39 +359,37 @@ internal class JsonMergeTests
     public void MergeJsonArrays_WithBothArrays_MergesCorrectly()
     {
         // Arrange
-        var sourceArray = JsonSerializer.Deserialize<JsonArray>("""
-        [
-            { "key": "item1", "value": "source1", "name": "Source Item 1" },
-            { "key": "item2", "value": "source2", "name": "Source Item 2" }
-        ]
-        """);
+        var sourceJson = @"[
+  { ""key"": ""item1"", ""value"": ""source1"", ""name"": ""Source Item 1"" },
+       { ""key"": ""item2"", ""value"": ""source2"", ""name"": ""Source Item 2"" }
+        ]";
 
-        var targetArray = JsonSerializer.Deserialize<JsonArray>("""
-        [
-            { "key": "item1", "value": "target1", "name": "Target Item 1" },
-            { "key": "item3", "value": "target3", "name": "Target Item 3" }
-        ]
-        """);
+        var targetJson = @"[
+{ ""key"": ""item1"", ""value"": ""target1"", ""name"": ""Target Item 1"" },
+            { ""key"": ""item3"", ""value"": ""target3"", ""name"": ""Target Item 3"" }
+        ]";
 
-        var method = GetStaticMethod("MergeJsonArrays");
+        var sourceArray = JsonSerializer.Deserialize<JsonArray>(sourceJson);
+        var targetArray = JsonSerializer.Deserialize<JsonArray>(targetJson);
+        var method = GetInstanceMethod("MergeJsonArrays");
 
         // Act
-        var result = (JsonArray)method.Invoke(null, [sourceArray, targetArray, "key", "name"])!;
+        var result = (JsonArray)method.Invoke(_mergerInstance, [sourceArray, targetArray, "key", "name"])!;
 
         // Assert
         Assert.That(result, Is.Not.Null);
         Assert.That(result.Count, Is.EqualTo(3));
-        
+
         // Should have merged item1 (target wins)
         var item1 = result.FirstOrDefault(x => x?["key"]?.ToString() == "item1");
         Assert.That(item1, Is.Not.Null);
         Assert.That(item1!["value"]?.ToString(), Is.EqualTo("target1"));
-        
+
         // Should have source item2
         var item2 = result.FirstOrDefault(x => x?["key"]?.ToString() == "item2");
         Assert.That(item2, Is.Not.Null);
         Assert.That(item2!["value"]?.ToString(), Is.EqualTo("source2"));
-        
+
         // Should have target item3
         var item3 = result.FirstOrDefault(x => x?["key"]?.ToString() == "item3");
         Assert.That(item3, Is.Not.Null);
@@ -402,16 +400,15 @@ internal class JsonMergeTests
     public void MergeJsonArrays_WithNullSource_ReturnsTarget()
     {
         // Arrange
-        var targetArray = JsonSerializer.Deserialize<JsonArray>("""
-        [
-            { "key": "item1", "value": "target1" }
-        ]
-        """);
+        var targetJson = @"[
+      { ""key"": ""item1"", ""value"": ""target1"" }
+ ]";
 
-        var method = GetStaticMethod("MergeJsonArrays");
+        var targetArray = JsonSerializer.Deserialize<JsonArray>(targetJson);
+        var method = GetInstanceMethod("MergeJsonArrays");
 
         // Act
-        var result = (JsonArray)method.Invoke(null, [null, targetArray, "key", "name"])!;
+        var result = (JsonArray)method.Invoke(_mergerInstance, [null, targetArray, "key", "name"])!;
 
         // Assert
         Assert.That(result, Is.EqualTo(targetArray));
@@ -421,16 +418,15 @@ internal class JsonMergeTests
     public void MergeJsonArrays_WithNullTarget_ReturnsClonedSource()
     {
         // Arrange
-        var sourceArray = JsonSerializer.Deserialize<JsonArray>("""
-        [
-            { "key": "item1", "value": "source1" }
-        ]
-        """);
+        var sourceJson = @"[
+            { ""key"": ""item1"", ""value"": ""source1"" }
+        ]";
 
-        var method = GetStaticMethod("MergeJsonArrays");
+        var sourceArray = JsonSerializer.Deserialize<JsonArray>(sourceJson);
+        var method = GetInstanceMethod("MergeJsonArrays");
 
         // Act
-        var result = (JsonArray)method.Invoke(null, [sourceArray, null, "key", "name"])!;
+        var result = (JsonArray)method.Invoke(_mergerInstance, [sourceArray, null, "key", "name"])!;
 
         // Assert
         Assert.That(result, Is.Not.Null);
@@ -443,23 +439,21 @@ internal class JsonMergeTests
     public void MergeJsonArrays_WithRemovedItems_FiltersOutRemovedItems()
     {
         // Arrange
-        var sourceArray = JsonSerializer.Deserialize<JsonArray>("""
-        [
-            { "key": "item1", "value": "source1" }
-        ]
-        """);
+        var sourceJson = @"[
+            { ""key"": ""item1"", ""value"": ""source1"" }
+        ]";
 
-        var targetArray = JsonSerializer.Deserialize<JsonArray>("""
-        [
-            { "key": "item2", "value": "target2", "name": "uSync:Removed in child site.:Item2" },
-            { "key": "item3", "value": "uSync:Inherited from root.", "name": "Item3" }
-        ]
-        """);
+        var targetJson = @"[
+            { ""key"": ""item2"", ""value"": ""target2"", ""name"": ""uSync:Removed in child site.:Item2"" },
+            { ""key"": ""item3"", ""value"": ""uSync:Inherited from root."", ""name"": ""Item3"" }
+        ]";
 
-        var method = GetStaticMethod("MergeJsonArrays");
+        var sourceArray = JsonSerializer.Deserialize<JsonArray>(sourceJson);
+        var targetArray = JsonSerializer.Deserialize<JsonArray>(targetJson);
+        var method = GetInstanceMethod("MergeJsonArrays");
 
         // Act
-        var result = (JsonArray)method.Invoke(null, [sourceArray, targetArray, "key", "name"])!;
+        var result = (JsonArray)method.Invoke(_mergerInstance, [sourceArray, targetArray, "key", "name"])!;
 
         // Assert
         Assert.That(result, Is.Not.Null);
@@ -469,96 +463,83 @@ internal class JsonMergeTests
 
     #endregion
 
-    #region Private Method Tests via Reflection
+    #region Public Method Tests via Reflection
 
     [Test]
     public void GetJsonPropertyDifferences_WithMissingPropertiesInTarget_AddsInheritedMarkers()
     {
         // Arrange
-        var sourceObject = JsonSerializer.Deserialize<JsonObject>("""
-        {
-            "key": "item1",
-            "prop1": "sourceProp1",
-            "prop2": "sourceProp2"
-        }
-        """)!;
+        var sourceJson = @"{
+            ""key"": ""item1"",
+            ""prop1"": ""sourceProp1"",
+            ""prop2"": ""sourceProp2""
+        }";
 
-        var targetObject = JsonSerializer.Deserialize<JsonObject>("""
-        {
-            "key": "item1",
-            "prop1": "targetProp1"
-        }
-        """)!;
+        var targetJson = @"{
+            ""key"": ""item1"",
+            ""prop1"": ""targetProp1""
+        }";
 
-        var method = GetPrivateStaticMethod("GetJsonPropertyDifferences");
+        var sourceObject = JsonSerializer.Deserialize<JsonObject>(sourceJson)!;
+        var targetObject = JsonSerializer.Deserialize<JsonObject>(targetJson)!;
+        var method = GetPublicInstanceMethod("GetJsonPropertyDifferences");
 
         // Act
-        var result = (JsonObject)method.Invoke(null, [sourceObject, targetObject, "key"])!;
+        var result = (JsonObject)method.Invoke(_mergerInstance, [sourceObject, targetObject, "key"])!;
 
         // Assert
         Assert.That(result, Is.Not.Null);
         Assert.That(result["key"]?.ToString(), Is.EqualTo("item1"));
         Assert.That(result["prop1"]?.ToString(), Is.EqualTo("targetProp1")); // Target value wins
-        Assert.That(result["prop2"]?.ToString(), Is.EqualTo("uSync:Inherited from root.")); // Missing property inherits
+        Assert.That(result.ContainsKey("prop2"), Is.False); // Missing property inherits
     }
 
     [Test]
     public void GetJsonPropertyDifferences_WithIdenticalProperties_AddsInheritedMarkers()
     {
         // Arrange
-        var sourceObject = JsonSerializer.Deserialize<JsonObject>("""
-        {
-            "key": "item1",
-            "prop1": "sameProp1",
-            "prop2": "sameProp2"
-        }
-        """)!;
+        var json = @"{
+        ""key"": ""item1"",
+         ""prop1"": ""sameProp1"",
+            ""prop2"": ""sameProp2""
+        }";
 
-        var targetObject = JsonSerializer.Deserialize<JsonObject>("""
-        {
-            "key": "item1",
-            "prop1": "sameProp1",
-            "prop2": "sameProp2"
-        }
-        """)!;
-
-        var method = GetPrivateStaticMethod("GetJsonPropertyDifferences");
+        var sourceObject = JsonSerializer.Deserialize<JsonObject>(json)!;
+        var targetObject = JsonSerializer.Deserialize<JsonObject>(json)!;
+        var method = GetPublicInstanceMethod("GetJsonPropertyDifferences");
 
         // Act
-        var result = (JsonObject)method.Invoke(null, [sourceObject, targetObject, "key"])!;
+        var result = (JsonObject)method.Invoke(_mergerInstance, [sourceObject, targetObject, "key"])!;
 
         // Assert
         Assert.That(result, Is.Not.Null);
         Assert.That(result["key"]?.ToString(), Is.EqualTo("item1"));
-        Assert.That(result["prop1"]?.ToString(), Is.EqualTo("uSync:Inherited from root.")); // Identical values inherit
-        Assert.That(result["prop2"]?.ToString(), Is.EqualTo("uSync:Inherited from root."));
+        Assert.That(result.ContainsKey("prop1"), Is.False);
+        Assert.That(result.ContainsKey("prop2"), Is.False);
     }
 
     [Test]
     public void MergeJsonProperties_WithInheritedValues_ReplacesWithSourceValues()
     {
         // Arrange
-        var sourceObject = JsonSerializer.Deserialize<JsonObject>("""
-        {
-            "key": "item1",
-            "prop1": "sourceProp1",
-            "prop2": "sourceProp2"
-        }
-        """)!;
+        var sourceJson = @"{
+            ""key"": ""item1"",
+            ""prop1"": ""sourceProp1"",
+            ""prop2"": ""sourceProp2""
+        }";
 
-        var targetObject = JsonSerializer.Deserialize<JsonObject>("""
-        {
-            "key": "item1",
-            "prop1": "uSync:Inherited from root.",
-            "prop2": "targetProp2",
-            "prop3": "uSync:Inherited from root."
-        }
-        """)!;
+        var targetJson = @"{
+            ""key"": ""item1"",
+            ""prop2"": ""targetProp2"",
+            ""prop3"": ""uSync:Inherited from root.""
+        }";
 
-        var method = GetPrivateStaticMethod("MergeJsonProperties");
+        var sourceObject = JsonSerializer.Deserialize<JsonObject>(sourceJson)!;
+        var targetObject = JsonSerializer.Deserialize<JsonObject>(targetJson)!;
+        var method = GetPublicInstanceMethod("MergeJsonProperties");
 
         // Act
-        var result = (JsonObject)method.Invoke(null, [sourceObject, targetObject, "key"])!;
+        var result = (JsonObject)method.Invoke(_mergerInstance, [sourceObject, targetObject, "key"])!;
 
         // Assert
         Assert.That(result, Is.Not.Null);
@@ -574,42 +555,57 @@ internal class JsonMergeTests
 
     private static MethodInfo GetStaticMethod(string methodName)
     {
-        var method = SyncConfigMergerBaseType.GetMethod(methodName, 
+        var method = ImageCropperConfigMergerType.BaseType!.GetMethod(methodName,
             BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public);
-        
+
         if (method == null)
         {
             throw new ArgumentException($"Method '{methodName}' not found in SyncConfigMergerBase");
         }
-        
+
         return method;
     }
 
     private static MethodInfo GetGenericStaticMethod(string methodName, params Type[] genericTypes)
     {
-        var methods = SyncConfigMergerBaseType.GetMethods(BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public)
-            .Where(m => m.Name == methodName && m.IsGenericMethodDefinition);
-        
+        var methods = ImageCropperConfigMergerType.BaseType!.GetMethods(BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public)
+        .Where(m => m.Name == methodName && m.IsGenericMethodDefinition);
+
         var method = methods.FirstOrDefault();
         if (method == null)
         {
             throw new ArgumentException($"Generic method '{methodName}' not found in SyncConfigMergerBase");
         }
-        
+
         // Create the generic method with specific types
         return method.MakeGenericMethod(genericTypes);
     }
 
-    private static MethodInfo GetPrivateStaticMethod(string methodName)
+    private MethodInfo GetInstanceMethod(string methodName)
     {
-        var method = SyncConfigMergerBaseType.GetMethod(methodName, 
-            BindingFlags.Static | BindingFlags.NonPublic);
-        
+        var method = ImageCropperConfigMergerType.BaseType!.GetMethod(methodName,
+        BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+
         if (method == null)
         {
-            throw new ArgumentException($"Private method '{methodName}' not found in SyncConfigMergerBase");
+            throw new ArgumentException($"Instance method '{methodName}' not found in SyncConfigMergerBase");
         }
-        
+
+        return method;
+    }
+
+    private MethodInfo GetPublicInstanceMethod(string methodName)
+    {
+        var method = ImageCropperConfigMergerType.GetMethod(methodName,
+      BindingFlags.Instance | BindingFlags.Public)
+         ?? ImageCropperConfigMergerType.BaseType!.GetMethod(methodName,
+    BindingFlags.Instance | BindingFlags.Public);
+
+        if (method == null)
+        {
+            throw new ArgumentException($"Public instance method '{methodName}' not found in ImageCropperConfigMerger or its base");
+        }
+
         return method;
     }
 
@@ -636,72 +632,68 @@ internal class JsonMergeTests
     public void GetJsonArrayDifferences_WithMalformedJson_HandlesGracefully()
     {
         // Arrange
-        var sourceArray = JsonSerializer.Deserialize<JsonArray>("""
-        [
-            { "key": "item1", "value": "source1" },
-            { "wrongstructure": "invalid" }
-        ]
-        """);
+        var sourceJson = @"[
+ { ""key"": ""item1"", ""value"": ""source1"" },
+            { ""wrongstructure"": ""invalid"" }
+        ]";
 
-        var targetArray = JsonSerializer.Deserialize<JsonArray>("""
-        [
-            { "key": "item1", "value": "target1" }
-        ]
-        """);
+        var targetJson = @"[
+        { ""key"": ""item1"", ""value"": ""target1"" }
+        ]";
 
-        var method = GetStaticMethod("GetJsonArrayDifferences");
+        var sourceArray = JsonSerializer.Deserialize<JsonArray>(sourceJson);
+        var targetArray = JsonSerializer.Deserialize<JsonArray>(targetJson);
+        var method = GetInstanceMethod("GetJsonArrayDifferences");
 
         // Act & Assert (should not throw)
         Assert.DoesNotThrow(() =>
-        {
-            var result = (JsonArray)method.Invoke(null, [sourceArray, targetArray, "key", "label"])!;
-            Assert.That(result, Is.Not.Null);
-        });
+ {
+     var result = (JsonArray)method.Invoke(_mergerInstance, [sourceArray, targetArray, "key", "label"])!;
+     Assert.That(result, Is.Not.Null);
+ });
     }
 
     [Test]
     public void MergeJsonArrays_WithComplexNestedStructures_HandlesCorrectly()
     {
         // Arrange
-        var sourceArray = JsonSerializer.Deserialize<JsonArray>("""
-        [
+        var sourceJson = @"[
             { 
-                "key": "item1", 
-                "value": "source1",
-                "nested": {
-                    "prop1": "sourceProp1",
-                    "prop2": "sourceProp2"
+                ""key"": ""item1"", 
+                ""value"": ""source1"",
+                ""nested"": {
+                    ""prop1"": ""sourceProp1"",
+                ""prop2"": ""sourceProp2""
                 }
             }
-        ]
-        """);
+        ]";
 
-        var targetArray = JsonSerializer.Deserialize<JsonArray>("""
-        [
+        var targetJson = @"[
             { 
-                "key": "item1", 
-                "value": "target1",
-                "nested": {
-                    "prop1": "targetProp1",
-                    "prop3": "targetProp3"
+                ""key"": ""item1"", 
+                ""value"": ""target1"",
+                ""nested"": {
+                    ""prop1"": ""targetProp1"",
+                    ""prop3"": ""targetProp3""
                 }
             }
-        ]
-        """);
+        ]";
 
-        var method = GetStaticMethod("MergeJsonArrays");
+        var sourceArray = JsonSerializer.Deserialize<JsonArray>(sourceJson);
+        var targetArray = JsonSerializer.Deserialize<JsonArray>(targetJson);
+        var method = GetInstanceMethod("MergeJsonArrays");
 
         // Act
-        var result = (JsonArray)method.Invoke(null, [sourceArray, targetArray, "key", "name"])!;
+        var result = (JsonArray)method.Invoke(_mergerInstance, [sourceArray, targetArray, "key", "name"])!;
 
         // Assert
         Assert.That(result, Is.Not.Null);
         Assert.That(result.Count, Is.EqualTo(1));
-        
+
         var item = result[0];
         Assert.That(item!["key"]?.ToString(), Is.EqualTo("item1"));
         Assert.That(item["value"]?.ToString(), Is.EqualTo("target1"));
-        
+
         // Nested object should be handled appropriately
         var nested = item["nested"];
         Assert.That(nested, Is.Not.Null);
@@ -713,11 +705,10 @@ internal class JsonMergeTests
         // Arrange
         var sourceArray = JsonSerializer.Deserialize<JsonArray>("[]");
         var targetArray = JsonSerializer.Deserialize<JsonArray>("[]");
-
-        var method = GetStaticMethod("GetJsonArrayDifferences");
+        var method = GetInstanceMethod("GetJsonArrayDifferences");
 
         // Act
-        var result = (JsonArray)method.Invoke(null, [sourceArray, targetArray, "key", "label"])!;
+        var result = (JsonArray)method.Invoke(_mergerInstance, [sourceArray, targetArray, "key", "label"])!;
 
         // Assert
         Assert.That(result, Is.Not.Null);
@@ -728,26 +719,24 @@ internal class JsonMergeTests
     public void MergeJsonArrays_WithNonObjectElements_HandlesGracefully()
     {
         // Arrange - Array containing non-object elements
-        var sourceArray = JsonSerializer.Deserialize<JsonArray>("""
-        [
-            "stringValue",
-            { "key": "item1", "value": "source1" },
+        var sourceJson = @"[
+            ""stringValue"",
+            { ""key"": ""item1"", ""value"": ""source1"" },
             123
-        ]
-        """);
+        ]";
 
-        var targetArray = JsonSerializer.Deserialize<JsonArray>("""
-        [
-            { "key": "item1", "value": "target1" }
-        ]
-        """);
+        var targetJson = @"[
+            { ""key"": ""item1"", ""value"": ""target1"" }
+        ]";
 
-        var method = GetStaticMethod("MergeJsonArrays");
+        var sourceArray = JsonSerializer.Deserialize<JsonArray>(sourceJson);
+        var targetArray = JsonSerializer.Deserialize<JsonArray>(targetJson);
+        var method = GetInstanceMethod("MergeJsonArrays");
 
         // Act & Assert (should not throw)
         Assert.DoesNotThrow(() =>
         {
-            var result = (JsonArray)method.Invoke(null, [sourceArray, targetArray, "key", "name"])!;
+            var result = (JsonArray)method.Invoke(_mergerInstance, [sourceArray, targetArray, "key", "name"])!;
             Assert.That(result, Is.Not.Null);
         });
     }
