@@ -96,8 +96,6 @@ export class uSyncHistoryElement extends UmbLitElement {
     umbOpenModal(this, HISTORY_MODAL_TOKEN, {
       data: { item: item },
     }).catch(() => undefined);
-
-    return null;
   }
 
   renderTableHead() {
