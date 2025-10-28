@@ -1,5 +1,5 @@
 npm install 
 
-dotnet restore uSync.sln
+dotnet restore uSync.slnx 
 
-dotnet build uSync.sln -c Release -f net9.0
+dotnet build uSync.slnx -c Release -f net10.0
