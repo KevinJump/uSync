@@ -1,0 +1,27 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path=".github/workflows/dotnet-build.yml" />
+    <File Path="changes/format.md" />
+    <File Path="Directory.Build.props" />
+    <File Path="dist/build-package.ps1" />
+    <File Path="global.json" />
+    <File Path="gulp-transformManifest.js" />
+    <File Path="gulpfile.js" />
+    <File Path="NuGet.Config" />
+    <File Path="package.json" />
+  </Folder>
+  <Folder Name="/Tools/">
+    <Project Path="uSync.AutoTemplates/uSync.AutoTemplates.csproj" />
+    <Project Path="uSync.SchemaGenerator/uSync.SchemaGenerator.csproj" />
+  </Folder>
+  <Project Path="uSync.Backoffice.Management.Api/uSync.Backoffice.Management.Api.csproj" />
+  <Project Path="uSync.Backoffice.Management.Client/uSync.Backoffice.Management.Client.csproj" />
+  <Project Path="uSync.BackOffice.Targets/uSync.BackOffice.Targets.csproj" />
+  <Project Path="uSync.BackOffice/uSync.BackOffice.csproj" />
+  <Project Path="uSync.Community.Contrib/uSync.Community.Contrib.csproj" />
+  <Project Path="uSync.Community.DataTypeSerializers/uSync.Community.DataTypeSerializers.csproj" />
+  <Project Path="uSync.Core/uSync.Core.csproj" />
+  <Project Path="uSync.Tests/uSync.Tests.csproj" />
+  <Project Path="uSync/uSync.csproj" />
+</Solution>

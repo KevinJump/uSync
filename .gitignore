@@ -259,5 +259,6 @@ $RECYCLE.BIN/
 
 # local solution (has website in it)
 /uSync.*.sln
+/uSync.*.slnx
 /uSync.Backoffice.Management.Client/usync-assets/tsconfig.dist.tsbuildinfo
 /uSync.Backoffice.Management.Client/usync-assets/.npmrc
