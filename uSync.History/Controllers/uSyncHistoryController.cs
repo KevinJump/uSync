@@ -43,7 +43,9 @@ namespace uSync.History.Controllers
             var list = new List<HistoryInfo>();
             foreach (var file in files)
             {
-                list.Add(await LoadHistoryAsync(file));
+                var history = await LoadHistoryAsync(file);
+                if (history is not null)
+                    list.Add(history);
             }
 
             return list.OrderByDescending(x => x.Date);
@@ -77,16 +79,15 @@ namespace uSync.History.Controllers
 
         [HttpGet("HistoryInfo")]
         [ProducesResponseType(200)]
-        public async Task<HistoryInfo> LoadHistoryAsync(string filePath)
+        public async Task<HistoryInfo?> LoadHistoryAsync(string filePath)
         {
             string historyFolder = GetHistoryFolder();
             var fullPath = Path.Combine(historyFolder, filePath);
             string contents = await _syncFileService.LoadContentAsync(fullPath);
 
             var actions = JsonConvert.DeserializeObject<HistoryInfo>(contents);
-
+            if (actions is null) return null;
             actions.FilePath = filePath;
-
             return actions;
         }
     }
