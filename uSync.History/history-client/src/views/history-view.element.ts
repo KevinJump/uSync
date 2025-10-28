@@ -74,8 +74,7 @@ export class uSyncHistoryElement extends UmbLitElement {
         ><uui-table-cell>${item.changes}/${item.total}</uui-table-cell
         ><uui-table-cell>${item.username}</uui-table-cell>
         <uui-table-cell
-          >${(item.date,
-          this.localize.date(item.date, TimeFormatOptions))}</uui-table-cell
+          >${this.localize.date(item.date, TimeFormatOptions)}</uui-table-cell
         ></uui-table-row
       >`;
     });
