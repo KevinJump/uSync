@@ -41,6 +41,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.Backoffice.Management
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.Backoffice.Management.Api", "uSync.Backoffice.Management.Api\uSync.Backoffice.Management.Api.csproj", "{7701860C-52E5-4C0B-A020-CBC8FFD6CBEA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "uSync.History", "uSync.History\uSync.History.csproj", "{9F0B9F94-C813-080D-3CE4-5972E2C404C6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -91,6 +93,10 @@ Global
 		{7701860C-52E5-4C0B-A020-CBC8FFD6CBEA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7701860C-52E5-4C0B-A020-CBC8FFD6CBEA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7701860C-52E5-4C0B-A020-CBC8FFD6CBEA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9F0B9F94-C813-080D-3CE4-5972E2C404C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9F0B9F94-C813-080D-3CE4-5972E2C404C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9F0B9F94-C813-080D-3CE4-5972E2C404C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9F0B9F94-C813-080D-3CE4-5972E2C404C6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

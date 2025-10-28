@@ -2410,6 +2410,13 @@
           "Umbraco.Cms.Api.Management": "[16.0.0, )",
           "Umbraco.Cms.Web.Website": "[16.0.0, )"
         }
+      },
+      "usync.history": {
+        "type": "Project",
+        "dependencies": {
+          "uSync.BackOffice": "[16.0.0, )",
+          "uSync.Backoffice.Management.Api": "[16.0.0, )"
+        }
       }
     }
   }

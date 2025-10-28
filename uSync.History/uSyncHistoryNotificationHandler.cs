@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using System.Threading.Tasks;
 using Umbraco.Cms.Core.Events;
 using Umbraco.Cms.Core.Hosting;
 using Umbraco.Cms.Core.Security;
@@ -10,16 +11,16 @@ using uSync.BackOffice.Services;
 namespace uSync.History
 {
     internal class uSyncHistoryNotificationHandler 
-        : INotificationHandler<uSyncImportCompletedNotification>,
-        INotificationHandler<uSyncExportCompletedNotification>
+        : INotificationAsyncHandler<uSyncImportCompletedNotification>,
+        INotificationAsyncHandler<uSyncExportCompletedNotification>
     {
         private readonly IHostingEnvironment _hostingEnvironment;
-        private readonly SyncFileService _syncFileService;
+        private readonly ISyncFileService _syncFileService;
         private readonly IBackOfficeSecurityAccessor _backOfficeSecurityAccessor;
         private readonly ILogger<uSyncHistoryNotificationHandler> _logger;
 
         public uSyncHistoryNotificationHandler(
-            SyncFileService syncFileService,
+            ISyncFileService syncFileService,
             IBackOfficeSecurityAccessor backOfficeSecurityAccessor,
             IHostingEnvironment hostingEnvironment,
             ILogger<uSyncHistoryNotificationHandler> logger)
@@ -30,7 +31,7 @@ namespace uSync.History
             _logger = logger;
         }
 
-        public void Handle(uSyncImportCompletedNotification notification)
+        public async Task HandleAsync(uSyncImportCompletedNotification notification, CancellationToken cancellationToken)
         {
             var changeActions = notification.Actions
                 .Where(x => x.Change > Core.ChangeType.NoChange && x.Change < Core.ChangeType.Hidden)
@@ -38,11 +39,11 @@ namespace uSync.History
 
             if (changeActions.Any())
             {
-                SaveActions(changeActions, "Import", notification.Actions.Count());
+                await SaveActions(changeActions, "Import", notification.Actions.Count());
             }
         }
 
-        public void Handle(uSyncExportCompletedNotification notification)
+        public async Task HandleAsync(uSyncExportCompletedNotification notification, CancellationToken cancellationToken)
         {
             var changeActions = notification.Actions
                 .Where(x => x.Change > Core.ChangeType.NoChange && x.Change < Core.ChangeType.Hidden)
@@ -50,11 +51,11 @@ namespace uSync.History
 
             if (changeActions.Any())
             {
-                SaveActions(changeActions, "Export", notification.Actions.Count());
+                await SaveActions(changeActions, "Export", notification.Actions.Count());
             }
         }
 
-        private void SaveActions(IEnumerable<uSyncAction> actions, string method, int total)
+        private async Task SaveActions(IEnumerable<uSyncAction> actions, string method, int total)
         {
             try
             {
@@ -75,7 +76,7 @@ namespace uSync.History
 
                 _syncFileService.CreateFoldersForFile(historyFile);
 
-                _syncFileService.SaveFile(historyFile, historyJson);
+                await _syncFileService.SaveFileAsync(historyFile, historyJson);
             }
             catch(Exception ex)
             {

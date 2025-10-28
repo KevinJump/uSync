@@ -1,16 +1,18 @@
-﻿using Microsoft.AspNetCore.Routing;
-
+﻿using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using Microsoft.AspNetCore.Mvc.Controllers;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.SwaggerGen;
+using System.Text.Json.Nodes;
+using Umbraco.Cms.Api.Common.OpenApi;
 using Umbraco.Cms.Core.Composing;
 using Umbraco.Cms.Core.DependencyInjection;
-using Umbraco.Cms.Core.Events;
-using Umbraco.Cms.Core.Notifications;
-using Umbraco.Cms.Core.Security;
+using Umbraco.Cms.Core.Manifest;
+using Umbraco.Cms.Infrastructure.Manifest;
 using Umbraco.Extensions;
-
 using uSync.BackOffice;
-using uSync.BackOffice.Configuration;
-using uSync.BackOffice.Hubs;
-using uSync.History.Controllers;
+using uSync.BackOffice.Extensions;
 
 namespace uSync.History
 {
@@ -18,46 +20,85 @@ namespace uSync.History
     {
         public void Compose(IUmbracoBuilder builder)
         {
-            builder.AddNotificationHandler<ServerVariablesParsingNotification, uSyncHistoryServerVariablesHandler>();
-
-            builder.AddNotificationHandler<uSyncImportCompletedNotification, uSyncHistoryNotificationHandler>();
-            builder.AddNotificationHandler<uSyncExportCompletedNotification, uSyncHistoryNotificationHandler>();
-            // don't add if the filter is already there .
-            if (!builder.ManifestFilters().Has<uSyncHistoryManifestFilter>())
-            {
-                // add the package manifest programatically. 
-                builder.ManifestFilters().Append<uSyncHistoryManifestFilter>();
-            }
+            builder.AddNotificationAsyncHandler<uSyncImportCompletedNotification, uSyncHistoryNotificationHandler>();
+            builder.AddNotificationAsyncHandler<uSyncExportCompletedNotification, uSyncHistoryNotificationHandler>();
+            builder.Services.AddSingleton<IOperationIdHandler, MaintenanceModeCustomOperationHandler>();
+            builder.Services.ConfigureOptions<ConfigureSwaggerGenOptions>();
+            builder.Services.AddSingleton<IPackageManifestReader, uSyncHistoryManifestReader>();
         }
     }
 
-    internal class uSyncHistoryServerVariablesHandler : INotificationHandler<ServerVariablesParsingNotification>
+    internal class ConfigureSwaggerGenOptions : IConfigureOptions<SwaggerGenOptions>
     {
-        private readonly uSyncConfigService _uSyncConfig;
-        private readonly LinkGenerator _linkGenerator;
-        private readonly uSyncHubRoutes _uSyncHubRoutes;
-        private readonly IBackOfficeSecurityAccessor _securityAccessor;
-
-        /// <inheritdoc cref="INotificationHandler{TNotification}" />
-        public uSyncHistoryServerVariablesHandler(LinkGenerator linkGenerator,
-            uSyncConfigService uSyncConfigService,
-            uSyncHubRoutes hubRoutes,
-            IBackOfficeSecurityAccessor securityAccessor)
+        public void Configure(SwaggerGenOptions options)
         {
-            _linkGenerator = linkGenerator;
-            _uSyncConfig = uSyncConfigService;
-            _uSyncHubRoutes = hubRoutes;
-            _securityAccessor = securityAccessor;
+            options.SwaggerDoc(
+                "uSync.History",
+                new OpenApiInfo
+                {
+                    Title = "uSync History API",
+                    Version = "Latest",
+                    Description = "it's uSync history methods"
+                });
+
+        }
+    }
+
+    public class MaintenanceModeCustomOperationHandler : IOperationIdHandler
+    {
+        public bool CanHandle(ApiDescription apiDescription)
+        {
+            if (apiDescription.ActionDescriptor is not
+                ControllerActionDescriptor controllerActionDescriptor)
+                return false;
+
+            return CanHandle(apiDescription, controllerActionDescriptor);
         }
 
+        public bool CanHandle(ApiDescription apiDescription, ControllerActionDescriptor controllerActionDescriptor)
+            => controllerActionDescriptor.ControllerTypeInfo.Namespace?.StartsWith("uSync.History") is true;
 
-        /// <inheritdoc/>
-        public void Handle(ServerVariablesParsingNotification notification)
+        public string Handle(ApiDescription apiDescription)
+            => $"{apiDescription.ActionDescriptor.RouteValues["action"]}";
+    }
+
+    internal class uSyncHistoryManifestReader : IPackageManifestReader
+    {
+        public Task<IEnumerable<PackageManifest>> ReadPackageManifestsAsync()
         {
-            notification.ServerVariables.Add("uSyncHistory", new Dictionary<string, object>
+            var version = GetuSyncVersion();
+            var script = $"/App_Plugins/uSync.History/history.js?v={version}";
+
+            List<PackageManifest> manifest = [
+                new PackageManifest
             {
-                { "Service", _linkGenerator.GetUmbracoApiServiceBaseUrl<uSyncHistoryController>(controller => controller.GetApi()) },
-            });
+                Id = "uSync.History",
+                Name = "uSync History",
+                AllowTelemetry = true,
+                Version = GetuSyncVersion(),
+                Extensions = [ new JsonObject {
+                    ["name"] = "usync.history.entrypoint",
+                    ["alias"] = "uSync History EntryPoint",
+                    ["type"] = "backofficeEntryPoint",
+                    ["js"] = script
+                }],
+            }
+            ];
+
+            return Task.FromResult(manifest.AsEnumerable());
+        }
+
+        private string GetuSyncVersion()
+        {
+            var assembly = typeof(uSyncHistoryManifestReader).Assembly;
+            try
+            {
+                return assembly.GetAssemblyProductVersion().ToSemanticStringWithoutBuild();
+            }
+            catch
+            {
+                return assembly.GetName()?.Version?.ToString(3) ?? "15.0.0";
+            }
         }
     }
 }
