@@ -123,7 +123,8 @@ internal abstract class SyncConfigMergerBase
             if (targetObject.TryGetPropertyValue(property.Key, out var targetValue) is false || targetValue is null)
             {
                 // value isn't in target. inherit.
-                targetObject[property.Key] = JsonValue.Create(_inheritedValue);
+                // targetObject[property.Key] = JsonValue.Create(_inheritedValue);
+                // inherit is implicit as missing properties are added on the merge.
                 continue;
             }
             
@@ -156,7 +157,11 @@ internal abstract class SyncConfigMergerBase
             else
             {
                 // source wins.
-                targetObject[property.Key] = JsonValue.Create(_inheritedValue);
+                // targetObject[property.Key] = JsonValue.Create(_inheritedValue);
+
+                // inherited is implicit.
+                if (targetObject.ContainsKey(property.Key)) 
+                    targetObject.Remove(property.Key);
             }
         }
 
@@ -276,7 +281,7 @@ internal abstract class SyncConfigMergerBase
 
         foreach(var sourceProperty in sourceOnly)
         {
-            targetItems[sourceProperty.Key] = sourceProperty.Value?.DeepClone();
+            targetObject[sourceProperty.Key] = sourceProperty.Value?.DeepClone();
         }
 
         return targetObject;
