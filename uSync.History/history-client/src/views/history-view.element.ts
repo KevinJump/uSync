@@ -92,7 +92,7 @@ export class uSyncHistoryElement extends UmbLitElement {
   }
 
   async #showDetail(item: HistoryInfo) {
-    console.log("thing happen", item);
+    
     umbOpenModal(this, HISTORY_MODAL_TOKEN, {
       data: { item: item },
     }).catch(() => undefined);
