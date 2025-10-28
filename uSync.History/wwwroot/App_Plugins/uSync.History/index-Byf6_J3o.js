@@ -15,7 +15,7 @@ const I = {
   type: "workspaceView",
   alias: "historyView",
   name: "uSync history",
-  js: () => import("./history-view.element-BU5CDzls.js"),
+  js: () => import("./history-view.element-Dmaa43_J.js"),
   weight: 125,
   meta: {
     label: "History",
@@ -28,11 +28,16 @@ const I = {
       match: R.workspace.alias
     }
   ]
-}, E = [k];
-var W = async (e, a) => {
+}, E = [k], W = {
+  type: "modal",
+  alias: "usync.history.modal",
+  name: "uSync History",
+  js: () => import("./history-modal.element-CoNqy51l.js")
+}, H = [W];
+var D = async (e, a) => {
   let t = typeof a == "function" ? await a(e) : a;
   if (t) return e.scheme === "bearer" ? `Bearer ${t}` : e.scheme === "basic" ? `Basic ${btoa(t)}` : t;
-}, D = { bodySerializer: (e) => JSON.stringify(e, (a, t) => typeof t == "bigint" ? t.toString() : t) }, H = (e) => {
+}, N = { bodySerializer: (e) => JSON.stringify(e, (a, t) => typeof t == "bigint" ? t.toString() : t) }, P = (e) => {
   switch (e) {
     case "label":
       return ".";
@@ -43,7 +48,7 @@ var W = async (e, a) => {
     default:
       return "&";
   }
-}, N = (e) => {
+}, B = (e) => {
   switch (e) {
     case "form":
       return ",";
@@ -54,7 +59,7 @@ var W = async (e, a) => {
     default:
       return ",";
   }
-}, P = (e) => {
+}, J = (e) => {
   switch (e) {
     case "label":
       return ".";
@@ -67,7 +72,7 @@ var W = async (e, a) => {
   }
 }, S = ({ allowReserved: e, explode: a, name: t, style: n, value: o }) => {
   if (!a) {
-    let r = (e ? o : o.map((l) => encodeURIComponent(l))).join(N(n));
+    let r = (e ? o : o.map((l) => encodeURIComponent(l))).join(B(n));
     switch (n) {
       case "label":
         return `.${r}`;
@@ -79,7 +84,7 @@ var W = async (e, a) => {
         return `${t}=${r}`;
     }
   }
-  let i = H(n), s = o.map((r) => n === "label" || n === "simple" ? e ? r : encodeURIComponent(r) : b({ allowReserved: e, name: t, value: r })).join(i);
+  let i = P(n), s = o.map((r) => n === "label" || n === "simple" ? e ? r : encodeURIComponent(r) : b({ allowReserved: e, name: t, value: r })).join(i);
   return n === "label" || n === "matrix" ? i + s : s;
 }, b = ({ allowReserved: e, name: a, value: t }) => {
   if (t == null) return "";
@@ -104,10 +109,10 @@ var W = async (e, a) => {
         return l;
     }
   }
-  let i = P(n), s = Object.entries(o).map(([r, l]) => b({ allowReserved: e, name: n === "deepObject" ? `${t}[${r}]` : r, value: l })).join(i);
+  let i = J(n), s = Object.entries(o).map(([r, l]) => b({ allowReserved: e, name: n === "deepObject" ? `${t}[${r}]` : r, value: l })).join(i);
   return n === "label" || n === "matrix" ? i + s : s;
-}, B = /\{[^{}]+\}/g, J = ({ path: e, url: a }) => {
-  let t = a, n = a.match(B);
+}, V = /\{[^{}]+\}/g, L = ({ path: e, url: a }) => {
+  let t = a, n = a.match(V);
   if (n) for (let o of n) {
     let i = !1, s = o.substring(1, o.length - 1), r = "simple";
     s.endsWith("*") && (i = !0, s = s.substring(0, s.length - 1)), s.startsWith(".") ? (s = s.substring(1), r = "label") : s.startsWith(";") && (s = s.substring(1), r = "matrix");
@@ -145,7 +150,7 @@ var W = async (e, a) => {
     }
   }
   return o.join("&");
-}, V = (e) => {
+}, M = (e) => {
   var t;
   if (!e) return "stream";
   let a = (t = e.split(";")[0]) == null ? void 0 : t.trim();
@@ -155,9 +160,9 @@ var W = async (e, a) => {
     if (["application/", "audio/", "image/", "video/"].some((n) => a.startsWith(n))) return "blob";
     if (a.startsWith("text/")) return "text";
   }
-}, L = async ({ security: e, ...a }) => {
+}, G = async ({ security: e, ...a }) => {
   for (let t of e) {
-    let n = await W(t, a.auth);
+    let n = await D(t, a.auth);
     if (!n) continue;
     let o = t.name ?? "Authorization";
     switch (t.in) {
@@ -174,9 +179,9 @@ var W = async (e, a) => {
     }
     return;
   }
-}, j = (e) => M({ baseUrl: e.baseUrl, path: e.path, query: e.query, querySerializer: typeof e.querySerializer == "function" ? e.querySerializer : C(e.querySerializer), url: e.url }), M = ({ baseUrl: e, path: a, query: t, querySerializer: n, url: o }) => {
+}, j = (e) => Q({ baseUrl: e.baseUrl, path: e.path, query: e.query, querySerializer: typeof e.querySerializer == "function" ? e.querySerializer : C(e.querySerializer), url: e.url }), Q = ({ baseUrl: e, path: a, query: t, querySerializer: n, url: o }) => {
   let i = o.startsWith("/") ? o : `/${o}`, s = (e ?? "") + i;
-  a && (s = J({ path: a, url: s }));
+  a && (s = L({ path: a, url: s }));
   let r = t ? n(t) : "";
   return r.startsWith("?") && (r = r.substring(1)), r && (s += `?${r}`), s;
 }, v = (e, a) => {
@@ -219,10 +224,10 @@ var W = async (e, a) => {
   use(e) {
     return this._fns = [...this._fns, e], this._fns.length - 1;
   }
-}, G = () => ({ error: new w(), request: new w(), response: new w() }), Q = C({ allowReserved: !1, array: { explode: !0, style: "form" }, object: { explode: !0, style: "deepObject" } }), X = { "Content-Type": "application/json" }, O = (e = {}) => ({ ...D, headers: X, parseAs: "auto", querySerializer: Q, ...e }), F = (e = {}) => {
-  let a = v(O(), e), t = () => ({ ...a }), n = (s) => (a = v(a, s), t()), o = G(), i = async (s) => {
+}, X = () => ({ error: new w(), request: new w(), response: new w() }), F = C({ allowReserved: !1, array: { explode: !0, style: "form" }, object: { explode: !0, style: "deepObject" } }), K = { "Content-Type": "application/json" }, O = (e = {}) => ({ ...N, headers: K, parseAs: "auto", querySerializer: F, ...e }), Y = (e = {}) => {
+  let a = v(O(), e), t = () => ({ ...a }), n = (s) => (a = v(a, s), t()), o = X(), i = async (s) => {
     let r = { ...a, ...s, fetch: s.fetch ?? a.fetch ?? globalThis.fetch, headers: q(a.headers, s.headers) };
-    r.security && await L({ ...r, security: r.security }), r.body && r.bodySerializer && (r.body = r.bodySerializer(r.body)), (r.body === void 0 || r.body === "") && r.headers.delete("Content-Type");
+    r.security && await G({ ...r, security: r.security }), r.body && r.bodySerializer && (r.body = r.bodySerializer(r.body)), (r.body === void 0 || r.body === "") && r.headers.delete("Content-Type");
     let l = j(r), d = { redirect: "follow", ...r }, f = new Request(l, d);
     for (let c of o.request._fns) c && (f = await c(f, r));
     let U = r.fetch, u = await U(f);
@@ -230,7 +235,7 @@ var W = async (e, a) => {
     let y = { request: f, response: u };
     if (u.ok) {
       if (u.status === 204 || u.headers.get("Content-Length") === "0") return r.responseStyle === "data" ? {} : { data: {}, ...y };
-      let c = (r.parseAs === "auto" ? V(u.headers.get("Content-Type")) : r.parseAs) ?? "json";
+      let c = (r.parseAs === "auto" ? M(u.headers.get("Content-Type")) : r.parseAs) ?? "json";
       if (c === "stream") return r.responseStyle === "data" ? u.body : { data: u.body, ...y };
       let h = await u[c]();
       return c === "json" && (r.responseValidator && await r.responseValidator(h), r.responseTransformer && (h = await r.responseTransformer(h))), r.responseStyle === "data" ? h : { data: h, ...y };
@@ -247,10 +252,10 @@ var W = async (e, a) => {
   };
   return { buildUrl: j, connect: (s) => i({ ...s, method: "CONNECT" }), delete: (s) => i({ ...s, method: "DELETE" }), get: (s) => i({ ...s, method: "GET" }), getConfig: t, head: (s) => i({ ...s, method: "HEAD" }), interceptors: o, options: (s) => i({ ...s, method: "OPTIONS" }), patch: (s) => i({ ...s, method: "PATCH" }), post: (s) => i({ ...s, method: "POST" }), put: (s) => i({ ...s, method: "PUT" }), request: i, setConfig: n, trace: (s) => i({ ...s, method: "TRACE" }) };
 };
-const x = F(O({
+const x = Y(O({
   baseUrl: "https://localhost:44338"
-})), ee = (e, a) => {
-  console.log("hit"), a.registerMany([...z, ...E]), e.consumeContext(_, (t) => {
+})), re = (e, a) => {
+  console.log("hit"), a.registerMany([...z, ...E, ...H]), e.consumeContext(_, (t) => {
     if (t) {
       var n = t.getOpenApiConfiguration();
       x.setConfig({
@@ -266,6 +271,6 @@ const x = F(O({
 };
 export {
   x as c,
-  ee as o
+  re as o
 };
-//# sourceMappingURL=index-BGXA9jiq.js.map
+//# sourceMappingURL=index-Byf6_J3o.js.map

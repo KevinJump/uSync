@@ -1,12 +1,13 @@
 import { UmbEntryPointOnInit } from "@umbraco-cms/backoffice/extension-api";
 import { manifests as localizations } from "./lang/manifest.js";
 import { manifests as views } from "./views/manifest.js";
+import { manifests as modals } from "./dialogs/manifest.js";
 import { UMB_AUTH_CONTEXT } from "@umbraco-cms/backoffice/auth";
 import { client } from "./api/client.gen.js";
 
 export const onInit: UmbEntryPointOnInit = (_host, extensionRegistry) => {
   console.log("hit");
-  extensionRegistry.registerMany([...localizations, ...views]);
+  extensionRegistry.registerMany([...localizations, ...views, ...modals]);
 
   _host.consumeContext(UMB_AUTH_CONTEXT, (_auth) => {
     if (!_auth) return;

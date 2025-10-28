@@ -5,17 +5,15 @@ import {
   state,
 } from "@umbraco-cms/backoffice/external/lit";
 import { UmbLitElement } from "@umbraco-cms/backoffice/lit-element";
-import { History, HistoryInfoReadable } from "../api";
+import { History, HistoryInfo } from "../api";
 import { TimeFormatOptions } from "../consts";
-import {
-  UMB_MODAL_MANAGER_CONTEXT,
-  umbConfirmModal,
-} from "@umbraco-cms/backoffice/modal";
+import { umbConfirmModal, umbOpenModal } from "@umbraco-cms/backoffice/modal";
+import { HISTORY_MODAL_TOKEN } from "../dialogs/history-modal.token";
 
 @customElement("usync-history-view")
 export class uSyncHistoryElement extends UmbLitElement {
   @state()
-  history: Array<HistoryInfoReadable> = [];
+  history: Array<HistoryInfo> = [];
 
   constructor() {
     super();
@@ -32,7 +30,7 @@ export class uSyncHistoryElement extends UmbLitElement {
     this.history = (await History.getHistory()).data ?? [];
   }
 
-  #onclick(e: Event) {
+  #onclick() {
     umbConfirmModal(this, {
       headline: this.localize.term("uSyncHistory_clear"),
       content: this.localize.term("uSyncHistory_clearWarning"),
@@ -66,6 +64,8 @@ export class uSyncHistoryElement extends UmbLitElement {
   renderHistory() {
     const items = this.history.map((item) => {
       return html`<uui-table-row
+        @click=${() => this.#showDetail(item)}
+        class="table"
         ><uui-table-cell>${this.renderIcon(item)}</uui-table-cell
         ><uui-table-cell
           ><umb-localize
@@ -92,8 +92,11 @@ export class uSyncHistoryElement extends UmbLitElement {
     ></umb-body-layout>`;
   }
 
-  async #showDetail() {
-    const modalContext = await this.getContext(UMB_MODAL_MANAGER_CONTEXT);
+  async #showDetail(item: HistoryInfo) {
+    console.log("thing happen", item);
+    umbOpenModal(this, HISTORY_MODAL_TOKEN, {
+      data: { item: item },
+    }).catch(() => undefined);
 
     return null;
   }
@@ -112,7 +115,7 @@ export class uSyncHistoryElement extends UmbLitElement {
     >`;
   }
 
-  renderIcon(item: HistoryInfoReadable) {
+  renderIcon(item: HistoryInfo) {
     switch (item.method) {
       case "Import":
         return html`<umb-icon name="icon-box"></umb-icon>`;
@@ -127,6 +130,10 @@ export class uSyncHistoryElement extends UmbLitElement {
       width: 100%;
       display: flex;
       justify-content: flex-end;
+    }
+
+    .table {
+      cursor: pointer;
     }
 
     umb-empty-state {

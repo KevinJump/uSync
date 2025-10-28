@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Umbraco.Cms.Core.Events;
 using Umbraco.Cms.Core.Hosting;
 using Umbraco.Cms.Core.Security;
+using uSync.Backoffice.Management.Api.Extensions;
 using uSync.BackOffice;
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
@@ -61,7 +62,7 @@ namespace uSync.History
             {
                 var historyInfo = new HistoryInfo
                 {
-                    Actions = actions,
+                    Actions = actions.Select(x => x.ToActionView()),
                     Date = DateTime.Now,
                     Username = _backOfficeSecurityAccessor?.BackOfficeSecurity?.CurrentUser?.Username ?? "Background Process",
                     Method = method,
