@@ -1,5 +1,8 @@
 name: v16 - PR Project Build and Test
-
+permissions:
+  contents: read
+  pull-requests: write
+  
 on:
   pull_request:
     branches: [v16/main]
