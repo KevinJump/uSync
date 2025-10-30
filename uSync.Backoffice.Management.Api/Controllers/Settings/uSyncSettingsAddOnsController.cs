@@ -39,7 +39,7 @@ public class uSyncSettingsAddOnsController : uSyncControllerBase
         }
         catch
         {
-            return assembly.GetName()?.Version?.ToString(3) ?? "15.0.0";
+            return assembly.GetName()?.Version?.ToString(3) ?? "17.x";
         }
     }
 }

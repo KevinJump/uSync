@@ -43,7 +43,7 @@ internal sealed class SyncSectionManifestReader : IPackageManifestReader
                 Id = "uSync.Section",
                 Name = "uSync Section",
                 AllowTelemetry = false,
-                Version = typeof(SyncSectionManifestReader).Assembly.GetName()?.Version?.ToString(3) ?? "15.0.0",
+                Version = typeof(SyncSectionManifestReader).Assembly.GetName()?.Version?.ToString(3) ?? "17.0.0",
                 Extensions = [ new JsonObject {
                     ["type"] = "section",
                     ["name"] = "uSync Section",
@@ -103,7 +103,7 @@ internal sealed class uSyncManifestReader : IPackageManifestReader
         }
         catch
         {
-            return assembly.GetName()?.Version?.ToString(3) ?? "15.0.0";
+            return assembly.GetName()?.Version?.ToString(3) ?? "17.0.0";
         }
     }
 }

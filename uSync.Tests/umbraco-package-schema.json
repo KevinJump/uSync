@@ -699,6 +699,62 @@
             ],
             "type": "object"
         },
+        "ManifestCollectionMenuItem": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "api": {
+                    "description": "The file location of the api javascript file to load",
+                    "type": "string"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "forEntityTypes": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "type": {
+                    "const": "collectionMenuItem",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with higher numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "forEntityTypes",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
         "ManifestCollectionView": {
             "properties": {
                 "alias": {
@@ -4476,6 +4532,12 @@
                 "elementName": {
                     "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
                     "type": "string"
+                },
+                "forEntityTypes": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 },
                 "js": {
                     "description": "The file location of the javascript file to load",
@@ -10723,6 +10785,9 @@
                 },
                 "pathname": {
                     "type": "string"
+                },
+                "preventUrlRetention": {
+                    "type": "boolean"
                 }
             },
             "required": [
@@ -11814,6 +11879,9 @@
                     },
                     {
                         "$ref": "#/definitions/ManifestPickerSearchResultItem"
+                    },
+                    {
+                        "$ref": "#/definitions/ManifestCollectionMenuItem"
                     },
                     {
                         "$ref": "#/definitions/ManifestPropertyEditorDataSource"

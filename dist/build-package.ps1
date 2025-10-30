@@ -96,7 +96,7 @@ else {
 }
 
 
-$sln_name = "..\uSync.sln";
+$sln_name = "..\uSync.slnx";
 
 # ""; "##### Restoring project"; "--------------------------------"; ""
 # dotnet restore ..
@@ -109,6 +109,7 @@ dotnet run -c $env --project ..\uSync.SchemaGenerator\uSync.SchemaGenerator.cspr
 
 ""; "##### Packaging"; "----------------------------------" ; ""
 $projects = "uSync.Core", 
+    "uSync.AutoTemplates",
     "uSync.Community.Contrib",
     "uSync.Community.DataTypeSerializers",
     "uSync.BackOffice",
