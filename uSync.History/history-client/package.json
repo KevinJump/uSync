@@ -22,7 +22,7 @@
         "@hey-api/openapi-ts": "^0.85.0",
         "@jumoo/usync": "^16.1.0",
         "@rollup/plugin-node-resolve": "^15.3.1",
-        "@umbraco-cms/backoffice": "^16.0.0",
+        "@umbraco-cms/backoffice": "^17.0.0-rc1",
         "lit": "^3.3.1",
         "node-fetch": "^3.3.2",
         "prettier": "^3.6.2",
@@ -31,5 +31,8 @@
         "vite": "^5.4.21",
         "vite-plugin-checker": "^0.6.4",
         "vite-plugin-static-copy": "^1.0.6"
+    },
+    "dependencies": {
+        "@jumoo/translate": "^17.0.0-rc1"
     }
 }
