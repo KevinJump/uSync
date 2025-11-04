@@ -22,6 +22,7 @@
   <Project Path="uSync.Community.Contrib/uSync.Community.Contrib.csproj" />
   <Project Path="uSync.Community.DataTypeSerializers/uSync.Community.DataTypeSerializers.csproj" />
   <Project Path="uSync.Core/uSync.Core.csproj" />
+  <Project Path="uSync.History/uSync.History.csproj" />
   <Project Path="uSync.Tests/uSync.Tests.csproj" />
   <Project Path="uSync/uSync.csproj" />
 </Solution>

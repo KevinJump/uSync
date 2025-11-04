@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json.Serialization;
 using Newtonsoft.Json;
-using uSync.BackOffice;
+using uSync.BackOffice.Models;
 
 namespace uSync.History
 {
@@ -8,16 +8,16 @@ namespace uSync.History
 
     public class HistoryInfo
     {
-        public IEnumerable<uSyncAction> Actions { get; set; }
+        public IEnumerable<uSyncActionView> Actions { get; set; } = [];
 
         public DateTime Date { get; set; }
 
-        public string Username { get; set; }
+        public string Username { get; set; } = string.Empty;
 
-        public string Method { get; set; }
+        public string Method { get; set; } = string.Empty;
 
-        public string FilePath { get; set; }
-        
+        public string FilePath { get; set; } = string.Empty;
+
         public int Changes { get; set; }
 
         public int Total { get; set; }
