@@ -245,21 +245,21 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         var name = info.Element(uSyncConstants.Xml.Name).ValueOrDefault(string.Empty);
         if (!string.IsNullOrEmpty(name) && item.Name != name)
         {
-            changes.AddUpdate(uSyncConstants.Xml.Name, item.Name ?? "(None)", name, "");
+            changes.AddUpdate(uSyncConstants.Xml.Name, item.Name.ToNonBlankValue(), name, "");
             item.Name = name;
         }
 
         var icon = info.Element("Icon").ValueOrDefault(string.Empty);
         if (item.Icon != icon)
         {
-            changes.AddUpdate("Icon", item.Icon ?? "(None)", icon, "");
+            changes.AddUpdate("Icon", item.Icon.ToNonBlankValue(), icon, "");
             item.Icon = icon;
         }
 
         var thumbnail = info.Element("Thumbnail").ValueOrDefault(string.Empty);
         if (item.Thumbnail != thumbnail)
         {
-            changes.AddUpdate("Icon", item.Thumbnail ?? "(None)", thumbnail, "");
+            changes.AddUpdate("Icon", item.Thumbnail.ToNonBlankValue(), thumbnail, "");
             item.Thumbnail = thumbnail;
         }
 
@@ -465,52 +465,52 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
                 result.Property.Name = name;
             }
 
-            var description = propertyNode.Element("Description").ValueOrDefault(string.Empty);
+            var description = propertyNode.Element("Description").ValueOrDefault<string?>(null);
             if (result.Property.Description != description)
             {
-                changes.AddUpdate("Description", result.Property.Description ?? "(None)", description, $"{alias}/Description");
+                changes.AddUpdate($"Property/{alias}/Description", result.Property.Description.ToNonBlankValue(), description, $"{alias}/Description");
                 result.Property.Description = description;
             }
 
             var mandatory = propertyNode.Element("Mandatory").ValueOrDefault(false);
             if (result.Property.Mandatory != mandatory)
             {
-                changes.AddUpdate("Mandatory", result.Property.Mandatory, mandatory, $"{alias}/Mandatory");
+                changes.AddUpdate($"Property/{alias}/Mandatory", result.Property.Mandatory, mandatory, $"{alias}/Mandatory");
                 result.Property.Mandatory = mandatory;
             }
 
             var regEx = propertyNode.Element("Validation").ValueOrDefault(string.Empty);
             if (result.Property.ValidationRegExp != regEx)
             {
-                changes.AddUpdate("Validation", result.Property.ValidationRegExp ?? "(None)", regEx, $"{alias}/RegEx");
+                changes.AddUpdate($"Property/{alias}/Validation", result.Property.ValidationRegExp.ToNonBlankValue(), regEx, $"{alias}/RegEx");
                 result.Property.ValidationRegExp = propertyNode.Element("Validation").ValueOrDefault(string.Empty);
             }
 
             var sortOrder = propertyNode.Element(uSyncConstants.Xml.SortOrder).ValueOrDefault(0);
             if (result.Property.SortOrder != sortOrder)
             {
-                changes.AddUpdate(uSyncConstants.Xml.SortOrder, result.Property.SortOrder, sortOrder, $"{alias}/SortOrder");
+                changes.AddUpdate($"Property/{alias}/{uSyncConstants.Xml.SortOrder}", result.Property.SortOrder, sortOrder, $"{alias}/SortOrder");
                 result.Property.SortOrder = sortOrder;
             }
 
             var mandatoryMessage = propertyNode.Element("MandatoryMessage").ValueOrDefault(string.Empty);
             if (result.Property.MandatoryMessage != mandatoryMessage)
             {
-                changes.AddUpdate("MandatoryMessage", result.Property.MandatoryMessage ?? "(None)", mandatoryMessage, $"{alias}/MandatoryMessage");
+                changes.AddUpdate($"Property/{alias}/MandatoryMessage", result.Property.MandatoryMessage.ToNonBlankValue(), mandatoryMessage, $"{alias}/MandatoryMessage");
                 result.Property.MandatoryMessage = mandatoryMessage;
             }
 
             var validationRegExMessage = propertyNode.Element("ValidationRegExpMessage").ValueOrDefault(string.Empty);
             if (result.Property.ValidationRegExpMessage != validationRegExMessage)
             {
-                changes.AddUpdate("ValidationRegExpMessage", result.Property.ValidationRegExpMessage ?? "(None)", validationRegExMessage, $"{alias}/ValidationRegExpMessage");
+                changes.AddUpdate($"Property/{alias}/ValidationRegExpMessage", result.Property.ValidationRegExpMessage.ToNonBlankValue(), validationRegExMessage, $"{alias}/ValidationRegExpMessage");
                 result.Property.ValidationRegExpMessage = validationRegExMessage;
             }
 
             var labelOnTop = propertyNode.Element("LabelOnTop").ValueOrDefault(false);
             if (result.Property.LabelOnTop != labelOnTop)
             {
-                changes.AddUpdate("LabelOnTop", result.Property.LabelOnTop, labelOnTop, $"{alias}/LabelOnTop");
+                changes.AddUpdate($"Property/{alias}/LabelOnTop", result.Property.LabelOnTop, labelOnTop, $"{alias}/LabelOnTop");
                 result.Property.LabelOnTop = labelOnTop;
             }
 
@@ -724,7 +724,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
 
                     return uSyncChange.Update($"property/{propertyName}",
                         propertyName,
-                        current?.ToString() ?? "(Blank)",
+                        current.ToNonBlankValue(),
                         attempt.Result?.ToString());
                 }
             }
@@ -826,7 +826,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
 
                 if (existing.Name != tab.Name)
                 {
-                    changes.AddUpdate(uSyncConstants.Xml.Name, existing.Name ?? "(None)", tab.Name ?? "(None)", $"Tabs/{tab.Name}/Name");
+                    changes.AddUpdate(uSyncConstants.Xml.Name, existing.Name.ToNonBlankValue(), tab.Name.ToNonBlankValue(), $"Tabs/{tab.Name}/Name");
                     existing.Name = tab.Name;
                 }
 

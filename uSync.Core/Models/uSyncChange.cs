@@ -51,7 +51,7 @@ public class uSyncChange
             Change = ChangeDetailType.Delete,
             Path = path,
             Name = name,
-            OldValue = useOld ? (string.IsNullOrEmpty(oldValue) ? "(Blank)" : oldValue) : "Missing Property",
+            OldValue = useOld ? oldValue.ToNonBlankValue() : "Missing Property",
             NewValue = ""
         };
 
@@ -62,8 +62,8 @@ public class uSyncChange
             Name = name,
             Path = path,
             Change = ChangeDetailType.Update,
-            NewValue = string.IsNullOrEmpty(newValue) ? "(Blank)" : newValue,
-            OldValue = string.IsNullOrEmpty(oldValue) ? "(Blank)" : oldValue
+            NewValue = newValue.ToNonBlankValue(),
+            OldValue = oldValue.ToNonBlankValue()
         };
 
     public static uSyncChange Update(string path, string name, IEnumerable<string> oldValues, IEnumerable<string> newValues)

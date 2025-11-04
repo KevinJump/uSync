@@ -408,7 +408,7 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
                     if (updatedValue.Success)
                     {
                         logger.LogDebug("Saving HistoryCleanup Value: {name} {value}", element.Name.LocalName, updatedValue.Result);
-                        changes.AddUpdate($"{_historyCleanupName}:{element.Name.LocalName}", current ?? "(Blank)", updatedValue.Result, $"{_historyCleanupName}/{element.Name.LocalName}");
+                        changes.AddUpdate($"{_historyCleanupName}:{element.Name.LocalName}", current.ToNonBlankValue(), updatedValue.Result, $"{_historyCleanupName}/{element.Name.LocalName}");
                         property.SetValue(historyCleanup, updatedValue.Result);
                     }
                 }

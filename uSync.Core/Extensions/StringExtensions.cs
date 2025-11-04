@@ -1,10 +1,10 @@
-﻿using Umbraco.Extensions;
+﻿using System.Runtime.CompilerServices;
+using Umbraco.Extensions;
 
 namespace uSync.Core;
 
 public static class StringExtensions
 {
-
     /// <summary>
     ///  things can't be called web.config or app.config it causes issues on build and publish 
     /// </summary>
@@ -27,6 +27,7 @@ public static class StringExtensions
         }
         return value;
     }
+
 
 
     private static readonly char[] _base32Table = [
@@ -122,4 +123,10 @@ public static class StringExtensions
     public static bool IsObjectNullOrEmptyString(this object value)
         => value == null || (value is string valueString && string.IsNullOrWhiteSpace(valueString));
 
+
+    public static string ToNonBlankValue(this object? value)
+        => value is null ? "(None)" : value.ToString().ToNonBlankValue();
+
+    public static string ToNonBlankValue(this string? value)
+        => value is null ? "(None)" : string.IsNullOrWhiteSpace(value) ? "(Blank)" : value; 
 }
