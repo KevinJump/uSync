@@ -9,7 +9,7 @@ const workspace: UmbExtensionManifest = {
   meta: {
     label: "History",
     pathname: "history",
-    icon: "icon-calendar-alt",
+    icon: "icon-history",
   },
   conditions: [
     {

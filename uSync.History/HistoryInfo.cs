@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json.Serialization;
 using Newtonsoft.Json;
-using uSync.BackOffice;
-using uSync.Backoffice.Management.Api.Models;
+using uSync.BackOffice.Models;
 
 namespace uSync.History
 {
