@@ -1,38 +1,38 @@
 {
-    "name": "usync-history-client",
-    "version": "16.1.0",
-    "licence": "Custom",
-    "description": "uSync history function",
-    "type": "module",
-    "author": {
-        "name": "Jumoo",
-        "email": "info@jumoo.co.uk",
-        "url": "https://jumoo.co.uk"
-    },
-    "scripts": {
-        "build": "tsc && vite build",
-        "watch": "vite build --watch",
-        "generate": "rm-rs -r -f ./src/api && openapi-ts",
-        "format:fix": "npm run format -- --write",
-        "format": "prettier \"src/**/*.ts\" --check",
-        "generate-client": "node scripts/generate-openapi.js https://localhost:44338/umbraco/swagger/uSync.History/swagger.json?urls.primaryName=uSync+Management+Api"
-    },
-    "devDependencies": {
-        "@hey-api/client-fetch": "^0.12.0",
-        "@hey-api/openapi-ts": "^0.85.0",
-        "@jumoo/usync": "^16.1.0",
-        "@rollup/plugin-node-resolve": "^15.3.1",
-        "@umbraco-cms/backoffice": "^17.0.0-rc1",
-        "lit": "^3.3.1",
-        "node-fetch": "^3.3.2",
-        "prettier": "^3.6.2",
-        "rm-rs": "^0.2.3",
-        "typescript": "^5.9.3",
-        "vite": "^5.4.21",
-        "vite-plugin-checker": "^0.6.4",
-        "vite-plugin-static-copy": "^1.0.6"
-    },
-    "dependencies": {
-        "@jumoo/translate": "^17.0.0-rc1"
-    }
+  "name": "usync-history-client",
+  "version": "17.0.0",
+  "licence": "Custom",
+  "description": "uSync history function",
+  "type": "module",
+  "author": {
+    "name": "Jumoo",
+    "email": "info@jumoo.co.uk",
+    "url": "https://jumoo.co.uk"
+  },
+  "scripts": {
+    "build": "tsc && vite build",
+    "watch": "vite build --watch",
+    "generate": "rm-rs -r -f ./src/api && openapi-ts",
+    "format:fix": "npm run format -- --write",
+    "format": "prettier \"src/**/*.ts\" --check",
+    "generate-client": "node scripts/generate-openapi.js https://localhost:44338/umbraco/swagger/uSync.History/swagger.json?urls.primaryName=uSync+Management+Api"
+  },
+  "devDependencies": {
+    "@hey-api/client-fetch": "^0.12.0",
+    "@hey-api/openapi-ts": "^0.85.0",
+    "@jumoo/usync": "^16.1.0",
+    "@rollup/plugin-node-resolve": "^15.3.1",
+    "@umbraco-cms/backoffice": "^17.0.0-rc1",
+    "lit": "^3.3.1",
+    "node-fetch": "^3.3.2",
+    "prettier": "^3.6.2",
+    "rm-rs": "^0.2.3",
+    "typescript": "^5.9.3",
+    "vite": "^5.4.21",
+    "vite-plugin-checker": "^0.6.4",
+    "vite-plugin-static-copy": "^1.0.6"
+  },
+  "dependencies": {
+    "@jumoo/translate": "^17.0.0-rc1"
+  }
 }

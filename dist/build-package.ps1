@@ -51,6 +51,7 @@ if (![string]::IsNullOrWhiteSpace($suffix)) {
 
 # $buildParams = "ContinuousIntegrationBuild=true,version=$fullVersion"
 
+
 "----------------------------------"
 Write-Host "Version  :" $fullVersion
 Write-Host "Config   :" $env
@@ -62,37 +63,51 @@ if ($skipClient) {
 } 
 else {
 
-    ""; "##### Generating NPM Client Package"; "----------------------------------" ; ""
-    Set-Location ..\uSync.Backoffice.Management.Client\usync-assets\
+    $clients = @( 
+         "uSync.Backoffice.Management.Client\usync-assets", 
+         "uSync.History\history-client" 
+    )
 
-    npm version $fullVersion 
-    ## npm run make
+    foreach($client in $clients) 
+    {
+        $isFullClient = $client -eq "uSync.Backoffice.Management.Client\usync-assets"
 
-    ""; "'### Building uSync client"; "----------------------------------" ; ""
-    ## build Client
-    npm run build
+        ""; "##### Generating NPM Client Package"; "----------------------------------" 
+        "#### $client"; "----------------------------------" ; ""
+        Set-Location ..\$client
 
-    ""; "### Build uSync Package"; "----------------------------------" ; ""
-    ## build the npm package version 
-    npm run client:build
+        npm version $fullVersion 
+        ## npm run make
 
-    ""; "### Packaging uSync Package"; "----------------------------------" ; ""
-    ## pack the package 
-    npm run client:pack
+        ""; "'### Building uSync client"; "----------------------------------" ; ""
+        ## build Client
+        npm run build
 
-    ""; "### Publishing uSync Package"; "----------------------------------" ; ""
-    ## publish the package . 
-    if (!$finalRelease) {
-        npm publish --tag next 
+        if ($isFullClient) 
+        {
+            ""; "### Build uSync Package"; "----------------------------------" ; ""
+            ## build the npm package version 
+            npm run client:build
+
+            ""; "### Packaging uSync Package"; "----------------------------------" ; ""
+            ## pack the package 
+            npm run client:pack
+
+            ""; "### Publishing uSync Package"; "----------------------------------" ; ""
+            ## publish the package . 
+            if (!$finalRelease) {
+                npm publish --tag next 
+            }
+            else {
+                npm publish --tag latest
+            }
+        }
+
+        ## stamp the version, just means this value does not change per test build
+        npm version $version;
+
+        Set-Location ..\..\dist
     }
-    else {
-        npm publish --tag latest
-    }
-
-    ## stamp the version, just means this value does not change per test build
-    npm version $version;
-
-    Set-Location ..\..\dist
 }
 
 
