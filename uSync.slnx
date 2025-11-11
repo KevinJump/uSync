@@ -1,4 +1,8 @@
 <Solution>
+  <Folder Name="/Contrib/">
+    <Project Path="uSync.Community.Contrib/uSync.Community.Contrib.csproj" />
+    <Project Path="uSync.Community.DataTypeSerializers/uSync.Community.DataTypeSerializers.csproj" />
+  </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
     <File Path=".github/workflows/dotnet-build.yml" />
@@ -15,12 +19,13 @@
     <Project Path="uSync.AutoTemplates/uSync.AutoTemplates.csproj" />
     <Project Path="uSync.SchemaGenerator/uSync.SchemaGenerator.csproj" />
   </Folder>
+  <Folder Name="/WebSites/">
+    <Project Path="uSyncSource.Site/uSyncSource.Site.csproj" />
+  </Folder>
   <Project Path="uSync.Backoffice.Management.Api/uSync.Backoffice.Management.Api.csproj" />
   <Project Path="uSync.Backoffice.Management.Client/uSync.Backoffice.Management.Client.csproj" />
   <Project Path="uSync.BackOffice.Targets/uSync.BackOffice.Targets.csproj" />
   <Project Path="uSync.BackOffice/uSync.BackOffice.csproj" />
-  <Project Path="uSync.Community.Contrib/uSync.Community.Contrib.csproj" />
-  <Project Path="uSync.Community.DataTypeSerializers/uSync.Community.DataTypeSerializers.csproj" />
   <Project Path="uSync.Core/uSync.Core.csproj" />
   <Project Path="uSync.History/uSync.History.csproj" />
   <Project Path="uSync.Tests/uSync.Tests.csproj" />
