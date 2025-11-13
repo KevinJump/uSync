@@ -43,6 +43,10 @@ public class RTEBlockDataContentMigrator : SyncBlockMapperBase<RichTextBlockValu
     /// <inheritdoc />
     public override async Task<string?> GetImportValueAsync(string value, string editorAlias)
     {
+        // bit hacky but the nested block layout values won't load
+        // if the editor alias is still Umbraco.TinyMCE (might also be an core bug?)
+        value = value.Replace("\"Umbraco.TinyMCE\":", $"\"{editorAlias}\":");
+
         if (value.TryDeserialize<RichTextEditorValue>(out RichTextEditorValue? richTextEditorValue) is false || richTextEditorValue is null)
             return await base.GetImportValueAsync(value, editorAlias);
 

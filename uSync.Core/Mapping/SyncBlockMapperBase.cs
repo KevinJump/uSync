@@ -2,7 +2,7 @@
 
 using System.Collections;
 using System.Text.Json.Nodes;
-
+using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Models.Blocks;
 using Umbraco.Cms.Core.Services;
@@ -79,6 +79,8 @@ public abstract class SyncBlockMapperBase<TBlockValue> : SyncValueMapperBase
 
         foreach (var contentItem in blocks)
         {
+            MigrateBlock(contentItem);
+
             await ProcessBlockData(contentItem, GetValueMethod);
         }
 
@@ -108,6 +110,47 @@ public abstract class SyncBlockMapperBase<TBlockValue> : SyncValueMapperBase
                 value.Value = mappedValue;
         }
     }
+
+#pragma warning disable CS0618 // Type or member is obsolete (post v18, we will need to have our own model?)
+    private bool MigrateBlock(BlockItemData? block)
+    {
+        if (block is null) return false;
+
+        bool converted = false;
+        if (block.Values.Count == 0 && block.RawPropertyValues?.Count > 0)
+        {
+            block.Values = SyncBlockMapperBase<TBlockValue>.MigrateBlockRawValues(block.RawPropertyValues);
+            block.RawPropertyValues.Clear();
+            converted = true;
+        }
+
+        if (block.Key == Guid.Empty && block.Udi is GuidUdi guidUdi)
+        {
+            block.Key = guidUdi.Guid;
+            converted = true;
+        }
+
+        block.Udi = null;
+
+        return converted;
+    }
+#pragma warning restore CS0618 // Type or member is obsolete
+
+
+    private static List<BlockPropertyValue> MigrateBlockRawValues(Dictionary<string, object?> rawValues)
+    {
+        var values = new List<BlockPropertyValue>();
+        foreach (var kvp in rawValues)
+        {
+            values.Add(new BlockPropertyValue
+            {
+                Alias = kvp.Key,
+                Value = kvp.Value
+            });
+        }
+        return values;
+    }
+
 
     private async Task<IContentType?> GetContentType(Guid contentTypeKey)
         => await _contentTypeService.GetAsync(contentTypeKey);
