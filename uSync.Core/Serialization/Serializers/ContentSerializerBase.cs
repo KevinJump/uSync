@@ -301,10 +301,6 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
     protected virtual object? GetPropertyValue(TObject content, IPropertyValue value, SyncSerializerOptions options)
         => value.EditedValue;
 
-    [Obsolete("Use Get Property value with content and options, will be removed in v17")]
-    protected virtual object? GetPropertyValue(IPropertyValue value)
-        => value.EditedValue;
-
     protected override async Task<SyncAttempt<TObject>> CanDeserializeAsync(XElement node, SyncSerializerOptions options)
     {
         if (options.FailOnMissingParent)
