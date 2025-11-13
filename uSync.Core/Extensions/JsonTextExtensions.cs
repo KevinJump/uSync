@@ -25,10 +25,11 @@ public static class JsonTextExtensions
         Converters =
         {
             new JsonStringEnumConverter(),
-            new JsonObjectConverter(),
-            new JsonBlockValueConverter(),
             new JsonUdiConverter(),
             new JsonUdiRangeConverter(),
+            new JsonObjectConverter(),
+            new JsonBlockValueConverter(),
+
             new JsonBooleanConverter(),
             new JsonXElementConverter(),
             // new JsonBlockListLayoutItemConverter(),
