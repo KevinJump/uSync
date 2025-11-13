@@ -1,13 +1,11 @@
 ﻿using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using System.Threading.Tasks;
 using Umbraco.Cms.Core.Events;
 using Umbraco.Cms.Core.Hosting;
 using Umbraco.Cms.Core.Security;
 using uSync.Backoffice.Management.Api.Extensions;
 using uSync.BackOffice;
-using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
+using uSync.Core.Extensions;
 
 namespace uSync.History
 {
@@ -70,7 +68,7 @@ namespace uSync.History
                     Changes = actions.CountChanges()
                 };
 
-                var historyJson = JsonConvert.SerializeObject(historyInfo, Formatting.Indented);
+                var historyJson = historyInfo.SerializeJsonString(true);
 
                 var rootFolder = _syncFileService.GetAbsPath(_hostingEnvironment.LocalTempPath);
                 var historyFile = Path.Combine(rootFolder, "uSync", "history", DateTime.Now.ToString("dd_MM_yyyy_HH_mm_ss") + ".json");

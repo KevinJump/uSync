@@ -1,7 +1,6 @@
 ﻿using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using Umbraco.Cms.Api.Common.Attributes;
 using Umbraco.Cms.Api.Common.Filters;
 using Umbraco.Cms.Core;
@@ -10,6 +9,7 @@ using Umbraco.Cms.Web.Common.Filters;
 using uSync.Backoffice.Management.Api.Configuration;
 using uSync.BackOffice.Authorization;
 using uSync.BackOffice.Services;
+using uSync.Core.Extensions;
 
 namespace uSync.History.Controllers
 {
@@ -85,7 +85,7 @@ namespace uSync.History.Controllers
             var fullPath = Path.Combine(historyFolder, filePath);
             string contents = await _syncFileService.LoadContentAsync(fullPath);
 
-            var actions = JsonConvert.DeserializeObject<HistoryInfo>(contents);
+            var actions = contents.DeserializeJson<HistoryInfo>();
             if (actions is null) return null;
             actions.FilePath = filePath;
             return actions;
