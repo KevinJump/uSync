@@ -58,7 +58,7 @@
 		"@hey-api/client-fetch": "^0.10.0",
 		"@hey-api/openapi-ts": "^0.85.0",
 		"@microsoft/signalr": "^9.0.6",
-		"@umbraco-cms/backoffice": "^17.0.0-rc1",
+		"@umbraco-cms/backoffice": "^17.0.0-rc2",
 		"lit": "^3.2.1",
 		"prettier": "^3.6.2",
 		"typescript": "^5.9.3",
