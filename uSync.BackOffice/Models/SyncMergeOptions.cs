@@ -33,5 +33,5 @@ public class SyncMergeOptions
     /// <summary>
     ///  what type of merging are we going to do.
     /// </summary>
-    public SyncMergeStrategy MergeStrategy { get; set; } = SyncMergeStrategy.Fancy;
+    public SyncMergeStrategy MergeStrategy { get; set; } = SyncMergeStrategy.Magic;
 }
