@@ -26,8 +26,11 @@ using uSync.BackOffice.SyncHandlers.Models;
 using uSync.Core;
 using uSync.Core.Dependency;
 using uSync.Core.Models;
+using uSync.Core.Roots.Models;
 using uSync.Core.Serialization;
 using uSync.Core.Tracking;
+
+using CoreConstants = uSync.Core.uSyncConstants;
 
 namespace uSync.BackOffice.SyncHandlers;
 
@@ -346,8 +349,13 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// </summary>
     protected virtual async Task<IReadOnlyList<OrderedNodeInfo>> GetMergedItemsAsync(string[] folders, SyncMergeOptions options)
     {
+        var fileMergeOptions = new SyncFileMergeOptions
+        {
+            MergeStrategy = options.MergeStrategy
+        };
+
         var baseTracker = trackers.FirstOrDefault() as ISyncTrackerBase;
-        return [.. (await syncFileService.MergeFoldersAsync(folders, uSyncConfig.Settings.DefaultExtension, baseTracker))];
+        return [.. (await syncFileService.MergeFoldersAsync(folders, uSyncConfig.Settings.DefaultExtension, baseTracker, fileMergeOptions))];
     }
 
     /// <summary>
@@ -360,14 +368,14 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// <summary>
     ///  given a file path, will give you the merged values across all folders. 
     /// </summary>
-    protected virtual async Task<XElement?> GetMergedNodeAsync(string filePath)
+    protected virtual async Task<XElement?> GetMergedNodeAsync(string filePath, SyncFileMergeOptions options)
     {
         var allFiles = uSyncConfig.GetFolders()
             .Select(x => syncFileService.GetAbsPath($"{x}/{this.DefaultFolder}/{filePath}"))
             .ToArray();
 
         var baseTracker = trackers.FirstOrDefault() as ISyncTrackerBase;
-        return await syncFileService.MergeFilesAsync(allFiles, baseTracker);
+        return await syncFileService.MergeFilesAsync(allFiles, baseTracker, options);
     }
 
 
@@ -434,7 +442,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 
         if (file.InvariantStartsWith($"{uSyncConstants.MergedFolderName}/"))
         {
-            var node = await GetMergedNodeAsync(file.Substring(uSyncConstants.MergedFolderName.Length + 1));
+            var node = await GetMergedNodeAsync(file.Substring(uSyncConstants.MergedFolderName.Length + 1), new SyncFileMergeOptions());
             if (node is not null)
                 return await ImportElementAsync(node, file, config, options);
             else
@@ -859,7 +867,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 
         return [uSyncAction.Fail(nameof(udi), this.handlerType, this.ItemType, ChangeType.Fail, $"Item not found {udi}",
              new KeyNotFoundException(nameof(udi)))];
-            
+
     }
 
     /// <summary>
@@ -926,7 +934,15 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
                 if (nodes.Count > 0)
                 {
                     nodes.Add(attempt.Item);
-                    var differences = syncFileService.GetDifferences(nodes, trackers.FirstOrDefault());
+
+                    var mergeOptions = new SyncFileMergeOptions
+                    {
+                        MergeStrategy = config.GetSetting<SyncMergeStrategy>(
+                            CoreConstants.DefaultSettings.MergeStrategy,
+                            CoreConstants.DefaultSettings.MergeStrategy_Default)
+                    };
+
+                    var differences = syncFileService.GetDifferences(nodes, trackers.FirstOrDefault(), mergeOptions);
                     if (differences is not null && differences.HasElements)
                     {
                         if (config.FullFileOnDifference)
@@ -1309,7 +1325,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         {
             return [uSyncActionHelper<TObject>
                 .ReportActionFail(Path.GetFileName(node.GetAlias()), $"format error {fex.Message}")];
-                
+
         }
     }
 

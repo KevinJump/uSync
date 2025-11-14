@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-
+using uSync.BackOffice.Models;
+using uSync.Core.Roots.Models;
 using uSync.Core.Tracking;
 
 namespace uSync.BackOffice.Services;
@@ -92,9 +94,17 @@ public interface ISyncFileService
     Task<List<XElement>> GetAllNodesAsync(string[] filePaths);
 
     /// <summary>
+    ///  legacy merge (fancy) - will be removed in v19
+    /// </summary>
+    [Obsolete("Will be removed in v19 - pass the options for greater control")]
+    XElement? GetDifferences(List<XElement> nodes, ISyncTrackerBase? trackerBase)
+        => GetDifferences(nodes, trackerBase, new SyncFileMergeOptions());
+
+
+    /// <summary>
     ///  get a XML representation of the differences between two files
     /// </summary>
-    XElement? GetDifferences(List<XElement> nodes, ISyncTrackerBase? trackerBase);
+    XElement? GetDifferences(List<XElement> nodes, ISyncTrackerBase? trackerBase, SyncFileMergeOptions options);
 
     /// <summary>
     ///  list the folders inside a folder
@@ -136,9 +146,23 @@ public interface ISyncFileService
     Task<XElement> LoadXElementAsync(string file);
 
     /// <summary>
+    ///  legacy merge (fancy) - will be removed in v19
+    /// </summary>
+    [Obsolete("Will be removed in v19 - pass the options for greater control")]
+    Task<int> MakeSingleExportFromFolders(string[] folders, string itemType, ISyncTrackerBase? trackerBase, string fileName, string extension)
+        => MakeSingleExportFromFolders(folders, itemType, trackerBase, fileName, extension, new SyncFileMergeOptions());
+
+    /// <summary>
     ///  merge all the files in the given folders into a single xml node, that can be bulk imported
     /// </summary>
-    Task<int> MakeSingleExportFromFolders(string[] folders, string itemType, ISyncTrackerBase? trackerBase, string fileName, string extension);
+    Task<int> MakeSingleExportFromFolders(string[] folders, string itemType, ISyncTrackerBase? trackerBase, string fileName, string extension, SyncFileMergeOptions options);
+
+    /// <summary>
+    ///  legacy merge (fancy) - will be removed in v19
+    /// </summary>
+    [Obsolete("Will be removed in v19 - pass the options for greater control")]
+    Task<XElement?> MergeFilesAsync(string[] filenames, ISyncTrackerBase? trackerBase)
+        => MergeFilesAsync(filenames, trackerBase, new SyncFileMergeOptions());
 
     /// <summary>
     ///  merge a list of files into a single XElement
@@ -146,7 +170,15 @@ public interface ISyncFileService
     /// <remarks>
     ///  depending on the tracker this can do clever things like merge bits of doctypes together.
     /// </remarks>
-    Task<XElement?> MergeFilesAsync(string[] filenames, ISyncTrackerBase? trackerBase);
+    Task<XElement?> MergeFilesAsync(string[] filenames, ISyncTrackerBase? trackerBase, SyncFileMergeOptions options);
+
+    /// <summary>
+    ///  legacy merge (fancy) - will be removed in v19
+    /// </summary>
+    [Obsolete("Will be removed in v19 - pass the options for greater control")]
+    Task<IEnumerable<OrderedNodeInfo>> MergeFoldersAsync(string[] folders, string extension, ISyncTrackerBase? trackerBase)
+        => MergeFoldersAsync(folders, extension, trackerBase, new SyncFileMergeOptions());
+
 
     /// <summary>
     ///  Merge a number of uSync folders into a single 'usync source'
@@ -161,7 +193,8 @@ public interface ISyncFileService
     ///  the doctype tracker merges properties so you can have 
     ///  property level root values for doctypes. 
     /// </remarks>
-    Task<IEnumerable<OrderedNodeInfo>> MergeFoldersAsync(string[] folders, string extension, ISyncTrackerBase? trackerBase);
+    Task<IEnumerable<OrderedNodeInfo>> MergeFoldersAsync(string[] folders, string extension, ISyncTrackerBase? trackerBase,
+        SyncFileMergeOptions options);
 
 
     /// <summary>

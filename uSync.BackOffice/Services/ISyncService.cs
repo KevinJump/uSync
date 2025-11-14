@@ -7,6 +7,7 @@ using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Models;
 using uSync.BackOffice.SyncHandlers.Interfaces;
 using uSync.BackOffice.SyncHandlers.Models;
+using uSync.Core.Roots.Models;
 
 namespace uSync.BackOffice;
 
@@ -158,7 +159,7 @@ public interface ISyncService
     Task FinishBulkProcessAsync(HandlerActions action, IEnumerable<uSyncAction> actions);
 
     /// <summary>
-    ///  merge the given folders in single 'production' files for each handler.
+    ///  obsolete file merge method.
     /// </summary>
     Task<int> MergeExportFolder(string[] paths, IEnumerable<HandlerConfigPair> handlers);
 

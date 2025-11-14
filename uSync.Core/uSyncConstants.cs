@@ -1,4 +1,6 @@
-﻿namespace uSync.Core;
+﻿using uSync.Core.Roots.Models;
+
+namespace uSync.Core;
 
 public static partial class uSyncConstants
 {
@@ -142,6 +144,9 @@ public static partial class uSyncConstants
 
         public const string UsingRazorViews = "UsingRazorViews";
         public const bool UsingRazorViews_Default = false;
+
+        public const string MergeStrategy = "MergeStrategy";
+        public const SyncMergeStrategy MergeStrategy_Default = SyncMergeStrategy.Magic;
 
     }
 

@@ -12,8 +12,8 @@ using System.Xml;
 using System.Xml.Linq;
 
 using Umbraco.Cms.Core.Extensions;
-
 using uSync.Core;
+using uSync.Core.Roots.Models;
 using uSync.Core.Tracking;
 
 namespace uSync.BackOffice.Services;
@@ -324,9 +324,9 @@ internal class SyncFileService : ISyncFileService
         }
     }
 
-    public async Task<int> MakeSingleExportFromFolders(string[] folders, string itemType, ISyncTrackerBase? trackerBase, string filename, string extension)
+    public async Task<int> MakeSingleExportFromFolders(string[] folders, string itemType, ISyncTrackerBase? trackerBase, string filename, string extension, SyncFileMergeOptions options)
     {
-        var merged = await MergeFoldersAsync(folders, extension, trackerBase);
+        var merged = await MergeFoldersAsync(folders, extension, trackerBase, options);
 
         var megaNode = new XElement(itemType + "s");
         int count = 0;
@@ -407,7 +407,7 @@ internal class SyncFileService : ISyncFileService
     #region roots
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<OrderedNodeInfo>> MergeFoldersAsync(string[] folders, string extension, ISyncTrackerBase? trackerBase)
+    public async Task<IEnumerable<OrderedNodeInfo>> MergeFoldersAsync(string[] folders, string extension, ISyncTrackerBase? trackerBase, SyncFileMergeOptions options)
     {
         var elements = new Dictionary<string, OrderedNodeInfo>();
         var cleanElements = new Dictionary<string, OrderedNodeInfo>();
@@ -436,7 +436,7 @@ internal class SyncFileService : ISyncFileService
                     if (elements.TryGetValue(item.Key, out var value))
                     {
                         // merge these files.
-                        item.Value.SetNode(MergeNodes(value.Node, item.Value.Node, trackerBase));
+                        item.Value.SetNode(MergeNodes(value.Node, item.Value.Node, trackerBase, options));
                         item.Value.SetFileName($"{uSyncConstants.MergedFolderName}/{Path.GetFileName(item.Value.FileName)}");
                     }
                 }
@@ -468,7 +468,7 @@ internal class SyncFileService : ISyncFileService
     }
 
     /// <inheritdoc/>
-    public async Task<XElement?> MergeFilesAsync(string[] filenames, ISyncTrackerBase? trackerBase)
+    public async Task<XElement?> MergeFilesAsync(string[] filenames, ISyncTrackerBase? trackerBase, SyncFileMergeOptions options)
     {
         if (filenames.Length == 0) return null;
         var latest = await LoadXElementSafeAsync(filenames[0]);
@@ -478,13 +478,20 @@ internal class SyncFileService : ISyncFileService
         {
             var node = await LoadXElementSafeAsync(filenames[n]);
             if (node is null) continue;
-            latest = MergeNodes(latest, node, trackerBase);
+            latest = MergeNodes(latest, node, trackerBase, options);
         }
         return latest;
     }
 
-    private static XElement MergeNodes(XElement source, XElement target, ISyncTrackerBase? trackerBase)
-        => trackerBase is null ? target : trackerBase.MergeFiles(source, target) ?? target;
+    private static XElement MergeNodes(XElement source, XElement target, ISyncTrackerBase? trackerBase, SyncFileMergeOptions options)
+    {
+        if (trackerBase is ISyncTrackerOptionsBase optionsBase)
+        {
+            return optionsBase.MergeFiles(source, target, options) ?? target;
+        }
+
+        return trackerBase is null ? target : trackerBase.MergeFiles(source, target) ?? target;
+    }
 
     private async Task<IEnumerable<KeyValuePair<string, OrderedNodeInfo>>> GetFolderItemsAsync(string folder, string extension)
     {
@@ -525,7 +532,7 @@ internal class SyncFileService : ISyncFileService
     }
 
     /// <inheritdoc/>
-    public XElement? GetDifferences(List<XElement> nodes, ISyncTrackerBase? trackerBase)
+    public XElement? GetDifferences(List<XElement> nodes, ISyncTrackerBase? trackerBase, SyncFileMergeOptions options)
     {
         try
         {
@@ -533,6 +540,11 @@ internal class SyncFileService : ISyncFileService
             if (nodes!.Count == 1) return nodes[0];
             if (trackerBase is null)
                 return SyncRootMergerHelper.GetDifferencesByFileContents(nodes);
+
+            if (trackerBase is ISyncTrackerOptionsBase optionsBase)
+            {
+                return optionsBase.GetDifferences(nodes, options);
+            }
 
             return trackerBase?.GetDifferences(nodes);
         }

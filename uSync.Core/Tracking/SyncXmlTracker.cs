@@ -6,6 +6,7 @@ using Umbraco.Extensions;
 
 using uSync.Core.Extensions;
 using uSync.Core.Models;
+using uSync.Core.Roots.Models;
 using uSync.Core.Serialization;
 
 namespace uSync.Core.Tracking;
@@ -345,11 +346,11 @@ public class SyncXmlTracker<TObject>
         };
     }
 
-    public virtual XElement? MergeFiles(XElement a, XElement b) => b;
+    public virtual XElement? MergeFiles(XElement a, XElement b) 
+        => b;
 
     public virtual XElement? GetDifferences(List<XElement> nodes)
         => nodes?.Count > 0 ? nodes[^1] : null;
-
 }
 
 public class TrackingItem

@@ -3,6 +3,7 @@
 using Umbraco.Cms.Core;
 
 using uSync.Core.Extensions;
+using uSync.Core.Roots.Models;
 
 namespace uSync.Core.Roots.Configs;
 internal class ImageCropperConfigMerger : SyncConfigMergerBase, ISyncConfigMerger
@@ -27,7 +28,7 @@ internal class ImageCropperConfigMerger : SyncConfigMergerBase, ISyncConfigMerge
         return MergeJsonProperties(rootConfig, targetConfig, "_");
     }
 
-    public object? GetDifferenceConfig(string root, string target)
+    public object? GetDifferenceConfig(string root, string target, SyncFileMergeOptions options)
     {
         var rootConfig = root.DeserializeJson<JsonObject>();
         var targetConfig = target.DeserializeJson<JsonObject>();
@@ -35,6 +36,6 @@ internal class ImageCropperConfigMerger : SyncConfigMergerBase, ISyncConfigMerge
         if (targetConfig is null) return target;
         if (rootConfig is null) return target;
 
-        return GetJsonPropertyDifferences(rootConfig, targetConfig, "_");
+        return GetJsonPropertyDifferences(rootConfig, targetConfig, "_", options);
     }
 }
