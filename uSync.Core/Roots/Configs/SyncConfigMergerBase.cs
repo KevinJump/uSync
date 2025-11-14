@@ -132,7 +132,7 @@ internal abstract class SyncConfigMergerBase
             if (property.Value.IsJsonEqual(targetValue) is false)
             {
                 // we don't merge past the top level unless we are magic merging. 
-                if (options.MergeStrategy <= SyncMergeStrategy.Magic) continue;
+                if (options.MergeStrategy < SyncMergeStrategy.Magic) continue;
 
                 // target is an update so we keep this value.
                 // unless its an array, and then we have to merge deeper. 
