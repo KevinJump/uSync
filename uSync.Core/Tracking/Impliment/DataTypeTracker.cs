@@ -59,7 +59,7 @@ public class DataTypeTracker : SyncXmlTrackAndMerger<IDataType>, ISyncTracker<ID
 
     public override XElement? GetDifferences(List<XElement> nodes, SyncFileMergeOptions options)
     {
-        if (nodes.Count <= 1) return base.GetDifferences(nodes);
+        if (nodes.Count <= 1) return base.GetDifferences(nodes, options);
 
         var editorAlias = GetEditorAlias(nodes[0]);
         var merger = GetConfigMerger(editorAlias);
