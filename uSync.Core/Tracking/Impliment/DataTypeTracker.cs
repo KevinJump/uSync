@@ -71,7 +71,7 @@ public class DataTypeTracker : SyncXmlTrackAndMerger<IDataType>, ISyncTracker<ID
         return SyncRootMergerHelper.GetDifferences(nodes, TrackingItems, options);
     }
 
-    private XElement? GetDifferences(XElement root, XElement target, ISyncConfigMerger merger, SyncFileMergeOptions options)
+    protected XElement? GetDifferences(XElement root, XElement target, ISyncConfigMerger merger, SyncFileMergeOptions options)
     {
 
         var rootConfig = root.Element("Config").ValueOrDefault(string.Empty);
