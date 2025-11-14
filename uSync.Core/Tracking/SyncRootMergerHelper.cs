@@ -20,7 +20,7 @@ public class SyncRootMergerHelper
 
     public static XElement? GetDifferencesByFileContents(List<XElement> nodes)
     {
-        /// this is the fallback, and i basicaly does a 'none' merge where the latest diffrence is the one you get.
+        /// this is the fallback, and it basically does a 'none' merge where the latest difference is the one you get.
 
         /// work out what is the 'latest' version of the node we are using for comparison.
         /// 
