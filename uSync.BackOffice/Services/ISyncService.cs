@@ -159,7 +159,8 @@ public interface ISyncService
     Task FinishBulkProcessAsync(HandlerActions action, IEnumerable<uSyncAction> actions);
 
     /// <summary>
-    ///  obsolete file merge method.
+    ///  Merge the given folders in single 'production' files for each handler.
+    ///  [Obsolete: Use overload with SyncFileMergeOptions for greater control]
     /// </summary>
     Task<int> MergeExportFolder(string[] paths, IEnumerable<HandlerConfigPair> handlers);
 
