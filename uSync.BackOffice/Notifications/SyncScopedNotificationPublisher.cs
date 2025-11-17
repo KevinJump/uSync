@@ -82,7 +82,7 @@ internal class SyncScopedNotificationPublisher
         else
         {
             // when not in the background we group them
-            // Umbraco doesn't currenlty fire them as groups, but it might in the future so we should. 
+            // Umbraco doesn't currently fire them as groups, but it might in the future so we should. 
             var groupedNotifications = notifications
                 .Where(x => x != null)
                 .GroupBy(x => x.GetType().Name);
