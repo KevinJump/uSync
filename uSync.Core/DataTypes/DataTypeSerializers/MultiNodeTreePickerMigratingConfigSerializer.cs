@@ -35,17 +35,26 @@ internal class MultiNodeTreePickerMigratingConfigSerializer : ConfigurationSeria
         if (string.IsNullOrWhiteSpace(filter) || filter.Equals("null", StringComparison.OrdinalIgnoreCase))
             return configuration;
 
-        if (Guid.TryParse(filter, out var _) is true)
-            return configuration;
-
-        // filter isn't a guid, we need to map it. 
+        // we need a type type to continue.
         var filterType = GetTreeType(configuration);
         if (filterType is null)
             return configuration;
 
-        var key = GetKeyFromTypeAlias(filterType, filter);
-        if (key != null)
-            configuration["filter"] = key;
+        var filters = filter.Split(",");
+        List<Guid> keys = new(filters.Length);
+
+        foreach (var alias in filters)
+        {
+            if (Guid.TryParse(alias, out var _) is true)
+                continue;
+
+            var key = GetKeyFromTypeAlias(filterType, alias);
+            if (key.HasValue)
+                keys.Add(key.Value);
+        }
+
+        if (keys.Count > 0)
+            configuration["filter"] = string.Join(",", keys);
 
         return configuration;
     }
