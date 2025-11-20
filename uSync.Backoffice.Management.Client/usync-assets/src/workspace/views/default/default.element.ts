@@ -138,7 +138,6 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 			});
 
 			this.observe(_instance.inBackground, (_inBackground) => {
-				console.log('inBackground', _inBackground);
 				this._inBackground = _inBackground;
 			});
 
