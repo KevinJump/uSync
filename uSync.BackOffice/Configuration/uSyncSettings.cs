@@ -276,6 +276,9 @@ public enum SyncFolderMode
     Production,
 };
 
+/// <summary>
+///  Mode is where the processing happens - normal or background  
+/// </summary>
 public enum SyncProcessingMode
 {
     /// <summary>

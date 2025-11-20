@@ -110,7 +110,7 @@ export class uSyncWorkspaceContext
 		this.#signalRContext = new uSyncSignalRContext(this);
 
 		this.observe(this.#signalRContext.connected, (connected) => {
-			console.log('SignalR connected', connected);
+			console.debug('SignalR connected', connected);
 		});
 
 		this.observe(this.#signalRContext.complete, (complete) => {
@@ -238,8 +238,6 @@ export class uSyncWorkspaceContext
 
 			if (data) {
 				step++;
-
-				console.log('performAction data', data);
 
 				let summary = data.status ?? [];
 

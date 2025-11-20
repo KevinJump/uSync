@@ -60,7 +60,7 @@ export class SyncLegacyFilesElement extends UmbLitElement {
 				window.location.reload();
 			})
 			.catch(() => {
-				console.log('copy cancelled');
+				console.log('copy cancelled by user');
 			});
 	}
 
@@ -82,7 +82,7 @@ export class SyncLegacyFilesElement extends UmbLitElement {
 				window.location.reload();
 			})
 			.catch(() => {
-				console.log('ignore cancelled');
+				console.log('ignore cancelled by user');
 			});
 	}
 
