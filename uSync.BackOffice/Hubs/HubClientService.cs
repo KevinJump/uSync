@@ -64,6 +64,9 @@ public class HubClientService
         this.SendMessage(summary);
     }
 
+    /// <summary>
+    ///  post a 'complete' message to the client
+    /// </summary>
     public void PostComplete(Guid requestId, string message, bool success, IEnumerable<uSyncActionView> actions)
     {
         if (_hubContext == null || string.IsNullOrWhiteSpace(_clientId)) return;
