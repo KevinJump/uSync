@@ -45,8 +45,11 @@ internal class MultiNodeTreePickerMigratingConfigSerializer : ConfigurationSeria
 
         foreach (var alias in filters)
         {
-            if (Guid.TryParse(alias, out var _) is true)
+            if (Guid.TryParse(alias, out var existingKey) is true)
+            {
+                keys.Add(existingKey);
                 continue;
+            }
 
             var key = GetKeyFromTypeAlias(filterType, alias);
             if (key.HasValue)
