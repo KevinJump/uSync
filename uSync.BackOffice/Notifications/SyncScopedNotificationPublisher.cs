@@ -65,33 +65,35 @@ internal class SyncScopedNotificationPublisher
 
         SetNotificationStates(notifications);
 
-        var groupedNotifications = notifications
-            .Where(x => x != null)
-            .GroupBy(x => x.GetType().Name);
-
-        foreach (var items in groupedNotifications)
+        if (_uSyncConfig.Settings.BackgroundNotifications is true && _backgroundTaskQueue != null)
         {
-            if (_uSyncConfig.Settings.BackgroundNotifications is true && _backgroundTaskQueue != null)
-            {
-                _logger.LogDebug("Pushed {count} notifications into background queue", items.Count());
-                _backgroundTaskQueue.QueueBackgroundWorkItem(
-                    cancellationToken =>
+            _logger.LogDebug("Processing notifications in background queue");
+            _backgroundTaskQueue.QueueBackgroundWorkItem(
+                cancellationToken =>
+                {
+                    using (ExecutionContext.SuppressFlow())
                     {
-                        using (ExecutionContext.SuppressFlow())
-                        {
-                            Task.Run(() => _eventAggregator.Publish(items), cancellationToken);
-                            _logger.LogDebug("Background Events Processed");
-                            return Task.CompletedTask;
-                        }
-                    });
-            }
-            else
+                        Task.Run(() => base.PublishScopedNotifications(notifications), cancellationToken);
+                        _logger.LogDebug("Background Events Processed");
+                        return Task.CompletedTask;
+                    }
+                });
+        }
+        else
+        {
+            // when not in the background we group them
+            // Umbraco doesn't currently fire them as groups, but it might in the future so we should. 
+            var groupedNotifications = notifications
+                .Where(x => x != null)
+                .GroupBy(x => x.GetType().Name);
+
+            foreach (var items in groupedNotifications)
             {
                 _updateCallback?.Invoke($"Processing {items.Key}s ({items.Count()})", 90, 100);
                 _eventAggregator.Publish(items);
             }
-        }
 
+        }
         sw.Stop();
         _logger.LogDebug("<< Notifications processed - {elapsed}ms", sw.ElapsedMilliseconds);
 
