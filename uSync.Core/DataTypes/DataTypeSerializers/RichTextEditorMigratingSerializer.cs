@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using J2N.Collections.ObjectModel;
+
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using System.Collections.Immutable;
@@ -12,8 +14,21 @@ using Umbraco.Extensions;
 using uSync.Core.Extensions;
 
 namespace uSync.Core.DataTypes.DataTypeSerializers;
+
 internal class RichTextEditorMigratingSerializer : ConfigurationSerializerBase, IConfigurationSerializer
 {
+    private static List<string> _defaultToolbar = ["sourcecode", "bold", "italic", "underline", "alignleft", "aligncenter", "alignright",
+                          "bullist", "numlist", "outdent", "indent", "link", "umbmediapicker", "umbembeddialog"];
+
+    private static List<string> _defaultExtensions = [
+        "Umb.Tiptap.RichTextEssentials", "Umb.Tiptap.Anchor", "Umb.Tiptap.Blockquote", "Umb.Tiptap.Bold", "Umb.Tiptap.BulletList",
+        "Umb.Tiptap.CodeBlock", "Umb.Tiptap.Embed", "Umb.Tiptap.Figure", "Umb.Tiptap.Heading", "Umb.Tiptap.HorizontalRule",
+        "Umb.Tiptap.HtmlAttributeClass", "Umb.Tiptap.HtmlAttributeDataset", "Umb.Tiptap.HtmlAttributeId", "Umb.Tiptap.HtmlAttributeStyle",
+        "Umb.Tiptap.HtmlTagDiv", "Umb.Tiptap.HtmlTagSpan", "Umb.Tiptap.Image", "Umb.Tiptap.Italic", "Umb.Tiptap.Link",
+        "Umb.Tiptap.MediaUpload", "Umb.Tiptap.OrderedList", "Umb.Tiptap.Strike", "Umb.Tiptap.Subscript", "Umb.Tiptap.Superscript",
+        "Umb.Tiptap.Table", "Umb.Tiptap.TextAlign", "Umb.Tiptap.TextDirection", "Umb.Tiptap.TextIndent", "Umb.Tiptap.TrailingNode",
+        "Umb.Tiptap.Underline", "Umb.Tiptap.WordCount"];
+
     private readonly TinyMceToTiptapMigrationSettings _options;
     private readonly ILogger<RichTextEditorMigratingSerializer> _logger;
 
@@ -59,48 +74,34 @@ internal class RichTextEditorMigratingSerializer : ConfigurationSerializerBase, 
         if (_options?.DisableMigration is true)
             return configuration;
 
-        if (configuration.ContainsKey("mode") is false && configuration.ContainsKey("hideLabel") is false)
+        if (configuration.ContainsKey("extensions") is true)
         {
-            _logger.LogDebug("Skipping Tiptap migration as it does not contain 'mode' or 'hideLabel'.");
-            // if both mode and hideLabel are not present, then this has probibly already been migrated
+            _logger.LogDebug("Skipping Tiptap migration as it already contains 'extensions'.");
             return configuration;
         }
 
         _logger.LogDebug("Migrating TinyMCE configuration to Tiptap format.");
         // do the tip tap things. 
 
-
-
-        if (!configuration.TryGetValue("toolbar", out var toolbar)
-            || (toolbar is not List<string> toolBarList && TryGetToolbarArray(toolbar, out toolBarList) is false)) 
-        { 
-                _logger.LogDebug("Skipping Tiptap migration as toolbar is not a list or string.");
-                return configuration;
+        // update we don't skip if the toolbar is missing, i can be for some older configs
+        List<string> toolbarList = [];
+        if (configuration.TryGetValue("toolbar", out var toolbar)
+            && toolbar is List<string> toolbarListObject)
+        {
+            TryGetToolbarArray(toolbarListObject, out toolbarList);
         }
-    
+        else
+        {
+            toolbarList = _defaultToolbar;
+        }
 
         configuration.Remove("mode");
         configuration.Remove("hideLabel");
 
-        var newToolbar = toolBarList.Select(MapToolbarItem).WhereNotNull().ToList();
+        var newToolbar = toolbarList.Select(MapToolbarItem).WhereNotNull().ToList();
         configuration["toolbar"] = new List<List<List<string>>> { new() { newToolbar } };
 
-        var extensions = new List<string>
-        {
-            "Umb.Tiptap.RichTextEssentials",
-            "Umb.Tiptap.Embed",
-            "Umb.Tiptap.Figure",
-            "Umb.Tiptap.Image",
-            "Umb.Tiptap.Link",
-            "Umb.Tiptap.MediaUpload",
-            "Umb.Tiptap.Subscript",
-            "Umb.Tiptap.Superscript",
-            "Umb.Tiptap.Table",
-            "Umb.Tiptap.TextAlign",
-            "Umb.Tiptap.TextDirection",
-            "Umb.Tiptap.TextIndent",
-            "Umb.Tiptap.Underline"
-        };
+        var extensions = _defaultExtensions;
 
         if (configuration.TryGetValue("blocks", out var blocks) && blocks is not null)
         {
@@ -117,8 +118,8 @@ internal class RichTextEditorMigratingSerializer : ConfigurationSerializerBase, 
     {
         toolBarList = new List<string>();
         if (toolbar is null || toolbar is not JsonElement jsonElement || jsonElement.ValueKind != JsonValueKind.Array)
-            return false; 
-        
+            return false;
+
         toolBarList = jsonElement.EnumerateArray().Select(x => x.GetString() ?? string.Empty).ToList();
         return true;
     }
