@@ -17,10 +17,10 @@ namespace uSync.Core.DataTypes.DataTypeSerializers;
 
 internal class RichTextEditorMigratingSerializer : ConfigurationSerializerBase, IConfigurationSerializer
 {
-    private static List<string> _defaultToolbar = ["sourcecode", "bold", "italic", "underline", "alignleft", "aligncenter", "alignright",
+    private static string[] _defaultToolbar = ["sourcecode", "bold", "italic", "underline", "alignleft", "aligncenter", "alignright",
                           "bullist", "numlist", "outdent", "indent", "link", "umbmediapicker", "umbembeddialog"];
 
-    private static List<string> _defaultExtensions = [
+    private static string[] _defaultExtensions = [
         "Umb.Tiptap.RichTextEssentials", "Umb.Tiptap.Anchor", "Umb.Tiptap.Blockquote", "Umb.Tiptap.Bold", "Umb.Tiptap.BulletList",
         "Umb.Tiptap.CodeBlock", "Umb.Tiptap.Embed", "Umb.Tiptap.Figure", "Umb.Tiptap.Heading", "Umb.Tiptap.HorizontalRule",
         "Umb.Tiptap.HtmlAttributeClass", "Umb.Tiptap.HtmlAttributeDataset", "Umb.Tiptap.HtmlAttributeId", "Umb.Tiptap.HtmlAttributeStyle",
@@ -87,8 +87,8 @@ internal class RichTextEditorMigratingSerializer : ConfigurationSerializerBase, 
         List<string> toolbarList = [];
         if (configuration.TryGetValue("toolbar", out var toolbar) is false
             && TryGetToolbarArray(toolbar, out toolbarList) is false)
-        { 
-            toolbarList = _defaultToolbar;
+        {
+            toolbarList = _defaultToolbar.ToList();
         }
 
         configuration.Remove("mode");
@@ -97,7 +97,7 @@ internal class RichTextEditorMigratingSerializer : ConfigurationSerializerBase, 
         var newToolbar = toolbarList.Select(MapToolbarItem).WhereNotNull().ToList();
         configuration["toolbar"] = new List<List<List<string>>> { new() { newToolbar } };
 
-        var extensions = _defaultExtensions;
+        var extensions = _defaultExtensions.ToList();
 
         if (configuration.TryGetValue("blocks", out var blocks) && blocks is not null)
         {
