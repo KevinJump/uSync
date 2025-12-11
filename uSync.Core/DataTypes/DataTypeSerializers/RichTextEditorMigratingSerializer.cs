@@ -85,13 +85,9 @@ internal class RichTextEditorMigratingSerializer : ConfigurationSerializerBase, 
 
         // update we don't skip if the toolbar is missing, i can be for some older configs
         List<string> toolbarList = [];
-        if (configuration.TryGetValue("toolbar", out var toolbar)
-            && toolbar is List<string> toolbarListObject)
-        {
-            TryGetToolbarArray(toolbarListObject, out toolbarList);
-        }
-        else
-        {
+        if (configuration.TryGetValue("toolbar", out var toolbar) is false
+            && TryGetToolbarArray(toolbar, out toolbarList) is false)
+        { 
             toolbarList = _defaultToolbar;
         }
 
