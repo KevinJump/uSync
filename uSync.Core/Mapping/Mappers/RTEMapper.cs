@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Services;
+using Umbraco.Cms.Infrastructure.Migrations.Upgrade.V_15_0_0.LocalLinks;
 
 using uSync.Core.Dependency;
 using uSync.Core.Extensions;
@@ -20,13 +21,16 @@ namespace uSync.Core.Mapping;
 public partial class RTEMapper : SyncValueMapperBase, ISyncMapper
 {
     private readonly Lazy<SyncValueMapperCollection> _mapperCollection;
+    private readonly LocalLinkProcessor _localLinkProcessor;
 
     public RTEMapper(
         IEntityService entityService,
-        Lazy<SyncValueMapperCollection> mappers)
+        Lazy<SyncValueMapperCollection> mappers,
+        LocalLinkProcessor localLinkProcessor)
         : base(entityService)
     {
         _mapperCollection = mappers;
+        _localLinkProcessor = localLinkProcessor;
     }
 
     // would preferer the link regex - less likely to get rouge ones 
@@ -42,6 +46,22 @@ public partial class RTEMapper : SyncValueMapperBase, ISyncMapper
         Constants.PropertyEditors.Aliases.RichText,
         $"{Constants.PropertyEditors.Aliases.Grid}.rte"
     ];
+
+    public override Task<string?> GetImportValueAsync(string value, string editorAlias)
+    {
+        if (value.TryParseToJsonObject(out var jsonObject) is false || jsonObject is null)
+            return base.GetImportValueAsync(value, editorAlias);
+
+        if (jsonObject.TryGetPropertyValue("markup", out var markupNode) is false || markupNode is null)
+            return base.GetImportValueAsync(value, editorAlias);
+
+        // migrate the markup content if needed
+        var migratedMarkup = markupNode.ToString();       
+        migratedMarkup = _localLinkProcessor.ProcessStringValue(migratedMarkup);
+        jsonObject["markup"] = migratedMarkup;
+
+        return Task.FromResult<string?>(jsonObject.SerializeJsonString());
+    }
 
     public override async Task<IEnumerable<uSyncDependency>> GetDependenciesAsync(object value, string editorAlias, DependencyFlags flags)
     {
