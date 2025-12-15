@@ -410,6 +410,10 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         {
             changes.AddUpdate(uSyncConstants.Xml.Key, item.Key, key);
             logger.LogTrace("{Id} Setting Key {Key}", item.Id, key);
+
+            if (item.Id > 0)
+                await OnKeyChange(item, item.Key, key);
+
             item.Key = key;
         }
 
@@ -424,6 +428,13 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         changes.AddRange(DeserializeName(item, node, options));
 
         return changes;
+    }
+
+    protected virtual Task OnKeyChange(TObject item, Guid oldKey, Guid newKey)
+    {
+        // nothing to do here, but subclasses might need to act on key changes.
+        logger.LogDebug("{id} Key changed from {oldKey} to {newKey}", item.Id, oldKey, newKey);
+        return Task.CompletedTask;
     }
 
     protected IEnumerable<uSyncChange> DeserializeName(TObject item, XElement node, SyncSerializerOptions options)

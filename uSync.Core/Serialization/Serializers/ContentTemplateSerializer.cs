@@ -8,6 +8,7 @@ using Umbraco.Cms.Core.Models.Entities;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Strings;
 
+using uSync.Core.Documents;
 using uSync.Core.Extensions;
 using uSync.Core.Mapping;
 using uSync.Core.Models;
@@ -29,8 +30,9 @@ public class ContentTemplateSerializer : ContentSerializer, ISyncSerializer<ICon
         IContentTypeService contentTypeService,
         SyncValueMapperCollection syncMappers,
         IUserService userService,
-        ITemplateService templateService)
-        : base(entityService, languageService, relationService, shortStringHelper, logger, contentService, syncMappers, userService, templateService)
+        ITemplateService templateService,
+        ISyncDocumentUrlCleaner urlCleaner)
+        : base(entityService, languageService, relationService, shortStringHelper, logger, contentService, syncMappers, userService, templateService, urlCleaner)
     {
         _contentTypeService = contentTypeService;
         this.umbracoObjectType = UmbracoObjectTypes.DocumentBlueprint;
