@@ -15,208 +15,127 @@ namespace uSync.Tests.Migrations;
 internal class MediaPickerMigrationTests : MigrationTestBase
 {
     private MediaPickerConfigSerializer _serializer;
-    private Mock<IMediaTypeService> _mediaTypeServiceMock;
+    private Mock<IMediaTypeService> _mockMediaTypeService;
 
     [SetUp]
     public void Setup()
     {
-        _mediaTypeServiceMock = new Mock<IMediaTypeService>();
-        _serializer = new MediaPickerConfigSerializer(_mediaTypeServiceMock.Object);
+        _mockMediaTypeService = new Mock<IMediaTypeService>();
+        
+        // Mock media types with their aliases and keys
+        var imageMediaType = new Mock<IMediaType>();
+        imageMediaType.Setup(x => x.Key).Returns(Guid.Parse("cc07b313-0843-4aa8-bbda-871c8da728c8"));
+        imageMediaType.Setup(x => x.Alias).Returns("Image");
+        
+        var videoMediaType = new Mock<IMediaType>();
+        videoMediaType.Setup(x => x.Key).Returns(Guid.Parse("f6c515bb-653c-4bdc-821c-987729ebe327"));
+        videoMediaType.Setup(x => x.Alias).Returns("Video");
+        
+        var fileMediaType = new Mock<IMediaType>();
+        fileMediaType.Setup(x => x.Key).Returns(Guid.Parse("4c52d8ab-54e6-40cd-999c-7a5f24903e4d"));
+        fileMediaType.Setup(x => x.Alias).Returns("File");
+        
+        _mockMediaTypeService.Setup(x => x.Get("Image")).Returns(imageMediaType.Object);
+        _mockMediaTypeService.Setup(x => x.Get("Video")).Returns(videoMediaType.Object);
+        _mockMediaTypeService.Setup(x => x.Get("File")).Returns(fileMediaType.Object);
+        
+        _serializer = new MediaPickerConfigSerializer(_mockMediaTypeService.Object);
     }
+
+    // Test migrating filter from aliases to GUIDs
+    private static string FilterAliasSource = @"{
+  ""filter"": ""Image,Video"",
+  ""multiple"": false,
+  ""validationLimit"": {}
+}";
+
+    private static string FilterAliasTarget = @"{
+  ""filter"": ""cc07b313-0843-4aa8-bbda-871c8da728c8,f6c515bb-653c-4bdc-821c-987729ebe327"",
+  ""multiple"": false,
+  ""validationLimit"": {}
+}";
 
     [Test]
-    public void FilterMigrationFromAliasToGuid()
-    {
-        // Arrange
-        var mediaTypeGuid = Guid.Parse("a1b2c3d4-e5f6-7890-abcd-ef1234567890");
-        var mediaTypeMock = new Mock<IMediaType>();
-        mediaTypeMock.Setup(x => x.Key).Returns(mediaTypeGuid);
+    public void FilterAliasMigrationTest()
+        => TestSerializerPropertyMigration(_serializer, FilterAliasSource, FilterAliasTarget);
 
-        _mediaTypeServiceMock
-            .Setup(x => x.Get("myMediaType"))
-            .Returns(mediaTypeMock.Object);
-
-        var source = @"{
-  ""filter"": ""myMediaType"",
-  ""ignoreUserStartNodes"": false
+    // Test that already migrated filter (GUIDs) remain unchanged
+    private static string FilterGuidSource = @"{
+  ""filter"": ""cc07b313-0843-4aa8-bbda-871c8da728c8,f6c515bb-653c-4bdc-821c-987729ebe327"",
+  ""multiple"": false,
+  ""validationLimit"": {}
 }";
-
-        var target = @"{
-  ""filter"": ""a1b2c3d4-e5f6-7890-abcd-ef1234567890"",
-  ""ignoreUserStartNodes"": false
-}";
-
-        // Act & Assert
-        TestSerializerPropertyMigration(_serializer, source, target);
-    }
 
     [Test]
-    public void FilterMigrationAlreadyGuid()
-    {
-        // Arrange - filter is already a GUID, should not change
-        var source = @"{
-  ""filter"": ""a1b2c3d4-e5f6-7890-abcd-ef1234567890"",
-  ""ignoreUserStartNodes"": false
+    public void FilterAlreadyMigratedTest()
+        => TestSerializerPropertyMigration(_serializer, FilterGuidSource, FilterGuidSource);
+
+    // Test migrating startNodeId from UDI to GUID
+    private static string StartNodeUdiSource = @"{
+  ""startNodeId"": ""umb://media/71332aa78bea44f19aa600de961b66e8"",
+  ""multiple"": false,
+  ""validationLimit"": {}
 }";
 
-        var target = @"{
-  ""filter"": ""a1b2c3d4-e5f6-7890-abcd-ef1234567890"",
-  ""ignoreUserStartNodes"": false
+    private static string StartNodeUdiTarget = @"{
+  ""startNodeId"": ""71332aa7-8bea-44f1-9aa6-00de961b66e8"",
+  ""multiple"": false,
+  ""validationLimit"": {}
 }";
-
-        // Act & Assert
-        TestSerializerPropertyMigration(_serializer, source, target);
-    }
 
     [Test]
-    public void FilterMigrationMultipleAliasesToGuids()
-    {
-        // Arrange
-        var mediaType1Guid = Guid.Parse("11111111-1111-1111-1111-111111111111");
-        var mediaType2Guid = Guid.Parse("22222222-2222-2222-2222-222222222222");
-        var mediaType3Guid = Guid.Parse("33333333-3333-3333-3333-333333333333");
+    public void StartNodeUdiMigrationTest()
+        => TestSerializerPropertyMigration(_serializer, StartNodeUdiSource, StartNodeUdiTarget);
 
-        var mediaType1Mock = new Mock<IMediaType>();
-        mediaType1Mock.Setup(x => x.Key).Returns(mediaType1Guid);
-
-        var mediaType2Mock = new Mock<IMediaType>();
-        mediaType2Mock.Setup(x => x.Key).Returns(mediaType2Guid);
-
-        var mediaType3Mock = new Mock<IMediaType>();
-        mediaType3Mock.Setup(x => x.Key).Returns(mediaType3Guid);
-
-        _mediaTypeServiceMock
-            .Setup(x => x.Get("mediaTypeOne"))
-            .Returns(mediaType1Mock.Object);
-
-        _mediaTypeServiceMock
-            .Setup(x => x.Get("mediaTypeTwo"))
-            .Returns(mediaType2Mock.Object);
-
-        _mediaTypeServiceMock
-            .Setup(x => x.Get("mediaTypeThree"))
-            .Returns(mediaType3Mock.Object);
-
-        var source = @"{
-  ""filter"": ""mediaTypeOne,mediaTypeTwo,mediaTypeThree"",
-  ""ignoreUserStartNodes"": false
+    // Test that already migrated startNodeId (GUID) remains unchanged
+    private static string StartNodeGuidSource = @"{
+  ""startNodeId"": ""71332aa7-8bea-44f1-9aa6-00de961b66e8"",
+  ""multiple"": false,
+  ""validationLimit"": {}
 }";
-
-        var target = @"{
-  ""filter"": ""11111111-1111-1111-1111-111111111111,22222222-2222-2222-2222-222222222222,33333333-3333-3333-3333-333333333333"",
-  ""ignoreUserStartNodes"": false
-}";
-
-        // Act & Assert
-        TestSerializerPropertyMigration(_serializer, source, target);
-    }
 
     [Test]
-    public void FilterMigrationMixedAliasesAndGuids()
-    {
-        // Arrange - mix of aliases and GUIDs
-        var mediaType1Guid = Guid.Parse("11111111-1111-1111-1111-111111111111");
+    public void StartNodeAlreadyMigratedTest()
+        => TestSerializerPropertyMigration(_serializer, StartNodeGuidSource, StartNodeGuidSource);
 
-        var mediaType1Mock = new Mock<IMediaType>();
-        mediaType1Mock.Setup(x => x.Key).Returns(mediaType1Guid);
-
-        _mediaTypeServiceMock
-            .Setup(x => x.Get("mediaTypeOne"))
-            .Returns(mediaType1Mock.Object);
-
-        var source = @"{
-  ""filter"": ""mediaTypeOne,22222222-2222-2222-2222-222222222222"",
-  ""ignoreUserStartNodes"": false
+    // Test migrating both filter and startNodeId together
+    private static string BothSource = @"{
+  ""filter"": ""Image,File"",
+  ""startNodeId"": ""umb://media/71332aa78bea44f19aa600de961b66e8"",
+  ""multiple"": true,
+  ""validationLimit"": {}
 }";
 
-        var target = @"{
-  ""filter"": ""11111111-1111-1111-1111-111111111111,22222222-2222-2222-2222-222222222222"",
-  ""ignoreUserStartNodes"": false
+    private static string BothTarget = @"{
+  ""filter"": ""cc07b313-0843-4aa8-bbda-871c8da728c8,4c52d8ab-54e6-40cd-999c-7a5f24903e4d"",
+  ""startNodeId"": ""71332aa7-8bea-44f1-9aa6-00de961b66e8"",
+  ""multiple"": true,
+  ""validationLimit"": {}
 }";
-
-        // Act & Assert
-        TestSerializerPropertyMigration(_serializer, source, target);
-    }
 
     [Test]
-    public void StartNodeIdMigrationFromUdiToGuid()
-    {
-        // Arrange
-        var source = @"{
-  ""ignoreUserStartNodes"": false,
-  ""startNodeId"": ""umb://media/a1b2c3d4e5f67890abcdef1234567890""
-}";
+    public void BothFilterAndStartNodeMigrationTest()
+        => TestSerializerPropertyMigration(_serializer, BothSource, BothTarget);
 
-        var target = @"{
-  ""ignoreUserStartNodes"": false,
-  ""startNodeId"": ""a1b2c3d4-e5f6-7890-abcd-ef1234567890""
+    // Test with null/empty filter
+    private static string NullFilterSource = @"{
+  ""filter"": null,
+  ""multiple"": false,
+  ""validationLimit"": {}
 }";
-
-        // Act & Assert
-        TestSerializerPropertyMigration(_serializer, source, target);
-    }
 
     [Test]
-    public void StartNodeIdMigrationAlreadyGuid()
-    {
-        // Arrange - startNodeId is already a GUID, should not change
-        var source = @"{
-  ""ignoreUserStartNodes"": false,
-  ""startNodeId"": ""a1b2c3d4-e5f6-7890-abcd-ef1234567890""
-}";
+    public void NullFilterTest()
+        => TestSerializerPropertyMigration(_serializer, NullFilterSource, NullFilterSource);
 
-        var target = @"{
-  ""ignoreUserStartNodes"": false,
-  ""startNodeId"": ""a1b2c3d4-e5f6-7890-abcd-ef1234567890""
+    // Test with unknown alias (should preserve the alias)
+    private static string UnknownAliasSource = @"{
+  ""filter"": ""UnknownMediaType"",
+  ""multiple"": false,
+  ""validationLimit"": {}
 }";
-
-        // Act & Assert
-        TestSerializerPropertyMigration(_serializer, source, target);
-    }
 
     [Test]
-    public void StartNodeIdMigrationEmpty()
-    {
-        // Arrange - empty startNodeId should remain empty
-        var source = @"{
-  ""ignoreUserStartNodes"": false,
-  ""startNodeId"": """"
-}";
-
-        var target = @"{
-  ""ignoreUserStartNodes"": false,
-  ""startNodeId"": """"
-}";
-
-        // Act & Assert
-        TestSerializerPropertyMigration(_serializer, source, target);
-    }
-
-    [Test]
-    public void FilterAndStartNodeIdMigrationTogether()
-    {
-        // Arrange - test both filter and startNodeId migration in the same config
-        var mediaTypeGuid = Guid.Parse("a1b2c3d4-e5f6-7890-abcd-ef1234567890");
-        var mediaTypeMock = new Mock<IMediaType>();
-        mediaTypeMock.Setup(x => x.Key).Returns(mediaTypeGuid);
-
-        _mediaTypeServiceMock
-            .Setup(x => x.Get("myMediaType"))
-            .Returns(mediaTypeMock.Object);
-
-        var source = @"{
-  ""filter"": ""myMediaType"",
-  ""ignoreUserStartNodes"": false,
-  ""startNodeId"": ""umb://media/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb""
-}";
-
-        var target = @"{
-  ""filter"": ""a1b2c3d4-e5f6-7890-abcd-ef1234567890"",
-  ""ignoreUserStartNodes"": false,
-  ""startNodeId"": ""bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb""
-}";
-
-        // Act & Assert
-        TestSerializerPropertyMigration(_serializer, source, target);
-    }
+    public void UnknownAliasPreservedTest()
+        => TestSerializerPropertyMigration(_serializer, UnknownAliasSource, UnknownAliasSource);
 }
