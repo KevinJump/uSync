@@ -36,7 +36,7 @@ internal abstract class PickerConfigurationSerializerBase<TContentType> : Config
                 continue;
             }
 
-            // Lookup the media type by alias - return the guid. 
+            // Lookup the content type by alias - return the guid.
             var mediaType = GetByAlias(value);
             if (mediaType != null)
             {
