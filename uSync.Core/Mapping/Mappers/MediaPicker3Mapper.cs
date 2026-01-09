@@ -15,15 +15,12 @@ namespace uSync.Core.Mapping.Mappers;
 public class MediaPicker3Mapper : SyncValueMapperBase, ISyncMapper
 {
     private readonly ILogger<MediaPicker3Mapper> _logger;
-    private readonly IMediaTypeService _mediaTypeService;
 
     public MediaPicker3Mapper(
         IEntityService entityService,
-        ILogger<MediaPicker3Mapper> logger,
-        IMediaTypeService mediaTypeService) : base(entityService)
+        ILogger<MediaPicker3Mapper> logger) : base(entityService)
     {
         _logger = logger;
-        _mediaTypeService = mediaTypeService;
     }
 
     public override string Name => "MediaPicker3 Mapper";
