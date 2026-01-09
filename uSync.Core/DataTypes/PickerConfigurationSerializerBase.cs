@@ -15,7 +15,6 @@ internal abstract class PickerConfigurationSerializerBase<TContentType> : Config
         if (configuration.TryGetValue("startNodeId", out var startNodeValue) is true)
             configuration["startNodeId"] = ConvertUdiToGuid(startNodeValue) ?? startNodeValue;
 
-
         return base.GetConfigurationImport(configuration);
     }
 
