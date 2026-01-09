@@ -22,7 +22,7 @@ internal abstract class PickerConfigurationSerializerBase<TContentType> : Config
     protected string? ConvertAliasesToGuidValues(object? filterValue)
     {
         var item = filterValue?.ToString();
-        if (string.IsNullOrWhiteSpace(item)) return item;
+        if (string.IsNullOrWhiteSpace(item) || item.Equals("null", System.StringComparison.OrdinalIgnoreCase)) return item;
 
         List<string> result = [];
 
