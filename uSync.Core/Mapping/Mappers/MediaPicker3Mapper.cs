@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-
 using System.Text.Json.Nodes;
 
 using Umbraco.Cms.Core;
@@ -16,17 +15,20 @@ namespace uSync.Core.Mapping.Mappers;
 public class MediaPicker3Mapper : SyncValueMapperBase, ISyncMapper
 {
     private readonly ILogger<MediaPicker3Mapper> _logger;
+    private readonly IMediaTypeService _mediaTypeService;
 
     public MediaPicker3Mapper(
         IEntityService entityService,
-        ILogger<MediaPicker3Mapper> logger) : base(entityService)
+        ILogger<MediaPicker3Mapper> logger,
+        IMediaTypeService mediaTypeService) : base(entityService)
     {
         _logger = logger;
+        _mediaTypeService = mediaTypeService;
     }
 
     public override string Name => "MediaPicker3 Mapper";
 
-    public override string[] Editors => [Constants.PropertyEditors.Aliases.MediaPicker3];
+    public override string[] Editors => [Constants.PropertyEditors.Aliases.MediaPicker3];    
 
     public override Task<string?> GetExportValueAsync(object value, string editorAlias)
     {
