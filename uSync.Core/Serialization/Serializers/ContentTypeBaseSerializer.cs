@@ -930,7 +930,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         if (string.IsNullOrWhiteSpace(alias))
             return item.PropertyGroups.FirstOrDefault(x => x.Name.InvariantEquals(name));
 
-        return item.PropertyGroups.FirstOrDefault(x => x.Alias.InvariantContains(alias));
+        return item.PropertyGroups.FirstOrDefault(x => x.Alias.InvariantEquals(alias));
     }
 
     /// <summary>
