@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-
 using System.Text.Json.Nodes;
 
 using Umbraco.Cms.Core;
