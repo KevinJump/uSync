@@ -191,6 +191,9 @@ internal class uSyncApplicationStartingHandler : INotificationAsyncHandler<Umbra
     /// <summary>
     ///  Determines if the import should proceed based on the presence of stop and once files.
     /// </summary>
+    /// <param name="hasStopFile">Whether a stop file exists in the working folder</param>
+    /// <param name="hasOnceFile">Whether a once file exists in the working folder</param>
+    /// <returns>True if import should proceed, false otherwise</returns>
     private bool ShouldProceedWithImport(bool hasStopFile, bool hasOnceFile)
     {
         // If there's no stop file, proceed with import
