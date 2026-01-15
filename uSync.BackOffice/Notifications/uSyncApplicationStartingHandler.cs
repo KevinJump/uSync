@@ -132,9 +132,8 @@ internal class uSyncApplicationStartingHandler : INotificationAsyncHandler<Umbra
                     var workingFolder = _uSyncConfig.GetWorkingFolder();
                     var hasStopFile = HasStopFile(workingFolder);
                     var hasOnceFile = HasOnceFile(workingFolder);
-                    var shouldImport = !hasStopFile || (_uSyncConfig.Settings.IgnoreStopIfOnceExists && hasOnceFile);
 
-                    if (shouldImport)
+                    if (ShouldProceedWithImport(hasStopFile, hasOnceFile))
                     {
                         await _uSyncService.StartupImportAsync(_uSyncConfig.GetFolders(), false, new SyncHandlerOptions
                         {
@@ -184,10 +183,25 @@ internal class uSyncApplicationStartingHandler : INotificationAsyncHandler<Umbra
             => _syncFileService.FileExists($"{folder}/{_uSyncConfig.Settings.StopFile}");
 
     /// <summary>
-    ///  does the uSync folder contain a uSync.once file
+    ///  Does the uSync folder contain a uSync.once file?
     /// </summary>
     private bool HasOnceFile(string folder)
             => _syncFileService.FileExists($"{folder}/{_uSyncConfig.Settings.OnceFile}");
+
+    /// <summary>
+    ///  Determines if the import should proceed based on the presence of stop and once files.
+    /// </summary>
+    private bool ShouldProceedWithImport(bool hasStopFile, bool hasOnceFile)
+    {
+        // If there's no stop file, proceed with import
+        if (!hasStopFile) return true;
+
+        // If stop file exists and IgnoreStopIfOnceExists is enabled, check for once file
+        if (_uSyncConfig.Settings.IgnoreStopIfOnceExists && hasOnceFile) return true;
+
+        // Otherwise, stop file blocks the import
+        return false;
+    }
 
     /// <summary>
     ///  Process the once file (if it exists we rename it to usync.stop).
