@@ -51,6 +51,12 @@ public class uSyncSettings
     public string OnceFile { get; set; } = "usync.once";
 
     /// <summary>
+    ///  When enabled, the presence of a once file will override the stop file, allowing import to proceed
+    /// </summary>
+    [DefaultValue(false)]
+    public bool IgnoreStopIfOnceExists { get; set; } = false;
+
+    /// <summary>
     ///  lock specific types at root so they can't be changed in child sites. 
     /// </summary>
     /// <remarks>
