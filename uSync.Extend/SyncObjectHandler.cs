@@ -1,9 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Strings;
 
@@ -13,7 +9,6 @@ using uSync.BackOffice.Services;
 using uSync.BackOffice.SyncHandlers;
 using uSync.BackOffice.SyncHandlers.Interfaces;
 using uSync.Core;
-using uSync.Extend.Example;
 
 namespace uSync.Extend;
 
