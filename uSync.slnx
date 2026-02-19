@@ -27,7 +27,9 @@
   <Project Path="uSync.BackOffice.Targets/uSync.BackOffice.Targets.csproj" />
   <Project Path="uSync.BackOffice/uSync.BackOffice.csproj" />
   <Project Path="uSync.Core/uSync.Core.csproj" />
-  <Project Path="uSync.Extend/uSync.Extend.csproj" Id="7004bc54-4d76-45d4-aa26-3f1a415c5b8c" />
+  <Project Path="uSync.Extend/uSync.Extend.csproj" Id="7004bc54-4d76-45d4-aa26-3f1a415c5b8c">
+    <Build Solution="Debug|*" Project="false" />
+  </Project>
   <Project Path="uSync.History/uSync.History.csproj" />
   <Project Path="uSync.Tests/uSync.Tests.csproj" />
   <Project Path="uSync/uSync.csproj" />
