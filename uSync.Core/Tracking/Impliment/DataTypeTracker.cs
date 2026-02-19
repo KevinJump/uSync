@@ -4,6 +4,7 @@ using Umbraco.Cms.Core.Models;
 
 using uSync.Core.Extensions;
 using uSync.Core.Roots.Configs;
+using uSync.Core.Roots.Models;
 using uSync.Core.Serialization;
 
 namespace uSync.Core.Tracking.Impliment;
@@ -56,21 +57,21 @@ public class DataTypeTracker : SyncXmlTrackAndMerger<IDataType>, ISyncTracker<ID
         return base.MergeFiles(a, b);
     }
 
-    public override XElement? GetDifferences(List<XElement> nodes)
+    public override XElement? GetDifferences(List<XElement> nodes, SyncFileMergeOptions options)
     {
-        if (nodes.Count <= 1) return base.GetDifferences(nodes);
+        if (nodes.Count <= 1) return base.GetDifferences(nodes, options);
 
         var editorAlias = GetEditorAlias(nodes[0]);
         var merger = GetConfigMerger(editorAlias);
         if (!string.IsNullOrEmpty(editorAlias) && merger != null)
         {
-            return GetDifferences(nodes[0], nodes[1], merger);
+            return GetDifferences(nodes[0], nodes[1], merger, options);
         }
 
-        return SyncRootMergerHelper.GetDifferences(nodes, TrackingItems);
+        return SyncRootMergerHelper.GetDifferences(nodes, TrackingItems, options);
     }
 
-    public XElement? GetDifferences(XElement root, XElement target, ISyncConfigMerger merger)
+    protected XElement? GetDifferences(XElement root, XElement target, ISyncConfigMerger merger, SyncFileMergeOptions options)
     {
 
         var rootConfig = root.Element("Config").ValueOrDefault(string.Empty);
@@ -79,7 +80,7 @@ public class DataTypeTracker : SyncXmlTrackAndMerger<IDataType>, ISyncTracker<ID
         if (!string.IsNullOrEmpty(rootConfig) && !string.IsNullOrEmpty(targetConfig))
         {
             // calculate config differences. 
-            var difference = merger.GetDifferenceConfig(rootConfig, targetConfig);
+            var difference = merger.GetDifferenceConfig(rootConfig, targetConfig, options);
             if (difference != null)
             {
                 root.Element("Config")?.ReplaceNodes(new XCData(SerializeConfig(difference)));
@@ -89,7 +90,7 @@ public class DataTypeTracker : SyncXmlTrackAndMerger<IDataType>, ISyncTracker<ID
 
         }
 
-        return SyncRootMergerHelper.GetDifferences([root, target], TrackingItems);
+        return SyncRootMergerHelper.GetDifferences([root, target], TrackingItems, options);
     }
 
     private string GetEditorAlias(XElement node)

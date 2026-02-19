@@ -1,4 +1,5 @@
 ﻿using uSync.BackOffice.SyncHandlers.Interfaces;
+using uSync.Core.Roots.Models;
 
 namespace uSync.BackOffice.Models;
 
@@ -28,4 +29,9 @@ public class SyncMergeOptions
     ///  Callback use to pass info to the UI.
     /// </summary>
     public SyncUpdateCallback? UpdateCallback { get; set; }
+
+    /// <summary>
+    ///  what type of merging are we going to do.
+    /// </summary>
+    public SyncMergeStrategy MergeStrategy { get; set; } = SyncMergeStrategy.Magic;
 }

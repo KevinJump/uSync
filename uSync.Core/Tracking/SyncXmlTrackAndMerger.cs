@@ -1,5 +1,5 @@
 ﻿using System.Xml.Linq;
-
+using uSync.Core.Roots.Models;
 using uSync.Core.Serialization;
 
 namespace uSync.Core.Tracking;
@@ -12,10 +12,20 @@ public class SyncXmlTrackAndMerger<TObject>
     {
     }
 
-    public override XElement? MergeFiles(XElement a, XElement b)
-        => SyncRootMergerHelper.GetCombined([a, b], TrackingItems);
+    public virtual XElement? MergeFiles(XElement a, XElement b, SyncFileMergeOptions options)
+    {
+        if (options.MergeStrategy == SyncMergeStrategy.None)
+            return base.MergeFiles(a, b);
 
-    public override XElement? GetDifferences(List<XElement> nodes)
-        => SyncRootMergerHelper.GetDifferences(nodes, TrackingItems);
+        return SyncRootMergerHelper.GetCombined([a, b], TrackingItems, options);
+    }
+
+    public virtual XElement? GetDifferences(List<XElement> nodes, SyncFileMergeOptions options)
+    {
+        if (options.MergeStrategy == SyncMergeStrategy.None)
+            return base.GetDifferences(nodes);
+
+        return SyncRootMergerHelper.GetDifferences(nodes, TrackingItems, options);
+    }
 
 }

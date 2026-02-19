@@ -6,8 +6,11 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
-
+using uSync.BackOffice.Configuration;
 using uSync.BackOffice.SyncHandlers.Models;
+using uSync.Core.Roots.Models;
+
+using CoreConstants = uSync.Core.uSyncConstants;
 
 namespace uSync.BackOffice;
 
@@ -130,7 +133,14 @@ public partial class SyncService
             var targetFileName = Path.Combine(_uSyncConfig.Settings.ProductionFolder,
                 handler.Handler.DefaultFolder + "." + _uSyncConfig.Settings.DefaultExtension);
 
-            totalMerged += await _syncFileService.MakeSingleExportFromFolders(folders, serializerType, baseTracker, targetFileName, _uSyncConfig.Settings.DefaultExtension);
+            var handlerMergeOptions = new SyncFileMergeOptions
+            {
+                MergeStrategy = handler.Settings.GetSetting<SyncMergeStrategy>(
+                            CoreConstants.DefaultSettings.MergeStrategy,
+                            CoreConstants.DefaultSettings.MergeStrategy_Default)
+            };
+
+            totalMerged += await _syncFileService.MakeSingleExportFromFolders(folders, serializerType, baseTracker, targetFileName, _uSyncConfig.Settings.DefaultExtension, handlerMergeOptions);
         }
 
         return totalMerged;

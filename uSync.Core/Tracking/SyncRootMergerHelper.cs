@@ -1,24 +1,27 @@
 ﻿using System.Xml.Linq;
 using System.Xml.XPath;
+using uSync.Core.Roots.Models;
 
 namespace uSync.Core.Tracking;
 
 public class SyncRootMergerHelper
 {
-    public static XElement GetDifferences(List<XElement> nodes, IList<TrackingItem> trackedNodes)
+    public static XElement GetDifferences(List<XElement> nodes, IList<TrackingItem> trackedNodes, SyncFileMergeOptions options)
     {
-        var (_, differences) = CompareNodes(nodes, trackedNodes);
+        var (_, differences) = CompareNodes(nodes, trackedNodes, options);
         return differences;
     }
 
-    public static XElement GetCombined(List<XElement> nodes, IList<TrackingItem> trackedNodes)
+    public static XElement GetCombined(List<XElement> nodes, IList<TrackingItem> trackedNodes, SyncFileMergeOptions options)
     {
-        var (combined, _) = CompareNodes(nodes, trackedNodes);
+        var (combined, _) = CompareNodes(nodes, trackedNodes, options);
         return combined;
     }
 
     public static XElement? GetDifferencesByFileContents(List<XElement> nodes)
     {
+        /// this is the fallback, and it basically does a 'none' merge where the latest difference is the one you get.
+
         /// work out what is the 'latest' version of the node we are using for comparison.
         /// 
         // Node1, Node2, Node3 
@@ -52,7 +55,7 @@ public class SyncRootMergerHelper
         return target;
     }
 
-    public static (XElement combined, XElement differences) CompareNodes(List<XElement> nodes, IList<TrackingItem> trackedNodes)
+    public static (XElement combined, XElement differences) CompareNodes(List<XElement> nodes, IList<TrackingItem> trackedNodes, SyncFileMergeOptions options)
     {
         var differences = XElement.Parse(nodes[^1].ToString());
         var combined = XElement.Parse(nodes[^1].ToString());

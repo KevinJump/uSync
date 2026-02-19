@@ -6,6 +6,7 @@ using System.Text.Json.Nodes;
 using Umbraco.Extensions;
 
 using uSync.Core.Extensions;
+using uSync.Core.Roots.Models;
 
 namespace uSync.Core.Roots.Configs;
 
@@ -72,7 +73,7 @@ internal abstract class SyncConfigMergerBase
         return [.. remaining];
     }
 
-    protected JsonArray? GetJsonArrayDifferences(JsonArray? sourceArray, JsonArray? targetArray, string key, string removeProperty)
+    protected JsonArray? GetJsonArrayDifferences(JsonArray? sourceArray, JsonArray? targetArray, string key, string removeProperty, SyncFileMergeOptions options)
     {
         // if target is blank the difference is nothing?
         if (targetArray is null) return [];
@@ -98,7 +99,7 @@ internal abstract class SyncConfigMergerBase
             if (block.Value.IsJsonEqual(sourceItem) is false)
             {
                 // the values are different, so we go property by property to see if we can merge them.
-                var target = GetJsonPropertyDifferences(sourceItem, block.Value, key);
+                var target = GetJsonPropertyDifferences(sourceItem, block.Value, key, options);
                 targetOnly.Add(target);
             }
         }
@@ -113,7 +114,7 @@ internal abstract class SyncConfigMergerBase
         return targetOnly.ToJsonArray();
     }
 
-    public JsonObject GetJsonPropertyDifferences(JsonObject sourceObject, JsonObject targetObject, string propertyKey)
+    public JsonObject GetJsonPropertyDifferences(JsonObject sourceObject, JsonObject targetObject, string propertyKey, SyncFileMergeOptions options)
     {
         foreach (var property in sourceObject)
         {
@@ -130,6 +131,9 @@ internal abstract class SyncConfigMergerBase
             
             if (property.Value.IsJsonEqual(targetValue) is false)
             {
+                // we don't merge past the top level unless we are magic merging. 
+                if (options.MergeStrategy < SyncMergeStrategy.Magic) continue;
+
                 // target is an update so we keep this value.
                 // unless its an array, and then we have to merge deeper. 
                 switch (targetValue.GetValueKind())
@@ -141,7 +145,7 @@ internal abstract class SyncConfigMergerBase
                         // this assumes we know what they key should be based on our array of well known array keys.
                         // if the array is new or generic we fall back to 'key';
                         var (arrayKey, arrayLabel) = _knownArrayKeys.GetValueOrDefault(property.Key, (key: "key", label: "label"));
-                        targetObject[property.Key] = GetJsonArrayDifferences(sourceArray, targetArray, arrayKey, arrayLabel);
+                        targetObject[property.Key] = GetJsonArrayDifferences(sourceArray, targetArray, arrayKey, arrayLabel, options);
                         break;
                     case JsonValueKind.Object:
                         // i am not sure we ever hit this in the block config, but it's here should the block or json store
@@ -149,7 +153,7 @@ internal abstract class SyncConfigMergerBase
                         // wouldn't have a key. 
                         if (property.Value is JsonObject sourceObj && targetValue is JsonObject targetObj)
                         {
-                            targetObject[property.Key] = GetJsonPropertyDifferences(sourceObj, targetObj, string.Empty);
+                            targetObject[property.Key] = GetJsonPropertyDifferences(sourceObj, targetObj, string.Empty, options);
                         }
                         break;
                 }
