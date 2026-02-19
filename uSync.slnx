@@ -8,6 +8,7 @@
     <File Path=".github/workflows/dotnet-build.yml" />
     <File Path="changes/format.md" />
     <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
     <File Path="dist/build-package.ps1" />
     <File Path="global.json" />
     <File Path="gulp-transformManifest.js" />

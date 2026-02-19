@@ -261,6 +261,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
@@ -403,6 +406,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
@@ -542,6 +548,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
@@ -790,6 +799,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
@@ -973,6 +985,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
@@ -1108,6 +1123,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
@@ -1305,6 +1323,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
@@ -1451,6 +1472,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
@@ -1601,6 +1625,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
@@ -1747,6 +1774,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
@@ -1897,6 +1927,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
@@ -2043,6 +2076,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
@@ -2193,6 +2229,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
@@ -2339,6 +2378,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
@@ -2489,6 +2531,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
@@ -2635,6 +2680,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
@@ -2785,6 +2833,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
@@ -2931,6 +2982,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
@@ -3082,6 +3136,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
@@ -3228,6 +3285,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
@@ -3378,6 +3438,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
@@ -3524,6 +3587,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
@@ -3674,6 +3740,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
@@ -3822,6 +3891,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
@@ -3931,6 +4003,302 @@
             ],
             "type": "object"
         },
+        "ManifestEntityCollectionItemCard<MetaEntityCollectionItemCard>": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "conditions": {
+                    "description": "Set the conditions for when the extension should be loaded",
+                    "items": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/definitions/UmbEntityUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbLanguageUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceEntityIsNewConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowDeleteAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowDisableAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowEnableAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowExternalLoginAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowMfaAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/SwitchConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<string>"
+                            }
+                        ]
+                    },
+                    "type": "array"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "forEntityTypes": {
+                    "description": "The entity types this collection item supports.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaEntityCollectionItemCard",
+                    "description": "Additional metadata for the collection item."
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "overwrites": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Define one or more extension aliases that this extension should overwrite."
+                },
+                "type": {
+                    "const": "entityCollectionItemCard",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with higher numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "forEntityTypes",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestEntityCollectionItemRef<MetaEntityCollectionItemRef>": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "conditions": {
+                    "description": "Set the conditions for when the extension should be loaded",
+                    "items": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/definitions/UmbEntityUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbLanguageUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceEntityIsNewConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowDeleteAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowDisableAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowEnableAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowExternalLoginAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowMfaAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/SwitchConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<string>"
+                            }
+                        ]
+                    },
+                    "type": "array"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "forEntityTypes": {
+                    "description": "The entity types this collection item supports.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaEntityCollectionItemRef",
+                    "description": "Additional metadata for the collection item."
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "overwrites": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Define one or more extension aliases that this extension should overwrite."
+                },
+                "type": {
+                    "const": "entityCollectionItemRef",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with higher numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "forEntityTypes",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
         "ManifestEntityCreateOptionAction<MetaEntityCreateOptionAction>": {
             "properties": {
                 "alias": {
@@ -3967,6 +4335,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
@@ -4103,6 +4474,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
@@ -4425,6 +4799,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
@@ -4611,6 +4988,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
@@ -4745,6 +5125,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
@@ -5096,6 +5479,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
@@ -5238,6 +5624,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
@@ -5373,6 +5762,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
@@ -5511,6 +5903,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
@@ -5861,6 +6256,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
@@ -6318,6 +6716,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
@@ -6547,6 +6948,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
@@ -6685,6 +7089,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
@@ -6869,6 +7276,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
@@ -7003,6 +7413,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
@@ -7185,6 +7598,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
@@ -7616,6 +8032,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
@@ -7757,6 +8176,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
@@ -7896,6 +8318,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
@@ -8055,6 +8480,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
@@ -8211,6 +8639,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
@@ -8337,6 +8768,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
@@ -8525,6 +8959,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
@@ -8660,6 +9097,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
@@ -8799,6 +9239,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
@@ -8930,6 +9373,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
@@ -9123,6 +9569,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
@@ -9259,6 +9708,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
@@ -9399,6 +9851,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
@@ -9535,6 +9990,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
@@ -10206,6 +10664,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
@@ -10390,6 +10851,12 @@
                 "bulkTrashRepositoryAlias",
                 "icon"
             ],
+            "type": "object"
+        },
+        "MetaEntityCollectionItemCard": {
+            "type": "object"
+        },
+        "MetaEntityCollectionItemRef": {
             "type": "object"
         },
         "MetaEntityCreateOptionAction": {
@@ -11131,6 +11598,23 @@
                 "propertyEditorUiAlias": {
                     "type": "string"
                 },
+                "validation": {
+                    "properties": {
+                        "mandatory": {
+                            "type": "boolean"
+                        },
+                        "mandatoryMessage": {
+                            "type": [
+                                "null",
+                                "string"
+                            ]
+                        }
+                    },
+                    "required": [
+                        "mandatory"
+                    ],
+                    "type": "object"
+                },
                 "weight": {
                     "type": "number"
                 }
@@ -11366,6 +11850,18 @@
             ],
             "type": "object"
         },
+        "UmbConditionConfigBase<\"Umb.Condition.WorkspaceContentTypeUnique\">": {
+            "properties": {
+                "alias": {
+                    "const": "Umb.Condition.WorkspaceContentTypeUnique",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "alias"
+            ],
+            "type": "object"
+        },
         "UmbConditionConfigBase<\"Umb.Condition.WorkspaceEntityType\">": {
             "properties": {
                 "alias": {
@@ -11574,6 +12070,29 @@
                         },
                         "oneOf": {
                             "description": "Define one or more content type aliases in which workspace this extension should be available",
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        }
+                    },
+                    "type": "object"
+                }
+            ]
+        },
+        "UmbWorkspaceContentTypeUniqueConditionConfig": {
+            "allOf": [
+                {
+                    "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.WorkspaceContentTypeUnique\">"
+                },
+                {
+                    "properties": {
+                        "match": {
+                            "description": "Define a content type unique (GUID) in which workspace this extension should be available",
+                            "type": "string"
+                        },
+                        "oneOf": {
+                            "description": "Define one or more content type unique (GUIDs) in which workspace this extension should be available",
                             "items": {
                                 "type": "string"
                             },
@@ -11842,10 +12361,10 @@
                         "$ref": "#/definitions/ManifestMenuItemTreeKind"
                     },
                     {
-                        "$ref": "#/definitions/ManifestCollectionAction"
+                        "$ref": "#/definitions/ManifestCollectionView"
                     },
                     {
-                        "$ref": "#/definitions/ManifestCollectionView"
+                        "$ref": "#/definitions/ManifestCollectionAction"
                     },
                     {
                         "$ref": "#/definitions/ManifestCollection"
@@ -11939,6 +12458,12 @@
                     },
                     {
                         "$ref": "#/definitions/ManifestSectionContext<MetaSectionContext>"
+                    },
+                    {
+                        "$ref": "#/definitions/ManifestEntityCollectionItemCard<MetaEntityCollectionItemCard>"
+                    },
+                    {
+                        "$ref": "#/definitions/ManifestEntityCollectionItemRef<MetaEntityCollectionItemRef>"
                     },
                     {
                         "$ref": "#/definitions/ManifestCurrentUserAction<MetaCurrentUserAction>"
