@@ -465,7 +465,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
                 result.Property.Name = name;
             }
 
-            var description = propertyNode.Element("Description").ValueOrDefault<string?>(null);
+            var description = propertyNode.Element("Description").ValueOrDefault<string?>(string.Empty);
             if (result.Property.Description != description)
             {
                 changes.AddUpdate($"Property/{alias}/Description", result.Property.Description.ToNonBlankValue(), description, $"{alias}/Description");
