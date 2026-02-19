@@ -263,7 +263,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
             item.Thumbnail = thumbnail;
         }
 
-        var description = info.Element("Description").ValueOrDefault<string?>(null);
+        var description = info.Element("Description").ValueOrDefault<string?>(string.Empty);
         if (item.Description != description)
         {
             changes.AddUpdate("Description", item.Description, description, "");
