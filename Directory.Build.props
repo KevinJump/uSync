@@ -11,7 +11,7 @@
 
 		<RepositoryUrl>https://github.com/KevinJump/uSync8/tree/core/main</RepositoryUrl>
 
-		<Copyright>Jumoo @ 2013-2025</Copyright>
+		<Copyright>Jumoo @ 2013-2026</Copyright>
 
 		<PackageIcon>usync-logo.png</PackageIcon>
 
@@ -25,21 +25,21 @@
 		<NoWarn>NU1902</NoWarn>
 
 		<PackageReleaseNotes>
-	<![CDATA[9.0 : Dotnet core version
- - 9.1 : Net 5/6 targets
- - 9.2 : Peformance improvements
- - 9.3 : Single pass
- - 9.4 : First boot
-10.0 : Umbraco 10 release (LTS)
- - 10.1 : Umbraco 'Production' mode support
- - 10.2 : Upload / Download Syncs
-11.0 : Umbraco v11 release
-12.0 : Umbraco v12 release
-13.o : Umbraco v13 release
-14.0 : Umbraco v14 release
-15.0 : Umbraco v15 release
-16.0 : Umbraco v16 release
-17.0 : Umbraco v17 release]]>
+	<![CDATA[- 9.0 : Dotnet core version
+- 9.1 : Net 5/6 targets
+	- 9.2 : Peformance improvements
+	- 9.3 : Single pass
+	- 9.4 : First boot
+- 10.0 : Umbraco 10 release (LTS)
+	- 10.1 : Umbraco 'Production' mode support
+	- 10.2 : Upload / Download Syncs
+- 11.0 : Umbraco v11 release
+- 12.0 : Umbraco v12 release
+- 13.0 : Umbraco v13 release
+- 14.0 : Umbraco v14 release
+- 15.0 : Umbraco v15 release
+- 16.0 : Umbraco v16 release
+- 17.0 : Umbraco v17 release]]>
 		</PackageReleaseNotes>
 
 		<EmbedUntrackedSources>true</EmbedUntrackedSources>
@@ -48,9 +48,8 @@
 
 		<!-- don't append the build onto the version -->
 		<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
-
 	</PropertyGroup>
-
+	
 	<ItemGroup>
 		<InternalsVisibleTo Include="uSync.Tests" />
 		<None Include="../assets/usync-logo.png" Pack="true" PackagePath="\" Visible="false" />
