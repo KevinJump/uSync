@@ -6,6 +6,7 @@ using Umbraco.Cms.Core.DependencyInjection;
 using uSync.Core.Cache;
 using uSync.Core.DataTypes;
 using uSync.Core.Dependency;
+using uSync.Core.Documents;
 using uSync.Core.Mapping;
 using uSync.Core.Roots.Configs;
 using uSync.Core.Serialization;
@@ -32,6 +33,9 @@ public static class uSyncCoreBuilderExtensions
             return builder;
 
         builder.Services.AddSingleton<uSyncCapabilityChecker>();
+
+        // document url cleaner, for key changes
+        builder.Services.AddSingleton<ISyncDocumentUrlCleaner ,SyncDocumentUrlCleaner>();
 
         // cache for entity items, we use it to speed up lookups.
         builder.Services.AddSingleton<SyncEntityCache>();

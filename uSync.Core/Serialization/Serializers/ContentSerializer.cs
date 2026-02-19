@@ -10,6 +10,7 @@ using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Strings;
 using Umbraco.Extensions;
 
+using uSync.Core.Documents;
 using uSync.Core.Extensions;
 using uSync.Core.Mapping;
 using uSync.Core.Models;
@@ -23,6 +24,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
     protected readonly IUserService userService;
 
     protected readonly ITemplateService _templateService;
+    protected readonly ISyncDocumentUrlCleaner _urlCleaner;
 
     public ContentSerializer(
         IEntityService entityService,
@@ -33,7 +35,8 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
         IContentService contentService,
         SyncValueMapperCollection syncMappers,
         IUserService userService,
-        ITemplateService templateService)
+        ITemplateService templateService,
+        ISyncDocumentUrlCleaner urlCleaner)
         : base(entityService, languageService, relationService, shortStringHelper, logger, UmbracoObjectTypes.Document, syncMappers)
     {
         this.contentService = contentService;
@@ -41,6 +44,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
         this.relationAlias = Constants.Conventions.RelationTypes.RelateParentDocumentOnDeleteAlias;
         this.userService = userService;
         _templateService = templateService;
+        _urlCleaner = urlCleaner;
     }
 
     #region Serialization
@@ -298,7 +302,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
         var changes = await DeserializeSchedulesAsync(item, node, options);
         if (changes.Count != 0)
             return SyncAttempt<IContent>.Succeed(item.Name ?? item.Id.ToString(), item, ChangeType.Import, "" ?? string.Empty, true,
-                [..details, ..changes]);
+                [.. details, .. changes]);
 
         // if we have changed the sort order, then we return a change, else it was no change.        
         return SyncAttempt<IContent>.Succeed(item.Name ?? item.Id.ToString(), item,
@@ -794,4 +798,12 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
             }
         });
     }
+
+    protected override Task OnKeyChange(IContent item, Guid oldKey, Guid newKey)
+    {
+        // key changes need to clean the DocumentUrl cache.
+        _urlCleaner.CleanUrlsForDocument(oldKey);
+        return Task.CompletedTask;
+    }
 }
+
