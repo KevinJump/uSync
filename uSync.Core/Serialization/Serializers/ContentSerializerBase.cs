@@ -457,7 +457,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
             item.Name = name;
         }
 
-        if (nameNode.HasElements)
+        if (nameNode.HasElements && item.ContentType.VariesByCulture())
         {
             var activeCultures = options.GetDeserializedCultures(node);
 
