@@ -19,6 +19,16 @@ import {
 	USYNC_SIGNALR_CONTEXT_TOKEN,
 } from '@jumoo/uSync';
 import { uSyncActionPerformEvent } from '../../components/events';
+import { UmbRequestReloadChildrenOfEntityEvent } from '@umbraco-cms/backoffice/entity-action';
+import { UMB_ACTION_EVENT_CONTEXT } from '@umbraco-cms/backoffice/action';
+import { UMB_DOCUMENT_TYPE_ROOT_ENTITY_TYPE } from '@umbraco-cms/backoffice/document-type';
+import { UMB_MEDIA_TYPE_ROOT_ENTITY_TYPE } from '@umbraco-cms/backoffice/media-type';
+import { UMB_TEMPLATE_ROOT_ENTITY_TYPE } from '@umbraco-cms/backoffice/template';
+import { UMB_DATA_TYPE_ROOT_ENTITY_TYPE } from '@umbraco-cms/backoffice/data-type';
+import { UMB_MEMBER_TYPE_ROOT_ENTITY_TYPE } from '@umbraco-cms/backoffice/member-type';
+import { UMB_STYLESHEET_ROOT_ENTITY_TYPE } from '@umbraco-cms/backoffice/stylesheet';
+import { UMB_PARTIAL_VIEW_ROOT_ENTITY_TYPE } from '@umbraco-cms/backoffice/partial-view';
+import { UMB_SCRIPT_ROOT_ENTITY_TYPE } from '@umbraco-cms/backoffice/script';
 
 @customElement('usync-default-view')
 export class uSyncDefaultViewElement extends UmbLitElement {
@@ -126,10 +136,12 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 				this._results = _results;
 			});
 
-			this.observe(_instance.completed, (_completed) => {
+			this.observe(_instance.completed, async (_completed) => {
 				this._completed = _completed;
 				if (this._completed) {
 					this._buttonState = 'success';
+
+					await this.#refreshTrees();
 				}
 			});
 
@@ -146,6 +158,28 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 					this._group = _workingGroup;
 				}
 			});
+		});
+	}
+
+	async #refreshTrees() {
+		const actionEventContext = await this.getContext(UMB_ACTION_EVENT_CONTEXT);
+		const refreshTypes = [
+			UMB_DOCUMENT_TYPE_ROOT_ENTITY_TYPE,
+			UMB_MEDIA_TYPE_ROOT_ENTITY_TYPE,
+			UMB_MEMBER_TYPE_ROOT_ENTITY_TYPE,
+			UMB_TEMPLATE_ROOT_ENTITY_TYPE,
+			UMB_DATA_TYPE_ROOT_ENTITY_TYPE,
+			UMB_STYLESHEET_ROOT_ENTITY_TYPE,
+			UMB_PARTIAL_VIEW_ROOT_ENTITY_TYPE,
+			UMB_SCRIPT_ROOT_ENTITY_TYPE,
+		];
+
+		refreshTypes.forEach((type) => {
+			const event = new UmbRequestReloadChildrenOfEntityEvent({
+				entityType: type,
+				unique: null,
+			});
+			actionEventContext?.dispatchEvent(event);
 		});
 	}
 
