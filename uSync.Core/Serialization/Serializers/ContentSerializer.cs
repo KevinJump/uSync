@@ -24,7 +24,21 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
     protected readonly IUserService userService;
 
     protected readonly ITemplateService _templateService;
-    protected readonly ISyncDocumentUrlCleaner _urlCleaner;
+    protected readonly ISyncDocumentUrlCleaner? _urlCleaner;
+
+    [Obsolete("Use the constructor with urlCleaner, will be removed in v19")]
+    public ContentSerializer(
+        IEntityService entityService,
+        ILanguageService languageService,
+        IRelationService relationService,
+        IShortStringHelper shortStringHelper,
+        ILogger<ContentSerializer> logger,
+        IContentService contentService,
+        SyncValueMapperCollection syncMappers,
+        IUserService userService,
+        ITemplateService templateService
+    ) : this(entityService, languageService, relationService, shortStringHelper, logger, contentService, syncMappers, userService, templateService, null)
+    { }
 
     public ContentSerializer(
         IEntityService entityService,
@@ -802,7 +816,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
     protected override Task OnKeyChange(IContent item, Guid oldKey, Guid newKey)
     {
         // key changes need to clean the DocumentUrl cache.
-        _urlCleaner.CleanUrlsForDocument(oldKey);
+        _urlCleaner?.CleanUrlsForDocument(oldKey);
         return Task.CompletedTask;
     }
 }
