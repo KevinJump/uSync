@@ -7,6 +7,8 @@ having to write the whole thing from scratch.
 
 The extend package contains two base classes that simplfiy Handler and serializer creation for uSync.
 
+Look in the [./Example](./Example) folder for a working example of how to use these base classes to create your own handlers and serializers.
+
 ### SyncObjectHandler
 In uSync a handler is the thing that controlls the Input/Output of data to and from the file system.
 its the thing that is called when an item is saved or when uSync exports or imports anything. 
