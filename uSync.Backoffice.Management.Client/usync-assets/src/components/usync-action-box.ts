@@ -5,7 +5,7 @@ import {
 	property,
 	ifDefined,
 } from '@umbraco-cms/backoffice/external/lit';
-import { SyncActionGroup } from '@jumoo/uSync';
+import { SyncActionGroup, uSyncTimeFormatOptions } from '@jumoo/uSync';
 import { UUIButtonState } from '@umbraco-cms/backoffice/external/uui';
 import {
 	uSyncActionButtonClickEvent,
@@ -62,7 +62,9 @@ export class uSyncActionBox extends UmbLitElement {
 		return html`
 			<uui-box class="action-box ${this.disabled ? 'disabled' : ''}">
 				<div class="box-content">
-					<h2 class="box-heading">${this.group?.groupName}</h2>
+					<h2 class="box-heading" title=${this.getLastSyncDate()}>
+						${this.group?.groupName}
+					</h2>
 					<umb-icon name=${this.group?.icon}></umb-icon>
 					<div class="box-buttons">${dropdownButtons}</div>
 				</div>
@@ -70,14 +72,10 @@ export class uSyncActionBox extends UmbLitElement {
 		`;
 	}
 
-	// renderLastSync() {
-	// 	if (!this.group?.lastSync) return nothing;
-	// 	const lastSync = this.localize.date(
-	// 		this.group.lastSync ?? '',
-	// 		uSyncTimeFormatOptions,
-	// 	);
-	// 	return html`<div class="last-sync">Last Import : ${lastSync}</div>`;
-	// }
+	getLastSyncDate() {
+		if (!this.group?.lastSync) return '';
+		return `Last imported: ${this.localize.date(this.group.lastSync, uSyncTimeFormatOptions)}`;
+	}
 
 	static styles = css`
 		:host {
@@ -95,7 +93,8 @@ export class uSyncActionBox extends UmbLitElement {
 		}
 
 		.box-heading {
-			font-size: var(--uui-size-8);
+			font-size: var(--uui-type-h3-size);
+			cursor: help;
 			margin: 0;
 		}
 
