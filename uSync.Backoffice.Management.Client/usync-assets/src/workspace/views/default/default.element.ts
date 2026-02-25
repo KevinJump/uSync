@@ -328,7 +328,7 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 		css`
 			:host {
 				display: block;
-				margin-top: calc(var(--uui-size-space-4) * -1);
+				// margin-top: calc(var(--uui-size-space-4) * -1);
 			}
 
 			.wrapper {
@@ -356,7 +356,7 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 				display: grid;
 				grid-template-columns: repeat(auto-fit, minmax(430px, 1fr));
 				position: relative;
-				gap: var(--uui-size-space-4);
+				gap: var(--uui-size-space-5);
 				flex-wrap: wrap;
 				align-content: stretch;
 				z-index: 1;

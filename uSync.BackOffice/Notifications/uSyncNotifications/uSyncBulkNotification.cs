@@ -13,12 +13,15 @@ public class uSyncBulkNotification : INotification
     /// <summary>
     ///  generate new BulkNotificationObject
     /// </summary>
-    /// <param name="actions"></param>
     public uSyncBulkNotification(IEnumerable<uSyncAction> actions, string? group)
     {
         this.Group = group;
         this.Actions = actions;
     }
+
+    /// <summary>
+    ///  generate a new bulk notification object without a group.
+    /// </summary>
 
     [Obsolete("Use the constructor with group and actions instead - will be removed in v19")]
     public uSyncBulkNotification(IEnumerable<uSyncAction> actions)

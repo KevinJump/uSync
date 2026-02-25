@@ -95,7 +95,7 @@ export class uSyncActionBox extends UmbLitElement {
 		.box-heading {
 			font-size: var(--uui-type-h3-size);
 			cursor: help;
-			margin: 0;
+			margin: var(--uui-size-space-3);
 		}
 
 		umb-icon {

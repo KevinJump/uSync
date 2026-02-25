@@ -163,24 +163,26 @@ export class USyncSettingsViewElement extends UmbElementMixin(LitElement) {
 	static styles = css`
 		:host {
 			display: block;
-			margin: calc(var(--uui-size-space-4) * -1) 0;
 		}
 
 		.usync-settings-layout {
 			display: grid;
 			grid-template-columns: 5fr 5fr;
 			grid-template-rows: auto auto;
-			gap: var(--uui-size-space-4) var(--uui-size-space-4);
+			gap: var(--uui-size-space-5);
+			row-gap: var(--uui-size-space-5);
 			grid-auto-flow: row;
 			grid-template-areas: 'settings info', 'handler info';
 		}
 
-		.setting-link {
-			text-align: center;
+		.usync-settings-layout > div {
+			display: flex;
+			flex-direction: column;
+			gap: var(--uui-size-space-6);
 		}
 
-		uui-box {
-			margin: var(--uui-size-space-4) 0;
+		.setting-link {
+			text-align: center;
 		}
 	`;
 }

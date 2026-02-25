@@ -50,7 +50,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
         SyncValueMapperCollection syncMappers,
         IUserService userService,
         ITemplateService templateService,
-        ISyncDocumentUrlCleaner urlCleaner)
+        ISyncDocumentUrlCleaner? urlCleaner)
         : base(entityService, languageService, relationService, shortStringHelper, logger, UmbracoObjectTypes.Document, syncMappers)
     {
         this.contentService = contentService;
