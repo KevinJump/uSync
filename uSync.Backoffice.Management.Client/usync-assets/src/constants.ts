@@ -34,3 +34,12 @@ const _constants = {
 };
 
 export const uSyncConstants = _constants;
+
+export const uSyncTimeFormatOptions: Intl.DateTimeFormatOptions = {
+	year: 'numeric',
+	month: 'short',
+	day: 'numeric',
+	hour: 'numeric',
+	minute: 'numeric',
+	second: 'numeric',
+};

@@ -12,7 +12,12 @@ public interface ISyncManagementService
 
     [Obsolete("Use GetActions(string setName) instead, this will be removed in v18")]
     List<SyncActionGroup> GetActions();
+
+    [Obsolete("Use GetActionsAsync(string setName) instead, this will be removed in v19")]
     List<SyncActionGroup> GetActions(string setName);
+    
+    Task<List<SyncActionGroup>> GetActionsAsync(string setName);
+    
     Func<SyncActionOptions, uSyncCallbacks, Task<SyncActionResult>> GetHandlerMethodAsync(HandlerActions action);
     
     Task<PerformActionResponse> PerformActionAsync(PerformActionRequest actionRequest, IUser? user);

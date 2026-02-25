@@ -1,23 +1,23 @@
 import {
-	LitElement,
 	customElement,
 	html,
 	css,
 	property,
 	ifDefined,
 } from '@umbraco-cms/backoffice/external/lit';
-import { SyncActionGroup } from '@jumoo/uSync';
+import { SyncActionGroup, uSyncTimeFormatOptions } from '@jumoo/uSync';
 import { UUIButtonState } from '@umbraco-cms/backoffice/external/uui';
 import {
 	uSyncActionButtonClickEvent,
 	uSyncActionPerformEvent,
 } from '../workspace/components/events';
+import { UmbLitElement } from '@umbraco-cms/backoffice/lit-element';
 
 /**
  * displays the action buttons for a given group
  */
 @customElement('usync-action-box')
-export class uSyncActionBox extends LitElement {
+export class uSyncActionBox extends UmbLitElement {
 	/**
 	 * Collection of buttons to display.
 	 */
@@ -62,12 +62,19 @@ export class uSyncActionBox extends LitElement {
 		return html`
 			<uui-box class="action-box ${this.disabled ? 'disabled' : ''}">
 				<div class="box-content">
-					<h2 class="box-heading">${this.group?.groupName}</h2>
+					<h2 class="box-heading" title=${this.getLastSyncDate()}>
+						${this.group?.groupName}
+					</h2>
 					<umb-icon name=${this.group?.icon}></umb-icon>
 					<div class="box-buttons">${dropdownButtons}</div>
 				</div>
 			</uui-box>
 		`;
+	}
+
+	getLastSyncDate() {
+		if (!this.group?.lastSync) return '';
+		return `Last imported: ${this.localize.date(this.group.lastSync, uSyncTimeFormatOptions)}`;
 	}
 
 	static styles = css`
@@ -86,7 +93,8 @@ export class uSyncActionBox extends LitElement {
 		}
 
 		.box-heading {
-			font-size: var(--uui-size-8);
+			font-size: var(--uui-type-h3-size);
+			cursor: help;
 			margin: 0;
 		}
 
@@ -107,6 +115,12 @@ export class uSyncActionBox extends LitElement {
 
 		.disabled {
 			opacity: 0.4;
+		}
+
+		.last-sync {
+			color: var(--uui-color-text-alt);
+			font-style: italic;
+			font-size: var(--uui-size-5);
 		}
 	`;
 }

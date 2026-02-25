@@ -24,6 +24,11 @@ public class uSync
     /// </summary>
     public const string EventPausedKey = "uSync.PausedKey";
 
+    /// <summary>
+    ///  the name we use internally for the 'everything' group.
+    /// </summary>
+    public const string EverythingGroupName = "All";
+
     internal class Trees
     {
         internal const string uSync = "usync";

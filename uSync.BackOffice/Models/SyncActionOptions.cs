@@ -29,6 +29,12 @@ public class SyncActionOptions
     /// </summary>
     public string? Set { get; set; }
 
+
+    /// <summary>
+    ///  the group within the set that is being processed - e.g settings, content, media etc.
+    /// </summary>
+    public string? Group { get; set; }
+
     /// <summary>
     /// SyncActions to use as the source for all individual actions
     /// </summary>

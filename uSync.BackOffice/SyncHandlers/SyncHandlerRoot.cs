@@ -1370,7 +1370,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 
         var group = !string.IsNullOrWhiteSpace(DefaultConfig.Group) ? DefaultConfig.Group : this.Group;
 
-        if (uSyncConfig.Settings.ExportOnSave.InvariantContains("All") ||
+        if (uSyncConfig.Settings.ExportOnSave.InvariantContains(uSync.EverythingGroupName) ||
             uSyncConfig.Settings.ExportOnSave.InvariantContains(group))
         {
             return HandlerActions.Save.IsValidAction(DefaultConfig.Actions);

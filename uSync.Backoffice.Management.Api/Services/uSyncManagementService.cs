@@ -13,6 +13,7 @@ using uSync.BackOffice.Models;
 using uSync.BackOffice.Services;
 using uSync.BackOffice.SyncHandlers;
 using uSync.BackOffice.SyncHandlers.Models;
+using uSync.BackOffice.Tracker;
 
 namespace uSync.Backoffice.Management.Api.Services;
 
@@ -30,13 +31,16 @@ internal class uSyncManagementService : ISyncManagementService
 
     private readonly ILongRunningOperationService _longRunningOperationService;
 
+    private readonly ISyncTrackerService _syncTrackerService;
+
     public uSyncManagementService(
         ISyncActionService syncActionService,
         ISyncConfigService configService,
         ISyncManagementCache syncManagementCache,
         IHubContext<SyncHub> hubContext,
         ISyncHandlerFactory handlerFactory,
-        ILongRunningOperationService longRunningOperationService)
+        ILongRunningOperationService longRunningOperationService,
+        ISyncTrackerService syncTrackerService)
     {
         _syncActionService = syncActionService;
         _configService = configService;
@@ -44,19 +48,22 @@ internal class uSyncManagementService : ISyncManagementService
         _hubContext = hubContext;
         _handlerFactory = handlerFactory;
         _longRunningOperationService = longRunningOperationService;
+        _syncTrackerService = syncTrackerService;
     }
 
     [Obsolete("Use GetActions(string setName) instead, this will be removed in v18")]
     public List<SyncActionGroup> GetActions()
         => GetActions(_configService.Settings.DefaultSet);
 
+    [Obsolete("Use GetActionsAsync(string setName) instead, this will be removed in v19")]
+    public List<SyncActionGroup> GetActions(string setName)
+        => GetActionsAsync(setName).Result;
+
     /// <summary>
     ///  Gets the list of available actions
     /// </summary>
-    public List<SyncActionGroup> GetActions(string setName)
+    public async Task<List<SyncActionGroup>> GetActionsAsync(string setName)
     {
-        // TODO: Load the actions based on the handlers, and the config, (so they can be turned on and off)
-
         var defaultReport = new SyncActionButton()
         {
             Key = HandlerActions.Report.ToString(),
@@ -128,7 +135,6 @@ internal class uSyncManagementService : ISyncManagementService
                 ]
         };
 
-        // TODO: we need to load in additional action groups as needed from plugins.
         List<SyncActionButton> defaultButtons = [defaultReport, defaultImport, defaultExport];
         List<SyncActionButton> everythingButtons = [defaultReport, everythingImport, everythingExport];
 
@@ -143,24 +149,29 @@ internal class uSyncManagementService : ISyncManagementService
 
         foreach (var group in groups)
         {
+            var groupAlias = group.Key.ToLowerInvariant();
+
             actionGroups.Add(new SyncActionGroup
             {
                 GroupName = $"{group.Key}",
                 Icon = group.Value,
                 Key = group.Key.ToLowerInvariant(),
-                Buttons = defaultButtons
+                Buttons = defaultButtons,
+                LastSync = await _syncTrackerService.GetLastSync(groupAlias)
             });
         }
 
         if (string.IsNullOrWhiteSpace(_configService.Settings.UIEnabledGroups) ||
-            _configService.Settings.UIEnabledGroups.InvariantContains("all"))
+            _configService.Settings.UIEnabledGroups.InvariantContains(BackOffice.uSync.EverythingGroupName))
         {
             actionGroups.Add(new SyncActionGroup
             {
                 GroupName = "Everything",
                 Icon = "icon-paper-plane-alt",
-                Key = "all",
-                Buttons = everythingButtons
+                Key = BackOffice.uSync.EverythingGroupName,
+                Buttons = everythingButtons,
+                LastSync = await _syncTrackerService.GetLastSync(BackOffice.uSync.EverythingGroupName)
+
             });
         }
 
@@ -247,6 +258,7 @@ internal class uSyncManagementService : ISyncManagementService
         {
             Folders = _configService.GetFolders(),
             Set = actionRequest.Options?.Set ?? _configService.Settings.DefaultSet,
+            Group = actionRequest.Options?.Group ?? "all",
             Force = actionRequest.Options?.Force ?? false,
             Actions = [],
         };

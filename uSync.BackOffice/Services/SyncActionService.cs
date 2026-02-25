@@ -206,7 +206,7 @@ internal class SyncActionService : ISyncActionService
     /// <inheritdoc/>
     public async Task<SyncActionResult> FinishProcessAsync(SyncFinalActionRequest request)
     {
-        await _uSyncService.FinishBulkProcessAsync(request.HandlerAction, request.Actions);
+        await _uSyncService.FinishBulkProcessAsync(request.HandlerAction, request.ActionOptions.Group, request.Actions);
 
         _timer?.Stop();
         var elapsed = _timer?.ElapsedMilliseconds ?? 0;

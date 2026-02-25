@@ -38,7 +38,7 @@ public static class HandlerConfigPairExtensions
     public static bool IsValidGroup(this HandlerConfigPair handlerAndConfig, string group)
     {
         // empty means all as does 'all'
-        if (string.IsNullOrWhiteSpace(group) || group.InvariantEquals("all")) return true;
+        if (string.IsNullOrWhiteSpace(group) || group.InvariantEquals(uSync.EverythingGroupName)) return true;
 
         var handlerGroup = handlerAndConfig.Handler.Group;
         if (!string.IsNullOrWhiteSpace(handlerAndConfig.Settings.Group))

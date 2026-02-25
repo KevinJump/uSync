@@ -8,6 +8,11 @@ namespace uSync.BackOffice;
 public class uSyncReportCompletedNotification : uSyncBulkNotification
 {
     /// <inheritdoc/>
+    public uSyncReportCompletedNotification(IEnumerable<uSyncAction> actions, string? group )
+        : base(actions, group) { }
+
+
+    /// <inheritdoc/>
     public uSyncReportCompletedNotification(IEnumerable<uSyncAction> actions)
-        : base(actions) { }
+        : base(actions, null) { }
 }
