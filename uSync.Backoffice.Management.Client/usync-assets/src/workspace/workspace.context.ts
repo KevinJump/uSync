@@ -47,6 +47,7 @@ export class uSyncWorkspaceContext
 	 */
 	#actions = new UmbArrayState<SyncActionGroup>([], (x) => x.key);
 	public readonly actions = this.#actions.asObservable();
+	private _currentSetName: string = '';
 
 	/**
 	 * the working group name
@@ -134,6 +135,7 @@ export class uSyncWorkspaceContext
 
 		if (data) {
 			this.#actions.setValue(data);
+			this._currentSetName = setName;
 		}
 	}
 
@@ -250,6 +252,7 @@ export class uSyncWorkspaceContext
 
 				if (complete) {
 					this.#results.setValue(data?.actions ?? []);
+					this.getActions(this._currentSetName);
 				}
 			} else {
 				complete = true;

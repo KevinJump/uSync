@@ -205,7 +205,7 @@ public partial class SyncService : ISyncService
             var results = await SyncService.PerformPostImportAsync(handlers, actions);
 
             // fire complete
-            await _mutexService.FireBulkCompleteAsync(new uSyncImportCompletedNotification(actions));
+            await _mutexService.FireBulkCompleteAsync(new uSyncImportCompletedNotification(actions, handlerOptions.Group));
 
             _logger.LogInformation("uSync Import: {handlerCount} handlers, processed {itemCount} items, {changeCount} changes in {ElapsedMilliseconds}ms",
                 handlers.Count(),
@@ -402,7 +402,7 @@ public partial class SyncService : ISyncService
         summary.UpdateMessage("Export Completed");
         callbacks?.Callback?.Invoke(summary);
 
-        await _mutexService.FireBulkCompleteAsync(new uSyncExportCompletedNotification(actions));
+        await _mutexService.FireBulkCompleteAsync(new uSyncExportCompletedNotification(actions, null));
 
         sw.Stop();
 

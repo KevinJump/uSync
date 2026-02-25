@@ -1,5 +1,4 @@
 import {
-	LitElement,
 	customElement,
 	html,
 	css,
@@ -12,12 +11,13 @@ import {
 	uSyncActionButtonClickEvent,
 	uSyncActionPerformEvent,
 } from '../workspace/components/events';
+import { UmbLitElement } from '@umbraco-cms/backoffice/lit-element';
 
 /**
  * displays the action buttons for a given group
  */
 @customElement('usync-action-box')
-export class uSyncActionBox extends LitElement {
+export class uSyncActionBox extends UmbLitElement {
 	/**
 	 * Collection of buttons to display.
 	 */
@@ -70,6 +70,15 @@ export class uSyncActionBox extends LitElement {
 		`;
 	}
 
+	// renderLastSync() {
+	// 	if (!this.group?.lastSync) return nothing;
+	// 	const lastSync = this.localize.date(
+	// 		this.group.lastSync ?? '',
+	// 		uSyncTimeFormatOptions,
+	// 	);
+	// 	return html`<div class="last-sync">Last Import : ${lastSync}</div>`;
+	// }
+
 	static styles = css`
 		:host {
 			flex-grow: 1;
@@ -107,6 +116,12 @@ export class uSyncActionBox extends LitElement {
 
 		.disabled {
 			opacity: 0.4;
+		}
+
+		.last-sync {
+			color: var(--uui-color-text-alt);
+			font-style: italic;
+			font-size: var(--uui-size-5);
 		}
 	`;
 }

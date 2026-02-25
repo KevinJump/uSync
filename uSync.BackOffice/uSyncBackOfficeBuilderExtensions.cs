@@ -25,6 +25,7 @@ using uSync.BackOffice.Services;
 using uSync.BackOffice.SyncHandlers;
 using uSync.BackOffice.SyncHandlers.Handlers;
 using uSync.BackOffice.SyncHandlers.Interfaces;
+using uSync.BackOffice.Tracker;
 using uSync.Core;
 
 namespace uSync.BackOffice;
@@ -88,6 +89,8 @@ public static class uSyncBackOfficeBuilderExtensions
         builder.Services.AddSingleton<uSyncHubRoutes>();
         builder.Services.AddSignalR();
         builder.Services.AdduSyncSignalR();
+
+        builder.AddSyncTracker();
 
         builder.Services.AddTransient<ISyncLegacyService, SyncLegacyService>();
 

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
@@ -154,19 +155,24 @@ public partial class SyncService
     }
 
     /// <inheritdoc/>>
+    [Obsolete("Use the overload with the group parameter instead")]
     public async Task FinishBulkProcessAsync(HandlerActions action, IEnumerable<uSyncAction> actions)
+        => await FinishBulkProcessAsync(action, uSync.EverythingGroupName, actions);
+
+    /// <inheritdoc/>>
+    public async Task FinishBulkProcessAsync(HandlerActions action, string? group, IEnumerable<uSyncAction> actions)
     {
         switch (action)
         {
             case HandlerActions.Export:
                 await WriteVersionFileAsync(_uSyncConfig.GetWorkingFolder());
-                await _mutexService.FireBulkCompleteAsync(new uSyncExportCompletedNotification(actions));
+                await _mutexService.FireBulkCompleteAsync(new uSyncExportCompletedNotification(actions, group));
                 break;
             case HandlerActions.Import:
-                await _mutexService.FireBulkCompleteAsync(new uSyncImportCompletedNotification(actions));
+                await _mutexService.FireBulkCompleteAsync(new uSyncImportCompletedNotification(actions, group));
                 break;
             case HandlerActions.Report:
-                await _mutexService.FireBulkCompleteAsync(new uSyncReportCompletedNotification(actions));
+                await _mutexService.FireBulkCompleteAsync(new uSyncReportCompletedNotification(actions, group));
                 break;
         }
     }

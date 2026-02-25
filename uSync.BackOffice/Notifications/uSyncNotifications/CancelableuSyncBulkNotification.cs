@@ -13,7 +13,7 @@ public class CancelableuSyncBulkNotification : uSyncBulkNotification, ICancelabl
     ///  Notification constructor
     /// </summary>
     public CancelableuSyncBulkNotification()
-        : base(Enumerable.Empty<uSyncAction>())
+        : base(Enumerable.Empty<uSyncAction>(), null)
     { }
 
     /// <summary>
