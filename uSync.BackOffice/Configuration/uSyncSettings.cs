@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
+using System.Text.Json.Serialization;
 
 namespace uSync.BackOffice.Configuration;
 
@@ -264,6 +265,7 @@ public class uSyncSettings
 /// <summary>
 ///  uSync's folder mode - normal, root or production
 /// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter<SyncFolderMode>))]
 public enum SyncFolderMode
 {
     /// <summary>
@@ -285,6 +287,7 @@ public enum SyncFolderMode
 /// <summary>
 ///  Mode is where the processing happens - normal or background  
 /// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter<SyncProcessingMode>))]
 public enum SyncProcessingMode
 {
     /// <summary>

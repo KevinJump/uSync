@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
 using System.Xml.Linq;
 using System.Xml.XPath;
 
@@ -414,6 +415,7 @@ public class TrackingKey
     public bool IsAttribute { get; set; }
 }
 
+[JsonConverter(typeof(JsonStringEnumConverter<TrackingDirection>))]
 public enum TrackingDirection
 {
     TargetToSource,

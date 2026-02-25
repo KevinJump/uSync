@@ -1,4 +1,6 @@
-﻿namespace uSync.Core.Sync;
+﻿using System.Text.Json.Serialization;
+
+namespace uSync.Core.Sync;
 
 /// <summary>
 ///  The type of tree item this is.
@@ -15,6 +17,7 @@
 ///  we can treat it as a 'settings' tree and show the 
 ///  menus when they are valid.
 /// </remarks>
+[JsonConverter(typeof(JsonStringEnumConverter<SyncTreeType>))]
 public enum SyncTreeType
 {
     /// <summary>
