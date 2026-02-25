@@ -162,15 +162,15 @@ internal class uSyncManagementService : ISyncManagementService
         }
 
         if (string.IsNullOrWhiteSpace(_configService.Settings.UIEnabledGroups) ||
-            _configService.Settings.UIEnabledGroups.InvariantContains("all"))
+            _configService.Settings.UIEnabledGroups.InvariantContains(BackOffice.uSync.EverythingGroupName))
         {
             actionGroups.Add(new SyncActionGroup
             {
                 GroupName = "Everything",
                 Icon = "icon-paper-plane-alt",
-                Key = "all",
+                Key = BackOffice.uSync.EverythingGroupName,
                 Buttons = everythingButtons,
-                LastSync = await _syncTrackerService.GetLastSync("all")
+                LastSync = await _syncTrackerService.GetLastSync(BackOffice.uSync.EverythingGroupName)
 
             });
         }

@@ -42,7 +42,7 @@ public enum HandlerActions
     /// <summary>
     /// All actions
     /// </summary>
-    [SyncActionName("All")]
+    [SyncActionName(uSync.EverythingGroupName)]
     All
 }
 

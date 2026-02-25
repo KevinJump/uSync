@@ -98,15 +98,15 @@ public class uSyncSettings
     /// <summary>
     /// Export when an item is saved in Umbraco
     /// </summary>
-    [DefaultValue("All")]
-    public string ExportOnSave { get; set; } = "All";
+    [DefaultValue(uSync.EverythingGroupName)]
+    public string ExportOnSave { get; set; } = uSync.EverythingGroupName;
 
 
     /// <summary>
     /// The handler groups that are enabled in the UI.
     /// </summary>
-    [DefaultValue("All")]
-    public string UIEnabledGroups { get; set; } = "All";
+    [DefaultValue(uSync.EverythingGroupName)]
+    public string UIEnabledGroups { get; set; } = uSync.EverythingGroupName;
 
     /// <summary>
     /// Debug reports (creates an export into a temp folder for comparison)
@@ -177,8 +177,8 @@ public class uSyncSettings
     /// <summary>
     /// Handler group(s) to run on first boot, default is All (so full import)
     /// </summary>
-    [DefaultValue("All")]
-    public string FirstBootGroup { get; set; } = "All";
+    [DefaultValue(uSync.EverythingGroupName)]
+    public string FirstBootGroup { get; set; } = uSync.EverythingGroupName;
 
     /// <summary>
     /// Disable the default dashboard (so people can't accidently press the buttons).

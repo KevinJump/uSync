@@ -17,6 +17,6 @@ internal class SyncTrackerNotificationHandler
 
     public async Task HandleAsync(uSyncImportCompletedNotification notification, CancellationToken cancellationToken)
     {
-        await _syncTrackerService.SaveLastSync(notification.Group ?? "all");
+        await _syncTrackerService.SaveLastSync(notification.Group ?? uSync.EverythingGroupName);
     }
 }

@@ -39,7 +39,7 @@ internal class SyncTrackerService : ISyncTrackerService
     public async Task<DateTime?> GetLastSync(string group)
     {
         var lastSync = await InternalGetLastSync(group);
-        var lastAllSync = await InternalGetLastSync("All");
+        var lastAllSync = await InternalGetLastSync(uSync.EverythingGroupName);
         return lastSync > lastAllSync ? lastSync : lastAllSync;
     }
 

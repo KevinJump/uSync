@@ -27,7 +27,7 @@ public class uSync
     /// <summary>
     ///  the name we use internally for the 'everything' group.
     /// </summary>
-    public const string EverythingGroupName = "all";
+    public const string EverythingGroupName = "All";
 
     internal class Trees
     {
