@@ -1,10 +1,12 @@
 ﻿using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 namespace uSync.Core;
 
 /// <summary>
 ///  Type of change performed
 /// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter<ChangeType>))]
 public enum ChangeType : int
 {
     [EnumMember(Value = "Clean")]

@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Text.Json.Serialization;
 
 namespace uSync.BackOffice.SyncHandlers.Models;
 
 /// <summary>
 ///  Possible actions a handler can do (stored in config)
 /// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter<HandlerActions>))]
 public enum HandlerActions
 {
     /// <summary>

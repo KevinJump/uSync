@@ -100,6 +100,7 @@ public class uSyncChange
         };
 }
 
+[JsonConverter(typeof(JsonStringEnumConverter<ChangeDetailType>))]
 public enum ChangeDetailType
 {
     NoChange,

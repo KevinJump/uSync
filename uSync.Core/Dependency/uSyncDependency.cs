@@ -1,4 +1,6 @@
-﻿using Umbraco.Cms.Core;
+﻿using System.Text.Json.Serialization;
+
+using Umbraco.Cms.Core;
 
 namespace uSync.Core.Dependency;
 
@@ -90,6 +92,7 @@ public class uSyncDependency
 /// <summary>
 ///  the match mode for the dependency (reserved)
 /// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter<DependencyMode>))]
 public enum DependencyMode
 {
     MustMatch,
