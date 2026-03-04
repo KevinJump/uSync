@@ -198,7 +198,7 @@ public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncSerializer<IM
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Error creating media item with alias {alias} and parent {parentId}", alias, parent?.Id);
+                logger.LogError(ex, "Error creating media item with alias {alias} and parent {parentId}", alias, parentId);
                 throw;
             }
 
