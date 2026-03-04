@@ -86,7 +86,7 @@ internal class RichTextEditorMigratingSerializer : ConfigurationSerializerBase, 
         // update we don't skip if the toolbar is missing, i can be for some older configs
         List<string> toolbarList = [];
         if (configuration.TryGetValue("toolbar", out var toolbar) is false
-            && TryGetToolbarArray(toolbar, out toolbarList) is false)
+            || TryGetToolbarArray(toolbar, out toolbarList) is false)
         {
             toolbarList = _defaultToolbar.ToList();
         }
@@ -113,7 +113,15 @@ internal class RichTextEditorMigratingSerializer : ConfigurationSerializerBase, 
     private bool TryGetToolbarArray(object? toolbar, out List<string> toolBarList)
     {
         toolBarList = new List<string>();
-        if (toolbar is null || toolbar is not JsonElement jsonElement || jsonElement.ValueKind != JsonValueKind.Array)
+        if (toolbar is null) return false;
+
+        if (toolbar is IEnumerable<string> stringList)
+        {
+            toolBarList = stringList.ToList();
+            return toolBarList.Count > 0;
+        }
+
+        if (toolbar is not JsonElement jsonElement || jsonElement.ValueKind != JsonValueKind.Array)
             return false;
 
         toolBarList = jsonElement.EnumerateArray().Select(x => x.GetString() ?? string.Empty).ToList();
