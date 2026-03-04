@@ -2,6 +2,7 @@
 
 using System.Collections;
 using System.Text.Json.Nodes;
+
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Models.Blocks;
@@ -10,6 +11,7 @@ using Umbraco.Extensions;
 
 using uSync.Core.Dependency;
 using uSync.Core.Extensions;
+using uSync.Core.Mapping.Mappers;
 
 namespace uSync.Core.Mapping;
 
@@ -70,7 +72,12 @@ public abstract class SyncBlockMapperBase<TBlockValue> : SyncValueMapperBase
     private async Task<string?> ProcessBlockValuesAsync(string value, Func<object?, string, Task<object?>> GetValueMethod)
     {
         var blockValue = SyncBlockMapperBase<TBlockValue>.GetBlockValue(value);
-        if (blockValue == null) return value;
+        if (blockValue == null)
+        {
+            if (value.Contains("ncContentTypeAlias") is false) return value;
+            var nestedContentHelper = new NestedContentToBlockListHelper(_contentTypeService);
+            return nestedContentHelper.ConvertNestedContentToBlockList(value);
+        }
 
         List<BlockItemData> blocks = [
             ..blockValue.ContentData,

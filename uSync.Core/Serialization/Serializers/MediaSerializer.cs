@@ -190,9 +190,17 @@ public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncSerializer<IM
     {
         return uSyncTaskHelper.FromResultOf(() =>
         {
-            var parentId = parent != null ? parent.Id : -1;
-            var item = _mediaService.CreateMedia(alias, parentId, itemType);
-            return Attempt.Succeed((IMedia)item);
+            try
+            {
+                var parentId = parent != null ? parent.Id : -1;
+                var item = _mediaService.CreateMedia(alias, parentId, itemType);
+                return Attempt.Succeed((IMedia)item);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error creating media item with alias {alias} and parent {parentId}", alias, parent?.Id);
+                throw;
+            }
 
         });
     }

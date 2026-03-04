@@ -145,7 +145,7 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
         // config 
         if (ShouldDesterilizeConfig(name, editorAlias, options))
         {
-            details.AddRange(DeserializeConfiguration(item, node));
+            details.AddRange(DeserializeConfiguration(item, node, editorAlias));
         }
 
         details.AddNotNull(await SetFolderFromElementAsync(item, info?.Element("Folder")));
@@ -174,7 +174,7 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
         return null;
     }
 
-    private List<uSyncChange> DeserializeConfiguration(IDataType item, XElement node)
+    private List<uSyncChange> DeserializeConfiguration(IDataType item, XElement node, string editorAlias)
     {
         var config = node.Element("Config").ValueOrDefault(string.Empty);
         if (string.IsNullOrEmpty(config)) return [];
@@ -191,10 +191,10 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
         importData = importData.ConvertToCamelCase();
 
         // multiple serializers can run per property. 
-        var serializers = _configurationSerializers.GetSerializers(item.EditorAlias);
+        var serializers = _configurationSerializers.GetSerializers(editorAlias);
         foreach (var serializer in serializers)
         {
-            logger.LogDebug("Running Configuration Serializer : {name} for {type}", serializer.Name, item.EditorAlias);
+            logger.LogDebug("Running Configuration Serializer : {name} for {type}", serializer.Name, editorAlias);
             importData = serializer.GetConfigurationImport(importData);
         }
 
