@@ -41,7 +41,7 @@ internal class NestedContentMigratingConfig : ConfigurationSerializerBase, IConf
         if (configuration.TryGetValue("contentTypes", out var contentTypes) && contentTypes is JsonArray contentTypesArray)
         {
             var blocks = new List<BlockListConfiguration.BlockConfiguration>();
-            foreach (var contentType in contentTypesArray.Cast<JsonObject>())
+            foreach (var contentType in contentTypesArray.OfType<JsonObject>())
             {
                 if (contentType["ncAlias"]?.ToString() is not string alias) continue;
                 var contentTypeItem = _contentTypeService.Get(alias);
