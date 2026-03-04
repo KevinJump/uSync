@@ -32,7 +32,17 @@ internal class NestedContentToBlockListHelper
     {
         if (nestedContentValue.Contains("ncContentTypeAlias") is false) return nestedContentValue;
 
-        var nestedContent = nestedContentValue.DeserializeJson<List<Dictionary<string, object>>>();
+        List<Dictionary<string, object>>? nestedContent;
+        try
+        {
+            nestedContent = nestedContentValue.DeserializeJson<List<Dictionary<string, object>>>();
+        }
+        catch (Exception)
+        {
+            // If deserialization fails (e.g. malformed or partially corrupted JSON),
+            // fall back to returning the original value.
+            return nestedContentValue;
+        }
         if (nestedContent == null) return nestedContentValue;
 
         BlockListValue blockListValue = new BlockListValue();
