@@ -1,4 +1,6 @@
-﻿namespace uSync.Core.DataTypes;
+﻿using Umbraco.Extensions;
+
+namespace uSync.Core.DataTypes;
 
 public interface IConfigurationSerializer
 {
@@ -21,4 +23,7 @@ public interface IConfigurationSerializer
     string? GetEditorAlias() => null;
 
     string? GetEditorUIAlias() => null;
+
+    bool IsSerializer(string propertyName)
+        => Editors.InvariantContains(propertyName);
 }
