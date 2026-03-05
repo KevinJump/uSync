@@ -140,7 +140,7 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
         // EditorUIAlias is often not set on migrations, so we need to go get it.
         // Also for updates (like RTE to TipTap) then this value needs to change.
         // so if it's blank or if fetching it gets us a new value, we should update it.
-        var newEditorUiAlias = ToPropertyEditorUiAlias(editorAlias) ?? string.Empty;
+        var newEditorUiAlias = ToPropertyEditorUiAlias(item.EditorAlias) ?? string.Empty;
         if (string.IsNullOrWhiteSpace(editorUiAlias) || string.IsNullOrWhiteSpace(newEditorUiAlias) is false)
             editorUiAlias = newEditorUiAlias;
 

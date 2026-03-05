@@ -14,7 +14,7 @@ namespace uSync.Tests.Migrations;
 [TestFixture]
 internal class NestedContentMigrationTests : MigrationTestBase
 {
-    private NestedContentMigratingConfig _serializer;
+    private NestedContentConfigurationMigrator _serializer;
     private Mock<IContentTypeService> _mockContentTypeService;
 
     [SetUp]
@@ -31,7 +31,7 @@ internal class NestedContentMigrationTests : MigrationTestBase
         _mockContentTypeService.Setup(x => x.Get("articleType")).Returns(articleContentType.Object);
         _mockContentTypeService.Setup(x => x.Get("blogType")).Returns(blogContentType.Object);
 
-        _serializer = new NestedContentMigratingConfig(_mockContentTypeService.Object);
+        _serializer = new NestedContentConfigurationMigrator(_mockContentTypeService.Object);
     }
 
     private static readonly string FullMigrationSource = @"{

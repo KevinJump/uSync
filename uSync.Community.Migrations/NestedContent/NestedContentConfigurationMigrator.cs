@@ -4,6 +4,7 @@ using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.PropertyEditors;
 using Umbraco.Cms.Core.Services;
 
+using uSync.Community.Migrations;
 using uSync.Core.Extensions;
 
 namespace uSync.Core.DataTypes.DataTypeSerializers;
@@ -13,22 +14,20 @@ namespace uSync.Core.DataTypes.DataTypeSerializers;
 ///  migrates nested content to a block list element. 
 /// </summary>
 
-internal class NestedContentMigratingConfig : ConfigurationSerializerBase, IConfigurationSerializer
+internal class NestedContentConfigurationMigrator : SyncConfigurationMigratorBase, IConfigurationSerializer
 {
     private readonly IContentTypeService _contentTypeService;
 
-    public NestedContentMigratingConfig(IContentTypeService contentTypeService)
+    public NestedContentConfigurationMigrator(IContentTypeService contentTypeService)
     {
         this._contentTypeService = contentTypeService;
     }
 
-    public string Name => nameof(NestedContentMigratingConfig);
+    public string Name => nameof(NestedContentConfigurationMigrator);
     public string[] Editors => [SyncLegacyTypes.NestedContent, SyncLegacyTypes.OurNestedContent];
 
-    public string? GetEditorAlias() => Constants.PropertyEditors.Aliases.BlockList;
-    public string? GetEditorUIAlias() => "Umb.PropertyEditorUi.BlockList";
-
-    public override IDictionary<string, object> GetConfigurationImport(IDictionary<string, object> configuration)
+    public override string? TargetEditor => Constants.PropertyEditors.Aliases.BlockList;
+    public override IDictionary<string, object> GetMigratedConfiguration(IDictionary<string, object> configuration)
     {
         var config = new BlockListConfiguration();
 

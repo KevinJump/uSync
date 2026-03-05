@@ -6,16 +6,17 @@ using uSync.Core.Mapping;
 namespace uSync.Community.Migrations.Contentment;
 
 [RequiresPropertyEditor("Umbraco.Community.Contentment.CodeEditor")]
-public class SkttlHtmlEditorConfigSerializer : ConfigurationDependenantSerializerBase, IConfigurationSerializer
+public class SkttlHtmlEditorConfigurationMigrator : SyncDependenantConfigurationMigratorBase, IConfigurationSerializer
 {
-    public string Name => nameof(SkttlHtmlEditorConfigSerializer);
+    public string Name => nameof(SkttlHtmlEditorConfigurationMigrator);
     public override string[] Editors => ["skttl.HtmlEditor"];
+    public override string? TargetEditor => "Umbraco.Community.Contentment.CodeEditor";
 
-    public SkttlHtmlEditorConfigSerializer(PropertyEditorCollection propertyEditors)
+    public SkttlHtmlEditorConfigurationMigrator(PropertyEditorCollection propertyEditors)
         : base(propertyEditors)
     { }
 
-    public override IDictionary<string, object> GetConfigurationImport(IDictionary<string, object> configuration)
+    public override IDictionary<string, object> GetMigratedConfiguration(IDictionary<string, object> configuration)
     {
         return new Dictionary<string, object>
         {
