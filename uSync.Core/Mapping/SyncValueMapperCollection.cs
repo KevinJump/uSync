@@ -5,6 +5,7 @@ using Umbraco.Extensions;
 
 using uSync.Core.Cache;
 using uSync.Core.Extensions;
+using uSync.Core.Migrations;
 
 namespace uSync.Core.Mapping;
 
@@ -12,18 +13,21 @@ public class SyncValueMapperCollection
         : BuilderCollectionBase<ISyncMapper>
 {
     private readonly ConcurrentDictionary<string, string> _customMappings = new(StringComparer.InvariantCultureIgnoreCase);
+    private readonly ISyncMigratedDataService _migratedDataService;
 
     public SyncEntityCache EntityCache { get; private set; }
 
     public SyncValueMapperCollection(
         SyncEntityCache entityCache,
-        Func<IEnumerable<ISyncMapper>> items)
+        Func<IEnumerable<ISyncMapper>> items,
+        ISyncMigratedDataService migratedDataService)
         : base(items)
     {
         EntityCache = entityCache;
 
         // todo, load these from config. 
         _customMappings = [];
+        _migratedDataService = migratedDataService;
     }
 
     /// <summary>
@@ -33,6 +37,20 @@ public class SyncValueMapperCollection
     {
         var mappedAlias = GetMapperAlias(editorAlias);
         return this.Where(x => x.Editors.InvariantContains(mappedAlias));
+    }
+
+    /// <summary>
+    ///  will get any mappers and any mappers associated with the editor alias that have been migrated (if any) 
+    ///  this allows us to support old mappers for a property editor, even if the property editor alias has changed.
+    /// </summary>
+    public async Task<IEnumerable<ISyncMapper>> GetImportingSyncMappers(string editorAlias)
+    {
+        var mappers = new List<ISyncMapper>();
+        var importingAlias = await _migratedDataService.GetAsync(editorAlias);
+        if (importingAlias is not null)
+            mappers.AddRange(this.Where(x => x.Editors.InvariantContains(importingAlias.Orginal)));
+       
+        return [.. mappers, ..GetSyncMappers(editorAlias)];
     }
 
     /// <summary>
@@ -65,7 +83,7 @@ public class SyncValueMapperCollection
     {
         if (string.IsNullOrWhiteSpace(value)) return null;
 
-        var mappers = GetSyncMappers(editorAlias);
+        var mappers = await GetImportingSyncMappers(editorAlias);
         if (mappers.Any())
         {
             var mappedValue = value;

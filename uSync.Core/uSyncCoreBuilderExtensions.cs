@@ -8,6 +8,7 @@ using uSync.Core.DataTypes;
 using uSync.Core.Dependency;
 using uSync.Core.Documents;
 using uSync.Core.Mapping;
+using uSync.Core.Migrations;
 using uSync.Core.Roots.Configs;
 using uSync.Core.Serialization;
 using uSync.Core.Tracking;
@@ -33,6 +34,9 @@ public static class uSyncCoreBuilderExtensions
             return builder;
 
         builder.Services.AddSingleton<uSyncCapabilityChecker>();
+
+        // migration data, so we can see when things go between types.
+        builder.AddSyncMigratedData();
 
         // document url cleaner, for key changes
         builder.Services.AddSingleton<ISyncDocumentUrlCleaner ,SyncDocumentUrlCleaner>();
@@ -68,7 +72,6 @@ public static class uSyncCoreBuilderExtensions
 
         // the item factory lets us get to these collections from one place. 
         builder.Services.AddSingleton<ISyncItemFactory, SyncItemFactory>();
-
 
         return builder;
     }

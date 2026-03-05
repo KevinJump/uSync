@@ -12,6 +12,7 @@ using Umbraco.Extensions;
 
 using uSync.Core.DataTypes;
 using uSync.Core.Extensions;
+using uSync.Core.Migrations;
 using uSync.Core.Models;
 
 namespace uSync.Core.Serialization.Serializers;
@@ -25,6 +26,7 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
     private readonly ConfigurationSerializerCollection _configurationSerializers;
     private readonly PropertyEditorCollection _propertyEditors;
     private readonly IConfigurationEditorJsonSerializer _jsonSerializer;
+    private readonly ISyncMigratedDataService _migratedDataService;
 
     public DataTypeSerializer(IEntityService entityService, ILogger<DataTypeSerializer> logger,
         IDataTypeService dataTypeService,
@@ -32,7 +34,8 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
         DataEditorCollection dataEditors,
         ConfigurationSerializerCollection configurationSerializers,
         PropertyEditorCollection propertyEditors,
-        IConfigurationEditorJsonSerializer jsonSerializer)
+        IConfigurationEditorJsonSerializer jsonSerializer, 
+        ISyncMigratedDataService migratedDataService)
         : base(entityService, dataTypeContainerService, logger, UmbracoObjectTypes.DataTypeContainer)
     {
         this._dataTypeService = dataTypeService;
@@ -41,6 +44,7 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
         this._configurationSerializers = configurationSerializers;
         this._propertyEditors = propertyEditors;
         this._jsonSerializer = jsonSerializer;
+        _migratedDataService = migratedDataService;
     }
 
     /// <summary>
@@ -113,6 +117,10 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
         if (editorAlias != item.EditorAlias)
         {
             // change the editor type.....
+
+            // we put this in the migrator service, because it means the value has been migrated. 
+            await _migratedDataService.AddRename(item.EditorAlias, editorAlias, null);
+
             if (editor is not null)
             {
                 details.AddUpdate("EditorAlias", item.EditorAlias, editorAlias, "EditorAlias");

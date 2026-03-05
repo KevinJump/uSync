@@ -72,12 +72,7 @@ public abstract class SyncBlockMapperBase<TBlockValue> : SyncValueMapperBase
     private async Task<string?> ProcessBlockValuesAsync(string value, Func<object?, string, Task<object?>> GetValueMethod)
     {
         var blockValue = SyncBlockMapperBase<TBlockValue>.GetBlockValue(value);
-        if (blockValue == null)
-        {
-            if (value.Contains("ncContentTypeAlias") is false) return value;
-            var nestedContentHelper = new NestedContentToBlockListHelper(_contentTypeService);
-            return nestedContentHelper.ConvertNestedContentToBlockList(value);
-        }
+        if (blockValue == null) return value;
 
         List<BlockItemData> blocks = [
             ..blockValue.ContentData,

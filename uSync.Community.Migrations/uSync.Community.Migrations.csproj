@@ -7,8 +7,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Umbraco.Cms.Web.Website"/>
-		<PackageReference Include="Umbraco.Cms.Core"/>
+		<PackageReference Include="Umbraco.Cms.Web.Website" />
+		<PackageReference Include="Umbraco.Cms.Core" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\uSync.Core\uSync.Core.csproj" />
