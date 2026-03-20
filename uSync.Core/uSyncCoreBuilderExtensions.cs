@@ -48,11 +48,11 @@ public static class uSyncCoreBuilderExtensions
         // has to happen before the DataTypeSerializer is loaded, because that is where
         // they are used
         builder.WithCollectionBuilder<ConfigurationSerializerCollectionBuilder>()
-            .Add(() => builder.TypeLoader.GetTypes<IConfigurationSerializer>());
+            .Add(builder.TypeLoader.GetTypes<IConfigurationSerializer>());
 
         // value mappers, (map internal things in properties in and out of syncing process)
         builder.WithCollectionBuilder<SyncValueMapperCollectionBuilder>()
-            .Add(() => builder.TypeLoader.GetTypes<ISyncMapper>());
+            .Add(builder.TypeLoader.GetTypes<ISyncMapper>());
 
         // serializers - turn umbraco objects into / from xml in memory. 
         builder.WithCollectionBuilder<SyncSerializerCollectionBuilder>()

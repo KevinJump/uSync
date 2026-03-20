@@ -62,13 +62,13 @@ internal class MultiNodeTreePickerMigratingConfigSerializer : ConfigurationSeria
     private static string? GetTreeType(IDictionary<string, object> configuration)
     {
         if (configuration.TryGetValue("treeSource", out var treeSourceValue) is false || treeSourceValue is null)
-            return null;
+            return "content";
 
         if (treeSourceValue.TryConvertToJsonObject(out var treeSource) is false)
-            return null;
+            return "content";
 
         if (treeSource.TryGetPropertyValue("type", out var typeValue) is false)
-            return null;
+            return "content";
 
         return typeValue?.GetValueAs<string>();
     }

@@ -21,7 +21,7 @@ internal class MigrationTestBase
 
         dictionaryData = dictionaryData.ConvertToCamelCase();
 
-        var result = serializer.GetConfigurationImport(dictionaryData);
+        var result = serializer.GetConfigurationImportAsync("test", dictionaryData);
 
         var targetDictionary =
             JsonSerializer.Serialize(

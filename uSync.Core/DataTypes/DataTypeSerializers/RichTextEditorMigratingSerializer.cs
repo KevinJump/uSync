@@ -9,6 +9,7 @@ using System.Text.Json.Nodes;
 
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Configuration.Models;
+using Umbraco.Cms.Core.PropertyEditors;
 using Umbraco.Extensions;
 
 using uSync.Core.Extensions;
@@ -88,23 +89,34 @@ internal class RichTextEditorMigratingSerializer : ConfigurationSerializerBase, 
         if (configuration.TryGetValue("toolbar", out var toolbar) is false
             && TryGetToolbarArray(toolbar, out toolbarList) is false)
         {
-            toolbarList = _defaultToolbar.ToList();
+            toolbarList = [.. _defaultToolbar];
         }
+
+        if (toolbarList.Count == 0) 
+            toolbarList = [.. _defaultToolbar];
 
         configuration.Remove("mode");
         configuration.Remove("hideLabel");
 
+        _logger.LogDebug("Original toolbar items: {ToolbarItems}", string.Join(", ", toolbarList));
+
         var newToolbar = toolbarList.Select(MapToolbarItem).WhereNotNull().ToList();
-        configuration["toolbar"] = new List<List<List<string>>> { new() { newToolbar } };
+
+        _logger.LogDebug("Mapped toolbar items: {ToolbarItems}", string.Join(", ", newToolbar));
 
         var extensions = _defaultExtensions.ToList();
-
         if (configuration.TryGetValue("blocks", out var blocks) && blocks is not null)
         {
             // if there are blocks, we need to add the block extension
+            newToolbar.Add("Umb.Tiptap.Toolbar.BlockPicker");
             extensions.Add("Umb.Tiptap.Block");
         }
+        
+        if (configuration.ContainsKey("toolbar"))
+            configuration.Remove("toolbar");
 
+        configuration["toolbar"] = new List<List<List<string>>> { new() { newToolbar } };
+        
         configuration["extensions"] = extensions.ToArray();
 
         return configuration;

@@ -5,6 +5,7 @@ namespace uSync.Backoffice.Management.Api.Extensions;
 
 public static class uSyncActionExtensions
 {
+    [Obsolete("This is for backwards compatibility, use AsActionView instead - will be removed in v19")]
     public static uSyncActionView ToActionView(this uSyncAction action)
     {
         var msg = string.IsNullOrWhiteSpace(action.Message) is false

@@ -4,7 +4,7 @@ using Umbraco.Extensions;
 namespace uSync.Core.DataTypes;
 
 public class ConfigurationSerializerCollectionBuilder
-    : LazyCollectionBuilderBase<ConfigurationSerializerCollectionBuilder, ConfigurationSerializerCollection, IConfigurationSerializer>
+    : WeightedCollectionBuilderBase<ConfigurationSerializerCollectionBuilder, ConfigurationSerializerCollection, IConfigurationSerializer>
 {
     protected override ConfigurationSerializerCollectionBuilder This => this;
 }

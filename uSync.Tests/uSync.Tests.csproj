@@ -22,7 +22,6 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\uSync.BackOffice\uSync.BackOffice.csproj" />
-	  <ProjectReference Include="..\uSync.Community.Migrations\uSync.Community.Migrations.csproj" />
 	  <ProjectReference Include="..\uSync.Core\uSync.Core.csproj" />
 	</ItemGroup>
 

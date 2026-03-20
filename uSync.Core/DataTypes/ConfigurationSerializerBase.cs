@@ -15,6 +15,11 @@ public abstract class ConfigurationSerializerBase
     public virtual IDictionary<string, object> GetConfigurationImport(IDictionary<string, object> configuration)
         => configuration;
 
+    public virtual Task<IDictionary<string, object>> GetConfigurationExportAsync(string name, IDictionary<string, object> configuration)
+        => Task.FromResult(GetConfigurationExport(configuration));
+
+    public virtual Task<IDictionary<string, object>> GetConfigurationImportAsync(string name, IDictionary<string, object> configuration)
+        => Task.FromResult(GetConfigurationImport(configuration));
     /// <summary>
     ///  renames properties that might exist in a json string (if it is one).
     /// </summary>

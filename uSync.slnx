@@ -2,7 +2,6 @@
   <Folder Name="/Contrib/">
     <Project Path="uSync.Community.Contrib/uSync.Community.Contrib.csproj" />
     <Project Path="uSync.Community.DataTypeSerializers/uSync.Community.DataTypeSerializers.csproj" />
-    <Project Path="uSync.Community.Migrations/uSync.Community.Migrations.csproj" Id="4538c1d5-f6d5-451a-a383-5291167a37e1" />
   </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />

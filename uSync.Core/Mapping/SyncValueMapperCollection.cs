@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 
 using Umbraco.Cms.Core.Composing;
+using Umbraco.Cms.Core.Models;
 using Umbraco.Extensions;
 
 using uSync.Core.Cache;
@@ -79,6 +80,7 @@ public class SyncValueMapperCollection
     /// <summary>
     ///  Get the mapped import value
     /// </summary>
+    [Obsolete("Use GetImportValueAsync(string value, IPropertyType propertyType) instead will be removed in v19")]
     public async Task<object?> GetImportValueAsync(string value, string editorAlias)
     {
         if (string.IsNullOrWhiteSpace(value)) return null;
@@ -97,6 +99,29 @@ public class SyncValueMapperCollection
 
         return value;
     }
+
+    public async Task<object?> GetImportValueAsync(string value, IPropertyType propertyType)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return null;
+
+        var mappers = await GetImportingSyncMappers(propertyType.PropertyEditorAlias);
+        if (mappers.Any())
+        {
+            var mappedValue = value;
+            foreach (var mapper in mappers)
+            {
+                mappedValue = 
+                    mapper is ISyncPropertyMapper syncPropertyMapper ?
+                     (await syncPropertyMapper.GetImportValueAsync(mappedValue ?? string.Empty, propertyType)) :
+                     (await mapper.GetImportValueAsync(mappedValue ?? string.Empty, propertyType.PropertyEditorAlias));
+            }
+
+            return GetCleanFlatJson(mappedValue ?? string.Empty);
+        }
+
+        return value;
+    }
+
 
     static readonly char[] _trimChars = ['\"', '\''];
 
@@ -143,8 +168,8 @@ public class SyncValueMapperCollection
 }
 
 public class SyncValueMapperCollectionBuilder
-    // : WeightedCollectionBuilderBase<SyncValueMapperCollectionBuilder, SyncValueMapperCollection, ISyncMapper>
-    : LazyCollectionBuilderBase<SyncValueMapperCollectionBuilder, SyncValueMapperCollection, ISyncMapper>
+    : WeightedCollectionBuilderBase<SyncValueMapperCollectionBuilder, SyncValueMapperCollection, ISyncMapper>
+    // : LazyCollectionBuilderBase<SyncValueMapperCollectionBuilder, SyncValueMapperCollection, ISyncMapper>
 {
     protected override SyncValueMapperCollectionBuilder This => this;
 }

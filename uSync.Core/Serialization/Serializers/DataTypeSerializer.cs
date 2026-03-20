@@ -153,7 +153,7 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
         // config 
         if (ShouldDesterilizeConfig(name, editorAlias, options))
         {
-            details.AddRange(DeserializeConfiguration(item, node, editorAlias));
+            details.AddRange(await DeserializeConfiguration(item, node, editorAlias));
         }
 
         details.AddNotNull(await SetFolderFromElementAsync(item, info?.Element("Folder")));
@@ -182,7 +182,7 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
         return null;
     }
 
-    private List<uSyncChange> DeserializeConfiguration(IDataType item, XElement node, string editorAlias)
+    private async Task<List<uSyncChange>> DeserializeConfiguration(IDataType item, XElement node, string editorAlias)
     {
         var config = node.Element("Config").ValueOrDefault(string.Empty);
         if (string.IsNullOrEmpty(config)) return [];
@@ -203,7 +203,7 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
         foreach (var serializer in serializers)
         {
             logger.LogDebug("Running Configuration Serializer : {name} for {type}", serializer.Name, editorAlias);
-            importData = serializer.GetConfigurationImport(importData);
+            importData = await serializer.GetConfigurationImportAsync(item.Name ?? node.GetAlias(), importData);
         }
 
         if (importData.IsJsonEqual(item.ConfigurationData) is false)
@@ -225,7 +225,7 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
         var node = InitializeBaseNode(item, item.Name ?? item.Id.ToString(), item.Level);
 
         node.Add(await SerializerInfoAsync(item));
-        node.Add(SerializeConfiguration(item));
+        node.Add(await SerializeConfiguration(item));
 
         return SyncAttempt<XElement>.Succeed(item.Name ?? item.Id.ToString(), node, typeof(IDataType), ChangeType.Export);
     }
@@ -241,7 +241,7 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
         return info;
     }
 
-    private XElement SerializeConfiguration(IDataType item)
+    private async Task<XElement> SerializeConfiguration(IDataType item)
     {
         var configurationObject = TryGetConfigurationObject(item);
 
@@ -255,7 +255,7 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
         foreach(var serializer in serializers)
         {
             logger.LogDebug("Running Configuration Serializer : {name} for {type}", serializer.Name, item.EditorAlias);
-            merged = serializer.GetConfigurationExport(merged);
+            merged = await serializer.GetConfigurationExportAsync(item.Name ?? item.Id.ToString(), merged);
         }
 
         var json = merged
