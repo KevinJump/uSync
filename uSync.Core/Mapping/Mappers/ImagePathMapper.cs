@@ -55,10 +55,8 @@ public class ImagePathMapper : SyncValueMapperBase, ISyncMapper
         _mediaFolder = GetMediaFolderSetting(_globalOptions.CurrentValue.UmbracoMediaPath.TrimStart('~'));
         _globalOptions.OnChange(x => _mediaFolder = GetMediaFolderSetting(x.UmbracoMediaPath.TrimStart('~')));
 
-        if (!string.IsNullOrWhiteSpace(_mediaFolder))
-        {
-            logger.LogDebug("Media Folders: [{media}]", _mediaFolder);
-        }
+        if (logger.IsEnabled(LogLevel.Debug))
+            logger.LogDebug("Media Folders: [{media}]", _mediaFolder ?? "(Blank)");
 
         _imageUrlGenerator = imageUrlGenerator;
     }

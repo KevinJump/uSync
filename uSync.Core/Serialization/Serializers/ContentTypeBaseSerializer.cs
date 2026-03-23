@@ -223,8 +223,6 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
 
     protected async Task<IEnumerable<uSyncChange>> DeserializeBaseAsync(TObject item, XElement node)
     {
-        logger.LogDebug("De-serializing Base");
-
         if (node == null) return [];
 
         var info = node.Element(uSyncConstants.Xml.Info);
@@ -341,8 +339,6 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
 
     protected async Task<IEnumerable<uSyncChange>> DeserializeStructureAsync(TObject item, XElement node)
     {
-        logger.LogDebug("De-serializing Structure");
-
         var structure = node.Element("Structure");
         if (structure == null) return [];
 
@@ -357,27 +353,37 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
 
         foreach (var baseNode in nodes)
         {
-            logger.LogDebug("baseNode {base}", baseNode.ToString());
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("baseNode {base}", baseNode.ToString());
+
             var alias = baseNode.Value;
             var key = baseNode.Attribute(uSyncConstants.Xml.Key).ValueOrDefault(Guid.Empty);
 
-            logger.LogDebug("Structure: {key}", key);
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("Structure: {key}", key);
+
 
             var itemSortOrder = baseNode.Attribute(uSyncConstants.Xml.SortOrder).ValueOrDefault(sortOrder);
-            logger.LogDebug("Sort Order: {sortOrder}", itemSortOrder);
+            
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("Sort Order: {sortOrder}", itemSortOrder);
 
             IContentTypeBase? baseItem = default;
 
             if (key != Guid.Empty)
             {
-                logger.LogDebug("Structure By Key {key}", key);
+                if (logger.IsEnabled(LogLevel.Debug))
+                    logger.LogDebug("Structure By Key {key}", key);
+
                 // lookup by key (our preferred way)
                 baseItem = await FindItemAsync(key);
             }
 
             if (baseItem == null)
             {
-                logger.LogDebug("Structure By Alias: {alias}", alias);
+                if (logger.IsEnabled(LogLevel.Debug))
+                    logger.LogDebug("Structure By Alias: {alias}", alias);
+
                 // lookup by alias (less nice)
                 baseItem = await FindItemAsync(alias);
             }
@@ -415,8 +421,6 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
 
     protected async Task<IEnumerable<uSyncChange>> DeserializePropertiesAsync(TObject item, XElement node, SyncSerializerOptions options)
     {
-        logger.LogDebug("De-serializing Properties");
-
         var propertiesNode = node?.Element("GenericProperties");
         if (propertiesNode == null) return [];
 
@@ -437,7 +441,8 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
             var definitionKey = propertyNode.Element("Definition").ValueOrDefault(Guid.Empty);
             var propertyEditorAlias = propertyNode.Element("Type").ValueOrDefault(string.Empty);
 
-            logger.LogDebug(" > Property: {alias} {key} {definitionKey} {editorAlias}", alias, key, definitionKey, propertyEditorAlias);
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug(" > Property: {alias} {key} {definitionKey} {editorAlias}", alias, key, definitionKey, propertyEditorAlias);
 
             var result = await GetOrCreatePropertyAsync(item, key, alias, definitionKey, propertyEditorAlias, compositeProperties);
             if (result.Property == null)
@@ -521,7 +526,9 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
             if (result.IsNew)
             {
                 changes.AddNew(alias, name, alias);
-                logger.LogDebug("Property {alias} is new adding to tab. {tabAlias}", alias, tabAlias ?? "(No tab name)");
+
+                if (logger.IsEnabled(LogLevel.Debug))
+                    logger.LogDebug("Property {alias} is new adding to tab. {tabAlias}", alias, tabAlias ?? "(No tab name)");
 
                 if (string.IsNullOrWhiteSpace(tabAlias))
                 {
@@ -544,7 +551,9 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
             }
             else
             {
-                logger.LogDebug("Property {alias} exists, checking tab location {tabAlias}", alias, tabAlias);
+                if (logger.IsEnabled(LogLevel.Debug))
+                    logger.LogDebug("Property {alias} exists, checking tab location {tabAlias}", alias, tabAlias);
+
                 // we need to see if this one has moved. 
                 if (!string.IsNullOrWhiteSpace(tabAlias))
                 {
@@ -577,7 +586,8 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         }
         else
         {
-            logger.LogDebug("Property Removal disabled by configuration");
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("Property Removal disabled by configuration");
         }
 
         return changes;
@@ -654,7 +664,9 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
 
         if (aliasCache?.Contains(alias) is true)
         {
-            logger.LogDebug("Alias clash {alias} already exists", alias);
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("Alias clash {alias} already exists", alias);
+
             return $"{alias}_{Guid.NewGuid().ToShortKeyString(8)}";
         }
 
@@ -677,8 +689,8 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
 
         RefreshAliasCache();
 
-        logger.LogDebug("remove [{alias}] - {cache}", alias,
-            aliasCache != null ? string.Join(",", aliasCache) : "Empty");
+        if (logger.IsEnabled(LogLevel.Debug))
+            logger.LogDebug("remove [{alias}] - {cache}", alias, aliasCache != null ? string.Join(",", aliasCache) : "Empty");
     }
 
     private void RefreshAliasCache()
@@ -695,7 +707,9 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
             aliasCache?.Add(alias);
 
         RefreshAliasCache();
-        logger.LogDebug("Add [{aliaS}] - {cache}", alias, string.Join(",", aliasCache ?? []));
+
+        if (logger.IsEnabled(LogLevel.Debug))
+            logger.LogDebug("Add [{aliaS}] - {cache}", alias, string.Join(",", aliasCache ?? []));
     }
 
 
@@ -802,8 +816,6 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
 
     protected IEnumerable<uSyncChange> DeserializeTabs(TObject item, XElement node)
     {
-        logger.LogDebug("De-serializing Tabs");
-
         bool supportsPublishing = item is ContentType;
 
         var tabs = ContentTypeBaseSerializer<TObject>.LoadTabInfo(node);
@@ -813,7 +825,8 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
 
         foreach (var tab in tabs.OrderBy(x => x.Depth))
         {
-            logger.LogDebug("> Tab {name} {alias} {sortOrder} {depth}", tab.Name, tab.Alias, tab.SortOrder, tab.Depth);
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("> Tab {name} {alias} {sortOrder} {depth}", tab.Name, tab.Alias, tab.SortOrder, tab.Depth);
 
             var existing = ContentTypeBaseSerializer<TObject>.FindTab(item, tab.Alias, tab.Name, tab.Key);
             if (existing != null)
@@ -900,7 +913,9 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         // does the root tab already exist. 
         if (item.PropertyGroups.Contains(tabRoot) is true)
         {
-            logger.LogDebug("Parent Tab {tabRoot} already exists", tabRoot);
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("Parent Tab {tabRoot} already exists", tabRoot);
+
             return null;
         }
 
@@ -911,7 +926,9 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
             return null;
         }
 
-        logger.LogDebug("Parent Tab {tabRoot} doesn't exist, creating", tabRoot);
+        if (logger.IsEnabled(LogLevel.Debug))
+            logger.LogDebug("Parent Tab {tabRoot} doesn't exist, creating", tabRoot);
+
         item.AddPropertyGroup(tabRoot, compositionParent.Name ?? tabRoot);
         item.PropertyGroups[tabRoot].Type = compositionParent.Type;
         item.PropertyGroups[tabRoot].SortOrder = compositionParent.SortOrder;
@@ -1023,7 +1040,9 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
                     }
                     else
                     {
-                        logger.LogInformation("Removing tab : {alias}", tab.Alias);
+                        if (logger.IsEnabled(LogLevel.Information))
+                            logger.LogInformation("Removing tab : {alias}", tab.Alias);
+
                         changes.Add(uSyncChange.Delete($"Tabs/{tab.Alias}", tab.Alias, tab.Alias));
                         item.PropertyGroups.Remove(tab);
                     }
@@ -1044,20 +1063,20 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         var key = folderNode.Attribute(uSyncConstants.Xml.Key).ValueOrDefault(Guid.Empty);
         if (key == Guid.Empty) return;
 
-
-        logger.LogDebug("Folder Key {key}", key.ToString());
+        if (logger.IsEnabled(LogLevel.Debug))
+            logger.LogDebug("Folder Key {key}", key.ToString());
 
         var folder = await FindContainerAsync(key);
         if (folder is not null) return;
 
-        logger.LogDebug("Clean folder - Key doesn't not match");
+        if (logger.IsEnabled(LogLevel.Debug))
+            logger.LogDebug("Clean folder - Key doesn't not match");
+
         await FindFolderAsync(key, folderNode.Value);
     }
 
     protected async Task<IEnumerable<uSyncChange>> DeserializeCompositionsAsync(TObject item, XElement node)
     {
-        logger.LogDebug("{alias} De-serializing Compositions", item.Alias);
-
         var comps = node?.Element(uSyncConstants.Xml.Info)?.Element("Compositions");
         if (comps == null) return [];
 
@@ -1068,7 +1087,8 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
             var alias = compositionNode.Value;
             var key = compositionNode.Attribute(uSyncConstants.Xml.Key).ValueOrDefault(Guid.Empty);
 
-            logger.LogDebug("{itemAlias} > Comp {alias} {key}", item.Alias, alias, key);
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("{itemAlias} > Comp {alias} {key}", item.Alias, alias, key);
 
             var type = await FindItemAsync(key, alias);
             if (type != null)
@@ -1149,8 +1169,6 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         string propertyEditorAlias,
         List<string>? compositeProperties)
     {
-        logger.LogDebug("GetOrCreateProperty {key} [{alias}]", key, alias);
-
         var result = new PropertyTypeResult
         {
             IsNew = false,
@@ -1196,7 +1214,9 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
 
             if (PropertyExistsOnComposite(item, alias, compositeProperties))
             {
-                logger.LogDebug("Cannot create property here {name} as it exist on Composition", item.Name);
+                if (logger.IsEnabled(LogLevel.Debug))
+                    logger.LogDebug("Cannot create property here {name} as it exist on Composition", item.Name);
+
                 // can't create here, its on a composite
                 return new PropertyTypeResult();
             }
@@ -1213,7 +1233,9 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         // also update it if its not the same as the DataType, (because that has to match)
         if (!result.Property.PropertyEditorAlias.Equals(editorAlias))
         {
-            logger.LogDebug("Property Editor Alias mismatch {propertyEditorAlias} != {editorAlias} fixing...", result.Property.PropertyEditorAlias, editorAlias);
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("Property Editor Alias mismatch {propertyEditorAlias} != {editorAlias} fixing...", result.Property.PropertyEditorAlias, editorAlias);
+
             result.Property.PropertyEditorAlias = editorAlias;
         }
 
@@ -1262,7 +1284,8 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
             {
                 // if you remove something with lots of 
                 // content this can timeout (still? - need to check on v8)
-                logger.LogDebug("Removing {alias}", alias);
+                if (logger.IsEnabled(LogLevel.Debug))
+                    logger.LogDebug("Removing {alias}", alias);
 
                 changes.Add(uSyncChange.Delete($"Property/{alias}", alias, ""));
 
@@ -1353,10 +1376,11 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
 
     public override async Task SaveItemAsync(TObject item)
     {
-        logger.LogDebug("Save Item {name} ({alias})", item.Name, item.Alias);
         if (item.IsDirty() is false)
         {
-            logger.LogDebug("Item not dirty, skipping save");
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("Item not dirty, skipping save");
+
             return;
         }
 

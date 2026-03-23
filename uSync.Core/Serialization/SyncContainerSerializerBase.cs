@@ -37,11 +37,15 @@ public abstract class SyncContainerSerializerBase<TObject>
     {
         if (flags.HasFlag(SerializerFlags.LastPass))
         {
-            logger.LogDebug("Processing deletes as part of the last pass");
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("Processing deletes as part of the last pass");
+
             return await base.ProcessDeleteAsync(key, alias, flags);
         }
 
-        logger.LogDebug("Delete not processing as this is not the final pass");
+        if (logger.IsEnabled(LogLevel.Debug))
+            logger.LogDebug("Delete not processing as this is not the final pass");
+
         return SyncAttempt<TObject>.Succeed(alias, ChangeType.Hidden);
     }
 
@@ -49,8 +53,6 @@ public abstract class SyncContainerSerializerBase<TObject>
     {
         TObject? item = await FindItemAsync(node);
         if (item is not null) return Attempt.Succeed(item);
-
-        logger.LogDebug("FindOrCreate: Creating");
 
         // create
         var parent = default(TObject);
@@ -61,13 +63,13 @@ public abstract class SyncContainerSerializerBase<TObject>
         var parentNode = info?.Element(uSyncConstants.Xml.Parent);
         if (parentNode is not null)
         {
-            logger.LogDebug("Finding Parent");
-
             var parentKey = parentNode.Attribute(uSyncConstants.Xml.Key).ValueOrDefault(Guid.Empty);
             parent = await FindItemAsync(parentKey, parentNode.Value);
             if (parent != null)
             {
-                logger.LogDebug("Parent Found {parentId}", parent.Id);
+                if (logger.IsEnabled(LogLevel.Debug))
+                    logger.LogDebug("Parent Found {parentId}", parent.Id);
+
                 treeItem = parent;
             }
         }
@@ -81,20 +83,25 @@ public abstract class SyncContainerSerializerBase<TObject>
 
                 var folderKey = folder.Attribute(uSyncConstants.Xml.Key).ValueOrDefault(Guid.Empty);
 
-                logger.LogDebug("Searching for Parent by folder {folderKey} {folderValue}", folderKey, folder.Value);
+                if (logger.IsEnabled(LogLevel.Debug))
+                    logger.LogDebug("Searching for Parent by folder {folderKey} {folderValue}", folderKey, folder.Value);
 
                 var container = await FindFolderAsync(folderKey, folder.Value);
                 if (container != null)
                 {
                     treeItem = container;
-                    logger.LogDebug("Parent is Folder {TreeItemId}", treeItem.Key);
+
+                    if (logger.IsEnabled(LogLevel.Debug))
+                        logger.LogDebug("Parent is Folder {TreeItemId}", treeItem.Key);
 
                     // update the container key if its different (because we don't serialize folders on their own)
                     if (container.Key != folderKey)
                     {
                         if (container.Key != folderKey)
                         {
-                            logger.LogDebug("Folder Found: Key Different");
+                            if (logger.IsEnabled(LogLevel.Debug))
+                                logger.LogDebug("Folder Found: Key Different");
+
                             container.Key = folderKey;
                             await SaveContainerAsync(treeItem.Key, container);
                         }

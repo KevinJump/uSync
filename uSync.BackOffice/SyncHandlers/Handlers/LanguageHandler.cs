@@ -140,7 +140,9 @@ public class LanguageHandler : SyncHandlerBase<ILanguage>, ISyncHandler,
                     // not the file we just saved, but matching IsoCode, we remove it.
                     if (node.Element("IsoCode").ValueOrDefault(string.Empty) == item.IsoCode)
                     {
-                        logger.LogDebug("Found Matching Lang File, cleaning");
+                        if (logger.IsEnabled(LogLevel.Debug))
+                            logger.LogDebug("Found Matching Lang File, cleaning");
+
                         var attempt = await serializer.SerializeEmptyAsync(item, SyncActionType.Rename, node.GetAlias());
                         if (attempt.Success && attempt.Item is not null)
                         {
@@ -152,7 +154,9 @@ public class LanguageHandler : SyncHandlerBase<ILanguage>, ISyncHandler,
                 if (!installedLanguages.InvariantContains(IsoCode))
                 {
                     // language is no longer installed, make the file empty. 
-                    logger.LogDebug("Language in file is not on the site, cleaning");
+                    if (logger.IsEnabled(LogLevel.Debug))
+                        logger.LogDebug("Language in file is not on the site, cleaning");
+
                     var attempt = await serializer.SerializeEmptyAsync(item, SyncActionType.Delete, node.GetAlias());
                     if (attempt.Success && attempt.Item is not null)
                     {

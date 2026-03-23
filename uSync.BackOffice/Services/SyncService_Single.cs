@@ -142,7 +142,9 @@ public partial class SyncService
                     }
                     finally
                     {
-                        _logger.LogDebug("Imported {count} items", actions.Count);
+                        if (_logger.IsEnabled(LogLevel.Debug))
+                            _logger.LogDebug("Imported {count} items", actions.Count);
+
                         scope?.Complete();
                     }
 

@@ -24,7 +24,9 @@ internal class SyncDocumentUrlCleaner : ISyncDocumentUrlCleaner
         {
             using (_scopeProvider.CreateCoreScope(autoComplete: true))
             {
-                _logger.LogDebug("Cleaning urls for document {DocumentKey}", key);
+                if (_logger.IsEnabled(LogLevel.Debug))
+                    _logger.LogDebug("Cleaning urls for document {DocumentKey}", key);
+
                 _documentUrlRepository.DeleteByDocumentKey([key]);
             }
         }

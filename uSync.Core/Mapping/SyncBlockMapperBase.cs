@@ -55,7 +55,10 @@ public abstract class SyncBlockMapperBase<TBlockValue> : SyncValueMapperBase
     private async Task<object?> GetImportProperty(object? value, string propertyEditorAlias)
     {
         if (_mapperCollection.Value is null) return value;
-        _logger.LogDebug("Importing block value for {PropertyEditorAlias} {valueType}", propertyEditorAlias, value?.GetType().Name ?? "blank");
+
+        if (_logger.IsEnabled(LogLevel.Debug))
+            _logger.LogDebug("Importing block value for {PropertyEditorAlias} {valueType}", propertyEditorAlias, value?.GetType().Name ?? "blank");
+
         var importString = SyncBlockMapperBase<TBlockValue>.GetStringValue(value) ?? string.Empty;
         return await _mapperCollection.Value.GetImportValueAsync(importString, propertyEditorAlias);
     }
@@ -63,7 +66,10 @@ public abstract class SyncBlockMapperBase<TBlockValue> : SyncValueMapperBase
     private async Task<object?> GetExportProperty(object? value, string propertyEditorAlias)
     {
         if (_mapperCollection.Value is null) return value;
-        _logger.LogDebug("Exporting block value for {PropertyEditorAlias} {valueType}", propertyEditorAlias, value?.GetType().Name ?? "blank");
+        
+        if (_logger.IsEnabled(LogLevel.Debug))
+            _logger.LogDebug("Exporting block value for {PropertyEditorAlias} {valueType}", propertyEditorAlias, value?.GetType().Name ?? "blank");
+
         var exportValueAsString = SyncBlockMapperBase<TBlockValue>.GetStringValue(value) ?? string.Empty;
         var result = await _mapperCollection.Value.GetExportValueAsync(exportValueAsString, propertyEditorAlias);
         return result.ConvertToJsonNode()?.ExpandAllJsonInToken() ?? result;

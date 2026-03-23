@@ -77,11 +77,15 @@ internal class RichTextEditorMigratingSerializer : ConfigurationSerializerBase, 
 
         if (configuration.ContainsKey("extensions") is true)
         {
-            _logger.LogDebug("Skipping Tiptap migration as it already contains 'extensions'.");
+            if (_logger.IsEnabled(LogLevel.Debug))
+                _logger.LogDebug("Skipping Tiptap migration as it already contains 'extensions'.");
+
             return configuration;
         }
 
-        _logger.LogDebug("Migrating TinyMCE configuration to Tiptap format.");
+        if (_logger.IsEnabled(LogLevel.Debug))
+            _logger.LogDebug("Migrating TinyMCE configuration to Tiptap format.");
+
         // do the tip tap things. 
 
         // update we don't skip if the toolbar is missing, i can be for some older configs
@@ -98,11 +102,13 @@ internal class RichTextEditorMigratingSerializer : ConfigurationSerializerBase, 
         configuration.Remove("mode");
         configuration.Remove("hideLabel");
 
-        _logger.LogDebug("Original toolbar items: {ToolbarItems}", string.Join(", ", toolbarList));
+        if (_logger.IsEnabled(LogLevel.Debug))
+            _logger.LogDebug("Original toolbar items: {ToolbarItems}", string.Join(", ", toolbarList));
 
         var newToolbar = toolbarList.Select(MapToolbarItem).WhereNotNull().ToList();
 
-        _logger.LogDebug("Mapped toolbar items: {ToolbarItems}", string.Join(", ", newToolbar));
+        if (_logger.IsEnabled(LogLevel.Debug))
+            _logger.LogDebug("Mapped toolbar items: {ToolbarItems}", string.Join(", ", newToolbar));
 
         var extensions = _defaultExtensions.ToList();
         if (configuration.TryGetValue("blocks", out var blocks) && blocks is not null)

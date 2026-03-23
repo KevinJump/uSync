@@ -79,7 +79,9 @@ public class DictionaryItemSerializer : SyncSerializerBase<IDictionaryItem>, ISy
 
             if (options.GetSetting<bool>(uSyncConstants.DefaultSettings.ForceKeySync, uSyncConstants.DefaultSettings.ForceKeySync_Default))
             {
-                logger.LogDebug("Forcing key sync of dictionary item - if the keys are out of sync on existing items this can cause a SQL Constraint error");
+                if (logger.IsEnabled(LogLevel.Debug))
+                    logger.LogDebug("Forcing key sync of dictionary item - if the keys are out of sync on existing items this can cause a SQL Constraint error");
+
                 item.Key = key;
             }
         }

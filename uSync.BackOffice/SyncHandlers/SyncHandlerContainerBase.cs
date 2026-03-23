@@ -83,7 +83,9 @@ public abstract class SyncHandlerContainerBase<TObject>
                     if (ObjectTypes.GetUmbracoObjectType(slim.NodeObjectType) != this.ItemContainerType) continue;
 
                     name = slim.Name ?? name;
-                    logger.LogDebug("Folder has no children {name} {type}", name, slim.NodeObjectType);
+
+                    if (logger.IsEnabled(LogLevel.Debug))
+                        logger.LogDebug("Folder has no children {name} {type}", name, slim.NodeObjectType);
                 }
 
                 actions.Add(uSyncAction.SetAction(true, name, typeof(EntityContainer).Name, ChangeType.Delete, "Empty Container"));
@@ -228,7 +230,8 @@ public abstract class SyncHandlerContainerBase<TObject>
     {
         foreach (var folder in containers)
         {
-            logger.LogDebug("Processing container change : {name} [{id}]", folder.Name, folder.Id);
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("Processing container change : {name} [{id}]", folder.Name, folder.Id);
 
             var targetFolders = RootFolders.Select(x => Path.Combine(x, DefaultFolder)).ToArray();
 

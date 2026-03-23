@@ -68,8 +68,6 @@ public class LanguageSerializer : SyncSerializerBase<ILanguage>, ISyncSerializer
     /// </summary>
     public override async Task<SyncAttempt<ILanguage>> DeserializeSecondPassAsync(ILanguage item, XElement node, SyncSerializerOptions options)
     {
-        logger.LogDebug("Language Second Pass {IsoCode}", item.IsoCode);
-
         var details = new List<uSyncChange>();
 
         var isDefault = node.Element("IsDefault").ValueOrDefault(false);

@@ -213,7 +213,8 @@ internal class SyncFileService : ISyncFileService
     /// <inheritdoc/>
     public async Task SaveFileAsync(string filename, Stream stream)
     {
-        _logger.LogDebug("Saving File: {file}", filename);
+        if (_logger.IsEnabled(LogLevel.Debug))
+            _logger.LogDebug("Saving File: {file}", filename);
 
         using (Stream fileStream = OpenWrite(filename))
         {
@@ -227,7 +228,9 @@ internal class SyncFileService : ISyncFileService
     public async Task SaveFileAsync(string filename, string content)
     {
         var localFile = GetAbsPath(filename);
-        _logger.LogDebug("Saving File: {local} [{length}]", localFile, content.Length);
+
+        if (_logger.IsEnabled(LogLevel.Debug))
+            _logger.LogDebug("Saving File: {local} [{length}]", localFile, content.Length);
 
         using (Stream stream = OpenWrite(localFile))
         {
