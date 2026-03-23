@@ -205,7 +205,8 @@ internal class RichTextMigrationTests : MigrationTestBase
         ""Umb.Tiptap.Toolbar.TextIndent"",
         ""Umb.Tiptap.Toolbar.Link"",
         ""Umb.Tiptap.Toolbar.MediaPicker"",
-        ""Umb.Tiptap.Toolbar.EmbeddedMedia""
+        ""Umb.Tiptap.Toolbar.EmbeddedMedia"",
+        ""Umb.Tiptap.Toolbar.BlockPicker""
       ]
     ]
   ],
