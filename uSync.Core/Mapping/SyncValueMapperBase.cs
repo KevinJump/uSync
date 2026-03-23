@@ -1,6 +1,7 @@
 ﻿using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Models.Entities;
+using Umbraco.Cms.Core.PropertyEditors;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Extensions;
 
@@ -21,7 +22,6 @@ public abstract class SyncValueMapperBase
 
         var meta = GetType().GetCustomAttribute<NullableMapperAttribute>(false);
         if (meta != null) _hasNullableValue = true;
-
     }
 
     public abstract string Name { get; }
@@ -109,5 +109,31 @@ public abstract class SyncValueMapperBase
         if (!attempt) return default;
 
         return attempt.Result;
+    }
+}
+
+/// <summary>
+///  dependent value mappers, require other property editors to be present to work. 
+///  if the other property editor is not installed, this mapper will not run for the property. 
+/// </summary>
+public abstract class SyncDependentValueMapperBase : SyncValueMapperBase
+{
+    private readonly PropertyEditorCollection _propertyEditors;
+    private readonly string? _requiresEditor;
+
+    protected SyncDependentValueMapperBase(
+        IEntityService entityService,
+        PropertyEditorCollection propertyEditors) : base(entityService)
+    {
+        var requires = GetType().GetCustomAttribute<RequiresPropertyEditorAttribute>(false);
+        if (requires != null)
+            _requiresEditor = requires.Editor;
+        _propertyEditors = propertyEditors;
+    }
+
+    public override bool IsMapper(PropertyType propertyType)
+    {
+        return base.IsMapper(propertyType) &&
+            _propertyEditors.Any(x => x.Alias.Equals(_requiresEditor, StringComparison.InvariantCultureIgnoreCase));
     }
 }

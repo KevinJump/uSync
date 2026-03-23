@@ -775,7 +775,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         // them they plug in as ISyncMapper things
         logger.LogTrace("Getting ImportValue [{PropertyEditorAlias}]", propertyType.PropertyEditorAlias);
 
-        var importValue = await syncMappers.GetImportValueAsync(value, propertyType.PropertyEditorAlias);
+        var importValue = await syncMappers.GetImportValueAsync(value, propertyType);
         logger.LogTrace("Import Value {PropertyEditorAlias} {importValue}", propertyType.PropertyEditorAlias, importValue);
         return importValue;
     }

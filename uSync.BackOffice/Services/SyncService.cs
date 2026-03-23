@@ -1,5 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
 
+using Org.BouncyCastle.Asn1.Ocsp;
+using Org.BouncyCastle.Tls;
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -152,6 +155,8 @@ public partial class SyncService : ISyncService
         // if its blank, we just throw it back empty. 
         if (handlers == null || !handlers.Any()) return [];
 
+        Guid requestId = Guid.NewGuid();
+
         var sw = Stopwatch.StartNew();
 
         using (var pause = _mutexService.ImportPause(true))
@@ -218,10 +223,18 @@ public partial class SyncService : ISyncService
 
             callbacks?.Update?.Invoke($"Processed {actions.Count} items in {sw.ElapsedMilliseconds}ms", 1, 1);
 
+            summary.Message = "Completed";
+            summary.Total = handlers.Count() + 1;
+            var finalActions = actions.Select(x => x.AsActionView()).ToList();
+
+            callbacks?.Callback?.Invoke(summary);
+            callbacks?.Complete?.Invoke(requestId, "Sync complete", true, finalActions);
+
             return actions;
         }
-
     }
+
+
 
     private static async Task<List<uSyncAction>> PerformPostImportAsync(IEnumerable<HandlerConfigPair> handlers, IEnumerable<uSyncAction> actions)
     {

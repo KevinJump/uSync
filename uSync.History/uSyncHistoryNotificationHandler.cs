@@ -60,7 +60,7 @@ namespace uSync.History
             {
                 var historyInfo = new HistoryInfo
                 {
-                    Actions = actions.Select(x => x.ToActionView()),
+                    Actions = actions.Select(x => x.AsActionView()),
                     Date = DateTime.Now,
                     Username = _backOfficeSecurityAccessor?.BackOfficeSecurity?.CurrentUser?.Username ?? "Background Process",
                     Method = method,

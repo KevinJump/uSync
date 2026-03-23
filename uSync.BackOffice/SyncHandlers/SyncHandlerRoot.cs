@@ -508,8 +508,9 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         }
         catch (Exception ex)
         {
-            logger.LogWarning("[{alias}] ImportElement Failed : {exception}", this.Alias, ex.ToString());
-            return [uSyncAction.Fail(Path.GetFileName(filename), this.Alias, this.ItemType, ChangeType.Fail,
+            var fileWithoutPath = Path.GetFileName(filename);
+            logger.LogWarning("[{alias}] ({filename}) ImportElement Failed : {exception}", this.Alias, fileWithoutPath, ex.ToString());
+            return [uSyncAction.Fail(fileWithoutPath, this.Alias, this.ItemType, ChangeType.Fail,
                 $"{this.Alias} Import Fail: {ex.Message}", new Exception(ex.Message))];
         }
 

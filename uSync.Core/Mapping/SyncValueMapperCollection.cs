@@ -1,10 +1,12 @@
 ﻿using System.Collections.Concurrent;
 
 using Umbraco.Cms.Core.Composing;
+using Umbraco.Cms.Core.Models;
 using Umbraco.Extensions;
 
 using uSync.Core.Cache;
 using uSync.Core.Extensions;
+using uSync.Core.Migrations;
 
 namespace uSync.Core.Mapping;
 
@@ -12,18 +14,21 @@ public class SyncValueMapperCollection
         : BuilderCollectionBase<ISyncMapper>
 {
     private readonly ConcurrentDictionary<string, string> _customMappings = new(StringComparer.InvariantCultureIgnoreCase);
+    private readonly ISyncMigratedDataService _migratedDataService;
 
     public SyncEntityCache EntityCache { get; private set; }
 
     public SyncValueMapperCollection(
         SyncEntityCache entityCache,
-        Func<IEnumerable<ISyncMapper>> items)
+        Func<IEnumerable<ISyncMapper>> items,
+        ISyncMigratedDataService migratedDataService)
         : base(items)
     {
         EntityCache = entityCache;
 
         // todo, load these from config. 
         _customMappings = [];
+        _migratedDataService = migratedDataService;
     }
 
     /// <summary>
@@ -33,6 +38,20 @@ public class SyncValueMapperCollection
     {
         var mappedAlias = GetMapperAlias(editorAlias);
         return this.Where(x => x.Editors.InvariantContains(mappedAlias));
+    }
+
+    /// <summary>
+    ///  will get any mappers and any mappers associated with the editor alias that have been migrated (if any) 
+    ///  this allows us to support old mappers for a property editor, even if the property editor alias has changed.
+    /// </summary>
+    public async Task<IEnumerable<ISyncMapper>> GetImportingSyncMappers(string editorAlias)
+    {
+        var mappers = new List<ISyncMapper>();
+        var importingAlias = await _migratedDataService.GetAsync(editorAlias);
+        if (importingAlias is not null)
+            mappers.AddRange(this.Where(x => x.Editors.InvariantContains(importingAlias.Orginal)));
+       
+        return [.. mappers, ..GetSyncMappers(editorAlias)];
     }
 
     /// <summary>
@@ -61,11 +80,12 @@ public class SyncValueMapperCollection
     /// <summary>
     ///  Get the mapped import value
     /// </summary>
+    [Obsolete("Use GetImportValueAsync(string value, IPropertyType propertyType) instead will be removed in v19")]
     public async Task<object?> GetImportValueAsync(string value, string editorAlias)
     {
         if (string.IsNullOrWhiteSpace(value)) return null;
 
-        var mappers = GetSyncMappers(editorAlias);
+        var mappers = await GetImportingSyncMappers(editorAlias);
         if (mappers.Any())
         {
             var mappedValue = value;
@@ -79,6 +99,29 @@ public class SyncValueMapperCollection
 
         return value;
     }
+
+    public async Task<object?> GetImportValueAsync(string value, IPropertyType propertyType)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return null;
+
+        var mappers = await GetImportingSyncMappers(propertyType.PropertyEditorAlias);
+        if (mappers.Any())
+        {
+            var mappedValue = value;
+            foreach (var mapper in mappers)
+            {
+                mappedValue = 
+                    mapper is ISyncPropertyMapper syncPropertyMapper ?
+                     (await syncPropertyMapper.GetImportValueAsync(mappedValue ?? string.Empty, propertyType)) :
+                     (await mapper.GetImportValueAsync(mappedValue ?? string.Empty, propertyType.PropertyEditorAlias));
+            }
+
+            return GetCleanFlatJson(mappedValue ?? string.Empty);
+        }
+
+        return value;
+    }
+
 
     static readonly char[] _trimChars = ['\"', '\''];
 
@@ -125,8 +168,8 @@ public class SyncValueMapperCollection
 }
 
 public class SyncValueMapperCollectionBuilder
-    // : WeightedCollectionBuilderBase<SyncValueMapperCollectionBuilder, SyncValueMapperCollection, ISyncMapper>
-    : LazyCollectionBuilderBase<SyncValueMapperCollectionBuilder, SyncValueMapperCollection, ISyncMapper>
+    : WeightedCollectionBuilderBase<SyncValueMapperCollectionBuilder, SyncValueMapperCollection, ISyncMapper>
+    // : LazyCollectionBuilderBase<SyncValueMapperCollectionBuilder, SyncValueMapperCollection, ISyncMapper>
 {
     protected override SyncValueMapperCollectionBuilder This => this;
 }

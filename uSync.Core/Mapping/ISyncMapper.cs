@@ -15,6 +15,10 @@ public interface ISyncMapper
     Task<string?> GetImportValueAsync(string value, string editorAlias);
 
     Task<IEnumerable<uSyncDependency>> GetDependenciesAsync(object value, string editorAlias, DependencyFlags flags);
+}
 
+public interface ISyncPropertyMapper : ISyncMapper
+{
+    Task<string?> GetImportValueAsync(string value, IPropertyType propertyType);
 
 }

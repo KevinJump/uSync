@@ -85,7 +85,9 @@ internal sealed class uSyncManifestReader : IPackageManifestReader
                     Imports = new Dictionary<string, string>
                     {
                         {  "@jumoo/uSync", script },
-                        {  "@jumoo/uSync/external/signalr", script }
+                        {  "@jumoo/uSync/external/signalr", script },
+                        {  "@jumoo/usync", script },
+                        {  "@jumoo/usync/external/signalr", script }
                     }
                 }
             }

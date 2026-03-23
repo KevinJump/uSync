@@ -19,7 +19,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Umbraco.Cms.Web.Website"/>
+		<PackageReference Include="Umbraco.Cms.Web.Website" />
 		<PackageReference Include="Umbraco.Cms.Api.Management" />
 		<PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
 	</ItemGroup>

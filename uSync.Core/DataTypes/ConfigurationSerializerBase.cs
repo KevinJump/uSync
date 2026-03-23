@@ -1,5 +1,10 @@
 ﻿using System.Collections.Immutable;
 
+using Umbraco.Cms.Core.PropertyEditors;
+using Umbraco.Extensions;
+
+using uSync.Core.Mapping;
+
 namespace uSync.Core.DataTypes;
 
 public abstract class ConfigurationSerializerBase
@@ -10,6 +15,11 @@ public abstract class ConfigurationSerializerBase
     public virtual IDictionary<string, object> GetConfigurationImport(IDictionary<string, object> configuration)
         => configuration;
 
+    public virtual Task<IDictionary<string, object>> GetConfigurationExportAsync(string name, IDictionary<string, object> configuration)
+        => Task.FromResult(GetConfigurationExport(configuration));
+
+    public virtual Task<IDictionary<string, object>> GetConfigurationImportAsync(string name, IDictionary<string, object> configuration)
+        => Task.FromResult(GetConfigurationImport(configuration));
     /// <summary>
     ///  renames properties that might exist in a json string (if it is one).
     /// </summary>
@@ -26,6 +36,27 @@ public abstract class ConfigurationSerializerBase
         }
 
         return sort ? source.ToImmutableSortedDictionary() : source;
+    }
+}
+
+public abstract class ConfigurationDependenantSerializerBase : ConfigurationSerializerBase
+{
+    private readonly PropertyEditorCollection _propertyEditors;
+    public abstract string[] Editors { get; }
+    private string? _requires { get; }
+
+    protected ConfigurationDependenantSerializerBase(PropertyEditorCollection propertyEditors)
+    {
+        _propertyEditors = propertyEditors;
+        var requires = GetType().GetCustomAttribute<RequiresPropertyEditorAttribute>(false);
+        if (requires != null)
+            _requires = requires.Editor;
+    }
+
+    public bool IsSerializer(string propertyName)
+    {
+        return Editors.InvariantContains(propertyName)
+            && (_requires is null ? true : _propertyEditors.Any(x => x.Alias.Equals(propertyName, StringComparison.InvariantCultureIgnoreCase)));
     }
 
 }

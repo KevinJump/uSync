@@ -8,6 +8,7 @@ using uSync.Core.DataTypes;
 using uSync.Core.Dependency;
 using uSync.Core.Documents;
 using uSync.Core.Mapping;
+using uSync.Core.Migrations;
 using uSync.Core.Roots.Configs;
 using uSync.Core.Serialization;
 using uSync.Core.Tracking;
@@ -34,6 +35,9 @@ public static class uSyncCoreBuilderExtensions
 
         builder.Services.AddSingleton<uSyncCapabilityChecker>();
 
+        // migration data, so we can see when things go between types.
+        builder.AddSyncMigratedData();
+
         // document url cleaner, for key changes
         builder.Services.AddSingleton<ISyncDocumentUrlCleaner ,SyncDocumentUrlCleaner>();
 
@@ -44,11 +48,11 @@ public static class uSyncCoreBuilderExtensions
         // has to happen before the DataTypeSerializer is loaded, because that is where
         // they are used
         builder.WithCollectionBuilder<ConfigurationSerializerCollectionBuilder>()
-            .Add(() => builder.TypeLoader.GetTypes<IConfigurationSerializer>());
+            .Add(builder.TypeLoader.GetTypes<IConfigurationSerializer>());
 
         // value mappers, (map internal things in properties in and out of syncing process)
         builder.WithCollectionBuilder<SyncValueMapperCollectionBuilder>()
-            .Add(() => builder.TypeLoader.GetTypes<ISyncMapper>());
+            .Add(builder.TypeLoader.GetTypes<ISyncMapper>());
 
         // serializers - turn umbraco objects into / from xml in memory. 
         builder.WithCollectionBuilder<SyncSerializerCollectionBuilder>()
@@ -68,7 +72,6 @@ public static class uSyncCoreBuilderExtensions
 
         // the item factory lets us get to these collections from one place. 
         builder.Services.AddSingleton<ISyncItemFactory, SyncItemFactory>();
-
 
         return builder;
     }

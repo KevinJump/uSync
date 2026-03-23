@@ -3,6 +3,7 @@
 using System.Text.RegularExpressions;
 
 using Umbraco.Cms.Core;
+using Umbraco.Cms.Core.Composing;
 using Umbraco.Cms.Core.Models.Blocks;
 using Umbraco.Cms.Core.Services;
 
@@ -20,6 +21,7 @@ public partial class RTEBlockHelper
 /// <summary>
 ///  updates inline block data-content-udi attributes to data-content-key
 /// </summary>
+[Weight(200)]
 public class RTEBlockDataContentMigrator : SyncBlockMapperBase<RichTextBlockValue>, ISyncMapper
 {
     public RTEBlockDataContentMigrator(

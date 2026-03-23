@@ -4,7 +4,7 @@ using Umbraco.Extensions;
 namespace uSync.Core.DataTypes;
 
 public class ConfigurationSerializerCollectionBuilder
-    : LazyCollectionBuilderBase<ConfigurationSerializerCollectionBuilder, ConfigurationSerializerCollection, IConfigurationSerializer>
+    : WeightedCollectionBuilderBase<ConfigurationSerializerCollectionBuilder, ConfigurationSerializerCollection, IConfigurationSerializer>
 {
     protected override ConfigurationSerializerCollectionBuilder This => this;
 }
@@ -19,10 +19,10 @@ public class ConfigurationSerializerCollection :
     }
 
     public IConfigurationSerializer? GetSerializer(string editorAlias)
-        => this.FirstOrDefault(x => x.Editors.InvariantContains(editorAlias));
+        => this.FirstOrDefault(x => x.IsSerializer(editorAlias));
 
     public IEnumerable<IConfigurationSerializer> GetSerializers(string editorAlias)
-        => this.Where(x => x.Editors.InvariantContains(editorAlias));
+        => this.Where(x => x.IsSerializer(editorAlias));
 
     /// <summary>
     ///  find the first serializer that returns a non-null UI alias.
