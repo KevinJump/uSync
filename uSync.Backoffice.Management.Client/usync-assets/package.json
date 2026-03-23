@@ -55,14 +55,13 @@
 		"make": "npm run build && npm run client:make"
 	},
 	"devDependencies": {
-		"@hey-api/client-fetch": "^0.10.0",
 		"@hey-api/openapi-ts": "^0.85.0",
 		"@microsoft/signalr": "^10.0.0",
-		"@umbraco-cms/backoffice": "^17.0.0",
-		"lit": "^3.2.1",
-		"prettier": "^3.6.2",
+		"@umbraco-cms/backoffice": "^17.2.2",
+		"lit": "^3.3.2",
+		"prettier": "^3.8.1",
 		"typescript": "^5.9.3",
-		"vite": "^5.4.20",
+		"vite": "^8.0.1",
 		"vite-plugin-dts": "^4.5.4"
 	}
 }
