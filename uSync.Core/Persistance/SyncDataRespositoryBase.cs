@@ -15,7 +15,7 @@ namespace uSync.Core.Persistance;
 /// </summary>
 /// <remarks>
 ///  we are super cautious with this data, it's not the end of the world if it's not here (for most sites).
-///  and this is the only SQL that uSync does anywhere, so we are guarding it, so if it failes we carry on
+///  and this is the only SQL that uSync does anywhere, so we are guarding it, so if it fails we carry on
 ///  and log the errors so people can see them. 
 /// </remarks>
 
