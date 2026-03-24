@@ -1,4 +1,6 @@
-﻿using Umbraco.Cms.Core.Cache;
+﻿using Microsoft.Extensions.Logging;
+
+using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Infrastructure.Scoping;
 
 using uSync.Core.Persistance;
@@ -12,8 +14,9 @@ internal class SyncMigratedDataRepository
     public SyncMigratedDataRepository(
         IScopeAccessor scopeAccessor,
         AppCaches appCaches,
-        ISyncMigratedFullDataSetCachePolicy cachePolicy)
+        ISyncMigratedFullDataSetCachePolicy cachePolicy,
+        ILogger<SyncMigratedDataRepository> logger)
         : base(scopeAccessor, appCaches, cachePolicy, 
-            SyncMigrations.MigratedDataTableName)
+            SyncMigrations.MigratedDataTableName, logger)
     { }
 }

@@ -1,4 +1,6 @@
-﻿using NPoco;
+﻿using Microsoft.Extensions.Logging;
+
+using NPoco;
 
 using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Infrastructure.Persistence;
@@ -8,13 +10,22 @@ using Umbraco.Extensions;
 
 namespace uSync.Core.Persistance;
 
+/// <summary>
+///  repository to store some migration info (for when types change from one type to another).
+/// </summary>
+/// <remarks>
+///  we are super causious with this data, it's not the end of the world if it's not here (for most sites).
+///  and this is the only SQL that uSync does anywhere, so we are guarding it, so if it failes we carry on
+///  and log the errors so people can see them. 
+/// </remarks>
+
 internal abstract class SyncDataRespositoryBase<TModel, Key> : ISyncDataRespository<TModel, Key>
     where TModel : class, ISyncDataEntity<Key>
 {
-    // protected readonly ISyncDataRepositoryCachePolicy<TModel, Key> _cachePolicy;
     protected readonly ISyncDataFullSetCachePolicy<TModel, Key> _cachePolicy;
     protected readonly IScopeAccessor _scopeAccessor;
     protected readonly AppCaches _appCaches;
+    protected readonly ILogger<SyncDataRespositoryBase<TModel, Key>> _logger;
 
     protected readonly string _tableName;
 
@@ -22,13 +33,15 @@ internal abstract class SyncDataRespositoryBase<TModel, Key> : ISyncDataResposit
         IScopeAccessor scopeAccessor,
         AppCaches appCaches,
         ISyncDataFullSetCachePolicy<TModel, Key> cachePolicy,
-        string tableName)
+        string tableName,
+        ILogger<SyncDataRespositoryBase<TModel, Key>> logger)
     {
         _scopeAccessor = scopeAccessor;
         _appCaches = appCaches;
         _cachePolicy = cachePolicy;
 
         _tableName = tableName;
+        _logger = logger;
     }
 
     protected IScope AmbientScope
@@ -82,41 +95,74 @@ internal abstract class SyncDataRespositoryBase<TModel, Key> : ISyncDataResposit
 
     private async Task PersistNewItemAsync(TModel model)
     {
-        if (await ExistsAsync(model.Key))
-            throw new InvalidOperationException($"An item with the id {model.Key} already exists.");
-
-        using (var transaction = Database.GetTransaction())
+        try
         {
-            await Database.InsertAsync(model);
-            transaction.Complete();
+            if (await ExistsAsync(model.Key))
+                throw new InvalidOperationException($"An item with the id {model.Key} already exists.");
+
+            using (var transaction = Database.GetTransaction())
+            {
+                await Database.InsertAsync(model);
+                transaction.Complete();
+            }
+        }
+        catch(Exception ex)
+        {
+            _logger.LogWarning(ex, "uSync Migration - Persist New Item Failed");
+            return;
         }
     }
 
     private async Task PersistUpdatedItemAsync(TModel model)
     {
-        if (await ExistsAsync(model.Key) == false)
-            throw new InvalidOperationException($"An item with the key {model.Key} does not exist.");
-
-        using (var transaction = Database.GetTransaction())
+        try
         {
-            await Database.UpdateAsync(model);
-            transaction.Complete();
+            if (await ExistsAsync(model.Key) == false)
+                throw new InvalidOperationException($"An item with the key {model.Key} does not exist.");
+
+            using (var transaction = Database.GetTransaction())
+            {
+                await Database.UpdateAsync(model);
+                transaction.Complete();
+            }
+        }
+        catch(Exception ex)
+        {
+            _logger.LogWarning(ex, "uSync Migration Update Query Failed");
+            return;
         }
     }
 
     private async Task PersistDeletedItemAsync(TModel model)
     {
-        var deletes = GetDeleteClauses();
-        foreach (var delete in deletes)
+        try
         {
-            await Database.ExecuteAsync(delete, new { model.Key });
+            var deletes = GetDeleteClauses();
+            foreach (var delete in deletes)
+            {
+                await Database.ExecuteAsync(delete, new { model.Key });
+            }
+        }
+        catch(Exception ex)
+        {
+            _logger.LogWarning(ex, "uSync Migration Delete Failed");
+            return;
         }
     }
 
     private async Task<IEnumerable<TModel>> PerformGetAllAsync()
     {
-        var sql = GetBaseQuery(false);
-        return await Database.FetchAsync<TModel>(sql);
+        try
+        {
+            var sql = GetBaseQuery(false);
+            return await Database.FetchAsync<TModel>(sql);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "uSync Migration Query Failed");
+            return [];
+        }
+        
     }
 
 }
