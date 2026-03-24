@@ -1330,14 +1330,6 @@
           "uSync.Core": "[17.0.0, )"
         }
       },
-      "usync.community.migrations": {
-        "type": "Project",
-        "dependencies": {
-          "Umbraco.Cms.Core": "[17.1.0, )",
-          "Umbraco.Cms.Web.Website": "[17.1.0, )",
-          "uSync.Core": "[17.0.0, )"
-        }
-      },
       "usync.core": {
         "type": "Project",
         "dependencies": {

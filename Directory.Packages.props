@@ -16,15 +16,15 @@
   </ItemGroup>
   <!-- source link -->
   <ItemGroup>
-    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.103" />
+    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.201" />
   </ItemGroup>
   <!-- testing -->
   <ItemGroup>
     <PackageVersion Include="Umbraco.Cms.Tests" Version="17.1.0" />
     <PackageVersion Include="Umbraco.Cms.Tests.Integration" Version="17.1.0" />
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
-    <PackageVersion Include="NUnit3TestAdapter" Version="5.2.0" />
-    <PackageVersion Include="coverlet.collector" Version="6.0.4" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.3.0" />
+    <PackageVersion Include="NUnit3TestAdapter" Version="6.2.0" />
+    <PackageVersion Include="coverlet.collector" Version="8.0.1" />
   </ItemGroup>
   <!-- command line -->
   <ItemGroup>
