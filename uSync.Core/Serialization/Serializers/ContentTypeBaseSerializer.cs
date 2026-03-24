@@ -1070,7 +1070,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         if (folder is not null) return;
 
         if (logger.IsEnabled(LogLevel.Debug))
-            logger.LogDebug("Clean folder - Key doesn't not match");
+            logger.LogDebug("Clean folder - Key doesn't match");
 
         await FindFolderAsync(key, folderNode.Value);
     }
