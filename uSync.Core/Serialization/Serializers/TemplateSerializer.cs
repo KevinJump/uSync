@@ -183,7 +183,7 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
             // template is not on disk, we could use the viewEngine to find the view 
             // if this finds the view it tells us that the view is somewhere else ? 
             if (logger.IsEnabled(LogLevel.Debug))
-                logger.LogDebug("Failed to find content, but UsingRazorViews so if Umbraco create's anyway, we will then delete the file");
+                logger.LogDebug("Failed to find content, but UsingRazorViews so if Umbraco creates anyway, we will then delete the file");
             
             return Attempt.Succeed($"<!-- [uSyncMarker:{this.Id}]  template content - will be removed -->");
         }
