@@ -709,7 +709,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         RefreshAliasCache();
 
         if (logger.IsEnabled(LogLevel.Debug))
-            logger.LogDebug("Add [{aliaS}] - {cache}", alias, string.Join(",", aliasCache ?? []));
+            logger.LogDebug("Add [{alias}] - {cache}", alias, string.Join(",", aliasCache ?? []));
     }
 
 
