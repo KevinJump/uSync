@@ -14,7 +14,7 @@ namespace uSync.Core.Persistance;
 ///  repository to store some migration info (for when types change from one type to another).
 /// </summary>
 /// <remarks>
-///  we are super causious with this data, it's not the end of the world if it's not here (for most sites).
+///  we are super cautious with this data, it's not the end of the world if it's not here (for most sites).
 ///  and this is the only SQL that uSync does anywhere, so we are guarding it, so if it failes we carry on
 ///  and log the errors so people can see them. 
 /// </remarks>
