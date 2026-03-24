@@ -18,7 +18,7 @@ internal static class SyncMigratedDataBuilderExtensions
 {
     public static IUmbracoBuilder AddSyncMigratedData(this IUmbracoBuilder builder)
     {
-        builder.Services.AddSingleton<ISyncMigratedDataCachePolicy, SyncMigratedDataCachePolicy>();
+        builder.Services.AddSingleton<ISyncMigratedFullDataSetCachePolicy, SyncMigratedFullDataSetCachePolicy>();
         builder.Services.AddSingleton<ISyncMigratedDataRepository, SyncMigratedDataRepository>();
         builder.Services.AddSingleton<ISyncMigratedDataService, SyncMigratedDataService>();
         builder.AddNotificationAsyncHandler<UmbracoApplicationStartingNotification, SyncMigratedDataMigrationHandler>();

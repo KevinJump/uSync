@@ -12,7 +12,7 @@ internal class SyncMigratedDataRepository
     public SyncMigratedDataRepository(
         IScopeAccessor scopeAccessor,
         AppCaches appCaches,
-        ISyncMigratedDataCachePolicy cachePolicy)
+        ISyncMigratedFullDataSetCachePolicy cachePolicy)
         : base(scopeAccessor, appCaches, cachePolicy, 
             SyncMigrations.MigratedDataTableName)
     { }

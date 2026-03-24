@@ -11,7 +11,8 @@ namespace uSync.Core.Persistance;
 internal abstract class SyncDataRespositoryBase<TModel, Key> : ISyncDataRespository<TModel, Key>
     where TModel : class, ISyncDataEntity<Key>
 {
-    protected readonly ISyncDataRepositoryCachePolicy<TModel, Key> _cachePolicy;
+    // protected readonly ISyncDataRepositoryCachePolicy<TModel, Key> _cachePolicy;
+    protected readonly ISyncDataFullSetCachePolicy<TModel, Key> _cachePolicy;
     protected readonly IScopeAccessor _scopeAccessor;
     protected readonly AppCaches _appCaches;
 
@@ -20,7 +21,7 @@ internal abstract class SyncDataRespositoryBase<TModel, Key> : ISyncDataResposit
     public SyncDataRespositoryBase(
         IScopeAccessor scopeAccessor,
         AppCaches appCaches,
-        ISyncDataRepositoryCachePolicy<TModel, Key> cachePolicy,
+        ISyncDataFullSetCachePolicy<TModel, Key> cachePolicy,
         string tableName)
     {
         _scopeAccessor = scopeAccessor;
@@ -71,10 +72,10 @@ internal abstract class SyncDataRespositoryBase<TModel, Key> : ISyncDataResposit
         => await _cachePolicy.DeleteAsync(item, PersistDeletedItemAsync);
 
     public virtual async Task<bool> ExistsAsync(Key key)
-        => await _cachePolicy.ExistsAsync(key, PerformExistsAsync);
+        => await _cachePolicy.ExistsAsync(key, PerformGetAllAsync);
 
     public virtual async Task<TModel?> GetAsync(Key key)
-        => await _cachePolicy.GetAsync(key, PerformGetAsync);
+        => await _cachePolicy.GetAsync(key, PerformGetAllAsync);
 
     public virtual async Task<IEnumerable<TModel>> GetAllAsync(params Key[] keys)
         => await _cachePolicy.GetAllAsync(keys, PerformGetAllAsync);
@@ -112,31 +113,9 @@ internal abstract class SyncDataRespositoryBase<TModel, Key> : ISyncDataResposit
         }
     }
 
-    private async Task<bool> PerformExistsAsync(Key key)
-    {
-        var sql = GetBaseQuery(true)
-                .Where(GetBaseWhereClause(), new { Key = key });
-        return await Database.ExecuteScalarAsync<int>(sql) > 0;
-    }
-
-    private async Task<TModel?> PerformGetAsync(Key id)
-    {
-        var sql = GetBaseQuery(false)
-            .Where(GetBaseWhereClause(), new { Key = id });
-
-        return await Database.FirstOrDefaultAsync<TModel>(sql);
-    }
-
-    private async Task<IEnumerable<TModel>> PerformGetAllAsync(Key[]? keys)
+    private async Task<IEnumerable<TModel>> PerformGetAllAsync()
     {
         var sql = GetBaseQuery(false);
-
-        if (keys is null || keys.Length == 0)
-            return await Database.FetchAsync<TModel>(sql);
-
-        var uniqueIds = keys.Distinct().ToArray();
-        sql.Where($"{SqlSyntax.GetQuotedColumnName("Key")} IN (@Keys)", new { Keys = uniqueIds });
-
         return await Database.FetchAsync<TModel>(sql);
     }
 
