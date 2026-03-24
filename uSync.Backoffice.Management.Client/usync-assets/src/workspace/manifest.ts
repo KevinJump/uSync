@@ -87,14 +87,14 @@ const workspaceViews: Array<UmbExtensionManifest> = [
 	},
 	{
 		type: 'workspaceView',
-		alias: uSyncConstants.workspace.legacyView.alais,
+		alias: uSyncConstants.workspace.legacyView.alias,
 		name: 'uSync legacy',
 		js: () => import('./views/legacy/legacy.element.js'),
 		weight: 150,
 		meta: {
-			label: 'Legacy',
+			label: 'Migrate',
 			pathname: 'legacy',
-			icon: 'icon-dock-connector color-red',
+			icon: 'icon-arrow-up',
 		},
 		conditions: [
 			{

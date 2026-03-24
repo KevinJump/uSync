@@ -28,7 +28,7 @@ const _constants = {
 			alias: 'usync.workspace.addons',
 		},
 		legacyView: {
-			alais: 'usync.workspace.legacy',
+			alias: 'usync.workspace.legacy',
 		},
 	},
 };
