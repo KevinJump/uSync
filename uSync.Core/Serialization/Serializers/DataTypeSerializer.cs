@@ -79,7 +79,7 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
         if (flags.HasFlag(SerializerFlags.LastPass))
         {
             if (logger.IsEnabled(LogLevel.Debug))
-                logger.LogDebug("Processing deletes as part of the last pass)");
+                logger.LogDebug("Processing deletes as part of the last pass");
 
             return await base.ProcessDeleteAsync(key, alias, flags);
         }
