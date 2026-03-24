@@ -10,7 +10,7 @@ using IScope = Umbraco.Cms.Infrastructure.Scoping.IScope;
 namespace uSync.Core.Migrations;
 
 /// <summary>
-///  this is simliar to the SyncDataCachePolicy, except everything is cached in one key,
+///  this is similar to the SyncDataCachePolicy, except everything is cached in one key,
 /// </summary>
 /// <remarks>
 ///  caching all entites, works when it is unlikely they will change much duing the lookup
