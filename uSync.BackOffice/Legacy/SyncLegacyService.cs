@@ -45,7 +45,7 @@ internal class SyncLegacyService : ISyncLegacyService
         // if the default folder is not point to latest, then we don't check for legacy. 
         if (HasDefaultConfigFolder() is false) return false;
 
-        for (int n = _majorVersion - 1; n > 8; n--)
+        for (int n = _majorVersion - 1; n >= 8; n--)
         {
             var legacyFolder = $"~/uSync/v{n}";
             if (_syncFileService.DirectoryExists(legacyFolder))
