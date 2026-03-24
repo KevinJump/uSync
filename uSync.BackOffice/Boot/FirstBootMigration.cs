@@ -67,15 +67,17 @@ public class FirstBootMigration : UnscopedAsyncMigrationBase
 
             if (_serverRoleAccessor.CurrentServerRole == ServerRole.Subscriber)
             {
-                _logger.LogInformation("This is a Subscriber server in a load balanced setup - uSync only runs on single or schedulingPublisher (main) servers");
+                if (_logger.IsEnabled(LogLevel.Information))
+                    _logger.LogInformation("This is a Subscriber server in a load balanced setup - uSync only runs on single or schedulingPublisher (main) servers");
+                
                 return;
             }
 
             var sw = Stopwatch.StartNew();
             var changes = 0;
 
-            _logger.LogInformation("Import on First-boot Set - will import {group} handler groups",
-                _uSyncConfig.Settings.FirstBootGroup);
+            if (_logger.IsEnabled(LogLevel.Information))
+                _logger.LogInformation("Import on First-boot Set - will import {group} handler groups", _uSyncConfig.Settings.FirstBootGroup);
 
             // if config service is set to import on first boot then this 
             // will let uSync do a first boot import 
@@ -95,8 +97,9 @@ public class FirstBootMigration : UnscopedAsyncMigrationBase
             };
 
             sw.Stop();
-            _logger.LogInformation("uSync First boot complete {changes} changes in ({time}ms)",
-                changes, sw.ElapsedMilliseconds);
+            
+            if (_logger.IsEnabled(LogLevel.Information))
+                _logger.LogInformation("uSync First boot complete {changes} changes in ({time}ms)", changes, sw.ElapsedMilliseconds);
         }
         catch (Exception ex)
         {

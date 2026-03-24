@@ -129,7 +129,9 @@ public partial class SyncService : ISyncService
 
         if (_lastStartupRun.HasValue && _lastStartupRun.Value == runHash)
         {
-            _logger.LogInformation("uSync: Skipping [duplicate] startup import has already ran with these parameters");
+            if (_logger.IsEnabled(LogLevel.Information))
+                _logger.LogInformation("uSync: Skipping [duplicate] startup import has already ran with these parameters");
+
             return [];
         }
 
@@ -212,11 +214,14 @@ public partial class SyncService : ISyncService
             // fire complete
             await _mutexService.FireBulkCompleteAsync(new uSyncImportCompletedNotification(actions, handlerOptions.Group));
 
-            _logger.LogInformation("uSync Import: {handlerCount} handlers, processed {itemCount} items, {changeCount} changes in {ElapsedMilliseconds}ms",
-                handlers.Count(),
-                actions.Count,
-                actions.CountChanges(),
-            sw.ElapsedMilliseconds);
+            if (_logger.IsEnabled(LogLevel.Information))
+            {
+                _logger.LogInformation("uSync Import: {handlerCount} handlers, processed {itemCount} items, {changeCount} changes in {ElapsedMilliseconds}ms",
+                    handlers.Count(),
+                    actions.Count,
+                    actions.CountChanges(),
+                    sw.ElapsedMilliseconds);
+            }
 
             if (actions.ContainsErrors())
                 _logger.LogWarning("uSync Import: Errors detected in import : {count}", actions.CountErrors());
@@ -419,10 +424,13 @@ public partial class SyncService : ISyncService
 
         sw.Stop();
 
-        _logger.LogInformation("uSync Export: {handlerCount} handlers, processed {itemCount} items, {changeCount} changes in {ElapsedMilliseconds}ms",
-            handlers.Count(), actions.Count,
-            actions.CountChanges(),
-            sw.ElapsedMilliseconds);
+        if (_logger.IsEnabled(LogLevel.Information))
+        {
+            _logger.LogInformation("uSync Export: {handlerCount} handlers, processed {itemCount} items, {changeCount} changes in {ElapsedMilliseconds}ms",
+                handlers.Count(), actions.Count,
+                actions.CountChanges(),
+                sw.ElapsedMilliseconds);
+        }
 
         callbacks?.Update?.Invoke($"Processed {actions.Count} items in {sw.ElapsedMilliseconds}ms", 1, 1);
 
@@ -439,7 +447,8 @@ public partial class SyncService : ISyncService
     {
         if (e.EntityTypes != null && !string.IsNullOrWhiteSpace(e.Folder))
         {
-            _logger.LogInformation("Import Triggered by downlevel change {folder}", e.Folder);
+            if (_logger.IsEnabled(LogLevel.Information))
+                _logger.LogInformation("Import Triggered by downlevel change {folder}", e.Folder);
 
             var handlers = _handlerFactory
                 .GetValidHandlersByEntityType(e.EntityTypes, e.HandlerOptions);
@@ -464,7 +473,8 @@ public partial class SyncService : ISyncService
     {
         if (e.EntityTypes != null && !string.IsNullOrWhiteSpace(e.Folder))
         {
-            _logger.LogInformation("Export Triggered by downlevel change {folder}", e.Folder);
+            if (_logger.IsEnabled(LogLevel.Information))
+                _logger.LogInformation("Export Triggered by downlevel change {folder}", e.Folder);
 
             var handlers = _handlerFactory
                 .GetValidHandlersByEntityType(e.EntityTypes, e.HandlerOptions);

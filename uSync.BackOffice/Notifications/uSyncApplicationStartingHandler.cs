@@ -70,19 +70,25 @@ internal class uSyncApplicationStartingHandler : INotificationAsyncHandler<Umbra
         // are not running on a replica.
         if (_runtimeState.Level < RuntimeLevel.Run)
         {
-            _logger.LogInformation("Umbraco is in {mode} mode, so uSync will not run this time.", _runtimeState.Level);
+            if (_logger.IsEnabled(LogLevel.Information)) 
+                _logger.LogInformation("Umbraco is in {mode} mode, so uSync will not run this time.", _runtimeState.Level);
+
             return;
         }
 
         if (_serverRegistrar.CurrentServerRole == ServerRole.Subscriber)
         {
-            _logger.LogInformation("This is a replicate server in a load balanced setup - uSync will not run {serverRole}", _serverRegistrar.CurrentServerRole);
+            if (_logger.IsEnabled(LogLevel.Information))
+                _logger.LogInformation("This is a replicate server in a load balanced setup - uSync will not run {serverRole}", _serverRegistrar.CurrentServerRole);
+
             return;
         }
         
         if (_uSyncConfig.Settings.BackgroundStartup || _uSyncConfig.Settings.ProcessingMode == SyncProcessingMode.Background)
         {
-            _logger.LogInformation("uSync: Running startup in background");
+            if (_logger.IsEnabled(LogLevel.Information))
+                _logger.LogInformation("uSync: Running startup in background");
+
             _backgroundTaskQueue.QueueBackgroundWorkItem(
                 cancellationToken =>
                 {
@@ -119,7 +125,8 @@ internal class uSyncApplicationStartingHandler : INotificationAsyncHandler<Umbra
                         Group = _uSyncConfig.Settings.ExportOnSave
                     };
 
-                    _logger.LogInformation("uSync: Running export at startup");
+                    if (_logger.IsEnabled(LogLevel.Information))
+                        _logger.LogInformation("uSync: Running export at startup");
                     
                     
                     _uSyncService.StartupExportAsync(_uSyncConfig.GetWorkingFolder(), options).Wait();
@@ -127,7 +134,8 @@ internal class uSyncApplicationStartingHandler : INotificationAsyncHandler<Umbra
 
                 if (IsImportAtStartupEnabled())
                 {
-                    _logger.LogInformation("uSync: Running Import at startup {group}", _uSyncConfig.Settings.ImportAtStartup);
+                    if (_logger.IsEnabled(LogLevel.Information))
+                        _logger.LogInformation("uSync: Running Import at startup {group}", _uSyncConfig.Settings.ImportAtStartup);
 
                     var workingFolder = _uSyncConfig.GetWorkingFolder();
                     var hasStopFile = HasStopFile(workingFolder);
@@ -144,7 +152,8 @@ internal class uSyncApplicationStartingHandler : INotificationAsyncHandler<Umbra
                     }
                     else
                     {
-                        _logger.LogInformation("Startup Import blocked by {stopFile} file", _uSyncConfig.Settings.StopFile);
+                        if (_logger.IsEnabled(LogLevel.Information))
+                            _logger.LogInformation("Startup Import blocked by {stopFile} file", _uSyncConfig.Settings.StopFile);
                     }
                 }
             }
@@ -156,7 +165,9 @@ internal class uSyncApplicationStartingHandler : INotificationAsyncHandler<Umbra
         finally
         {
             sw.Stop();
-            _logger.LogInformation("uSync: Startup Complete {elapsed}ms", sw.ElapsedMilliseconds);
+
+            if (_logger.IsEnabled(LogLevel.Information))
+                _logger.LogInformation("uSync: Startup Complete {elapsed}ms", sw.ElapsedMilliseconds);
         }
 
     }
@@ -215,7 +226,9 @@ internal class uSyncApplicationStartingHandler : INotificationAsyncHandler<Umbra
         {
             _syncFileService.DeleteFile($"{folder}/{_uSyncConfig.Settings.OnceFile}");
             await _syncFileService.SaveFileAsync($"{folder}/{_uSyncConfig.Settings.StopFile}", "uSync Stop file, prevents startup import");
-            _logger.LogInformation($"{_uSyncConfig.Settings.OnceFile} file replaced by {_uSyncConfig.Settings.StopFile} file");
+
+            if (_logger.IsEnabled(LogLevel.Information))
+                _logger.LogInformation("{onceFile} file replaced by {stopFile} file", _uSyncConfig.Settings.OnceFile, _uSyncConfig.Settings.StopFile);
         }
     }
 
