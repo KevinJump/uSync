@@ -78,11 +78,15 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
     {
         if (flags.HasFlag(SerializerFlags.LastPass))
         {
-            logger.LogDebug("Processing deletes as part of the last pass)");
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("Processing deletes as part of the last pass");
+
             return await base.ProcessDeleteAsync(key, alias, flags);
         }
 
-        logger.LogDebug("Delete not processing as this is not the final pass");
+        if (logger.IsEnabled(LogLevel.Debug))
+            logger.LogDebug("Delete not processing as this is not the final pass");
+
         return SyncAttempt<IDataType>.Succeed(alias, ChangeType.Hidden);
     }
 
@@ -202,14 +206,19 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
         var serializers = _configurationSerializers.GetSerializers(editorAlias);
         foreach (var serializer in serializers)
         {
-            logger.LogDebug("Running Configuration Serializer : {name} for {type}", serializer.Name, editorAlias);
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("Running Configuration Serializer : {name} for {type}", serializer.Name, editorAlias);
+
             importData = await serializer.GetConfigurationImportAsync(item.Name ?? node.GetAlias(), importData);
         }
 
         if (importData.IsJsonEqual(item.ConfigurationData) is false)
         {
             changes.AddUpdateJson("Data", item.ConfigurationData, importData, "Configuration Data");
-            logger.LogDebug("Setting Config for {item} : {data}", item.Name, importData);
+
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("Setting Config for {item} : {data}", item.Name, importData);
+
             item.ConfigurationData = importData;
         }
         // else no change. 
@@ -254,7 +263,9 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
         var serializers = _configurationSerializers.GetSerializers(item.EditorAlias);
         foreach(var serializer in serializers)
         {
-            logger.LogDebug("Running Configuration Serializer : {name} for {type}", serializer.Name, item.EditorAlias);
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("Running Configuration Serializer : {name} for {type}", serializer.Name, item.EditorAlias);
+
             merged = await serializer.GetConfigurationExportAsync(item.Name ?? item.Id.ToString(), merged);
         }
 
@@ -320,7 +331,9 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
 
                 if (newEditor is not null)
                 {
-                    logger.LogDebug("Editor replacement for {alias} found : {newAlias}", editorAlias, newAlias);
+                    if (logger.IsEnabled(LogLevel.Debug))
+                        logger.LogDebug("Editor replacement for {alias} found : {newAlias}", editorAlias, newAlias);
+
                     return newEditor;
                 }
             }

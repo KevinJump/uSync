@@ -327,7 +327,8 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         CleanCaches(cacheKey);
         options.Callbacks?.Update?.Invoke("Done", 3, 3);
 
-        logger.LogDebug("ImportAll: {count} items imported", actions.Count);
+        if (logger.IsEnabled(LogLevel.Debug))
+            logger.LogDebug("ImportAll: {count} items imported", actions.Count);
 
         return actions;
     }
@@ -562,7 +563,9 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 
             if (result.Success && result.Change > ChangeType.NoChange && result.Saved is false && result.Item is not null)
             {
-                logger.LogTrace("Second Pass Import for {alias} - Saving item {key}", this.Alias, node.GetKey());
+                if (logger.IsEnabled(LogLevel.Trace))
+                    logger.LogTrace("Second Pass Import for {alias} - Saving item {key}", this.Alias, node.GetKey());
+
                 await serializer.SaveItemAsync(result.Item);
             }
 
@@ -621,7 +624,9 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
             // move parent to here, we only need to check it if there are files.
             var parent = await GetCleanParentAsync(cleanFile);
             if (parent == null) return [];
-            logger.LogDebug("Got parent with {alias} from clean file {file}", GetItemAlias(parent), Path.GetFileName(cleanFile));
+
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("Got parent with {alias} from clean file {file}", GetItemAlias(parent), Path.GetFileName(cleanFile));
 
             // keys should aways have at least one entry (the key from cleanFile)
             // if it doesn't then something might have gone wrong.
@@ -670,7 +675,8 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 
         return runtimeCache.GetCacheItem(cacheKey, () =>
         {
-            logger.LogDebug("Getting Folder Keys : {cacheKey}", cacheKey);
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("Getting Folder Keys : {cacheKey}", cacheKey);
 
             // when it's not flat structure we also get the sub folders. (extra defensive get them all)
             var keys = new List<Guid>();
@@ -686,7 +692,8 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
                 }
             }
 
-            logger.LogDebug("Loaded {count} keys from {folder} [{cacheKey}]", keys.Count, folder, cacheKey);
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("Loaded {count} keys from {folder} [{cacheKey}]", keys.Count, folder, cacheKey);
 
             return keys;
 
@@ -743,11 +750,15 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
             {
                 if (config.AllowCreateOnlyDeletes() is false || node.IsEmpty is false || node.GetEmptyAction() != SyncActionType.Delete)
                 {
-                    logger.LogDebug("CreateOnly: Item {alias} is a delete - deletes are also blocked for existing items.", node.GetAlias());
+                    if (logger.IsEnabled(LogLevel.Debug))
+                        logger.LogDebug("CreateOnly: Item {alias} is a delete - deletes are also blocked for existing items.", node.GetAlias());
+
                     return false;
                 }
 
-                logger.LogDebug("CreateOnly: Item {alias} already exist not importing it.", node.GetAlias());
+                if (logger.IsEnabled(LogLevel.Debug))
+                    logger.LogDebug("CreateOnly: Item {alias} already exist not importing it.", node.GetAlias());
+
                 return false;
             }
         }
@@ -761,7 +772,9 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
             var ignoreList = ignore.ToDelimitedList();
             if (ignoreList.InvariantContains(node.GetAlias()))
             {
-                logger.LogDebug("Ignore: Item {alias} is in the ignore list", node.GetAlias());
+                if (logger.IsEnabled(LogLevel.Debug))
+                    logger.LogDebug("Ignore: Item {alias} is in the ignore list", node.GetAlias());
+
                 return false;
             }
         }
@@ -1175,7 +1188,9 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
             {
                 if (actions.Any(x => x.Key == guid && (x.Change < ChangeType.Fail || x.Change == ChangeType.ParentMissing)))
                 {
-                    logger.LogDebug("Found existing key in actions {item}", actions[i].Name);
+                    if (logger.IsEnabled(LogLevel.Debug))
+                        logger.LogDebug("Found existing key in actions {item}", actions[i].Name);
+
                     actions[i].Change = ChangeType.Create;
                 }
                 else
@@ -1199,7 +1214,8 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 
         int count = 0;
 
-        logger.LogDebug("ReportFolder: {folder} ({count} files)", folder, files.Count);
+        if (logger.IsEnabled(LogLevel.Debug))
+            logger.LogDebug("ReportFolder: {folder} ({count} files)", folder, files.Count);
 
         foreach (string file in files)
         {
@@ -1567,7 +1583,9 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 
                         if (DoItemsMatch(node, item))
                         {
-                            logger.LogDebug("Duplicate {file} of {alias}, saving as rename", Path.GetFileName(file), this.GetItemAlias(item));
+
+                            if (logger.IsEnabled(LogLevel.Debug))
+                                logger.LogDebug("Duplicate {file} of {alias}, saving as rename", Path.GetFileName(file), this.GetItemAlias(item));
 
                             var attempt = await serializer.SerializeEmptyAsync(item, SyncActionType.Rename, node.GetAlias());
                             if (attempt.Success && attempt.Item is not null)

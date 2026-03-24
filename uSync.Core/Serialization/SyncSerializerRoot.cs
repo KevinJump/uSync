@@ -71,21 +71,29 @@ public abstract class SyncSerializerRoot<TObject>
 
             var alias = node.GetAlias();
 
-            logger.LogDebug(" >> Deserializing {alias} - {type}", alias, ItemType);
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug(" >> Deserializing {alias} - {type}", alias, ItemType);
+
             var result = await DeserializeCoreAsync(node, options);
-            logger.LogDebug(" << Deserialized result {alias} - {result}", alias, result.Success);
+            
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug(" << Deserialized result {alias} - {result}", alias, result.Success);
 
             if (result.Success && result.Item is not null)
             {
                 if (!result.Saved && !options.Flags.HasFlag(SerializerFlags.DoNotSave))
                 {
-                    logger.LogDebug("Saving - {alias}", alias);
+                    if (logger.IsEnabled(LogLevel.Debug))
+                        logger.LogDebug("Saving - {alias}", alias);
+
                     await SaveItemAsync(result.Item);
                 }
 
                 if (options.OnePass)
                 {
-                    logger.LogDebug("Deserialized {alias} - second pass", alias);
+                    if (logger.IsEnabled(LogLevel.Debug))
+                        logger.LogDebug("Deserialized {alias} - second pass", alias);
+
                     return await DeserializeSecondPassAsync(result.Item, node, options);
                 }
             }
@@ -153,7 +161,8 @@ public abstract class SyncSerializerRoot<TObject>
 
         var (key, alias) = FindKeyAndAlias(node);
 
-        logger.LogDebug("Empty Node : Processing Action {actionType} ({key} {alias})", actionType, key, alias);
+        if (logger.IsEnabled(LogLevel.Debug))
+            logger.LogDebug("Empty Node : Processing Action {actionType} ({key} {alias})", actionType, key, alias);
 
         switch (actionType)
         {
@@ -175,8 +184,6 @@ public abstract class SyncSerializerRoot<TObject>
 
     protected virtual async Task<SyncAttempt<TObject>> ProcessDeleteAsync(Guid key, string alias, SerializerFlags flags)
     {
-        logger.LogDebug("Processing Delete {key} {alias}", key, alias);
-
         var item = await this.FindItemAsync(key);
         if (item == null && !string.IsNullOrWhiteSpace(alias))
         {
@@ -194,18 +201,24 @@ public abstract class SyncSerializerRoot<TObject>
 
         if (item != null)
         {
-            logger.LogDebug("Deleting Item : {alias}", ItemAlias(item));
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("Deleting Item : {alias}", ItemAlias(item));
+
             await DeleteItemAsync(item);
             return SyncAttempt<TObject>.Succeed(alias, ChangeType.Delete);
         }
 
-        logger.LogDebug("Delete Item not found");
+        if (logger.IsEnabled(LogLevel.Debug))
+            logger.LogDebug("Delete Item not found");
+
         return SyncAttempt<TObject>.Succeed(alias, ChangeType.NoChange);
     }
 
     protected virtual SyncAttempt<TObject> ProcessRename(Guid key, string alias, SerializerFlags flags)
     {
-        logger.LogDebug("Process Rename (no action)");
+        if (logger.IsEnabled(LogLevel.Debug))
+            logger.LogDebug("Process Rename (no action)");
+
         return SyncAttempt<TObject>.Succeed(alias, ChangeType.NoChange);
     }
 
@@ -274,7 +287,8 @@ public abstract class SyncSerializerRoot<TObject>
 
     public virtual Task<SyncAttempt<XElement>> SerializeEmptyAsync(TObject item, SyncActionType change, string alias)
     {
-        logger.LogDebug("Base: Serializing Empty Element {alias} {change}", alias, change);
+        if (logger.IsEnabled(LogLevel.Debug))
+            logger.LogDebug("Base: Serializing Empty Element {alias} {change}", alias, change);
 
         if (string.IsNullOrEmpty(alias))
             alias = ItemAlias(item);
@@ -339,7 +353,8 @@ public abstract class SyncSerializerRoot<TObject>
     {
         var (key, alias) = FindKeyAndAlias(node);
 
-        logger.LogTrace("Base: Find Item {key} [{alias}]", key, alias);
+        if (logger.IsEnabled(LogLevel.Trace))
+            logger.LogTrace("Base: Find Item {key} [{alias}]", key, alias);
 
         if (key != Guid.Empty)
         {
@@ -349,7 +364,9 @@ public abstract class SyncSerializerRoot<TObject>
 
         if (!string.IsNullOrWhiteSpace(alias))
         {
-            logger.LogTrace("Base: Lookup by Alias: {alias}", alias);
+            if (logger.IsEnabled(LogLevel.Trace))
+                logger.LogTrace("Base: Lookup by Alias: {alias}", alias);
+
             return await FindItemAsync(alias);
         }
 

@@ -55,11 +55,15 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
     {
         if (flags.HasFlag(SerializerFlags.LastPass))
         {
-            logger.LogDebug("Processing deletes as part of the last pass");
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("Processing deletes as part of the last pass");
+
             return await base.ProcessDeleteAsync(key, alias, flags);
         }
 
-        logger.LogDebug("Delete not processing as this is not the final pass");
+        if (logger.IsEnabled(LogLevel.Debug))
+            logger.LogDebug("Delete not processing as this is not the final pass");
+
         return SyncAttempt<ITemplate>.Succeed(alias, ChangeType.Hidden);
     }
 
@@ -103,7 +107,9 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
 
             item = attempt.Result;
             details.AddNew(alias, alias, "Template");
-            logger.LogDebug("New Template: {alias} {path}", item.Alias, item.Path);
+
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("New Template: {alias} {path}", item.Alias, item.Path);
 
             // don't need to go through the process, the create also saves it.
             return SyncAttempt<ITemplate>.Succeed(name, item, ChangeType.Import, "Created", true, details);
@@ -155,14 +161,18 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
     {
         if (ShouldGetContentFromNode(node, options))
         {
-            logger.LogDebug("Getting content for Template from XML");
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("Getting content for Template from XML");
+
             return Attempt.Succeed(GetContentFromConfig(node));
         }
 
         var templatePath = ViewPath(node.GetAlias());
         if (templatePath is not null && _viewFileSystem?.FileExists(templatePath) is true)
         {
-            logger.LogDebug("Reading {path} contents", templatePath);
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("Reading {path} contents", templatePath);
+
             return Attempt.Succeed(GetContentFromFile(templatePath));
         }
 
@@ -172,7 +182,9 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
         {
             // template is not on disk, we could use the viewEngine to find the view 
             // if this finds the view it tells us that the view is somewhere else ? 
-            logger.LogDebug("Failed to find content, but UsingRazorViews so if Umbraco create's anyway, we will then delete the file");
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("Failed to find content, but UsingRazorViews so if Umbraco creates anyway, we will then delete the file");
+            
             return Attempt.Succeed($"<!-- [uSyncMarker:{this.Id}]  template content - will be removed -->");
         }
 
@@ -198,7 +210,9 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
             {
                 if (ViewsAreCompiled(options))
                 {
-                    logger.LogDebug("Template contents will not be imported because site is running in Production mode");
+                    if (logger.IsEnabled(LogLevel.Debug))
+                        logger.LogDebug("Template contents will not be imported because site is running in Production mode");
+
                     return false;
                 }
 
@@ -272,7 +286,9 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
                     var content = await System.IO.File.ReadAllTextAsync(fullPath);
                     if (content.Contains($"[uSyncMarker:{this.Id}]"))
                     {
-                        logger.LogDebug("Removing the file from disk, because it exists in a razor view {templatePath}", templatePath);
+                        if (logger.IsEnabled(LogLevel.Debug))
+                            logger.LogDebug("Removing the file from disk, because it exists in a razor view {templatePath}", templatePath);
+
                         _viewFileSystem.DeleteFile(templatePath);
 
                         // we have to tell the handlers we saved it - or they will and write the file back 
@@ -335,15 +351,23 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
         if (item.HasIdentity)
         {
             // update
-            logger.LogDebug("Saving: {alias} {path}", item.Alias, item.Path);
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("Saving: {alias} {path}", item.Alias, item.Path);
+
             var result = await _templateService.UpdateAsync(item, userKey);
-            logger.LogDebug("Update Template Result: [{key}] {result} {status}", item.Key, result.Success, result.Status);
+            
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("Update Template Result: [{key}] {result} {status}", item.Key, result.Success, result.Status);
         }
         else
         {
-            logger.LogDebug("Creating: {alias} {path}", item.Alias, item.Path);
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("Creating: {alias} {path}", item.Alias, item.Path);
+
             var result = await _templateService.CreateAsync(item.Name ?? item.Alias, item.Alias, item.Content, userKey, item.Key);
-            logger.LogDebug("Update Template Result: [{key}] {result} {status}", item.Key, result.Success, result.Status);
+            
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("Update Template Result: [{key}] {result} {status}", item.Key, result.Success, result.Status);
         }
     }
 

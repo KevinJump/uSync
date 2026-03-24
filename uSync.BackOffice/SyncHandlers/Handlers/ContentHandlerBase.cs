@@ -119,7 +119,9 @@ public abstract class ContentHandlerBase<TObject> : SyncHandlerTreeBase<TObject>
             var path = node.Element("Info")?.Element("Path").ValueOrDefault(string.Empty);
             if (!string.IsNullOrWhiteSpace(path) && !include.Any(x => path.InvariantStartsWith(x)))
             {
-                logger.LogDebug("Not processing item, {alias} path {path} not in include path", node.GetAlias(), path);
+                if (logger.IsEnabled(LogLevel.Debug))
+                    logger.LogDebug("Not processing item, {alias} path {path} not in include path", node.GetAlias(), path);
+
                 return false;
             }
         }
@@ -131,7 +133,9 @@ public abstract class ContentHandlerBase<TObject> : SyncHandlerTreeBase<TObject>
             var path = node.Element("Info")?.Element("Path").ValueOrDefault(string.Empty);
             if (!string.IsNullOrWhiteSpace(path) && exclude.Any(x => path.InvariantStartsWith(x)))
             {
-                logger.LogDebug("Not processing item, {alias} path {path} is excluded", node.GetAlias(), path);
+                if (logger.IsEnabled(LogLevel.Debug))
+                    logger.LogDebug("Not processing item, {alias} path {path} is excluded", node.GetAlias(), path);
+
                 return false;
             }
         }
@@ -148,14 +152,18 @@ public abstract class ContentHandlerBase<TObject> : SyncHandlerTreeBase<TObject>
 
         if (includeDocTypes.Length > 0 && !includeDocTypes.InvariantContains(doctype))
         {
-            logger.LogDebug("Not processing {alias} as it in not in the Included by ContentType list {contentType}", node.GetAlias(), doctype);
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("Not processing {alias} as it in not in the Included by ContentType list {contentType}", node.GetAlias(), doctype);
+
             return false;
         }
 
         var excludeDocTypes = config.GetSetting("ExcludeContentTypes", "").Split(',', StringSplitOptions.RemoveEmptyEntries);
         if (excludeDocTypes.Length > 0 && excludeDocTypes.InvariantContains(doctype))
         {
-            logger.LogDebug("Not processing {alias} as it is excluded by ContentType {contentType}", node.GetAlias(), doctype);
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("Not processing {alias} as it is excluded by ContentType {contentType}", node.GetAlias(), doctype);
+
             return false;
         }
 
@@ -231,7 +239,9 @@ public abstract class ContentHandlerBase<TObject> : SyncHandlerTreeBase<TObject>
         bool quickCleanup = this.DefaultConfig.GetSetting("QuickCleanup", false);
         if (quickCleanup)
         {
-            logger.LogDebug("Quick cleanup is on, so not looking in all config files");
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("Quick cleanup is on, so not looking in all config files");
+
             return;
         }
 

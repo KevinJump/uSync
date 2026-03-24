@@ -73,13 +73,16 @@ public class DictionaryItemSerializer : SyncSerializerBase<IDictionaryItem>, ISy
             // renaming of mismatched key values might result in duplicates.
             // but the workarounds could also end up creating far to many extra records
             // (we would delete/recreate one each time you synced)
+            
+            logger.LogWarning("Dictionary keys (Guids) do not match - we can continue with this, but renaming dictionary items from a source computer with a mismatched key value might result in duplicate entries in your dictionary values.");
 
-            logger.LogInformation("Dictionary keys (Guids) do not match - we can continue with this, but renaming dictionary items from a source computer with a mismatched key value might result in duplicate entries in your dictionary values.");
             details.AddUpdate(uSyncConstants.Xml.Key, item.Key, key);
 
             if (options.GetSetting<bool>(uSyncConstants.DefaultSettings.ForceKeySync, uSyncConstants.DefaultSettings.ForceKeySync_Default))
             {
-                logger.LogDebug("Forcing key sync of dictionary item - if the keys are out of sync on existing items this can cause a SQL Constraint error");
+                if (logger.IsEnabled(LogLevel.Debug))
+                    logger.LogDebug("Forcing key sync of dictionary item - if the keys are out of sync on existing items this can cause a SQL Constraint error");
+
                 item.Key = key;
             }
         }

@@ -60,21 +60,28 @@ internal class SyncScopedNotificationPublisher
     {
         if (notifications.Count == 0) return;
 
-        _logger.LogDebug(">> Publishing Notifications [{count}]", notifications.Count);
+        if (_logger.IsEnabled(LogLevel.Debug))
+            _logger.LogDebug(">> Publishing Notifications [{count}]", notifications.Count);
+
         var sw = Stopwatch.StartNew();
 
         SetNotificationStates(notifications);
 
         if (_uSyncConfig.Settings.BackgroundNotifications is true && _backgroundTaskQueue != null)
         {
-            _logger.LogDebug("Processing notifications in background queue");
+            if (_logger.IsEnabled(LogLevel.Debug))
+                _logger.LogDebug("Processing notifications in background queue");
+
             _backgroundTaskQueue.QueueBackgroundWorkItem(
                 cancellationToken =>
                 {
                     using (ExecutionContext.SuppressFlow())
                     {
                         Task.Run(() => base.PublishScopedNotifications(notifications), cancellationToken);
-                        _logger.LogDebug("Background Events Processed");
+
+                        if (_logger.IsEnabled(LogLevel.Debug))
+                            _logger.LogDebug("Background Events Processed");
+
                         return Task.CompletedTask;
                     }
                 });
@@ -95,7 +102,9 @@ internal class SyncScopedNotificationPublisher
 
         }
         sw.Stop();
-        _logger.LogDebug("<< Notifications processed - {elapsed}ms", sw.ElapsedMilliseconds);
+
+        if (_logger.IsEnabled(LogLevel.Debug))
+            _logger.LogDebug("<< Notifications processed - {elapsed}ms", sw.ElapsedMilliseconds);
 
         if (sw.ElapsedMilliseconds / notifications.Count > 2000)
             _logger.LogWarning("Processing notifications is slow, you should check for custom code running on notification events that may slow this down");

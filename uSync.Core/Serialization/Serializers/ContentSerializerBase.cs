@@ -337,7 +337,8 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
             {
                 if (parentNode.GetKey() == Guid.Empty)
                 {
-                    logger.LogDebug("Parent is root (-1)");
+                    if (logger.IsEnabled(LogLevel.Debug))
+                        logger.LogDebug("Parent is root (-1)");
                 }
                 else
                 {
@@ -347,7 +348,9 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
                         var friendlyPath = info.Element(uSyncConstants.Xml.Path).ValueOrDefault(string.Empty);
                         if (!string.IsNullOrWhiteSpace(friendlyPath))
                         {
-                            logger.LogDebug("Find Parent failed, will search by path {FriendlyPath}", friendlyPath);
+                            if (logger.IsEnabled(LogLevel.Debug))
+                                logger.LogDebug("Find Parent failed, will search by path {FriendlyPath}", friendlyPath);
+
                             parent = await FindParentByPathAsync(friendlyPath);
                         }
                     }
@@ -360,7 +363,8 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
                     }
                     else
                     {
-                        logger.LogDebug("Unable to find parent but parent node is set in configuration");
+                        if (logger.IsEnabled(LogLevel.Debug))
+                            logger.LogDebug("Unable to find parent but parent node is set in configuration");
                     }
                 }
             }
@@ -372,7 +376,10 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
                 if (item.ParentId != parentId)
                 {
                     changes.AddUpdate(uSyncConstants.Xml.Parent, item.ParentId, parentId);
-                    logger.LogTrace("{Id} Setting Parent {ParentId}", item.Id, parentId);
+
+                    if (logger.IsEnabled(LogLevel.Trace))
+                        logger.LogTrace("{Id} Setting Parent {ParentId}", item.Id, parentId);
+
                     item.ParentId = parentId;
                 }
 
@@ -381,7 +388,10 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
                 if (item.Path != nodePath)
                 {
                     changes.AddUpdate(uSyncConstants.Xml.Path, item.Path, nodePath);
-                    logger.LogDebug("{Id} Setting Path {idPath} was {oldPath}", item.Id, nodePath, item.Path);
+
+                    if (logger.IsEnabled(LogLevel.Debug))
+                        logger.LogDebug("{Id} Setting Path {idPath} was {oldPath}", item.Id, nodePath, item.Path);
+
                     item.Path = nodePath;
                 }
             }
@@ -389,7 +399,10 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
             if (item.Level != nodeLevel)
             {
                 changes.AddUpdate(uSyncConstants.Xml.Level, item.Level, nodeLevel);
-                logger.LogDebug("{Id} Setting Level to {Level} was {OldLevel}", item.Id, nodeLevel, item.Level);
+
+                if (logger.IsEnabled(LogLevel.Debug))
+                    logger.LogDebug("{Id} Setting Level to {Level} was {OldLevel}", item.Id, nodeLevel, item.Level);
+
                 item.Level = nodeLevel;
             }
         }
@@ -409,7 +422,9 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         if (key != Guid.Empty && item.Key != key)
         {
             changes.AddUpdate(uSyncConstants.Xml.Key, item.Key, key);
-            logger.LogTrace("{Id} Setting Key {Key}", item.Id, key);
+
+            if (logger.IsEnabled(LogLevel.Trace))
+                logger.LogTrace("{Id} Setting Key {Key}", item.Id, key);
 
             if (item.Id > 0)
                 await OnKeyChange(item, item.Key, key);
@@ -421,7 +436,10 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         if (item.CreateDate != createDate)
         {
             changes.AddUpdate("CreateDate", item.CreateDate, createDate);
-            logger.LogDebug("{id} Setting CreateDate: {createDate}", item.Id, createDate);
+
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("{id} Setting CreateDate: {createDate}", item.Id, createDate);
+
             item.CreateDate = createDate;
         }
 
@@ -433,7 +451,9 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
     protected virtual Task OnKeyChange(TObject item, Guid oldKey, Guid newKey)
     {
         // nothing to do here, but subclasses might need to act on key changes.
-        logger.LogDebug("{id} Key changed from {oldKey} to {newKey}", item.Id, oldKey, newKey);
+        if (logger.IsEnabled(LogLevel.Debug))
+            logger.LogDebug("{id} Key changed from {oldKey} to {newKey}", item.Id, oldKey, newKey);
+
         return Task.CompletedTask;
     }
 
@@ -514,7 +534,8 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
                 var current = item.Properties[alias];
                 if (current is null) continue;
 
-                logger.LogTrace("De-serialize Property {alias} {editorAlias}", alias, current.PropertyType.PropertyEditorAlias);
+                if (logger.IsEnabled(LogLevel.Trace))
+                    logger.LogTrace("De-serialize Property {alias} {editorAlias}", alias, current.PropertyType.PropertyEditorAlias);
 
                 var values = property.Elements("Value").ToList();
 
@@ -524,7 +545,8 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
                     var segment = value.Attribute("Segment").ValueOrDefault(string.Empty);
                     var propValue = value.ValueOrDefault(string.Empty);
 
-                    logger.LogTrace("{item} {Property} Culture {Culture} Segment {Segment}", item.Name, alias, culture, segment);
+                    if (logger.IsEnabled(LogLevel.Trace))
+                        logger.LogTrace("{item} {Property} Culture {Culture} Segment {Segment}", item.Name, alias, culture, segment);
 
                     try
                     {
@@ -535,7 +557,9 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
                             //
                             if (!current.PropertyType.VariesByCulture())
                             {
-                                logger.LogTrace("Item does not vary by culture - but uSync item file contains culture");
+                                if (logger.IsEnabled(LogLevel.Trace))
+                                    logger.LogTrace("Item does not vary by culture - but uSync item file contains culture");
+                                
                                 // if we get here, then things are wrong, so we will try to fix them.
                                 //
                                 // if the content config thinks it should vary by culture, but the document type doesn't
@@ -568,11 +592,15 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
                                 {
                                     // there is only one value - so we should set the default variant with this for consistency?
                                     culture = defaultLanguageIsoCode;
-                                    logger.LogDebug("Property {Alias} contains a single value that has no culture setting default culture {Culture}", alias, culture);
+
+                                    if (logger.IsEnabled(LogLevel.Debug))
+                                        logger.LogDebug("Property {Alias} contains a single value that has no culture setting default culture {Culture}", alias, culture);
                                 }
                                 else
                                 {
-                                    logger.LogDebug("{item} Property {Alias} contains a value that has no culture but this property varies by culture so this value has no effect", item.Name, alias);
+                                    if (logger.IsEnabled(LogLevel.Debug))
+                                        logger.LogDebug("{item} Property {Alias} contains a value that has no culture but this property varies by culture so this value has no effect", item.Name, alias);
+
                                     continue;
                                 }
                             }
@@ -590,7 +618,8 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
                                 string.IsNullOrEmpty(culture) ? null : culture,
                                 string.IsNullOrEmpty(segment) ? null : segment);
 
-                            logger.LogDebug("Property [{id}] {item} set {alias} value", item.Id, item.Name, alias);
+                            if (logger.IsEnabled(LogLevel.Debug))
+                                logger.LogDebug("Property [{id}] {item} set {alias} value", item.Id, item.Name, alias);
                         }
                     }
                     catch (Exception ex)
@@ -671,7 +700,8 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
     {
         if (sortOrder != -1 && item.SortOrder != sortOrder)
         {
-            logger.LogTrace("{id} Setting Sort Order {sortOrder}", item.Name ?? item.Key.ToString(), sortOrder);
+            if (logger.IsEnabled(LogLevel.Trace))
+                logger.LogTrace("{id} Setting Sort Order {sortOrder}", item.Name ?? item.Key.ToString(), sortOrder);
 
             var currentSortOrder = item.SortOrder;
             item.SortOrder = sortOrder;
@@ -752,7 +782,8 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         // this is where the mapping magic will happen. 
         // at the moment there are no value mappers, but if we need
         // them they plug in as ISyncMapper things
-        logger.LogTrace("Getting ExportValue [{PropertyEditorAlias}]", propertyType.PropertyEditorAlias);
+        if (logger.IsEnabled(LogLevel.Trace))
+            logger.LogTrace("Getting ExportValue [{PropertyEditorAlias}]", propertyType.PropertyEditorAlias);
 
         var exportValue = await syncMappers.GetExportValueAsync(value, propertyType.PropertyEditorAlias);
 
@@ -763,7 +794,10 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         {
             return jsonNode.SerializeJsonNode();
         }
-        logger.LogTrace("Export Value {PropertyEditorAlias} {exportValue}", propertyType.PropertyEditorAlias, exportValue ?? string.Empty);
+
+        if (logger.IsEnabled(LogLevel.Trace))
+            logger.LogTrace("Export Value {PropertyEditorAlias} {exportValue}", propertyType.PropertyEditorAlias, exportValue ?? string.Empty);
+
         return exportValue ?? string.Empty;
     }
 
@@ -773,10 +807,14 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         // this is where the mapping magic will happen. 
         // at the moment there are no value mappers, but if we need
         // them they plug in as ISyncMapper things
-        logger.LogTrace("Getting ImportValue [{PropertyEditorAlias}]", propertyType.PropertyEditorAlias);
+        if (logger.IsEnabled(LogLevel.Trace))
+            logger.LogTrace("Getting ImportValue [{PropertyEditorAlias}]", propertyType.PropertyEditorAlias);
 
         var importValue = await syncMappers.GetImportValueAsync(value, propertyType);
-        logger.LogTrace("Import Value {PropertyEditorAlias} {importValue}", propertyType.PropertyEditorAlias, importValue);
+
+        if (logger.IsEnabled(LogLevel.Trace))
+            logger.LogTrace("Import Value {PropertyEditorAlias} {importValue}", propertyType.PropertyEditorAlias, importValue);
+
         return importValue;
     }
 
@@ -978,7 +1016,9 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         var key = node.Attribute(uSyncConstants.Xml.Key).ValueOrDefault(Guid.Empty);
         if (key != Guid.Empty)
         {
-            logger.LogTrace("Looking for Parent by Key {Key}", key);
+            if (logger.IsEnabled(LogLevel.Trace))
+                logger.LogTrace("Looking for Parent by Key {Key}", key);
+
             item = await FindItemAsync(key);
             if (item != null) return item;
         }
@@ -986,7 +1026,10 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         if (item == null && searchByAlias)
         {
             var alias = node.ValueOrDefault(string.Empty);
-            logger.LogTrace("Looking for Parent by Alias {Alias}", alias);
+
+            if (logger.IsEnabled(LogLevel.Trace))
+                logger.LogTrace("Looking for Parent by Alias {Alias}", alias);
+
             if (!string.IsNullOrEmpty(alias))
             {
                 item = await FindItemAsync(node.ValueOrDefault(alias));
@@ -1008,12 +1051,15 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         var item = default(TObject);
         foreach (var folder in folders)
         {
-            logger.LogTrace("Looking for Item in folder {folder}", folder);
+            if (logger.IsEnabled(LogLevel.Trace))
+                logger.LogTrace("Looking for Item in folder {folder}", folder);
+
             var next = await FindItemAsync(folder, item);
             if (next == null)
             {
                 // if we get lost 1/2 way we are returning that as the path? which would put us in an odd place?
-                logger.LogTrace("Didn't find {folder} returning last found Parent", folder);
+                if (logger.IsEnabled(LogLevel.Trace))
+                    logger.LogTrace("Didn't find {folder} returning last found Parent", folder);
 
                 // if we don't fail on exact this is OK, 
                 // else its not - so we haven't 'found' the right place.
@@ -1025,11 +1071,13 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
 
         if (item == null)
         {
-            logger.LogDebug("Parent not found in the path");
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("Parent not found in the path");
         }
         else
         {
-            logger.LogTrace("Parent Item Found {Name} {id}", item.Name, item.Id);
+            if (logger.IsEnabled(LogLevel.Trace))
+                logger.LogTrace("Parent Item Found {Name} {id}", item.Name, item.Id);
         }
 
         return item;
@@ -1170,8 +1218,8 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         }
         catch (ArgumentException ex)
         {
-            logger.LogDebug("Unable to parse pattern '{pattern}' from '{settingsKey}' as Regex. {error}. Pattern will not be considered.", pattern,
-                uSyncConstants.DefaultSettings.DoNotSerializePattern, ex.Message);
+            logger.LogWarning("Unable to parse pattern '{pattern}' from '{settingsKey}' as Regex. {error}. Pattern will not be considered.", pattern,
+                    uSyncConstants.DefaultSettings.DoNotSerializePattern, ex.Message);
             return null;
         }
     }

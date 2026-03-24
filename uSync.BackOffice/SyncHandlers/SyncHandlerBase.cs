@@ -81,7 +81,8 @@ public abstract class SyncHandlerBase<TObject>
             var parentKey = await GetCleanParentKeyAsync(cleanFile);
             if (parentKey is null) return [];
 
-            logger.LogDebug("Got parent with {Id} from clean file {file}", parentKey, Path.GetFileName(cleanFile));
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("Got parent with {Id} from clean file {file}", parentKey, Path.GetFileName(cleanFile));
 
             // keys should aways have at least one entry (the key from cleanFile)
             // if it doesn't then something might have gone wrong.
@@ -133,12 +134,14 @@ public abstract class SyncHandlerBase<TObject>
     {
         var items = (await GetChildItemsAsync(key)).ToArray();
 
-        logger.LogDebug("DeleteMissingItems: {parentId} Checking {itemCount} items for {keyCount} keys", key, items.Length, keysToKeep.Count());
+        if (logger.IsEnabled(LogLevel.Debug))
+            logger.LogDebug("DeleteMissingItems: {parentId} Checking {itemCount} items for {keyCount} keys", key, items.Length, keysToKeep.Count());
 
         var actions = new List<uSyncAction>();
         foreach (var item in items.Where(x => !keysToKeep.Contains(x.Key)))
         {
-            logger.LogDebug("DeleteMissingItems: Found {item} that is not in file list (Reporting: {reportOnly})", item.Id, reportOnly);
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("DeleteMissingItems: Found {item} that is not in file list (Reporting: {reportOnly})", item.Id, reportOnly);
 
             var name = String.Empty;
             if (item is IEntitySlim slim) name = slim.Name;
@@ -148,7 +151,9 @@ public abstract class SyncHandlerBase<TObject>
                 var actualItem = await GetFromServiceAsync(item.Key);
                 if (actualItem == null)
                 {
-                    logger.LogDebug("Actual Item {id} can't be found", item.Id);
+                    if (logger.IsEnabled(LogLevel.Debug))
+                        logger.LogDebug("Actual Item {id} can't be found", item.Id);
+
                     continue;
                 }
 
@@ -157,7 +162,9 @@ public abstract class SyncHandlerBase<TObject>
                 // actually do the delete if we are really not reporting
                 if (!reportOnly)
                 {
-                    logger.LogInformation("Deleting item: {id} {name} as part of a 'clean' import", actualItem.Id, name);
+                    if (logger.IsEnabled(LogLevel.Information))
+                        logger.LogInformation("Deleting item: {id} {name} as part of a 'clean' import", actualItem.Id, name);
+
                     await DeleteViaServiceAsync(actualItem);
                 }
             }

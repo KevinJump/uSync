@@ -165,7 +165,8 @@ public partial class TemplateWatcher : IRegisteredObject
         {
             if (_templateFileSystem?.FileExists(filename) is false) return;
 
-            _logger.LogInformation("Checking {filename} template", filename);
+            if (_logger.IsEnabled(LogLevel.Information))
+                _logger.LogInformation("Checking {filename} template", filename);
 
             var fileAlias = GetAliasFromFileName(filename);
 

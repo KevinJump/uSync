@@ -155,7 +155,9 @@ public class SyncHandlerFactory : ISyncHandlerFactory
 
             if (!options.IncludeDisabled && handlerSetSettings.DisabledHandlers.InvariantContains(handler.Alias))
             {
-                _logger.LogTrace("Handler {handler} is in the disabled handler list", handler.Alias);
+                if (_logger.IsEnabled(LogLevel.Trace))
+                    _logger.LogTrace("Handler {handler} is in the disabled handler list", handler.Alias);
+
                 continue;
             }
 

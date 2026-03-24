@@ -52,7 +52,10 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
                 var sw = Stopwatch.StartNew();
                 var aliases = _contentTypeService.GetAllContentTypeAliases().ToList();
                 sw.Stop();
-                this.logger.LogDebug("Cache hit, 'usync_{id}' fetching all aliases {time}ms", this.Id, sw.ElapsedMilliseconds);
+
+                if (logger.IsEnabled(LogLevel.Debug))
+                    logger.LogDebug("Cache hit, 'usync_{id}' fetching all aliases {time}ms", this.Id, sw.ElapsedMilliseconds);
+
                 return aliases;
             });
     }
@@ -168,8 +171,6 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
 
     public override async Task<SyncAttempt<IContentType>> DeserializeSecondPassAsync(IContentType item, XElement node, SyncSerializerOptions options)
     {
-        logger.LogDebug("Deserialize Second Pass {alias}", item.Alias);
-
         var details = new List<uSyncChange>();
 
         SetSafeAliasValue(item, node, false);
@@ -198,7 +199,10 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
             dirty += string.Join(", ", item.PropertyGroups.Where(x => x.IsDirty()).Select(x => $"Group:{x.Name}"));
             dirty += string.Join(", ", item.PropertyTypes.Where(x => x.IsDirty()).Select(x => $"Property:{x.Name}"));
             dirty += historyUpdated ? " CleanupHistory" : "";
-            logger.LogDebug("Saving in Serializer because item is dirty [{properties}]", dirty);
+
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("Saving in Serializer because item is dirty [{properties}]", dirty);
+
 
             await _contentTypeService.UpdateAsync(item, Constants.Security.SuperUserKey);
         }
@@ -276,7 +280,9 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
 
             if (templateItem is not null)
             {
-                logger.LogDebug("Adding Template: {alias}", templateItem.Alias);
+                if (logger.IsEnabled(LogLevel.Debug))
+                    logger.LogDebug("Adding Template: {alias}", templateItem.Alias);
+
                 allowedTemplates.Add(templateItem);
             }
         }
@@ -407,7 +413,9 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
                     var updatedValue = element.Value.TryConvertTo(property.PropertyType);
                     if (updatedValue.Success)
                     {
-                        logger.LogDebug("Saving HistoryCleanup Value: {name} {value}", element.Name.LocalName, updatedValue.Result);
+                        if (logger.IsEnabled(LogLevel.Debug))
+                            logger.LogDebug("Saving HistoryCleanup Value: {name} {value}", element.Name.LocalName, updatedValue.Result);
+
                         changes.AddUpdate($"{_historyCleanupName}:{element.Name.LocalName}", current.ToNonBlankValue(), updatedValue.Result, $"{_historyCleanupName}/{element.Name.LocalName}");
                         property.SetValue(historyCleanup, updatedValue.Result);
                     }
