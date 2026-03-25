@@ -16,7 +16,7 @@ internal class SyncMigratedDataRepository
         IScopeAccessor scopeAccessor,
         AppCaches appCaches,
         ISyncMigratedFullDataSetCachePolicy cachePolicy,
-        ILogger<SyncMigratedDataRepository> logger)
+        ILogger<SyncDataRespositoryBase<SyncMigratedData, string>> logger)
         : base(scopeAccessor, logger, appCaches,
             cachePolicy, SyncMigrations.MigratedDataTableName)
     { }
