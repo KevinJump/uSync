@@ -7,10 +7,14 @@ namespace uSync.Core.Migrations;
 internal class SyncMigratedDataService : SyncDataServiceBase<SyncMigratedData, string>,
     ISyncMigratedDataService
 {
+    private readonly ISyncMigratedDataRepository _migratedRepository;
+
     public SyncMigratedDataService(
-        ISyncMigratedDataRepository repository,
-        ICoreScopeProvider scopeProvider) : base(repository, scopeProvider)
-    { }
+        ISyncMigratedDataRepository migratedRepository,
+        ICoreScopeProvider scopeProvider) : base(migratedRepository, scopeProvider)
+    {
+        _migratedRepository = migratedRepository;
+    }
 
     /// <summary>
     ///  tells us if this property has had it's id migrated, 
@@ -30,5 +34,13 @@ internal class SyncMigratedDataService : SyncDataServiceBase<SyncMigratedData, s
             AdditionalData = additionalData
         };
         await SaveAsync(item);
+    }
+
+    public async Task DeleteAllAsync()
+    {
+        using(var scope = ScopeProvider.CreateCoreScope(autoComplete: true))
+        {
+           await _migratedRepository.DeleteAllAsync();
+        }
     }
 }

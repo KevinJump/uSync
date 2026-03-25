@@ -4,4 +4,5 @@ namespace uSync.Core.Migrations;
 
 public interface ISyncMigratedDataRepository : ISyncDataRespository<SyncMigratedData, string>
 {
+    Task DeleteAllAsync();
 }
