@@ -142,9 +142,10 @@ internal class SyncFullDataSetRepositoryCachePolicy<TModel, TKey>
 
         if (await _semaphoreLock.WaitAsync(_semaphoreLockTimeout, cancellationToken) is false)
         {
-            // we don't want to cause issues if the cache is missing, so return nothing, this is the most likely outcome,
-            // and the processes will all still happen you just might miss some of the migrating value mappers, but that is better than locking up the system.
-            return [];
+            // we don't want to cause issues if the cache is missing or contended,
+            // so avoid blocking and fall back to fetching the data directly without caching.
+            TModel[] entries = [.. (await performGetAllAsync())];
+            return entries;
         }
 
         try
