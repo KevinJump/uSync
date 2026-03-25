@@ -8,11 +8,11 @@ using IScope = Umbraco.Cms.Infrastructure.Scoping.IScope;
 namespace uSync.Core.Persistance.Cache;
 
 /// <summary>
-///  this is similar to the SyncDataCachePolicy, except everything is cached in one key,
+///  this is similar to the SyncDataCachePolicy, except everything is cached in one key.
 /// </summary>
 /// <remarks>
-///  caching all entites, works when it is unlikely they will change much during the lookup
-///  phase, and there are not a lot (e.g 100+s) of entrires, we can cache them, and then
+///  caching all entities works when it is unlikely they will change much during the lookup
+///  phase, and there are not a lot (e.g 100+s) of entries, we can cache them, and then
 ///  all the lookups don't hit the database. 
 /// </remarks>
 internal class SyncFullDataSetRepositoryCachePolicy<TModel, TKey> 
@@ -142,9 +142,10 @@ internal class SyncFullDataSetRepositoryCachePolicy<TModel, TKey>
 
         if (await _semaphoreLock.WaitAsync(_semaphoreLockTimeout, cancellationToken) is false)
         {
-            // we don't want to cause issues if the cache is missing, so return nothing, this is the most likely outcome,
-            // and the processes will all still happen you just might miss some of the migrating value mappers, but that is better than locking up the system.
-            return [];
+            // we don't want to cause issues if the cache is missing or contended,
+            // so avoid blocking and fall back to fetching the data directly without caching.
+            TModel[] entries = [.. (await performGetAllAsync())];
+            return entries;
         }
 
         try
