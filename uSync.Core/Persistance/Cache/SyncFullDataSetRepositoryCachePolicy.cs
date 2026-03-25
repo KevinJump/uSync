@@ -3,11 +3,9 @@ using Umbraco.Cms.Core.Scoping;
 using Umbraco.Cms.Infrastructure.Scoping;
 using Umbraco.Extensions;
 
-using uSync.Core.Persistance;
-
 using IScope = Umbraco.Cms.Infrastructure.Scoping.IScope;
 
-namespace uSync.Core.Migrations;
+namespace uSync.Core.Persistance.Cache;
 
 /// <summary>
 ///  this is similar to the SyncDataCachePolicy, except everything is cached in one key,
@@ -17,16 +15,18 @@ namespace uSync.Core.Migrations;
 ///  phase, and there are not a lot (e.g 100+s) of entrires, we can cache them, and then
 ///  all the lookups don't hit the database. 
 /// </remarks>
-internal class SyncMigrateFullDataSetCachePolicy<TModel, TKey> 
-    : ISyncDataFullSetCachePolicy<TModel, TKey> 
+internal class SyncFullDataSetRepositoryCachePolicy<TModel, TKey> 
+    : ISyncFullDataSetRepositoryCachePolicy<TModel, TKey> 
     where TModel : class, ISyncDataEntity<TKey>
 {
+    private const int _cacheDurationMinutes = 10;
+
     private readonly IAppPolicyCache _globalCache;
     private readonly IScopeAccessor _scopeAccessor;
     private readonly IRepositoryCacheVersionService _repositoryCacheVersionService;
     private readonly ICacheSyncService _cacheSyncService;
 
-    public SyncMigrateFullDataSetCachePolicy(
+    public SyncFullDataSetRepositoryCachePolicy(
         IAppPolicyCache globalCache,
         IScopeAccessor scopeAccessor,
         IRepositoryCacheVersionService repositoryCacheVersionService,
@@ -67,33 +67,37 @@ internal class SyncMigrateFullDataSetCachePolicy<TModel, TKey>
         finally
         {
             ClearAllAsync();
+            await RegisterCacheChangeAsync();
         }
     }
 
-    public Task DeleteAsync(TModel model, Func<TModel, Task> persistDeleteAsync, CancellationToken cancellationToken = default)
+    public async Task DeleteAsync(TModel model, Func<TModel, Task> persistDeleteAsync, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(model);
         try
         {
-            return persistDeleteAsync(model);
+            await persistDeleteAsync(model);
         }
         finally
         {
             ClearAllAsync();
+            await RegisterCacheChangeAsync();
         }
     }
 
-    public Task UpdateAsync(TModel model, Func<TModel, Task> persistUpdateAsync, CancellationToken cancellationToken = default)
+    public async Task UpdateAsync(TModel model, Func<TModel, Task> persistUpdateAsync, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(model);
         try
         {
-            return persistUpdateAsync(model);
+            await persistUpdateAsync(model);
         }
         finally
         {
             ClearAllAsync();
+            await RegisterCacheChangeAsync();
         }
+
     }
 
     public async Task<bool> ExistsAsync(TKey key, Func<Task<IEnumerable<TModel>>> performGetAllAsync, CancellationToken cancellationToken = default)
@@ -155,7 +159,7 @@ internal class SyncMigrateFullDataSetCachePolicy<TModel, TKey>
 
     private Task InsertCacheEntries(TModel[] entries)
     {
-        Cache.Insert(_dataSetCacheKey, () => entries, TimeSpan.FromMinutes(10), true);
+        Cache.Insert(_dataSetCacheKey, () => entries, TimeSpan.FromMinutes(_cacheDurationMinutes), true);
         return Task.CompletedTask;
     }
 
@@ -168,5 +172,6 @@ internal class SyncMigrateFullDataSetCachePolicy<TModel, TKey>
         _cacheSyncService.SyncInternal(CancellationToken.None);
     }
 
-
+    private async Task RegisterCacheChangeAsync()
+        => await _repositoryCacheVersionService.SetCacheUpdatedAsync<TModel>();
 }

@@ -1,6 +1,6 @@
-﻿namespace uSync.Core.Persistance;
+﻿namespace uSync.Core.Persistance.Cache;
 
-public interface ISyncDataFullSetCachePolicy<TModel, TKey> where TModel : class, ISyncDataEntity<TKey>
+public interface ISyncFullDataSetRepositoryCachePolicy<TModel, TKey> where TModel : class, ISyncDataEntity<TKey>
 {
     void ClearAllAsync();
     Task CreateAsync(TModel model, Func<TModel, Task> persistNewAsync, CancellationToken cancellationToken = default);

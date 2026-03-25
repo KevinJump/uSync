@@ -1,4 +1,4 @@
-﻿namespace uSync.Core.Persistance;
+﻿namespace uSync.Core.Persistance.Cache;
 
 public interface ISyncDataRepositoryCachePolicy<TModel, TKey> where TModel : class, ISyncDataEntity<TKey>
 {

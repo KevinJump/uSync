@@ -10,7 +10,7 @@ using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Infrastructure.Migrations.Upgrade;
 
 using uSync.Core.Migrations.Migrations;
-using uSync.Core.Persistance;
+using uSync.Core.Persistance.Cache;
 
 namespace uSync.Core.Migrations;
 

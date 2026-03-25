@@ -8,6 +8,8 @@ using Umbraco.Cms.Infrastructure.Persistence.SqlSyntax;
 using Umbraco.Cms.Infrastructure.Scoping;
 using Umbraco.Extensions;
 
+using uSync.Core.Persistance.Cache;
+
 namespace uSync.Core.Persistance;
 
 /// <summary>
@@ -22,7 +24,7 @@ namespace uSync.Core.Persistance;
 internal abstract class SyncDataRespositoryBase<TModel, Key> : ISyncDataRespository<TModel, Key>
     where TModel : class, ISyncDataEntity<Key>
 {
-    protected readonly ISyncDataFullSetCachePolicy<TModel, Key> _cachePolicy;
+    protected readonly ISyncFullDataSetRepositoryCachePolicy<TModel, Key> _cachePolicy;
     protected readonly IScopeAccessor _scopeAccessor;
     protected readonly AppCaches _appCaches;
     protected readonly ILogger<SyncDataRespositoryBase<TModel, Key>> _logger;
@@ -31,17 +33,17 @@ internal abstract class SyncDataRespositoryBase<TModel, Key> : ISyncDataResposit
 
     public SyncDataRespositoryBase(
         IScopeAccessor scopeAccessor,
+        ILogger<SyncDataRespositoryBase<TModel, Key>> logger,
         AppCaches appCaches,
-        ISyncDataFullSetCachePolicy<TModel, Key> cachePolicy,
-        string tableName,
-        ILogger<SyncDataRespositoryBase<TModel, Key>> logger)
+        ISyncFullDataSetRepositoryCachePolicy<TModel, Key> cachePolicy,
+        string tableName)
     {
         _scopeAccessor = scopeAccessor;
+        _logger = logger;
         _appCaches = appCaches;
         _cachePolicy = cachePolicy;
 
         _tableName = tableName;
-        _logger = logger;
     }
 
     protected IScope AmbientScope

@@ -6,9 +6,10 @@ using Umbraco.Extensions;
 
 using IScope = Umbraco.Cms.Infrastructure.Scoping.IScope;
 
-namespace uSync.Core.Persistance;
+namespace uSync.Core.Persistance.Cache;
 
-internal class SyncDataRepositoryCachePolicy<TModel, TKey> : ISyncDataRepositoryCachePolicy<TModel, TKey> where TModel : class, ISyncDataEntity<TKey>
+internal class SyncDataRepositoryCachePolicy<TModel, TKey> 
+    : ISyncDataRepositoryCachePolicy<TModel, TKey> where TModel : class, ISyncDataEntity<TKey>
 {
     private readonly IAppPolicyCache _globalCache;
     private readonly IScopeAccessor _scopeAccessor;
