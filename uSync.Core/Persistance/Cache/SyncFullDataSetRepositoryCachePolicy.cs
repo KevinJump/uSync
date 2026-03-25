@@ -131,17 +131,24 @@ internal class SyncFullDataSetRepositoryCachePolicy<TModel, TKey>
         return all.FirstOrDefault(x => x.Key?.Equals(key) is true);
     }
 
-    SemaphoreSlim _semaphoreLock = new SemaphoreSlim(1);
+    private static readonly SemaphoreSlim _semaphoreLock = new SemaphoreSlim(1,1);
+    private static readonly TimeSpan _semaphoreLockTimeout = TimeSpan.FromSeconds(90);
+
 
     private async Task<TModel[]> GetAllCached(Func<Task<IEnumerable<TModel>>> performGetAllAsync, CancellationToken cancellationToken)
     {
         var all = Cache.GetCacheItem<TModel[]>(_dataSetCacheKey);
         if (all is not null) return all;
 
+        if (await _semaphoreLock.WaitAsync(_semaphoreLockTimeout, cancellationToken) is false)
+        {
+            // we don't want to cause issues if the cache is missing, so return nothing, this is the most likely outcome,
+            // and the processes will all still happen you just might miss some of the migrating value mappers, but that is better than locking up the system.
+            return [];
+        }
+
         try
         {
-            await _semaphoreLock.WaitAsync(cancellationToken);
-            
             // try in the lock, possible something else filled it in while we waited. 
             all = Cache.GetCacheItem<TModel[]>(_dataSetCacheKey);
             if (all is not null) return all;
