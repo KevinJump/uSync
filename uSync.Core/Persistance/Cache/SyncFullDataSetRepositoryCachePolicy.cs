@@ -11,7 +11,7 @@ namespace uSync.Core.Persistance.Cache;
 ///  this is similar to the SyncDataCachePolicy, except everything is cached in one key,
 /// </summary>
 /// <remarks>
-///  caching all entites, works when it is unlikely they will change much duing the lookup
+///  caching all entites, works when it is unlikely they will change much during the lookup
 ///  phase, and there are not a lot (e.g 100+s) of entrires, we can cache them, and then
 ///  all the lookups don't hit the database. 
 /// </remarks>
