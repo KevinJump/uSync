@@ -55,9 +55,11 @@ public partial class SyncService
     /// <inheritdoc/>>
     public async Task<IEnumerable<uSyncAction>> ImportHandlerAsync(string handlerAlias, uSyncImportOptions options)
     {
+        if (await _importSemaphoreLock.WaitAsync(_importLockWaitTimeSpan) is false) 
+            throw new TimeoutException($"Could not acquire import lock within the configured timespan of {_importLockWaitTimeSpan.TotalSeconds} seconds.");
+
         try
         {
-            _importSemaphoreLock.Wait();
             using (var pause = _mutexService.ImportPause(options.PauseDuringImport))
             {
                 var handlerPair = _handlerFactory.GetValidHandler(handlerAlias, new SyncHandlerOptions
@@ -106,9 +108,11 @@ public partial class SyncService
     /// <inheritdoc/>>
     public async Task<IEnumerable<uSyncAction>> PerformPostImportAsync(string[] folders, string handlerSet, IEnumerable<uSyncAction> actions)
     {
+        if (await _importSemaphoreLock.WaitAsync(_importLockWaitTimeSpan) is false)
+            throw new TimeoutException($"Could not acquire import lock within the configured timespan of {_importLockWaitTimeSpan.TotalSeconds} seconds.");
+
         try
         {
-            _importSemaphoreLock.Wait();
             using (var pause = _mutexService.ImportPause(true))
             {
                 var handlers = _handlerFactory.GetValidHandlers(new SyncHandlerOptions { Set = handlerSet, Action = HandlerActions.Import });

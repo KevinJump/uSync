@@ -293,6 +293,8 @@ export class uSyncWorkspaceContext
 
 		if (!response) return;
 
+		console.log('Downloading file', response);
+
 		const url = window.URL.createObjectURL(response);
 
 		const download = document.createElement('a');

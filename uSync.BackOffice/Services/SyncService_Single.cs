@@ -75,10 +75,11 @@ public partial class SyncService
     /// <inheritdoc/>>
     public async Task<IEnumerable<uSyncAction>> ImportPartialAsync(IList<OrderedNodeInfo> orderedNodes, uSyncPagedImportOptions options)
     {
+        if (await _importSemaphoreLock.WaitAsync(_importLockWaitTimeSpan) is false)
+            throw new TimeoutException($"Could not acquire import lock within the configured timespan of {_importLockWaitTimeSpan.TotalSeconds} seconds.");
+
         try
         {
-            _importSemaphoreLock.Wait();
-
             var total = orderedNodes.Count;
 
             using (var pause = _mutexService.ImportPause(options.PauseDuringImport))
@@ -162,10 +163,11 @@ public partial class SyncService
     /// <inheritdoc/>>
     public async Task<IEnumerable<uSyncAction>> ImportPartialSecondPassAsync(IEnumerable<uSyncAction> actions, uSyncPagedImportOptions options)
     {
+        if (await _importSemaphoreLock.WaitAsync(_importLockWaitTimeSpan) is false)
+            throw new TimeoutException($"Could not acquire import lock within the configured timespan of {_importLockWaitTimeSpan.TotalSeconds} seconds.");
+
         try
         {
-            _importSemaphoreLock.Wait();
-
             using (var pause = _mutexService.ImportPause(options.PauseDuringImport))
             {
                 SyncHandlerOptions syncHandlerOptions = HandlerOptionsFromPaged(options);
@@ -233,10 +235,11 @@ public partial class SyncService
     {
         if (actions == null || !actions.Any()) return [];
 
+        if (await _importSemaphoreLock.WaitAsync(_importLockWaitTimeSpan) is false)
+            throw new TimeoutException($"Could not acquire import lock within the configured timespan of {_importLockWaitTimeSpan.TotalSeconds} seconds.");
+
         try
         {
-            _importSemaphoreLock.Wait();
-
             using (var pause = _mutexService.ImportPause(options.PauseDuringImport))
             {
 
@@ -293,10 +296,11 @@ public partial class SyncService
     {
         if (actions == null) return [];
 
+        if (await _importSemaphoreLock.WaitAsync(_importLockWaitTimeSpan) is false)
+            throw new TimeoutException($"Could not acquire import lock within the configured timespan of {_importLockWaitTimeSpan.TotalSeconds} seconds.");
+
         try
         {
-            _importSemaphoreLock.Wait();
-
             using (var pause = _mutexService.ImportPause(options.PauseDuringImport))
             {
                 SyncHandlerOptions syncHandlerOptions = new(options.HandlerSet, options.UserId);

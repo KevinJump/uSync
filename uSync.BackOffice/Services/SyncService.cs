@@ -110,6 +110,7 @@ public partial class SyncService : ISyncService
 
     #region Importing
     static readonly SemaphoreSlim _importSemaphoreLock = new SemaphoreSlim(1, 1);
+    static readonly TimeSpan _importLockWaitTimeSpan = TimeSpan.FromMinutes(30);
 
     /// <summary>
     ///  hash of the options last used in a startup import
