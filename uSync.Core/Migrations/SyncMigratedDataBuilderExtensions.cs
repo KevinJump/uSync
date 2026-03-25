@@ -9,8 +9,8 @@ using Umbraco.Cms.Core.Scoping;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Infrastructure.Migrations.Upgrade;
 
+using uSync.Core.Migrations.Cache;
 using uSync.Core.Migrations.Migrations;
-using uSync.Core.Persistance.Cache;
 
 namespace uSync.Core.Migrations;
 

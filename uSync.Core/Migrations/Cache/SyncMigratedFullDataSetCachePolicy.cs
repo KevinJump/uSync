@@ -1,9 +1,9 @@
 ﻿using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Infrastructure.Scoping;
 
-using uSync.Core.Migrations;
+using uSync.Core.Persistance.Cache;
 
-namespace uSync.Core.Persistance.Cache;
+namespace uSync.Core.Migrations.Cache;
 
 internal class SyncMigratedFullDataSetCachePolicy : SyncFullDataSetRepositoryCachePolicy<SyncMigratedData, string>
     , ISyncMigratedFullDataSetCachePolicy

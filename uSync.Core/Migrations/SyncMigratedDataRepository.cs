@@ -3,8 +3,8 @@
 using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Infrastructure.Scoping;
 
+using uSync.Core.Migrations.Cache;
 using uSync.Core.Persistance;
-using uSync.Core.Persistance.Cache;
 
 namespace uSync.Core.Migrations;
 
