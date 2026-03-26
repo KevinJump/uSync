@@ -51,6 +51,14 @@ internal class SyncDataServiceBase<TModel, TKey> : ISyncDataService<TModel, TKey
         scope.Complete();
     }
 
+    public virtual async Task DeleteAllAsync()
+    {
+        using (var scope = ScopeProvider.CreateCoreScope(autoComplete: true))
+        {
+            await Repository.DeleteAllAsync();
+        }
+    }
+
     public virtual async Task<bool> ExistsAsync(TKey key)
     {
         using var scope = ScopeProvider.CreateCoreScope(autoComplete: true);

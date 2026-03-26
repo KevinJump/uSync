@@ -3,6 +3,7 @@
 public interface ISyncDataRespository<TModel, TKey> where TModel : class, ISyncDataEntity<TKey>
 {
     Task CreateAsync(TModel item);
+    Task DeleteAllAsync();
     Task DeleteAsync(TModel item);
     Task<bool> ExistsAsync(TKey key);
     Task<IEnumerable<TModel>> GetAllAsync(params TKey[] keys);

@@ -85,6 +85,19 @@ internal class SyncFullDataSetRepositoryCachePolicy<TModel, TKey>
         }
     }
 
+    public async Task DeleteAllAsync(Func<Task> persistDeleteAllAsync, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            await persistDeleteAllAsync();
+        }
+        finally
+        {
+            ClearAllAsync();
+            await RegisterCacheChangeAsync();
+        }
+    }
+
     public async Task UpdateAsync(TModel model, Func<TModel, Task> persistUpdateAsync, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(model);

@@ -35,12 +35,5 @@ internal class SyncMigratedDataService : SyncDataServiceBase<SyncMigratedData, s
         };
         await SaveAsync(item);
     }
-
-    public async Task DeleteAllAsync()
-    {
-        using(var scope = ScopeProvider.CreateCoreScope(autoComplete: true))
-        {
-           await _migratedRepository.DeleteAllAsync();
-        }
-    }
 }
+  

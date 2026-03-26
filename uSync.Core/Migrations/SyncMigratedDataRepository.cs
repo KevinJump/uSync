@@ -21,16 +21,5 @@ internal class SyncMigratedDataRepository
         : base(scopeAccessor, logger, appCaches,
             cachePolicy, SyncMigrations.MigratedDataTableName)
     { }
-
-    public async Task DeleteAllAsync()
-    {
-        var sql = Sql().Delete()
-            .From<SyncMigratedData>();
-
-        using(var transaction = Database.GetTransaction())
-        {
-            _ = await Database.ExecuteScalarAsync<int>(sql);
-            transaction.Complete();
-        }
-    }
+ 
 }

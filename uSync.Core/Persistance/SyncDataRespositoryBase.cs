@@ -86,6 +86,9 @@ internal abstract class SyncDataRespositoryBase<TModel, Key> : ISyncDataResposit
     public virtual async Task DeleteAsync(TModel item)
         => await _cachePolicy.DeleteAsync(item, PersistDeletedItemAsync);
 
+    public virtual async Task DeleteAllAsync()
+        => await _cachePolicy.DeleteAllAsync(PersistDeleteAllAsync);
+
     public virtual async Task<bool> ExistsAsync(Key key)
         => await _cachePolicy.ExistsAsync(key, PerformGetAllAsync);
 
@@ -148,6 +151,20 @@ internal abstract class SyncDataRespositoryBase<TModel, Key> : ISyncDataResposit
         catch(Exception ex)
         {
             _logger.LogWarning(ex, "uSync Migration Delete Failed");
+            return;
+        }
+    }
+
+    private async Task PersistDeleteAllAsync()
+    {
+        try
+        {
+            var delete = $"DELETE FROM {_tableName}";
+            await Database.ExecuteAsync(delete);
+        }
+        catch(Exception ex)
+        {
+            _logger.LogWarning(ex, "uSync Migration Delete All Failed");
             return;
         }
     }
