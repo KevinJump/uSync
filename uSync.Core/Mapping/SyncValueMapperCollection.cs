@@ -39,7 +39,7 @@ public class SyncValueMapperCollection
     public IEnumerable<ISyncMapper> GetSyncMappers(string editorAlias)
     {
         var mappedAlias = GetMapperAlias(editorAlias);
-        return this.Where(m => m.IsMapper(editorAlias));
+        return this.Where(m => m.IsMapper(mappedAlias));
     }
 
     /// <summary>
