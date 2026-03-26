@@ -1,5 +1,4 @@
 import { defineConfig } from "vite";
-import { viteStaticCopy } from "vite-plugin-static-copy";
 import { checker } from "vite-plugin-checker";
 import { nodeResolve } from "@rollup/plugin-node-resolve";
 
@@ -24,14 +23,6 @@ export default defineConfig({
     nodeResolve(),
     checker({
       typescript: true,
-    }),
-    viteStaticCopy({
-      targets: [
-        {
-          src: "src/icons/svg/*.js",
-          dest: "icons",
-        },
-      ],
     }),
   ],
 });
