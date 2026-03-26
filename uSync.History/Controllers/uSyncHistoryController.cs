@@ -1,15 +1,16 @@
 ﻿using Asp.Versioning;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
 using Umbraco.Cms.Api.Common.Attributes;
 using Umbraco.Cms.Api.Common.Filters;
 using Umbraco.Cms.Core;
-using Umbraco.Cms.Core.Hosting;
 using Umbraco.Cms.Web.Common.Filters;
+
 using uSync.Backoffice.Management.Api.Configuration;
 using uSync.BackOffice.Authorization;
-using uSync.BackOffice.Services;
-using uSync.Core.Extensions;
+using uSync.History.Service;
 
 namespace uSync.History.Controllers
 {
@@ -23,72 +24,21 @@ namespace uSync.History.Controllers
     [ApiExplorerSettings(GroupName = "History")]
     public class uSyncHistoryController : ControllerBase
     {
-        private readonly IHostingEnvironment _hostingEnvironment;
-        private readonly ISyncFileService _syncFileService;
+        private readonly ISyncHistoryService _syncHistoryService;
 
-        public uSyncHistoryController(ISyncFileService syncFileService, IHostingEnvironment hostingEnvironment)
+        public uSyncHistoryController(ISyncHistoryService syncHistoryService)
         {
-            _syncFileService = syncFileService;
-            _hostingEnvironment = hostingEnvironment;
+            _syncHistoryService = syncHistoryService;
         }
 
         [HttpGet("GetHistory")]
         [ProducesResponseType(200)]
         public async Task<IEnumerable<HistoryInfo>> GetHistory()
-        {
-            string historyFolder = GetHistoryFolder();
-            var files = _syncFileService.GetFiles(historyFolder, "*.json")
-                .Select(x => x.Substring(historyFolder.Length + 1));
-
-            var list = new List<HistoryInfo>();
-            foreach (var file in files)
-            {
-                var history = await LoadHistoryAsync(file);
-                if (history is not null)
-                    list.Add(history);
-            }
-
-            return list.OrderByDescending(x => x.Date);
-        }
-
-        [HttpGet("GetHistoryFolder")]
-        [ProducesResponseType(200)]
-        private string GetHistoryFolder()
-        {
-            var rootFolder = _syncFileService.GetAbsPath(_hostingEnvironment.LocalTempPath);
-            var historyFolder = Path.GetFullPath(Path.Combine(rootFolder, "uSync", "history"));
-            return historyFolder;
-        }
+            => await _syncHistoryService.GetHistoryAsync();
 
         [HttpGet("ClearHistory")]
         [ProducesResponseType(200)]
-        public bool ClearHistory()
-        {
-            // 1. get history folder
-            string historyFolder = GetHistoryFolder();
-            // 2. get history files
-            var files = _syncFileService.GetFiles(historyFolder, "*.json");
-            // 3. delet this
-            foreach (var file in files)
-            {
-                _syncFileService.DeleteFile(file);
-            }
-            // 4. truth
-            return true;
-        }
-
-        [HttpGet("HistoryInfo")]
-        [ProducesResponseType(200)]
-        public async Task<HistoryInfo?> LoadHistoryAsync(string filePath)
-        {
-            string historyFolder = GetHistoryFolder();
-            var fullPath = Path.Combine(historyFolder, filePath);
-            string contents = await _syncFileService.LoadContentAsync(fullPath);
-
-            var actions = contents.DeserializeJson<HistoryInfo>();
-            if (actions is null) return null;
-            actions.FilePath = filePath;
-            return actions;
-        }
+        public void ClearHistory()
+            => _syncHistoryService.ClearHistory();
     }
 }

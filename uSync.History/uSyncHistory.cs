@@ -11,16 +11,24 @@ namespace uSync.History
     {
         public string Name => "_uSync History";
 
-        public string Version => typeof(uSyncHistory).Assembly.GetName().Version?.ToString(3) ?? "16.1.0";
+        public string Version => typeof(uSyncHistory).Assembly.GetName().Version?.ToString(3) ?? "17.0";
 
         public string Icon => "icon-history";
 
-        public string View => "/App_Plugins/uSyncHistory/dashboard.html";
+        public string View => "";
 
         public string Alias => "uSyncHistory";
 
         public string DisplayName => "History";
 
         public int SortOrder => 20;
+    }
+
+    internal class SyncHistoryConstants
+    {
+        public const string AppName = "uSync.History";
+        public const string DisplayName = "uSync History";
+        public const string PlugnPath = "/App_Plugins/uSync.History/";
+
     }
 }

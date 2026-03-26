@@ -13,6 +13,7 @@ using Umbraco.Cms.Infrastructure.Manifest;
 using Umbraco.Extensions;
 using uSync.BackOffice;
 using uSync.BackOffice.Extensions;
+using uSync.History.Service;
 
 namespace uSync.History
 {
@@ -20,6 +21,8 @@ namespace uSync.History
     {
         public void Compose(IUmbracoBuilder builder)
         {
+            builder.Services.AddSingleton<ISyncHistoryService, SyncHistoryService>();
+
             builder.AddNotificationAsyncHandler<uSyncImportCompletedNotification, uSyncHistoryNotificationHandler>();
             builder.AddNotificationAsyncHandler<uSyncExportCompletedNotification, uSyncHistoryNotificationHandler>();
             builder.Services.AddSingleton<IOperationIdHandler, MaintenanceModeCustomOperationHandler>();
@@ -33,12 +36,12 @@ namespace uSync.History
         public void Configure(SwaggerGenOptions options)
         {
             options.SwaggerDoc(
-                "uSync.History",
+                SyncHistoryConstants.AppName,
                 new OpenApiInfo
                 {
-                    Title = "uSync History API",
+                    Title = $"{SyncHistoryConstants.DisplayName} API",
                     Version = "Latest",
-                    Description = "uSync History API methods"
+                    Description = $"{SyncHistoryConstants.DisplayName} API methods"
                 });
 
         }
@@ -67,18 +70,18 @@ namespace uSync.History
         public Task<IEnumerable<PackageManifest>> ReadPackageManifestsAsync()
         {
             var version = GetuSyncVersion();
-            var script = $"/App_Plugins/uSync.History/history.js?v={version}";
+            var script = $"{SyncHistoryConstants.PlugnPath}history.js?v={version}";
 
             List<PackageManifest> manifest = [
                 new PackageManifest
             {
-                Id = "uSync.History",
-                Name = "uSync History",
+                Id = SyncHistoryConstants.AppName,
+                Name = SyncHistoryConstants.DisplayName,
                 AllowTelemetry = true,
                 Version = GetuSyncVersion(),
                 Extensions = [ new JsonObject {
-                    ["name"] = "usync.history.entrypoint",
-                    ["alias"] = "uSync History EntryPoint",
+                    ["name"] = $"{SyncHistoryConstants.AppName}.entrypoint",
+                    ["alias"] = $"{SyncHistoryConstants.DisplayName} EntryPoint",
                     ["type"] = "backofficeEntryPoint",
                     ["js"] = script
                 }],
@@ -97,7 +100,7 @@ namespace uSync.History
             }
             catch
             {
-                return assembly.GetName()?.Version?.ToString(3) ?? "15.0.0";
+                return assembly.GetName()?.Version?.ToString(3) ?? "17.0.0";
             }
         }
     }
