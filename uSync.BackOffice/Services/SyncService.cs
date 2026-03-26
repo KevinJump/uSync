@@ -1,8 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
 
-using Org.BouncyCastle.Asn1.Ocsp;
-using Org.BouncyCastle.Tls;
-
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -26,6 +23,7 @@ using uSync.BackOffice.SyncHandlers;
 using uSync.BackOffice.SyncHandlers.Models;
 using uSync.Core;
 using uSync.Core.Extensions;
+using uSync.Core.Notifications;
 using uSync.Core.Serialization;
 
 namespace uSync.BackOffice;
@@ -298,6 +296,9 @@ public partial class SyncService : ISyncService
         {
             if (_syncFileService.DirectoryExists(folder))
                 _syncFileService.CleanFolder(folder);
+
+            // tell the migrations table to clean itself too. 
+            _eventAggregator.Publish(new SyncExportCleanNotification());
         }
         catch (Exception ex)
         {

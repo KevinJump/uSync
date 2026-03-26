@@ -6,29 +6,31 @@ using Umbraco.Extensions;
 
 using uSync.Core.Cache;
 using uSync.Core.Extensions;
-using uSync.Core.Migrations;
+using uSync.Core.Mapping.Tracking;
+using uSync.Core.Tracking;
 
 namespace uSync.Core.Mapping;
 
 public class SyncValueMapperCollection
         : BuilderCollectionBase<ISyncMapper>
 {
-    private readonly ConcurrentDictionary<string, string> _customMappings = new(StringComparer.InvariantCultureIgnoreCase);
-    private readonly ISyncMigratedDataService _migratedDataService;
+    private readonly SyncMapperTrackerCollection _mapperTrackers;
 
+    private readonly ConcurrentDictionary<string, string> _customMappings = new(StringComparer.InvariantCultureIgnoreCase);
+ 
     public SyncEntityCache EntityCache { get; private set; }
 
     public SyncValueMapperCollection(
         SyncEntityCache entityCache,
         Func<IEnumerable<ISyncMapper>> items,
-        ISyncMigratedDataService migratedDataService)
+        SyncMapperTrackerCollection mapperTrackers)
         : base(items)
     {
         EntityCache = entityCache;
 
         // todo, load these from config. 
         _customMappings = [];
-        _migratedDataService = migratedDataService;
+        _mapperTrackers = mapperTrackers;
     }
 
     /// <summary>
@@ -37,21 +39,17 @@ public class SyncValueMapperCollection
     public IEnumerable<ISyncMapper> GetSyncMappers(string editorAlias)
     {
         var mappedAlias = GetMapperAlias(editorAlias);
-        return this.Where(x => x.Editors.InvariantContains(mappedAlias));
+        return this.Where(m => m.IsMapper(mappedAlias));
     }
 
     /// <summary>
-    ///  will get any mappers and any mappers associated with the editor alias that have been migrated (if any) 
+    ///  will get any mappers and any mappers that are tracked for the editor alias, this is important because
     ///  this allows us to support old mappers for a property editor, even if the property editor alias has changed.
     /// </summary>
     public async Task<IEnumerable<ISyncMapper>> GetImportingSyncMappers(string editorAlias)
     {
-        var mappers = new List<ISyncMapper>();
-        var importingAlias = await _migratedDataService.GetAsync(editorAlias);
-        if (importingAlias is not null)
-            mappers.AddRange(this.Where(x => x.Editors.InvariantContains(importingAlias.Orginal)));
-       
-        return [.. mappers, ..GetSyncMappers(editorAlias)];
+        var mappers = await _mapperTrackers.GetMappersAsync(editorAlias);
+        return [.. mappers, .. GetSyncMappers(editorAlias)];
     }
 
     /// <summary>

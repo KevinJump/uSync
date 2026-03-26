@@ -9,6 +9,9 @@ public interface ISyncMapper
     string Name { get; }
     string[] Editors { get; }
 
+    bool IsMapper(string editorAlias) 
+        => Editors.Contains(editorAlias, StringComparer.OrdinalIgnoreCase);
+
     bool IsMapper(PropertyType propertyType);
 
     Task<string?> GetExportValueAsync(object value, string editorAlias);

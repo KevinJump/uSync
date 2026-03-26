@@ -18,6 +18,7 @@ public class ConfigurationSerializerCollection :
     {
     }
 
+    [Obsolete("Use GetSerializers instead to get all serializers for an editor alias, getting only the first is not recommended. will be removed in v19")]
     public IConfigurationSerializer? GetSerializer(string editorAlias)
         => this.FirstOrDefault(x => x.IsSerializer(editorAlias));
 
@@ -38,5 +39,20 @@ public class ConfigurationSerializerCollection :
             }
         }
         return null;
+    }
+
+    /// <summary>
+    ///  tells serializers that care about it that this is a rename 
+    /// </summary>
+    /// <param name="oldEditorAlias"></param>
+    /// <param name="newEditorAlias"></param>
+    public async Task TrackRenamedEditorAsync(string oldEditorAlias, string newEditorAlias) {
+    
+        foreach(var serializer in GetSerializers(oldEditorAlias))
+        {
+            if (serializer is IConfigurationTrackingSerializer trackingSerializer)
+                await trackingSerializer.TrackRenamedEditorAsync(oldEditorAlias, newEditorAlias);
+        }
+
     }
 }
