@@ -617,7 +617,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         // be a little slower (not much though)
 
         // we cache this, (it is cleared on an ImportAll)
-        var keys = GetFolderKeys(folder, flat);
+        var keys = await GetFolderKeysAsync(folder, flat);
         if (keys.Count > 0)
         {
             // move parent to here, we only need to check it if there are files.
@@ -664,39 +664,50 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     ///  so we cache it, and if we are using the flat folder structure, then
     ///  we only do it once, so its quicker. 
     /// </remarks>
+    [Obsolete("Use GetFolderKeysAsync instead, will be removed in v19")]
     protected IList<Guid> GetFolderKeys(string folder, bool flat)
+        => GetFolderKeysAsync(folder, flat).GetAwaiter().GetResult();
+
+    /// <summary>
+    ///  Get the GUIDs for all items in a folder
+    /// </summary>
+    /// <remarks>
+    ///  This is disk intensive, (checking the .config files all the time)
+    ///  so we cache it, and if we are using the flat folder structure, then
+    ///  we only do it once, so its quicker. 
+    /// </remarks>
+    protected async Task<IList<Guid>> GetFolderKeysAsync(string folder, bool flat)
     {
         // We only need to load all the keys once per handler (if all items are in a folder that key will be used).
         var folderKey = folder.GetHashCode();
 
         var cacheKey = $"{GetCacheKeyBase()}_{folderKey}";
 
+        var cached = runtimeCache.GetCacheItem<IList<Guid>>(cacheKey);
+        if (cached is not null) return cached;
 
-        return runtimeCache.GetCacheItem(cacheKey, () =>
+        if (logger.IsEnabled(LogLevel.Debug))
+            logger.LogDebug("Getting Folder Keys : {cacheKey}", cacheKey);
+
+        // when it's not flat structure we also get the sub folders. (extra defensive get them all)
+        var keys = new List<Guid>();
+        var files = syncFileService.GetFiles(folder, $"*.{this.uSyncConfig.Settings.DefaultExtension}", !flat);
+
+        foreach (var file in files)
         {
-            if (logger.IsEnabled(LogLevel.Debug))
-                logger.LogDebug("Getting Folder Keys : {cacheKey}", cacheKey);
-
-            // when it's not flat structure we also get the sub folders. (extra defensive get them all)
-            var keys = new List<Guid>();
-            var files = syncFileService.GetFiles(folder, $"*.{this.uSyncConfig.Settings.DefaultExtension}", !flat).ToList();
-
-            foreach (var file in files)
+            var node = await syncFileService.LoadXElementAsync(file);
+            var key = node.GetKey();
+            if (key != Guid.Empty && !keys.Contains(key))
             {
-                var node = syncFileService.LoadXElementAsync(file).Result;
-                var key = node.GetKey();
-                if (key != Guid.Empty && !keys.Contains(key))
-                {
-                    keys.Add(key);
-                }
+                keys.Add(key);
             }
+        }
 
-            if (logger.IsEnabled(LogLevel.Debug))
-                logger.LogDebug("Loaded {count} keys from {folder} [{cacheKey}]", keys.Count, folder, cacheKey);
+        if (logger.IsEnabled(LogLevel.Debug))
+            logger.LogDebug("Loaded {count} keys from {folder} [{cacheKey}]", keys.Count, folder, cacheKey);
 
-            return keys;
-
-        }, null) ?? [];
+        runtimeCache.GetCacheItem(cacheKey, () => keys);
+        return keys;
     }
 
     /// <summary>
@@ -872,7 +883,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 
         return [uSyncAction.Fail(nameof(udi), this.handlerType, this.ItemType, ChangeType.Fail, $"Item not found {udi}",
              new KeyNotFoundException(nameof(udi)))];
-            
+
     }
 
     /// <summary>
@@ -1325,7 +1336,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         {
             return [uSyncActionHelper<TObject>
                 .ReportActionFail(Path.GetFileName(node.GetAlias()), $"format error {fex.Message}")];
-                
+
         }
     }
 
@@ -1501,17 +1512,16 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         if (item == null) return;
 
         var targetFolder = folders.Last();
-
         var filename = (await GetPathAsync(targetFolder, item, config.GuidNames, config.UseFlatStructure))
             .ToAppSafeFileName();
 
         if (IsLockedAtRoot(folders, filename.Substring(targetFolder.Length + 1)))
-        {
-            // don't do anything this thing exists at a higher level. ! 
             return;
-        }
 
-        if (await ShouldExportDeletedFileAsync(item, config) is false) return;
+        // Only perform the expensive full-serialize check if this handler
+        // actually overrides ShouldExportAsync (i.e. has filtering logic).
+        if (HandlerHasShouldExportOverride() && await ShouldExportDeletedFileAsync(item, config) is false)
+            return;
 
         var attempt = await serializer.SerializeEmptyAsync(item, SyncActionType.Delete, string.Empty);
         if (attempt.Item is not null && await ShouldExportAsync(attempt.Item, config) is true)
@@ -1520,16 +1530,19 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
             {
                 await syncFileService.SaveXElementAsync(attempt.Item, filename);
 
-                // so check - it shouldn't (under normal operation) 
-                // be possible for a clash to exist at delete, because nothing else 
-                // will have changed (like name or location) 
-
-                // we only then do this if we are not using flat structure. 
                 if (!DefaultConfig.UseFlatStructure)
                     await this.CleanUpAsync(item, filename, Path.Combine(folders.Last(), this.DefaultFolder));
             }
         }
     }
+
+    // Cached reflection result — only computed once per handler type.
+    private bool? _hasShouldExportOverride;
+    private bool HandlerHasShouldExportOverride()
+        => _hasShouldExportOverride ??= GetType()
+            .GetMethod(nameof(ShouldExportAsync),
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            ?.DeclaringType != typeof(SyncHandlerRoot<TObject, TContainer>);
 
     private async Task<bool> ShouldExportDeletedFileAsync(TObject item, HandlerSettings config)
     {
@@ -1541,7 +1554,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         }
         catch (Exception ex)
         {
-            logger.LogWarning(ex, "Failed to calculate if this item should be exported when deleted, the common option is yes, so we will");
+            logger.LogWarning("Error while checking if should export deleted file: {message}", ex.Message);
             return true;
         }
     }
@@ -1608,7 +1621,6 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
             await CleanUpAsync(item, newFile, children);
         }
     }
-
     #endregion
 
     // 98% of the time the serializer can do all these calls for us, 
