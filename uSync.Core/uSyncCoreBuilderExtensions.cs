@@ -8,7 +8,7 @@ using uSync.Core.DataTypes;
 using uSync.Core.Dependency;
 using uSync.Core.Documents;
 using uSync.Core.Mapping;
-using uSync.Core.Migrations;
+using uSync.Core.Mapping.Tracking;
 using uSync.Core.Roots.Configs;
 using uSync.Core.Serialization;
 using uSync.Core.Tracking;
@@ -35,9 +35,6 @@ public static class uSyncCoreBuilderExtensions
 
         builder.Services.AddSingleton<uSyncCapabilityChecker>();
 
-        // migration data, so we can see when things go between types.
-        builder.AddSyncMigratedData();
-
         // document url cleaner, for key changes
         builder.Services.AddSingleton<ISyncDocumentUrlCleaner ,SyncDocumentUrlCleaner>();
 
@@ -50,9 +47,14 @@ public static class uSyncCoreBuilderExtensions
         builder.WithCollectionBuilder<ConfigurationSerializerCollectionBuilder>()
             .Add(builder.TypeLoader.GetTypes<IConfigurationSerializer>());
 
+        // mapping trackers for when editor aliases might have changed
+        builder.WithCollectionBuilder<SyncMapperTrackerCollectionBuilder>()
+            .Add(() => builder.TypeLoader.GetTypes<ISyncMapperTracker>());
+
         // value mappers, (map internal things in properties in and out of syncing process)
         builder.WithCollectionBuilder<SyncValueMapperCollectionBuilder>()
             .Add(builder.TypeLoader.GetTypes<ISyncMapper>());
+
 
         // serializers - turn umbraco objects into / from xml in memory. 
         builder.WithCollectionBuilder<SyncSerializerCollectionBuilder>()

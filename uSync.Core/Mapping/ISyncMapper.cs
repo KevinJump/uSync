@@ -9,6 +9,7 @@ public interface ISyncMapper
     string Name { get; }
     string[] Editors { get; }
 
+    bool IsMapper(string editorAlias);
     bool IsMapper(PropertyType propertyType);
 
     Task<string?> GetExportValueAsync(object value, string editorAlias);

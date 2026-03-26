@@ -35,3 +35,8 @@ public interface IConfigurationSerializer
     bool IsSerializer(string propertyName)
         => Editors.InvariantContains(propertyName);
 }
+
+public interface IConfigurationTrackingSerializer : IConfigurationSerializer
+{
+    Task TrackRenamedEditorAsync(string oldEditorAlias, string newEditorAlias);
+}

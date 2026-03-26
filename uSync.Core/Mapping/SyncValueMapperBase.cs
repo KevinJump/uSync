@@ -28,6 +28,9 @@ public abstract class SyncValueMapperBase
 
     public abstract string[] Editors { get; }
 
+    public virtual bool IsMapper(string editorAlias)
+        => Editors.InvariantContains(editorAlias);
+
     public virtual bool IsMapper(PropertyType propertyType)
         => Editors.InvariantContains(propertyType.PropertyEditorAlias);
 
