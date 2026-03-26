@@ -511,8 +511,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         {
             var fileWithoutPath = Path.GetFileName(filename);
             logger.LogWarning("[{alias}] ({filename}) ImportElement Failed : {exception}", this.Alias, fileWithoutPath, ex.ToString());
-            return [uSyncAction.Fail(fileWithoutPath, this.Alias, this.ItemType, ChangeType.Fail,
-                $"{this.Alias} Import Fail: {ex.Message}", new Exception(ex.Message))];
+            return [uSyncAction.Fail(fileWithoutPath, this.Alias, this.ItemType, ChangeType.Fail, $"Import Fail: {ex.Message}", new Exception(ex.Message))];
         }
 
     }
@@ -631,7 +630,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
             // keys should aways have at least one entry (the key from cleanFile)
             // if it doesn't then something might have gone wrong.
             // because we are being defensive when it comes to deletes, 
-            // we only then do deletes when we know we have loaded some keys!
+            // we only then do this if we know we have loaded some keys!
             return await DeleteMissingItemsAsync(parent, keys, reportOnly);
         }
         else
@@ -1069,7 +1068,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         }
 
         callback?.Invoke("Validating Report", 2, 3);
-        var validationActions = ReportMissingParents([.. actions]);
+        var validationActions = await ReportMissingParentsAsync([.. actions]);
         actions.AddRange(ReportDeleteCheck(uSyncConfig.GetWorkingFolder(), validationActions));
 
         CleanCaches(cacheKey);
@@ -1175,13 +1174,13 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     ///  This method checks for the parent of an item in the wider list of items being 
     ///  imported.
     /// </remarks>
-    private List<uSyncAction> ReportMissingParents(uSyncAction[] actions)
+    private async Task<List<uSyncAction>> ReportMissingParentsAsync(uSyncAction[] actions)
     {
         for (int i = 0; i < actions.Length; i++)
         {
             if (actions[i].Change != ChangeType.ParentMissing || actions[i].FileName is null) continue;
 
-            var node = syncFileService.LoadXElementAsync(actions[i].FileName!).Result;
+            var node = await syncFileService.LoadXElementAsync(actions[i].FileName!);
             var guid = node.GetParentKey();
 
             if (guid != Guid.Empty)
