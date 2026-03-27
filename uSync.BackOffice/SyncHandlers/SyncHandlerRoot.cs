@@ -1554,7 +1554,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         }
         catch (Exception ex)
         {
-            logger.LogWarning("Error while checking if should export deleted file: {message}", ex.Message);
+            logger.LogWarning(ex, "Error while checking if should export deleted file.");
             return true;
         }
     }
