@@ -207,8 +207,9 @@ public abstract class SyncContainerSerializerBase<TObject>
             parent = await entityTypeContainerTypeService.GetParentAsync(parent);
         }
 
-        _containersCache.TryAdd(item.ParentId, containers);
-        return containers;
+        var containersArray = containers.ToArray();
+        _containersCache.TryAdd(item.ParentId, containersArray);
+        return containersArray;
     }
 
 
