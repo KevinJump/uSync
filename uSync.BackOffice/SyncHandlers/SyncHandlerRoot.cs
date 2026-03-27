@@ -690,18 +690,20 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
             logger.LogDebug("Getting Folder Keys : {cacheKey}", cacheKey);
 
         // when it's not flat structure we also get the sub folders. (extra defensive get them all)
-        var keys = new List<Guid>();
+        var keySet = new HashSet<Guid>();
         var files = syncFileService.GetFiles(folder, $"*.{this.uSyncConfig.Settings.DefaultExtension}", !flat);
 
         foreach (var file in files)
         {
             var node = await syncFileService.LoadXElementAsync(file);
             var key = node.GetKey();
-            if (key != Guid.Empty && !keys.Contains(key))
+            if (key != Guid.Empty)
             {
-                keys.Add(key);
+                keySet.Add(key);
             }
         }
+
+        var keys = keySet.ToList();
 
         if (logger.IsEnabled(LogLevel.Debug))
             logger.LogDebug("Loaded {count} keys from {folder} [{cacheKey}]", keys.Count, folder, cacheKey);

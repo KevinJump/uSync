@@ -305,7 +305,7 @@ public abstract class SyncContainerSerializerBase<TObject>
     ///  only used on serialization, allows us to only build the folder path for a set of containers once.
     /// </remarks>
     private ConcurrentDictionary<int, XElement> _folderCache = [];
-    private ConcurrentDictionary<int, List<EntityContainer>> _containersCache = [];
+    private ConcurrentDictionary<int, EntityContainer[]> _containersCache = [];
 
     private void ClearFolderCache()
     {
