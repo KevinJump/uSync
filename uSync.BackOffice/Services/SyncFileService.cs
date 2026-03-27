@@ -198,7 +198,7 @@ internal class SyncFileService : ISyncFileService
                 if (stream is null)
                     throw new FileNotFoundException($"Cannot create stream for {file}"); ;
 
-                using (var xmlReader = XmlReader.Create(stream, _readerSettings))
+                using (var xmlReader = XmlReader.Create(stream, _readerSettings.Clone()))
                 {
                     return await XElement.LoadAsync(xmlReader, LoadOptions.PreserveWhitespace, CancellationToken.None);    
                 }
