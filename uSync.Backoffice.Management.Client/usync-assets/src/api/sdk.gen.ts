@@ -4,7 +4,7 @@ import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
 import type { CheckLegacyData, CheckLegacyErrors, CheckLegacyResponses, CopyLegacyData, CopyLegacyErrors, CopyLegacyResponses, DownloadData, DownloadErrors, DownloadResponses, GetActionsBySetData, GetActionsBySetErrors, GetActionsBySetResponses, GetActionsData, GetActionsErrors, GetActionsResponses, GetAddOnsData, GetAddOnsErrors, GetAddonSplashData, GetAddonSplashErrors, GetAddonSplashResponses, GetAddOnsResponses, GetHandlerSetSettingsData, GetHandlerSetSettingsErrors, GetHandlerSetSettingsResponses, GetSetsData, GetSetsErrors, GetSetsResponses, GetSettingsData, GetSettingsErrors, GetSettingsResponses, IgnoreLegacyData, IgnoreLegacyErrors, IgnoreLegacyResponses, ImportSingleData, ImportSingleErrors, ImportSingleResponses, MergeExportFolderData, MergeExportFolderErrors, MergeExportFolderResponses, PerformActionData, PerformActionErrors, PerformActionResponses, ProcessUploadData, ProcessUploadErrors, ProcessUploadResponses } from './types.gen';
 
-export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
+export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
      * You can provide a client instance returned by `createClient()` instead of
      * individual options. This might be also useful if you want to implement a
@@ -24,12 +24,7 @@ export class ActionsService {
      */
     public static getActions<ThrowOnError extends boolean = true>(options?: Options<GetActionsData, ThrowOnError>) {
         return (options?.client ?? client).get<GetActionsResponses, GetActionsErrors, ThrowOnError>({
-            security: [
-                {
-                    scheme: 'bearer',
-                    type: 'http'
-                }
-            ],
+            security: [{ scheme: 'bearer', type: 'http' }],
             url: '/umbraco/usync/api/v1/Actions',
             ...options
         });
@@ -37,12 +32,7 @@ export class ActionsService {
     
     public static getActionsBySet<ThrowOnError extends boolean = true>(options?: Options<GetActionsBySetData, ThrowOnError>) {
         return (options?.client ?? client).get<GetActionsBySetResponses, GetActionsBySetErrors, ThrowOnError>({
-            security: [
-                {
-                    scheme: 'bearer',
-                    type: 'http'
-                }
-            ],
+            security: [{ scheme: 'bearer', type: 'http' }],
             url: '/umbraco/usync/api/v1/ActionsBySet',
             ...options
         });
@@ -50,12 +40,7 @@ export class ActionsService {
     
     public static download<ThrowOnError extends boolean = true>(options?: Options<DownloadData, ThrowOnError>) {
         return (options?.client ?? client).post<DownloadResponses, DownloadErrors, ThrowOnError>({
-            security: [
-                {
-                    scheme: 'bearer',
-                    type: 'http'
-                }
-            ],
+            security: [{ scheme: 'bearer', type: 'http' }],
             url: '/umbraco/usync/api/v1/Download',
             ...options
         });
@@ -63,12 +48,7 @@ export class ActionsService {
     
     public static importSingle<ThrowOnError extends boolean = true>(options?: Options<ImportSingleData, ThrowOnError>) {
         return (options?.client ?? client).post<ImportSingleResponses, ImportSingleErrors, ThrowOnError>({
-            security: [
-                {
-                    scheme: 'bearer',
-                    type: 'http'
-                }
-            ],
+            security: [{ scheme: 'bearer', type: 'http' }],
             url: '/umbraco/usync/api/v1/Import',
             ...options,
             headers: {
@@ -80,12 +60,7 @@ export class ActionsService {
     
     public static performAction<ThrowOnError extends boolean = true>(options?: Options<PerformActionData, ThrowOnError>) {
         return (options?.client ?? client).post<PerformActionResponses, PerformActionErrors, ThrowOnError>({
-            security: [
-                {
-                    scheme: 'bearer',
-                    type: 'http'
-                }
-            ],
+            security: [{ scheme: 'bearer', type: 'http' }],
             url: '/umbraco/usync/api/v1/Perform',
             ...options,
             headers: {
@@ -97,12 +72,7 @@ export class ActionsService {
     
     public static processUpload<ThrowOnError extends boolean = true>(options?: Options<ProcessUploadData, ThrowOnError>) {
         return (options?.client ?? client).post<ProcessUploadResponses, ProcessUploadErrors, ThrowOnError>({
-            security: [
-                {
-                    scheme: 'bearer',
-                    type: 'http'
-                }
-            ],
+            security: [{ scheme: 'bearer', type: 'http' }],
             url: '/umbraco/usync/api/v1/ProcessUpload',
             ...options
         });
@@ -112,12 +82,7 @@ export class ActionsService {
 export class FoldersService {
     public static mergeExportFolder<ThrowOnError extends boolean = true>(options?: Options<MergeExportFolderData, ThrowOnError>) {
         return (options?.client ?? client).post<MergeExportFolderResponses, MergeExportFolderErrors, ThrowOnError>({
-            security: [
-                {
-                    scheme: 'bearer',
-                    type: 'http'
-                }
-            ],
+            security: [{ scheme: 'bearer', type: 'http' }],
             url: '/umbraco/usync/api/v1/MergeExport',
             ...options
         });
@@ -127,12 +92,7 @@ export class FoldersService {
 export class MigrationsService {
     public static checkLegacy<ThrowOnError extends boolean = true>(options?: Options<CheckLegacyData, ThrowOnError>) {
         return (options?.client ?? client).get<CheckLegacyResponses, CheckLegacyErrors, ThrowOnError>({
-            security: [
-                {
-                    scheme: 'bearer',
-                    type: 'http'
-                }
-            ],
+            security: [{ scheme: 'bearer', type: 'http' }],
             url: '/umbraco/usync/api/v1/CheckLegacy',
             ...options
         });
@@ -140,12 +100,7 @@ export class MigrationsService {
     
     public static copyLegacy<ThrowOnError extends boolean = true>(options?: Options<CopyLegacyData, ThrowOnError>) {
         return (options?.client ?? client).post<CopyLegacyResponses, CopyLegacyErrors, ThrowOnError>({
-            security: [
-                {
-                    scheme: 'bearer',
-                    type: 'http'
-                }
-            ],
+            security: [{ scheme: 'bearer', type: 'http' }],
             url: '/umbraco/usync/api/v1/CopyLegacy',
             ...options
         });
@@ -153,12 +108,7 @@ export class MigrationsService {
     
     public static ignoreLegacy<ThrowOnError extends boolean = true>(options?: Options<IgnoreLegacyData, ThrowOnError>) {
         return (options?.client ?? client).post<IgnoreLegacyResponses, IgnoreLegacyErrors, ThrowOnError>({
-            security: [
-                {
-                    scheme: 'bearer',
-                    type: 'http'
-                }
-            ],
+            security: [{ scheme: 'bearer', type: 'http' }],
             url: '/umbraco/usync/api/v1/IgnoreLegacy',
             ...options
         });
@@ -168,12 +118,7 @@ export class MigrationsService {
 export class SettingsService {
     public static getAddOns<ThrowOnError extends boolean = true>(options?: Options<GetAddOnsData, ThrowOnError>) {
         return (options?.client ?? client).get<GetAddOnsResponses, GetAddOnsErrors, ThrowOnError>({
-            security: [
-                {
-                    scheme: 'bearer',
-                    type: 'http'
-                }
-            ],
+            security: [{ scheme: 'bearer', type: 'http' }],
             url: '/umbraco/usync/api/v1/AddOns',
             ...options
         });
@@ -181,12 +126,7 @@ export class SettingsService {
     
     public static getAddonSplash<ThrowOnError extends boolean = true>(options?: Options<GetAddonSplashData, ThrowOnError>) {
         return (options?.client ?? client).get<GetAddonSplashResponses, GetAddonSplashErrors, ThrowOnError>({
-            security: [
-                {
-                    scheme: 'bearer',
-                    type: 'http'
-                }
-            ],
+            security: [{ scheme: 'bearer', type: 'http' }],
             url: '/umbraco/usync/api/v1/AddOnSplash',
             ...options
         });
@@ -194,12 +134,7 @@ export class SettingsService {
     
     public static getHandlerSetSettings<ThrowOnError extends boolean = true>(options?: Options<GetHandlerSetSettingsData, ThrowOnError>) {
         return (options?.client ?? client).get<GetHandlerSetSettingsResponses, GetHandlerSetSettingsErrors, ThrowOnError>({
-            security: [
-                {
-                    scheme: 'bearer',
-                    type: 'http'
-                }
-            ],
+            security: [{ scheme: 'bearer', type: 'http' }],
             url: '/umbraco/usync/api/v1/HandlerSettings',
             ...options
         });
@@ -207,12 +142,7 @@ export class SettingsService {
     
     public static getSets<ThrowOnError extends boolean = true>(options?: Options<GetSetsData, ThrowOnError>) {
         return (options?.client ?? client).get<GetSetsResponses, GetSetsErrors, ThrowOnError>({
-            security: [
-                {
-                    scheme: 'bearer',
-                    type: 'http'
-                }
-            ],
+            security: [{ scheme: 'bearer', type: 'http' }],
             url: '/umbraco/usync/api/v1/Sets',
             ...options
         });
@@ -220,12 +150,7 @@ export class SettingsService {
     
     public static getSettings<ThrowOnError extends boolean = true>(options?: Options<GetSettingsData, ThrowOnError>) {
         return (options?.client ?? client).get<GetSettingsResponses, GetSettingsErrors, ThrowOnError>({
-            security: [
-                {
-                    scheme: 'bearer',
-                    type: 'http'
-                }
-            ],
+            security: [{ scheme: 'bearer', type: 'http' }],
             url: '/umbraco/usync/api/v1/Settings',
             ...options
         });
