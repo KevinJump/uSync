@@ -58,6 +58,344 @@
             ],
             "type": "object"
         },
+        "ManifestAuditLogAction<MetaAuditLogAction>": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "api": {
+                    "description": "The file location of the api javascript file to load",
+                    "type": "string"
+                },
+                "conditions": {
+                    "description": "Set the conditions for when the extension should be loaded",
+                    "items": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/definitions/UmbEntityUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbLanguageUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceEntityIsNewConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowDeleteAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowDisableAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowEnableAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowExternalLoginAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowMfaAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SwitchConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<string>"
+                            }
+                        ]
+                    },
+                    "type": "array"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "forEntityTypes": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaAuditLogAction"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "overwrites": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Define one or more extension aliases that this extension should overwrite."
+                },
+                "type": {
+                    "const": "auditLogAction",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with higher numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "forEntityTypes",
+                "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestAuditLogActionDefaultKind": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "api": {
+                    "description": "The file location of the api javascript file to load",
+                    "type": "string"
+                },
+                "conditions": {
+                    "description": "Set the conditions for when the extension should be loaded",
+                    "items": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/definitions/UmbEntityUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbLanguageUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceEntityIsNewConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowDeleteAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowDisableAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowEnableAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowExternalLoginAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowMfaAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SwitchConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<string>"
+                            }
+                        ]
+                    },
+                    "type": "array"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "forEntityTypes": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "const": "default",
+                    "description": "The kind of the extension, used to group extensions together",
+                    "type": "string"
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaAuditLogActionDefaultKind"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "overwrites": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Define one or more extension aliases that this extension should overwrite."
+                },
+                "type": {
+                    "const": "auditLogAction",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with higher numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "forEntityTypes",
+                "kind",
+                "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
         "ManifestAuthProvider": {
             "description": "Represents an authentication provider that can be used to authenticate users.\nThe provider needs to be registered in the API that the authorization request is sent to in order to be used.",
             "properties": {
@@ -255,6 +593,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -264,13 +605,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -298,6 +651,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -400,6 +756,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -409,13 +768,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -443,6 +814,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -544,6 +918,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -553,13 +930,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -587,6 +976,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -764,6 +1156,164 @@
             ],
             "type": "object"
         },
+        "ManifestCollectionTextFilter": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "api": {
+                    "description": "The file location of the api javascript file to load",
+                    "type": "string"
+                },
+                "conditions": {
+                    "description": "Set the conditions for when the extension should be loaded",
+                    "items": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/definitions/UmbEntityUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbLanguageUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceEntityIsNewConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowDeleteAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowDisableAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowEnableAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowExternalLoginAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowMfaAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SwitchConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<string>"
+                            }
+                        ]
+                    },
+                    "type": "array"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "description": "The kind of the extension, used to group extensions together",
+                    "examples": [
+                        "button"
+                    ]
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "overwrites": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Define one or more extension aliases that this extension should overwrite."
+                },
+                "type": {
+                    "const": "collectionTextFilter",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with higher numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
         "ManifestCollectionView": {
             "properties": {
                 "alias": {
@@ -793,6 +1343,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -802,13 +1355,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -836,6 +1401,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -979,6 +1547,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -988,13 +1559,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -1022,6 +1605,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -1119,6 +1705,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -1128,13 +1717,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -1162,6 +1763,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -1317,6 +1921,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -1326,13 +1933,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -1360,6 +1979,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -1435,6 +2057,175 @@
             ],
             "type": "object"
         },
+        "ManifestEntityActionContentRollbackKind": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "api": {
+                    "description": "The file location of the api javascript file to load",
+                    "type": "string"
+                },
+                "conditions": {
+                    "description": "Set the conditions for when the extension should be loaded",
+                    "items": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/definitions/UmbEntityUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbLanguageUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceEntityIsNewConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowDeleteAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowDisableAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowEnableAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowExternalLoginAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowMfaAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SwitchConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<string>"
+                            }
+                        ]
+                    },
+                    "type": "array"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "forEntityTypes": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "const": "contentRollback",
+                    "description": "The kind of the extension, used to group extensions together",
+                    "type": "string"
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaEntityActionContentRollbackKind"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "overwrites": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Define one or more extension aliases that this extension should overwrite."
+                },
+                "type": {
+                    "const": "entityAction",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with higher numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "forEntityTypes",
+                "kind",
+                "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
         "ManifestEntityActionCreateFolderKind": {
             "properties": {
                 "alias": {
@@ -1468,6 +2259,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -1477,13 +2271,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -1511,6 +2317,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -1619,6 +2428,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -1628,13 +2440,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -1662,6 +2486,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -1770,6 +2597,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -1779,13 +2609,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -1813,6 +2655,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -1921,6 +2766,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -1930,13 +2778,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -1964,6 +2824,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -2072,6 +2935,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -2081,13 +2947,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -2115,6 +2993,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -2223,6 +3104,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -2232,13 +3116,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -2266,6 +3162,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -2374,6 +3273,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -2383,13 +3285,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -2417,6 +3331,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -2525,6 +3442,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -2534,13 +3454,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -2568,6 +3500,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -2676,6 +3611,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -2685,13 +3623,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -2719,6 +3669,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -2827,6 +3780,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -2836,13 +3792,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -2870,6 +3838,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -2978,6 +3949,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -2987,13 +3961,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -3021,6 +4007,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -3130,6 +4119,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -3139,13 +4131,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -3173,6 +4177,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -3281,6 +4288,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -3290,13 +4300,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -3324,6 +4346,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -3432,6 +4457,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -3441,13 +4469,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -3475,6 +4515,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -3583,6 +4626,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -3592,13 +4638,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -3626,6 +4684,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -3734,6 +4795,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -3743,13 +4807,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -3777,6 +4853,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -3885,6 +4964,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -3894,13 +4976,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -3928,6 +5022,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -4032,6 +5129,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -4041,13 +5141,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -4075,6 +5187,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -4180,6 +5295,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -4189,13 +5307,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -4223,6 +5353,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -4331,6 +5464,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -4340,13 +5476,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -4374,6 +5522,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -4470,6 +5621,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -4479,13 +5633,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -4513,6 +5679,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -4793,6 +5962,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -4802,13 +5974,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -4836,6 +6020,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -4982,6 +6169,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -4991,13 +6181,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -5025,6 +6227,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -5121,6 +6326,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -5130,13 +6338,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -5164,6 +6384,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -5473,6 +6696,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -5482,13 +6708,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -5516,6 +6754,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -5618,6 +6859,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -5627,13 +6871,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -5661,6 +6917,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -5758,6 +7017,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -5767,13 +7029,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -5801,6 +7075,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -5899,6 +7176,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -5908,13 +7188,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -5942,6 +7234,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -6252,6 +7547,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -6261,13 +7559,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -6295,6 +7605,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -6710,6 +8023,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -6719,13 +8035,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -6753,6 +8081,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -6942,6 +8273,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -6951,13 +8285,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -6985,6 +8331,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -7085,6 +8434,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -7094,13 +8446,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -7128,6 +8492,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -7270,6 +8637,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -7279,13 +8649,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -7313,6 +8695,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -7409,6 +8794,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -7418,13 +8806,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -7452,6 +8852,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -7594,6 +8997,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -7603,13 +9009,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -7637,6 +9055,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -8026,6 +9447,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -8035,13 +9459,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -8069,6 +9505,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -8170,6 +9609,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -8179,13 +9621,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -8213,6 +9667,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -8314,6 +9771,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -8323,13 +9783,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -8357,6 +9829,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -8474,6 +9949,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -8483,13 +9961,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -8517,6 +10007,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -8633,6 +10126,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -8642,13 +10138,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -8676,6 +10184,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -8764,6 +10275,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -8773,13 +10287,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -8807,6 +10333,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -8953,6 +10482,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -8962,13 +10494,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -8996,6 +10540,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -9093,6 +10640,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -9102,13 +10652,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -9136,6 +10698,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -9233,6 +10798,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -9242,13 +10810,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -9276,6 +10856,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -9369,6 +10952,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -9378,13 +10964,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -9412,6 +11010,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -9475,6 +11076,165 @@
             },
             "required": [
                 "alias",
+                "meta",
+                "name",
+                "type"
+            ],
+            "type": "object"
+        },
+        "ManifestWorkspaceInfoAppAuditLogKind": {
+            "properties": {
+                "alias": {
+                    "description": "The alias of the extension, ensure it is unique",
+                    "type": "string"
+                },
+                "conditions": {
+                    "description": "Set the conditions for when the extension should be loaded",
+                    "items": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/definitions/UmbEntityUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbLanguageUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/WorkspaceAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceEntityIsNewConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsAdminConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowChangePassword\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowDeleteAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowDisableAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowEnableAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowExternalLoginAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowMfaAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/SwitchConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbConditionConfigBase<string>"
+                            }
+                        ]
+                    },
+                    "type": "array"
+                },
+                "element": {
+                    "description": "The file location of the element javascript file to load",
+                    "type": "string"
+                },
+                "elementName": {
+                    "description": "The HTML web component name to use such as 'my-dashboard'\nNote it is NOT <my-dashboard></my-dashboard>, just the element name.",
+                    "type": "string"
+                },
+                "js": {
+                    "description": "The file location of the javascript file to load",
+                    "type": "string"
+                },
+                "kind": {
+                    "const": "auditLog",
+                    "description": "The kind of the extension, used to group extensions together",
+                    "type": "string"
+                },
+                "meta": {
+                    "$ref": "#/definitions/MetaWorkspaceInfoAppAuditLogKind",
+                    "description": "This contains properties specific to the type of extension"
+                },
+                "name": {
+                    "description": "The friendly name of the extension",
+                    "type": "string"
+                },
+                "overwrites": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Define one or more extension aliases that this extension should overwrite."
+                },
+                "type": {
+                    "const": "workspaceInfoApp",
+                    "description": "The type of extension such as dashboard etc...",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "Extensions such as dashboards are ordered by weight with higher numbers being first in the list",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "alias",
+                "kind",
                 "meta",
                 "name",
                 "type"
@@ -9563,6 +11323,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -9572,13 +11335,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -9606,6 +11381,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -9704,6 +11482,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -9713,13 +11494,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -9747,6 +11540,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -9845,6 +11641,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -9854,13 +11653,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -9888,6 +11699,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -9986,6 +11800,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -9995,13 +11812,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -10029,6 +11858,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -10095,6 +11927,27 @@
                 "meta",
                 "name",
                 "type"
+            ],
+            "type": "object"
+        },
+        "MetaAuditLogAction": {
+            "type": "object"
+        },
+        "MetaAuditLogActionDefaultKind": {
+            "properties": {
+                "additionalOptions": {
+                    "type": "boolean"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "icon",
+                "label"
             ],
             "type": "object"
         },
@@ -10268,6 +12121,43 @@
             "type": "object"
         },
         "MetaEntityAction": {
+            "type": "object"
+        },
+        "MetaEntityActionContentRollbackKind": {
+            "properties": {
+                "additionalOptions": {
+                    "description": "The action requires additional input from the user.\nA dialog will prompt the user for more information or to make a choice.",
+                    "type": "{boolean}"
+                },
+                "detailRepositoryAlias": {
+                    "type": "string"
+                },
+                "icon": {
+                    "description": "An icon to represent the action to be performed",
+                    "examples": [
+                        "icon-box",
+                        "icon-grid"
+                    ],
+                    "type": "string"
+                },
+                "label": {
+                    "description": "The friendly name of the action to perform",
+                    "examples": [
+                        "Create",
+                        "Create Content Template"
+                    ],
+                    "type": "string"
+                },
+                "rollbackRepositoryAlias": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "detailRepositoryAlias",
+                "icon",
+                "label",
+                "rollbackRepositoryAlias"
+            ],
             "type": "object"
         },
         "MetaEntityActionCreateKind": {
@@ -10658,6 +12548,9 @@
                                 "$ref": "#/definitions/UmbWorkspaceEntityTypeConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbContentWorkspaceIsLoadedConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/UmbPropertyHasValueConditionConfig"
                             },
                             {
@@ -10667,13 +12560,25 @@
                                 "$ref": "#/definitions/UmbWorkspaceContentTypeUniqueConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbEntityContentTypeUniqueConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbIsRoutableContextConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/SectionAliasConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbSectionUserPermissionConditionConfig"
                             },
                             {
+                                "$ref": "#/definitions/UmbIsServerProductionModeConditionConfig"
+                            },
+                            {
                                 "$ref": "#/definitions/CollectionAliasConditionConfig"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbCollectionHasItemsConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/UmbCurrentUserGroupIdConditionConfig"
@@ -10701,6 +12606,9 @@
                             },
                             {
                                 "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.User.AllowUnlockAction\">"
+                            },
+                            {
+                                "$ref": "#/definitions/UmbInModalConditionConfig"
                             },
                             {
                                 "$ref": "#/definitions/SwitchConditionConfig"
@@ -10943,6 +12851,9 @@
                     "type": "string"
                 },
                 "searchProviderAlias": {
+                    "type": "string"
+                },
+                "sectionAlias": {
                     "type": "string"
                 }
             },
@@ -11458,6 +13369,17 @@
         "MetaWorkspaceInfoApp": {
             "type": "object"
         },
+        "MetaWorkspaceInfoAppAuditLogKind": {
+            "properties": {
+                "auditLogRepositoryAlias": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "auditLogRepositoryAlias"
+            ],
+            "type": "object"
+        },
         "MetaWorkspaceRoutableKind": {
             "properties": {
                 "entityType": {
@@ -11670,6 +13592,18 @@
                 }
             ]
         },
+        "UmbCollectionHasItemsConditionConfig": {
+            "properties": {
+                "alias": {
+                    "const": "Umb.Condition.CollectionHasItems",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "alias"
+            ],
+            "type": "object"
+        },
         "UmbConditionConfigBase<\"Umb.Condition.CollectionAlias\">": {
             "properties": {
                 "alias": {
@@ -11698,6 +13632,18 @@
             "properties": {
                 "alias": {
                     "const": "Umb.Condition.Entity.Unique",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "alias"
+            ],
+            "type": "object"
+        },
+        "UmbConditionConfigBase<\"Umb.Condition.EntityContentType.Unique\">": {
+            "properties": {
+                "alias": {
+                    "const": "Umb.Condition.EntityContentType.Unique",
                     "type": "string"
                 }
             },
@@ -11885,6 +13831,18 @@
             ],
             "type": "object"
         },
+        "UmbContentWorkspaceIsLoadedConditionConfig": {
+            "properties": {
+                "alias": {
+                    "const": "Umb.Condition.Workspace.ContentIsLoaded",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "alias"
+            ],
+            "type": "object"
+        },
         "UmbCurrentUserGroupIdConditionConfig": {
             "properties": {
                 "alias": {
@@ -11925,6 +13883,29 @@
                 "alias"
             ],
             "type": "object"
+        },
+        "UmbEntityContentTypeUniqueConditionConfig": {
+            "allOf": [
+                {
+                    "$ref": "#/definitions/UmbConditionConfigBase<\"Umb.Condition.EntityContentType.Unique\">"
+                },
+                {
+                    "properties": {
+                        "match": {
+                            "description": "Define the unique (GUID) of the entity content type for which this extension should be available.",
+                            "type": "string"
+                        },
+                        "oneOf": {
+                            "description": "Define one or more unique (GUIDs) of entity content types for which this extension should be available.",
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        }
+                    },
+                    "type": "object"
+                }
+            ]
         },
         "UmbEntityTypeConditionConfig": {
             "allOf": [
@@ -11980,11 +13961,59 @@
                 }
             ]
         },
+        "UmbInModalConditionConfig": {
+            "properties": {
+                "alias": {
+                    "const": "Umb.Condition.InModal",
+                    "type": "string"
+                },
+                "match": {
+                    "description": "The expected modal state to match.\n- `true`: Condition is permitted when inside a modal (default)\n- `false`: Condition is permitted when NOT inside a modal",
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "alias"
+            ],
+            "type": "object"
+        },
         "UmbIsAdminConditionConfig": {
             "properties": {
                 "alias": {
                     "const": "Umb.Condition.CurrentUser.IsAdmin",
                     "type": "string"
+                }
+            },
+            "required": [
+                "alias"
+            ],
+            "type": "object"
+        },
+        "UmbIsRoutableContextConditionConfig": {
+            "properties": {
+                "alias": {
+                    "const": "Umb.Condition.IsRoutableContext",
+                    "type": "string"
+                },
+                "match": {
+                    "description": "The expected routable context state to match.\n- `true`: Condition is permitted when inside a routable context (default)\n- `false`: Condition is permitted when NOT inside a routable context",
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "alias"
+            ],
+            "type": "object"
+        },
+        "UmbIsServerProductionModeConditionConfig": {
+            "properties": {
+                "alias": {
+                    "const": "Umb.Condition.Server.IsProductionMode",
+                    "type": "string"
+                },
+                "match": {
+                    "description": "If true (default), the condition is permitted when in Production mode.\nIf false, the condition is permitted when NOT in Production mode.",
+                    "type": "boolean"
                 }
             },
             "required": [
@@ -12232,9 +14261,6 @@
                         "$ref": "#/definitions/ManifestCondition"
                     },
                     {
-                        "$ref": "#/definitions/ManifestAuthProvider"
-                    },
-                    {
                         "$ref": "#/definitions/ManifestWorkspaceDefaultKind"
                     },
                     {
@@ -12293,12 +14319,6 @@
                     },
                     {
                         "$ref": "#/definitions/ManifestEntityActionCreateKind"
-                    },
-                    {
-                        "$ref": "#/definitions/ManifestIcons"
-                    },
-                    {
-                        "$ref": "#/definitions/ManifestModal"
                     },
                     {
                         "$ref": "#/definitions/ManifestEntityActionDuplicateToKind"
@@ -12361,7 +14381,10 @@
                         "$ref": "#/definitions/ManifestMenuItemTreeKind"
                     },
                     {
-                        "$ref": "#/definitions/ManifestCollectionView"
+                        "$ref": "#/definitions/ManifestModal"
+                    },
+                    {
+                        "$ref": "#/definitions/ManifestAuthProvider"
                     },
                     {
                         "$ref": "#/definitions/ManifestCollectionAction"
@@ -12373,10 +14396,25 @@
                         "$ref": "#/definitions/ManifestCollectionActionCreateKind"
                     },
                     {
+                        "$ref": "#/definitions/ManifestCollectionTextFilter"
+                    },
+                    {
                         "$ref": "#/definitions/ManifestCollectionMenu"
                     },
                     {
+                        "$ref": "#/definitions/ManifestCollectionView"
+                    },
+                    {
                         "$ref": "#/definitions/ManifestWorkspaceViewCollectionKind"
+                    },
+                    {
+                        "$ref": "#/definitions/ManifestAuditLogActionDefaultKind"
+                    },
+                    {
+                        "$ref": "#/definitions/ManifestEntityActionContentRollbackKind"
+                    },
+                    {
+                        "$ref": "#/definitions/ManifestWorkspaceInfoAppAuditLogKind"
                     },
                     {
                         "$ref": "#/definitions/ManifestWorkspaceViewContentCollectionKind"
@@ -12386,6 +14424,9 @@
                     },
                     {
                         "$ref": "#/definitions/ManifestUserProfileApp"
+                    },
+                    {
+                        "$ref": "#/definitions/ManifestIcons"
                     },
                     {
                         "$ref": "#/definitions/ManifestEntityUserPermission"
@@ -12454,9 +14495,6 @@
                         "$ref": "#/definitions/ManifestEntityCreateOptionAction<MetaEntityCreateOptionAction>"
                     },
                     {
-                        "$ref": "#/definitions/ManifestEntityItemRef<MetaEntityItemRef>"
-                    },
-                    {
                         "$ref": "#/definitions/ManifestSectionContext<MetaSectionContext>"
                     },
                     {
@@ -12466,10 +14504,16 @@
                         "$ref": "#/definitions/ManifestEntityCollectionItemRef<MetaEntityCollectionItemRef>"
                     },
                     {
+                        "$ref": "#/definitions/ManifestAuditLogAction<MetaAuditLogAction>"
+                    },
+                    {
                         "$ref": "#/definitions/ManifestCurrentUserAction<MetaCurrentUserAction>"
                     },
                     {
                         "$ref": "#/definitions/ManifestPropertyValidationPathTranslator<any>"
+                    },
+                    {
+                        "$ref": "#/definitions/ManifestEntityItemRef<MetaEntityItemRef>"
                     },
                     {
                         "$ref": "#/definitions/ManifestEntityBulkActionDeleteKind"
