@@ -7,6 +7,8 @@ import type {
   ClearHistoryResponses,
   GetHistoryData,
   GetHistoryResponses,
+  HistoryIsEnabledData,
+  HistoryIsEnabledResponses,
 } from "./types.gen";
 
 export type Options<
@@ -46,5 +48,15 @@ export class History {
       unknown,
       ThrowOnError
     >({ url: "/umbraco/usync/api/v1/history/GetHistory", ...options });
+  }
+
+  public static historyIsEnabled<ThrowOnError extends boolean = true>(
+    options?: Options<HistoryIsEnabledData, ThrowOnError>,
+  ) {
+    return (options?.client ?? client).get<
+      HistoryIsEnabledResponses,
+      unknown,
+      ThrowOnError
+    >({ url: "/umbraco/usync/api/v1/history/HistoryIsEnabled", ...options });
   }
 }

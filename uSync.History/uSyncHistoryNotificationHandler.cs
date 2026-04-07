@@ -1,11 +1,13 @@
 ﻿using Microsoft.Extensions.Logging;
+
 using Umbraco.Cms.Core.Events;
 using Umbraco.Cms.Core.Hosting;
 using Umbraco.Cms.Core.Security;
-using uSync.Backoffice.Management.Api.Extensions;
+
 using uSync.BackOffice;
 using uSync.BackOffice.Services;
 using uSync.Core.Extensions;
+using uSync.History.Service;
 
 namespace uSync.History
 {
@@ -15,6 +17,7 @@ namespace uSync.History
     {
         private readonly IHostingEnvironment _hostingEnvironment;
         private readonly ISyncFileService _syncFileService;
+        private readonly ISyncHistoryService _syncHistoryService;
         private readonly IBackOfficeSecurityAccessor _backOfficeSecurityAccessor;
         private readonly ILogger<uSyncHistoryNotificationHandler> _logger;
 
@@ -22,16 +25,20 @@ namespace uSync.History
             ISyncFileService syncFileService,
             IBackOfficeSecurityAccessor backOfficeSecurityAccessor,
             IHostingEnvironment hostingEnvironment,
-            ILogger<uSyncHistoryNotificationHandler> logger)
+            ILogger<uSyncHistoryNotificationHandler> logger,
+            ISyncHistoryService syncHistoryService)
         {
             _syncFileService = syncFileService;
             _backOfficeSecurityAccessor = backOfficeSecurityAccessor;
             _hostingEnvironment = hostingEnvironment;
             _logger = logger;
+            _syncHistoryService = syncHistoryService;
         }
 
         public async Task HandleAsync(uSyncImportCompletedNotification notification, CancellationToken cancellationToken)
         {
+            if (_syncHistoryService.IsEnabled() is false) return;
+
             var changeActions = notification.Actions
                 .Where(x => x.Change > Core.ChangeType.NoChange && x.Change < Core.ChangeType.Hidden)
                 .ToList();
@@ -44,6 +51,8 @@ namespace uSync.History
 
         public async Task HandleAsync(uSyncExportCompletedNotification notification, CancellationToken cancellationToken)
         {
+            if (_syncHistoryService.IsEnabled() is false) return;
+
             var changeActions = notification.Actions
                 .Where(x => x.Change > Core.ChangeType.NoChange && x.Change < Core.ChangeType.Hidden)
                 .ToList();
