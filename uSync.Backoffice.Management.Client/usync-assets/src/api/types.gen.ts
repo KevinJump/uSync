@@ -920,6 +920,11 @@ export type CustomAttributeNamedArgumentWritable = {
     memberInfo: MemberInfoWritable;
 };
 
+export type CustomAttributeTypedArgumentWritable = {
+    argumentType: TypeWritable;
+    value?: unknown;
+};
+
 export type EventInfoWritable = {
     memberType: MemberTypes;
     attributes: EventAttributes;
@@ -982,6 +987,22 @@ export type TypeInfoWritable = {
     memberType: MemberTypes;
     genericParameterAttributes: GenericParameterAttributes;
     attributes: TypeAttributes;
+};
+
+export type USyncActionWritable = {
+    handlerAlias?: string | null;
+    success: boolean;
+    itemType: string;
+    message?: string | null;
+    exception?: ExceptionWritable | null;
+    change: ChangeType;
+    fileName?: string | null;
+    name: string;
+    path?: string | null;
+    requiresPostProcessing: boolean;
+    detailMessage?: string | null;
+    details?: Array<USyncChange> | null;
+    key: string;
 };
 
 export type GetActionsData = {

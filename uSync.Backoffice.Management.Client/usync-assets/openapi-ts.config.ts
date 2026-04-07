@@ -4,8 +4,8 @@ import { defaultPlugins } from '@hey-api/openapi-ts';
 export default defineConfig({
 	input: 'http://localhost:16903/umbraco/swagger/uSync/swagger.json',
 	output: {
-		format: 'prettier',
 		path: 'src/api',
+		postProcess: ['prettier'],
 	},
 	plugins: [
 		...defaultPlugins,
@@ -21,8 +21,11 @@ export default defineConfig({
 		},
 		{
 			name: '@hey-api/sdk',
-			asClass: true,
-			classNameBuilder: '{{name}}Service',
+			operations: {
+				strategy: 'byTags',
+				container: 'class',
+				containerName: '{{name}}Service',
+			},
 		},
 	],
 });

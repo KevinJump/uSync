@@ -12,7 +12,6 @@
   "scripts": {
     "build": "tsc && vite build",
     "watch": "vite build --watch",
-    "generate": "rm-rs -r -f ./src/api && openapi-ts",
     "format:fix": "npm run format -- --write",
     "format": "prettier \"src/**/*.ts\" --check",
     "generate-client": "node scripts/generate-openapi.js https://localhost:44398/umbraco/swagger/uSync.History/swagger.json?urls.primaryName=uSync+Management+Api"
@@ -23,6 +22,7 @@
     "@jumoo/usync": "^17.0.4",
     "@rollup/plugin-node-resolve": "^15.3.1",
     "@umbraco-cms/backoffice": "^17.3.0",
+    "chalk": "^5.6.2",
     "lit": "^3.3.2",
     "node-fetch": "^3.3.2",
     "prettier": "^3.8.1",
