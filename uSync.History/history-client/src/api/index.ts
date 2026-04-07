@@ -12,6 +12,9 @@ export {
   type GetHistoryResponse,
   type GetHistoryResponses,
   type HistoryInfo,
+  type HistoryIsEnabledData,
+  type HistoryIsEnabledResponse,
+  type HistoryIsEnabledResponses,
   type USyncActionView,
   type USyncChange,
 } from "./types.gen";

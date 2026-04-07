@@ -91,3 +91,20 @@ export type GetHistoryResponses = {
 };
 
 export type GetHistoryResponse = GetHistoryResponses[keyof GetHistoryResponses];
+
+export type HistoryIsEnabledData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/umbraco/usync/api/v1/history/HistoryIsEnabled";
+};
+
+export type HistoryIsEnabledResponses = {
+  /**
+   * OK
+   */
+  200: boolean;
+};
+
+export type HistoryIsEnabledResponse =
+  HistoryIsEnabledResponses[keyof HistoryIsEnabledResponses];

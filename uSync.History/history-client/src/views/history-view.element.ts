@@ -15,6 +15,9 @@ export class uSyncHistoryElement extends UmbLitElement {
   @state()
   history: Array<HistoryInfo> = [];
 
+  @state()
+  isEnabled = false;
+
   constructor() {
     super();
   }
@@ -22,8 +25,16 @@ export class uSyncHistoryElement extends UmbLitElement {
   async connectedCallback() {
     super.connectedCallback();
 
+    this.isEnabled = await this.#isEnabled();
+
+    if (!this.isEnabled) return;
+
     // load
     await this.#loadHistory();
+  }
+
+  async #isEnabled() {
+    return (await History.historyIsEnabled()).data ?? false;
   }
 
   async #loadHistory() {
@@ -49,8 +60,19 @@ export class uSyncHistoryElement extends UmbLitElement {
   }
 
   render() {
+    if (!this.isEnabled) return this.renderDisabled();
+
     if (this.history?.length > 0) return html`${this.renderHistory()}`;
     return html`${this.renderEmpty()}`;
+  }
+
+  renderDisabled() {
+    return html`<umb-empty-state
+      ><h2>
+        <uui-icon name="usync-logo"></uui-icon>
+      </h2>
+      <h3><umb-localize key="uSyncHistory_disabled"></umb-localize></h3
+    ></umb-empty-state>`;
   }
 
   renderEmpty() {
@@ -92,7 +114,6 @@ export class uSyncHistoryElement extends UmbLitElement {
   }
 
   async #showDetail(item: HistoryInfo) {
-    
     umbOpenModal(this, HISTORY_MODAL_TOKEN, {
       data: { item: item },
     }).catch(() => undefined);

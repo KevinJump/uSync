@@ -1,4 +1,5 @@
 import { uSyncConstants } from "@jumoo/uSync";
+import { SyncHistoryEnabledConditionConfig } from "../condition/history-enabled.condition.js";
 
 const workspace: UmbExtensionManifest = {
   type: "workspaceView",
@@ -16,6 +17,10 @@ const workspace: UmbExtensionManifest = {
       alias: "Umb.Condition.WorkspaceAlias",
       match: uSyncConstants.workspace.alias,
     },
+    {
+      alias: "Umb.Condition.SyncHistoryEnabled",
+      isEnabled: true,
+    } as SyncHistoryEnabledConditionConfig,
   ],
 };
 

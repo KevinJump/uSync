@@ -5,6 +5,7 @@ using System.Text;
 using Umbraco.Cms.Core.Hosting;
 using Umbraco.Extensions;
 
+using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
 using uSync.Core.Extensions;
 
@@ -13,13 +14,19 @@ namespace uSync.History.Service;
 internal class SyncHistoryService : ISyncHistoryService
 {
     private readonly ISyncFileService _syncFileService;
+    private readonly ISyncConfigService _syncConfigService;
     private readonly IHostingEnvironment _hostingEnvironment;
 
-    public SyncHistoryService(ISyncFileService syncFileService, IHostingEnvironment hostingEnvironment)
+    public SyncHistoryService(ISyncFileService syncFileService, IHostingEnvironment hostingEnvironment, ISyncConfigService syncConfigService)
     {
         _syncFileService = syncFileService;
         _hostingEnvironment = hostingEnvironment;
+        _syncConfigService = syncConfigService;
     }
+
+    public bool IsEnabled()
+        => _syncConfigService.Settings.EnableHistory;   
+
 
     public async Task<IEnumerable<HistoryInfo>> GetHistoryAsync()
     {
