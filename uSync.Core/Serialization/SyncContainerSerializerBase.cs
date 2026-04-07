@@ -194,19 +194,22 @@ public abstract class SyncContainerSerializerBase<TObject>
     {
         if (entityTypeContainerTypeService is null) return [];
 
-        var parent = await entityTypeContainerTypeService.GetParentAsync(item);
-        if (parent is null) return [];
+        if (_containersCache.TryGetValue(item.ParentId, out var cached) && cached is not null)
+            return cached;
 
-        var containers = new List<EntityContainer>() { parent };
+        var containers = new List<EntityContainer>();
+
+        var parent = await entityTypeContainerTypeService.GetParentAsync(item);
 
         while (parent is not null)
         {
+            containers.Add(parent);
             parent = await entityTypeContainerTypeService.GetParentAsync(parent);
-            if (parent is not null)
-                containers.Add(parent);
         }
 
-        return containers;
+        var containersArray = containers.ToArray();
+        _containersCache.TryAdd(item.ParentId, containersArray);
+        return containersArray;
     }
 
 
@@ -302,9 +305,13 @@ public abstract class SyncContainerSerializerBase<TObject>
     ///  only used on serialization, allows us to only build the folder path for a set of containers once.
     /// </remarks>
     private ConcurrentDictionary<int, XElement> _folderCache = [];
+    private ConcurrentDictionary<int, EntityContainer[]> _containersCache = [];
 
     private void ClearFolderCache()
-        => _folderCache = [];
+    {
+        _folderCache = [];
+        _containersCache = [];
+    }
 
     public void InitializeCache()
     {

@@ -74,7 +74,7 @@ public abstract class SyncHandlerBase<TObject>
         // be a little slower (not much though)
 
         // we cache this, (it is cleared on an ImportAll)
-        var keys = GetFolderKeys(folder, flat);
+        var keys = await GetFolderKeysAsync(folder, flat);
         if (keys.Count > 0)
         {
             // move parent to here, we only need to check it if there are files.

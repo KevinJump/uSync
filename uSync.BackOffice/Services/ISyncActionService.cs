@@ -68,5 +68,12 @@ public interface ISyncActionService
     /// <summary>
     ///  unpacks a zip archive (stream) to disk, checks it and copies it over the existing uSync folder. 
     /// </summary>
-    UploadImportResult UnpackImportFromStream(Stream stream);
+    [Obsolete("Use UnpackImportFromStreamAsync(Stream stream) will be removed in v19")]
+    UploadImportResult UnpackImportFromStream(Stream stream)
+        => UnpackImportFromStreamAsync(stream).GetAwaiter().GetResult();
+
+    /// <summary>
+    ///  unpacks a zip archive (stream) to disk, checks it and copies it over the existing uSync folder. 
+    /// </summary>
+    Task<UploadImportResult> UnpackImportFromStreamAsync(Stream stream);
 }

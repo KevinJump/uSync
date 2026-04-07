@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -197,7 +198,7 @@ internal class SyncFileService : ISyncFileService
                 if (stream is null)
                     throw new FileNotFoundException($"Cannot create stream for {file}"); ;
 
-                using (var xmlReader = XmlReader.Create(stream, _readerSettings))
+                using (var xmlReader = XmlReader.Create(stream, _readerSettings.Clone()))
                 {
                     return await XElement.LoadAsync(xmlReader, LoadOptions.PreserveWhitespace, CancellationToken.None);    
                 }
@@ -348,7 +349,7 @@ internal class SyncFileService : ISyncFileService
     }
 
     /// <inheritdoc/>
-    public List<string> VerifyFolder(string folder, string extension)
+    public async Task<List<string>> VerifyFolderAsync(string folder, string extension)
     {
         var resolvedFolder = GetAbsPath(folder);
         if (!DirectoryExists(resolvedFolder))
@@ -371,7 +372,7 @@ internal class SyncFileService : ISyncFileService
         {
             try
             {
-                var node = LoadXElementAsync(file).Result;
+                var node = await LoadXElementAsync(file);
 
                 if (!node.IsEmptyItem())
                 {
@@ -489,29 +490,33 @@ internal class SyncFileService : ISyncFileService
     private static XElement MergeNodes(XElement source, XElement target, ISyncTrackerBase? trackerBase)
         => trackerBase is null ? target : trackerBase.MergeFiles(source, target) ?? target;
 
-    private async Task<IEnumerable<KeyValuePair<string, OrderedNodeInfo>>> GetFolderItemsAsync(string folder, string extension)
+    private async Task<IEnumerable<KeyValuePair<string, OrderedNodeInfo>>> GetFolderItemsAsync(
+        string folder, string extension)
     {
-        var items = new List<KeyValuePair<string, OrderedNodeInfo>>();
+        var filePaths = GetFilePaths(folder, extension);
+        var results = new ConcurrentBag<KeyValuePair<string, OrderedNodeInfo>>();
 
-        foreach (var file in GetFilePaths(folder, extension))
-        {
-            var element = await LoadXElementSafeAsync(file);
-            if (element != null)
+        await Parallel.ForEachAsync(
+            filePaths,
+            new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount },
+            async (file, _) =>
             {
-                var path = file.Substring(folder.Length);
+                var element = await LoadXElementSafeAsync(file);
+                if (element is not null)
+                {
+                    var path = file.Substring(folder.Length);
+                    results.Add(new KeyValuePair<string, OrderedNodeInfo>(
+                        key: path,
+                        value: new OrderedNodeInfo(
+                            filename: file,
+                            node: element,
+                            level: (element.GetLevel() * 1000) + element.GetItemSortOrder(),
+                            path: path,
+                            isRoot: true)));
+                }
+            });
 
-                items.Add(new KeyValuePair<string, OrderedNodeInfo>(
-                    key: path,
-                    value: new OrderedNodeInfo(
-                        filename: file,
-                        node: element,
-                        level: (element.GetLevel() * 1000) + element.GetItemSortOrder(),
-                        path: path,
-                        isRoot: true)));
-            }
-        }
-
-        return items;
+        return results;
     }
 
     /// <inheritdoc/>

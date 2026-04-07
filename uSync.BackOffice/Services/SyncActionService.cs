@@ -231,7 +231,7 @@ internal class SyncActionService : ISyncActionService
         return _uSyncService.CompressFolder(_uSyncConfig.GetWorkingFolder());
     }
 
-    public UploadImportResult UnpackImportFromStream(Stream stream)
+    public async Task<UploadImportResult> UnpackImportFromStreamAsync(Stream stream)
     {
         var tempFolder = Path.Combine(_uSyncTempPath, Path.GetFileNameWithoutExtension(Path.GetRandomFileName())) 
             ?? $"{_uSyncTempPath}{Path.DirectorySeparatorChar}{Path.GetFileNameWithoutExtension(Path.GetRandomFileName()) ?? Guid.NewGuid().ToString()}";
@@ -242,7 +242,7 @@ internal class SyncActionService : ISyncActionService
         {
             _uSyncService.DeCompressFile(stream, tempFolder);
 
-            var errors = _syncFileService.VerifyFolder(tempFolder,
+            var errors = await _syncFileService.VerifyFolderAsync(tempFolder,
                 _uSyncConfig.Settings.DefaultExtension);
 
             if (errors.Count > 0)
