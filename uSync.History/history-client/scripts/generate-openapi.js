@@ -13,6 +13,8 @@ if (swaggerUrl === undefined) {
   process.exit();
 }
 
+console.log(`Using OpenAPI spec URL: ${chalk.yellow(swaggerUrl)}`);
+
 // Needed to ignore self-signed certificates from running Umbraco on https on localhost
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
@@ -30,21 +32,33 @@ fetch(swaggerUrl).then(async (response) => {
 
   console.log(`OpenAPI spec fetched successfully`);
   console.log(`Calling ${chalk.yellow('hey-api')} to generate TypeScript client`);
-
+  
   await createClient({
     input: swaggerUrl,
-    output: 'src/api',
+    output: {
+      path: 'src/api',
+      postProcess: ['prettier'],
+    },
     plugins: [
       ...defaultPlugins,
-      '@hey-api/client-fetch',
+      {
+        name: '@hey-api/client-fetch',
+        exportFromIndex: true,
+        throwOnError: true,
+      },
       {
         name: '@hey-api/typescript',
-        enums: 'typescript'
+        enums: 'typescript',
+        readOnlyWriteOnlyBehavior: 'off',
       },
       {
         name: '@hey-api/sdk',
-        asClass: true
-      }
+        operations: {
+          strategy: 'byTags',
+          container: 'class',
+          containerName: '{{name}}',
+        },
+      },
     ],
   });
 

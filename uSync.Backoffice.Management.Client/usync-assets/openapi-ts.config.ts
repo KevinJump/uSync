@@ -7,9 +7,6 @@ export default defineConfig({
 		path: 'src/api',
 		postProcess: ['prettier'],
 	},
-	services: {
-		asClass: true,
-	},
 	plugins: [
 		...defaultPlugins,
 		{
