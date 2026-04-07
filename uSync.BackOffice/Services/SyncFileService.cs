@@ -242,14 +242,14 @@ internal class SyncFileService : ISyncFileService
         }
     }
 
-    private static XmlReaderSettings _readerSettings = new XmlReaderSettings
+    private static readonly XmlReaderSettings _readerSettings = new()
     {
         CheckCharacters = false,
         Async = true,
         IgnoreWhitespace = true,
     };
 
-    private static XmlWriterSettings _writerSettings = new XmlWriterSettings
+    private static readonly XmlWriterSettings _writerSettings = new()
     {
         Encoding = Encoding.UTF8,
         CheckCharacters = false,
