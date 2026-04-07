@@ -58,6 +58,7 @@
 		"@hey-api/openapi-ts": "^0.95.0",
 		"@microsoft/signalr": "^10.0.0",
 		"@umbraco-cms/backoffice": "^17.3.0",
+		"eslint": "^10.2.0",
 		"lit": "^3.3.2",
 		"prettier": "^3.8.1",
 		"typescript": "^5.9.3",
