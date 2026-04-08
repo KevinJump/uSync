@@ -372,8 +372,7 @@ public partial class SyncService
     public async Task<IEnumerable<uSyncAction>> ExportSingleItem(Udi udi, string[] folders, SyncHandlerOptions options)
     {
         var handler = _handlerFactory.GetValidHandlerByEntityType(udi.EntityType, options);
-        if (handler == null) return [uSyncAction.Fail("Single", "Not Found", udi.EntityType, ChangeType.Fail, "Could not find handler", new KeyNotFoundException(udi.EntityType))];
-        
+        if (handler == null) return [uSyncAction.Fail("Single", "Unknown", udi.EntityType, ChangeType.Fail, $"Could not find handler for entity type '{udi.EntityType}'", new KeyNotFoundException(udi.EntityType))];
         return await handler.Handler.ExportAsync(udi, folders, handler.Settings);
     }
 }
