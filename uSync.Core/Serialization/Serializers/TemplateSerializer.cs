@@ -14,6 +14,7 @@ using Umbraco.Cms.Core.Strings;
 using Umbraco.Extensions;
 
 using uSync.Core.Models;
+using uSync.Core.Templates;
 using uSync.Core.Versions;
 
 namespace uSync.Core.Serialization.Serializers;
@@ -21,10 +22,9 @@ namespace uSync.Core.Serialization.Serializers;
 [SyncSerializer("D0E0769D-CCAE-47B4-AD34-4182C587B08A", "Template Serializer", uSyncConstants.Serialization.Template)]
 public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer<ITemplate>
 {
-    private readonly IShortStringHelper _shortStringHelper;
     private readonly IFileSystem? _viewFileSystem;
 
-    private readonly ITemplateService _templateService;
+    private readonly ISyncTemplateService _templateService;
     private readonly IUserIdKeyResolver _userIdKeyResolver;
 
     private readonly uSyncCapabilityChecker _capabilityChecker;
@@ -38,17 +38,15 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
         FileSystems fileSystems,
         IConfiguration configuration,
         uSyncCapabilityChecker capabilityChecker,
-        ITemplateService templateService,
-        IUserIdKeyResolver userIdKeyResolver)
+        IUserIdKeyResolver userIdKeyResolver,
+        ISyncTemplateService syncTemplateService)
         : base(entityService, logger)
     {
-        _shortStringHelper = shortStringHelper;
-
         _viewFileSystem = fileSystems.MvcViewsFileSystem;
         _configuration = configuration;
         _capabilityChecker = capabilityChecker;
-        _templateService = templateService;
         _userIdKeyResolver = userIdKeyResolver;
+        _templateService = syncTemplateService;
     }
 
     protected override async Task<SyncAttempt<ITemplate>> ProcessDeleteAsync(Guid key, string alias, SerializerFlags flags)
@@ -103,7 +101,13 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
                 userKey, key);
 
             if (attempt.Success is false)
-                return SyncAttempt<ITemplate>.Fail(name, ChangeType.Import, "Failed to create template");
+            {
+                logger.LogWarning("Failed to create template {alias} {name} - {error} - {status}",
+                    alias, name, attempt.Exception?.Message ?? "Unknown error", attempt.Status);
+                
+                return SyncAttempt<ITemplate>.Fail(name, ChangeType.Import, 
+                    $"Failed to create template {alias} {name} - {attempt.Exception?.Message ?? "Unknown error"} - {attempt.Status}");
+            }
 
             item = attempt.Result;
             details.AddNew(alias, alias, "Template");
@@ -118,8 +122,8 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
         if (item is null)
         {
             // creating went wrong
-            logger.LogWarning("Failed to create template");
-            return SyncAttempt<ITemplate>.Fail(name, ChangeType.Import, "Failed to create template");
+            logger.LogWarning("Failed to create template - item is null after create process.");
+            return SyncAttempt<ITemplate>.Fail(name, ChangeType.Import, "Failed to create template - no new item created.");
         }
 
         if (item.Key != key)
