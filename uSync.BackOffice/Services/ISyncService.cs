@@ -170,5 +170,12 @@ public interface ISyncService
     ///  merge the given folders in single 'production' files for each handler.
     /// </summary>
     Task<int> MergeExportFolder(string[] paths, IEnumerable<HandlerConfigPair> handlers);
+
+    /// <summary>
+    ///  export a single item to the specified folders using the supplied handler options.
+    /// </summary>
+    /// <param name="udi">The unique document identifier of the item to export.</param>
+    /// <param name="folders">The target folders to export the item into.</param>
+    /// <param name="options">The handler options to use during export.</param>
     Task<IEnumerable<uSyncAction>> ExportSingleItem(Udi udi, string[] folders, SyncHandlerOptions options);
 }
