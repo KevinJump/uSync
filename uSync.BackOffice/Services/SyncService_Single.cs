@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
+using Umbraco.Cms.Core;
 using Umbraco.Extensions;
 
 using uSync.BackOffice.Extensions;
@@ -360,4 +361,19 @@ public partial class SyncService
     /// </remarks>
     private static int CalculateProgress(int value, int total, int min, int max)
         => (int)(min + (((float)value / total) * (max - min)));
+
+
+    /// <summary>
+    ///  export a single item via the correct handler. 
+    /// </summary>
+    /// <remarks>
+    ///  this method isn't used directly in the code, but is here as a helper .
+    /// </remarks>
+    public async Task<IEnumerable<uSyncAction>> ExportSingleItem(Udi udi, string[] folders, SyncHandlerOptions options)
+    {
+        var handler = _handlerFactory.GetValidHandlerByEntityType(udi.EntityType, options);
+        if (handler == null) return [uSyncAction.Fail("Single", "Not Found", udi.EntityType, ChangeType.Fail, "Could not find handler", new KeyNotFoundException(udi.EntityType))];
+        
+        return await handler.Handler.ExportAsync(udi, folders, handler.Settings);
+    }
 }

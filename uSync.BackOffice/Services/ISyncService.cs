@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
+using Umbraco.Cms.Core;
+
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Models;
 using uSync.BackOffice.SyncHandlers.Interfaces;
@@ -168,4 +170,5 @@ public interface ISyncService
     ///  merge the given folders in single 'production' files for each handler.
     /// </summary>
     Task<int> MergeExportFolder(string[] paths, IEnumerable<HandlerConfigPair> handlers);
+    Task<IEnumerable<uSyncAction>> ExportSingleItem(Udi udi, string[] folders, SyncHandlerOptions options);
 }
