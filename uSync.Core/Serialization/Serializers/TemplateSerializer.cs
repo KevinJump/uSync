@@ -119,13 +119,6 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
             return SyncAttempt<ITemplate>.Succeed(name, item, ChangeType.Import, "Created", true, details);
         }
 
-        if (item is null)
-        {
-            // creating went wrong
-            logger.LogWarning("Failed to create template - item is null after create process.");
-            return SyncAttempt<ITemplate>.Fail(name, ChangeType.Import, "Failed to create template - no new item created.");
-        }
-
         if (item.Key != key)
         {
             details.AddUpdate(uSyncConstants.Xml.Key, item.Key, key);
