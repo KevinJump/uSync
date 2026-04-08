@@ -11,6 +11,7 @@ using uSync.Core.Mapping;
 using uSync.Core.Mapping.Tracking;
 using uSync.Core.Roots.Configs;
 using uSync.Core.Serialization;
+using uSync.Core.Templates;
 using uSync.Core.Tracking;
 
 namespace uSync.Core;
@@ -40,6 +41,9 @@ public static class uSyncCoreBuilderExtensions
 
         // cache for entity items, we use it to speed up lookups.
         builder.Services.AddSingleton<SyncEntityCache>();
+
+        // templates have a wrapper service because we have to do work when in production mode
+        builder.Services.AddSingleton<ISyncTemplateService, SyncTemplateService>();
 
         // register *all* ConfigurationSerializers except those marked [HideFromTypeFinder]
         // has to happen before the DataTypeSerializer is loaded, because that is where

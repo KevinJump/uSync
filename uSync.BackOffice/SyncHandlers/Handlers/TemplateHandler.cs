@@ -23,6 +23,7 @@ using uSync.BackOffice.SyncHandlers.Interfaces;
 using uSync.BackOffice.SyncHandlers.Models;
 using uSync.Core;
 using uSync.Core.Serialization;
+using uSync.Core.Templates;
 
 using static Umbraco.Cms.Core.Constants;
 
@@ -42,7 +43,7 @@ public class TemplateHandler : SyncHandlerLevelBase<ITemplate>, ISyncHandler, IS
     INotificationAsyncHandler<MovingNotification<ITemplate>>
 {
     private readonly IFileSystem? _viewFileSystem;
-    private readonly ITemplateService _templateService;
+    private readonly ISyncTemplateService _templateService;
 
     private readonly ITemplateContentParserService _templateContentParserService;
 
@@ -51,7 +52,6 @@ public class TemplateHandler : SyncHandlerLevelBase<ITemplate>, ISyncHandler, IS
     public TemplateHandler(
         ILogger<TemplateHandler> logger,
         IEntityService entityService,
-        ITemplateService templateService,
         FileSystems fileSystems,
         ITemplateContentParserService templateContentParserService,
         AppCaches appCaches,
@@ -59,12 +59,13 @@ public class TemplateHandler : SyncHandlerLevelBase<ITemplate>, ISyncHandler, IS
         ISyncFileService syncFileService,
         ISyncEventService mutexService,
         ISyncConfigService uSyncConfig,
-        ISyncItemFactory syncItemFactory)
+        ISyncItemFactory syncItemFactory,
+        ISyncTemplateService syncTemplateService)
         : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfig, syncItemFactory)
     {
-        _templateService = templateService;
         _viewFileSystem = fileSystems.MvcViewsFileSystem;
         _templateContentParserService = templateContentParserService;
+        _templateService = syncTemplateService;
     }
 
     /// <inheritdoc/>
