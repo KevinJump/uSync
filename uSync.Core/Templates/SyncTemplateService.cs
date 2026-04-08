@@ -13,7 +13,7 @@ using uSync.Core.Versions;
 namespace uSync.Core.Templates;
 
 /// <summary>
-///  does creating of templates, espeically if we are in production mode. 
+///  handles creation of templates, especially when running in production mode.
 /// </summary>
 internal class SyncTemplateService : ISyncTemplateService
 {
@@ -34,29 +34,33 @@ internal class SyncTemplateService : ISyncTemplateService
     }
 
     /// <summary>
-    ///  creates a template, but only if we are in production mode. 
+    ///  creates a template, using the service when possible and falling back to the repository when in production mode.
     /// </summary>
-    /// <param name="name"></param>
-    /// <param name="alias"></param>
-    /// <param name="description"></param>
+    /// <param name="name">The display name of the template.</param>
+    /// <param name="alias">The alias of the template.</param>
+    /// <param name="content">The template content.</param>
+    /// <param name="userKey">The key of the user performing the operation.</param>
+    /// <param name="key">The key to assign to the new template.</param>
     /// <returns></returns>
     public async Task<Attempt<ITemplate, TemplateOperationStatus>> CreateAsync(string name, string alias, string? content, Guid userKey, Guid key)
     {
-        TemplateOperationStatus lastKnownStatus = TemplateOperationStatus.Success;
-
         if (IsInProductionMode() is false)
         {
             var attempt = await _templateService.CreateAsync(name, alias, content, userKey, key);
             if (attempt.Success)
                 return attempt;
+
+            // only fall back to the repository when blocked by production mode restrictions
+            if (attempt.Status is not TemplateOperationStatus.NotAllowedInProductionMode)
+                return attempt;
         }
 
-        // else - lets try the repository way (surely this is a hack?)
+        // in production mode (or blocked by it) - use the repository directly
         // https://github.com/umbraco/Umbraco-CMS/pull/21600#issuecomment-4205232583
-        return await CreateTemplateInternal(name, alias, content, userKey, key, lastKnownStatus);
+        return await CreateTemplateInternal(name, alias, content, userKey, key);
     }
 
-    private async Task<Attempt<ITemplate, TemplateOperationStatus>> CreateTemplateInternal(string name, string alias, string? content, Guid userKey, Guid key, TemplateOperationStatus lastKnownStatus) 
+    private Task<Attempt<ITemplate, TemplateOperationStatus>> CreateTemplateInternal(string name, string alias, string? content, Guid userKey, Guid key)
     {
         var template = new Template(_shortStringHelper, name, alias)
         {
@@ -66,17 +70,14 @@ internal class SyncTemplateService : ISyncTemplateService
 
         try
         {
-            using (var scope = _scopeProvider.CreateCoreScope(autoComplete: true))
-            {
-                _templateRepository.Save(template);
-                scope.Complete();
+            using var scope = _scopeProvider.CreateCoreScope(autoComplete: true);
+            _templateRepository.Save(template);
 
-                return Attempt.SucceedWithStatus<ITemplate, TemplateOperationStatus>(TemplateOperationStatus.Success, template);
-            }
+            return Task.FromResult(Attempt.SucceedWithStatus<ITemplate, TemplateOperationStatus>(TemplateOperationStatus.Success, template));
         }
         catch (Exception ex)
         {
-            return Attempt.FailWithStatus<ITemplate, TemplateOperationStatus>(lastKnownStatus, template, ex);
+            return Task.FromResult(Attempt.FailWithStatus<ITemplate, TemplateOperationStatus>(TemplateOperationStatus.NotAllowedInProductionMode, template, ex));
         }
     }
 

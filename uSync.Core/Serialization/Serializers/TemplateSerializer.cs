@@ -10,7 +10,6 @@ using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.IO;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Services;
-using Umbraco.Cms.Core.Strings;
 using Umbraco.Extensions;
 
 using uSync.Core.Models;
@@ -34,7 +33,6 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
     public TemplateSerializer(
         IEntityService entityService,
         ILogger<TemplateSerializer> logger,
-        IShortStringHelper shortStringHelper,
         FileSystems fileSystems,
         IConfiguration configuration,
         uSyncCapabilityChecker capabilityChecker,
