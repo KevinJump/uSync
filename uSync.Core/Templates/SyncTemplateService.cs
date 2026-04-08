@@ -34,7 +34,8 @@ internal class SyncTemplateService : ISyncTemplateService
     }
 
     /// <summary>
-    ///  creates a template, using the service when possible and falling back to the repository when in production mode.
+    ///  creates a template, using the service when possible and falling back to the repository
+    ///  when already in production mode or when the service returns <see cref="TemplateOperationStatus.NotAllowedInProductionMode"/>.
     /// </summary>
     /// <param name="name">The display name of the template.</param>
     /// <param name="alias">The alias of the template.</param>
