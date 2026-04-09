@@ -307,9 +307,15 @@ export class uSyncWorkspaceContext
 	}
 
 	#getFileName() {
-		const timestamp = new Date()
-			.toISOString()
-			.replace(/^20(\d{2})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}).*/, '$1$2$3_$4$5$6');
+		const now = new Date();
+		const year = now.getUTCFullYear().toString();
+		const month = (now.getUTCMonth() + 1).toString().padStart(2, '0');
+		const day = now.getUTCDate().toString().padStart(2, '0');
+		const hours = now.getUTCHours().toString().padStart(2, '0');
+		const minutes = now.getUTCMinutes().toString().padStart(2, '0');
+		const seconds = now.getUTCSeconds().toString().padStart(2, '0');
+		const milliseconds = now.getUTCMilliseconds().toString().padStart(3, '0');
+		const timestamp = `${year}${month}${day}_${hours}${minutes}${seconds}${milliseconds}`;
 		return `usync_export_${timestamp}.zip`;
 	}
 
