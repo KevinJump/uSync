@@ -1021,8 +1021,8 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
 
         PropertyGroup[] removals = item.PropertyGroups
             .Where(x => x is not null
-                && inheritedTabs.Contains(x.Alias) is false // don't touch inherited tabs
-                && newTabs.Contains(x.Alias) is false) // only include tabs we don't have in the xml
+                && inheritedTabs.InvariantContains(x.Alias) is false // don't touch inherited tabs
+                && newTabs.InvariantContains(x.Alias) is false) // only include tabs we don't have in the xml
             .ToArray() ?? [];
 
         if (removals.Length == 0) return [];
