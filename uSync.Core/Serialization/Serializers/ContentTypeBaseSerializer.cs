@@ -1004,55 +1004,49 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
 
     protected IEnumerable<uSyncChange> CleanTabs(TObject item, XElement node, SyncSerializerOptions options)
     {
-        if (options.DeleteItems())
+        if (options.DeleteItems() is false) return [];
+
+        var tabNode = node?.Element("Tabs");
+        if (tabNode == null) return [];
+
+        var newTabs = tabNode.Elements("Tab")
+            .Select(x => GetTabAliasFromTabGroup(x))
+            .ToList();
+
+        var inheritedTabs =
+            item.ContentTypeComposition
+                    .SelectMany(c => c.CompositionPropertyGroups.Select(x => x.Alias))
+                    .Distinct()
+                    .ToList();
+
+        PropertyGroup[] removals = item.PropertyGroups
+            .Where(x => x is not null
+                && inheritedTabs.InvariantContains(x.Alias) is false // don't touch inherited tabs
+                && newTabs.InvariantContains(x.Alias) is false) // only include tabs we don't have in the xml
+            .ToArray();
+
+        if (removals.Length == 0) return [];
+
+        var changes = new List<uSyncChange>();
+        foreach (var tab in removals)
         {
-            var tabNode = node?.Element("Tabs");
-            if (tabNode == null) return [];
-
-            var newTabs = tabNode.Elements("Tab")
-                .Select(x => GetTabAliasFromTabGroup(x))
-                .ToList();
-
-            var inheritedTabs = item.CompositionPropertyGroups.Select(x => x.Alias).ToList();
-
-            List<PropertyGroup> removals = [];
-            foreach (var tab in item.PropertyGroups)
+            if (tab.PropertyTypes?.Count > 0)
             {
-                // don't remove the inherited tabs
-                if (inheritedTabs.Contains(tab.Alias)) continue;
-
-                if (!newTabs.InvariantContains(tab.Alias))
-                {
-                    removals.Add(tab);
-                }
+                logger.LogWarning("Not removing {tab} as it still has properties {properties}", tab.Alias,
+                    String.Join(",", tab.PropertyTypes.Select(x => x.Name)));
+                changes.Add(uSyncChange.Warning($"Tabs/{tab.Alias}", $"Tab: {tab.Alias}", $"Tab '{tab.Alias}' not removed because it still has properties: {String.Join(",", tab.PropertyTypes.Select(x => x.Name))}"));
             }
-
-            if (removals.Count > 0)
+            else
             {
-                var changes = new List<uSyncChange>();
+                if (logger.IsEnabled(LogLevel.Information))
+                    logger.LogInformation("Removing tab : {alias}", tab.Alias);
 
-                foreach (var tab in removals)
-                {
-                    if (tab.PropertyTypes?.Count > 0)
-                    {
-                        logger.LogWarning("Not removing {tab} as it still has properties {properties}", tab.Alias,
-                            String.Join(",", tab.PropertyTypes.Select(x => x.Name)));
-                    }
-                    else
-                    {
-                        if (logger.IsEnabled(LogLevel.Information))
-                            logger.LogInformation("Removing tab : {alias}", tab.Alias);
-
-                        changes.Add(uSyncChange.Delete($"Tabs/{tab.Alias}", tab.Alias, tab.Alias));
-                        item.PropertyGroups.Remove(tab);
-                    }
-                }
-
-                return changes;
+                changes.Add(uSyncChange.Delete($"Tabs/{tab.Alias}", $"Tab {tab.Alias}", tab.Alias));
+                item.PropertyGroups.Remove(tab);
             }
         }
 
-        return [];
+        return changes;
     }
 
     protected async Task CleanFolderAsync(TObject item, XElement node)
