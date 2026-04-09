@@ -119,7 +119,7 @@ export default {
 		importAtStartup: 'Import at startup',
 		importAtStartupDesc: 'Run an import of files from the disk when Umbraco starts',
 
-		exportAtStartup: 'Export at stattup',
+		exportAtStartup: 'Export at startup',
 		exportAtStartupDesc: 'Export the Umbraco settings when the site starts up',
 
 		exportOnSave: 'Export on save',
