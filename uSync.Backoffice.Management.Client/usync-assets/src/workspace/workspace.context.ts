@@ -299,11 +299,18 @@ export class uSyncWorkspaceContext
 
 		const download = document.createElement('a');
 		download.href = url;
-		download.download = 'usync-export.zip';
+		download.download = this.#getFileName();
 		document.body.appendChild(download);
 		download.dispatchEvent(new MouseEvent('click'));
 		download.remove();
 		window.URL.revokeObjectURL(url);
+	}
+
+	#getFileName() {
+		const timestamp = new Date()
+			.toISOString()
+			.replace(/^20(\d{2})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}).*/, '$1$2$3_$4$5$6');
+		return `usync_export_${timestamp}.zip`;
 	}
 
 	async importSingle(item: USyncActionView) {
