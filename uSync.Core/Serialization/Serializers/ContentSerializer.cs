@@ -14,7 +14,6 @@ using uSync.Core.Documents;
 using uSync.Core.Extensions;
 using uSync.Core.Mapping;
 using uSync.Core.Models;
-using uSync.Core.Templates;
 
 namespace uSync.Core.Serialization.Serializers;
 
@@ -24,7 +23,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
     protected readonly IContentService contentService;
     protected readonly IUserService userService;
 
-    protected readonly ISyncTemplateService _templateService;
+    protected readonly ITemplateService _templateService;
     protected readonly ISyncDocumentUrlCleaner? _urlCleaner;
 
     [Obsolete("Use the constructor with urlCleaner, will be removed in v19")]
@@ -37,8 +36,8 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
         IContentService contentService,
         SyncValueMapperCollection syncMappers,
         IUserService userService,
-        ISyncTemplateService syncTemplateService
-    ) : this(entityService, languageService, relationService, shortStringHelper, logger, contentService, syncMappers, userService, syncTemplateService, null)
+        ITemplateService templateService
+    ) : this(entityService, languageService, relationService, shortStringHelper, logger, contentService, syncMappers, userService, templateService, null)
     { }
 
     public ContentSerializer(
@@ -50,7 +49,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
         IContentService contentService,
         SyncValueMapperCollection syncMappers,
         IUserService userService,
-        ISyncTemplateService syncTemplateService,
+        ITemplateService templateService,
         ISyncDocumentUrlCleaner? urlCleaner)
         : base(entityService, languageService, relationService, shortStringHelper, logger, UmbracoObjectTypes.Document, syncMappers)
     {
@@ -58,7 +57,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
 
         this.relationAlias = Constants.Conventions.RelationTypes.RelateParentDocumentOnDeleteAlias;
         this.userService = userService;
-        _templateService = syncTemplateService;
+        _templateService = templateService;
         _urlCleaner = urlCleaner;
     }
 
