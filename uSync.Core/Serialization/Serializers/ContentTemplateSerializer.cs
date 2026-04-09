@@ -12,7 +12,6 @@ using uSync.Core.Documents;
 using uSync.Core.Extensions;
 using uSync.Core.Mapping;
 using uSync.Core.Models;
-using uSync.Core.Templates;
 
 namespace uSync.Core.Serialization.Serializers;
 
@@ -31,7 +30,7 @@ public class ContentTemplateSerializer : ContentSerializer, ISyncSerializer<ICon
         IContentTypeService contentTypeService,
         SyncValueMapperCollection syncMappers,
         IUserService userService,
-        ISyncTemplateService templateService,
+        ITemplateService templateService,
         ISyncDocumentUrlCleaner urlCleaner)
         : base(entityService, languageService, relationService, shortStringHelper, logger, contentService, syncMappers, userService, templateService, urlCleaner)
     {
