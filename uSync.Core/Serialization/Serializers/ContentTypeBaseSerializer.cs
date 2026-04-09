@@ -1023,7 +1023,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
             .Where(x => x is not null
                 && inheritedTabs.InvariantContains(x.Alias) is false // don't touch inherited tabs
                 && newTabs.InvariantContains(x.Alias) is false) // only include tabs we don't have in the xml
-            .ToArray() ?? [];
+            .ToArray();
 
         if (removals.Length == 0) return [];
 
