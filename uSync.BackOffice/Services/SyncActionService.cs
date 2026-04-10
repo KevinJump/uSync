@@ -187,7 +187,7 @@ internal class SyncActionService : ISyncActionService
     public async Task StartProcessAsync(SyncStartActionRequest request)
     {
         if (_logger.IsEnabled(LogLevel.Information))
-            _logger.LogInformation("[uSync {version}] {user} Starting {action} process", uSync.Version.ToString(3), request.Username, request.HandlerAction);
+            _logger.LogInformation("[uSync] - Starting {action} process", request.HandlerAction);
 
         _timer = Stopwatch.StartNew();
         await _uSyncService.StartBulkProcessAsync(request.HandlerAction);
@@ -214,9 +214,8 @@ internal class SyncActionService : ISyncActionService
 
         if (_logger.IsEnabled(LogLevel.Information))
         {
-            _logger.LogInformation("[uSync {version}] {user} finished {action} process ({changes}/{count} changes) in ({time:#,#}ms)",
-                uSync.Version.ToString(3), request.Username, request.HandlerAction,
-                request.Actions.CountChanges(), request.Actions.Count(), elapsed);
+            _logger.LogInformation("[uSync] finished {action} process ({changes}/{count} changes) in ({time:#,#}ms)",
+                request.HandlerAction, request.Actions.CountChanges(), request.Actions.Count(), elapsed);
         }
 
         request.Callbacks?.Update?.Invoke($"{request.HandlerAction} completed ({elapsed:#,#}ms)", 1, 1);
