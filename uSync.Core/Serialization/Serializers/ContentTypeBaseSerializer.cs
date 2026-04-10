@@ -1038,8 +1038,8 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
             }
             else
             {
-                if (logger.IsEnabled(LogLevel.Information))
-                    logger.LogInformation("Removing tab : {alias}", tab.Alias);
+                if (logger.IsEnabled(LogLevel.Debug))
+                    logger.LogDebug("Removing tab : {alias}", tab.Alias);
 
                 changes.Add(uSyncChange.Delete($"Tabs/{tab.Alias}", $"Tab {tab.Alias}", tab.Alias));
                 item.PropertyGroups.Remove(tab);

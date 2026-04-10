@@ -234,7 +234,9 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         }
         else
         {
-            logger.LogInformation("No caching of handler key lookups (CacheFolderKeys = false)");
+            if (logger.IsEnabled(LogLevel.Debug)) 
+                logger.LogDebug("No caching of handler key lookups (CacheFolderKeys = false)");
+
             this.runtimeCache = NoAppCache.Instance;
         }
     }
