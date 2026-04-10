@@ -3,14 +3,20 @@ using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi;
+
 using Swashbuckle.AspNetCore.SwaggerGen;
+
 using System.Text.Json.Nodes;
+
 using Umbraco.Cms.Api.Common.OpenApi;
+using Umbraco.Cms.Api.Management.OpenApi;
 using Umbraco.Cms.Core.Composing;
 using Umbraco.Cms.Core.DependencyInjection;
 using Umbraco.Cms.Core.Manifest;
 using Umbraco.Cms.Infrastructure.Manifest;
 using Umbraco.Extensions;
+
+using uSync.Backoffice.Management.Api.Configuration;
 using uSync.BackOffice;
 using uSync.BackOffice.Extensions;
 using uSync.History.Service;
@@ -36,7 +42,7 @@ namespace uSync.History
         public void Configure(SwaggerGenOptions options)
         {
             options.SwaggerDoc(
-                SyncHistoryConstants.AppName,
+                SyncHistoryConstants.ApiName,
                 new OpenApiInfo
                 {
                     Title = $"{SyncHistoryConstants.DisplayName} API",
@@ -44,8 +50,16 @@ namespace uSync.History
                     Description = $"{SyncHistoryConstants.DisplayName} API methods"
                 });
 
+            options.OperationFilter<uSyncHistoryClientOperationSecurityFilter>();
+
         }
     }
+
+    public class uSyncHistoryClientOperationSecurityFilter : BackOfficeSecurityRequirementsOperationFilterBase
+    {
+        protected override string ApiName => SyncHistoryConstants.AppName;
+    }
+
 
     public class MaintenanceModeCustomOperationHandler : IOperationIdHandler
     {
@@ -59,7 +73,7 @@ namespace uSync.History
         }
 
         public bool CanHandle(ApiDescription apiDescription, ControllerActionDescriptor controllerActionDescriptor)
-            => controllerActionDescriptor.ControllerTypeInfo.Namespace?.StartsWith("uSync.History") is true;
+            => controllerActionDescriptor.ControllerTypeInfo.Namespace?.StartsWith(SyncHistoryConstants.ApiName) is true;
 
         public string Handle(ApiDescription apiDescription)
             => $"{apiDescription.ActionDescriptor.RouteValues["action"]}";

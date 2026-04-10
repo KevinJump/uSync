@@ -26,6 +26,7 @@ namespace uSync.History
 
     internal class SyncHistoryConstants
     {
+        public const string ApiName = "uSync.History";
         public const string AppName = "uSync.History";
         public const string DisplayName = "uSync History";
         public const string PlugnPath = "/App_Plugins/uSync.History/";

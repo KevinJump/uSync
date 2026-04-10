@@ -149,14 +149,6 @@ export type EventInfo = {
     eventHandlerType?: Type | null;
 };
 
-export enum EventMessageTypeModel {
-    DEFAULT = 'Default',
-    INFO = 'Info',
-    ERROR = 'Error',
-    SUCCESS = 'Success',
-    WARNING = 'Warning'
-}
-
 export type Exception = {
     targetSite?: MethodBase | null;
     readonly message: string;
@@ -429,12 +421,6 @@ export type Module = {
 
 export type ModuleHandle = {
     readonly mdStreamVersion: number;
-};
-
-export type NotificationHeaderModel = {
-    message: string;
-    category: string;
-    type: EventMessageTypeModel;
 };
 
 export enum ParameterAttributes {

@@ -3,7 +3,7 @@
 	"compilerOptions": {
 		"outDir": "./dist",
 		"rootDir": "./src",
-		"emitDeclarationOnly": true,
+		"emitDeclarationOnly": false,
 		"useDefineForClassFields": false,
 		"moduleDetection": "force",
 		"allowJs": true,
@@ -11,7 +11,8 @@
 		"composite": true,
 		"sourceMap": false,
 		"declaration": true,
-		"allowArbitraryExtensions": false
+		"allowArbitraryExtensions": false,
+		"allowImportingTsExtensions": false
 	},
 	"include": ["src/**/*.ts", "src/**/*.js"]
 }
