@@ -162,8 +162,8 @@ public abstract class SyncHandlerBase<TObject>
                 // actually do the delete if we are really not reporting
                 if (!reportOnly)
                 {
-                    if (logger.IsEnabled(LogLevel.Information))
-                        logger.LogInformation("Deleting item: {id} {name} as part of a 'clean' import", actualItem.Id, name);
+                    if (logger.IsEnabled(LogLevel.Debug))
+                        logger.LogDebug("Deleting item: {id} {name} as part of a 'clean' import", actualItem.Id, name);
 
                     await DeleteViaServiceAsync(actualItem);
                 }
