@@ -28,7 +28,7 @@ public partial class RTEMapper : SyncValueMapperBase, ISyncMapper
     private readonly LocalLinkProcessor _localLinkProcessor;
     private readonly ILogger<RTEMapper> _logger;
     private readonly IIdKeyMap _idKeyMap;
-    private readonly ISyncImageUpdateHelper _syncImageHmacChecker;
+    private readonly ISyncImageUpdateHelper _syncImageUpdater;
 
     public RTEMapper(
         IEntityService entityService,
@@ -36,14 +36,14 @@ public partial class RTEMapper : SyncValueMapperBase, ISyncMapper
         LocalLinkProcessor localLinkProcessor,
         ILogger<RTEMapper> logger,
         IIdKeyMap idKeyMap,
-        ISyncImageUpdateHelper syncImageHmacChecker)
+        ISyncImageUpdateHelper syncImageUpdateHelper)
         : base(entityService)
     {
         _mapperCollection = mappers;
         _localLinkProcessor = localLinkProcessor;
         _logger = logger;
         _idKeyMap = idKeyMap;
-        _syncImageHmacChecker = syncImageHmacChecker;
+        _syncImageUpdater = syncImageUpdateHelper;
     }
 
     // would preferer the link regex - less likely to get rouge ones 
@@ -78,7 +78,7 @@ public partial class RTEMapper : SyncValueMapperBase, ISyncMapper
         var markup = _localLinkProcessor.ProcessStringValue(migratedMarkup);
 
         // check if we need to update at hmac values inside the site. 
-        markup = _syncImageHmacChecker.UpdateImageUrlValues(markup);
+        markup = _syncImageUpdater.UpdateImageUrlValues(markup);
         jsonObject["markup"] = markup;
 
         return Task.FromResult<string?>(jsonObject.SerializeJsonString());
