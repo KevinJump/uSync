@@ -132,7 +132,7 @@ public partial class RTEMapper : SyncValueMapperBase, ISyncMapper
 
         // macros should never really be here, so this never gets called - we will remove this functionality in Umbraco 18
         if (MacroRegEx.IsMatch(stringValue))
-            await GetMacroDependencies(stringValue, editorAlias, flags);
+            dependencies.AddRange(await GetMacroDependencies(stringValue, editorAlias, flags));
 
         return dependencies.Distinct();
     }
