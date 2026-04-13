@@ -170,7 +170,7 @@ public partial class RTEMapper : SyncValueMapperBase, ISyncMapper, ISyncProperty
         {
             if (UdiParser.TryParse(m.Value, out GuidUdi? udi) && udi is not null)
             {
-                // onlt include when we are linking everything or including media, otherwise it can basically spider the site.
+                // only include when we are linking everything or including media, otherwise it can basically spider the site.
                 if (flags.HasFlag(DependencyFlags.IncludeLinked) == false && udi.EntityType != Constants.UdiEntityType.Media)
                     continue;
 
