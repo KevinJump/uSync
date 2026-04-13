@@ -66,7 +66,9 @@ public class SyncImageUpdateHelper : ISyncImageUpdateHelper
             doc.LoadHtml(html);
 
             var nodes = doc.DocumentNode.SelectNodes("//img[@data-udi]");
-            if (nodes is null) return html;
+            if (nodes is null || nodes.Count == 0) return html;
+
+            if (_umbracoContextAccessor.TryGetUmbracoContext(out var umbracoContext) is false) return html;
 
             foreach (var img in nodes)
             {
@@ -75,8 +77,6 @@ public class SyncImageUpdateHelper : ISyncImageUpdateHelper
 
                 if (UdiParser.TryParse(udiString, out GuidUdi? udi) is false || udi is null)
                     continue;
-
-                if (_umbracoContextAccessor.TryGetUmbracoContext(out var umbracoContext) is false) continue;
 
                 IPublishedContent? media = umbracoContext?.Media?.GetById(udi.Guid);
                 if (media is null)
