@@ -69,7 +69,7 @@ public class SyncImageUpdateHelper : ISyncImageUpdateHelper
 
             if (_umbracoContextAccessor.TryGetUmbracoContext(out var umbracoContext) is false) continue;
 
-            IPublishedContent? media = umbracoContext?.Content?.GetById(udi.Guid);
+            IPublishedContent? media = umbracoContext?.Media?.GetById(udi.Guid);
             if (media is null)
             {
                 _logger.LogWarning("Could not find media item with UDI {Udi} for image URL generation.", udiString);
