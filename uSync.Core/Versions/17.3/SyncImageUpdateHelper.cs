@@ -12,6 +12,8 @@ using Umbraco.Cms.Core.Routing;
 using Umbraco.Cms.Core.Web;
 using Umbraco.Extensions;
 
+using uSync.Core.Configuration;
+
 namespace uSync.Core.Versions;
 
 /// <inheritdoc/>
@@ -22,25 +24,33 @@ public class SyncImageUpdateHelper : ISyncImageUpdateHelper
     private readonly IUmbracoContextAccessor _umbracoContextAccessor;
     private readonly IPublishedUrlProvider _publishedUrlProvider;
     private readonly ILogger<SyncImageUpdateHelper> _logger;
+    private SyncCoreSettings _syncCoreSettings;
 
     public SyncImageUpdateHelper(
         IImageUrlGenerator imageUrlGenerator,
         IOptions<ImagingSettings> imagingSettings,
         IUmbracoContextAccessor umbracoContextAccessor,
         IPublishedUrlProvider publishedUrlProvider,
-        ILogger<SyncImageUpdateHelper> logger)
+        ILogger<SyncImageUpdateHelper> logger,
+        IOptionsMonitor<SyncCoreSettings> syncCoreSettings)
     {
         _imageUrlGenerator = imageUrlGenerator;
         _imagingSettings = imagingSettings.Value;
         _umbracoContextAccessor = umbracoContextAccessor;
         _publishedUrlProvider = publishedUrlProvider;
         _logger = logger;
+
+        _syncCoreSettings = syncCoreSettings.CurrentValue;
+        syncCoreSettings.OnChange(coreSettings =>
+        {
+            _syncCoreSettings = coreSettings;
+        });
     }
 
     /// <inheritdoc/>
     public string UpdateImageUrlValues(string html)
     {
-        if (_imagingSettings.HMACSecretKey.Length == 0)
+        if (_syncCoreSettings.UpdateHMACUrls is false || _imagingSettings.HMACSecretKey.Length == 0)
             return html;
 
         var doc = new HtmlAgilityPack.HtmlDocument();
