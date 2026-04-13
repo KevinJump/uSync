@@ -13,7 +13,7 @@ import {
 	USyncSettings,
 } from '@jumoo/uSync';
 
-export * from './components/usyncSettingItem.element';
+export * from './components/usyncSettingItem.element.js';
 
 @customElement('usync-settings-view')
 export class USyncSettingsViewElement extends UmbElementMixin(LitElement) {
