@@ -57,7 +57,7 @@ namespace uSync.History
 
     public class uSyncHistoryClientOperationSecurityFilter : BackOfficeSecurityRequirementsOperationFilterBase
     {
-        protected override string ApiName => SyncHistoryConstants.AppName;
+        protected override string ApiName => SyncHistoryConstants.ApiName;
     }
 
 
