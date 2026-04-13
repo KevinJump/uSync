@@ -429,7 +429,7 @@ internal class uSyncManagementService : ISyncManagementService
     ///  take a zip file as a stream expand it over the current uSync folder. 
     /// </summary>
     public UploadImportResult UnpackStream(Stream stream)
-        => _syncActionService.UnpackImportFromStreamAsync(stream).Result;
+        => _syncActionService.UnpackImportFromStream(stream);
 
     public async Task<SyncFileVersionCheckResult> GetSyncFileInfo()
         => await _syncVersionFileService.GetSyncFileInfo(_configService.GetWorkingFolder());
