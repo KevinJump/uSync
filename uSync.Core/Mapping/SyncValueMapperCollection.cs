@@ -7,6 +7,7 @@ using Umbraco.Extensions;
 using uSync.Core.Cache;
 using uSync.Core.Extensions;
 using uSync.Core.Mapping.Tracking;
+using uSync.Core.Serialization;
 using uSync.Core.Tracking;
 
 namespace uSync.Core.Mapping;
@@ -82,7 +83,7 @@ public class SyncValueMapperCollection
     public async Task<object?> GetImportValueAsync(string value, string editorAlias)
     {
         if (string.IsNullOrWhiteSpace(value)) return null;
-
+         
         var mappers = await GetImportingSyncMappers(editorAlias);
         if (mappers.Any())
         {
@@ -98,7 +99,7 @@ public class SyncValueMapperCollection
         return value;
     }
 
-    public async Task<object?> GetImportValueAsync(string value, IPropertyType propertyType)
+    public async Task<object?> GetImportValueAsync(string value, IPropertyType propertyType, SyncSerializerOptions options)
     {
         if (string.IsNullOrWhiteSpace(value)) return null;
 
@@ -110,8 +111,8 @@ public class SyncValueMapperCollection
             {
                 mappedValue = 
                     mapper is ISyncPropertyMapper syncPropertyMapper ?
-                     (await syncPropertyMapper.GetImportValueAsync(mappedValue ?? string.Empty, propertyType)) :
-                     (await mapper.GetImportValueAsync(mappedValue ?? string.Empty, propertyType.PropertyEditorAlias));
+                     (await syncPropertyMapper.GetImportValueAsync(mappedValue ?? string.Empty, propertyType, options)) :
+                     (await mapper.GetImportValueAsync(mappedValue ?? string.Empty, propertyType.PropertyEditorAlias, options));
             }
 
             return GetCleanFlatJson(mappedValue ?? string.Empty);

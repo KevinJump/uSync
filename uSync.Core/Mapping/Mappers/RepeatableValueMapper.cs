@@ -2,6 +2,7 @@
 using Umbraco.Cms.Core.Services;
 
 using uSync.Core.Extensions;
+using uSync.Core.Serialization;
 
 namespace uSync.Core.Mapping;
 
@@ -20,7 +21,7 @@ public class RepeatableValueMapper : SyncValueMapperBase, ISyncMapper
         Constants.PropertyEditors.Aliases.MultipleTextstring
     ];
 
-    public override Task<string?> GetImportValueAsync(string value, string editorAlias)
+    public override Task<string?> GetImportValueAsync(string value, string editorAlias, SyncSerializerOptions options)
     {
         return uSyncTaskHelper.FromResultOf<string?>(() =>
         {

@@ -169,7 +169,7 @@ public partial class SyncService
         switch (action)
         {
             case HandlerActions.Export:
-                await WriteVersionFileAsync(_uSyncConfig.GetWorkingFolder());
+                await _syncVersionFileService.WriteVersionFileAsync(_uSyncConfig.GetWorkingFolder());
                 await _mutexService.FireBulkCompleteAsync(new uSyncExportCompletedNotification(actions, group));
                 break;
             case HandlerActions.Import:

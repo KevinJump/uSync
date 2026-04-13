@@ -9,6 +9,7 @@ using Umbraco.Cms.Core.Services;
 
 using uSync.Core.Dependency;
 using uSync.Core.Extensions;
+using uSync.Core.Serialization;
 
 namespace uSync.Core.Mapping.Mappers.RTEMappers;
 
@@ -43,7 +44,7 @@ public class RTEBlockDataContentMigrator : SyncBlockMapperBase<RichTextBlockValu
     ];
 
     /// <inheritdoc />
-    public override async Task<string?> GetImportValueAsync(string value, string editorAlias)
+    public override async Task<string?> GetImportValueAsync(string value, string editorAlias, SyncSerializerOptions options)
     {
         // Workaround: The nested block layout values won't load if the editor alias is still "Umbraco.TinyMCE".
         // Expected behavior: The editor should support loading nested block layouts regardless of the alias.
@@ -53,13 +54,13 @@ public class RTEBlockDataContentMigrator : SyncBlockMapperBase<RichTextBlockValu
         value = value.Replace("\"Umbraco.TinyMCE\":", $"\"{editorAlias}\":");
 
         if (value.TryDeserialize<RichTextEditorValue>(out RichTextEditorValue? richTextEditorValue) is false || richTextEditorValue is null)
-            return await base.GetImportValueAsync(value, editorAlias);
+            return await base.GetImportValueAsync(value, editorAlias, options);
 
         richTextEditorValue.Markup = MigrateRTEMarkupBlocks(richTextEditorValue.Markup);
 
         if (richTextEditorValue.Blocks is not null && richTextEditorValue.Blocks?.ContentData.Count > 0)
         {
-            var blockJson = await base.GetImportValueAsync(richTextEditorValue.Blocks.SerializeJsonString(), editorAlias);
+            var blockJson = await base.GetImportValueAsync(richTextEditorValue.Blocks.SerializeJsonString(), editorAlias, options);
             if (blockJson is not null)
             {
                 richTextEditorValue.Blocks = blockJson.DeserializeJson<RichTextBlockValue>();

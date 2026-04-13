@@ -1,9 +1,11 @@
 ﻿using System.Globalization;
 
 using Umbraco.Cms.Core;
+using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Services;
 
 using uSync.Core.Extensions;
+using uSync.Core.Serialization;
 
 namespace uSync.Core.Mapping;
 
@@ -24,7 +26,7 @@ public class DateTimeMapper : SyncValueMapperBase, ISyncMapper
 
     public override string[] Editors => [Constants.PropertyEditors.Aliases.DateTime];
 
-    public override Task<string?> GetImportValueAsync(string value, string editorAlias)
+    public override Task<string?> GetImportValueAsync(string value, string editorAlias, SyncSerializerOptions options)
         => uSyncTaskHelper.FromResultOf(() => GetFormattedDateTime(value));
 
     public override Task<string?> GetExportValueAsync(object value, string editorAlias)

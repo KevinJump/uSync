@@ -146,4 +146,8 @@ export class uSyncActionRepository extends UmbControllerBase {
 	async importSingle(action: USyncActionView) {
 		return await this.#actionDataSource.importSingle(action);
 	}
+
+	async getSyncFileInfo() {
+		return await this.#actionDataSource.getSyncFileInfo();
+	}
 }

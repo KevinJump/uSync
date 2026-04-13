@@ -163,7 +163,6 @@ public static partial class uSyncConstants
 /// <remarks>
 ///  saved for prosperity should they be removed from the core. 
 /// </remarks>
-[Obsolete("Legacy property editor names, all legacy elements should go via uSync.Migrations")]
 public static class SyncLegacyTypes
 {
     public const string NestedContent = "Umbraco.NestedContent";

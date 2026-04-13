@@ -10,6 +10,7 @@ using Umbraco.Cms.Infrastructure.Migrations.Upgrade.V_15_0_0.LocalLinks;
 
 using uSync.Core.Dependency;
 using uSync.Core.Extensions;
+using uSync.Core.Serialization;
 using uSync.Core.Versions;
 
 namespace uSync.Core.Mapping;
@@ -22,7 +23,7 @@ namespace uSync.Core.Mapping;
 /// 
 /// "<p>Content Updated with a <a data-udi=\"umb://document/469b6e232ae04dcdb4a26e857f75e1fb\" href=\"/{localLink:umb://document/469b6e232ae04dcdb4a26e857f75e1fb}\" title=\"ContentTemplate\">link</a></p>" 
 /// </remarks>
-public partial class RTEMapper : SyncValueMapperBase, ISyncMapper
+public partial class RTEMapper : SyncValueMapperBase, ISyncMapper, ISyncPropertyMapper
 {
     private readonly Lazy<SyncValueMapperCollection> _mapperCollection;
     private readonly LocalLinkProcessor _localLinkProcessor;
@@ -60,25 +61,29 @@ public partial class RTEMapper : SyncValueMapperBase, ISyncMapper
         $"{Constants.PropertyEditors.Aliases.Grid}.rte"
     ];
 
-    public override Task<string?> GetImportValueAsync(string value, string editorAlias)
+    public override Task<string?> GetImportValueAsync(string value, IPropertyType propertyType, SyncSerializerOptions options)
     {
+        var mapHmacValues = options.GetSetting<bool>("MapHMACValues", false);
+
         if (value.TryParseToJsonObject(out var jsonObject) is false || jsonObject is null)
-            return base.GetImportValueAsync(value, editorAlias);
+            return base.GetImportValueAsync(value, propertyType, options);
 
         if (jsonObject.TryGetPropertyValue("markup", out var markupNode) is false || markupNode is null)
-            return base.GetImportValueAsync(value, editorAlias);
+            return base.GetImportValueAsync(value, propertyType, options);
 
         // migrate the markup content if needed
         var migratedMarkup = markupNode.ToString();
-        if (migratedMarkup is null) 
-            return base.GetImportValueAsync(value, editorAlias);
+        if (migratedMarkup is null)
+            return base.GetImportValueAsync(value, propertyType, options);
 
         // This migration is going to be removed from Umbraco at some point, (which will break native migrations from v13 -> v18+)
         // we need to replace the functionality with our own if we want usync to migrate correctly across this version bar.
         var markup = _localLinkProcessor.ProcessStringValue(migratedMarkup);
 
         // check if we need to update at hmac values inside the site. 
-        markup = _syncImageUpdater.UpdateImageUrlValues(markup);
+        if (mapHmacValues is true) 
+            markup = _syncImageUpdater.UpdateImageUrlValues(markup);
+
         jsonObject["markup"] = markup;
 
         return Task.FromResult<string?>(jsonObject.SerializeJsonString());

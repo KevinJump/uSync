@@ -23,6 +23,10 @@ export class uSyncActionDataSource implements SyncActionDataSource {
 		this.#host = host;
 	}
 
+	async getSyncFileInfo() {
+		return await tryExecute(this.#host, ActionsService.getSyncFileInfo());
+	}
+
 	async getActionsBySet(
 		setName: string,
 	): Promise<UmbDataSourceResponse<Array<SyncActionGroup>>> {

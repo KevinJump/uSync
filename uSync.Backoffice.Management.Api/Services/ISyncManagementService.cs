@@ -3,6 +3,7 @@
 using uSync.Backoffice.Management.Api.Models;
 using uSync.BackOffice;
 using uSync.BackOffice.Models;
+using uSync.BackOffice.Services;
 using uSync.BackOffice.SyncHandlers.Models;
 
 namespace uSync.Backoffice.Management.Api.Services;
@@ -19,7 +20,7 @@ public interface ISyncManagementService
     Task<List<SyncActionGroup>> GetActionsAsync(string setName);
     
     Func<SyncActionOptions, uSyncCallbacks, Task<SyncActionResult>> GetHandlerMethodAsync(HandlerActions action);
-    
+    Task<SyncFileVersionCheckResult> GetSyncFileInfo();
     Task<PerformActionResponse> PerformActionAsync(PerformActionRequest actionRequest, IUser? user);
     UploadImportResult UnpackStream(Stream stream);
 }

@@ -542,6 +542,12 @@ export type SyncActionGroup = {
     lastSync?: string | null;
 };
 
+export type SyncFileVersionCheckResult = {
+    isCurrent: boolean;
+    formatVersion?: string | null;
+    hmacMatch: boolean;
+};
+
 export enum SyncFolderMode {
     NORMAL = 'Normal',
     ROOT = 'Root',
@@ -1063,6 +1069,29 @@ export type DownloadResponses = {
 };
 
 export type DownloadResponse = DownloadResponses[keyof DownloadResponses];
+
+export type GetSyncFileInfoData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/umbraco/usync/api/v1/GetSyncFileInfo';
+};
+
+export type GetSyncFileInfoErrors = {
+    /**
+     * The resource is protected and requires an authentication token
+     */
+    401: unknown;
+};
+
+export type GetSyncFileInfoResponses = {
+    /**
+     * OK
+     */
+    200: SyncFileVersionCheckResult;
+};
+
+export type GetSyncFileInfoResponse = GetSyncFileInfoResponses[keyof GetSyncFileInfoResponses];
 
 export type ImportSingleData = {
     body?: USyncActionView;

@@ -9,6 +9,8 @@
 /// </remarks>
 public interface ISyncImageUpdateHelper
 {
+    string GetImageHmacString(string value);
+
     /// <summary>
     ///  update any image urls in the provided html to have the correct HMAC hash value for the current site. 
     ///  If the HMAC secret key is not set, this will return the original html unmodified.

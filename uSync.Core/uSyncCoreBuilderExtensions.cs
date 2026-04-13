@@ -4,7 +4,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Umbraco.Cms.Core.DependencyInjection;
 
 using uSync.Core.Cache;
-using uSync.Core.Configuration;
 using uSync.Core.DataTypes;
 using uSync.Core.Dependency;
 using uSync.Core.Documents;
@@ -34,10 +33,6 @@ public static class uSyncCoreBuilderExtensions
         // TODO: Check this - in theory, if SyncEntityCache is already registered we don't run again.
         if (builder.Services.FirstOrDefault(x => x.ServiceType == typeof(SyncEntityCache)) != null)
             return builder;
-
-        // core settings (these are low level things that apply to how things are processed).
-        var coreOptions = builder.Services.AddOptions<SyncCoreSettings>()
-            .Bind(builder.Config.GetSection("uSync:Core"));
 
         builder.Services.AddSingleton<uSyncCapabilityChecker>();
         builder.Services.AddSingleton<ISyncImageUpdateHelper, SyncImageUpdateHelper>();
