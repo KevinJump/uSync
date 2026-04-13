@@ -16,7 +16,6 @@ using Umbraco.Cms.Core.Manifest;
 using Umbraco.Cms.Infrastructure.Manifest;
 using Umbraco.Extensions;
 
-using uSync.Backoffice.Management.Api.Configuration;
 using uSync.BackOffice;
 using uSync.BackOffice.Extensions;
 using uSync.History.Service;
