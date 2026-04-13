@@ -64,7 +64,7 @@ export default {
 					<p><strong>Remove or rename the %0% folder to prevent this	popup</strong></p>`,
 
 		hmacMismatch: `<h4>HMAC Mismatch <uui-icon name="alert"></uui-icon></h4>
-			<p>Is looks like the <code>Imaging:HMAC</code> setting used to generate the files in the uSync folder does not match the current setting for this site.</p>
+			<p>It looks like the <code>Imaging:HMAC</code> setting used to generate the files in the uSync folder does not match the current setting for this site.</p>
 			<p>Images inside RTE controls will have the HMAC Value appended to the URL value, and without any additional configuration, these images may not render correctly.</p>
 			<ul><li>You can turn on "HMAC mapping" in uSync,</li>
 			<li>or you can ensure the HMAC value in the <code>Imaging:HMAC</code> setting matches the value used to generate the files in the uSync folder</li></ul>`,
