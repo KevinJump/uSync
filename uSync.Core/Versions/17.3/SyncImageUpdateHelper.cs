@@ -1,6 +1,4 @@
-﻿using MessagePack.Formatters;
-
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using Umbraco.Cms.Core;
