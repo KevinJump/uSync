@@ -1,9 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-using Org.BouncyCastle.Asn1.Ocsp;
-
-using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
 
