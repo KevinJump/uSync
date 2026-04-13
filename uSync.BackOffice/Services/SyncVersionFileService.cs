@@ -91,15 +91,23 @@ internal class SyncVersionFileService : ISyncVersionFileService
 
     private static bool IsCurrentFormatVersion(string formatVersion)
     {
-        if (!formatVersion.InvariantEquals(Core.uSyncConstants.FormatVersion))
+        if (string.IsNullOrWhiteSpace(formatVersion))
         {
-            var expectedVersion = SemVersion.Parse(Core.uSyncConstants.FormatVersion);
-            if (SemVersion.TryParse(formatVersion, out SemVersion? current) && current is not null)
-            {
-                return current.CompareTo(expectedVersion) >= 0;
-            }
+            return false;
         }
-        return true;
+
+        if (formatVersion.InvariantEquals(Core.uSyncConstants.FormatVersion))
+        {
+            return true;
+        }
+
+        var expectedVersion = SemVersion.Parse(Core.uSyncConstants.FormatVersion);
+        if (SemVersion.TryParse(formatVersion, out SemVersion? current) && current is not null)
+        {
+            return current.CompareTo(expectedVersion) >= 0;
+        }
+
+        return false;
     }
 
     private bool HmacValuesMatch(XElement node)
