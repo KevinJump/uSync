@@ -607,7 +607,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
                         }
 
                         // get here ... set the value
-                        var itemValue = await GetImportValueAsync(propValue, current.PropertyType, culture, segment);
+                        var itemValue = await GetImportValueAsync(propValue, current.PropertyType, culture, segment, options);
                         var currentValue = item.GetValue(alias, culture, segment);
 
                         if (ContentSerializerBase<TObject>.IsUpdatedValue(currentValue, itemValue))
@@ -802,7 +802,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
     }
 
 
-    protected async Task<object?> GetImportValueAsync(string value, IPropertyType propertyType, string culture, string segment)
+    protected async Task<object?> GetImportValueAsync(string value, IPropertyType propertyType, string culture, string segment, SyncSerializerOptions options)
     {
         // this is where the mapping magic will happen. 
         // at the moment there are no value mappers, but if we need
@@ -810,7 +810,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         if (logger.IsEnabled(LogLevel.Trace))
             logger.LogTrace("Getting ImportValue [{PropertyEditorAlias}]", propertyType.PropertyEditorAlias);
 
-        var importValue = await syncMappers.GetImportValueAsync(value, propertyType);
+        var importValue = await syncMappers.GetImportValueAsync(value, propertyType, options);
 
         if (logger.IsEnabled(LogLevel.Trace))
             logger.LogTrace("Import Value {PropertyEditorAlias} {importValue}", propertyType.PropertyEditorAlias, importValue);

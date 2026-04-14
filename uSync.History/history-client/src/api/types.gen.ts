@@ -69,6 +69,13 @@ export type ClearHistoryData = {
   url: "/umbraco/usync/api/v1/history/ClearHistory";
 };
 
+export type ClearHistoryErrors = {
+  /**
+   * The resource is protected and requires an authentication token
+   */
+  401: unknown;
+};
+
 export type ClearHistoryResponses = {
   /**
    * OK
@@ -81,6 +88,13 @@ export type GetHistoryData = {
   path?: never;
   query?: never;
   url: "/umbraco/usync/api/v1/history/GetHistory";
+};
+
+export type GetHistoryErrors = {
+  /**
+   * The resource is protected and requires an authentication token
+   */
+  401: unknown;
 };
 
 export type GetHistoryResponses = {
@@ -97,6 +111,13 @@ export type HistoryIsEnabledData = {
   path?: never;
   query?: never;
   url: "/umbraco/usync/api/v1/history/HistoryIsEnabled";
+};
+
+export type HistoryIsEnabledErrors = {
+  /**
+   * The resource is protected and requires an authentication token
+   */
+  401: unknown;
 };
 
 export type HistoryIsEnabledResponses = {

@@ -3,6 +3,7 @@ using Umbraco.Cms.Core.Services;
 using Umbraco.Extensions;
 
 using uSync.Core.Dependency;
+using uSync.Core.Serialization;
 
 using static Umbraco.Cms.Core.Constants;
 
@@ -53,10 +54,10 @@ public class MemberGroupPickerMapper : SyncValueMapperBase, ISyncMapper
     /// <summary>
     ///  Import: take the name of the group, and return the id of the group.
     /// </summary>
-    public override async Task<string?> GetImportValueAsync(string value, string editorAlias)
+    public override async Task<string?> GetImportValueAsync(string value, string editorAlias, SyncSerializerOptions options)
     {
         if (string.IsNullOrEmpty(value))
-            return await base.GetImportValueAsync(value, editorAlias);
+            return await base.GetImportValueAsync(value, editorAlias, options);
 
         var items = value.ToDelimitedList();
 

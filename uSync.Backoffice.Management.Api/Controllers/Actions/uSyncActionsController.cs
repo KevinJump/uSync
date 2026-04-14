@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 using uSync.Backoffice.Management.Api.Models;
 using uSync.Backoffice.Management.Api.Services;
+using uSync.BackOffice.Services;
 
 namespace uSync.Backoffice.Management.Api.Controllers.Actions;
 
@@ -33,7 +34,12 @@ public class uSyncActionsController : uSyncControllerBase
     public async Task<List<SyncActionGroup>> GetActionsBySet(string setName)
     {
         return await _syncManagementService.GetActionsAsync(setName);
-    }   
+    }
 
+    [HttpGet("GetSyncFileInfo")]
+    [MapToApiVersion("1.0")]
+    [ProducesResponseType(typeof(SyncFileVersionCheckResult), 200)]
+    public async Task<SyncFileVersionCheckResult> GetSyncFileInfo()
+        => await _syncManagementService.GetSyncFileInfo();
 
 }

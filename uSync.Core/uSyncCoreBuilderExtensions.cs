@@ -12,6 +12,7 @@ using uSync.Core.Mapping.Tracking;
 using uSync.Core.Roots.Configs;
 using uSync.Core.Serialization;
 using uSync.Core.Tracking;
+using uSync.Core.Versions;
 
 namespace uSync.Core;
 
@@ -34,6 +35,7 @@ public static class uSyncCoreBuilderExtensions
             return builder;
 
         builder.Services.AddSingleton<uSyncCapabilityChecker>();
+        builder.Services.AddSingleton<ISyncImageUpdateHelper, SyncImageUpdateHelper>();
 
         // document url cleaner, for key changes
         builder.Services.AddSingleton<ISyncDocumentUrlCleaner ,SyncDocumentUrlCleaner>();

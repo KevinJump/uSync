@@ -26,6 +26,7 @@ internal class uSyncManagementService : ISyncManagementService
     private readonly ISyncManagementCache _syncManagementCache;
     private readonly IHubContext<SyncHub> _hubContext;
     private readonly ISyncConfigService _configService;
+    private readonly ISyncVersionFileService _syncVersionFileService;
 
     private readonly ISyncHandlerFactory _handlerFactory;
 
@@ -36,6 +37,7 @@ internal class uSyncManagementService : ISyncManagementService
     public uSyncManagementService(
         ISyncActionService syncActionService,
         ISyncConfigService configService,
+        ISyncVersionFileService syncVersionFileService,
         ISyncManagementCache syncManagementCache,
         IHubContext<SyncHub> hubContext,
         ISyncHandlerFactory handlerFactory,
@@ -44,6 +46,7 @@ internal class uSyncManagementService : ISyncManagementService
     {
         _syncActionService = syncActionService;
         _configService = configService;
+        _syncVersionFileService = syncVersionFileService;
         _syncManagementCache = syncManagementCache;
         _hubContext = hubContext;
         _handlerFactory = handlerFactory;
@@ -427,5 +430,8 @@ internal class uSyncManagementService : ISyncManagementService
     /// </summary>
     public UploadImportResult UnpackStream(Stream stream)
         => _syncActionService.UnpackImportFromStream(stream);
+
+    public async Task<SyncFileVersionCheckResult> GetSyncFileInfo()
+        => await _syncVersionFileService.GetSyncFileInfo(_configService.GetWorkingFolder());
 
 }

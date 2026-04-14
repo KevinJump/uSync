@@ -4,10 +4,13 @@ import type { Client, Options as Options2, TDataShape } from "./client";
 import { client } from "./client.gen";
 import type {
   ClearHistoryData,
+  ClearHistoryErrors,
   ClearHistoryResponses,
   GetHistoryData,
+  GetHistoryErrors,
   GetHistoryResponses,
   HistoryIsEnabledData,
+  HistoryIsEnabledErrors,
   HistoryIsEnabledResponses,
 } from "./types.gen";
 
@@ -35,9 +38,13 @@ export class History {
   ) {
     return (options?.client ?? client).get<
       ClearHistoryResponses,
-      unknown,
+      ClearHistoryErrors,
       ThrowOnError
-    >({ url: "/umbraco/usync/api/v1/history/ClearHistory", ...options });
+    >({
+      security: [{ scheme: "bearer", type: "http" }],
+      url: "/umbraco/usync/api/v1/history/ClearHistory",
+      ...options,
+    });
   }
 
   public static getHistory<ThrowOnError extends boolean = true>(
@@ -45,9 +52,13 @@ export class History {
   ) {
     return (options?.client ?? client).get<
       GetHistoryResponses,
-      unknown,
+      GetHistoryErrors,
       ThrowOnError
-    >({ url: "/umbraco/usync/api/v1/history/GetHistory", ...options });
+    >({
+      security: [{ scheme: "bearer", type: "http" }],
+      url: "/umbraco/usync/api/v1/history/GetHistory",
+      ...options,
+    });
   }
 
   public static historyIsEnabled<ThrowOnError extends boolean = true>(
@@ -55,8 +66,12 @@ export class History {
   ) {
     return (options?.client ?? client).get<
       HistoryIsEnabledResponses,
-      unknown,
+      HistoryIsEnabledErrors,
       ThrowOnError
-    >({ url: "/umbraco/usync/api/v1/history/HistoryIsEnabled", ...options });
+    >({
+      security: [{ scheme: "bearer", type: "http" }],
+      url: "/umbraco/usync/api/v1/history/HistoryIsEnabled",
+      ...options,
+    });
   }
 }

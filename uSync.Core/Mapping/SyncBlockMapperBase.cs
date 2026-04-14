@@ -12,6 +12,7 @@ using Umbraco.Extensions;
 using uSync.Core.Dependency;
 using uSync.Core.Extensions;
 using uSync.Core.Mapping.Mappers;
+using uSync.Core.Serialization;
 
 namespace uSync.Core.Mapping;
 
@@ -34,11 +35,11 @@ public abstract class SyncBlockMapperBase<TBlockValue> : SyncValueMapperBase
         _logger = logger;
     }
 
-    public override async Task<string?> GetImportValueAsync(string value, string editorAlias)
-        => await ProcessBlockValuesAsync(value, GetImportProperty);
+    public override async Task<string?> GetImportValueAsync(string value, string editorAlias, SyncSerializerOptions options)
+        => await ProcessBlockValuesAsync(value, GetImportProperty, options);
 
     public override async Task<string?> GetExportValueAsync(object value, string editorAlias)
-        => await ProcessBlockValuesAsync(value?.ToString() ?? string.Empty, GetExportProperty);
+        => await ProcessBlockValuesAsync(value?.ToString() ?? string.Empty, GetExportProperty, new());
 
     private static string? GetStringValue(object? value)
     {
@@ -52,30 +53,31 @@ public abstract class SyncBlockMapperBase<TBlockValue> : SyncValueMapperBase
         };
     }
 
-    private async Task<object?> GetImportProperty(object? value, string propertyEditorAlias)
+    private async Task<object?> GetImportProperty(object? value, IPropertyType? propertyType, SyncSerializerOptions options)
     {
-        if (_mapperCollection.Value is null) return value;
+        if (_mapperCollection.Value is null || propertyType is null) return value;
 
         if (_logger.IsEnabled(LogLevel.Debug))
-            _logger.LogDebug("Importing block value for {PropertyEditorAlias} {valueType}", propertyEditorAlias, value?.GetType().Name ?? "blank");
+            _logger.LogDebug("Importing block value for {PropertyEditorAlias} {valueType}", propertyType.PropertyEditorAlias, value?.GetType().Name ?? "blank");
 
         var importString = SyncBlockMapperBase<TBlockValue>.GetStringValue(value) ?? string.Empty;
-        return await _mapperCollection.Value.GetImportValueAsync(importString, propertyEditorAlias);
+        return await _mapperCollection.Value.GetImportValueAsync(importString, propertyType, options);
     }
 
-    private async Task<object?> GetExportProperty(object? value, string propertyEditorAlias)
+    private async Task<object?> GetExportProperty(object? value, IPropertyType? propertyType, SyncSerializerOptions options)
     {
-        if (_mapperCollection.Value is null) return value;
-        
+        if (_mapperCollection.Value is null || propertyType is null) 
+            return value;        
+
         if (_logger.IsEnabled(LogLevel.Debug))
-            _logger.LogDebug("Exporting block value for {PropertyEditorAlias} {valueType}", propertyEditorAlias, value?.GetType().Name ?? "blank");
+            _logger.LogDebug("Exporting block value for {PropertyEditorAlias} {valueType}", propertyType.PropertyEditorAlias, value?.GetType().Name ?? "blank");
 
         var exportValueAsString = SyncBlockMapperBase<TBlockValue>.GetStringValue(value) ?? string.Empty;
-        var result = await _mapperCollection.Value.GetExportValueAsync(exportValueAsString, propertyEditorAlias);
+        var result = await _mapperCollection.Value.GetExportValueAsync(exportValueAsString, propertyType.PropertyEditorAlias);
         return result.ConvertToJsonNode()?.ExpandAllJsonInToken() ?? result;
     }
 
-    private async Task<string?> ProcessBlockValuesAsync(string value, Func<object?, string, Task<object?>> GetValueMethod)
+    private async Task<string?> ProcessBlockValuesAsync(string value, Func<object?, IPropertyType?, SyncSerializerOptions, Task<object?>> GetValueMethod, SyncSerializerOptions options)
     {
         var blockValue = SyncBlockMapperBase<TBlockValue>.GetBlockValue(value);
         if (blockValue == null) return value;
@@ -89,7 +91,7 @@ public abstract class SyncBlockMapperBase<TBlockValue> : SyncValueMapperBase
         {
             MigrateBlock(contentItem);
 
-            await ProcessBlockData(contentItem, GetValueMethod);
+            await ProcessBlockData(contentItem, GetValueMethod, options);
         }
 
         if (blockValue.Expose.Count == 0)
@@ -101,7 +103,7 @@ public abstract class SyncBlockMapperBase<TBlockValue> : SyncValueMapperBase
         return blockValue.SerializeJsonString(true);
     }
 
-    private async Task ProcessBlockData(BlockItemData? blockItem, Func<object?, string, Task<object?>> GetValueMethod)
+    private async Task ProcessBlockData(BlockItemData? blockItem, Func<object?, IPropertyType?, SyncSerializerOptions, Task<object?>> GetValueMethod, SyncSerializerOptions options)
     {
         if (blockItem == null) return;
 
@@ -113,7 +115,7 @@ public abstract class SyncBlockMapperBase<TBlockValue> : SyncValueMapperBase
             var property = contentType.CompositionPropertyTypes.FirstOrDefault(x => x.Alias == value.Alias);
             if (property == null) continue;
 
-            var mappedValue = await GetValueMethod(value.Value, property.PropertyEditorAlias);
+            var mappedValue = await GetValueMethod(value.Value, property, options);
             if (mappedValue != null)
                 value.Value = mappedValue;
         }

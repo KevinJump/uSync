@@ -17,6 +17,7 @@ import {
 	uSyncConstants,
 	SyncPerformActionOptions,
 	SyncSelectableSet,
+	SyncFileVersionCheckResult,
 } from '@jumoo/uSync';
 import uSyncSignalRContext from '../signalr/signalr.context';
 import {
@@ -100,6 +101,9 @@ export class uSyncWorkspaceContext
 	#legacy = new UmbObjectState<SyncLegacyCheckResponse | undefined>(undefined);
 	public readonly legacy = this.#legacy?.asObservable();
 
+	#syncFileInfo = new UmbObjectState<SyncFileVersionCheckResult | undefined>(undefined);
+	public readonly syncFileInfo = this.#syncFileInfo?.asObservable();
+
 	constructor(host: UmbControllerHost) {
 		super(host);
 
@@ -154,6 +158,14 @@ export class uSyncWorkspaceContext
 
 	async getAddons() {
 		const { data } = await this.#repository.getAddons();
+		return data;
+	}
+
+	async getSyncFileInfo() {
+		const { data } = await this.#repository.getSyncFileInfo();
+		if (data) {
+			this.#syncFileInfo.setValue(data);
+		}
 		return data;
 	}
 

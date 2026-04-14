@@ -17,6 +17,7 @@ import {
 	USyncActionView,
 	SyncSelectableSet,
 	USYNC_SIGNALR_CONTEXT_TOKEN,
+	SyncFileVersionCheckResult,
 } from '@jumoo/uSync';
 import { uSyncActionPerformEvent } from '../../components/events';
 import { UmbRequestReloadChildrenOfEntityEvent } from '@umbraco-cms/backoffice/entity-action';
@@ -45,6 +46,9 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 
 	@state()
 	_legacy?: SyncLegacyCheckResponse;
+
+	@state()
+	_syncFileInfo?: SyncFileVersionCheckResult;
 
 	@state()
 	_buttonState: UUIButtonState;
@@ -103,6 +107,7 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 
 				this.#actionContext?.checkLegacy();
 				this.#actionContext?.getHandlerSets();
+				this.#actionContext?.getSyncFileInfo();
 			});
 
 			this.observe(_instance.sets, (sets) => {
@@ -147,6 +152,10 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 
 			this.observe(_instance.legacy, (_legacy) => {
 				this._legacy = _legacy;
+			});
+
+			this.observe(_instance.syncFileInfo, (_syncFileInfo) => {
+				this._syncFileInfo = _syncFileInfo;
 			});
 
 			this.observe(_instance.inBackground, (_inBackground) => {
@@ -209,7 +218,8 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 		} else {
 			return html`
 				<umb-body-layout>
-					${this.#renderLegacyBanner()} ${this.#renderSetPicker()}
+					${this.#renderSyncFileInfo()} ${this.#renderLegacyBanner()}
+					${this.#renderSetPicker()}
 					<div class="wrapper">
 						${this.#renderActions()} ${this.#renderBanner()}
 						${this.#renderBackgroundBanner()}
@@ -257,6 +267,17 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 						${this.localize.term('uSync_legacyBanner')}
 					</div>
 				`;
+	}
+
+	#renderSyncFileInfo() {
+		return nothing;
+
+		// TODO: We might show this info to the user here, but we need a nice way of turning it off,
+		// 			 if they have all the correct settings in place.
+
+		// if (this._syncFileInfo?.isCurrent && this._syncFileInfo?.hmacMatch) return nothing;
+		// return html`<usync-sync-file-info
+		// 	._syncFileInfo=${this._syncFileInfo}></usync-sync-file-info>`;
 	}
 
 	#renderActions() {

@@ -45,6 +45,7 @@ public partial class SyncService : ISyncService
     private readonly ISyncHandlerFactory _handlerFactory;
     private readonly ISyncFileService _syncFileService;
     private readonly ISyncEventService _mutexService;
+    private readonly ISyncVersionFileService _syncVersionFileService;
 
     private readonly ICoreScopeProvider _scopeProvider;
 
@@ -68,7 +69,8 @@ public partial class SyncService : ISyncService
         ICoreScopeProvider scopeProvider,
         ILoggerFactory loggerFactory,
         IBackgroundTaskQueue backgroundTaskQueue,
-        DistributedCache distributedCache)
+        DistributedCache distributedCache,
+        ISyncVersionFileService syncVersionFileService)
     {
         this._logger = logger;
 
@@ -88,6 +90,7 @@ public partial class SyncService : ISyncService
 
         _backgroundTaskQueue = backgroundTaskQueue;
         _distributedCache = distributedCache;
+        _syncVersionFileService = syncVersionFileService;
     }
 
     /// <inheritdoc/>>
@@ -317,7 +320,7 @@ public partial class SyncService : ISyncService
 
         var handlers = _handlerFactory.GetValidHandlers(handlerOptions);
 
-        await WriteVersionFileAsync(folder);
+        await _syncVersionFileService.WriteVersionFileAsync(folder);
 
         return await ExportAsync(folder, handlers, callbacks);
     }
@@ -370,24 +373,6 @@ public partial class SyncService : ISyncService
         return true;
     }
 
-    private async Task WriteVersionFileAsync(string folder)
-    {
-        try
-        {
-            var versionFile = Path.Combine(_syncFileService.GetAbsPath(folder), $"usync.{_uSyncConfig.Settings.DefaultExtension}");
-            var versionNode = new XElement("uSync",
-                new XAttribute("version", typeof(uSync).Assembly.GetName()?.Version?.ToString() ?? "15.0.0"),
-                new XAttribute("format", Core.uSyncConstants.FormatVersion));
-            // remove date, we don't really care, and it causes unnecessary git changes.
-
-            _syncFileService.CreateFoldersForFile(versionFile);
-            await _syncFileService.SaveXElementAsync(versionNode, versionFile);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Issue saving the usync.config file in the root of {folder}", folder);
-        }
-    }
 
     /// <inheritdoc/>>
     public async Task<IEnumerable<uSyncAction>> ExportAsync(string folder, IEnumerable<HandlerConfigPair> handlers, uSyncCallbacks? callbacks)

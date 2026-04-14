@@ -17,7 +17,7 @@ namespace uSync.History.Controllers
     [ApiController]
     [uSyncVersionedRoute("history")]
     [Authorize(Policy = SyncAuthorizationPolicies.TreeAccessuSync)]
-    [MapToApi("uSync.History")]
+    [MapToApi(SyncHistoryConstants.ApiName)]
     [DisableBrowserCache]
     [JsonOptionsName(Constants.JsonOptionsNames.BackOffice)]
     [ApiVersion("1.0")]

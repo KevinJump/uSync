@@ -2,8 +2,6 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
 using Umbraco.Cms.Core;
@@ -15,6 +13,7 @@ using Umbraco.Extensions;
 
 using uSync.Core.Dependency;
 using uSync.Core.Extensions;
+using uSync.Core.Serialization;
 
 namespace uSync.Core.Mapping;
 
@@ -34,7 +33,7 @@ public class ImagePathMapper : SyncValueMapperBase, ISyncMapper
     private const string _genericMediaPath = "/media";
 
     private readonly string _siteRoot;
-    private string _mediaFolder;
+    private string? _mediaFolder;
     private readonly ILogger<ImagePathMapper> _logger;
     private readonly IConfiguration _configuration;
     private readonly IImageUrlGenerator _imageUrlGenerator;
@@ -143,7 +142,7 @@ public class ImagePathMapper : SyncValueMapperBase, ISyncMapper
     ///
     /// </remarks>
     /// <returns></returns>
-    private static string ReplacePath(string filePath, string currentPath, string targetPath)
+    private static string ReplacePath(string filePath, string? currentPath, string? targetPath)
     {
         if (!string.IsNullOrWhiteSpace(targetPath)
             && !string.IsNullOrWhiteSpace(currentPath)
@@ -179,8 +178,7 @@ public class ImagePathMapper : SyncValueMapperBase, ISyncMapper
         return umbracoMediaPath;
     }
 
-
-    public override Task<string?> GetImportValueAsync(string value, string editorAlias)
+    public override Task<string?> GetImportValueAsync(string value, string editorAlias, SyncSerializerOptions options)
     {
         return uSyncTaskHelper.FromResultOf(() =>
         {

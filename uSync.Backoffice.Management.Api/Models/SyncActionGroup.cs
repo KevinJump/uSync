@@ -7,7 +7,6 @@ public class SyncActionGroup
     public string GroupName { get; set; } = "settings";
     public List<SyncActionButton> Buttons { get; set; } = [];
     public DateTime? LastSync { get; set; }
-
 }
 
 public class SyncActionButton

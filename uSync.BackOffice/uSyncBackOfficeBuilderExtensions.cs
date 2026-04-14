@@ -71,6 +71,7 @@ public static class uSyncBackOfficeBuilderExtensions
         builder.Services.AddSingleton<ISyncEventService, SyncEventService>();
         builder.Services.AddSingleton<ISyncConfigService, SyncConfigService>();
         builder.Services.AddSingleton<ISyncFileService, SyncFileService>();
+        builder.Services.AddSingleton<ISyncVersionFileService, SyncVersionFileService>();
 
         builder.WithCollectionBuilder<SyncHandlerCollectionBuilder>()
             .Add(() => builder.TypeLoader.GetTypes<ISyncHandler>());
