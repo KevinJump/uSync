@@ -1,5 +1,6 @@
 ﻿using Asp.Versioning;
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
@@ -9,6 +10,7 @@ using System.Text;
 
 using Umbraco.Cms.Core.Security;
 using Umbraco.Cms.Core.Services;
+using Umbraco.Cms.Web.Common.Authorization;
 
 using uSync.Backoffice.Management.Api.Models;
 using uSync.Backoffice.Management.Api.Services;
@@ -43,7 +45,8 @@ public class uSyncPerformActionController : uSyncControllerBase
 
     [HttpPost("Download")]
     [ProducesResponseType<FileContentResult>(StatusCodes.Status200OK)]
-    public ActionResult Download(string requestId)
+    [Authorize(Policy = AuthorizationPolicies.RequireAdminAccess)]
+    public ActionResult Download()
     {
         var filename = "uSync.zip";
 

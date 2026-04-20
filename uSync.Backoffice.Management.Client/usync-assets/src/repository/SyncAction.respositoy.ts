@@ -127,8 +127,8 @@ export class uSyncActionRepository extends UmbControllerBase {
 		return await this.#migrartionDataSource.copyLegacy();
 	}
 
-	async downloadFile(requestId: string) {
-		var result = await this.#actionDataSource.downloadFile(requestId);
+	async downloadFile() {
+		var result = await this.#actionDataSource.downloadFile();
 
 		console.log('Download result', result);
 

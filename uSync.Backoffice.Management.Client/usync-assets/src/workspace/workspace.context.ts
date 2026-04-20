@@ -274,7 +274,7 @@ export class uSyncWorkspaceContext
 		// post action
 		if (options.file && options.action === 'Export') {
 			// post export , open the dialog offer the download.
-			await this.downloadFile(id);
+			await this.downloadFile();
 		}
 
 		if (!this.#inBackground.getValue()) {
@@ -300,8 +300,8 @@ export class uSyncWorkspaceContext
 		return true;
 	}
 
-	async downloadFile(requestId: string) {
-		const response = await this.#repository.downloadFile(requestId);
+	async downloadFile() {
+		const response = await this.#repository.downloadFile();
 
 		if (!response) return;
 

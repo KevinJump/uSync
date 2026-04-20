@@ -1048,9 +1048,7 @@ export type GetActionsBySetResponse = GetActionsBySetResponses[keyof GetActionsB
 export type DownloadData = {
     body?: never;
     path?: never;
-    query?: {
-        requestId?: string;
-    };
+    query?: never;
     url: '/umbraco/usync/api/v1/Download';
 };
 
