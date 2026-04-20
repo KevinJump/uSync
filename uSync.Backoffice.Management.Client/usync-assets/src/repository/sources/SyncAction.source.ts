@@ -49,15 +49,8 @@ export class uSyncActionDataSource implements SyncActionDataSource {
 		);
 	}
 
-	async downloadFile(requestId: string) {
-		return await tryExecute(
-			this.#host,
-			ActionsService.download({
-				query: {
-					requestId: requestId,
-				},
-			}),
-		);
+	async downloadFile() {
+		return await tryExecute(this.#host, ActionsService.download());
 	}
 
 	async processUpload(fileId: string) {
