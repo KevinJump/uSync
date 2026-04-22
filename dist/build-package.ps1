@@ -132,6 +132,7 @@ $projects = "uSync.Core",
     "uSync.Backoffice.Management.Api", 
     "uSync.Backoffice.Management.Client",
     "uSync.History",
+    "uSync.Extend",
     "uSync";
 
 foreach($project in $projects) {
