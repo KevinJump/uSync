@@ -1,7 +1,7 @@
 import { UmbLitElement } from '@umbraco-cms/backoffice/lit-element';
 import { customElement, property } from 'lit/decorators.js';
 import { SyncFileVersionCheckResult } from '../api';
-import { css, CSSResultGroup, html, nothing } from '@umbraco-cms/backoffice/external/lit';
+import { css, html, nothing } from '@umbraco-cms/backoffice/external/lit';
 
 @customElement('usync-sync-file-info')
 export class uSyncSyncFileInfoView extends UmbLitElement {
