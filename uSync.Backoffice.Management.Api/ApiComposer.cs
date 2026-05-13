@@ -15,9 +15,10 @@ public class ApiComposer : IComposer
 {
     public void Compose(IUmbracoBuilder builder)
     {
-        builder.Services.AddSingleton<IOperationIdHandler, uSyncCustomOperationHandler>();
+        // builder.Services.AddSingleton<IOperationIdHandler, uSyncCustomOperationHandler>();
 
-        builder.Services.ConfigureOptions<ConfigSyncApiSwaggerGenOptions>();
+        builder.AddSyncOpenApi();
+
         builder.Services.AddSingleton<ISyncManagementCache, uSyncManagementCache>();
         builder.Services.AddSingleton<ISyncManagementService, uSyncManagementService>();
     }

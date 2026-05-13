@@ -242,7 +242,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
 
             // we say no change back, this stops the core second pass function from saving 
             // this item (which we have just done with DoSaveOrPublish)
-            return SyncAttempt<IContent>.Succeed(item.Name ?? item.Id.ToString(), saveAttempt.Content, changeType, message ?? string.Empty, true, details);
+            return SyncAttempt<IContent>.Succeed(item.Name ?? item.Id.ToString(), saveAttempt.Content as IContent ?? item, changeType, message ?? string.Empty, true, details);
         }
         else
         {
@@ -644,7 +644,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
                     return result.FromPublishResult();
                 }
 
-                content = result.Content;
+                content = result.Content as IContent ?? content;
             }
 
             var unpublishedCultures = cultures
@@ -665,7 +665,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
 
                         var result = contentService.Unpublish(item, culture, userId);
                         if (result.Success)
-                            content = result.Content;
+                            content = result.Content as IContent ?? content;
                     }
 
                 }
@@ -717,7 +717,7 @@ public class ContentSerializer : ContentSerializerBase<IContent>, ISyncSerialize
 
                 var result = contentService.Unpublish(item, culture);
                 if (result.Success)
-                    content = result.Content;
+                    content = result.Content as IContent ?? content;
             }
         }
 

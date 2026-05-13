@@ -5,16 +5,16 @@
   <!-- umbraco site -->
   <ItemGroup>
     <PackageVersion Include="Our.Umbraco.ConditionalDisplayers" Version="16.6.0" />
-    <PackageVersion Include="Umbraco.Cms" Version="17.3.0" />
+    <PackageVersion Include="Umbraco.Cms" Version="18.0.0-beta1" />
     <PackageVersion Include="Microsoft.ICU.ICU4C.Runtime" Version="72.1.0.3" />
-    <PackageVersion Include="Umbraco.Cms.DevelopmentMode.Backoffice" Version="17.3.0" />
-    <PackageVersion Include="Clean.Core" Version="7.0.5" />
+    <PackageVersion Include="Umbraco.Cms.DevelopmentMode.Backoffice" Version="18.0.0-beta1" />
+    <PackageVersion Include="Clean.Core" Version="18.0.0-beta1" />
   </ItemGroup>
   <!-- umbraco libraries for packages -->
   <ItemGroup>
-    <PackageVersion Include="Umbraco.Cms.Core" Version="17.3.0" />
-    <PackageVersion Include="Umbraco.Cms.Web.Website" Version="17.3.0" />
-    <PackageVersion Include="Umbraco.Cms.Api.Management" Version="17.3.0" />
+    <PackageVersion Include="Umbraco.Cms.Core" Version="18.0.0-beta1" />
+    <PackageVersion Include="Umbraco.Cms.Web.Website" Version="18.0.0-beta1" />
+    <PackageVersion Include="Umbraco.Cms.Api.Management" Version="18.0.0-beta1" />
   </ItemGroup>
   <!-- source link -->
   <ItemGroup>
@@ -22,9 +22,9 @@
   </ItemGroup>
   <!-- testing -->
   <ItemGroup>
-    <PackageVersion Include="Umbraco.Cms.Tests" Version="17.3.0" />
-    <PackageVersion Include="Umbraco.Cms.Tests.Integration" Version="17.3.0" />
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.4.0" />
+    <PackageVersion Include="Umbraco.Cms.Tests" Version="18.0.0-beta1" />
+    <PackageVersion Include="Umbraco.Cms.Tests.Integration" Version="18.0.0-beta1" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.5.1" />
     <PackageVersion Include="NUnit3TestAdapter" Version="6.2.0" />
     <PackageVersion Include="coverlet.collector" Version="8.0.1" />
   </ItemGroup>

@@ -6,12 +6,12 @@ using System.Text.RegularExpressions;
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Services;
-using Umbraco.Cms.Infrastructure.Migrations.Upgrade.V_15_0_0.LocalLinks;
 
 using uSync.Core.Dependency;
 using uSync.Core.Extensions;
 using uSync.Core.Serialization;
 using uSync.Core.Versions;
+using uSync.Core.Versions._18._0;
 
 namespace uSync.Core.Mapping;
 
@@ -26,7 +26,7 @@ namespace uSync.Core.Mapping;
 public partial class RTEMapper : SyncValueMapperBase, ISyncMapper, ISyncPropertyMapper
 {
     private readonly Lazy<SyncValueMapperCollection> _mapperCollection;
-    private readonly LocalLinkProcessor _localLinkProcessor;
+    private readonly SyncLocalLinkProcessor _localLinkProcessor;
     private readonly ILogger<RTEMapper> _logger;
     private readonly IIdKeyMap _idKeyMap;
     private readonly ISyncImageUpdateHelper _syncImageUpdater;
@@ -34,7 +34,7 @@ public partial class RTEMapper : SyncValueMapperBase, ISyncMapper, ISyncProperty
     public RTEMapper(
         IEntityService entityService,
         Lazy<SyncValueMapperCollection> mappers,
-        LocalLinkProcessor localLinkProcessor,
+        SyncLocalLinkProcessor localLinkProcessor,
         ILogger<RTEMapper> logger,
         IIdKeyMap idKeyMap,
         ISyncImageUpdateHelper syncImageUpdateHelper)

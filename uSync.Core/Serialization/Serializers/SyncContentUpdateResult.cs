@@ -10,7 +10,7 @@ public class SyncContentUpdateResult
     public SyncContentUpdateResult() { }
 
     [SetsRequiredMembers]
-    public SyncContentUpdateResult(bool success, IContent item, string? message)
+    public SyncContentUpdateResult(bool success, IContent? item, string? message)
     {
         Success = success;
         Content = item;
@@ -19,7 +19,7 @@ public class SyncContentUpdateResult
 
     public required bool Success { get; set; }
 
-    public required IContent Content { get; set; }
+    public required IContent? Content { get; set; }
 
     public string? Message { get; set; }
     public Exception? Exception { get; set; }
@@ -32,9 +32,9 @@ public static class SyncContentUpdateResultExtensions
     /// </summary>
     public static SyncContentUpdateResult FromPublishResult(this PublishResult result)
     {
-        if (result.Success)
+        if (result.Success && result.Content is IContent content)
         {
-            return new SyncContentUpdateResult(true, result.Content, null);
+            return new SyncContentUpdateResult(true, content, null);
         }
 
         var errorMessage = result.EventMessages?.FormatMessages(":") ?? string.Empty;
@@ -44,6 +44,6 @@ public static class SyncContentUpdateResultExtensions
             message += string.Join(",", result.InvalidProperties.Select(x => x.Alias));
         }
 
-        return new SyncContentUpdateResult(false, result.Content, message);
+        return new SyncContentUpdateResult(false, result.Content as IContent ?? null, message);
     }
 }
