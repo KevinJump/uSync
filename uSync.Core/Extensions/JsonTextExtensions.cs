@@ -520,4 +520,15 @@ public static class JsonTextExtensions
 
     #endregion
 
+    #region Type Checks 
+
+    /// <summary>
+    ///  checks if the value is a non-string JSON value (array, object, number, boolean).
+    /// </summary>
+    public static bool IsNonStringJsonValue(this object? value)
+        => value is JsonElement { ValueKind: not JsonValueKind.String and not JsonValueKind.Undefined }
+           || value is JsonArray or JsonObject;
+
+    #endregion
+
 }

@@ -67,20 +67,13 @@ public abstract class SyncBlockMapperBase<TBlockValue> : SyncValueMapperBase
         // When the original value was a non-string JSON type (array, object, number, etc.),
         // convert string results back to JsonNode to preserve the correct JSON type
         // and prevent double-encoding when the block value is re-serialized.
-        if (result is string stringResult && IsNonStringJsonValue(value))
+        if (result is string stringResult && value.IsNonStringJsonValue())
         {
             return stringResult.ConvertToJsonNode() ?? result;
         }
 
         return result;
     }
-
-    /// <summary>
-    ///  checks if the value is a non-string JSON value (array, object, number, boolean).
-    /// </summary>
-    private static bool IsNonStringJsonValue(object? value)
-        => value is JsonElement { ValueKind: not JsonValueKind.String and not JsonValueKind.Undefined }
-           || value is JsonArray or JsonObject;
 
     private async Task<object?> GetExportProperty(object? value, IPropertyType? propertyType, SyncSerializerOptions options)
     {
