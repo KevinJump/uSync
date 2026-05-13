@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 
 using System.Collections;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 
 using Umbraco.Cms.Core;
@@ -61,7 +62,17 @@ public abstract class SyncBlockMapperBase<TBlockValue> : SyncValueMapperBase
             _logger.LogDebug("Importing block value for {PropertyEditorAlias} {valueType}", propertyType.PropertyEditorAlias, value?.GetType().Name ?? "blank");
 
         var importString = SyncBlockMapperBase<TBlockValue>.GetStringValue(value) ?? string.Empty;
-        return await _mapperCollection.Value.GetImportValueAsync(importString, propertyType, options);
+        var result = await _mapperCollection.Value.GetImportValueAsync(importString, propertyType, options);
+
+        // When the original value was a non-string JSON type (array, object, number, etc.),
+        // convert string results back to JsonNode to preserve the correct JSON type
+        // and prevent double-encoding when the block value is re-serialized.
+        if (result is string stringResult && value.IsNonStringJsonValue())
+        {
+            return stringResult.ConvertToJsonNode() ?? result;
+        }
+
+        return result;
     }
 
     private async Task<object?> GetExportProperty(object? value, IPropertyType? propertyType, SyncSerializerOptions options)
