@@ -57,15 +57,12 @@
 	"devDependencies": {
 		"@hey-api/openapi-ts": "^0.97.1",
 		"@microsoft/signalr": "^10.0.0",
-		"@umbraco-cms/backoffice": "^17.3.0",
+		"@umbraco-cms/backoffice": "^18.0.0-beta2",
 		"eslint": "^10.2.0",
 		"lit": "^3.3.2",
 		"prettier": "^3.8.1",
 		"typescript": "^5.9.3",
 		"vite": "^8.0.5",
 		"vite-plugin-dts": "^4.5.4"
-	},
-	"dependencies": {
-		"@umbraco-ui/uui": "^2.0.0-rc.1"
 	}
 }

@@ -89,6 +89,10 @@ export class uSyncResultRow extends UmbLitElement {
 			cursor: pointer;
 		}
 
+		:host:last-child {
+			background-color: blue;
+		}
+
 		.row:hover {
 			background-color: var(--uui-color-surface-alt);
 		}
