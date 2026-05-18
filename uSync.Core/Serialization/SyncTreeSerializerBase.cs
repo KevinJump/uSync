@@ -6,6 +6,8 @@ using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Models.Entities;
 using Umbraco.Cms.Core.Services;
 
+using uSync.Core.Serialization.Models;
+
 namespace uSync.Core.Serialization;
 
 public abstract class SyncTreeSerializerBase<TObject> : SyncSerializerBase<TObject>
@@ -88,7 +90,7 @@ public abstract class SyncTreeSerializerBase<TObject> : SyncSerializerBase<TObje
     /// <summary>
     ///  calculates the Umbraco Path value for an item, based on the parent
     /// </summary>
-    protected string CalculateNodePath(TObject item, TObject? parent)
+    protected string CalculateNodePath(TObject item, SyncParentItem? parent)
     {
         if (parent == null)
         {
@@ -103,7 +105,7 @@ public abstract class SyncTreeSerializerBase<TObject> : SyncSerializerBase<TObje
     /// <summary>
     ///  calculates the Level based on the parent.
     /// </summary>
-    protected int CalculateNodeLevel(TObject item, TObject? parent)
+    protected int CalculateNodeLevel(TObject item, SyncParentItem? parent)
     {
         if (parent == null)
         {

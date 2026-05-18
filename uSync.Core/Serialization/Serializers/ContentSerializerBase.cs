@@ -15,6 +15,7 @@ using uSync.Core.Cache;
 using uSync.Core.Extensions;
 using uSync.Core.Mapping;
 using uSync.Core.Models;
+using uSync.Core.Serialization.Models;
 
 namespace uSync.Core.Serialization.Serializers;
 
@@ -22,6 +23,8 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
     where TObject : IContentBase
 {
     protected UmbracoObjectTypes umbracoObjectType;
+    protected UmbracoObjectTypes containerType = UmbracoObjectTypes.Unknown;
+
     protected SyncValueMapperCollection syncMappers;
 
 
@@ -909,7 +912,11 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
                 }
             }
 
-            var items = syncMappers.EntityCache.GetAll(this.umbracoObjectType, [.. lookups]);
+            List<UmbracoObjectTypes> objectTypes = [this.umbracoObjectType];
+            if (this.containerType != UmbracoObjectTypes.Unknown)
+                objectTypes.Add(this.containerType);
+
+            var items = syncMappers.EntityCache.GetAll([..objectTypes], [.. lookups]);
             // var items = entityService.GetAll(this.umbracoObjectType, lookups.ToArray());
             foreach (var item in items)
             {
@@ -979,7 +986,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         }
         else if (parentKey == Guid.Empty)
         {
-            return FindAtRootAsync(alias).Result;
+            return await FindAtRootAsync(alias);
         }
 
         return default;
@@ -987,9 +994,11 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
 
     protected virtual async Task<TObject?> FindItemAsync(string alias, TObject? parent)
     {
+        var folderType = this.containerType != UmbracoObjectTypes.Unknown ? this.containerType : this.umbracoObjectType;
+
         if (parent != null)
         {
-            var children = entityService.GetChildren(parent.Id, this.umbracoObjectType);
+            var children = entityService.GetChildren(parent.Id, folderType);
             var child = children.FirstOrDefault(x => x.Name?.ToSafeAlias(shortStringHelper)?.InvariantEquals(alias) is true);
             if (child != null)
                 return await FindItemAsync(child.Key);
@@ -1007,7 +1016,20 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
     public override string ItemAlias(TObject item)
         => item.Name ?? item.Id.ToString();
 
-    protected async Task<TObject?> FindParentAsync(XElement node, bool searchByAlias = false)
+    protected virtual async Task<SyncParentItem?> FindItemAsParent(Guid key)
+    {
+        var item = await FindItemAsync(key);
+        return item == null ? null : new SyncParentItem
+        {
+            Id = item.Id,
+            Key = item.Key,
+            Name = item.Name ?? item.Id.ToString(),
+            Path = item.Path,
+            Level = item.Level
+        };
+    }
+
+    protected async Task<SyncParentItem?> FindParentAsync(XElement node, bool searchByAlias = false)
     {
         var item = default(TObject);
 
@@ -1019,8 +1041,15 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
             if (logger.IsEnabled(LogLevel.Trace))
                 logger.LogTrace("Looking for Parent by Key {Key}", key);
 
-            item = await FindItemAsync(key);
-            if (item != null) return item;
+            var parentItem = await FindItemAsParent(key);
+            if (parentItem != null) return new SyncParentItem
+            {
+                Id = parentItem.Id,
+                Key = parentItem.Key,
+                Name = parentItem.Name ?? parentItem.Id.ToString(),
+                Path = parentItem.Path,
+                Level = parentItem.Level
+            };
         }
 
         if (item == null && searchByAlias)
@@ -1036,14 +1065,28 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
             }
         }
 
-        return item;
+        return item is null ? null : new SyncParentItem
+        {
+            Id = item.Id,
+            Key = item.Key,
+            Name = item.Name ?? item.Id.ToString(),
+            Path = item.Path,
+            Level = item.Level
+        };
     }
 
-    protected async Task<TObject?> FindParentByPathAsync(string path, bool failIfNotExact = false)
+    protected async Task<SyncParentItem?> FindParentByPathAsync(string path, bool failIfNotExact = false)
     {
         // logger.Debug(serializerType, "Looking for Parent by path {Path}", path);
         var folders = path.ToDelimitedList("/").ToList();
-        return await FindByPathAsync(folders.Take(folders.Count - 1), failIfNotExact);
+        var item = await FindByPathAsync(folders.Take(folders.Count - 1), failIfNotExact);
+        return item == null ? null : new SyncParentItem
+        {
+            Id = item.Id,
+            Key = item.Key,
+            Name = item.Name ?? item.Id.ToString(),
+            Path = item.Path
+        };
     }
 
     protected async Task<TObject?> FindByPathAsync(IEnumerable<string> folders, bool failIfNotExact)
@@ -1117,8 +1160,8 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
 
     private void CleanCaches(int id)
     {
-        // clean the name cache for this id.
-        // nameCache.Remove(id);
+        if (logger.IsEnabled(LogLevel.Trace))
+            logger.LogTrace("Cleaning name cache for id {id}", id);
     }
 
     protected CachedName? GetCachedName(int id)
@@ -1227,5 +1270,5 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
     /// <summary>`
     ///  find the item by id, (we really don't want to do this, but parents are only stored in content by id).
     /// </summary>
-    protected abstract Task<TObject?> FindParentByIdAsync(int id);
+    protected abstract Task<SyncParentItem?> FindParentByIdAsync(int id);
 }

@@ -46,6 +46,8 @@ public static partial class uSyncConstants
         public const string Media = "Media";
         public const string Users = "Users";
         public const string Members = "Members";
+        public const string Element = "Element";
+        public const string ElementContainer = "ElementContainer";
 
         public const string Domain = "Domain";
 

@@ -13,7 +13,6 @@ using System.Threading.Tasks;
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Extensions;
 using uSync.BackOffice.Models;
-using uSync.BackOffice.SyncHandlers;
 using uSync.BackOffice.SyncHandlers.Models;
 
 namespace uSync.BackOffice.Services;

@@ -143,11 +143,11 @@ public class ContentTemplateSerializer : ContentSerializer, ISyncSerializer<ICon
         });
     }
 
-    protected override Task<SyncContentUpdateResult> DoSaveOrPublishAsync(IContent item, XElement node, SyncSerializerOptions options)
+    protected override Task<SyncContentUpdateResult<IContent>> DoSaveOrPublishAsync(IContent item, XElement node, SyncSerializerOptions options)
     {
         contentService.SaveBlueprint(item, null, options.UserId);
         var updatedItem = contentService.GetBlueprintById(item.Id);
-        return Task.FromResult(new SyncContentUpdateResult
+        return Task.FromResult(new SyncContentUpdateResult<IContent>
         {
             Success = true,
             Content = updatedItem ?? item,

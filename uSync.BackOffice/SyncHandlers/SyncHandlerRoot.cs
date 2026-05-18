@@ -1,4 +1,8 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Lucene.Net.Util;
+
+using Microsoft.Extensions.Logging;
+
+using Org.BouncyCastle.Tls;
 
 using System;
 using System.Collections.Generic;
@@ -494,18 +498,10 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
             var serializerOptions = new SyncSerializerOptions(options.Flags, settings.Settings, options.UserId);
             serializerOptions.MergeSettings(options.Settings);
 
-            // get the item.
-            var attempt = await DeserializeItemAsync(node, serializerOptions);
-            var action = uSyncActionHelper<TObject>.SetAction(attempt, GetNameFromFileOrNode(filename, node), node.GetKey(), this.Alias, IsTwoPass);
-
-            // add item if we have it.
-            if (attempt.Item != null) action.Item = attempt.Item;
-
-            // add details if we have them
-            if (attempt.Details != null && attempt.Details.Any()) action.Details = attempt.Details;
+            uSyncAction action = await DeserializeItemToAction(node, filename, serializerOptions);
 
             // this might not be the place to do this because, two pass items are imported at another point too.
-            await _mutexService.FireItemCompletedEventAsync(new uSyncImportedItemNotification(node, attempt.Change));
+            await _mutexService.FireItemCompletedEventAsync(new uSyncImportedItemNotification(node, action.Change));
 
             return [action];
         }
@@ -516,6 +512,20 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
             return [uSyncAction.Fail(fileWithoutPath, this.Alias, this.ItemType, ChangeType.Fail, $"Import Fail: {ex.Message}", new Exception(ex.Message))];
         }
 
+    }
+
+    protected virtual async Task<uSyncAction> DeserializeItemToAction(XElement node, string filename, SyncSerializerOptions serializerOptions)
+    {
+        // get the item.
+        var attempt = await DeserializeItemAsync(node, serializerOptions);
+        var action = uSyncActionHelper<TObject>.SetAction(attempt, GetNameFromFileOrNode(filename, node), node.GetKey(), this.Alias, IsTwoPass);
+
+        // add item if we have it.
+        if (attempt.Item != null) action.Item = attempt.Item;
+
+        // add details if we have them
+        if (attempt.Details != null && attempt.Details.Any()) action.Details = attempt.Details;
+        return action;
     }
 
 
@@ -821,6 +831,9 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 
         if (ItemContainerType != UmbracoObjectTypes.Unknown)
         {
+            if (parent is not null)
+                actions.AddRange(await ExportContainer(parent, folders, config));
+
             var containers = await GetFoldersAsync(parent);
             foreach (var container in containers)
             {
@@ -889,6 +902,15 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
              new KeyNotFoundException(nameof(udi)))];
 
     }
+
+
+    /// <summary>
+    ///  support for handlers that want to export their containers, that are of a different model type 
+    ///  to the items they export.
+    /// </summary>
+
+    public virtual Task<IEnumerable<uSyncAction>> ExportContainer(TContainer item, string[] folders, HandlerSettings config)
+        => Task.FromResult(Enumerable.Empty<uSyncAction>());
 
     /// <summary>
     /// Export a given item to disk
@@ -1962,7 +1984,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 
     #endregion
 
-    private string GetNameFromFileOrNode(string filename, XElement node)
+    protected string GetNameFromFileOrNode(string filename, XElement node)
     {
         if (string.IsNullOrWhiteSpace(filename) is true) return node.GetAlias();
         return syncFileService.GetSiteRelativePath(filename);
