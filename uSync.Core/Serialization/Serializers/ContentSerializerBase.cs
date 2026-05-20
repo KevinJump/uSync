@@ -830,9 +830,13 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
             && node.Element(uSyncConstants.Xml.Info) != null;
 
 
+
     // these are the functions using the simple 'getItem(alias)' 
     // that we cannot use for content/media trees.
-    protected override async Task<Attempt<TObject?>> FindOrCreateAsync(XElement node)
+    protected override Task<Attempt<TObject?>> FindOrCreateAsync(XElement node)
+        => FindOrCreateAsync(node, new SyncSerializerOptions());
+
+    protected async Task<Attempt<TObject?>> FindOrCreateAsync(XElement node, SyncSerializerOptions options)
     {
         var item = await FindItemAsync(node);
         if (item is not null)
@@ -863,8 +867,17 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         var contentTypeAlias = node.Element(uSyncConstants.Xml.Info)?
             .Element("ContentType").ValueOrDefault(node.Name.LocalName) ?? node.Name.LocalName;
 
-        return await CreateItemAsync(alias, parent, contentTypeAlias);
+        return await CreateItemAsync(new ContentItemCreationOptions
+        {
+            Alias = alias,
+            Parent = parent,
+            ContentTypeAlias = contentTypeAlias,
+            Node = node,
+        }, options);
     }
+
+    protected virtual Task<Attempt<TObject?>> CreateItemAsync(ContentItemCreationOptions creation, SyncSerializerOptions options)
+        => CreateItemAsync(creation.Alias, creation.Parent, creation.ContentTypeAlias);
 
     protected override string GetItemBaseType(XElement node)
         => node.Name.LocalName;
@@ -1271,4 +1284,12 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
     ///  find the item by id, (we really don't want to do this, but parents are only stored in content by id).
     /// </summary>
     protected abstract Task<SyncParentItem?> FindParentByIdAsync(int id);
+}
+
+public class ContentItemCreationOptions
+{
+    public required string Alias { get; set; }
+    public ITreeEntity? Parent { get; set; }
+    public required string ContentTypeAlias { get; set; }
+    public required XElement Node { get; set; }
 }

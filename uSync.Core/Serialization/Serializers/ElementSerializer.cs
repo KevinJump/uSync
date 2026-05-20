@@ -21,6 +21,8 @@ public class ElementSerializer : PublishableContentBaseSerializer<IElement>, ISy
     private readonly IElementService _elementService;
     private readonly IElementContainerService _containerService;
     private readonly IContentTypeService _contentTypeService;
+    private readonly IElementEditingService _elementEditingService;
+    private readonly IIdKeyMap _keyMap;
 
     public ElementSerializer(
         IEntityService entityService,
@@ -32,8 +34,10 @@ public class ElementSerializer : PublishableContentBaseSerializer<IElement>, ISy
         IElementService elementService,
         IElementContainerService containerService,
         IContentTypeService contentTypeService,
-        IUserService userService)
-        : base(entityService, languageService, relationService, shortStringHelper, logger, 
+        IUserService userService,
+        IElementEditingService elementEditingService,
+        IIdKeyMap keyMap)
+        : base(entityService, languageService, relationService, shortStringHelper, logger,
             UmbracoObjectTypes.Element, syncMappers, userService)
     {
         _elementService = elementService;
@@ -41,6 +45,8 @@ public class ElementSerializer : PublishableContentBaseSerializer<IElement>, ISy
         _contentTypeService = contentTypeService;
 
         containerType = UmbracoObjectTypes.ElementContainer;
+        _elementEditingService = elementEditingService;
+        _keyMap = keyMap;
     }
 
     public override Task DeleteItemAsync(IElement item)
@@ -49,21 +55,49 @@ public class ElementSerializer : PublishableContentBaseSerializer<IElement>, ISy
     public override Task<IElement?> FindItemAsync(Guid key)
         => Task.FromResult(_elementService.GetById(key));
 
-    public override Task SaveItemAsync(IElement item)
-        => Task.FromResult(_elementService.Save(item));
+    protected override void SetTrashed(IElement item)
+        => ((ContentBase)item).Trashed = true;
 
-    protected override Task<Attempt<IElement?>> CreateItemAsync(string alias, ITreeEntity? parent, string itemType)
+    protected override void MoveToRecycleBin(IElement item)
     {
-        var contentType = _contentTypeService.Get(itemType);
-        if (contentType is null)
-            return Task.FromResult(Attempt<IElement?>.Fail(new Exception($"No content type found with alias {itemType}")));
+        _elementEditingService.MoveToRecycleBinAsync(item.Key, Constants.Security.SuperUserKey)
+            .Wait();
+    }
 
-        var element = new Element(alias, parent?.Id ?? -1, contentType);
+    protected override void MoveItem(IElement item, int parentId)
+    {
+            var parentAttempt = _keyMap.GetKeyForId(parentId, UmbracoObjectTypes.ElementContainer);
+            Guid? parentKey = parentAttempt.Success ? parentAttempt.Result : null;
+            _elementEditingService.RestoreAsync(item.Key, parentKey, Constants.Security.SuperUserKey)
+                .Wait();
+    }
+
+    public override Task SaveItemAsync(IElement item)
+    {
+        _elementService.Save(item);
+        return Task.CompletedTask;
+    }
+
+    // gone wrong if we get this. 
+    protected override Task<Attempt<IElement?>> CreateItemAsync(string alias, ITreeEntity? parent, string itemType)
+        => throw new NotImplementedException();
+
+    protected override Task<Attempt<IElement?>> CreateItemAsync(ContentItemCreationOptions creation, SyncSerializerOptions options)
+    {
+        var contentType = _contentTypeService.Get(creation.ContentTypeAlias);
+        if (contentType is null)
+            return Task.FromResult(Attempt<IElement?>.Fail(new Exception($"No content type found with alias {creation.ContentTypeAlias}")));
+
+        var element = new Element(creation.Alias, creation.Parent?.Id ?? -1, contentType);
+
+        // elements require the node name is set before the save happens. 
+        var changes = DeserializeName(element, creation.Node, options);
+
         var operationalResult = _elementService.Save(element);
         if (operationalResult.Success is false)
         {
             var messages = operationalResult.EventMessages?.FormatMessages() ?? "";
-            return Task.FromResult(Attempt<IElement?>.Fail(new Exception($"Failed to create element with alias {alias} and content type {itemType}. {messages}")));
+            return Task.FromResult(Attempt<IElement?>.Fail(new Exception($"Failed to create element with alias {creation.Alias} and content type {creation.ContentTypeAlias}. {messages}")));
         }
 
         return Task.FromResult(Attempt<IElement?>.Succeed(element));

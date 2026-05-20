@@ -104,10 +104,9 @@ public class ElementHandler : PublishableContentHandlerBase<IElement>, ISyncHand
             return [uSyncAction.Fail(nameof(item), this.handlerType, this.ItemType, ChangeType.Fail, "Item not set",
                 new ArgumentNullException(nameof(item)))];
 
+        // nothing to export ? 
         var container = await GetContainer(item.Key);
-        if (container == null)
-            return [uSyncAction.Fail(nameof(item), this.handlerType, this.ItemType, ChangeType.Fail, "Container not found",
-                new Exception($"Container with key {item.Key} not found"))];
+        if (container == null) return [];
 
         if (await _mutexService.FireItemStartingEventAsync(new CancelableuSyncItemNotification<EntityContainer>(container)))
         {

@@ -139,10 +139,9 @@ public abstract class PublishableContentBaseSerializer<TObject> : ContentSeriali
     }
 
     protected abstract Task<uSyncChange?> DeserializeTemplate(TObject item, XElement node);
-
     protected override async Task<SyncAttempt<TObject>> DeserializeCoreAsync(XElement node, SyncSerializerOptions options)
     {
-        var attempt = await FindOrCreateAsync(node);
+        var attempt = await FindOrCreateAsync(node, options);
         if (!attempt.Success || attempt.Result is null)
             throw attempt.Exception ?? new Exception($"Unknown error {node.GetAlias()}");
 
