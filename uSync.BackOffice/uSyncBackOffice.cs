@@ -7,6 +7,9 @@ namespace uSync.BackOffice;
 /// </summary>
 public class uSync
 {
+    /// <summary>
+    ///  assembly version for uSync
+    /// </summary>
     public static Version Version => typeof(uSync).Assembly.GetName().Version ?? new Version(15, 0, 0);
 
     /// <summary>
