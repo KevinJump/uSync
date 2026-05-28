@@ -69,7 +69,8 @@ public abstract class SyncBlockMapperBase<TBlockValue> : SyncValueMapperBase
         // and prevent double-encoding when the block value is re-serialized.
         if (result is string stringResult && value.IsNonStringJsonValue())
         {
-            return stringResult.ConvertToJsonNode() ?? result;
+            return stringResult.ConvertStringToExpandedJson() ?? result;
+            // return stringResult.ConvertToJsonNode() ?? result;
         }
 
         return result;
