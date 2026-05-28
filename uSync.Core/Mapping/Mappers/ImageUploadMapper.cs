@@ -30,6 +30,9 @@ public class ImageUploadMapper : ImagePathMapperBase, ISyncMapper
     {
         return uSyncTaskHelper.FromResultOf(() =>
         {
+            if (_logger.IsEnabled(LogLevel.Debug))
+                _logger.LogDebug("Getting export value for ImageUpload with value {Value}", value);
+
             var stringValue = value?.ToString();
             if (string.IsNullOrWhiteSpace(stringValue)) return stringValue;
             return StripSitePath(stringValue);
