@@ -31,8 +31,8 @@ public class ImagePathMapper : ImagePathMapperBase, ISyncMapper
 
     public ImagePathMapper(
         IEntityService entityService,
-        IConfiguration configuration,
         ILogger<ImagePathMapper> logger,
+        IConfiguration configuration,
         IOptionsMonitor<GlobalSettings> globalOptions,
         IImageUrlGenerator imageUrlGenerator) : base(entityService, logger, configuration, globalOptions)
     {
