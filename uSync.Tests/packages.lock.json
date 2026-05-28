@@ -2617,7 +2617,7 @@
       "Umbraco.Cms": {
         "type": "CentralTransitive",
         "requested": "[17.4.2, )",
-        "resolved": "17.4.2",
+        "resolved": "17.3.0",
         "contentHash": "yaG/li5/5RT7354r6rloErE96HojsDEHyYE+iVxcb+ySCLn2PF424qVSXEYq5ZXAbN4Zbx2/6oytTA4HX5w2rg==",
         "dependencies": {
           "Asp.Versioning.Mvc": "8.1.1",
