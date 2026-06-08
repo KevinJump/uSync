@@ -7,6 +7,7 @@ using Umbraco.Cms.Core.DependencyInjection;
 using uSync.Backoffice.Management.Api.Configuration;
 using uSync.Backoffice.Management.Api.Services;
 using uSync.BackOffice;
+using uSync.Core.Extensions;
 
 namespace uSync.Backoffice.Management.Api;
 
@@ -15,6 +16,9 @@ public class ApiComposer : IComposer
 {
     public void Compose(IUmbracoBuilder builder)
     {
+        if (builder.IsUmbracoBackOfficeEnabled() is false)
+            return;
+
         builder.Services.AddSingleton<IOperationIdHandler, uSyncCustomOperationHandler>();
 
         builder.Services.ConfigureOptions<ConfigSyncApiSwaggerGenOptions>();

@@ -18,6 +18,7 @@ using Umbraco.Extensions;
 
 using uSync.BackOffice;
 using uSync.BackOffice.Extensions;
+using uSync.Core.Extensions;
 using uSync.History.Service;
 
 namespace uSync.History
@@ -26,6 +27,10 @@ namespace uSync.History
     {
         public void Compose(IUmbracoBuilder builder)
         {
+            // don't load if the backoffice is not loaded as part of the project. 
+            if (builder.IsUmbracoBackOfficeEnabled() is false)
+                return;
+
             builder.Services.AddSingleton<ISyncHistoryService, SyncHistoryService>();
 
             builder.AddNotificationAsyncHandler<uSyncImportCompletedNotification, uSyncHistoryNotificationHandler>();
