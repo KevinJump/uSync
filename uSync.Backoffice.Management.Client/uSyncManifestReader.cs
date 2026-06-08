@@ -10,6 +10,7 @@ using Umbraco.Extensions;
 
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Extensions;
+using uSync.Core.Extensions;
 
 namespace uSync.Backoffice.Management.Client;
 
@@ -18,8 +19,12 @@ public class uSyncManifestComposer : IComposer
 {
     public void Compose(IUmbracoBuilder builder)
     {
-        builder.Services.AddSingleton<IPackageManifestReader, uSyncManifestReader>();
-        builder.Services.AddSingleton<IPackageManifestReader, SyncSectionManifestReader>();
+        if (builder.IsUmbracoBackOfficeEnabled())
+        {
+            // only load this when the backoffice is enabled. 
+            builder.Services.AddSingleton<IPackageManifestReader, uSyncManifestReader>();
+            builder.Services.AddSingleton<IPackageManifestReader, SyncSectionManifestReader>();
+        }
     }
 }
 
