@@ -983,10 +983,9 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
                     await syncFileService.SaveXElementAsync(attempt.Item, filename);
                 }
 
-                if (config.CreateClean && await HasChildrenAsync(item))
-                {
+                if (config.CreateClean)
                     await CreateCleanFileAsync(GetItemKey(item), filename);
-                }
+
             }
             else
             {
