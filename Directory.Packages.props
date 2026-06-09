@@ -8,6 +8,7 @@
 		<PackageVersion Include="Umbraco.Cms.DevelopmentMode.Backoffice" Version="17.4.2" />
 		<PackageVersion Include="Our.Umbraco.ConditionalDisplayers" Version="16.6.0" />
 		<PackageVersion Include="Microsoft.ICU.ICU4C.Runtime" Version="72.1.0.3" />
+		<PackageVersion Include="Clean" Version="7.0.5" />
 		<PackageVersion Include="Clean.Core" Version="7.0.5" />
 	</ItemGroup>
 	<!-- umbraco libraries for packages -->
