@@ -97,7 +97,15 @@ public class ContentHandler : ContentHandlerBase<IContent>, ISyncHandler,
             var total = long.MaxValue;
             while (page * pageSize < total)
             {
-                items.AddRange(_contentService.GetPagedChildren(parent.Id, page++, pageSize, out total));
+                items.AddRange(_contentService.GetPagedChildren(
+                    id: parent.Id,
+                    pageIndex: page++,
+                    pageSize: pageSize,
+                    totalRecords: out total,
+                    propertyAliases: null,
+                    filter: null,
+                    ordering: null,
+                    loadTemplates: true));
             }
             return items;
 
