@@ -45,7 +45,7 @@ public abstract class PublishableContentBaseSerializer<TObject> : ContentSeriali
         node.Add(info);
         node.Add(properties);
 
-        return SyncAttempt<XElement>.Succeed(item.Name ?? item.Id.ToString(), node, typeof(IContent), ChangeType.Export);
+        return SyncAttempt<XElement>.Succeed(ItemAlias(item), node, typeof(TObject), ChangeType.Export);
     }
 
 
@@ -75,14 +75,14 @@ public abstract class PublishableContentBaseSerializer<TObject> : ContentSeriali
 
         // to make this a non-breaking change, we say default = item.published, but when 
         // dealing with cultures it isn't used. 
-        published.Add(new XAttribute("Default", item.Published));
+        published.Add(new XAttribute(uSyncConstants.Xml.Default, item.Published));
 
         foreach (var culture in item.AvailableCultures.OrderBy(x => x))
         {
             if (activeCultures.IsValid(culture))
             {
                 published.Add(new XElement("Published", item.IsCulturePublished(culture),
-                    new XAttribute("Culture", culture)));
+                    new XAttribute(uSyncConstants.Xml.Culture, culture)));
             }
         }
         return published;
@@ -232,9 +232,9 @@ public abstract class PublishableContentBaseSerializer<TObject> : ContentSeriali
             return new SyncContentUpdateResult<TObject>(true, item, "No changes");
         }
 
-        var trashed = item.Trashed || (node.Element(uSyncConstants.Xml.Info)?.Element("Trashed").ValueOrDefault(false) ?? false);
+        var itemOrNodeTrashed = item.Trashed || node.IsTrashed();
         var publishedNode = node.Element(uSyncConstants.Xml.Info)?.Element("Published");
-        if (!trashed && publishedNode != null)
+        if (!itemOrNodeTrashed && publishedNode != null)
         {
             var schedules = GetSchedules(node.Element(uSyncConstants.Xml.Info)?.Element("Schedule"));
 

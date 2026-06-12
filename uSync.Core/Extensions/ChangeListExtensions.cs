@@ -1,4 +1,6 @@
-﻿using uSync.Core.Extensions;
+﻿using System.Linq.Expressions;
+
+using uSync.Core.Extensions;
 using uSync.Core.Models;
 
 namespace uSync.Core;
@@ -49,4 +51,27 @@ public static class ChangeListExtensions
 
     public static bool HasWarning(this List<uSyncChange> changes)
         => changes.Any(x => x.Change == ChangeDetailType.Warning);
+
+
+    /// <summary>
+    /// If <paramref name="newValue"/> differs from the current property value,
+    /// records a change and applies the setter.
+    /// </summary>
+    public static uSyncChange? ApplyIfChanged<TObject, TValue>(
+        this TObject item,
+        Expression<Func<TObject, TValue>> propertyExpr,
+        TValue newValue,
+        Action<TObject, TValue> setter,
+        string path = "")
+    {
+        var getter = propertyExpr.Compile();
+        var oldValue = getter(item);
+
+        if (EqualityComparer<TValue>.Default.Equals(oldValue, newValue)) return null;
+
+        var propName = ((MemberExpression)propertyExpr.Body).Member.Name;
+        setter(item, newValue);
+        
+        return uSyncChange.Update(path, propName, oldValue?.ToString() ?? string.Empty, newValue?.ToString() ?? string.Empty, true);
+    }
 }

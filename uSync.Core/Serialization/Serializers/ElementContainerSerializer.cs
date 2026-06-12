@@ -4,14 +4,17 @@ using System.Xml.Linq;
 
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Models;
+using Umbraco.Cms.Core.Models.Entities;
 using Umbraco.Cms.Core.Services;
 
 using uSync.Core.Models;
 
+using static Umbraco.Cms.Core.Constants.HttpContext;
+
 namespace uSync.Core.Serialization.Serializers;
 
 [SyncSerializer("8AD4ED7F-9E47-4918-ACAE-146132F5AB56",
-    "Element Serializer", uSyncConstants.Serialization.ElementContainer, IsTwoPass = false)]
+    "Element Serializer", uSyncConstants.Serialization.ElementContainer, IsTwoPass = true)]
 internal class ElementContainerSerializer : SyncSerializerBase<EntityContainer>,
     ISyncEntityContainerSerializer<EntityContainer>
 {
@@ -62,58 +65,91 @@ internal class ElementContainerSerializer : SyncSerializerBase<EntityContainer>,
 
     protected override async Task<SyncAttempt<EntityContainer>> DeserializeCoreAsync(XElement node, SyncSerializerOptions options)
     {
-        var item = await FindItemAsync(node);
-        if (item is null)
+        var details = new List<uSyncChange>();
+
+        var item = await FindItemAsync(node)
+                ?? new EntityContainer(ContainedType.GetGuid());
+
+        var name = node.GetAlias();
+        if (item.Name != name)
         {
-            // create a new one. 
-            item = new EntityContainer(ContainedType.GetGuid());
+            details.AddUpdate(uSyncConstants.Xml.Name, ItemAlias(item), item.Name, name);
+            item.Name = name;
         }
 
-        item.Name = node.GetAlias();
-        item.Key = node.GetKey();
-        item.SortOrder = int.TryParse(node.Attribute("SortOrder")?.Value, out var sortOrder) ? sortOrder : item.SortOrder;
+        var key = node.GetKey();
+        if (item.Key != key) {
+            details.AddUpdate(uSyncConstants.Xml.Key, ItemAlias(item), item.Key.ToString(), key.ToString());
+            item.Key = key;
+        }
 
-        var parentNode = node.Element("Parent");
-        if (parentNode is not null)
+        var sortOrder = node.Element(uSyncConstants.Xml.SortOrder).ValueOrDefault<int>(item.SortOrder);
+        if (item.SortOrder != sortOrder)
         {
-            var parentKey = parentNode.Attribute("Key")?.Value;
-            if (Guid.TryParse(parentKey, out var parentGuid))
+            details.AddUpdate(uSyncConstants.Xml.SortOrder, ItemAlias(item), item.SortOrder.ToString(), sortOrder.ToString());
+            item.SortOrder = sortOrder;
+        }
+
+        return SyncAttempt<EntityContainer>.Succeed(ItemAlias(item), item, ChangeType.Import, details);
+    }
+
+    public override async Task<SyncAttempt<EntityContainer>> DeserializeSecondPassAsync(EntityContainer item, XElement node, SyncSerializerOptions options)
+    {
+        var details = new List<uSyncChange>();
+
+        var parentId = await GetParentIdAsync(node, item);
+        if (item.ParentId != parentId)
+        {
+            var parent = await GetParentAsync(node);
+            if (parent is not null)
             {
-                var parentItem = await _containerService.GetAsync(parentGuid);
-                if (parentItem is not null)
-                {
-                    item.ParentId = parentItem.Id;
-                }
-                else
-                {
-                    logger.LogWarning("Parent with key {ParentKey} not found for container {ContainerName}", parentKey, item.Name);
-                }
-            }
-            else
-            {
-                logger.LogWarning("Invalid parent key {ParentKey} for container {ContainerName}", parentKey, item.Name);
+                details.AddUpdate(uSyncConstants.Xml.Parent, ItemAlias(item), item.ParentId.ToString(), parentId.ToString());
+                await _containerService.MoveAsync(item.Key, parent?.Key, Constants.Security.SuperUserKey);
             }
         }
 
-        return SyncAttempt<EntityContainer>.Succeed(ItemAlias(item), item, ChangeType.Import, []);
+        return SyncAttempt<EntityContainer>.Succeed(ItemAlias(item), item, ChangeType.Import, details); 
 
+    }
+
+    private async Task<ITreeEntity?> GetParentAsync(XElement node)
+    {
+        var parentNode = node.Element(uSyncConstants.Xml.Parent);
+        if (parentNode is null) return null;
+
+        var parentGuid = parentNode.GetKey();
+        if (parentGuid == Guid.Empty) return null;
+
+        return await _containerService.GetAsync(parentGuid);
+    }
+
+    private async Task<int> GetParentIdAsync(XElement node, EntityContainer item)
+    {
+        var parentNode = node.Element(uSyncConstants.Xml.Parent);
+        if (parentNode is null) return item.ParentId;
+
+        var parentGuid = parentNode.GetKey();
+        if (parentGuid == Guid.Empty) return Constants.System.Root;
+
+        var parentItem = await _containerService.GetAsync(parentGuid);
+        if (parentItem is null) return item.ParentId;
+
+        return parentItem.Id;
     }
 
     protected override async Task<SyncAttempt<XElement>> SerializeCoreAsync(EntityContainer item, SyncSerializerOptions options)
     {
         var node = InitializeBaseNode(item, ItemAlias(item), item.Level);
-        node.Add(new XElement("SortOrder", item.SortOrder));
+        node.Add(new XElement(uSyncConstants.Xml.SortOrder, item.SortOrder));
 
         if (item.ParentId != -1) {
             var parent = await _containerService.GetParentAsync(item);
             if (parent is not null) {
-                node.Add(new XElement("Parent",
-                    new XAttribute("Key", parent.Key)),
-                    new XElement(parent.Name ?? string.Empty));
+                node.Add(new XElement(uSyncConstants.Xml.Parent,
+                    new XAttribute(uSyncConstants.Xml.Key, parent.Key), parent.Name ?? string.Empty));
             }
         }
 
-        return SyncAttempt<XElement>.Succeed(ItemAlias(item), node, ChangeType.Export, []);
-        
+        return SyncAttempt<XElement>.Succeed(ItemAlias(item), node, typeof(IElement), ChangeType.Export);       
     }
 }

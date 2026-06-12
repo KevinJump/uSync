@@ -1,4 +1,6 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using Org.BouncyCastle.Bcpg.Sig;
+
+using System.Diagnostics.CodeAnalysis;
 using System.Security.Cryptography;
 using System.Xml;
 using System.Xml.Linq;
@@ -50,16 +52,31 @@ public static class XElementExtensions
     ///  Not all items have a parent
     /// </remarks>
     public static Guid GetParentKey(this XElement node)
-    {
-        var result = node
-            .Element(uSyncConstants.Xml.Info)?
-            .Element(uSyncConstants.Xml.Parent)?
-            .Attribute(uSyncConstants.Xml.Key).ValueOrDefault(Guid.Empty);
+        => node.Element(uSyncConstants.Xml.Parent)?.GetKey() 
+            ?? node.Element(uSyncConstants.Xml.Info)?
+                .Element(uSyncConstants.Xml.Parent)?
+                .GetKey() ?? Guid.Empty;
 
-        return result is not null && result.HasValue
-            ? result.Value
-            : Guid.Empty;
-    }
+    public static XElement? GetParentNode(this XElement node)
+        => node.Element(uSyncConstants.Xml.Parent) 
+            ?? node.Element(uSyncConstants.Xml.Info)?.Element(uSyncConstants.Xml.Parent);
+
+    public static XElement? GetNameNode(this XElement node)
+        => node
+            .Element(uSyncConstants.Xml.Info)?
+            .Element(uSyncConstants.Xml.Name);
+
+    public static XElement? GetNodeNameNode(this XElement node)
+        => node
+            .Element(uSyncConstants.Xml.Info)?
+            .Element(uSyncConstants.Xml.NodeName);
+
+
+    public static string? GetDefaultName(this XElement node)
+        => node.Attribute(uSyncConstants.Xml.Default).ValueOrDefault<string?>(null);
+
+    public static XElement? GetPropertiesNode(this XElement node)
+        => node.Element(uSyncConstants.Xml.Properties);
 
     /// <summary>
     ///  get the nice path name that is stored in the xml, gives us something to show
@@ -70,6 +87,10 @@ public static class XElementExtensions
     public static string GetPath(this XElement node)
         => node.Element(uSyncConstants.Xml.Info)?
             .Element(uSyncConstants.Xml.Path).ValueOrDefault(string.Empty) ?? string.Empty;
+
+    public static bool IsTrashed(this XElement node)
+        => node.Element(uSyncConstants.Xml.Info)?
+            .Element(uSyncConstants.Xml.Trashed).ValueOrDefault(false) is true;
 
     /// <summary>
     ///  does the xml represent an 'Empty' item (deleted/renamed/etc)

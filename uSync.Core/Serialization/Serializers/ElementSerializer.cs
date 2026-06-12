@@ -49,6 +49,9 @@ public class ElementSerializer : PublishableContentBaseSerializer<IElement>, ISy
         _keyMap = keyMap;
     }
 
+    protected override int RecycleBinId => Constants.System.RecycleBinElement;
+
+
     public override Task DeleteItemAsync(IElement item)
         => Task.FromResult(_elementService.Delete(item));
 

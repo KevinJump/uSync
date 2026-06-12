@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Lucene.Net.Analysis.Cjk;
+
+using Microsoft.Extensions.Logging;
 
 using Org.BouncyCastle.Security.Certificates;
 
@@ -281,10 +283,13 @@ public class ElementHandler : PublishableContentHandlerBase<IElement>, ISyncHand
 
     protected override async Task<uSyncAction> DeserializeItemToAction(XElement node, string filename, SyncSerializerOptions serializerOptions)
     {
-        if (node.Name.LocalName == global::uSync.Core.uSyncConstants.Serialization.ElementContainer)
+        if (NodeIsContainer(node))
         {
             var containerAttempt = await _containerSerializer.DeserializeAsync(node, serializerOptions);
             var containerAction = uSyncActionHelper<EntityContainer>.SetAction(containerAttempt, GetNameFromFileOrNode(filename, node), node.GetKey(), this.Alias, IsTwoPass);
+
+            if (containerAttempt.Success && containerAttempt.Item != null)
+                await _containerSerializer.DeserializeSecondPassAsync(containerAttempt.Item, node, serializerOptions); 
 
             if (containerAttempt.Item != null) containerAction.Item = containerAttempt.Item;
             if (containerAttempt.Details != null && containerAttempt.Details.Any()) containerAction.Details = containerAttempt.Details;
@@ -303,4 +308,47 @@ public class ElementHandler : PublishableContentHandlerBase<IElement>, ISyncHand
         if (attempt.Details != null && attempt.Details.Any()) action.Details = attempt.Details;
         return action;
     }
+
+    protected override async Task<IEnumerable<uSyncChange>> GetChangesAsync(XElement node, XElement currentNode, SyncSerializerOptions options)
+    {
+        if (NodeIsContainer(node) is false)
+            return await itemFactory.GetChangesAsync<IElement>(node, currentNode, options);
+        else 
+            return await itemFactory.GetChangesAsync<EntityContainer>(node, currentNode, options);
+    }
+
+    protected override async Task<SyncChangeInfo> IsItemCurrentAsync(XElement node, SyncSerializerOptions options)
+    {
+        if (NodeIsContainer(node) is false)
+        {
+            return await base.IsItemCurrentAsync(node, options);
+        }
+        else
+        {
+            var change = new SyncChangeInfo
+            {
+                CurrentNode = await SerializeContainerFromNodeAsync(node, options),
+            };
+            change.Change = await _containerSerializer.IsCurrentAsync(node, change.CurrentNode, options);
+            return change;
+        }
+    }
+
+    private async Task<XElement?> SerializeContainerFromNodeAsync(XElement node, SyncSerializerOptions options)
+    {
+        var item = await _containerSerializer.FindItemAsync(node);
+        if (item is null) return null;
+
+        var cultures = node.GetCultures();
+        if (string.IsNullOrWhiteSpace(cultures) is false)
+            options.Settings[Core.uSyncConstants.CultureKey] = cultures;
+
+        var attempt = await _containerSerializer.SerializeAsync(item, options);
+        if (attempt.Success) return attempt.Item;
+
+        return null;
+    }
+
+    private static bool NodeIsContainer(XElement node)
+        => node.Name.LocalName == global::uSync.Core.uSyncConstants.Serialization.ElementContainer;
 }

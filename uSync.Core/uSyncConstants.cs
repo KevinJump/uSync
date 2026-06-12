@@ -14,11 +14,17 @@ public static partial class uSyncConstants
 
         public const string Info = "Info";
         public const string Name = "Name";
+        public const string NodeName = "NodeName";
+
+        public const string Default = "Default";
+        public const string Trashed = "Trashed";
+        public const string Culture = "Culture";
+        public const string Segment = "Segment";
+
+        public const string Properties = "Properties";
 
         public const string SortOrder = "SortOrder";
-
         public const string ItemType = "itemType";
-
         public const string Template = "Template";
 
     }
@@ -144,6 +150,9 @@ public static partial class uSyncConstants
 
         public const string UsingRazorViews = "UsingRazorViews";
         public const bool UsingRazorViews_Default = false;
+
+        public const string ImportTrashed = "ImportTrashed";
+        public const bool ImportTrashed_Default = false;
 
     }
 

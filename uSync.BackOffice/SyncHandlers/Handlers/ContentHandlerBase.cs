@@ -18,6 +18,8 @@ using uSync.BackOffice.Services;
 using uSync.Core;
 using uSync.Core.Serialization;
 
+using uSyncCoreConstants = uSync.Core.uSyncConstants;
+
 namespace uSync.BackOffice.SyncHandlers.Handlers;
 
 /// <summary>
@@ -103,8 +105,9 @@ public abstract class ContentHandlerBase<TObject> : SyncHandlerTreeBase<TObject>
     private static bool ShouldImportTrashedItem(XElement node, HandlerSettings config)
     {
         // unless the setting is explicit we don't import trashed items. 
-        var trashed = node.Element("Info")?.Element("Trashed").ValueOrDefault(false);
-        if (trashed.GetValueOrDefault(false) && !config.GetSetting("ImportTrashed", false)) return false;
+        var isTrashed = node.IsTrashed();
+        if (isTrashed && !config.GetSetting(uSyncCoreConstants.DefaultSettings.ImportTrashed,
+            uSyncCoreConstants.DefaultSettings.ImportTrashed_Default)) return false;
 
         return true;
     }
@@ -116,7 +119,7 @@ public abstract class ContentHandlerBase<TObject> : SyncHandlerTreeBase<TObject>
 
         if (include.Length > 0)
         {
-            var path = node.Element("Info")?.Element("Path").ValueOrDefault(string.Empty);
+            var path = node.GetPath();
             if (!string.IsNullOrWhiteSpace(path) && !include.Any(x => path.InvariantStartsWith(x)))
             {
                 if (logger.IsEnabled(LogLevel.Debug))
@@ -130,7 +133,7 @@ public abstract class ContentHandlerBase<TObject> : SyncHandlerTreeBase<TObject>
             .Split([','], StringSplitOptions.RemoveEmptyEntries);
         if (exclude.Length > 0)
         {
-            var path = node.Element("Info")?.Element("Path").ValueOrDefault(string.Empty);
+            var path = node.GetPath();
             if (!string.IsNullOrWhiteSpace(path) && exclude.Any(x => path.InvariantStartsWith(x)))
             {
                 if (logger.IsEnabled(LogLevel.Debug))
@@ -183,8 +186,8 @@ public abstract class ContentHandlerBase<TObject> : SyncHandlerTreeBase<TObject>
         if (!await base.ShouldExportAsync(node, config)) return false;
 
         // We export trashed items by default, (but we don't import them by default)
-        var trashed = node.Element("Info")?.Element("Trashed").ValueOrDefault(false);
-        if (trashed.GetValueOrDefault(false) && !config.GetSetting<bool>("ExportTrashed", true)) return false;
+        var isTrashed = node.IsTrashed();
+        if (isTrashed && !config.GetSetting<bool>("ExportTrashed", true)) return false;
 
         if (config.GetSetting("RulesOnExport", false))
         {

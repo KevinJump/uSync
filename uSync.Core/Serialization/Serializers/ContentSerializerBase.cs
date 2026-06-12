@@ -16,6 +16,8 @@ using uSync.Core.Extensions;
 using uSync.Core.Mapping;
 using uSync.Core.Models;
 using uSync.Core.Serialization.Models;
+using uSync.Core.Serialization.Extensions;
+
 
 namespace uSync.Core.Serialization.Serializers;
 
@@ -59,10 +61,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
     /// </summary>
     protected virtual XElement InitializeNode(TObject item, string typeName, SyncSerializerOptions options)
     {
-        var node = new XElement(this.ItemType,
-            new XAttribute(uSyncConstants.Xml.Key, item.Key),
-            new XAttribute(uSyncConstants.Xml.Alias, item.Name ?? item.Id.ToString()),
-            new XAttribute(uSyncConstants.Xml.Level, GetLevel(item)));
+        var node = InitializeBaseNode(item, ItemAlias(item), GetLevel(item));
 
         // are we only serializing some cultures ? 
         var cultures = options.GetSetting(uSyncConstants.CultureKey, string.Empty);
@@ -154,7 +153,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
 
         var cultures = options.GetCultures();
 
-        var title = new XElement("NodeName", new XAttribute("Default", item.Name ?? item.Id.ToString()));
+        var title = new XElement(uSyncConstants.Xml.NodeName, new XAttribute("Default", item.Name ?? item.Id.ToString()));
         foreach (var culture in item.AvailableCultures.OrderBy(x => x))
         {
             if (cultures.IsValidOrBlank(culture))
@@ -178,7 +177,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
     /// </summary>
     private XElement GetTrashedInfo(TObject item)
     {
-        var trashed = new XElement("Trashed", item.Trashed);
+        var trashed = new XElement(uSyncConstants.Xml.Trashed, item.Trashed);
         if (item.Trashed)
         {
             var trashedParent = GetTrashedParent(item);
@@ -318,6 +317,41 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         return SyncAttempt<TObject>.Succeed("No check", ChangeType.NoChange);
     }
 
+    protected abstract int RecycleBinId { get; }
+
+    /// <summary>
+    ///  calculate what the parent, path and level should be for this item, based on the info in the file, and the current state of the system.
+    /// </summary>
+    protected async Task<(int parentId, string nodePath, int nodeLevel)> GetParentPathAndLevelAsync(TObject item, XElement node)
+    {
+        var isTrashed = node.IsTrashed();
+        if (isTrashed && item.ParentId == Constants.System.Root)
+            return (RecycleBinId, string.Empty, 1);
+
+        var parentId = -1;
+        var nodeLevel = item.CalculateNodeLevel(default);
+        var nodePath = item.CalculateNodePath(default);
+
+        var parentNode = node.GetParentNode();
+        if (parentNode is null)
+            return (parentId, nodePath, nodeLevel);
+
+        var parentItem = await FindParentAsync(parentNode, false);
+        if (parentItem is not null)
+            return (parentItem.Id, item.CalculateNodePath(parentItem), item.CalculateNodeLevel(parentItem));
+
+        // look for the parent by path. 
+        var friendlyPath = node.GetPath();
+        if (string.IsNullOrWhiteSpace(friendlyPath))
+            return (parentId, nodePath, nodeLevel);
+
+        if (logger.IsEnabled(LogLevel.Debug))
+            logger.LogDebug("Find Parent failed, will search by path {FriendlyPath}", friendlyPath);
+
+        parentItem = await FindParentByPathAsync(friendlyPath);
+        return (parentItem?.Id ?? parentId, nodePath, nodeLevel);
+    }
+
     protected virtual async Task<IEnumerable<uSyncChange>> DeserializeBaseAsync(TObject item, XElement node, SyncSerializerOptions options)
     {
         var info = node?.Element(uSyncConstants.Xml.Info);
@@ -325,78 +359,30 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
 
         var changes = new List<uSyncChange>();
 
-        var trashed = info.Element("Trashed").ValueOrDefault(false);
+        var (parentId, nodePath, nodeLevel) = await GetParentPathAndLevelAsync(item, info);
 
-        if (!trashed)
+        if (item.ParentId != parentId)
         {
-            // only try and set the path if the item isn't trashed. 
+            changes.AddUpdate(uSyncConstants.Xml.Parent, item.ParentId, parentId);
 
-            var parentId = -1;
-            var nodeLevel = CalculateNodeLevel(item, default);
-            var nodePath = CalculateNodePath(item, default);
+            if (logger.IsEnabled(LogLevel.Trace))
+                logger.LogTrace("{Id} Setting Parent {ParentId}", item.Id, parentId);
 
-            var parentNode = info.Element(uSyncConstants.Xml.Parent);
-            if (parentNode != null && parentNode.Attribute(uSyncConstants.Xml.Key).ValueOrDefault(Guid.Empty) != Guid.Empty)
+            item.ParentId = parentId;
+        }
+
+        if (item.Trashed is false)
+        {
+            // the following are calculated (not in the file
+            // because they might change without this node being saved).
+            if (item.Path != nodePath)
             {
-                if (parentNode.GetKey() == Guid.Empty)
-                {
-                    if (logger.IsEnabled(LogLevel.Debug))
-                        logger.LogDebug("Parent is root (-1)");
-                }
-                else
-                {
-                    var parent = await FindParentAsync(parentNode, false);
-                    if (parent == null)
-                    {
-                        var friendlyPath = info.Element(uSyncConstants.Xml.Path).ValueOrDefault(string.Empty);
-                        if (!string.IsNullOrWhiteSpace(friendlyPath))
-                        {
-                            if (logger.IsEnabled(LogLevel.Debug))
-                                logger.LogDebug("Find Parent failed, will search by path {FriendlyPath}", friendlyPath);
+                changes.AddUpdate(uSyncConstants.Xml.Path, item.Path, nodePath);
 
-                            parent = await FindParentByPathAsync(friendlyPath);
-                        }
-                    }
+                if (logger.IsEnabled(LogLevel.Debug))
+                    logger.LogDebug("{Id} Setting Path {idPath} was {oldPath}", item.Id, nodePath, item.Path);
 
-                    if (parent != null)
-                    {
-                        parentId = parent.Id;
-                        nodePath = CalculateNodePath(item, parent);
-                        nodeLevel = CalculateNodeLevel(item, parent);
-                    }
-                    else
-                    {
-                        if (logger.IsEnabled(LogLevel.Debug))
-                            logger.LogDebug("Unable to find parent but parent node is set in configuration");
-                    }
-                }
-            }
-
-            if (!item.Trashed)
-            {
-                // we change if its not in the bin,
-                // if its in the bin it will get fixed by handle trashed state.
-                if (item.ParentId != parentId)
-                {
-                    changes.AddUpdate(uSyncConstants.Xml.Parent, item.ParentId, parentId);
-
-                    if (logger.IsEnabled(LogLevel.Trace))
-                        logger.LogTrace("{Id} Setting Parent {ParentId}", item.Id, parentId);
-
-                    item.ParentId = parentId;
-                }
-
-                // the following are calculated (not in the file
-                // because they might change without this node being saved).
-                if (item.Path != nodePath)
-                {
-                    changes.AddUpdate(uSyncConstants.Xml.Path, item.Path, nodePath);
-
-                    if (logger.IsEnabled(LogLevel.Debug))
-                        logger.LogDebug("{Id} Setting Path {idPath} was {oldPath}", item.Id, nodePath, item.Path);
-
-                    item.Path = nodePath;
-                }
+                item.Path = nodePath;
             }
 
             if (item.Level != nodeLevel)
@@ -409,17 +395,6 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
                 item.Level = nodeLevel;
             }
         }
-        else // trashed. 
-        {
-            // we need to set the parent to something,
-            // or the move will fail.
-            if (item.ParentId == -1)
-            {
-                item.ParentId = item is IContent
-                    ? Constants.System.RecycleBinContent
-                    : Constants.System.RecycleBinMedia;
-            }
-        }
 
         var key = node.GetKey();
         if (key != Guid.Empty && item.Key != key)
@@ -429,7 +404,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
             if (logger.IsEnabled(LogLevel.Trace))
                 logger.LogTrace("{Id} Setting Key {Key}", item.Id, key);
 
-            if (item.Id > 0)
+            if (item.HasIdentity)
                 await OnKeyChange(item, item.Key, key);
 
             item.Key = key;
@@ -462,21 +437,17 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
 
     protected IEnumerable<uSyncChange> DeserializeName(TObject item, XElement node, SyncSerializerOptions options)
     {
-        var nameNode = node.Element(uSyncConstants.Xml.Info)?.Element("NodeName");
-        if (nameNode == null)
-            return [];
+        var nameNode = node.GetNodeNameNode();
+        if (nameNode == null) return [];
 
         var updated = false;
-
-
         var changes = new List<uSyncChange>();
 
-        var name = nameNode.Attribute("Default").ValueOrDefault(string.Empty);
-        if (name != string.Empty && item.Name != name)
+        var name = nameNode.GetDefaultName();
+        if (name is not null && item.Name != name)
         {
             changes.AddUpdate(uSyncConstants.Xml.Name, item.Name ?? item.Id.ToString(), name);
             updated = true;
-
             item.Name = name;
         }
 
@@ -486,28 +457,26 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
 
             foreach (var cultureNode in nameNode.Elements(uSyncConstants.Xml.Name))
             {
-                var culture = cultureNode.Attribute("Culture").ValueOrDefault(string.Empty);
-                if (culture == string.Empty) continue;
+                var culture = cultureNode.Attribute("Culture").ValueOrDefault<string?>(null);
+                if (string.IsNullOrEmpty(culture)) continue;
 
-                if (activeCultures.IsValid(culture))
+                if (activeCultures.IsValid(culture) is false) continue;
+
+                // v14: if the culture is missing we need to add it
+                if (item.CultureInfos?.TryGetValue(culture, out var cultureInfo) is false)
+                    item.CultureInfos.Add(new ContentCultureInfos(culture));
+
+                var cultureName = cultureNode.ValueOrDefault(string.Empty);
+                var currentCultureName = item.GetCultureName(culture) ?? "";
+                if (string.IsNullOrEmpty(cultureName) is false
+                    && cultureName != currentCultureName)
                 {
-                    // v14: if the culture is missing we need to add it
-                    if (item.CultureInfos?.TryGetValue(culture, out var cultureInfo) is false)
-                    {
-                        item.CultureInfos.Add(new ContentCultureInfos(culture));
-                    }
+                    changes.AddUpdate($"Name ({culture})", currentCultureName, cultureName);
+                    updated = true;
 
-                    var cultureName = cultureNode.ValueOrDefault(string.Empty);
-                    var currentCultureName = item.GetCultureName(culture) ?? "";
-                    if (string.IsNullOrEmpty(cultureName) is false
-                        && cultureName != currentCultureName)
-                    {
-                        changes.AddUpdate($"Name ({culture})", currentCultureName, cultureName);
-                        updated = true;
-
-                        item.SetCultureName(cultureName, culture);
-                    }
+                    item.SetCultureName(cultureName, culture);
                 }
+
             }
         }
 
@@ -523,7 +492,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
 
         var activeCultures = options.GetDeserializedCultures(node);
 
-        var properties = node.Element("Properties");
+        var properties = node.GetPropertiesNode();
         if (properties == null || !properties.HasElements)
             return Attempt.SucceedWithStatus(errors, changes); // new Exception("No Properties in the content node"));
 
@@ -544,8 +513,8 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
 
                 foreach (var value in values)
                 {
-                    var culture = value.Attribute("Culture").ValueOrDefault(string.Empty);
-                    var segment = value.Attribute("Segment").ValueOrDefault(string.Empty);
+                    var culture = value.GetCultures();
+                    var segment = value.GetSegments();
                     var propValue = value.ValueOrDefault(string.Empty);
 
                     if (logger.IsEnabled(LogLevel.Trace))
@@ -562,7 +531,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
                             {
                                 if (logger.IsEnabled(LogLevel.Trace))
                                     logger.LogTrace("Item does not vary by culture - but uSync item file contains culture");
-                                
+
                                 // if we get here, then things are wrong, so we will try to fix them.
                                 //
                                 // if the content config thinks it should vary by culture, but the document type doesn't
@@ -725,8 +694,11 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         var info = node.Element(uSyncConstants.Xml.Info);
         if (info is null) return null;
 
-        var trashed = info.Element("Trashed").ValueOrDefault(false);
-        var restoreParent = info.Element("Trashed")?.Attribute("Parent").ValueOrDefault(Guid.Empty) ?? Guid.Empty;
+        var trashed = info.Element(uSyncConstants.Xml.Trashed).ValueOrDefault(false);
+        var restoreParent = info.Element(uSyncConstants.Xml.Trashed)?
+            .Attribute(uSyncConstants.Xml.Parent)
+            .ValueOrDefault(Guid.Empty) ?? Guid.Empty;
+
         return await HandleTrashedState(item, trashed, restoreParent, relationAlias);
     }
 
@@ -844,10 +816,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
 
         var alias = node.GetAlias();
 
-        var parentKey = node.Element(uSyncConstants.Xml.Info)
-            ?.Element(uSyncConstants.Xml.Parent)
-            ?.Attribute(uSyncConstants.Xml.Key)
-            .ValueOrDefault(Guid.Empty) ?? Guid.Empty;
+        var parentKey = node.GetParentKey();
 
         if (parentKey != Guid.Empty)
         {
@@ -929,7 +898,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
             if (this.containerType != UmbracoObjectTypes.Unknown)
                 objectTypes.Add(this.containerType);
 
-            var items = syncMappers.EntityCache.GetAll([..objectTypes], [.. lookups]);
+            var items = syncMappers.EntityCache.GetAll([.. objectTypes], [.. lookups]);
             // var items = entityService.GetAll(this.umbracoObjectType, lookups.ToArray());
             foreach (var item in items)
             {
@@ -1152,16 +1121,14 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
     /// </remarks>
     protected override async Task<bool> HasParentItemAsync(XElement node)
     {
-        var info = node.Element(uSyncConstants.Xml.Info);
-        var parentNode = info?.Element(uSyncConstants.Xml.Parent);
+        var parentNode = node.GetParentNode();
         if (parentNode == null) return true;
-
-        if (parentNode.Attribute(uSyncConstants.Xml.Key).ValueOrDefault(Guid.Empty) == Guid.Empty) return true;
+        if (parentNode.GetKey() == Guid.Empty) return true;
 
         var parent = await FindParentAsync(parentNode, false);
         if (parent == null)
         {
-            var friendlyPath = info?.Element(uSyncConstants.Xml.Path).ValueOrDefault(string.Empty) ?? string.Empty;
+            var friendlyPath = node.GetPath();
             if (!string.IsNullOrWhiteSpace(friendlyPath))
             {
                 parent = await FindParentByPathAsync(friendlyPath, true);

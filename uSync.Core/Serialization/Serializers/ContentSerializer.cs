@@ -26,20 +26,6 @@ public class ContentSerializer : PublishableContentBaseSerializer<IContent>, ISy
     protected readonly ITemplateService _templateService;
     protected readonly ISyncDocumentUrlCleaner? _urlCleaner;
 
-    [Obsolete("Use the constructor with urlCleaner, will be removed in v19")]
-    public ContentSerializer(
-        IEntityService entityService,
-        ILanguageService languageService,
-        IRelationService relationService,
-        IShortStringHelper shortStringHelper,
-        ILogger<ContentSerializer> logger,
-        IContentService contentService,
-        SyncValueMapperCollection syncMappers,
-        IUserService userService,
-        ITemplateService templateService
-    ) : this(entityService, languageService, relationService, shortStringHelper, logger, contentService, syncMappers, userService, templateService, null)
-    { }
-
     public ContentSerializer(
         IEntityService entityService,
         ILanguageService languageService,
@@ -60,26 +46,27 @@ public class ContentSerializer : PublishableContentBaseSerializer<IContent>, ISy
         _urlCleaner = urlCleaner;
     }
 
+    protected override int RecycleBinId => Constants.System.RecycleBinContent;
+
     #region Serialization
 
     protected override async Task<XElement?> SerializeTemplateAsync(IContent item, SyncSerializerOptions options)
     {
-        if (item.TemplateId != null && item.TemplateId.HasValue)
-        {
-            var template = await _templateService.GetAsync(item.TemplateId.Value);
-            if (template != null)
-            {
-                return new XElement(uSyncConstants.Xml.Template,
-                    new XAttribute(uSyncConstants.Xml.Key, template.Key),
-                    template.Alias);
-            }
-        }
-        return new XElement(uSyncConstants.Xml.Template);
+        if (item.TemplateId is null || item.TemplateId.HasValue is false)
+            return new XElement(uSyncConstants.Xml.Template);
+
+        var template = await _templateService.GetAsync(item.TemplateId.Value);
+        if (template is null)
+            return new XElement(uSyncConstants.Xml.Template);
+
+        return new XElement(uSyncConstants.Xml.Template,
+            new XAttribute(uSyncConstants.Xml.Key, template.Key),
+            template.Alias);
+
     }
 
     protected override ContentScheduleCollection GetScheduleById(int id)
         => contentService.GetContentScheduleByContentId(id);
-
 
     #endregion
 
@@ -87,36 +74,22 @@ public class ContentSerializer : PublishableContentBaseSerializer<IContent>, ISy
 
     protected override async Task<uSyncChange?> DeserializeTemplate(IContent item, XElement node)
     {
-        var templateNode = node.Element(uSyncConstants.Xml.Info)?.Element("Template");
+        var templateNode = node.Element(uSyncConstants.Xml.Info)?
+            .Element(uSyncConstants.Xml.Template);
+        
+        if (templateNode is null) return null;
 
-        if (templateNode != null)
-        {
-            var alias = templateNode.ValueOrDefault(string.Empty);
-            if (!string.IsNullOrWhiteSpace(alias))
-            {
-                var template = await _templateService.GetAsync(alias);
-                if (template != null && template.Id != item.TemplateId)
-                {
-                    var oldValue = item.TemplateId;
-                    item.TemplateId = template.Id;
-                    return uSyncChange.Update("Template", "Template", oldValue, template.Id);
-                }
-            }
+        var alias = templateNode.ValueOrDefault(string.Empty);
+        var key = templateNode.GetKey();
 
-            var key = templateNode.ValueOrDefault(Guid.Empty);
-            if (key != Guid.Empty)
-            {
-                var template = await _templateService.GetAsync(key);
-                if (template != null && template.Id != item.TemplateId)
-                {
-                    var oldValue = item.TemplateId;
-                    item.TemplateId = template.Id;
-                    return uSyncChange.Update("Template", "Template", oldValue, template.Id);
-                }
-            }
-        }
+        var template = await _templateService.GetAsync(alias) 
+            ?? await _templateService.GetAsync(key); 
 
-        return null;
+        if (template is null || template.Id == item.TemplateId) return null;
+
+        var oldValue = item.TemplateId;
+        item.TemplateId = template.Id;
+        return uSyncChange.Update("Template", "Template", oldValue, template.Id);
     }
 
     // trashed helpers. 

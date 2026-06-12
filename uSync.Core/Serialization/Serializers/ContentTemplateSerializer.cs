@@ -48,7 +48,8 @@ public class ContentTemplateSerializer : ContentSerializer, ISyncSerializer<ICon
     protected override async Task<SyncAttempt<IContent>> DeserializeCoreAsync(XElement node, SyncSerializerOptions options)
     {
         var attempt = await FindOrCreateAsync(node);
-        if (!attempt.Success || attempt.Result is null) throw attempt.Exception ?? new Exception($"Unknown error {node.GetAlias()}");
+        if (!attempt.Success || attempt.Result is null) 
+            throw attempt.Exception ?? new Exception($"Unknown error {node.GetAlias()}");
 
         var item = attempt.Result;
 
@@ -88,23 +89,18 @@ public class ContentTemplateSerializer : ContentSerializer, ISyncSerializer<ICon
             if (item != null) return item;
         }
 
-        var contentTypeAlias = node.Name.LocalName;
-        if (node.IsEmptyItem())
-        {
-            contentTypeAlias = node.GetAlias();
-        }
+        var contentTypeAlias = node.IsEmptyItem()
+            ? node.GetAlias()
+            : node.Name.LocalName;
 
         var contentType = _contentTypeService.Get(contentTypeAlias);
-        if (contentType != null)
-        {
-            var blueprints = contentService.GetBlueprintsForContentTypes(contentType.Id);
-            if (blueprints != null && blueprints.Any())
-            {
-                return blueprints.FirstOrDefault(x => x.Name == node.GetAlias());
-            }
-        }
+        if (contentType is null) return null;
 
-        return null;
+        var blueprints = contentService.GetBlueprintsForContentTypes(contentType.Id);
+        if (blueprints is null || blueprints.Any() == false) return null;
+        
+        return blueprints
+            .FirstOrDefault(x => x.Name == node.GetAlias());
 
     }
 
@@ -156,14 +152,14 @@ public class ContentTemplateSerializer : ContentSerializer, ISyncSerializer<ICon
     }
 
     public override Task SaveItemAsync(IContent item)
-        => uSyncTaskHelper.FromResultOf(() =>
-        {
-            contentService.SaveBlueprint(item, null, Constants.Security.SuperUserId);
-        });
+    {
+        contentService.SaveBlueprint(item, null);
+        return Task.CompletedTask;
+    }
 
     public override Task DeleteItemAsync(IContent item)
-        => uSyncTaskHelper.FromResultOf(() =>
-        {
-            contentService.DeleteBlueprint(item);
-        });
+    {
+        contentService.DeleteBlueprint(item);
+        return Task.CompletedTask;
+    }
 }

@@ -1360,6 +1360,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         }
         catch (FormatException fex)
         {
+            logger.LogWarning(fex, "error reading file {file}", filename);
             return [uSyncActionHelper<TObject>
                 .ReportActionFail(Path.GetFileName(node.GetAlias()), $"format error {fex.Message}")];
 
@@ -1402,7 +1403,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     }
 
 
-    private async Task<IEnumerable<uSyncChange>> GetChangesAsync(XElement node, XElement currentNode, SyncSerializerOptions options)
+    protected virtual async Task<IEnumerable<uSyncChange>> GetChangesAsync(XElement node, XElement currentNode, SyncSerializerOptions options)
         => await itemFactory.GetChangesAsync<TObject>(node, currentNode, options);
 
     #endregion
@@ -1927,7 +1928,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     protected async Task<SyncAttempt<TObject>> DeserializeItemSecondPassAsync(TObject item, XElement node, SyncSerializerOptions options)
         => await serializer.DeserializeSecondPassAsync(item, node, options);
 
-    private async Task<SyncChangeInfo> IsItemCurrentAsync(XElement node, SyncSerializerOptions options)
+    protected virtual async Task<SyncChangeInfo> IsItemCurrentAsync(XElement node, SyncSerializerOptions options)
     {
         var change = new SyncChangeInfo
         {
@@ -1957,7 +1958,7 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         return null;
     }
 
-    private class SyncChangeInfo
+    protected class SyncChangeInfo
     {
         public ChangeType Change { get; set; }
         public XElement? CurrentNode { get; set; }

@@ -48,6 +48,8 @@ public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncSerializer<IM
         ];
     }
 
+    protected override int RecycleBinId => Constants.System.RecycleBinMedia;
+
     protected override async Task<SyncAttempt<IMedia>> DeserializeCoreAsync(XElement node, SyncSerializerOptions options)
     {
         var attempt = await FindOrCreateAsync(node);

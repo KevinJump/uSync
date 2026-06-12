@@ -101,6 +101,8 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
         info.Add(new XElement("DefaultTemplate", templateAlias));
         info.AddIfNotNull(SerializeTemplates(item));
 
+        info.Add(new XElement("AllowedInLibrary", item.AllowedInLibrary));
+
         return info;
     }
 
@@ -226,6 +228,15 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
             changes.AddUpdate("ListView", item.ListView, listView, "Info/ListView");
             item.ListView = listView;
         }
+
+
+        var allowedInLibrary = info.Element("AllowedInLibrary").ValueOrDefault(false);
+        if (item.AllowedInLibrary != allowedInLibrary)
+        {
+            changes.AddUpdate("AllowedInLibrary", item.AllowedInLibrary, allowedInLibrary, "Info/AllowedInLibrary");
+            item.AllowedInLibrary = allowedInLibrary;
+        }
+
 
 
         var masterTemplate = info?.Element("DefaultTemplate").ValueOrDefault(string.Empty) ?? string.Empty;
