@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
@@ -20,8 +21,10 @@ namespace uSync.BackOffice.HealthChecks;
     Group = "uSync")]
 public class SyncFolderIntegrityChecks : HealthCheck
 {
-    private readonly ISyncConfigService _configService;
-    private readonly ISyncFileService _fileService;
+    private readonly ISyncConfigService? _configService;
+    private readonly ISyncFileService? _fileService;
+
+    public SyncFolderIntegrityChecks() { }
 
     /// <summary>
     ///  Constructor 
@@ -41,6 +44,9 @@ public class SyncFolderIntegrityChecks : HealthCheck
     /// <inheritdoc/>
     public override Task<IEnumerable<HealthCheckStatus>> GetStatusAsync()
     {
+        if (_configService is null || _fileService is null) 
+            return Task.FromResult(Enumerable.Empty<HealthCheckStatus>());
+
         var items = new List<HealthCheckStatus>
         {
             CheckuSyncFolder(),
@@ -52,6 +58,9 @@ public class SyncFolderIntegrityChecks : HealthCheck
 
     private HealthCheckStatus CheckuSyncFolder()
     {
+        if (_configService is null || _fileService is null)
+            return new HealthCheckStatus("Unable to check uSync folder integrity");
+
         var root = _fileService.GetAbsPath(_configService.GetWorkingFolder());
 
         if (_fileService.DirectoryExists(root) is false)
@@ -85,6 +94,8 @@ public class SyncFolderIntegrityChecks : HealthCheck
 
     private List<string> CheckFolder(string folder)
     {
+        if (_fileService is null) return [];
+
         var _keys = new Dictionary<Guid, string>();
 
         var clashes = new List<string>();
@@ -128,6 +139,9 @@ public class SyncFolderIntegrityChecks : HealthCheck
 
     private HealthCheckStatus CheckConfigFolderValidity()
     {
+        if (_configService is null || _fileService is null)
+            return new HealthCheckStatus("Unable to check uSync folder integrity");
+
         var root = _fileService.GetAbsPath(_configService.GetWorkingFolder());
 
         if (_fileService.DirectoryExists(root) is false)

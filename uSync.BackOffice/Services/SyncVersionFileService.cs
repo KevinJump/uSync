@@ -119,9 +119,23 @@ internal class SyncVersionFileService : ISyncVersionFileService
     }
 }
 
+/// <summary>
+///  results of a check of the version file 
+/// </summary>
 public class SyncFileVersionCheckResult
 {
+    /// <summary>
+    ///  the sync on disk is current to the current format we are writing. 
+    /// </summary>
     public bool IsCurrent { get; set; }
+
+    /// <summary>
+    ///  the version we are writing to disk
+    /// </summary>
     public string? FormatVersion { get; set; }
+
+    /// <summary>
+    ///  the hmac value for the folders matches. (reserved)
+    /// </summary>
     public bool HmacMatch { get; set; }
 }
