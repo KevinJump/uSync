@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
 
 using uSync.BackOffice.SyncHandlers.Interfaces;
-using uSync.BackOffice.SyncHandlers.Models;
 
-namespace uSync.BackOffice.SyncHandlers;
+namespace uSync.BackOffice.SyncHandlers.Models;
 
 /// <summary>
 ///  Factory for accessing the handlers and their configuration

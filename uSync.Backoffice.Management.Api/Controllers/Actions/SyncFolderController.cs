@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 using uSync.BackOffice;
 using uSync.BackOffice.Configuration;
-using uSync.BackOffice.SyncHandlers;
+using uSync.BackOffice.SyncHandlers.Models;
 
 namespace uSync.Backoffice.Management.Api.Controllers.Actions;
 

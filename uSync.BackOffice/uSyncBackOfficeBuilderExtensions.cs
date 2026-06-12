@@ -25,6 +25,7 @@ using uSync.BackOffice.Services;
 using uSync.BackOffice.SyncHandlers;
 using uSync.BackOffice.SyncHandlers.Handlers;
 using uSync.BackOffice.SyncHandlers.Interfaces;
+using uSync.BackOffice.SyncHandlers.Models;
 using uSync.BackOffice.Tracker;
 using uSync.Core;
 
@@ -200,6 +201,10 @@ public static class uSyncBackOfficeBuilderExtensions
             .AddNotificationAsyncHandler<ContentDeletingNotification, ContentHandler>()
             .AddNotificationAsyncHandler<ContentMovingNotification, ContentHandler>()
 
+            .AddNotificationAsyncHandler<ElementSavingNotification, ElementHandler>()
+            .AddNotificationAsyncHandler<ElementDeletingNotification, ElementHandler>()
+            .AddNotificationAsyncHandler<ElementMovingNotification, ElementHandler>()
+
             .AddNotificationAsyncHandler<MediaSavingNotification, MediaHandler>()
             .AddNotificationAsyncHandler<MediaDeletingNotification, MediaHandler>()
             .AddNotificationAsyncHandler<MediaMovingNotification, MediaHandler>()
@@ -225,6 +230,13 @@ public static class uSyncBackOfficeBuilderExtensions
         builder.AddNotificationAsyncHandler<ContentMovedToRecycleBinNotification, ContentHandler>();
         builder.AddNotificationAsyncHandler<ContentPublishedNotification, ContentHandler>();
         builder.AddNotificationAsyncHandler<ContentUnpublishedNotification, ContentHandler>();
+
+        builder.AddNotificationAsyncHandler<ElementSavedNotification, ElementHandler>();
+        builder.AddNotificationAsyncHandler<ElementDeletedNotification, ElementHandler>();
+        builder.AddNotificationAsyncHandler<ElementMovedNotification, ElementHandler>();
+        builder.AddNotificationAsyncHandler<ElementMovedToRecycleBinNotification, ElementHandler>();
+        builder.AddNotificationAsyncHandler<ElementPublishedNotification, ElementHandler>();
+        builder.AddNotificationAsyncHandler<ElementUnpublishedNotification, ElementHandler>();
 
         builder.AddNotificationAsyncHandler<MediaSavedNotification, MediaHandler>();
         builder.AddNotificationAsyncHandler<MediaDeletedNotification, MediaHandler>();
@@ -254,6 +266,9 @@ public static class uSyncBackOfficeBuilderExtensions
             AddNotificationAsyncHandler<ContentSavingNotification, CacheLifecycleManager>().
             AddNotificationAsyncHandler<ContentDeletingNotification, CacheLifecycleManager>().
             AddNotificationAsyncHandler<ContentMovingNotification, CacheLifecycleManager>().
+            AddNotificationAsyncHandler<ElementSavingNotification, CacheLifecycleManager>().
+            AddNotificationAsyncHandler<ElementDeletingNotification, CacheLifecycleManager>().
+            AddNotificationAsyncHandler<ElementMovingNotification, CacheLifecycleManager>().
             AddNotificationAsyncHandler<MediaSavingNotification, CacheLifecycleManager>().
             AddNotificationAsyncHandler<MediaSavedNotification, CacheLifecycleManager>().
             AddNotificationAsyncHandler<MediaDeletedNotification, CacheLifecycleManager>();

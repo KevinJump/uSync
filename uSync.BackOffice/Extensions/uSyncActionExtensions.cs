@@ -137,7 +137,9 @@ public static class uSyncActionExtensions
     public static bool RequiresSave<TObject>(this SyncAttempt<TObject> attempt)
         => attempt.Success && attempt.Change > Core.ChangeType.NoChange && !attempt.Saved && attempt.Item != null;
 
-
+    /// <summary>
+    ///  return the uSyncAction as an ActionView (used in the controllers)
+    /// </summary>
     public static uSyncActionView AsActionView(this uSyncAction action)
     {
         var msg = string.IsNullOrWhiteSpace(action.Message) is false

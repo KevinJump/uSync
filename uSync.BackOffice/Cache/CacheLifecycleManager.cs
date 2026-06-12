@@ -26,6 +26,9 @@ public class CacheLifecycleManager :
     INotificationAsyncHandler<ContentSavingNotification>,
     INotificationAsyncHandler<ContentDeletingNotification>,
     INotificationAsyncHandler<ContentMovingNotification>,
+    INotificationAsyncHandler<ElementSavingNotification>,
+    INotificationAsyncHandler<ElementDeletingNotification>,
+    INotificationAsyncHandler<ElementMovingNotification>,
     INotificationAsyncHandler<MediaSavingNotification>,
     INotificationAsyncHandler<MediaSavedNotification>,
     INotificationAsyncHandler<MediaDeletedNotification>
@@ -94,6 +97,22 @@ public class CacheLifecycleManager :
     ///  Clear the cache on the Umbraco Content Moving notification 
     /// </summary>
     public Task HandleAsync(ContentMovingNotification notification, CancellationToken c) => ClearOnEvents();
+
+    /// <summary>
+    ///  clear the cache on the Umbraco Element Saving notification
+    /// </summary>
+    public Task HandleAsync(ElementSavingNotification notification, CancellationToken c) => ClearOnEvents();
+
+    /// <summary>
+    ///  clear the cache on the Umbraco Element Deleting notification
+    /// </summary> 
+    public Task HandleAsync(ElementDeletingNotification notification, CancellationToken c) => ClearOnEvents();
+
+    /// <summary>
+    ///  clear the cache on the Element Moving notification 
+    /// </summary>
+    public Task HandleAsync(ElementMovingNotification notification, CancellationToken c) => ClearOnEvents();
+
 
     /// <summary>
     ///  Clear the cache on the Umbraco Media Saving notification 

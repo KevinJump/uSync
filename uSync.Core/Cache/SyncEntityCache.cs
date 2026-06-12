@@ -124,9 +124,9 @@ public class SyncEntityCache
             return null;
         }
     }
-    public IEnumerable<IEntitySlim> GetAll(UmbracoObjectTypes objectType, int[] ids)
+    public IEnumerable<IEntitySlim> GetAll(UmbracoObjectTypes[] objectTypes, int[] ids)
     {
-        if (!_cacheEnabled) return entityService.GetAll(objectType, ids);
+        if (!_cacheEnabled) return entityService.GetAll(objectTypes, ids);
 
         var items = new List<IEntitySlim>();
         var unCachedIds = new List<int>();
@@ -146,7 +146,7 @@ public class SyncEntityCache
         // if you call this with blank you get everything! 
         if (unCachedIds.Count > 0)
         {
-            var remaining = entityService.GetAll(objectType, unCachedIds.ToArray()).ToList();
+            var remaining = entityService.GetAll(objectTypes, unCachedIds.ToArray()).ToList();
             foreach (var item in remaining)
             {
                 items.AddNotNull(cache.GetCacheItem(item.Id.ToString(), () => { return item; }));
