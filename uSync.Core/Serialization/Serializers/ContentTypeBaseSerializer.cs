@@ -56,7 +56,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
     protected XElement SerializeInfo(TObject item)
     {
         return new XElement(uSyncConstants.Xml.Info,
-                        new XElement("Name", item.Name),
+                        new XElement(uSyncConstants.Xml.Name, item.Name),
                         new XElement("Icon", item.Icon),
                         new XElement("Thumbnail", item.Thumbnail),
                         new XElement("Description", string.IsNullOrWhiteSpace(item.Description) ? "" : item.Description),

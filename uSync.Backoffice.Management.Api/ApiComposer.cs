@@ -19,9 +19,7 @@ public class ApiComposer : IComposer
         if (builder.IsUmbracoBackOfficeEnabled() is false)
             return;
 
-        builder.Services.AddSingleton<IOperationIdHandler, uSyncCustomOperationHandler>();
-
-        builder.Services.ConfigureOptions<ConfigSyncApiSwaggerGenOptions>();
+        builder.AddSyncOpenApi();
         builder.Services.AddSingleton<ISyncManagementCache, uSyncManagementCache>();
         builder.Services.AddSingleton<ISyncManagementService, uSyncManagementService>();
     }

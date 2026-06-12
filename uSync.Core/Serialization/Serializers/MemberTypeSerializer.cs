@@ -99,22 +99,22 @@ public class MemberTypeSerializer : ContentTypeBaseSerializer<IMemberType>, ISyn
     protected override async Task<XElement> SerializePropertiesAsync(IMemberType item)
     {
         var node = await base.SerializePropertiesAsync(item);
-        foreach (var property in node.Elements("GenericProperty") ?? [])
-        {
-            var alias = property.Element(uSyncConstants.Xml.Alias).ValueOrDefault(string.Empty);
-            if (!string.IsNullOrWhiteSpace(alias) && _builtInProperties.TryGetValue(alias, out string? value))
-            {
-                var key = value;
-                if (!item.Alias.InvariantEquals("Member"))
-                {
-                    key = $"{item.Alias}{alias}".GetDeterministicHashCode().ToGuid().ToString();
-                }
+        //foreach (var property in node.Elements("GenericProperty") ?? [])
+        //{
+        //    var alias = property.Element(uSyncConstants.Xml.Alias).ValueOrDefault(string.Empty);
+        //    if (!string.IsNullOrWhiteSpace(alias) && _builtInProperties.TryGetValue(alias, out string? value))
+        //    {
+        //        var key = value;
+        //        if (!item.Alias.InvariantEquals("Member"))
+        //        {
+        //            key = $"{item.Alias}{alias}".GetDeterministicHashCode().ToGuid().ToString();
+        //        }
 
-                var keyElement = property.Element(uSyncConstants.Xml.Key);
-                if (keyElement is not null)
-                    keyElement.Value = key;
-            }
-        }
+        //        var keyElement = property.Element(uSyncConstants.Xml.Key);
+        //        if (keyElement is not null)
+        //            keyElement.Value = key;
+        //    }
+        //}
         return node;
     }
 

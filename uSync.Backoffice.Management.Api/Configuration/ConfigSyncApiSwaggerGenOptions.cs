@@ -1,31 +1,24 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using Microsoft.OpenApi;
-
-using Swashbuckle.AspNetCore.SwaggerGen;
-
+﻿using Umbraco.Cms.Api.Common.OpenApi;
 using Umbraco.Cms.Api.Management.OpenApi;
+using Umbraco.Cms.Core.DependencyInjection;
 
 namespace uSync.Backoffice.Management.Api.Configuration;
-public class ConfigSyncApiSwaggerGenOptions : IConfigureOptions<SwaggerGenOptions>
+
+public static class SyncOpenApiExtensions
 {
-    public void Configure(SwaggerGenOptions options)
-    {
-        options.SwaggerDoc(
-          uSyncClient.Api.ApiName,
-          new OpenApiInfo
-          {
-              Title = "uSync Management Api",
-              Version = "Latest",
-              Description = "Api access uSync operations"
-          });
-
-        options.OperationFilter<uSyncClientOperationSecurityFilter>();
-
-    }
-}
-
-public class uSyncClientOperationSecurityFilter : BackOfficeSecurityRequirementsOperationFilterBase
-{
-    protected override string ApiName => uSyncClient.Api.ApiName;
+    public static IUmbracoBuilder AddSyncOpenApi(this IUmbracoBuilder builder)
+        => builder.AddBackOfficeOpenApiDocument(
+            uSyncClient.Api.ApiName,
+            document => document
+                .WithTitle("uSync Management Api")
+                .WithBackOfficeAuthentication()
+                .ConfigureOpenApiOptions(options =>
+                {
+                    options.AddDocumentTransformer((doc, _, _) =>
+                    {
+                        doc.Info.Version = "1.0";
+                        return Task.CompletedTask;
+                    });
+                })
+            );
 }

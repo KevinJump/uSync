@@ -1,5 +1,8 @@
 ﻿using System.Xml.Linq;
 
+using Umbraco.Cms.Core.Models;
+using Umbraco.Cms.Core.Models.Entities;
+
 using uSync.Core.Cache;
 using uSync.Core.Dependency;
 using uSync.Core.Models;
@@ -50,6 +53,7 @@ public interface ISyncItemFactory
     ///  get all the possible dependencies for an object (based on the passed flags)
     /// </summary>
     Task<IEnumerable<uSyncDependency>> GetDependenciesAsync<TObject>(TObject item, DependencyFlags flags);
+    IEnumerable<ISyncEntityContainerSerializer<TObject>> GetContainerSerializers<TObject>(UmbracoObjectTypes containedType) where TObject : ITreeEntity;
 
     /// <summary>
     ///  an entity cache - can be used to improve lookup times on large syncs. 

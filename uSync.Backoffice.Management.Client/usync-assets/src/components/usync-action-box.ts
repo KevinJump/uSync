@@ -62,10 +62,12 @@ export class uSyncActionBox extends UmbLitElement {
 		return html`
 			<uui-box class="action-box ${this.disabled ? 'disabled' : ''}">
 				<div class="box-content">
-					<h2 class="box-heading" title=${this.getLastSyncDate()}>
-						${this.group?.groupName}
-					</h2>
-					<umb-icon name=${this.group?.icon}></umb-icon>
+					<div class="box-heading">
+						<h2 class="box-heading" title=${this.getLastSyncDate()}>
+							${this.group?.groupName}
+						</h2>
+						<umb-icon name=${this.group?.icon}></umb-icon>
+					</div>
 					<div class="box-buttons">${dropdownButtons}</div>
 				</div>
 			</uui-box>
@@ -84,6 +86,7 @@ export class uSyncActionBox extends UmbLitElement {
 
 		.action-box {
 			transition: opacity 0.2s ease-in-out;
+			--uui-box-default-padding: var(--uui-size-space-4) 0;
 		}
 
 		.box-content {
@@ -99,7 +102,7 @@ export class uSyncActionBox extends UmbLitElement {
 		}
 
 		umb-icon {
-			margin: var(--uui-size-8) 0 var(--uui-size-10);
+			margin: var(--uui-size-4) 0 var(--uui-size-4);
 			font-size: var(--uui-type-h2-size);
 			color: var(--uui-color-text-alt);
 		}
@@ -121,6 +124,13 @@ export class uSyncActionBox extends UmbLitElement {
 			color: var(--uui-color-text-alt);
 			font-style: italic;
 			font-size: var(--uui-size-5);
+		}
+
+		.box-heading {
+			display: flex;
+			flex-direction: row-reverse;
+			gap: var(--uui-size-2);
+			align-items: center;
 		}
 	`;
 }

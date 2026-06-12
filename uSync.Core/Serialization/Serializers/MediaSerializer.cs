@@ -14,6 +14,7 @@ using Umbraco.Extensions;
 using uSync.Core.Extensions;
 using uSync.Core.Mapping;
 using uSync.Core.Models;
+using uSync.Core.Serialization.Models;
 
 namespace uSync.Core.Serialization.Serializers;
 
@@ -46,6 +47,8 @@ public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncSerializer<IM
             "umbracoExtension"
         ];
     }
+
+    protected override int RecycleBinId => Constants.System.RecycleBinMedia;
 
     protected override async Task<SyncAttempt<IMedia>> DeserializeCoreAsync(XElement node, SyncSerializerOptions options)
     {
@@ -235,7 +238,21 @@ public class MediaSerializer : ContentSerializerBase<IMedia>, ISyncSerializer<IM
     public override Task DeleteItemAsync(IMedia item)
         => uSyncTaskHelper.FromResultOf(() => { return _mediaService.Delete(item); });
 
-    protected override Task<IMedia?> FindParentByIdAsync(int id)
-        => Task.FromResult(_mediaService.GetById(id));
-
+    protected override Task<SyncParentItem?> FindParentByIdAsync(int id)
+    {
+        return uSyncTaskHelper.FromResultOf(() =>
+         {
+             var parent = _mediaService.GetById(id);
+             if (parent != null)
+             {
+                 return new SyncParentItem
+                 {
+                     Id = parent.Id,
+                     Key = parent.Key,
+                     Name = parent.Name ?? string.Empty
+                 };
+             }
+             return null;
+         });
+    }
 }
