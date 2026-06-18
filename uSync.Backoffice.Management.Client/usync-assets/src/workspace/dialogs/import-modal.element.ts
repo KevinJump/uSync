@@ -29,7 +29,7 @@ export class uSyncImportModalDialog extends UmbModalBaseElement<any, any> {
 
 	render() {
 		return html`
-			<umb-body-layout .headline=${this.localize.term('uSync_importHeader')}>
+			<umb-body-layout .headline=${this.localize.termOrDefault('uSync_importHeader', 'Import from file')}>
 				${this.renderForm()} ${this.renderResult()}
 			</umb-body-layout>
 		`;
@@ -38,7 +38,7 @@ export class uSyncImportModalDialog extends UmbModalBaseElement<any, any> {
 	renderForm() {
 		if (this.result !== undefined) return;
 
-		return html` ${this.localize.term('uSync_uploadIntro')}
+		return html` ${this.localize.termOrDefault('uSync_uploadIntro', 'Select a zip file containing uSync files that you want to upload')}
 			<usync-file-upload @uploaded=${this.#onUploaded}></usync-file-upload>
 			<div slot="actions">
 				<uui-button
@@ -53,8 +53,8 @@ export class uSyncImportModalDialog extends UmbModalBaseElement<any, any> {
 
 		return html`${when(
 				this.result.success,
-				() => html`${this.localize.term('uSync_uploadSuccess')}`,
-				() => html`${this.localize.term('uSync_uploadError')} ${this.result?.errors}`,
+				() => html`${this.localize.termOrDefault('uSync_uploadSuccess', 'The files have been uploaded and extracted to the uSync folder')}`,
+				() => html`${this.localize.termOrDefault('uSync_uploadError', 'There was an error uploading the files')} ${this.result?.errors}`,
 			)}
 			<div slot="actions">
 				<uui-button id="continue" label="Import" @click="${this.#onImport}"></uui-button>
