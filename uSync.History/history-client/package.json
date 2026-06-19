@@ -17,7 +17,7 @@
     "generate-client": "node scripts/generate-openapi.js https://localhost:44398/umbraco/swagger/uSync.History/swagger.json?urls.primaryName=uSync+Management+Api"
   },
   "devDependencies": {
-    "@hey-api/openapi-ts": "^0.95.0",
+    "@hey-api/openapi-ts": "^0.97.0",
     "@jumoo/translate": "^17.2.3",
     "@jumoo/usync": "^17.0.4",
     "@rollup/plugin-node-resolve": "^15.3.1",
