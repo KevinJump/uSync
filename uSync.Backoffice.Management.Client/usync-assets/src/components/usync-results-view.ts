@@ -151,6 +151,7 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
 			justify-content: space-between;
 			padding: var(--uui-size-space-4);
 			border: 1px solid var(--uui-color-border);
+			border-radius: var(--uui-border-radius);
 			padding: var(--uui-size-space-4);
 		}
 

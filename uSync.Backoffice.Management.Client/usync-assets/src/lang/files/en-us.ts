@@ -96,6 +96,7 @@ export default {
 		IContentType: 'Content Types',
 		IMediaType: 'Media Types',
 		IMemberType: 'Member Types',
+		IElement: 'Library',
 		IContent: 'Content',
 		IMedia: 'Media',
 		IDomain: 'Domains',

@@ -13,6 +13,7 @@ using uSync.Core.Roots.Configs;
 using uSync.Core.Serialization;
 using uSync.Core.Tracking;
 using uSync.Core.Versions;
+using uSync.Core.Versions._18._0;
 
 namespace uSync.Core;
 
@@ -33,6 +34,8 @@ public static class uSyncCoreBuilderExtensions
         // TODO: Check this - in theory, if SyncEntityCache is already registered we don't run again.
         if (builder.Services.FirstOrDefault(x => x.ServiceType == typeof(SyncEntityCache)) != null)
             return builder;
+
+        builder.Services.AddSingleton<SyncLocalLinkProcessor>();
 
         builder.Services.AddSingleton<uSyncCapabilityChecker>();
         builder.Services.AddSingleton<ISyncImageUpdateHelper, SyncImageUpdateHelper>();

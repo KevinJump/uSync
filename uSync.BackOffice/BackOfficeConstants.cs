@@ -94,6 +94,11 @@ public static partial class uSyncConstants
         public const int Macros = USYNC_RESERVED_LOWER + 70;
 
         /// <summary>
+        ///  Elements Priority.
+        /// </summary>
+        public const int Elements = USYNC_RESERVED_LOWER + 190;
+
+        /// <summary>
         /// Media priority
         /// </summary>
         public const int Media = USYNC_RESERVED_LOWER + 200;
@@ -257,6 +262,12 @@ public static partial class uSyncConstants
         ///  WebhooksHandler name
         /// </summary>
         public const string WebhookHandler = "WebhookHandler";
+
+
+        /// <summary>
+        ///  Handler for Element (Library) items 
+        /// </summary>
+        public const string ElementHandler = "ElementHandler";
 
 
     }

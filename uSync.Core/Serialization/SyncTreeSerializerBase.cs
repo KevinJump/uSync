@@ -6,6 +6,8 @@ using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Models.Entities;
 using Umbraco.Cms.Core.Services;
 
+using uSync.Core.Serialization.Models;
+
 namespace uSync.Core.Serialization;
 
 public abstract class SyncTreeSerializerBase<TObject> : SyncSerializerBase<TObject>
@@ -83,35 +85,5 @@ public abstract class SyncTreeSerializerBase<TObject> : SyncSerializerBase<TObje
     ///  does the parent item (as defined in the xml) exist in umbraco for this item?
     /// </summary>
     protected virtual Task<bool> HasParentItemAsync(XElement node)
-        => Task.FromResult(true);
-
-    /// <summary>
-    ///  calculates the Umbraco Path value for an item, based on the parent
-    /// </summary>
-    protected string CalculateNodePath(TObject item, TObject? parent)
-    {
-        if (parent == null)
-        {
-            return string.Join(",", -1, item.Id);
-        }
-        else
-        {
-            return string.Join(",", parent.Path, item.Id);
-        }
-    }
-
-    /// <summary>
-    ///  calculates the Level based on the parent.
-    /// </summary>
-    protected int CalculateNodeLevel(TObject item, TObject? parent)
-    {
-        if (parent == null)
-        {
-            return 1;
-        }
-        else
-        {
-            return parent.Level + 1;
-        }
-    }
+        => Task.FromResult(true);   
 }

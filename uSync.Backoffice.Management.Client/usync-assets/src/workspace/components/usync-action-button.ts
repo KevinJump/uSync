@@ -37,27 +37,27 @@ export class SyncActionButtonElement extends UmbLitElement {
 	}
 
 	render() {
-		return html`
-			<uui-button-group>
-				<uui-button
-					class="action-button"
-					.disabled=${this.disabled}
-					label=${this.localize.term(`uSync_${this.button?.label}`)}
-					color=${<UUIInterfaceColor>this.button?.color}
-					look=${<UUIInterfaceLook>this.button?.look}
-					state=${ifDefined(this.state)}
-					@click=${() => this.#onClick(this.button)}></uui-button>
+		return (this.button?.children?.length ?? 0) > 0
+			? this.renderMultipleActions(this.button)
+			: this.renderSingleAction();
+	}
 
-				${this.renderDropdown(this.button)}
-			</uui-button-group>
-		`;
+	renderSingleAction() {
+		return html` <uui-button
+			class="action-button"
+			.disabled=${this.disabled}
+			label=${this.localize.term(`uSync_${this.button?.label}`)}
+			color=${<UUIInterfaceColor>this.button?.color}
+			look=${<UUIInterfaceLook>this.button?.look}
+			state=${ifDefined(this.state)}
+			@click=${() => this.#onClick(this.button)}></uui-button>`;
 	}
 
 	#onPopoverToggle(e: ToggleEvent) {
 		this._popoverOpen = e.newState === 'open';
 	}
 
-	renderDropdown(parent?: SyncActionButton) {
+	renderMultipleActions(parent?: SyncActionButton) {
 		if (!this.button?.children) return nothing;
 
 		const buttons = this.button?.children.map((item: SyncActionButton) => {
@@ -72,21 +72,30 @@ export class SyncActionButtonElement extends UmbLitElement {
 		const popoverId = `popover_${parent?.key}`;
 
 		return html`
-			<uui-button
-				.disabled=${this.disabled}
-				popovertarget=${popoverId}
-				.label=${this.button.label}
-				color=${<UUIInterfaceColor>parent?.color}
-				look=${<UUIInterfaceLook>parent?.look}
-				compact>
-				<uui-symbol-expand
-					class="expand-symbol"
-					.open=${this._popoverOpen}></uui-symbol-expand>
-			</uui-button>
+			<uui-button-group class="action-button">
+				<uui-button
+					.disabled=${this.disabled}
+					.label=${this.button.label}
+					color=${<UUIInterfaceColor>parent?.color}
+					look=${<UUIInterfaceLook>parent?.look}
+					@click=${() => this.#onClick(this.button)}>
+					${this.localize.term(`uSync_${this.button?.label}`)}
+				</uui-button>
+				<uui-button
+					.disabled=${this.disabled}
+					popovertarget=${popoverId}
+					.label=${this.button.label}
+					color=${<UUIInterfaceColor>parent?.color}
+					look=${<UUIInterfaceLook>parent?.look}
+					compact>
+					<uui-symbol-expand
+						class="expand-symbol"
+						.open=${this._popoverOpen}></uui-symbol-expand>
+				</uui-button>
+			</uui-button-group>
 
 			<uui-popover-container
 				id=${popoverId}
-				margin="6"
 				placement="bottom-end"
 				@toggle=${this.#onPopoverToggle}>
 				<umb-popover-layout>

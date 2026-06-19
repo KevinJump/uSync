@@ -1,10 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc.ApiExplorer;
-using Microsoft.AspNetCore.Mvc.Controllers;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using Microsoft.OpenApi;
-
-using Swashbuckle.AspNetCore.SwaggerGen;
+﻿using Microsoft.Extensions.DependencyInjection;
 
 using System.Text.Json.Nodes;
 
@@ -35,53 +29,47 @@ namespace uSync.History
 
             builder.AddNotificationAsyncHandler<uSyncImportCompletedNotification, uSyncHistoryNotificationHandler>();
             builder.AddNotificationAsyncHandler<uSyncExportCompletedNotification, uSyncHistoryNotificationHandler>();
-            builder.Services.AddSingleton<IOperationIdHandler, MaintenanceModeCustomOperationHandler>();
-            builder.Services.ConfigureOptions<ConfigureSwaggerGenOptions>();
+
             builder.Services.AddSingleton<IPackageManifestReader, uSyncHistoryManifestReader>();
         }
     }
 
-    internal class ConfigureSwaggerGenOptions : IConfigureOptions<SwaggerGenOptions>
+    internal static class SyncHistoryOpenApiExtensions
     {
-        public void Configure(SwaggerGenOptions options)
-        {
-            options.SwaggerDoc(
+        public static IUmbracoBuilder AddSyncHistoryOpenApi(this IUmbracoBuilder builder)
+            => builder.AddBackOfficeOpenApiDocument(
                 SyncHistoryConstants.ApiName,
-                new OpenApiInfo
-                {
-                    Title = $"{SyncHistoryConstants.DisplayName} API",
-                    Version = "Latest",
-                    Description = $"{SyncHistoryConstants.DisplayName} API methods"
-                });
-
-            options.OperationFilter<uSyncHistoryClientOperationSecurityFilter>();
-
-        }
+                document => document
+                    .WithTitle($"{SyncHistoryConstants.DisplayName} API")
+                    .WithBackOfficeAuthentication()
+                    .ConfigureOpenApiOptions(options =>
+                    {
+                        options.AddDocumentTransformer((doc, _, _) =>
+                        {
+                            doc.Info.Version = "Latest";
+                            return Task.CompletedTask;
+                        });
+                    })
+                );
     }
 
-    public class uSyncHistoryClientOperationSecurityFilter : BackOfficeSecurityRequirementsOperationFilterBase
-    {
-        protected override string ApiName => SyncHistoryConstants.ApiName;
-    }
+    //public class MaintenanceModeCustomOperationHandler : IOperationIdHandler
+    //{
+    //    public bool CanHandle(ApiDescription apiDescription)
+    //    {
+    //        if (apiDescription.ActionDescriptor is not
+    //            ControllerActionDescriptor controllerActionDescriptor)
+    //            return false;
 
+    //        return CanHandle(apiDescription, controllerActionDescriptor);
+    //    }
 
-    public class MaintenanceModeCustomOperationHandler : IOperationIdHandler
-    {
-        public bool CanHandle(ApiDescription apiDescription)
-        {
-            if (apiDescription.ActionDescriptor is not
-                ControllerActionDescriptor controllerActionDescriptor)
-                return false;
+    //    public bool CanHandle(ApiDescription apiDescription, ControllerActionDescriptor controllerActionDescriptor)
+    //        => controllerActionDescriptor.ControllerTypeInfo.Namespace?.StartsWith(SyncHistoryConstants.ApiName) is true;
 
-            return CanHandle(apiDescription, controllerActionDescriptor);
-        }
-
-        public bool CanHandle(ApiDescription apiDescription, ControllerActionDescriptor controllerActionDescriptor)
-            => controllerActionDescriptor.ControllerTypeInfo.Namespace?.StartsWith(SyncHistoryConstants.ApiName) is true;
-
-        public string Handle(ApiDescription apiDescription)
-            => $"{apiDescription.ActionDescriptor.RouteValues["action"]}";
-    }
+    //    public string Handle(ApiDescription apiDescription)
+    //        => $"{apiDescription.ActionDescriptor.RouteValues["action"]}";
+    //}
 
     internal class uSyncHistoryManifestReader : IPackageManifestReader
     {

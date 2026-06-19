@@ -11,7 +11,6 @@ using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Hubs;
 using uSync.BackOffice.Models;
 using uSync.BackOffice.Services;
-using uSync.BackOffice.SyncHandlers;
 using uSync.BackOffice.SyncHandlers.Models;
 using uSync.BackOffice.Tracker;
 

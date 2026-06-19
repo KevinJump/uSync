@@ -139,13 +139,15 @@ public abstract class SyncBlockMapperBase<TBlockValue> : SyncValueMapperBase
             converted = true;
         }
 
-        if (block.Key == Guid.Empty && block.Udi is GuidUdi guidUdi)
-        {
-            block.Key = guidUdi.Guid;
-            converted = true;
-        }
+        // can no longer does this migration like this as Udi isn't set anymore. 
 
-        block.Udi = null;
+        //if (block.Key == Guid.Empty && block.Udi is GuidUdi guidUdi)
+        //{
+        //    block.Key = guidUdi.Guid;
+        //    converted = true;
+        //}
+
+        //block.Udi = null;
 
         return converted;
     }

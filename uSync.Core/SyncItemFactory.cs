@@ -1,5 +1,8 @@
 ﻿using System.Xml.Linq;
 
+using Umbraco.Cms.Core.Models;
+using Umbraco.Cms.Core.Models.Entities;
+
 using uSync.Core.Cache;
 using uSync.Core.Dependency;
 using uSync.Core.Models;
@@ -35,9 +38,15 @@ public class SyncItemFactory : ISyncItemFactory
     public IEnumerable<ISyncSerializer<TObject>> GetSerializers<TObject>()
         => _syncSerializers.GetSerializers<TObject>();
 
+    public IEnumerable<ISyncEntityContainerSerializer<TObject>> GetContainerSerializers<TObject>(UmbracoObjectTypes containedType)
+        where TObject : ITreeEntity
+        => _syncSerializers.GetSerializers<TObject>()
+            .OfType<ISyncEntityContainerSerializer<TObject>>()
+            .Where(x => x.ContainedType == containedType);
+
+
     public ISyncSerializer<TObject>? GetSerializer<TObject>(string name)
         => _syncSerializers.GetSerializer<TObject>(name);
-
 
     public IEnumerable<ISyncTracker<TObject>> GetTrackers<TObject>()
         => _syncTrackers.GetTrackers<TObject>();

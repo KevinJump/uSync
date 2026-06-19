@@ -50,12 +50,11 @@ export class uSyncResultGroupView extends UmbLitElement {
 							class=${classMap({ expanded: this.expanded })}></uui-icon>
 					</div>
 				</div>
-				<uui-table>
-					${when(
-						this.expanded == true,
-						() => html`${this.renderGroupedRows(this.results)}`,
-					)}
-				</uui-table>
+
+				${when(
+					this.expanded == true,
+					() => html`<uui-table>${this.renderGroupedRows(this.results)}</uui-table>`,
+				)}
 			</uui-box>
 		`;
 	}
@@ -73,6 +72,15 @@ export class uSyncResultGroupView extends UmbLitElement {
 		uui-box {
 			cursor: pointer;
 			--uui-box-default-padding: 0;
+		}
+
+		uui-table {
+			border-top-left-radius: 0;
+			border-top-right-radius: 0;
+		}
+
+		usync-result-row:last-child row {
+			border-bottom: none;
 		}
 
 		.expanded {
