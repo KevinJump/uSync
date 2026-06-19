@@ -119,7 +119,7 @@ public class DataTypeSerializer : SyncContainerSerializerBase<IDataType>, ISyncS
             // use the configuration serializers to track the rename.
             // uSync.migrations can use this to hook into the rename here, so we don't 
             // have to track it in the core. 
-            await _configurationSerializers.TrackRenamedEditorAsync(item.EditorAlias, editorAlias);
+            await _configurationSerializers.TrackRenamedEditorAsync(editorAlias, item.EditorAlias);
 
             if (editor is not null)
             {
