@@ -2669,7 +2669,7 @@
       },
       "Umbraco.Cms": {
         "type": "CentralTransitive",
-        "requested": "[18.0.0-beta1, )",
+        "requested": "[18.0.0-rc2, )",
         "resolved": "18.0.0-rc2",
         "contentHash": "tz3hzoSwT2ER6sqJOgs2zKsFOHfwW8KKa8sXmYD1RkKyb+zmnN+EGznWV3TcW12GSJAgyC6hTWKMUYUAWz/b2g==",
         "dependencies": {
@@ -2821,7 +2821,7 @@
       },
       "Umbraco.Cms.DevelopmentMode.Backoffice": {
         "type": "CentralTransitive",
-        "requested": "[18.0.0-beta1, )",
+        "requested": "[18.0.0-rc2, )",
         "resolved": "18.0.0-rc2",
         "contentHash": "4qf7uJXoTxGBRqjhfqu/vJZlOXBR46sxXCAs4o9vp56p2OpOUoF6kGmGXi3DQ/m1qjqp2sMmeCCqhDK8fq3jZg==",
         "dependencies": {
