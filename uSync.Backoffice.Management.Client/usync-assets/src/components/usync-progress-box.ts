@@ -107,7 +107,9 @@ export class uSyncProcessBox extends UmbElementMixin(LitElement) {
 
 		return html`
 			<uui-box>
-				<h2>${this.title}</h2>
+				<div class="header">
+					<h2>${this.title}</h2>
+				</div>
 				<div class="action-list">${actionHtml}</div>
 				<div class="update-box">${this.updateMsg?.message}</div>
 				<uui-progress-bar
@@ -142,8 +144,13 @@ export class uSyncProcessBox extends UmbElementMixin(LitElement) {
 			display: block;
 		}
 
+		.header {
+			display: flex;
+			justify-content: center;
+			padding: var(uui-size-space-3);
+		}
+
 		h2 {
-			text-align: center;
 			margin: 0;
 		}
 
@@ -162,11 +169,11 @@ export class uSyncProcessBox extends UmbElementMixin(LitElement) {
 			min-width: var(--uui-size-layout-5);
 			color: var(--uui-color-text-alt);
 			opacity: 0.67;
-			margin: var(--uui-size-space-4) 0 var(--uui-size-space-6);
+			margin: var(--uui-size-space-2) 0;
 		}
 
 		.action h4 {
-			margin: var(--uui-size-space-4) 0;
+			margin: var(--uui-size-space-2) 0;
 		}
 
 		.icon-holder {

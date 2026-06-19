@@ -59,20 +59,21 @@ export class uSyncDetailsModalElement extends UmbModalBaseElement<
 			<umb-body-layout headline="Changes : ${this.data?.item.name ?? ''}">
 				<div class="layout">
 					<uui-box style="--uui-box-default-padding: 0;">
-						<div slot="header" id="header">
-							<h3><umb-localize key="uSync_detailHeadline"></umb-localize></h3>
-							<umb-localize key="uSync_detailHeader"></umb-localize>
+						<div class="headline">
+							<div>
+								<h3><umb-localize key="uSync_detailHeadline"></umb-localize></h3>
+								<umb-localize key="uSync_detailHeader"></umb-localize>
+							</div>
+							<div>${this.renderActions()}</div>
 						</div>
-						<div slot="header-actions">${this.renderActions()}</div>
 					</uui-box>
-					<uui-box style="--uui-box-default-padding: 0;">
-						<usync-change-view .item=${this.data?.item}></usync-change-view>
-					</uui-box>
+					<usync-change-view .item=${this.data?.item}></usync-change-view>
 				</div>
 				<div slot="actions">
 					<uui-button
 						id="cancel"
 						.label=${this.localize.term('general_close')}
+						look="outline"
 						@click="${this.#onClose}"></uui-button>
 				</div>
 			</umb-body-layout>
@@ -97,7 +98,14 @@ export class uSyncDetailsModalElement extends UmbModalBaseElement<
 			gap: var(--uui-size-space-4);
 		}
 
-		#header h3 {
+		.headline {
+			display: flex;
+			justify-content: space-between;
+			padding: var(--uui-size-space-4);
+			align-items: center;
+		}
+
+		.headline h3 {
 			margin: 0;
 		}
 	`;

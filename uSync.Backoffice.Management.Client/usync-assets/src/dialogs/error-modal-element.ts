@@ -22,6 +22,7 @@ export default class uSyncErrorModalElement extends UmbModalBaseElement<
 			<div slot="actions">
 				<uui-button
 					id="cancel"
+					look="outline"
 					.label=${this.localize.term('general_close')}
 					@click="${this.#onClose}"></uui-button>
 			</div>

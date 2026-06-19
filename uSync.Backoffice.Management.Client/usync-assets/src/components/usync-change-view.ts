@@ -127,7 +127,6 @@ export class uSyncChangeView extends UmbElementMixin(LitElement) {
 	static styles = css`
 		:host {
 			display: block;
-			margin: var(--uui-size-space-4) 0;
 		}
 
 		.change-box {

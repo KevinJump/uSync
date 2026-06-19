@@ -70,7 +70,7 @@ internal class uSyncManagementService : ISyncManagementService
         {
             Key = HandlerActions.Report.ToString(),
             Label = HandlerActions.Report.ToString(),
-            Look = "secondary",
+            Look = "outline",
             Color = "positive"
         };
 
