@@ -4,6 +4,18 @@ export default {
 		name: 'uSync',
 		banner: 'uSync pour tout synchroniser',
 
+		migrate: 'Migrer',
+		defaultView: 'Défaut',
+		settingsView: 'Paramètres',
+		addons: 'Extensions',
+
+		groupEverything: 'Tout',
+		groupContent: 'Contenu',
+		groupSettings: 'Paramètres',
+		groupForms: 'Formulaires',
+		groupMedia: 'Médias',
+		groupMembers: 'Membres',
+
 		Report: 'Rapport',
 		Import: 'Importer',
 		Export: 'Exporter',

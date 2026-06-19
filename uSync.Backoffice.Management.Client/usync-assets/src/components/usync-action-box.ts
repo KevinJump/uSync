@@ -63,7 +63,7 @@ export class uSyncActionBox extends UmbLitElement {
 			<uui-box class="action-box ${this.disabled ? 'disabled' : ''}">
 				<div class="box-content">
 					<h2 class="box-heading" title=${this.getLastSyncDate()}>
-						${this.group?.groupName}
+						${this.localize.termOrDefault(`uSync_group${this.group?.groupName}`, this.group?.groupName ?? '')}
 					</h2>
 					<umb-icon name=${this.group?.icon}></umb-icon>
 					<div class="box-buttons">${dropdownButtons}</div>

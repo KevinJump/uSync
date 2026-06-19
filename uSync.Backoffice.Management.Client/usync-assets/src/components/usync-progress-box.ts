@@ -63,6 +63,14 @@ export class uSyncProcessBox extends UmbElementMixin(LitElement) {
 		}, 2000);
 	}
 
+	#camelize(str: string) {
+		return str
+			.replace(/(?:^\w|[A-Z]|\b\w)/g, function (word: string, index: number) {
+				return index === 0 ? word.toLowerCase() : word.toUpperCase();
+			})
+			.replace(/\s+/g, '');
+	}
+
 	render() {
 		let actions = this.actions;
 		if (!this.actions || this.actions.length === 0) {
@@ -79,6 +87,8 @@ export class uSyncProcessBox extends UmbElementMixin(LitElement) {
 		let actionHtml = actions?.map((action) => {
 			if (action.status == HandlerStatus.COMPLETE) progress++;
 
+			const actionName = this.#camelize(action.name ?? 'unknown');
+
 			return html`
 				<div
 					class="action 
@@ -88,7 +98,7 @@ export class uSyncProcessBox extends UmbElementMixin(LitElement) {
 						<uui-icon .name=${action.icon ?? 'icon-box'}></uui-icon>
 						${this.renderBadge(action)}
 					</div>
-					<h4>${action.name ?? 'unknown'}</h4>
+					<h4>${this.localize.termOrDefault(`treeHeaders_${actionName}`, actionName)}</h4>
 				</div>
 			`;
 		});
@@ -107,7 +117,7 @@ export class uSyncProcessBox extends UmbElementMixin(LitElement) {
 
 		return html`
 			<uui-box>
-				<h2>${this.title}</h2>
+				<h2>${this.localize.termOrDefault(`uSync_group${this.title}`, this.title)}</h2>
 				<div class="action-list">${actionHtml}</div>
 				<div class="update-box">${this.updateMsg?.message}</div>
 				<uui-progress-bar

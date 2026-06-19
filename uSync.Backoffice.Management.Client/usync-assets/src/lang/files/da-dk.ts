@@ -4,6 +4,18 @@ export default {
 		name: 'uSync',
 		banner: 'uSync alt på én gang',
 
+		migrate: 'Migrer',
+		defaultView: 'Standard',
+		settingsView: 'Indstillinger',
+		addons: 'Tilføjelser',
+
+		groupEverything: 'Alt',
+		groupContent: 'Indhold',
+		groupSettings: 'Indstillinger',
+		groupForms: 'Formularer',
+		groupMedia: 'Medie',
+		groupMembers: 'Medlemmer',
+
 		Report: 'Rapport',
 		Import: 'Importer',
 		Export: 'Eksporter',
