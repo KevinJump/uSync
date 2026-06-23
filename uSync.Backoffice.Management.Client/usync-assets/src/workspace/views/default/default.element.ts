@@ -375,7 +375,7 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 
 			.action-buttons-box {
 				display: grid;
-				grid-template-columns: repeat(auto-fit, minmax(375px, 1fr));
+				grid-template-columns: repeat(auto-fit, minmax(370px, 1fr));
 				position: relative;
 				gap: var(--uui-size-space-4);
 				flex-wrap: wrap;
