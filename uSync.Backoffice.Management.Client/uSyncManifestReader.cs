@@ -19,12 +19,11 @@ public class uSyncManifestComposer : IComposer
 {
     public void Compose(IUmbracoBuilder builder)
     {
-        if (builder.IsUmbracoBackOfficeEnabled())
-        {
-            // only load this when the backoffice is enabled. 
-            builder.Services.AddSingleton<IPackageManifestReader, uSyncManifestReader>();
-            builder.Services.AddSingleton<IPackageManifestReader, SyncSectionManifestReader>();
-        }
+        if (builder.IsUmbracoBackOfficeEnabled() is false) return;
+
+        // only load this when the backoffice is enabled. 
+        builder.Services.AddSingleton<IPackageManifestReader, uSyncManifestReader>();
+        builder.Services.AddSingleton<IPackageManifestReader, SyncSectionManifestReader>();
     }
 }
 
@@ -39,7 +38,7 @@ internal sealed class SyncSectionManifestReader : IPackageManifestReader
 
     public Task<IEnumerable<PackageManifest>> ReadPackageManifestsAsync()
     {
-        if (_configService.Settings.MoveToSection is false) 
+        if (_configService.Settings.MoveToSection is false)
             return Task.FromResult(Enumerable.Empty<PackageManifest>());
 
         List<PackageManifest> manifest = [

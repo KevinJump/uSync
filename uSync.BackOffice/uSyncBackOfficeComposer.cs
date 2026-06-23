@@ -18,12 +18,10 @@ public class uSyncBackOfficeComposer : IComposer
     /// <inheritdoc/>
     public void Compose(IUmbracoBuilder builder)
     {
-        if (builder.IsUmbracoBackOfficeEnabled() is true) {
-            // the composers add uSync, but the extension methods
-            // will only add the values if uSync hasn't already 
-            // been added, so you can for example add uSync to your
-            // startup.cs file. and then the composers don't fire
-            builder.AdduSync();
-        }
+        // uSync core will actually run when their is no back office loaded. 
+        //if (builder.IsUmbracoBackOfficeEnabled() is false)
+        //    return;
+        
+        builder.AdduSync();
     }
 }

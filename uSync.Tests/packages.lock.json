@@ -10,12 +10,12 @@
       },
       "Microsoft.NET.Test.Sdk": {
         "type": "Direct",
-        "requested": "[18.6.0, )",
-        "resolved": "18.6.0",
-        "contentHash": "kAIBt0MsYR0o2RULmlW5BhQ1ha50aGEgLKG4f1p0kePBGLJCprqs3S+NxRrYN8UH7mSQRPKpeiH9mwPMEKUObQ==",
+        "requested": "[18.7.0, )",
+        "resolved": "18.7.0",
+        "contentHash": "49xH9j4UzCh2hMohJp53g3wUTvyycECw7CtVht4gfCz5ykudB1uBcF6D0TtgJPjCtP76UPW53bQElKdCeX+dUg==",
         "dependencies": {
-          "Microsoft.CodeCoverage": "18.6.0",
-          "Microsoft.TestPlatform.TestHost": "18.6.0"
+          "Microsoft.CodeCoverage": "18.7.0",
+          "Microsoft.TestPlatform.TestHost": "18.7.0"
         }
       },
       "NUnit3TestAdapter": {
@@ -31,14 +31,12 @@
       },
       "Umbraco.Cms.Tests": {
         "type": "Direct",
-        "requested": "[18.0.0-rc2, )",
-        "resolved": "18.0.0-rc2",
-        "contentHash": "kA0SlvdBDT+tCcr/jD68tMEaeR07OeqMFV4sfUHSls3Kdr5H7CovRdkQe+YcsH9ZR/xMxQ4jk5Y2xIcx/k126g==",
+        "requested": "[18.0.0-rc3, )",
+        "resolved": "18.0.0-rc3",
+        "contentHash": "LPFXSJkE5WQ9dTD09a8dcy3r6uZn/R3SUNOQy7/TOBvoFuFmdDFAXqU/DXOEEojP1bLE85saCs1nQBJ1+VZJVA==",
         "dependencies": {
           "Asp.Versioning.Mvc": "10.0.0",
           "Asp.Versioning.Mvc.ApiExplorer": "10.0.0",
-          "AutoFixture.AutoMoq": "4.18.1",
-          "AutoFixture.NUnit3": "4.18.1",
           "Dazinator.Extensions.FileProviders": "2.0.0",
           "Examine": "3.7.1",
           "Examine.Core": "3.7.1",
@@ -48,7 +46,7 @@
           "MailKit": "4.16.0",
           "Markdig": "1.1.3",
           "Markdown": "2.2.1",
-          "MessagePack": "3.1.4",
+          "MessagePack": "3.1.7",
           "Microsoft.AspNetCore.OpenApi": "10.0.7",
           "Microsoft.Data.Sqlite": "10.0.7",
           "Microsoft.EntityFrameworkCore.SqlServer": "10.0.7",
@@ -95,20 +93,18 @@
           "Swashbuckle.AspNetCore.SwaggerUI": "10.1.7",
           "System.Linq.Async": "7.0.1",
           "System.Security.Cryptography.Xml": "10.0.7",
-          "Umbraco.Cms": "[18.0.0-rc2, 19.0.0)",
+          "Umbraco.Cms": "[18.0.0-rc3, 19.0.0)",
           "ncrontab": "3.4.0"
         }
       },
       "Umbraco.Cms.Tests.Integration": {
         "type": "Direct",
-        "requested": "[18.0.0-rc2, )",
-        "resolved": "18.0.0-rc2",
-        "contentHash": "7IeNvpLUGnBLdIJMOoRQHjKf1OM61dO80qYgBmrreGxXlmkJUSTTaCmdtbofX1hQYqBmJBdxZ3f029+ebY+6nQ==",
+        "requested": "[18.0.0-rc3, )",
+        "resolved": "18.0.0-rc3",
+        "contentHash": "ajcllKukkBIdFgu9o0FLh82xKeewSku2t6w9vW9KwClzrt7kEKXBSYh5RP2zynG3tInUiIixH5JR0JuRws+gLQ==",
         "dependencies": {
           "Asp.Versioning.Mvc": "10.0.0",
           "Asp.Versioning.Mvc.ApiExplorer": "10.0.0",
-          "AutoFixture.AutoMoq": "4.18.1",
-          "AutoFixture.NUnit3": "4.18.1",
           "Bogus": "35.6.5",
           "Dazinator.Extensions.FileProviders": "2.0.0",
           "Examine": "3.7.1",
@@ -119,7 +115,7 @@
           "MailKit": "4.16.0",
           "Markdig": "1.1.3",
           "Markdown": "2.2.1",
-          "MessagePack": "3.1.4",
+          "MessagePack": "3.1.7",
           "Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation": "10.0.7",
           "Microsoft.AspNetCore.Mvc.Testing": "10.0.7",
           "Microsoft.AspNetCore.OpenApi": "10.0.7",
@@ -171,12 +167,12 @@
           "Swashbuckle.AspNetCore.SwaggerUI": "10.1.7",
           "System.Linq.Async": "7.0.1",
           "System.Security.Cryptography.Xml": "10.0.7",
-          "Umbraco.Cms": "[18.0.0-rc2, 19.0.0)",
-          "Umbraco.Cms.Api.Management": "[18.0.0-rc2, 19.0.0)",
-          "Umbraco.Cms.DevelopmentMode.Backoffice": "[18.0.0-rc2, 19.0.0)",
-          "Umbraco.Cms.Persistence.EFCore": "[18.0.0-rc2, 19.0.0)",
-          "Umbraco.Cms.PublishedCache.HybridCache": "[18.0.0-rc2, 19.0.0)",
-          "Umbraco.Cms.Tests": "[18.0.0-rc2, 19.0.0)",
+          "Umbraco.Cms": "[18.0.0-rc3, 19.0.0)",
+          "Umbraco.Cms.Api.Management": "[18.0.0-rc3, 19.0.0)",
+          "Umbraco.Cms.DevelopmentMode.Backoffice": "[18.0.0-rc3, 19.0.0)",
+          "Umbraco.Cms.Persistence.EFCore": "[18.0.0-rc3, 19.0.0)",
+          "Umbraco.Cms.PublishedCache.HybridCache": "[18.0.0-rc3, 19.0.0)",
+          "Umbraco.Cms.Tests": "[18.0.0-rc3, 19.0.0)",
           "ncrontab": "3.4.0"
         }
       },
@@ -210,32 +206,6 @@
         "contentHash": "H54UOpRoc4RmhQ4RA2lzDz43a/hAu/JN19Yyy/DNmH4XlRxhemfhifJyh9BaXNJOtGa2Dnu2xEeP4VSiTdUdAg==",
         "dependencies": {
           "Asp.Versioning.Mvc": "10.0.0"
-        }
-      },
-      "AutoFixture": {
-        "type": "Transitive",
-        "resolved": "4.18.1",
-        "contentHash": "BmWZDY4fkrYOyd5/CTBOeXbzsNwV8kI4kDi/Ty1Y5F+WDHBVKxzfWlBE4RSicvZ+EOi2XDaN5uwdrHsItLW6Kw==",
-        "dependencies": {
-          "Fare": "[2.1.1, 3.0.0)"
-        }
-      },
-      "AutoFixture.AutoMoq": {
-        "type": "Transitive",
-        "resolved": "4.18.1",
-        "contentHash": "5mG4BdhamHBJGDKNdH5p0o1GIqbNCDqq+4Ny4csnYpzZPYjkfT5xOXLyhkvpF8EgK3GN5o4HMclEe2rhQVr1jQ==",
-        "dependencies": {
-          "AutoFixture": "4.18.1",
-          "Moq": "[4.7.0, 5.0.0)"
-        }
-      },
-      "AutoFixture.NUnit3": {
-        "type": "Transitive",
-        "resolved": "4.18.1",
-        "contentHash": "n+7yZWj4SFzwHKbkbCE+i5wsoARD2UyFq5UA/zgBF3FciTwHu8WjSiTagFWytq5costpluJl5I0pINS0r8Ql6g==",
-        "dependencies": {
-          "AutoFixture": "4.18.1",
-          "NUnit": "[3.7.0, 4.0.0)"
         }
       },
       "Azure.Core": {
@@ -321,14 +291,6 @@
           "Examine.Core": "3.7.1",
           "Lucene.Net.QueryParser": "4.8.0-beta00017",
           "Lucene.Net.Replicator": "4.8.0-beta00017"
-        }
-      },
-      "Fare": {
-        "type": "Transitive",
-        "resolved": "2.1.1",
-        "contentHash": "HaI8puqA66YU7/9cK4Sgbs1taUTP1Ssa4QT2PIzqJ7GvAbN1QgkjbRsjH+FSbMh1MJdvS0CIwQNLtFT+KF6KpA==",
-        "dependencies": {
-          "NETStandard.Library": "1.6.1"
         }
       },
       "HtmlAgilityPack": {
@@ -473,23 +435,23 @@
       },
       "MessagePack": {
         "type": "Transitive",
-        "resolved": "3.1.4",
-        "contentHash": "BH0wlHWmVoZpbAPyyt2Awbq30C+ZsS3eHSkYdnyUAbqVJ22fAJDzn2xTieBeoT5QlcBzp61vHcv878YJGfi3mg==",
+        "resolved": "3.1.7",
+        "contentHash": "gXpifaxbhfBqh8bVToQn9j+OgCnhXWMbRCV7RQIbCVa9CNJG1fY6oHAYYl+ER3Tb9uUIHiQ5QbGiGwwFhoagbA==",
         "dependencies": {
-          "MessagePack.Annotations": "3.1.4",
-          "MessagePackAnalyzer": "3.1.4",
+          "MessagePack.Annotations": "3.1.7",
+          "MessagePackAnalyzer": "3.1.7",
           "Microsoft.NET.StringTools": "17.11.4"
         }
       },
       "MessagePack.Annotations": {
         "type": "Transitive",
-        "resolved": "3.1.4",
-        "contentHash": "aVWrDAkCdqxwQsz/q0ldPh2EFn48M99YUzE9OvZjMq2RNLKz4o2z88iGFvSvbMqOWRweRvKPHBJZe22PRqzslQ=="
+        "resolved": "3.1.7",
+        "contentHash": "IW1yX9viarFl/Dsio5G+pM90JkOSW4xhAiJcKxPPF5rzyp2/yCpieWju8G99QLEmaQeze2uQMEskUBA59YZmkw=="
       },
       "MessagePackAnalyzer": {
         "type": "Transitive",
-        "resolved": "3.1.4",
-        "contentHash": "CTaSsN/liJ7MhLCAB7Z4ZLBNuVGCq9lt2BT/cbrc9vzGv89yK3CqIA+z9T19a11eQYl9etZHL6MQJgCqECRVpg=="
+        "resolved": "3.1.7",
+        "contentHash": "ZF+OOJTRS7Ogzb4gG36hPKVQk3kEbp6kkUcdRjhddDq/uSGcV4BKIdYiyJipExXyE/zsqYb0ic215O9kI+fjPA=="
       },
       "Microsoft.ApplicationInsights": {
         "type": "Transitive",
@@ -657,8 +619,8 @@
       },
       "Microsoft.CodeCoverage": {
         "type": "Transitive",
-        "resolved": "18.6.0",
-        "contentHash": "bkmCXn/65Cd0LdO2zTb/ValGAJ1H8y/CgYOiBb3jsDyHI3Y1ljKx6RBvhvn3e5D/4R4I00RRwLf+Bd2Sn6bJjA=="
+        "resolved": "18.7.0",
+        "contentHash": "+wFfx9s7D9wegM0RziXMj2kvYDT4qcqXXtyjiQwSZOGQ2wwcOAJQcD6eQXk02jt0MvRNawtp8TJxTrV+wD8X1g=="
       },
       "Microsoft.Data.SqlClient": {
         "type": "Transitive",
@@ -1383,15 +1345,15 @@
       },
       "Microsoft.TestPlatform.ObjectModel": {
         "type": "Transitive",
-        "resolved": "18.6.0",
-        "contentHash": "gQTW4BIfM2ZLxixo9ITXoulLKjn20FiiHtqTsx9PENqTrX7368ZeJ5L0QZJyReXDWORPRV8jXwZR6Aar8JOyaA=="
+        "resolved": "18.7.0",
+        "contentHash": "6rmgU4q3/WOpOPcncI0YW0Q/QpcQtwR2TTEXDR5+4TfSimPBAk6Z/BgKLeGgp1SOun0ROVUCCafXhRLwsHaPpA=="
       },
       "Microsoft.TestPlatform.TestHost": {
         "type": "Transitive",
-        "resolved": "18.6.0",
-        "contentHash": "em1eLz5Q46+hsCtAXdXggWAPd9gQyT4ngdsQ7k1eWvQgpsjtS/wAOJ/5TteieFdiAvrEq1iVn00LtusAxRaVmQ==",
+        "resolved": "18.7.0",
+        "contentHash": "kYwfmebCs8992zaxEDkvG7S+YEouTeKfYVKUFEkwh1W2dIoOaevBt80XSKVXCUFEhusjOIm1sFfHBnoJgygrRA==",
         "dependencies": {
-          "Microsoft.TestPlatform.ObjectModel": "18.6.0",
+          "Microsoft.TestPlatform.ObjectModel": "18.7.0",
           "Newtonsoft.Json": "13.0.3"
         }
       },
@@ -1978,8 +1940,8 @@
       },
       "Umbraco.Cms.Api.Common": {
         "type": "Transitive",
-        "resolved": "18.0.0-rc2",
-        "contentHash": "FCi4dqGdW8xkGV4UDvXXWMOkIY6RWb74tnCaMXx49g+tLtoksNszxeHVp/fs3brqsUszW69LFKkMEnTvhhXP3Q==",
+        "resolved": "18.0.0-rc3",
+        "contentHash": "WW3BSeJOth1yxIGpQLy9nnpw9T0hvlyUinM2lYZRztKmk+Db0h4waqDW9Z3vQDn8SkdKz0AZq1IcITAC7tHCbg==",
         "dependencies": {
           "Asp.Versioning.Mvc": "10.0.0",
           "Asp.Versioning.Mvc.ApiExplorer": "10.0.0",
@@ -1991,7 +1953,7 @@
           "MailKit": "4.16.0",
           "Markdig": "1.1.3",
           "Markdown": "2.2.1",
-          "MessagePack": "3.1.4",
+          "MessagePack": "3.1.7",
           "Microsoft.AspNetCore.OpenApi": "10.0.7",
           "Microsoft.Extensions.Caching.Hybrid": "10.5.0",
           "Microsoft.Extensions.FileProviders.Embedded": "10.0.7",
@@ -2014,15 +1976,15 @@
           "Serilog.Sinks.Map": "2.0.0",
           "Swashbuckle.AspNetCore.SwaggerUI": "10.1.7",
           "System.Linq.Async": "7.0.1",
-          "Umbraco.Cms.Core": "[18.0.0-rc2, 19.0.0)",
-          "Umbraco.Cms.Web.Common": "[18.0.0-rc2, 19.0.0)",
+          "Umbraco.Cms.Core": "[18.0.0-rc3, 19.0.0)",
+          "Umbraco.Cms.Web.Common": "[18.0.0-rc3, 19.0.0)",
           "ncrontab": "3.4.0"
         }
       },
       "Umbraco.Cms.Api.Delivery": {
         "type": "Transitive",
-        "resolved": "18.0.0-rc2",
-        "contentHash": "OrCR3RLHmwMy2U0FsgobybXH0GEakq2CHWpeShGn6UgBX3/vojnVvfPEifAultjIsTjov+waxbszZwPJsvO/qA==",
+        "resolved": "18.0.0-rc3",
+        "contentHash": "eF01j25RWxHn6SnaM87HEkWaAWPnri0zJ12Djj8ErYDR/lK0Jlarz+RjNasyOPe8v+wC0STyiZ2GTs2LN4Ym7g==",
         "dependencies": {
           "Asp.Versioning.Mvc": "10.0.0",
           "Asp.Versioning.Mvc.ApiExplorer": "10.0.0",
@@ -2034,7 +1996,7 @@
           "MailKit": "4.16.0",
           "Markdig": "1.1.3",
           "Markdown": "2.2.1",
-          "MessagePack": "3.1.4",
+          "MessagePack": "3.1.7",
           "Microsoft.AspNetCore.OpenApi": "10.0.7",
           "Microsoft.Extensions.Caching.Abstractions": "10.0.7",
           "Microsoft.Extensions.Caching.Hybrid": "10.5.0",
@@ -2072,15 +2034,15 @@
           "Swashbuckle.AspNetCore.SwaggerUI": "10.1.7",
           "System.Linq.Async": "7.0.1",
           "System.Security.Cryptography.Xml": "10.0.7",
-          "Umbraco.Cms.Api.Common": "[18.0.0-rc2, 19.0.0)",
-          "Umbraco.Cms.Web.Common": "[18.0.0-rc2, 19.0.0)",
+          "Umbraco.Cms.Api.Common": "[18.0.0-rc3, 19.0.0)",
+          "Umbraco.Cms.Web.Common": "[18.0.0-rc3, 19.0.0)",
           "ncrontab": "3.4.0"
         }
       },
       "Umbraco.Cms.Examine.Lucene": {
         "type": "Transitive",
-        "resolved": "18.0.0-rc2",
-        "contentHash": "cZZ35rLN/TbbwtHyr+LUv0HiK9PK5qfrno95+WMJXmeAfVD1M99y4A9LUguDc/V6lVViJhLcDMl8II+mxcNXnA==",
+        "resolved": "18.0.0-rc3",
+        "contentHash": "k9YNijBPWSV2IPnuQzak+y/Am3aAPZDNS1mBfy96RpWw/nz9wmJPwiQM3NU7CXAei47d+riA0XWLIko3W4Dyzg==",
         "dependencies": {
           "Examine": "3.7.1",
           "Examine.Core": "3.7.1",
@@ -2119,14 +2081,14 @@
           "Serilog.Sinks.Map": "2.0.0",
           "System.Linq.Async": "7.0.1",
           "System.Security.Cryptography.Xml": "10.0.7",
-          "Umbraco.Cms.Infrastructure": "[18.0.0-rc2, 19.0.0)",
+          "Umbraco.Cms.Infrastructure": "[18.0.0-rc3, 19.0.0)",
           "ncrontab": "3.4.0"
         }
       },
       "Umbraco.Cms.Imaging.ImageSharp": {
         "type": "Transitive",
-        "resolved": "18.0.0-rc2",
-        "contentHash": "rOJMhbd2OZNvzrK/s2YL3uY4x7UF23N+UwYco3pfsjPboNfXPvB1JT73X55DAWlpPb3iOVc59a4hErW+Mj4hFw==",
+        "resolved": "18.0.0-rc3",
+        "contentHash": "HrXy6dDvleE8cyZBK6PtOgETdECrlXfh+3rg8q6/wz0Nqv/S8G/HG4q+bk7Ckk91DG++F18GyAIaTClBAv6rNw==",
         "dependencies": {
           "Asp.Versioning.Mvc": "10.0.0",
           "Asp.Versioning.Mvc.ApiExplorer": "10.0.0",
@@ -2138,7 +2100,7 @@
           "MailKit": "4.16.0",
           "Markdig": "1.1.3",
           "Markdown": "2.2.1",
-          "MessagePack": "3.1.4",
+          "MessagePack": "3.1.7",
           "Microsoft.Extensions.Caching.Abstractions": "10.0.7",
           "Microsoft.Extensions.Caching.Hybrid": "10.5.0",
           "Microsoft.Extensions.Caching.Memory": "10.0.7",
@@ -2175,14 +2137,14 @@
           "SixLabors.ImageSharp.Web": "3.2.0",
           "System.Linq.Async": "7.0.1",
           "System.Security.Cryptography.Xml": "10.0.7",
-          "Umbraco.Cms.Web.Common": "[18.0.0-rc2, 19.0.0)",
+          "Umbraco.Cms.Web.Common": "[18.0.0-rc3, 19.0.0)",
           "ncrontab": "3.4.0"
         }
       },
       "Umbraco.Cms.Infrastructure": {
         "type": "Transitive",
-        "resolved": "18.0.0-rc2",
-        "contentHash": "TdGE9QJKZUnmGoB2xTN/RCgTTV/iFiWAv8TfVuyDORsyHSc2fS0Pdej1X0xC4YShfgCemlBSTpNnMj1n8LpO0Q==",
+        "resolved": "18.0.0-rc3",
+        "contentHash": "wyO2QJqhzolrLbCjU4sUvedG94WT+TA8fZ3fjcG0uLwmbNuYDS05gBQpwOfqkofbHx/078gp0AZ8kPaS9fJhqA==",
         "dependencies": {
           "Examine.Core": "3.7.1",
           "HtmlAgilityPack": "1.12.4",
@@ -2219,14 +2181,14 @@
           "Serilog.Sinks.File": "7.0.0",
           "Serilog.Sinks.Map": "2.0.0",
           "System.Linq.Async": "7.0.1",
-          "Umbraco.Cms.Core": "[18.0.0-rc2, 19.0.0)",
+          "Umbraco.Cms.Core": "[18.0.0-rc3, 19.0.0)",
           "ncrontab": "3.4.0"
         }
       },
       "Umbraco.Cms.Persistence.EFCore": {
         "type": "Transitive",
-        "resolved": "18.0.0-rc2",
-        "contentHash": "fHPa4PJRhOtj4vAYjwkeMFZWieMme3t0Ij7frQVSnwBm7f8JM0C1+04ne99mMy+zV1c7rZSv58b5G5C39wotmw==",
+        "resolved": "18.0.0-rc3",
+        "contentHash": "XZUipxn4BeYCH+waTESSBOCvb7hoEFvhF2qEgdWCCGab4ipIf0e12YAPqnEQWszSrWlzVddKfdNKCpr3b6WBXQ==",
         "dependencies": {
           "Examine.Core": "3.7.1",
           "HtmlAgilityPack": "1.12.4",
@@ -2266,15 +2228,15 @@
           "Serilog.Sinks.File": "7.0.0",
           "Serilog.Sinks.Map": "2.0.0",
           "System.Linq.Async": "7.0.1",
-          "Umbraco.Cms.Core": "[18.0.0-rc2, 19.0.0)",
-          "Umbraco.Cms.Infrastructure": "[18.0.0-rc2, 19.0.0)",
+          "Umbraco.Cms.Core": "[18.0.0-rc3, 19.0.0)",
+          "Umbraco.Cms.Infrastructure": "[18.0.0-rc3, 19.0.0)",
           "ncrontab": "3.4.0"
         }
       },
       "Umbraco.Cms.Persistence.EFCore.Sqlite": {
         "type": "Transitive",
-        "resolved": "18.0.0-rc2",
-        "contentHash": "5yen2WH9DE0WhfxL9PSW/NuAmpVE5VQGDPxCZgvs6KvnHLnlJpvDxioE3iQZ4B5dtVpyW6QHSGZc4eUqJf3XyA==",
+        "resolved": "18.0.0-rc3",
+        "contentHash": "kp1/QVcBYzvAth28k2M/J3Dq2Ws9a6W0Wc8/jqNw4NMm50oy0t8z8AGjVekRPPXY5VLRJcxbKwm9mXWOd0WlxA==",
         "dependencies": {
           "Examine.Core": "3.7.1",
           "HtmlAgilityPack": "1.12.4",
@@ -2314,14 +2276,14 @@
           "Serilog.Sinks.File": "7.0.0",
           "Serilog.Sinks.Map": "2.0.0",
           "System.Linq.Async": "7.0.1",
-          "Umbraco.Cms.Persistence.EFCore": "[18.0.0-rc2, 19.0.0)",
+          "Umbraco.Cms.Persistence.EFCore": "[18.0.0-rc3, 19.0.0)",
           "ncrontab": "3.4.0"
         }
       },
       "Umbraco.Cms.Persistence.EFCore.SqlServer": {
         "type": "Transitive",
-        "resolved": "18.0.0-rc2",
-        "contentHash": "h7Kp5fsspPOlkawUzmsv2dWODBmhRHRYQjD0t/oltUmvAf/cTQWy1Z+iqlUcBd5qmM8+jYQe5blR+5IuD5O1nw==",
+        "resolved": "18.0.0-rc3",
+        "contentHash": "+gxC/JOlZfGdMKRoXbfsGiDiiI40rN0NT/5ArIO2PkEvW2dPCHUO69bHMDbsqrQ1s6LylJ1ggjV/0QlQt4z0jw==",
         "dependencies": {
           "Examine.Core": "3.7.1",
           "HtmlAgilityPack": "1.12.4",
@@ -2361,14 +2323,14 @@
           "Serilog.Sinks.File": "7.0.0",
           "Serilog.Sinks.Map": "2.0.0",
           "System.Linq.Async": "7.0.1",
-          "Umbraco.Cms.Persistence.EFCore": "[18.0.0-rc2, 19.0.0)",
+          "Umbraco.Cms.Persistence.EFCore": "[18.0.0-rc3, 19.0.0)",
           "ncrontab": "3.4.0"
         }
       },
       "Umbraco.Cms.Persistence.Sqlite": {
         "type": "Transitive",
-        "resolved": "18.0.0-rc2",
-        "contentHash": "eYrNn2Co1mFX411oa0Gf93H+NKHQQga3Y4xbH+vv839U0kO0nWjJS+OAcUvfOmvubE5/8Yy1dAI+t76QMh8D+w==",
+        "resolved": "18.0.0-rc3",
+        "contentHash": "NXO82h/yxHB7I2TeU2htrspoJ1ldFmSxtMLJsZZAcgip5cy+5zHZfAEkA14i7D2XPIare1NxuZkJBTjM3u/ZYg==",
         "dependencies": {
           "Examine.Core": "3.7.1",
           "HtmlAgilityPack": "1.12.4",
@@ -2406,14 +2368,14 @@
           "Serilog.Sinks.File": "7.0.0",
           "Serilog.Sinks.Map": "2.0.0",
           "System.Linq.Async": "7.0.1",
-          "Umbraco.Cms.Infrastructure": "[18.0.0-rc2, 19.0.0)",
+          "Umbraco.Cms.Infrastructure": "[18.0.0-rc3, 19.0.0)",
           "ncrontab": "3.4.0"
         }
       },
       "Umbraco.Cms.Persistence.SqlServer": {
         "type": "Transitive",
-        "resolved": "18.0.0-rc2",
-        "contentHash": "Yn3k50mSQ9Rn21rUZ5ed+LEPYed1+BR+YJCLD14035hnsfzxmMQL/wx7nGyGH7PvOS6EjOgA4p5YaAt70h8D9w==",
+        "resolved": "18.0.0-rc3",
+        "contentHash": "/Zn866u7qAj85o3X+hBYLGVKvro7Kkt4diw/LbZW+NthXKMoEraUN8IQC37az/B0+4IBSBEolZdGRsEFgbpP8g==",
         "dependencies": {
           "Examine.Core": "3.7.1",
           "HtmlAgilityPack": "1.12.4",
@@ -2451,14 +2413,14 @@
           "Serilog.Sinks.File": "7.0.0",
           "Serilog.Sinks.Map": "2.0.0",
           "System.Linq.Async": "7.0.1",
-          "Umbraco.Cms.Infrastructure": "[18.0.0-rc2, 19.0.0)",
+          "Umbraco.Cms.Infrastructure": "[18.0.0-rc3, 19.0.0)",
           "ncrontab": "3.4.0"
         }
       },
       "Umbraco.Cms.PublishedCache.HybridCache": {
         "type": "Transitive",
-        "resolved": "18.0.0-rc2",
-        "contentHash": "ebLr4fQYoCOJ+tDGM9jN3hAJ+WaAQXcJ2iQPwmgZPBGaGWiOc6v3X3wyL8Ia5FVyAqGqKwdMTQ6sLsZk1+IBmQ==",
+        "resolved": "18.0.0-rc3",
+        "contentHash": "ifRwaWhdY/XFcCIj/56wqZM0rh63dpxuVMnFnj3OVm+y3v4u/VQ6ZvlfH2wZia14dXEfljCVriHjhEAYLprT9Q==",
         "dependencies": {
           "Examine.Core": "3.7.1",
           "HtmlAgilityPack": "1.12.4",
@@ -2466,7 +2428,7 @@
           "MailKit": "4.16.0",
           "Markdig": "1.1.3",
           "Markdown": "2.2.1",
-          "MessagePack": "3.1.4",
+          "MessagePack": "3.1.7",
           "Microsoft.Extensions.Caching.Abstractions": "10.0.7",
           "Microsoft.Extensions.Caching.Hybrid": "10.5.0",
           "Microsoft.Extensions.Caching.Memory": "10.0.7",
@@ -2498,15 +2460,15 @@
           "Serilog.Sinks.File": "7.0.0",
           "Serilog.Sinks.Map": "2.0.0",
           "System.Linq.Async": "7.0.1",
-          "Umbraco.Cms.Core": "[18.0.0-rc2, 19.0.0)",
-          "Umbraco.Cms.Infrastructure": "[18.0.0-rc2, 19.0.0)",
+          "Umbraco.Cms.Core": "[18.0.0-rc3, 19.0.0)",
+          "Umbraco.Cms.Infrastructure": "[18.0.0-rc3, 19.0.0)",
           "ncrontab": "3.4.0"
         }
       },
       "Umbraco.Cms.StaticAssets": {
         "type": "Transitive",
-        "resolved": "18.0.0-rc2",
-        "contentHash": "VJ96eoW++lI0HU1oZX0LYJUmyDA4KfOavbAbK7fg6IW/csV+KesSUIw4HoNNk0zYGom06AIo6EC7xFobtV8xIA==",
+        "resolved": "18.0.0-rc3",
+        "contentHash": "bSzUUk8O05JRUmXXCfe4mcvgmfuoLidMzxSoTGeizXuyIcYQJY1hBfgnnjtie/fYwjGNv6EXf0AmAND+/ftxDw==",
         "dependencies": {
           "Asp.Versioning.Mvc": "10.0.0",
           "Asp.Versioning.Mvc.ApiExplorer": "10.0.0",
@@ -2519,7 +2481,7 @@
           "MailKit": "4.16.0",
           "Markdig": "1.1.3",
           "Markdown": "2.2.1",
-          "MessagePack": "3.1.4",
+          "MessagePack": "3.1.7",
           "Microsoft.AspNetCore.OpenApi": "10.0.7",
           "Microsoft.Extensions.Caching.Hybrid": "10.5.0",
           "Microsoft.Extensions.FileProviders.Embedded": "10.0.7",
@@ -2542,15 +2504,15 @@
           "Serilog.Sinks.Map": "2.0.0",
           "Swashbuckle.AspNetCore.SwaggerUI": "10.1.7",
           "System.Linq.Async": "7.0.1",
-          "Umbraco.Cms.Api.Management": "[18.0.0-rc2, 19.0.0)",
-          "Umbraco.Cms.Web.Website": "[18.0.0-rc2, 19.0.0)",
+          "Umbraco.Cms.Api.Management": "[18.0.0-rc3, 19.0.0)",
+          "Umbraco.Cms.Web.Website": "[18.0.0-rc3, 19.0.0)",
           "ncrontab": "3.4.0"
         }
       },
       "Umbraco.Cms.Targets": {
         "type": "Transitive",
-        "resolved": "18.0.0-rc2",
-        "contentHash": "Wy+F4ryIxsu2jrGMniiBdh+jNmtkStcffv8/xVDR3liNrGmFdnHVuEzIqyoHMHH7y+1lXfMZ2P3CTt8mbvn4yQ==",
+        "resolved": "18.0.0-rc3",
+        "contentHash": "XyFBFCasEt1wsLwX1myc6yAz/Jp3fBZ7E9TK+3hXs1RYLVzBtFp813pqnA6R5kSePPwEuiQxEEq2OXpVXe+bWw==",
         "dependencies": {
           "Asp.Versioning.Mvc": "10.0.0",
           "Asp.Versioning.Mvc.ApiExplorer": "10.0.0",
@@ -2563,7 +2525,7 @@
           "MailKit": "4.16.0",
           "Markdig": "1.1.3",
           "Markdown": "2.2.1",
-          "MessagePack": "3.1.4",
+          "MessagePack": "3.1.7",
           "Microsoft.AspNetCore.OpenApi": "10.0.7",
           "Microsoft.Extensions.Caching.Abstractions": "10.0.7",
           "Microsoft.Extensions.Caching.Hybrid": "10.5.0",
@@ -2601,16 +2563,16 @@
           "Swashbuckle.AspNetCore.SwaggerUI": "10.1.7",
           "System.Linq.Async": "7.0.1",
           "System.Security.Cryptography.Xml": "10.0.7",
-          "Umbraco.Cms.Api.Delivery": "[18.0.0-rc2, 19.0.0)",
-          "Umbraco.Cms.Api.Management": "[18.0.0-rc2, 19.0.0)",
-          "Umbraco.Cms.StaticAssets": "[18.0.0-rc2, 19.0.0)",
+          "Umbraco.Cms.Api.Delivery": "[18.0.0-rc3, 19.0.0)",
+          "Umbraco.Cms.Api.Management": "[18.0.0-rc3, 19.0.0)",
+          "Umbraco.Cms.StaticAssets": "[18.0.0-rc3, 19.0.0)",
           "ncrontab": "3.4.0"
         }
       },
       "Umbraco.Cms.Web.Common": {
         "type": "Transitive",
-        "resolved": "18.0.0-rc2",
-        "contentHash": "5Jnu1jp4hFmGYx1NaRiWVKYEZvyJLZ3m5zTwjUAUd/MTvHaGPxd/aO+rKmseq4FVjvIbd6ilu2vttkAoChUwKA==",
+        "resolved": "18.0.0-rc3",
+        "contentHash": "uTvSClnPGhFz32LIF6wj9wcbQR0FBBzmGJQ/8j85L5Mu5utD5wNpYObOVOZP6tdQaW7QNc/Xfj0pdeqWO4T+SQ==",
         "dependencies": {
           "Asp.Versioning.Mvc": "10.0.0",
           "Asp.Versioning.Mvc.ApiExplorer": "10.0.0",
@@ -2622,7 +2584,7 @@
           "MailKit": "4.16.0",
           "Markdig": "1.1.3",
           "Markdown": "2.2.1",
-          "MessagePack": "3.1.4",
+          "MessagePack": "3.1.7",
           "Microsoft.Extensions.Caching.Hybrid": "10.5.0",
           "Microsoft.Extensions.FileProviders.Embedded": "10.0.7",
           "MiniProfiler.AspNetCore.Mvc": "4.5.4",
@@ -2642,8 +2604,8 @@
           "Serilog.Sinks.File": "7.0.0",
           "Serilog.Sinks.Map": "2.0.0",
           "System.Linq.Async": "7.0.1",
-          "Umbraco.Cms.Examine.Lucene": "[18.0.0-rc2, 19.0.0)",
-          "Umbraco.Cms.PublishedCache.HybridCache": "[18.0.0-rc2, 19.0.0)",
+          "Umbraco.Cms.Examine.Lucene": "[18.0.0-rc3, 19.0.0)",
+          "Umbraco.Cms.PublishedCache.HybridCache": "[18.0.0-rc3, 19.0.0)",
           "ncrontab": "3.4.0"
         }
       },
@@ -2663,15 +2625,15 @@
       "usync.core": {
         "type": "Project",
         "dependencies": {
-          "Umbraco.Cms.Api.Management": "[18.0.0-rc2, )",
-          "Umbraco.Cms.Web.Website": "[18.0.0-rc2, )"
+          "Umbraco.Cms.Api.Management": "[18.0.0-rc3, )",
+          "Umbraco.Cms.Web.Website": "[18.0.0-rc3, )"
         }
       },
       "Umbraco.Cms": {
         "type": "CentralTransitive",
         "requested": "[18.0.0-rc2, )",
-        "resolved": "18.0.0-rc2",
-        "contentHash": "tz3hzoSwT2ER6sqJOgs2zKsFOHfwW8KKa8sXmYD1RkKyb+zmnN+EGznWV3TcW12GSJAgyC6hTWKMUYUAWz/b2g==",
+        "resolved": "18.0.0-rc3",
+        "contentHash": "FSyplg2uREANM594OIyuysLic4brZfw1lbrMIeqQWJ10No7tnpg0K3ylHr0RwjGhHpP3hLQ+0b13TIDK1WTJ5A==",
         "dependencies": {
           "Asp.Versioning.Mvc": "10.0.0",
           "Asp.Versioning.Mvc.ApiExplorer": "10.0.0",
@@ -2684,7 +2646,7 @@
           "MailKit": "4.16.0",
           "Markdig": "1.1.3",
           "Markdown": "2.2.1",
-          "MessagePack": "3.1.4",
+          "MessagePack": "3.1.7",
           "Microsoft.AspNetCore.OpenApi": "10.0.7",
           "Microsoft.Data.Sqlite": "10.0.7",
           "Microsoft.EntityFrameworkCore.SqlServer": "10.0.7",
@@ -2729,20 +2691,20 @@
           "Swashbuckle.AspNetCore.SwaggerUI": "10.1.7",
           "System.Linq.Async": "7.0.1",
           "System.Security.Cryptography.Xml": "10.0.7",
-          "Umbraco.Cms.Imaging.ImageSharp": "[18.0.0-rc2, 19.0.0)",
-          "Umbraco.Cms.Persistence.EFCore.SqlServer": "[18.0.0-rc2, 19.0.0)",
-          "Umbraco.Cms.Persistence.EFCore.Sqlite": "[18.0.0-rc2, 19.0.0)",
-          "Umbraco.Cms.Persistence.SqlServer": "[18.0.0-rc2, 19.0.0)",
-          "Umbraco.Cms.Persistence.Sqlite": "[18.0.0-rc2, 19.0.0)",
-          "Umbraco.Cms.Targets": "[18.0.0-rc2, 19.0.0)",
+          "Umbraco.Cms.Imaging.ImageSharp": "[18.0.0-rc3, 19.0.0)",
+          "Umbraco.Cms.Persistence.EFCore.SqlServer": "[18.0.0-rc3, 19.0.0)",
+          "Umbraco.Cms.Persistence.EFCore.Sqlite": "[18.0.0-rc3, 19.0.0)",
+          "Umbraco.Cms.Persistence.SqlServer": "[18.0.0-rc3, 19.0.0)",
+          "Umbraco.Cms.Persistence.Sqlite": "[18.0.0-rc3, 19.0.0)",
+          "Umbraco.Cms.Targets": "[18.0.0-rc3, 19.0.0)",
           "ncrontab": "3.4.0"
         }
       },
       "Umbraco.Cms.Api.Management": {
         "type": "CentralTransitive",
-        "requested": "[18.0.0-rc2, )",
-        "resolved": "18.0.0-rc2",
-        "contentHash": "8F/ZRhAX6Z8jYU+lms47tkkdnuWIYqCA4jnU2uJTAvKPXsvFa1Lb9NXtxgCdeX8p+CYgSfBfg4/aSieg+BhyTg==",
+        "requested": "[18.0.0-rc3, )",
+        "resolved": "18.0.0-rc3",
+        "contentHash": "9pB8Q9PUAL1WQ2N5nxg4+sNAKrUqoh/YSGQ5+77Ytsg7WucWI/W9VtFQcx2R/+xgYo3XZrlrUYwqOYjgsbTh7w==",
         "dependencies": {
           "Asp.Versioning.Mvc": "10.0.0",
           "Asp.Versioning.Mvc.ApiExplorer": "10.0.0",
@@ -2755,7 +2717,7 @@
           "MailKit": "4.16.0",
           "Markdig": "1.1.3",
           "Markdown": "2.2.1",
-          "MessagePack": "3.1.4",
+          "MessagePack": "3.1.7",
           "Microsoft.AspNetCore.OpenApi": "10.0.7",
           "Microsoft.Extensions.Caching.Abstractions": "10.0.7",
           "Microsoft.Extensions.Caching.Hybrid": "10.5.0",
@@ -2793,17 +2755,17 @@
           "Swashbuckle.AspNetCore.SwaggerUI": "10.1.7",
           "System.Linq.Async": "7.0.1",
           "System.Security.Cryptography.Xml": "10.0.7",
-          "Umbraco.Cms.Api.Common": "[18.0.0-rc2, 19.0.0)",
-          "Umbraco.Cms.Infrastructure": "[18.0.0-rc2, 19.0.0)",
-          "Umbraco.Cms.PublishedCache.HybridCache": "[18.0.0-rc2, 19.0.0)",
+          "Umbraco.Cms.Api.Common": "[18.0.0-rc3, 19.0.0)",
+          "Umbraco.Cms.Infrastructure": "[18.0.0-rc3, 19.0.0)",
+          "Umbraco.Cms.PublishedCache.HybridCache": "[18.0.0-rc3, 19.0.0)",
           "ncrontab": "3.4.0"
         }
       },
       "Umbraco.Cms.Core": {
         "type": "CentralTransitive",
-        "requested": "[18.0.0-rc2, )",
-        "resolved": "18.0.0-rc2",
-        "contentHash": "aJU2hB4I3eJSNPCzx7HbnF9+GuHFSUINo4qlXuywE1Tk/1ctfTvCYqewGbPU3uJEgSAvOm6OD/j94zTlg9b1OA==",
+        "requested": "[18.0.0-rc3, )",
+        "resolved": "18.0.0-rc3",
+        "contentHash": "UMLKASCklDq63ZRf6Q0d8NBSmL/fKPDzUvBEVjyy5gWCwHXO7SW9d0aPVnwXXJ0hjSJNJrI/Kpme+7bmGxVCyA==",
         "dependencies": {
           "Microsoft.Extensions.Caching.Abstractions": "10.0.7",
           "Microsoft.Extensions.Caching.Memory": "10.0.7",
@@ -2822,8 +2784,8 @@
       "Umbraco.Cms.DevelopmentMode.Backoffice": {
         "type": "CentralTransitive",
         "requested": "[18.0.0-rc2, )",
-        "resolved": "18.0.0-rc2",
-        "contentHash": "4qf7uJXoTxGBRqjhfqu/vJZlOXBR46sxXCAs4o9vp56p2OpOUoF6kGmGXi3DQ/m1qjqp2sMmeCCqhDK8fq3jZg==",
+        "resolved": "18.0.0-rc3",
+        "contentHash": "f6SoPSAVUjS4rnPU1Ukj0x2CqWoj/B/hCOSnEU0LHkr49Fuh/fws85y65d8NDwmqI3n4lbCvLq6ra4qadvXI1w==",
         "dependencies": {
           "Asp.Versioning.Mvc": "10.0.0",
           "Asp.Versioning.Mvc.ApiExplorer": "10.0.0",
@@ -2835,7 +2797,7 @@
           "MailKit": "4.16.0",
           "Markdig": "1.1.3",
           "Markdown": "2.2.1",
-          "MessagePack": "3.1.4",
+          "MessagePack": "3.1.7",
           "Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation": "10.0.7",
           "Microsoft.CodeAnalysis.CSharp": "5.3.0",
           "Microsoft.Extensions.Caching.Abstractions": "10.0.7",
@@ -2872,15 +2834,15 @@
           "Serilog.Sinks.Map": "2.0.0",
           "System.Linq.Async": "7.0.1",
           "System.Security.Cryptography.Xml": "10.0.7",
-          "Umbraco.Cms.Web.Common": "[18.0.0-rc2, 19.0.0)",
+          "Umbraco.Cms.Web.Common": "[18.0.0-rc3, 19.0.0)",
           "ncrontab": "3.4.0"
         }
       },
       "Umbraco.Cms.Web.Website": {
         "type": "CentralTransitive",
-        "requested": "[18.0.0-rc2, )",
-        "resolved": "18.0.0-rc2",
-        "contentHash": "dnTxHJ0Y8IdB2ADCH6zH0avnpdKuwIVv6Vtdmz4sirePiP+mizvsIVEgjv00bWRGXQ0zLg2El4a2Dwfr6V/5DA==",
+        "requested": "[18.0.0-rc3, )",
+        "resolved": "18.0.0-rc3",
+        "contentHash": "3T8/YlsjVrH5FBfZLIs0evHs4KylbVCAqIHndOebmmUjAbea8XAGh016b+XVNL/60zTukcoCuuN/ypWbX5macg==",
         "dependencies": {
           "Asp.Versioning.Mvc": "10.0.0",
           "Asp.Versioning.Mvc.ApiExplorer": "10.0.0",
@@ -2892,7 +2854,7 @@
           "MailKit": "4.16.0",
           "Markdig": "1.1.3",
           "Markdown": "2.2.1",
-          "MessagePack": "3.1.4",
+          "MessagePack": "3.1.7",
           "Microsoft.Extensions.Caching.Abstractions": "10.0.7",
           "Microsoft.Extensions.Caching.Hybrid": "10.5.0",
           "Microsoft.Extensions.Caching.Memory": "10.0.7",
@@ -2927,7 +2889,7 @@
           "Serilog.Sinks.Map": "2.0.0",
           "System.Linq.Async": "7.0.1",
           "System.Security.Cryptography.Xml": "10.0.7",
-          "Umbraco.Cms.Web.Common": "[18.0.0-rc2, 19.0.0)",
+          "Umbraco.Cms.Web.Common": "[18.0.0-rc3, 19.0.0)",
           "ncrontab": "3.4.0"
         }
       }

@@ -16,9 +16,6 @@ public class ApiComposer : IComposer
 {
     public void Compose(IUmbracoBuilder builder)
     {
-        if (builder.IsUmbracoBackOfficeEnabled() is false)
-            return;
-
         builder.AddSyncOpenApi();
         builder.Services.AddSingleton<ISyncManagementCache, uSyncManagementCache>();
         builder.Services.AddSingleton<ISyncManagementService, uSyncManagementService>();
