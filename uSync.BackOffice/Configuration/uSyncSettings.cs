@@ -18,7 +18,7 @@ public class uSyncSettings
     /// <summary>
     ///  collection of folders uSync looks in when performing imports.
     /// </summary>
-    [DefaultValue("uSync/Root/, uSync/v14/")]
+    [DefaultValue(new string[] { "uSync/Root/", "uSync/v14/" })]
     public string[] Folders { get; set; } = [];
 
     /// <summary>
@@ -154,6 +154,7 @@ public class uSyncSettings
     /// <summary>
     /// Custom mapping keys, allows users to add a simple config mapping to make one property type to behave like an existing one
     /// </summary>
+    [JsonIgnore]
     public IDictionary<string, string> CustomMappings { get; set; } = new Dictionary<string, string>();
 
     /// <summary>
@@ -183,13 +184,13 @@ public class uSyncSettings
     /// <summary>
     /// Disable the default dashboard (so people can't accidently press the buttons).
     /// </summary>
-    [DefaultValue("false")]
+    [DefaultValue(false)]
     public bool DisableDashboard { get; set; } = false;
 
     /// <summary>
     ///  summarize results (for when there are loads and loads of items)
     /// </summary>
-    [DefaultValue("false")]
+    [DefaultValue(false)]
     public bool SummaryDashboard { get; set; } = false;
 
     /// <summary>
@@ -201,6 +202,7 @@ public class uSyncSettings
     /// <summary>
     ///  list of addon (tabs) you don't want to show inside uSync dashboard.
     /// </summary>
+    [DefaultValue("licence")]
     public string HideAddOns { get; set; } = "licence";
 
     /// <summary>
@@ -221,7 +223,7 @@ public class uSyncSettings
     ///  if the notifications are not suppressed, then if an item fails to import
     ///  it doesn't stop other items from being imported. 
     /// </remarks>
-    [DefaultValue("true")]
+    [DefaultValue(true)]
     public bool DisableNotificationSuppression { get; set; } = true;
 
     /// <summary>

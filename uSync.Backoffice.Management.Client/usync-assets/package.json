@@ -40,13 +40,17 @@
 		"email": "info@jumoo.co.uk",
 		"url": "https://jumoo.co.uk"
 	},
+	"site": {
+		"port": "16903",
+		"api": "uSync"
+	},
 	"scripts": {
 		"client:build": "tsc --project ./tsconfig.dist.json",
 		"client:pack": "npm pack --pack-destination ./pack",
 		"client:publish": "npm publish --tag next",
 		"client:make": "npm run client:build && npm run client:pack && npm run client:publish",
 		"client:link": "npm link",
-		"generate": "openapi-ts",
+		"generate-client": "node scripts/generate-openapi.js https://localhost:44304/umbraco/openapi/uSync.json",
 		"format:fix": "npm run format -- --write",
 		"format": "prettier \"src/**/*.ts\" --check",
 		"build": "tsc && vite build",
@@ -57,9 +61,12 @@
 	"devDependencies": {
 		"@hey-api/openapi-ts": "^0.97.1",
 		"@microsoft/signalr": "^10.0.0",
-		"@umbraco-cms/backoffice": "^18.0.0-beta2",
+		"@umbraco-cms/backoffice": "^18.0.0-rc3",
+		"chalk": "^5.6.2",
+		"cross-env": "^10.1.0",
 		"eslint": "^10.2.0",
 		"lit": "^3.3.2",
+		"node-fetch": "^3.3.2",
 		"prettier": "^3.8.1",
 		"typescript": "^5.9.3",
 		"vite": "^8.0.16",

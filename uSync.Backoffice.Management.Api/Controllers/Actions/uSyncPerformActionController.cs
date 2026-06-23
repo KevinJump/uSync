@@ -24,7 +24,6 @@ public class uSyncPerformActionController : uSyncControllerBase
 {
     private readonly ISyncManagementService _managementService;
     private readonly ITemporaryFileService _temporaryFileService;
-
     private readonly IBackOfficeSecurityAccessor _backOfficeSecurityAccessor;
 
     public uSyncPerformActionController(

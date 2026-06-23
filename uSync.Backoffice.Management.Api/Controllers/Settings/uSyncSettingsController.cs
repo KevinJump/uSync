@@ -73,6 +73,6 @@ public class uSyncSettingsController : uSyncControllerBase
 
 public class SyncSelectableSet
 {
-    public required string Name { get; init; } 
+    public required string Name { get; init; }
     public required uSyncHandlerSetSettings Settings { get; init; }
 }

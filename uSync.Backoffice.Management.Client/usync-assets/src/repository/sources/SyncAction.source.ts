@@ -2,9 +2,14 @@ import { UmbControllerHost } from '@umbraco-cms/backoffice/controller-api';
 import { UmbDataSourceResponse } from '@umbraco-cms/backoffice/repository';
 import { tryExecute } from '@umbraco-cms/backoffice/resources';
 import {
-	ActionsService,
+	getActionsBySet,
+	getSyncFileInfo,
 	PerformActionRequest,
 	PerformActionResponse,
+	postDownload,
+	postImport,
+	postPerform,
+	postProcessUpload,
 	SyncActionGroup,
 	USyncActionView,
 } from '@jumoo/uSync';
@@ -24,7 +29,7 @@ export class uSyncActionDataSource implements SyncActionDataSource {
 	}
 
 	async getSyncFileInfo() {
-		return await tryExecute(this.#host, ActionsService.getSyncFileInfo());
+		return await tryExecute(this.#host, getSyncFileInfo());
 	}
 
 	async getActionsBySet(
@@ -32,7 +37,7 @@ export class uSyncActionDataSource implements SyncActionDataSource {
 	): Promise<UmbDataSourceResponse<Array<SyncActionGroup>>> {
 		return await tryExecute(
 			this.#host,
-			ActionsService.getActionsBySet({
+			getActionsBySet({
 				query: { setName: setName },
 			}),
 		);
@@ -43,20 +48,20 @@ export class uSyncActionDataSource implements SyncActionDataSource {
 	): Promise<UmbDataSourceResponse<PerformActionResponse>> {
 		return await tryExecute(
 			this.#host,
-			ActionsService.performAction({
+			postPerform({
 				body: request,
 			}),
 		);
 	}
 
 	async downloadFile() {
-		return await tryExecute(this.#host, ActionsService.download());
+		return await tryExecute(this.#host, postDownload());
 	}
 
 	async processUpload(fileId: string) {
 		return await tryExecute(
 			this.#host,
-			ActionsService.processUpload({
+			postProcessUpload({
 				query: {
 					tempKey: fileId,
 				},
@@ -67,7 +72,7 @@ export class uSyncActionDataSource implements SyncActionDataSource {
 	async importSingle(view: USyncActionView) {
 		return await tryExecute(
 			this.#host,
-			ActionsService.importSingle({
+			postImport({
 				body: view,
 			}),
 		);

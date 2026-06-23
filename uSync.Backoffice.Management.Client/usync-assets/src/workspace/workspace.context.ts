@@ -307,7 +307,7 @@ export class uSyncWorkspaceContext
 
 		console.log('Downloading file', response);
 
-		const url = window.URL.createObjectURL(response);
+		const url = window.URL.createObjectURL(response as unknown as Blob);
 
 		const download = document.createElement('a');
 		download.href = url;

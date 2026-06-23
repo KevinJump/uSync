@@ -19,15 +19,6 @@ public class uSyncActionsController : uSyncControllerBase
         _syncManagementService = syncManagementService;
     }
 
-    [HttpGet("Actions")]
-    [MapToApiVersion("1.0")]
-    [ProducesResponseType(typeof(List<SyncActionGroup>), 200)]
-    [Obsolete("This endpoint is deprecated, use ActionsBySet instead. will be removed in v18")]
-    public async Task<List<SyncActionGroup>> GetActions()
-    {
-        return await Task.FromResult(_syncManagementService.GetActions());
-    }
-
     [HttpGet("ActionsBySet")]
     [MapToApiVersion("1.0")]
     [ProducesResponseType(typeof(List<SyncActionGroup>), 200)]
@@ -36,7 +27,7 @@ public class uSyncActionsController : uSyncControllerBase
         return await _syncManagementService.GetActionsAsync(setName);
     }
 
-    [HttpGet("GetSyncFileInfo")]
+    [HttpGet("SyncFileInfo")]
     [MapToApiVersion("1.0")]
     [ProducesResponseType(typeof(SyncFileVersionCheckResult), 200)]
     public async Task<SyncFileVersionCheckResult> GetSyncFileInfo()

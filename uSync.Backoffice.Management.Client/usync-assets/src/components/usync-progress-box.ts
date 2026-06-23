@@ -9,10 +9,10 @@ import {
 	classMap,
 } from '@umbraco-cms/backoffice/external/lit';
 import { UmbElementMixin } from '@umbraco-cms/backoffice/element-api';
+import { HandlerStatus } from '@jumoo/uSync';
 import {
 	USYNC_SIGNALR_CONTEXT_TOKEN,
 	SyncUpdateMessage,
-	HandlerStatus,
 	SyncHandlerSummary,
 	SyncProgressSummary,
 } from '@jumoo/uSync';

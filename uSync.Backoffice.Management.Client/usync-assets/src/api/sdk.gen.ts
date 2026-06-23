@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { CheckLegacyData, CheckLegacyErrors, CheckLegacyResponses, CopyLegacyData, CopyLegacyErrors, CopyLegacyResponses, DownloadData, DownloadErrors, DownloadResponses, GetActionsBySetData, GetActionsBySetErrors, GetActionsBySetResponses, GetActionsData, GetActionsErrors, GetActionsResponses, GetAddOnsData, GetAddOnsErrors, GetAddonSplashData, GetAddonSplashErrors, GetAddonSplashResponses, GetAddOnsResponses, GetHandlerSetSettingsData, GetHandlerSetSettingsErrors, GetHandlerSetSettingsResponses, GetSetsData, GetSetsErrors, GetSetsResponses, GetSettingsData, GetSettingsErrors, GetSettingsResponses, GetSyncFileInfoData, GetSyncFileInfoErrors, GetSyncFileInfoResponses, IgnoreLegacyData, IgnoreLegacyErrors, IgnoreLegacyResponses, ImportSingleData, ImportSingleErrors, ImportSingleResponses, MergeExportFolderData, MergeExportFolderErrors, MergeExportFolderResponses, PerformActionData, PerformActionErrors, PerformActionResponses, ProcessUploadData, ProcessUploadErrors, ProcessUploadResponses } from './types.gen';
+import type { GetActionsBySetData, GetActionsBySetErrors, GetActionsBySetResponses, GetAddOnsData, GetAddOnsErrors, GetAddOnSplashData, GetAddOnSplashErrors, GetAddOnSplashResponses, GetAddOnsResponses, GetCheckLegacyData, GetCheckLegacyErrors, GetCheckLegacyResponses, GetHandlerSettingsData, GetHandlerSettingsErrors, GetHandlerSettingsResponses, GetSetsData, GetSetsErrors, GetSetsResponses, GetSettingsData, GetSettingsErrors, GetSettingsResponses, GetSyncFileInfoData, GetSyncFileInfoErrors, GetSyncFileInfoResponses, PostCopyLegacyData, PostCopyLegacyErrors, PostCopyLegacyResponses, PostDownloadData, PostDownloadErrors, PostDownloadResponses, PostIgnoreLegacyData, PostIgnoreLegacyErrors, PostIgnoreLegacyResponses, PostImportData, PostImportErrors, PostImportResponses, PostMergeExportData, PostMergeExportErrors, PostMergeExportResponses, PostPerformData, PostPerformErrors, PostPerformResponses, PostProcessUploadData, PostProcessUploadErrors, PostProcessUploadResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -18,149 +18,100 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
     meta?: Record<string, unknown>;
 };
 
-export class ActionsService {
-    /**
-     * @deprecated
-     */
-    public static getActions<ThrowOnError extends boolean = true>(options?: Options<GetActionsData, ThrowOnError>) {
-        return (options?.client ?? client).get<GetActionsResponses, GetActionsErrors, ThrowOnError>({
-            security: [{ scheme: 'bearer', type: 'http' }],
-            url: '/umbraco/usync/api/v1/Actions',
-            ...options
-        });
-    }
-    
-    public static getActionsBySet<ThrowOnError extends boolean = true>(options?: Options<GetActionsBySetData, ThrowOnError>) {
-        return (options?.client ?? client).get<GetActionsBySetResponses, GetActionsBySetErrors, ThrowOnError>({
-            security: [{ scheme: 'bearer', type: 'http' }],
-            url: '/umbraco/usync/api/v1/ActionsBySet',
-            ...options
-        });
-    }
-    
-    public static download<ThrowOnError extends boolean = true>(options?: Options<DownloadData, ThrowOnError>) {
-        return (options?.client ?? client).post<DownloadResponses, DownloadErrors, ThrowOnError>({
-            security: [{ scheme: 'bearer', type: 'http' }],
-            url: '/umbraco/usync/api/v1/Download',
-            ...options
-        });
-    }
-    
-    public static getSyncFileInfo<ThrowOnError extends boolean = true>(options?: Options<GetSyncFileInfoData, ThrowOnError>) {
-        return (options?.client ?? client).get<GetSyncFileInfoResponses, GetSyncFileInfoErrors, ThrowOnError>({
-            security: [{ scheme: 'bearer', type: 'http' }],
-            url: '/umbraco/usync/api/v1/GetSyncFileInfo',
-            ...options
-        });
-    }
-    
-    public static importSingle<ThrowOnError extends boolean = true>(options?: Options<ImportSingleData, ThrowOnError>) {
-        return (options?.client ?? client).post<ImportSingleResponses, ImportSingleErrors, ThrowOnError>({
-            security: [{ scheme: 'bearer', type: 'http' }],
-            url: '/umbraco/usync/api/v1/Import',
-            ...options,
-            headers: {
-                'Content-Type': 'application/json',
-                ...options?.headers
-            }
-        });
-    }
-    
-    public static performAction<ThrowOnError extends boolean = true>(options?: Options<PerformActionData, ThrowOnError>) {
-        return (options?.client ?? client).post<PerformActionResponses, PerformActionErrors, ThrowOnError>({
-            security: [{ scheme: 'bearer', type: 'http' }],
-            url: '/umbraco/usync/api/v1/Perform',
-            ...options,
-            headers: {
-                'Content-Type': 'application/json',
-                ...options?.headers
-            }
-        });
-    }
-    
-    public static processUpload<ThrowOnError extends boolean = true>(options?: Options<ProcessUploadData, ThrowOnError>) {
-        return (options?.client ?? client).post<ProcessUploadResponses, ProcessUploadErrors, ThrowOnError>({
-            security: [{ scheme: 'bearer', type: 'http' }],
-            url: '/umbraco/usync/api/v1/ProcessUpload',
-            ...options
-        });
-    }
-}
+export const getActionsBySet = <ThrowOnError extends boolean = false>(options?: Options<GetActionsBySetData, ThrowOnError>) => (options?.client ?? client).get<GetActionsBySetResponses, GetActionsBySetErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/umbraco/usync/api/v1/ActionsBySet',
+    ...options
+});
 
-export class FoldersService {
-    public static mergeExportFolder<ThrowOnError extends boolean = true>(options?: Options<MergeExportFolderData, ThrowOnError>) {
-        return (options?.client ?? client).post<MergeExportFolderResponses, MergeExportFolderErrors, ThrowOnError>({
-            security: [{ scheme: 'bearer', type: 'http' }],
-            url: '/umbraco/usync/api/v1/MergeExport',
-            ...options
-        });
-    }
-}
+export const postDownload = <ThrowOnError extends boolean = false>(options?: Options<PostDownloadData, ThrowOnError>) => (options?.client ?? client).post<PostDownloadResponses, PostDownloadErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/umbraco/usync/api/v1/Download',
+    ...options
+});
 
-export class MigrationsService {
-    public static checkLegacy<ThrowOnError extends boolean = true>(options?: Options<CheckLegacyData, ThrowOnError>) {
-        return (options?.client ?? client).get<CheckLegacyResponses, CheckLegacyErrors, ThrowOnError>({
-            security: [{ scheme: 'bearer', type: 'http' }],
-            url: '/umbraco/usync/api/v1/CheckLegacy',
-            ...options
-        });
+export const postImport = <ThrowOnError extends boolean = false>(options: Options<PostImportData, ThrowOnError>) => (options.client ?? client).post<PostImportResponses, PostImportErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/umbraco/usync/api/v1/Import',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
     }
-    
-    public static copyLegacy<ThrowOnError extends boolean = true>(options?: Options<CopyLegacyData, ThrowOnError>) {
-        return (options?.client ?? client).post<CopyLegacyResponses, CopyLegacyErrors, ThrowOnError>({
-            security: [{ scheme: 'bearer', type: 'http' }],
-            url: '/umbraco/usync/api/v1/CopyLegacy',
-            ...options
-        });
-    }
-    
-    public static ignoreLegacy<ThrowOnError extends boolean = true>(options?: Options<IgnoreLegacyData, ThrowOnError>) {
-        return (options?.client ?? client).post<IgnoreLegacyResponses, IgnoreLegacyErrors, ThrowOnError>({
-            security: [{ scheme: 'bearer', type: 'http' }],
-            url: '/umbraco/usync/api/v1/IgnoreLegacy',
-            ...options
-        });
-    }
-}
+});
 
-export class SettingsService {
-    public static getAddOns<ThrowOnError extends boolean = true>(options?: Options<GetAddOnsData, ThrowOnError>) {
-        return (options?.client ?? client).get<GetAddOnsResponses, GetAddOnsErrors, ThrowOnError>({
-            security: [{ scheme: 'bearer', type: 'http' }],
-            url: '/umbraco/usync/api/v1/AddOns',
-            ...options
-        });
+export const postPerform = <ThrowOnError extends boolean = false>(options: Options<PostPerformData, ThrowOnError>) => (options.client ?? client).post<PostPerformResponses, PostPerformErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/umbraco/usync/api/v1/Perform',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
     }
-    
-    public static getAddonSplash<ThrowOnError extends boolean = true>(options?: Options<GetAddonSplashData, ThrowOnError>) {
-        return (options?.client ?? client).get<GetAddonSplashResponses, GetAddonSplashErrors, ThrowOnError>({
-            security: [{ scheme: 'bearer', type: 'http' }],
-            url: '/umbraco/usync/api/v1/AddOnSplash',
-            ...options
-        });
-    }
-    
-    public static getHandlerSetSettings<ThrowOnError extends boolean = true>(options?: Options<GetHandlerSetSettingsData, ThrowOnError>) {
-        return (options?.client ?? client).get<GetHandlerSetSettingsResponses, GetHandlerSetSettingsErrors, ThrowOnError>({
-            security: [{ scheme: 'bearer', type: 'http' }],
-            url: '/umbraco/usync/api/v1/HandlerSettings',
-            ...options
-        });
-    }
-    
-    public static getSets<ThrowOnError extends boolean = true>(options?: Options<GetSetsData, ThrowOnError>) {
-        return (options?.client ?? client).get<GetSetsResponses, GetSetsErrors, ThrowOnError>({
-            security: [{ scheme: 'bearer', type: 'http' }],
-            url: '/umbraco/usync/api/v1/Sets',
-            ...options
-        });
-    }
-    
-    public static getSettings<ThrowOnError extends boolean = true>(options?: Options<GetSettingsData, ThrowOnError>) {
-        return (options?.client ?? client).get<GetSettingsResponses, GetSettingsErrors, ThrowOnError>({
-            security: [{ scheme: 'bearer', type: 'http' }],
-            url: '/umbraco/usync/api/v1/Settings',
-            ...options
-        });
-    }
-}
+});
+
+export const postProcessUpload = <ThrowOnError extends boolean = false>(options?: Options<PostProcessUploadData, ThrowOnError>) => (options?.client ?? client).post<PostProcessUploadResponses, PostProcessUploadErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/umbraco/usync/api/v1/ProcessUpload',
+    ...options
+});
+
+export const getSyncFileInfo = <ThrowOnError extends boolean = false>(options?: Options<GetSyncFileInfoData, ThrowOnError>) => (options?.client ?? client).get<GetSyncFileInfoResponses, GetSyncFileInfoErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/umbraco/usync/api/v1/SyncFileInfo',
+    ...options
+});
+
+export const postMergeExport = <ThrowOnError extends boolean = false>(options?: Options<PostMergeExportData, ThrowOnError>) => (options?.client ?? client).post<PostMergeExportResponses, PostMergeExportErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/umbraco/usync/api/v1/MergeExport',
+    ...options
+});
+
+export const getCheckLegacy = <ThrowOnError extends boolean = false>(options?: Options<GetCheckLegacyData, ThrowOnError>) => (options?.client ?? client).get<GetCheckLegacyResponses, GetCheckLegacyErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/umbraco/usync/api/v1/CheckLegacy',
+    ...options
+});
+
+export const postCopyLegacy = <ThrowOnError extends boolean = false>(options?: Options<PostCopyLegacyData, ThrowOnError>) => (options?.client ?? client).post<PostCopyLegacyResponses, PostCopyLegacyErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/umbraco/usync/api/v1/CopyLegacy',
+    ...options
+});
+
+export const postIgnoreLegacy = <ThrowOnError extends boolean = false>(options?: Options<PostIgnoreLegacyData, ThrowOnError>) => (options?.client ?? client).post<PostIgnoreLegacyResponses, PostIgnoreLegacyErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/umbraco/usync/api/v1/IgnoreLegacy',
+    ...options
+});
+
+export const getAddOns = <ThrowOnError extends boolean = false>(options?: Options<GetAddOnsData, ThrowOnError>) => (options?.client ?? client).get<GetAddOnsResponses, GetAddOnsErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/umbraco/usync/api/v1/AddOns',
+    ...options
+});
+
+export const getAddOnSplash = <ThrowOnError extends boolean = false>(options?: Options<GetAddOnSplashData, ThrowOnError>) => (options?.client ?? client).get<GetAddOnSplashResponses, GetAddOnSplashErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/umbraco/usync/api/v1/AddOnSplash',
+    ...options
+});
+
+export const getHandlerSettings = <ThrowOnError extends boolean = false>(options?: Options<GetHandlerSettingsData, ThrowOnError>) => (options?.client ?? client).get<GetHandlerSettingsResponses, GetHandlerSettingsErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/umbraco/usync/api/v1/HandlerSettings',
+    ...options
+});
+
+export const getSets = <ThrowOnError extends boolean = false>(options?: Options<GetSetsData, ThrowOnError>) => (options?.client ?? client).get<GetSetsResponses, GetSetsErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/umbraco/usync/api/v1/Sets',
+    ...options
+});
+
+export const getSettings = <ThrowOnError extends boolean = false>(options?: Options<GetSettingsData, ThrowOnError>) => (options?.client ?? client).get<GetSettingsResponses, GetSettingsErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/umbraco/usync/api/v1/Settings',
+    ...options
+});
