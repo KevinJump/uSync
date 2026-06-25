@@ -1,4 +1,6 @@
-﻿using Umbraco.Cms.Core;
+﻿using System.Text.Json.Serialization;
+
+using Umbraco.Cms.Core;
 
 using uSync.Core.Dependency;
 
@@ -39,11 +41,13 @@ public class SyncItem : SyncEntity
     /// <summary>
     ///  Flags controlling what is to be included when this item is exported
     /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public DependencyFlags Flags { get; set; } = DependencyFlags.None;
 
     /// <summary>
     ///  Type of change to be performed (reserved)
     /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public ChangeType Change { get; set; }
 
     public SyncItem() { }

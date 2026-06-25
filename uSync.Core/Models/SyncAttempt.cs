@@ -1,4 +1,6 @@
-﻿namespace uSync.Core.Models;
+﻿using System.Text.Json.Serialization;
+
+namespace uSync.Core.Models;
 
 public struct SyncAttempt<TObject>
 {
@@ -25,6 +27,7 @@ public struct SyncAttempt<TObject>
     /// <summary>
     ///  type of change that was performed
     /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public ChangeType Change { get; private set; }
 
     /// <summary>

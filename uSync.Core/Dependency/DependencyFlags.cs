@@ -1,9 +1,12 @@
-﻿namespace uSync.Core.Dependency;
+﻿using System.Text.Json.Serialization;
+
+namespace uSync.Core.Dependency;
 
 /// <summary>
 ///  Flags to control how item dependencies are calculated.
 /// </summary>
-[Flags]
+[Flags()]
+[JsonConverter(typeof(JsonStringEnumConverter<DependencyFlags>))]
 public enum DependencyFlags
 {
     /// <summary>
