@@ -31,6 +31,8 @@ namespace uSync.History
             builder.AddNotificationAsyncHandler<uSyncExportCompletedNotification, uSyncHistoryNotificationHandler>();
 
             builder.Services.AddSingleton<IPackageManifestReader, uSyncHistoryManifestReader>();
+
+            builder.AddSyncHistoryOpenApi();
         }
     }
 

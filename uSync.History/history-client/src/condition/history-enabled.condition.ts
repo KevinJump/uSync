@@ -4,7 +4,7 @@ import {
   UmbConditionControllerArguments,
 } from "@umbraco-cms/backoffice/extension-api";
 import { UmbConditionBase } from "@umbraco-cms/backoffice/extension-registry";
-import { History } from "../api";
+import { getHistoryIsEnabled } from "../api";
 
 export type SyncHistoryEnabledConditionConfig = UmbConditionConfigBase & {
   isEnabled: boolean;
@@ -17,7 +17,7 @@ export class SyncHistoryEnabledCondition extends UmbConditionBase<SyncHistoryEna
   ) {
     super(host, args);
 
-    History.historyIsEnabled().then((response) => {
+    getHistoryIsEnabled().then((response) => {
       const isEnabled = response.data ?? false;
       this.permitted = isEnabled && args.config.isEnabled;
     });

@@ -1,6 +1,4 @@
 import { defineConfig } from "vite";
-import { checker } from "vite-plugin-checker";
-import { nodeResolve } from "@rollup/plugin-node-resolve";
 
 export default defineConfig({
   build: {
@@ -19,10 +17,5 @@ export default defineConfig({
   },
   base: "/uSync.History/",
   mode: "production",
-  plugins: [
-    nodeResolve(),
-    checker({
-      typescript: true,
-    }),
-  ],
+  plugins: [],
 });

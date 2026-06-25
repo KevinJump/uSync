@@ -1,71 +1,107 @@
-import fetch from 'node-fetch';
-import chalk from 'chalk';
-import { createClient, defaultPlugins } from '@hey-api/openapi-ts';
+import fetch from "node-fetch";
+import chalk from "chalk";
+import { createClient, defaultPlugins } from "@hey-api/openapi-ts";
 
 // Start notifying user we are generating the TypeScript client
 console.log(chalk.green("Generating OpenAPI client..."));
 
-const swaggerUrl = process.argv[2];
-if (swaggerUrl === undefined) {
+const openApiUrl = process.argv[2];
+if (openApiUrl === undefined) {
   console.error(chalk.red(`ERROR: Missing URL to OpenAPI spec`));
-  console.error(`Please provide the URL to the OpenAPI spec as the first argument found in ${chalk.yellow('package.json')}`);
-  console.error(`Example: node generate-openapi.js ${chalk.yellow('https://localhost:44331/umbraco/swagger/REPLACE_ME/swagger.json')}`);
+  console.error(
+    `Please provide the URL to the OpenAPI spec as the first argument found in ${chalk.yellow("package.json")}`,
+  );
+  console.error(
+    `Example: node generate-openapi.js ${chalk.yellow("https://localhost:5000/umbraco/openapi/REPLACE_ME.json")}`,
+  );
   process.exit();
 }
 
-console.log(`Using OpenAPI spec URL: ${chalk.yellow(swaggerUrl)}`);
-
 // Needed to ignore self-signed certificates from running Umbraco on https on localhost
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 // Start checking to see if we can connect to the OpenAPI spec
 console.log("Ensure your Umbraco instance is running");
-console.log(`Fetching OpenAPI definition from ${chalk.yellow(swaggerUrl)}`);
+console.log(`Fetching OpenAPI definition from ${chalk.yellow(openApiUrl)}`);
 
-fetch(swaggerUrl).then(async (response) => {
-  if (!response.ok) {
-    console.error(chalk.red(`ERROR: OpenAPI spec returned with a non OK (200) response: ${response.status} ${response.statusText}`));
-    console.error(`The URL to your Umbraco instance may be wrong or the instance is not running`);
-    console.error(`Please verify or change the URL in the ${chalk.yellow('package.json')} for the script ${chalk.yellow('generate-openapi')}`);
-    return;
-  }
+fetch(openApiUrl)
+  .then(async (response) => {
+    if (!response.ok) {
+      console.error(
+        chalk.red(
+          `ERROR: OpenAPI spec returned with a non OK (200) response: ${response.status} ${response.statusText}`,
+        ),
+      );
+      console.error(
+        `The URL to your Umbraco instance may be wrong or the instance is not running`,
+      );
+      console.error(
+        `Please verify or change the URL in the ${chalk.yellow("package.json")} for the script ${chalk.yellow("generate-openapi")}`,
+      );
+      return;
+    }
 
-  console.log(`OpenAPI spec fetched successfully`);
-  console.log(`Calling ${chalk.yellow('hey-api')} to generate TypeScript client`);
-  
-  await createClient({
-    input: swaggerUrl,
-    output: {
-      path: 'src/api',
-      postProcess: ['prettier'],
-    },
-    plugins: [
-      ...defaultPlugins,
-      {
-        name: '@hey-api/client-fetch',
-        			runtimeConfigPath: '../hey-api',
-        exportFromIndex: true,
-        throwOnError: true,
+    console.log(`OpenAPI spec fetched successfully`);
+    console.log(
+      `Calling ${chalk.yellow("hey-api")} to generate TypeScript client`,
+    );
+
+    await createClient({
+      input: openApiUrl,
+      output: {
+        path: "src/api",
+        postProcess: ["prettier"],
       },
-      {
-        name: '@hey-api/typescript',
-        enums: 'typescript',
-        readOnlyWriteOnlyBehavior: 'off',
-      },
-      {
-        name: '@hey-api/sdk',
-        operations: {
-          strategy: 'byTags',
-          container: 'class',
-          containerName: '{{name}}',
+      plugins: [
+        // // Spread defaults so future @hey-api/openapi-ts additions come along automatically,
+        // // but filter out @hey-api/sdk because we override its responseStyle below.
+        // ...defaultPlugins.filter((plugin) => {
+        //   const pluginName = (typeof plugin === 'string' ? plugin : plugin.name);
+        //   return pluginName !== '@hey-api/sdk' && pluginName !== '@hey-api/typescript'
+        // }),
+        // {
+        //   name: '@hey-api/client-fetch',
+        //   runtimeConfigPath: '../hey-api',
+        //   exportFromIndex: true,
+        //   throwOnError: true,
+        // },
+        // {
+        //   name: '@hey-api/sdk',
+        //   operations: {
+        //     strategy: 'byTags',
+        //     container: 'class',
+        //     containerName: '{{name}}Service',
+        //   },
+        // },
+        // Spread defaults so future @hey-api/openapi-ts additions come along automatically,
+        // but filter out @hey-api/sdk because we override its responseStyle below.
+        ...defaultPlugins.filter(
+          (plugin) =>
+            (typeof plugin === "string" ? plugin : plugin.name) !==
+            "@hey-api/sdk",
+        ),
+        {
+          name: "@hey-api/sdk",
+          responseStyle: "fields",
         },
-      },
-    ],
-  });
+        {
+          name: "@hey-api/typescript",
+          enums: "typescript",
+          readOnlyWriteOnlyBehavior: "off",
+        },
+      ],
+    });
 
-})
-  .catch(error => {
-    console.error(`ERROR: Failed to connect to the OpenAPI spec: ${chalk.red(error.message)}`);
-    console.error(`The URL to your Umbraco instance may be wrong or the instance is not running`);
-    console.error(`Please verify or change the URL in the ${chalk.yellow('package.json')} for the script ${chalk.yellow('generate-openapi')}`);
+    process.exit();
+  })
+  .catch((error) => {
+    console.error(
+      `ERROR: Failed to connect to the OpenAPI spec: ${chalk.red(error.message)}`,
+    );
+    console.error(
+      `The URL to your Umbraco instance may be wrong or the instance is not running`,
+    );
+    console.error(
+      `Please verify or change the URL in the ${chalk.yellow("package.json")} for the script ${chalk.yellow("generate-openapi")}`,
+    );
   });

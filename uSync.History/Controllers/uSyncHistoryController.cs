@@ -32,13 +32,13 @@ namespace uSync.History.Controllers
         }
 
 
-        [HttpGet("HistoryIsEnabled")]
+        [HttpGet("IsEnabled")]
         [ProducesResponseType<bool>(200)]
         public bool HistoryIsEnabled()
             => _syncHistoryService.IsEnabled();
 
 
-        [HttpGet("GetHistory")]
+        [HttpGet("History")]
         [ProducesResponseType(200)]
         public async Task<IEnumerable<HistoryInfo>> GetHistory()
             => await _syncHistoryService.GetHistoryAsync();

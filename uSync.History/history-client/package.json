@@ -14,21 +14,18 @@
     "watch": "vite build --watch",
     "format:fix": "npm run format -- --write",
     "format": "prettier \"src/**/*.ts\" --check",
-    "generate-client": "node scripts/generate-openapi.js https://localhost:44398/umbraco/swagger/uSync.History/swagger.json?urls.primaryName=uSync+Management+Api"
+    "generate-client": "node scripts/generate-openapi.js https://localhost:44304/umbraco/openapi/uSync.History.json"
   },
   "devDependencies": {
-    "@hey-api/openapi-ts": "^0.97.0",
-    "@jumoo/translate": "^17.2.3",
-    "@jumoo/usync": "^17.0.4",
-    "@rollup/plugin-node-resolve": "^15.3.1",
-    "@umbraco-cms/backoffice": "^17.5.0-rc",
+    "@hey-api/openapi-ts": "^0.99.0",
+    "@jumoo/usync": "^18.0.0",
+    "@umbraco-cms/backoffice": "^18.0.0",
     "chalk": "^5.6.2",
+    "cross-env": "^10.1.0",
     "lit": "^3.3.2",
     "node-fetch": "^3.3.2",
     "prettier": "^3.8.1",
-    "rm-rs": "^0.2.3",
-    "typescript": "^5.9.3",
-    "vite": "^8.0.16",
-    "vite-plugin-checker": "^0.12.0"
+    "typescript": "^6.0.3",
+    "vite": "^8.1.0"
   }
 }

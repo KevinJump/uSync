@@ -5,7 +5,12 @@ import {
   state,
 } from "@umbraco-cms/backoffice/external/lit";
 import { UmbLitElement } from "@umbraco-cms/backoffice/lit-element";
-import { History, HistoryInfo } from "../api";
+import {
+  getHistoryClearHistory,
+  getHistoryHistory,
+  getHistoryIsEnabled,
+  HistoryInfo,
+} from "../api";
 import { TimeFormatOptions } from "../consts";
 import { umbConfirmModal, umbOpenModal } from "@umbraco-cms/backoffice/modal";
 import { HISTORY_MODAL_TOKEN } from "../dialogs/history-modal.token";
@@ -34,11 +39,11 @@ export class uSyncHistoryElement extends UmbLitElement {
   }
 
   async #isEnabled() {
-    return (await History.historyIsEnabled()).data ?? false;
+    return (await getHistoryIsEnabled()).data ?? false;
   }
 
   async #loadHistory() {
-    this.history = (await History.getHistory()).data ?? [];
+    this.history = (await getHistoryHistory()).data ?? [];
   }
 
   #onclick() {
@@ -56,7 +61,7 @@ export class uSyncHistoryElement extends UmbLitElement {
   }
 
   async #clearHistory() {
-    await History.clearHistory();
+    await getHistoryClearHistory();
   }
 
   render() {
