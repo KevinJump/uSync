@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Buffers;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -511,11 +512,24 @@ public static class JsonTextExtensions
     ///  tells us if the json for an object is equal, helps when the config objects don't have their
     ///  own Equals functions
     /// </summary>
-    public static bool IsJsonEqual(this object currentObject, object newObject)
+    public static bool IsJsonEqual(this object? currentObject, object? newObject)
     {
-        var currentString = currentObject.SerializeJsonString(false);
-        var newString = newObject.SerializeJsonString(false);
-        return currentString == newString;
+        if (currentObject is null && newObject is null)
+            return true;
+        if (currentObject is null)
+            return false;
+        if (newObject is null)
+            return false;
+
+        ArrayBufferWriter<byte> currentObjectBufferWriter = new(); 
+        using Utf8JsonWriter currentObjectUtf8JsonWriter = new(currentObjectBufferWriter);
+        JsonSerializer.Serialize(currentObjectUtf8JsonWriter, currentObject, _flatOptions);
+
+        ArrayBufferWriter<byte> newObjectBufferWriter = new();
+        using Utf8JsonWriter newObjectUtf8JsonWriter = new(newObjectBufferWriter);
+        JsonSerializer.Serialize(newObjectUtf8JsonWriter, newObject, _flatOptions);
+
+        return currentObjectBufferWriter.WrittenSpan.SequenceEqual(newObjectBufferWriter.WrittenSpan);
     }
 
     #endregion
