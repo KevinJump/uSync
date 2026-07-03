@@ -27,6 +27,7 @@ public static class DependencyOrders
     public static int MemberTypes = 700;
 
     public static int Media = 900;
+    public static int Elements = 990;
     public static int Content = 1000;
 
     public static int Domain = 1100;
@@ -41,6 +42,8 @@ public static class DependencyOrders
                 return Content;
             case UdiEntityType.Media:
                 return Media;
+            case UdiEntityType.Element:
+                return Elements;
             case UdiEntityType.DataTypeContainer:
             case UdiEntityType.DataType:
                 return DataTypes;
