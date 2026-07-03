@@ -113,11 +113,16 @@ else {
 
 $sln_name = "..\uSync.slnx";
 
-# ""; "##### Restoring project"; "--------------------------------"; ""
-# dotnet restore ..
+""; "##### Restoring project"; "--------------------------------"; ""
+## restore up front with --force-evaluate so the build's implicit restore doesn't run in
+## locked mode and fail on NU1403 package content-hash mismatches. --force-evaluate
+## re-evaluates against the current cache (updating the lock file) instead of erroring.
+dotnet restore $sln_name --force-evaluate
 
 ""; "##### Building project"; "--------------------------------"; ""
-dotnet build $sln_name -c $env -p:Version=$fullVersion -p:ContinuousIntegrationBuild=true
+## --no-restore: we've already restored above, don't let the build kick off a second
+## (locked-mode) restore that would re-introduce the NU1403 failures.
+dotnet build $sln_name -c $env --no-restore -p:Version=$fullVersion -p:ContinuousIntegrationBuild=true
 
 ""; "##### Generating the json schema"; "----------------------------------" ; ""
 dotnet run -c $env --project ..\uSync.SchemaGenerator\uSync.SchemaGenerator.csproj --no-build
