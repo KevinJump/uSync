@@ -40,7 +40,7 @@ namespace uSync.BackOffice.SyncHandlers.Handlers;
     name: "Library", folder: "Element",
     priority: uSyncConstants.Priorites.Elements,
     Icon = "icon-books", IsTwoPass = true, EntityType = UdiEntityType.Element)]
-public class ElementHandler : PublishableContentHandlerBase<IElement>, ISyncHandler,
+public class ElementHandler : PublishableContentHandlerBase<IElement>, ISyncHandler, ISyncContainerHandler,
     INotificationAsyncHandler<SavedNotification<IElement>>,
     INotificationAsyncHandler<DeletedNotification<IElement>>,
     INotificationAsyncHandler<ElementPublishedNotification>,
