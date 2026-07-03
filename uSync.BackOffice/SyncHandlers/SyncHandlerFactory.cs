@@ -74,6 +74,14 @@ public class SyncHandlerFactory : ISyncHandlerFactory
 
     #region Valid Loaders (need set, group, action)
 
+    /// <summary>
+    ///  not happy :( but this is a workaround for the fact that the ElementContainer handler is actually an Element handler,
+    ///  but we need to be able to get it by its type name. ideally we would want to extend ISyncHandler to have multiple ItemTypes,
+    ///  but that would be a breaking change, and we don't want to add that complexity to the interface. so for now, we just clean it up here.
+    /// </summary>
+    private string GetCleanItemType(string itemType)
+        => itemType.Equals("ElementContainer") ? "Element" : itemType;
+
     /// <inheritdoc/>
     public HandlerConfigPair? GetValidHandler(string alias, SyncHandlerOptions? options = null)
          => GetValidHandlers(options)
@@ -81,9 +89,12 @@ public class SyncHandlerFactory : ISyncHandlerFactory
 
     /// <inheritdoc/>
     public HandlerConfigPair? GetValidHandlerByTypeName(string itemType, SyncHandlerOptions? options = null)
-        => GetValidHandlers(options)
-            .Where(x => itemType.InvariantEquals(x.Handler.TypeName))
-            .FirstOrDefault();
+    {
+        var cleanType = GetCleanItemType(itemType);
+        return GetValidHandlers(options)
+            .FirstOrDefault(x => cleanType.InvariantEquals(x.Handler.TypeName));
+    }
+
 
     /// <inheritdoc/>
     public HandlerConfigPair? GetValidHandlerByEntityType(string entityType, SyncHandlerOptions? options = null)
