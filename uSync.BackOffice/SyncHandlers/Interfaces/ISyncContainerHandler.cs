@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-using Umbraco.Cms.Core.Models.Entities;
+using Umbraco.Cms.Core;
 
 using uSync.BackOffice.Configuration;
 
@@ -28,11 +28,16 @@ namespace uSync.BackOffice.SyncHandlers.Interfaces;
 public interface ISyncContainerHandler
 {
     /// <summary>
-    ///  Export a single container (folder) item, identified by its entity, to disk.
+    ///  Export a single container (folder) item, identified by its Udi, to disk.
     /// </summary>
-    /// <param name="item">the container entity to export</param>
+    /// <remarks>
+    ///  Takes a Udi (rather than a resolved entity) so the caller doesn't need to know
+    ///  which Umbraco service resolves a container of this handler's type - the handler
+    ///  already knows, and does the lookup itself.
+    /// </remarks>
+    /// <param name="udi">the Udi of the container to export</param>
     /// <param name="folders">the handler folders to export into</param>
     /// <param name="config">handler settings to use for the export</param>
     /// <returns>the actions describing what was exported</returns>
-    Task<IEnumerable<uSyncAction>> ExportContainer(IEntity item, string[] folders, HandlerSettings config);
+    Task<IEnumerable<uSyncAction>> ExportContainer(Udi udi, string[] folders, HandlerSettings config);
 }

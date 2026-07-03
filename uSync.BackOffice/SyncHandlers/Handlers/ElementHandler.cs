@@ -13,6 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
+using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Events;
 using Umbraco.Cms.Core.Models;
@@ -99,6 +100,20 @@ public class ElementHandler : PublishableContentHandlerBase<IElement>, ISyncHand
 
     private async Task<EntityContainer?> GetContainer(Guid key)
         => await _containerService.GetAsync(key);
+
+    /// <inheritdoc cref="ISyncContainerHandler.ExportContainer(Udi, string[], HandlerSettings)" />
+    public async Task<IEnumerable<uSyncAction>> ExportContainer(Udi udi, string[] folders, HandlerSettings config)
+    {
+        if (udi is not GuidUdi guidUdi)
+            return [uSyncAction.Fail(nameof(udi), this.handlerType, this.ItemType, ChangeType.Fail, "Item not found",
+                new KeyNotFoundException(nameof(udi)))];
+
+        var container = await GetContainer(guidUdi.Guid);
+        if (container is null) return [];
+
+        // EntityContainer implements IEntity, so it satisfies the polymorphic export below directly.
+        return await ExportContainer(container, folders, config);
+    }
 
     public override async Task<IEnumerable<uSyncAction>> ExportContainer(IEntity item, string[] folders, HandlerSettings config)
     {
