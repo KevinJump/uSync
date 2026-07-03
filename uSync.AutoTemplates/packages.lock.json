@@ -6,7 +6,7 @@
         "type": "Direct",
         "requested": "[18.0.0, )",
         "resolved": "18.0.0",
-        "contentHash": "iRnhJV7aCZs947W10u2BRcldvl3pk6COdRur4LcV5GVlDPPwNfKs00oIZYGgMYhazE/sg0cUHbjJXGuR3doPvw==",
+        "contentHash": "VS0UNcn8DzCABYczauahvlb3pBqzw6nl7WRWZMOKRlTz0238ms9KtnplJqphwFrsF3OdyNijUFuNf1TwJv4dqA==",
         "dependencies": {
           "Microsoft.Extensions.Caching.Abstractions": "10.0.7",
           "Microsoft.Extensions.Caching.Memory": "10.0.7",
