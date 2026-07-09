@@ -140,6 +140,18 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
                     parentKey = parent.Key;
                     parentName = parent.Name;
                 }
+                else
+                {
+                    // the parent might not be of our object type (e.g a blueprint's
+                    // parent can be a DocumentBlueprintContainer, not a DocumentBlueprint)
+                    // so fall back to an untyped lookup rather than losing the parent entirely.
+                    var entity = syncMappers.EntityCache.GetEntity(item.ParentId);
+                    if (entity != null)
+                    {
+                        parentKey = entity.Key;
+                        parentName = entity.Name ?? parentName;
+                    }
+                }
             }
         }
 
@@ -315,6 +327,8 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         return SyncAttempt<TObject>.Succeed("No check", ChangeType.NoChange);
     }
 
+    protected virtual async Task<ITreeEntity?> CreateParentIfMissingAsync(XElement parentNode, string path) => null;
+
     protected virtual async Task<IEnumerable<uSyncChange>> DeserializeBaseAsync(TObject item, XElement node, SyncSerializerOptions options)
     {
         var info = node?.Element(uSyncConstants.Xml.Info);
@@ -354,6 +368,10 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
                             parent = await FindParentByPathAsync(friendlyPath);
                         }
                     }
+
+                    // last chance blueprints will create the missing containers. 
+                    parent ??= await CreateParentIfMissingAsync(parentNode,
+                        info?.Element(uSyncConstants.Xml.Path).ValueOrDefault(string.Empty) ?? string.Empty);
 
                     if (parent != null)
                     {
@@ -918,6 +936,21 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
                     (item.Name ?? item.Id.ToString()).ToSafeAlias(shortStringHelper));
             }
 
+            // some paths contain ids for items that are not of our object type
+            // (e.g a blueprint's parent can be a DocumentBlueprintContainer, not
+            // a DocumentBlueprint) - so for anything still unresolved, fall back
+            // to an untyped lookup rather than leaving the raw id in the path.
+            var unresolvedIds = lookups.Where(id => items.All(x => x.Id != id));
+            foreach (var id in unresolvedIds)
+            {
+                var entity = syncMappers.EntityCache.GetEntity(id);
+                if (entity == null) continue;
+
+                AddToNameCache(entity.Id, entity.Key, entity.Name ?? entity.Id.ToString());
+                friendlyPath = friendlyPath.Replace($"[{entity.Id}]",
+                    (entity.Name ?? entity.Id.ToString()).ToSafeAlias(shortStringHelper));
+            }
+
             return friendlyPath;
         }
         catch (Exception ex)
@@ -1007,9 +1040,18 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
     public override string ItemAlias(TObject item)
         => item.Name ?? item.Id.ToString();
 
-    protected async Task<TObject?> FindParentAsync(XElement node, bool searchByAlias = false)
+    protected virtual async Task<ITreeEntity?> FindItemAsTreeEntityAsync(Guid key)
+        => await FindItemAsync(key);
+
+    protected virtual async Task<ITreeEntity?> FindItemAsTreeEntityAsync(string alias)
+        => await FindItemAsync(alias);
+
+    protected virtual async Task<ITreeEntity?> FindByPathAsTreeEntityAsync(IEnumerable<string> folders, bool failIfNotExits)
+        => await FindByPathAsync(folders, failIfNotExits);
+
+    protected async Task<ITreeEntity?> FindParentAsync(XElement node, bool searchByAlias = false)
     {
-        var item = default(TObject);
+        var item = default(ITreeEntity);
 
         if (node == null) return default;
 
@@ -1019,7 +1061,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
             if (logger.IsEnabled(LogLevel.Trace))
                 logger.LogTrace("Looking for Parent by Key {Key}", key);
 
-            item = await FindItemAsync(key);
+            item = await FindItemAsTreeEntityAsync(key);
             if (item != null) return item;
         }
 
@@ -1032,7 +1074,7 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
 
             if (!string.IsNullOrEmpty(alias))
             {
-                item = await FindItemAsync(node.ValueOrDefault(alias));
+                item = await FindItemAsTreeEntityAsync(node.ValueOrDefault(alias));
             }
         }
 
