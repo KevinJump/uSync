@@ -153,17 +153,15 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         {
             var value = propertyInfo.GetValue(property);
 
-            var attempt = value.TryConvertTo<TValue>();
-            if (attempt.Success)
+            // TryGetValueAs treats a null conversion result as failure, so fall back
+            // to an empty element - the property still gets recorded in the xml.
+            if (value.TryGetValueAs<TValue>(out var converted))
             {
-                if (attempt.Result != null)
-                {
-                    node.Add(new XElement(propertyName, attempt.Result));
-                }
-                else
-                {
-                    node.Add(new XElement(propertyName, string.Empty));
-                }
+                node.Add(new XElement(propertyName, converted));
+            }
+            else
+            {
+                node.Add(new XElement(propertyName, string.Empty));
             }
         }
     }
