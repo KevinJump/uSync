@@ -400,6 +400,43 @@ public static class JsonTextExtensions
         return true;
     }
 
+    /// <summary>
+    ///  Convert a value to the requested type, pre-empting the first-chance
+    ///  InvalidCastException that Umbraco's TryConvertTo throws when converting
+    ///  a JsonElement to a value type (see uSync.Complete issue #304).
+    /// </summary>
+    /// <remarks>
+    ///  Settings/config values often arrive as JsonElement (bound from appsettings.json).
+    ///  Asking Umbraco's TryConvertTo to turn one into e.g. a bool throws (and swallows)
+    ///  an InvalidCastException every call - harmless, but noisy and slow when a debugger
+    ///  is attached. Doing the JsonElement conversion with System.Text.Json first means the
+    ///  common path never throws; anything STJ can't handle still falls back to TryConvertTo.
+    /// </remarks>
+    public static bool TryConvertPreChecked<TObject>(this object? value, [MaybeNullWhen(false)] out TObject result)
+    {
+        result = default;
+        if (value is null) return false;
+
+        if (value is JsonElement element)
+        {
+            try
+            {
+                result = element.Deserialize<TObject>(_defaultOptions);
+                if (result is not null) return true;
+            }
+            catch
+            {
+                // not something STJ could convert directly - fall back to TryConvertTo below.
+            }
+        }
+
+        var attempt = value.TryConvertTo<TObject>();
+        if (attempt.Success is false || attempt.Result is null) return false;
+
+        result = attempt.Result;
+        return true;
+    }
+
     #endregion
 
     #region property getters 
