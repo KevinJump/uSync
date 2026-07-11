@@ -115,7 +115,7 @@ public abstract class SyncValueMapperBase
     protected static TObject? GetValueAs<TObject>(object value)
     {
         if (value == null) return default;
-        return value.TryConvertPreChecked<TObject>(out var result) ? result : default;
+        return value.TryGetValueAs<TObject>(out var result) ? result : default;
     }
 }
 

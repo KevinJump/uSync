@@ -390,34 +390,27 @@ public static class JsonTextExtensions
     public static string SerializeJsonString(this object value, bool indent = true)
         => value is null ? string.Empty : JsonSerializer.Serialize(value, indent ? _defaultOptions : _flatOptions);
 
-    private static bool TryGetValueAs<TObject>(this object value, [MaybeNullWhen(false)] out TObject result)
-    {
-        result = default;
-        if (value == null) return false;
-        var attempt = value.TryConvertTo<TObject>();
-        if (attempt is false || attempt.Result is null) return attempt;
-        result = attempt.Result;
-        return true;
-    }
-
     /// <summary>
-    ///  Convert a value to the requested type, pre-empting the first-chance
-    ///  InvalidCastException that Umbraco's TryConvertTo throws when converting
-    ///  a JsonElement to a value type (see uSync.Complete issue #304).
+    ///  Convert a value to the requested type.
     /// </summary>
     /// <remarks>
-    ///  Settings/config values often arrive as JsonElement (bound from appsettings.json).
-    ///  Asking Umbraco's TryConvertTo to turn one into e.g. a bool throws (and swallows)
-    ///  an InvalidCastException every call - harmless, but noisy and slow when a debugger
-    ///  is attached. Doing the JsonElement conversion with System.Text.Json first means the
-    ///  common path never throws; anything STJ can't handle still falls back to TryConvertTo.
+    ///  Pre-empts the first-chance InvalidCastException that Umbraco's TryConvertTo
+    ///  throws when converting a JsonElement to a value type (see uSync.Complete
+    ///  issue #304). Settings/config values often arrive as JsonElement (bound from
+    ///  appsettings.json); doing that conversion with System.Text.Json first means the
+    ///  common path never throws. String conversions (which TryConvertTo already
+    ///  handles cleanly) and anything STJ can't handle still fall back to TryConvertTo.
     /// </remarks>
-    public static bool TryConvertPreChecked<TObject>(this object? value, [MaybeNullWhen(false)] out TObject result)
+    public static bool TryGetValueAs<TObject>(this object? value, [MaybeNullWhen(false)] out TObject result)
     {
         result = default;
         if (value is null) return false;
 
-        if (value is JsonElement element)
+        // Umbraco's TryConvertTo turns a JsonElement into a string cleanly, but throws
+        // (and swallows) an InvalidCastException for JsonElement -> value type. Do the
+        // value-type conversion with System.Text.Json first to avoid that noise; string
+        // and anything STJ can't handle fall through to TryConvertTo below.
+        if (value is JsonElement element && typeof(TObject) != typeof(string))
         {
             try
             {
