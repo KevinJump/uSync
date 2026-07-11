@@ -264,75 +264,79 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     public async Task<IEnumerable<uSyncAction>> ImportAllAsync(string[] folders, HandlerSettings config, uSyncImportOptions options)
     {
         var cacheKey = PrepCaches();
-        runtimeCache.ClearByKey(cacheKey);
-
-        options.Callbacks?.Update?.Invoke("Calculating import order", 1, 9);
-
-        var items = await GetMergedItemsAsync(folders, new SyncMergeOptions(options.Callbacks?.Update));
-
-        options.Callbacks?.Update?.Invoke($"Processing {items.Count} items", 2, 9);
-
-        // create the update list with items.count space. this is the max size we need this list. 
-        List<uSyncAction> actions = new(items.Count);
-        List<ImportedItem<TObject>> updates = new(items.Count);
-        List<string> cleanMarkers = [];
-
-        int count = 0;
-        int total = items.Count;
-
-        options.Callbacks?.SetRange?.Invoke(count, total);
-
-        foreach (var item in items)
+        try
         {
-            count++;
+            options.Callbacks?.Update?.Invoke("Calculating import order", 1, 9);
 
+            var items = await GetMergedItemsAsync(folders, new SyncMergeOptions(options.Callbacks?.Update));
 
-            var result = await ImportElementAsync(item.Node, item.FileName, config, options);
-            foreach (var attempt in result)
+            options.Callbacks?.Update?.Invoke($"Processing {items.Count} items", 2, 9);
+
+            // create the update list with items.count space. this is the max size we need this list.
+            List<uSyncAction> actions = new(items.Count);
+            List<ImportedItem<TObject>> updates = new(items.Count);
+            List<string> cleanMarkers = [];
+
+            int count = 0;
+            int total = items.Count;
+
+            options.Callbacks?.SetRange?.Invoke(count, total);
+
+            foreach (var item in items)
             {
-                if (attempt.Success)
+                count++;
+
+
+                var result = await ImportElementAsync(item.Node, item.FileName, config, options);
+                foreach (var attempt in result)
                 {
-                    if (attempt.Change == ChangeType.Clean)
+                    if (attempt.Success)
                     {
-                        cleanMarkers.Add(item.Path);
+                        if (attempt.Change == ChangeType.Clean)
+                        {
+                            cleanMarkers.Add(item.Path);
+                        }
+                        else if (attempt.Item is not null && attempt.Item is TObject update)
+                        {
+                            updates.Add(new ImportedItem<TObject>(item.Node, update));
+                        }
                     }
-                    else if (attempt.Item is not null && attempt.Item is TObject update)
-                    {
-                        updates.Add(new ImportedItem<TObject>(item.Node, update));
-                    }
+
+                    if (attempt.Change != ChangeType.Clean)
+                        actions.Add(attempt);
+                }
+            }
+
+            // clean up memory we didn't use in the update list.
+            updates.TrimExcess();
+
+            // bulk save?
+            if (updates.Count > 0)
+            {
+                if (options.Flags.HasFlag(SerializerFlags.DoNotSave))
+                {
+                    await serializer.SaveAsync(updates.Select(x => x.Item));
                 }
 
-                if (attempt.Change != ChangeType.Clean)
-                    actions.Add(attempt);
+                await PerformSecondPassImportsAsync(updates, actions, config, options.Callbacks?.Update);
             }
-        }
 
-        // clean up memory we didn't use in the update list. 
-        updates.TrimExcess();
-
-        // bulk save?
-        if (updates.Count > 0)
-        {
-            if (options.Flags.HasFlag(SerializerFlags.DoNotSave))
+            if (actions.All(x => x.Success) && cleanMarkers.Count > 0)
             {
-                await serializer.SaveAsync(updates.Select(x => x.Item));
+                await PerformImportCleanAsync(cleanMarkers, actions, config, options.Callbacks?.Update);
             }
 
-            await PerformSecondPassImportsAsync(updates, actions, config, options.Callbacks?.Update);
-        }
+            options.Callbacks?.Update?.Invoke("Done", 3, 3);
 
-        if (actions.All(x => x.Success) && cleanMarkers.Count > 0)
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("ImportAll: {count} items imported", actions.Count);
+
+            return actions;
+        }
+        finally
         {
-            await PerformImportCleanAsync(cleanMarkers, actions, config, options.Callbacks?.Update);
+            CleanCaches(cacheKey);
         }
-
-        CleanCaches(cacheKey);
-        options.Callbacks?.Update?.Invoke("Done", 3, 3);
-
-        if (logger.IsEnabled(LogLevel.Debug))
-            logger.LogDebug("ImportAll: {count} items imported", actions.Count);
-
-        return actions;
     }
 
     /// <summary>
@@ -809,7 +813,19 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// Export all items to a give folder on the disk
     /// </summary>
     virtual public async Task<IEnumerable<uSyncAction>> ExportAllAsync(string[] folders, HandlerSettings settings, SyncUpdateCallback? callback)
-        => await ExportAllAsync(default, folders, settings, callback);
+    {
+        // scope the runtime cache (e.g. child-item lookups) to this export run, so the
+        // cache keys stay stable across async thread hops and are cleared when we're done.
+        var cacheKey = BeginCacheScope();
+        try
+        {
+            return await ExportAllAsync(default, folders, settings, callback);
+        }
+        finally
+        {
+            EndCacheScope(cacheKey);
+        }
+    }
 
 
     /// <summary>
@@ -1066,28 +1082,33 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         List<uSyncAction> actions = [];
 
         var cacheKey = PrepCaches();
-
-        callback?.Invoke("Calculating order", 1, 3);
-
-        var items = await GetMergedItemsAsync(folders, new SyncMergeOptions(callback));
-        var options = new uSyncImportOptions();
-
-        int count = 0;
-
-        foreach (var item in items)
+        try
         {
-            count++;
-            callback?.Invoke(Path.GetFileNameWithoutExtension(item.Path), count, items.Count);
-            actions.AddRange(await ReportElementAsync(item.Node, item.FileName, config, options));
+            callback?.Invoke("Calculating order", 1, 3);
+
+            var items = await GetMergedItemsAsync(folders, new SyncMergeOptions(callback));
+            var options = new uSyncImportOptions();
+
+            int count = 0;
+
+            foreach (var item in items)
+            {
+                count++;
+                callback?.Invoke(Path.GetFileNameWithoutExtension(item.Path), count, items.Count);
+                actions.AddRange(await ReportElementAsync(item.Node, item.FileName, config, options));
+            }
+
+            callback?.Invoke("Validating Report", 2, 3);
+            var validationActions = await ReportMissingParentsAsync([.. actions]);
+            actions.AddRange(ReportDeleteCheck(uSyncConfig.GetWorkingFolder(), validationActions));
+
+            callback?.Invoke($"Done ({this.ItemType})", 3, 3);
+            return actions;
         }
-
-        callback?.Invoke("Validating Report", 2, 3);
-        var validationActions = await ReportMissingParentsAsync([.. actions]);
-        actions.AddRange(ReportDeleteCheck(uSyncConfig.GetWorkingFolder(), validationActions));
-
-        CleanCaches(cacheKey);
-        callback?.Invoke($"Done ({this.ItemType})", 3, 3);
-        return actions;
+        finally
+        {
+            CleanCaches(cacheKey);
+        }
     }
 
     /// <summary>
@@ -1577,6 +1598,13 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     ///  </remarks>
     protected virtual async Task CleanUpAsync(TObject item, string newFile, string folder)
     {
+        // when using a flat folder structure with guid file names, an item's file is always
+        // "{key}.{ext}" in the same folder - it never changes name or location - so there can
+        // never be a stale duplicate file to clean up. Skip the (recursive) folder scan, which
+        // otherwise runs on every save/move/delete. (Content/Media make the same check earlier.)
+        if (DefaultConfig.UseFlatStructure && DefaultConfig.GuidNames)
+            return;
+
         var physicalFile = syncFileService.GetAbsPath(newFile);
 
         var files = syncFileService.GetFiles(folder, $"*.{this.uSyncConfig.Settings.DefaultExtension}");
@@ -1969,32 +1997,70 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 
 
     /// <summary>
-    ///  get the key for any caches we might call (thread based cache value)
+    ///  per-operation cache scope id.
+    /// </summary>
+    /// <remarks>
+    ///  this flows with the async operation (via AsyncLocal) so the runtime-cache keys
+    ///  stay stable even when a continuation resumes on a different thread. Previously the
+    ///  key was based on the managed thread id, which could change mid-operation across an
+    ///  await - defeating the cache (misses) and leaving orphaned entries in the shared
+    ///  runtime cache that the end-of-operation cleanup (running on another thread) missed.
+    ///
+    ///  when no operation scope is active (ad-hoc lookups) we fall back to the managed
+    ///  thread id, preserving the previous behavior for those callers.
+    /// </remarks>
+    private readonly AsyncLocal<string?> _cacheScope = new();
+
+    /// <summary>
+    ///  get the key for any caches we might call (scoped to the current operation)
     /// </summary>
     /// <returns></returns>
     protected string GetCacheKeyBase()
-        => $"keyCache_{this.Alias}_{Environment.CurrentManagedThreadId}";
+        => $"keyCache_{this.Alias}_{_cacheScope.Value ?? $"t{Environment.CurrentManagedThreadId}"}";
 
     private string PrepCaches()
     {
         if (this.serializer is ISyncCachedSerializer cachedSerializer)
             cachedSerializer.InitializeCache();
 
-        // make sure the runtime cache is clean.
-        var key = GetCacheKeyBase();
-
-        // this also clears the folder cache - as its a starts with call.
-        runtimeCache.ClearByKey(key);
-        return key;
+        return BeginCacheScope();
     }
 
     private void CleanCaches(string cacheKey)
     {
-        runtimeCache.ClearByKey(cacheKey);
+        EndCacheScope(cacheKey);
 
         if (this.serializer is ISyncCachedSerializer cachedSerializer)
             cachedSerializer.DisposeCache();
+    }
 
+    /// <summary>
+    ///  begin a runtime-cache scope for a single logical operation (import/report/export).
+    /// </summary>
+    /// <remarks>
+    ///  the scope id flows with the async operation (see <see cref="_cacheScope"/>) so the
+    ///  cache keys stay stable across await/thread hops, and the entries can be reliably
+    ///  cleared when the operation finishes.
+    /// </remarks>
+    /// <returns>the base cache key for the scope.</returns>
+    private string BeginCacheScope()
+    {
+        _cacheScope.Value = Guid.NewGuid().ToString("N");
+
+        // this also clears the folder cache - as its a 'starts with' call.
+        var key = GetCacheKeyBase();
+        runtimeCache.ClearByKey(key);
+        return key;
+    }
+
+    /// <summary>
+    ///  end the runtime-cache scope started by <see cref="BeginCacheScope"/>, clearing the
+    ///  entries cached during the operation.
+    /// </summary>
+    private void EndCacheScope(string cacheKey)
+    {
+        runtimeCache.ClearByKey(cacheKey);
+        _cacheScope.Value = null;
     }
 
     #region roots notifications 
