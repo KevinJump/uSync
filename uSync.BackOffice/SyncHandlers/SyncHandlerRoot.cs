@@ -697,8 +697,8 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 
         foreach (var file in files)
         {
-            var node = await syncFileService.LoadXElementAsync(file);
-            var key = node.GetKey();
+            // we only need the key here, so stream it rather than parsing the whole file.
+            var key = await syncFileService.LoadKeyFromFileAsync(file);
             if (key != Guid.Empty)
             {
                 keySet.Add(key);
@@ -719,8 +719,8 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     /// </summary>
     protected async Task<TObject?> GetCleanParentAsync(string file)
     {
-        var node = await syncFileService.LoadXElementAsync(file);
-        var key = node.GetKey();
+        // we only need the key to find the parent, so stream it rather than parsing the whole file.
+        var key = await syncFileService.LoadKeyFromFileAsync(file);
         if (key == Guid.Empty) return default;
         return await GetFromServiceAsync(key);
     }

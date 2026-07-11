@@ -137,6 +137,16 @@ public interface ISyncFileService
     Task<XElement> LoadXElementAsync(string file);
 
     /// <summary>
+    ///  load just the item key (the Key attribute on the root element) from a file.
+    /// </summary>
+    /// <remarks>
+    ///  This streams the file and stops at the root element, so we don't pay the cost
+    ///  of parsing the whole document when all we need is the key (e.g. when working out
+    ///  which items live in a folder for a 'clean' operation).
+    /// </remarks>
+    Task<Guid> LoadKeyFromFileAsync(string file);
+
+    /// <summary>
     ///  merge all the files in the given folders into a single xml node, that can be bulk imported
     /// </summary>
     Task<int> MakeSingleExportFromFolders(string[] folders, string itemType, ISyncTrackerBase? trackerBase, string fileName, string extension);
