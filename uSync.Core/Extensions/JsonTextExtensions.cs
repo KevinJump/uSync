@@ -430,6 +430,38 @@ public static class JsonTextExtensions
         return true;
     }
 
+    /// <summary>
+    ///  Convert a value to the requested runtime type.
+    /// </summary>
+    /// <remarks>
+    ///  Non-generic companion to the generic TryGetValueAs for callers that only
+    ///  have a runtime Type. Same JsonElement pre-check.
+    /// </remarks>
+    public static bool TryGetValueAs(this object? value, Type targetType, [MaybeNullWhen(false)] out object result)
+    {
+        result = default;
+        if (value is null) return false;
+
+        if (value is JsonElement element && targetType != typeof(string))
+        {
+            try
+            {
+                result = element.Deserialize(targetType, _defaultOptions);
+                if (result is not null) return true;
+            }
+            catch
+            {
+                // not something STJ could convert directly - fall back to TryConvertTo below.
+            }
+        }
+
+        var attempt = value.TryConvertTo(targetType);
+        if (attempt.Success is false || attempt.Result is null) return false;
+
+        result = attempt.Result;
+        return true;
+    }
+
     #endregion
 
     #region property getters 
@@ -491,8 +523,7 @@ public static class JsonTextExtensions
         if (obj.TryGetPropertyValue(propertyName, out var value) is false || value is null)
             return defaultValue;
 
-        var attempt = value.TryConvertTo<TResult>();
-        return attempt.ResultOr(defaultValue);
+        return value.TryGetValueAs<TResult>(out var result) ? result : defaultValue;
     }
 
     public static bool TryGetPropertyAsArray(this JsonObject jsonObject, string propertyName, [MaybeNullWhen(false)] out JsonArray result)

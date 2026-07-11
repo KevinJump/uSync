@@ -727,19 +727,18 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         if (propertyInfo != null)
         {
             var value = node.Element(propertyName).ValueOrDefault(string.Empty);
-            var attempt = value.TryConvertTo<TValue>();
-            if (attempt.Success)
+            if (value.TryGetValueAs<TValue>(out var converted))
             {
                 var current = ContentTypeBaseSerializer<TObject>.GetPropertyAs<TValue>(propertyInfo, property);
 
-                if (current == null || !current.Equals(attempt.Result))
+                if (current == null || !current.Equals(converted))
                 {
-                    propertyInfo.SetValue(property, attempt.Result);
+                    propertyInfo.SetValue(property, converted);
 
                     return uSyncChange.Update($"property/{propertyName}",
                         propertyName,
                         current.ToNonBlankValue(),
-                        attempt.Result?.ToString());
+                        converted?.ToString());
                 }
             }
         }
@@ -754,12 +753,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         var value = info.GetValue(property);
         if (value == null) return default;
 
-        var result = value.TryConvertTo<TValue>();
-        if (result.Success)
-            return result.Result;
-
-        return default;
-
+        return value.TryGetValueAs<TValue>(out var result) ? result : default;
     }
 
 

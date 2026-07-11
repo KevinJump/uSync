@@ -5,6 +5,8 @@ using System.Xml.Linq;
 
 using Umbraco.Extensions;
 
+using uSync.Core.Extensions;
+
 namespace uSync.Core;
 
 public static class XElementExtensions
@@ -138,11 +140,7 @@ public static class XElementExtensions
         var value = node.ValueOrDefault(string.Empty);
         if (value == string.Empty) return defaultValue;
 
-        var attempt = value.TryConvertTo<TObject>();
-        if (attempt)
-            return attempt.Result ?? defaultValue;
-
-        return defaultValue;
+        return value.TryGetValueAs<TObject>(out var result) ? result : defaultValue;
     }
 
 
@@ -209,8 +207,7 @@ public static class XElementExtensions
     {
         if (node is null) return;
 
-        var attempt = value.TryConvertTo<string>();
-        if (attempt.Success)
+        if (value.TryGetValueAs<string>(out var stringValue))
         {
             var element = node.Element(name);
             if (element is null)
@@ -219,7 +216,7 @@ public static class XElementExtensions
                 node.Add(element);
             }
 
-            element.Value = attempt.Result ?? string.Empty;
+            element.Value = stringValue ?? string.Empty;
         }
     }
 
@@ -289,11 +286,7 @@ public static class XElementExtensions
         var value = attribute.ValueOrDefault(string.Empty);
         if (value == string.Empty) return defaultValue;
 
-        var attempt = value.TryConvertTo<TObject>();
-        if (attempt)
-            return attempt.Result ?? defaultValue;
-
-        return defaultValue;
+        return value.TryGetValueAs<TObject>(out var result) ? result : defaultValue;
     }
     #endregion
 
