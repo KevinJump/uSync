@@ -13,14 +13,14 @@ namespace uSync.Tests.Extensions;
 ///  (uSync.Complete issue #304).
 /// </summary>
 [TestFixture]
-internal class TryConvertPreCheckedTests
+internal class TryGetValueAsTests
 {
     [Test]
     public void JsonElementTrue_ConvertsToBool()
     {
         object value = JsonSerializer.SerializeToElement(true);
 
-        var success = value.TryConvertPreChecked<bool>(out var result);
+        var success = value.TryGetValueAs<bool>(out var result);
 
         Assert.Multiple(() =>
         {
@@ -34,7 +34,7 @@ internal class TryConvertPreCheckedTests
     {
         object value = JsonSerializer.SerializeToElement(false);
 
-        var success = value.TryConvertPreChecked<bool>(out var result);
+        var success = value.TryGetValueAs<bool>(out var result);
 
         Assert.Multiple(() =>
         {
@@ -48,7 +48,7 @@ internal class TryConvertPreCheckedTests
     {
         object value = JsonSerializer.SerializeToElement(42);
 
-        var success = value.TryConvertPreChecked<int>(out var result);
+        var success = value.TryGetValueAs<int>(out var result);
 
         Assert.Multiple(() =>
         {
@@ -63,7 +63,7 @@ internal class TryConvertPreCheckedTests
         var guid = Guid.NewGuid();
         object value = JsonSerializer.SerializeToElement(guid.ToString());
 
-        var success = value.TryConvertPreChecked<Guid>(out var result);
+        var success = value.TryGetValueAs<Guid>(out var result);
 
         Assert.Multiple(() =>
         {
@@ -77,7 +77,7 @@ internal class TryConvertPreCheckedTests
     {
         object value = JsonSerializer.SerializeToElement("hello");
 
-        var success = value.TryConvertPreChecked<string>(out var result);
+        var success = value.TryGetValueAs<string>(out var result);
 
         Assert.Multiple(() =>
         {
@@ -93,7 +93,7 @@ internal class TryConvertPreCheckedTests
     {
         object value = "42";
 
-        var success = value.TryConvertPreChecked<int>(out var result);
+        var success = value.TryGetValueAs<int>(out var result);
 
         Assert.Multiple(() =>
         {
@@ -107,7 +107,7 @@ internal class TryConvertPreCheckedTests
     {
         object? value = null;
 
-        var success = value.TryConvertPreChecked<bool>(out var result);
+        var success = value.TryGetValueAs<bool>(out var result);
 
         Assert.Multiple(() =>
         {

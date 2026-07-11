@@ -409,15 +409,14 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
                 var current = GetPropertyAs<string>(property, historyCleanup);
                 if (element.Value != current)
                 {
-                    // now set it. 
-                    var updatedValue = element.Value.TryConvertTo(property.PropertyType);
-                    if (updatedValue.Success)
+                    // now set it.
+                    if (element.Value.TryGetValueAs(property.PropertyType, out var updatedValue))
                     {
                         if (logger.IsEnabled(LogLevel.Debug))
-                            logger.LogDebug("Saving HistoryCleanup Value: {name} {value}", element.Name.LocalName, updatedValue.Result);
+                            logger.LogDebug("Saving HistoryCleanup Value: {name} {value}", element.Name.LocalName, updatedValue);
 
-                        changes.AddUpdate($"{_historyCleanupName}:{element.Name.LocalName}", current.ToNonBlankValue(), updatedValue.Result, $"{_historyCleanupName}/{element.Name.LocalName}");
-                        property.SetValue(historyCleanup, updatedValue.Result);
+                        changes.AddUpdate($"{_historyCleanupName}:{element.Name.LocalName}", current.ToNonBlankValue(), updatedValue, $"{_historyCleanupName}/{element.Name.LocalName}");
+                        property.SetValue(historyCleanup, updatedValue);
                     }
                 }
             }
@@ -451,11 +450,6 @@ public class ContentTypeSerializer : ContentTypeBaseSerializer<IContentType>, IS
         var value = info.GetValue(property);
         if (value is null) return default;
 
-        var result = value.TryConvertTo<TValue>();
-        if (result.Success)
-            return result.Result;
-
-        return default;
-
+        return value.TryGetValueAs<TValue>(out var result) ? result : default;
     }
 }

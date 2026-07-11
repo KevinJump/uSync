@@ -706,8 +706,8 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         if (current != null && newValue != null && current.GetType() != newValue.GetType())
         {
             var currentType = current.GetType();
-            var attempt = newValue.TryConvertTo(currentType);
-            if (attempt.Success) return !current.Equals(attempt.Result);
+            if (newValue.TryGetValueAs(currentType, out var converted))
+                return !current.Equals(converted);
         }
 
         return true;

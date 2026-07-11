@@ -1,5 +1,7 @@
 ﻿using Umbraco.Extensions;
 
+using uSync.Core.Extensions;
+
 namespace uSync.Core;
 
 public static class ListExtensions
@@ -40,10 +42,9 @@ public static class ListExtensions
         foreach (var item in items)
         {
             if (string.IsNullOrWhiteSpace(item)) continue;
-            var attempt = item.TryConvertTo<T>();
-            if (attempt.Success && attempt.Result is not null)
+            if (item.TryGetValueAs<T>(out var result))
             {
-                yield return attempt.Result;
+                yield return result;
             }
         }
     }

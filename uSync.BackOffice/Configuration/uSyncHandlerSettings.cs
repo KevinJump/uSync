@@ -93,7 +93,7 @@ public static class HandlerSettingsExtensions
     {
         if (settings.Settings != null && settings.Settings.TryGetValue(key, out var value) && value is not null)
         {
-            if (value.TryConvertPreChecked<TResult>(out var result) && result is not null)
+            if (value.TryGetValueAs<TResult>(out var result) && result is not null)
                 return result;
         }
 

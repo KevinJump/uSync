@@ -74,7 +74,7 @@ public class SyncSerializerOptions
     {
         if (this.Settings?.TryGetValue(key, out var value) is true && value is not null)
         {
-            if (value.TryConvertPreChecked<TResult>(out var result) && result is not null)
+            if (value.TryGetValueAs<TResult>(out var result) && result is not null)
                 return result;
         }
 
