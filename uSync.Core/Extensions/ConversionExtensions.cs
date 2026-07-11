@@ -13,8 +13,8 @@ internal static class ConversionExtensions
 
     public static Guid ConvertToGuid(this int value)
     {
-        byte[] bytes = new byte[16];
-        BitConverter.GetBytes(value).CopyTo(bytes, 0);
+        Span<byte> bytes = stackalloc byte[16];
+        BitConverter.TryWriteBytes(bytes, value);
         return new Guid(bytes);
     }
 }
