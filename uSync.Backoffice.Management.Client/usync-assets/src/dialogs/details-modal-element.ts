@@ -86,7 +86,7 @@ export class uSyncDetailsModalElement extends UmbModalBaseElement<
 			type="button"
 			look="outline"
 			.state=${this.importState}
-			.label=${this.localize.term('uSync_importSingle')}
+			.label=${this.localize.termOrDefault('uSync_importSingle', 'Import')}
 			@click="${this.#onImport}"></uui-button>`;
 	}
 

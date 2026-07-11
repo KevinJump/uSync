@@ -243,11 +243,11 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 
 		return html`<div class="set-picker">
 			<label for="set-select"
-				>${this.localize.term('USyncSettings_currentHandlerSet')}</label
+				>${this.localize.termOrDefault('USyncSettings_currentHandlerSet', 'Current Set')}</label
 			>
 			<uui-select
 				id="set-select"
-				.label=${this.localize.term('USyncSettings_currentHandlerSet')}
+				.label=${this.localize.termOrDefault('USyncSettings_currentHandlerSet', 'Current Set')}
 				.options=${options}
 				@change=${(e: Event) => {
 					const select = e.target as HTMLSelectElement;
@@ -264,7 +264,7 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 			: html`
 					<div class="legacy-banner">
 						<umb-icon name="icon-alert"></umb-icon>
-						${this.localize.term('uSync_legacyBanner')}
+						${this.localize.termOrDefault('uSync_legacyBanner', 'This site contains files from a previous version of uSync, view the details in the legacy tab.')}
 					</div>
 				`;
 	}
@@ -333,15 +333,15 @@ export class uSyncDefaultViewElement extends UmbLitElement {
 		if (!this._connected) {
 			return html` <uui-box class="banner warning">
 				<uui-icon name="icon-alert"></uui-icon>
-				${this.localize.term('uSync_runningInBackground')}
+				${this.localize.termOrDefault('uSync_runningInBackground', 'uSync is running this process in background, if you navigate away from this page it will continue to run.')}
 				<br />
-				${this.localize.term('uSync_connectionLost')}
+				${this.localize.termOrDefault('uSync_connectionLost', 'the connection to the server has been lost, the process will continue to run in the background but you will not see updates here.')}
 			</uui-box>`;
 		}
 
 		return html`<uui-box class="banner info">
 			<uui-icon name="icon-info"></uui-icon>
-			${this.localize.term('uSync_runningInBackground')}
+			${this.localize.termOrDefault('uSync_runningInBackground', 'uSync is running this process in background, if you navigate away from this page it will continue to run.')}
 		</uui-box>`;
 	}
 

@@ -117,7 +117,7 @@ export class uSyncResultsView extends UmbElementMixin(LitElement) {
 
 		return html`<div class="result-header">
 			<uui-toggle
-				.label=${this.localize.term('uSync_showAll')}
+				.label=${this.localize.termOrDefault('uSync_showAll', 'Show all items')}
 				?checked=${this.showAll}
 				@change=${this.#toggleShowAll}></uui-toggle>
 			<umb-localize .key=${localKey} .args=${[count, changes]}

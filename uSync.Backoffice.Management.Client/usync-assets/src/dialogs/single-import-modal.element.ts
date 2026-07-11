@@ -64,7 +64,7 @@ export default class SyncImportSingleModalElement extends UmbModalBaseElement<
 							color="positive"
 							type="button"
 							.state=${this.importState}
-							.label=${this.localize.term('uSync_importSingle')}
+							.label=${this.localize.termOrDefault('uSync_importSingle', 'Import')}
 							@click="${this.#doImport}"></uui-button>`,
 				)}
 			</div>

@@ -30,7 +30,7 @@ export class uSyncLegacyModalElement extends UmbModalBaseElement<
 	renderLegacyFolder(folder: string | null | undefined) {
 		return folder === undefined || folder === null
 			? nothing
-			: html`${this.localize.term('uSync.legacyInfo', [folder])}`;
+			: html`${this.localize.termOrDefault('uSync.legacyInfo', 'uSync has found a legacy uSync folder', folder)}`;
 	}
 
 	renderLegacyTypes(legacyTypes: Array<string> | undefined) {
@@ -43,14 +43,12 @@ export class uSyncLegacyModalElement extends UmbModalBaseElement<
 		});
 
 		return html`<div>
-			${this.localize.term('uSync.legacyObsolete', [legacyTypeHtml])}
+			${this.localize.termOrDefault('uSync.legacyObsolete', 'Obsolete DataTypes', legacyTypeHtml)}
 		</div>`;
 	}
 
 	renderCopy() {
-		return html`${this.localize.term('uSync.legacyCopy', [
-			this.data?.legacyFolder ?? 'uSync/v15',
-		])} `;
+		return html`${this.localize.termOrDefault('uSync.legacyCopy', 'Copy to uSync folder', this.data?.legacyFolder ?? 'uSync/v15')} `;
 	}
 
 	static styles = css`
