@@ -88,7 +88,7 @@ public abstract class SyncTreeSerializerBase<TObject> : SyncSerializerBase<TObje
     /// <summary>
     ///  calculates the Umbraco Path value for an item, based on the parent
     /// </summary>
-    protected string CalculateNodePath(TObject item, TObject? parent)
+    protected string CalculateNodePath(TObject item, ITreeEntity? parent)
     {
         if (parent == null)
         {
@@ -103,7 +103,7 @@ public abstract class SyncTreeSerializerBase<TObject> : SyncSerializerBase<TObje
     /// <summary>
     ///  calculates the Level based on the parent.
     /// </summary>
-    protected int CalculateNodeLevel(TObject item, TObject? parent)
+    protected int CalculateNodeLevel(TObject item, ITreeEntity? parent)
     {
         if (parent == null)
         {
