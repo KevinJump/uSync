@@ -1,41 +1,52 @@
-name: v16 - PR Project Build and Test
+name: PR Project Build and Test
 permissions:
   contents: read
   pull-requests: write
-  
+
 on:
   pull_request:
-    branches: [v16/main]
+    branches: [ "*/main" ]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 env:
   config: Release
   out_folder: ./build-out/
+  solution_name: ./uSync.slnx
+  test_project: ./uSync.Tests/uSync.Tests.csproj
+  schema_gen_project: ./uSync.SchemaGenerator/uSync.SchemaGenerator.csproj
 
 jobs:
   build-project:
     runs-on: windows-latest
 
-    env:
-      solution_name: ./uSync.sln
-      test_project: ./uSync.Tests/uSync.tests.csproj
-      schema_gen_project: ./uSync.SchemaGenerator/uSync.SchemaGenerator.csproj
-
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 9.0.x
+          dotnet-version: 10.0.x
           cache: true
           cache-dependency-path: "**/packages.lock.json"
 
+      # the client project's build runs `npm run build` via an MSBuild target,
+      # so node needs to be available before the dotnet build step below.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+
       - name: restore
-        run: dotnet restore ${{ env.solution_name}} --locked-mode
+        run: dotnet restore ${{ env.solution_name }} --locked-mode
 
       - name: build
         run: dotnet build ${{ env.solution_name }} -c ${{ env.config }} -p:ContinuousIntegrationBuild=true
 
       - name: test
-        run: dotnet test ${{ env.solution_name }}
+        run: dotnet test ${{ env.test_project }} -c ${{ env.config }}
 
       - name: Generate AppSettings Schema
-        run: dotnet run -c ${{env.Config}} --project ${{ env.schema_gen_project}}
+        run: dotnet run -c ${{ env.config }} --project ${{ env.schema_gen_project }}
