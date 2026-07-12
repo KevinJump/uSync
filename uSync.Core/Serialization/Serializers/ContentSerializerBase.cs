@@ -142,6 +142,18 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
                     parentKey = parent.Key;
                     parentName = parent.Name;
                 }
+                else
+                {
+                    // the parent might not be of our object type (e.g a blueprint's
+                    // parent can be a DocumentBlueprintContainer, not a DocumentBlueprint)
+                    // so fall back to an untyped lookup rather than losing the parent entirely.
+                    var entity = syncMappers.EntityCache.GetEntity(item.ParentId);
+                    if (entity != null)
+                    {
+                        parentKey = entity.Key;
+                        parentName = entity.Name ?? parentName;
+                    }
+                }
             }
         }
 
@@ -320,6 +332,17 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
     protected abstract int RecycleBinId { get; }
 
     /// <summary>
+    ///  last chance creation of a missing parent - used by blueprints to create
+    ///  the DocumentBlueprintContainer folder chain the blueprint lives in.
+    /// </summary>
+    /// <remarks>
+    ///  returns null by default, serializers that can create their own parents
+    ///  (e.g the blueprint serializer) override this.
+    /// </remarks>
+    protected virtual Task<SyncParentItem?> CreateParentIfMissingAsync(XElement parentNode, string path)
+        => Task.FromResult<SyncParentItem?>(null);
+
+    /// <summary>
     ///  calculate what the parent, path and level should be for this item, based on the info in the file, and the current state of the system.
     /// </summary>
     protected async Task<(int parentId, string nodePath, int nodeLevel)> GetParentPathAndLevelAsync(TObject item, XElement node)
@@ -349,6 +372,11 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
             logger.LogDebug("Find Parent failed, will search by path {FriendlyPath}", friendlyPath);
 
         parentItem = await FindParentByPathAsync(friendlyPath);
+
+        // last chance - let the serializer create the parent if it can
+        // (blueprints create the missing DocumentBlueprintContainer folders).
+        parentItem ??= await CreateParentIfMissingAsync(parentNode, friendlyPath);
+
         return (parentItem?.Id ?? parentId, nodePath, nodeLevel);
     }
 
@@ -660,8 +688,8 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
         if (current != null && newValue != null && current.GetType() != newValue.GetType())
         {
             var currentType = current.GetType();
-            var attempt = newValue.TryConvertTo(currentType);
-            if (attempt.Success) return !current.Equals(attempt.Result);
+            if (newValue.TryGetValueAs(currentType, out var converted))
+                return !current.Equals(converted);
         }
 
         return true;
@@ -905,6 +933,21 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
                 AddToNameCache(item.Id, item.Key, item.Name ?? item.Id.ToString());
                 friendlyPath = friendlyPath.Replace($"[{item.Id}]",
                     (item.Name ?? item.Id.ToString()).ToSafeAlias(shortStringHelper));
+            }
+
+            // some paths contain ids for items that are not of our object type
+            // (e.g a blueprint's parent can be a DocumentBlueprintContainer, not
+            // a DocumentBlueprint) - so for anything still unresolved, fall back
+            // to an untyped lookup rather than leaving the raw id in the path.
+            var unresolvedIds = lookups.Where(id => items.All(x => x.Id != id));
+            foreach (var id in unresolvedIds)
+            {
+                var entity = syncMappers.EntityCache.GetEntity(id);
+                if (entity == null) continue;
+
+                AddToNameCache(entity.Id, entity.Key, entity.Name ?? entity.Id.ToString());
+                friendlyPath = friendlyPath.Replace($"[{entity.Id}]",
+                    (entity.Name ?? entity.Id.ToString()).ToSafeAlias(shortStringHelper));
             }
 
             return friendlyPath;

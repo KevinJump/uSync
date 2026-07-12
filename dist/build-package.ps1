@@ -117,7 +117,13 @@ $sln_name = "..\uSync.slnx";
 ## restore up front with --force-evaluate so the build's implicit restore doesn't run in
 ## locked mode and fail on NU1403 package content-hash mismatches. --force-evaluate
 ## re-evaluates against the current cache (updating the lock file) instead of erroring.
-dotnet restore $sln_name --force-evaluate
+##
+## -p:Configuration=$env matters: some projects (uSync.Extend) are excluded from the
+## Debug solution configuration via <Build Solution="Debug|*" Project="false" /> in
+## uSync.slnx. A restore with no configuration defaults to Debug and silently skips
+## those projects, leaving their lock file stale for the --no-restore build/pack below
+## (which run in $env/Release) - surfacing later as a NU1903 audit failure on pack.
+dotnet restore $sln_name --force-evaluate -p:Configuration=$env
 
 ""; "##### Building project"; "--------------------------------"; ""
 ## --no-restore: we've already restored above, don't let the build kick off a second

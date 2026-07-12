@@ -85,5 +85,5 @@ public abstract class SyncTreeSerializerBase<TObject> : SyncSerializerBase<TObje
     ///  does the parent item (as defined in the xml) exist in umbraco for this item?
     /// </summary>
     protected virtual Task<bool> HasParentItemAsync(XElement node)
-        => Task.FromResult(true);   
+        => Task.FromResult(true);
 }

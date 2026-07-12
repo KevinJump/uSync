@@ -2,6 +2,8 @@
 
 using Umbraco.Extensions;
 
+using uSync.Core.Extensions;
+
 namespace uSync.Core.Serialization;
 
 /// <summary>
@@ -70,11 +72,10 @@ public class SyncSerializerOptions
 
     public TResult GetSetting<TResult>(string key, TResult defaultValue)
     {
-        if (this.Settings?.TryGetValue(key, out var value) is true)
+        if (this.Settings?.TryGetValue(key, out var value) is true && value is not null)
         {
-            var attempt = value.TryConvertTo<TResult>();
-            if (attempt.Success && attempt.Result is not null)
-                return attempt.Result;
+            if (value.TryGetValueAs<TResult>(out var result) && result is not null)
+                return result;
         }
 
         return defaultValue;

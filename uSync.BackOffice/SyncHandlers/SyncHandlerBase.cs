@@ -99,9 +99,11 @@ public abstract class SyncHandlerBase<TObject>
 
     private async Task<Guid?> GetCleanParentKeyAsync(string cleanFile)
     {
-        var node = await syncFileService.LoadXElementAsync(cleanFile);
-        if (node.GetKey() == Guid.Empty) return Guid.Empty;
-        return (await GetCleanParentAsync(cleanFile))?.Key;
+        // stream the key rather than parsing the whole file, and reuse it for the
+        // parent lookup so we don't read the clean file a second time.
+        var key = await syncFileService.LoadKeyFromFileAsync(cleanFile);
+        if (key == Guid.Empty) return Guid.Empty;
+        return (await GetFromServiceAsync(key))?.Key;
     }
 
     /// <summary>

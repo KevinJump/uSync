@@ -211,6 +211,51 @@ internal class SyncFileService : ISyncFileService
         }
     }
 
+    private static readonly XmlReaderSettings _keyReaderSettings = new()
+    {
+        CheckCharacters = false,
+        Async = true,
+        IgnoreWhitespace = true,
+        IgnoreComments = true,
+        IgnoreProcessingInstructions = true,
+        DtdProcessing = DtdProcessing.Prohibit,
+    };
+
+    /// <inheritdoc/>
+    public async Task<Guid> LoadKeyFromFileAsync(string file)
+    {
+        EnsureFileExists(file);
+
+        try
+        {
+            using (var stream = OpenRead(file))
+            {
+                if (stream is null)
+                    throw new FileNotFoundException($"Cannot create stream for {file}");
+
+                using (var reader = XmlReader.Create(stream, _keyReaderSettings.Clone()))
+                {
+                    // move to the first (root) element and read its Key attribute,
+                    // we don't need to read any further into the document.
+                    while (await reader.ReadAsync())
+                    {
+                        if (reader.NodeType != XmlNodeType.Element) continue;
+
+                        var key = reader.GetAttribute(global::uSync.Core.uSyncConstants.Xml.Key);
+                        return Guid.TryParse(key, out var guid) ? guid : Guid.Empty;
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning("Error while reading key from {file} {message}", file, ex.Message);
+            throw new Exception($"Error while reading key from {file}", ex);
+        }
+
+        return Guid.Empty;
+    }
+
     /// <inheritdoc/>
     public async Task SaveFileAsync(string filename, Stream stream)
     {

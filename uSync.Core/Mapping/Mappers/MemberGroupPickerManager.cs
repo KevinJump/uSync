@@ -3,6 +3,7 @@ using Umbraco.Cms.Core.Services;
 using Umbraco.Extensions;
 
 using uSync.Core.Dependency;
+using uSync.Core.Extensions;
 using uSync.Core.Serialization;
 
 using static Umbraco.Cms.Core.Constants;
@@ -30,11 +31,10 @@ public class MemberGroupPickerMapper : SyncValueMapperBase, ISyncMapper
     /// </summary>
     public override async Task<string?> GetExportValueAsync(object value, string editorAlias)
     {
-        var attempt = value.TryConvertTo<string>();
-        if (attempt.Success is false || attempt.Result is null)
+        if (value.TryGetValueAs<string>(out var stringValue) is false)
             return await base.GetExportValueAsync(value, editorAlias);
 
-        var values = attempt.Result.ToDelimitedList().ConvertItems<int>();
+        var values = stringValue.ToDelimitedList().ConvertItems<int>();
 
         var groups = new List<string>();
 
@@ -86,11 +86,10 @@ public class MemberGroupPickerMapper : SyncValueMapperBase, ISyncMapper
             return Enumerable.Empty<uSyncDependency>();
 
         // get the int value and load the group
-        var attempt = value.TryConvertTo<string>();
-        if (attempt.Success is false || attempt.Result is null) 
+        if (value.TryGetValueAs<string>(out var stringValue) is false)
             return await base.GetDependenciesAsync(value, editorAlias, flags);
 
-        var values = attempt.Result.ToDelimitedList().ConvertItems<int>();
+        var values = stringValue.ToDelimitedList().ConvertItems<int>();
 
         var dependencies = new List<uSyncDependency>();
 

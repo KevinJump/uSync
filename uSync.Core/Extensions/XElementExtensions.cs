@@ -7,6 +7,8 @@ using System.Xml.Linq;
 
 using Umbraco.Extensions;
 
+using uSync.Core.Extensions;
+
 namespace uSync.Core;
 
 public static class XElementExtensions
@@ -157,13 +159,39 @@ public static class XElementExtensions
     public static TObject ValueOrDefault<TObject>([AllowNull] this XElement? node, TObject defaultValue)
     {
         var value = node.ValueOrDefault(string.Empty);
-        if (value == string.Empty) return defaultValue;
+        if (value.Length == 0) return defaultValue;
 
-        var attempt = value.TryConvertTo<TObject>();
-        if (attempt)
-            return attempt.Result ?? defaultValue;
+        return value.ConvertOrDefault(defaultValue);
+    }
 
-        return defaultValue;
+    /// <summary>
+    ///  Convert a non-empty string value to the requested type.
+    /// </summary>
+    /// <remarks>
+    ///  These getters are called for (almost) every attribute of every node during a
+    ///  report/import. The handful of value types actually used have direct, allocation
+    ///  free parsers that are much cheaper than routing through Umbraco's reflection based
+    ///  TryConvertTo. The typeof(TObject) == typeof(...) comparisons are folded to
+    ///  constants by the JIT per generic instantiation, so the branches have no runtime
+    ///  cost. Anything not matched falls through to TryGetValueAs.
+    /// </remarks>
+    private static TObject ConvertOrDefault<TObject>(this string value, TObject defaultValue)
+    {
+        if (typeof(TObject) == typeof(int))
+            return int.TryParse(value, out var i) ? (TObject)(object)i : defaultValue;
+
+        if (typeof(TObject) == typeof(Guid))
+            return Guid.TryParse(value, out var g) ? (TObject)(object)g : defaultValue;
+
+        if (typeof(TObject) == typeof(bool))
+            return bool.TryParse(value, out var b) ? (TObject)(object)b : defaultValue;
+
+        if (typeof(TObject).IsEnum)
+            return Enum.TryParse(typeof(TObject), value, true, out var e) && e is TObject enumValue
+                ? enumValue
+                : defaultValue;
+
+        return value.TryGetValueAs<TObject>(out var result) ? result : defaultValue;
     }
 
 
@@ -230,8 +258,7 @@ public static class XElementExtensions
     {
         if (node is null) return;
 
-        var attempt = value.TryConvertTo<string>();
-        if (attempt.Success)
+        if (value.TryGetValueAs<string>(out var stringValue))
         {
             var element = node.Element(name);
             if (element is null)
@@ -240,7 +267,7 @@ public static class XElementExtensions
                 node.Add(element);
             }
 
-            element.Value = attempt.Result ?? string.Empty;
+            element.Value = stringValue ?? string.Empty;
         }
     }
 
@@ -308,13 +335,9 @@ public static class XElementExtensions
     public static TObject ValueOrDefault<TObject>([AllowNull] this XAttribute attribute, TObject defaultValue)
     {
         var value = attribute.ValueOrDefault(string.Empty);
-        if (value == string.Empty) return defaultValue;
+        if (value.Length == 0) return defaultValue;
 
-        var attempt = value.TryConvertTo<TObject>();
-        if (attempt)
-            return attempt.Result ?? defaultValue;
-
-        return defaultValue;
+        return value.ConvertOrDefault(defaultValue);
     }
     #endregion
 
@@ -335,17 +358,17 @@ public static class XElementExtensions
     /// </remarks>
     public static async Task<string> MakePlatformSafeHashAsync(this XElement node)
     {
-        using (MemoryStream stream = new MemoryStream())
-        {
-            await node.SaveAsync(stream, SaveOptions.None, CancellationToken.None);
-            stream.Seek(0, SeekOrigin.Begin);
+        using HashAlgorithm hashAlgorithm = CryptoConfig.AllowOnlyFipsAlgorithms ? SHA1.Create() : MD5.Create();
 
-            using (HashAlgorithm hashAlgorithm = CryptoConfig.AllowOnlyFipsAlgorithms ? SHA1.Create() : MD5.Create())
-            {
-                var hash = await hashAlgorithm.ComputeHashAsync(stream);
-                return Convert.ToHexStringLower(hash);
-            }
+        // stream the xml straight into the hash instead of buffering the whole
+        // serialized document into a MemoryStream first. CryptoStream feeds each
+        // written block to the algorithm as it arrives, so nothing is held in memory.
+        using (var cryptoStream = new CryptoStream(Stream.Null, hashAlgorithm, CryptoStreamMode.Write))
+        {
+            await node.SaveAsync(cryptoStream, SaveOptions.None, CancellationToken.None);
         }
+
+        return Convert.ToHexStringLower(hashAlgorithm.Hash!);
     }
 
 }

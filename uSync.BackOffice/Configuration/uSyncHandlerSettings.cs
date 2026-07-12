@@ -4,6 +4,8 @@ using System.ComponentModel;
 
 using Umbraco.Extensions;
 
+using uSync.Core.Extensions;
+
 namespace uSync.BackOffice.Configuration;
 
 /// <summary>
@@ -89,10 +91,10 @@ public static class HandlerSettingsExtensions
     /// <returns></returns>
     public static TResult GetSetting<TResult>(this HandlerSettings settings, string key, TResult defaultValue)
     {
-        if (settings.Settings != null && settings.Settings.TryGetValue(key, out var value))
+        if (settings.Settings != null && settings.Settings.TryGetValue(key, out var value) && value is not null)
         {
-            var attempt = value.TryConvertTo<TResult>();
-            if (attempt) return attempt.Result ?? defaultValue;
+            if (value.TryGetValueAs<TResult>(out var result) && result is not null)
+                return result;
         }
 
         return defaultValue;

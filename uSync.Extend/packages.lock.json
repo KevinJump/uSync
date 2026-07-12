@@ -1209,7 +1209,7 @@
       "Umbraco.Cms.Api.Common": {
         "type": "Transitive",
         "resolved": "18.0.0",
-        "contentHash": "Rmeql1eoKH2uy1hms5QChjDAgqRVNAlRXQs2xR6U9qLV8c4mS+gD0hcK7gLIMJw5UrVrN7sCZUzOeDkrvimU5g==",
+        "contentHash": "HA+3PEv7E67OkfxTWbMehFgeL1PnXTZlRNGqD14sRRaWyEVwvniGx97j0CoQYTizIEpXEz10tXAutJl4UWMupw==",
         "dependencies": {
           "Asp.Versioning.Mvc": "10.0.0",
           "Asp.Versioning.Mvc.ApiExplorer": "10.0.0",
@@ -1252,7 +1252,7 @@
       "Umbraco.Cms.Examine.Lucene": {
         "type": "Transitive",
         "resolved": "18.0.0",
-        "contentHash": "9H4lHCo7CPOD/2lQd7rJdc1g4oWjDNXjU4NUqfjlRVe9hnGdG+ZKNBBCIwYSE0T/0wdSbZQvMlHsY0XSZkJngQ==",
+        "contentHash": "cCObE4X3PrAk42P2DwpijLJNexZ8dp5cM8l3/5X1E7WSfwDNR3vFu8+PnOpgBGbdPiIJrDrt6nZWL59OqhVbZA==",
         "dependencies": {
           "Examine": "3.7.1",
           "Examine.Core": "3.7.1",
@@ -1298,7 +1298,7 @@
       "Umbraco.Cms.Infrastructure": {
         "type": "Transitive",
         "resolved": "18.0.0",
-        "contentHash": "oLci+0vYha0K7U5l+SnOx+JyUFFD2/gkWl+2k28Z4z4tIxX+KOZaYs2kcSQEEeyNm9EgSeAQAWSrUk75pM7z8A==",
+        "contentHash": "dtDxfWuFMTHyjSWbKe+mQBQi3dG4LJFepeyMmQOh3OoTXxbRKNkZqJczXe3UTw+EQTA2S36L1s90alHjvFz3AA==",
         "dependencies": {
           "Examine.Core": "3.7.1",
           "HtmlAgilityPack": "1.12.4",
@@ -1342,7 +1342,7 @@
       "Umbraco.Cms.PublishedCache.HybridCache": {
         "type": "Transitive",
         "resolved": "18.0.0",
-        "contentHash": "lae6QsI/fnjIE2XF2bxsjhYBzqbFar4rUl/D0e+GHpn+hxUpbACmnQ3vNNpsrs7vd1U1zOKi5C/wSyUuosvY8A==",
+        "contentHash": "DfEM9pid0R9X5ug5Rt2fEKM9rRUzWfHpOxMorAXhZLqPz1iZVIiJkLS2vTwj7s8BRGyMKXlHVlJMJFRjsWrQ3A==",
         "dependencies": {
           "Examine.Core": "3.7.1",
           "HtmlAgilityPack": "1.12.4",
@@ -1390,7 +1390,7 @@
       "Umbraco.Cms.Web.Common": {
         "type": "Transitive",
         "resolved": "18.0.0",
-        "contentHash": "Ej8KnY0S2ShgLpnvvNRUxpIsYhmK4/SbB4G+WQsoxsamkFfI4aWvfRo5dg8JgKO7WQrNYLKpeE/GCV37oCcbzg==",
+        "contentHash": "C8HQgeOlDRrqurElg63GhX7xXTYzxSOZJ9crxyiKOtgfXGlaQXSuOxWB4WM4wuKOh0jQPZiyB7+cjbaVGw7JhQ==",
         "dependencies": {
           "Asp.Versioning.Mvc": "10.0.0",
           "Asp.Versioning.Mvc.ApiExplorer": "10.0.0",
@@ -1451,7 +1451,7 @@
         "type": "CentralTransitive",
         "requested": "[18.0.0, )",
         "resolved": "18.0.0",
-        "contentHash": "/kPxriMZLu/BZAO3zcw1gsmutBmx/b/65kr41AVq9IQM5jH5/dNjnqs8VsMsw9uKImvG9/rLaArrqU0E3dfi2Q==",
+        "contentHash": "tuxXGtQV0yvF/Cf0TieLBlW6z+lFygL95IJmVCS2L4K0F+Dw5c3oZkIvZ/pPowopas11ptq3UpDfPzhS1WgULg==",
         "dependencies": {
           "Asp.Versioning.Mvc": "10.0.0",
           "Asp.Versioning.Mvc.ApiExplorer": "10.0.0",
@@ -1512,7 +1512,7 @@
         "type": "CentralTransitive",
         "requested": "[18.0.0, )",
         "resolved": "18.0.0",
-        "contentHash": "iRnhJV7aCZs947W10u2BRcldvl3pk6COdRur4LcV5GVlDPPwNfKs00oIZYGgMYhazE/sg0cUHbjJXGuR3doPvw==",
+        "contentHash": "VS0UNcn8DzCABYczauahvlb3pBqzw6nl7WRWZMOKRlTz0238ms9KtnplJqphwFrsF3OdyNijUFuNf1TwJv4dqA==",
         "dependencies": {
           "Microsoft.Extensions.Caching.Abstractions": "10.0.7",
           "Microsoft.Extensions.Caching.Memory": "10.0.7",
@@ -1532,7 +1532,7 @@
         "type": "CentralTransitive",
         "requested": "[18.0.0, )",
         "resolved": "18.0.0",
-        "contentHash": "H/dZgJ4y6Y5CIPKsm3YTtDiDQZQtWmQ5jj7E3h45Poixl0CzZ8CgOB9VQl0egum76rZOpONEf6WlsvfFkz1nLg==",
+        "contentHash": "VbucQZpsyq3VTeGLRvGvgl1Jz9gd546WOMGNtTZ/0oBgnDPM6OMb/z8CUrR9jRvwQJDtBropUJMxJoRyc8AbHA==",
         "dependencies": {
           "Asp.Versioning.Mvc": "10.0.0",
           "Asp.Versioning.Mvc.ApiExplorer": "10.0.0",

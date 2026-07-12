@@ -39,7 +39,10 @@ public class SyncEntityCache
     public CachedName? GetName(int id)
     {
         if (!_cacheEnabled) return default;
-        return cache.GetCacheItem<CachedName>(id.ToString());
+        // read from nameCache - this is where AddName stores CachedName values.
+        // (reading from `cache` returned IEntitySlim entries under the same key,
+        //  which threw a swallowed InvalidCastException and never actually cached).
+        return nameCache.GetCacheItem<CachedName>(id.ToString());
     }
 
     public void AddName(int id, Guid guid, string name)

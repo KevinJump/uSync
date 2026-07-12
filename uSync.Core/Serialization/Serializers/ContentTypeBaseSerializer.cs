@@ -153,17 +153,15 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         {
             var value = propertyInfo.GetValue(property);
 
-            var attempt = value.TryConvertTo<TValue>();
-            if (attempt.Success)
+            // TryGetValueAs treats a null conversion result as failure, so fall back
+            // to an empty element - the property still gets recorded in the xml.
+            if (value.TryGetValueAs<TValue>(out var converted))
             {
-                if (attempt.Result != null)
-                {
-                    node.Add(new XElement(propertyName, attempt.Result));
-                }
-                else
-                {
-                    node.Add(new XElement(propertyName, string.Empty));
-                }
+                node.Add(new XElement(propertyName, converted));
+            }
+            else
+            {
+                node.Add(new XElement(propertyName, string.Empty));
             }
         }
     }
@@ -727,19 +725,18 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         if (propertyInfo != null)
         {
             var value = node.Element(propertyName).ValueOrDefault(string.Empty);
-            var attempt = value.TryConvertTo<TValue>();
-            if (attempt.Success)
+            if (value.TryGetValueAs<TValue>(out var converted))
             {
                 var current = ContentTypeBaseSerializer<TObject>.GetPropertyAs<TValue>(propertyInfo, property);
 
-                if (current == null || !current.Equals(attempt.Result))
+                if (current == null || !current.Equals(converted))
                 {
-                    propertyInfo.SetValue(property, attempt.Result);
+                    propertyInfo.SetValue(property, converted);
 
                     return uSyncChange.Update($"property/{propertyName}",
                         propertyName,
                         current.ToNonBlankValue(),
-                        attempt.Result?.ToString());
+                        converted?.ToString());
                 }
             }
         }
@@ -754,12 +751,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         var value = info.GetValue(property);
         if (value == null) return default;
 
-        var result = value.TryConvertTo<TValue>();
-        if (result.Success)
-            return result.Result;
-
-        return default;
-
+        return value.TryGetValueAs<TValue>(out var result) ? result : default;
     }
 
 

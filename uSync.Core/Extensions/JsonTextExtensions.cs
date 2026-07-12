@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Buffers;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -389,12 +390,74 @@ public static class JsonTextExtensions
     public static string SerializeJsonString(this object value, bool indent = true)
         => value is null ? string.Empty : JsonSerializer.Serialize(value, indent ? _defaultOptions : _flatOptions);
 
-    private static bool TryGetValueAs<TObject>(this object value, [MaybeNullWhen(false)] out TObject result)
+    /// <summary>
+    ///  Convert a value to the requested type.
+    /// </summary>
+    /// <remarks>
+    ///  Pre-empts the first-chance InvalidCastException that Umbraco's TryConvertTo
+    ///  throws when converting a JsonElement to a value type (see uSync.Complete
+    ///  issue #304). Settings/config values often arrive as JsonElement (bound from
+    ///  appsettings.json); doing that conversion with System.Text.Json first means the
+    ///  common path never throws. String conversions (which TryConvertTo already
+    ///  handles cleanly) and anything STJ can't handle still fall back to TryConvertTo.
+    /// </remarks>
+    public static bool TryGetValueAs<TObject>(this object? value, [MaybeNullWhen(false)] out TObject result)
     {
         result = default;
-        if (value == null) return false;
+        if (value is null) return false;
+
+        // Umbraco's TryConvertTo turns a JsonElement into a string cleanly, but throws
+        // (and swallows) an InvalidCastException for JsonElement -> value type. Do the
+        // value-type conversion with System.Text.Json first to avoid that noise; string
+        // and anything STJ can't handle fall through to TryConvertTo below.
+        if (value is JsonElement element && typeof(TObject) != typeof(string))
+        {
+            try
+            {
+                result = element.Deserialize<TObject>(_defaultOptions);
+                if (result is not null) return true;
+            }
+            catch
+            {
+                // not something STJ could convert directly - fall back to TryConvertTo below.
+            }
+        }
+
         var attempt = value.TryConvertTo<TObject>();
-        if (attempt is false || attempt.Result is null) return attempt;
+        if (attempt.Success is false || attempt.Result is null) return false;
+
+        result = attempt.Result;
+        return true;
+    }
+
+    /// <summary>
+    ///  Convert a value to the requested runtime type.
+    /// </summary>
+    /// <remarks>
+    ///  Non-generic companion to the generic TryGetValueAs for callers that only
+    ///  have a runtime Type. Same JsonElement pre-check.
+    /// </remarks>
+    public static bool TryGetValueAs(this object? value, Type targetType, [MaybeNullWhen(false)] out object result)
+    {
+        result = default;
+        if (value is null) return false;
+
+        if (value is JsonElement element && targetType != typeof(string))
+        {
+            try
+            {
+                result = element.Deserialize(targetType, _defaultOptions);
+                if (result is not null) return true;
+            }
+            catch
+            {
+                // not something STJ could convert directly - fall back to TryConvertTo below.
+            }
+        }
+
+        var attempt = value.TryConvertTo(targetType);
+        if (attempt.Success is false || attempt.Result is null) return false;
+
         result = attempt.Result;
         return true;
     }
@@ -460,8 +523,7 @@ public static class JsonTextExtensions
         if (obj.TryGetPropertyValue(propertyName, out var value) is false || value is null)
             return defaultValue;
 
-        var attempt = value.TryConvertTo<TResult>();
-        return attempt.ResultOr(defaultValue);
+        return value.TryGetValueAs<TResult>(out var result) ? result : defaultValue;
     }
 
     public static bool TryGetPropertyAsArray(this JsonObject jsonObject, string propertyName, [MaybeNullWhen(false)] out JsonArray result)
@@ -511,11 +573,24 @@ public static class JsonTextExtensions
     ///  tells us if the json for an object is equal, helps when the config objects don't have their
     ///  own Equals functions
     /// </summary>
-    public static bool IsJsonEqual(this object currentObject, object newObject)
+    public static bool IsJsonEqual(this object? currentObject, object? newObject)
     {
-        var currentString = currentObject.SerializeJsonString(false);
-        var newString = newObject.SerializeJsonString(false);
-        return currentString == newString;
+        if (currentObject is null && newObject is null)
+            return true;
+        if (currentObject is null)
+            return false;
+        if (newObject is null)
+            return false;
+
+        ArrayBufferWriter<byte> currentObjectBufferWriter = new(); 
+        using Utf8JsonWriter currentObjectUtf8JsonWriter = new(currentObjectBufferWriter);
+        JsonSerializer.Serialize(currentObjectUtf8JsonWriter, currentObject, _flatOptions);
+
+        ArrayBufferWriter<byte> newObjectBufferWriter = new();
+        using Utf8JsonWriter newObjectUtf8JsonWriter = new(newObjectBufferWriter);
+        JsonSerializer.Serialize(newObjectUtf8JsonWriter, newObject, _flatOptions);
+
+        return currentObjectBufferWriter.WrittenSpan.SequenceEqual(newObjectBufferWriter.WrittenSpan);
     }
 
     #endregion

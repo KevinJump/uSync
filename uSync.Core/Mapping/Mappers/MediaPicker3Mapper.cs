@@ -88,9 +88,8 @@ public class MediaPicker3Mapper : SyncValueMapperBase, ISyncMapper
     {
         if (obj != null && obj.ContainsKey(key))
         {
-            var attempt = obj[key]?.ToString().TryConvertTo<Guid>();
-            if (attempt?.Success is true)
-                return attempt?.Result ?? Guid.Empty;
+            if (obj[key]?.ToString().TryGetValueAs<Guid>(out var guid) is true)
+                return guid;
         }
 
         return Guid.Empty;

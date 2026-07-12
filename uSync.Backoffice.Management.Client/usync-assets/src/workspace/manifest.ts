@@ -38,7 +38,7 @@ const workspaceViews: Array<UmbExtensionManifest> = [
 		js: () => import('./views/default/default.element.js'),
 		weight: 300,
 		meta: {
-			label: 'Default',
+			label: '#uSync_defaultView',
 			pathname: 'default',
 			icon: 'usync-logo',
 		},
@@ -56,7 +56,7 @@ const workspaceViews: Array<UmbExtensionManifest> = [
 		js: () => import('./views/settings/settings.element.js'),
 		weight: 200,
 		meta: {
-			label: 'Settings',
+			label: '#uSync_settingsView',
 			pathname: 'settings',
 			icon: 'icon-settings',
 		},
@@ -74,7 +74,7 @@ const workspaceViews: Array<UmbExtensionManifest> = [
 		js: () => import('./views/addons/addons.element.js'),
 		weight: 100,
 		meta: {
-			label: 'AddOns',
+			label: '#uSync_addons',
 			pathname: 'addons',
 			icon: 'icon-box',
 		},
@@ -92,7 +92,7 @@ const workspaceViews: Array<UmbExtensionManifest> = [
 		js: () => import('./views/legacy/legacy.element.js'),
 		weight: 150,
 		meta: {
-			label: 'Migrate',
+			label: '#uSync_migrate',
 			pathname: 'legacy',
 			icon: 'icon-arrow-up',
 		},

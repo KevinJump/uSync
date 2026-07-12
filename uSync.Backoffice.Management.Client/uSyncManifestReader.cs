@@ -21,7 +21,7 @@ public class uSyncManifestComposer : IComposer
     {
         if (builder.IsUmbracoBackOfficeEnabled() is false) return;
 
-        // only load this when the backoffice is enabled. 
+        // only load this when the backoffice is enabled.
         builder.Services.AddSingleton<IPackageManifestReader, uSyncManifestReader>();
         builder.Services.AddSingleton<IPackageManifestReader, SyncSectionManifestReader>();
     }
