@@ -42,12 +42,8 @@ export class SyncLegacyFilesElement extends UmbLitElement {
 
 		const confirmContext = modalContext?.open(this, UMB_CONFIRM_MODAL, {
 			data: {
-				headline: this.localize.term('uSync_legacyCopyTitle', [
-					this._legacy?.latestVersion,
-				]),
-				content: html`${this.localize.term('uSync_legacyCopyContent', [
-					this._legacy?.latestFolder,
-				])}`,
+				headline: this.localize.termOrDefault('uSync_legacyCopyTitle', 'Overwrite files', this._legacy?.latestVersion),
+				content: html`${this.localize.termOrDefault('uSync_legacyCopyContent', 'Are you sure you want to overwrite the contents of the folder with the legacy uSync folder files?', this._legacy?.latestFolder)}`,
 				color: 'danger',
 				confirmLabel: 'Copy',
 			},
@@ -68,8 +64,8 @@ export class SyncLegacyFilesElement extends UmbLitElement {
 		const modalContext = await this.getContext(UMB_MODAL_MANAGER_CONTEXT);
 		const confirmContext = modalContext?.open(this, UMB_CONFIRM_MODAL, {
 			data: {
-				headline: this.localize.term('uSync_legacyIgnoreTitle'),
-				content: html`${this.localize.term('uSync_legacyIgnoreContent')}`,
+				headline: this.localize.termOrDefault('uSync_legacyIgnoreTitle', 'Ignore legacy files'),
+				content: html`${this.localize.termOrDefault('uSync_legacyIgnoreContent', 'Are you sure you want to ignore the files in the legacy uSync folder?')}`,
 				color: 'danger',
 				confirmLabel: 'Ignore',
 			},

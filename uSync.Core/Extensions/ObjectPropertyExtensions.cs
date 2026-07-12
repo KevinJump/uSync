@@ -75,11 +75,6 @@ public static class ObjectPropertyExtensions
         var value = info.GetValue(property);
         if (value == null) return defaultValue;
 
-        var result = value.TryConvertTo<TValue>();
-        if (result.Success)
-            return result.Result ?? defaultValue;
-
-        return defaultValue;
-
+        return value.TryGetValueAs<TValue>(out var result) ? result : defaultValue;
     }
 }

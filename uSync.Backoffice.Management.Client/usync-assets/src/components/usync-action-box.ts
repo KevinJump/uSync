@@ -64,7 +64,7 @@ export class uSyncActionBox extends UmbLitElement {
 				<div class="box-content">
 					<div class="box-heading">
 						<h2 class="box-heading" title=${this.getLastSyncDate()}>
-							${this.group?.groupName}
+							${this.localize.termOrDefault(`uSync_group${this.group?.groupName}`, this.group?.groupName ?? '')}
 						</h2>
 						<umb-icon name=${this.group?.icon}></umb-icon>
 					</div>

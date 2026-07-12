@@ -167,8 +167,7 @@ public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncSerializer<IDo
 
         var result = property.GetValue(item);
 
-        var attempt = result.TryConvertTo<int>();
-        return attempt.Success ? attempt.Result : 0;
+        return result.TryGetValueAs<int>(out var sortable) ? sortable : 0;
     }
 
     /// <summary>

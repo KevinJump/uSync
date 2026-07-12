@@ -18,10 +18,10 @@ public class uSyncBackOfficeComposer : IComposer
     /// <inheritdoc/>
     public void Compose(IUmbracoBuilder builder)
     {
-        // uSync core will actually run when their is no back office loaded. 
+        // uSync core will actually run when their is no back office loaded.
         //if (builder.IsUmbracoBackOfficeEnabled() is false)
         //    return;
-        
+
         builder.AdduSync();
     }
 }

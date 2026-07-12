@@ -46,7 +46,7 @@ export class SyncActionButtonElement extends UmbLitElement {
 		return html` <uui-button
 			class="action-button"
 			.disabled=${this.disabled}
-			label=${this.localize.term(`uSync_${this.button?.label}`)}
+			label=${this.localize.termOrDefault(`uSync_${this.button?.label}`, this.button?.label ?? '')}
 			color=${<UUIInterfaceColor>this.button?.color}
 			look=${<UUIInterfaceLook>this.button?.look}
 			state=${ifDefined(this.state)}
@@ -63,7 +63,7 @@ export class SyncActionButtonElement extends UmbLitElement {
 		const buttons = this.button?.children.map((item: SyncActionButton) => {
 			return html` <uui-menu-item
 				.disabled=${this.disabled}
-				.label=${this.localize.term(`uSync_${item.label}`)}
+				.label=${this.localize.termOrDefault(`uSync_${item.label}`, item.label)}
 				@click-label=${() => this.#onClick(item)}></uui-menu-item>`;
 		});
 
@@ -79,7 +79,7 @@ export class SyncActionButtonElement extends UmbLitElement {
 					color=${<UUIInterfaceColor>parent?.color}
 					look=${<UUIInterfaceLook>parent?.look}
 					@click=${() => this.#onClick(this.button)}>
-					${this.localize.term(`uSync_${this.button?.label}`)}
+					${this.localize.termOrDefault(`uSync_${this.button?.label}`, this.button?.label ?? '')}
 				</uui-button>
 				<uui-button
 					.disabled=${this.disabled}

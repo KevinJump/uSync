@@ -42,7 +42,7 @@ export class uSyncResultGroupView extends UmbLitElement {
 				<div
 					class="summary ${when(this.expanded, () => 'expanded')}"
 					@click=${() => (this.expanded = !this.expanded)}>
-					<h4>${this.localize.term('uSync_' + this.groupName)}</h4>
+					<h4>${this.localize.termOrDefault('uSync_' + this.groupName, this.groupName)}</h4>
 					<div class="summary-right">
 						<h4 class="count">${changeCount}/${this.results?.length}</h4>
 						<uui-icon
