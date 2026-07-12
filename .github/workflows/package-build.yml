@@ -1,15 +1,25 @@
-name: v16 - Build and Package.
+name: Build and Package
 permissions:
   contents: read
   pull-requests: write
-  
+
 on:
   push:
-    branches: [v16/main]
+    branches: [ "*/main" ]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   config: Release
   out_folder: ./build-out/
+  solution_name: ./uSync.slnx
+  test_project: ./uSync.Tests/uSync.Tests.csproj
+  schema_gen_project: ./uSync.SchemaGenerator/uSync.SchemaGenerator.csproj
 
 jobs:
   version:
@@ -45,30 +55,31 @@ jobs:
 
     needs: version
 
-    env:
-      solution_name: ./uSync.sln
-      test_project: ./uSync.Tests/uSync.tests.csproj
-      schema_gen_project: ./uSync.SchemaGenerator/uSync.SchemaGenerator.csproj
-
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 9.0.x
+          dotnet-version: 10.0.x
           cache: true
           cache-dependency-path: "**/packages.lock.json"
 
+      # the client project's build runs `npm run build` via an MSBuild target,
+      # so node needs to be available before the dotnet build step below.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+
       - name: restore
-        run: dotnet restore ${{ env.solution_name}} --locked-mode
+        run: dotnet restore ${{ env.solution_name }} --locked-mode
 
       - name: build
         run: dotnet build ${{ env.solution_name }} -c ${{ env.config }} -p:ContinuousIntegrationBuild=true
 
       - name: test
-        run: dotnet test ${{ env.solution_name }}
+        run: dotnet test ${{ env.test_project }} -c ${{ env.config }}
 
       - name: Generate AppSettings Schema
-        run: dotnet run -c ${{env.Config}} --project ${{ env.schema_gen_project}}
+        run: dotnet run -c ${{ env.config }} --project ${{ env.schema_gen_project }}
 
   package-up:
     runs-on: windows-latest
@@ -79,9 +90,13 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 9.0.x
+          dotnet-version: 10.0.x
           cache: true
           cache-dependency-path: "**/packages.lock.json"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
 
       - name: version
         run: |
@@ -100,13 +115,16 @@ jobs:
         run: npm run build
 
       - name: restore
-        run: dotnet restore ${{ env.solution_name}} --locked-mode
+        run: dotnet restore ${{ env.solution_name }} --locked-mode
 
       - name: package uSync.Core
         run: dotnet pack ./uSync.Core/uSync.Core.csproj -c ${{env.config}} --output ${{env.out_folder}} /p:version=${{ needs.version.outputs.version_string }}
 
-      - name: package uSync.Backoffice
-        run: dotnet pack ./uSync.Backoffice/uSync.Backoffice.csproj -c ${{env.config}} --output ${{env.out_folder}} /p:version=${{ needs.version.outputs.version_string }}
+      - name: package uSync.AutoTemplates
+        run: dotnet pack ./uSync.AutoTemplates/uSync.AutoTemplates.csproj -c ${{env.config}} --output ${{env.out_folder}} /p:version=${{ needs.version.outputs.version_string }}
+
+      - name: package uSync.BackOffice
+        run: dotnet pack ./uSync.BackOffice/uSync.BackOffice.csproj -c ${{env.config}} --output ${{env.out_folder}} /p:version=${{ needs.version.outputs.version_string }}
 
       - name: package uSync.Backoffice.Management.Api
         run: dotnet pack ./uSync.Backoffice.Management.Api/uSync.Backoffice.Management.Api.csproj -c ${{env.config}} --output ${{env.out_folder}} /p:version=${{ needs.version.outputs.version_string }}
@@ -114,8 +132,8 @@ jobs:
       - name: package uSync.Backoffice.Management.Client
         run: dotnet pack ./uSync.Backoffice.Management.Client/uSync.Backoffice.Management.Client.csproj -c ${{env.config}} --output ${{env.out_folder}} /p:version=${{ needs.version.outputs.version_string }}
 
-      - name: package uSync.Backoffice.Targets
-        run: dotnet pack ./uSync.Backoffice.Targets/uSync.Backoffice.Targets.csproj -c ${{env.config}} --output ${{env.out_folder}} /p:version=${{ needs.version.outputs.version_string }}
+      - name: package uSync.BackOffice.Targets
+        run: dotnet pack ./uSync.BackOffice.Targets/uSync.BackOffice.Targets.csproj -c ${{env.config}} --output ${{env.out_folder}} /p:version=${{ needs.version.outputs.version_string }}
 
       - name: package uSync.Community.Contrib
         run: dotnet pack ./uSync.Community.Contrib/uSync.Community.Contrib.csproj -c ${{env.config}} --output ${{env.out_folder}} /p:version=${{ needs.version.outputs.version_string }}
@@ -123,8 +141,19 @@ jobs:
       - name: package uSync.Community.DataTypeSerializers
         run: dotnet pack ./uSync.Community.DataTypeSerializers/uSync.Community.DataTypeSerializers.csproj -c ${{env.config}} --output ${{env.out_folder}} /p:version=${{ needs.version.outputs.version_string }}
 
+      - name: package uSync.Extend
+        run: dotnet pack ./uSync.Extend/uSync.Extend.csproj -c ${{env.config}} --output ${{env.out_folder}} /p:version=${{ needs.version.outputs.version_string }}
+
+      - name: package uSync.History
+        run: dotnet pack ./uSync.History/uSync.History.csproj -c ${{env.config}} --output ${{env.out_folder}} /p:version=${{ needs.version.outputs.version_string }}
+
+      - name: package uSync (meta package)
+        run: dotnet pack ./uSync/uSync.csproj -c ${{env.config}} --output ${{env.out_folder}} /p:version=${{ needs.version.outputs.version_string }}
+
+      # NOTE: intentionally no `dotnet nuget push` / `npm publish` step here - this
+      # workflow only builds artifacts for review, it does not auto-release to nuget.org.
       - name: Upload nuget file as build artifact
         uses: actions/upload-artifact@v4
         with:
           name: Nuget Build Output
-          path: ${{env.OUT_FOLDER}}
+          path: ${{ env.out_folder }}

@@ -1,11 +1,11 @@
-next-version: 15.0.0
+next-version: 18.0.0
 assembly-versioning-scheme: MajorMinorPatch
 mode: ContinuousDeployment
 branches:
   main:
     mode: ContinuousDeployment
     tag: ""
-    regex: ^v15\/main$
+    regex: ^v[0-9]+\/main$
   pull-request:
     mode: ContinuousDeployment
 ignore:
