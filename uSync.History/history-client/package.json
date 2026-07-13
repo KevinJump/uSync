@@ -1,6 +1,6 @@
 {
   "name": "usync-history-client",
-  "version": "18.0.1",
+  "version": "18.0.2",
   "licence": "Custom",
   "description": "uSync history function",
   "type": "module",
