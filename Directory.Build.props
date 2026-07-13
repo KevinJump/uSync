@@ -23,7 +23,8 @@
 		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
 
 		<NoWarn>NU1902</NoWarn>
-
+		<NuGetAuditMode>direct</NuGetAuditMode>
+		
 		<PackageReleaseNotes>
 	<![CDATA[- 9.0 : Dotnet core version
 - 9.1 : Net 5/6 targets
