@@ -5,7 +5,7 @@ using Umbraco.Cms.Core.Events;
 
 namespace uSync.BackOffice.Tracker;
 
-internal class SyncTrackerNotificationHandler
+internal sealed class SyncTrackerNotificationHandler
     : INotificationAsyncHandler<uSyncImportCompletedNotification>
 {
     private readonly ISyncTrackerService _syncTrackerService;

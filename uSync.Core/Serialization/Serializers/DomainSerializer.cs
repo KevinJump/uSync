@@ -349,7 +349,7 @@ public class DomainSerializer : SyncSerializerBase<IDomain>, ISyncSerializer<IDo
         await _domainService.UpdateDomainsAsync(contentKey.Result, updateModel);
     }
 
-    private class DomainSyncModel
+    private sealed class DomainSyncModel
     {
         public required Guid Key { get; set; }
         public required string DomainName { get; set; }
