@@ -1419,7 +1419,7 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
     public bool TabClashesWithExisting(TObject item, string alias, PropertyGroupType tabType)
     {
         EnsureAllTabsCacheLoaded(item);
-        return _allTabs?.ContainsKey(alias) is true && _allTabs?[alias] != tabType;
+        return _allTabs?.TryGetValue(alias, out PropertyGroupType aliasTab) is true && aliasTab != tabType;
     }
 
     public void EnsureAllTabsCacheLoaded(TObject item)
