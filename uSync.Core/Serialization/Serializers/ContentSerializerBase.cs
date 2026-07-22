@@ -541,8 +541,10 @@ public abstract class ContentSerializerBase<TObject> : SyncTreeSerializerBase<TO
 
                 foreach (var value in values)
                 {
-                    var culture = value.GetCultures();
-                    var segment = value.GetSegments();
+                    // note properties write out 'Culture' not 'Cultures' so we shouldn't use the helper methods here, they break it :( 
+                    var culture = value.Attribute("Culture").ValueOrDefault(string.Empty);
+                    var segment = value.Attribute("Segment").ValueOrDefault(string.Empty);
+
                     var propValue = value.ValueOrDefault(string.Empty);
 
                     if (logger.IsEnabled(LogLevel.Trace))
