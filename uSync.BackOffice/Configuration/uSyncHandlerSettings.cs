@@ -128,8 +128,51 @@ public static class HandlerSettingsExtensions
             UseFlatStructure = settings.UseFlatStructure,
             Group = settings.Group,
             GuidNames = settings.GuidNames,
-            Settings = new Dictionary<string, object?>(settings.Settings, StringComparer.InvariantCultureIgnoreCase)
+            CreateClean = settings.CreateClean,
+            FullFileOnDifference = settings.FullFileOnDifference,
+            Settings = settings.Settings is not null
+                ? new Dictionary<string, object?>(settings.Settings, StringComparer.InvariantCultureIgnoreCase)
+                : new Dictionary<string, object?>(StringComparer.InvariantCultureIgnoreCase)
         };
+    }
+
+    /// <summary>
+    ///  Merge a handler's own settings over the top of a set of default settings.
+    /// </summary>
+    /// <remarks>
+    ///  <para>
+    ///   Returns a new <see cref="HandlerSettings"/> so neither input is mutated.
+    ///  </para>
+    ///  <para>
+    ///   The strongly typed properties (Enabled, UseFlatStructure, GuidNames, etc.) are taken from
+    ///   <paramref name="handlerSettings"/>. Configuration binding cannot tell an unset boolean from
+    ///   one explicitly set to its default value, so we can't reliably layer these over the defaults
+    ///   without risking overriding a deliberately-set value - the handler's own block wins for them.
+    ///  </para>
+    ///  <para>
+    ///   The additional <see cref="HandlerSettings.Settings"/> dictionary <i>is</i> merged, because a
+    ///   key is only present when it has been explicitly configured. The <paramref name="defaults"/>
+    ///   provide the base and the handler's own keys take precedence - so a per-key default (e.g.
+    ///   CreateOnly) set in HandlerDefaults now cascades to handlers that define their own block.
+    ///  </para>
+    /// </remarks>
+    public static HandlerSettings MergeWithDefaults(this HandlerSettings handlerSettings, HandlerSettings defaults)
+    {
+        var merged = handlerSettings.Clone();
+
+        // start from the defaults, then layer the handler's own keys on top.
+        var settings = defaults.Settings is not null
+            ? new Dictionary<string, object?>(defaults.Settings, StringComparer.InvariantCultureIgnoreCase)
+            : new Dictionary<string, object?>(StringComparer.InvariantCultureIgnoreCase);
+
+        if (handlerSettings.Settings is not null)
+        {
+            foreach (var setting in handlerSettings.Settings)
+                settings[setting.Key] = setting.Value;
+        }
+
+        merged.Settings = settings;
+        return merged;
     }
 
 }

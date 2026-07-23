@@ -55,9 +55,11 @@ public static class uSyncBackOfficeBuilderExtensions
         }
         options.ValidateDataAnnotations();
 
-        // default handler options, other people can load their own names handler options and 
-        // they can be used throughout uSync (so complete will do this). 
-        var handlerOptions = builder.Services.Configure<uSyncHandlerSetSettings>(uSync.Sets.DefaultSet,
+        // default handler options, other people can load their own names handler options and
+        // they can be used throughout uSync (so complete will do this).
+        // ConfigureHandlerSet also layers each handler's own settings over the HandlerDefaults,
+        // so a handler only needs to specify the settings it wants to change from the defaults.
+        builder.Services.ConfigureHandlerSet(uSync.Sets.DefaultSet,
             builder.Config.GetSection(uSync.Configuration.ConfigDefaultSet));
 
         // Setup uSync core.
