@@ -81,7 +81,7 @@ public class uSyncPerformActionController : uSyncControllerBase
 
         using (var stream = tempFile.OpenReadStream())
         {
-            return Ok(_managementService.UnpackStream(stream));
+            return Ok(await _managementService.UnpackStreamAsync(stream));
         }
     }
 }

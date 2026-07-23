@@ -22,5 +22,9 @@ public interface ISyncManagementService
     Func<SyncActionOptions, uSyncCallbacks, Task<SyncActionResult>> GetHandlerMethodAsync(HandlerActions action);
     Task<SyncFileVersionCheckResult> GetSyncFileInfo();
     Task<PerformActionResponse> PerformActionAsync(PerformActionRequest actionRequest, IUser? user);
-    UploadImportResult UnpackStream(Stream stream);
+
+    [Obsolete("use UnpackStreamAsync will be removed in v19")]
+    UploadImportResult UnpackStream(Stream stream)
+        => UnpackStreamAsync(stream).Result;
+    Task<UploadImportResult> UnpackStreamAsync(Stream stream);
 }
