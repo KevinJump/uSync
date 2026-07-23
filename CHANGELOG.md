@@ -2,7 +2,7 @@
 
 All notable code and behaviour changes to uSync are recorded here.
 
-This file tracks changes to how uSync *behaves*. For changes to the on-disk
+This file tracks changes to how uSync _behaves_. For changes to the on-disk
 `.config` file format (which can cause items to report as changed and prompt a
 re-export), see [`changes/format.md`](changes/format.md).
 
@@ -14,7 +14,7 @@ History is backfilled from the v18 release history starting at `v18.0.0`.
 ### Changed
 
 - **Handler settings now inherit from `HandlerDefaults`.** When a handler has its
-  own settings block, its values are layered *over* the set's `HandlerDefaults`
+  own settings block, its values are layered _over_ the set's `HandlerDefaults`
   instead of replacing them wholesale. A handler now only needs to specify the
   settings it wants to change from the defaults.
   - The additional `Settings` dictionary is merged key-by-key (the handler's own
@@ -27,7 +27,7 @@ History is backfilled from the v18 release history starting at `v18.0.0`.
 
   > **Breaking:** Previously a handler that defined its own block ignored
   > `HandlerDefaults` entirely. Configurations that relied on that replacement
-  > behaviour (i.e. expected a handler block to *reset* settings back to their
+  > behaviour (i.e. expected a handler block to _reset_ settings back to their
   > built-in defaults rather than inherit the set defaults) will now see the
   > inherited values instead. Review any set that mixes `HandlerDefaults` with
   > per-handler blocks.
@@ -69,9 +69,3 @@ History is backfilled from the v18 release history starting at `v18.0.0`.
 ### Added
 
 - Initial uSync release for **Umbraco 18**.
-
----
-
-> **Note on tags:** the `v18.0.0` and `v18.0.8` git tags both point at the same
-> commit, so point releases (18.0.2, 18.0.3) are not individually tagged. The
-> versions above are taken from the release build commits on `v18/main`.
