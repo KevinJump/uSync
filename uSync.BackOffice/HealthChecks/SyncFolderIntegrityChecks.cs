@@ -24,6 +24,9 @@ public class SyncFolderIntegrityChecks : HealthCheck
     private readonly ISyncConfigService? _configService;
     private readonly ISyncFileService? _fileService;
 
+    /// <summary>
+    ///  Constructor
+    /// </summary>
     public SyncFolderIntegrityChecks() { }
 
     /// <summary>
