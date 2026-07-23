@@ -48,10 +48,16 @@ public class uSyncHandlerSetSettings
 public static class HandlerSetSettingsExtensions
 {
     /// <summary>
-    ///  Get the handler settings for the named handler - (will load defaults if no specific handler settings are found)
+    ///  Get the handler settings for the named handler.
     /// </summary>
+    /// <remarks>
+    ///  When the handler has its own settings block, those settings are merged over the top of
+    ///  <see cref="uSyncHandlerSetSettings.HandlerDefaults"/> (see <see cref="HandlerSettingsExtensions.MergeWithDefaults"/>),
+    ///  so a handler only needs to specify the additional settings it wants to change from the defaults.
+    ///  If the handler has no block of its own, the defaults are used as-is.
+    /// </remarks>
     public static HandlerSettings GetHandlerSettings(this uSyncHandlerSetSettings handlerSet, string alias)
         => handlerSet.Handlers.TryGetValue(alias, out var value)
-            ? value.Clone()
+            ? value.MergeWithDefaults(handlerSet.HandlerDefaults)
             : handlerSet.HandlerDefaults.Clone();
 }
