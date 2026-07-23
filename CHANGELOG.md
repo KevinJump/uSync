@@ -7,6 +7,7 @@ This file tracks changes to how uSync *behaves*. For changes to the on-disk
 re-export), see [`changes/format.md`](changes/format.md).
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+History is backfilled from the v18 release history starting at `v18.0.0`.
 
 ## [Unreleased]
 
@@ -36,3 +37,41 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `HandlerSettings.Clone()` no longer drops the `CreateClean` and
   `FullFileOnDifference` properties. Handlers that set either value in their own
   block were previously resolved as `false` regardless; they are now honoured.
+
+## [18.0.3] - 2026-07-22
+
+### Fixed
+
+- Culture-variant property values were dropped on import because of a
+  `culture`/`cultures` typo. Variant properties now import correctly. (#1000)
+
+## [18.0.2] - 2026-07-13
+
+### Added
+
+- `ISyncContainerHandler` — lets a handler whose items live in container (folder)
+  items export those containers one at a time. The Library **Element** handler
+  implements it, so container folders are no longer left behind when items are
+  exported individually (e.g. a dependency-based push); previously the folders
+  were only written during a full export. (#980)
+
+### Changed
+
+- **Extender API:** `ISyncContainerHandler.ExportContainer` now takes a `Udi`.
+
+### Fixed
+
+- Element container nodes now resolve to the Element handler by type name.
+- Merged the latest `v17/main` fixes and performance improvements into v18.
+
+## [18.0.0] - 2026-06-25
+
+### Added
+
+- Initial uSync release for **Umbraco 18**.
+
+---
+
+> **Note on tags:** the `v18.0.0` and `v18.0.8` git tags both point at the same
+> commit, so point releases (18.0.2, 18.0.3) are not individually tagged. The
+> versions above are taken from the release build commits on `v18/main`.
