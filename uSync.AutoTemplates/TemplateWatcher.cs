@@ -191,7 +191,7 @@ public partial class TemplateWatcher : IRegisteredObject
 
                 if (template != null)
                 {
-                    var currentMaster = string.IsNullOrWhiteSpace(template.MasterTemplateAlias) ? "null" : template.MasterTemplateAlias;
+                    var currentMaster = string.IsNullOrWhiteSpace(template.LayoutTemplateAlias) ? "null" : template.LayoutTemplateAlias;
                     if (fileMasterAlias != currentMaster)
                     {
                         // template.SetMasterTemplate(GetMasterTemplate(fileMasterAlias));

@@ -306,7 +306,7 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
         var node = this.InitializeBaseNode(item, item.Alias, await this.CalculateLevelAsync(item));
 
         node.Add(new XElement("Name", item.Name));
-        node.Add(new XElement("Parent", item.MasterTemplateAlias));
+        node.Add(new XElement("Parent", item.LayoutTemplateAlias));
 
         if (options.GetSetting(uSyncConstants.Conventions.IncludeContent, false))
         {
@@ -322,14 +322,14 @@ public class TemplateSerializer : SyncSerializerBase<ITemplate>, ISyncSerializer
 
     private async Task<int> CalculateLevelAsync(ITemplate item)
     {
-        if (item.MasterTemplateAlias.IsNullOrWhiteSpace()) return 1;
+        if (item.LayoutTemplateAlias.IsNullOrWhiteSpace()) return 1;
 
         int level = 1;
         var current = item;
-        while (!string.IsNullOrWhiteSpace(current.MasterTemplateAlias) && level < 20)
+        while (!string.IsNullOrWhiteSpace(current.LayoutTemplateAlias) && level < 20)
         {
             level++;
-            var parent = await FindItemAsync(current.MasterTemplateAlias);
+            var parent = await FindItemAsync(current.LayoutTemplateAlias);
             if (parent == null) return level;
 
             current = parent;
