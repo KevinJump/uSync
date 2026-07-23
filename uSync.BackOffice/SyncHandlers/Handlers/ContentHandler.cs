@@ -77,6 +77,7 @@ public class ContentHandler : PublishableContentHandlerBase<IContent>, ISyncHand
     protected override Task<bool> HasChildrenAsync(IContent item)
         => Task.FromResult(_contentService.HasChildren(item.Id));
 
+    /// <inheritdoc />
     protected override IEnumerable<IEntity> GetRootItems()
         => _contentService.GetRootContent();
 

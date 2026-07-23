@@ -21,12 +21,21 @@ using uSync.Core.Extensions;
 
 namespace uSync.BackOffice.SyncHandlers.Handlers;
 
+/// <summary>
+///  Base handler for content types that can be published (documents, elements, etc).
+/// </summary>
 public abstract class PublishableContentHandlerBase<TObject>
     : ContentHandlerBase<TObject>
     where TObject : class, IPublishableContentBase
 {
+    /// <summary>
+    ///  The Umbraco object type used for containers (folders) for this handler.
+    /// </summary>
     protected UmbracoObjectTypes ContainerType => UmbracoObjectTypes.Document;
 
+    /// <summary>
+    ///  Constructor
+    /// </summary>
     protected PublishableContentHandlerBase(
         ILogger<ContentHandlerBase<TObject>> logger,
         IEntityService entityService,
@@ -39,6 +48,9 @@ public abstract class PublishableContentHandlerBase<TObject>
         : base(logger, entityService, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfigService, syncItemFactory)
     { }
 
+    /// <summary>
+    ///  Get the root level items for this handler (items with no parent).
+    /// </summary>
     protected abstract IEnumerable<IEntity> GetRootItems();
 
     /// <summary>
@@ -69,6 +81,9 @@ public abstract class PublishableContentHandlerBase<TObject>
     }
 
 
+    /// <summary>
+    ///  Export a single item in response to a notification, cleaning up any orphaned files afterwards.
+    /// </summary>
     protected async Task ProcessItem(EnumerableObjectNotification<TObject> notification, TObject item, string[] handlerFolders)
     {
         try

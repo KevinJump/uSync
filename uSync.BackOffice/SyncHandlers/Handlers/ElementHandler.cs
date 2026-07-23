@@ -36,6 +36,9 @@ using static Umbraco.Cms.Core.Constants.HttpContext;
 
 namespace uSync.BackOffice.SyncHandlers.Handlers;
 
+/// <summary>
+///  Handler to manage the syncing of Element (library) items.
+/// </summary>
 [SyncHandler(
     alias: uSyncConstants.Handlers.ElementHandler,
     name: "Library", folder: "Element",
@@ -59,8 +62,12 @@ public class ElementHandler : PublishableContentHandlerBase<IElement>, ISyncHand
     private readonly IList<ISyncTracker<EntityContainer>> _treeTrackers;
     private readonly ISyncEntityContainerSerializer<EntityContainer> _containerSerializer;
 
+    /// <inheritdoc />
     public override string Group => uSyncConstants.Groups.Content;
 
+    /// <summary>
+    ///  Constructor
+    /// </summary>
     public ElementHandler(
         ILogger<ContentHandlerBase<IElement>> logger,
         IEntityService entityService,
@@ -92,6 +99,7 @@ public class ElementHandler : PublishableContentHandlerBase<IElement>, ISyncHand
     protected override Task<bool> HasChildrenAsync(IElement item)
         => Task.FromResult(false);
 
+    /// <inheritdoc />
     protected override IEnumerable<IEntity> GetRootItems()
     {
         var rootElements = entityService.GetRootEntities(UmbracoObjectTypes.Element);
@@ -115,6 +123,7 @@ public class ElementHandler : PublishableContentHandlerBase<IElement>, ISyncHand
         return await ExportContainer(container, folders, config);
     }
 
+    /// <inheritdoc />
     public override async Task<IEnumerable<uSyncAction>> ExportContainer(IEntity item, string[] folders, HandlerSettings config)
     {
         if (item is null)
@@ -209,6 +218,9 @@ public class ElementHandler : PublishableContentHandlerBase<IElement>, ISyncHand
         return attempt;
     }
 
+    /// <summary>
+    ///  Serialize a container (folder) into its XML representation.
+    /// </summary>
     protected async Task<SyncAttempt<XElement>> SerializeContainerAsync(EntityContainer item, SyncSerializerOptions options)
         => await _containerSerializer.SerializeAsync(item, options);
 
@@ -228,6 +240,9 @@ public class ElementHandler : PublishableContentHandlerBase<IElement>, ISyncHand
     private string GetContainerEntityPath(EntityContainer item, bool GuidNames, bool isFlat)
         => GuidNames ? GetContainerKey(item).ToString() : GetContainerName(item).ToAppSafeFileName();
 
+    /// <summary>
+    ///  Check for a filename clash when writing a container to a flat folder, appending a short key to avoid it.
+    /// </summary>
     virtual protected async Task<string> CheckAndFixContainerFileClashAsync(string path, EntityContainer item)
     {
         if (syncFileService.FileExists(path))
@@ -296,6 +311,7 @@ public class ElementHandler : PublishableContentHandlerBase<IElement>, ISyncHand
         }
     }
 
+    /// <inheritdoc />
     protected override async Task<uSyncAction> DeserializeItemToAction(XElement node, string filename, SyncSerializerOptions serializerOptions)
     {
         if (NodeIsContainer(node))
@@ -324,6 +340,7 @@ public class ElementHandler : PublishableContentHandlerBase<IElement>, ISyncHand
         return action;
     }
 
+    /// <inheritdoc />
     protected override async Task<IEnumerable<uSyncChange>> GetChangesAsync(XElement node, XElement currentNode, SyncSerializerOptions options)
     {
         if (NodeIsContainer(node) is false)
@@ -332,6 +349,7 @@ public class ElementHandler : PublishableContentHandlerBase<IElement>, ISyncHand
             return await itemFactory.GetChangesAsync<EntityContainer>(node, currentNode, options);
     }
 
+    /// <inheritdoc />
     protected override async Task<SyncChangeInfo> IsItemCurrentAsync(XElement node, SyncSerializerOptions options)
     {
         if (NodeIsContainer(node) is false)

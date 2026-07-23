@@ -518,6 +518,9 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 
     }
 
+    /// <summary>
+    ///  Deserialize an item from a node and return the resulting <see cref="uSyncAction"/>.
+    /// </summary>
     protected virtual async Task<uSyncAction> DeserializeItemToAction(XElement node, string filename, SyncSerializerOptions serializerOptions)
     {
         // get the item.
@@ -1423,6 +1426,9 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     }
 
 
+    /// <summary>
+    ///  Calculate the collection of changes between the incoming node and the current node.
+    /// </summary>
     protected virtual async Task<IEnumerable<uSyncChange>> GetChangesAsync(XElement node, XElement currentNode, SyncSerializerOptions options)
         => await itemFactory.GetChangesAsync<TObject>(node, currentNode, options);
 
@@ -1955,6 +1961,9 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
     protected async Task<SyncAttempt<TObject>> DeserializeItemSecondPassAsync(TObject item, XElement node, SyncSerializerOptions options)
         => await serializer.DeserializeSecondPassAsync(item, node, options);
 
+    /// <summary>
+    ///  Work out if the item represented by the node is current (matches what is already in Umbraco).
+    /// </summary>
     protected virtual async Task<SyncChangeInfo> IsItemCurrentAsync(XElement node, SyncSerializerOptions options)
     {
         var change = new SyncChangeInfo
@@ -1985,9 +1994,19 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
         return null;
     }
 
+    /// <summary>
+    ///  Holds the result of an item comparison - the type of change and the current serialized node.
+    /// </summary>
     protected class SyncChangeInfo
     {
+        /// <summary>
+        ///  The type of change detected for the item.
+        /// </summary>
         public ChangeType Change { get; set; }
+
+        /// <summary>
+        ///  The serialized node representing the item as it currently is in Umbraco.
+        /// </summary>
         public XElement? CurrentNode { get; set; }
     }
 
@@ -2012,6 +2031,9 @@ public abstract class SyncHandlerRoot<TObject, TContainer>
 
     #endregion
 
+    /// <summary>
+    ///  Get a display name for an item, using the file path where available, otherwise the node alias.
+    /// </summary>
     protected string GetNameFromFileOrNode(string filename, XElement node)
     {
         if (string.IsNullOrWhiteSpace(filename) is true) return node.GetAlias();
