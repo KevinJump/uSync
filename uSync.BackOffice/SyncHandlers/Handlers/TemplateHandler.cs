@@ -84,7 +84,7 @@ public class TemplateHandler : SyncHandlerLevelBase<ITemplate>, ISyncHandler, IS
 
                 // top level, lets check they aren't secretly lower down.
                 var templateContent = await GetTemplateContentAsync(item.Alias);
-                var masterAlias = _templateContentParserService.MasterTemplateAlias(templateContent);
+                var masterAlias = _templateContentParserService.LayoutTemplateAlias(templateContent);
                 if (string.IsNullOrWhiteSpace(masterAlias) || masterAlias == item.Alias || masterAlias.InvariantEquals("null"))
                 {
                     results.Add(item);
