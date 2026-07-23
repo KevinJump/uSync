@@ -32,6 +32,15 @@ History is backfilled from the v18 release history starting at `v18.0.0`.
   > inherited values instead. Review any set that mixes `HandlerDefaults` with
   > per-handler blocks.
 
+- **Extender API:** `ISyncManagementService` gains `UnpackStreamAsync(Stream)`.
+  The synchronous `UnpackStream(Stream)` is now obsolete (removed in v19). (#1005)
+
+- Cleared the remaining build warnings left over from the Umbraco 18 upgrade:
+  replaced `ITemplate.MasterTemplateAlias` usage with `LayoutTemplateAlias`,
+  and inlined the legacy `{localLink:x}` parsing that Umbraco is removing in
+  v18 into uSync's own code, since uSync still needs to detect un-migrated
+  links. No behavioural changes. (#1002, #1003, #1004)
+
 ### Fixed
 
 - `HandlerSettings.Clone()` no longer drops the `CreateClean` and
