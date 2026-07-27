@@ -426,7 +426,8 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         /// so we store them and do them once we've put 
         /// things in. 
         List<uSyncChange> changes = [];
-        Dictionary<string, string> propertiesToMove = [];
+        // value can be null - when the property is being moved out of all groups.
+        Dictionary<string, string?> propertiesToMove = [];
 
         List<string>? compositeProperties = default;
 
@@ -569,6 +570,15 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
                     {
                         logger.LogWarning("Cannot find tab {alias} to add {property} to", tabAlias, result.Property.Alias);
                         changes.AddWarning(alias, name, $"Unable to find tab {tabAlias} to add property too");
+                    }
+                }
+                else
+                {
+                    // no tab in the config - the property has been moved out of
+                    // any group. if it is currently in one, move it out (issue #1009)
+                    if (item.PropertyGroups.Any(x => x.PropertyTypes?.Contains(result.Property.Alias) is true))
+                    {
+                        propertiesToMove[result.Property.Alias] = null;
                     }
                 }
             }
@@ -1232,12 +1242,27 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
     }
 
 
-    private static IEnumerable<uSyncChange> MoveProperties(IContentTypeBase item, IDictionary<string, string> moves)
+    private static IEnumerable<uSyncChange> MoveProperties(IContentTypeBase item, IDictionary<string, string?> moves)
     {
         foreach (var move in moves)
         {
-            item.MovePropertyType(move.Key, move.Value);
-            yield return uSyncChange.Update($"{move.Key}/Tab/{move.Value}", move.Key, "", move.Value);
+            if (move.Value is null)
+            {
+                // moving the property out of all groups. MovePropertyType(alias, null)
+                // removes it from its current group but does *not* re-add it to the
+                // 'no group' collection, leaving it orphaned - so the change does not
+                // stick until a second import. We re-home it explicitly. (issue #1009)
+                var property = item.PropertyTypes.FirstOrDefault(x => x.Alias.InvariantEquals(move.Key));
+                item.MovePropertyType(move.Key, null!);
+                if (property is not null && item.PropertyTypes.Any(x => x.Alias.InvariantEquals(move.Key)) is false)
+                    item.AddPropertyType(property);
+            }
+            else
+            {
+                item.MovePropertyType(move.Key, move.Value);
+            }
+
+            yield return uSyncChange.Update($"{move.Key}/Tab/{move.Value}", move.Key, "", move.Value ?? "(No group)");
         }
     }
 
