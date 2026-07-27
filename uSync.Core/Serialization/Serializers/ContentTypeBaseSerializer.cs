@@ -1246,8 +1246,22 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
     {
         foreach (var move in moves)
         {
-            // a null target moves the property out of all groups (no group).
-            item.MovePropertyType(move.Key, move.Value!);
+            if (move.Value is null)
+            {
+                // moving the property out of all groups. MovePropertyType(alias, null)
+                // removes it from its current group but does *not* re-add it to the
+                // 'no group' collection, leaving it orphaned - so the change does not
+                // stick until a second import. We re-home it explicitly. (issue #1009)
+                var property = item.PropertyTypes.FirstOrDefault(x => x.Alias.InvariantEquals(move.Key));
+                item.MovePropertyType(move.Key, null!);
+                if (property is not null && item.PropertyTypes.Any(x => x.Alias.InvariantEquals(move.Key)) is false)
+                    item.AddPropertyType(property);
+            }
+            else
+            {
+                item.MovePropertyType(move.Key, move.Value);
+            }
+
             yield return uSyncChange.Update($"{move.Key}/Tab/{move.Value}", move.Key, "", move.Value ?? "(No group)");
         }
     }
