@@ -426,7 +426,8 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
         /// so we store them and do them once we've put 
         /// things in. 
         List<uSyncChange> changes = [];
-        Dictionary<string, string> propertiesToMove = [];
+        // value can be null - when the property is being moved out of all groups.
+        Dictionary<string, string?> propertiesToMove = [];
 
         List<string>? compositeProperties = default;
 
@@ -569,6 +570,15 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
                     {
                         logger.LogWarning("Cannot find tab {alias} to add {property} to", tabAlias, result.Property.Alias);
                         changes.AddWarning(alias, name, $"Unable to find tab {tabAlias} to add property too");
+                    }
+                }
+                else
+                {
+                    // no tab in the config - the property has been moved out of
+                    // any group. if it is currently in one, move it out (issue #1009)
+                    if (item.PropertyGroups.Any(x => x.PropertyTypes?.Contains(result.Property.Alias) is true))
+                    {
+                        propertiesToMove[result.Property.Alias] = null;
                     }
                 }
             }
@@ -1232,12 +1242,13 @@ public abstract class ContentTypeBaseSerializer<TObject> : SyncContainerSerializ
     }
 
 
-    private static IEnumerable<uSyncChange> MoveProperties(IContentTypeBase item, IDictionary<string, string> moves)
+    private static IEnumerable<uSyncChange> MoveProperties(IContentTypeBase item, IDictionary<string, string?> moves)
     {
         foreach (var move in moves)
         {
-            item.MovePropertyType(move.Key, move.Value);
-            yield return uSyncChange.Update($"{move.Key}/Tab/{move.Value}", move.Key, "", move.Value);
+            // a null target moves the property out of all groups (no group).
+            item.MovePropertyType(move.Key, move.Value!);
+            yield return uSyncChange.Update($"{move.Key}/Tab/{move.Value}", move.Key, "", move.Value ?? "(No group)");
         }
     }
 
